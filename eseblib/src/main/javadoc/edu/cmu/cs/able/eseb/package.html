@@ -1,0 +1,29 @@
+<html>
+<body>
+<p>The <code>eseblib</code> contains code to start an event bus server and clients that can connect to the event bus to publish events or subscribe to events. Events published may have several types which include basic data types and complex (composite) data types. All data types are instances of the <code>DataType</code> class. The following classes define the data types that can be send through the event bus (each event corresponds to a single data type):</p>
+<ul>
+	<li><code>DataType</code>: Superclass for all data types. This is an abstract class that does not implement any particular data type but rather all common functionality of all data types.</li>
+	<li><code>DataTypeCode</code>: Each data type has a unique <em>code</em> which is obtained from this enumeration.</li>
+	<li><code>Int32DataType</code>: Data type containing a 32-bit integer (maps to <code>int</code> in Java).</li>
+	<li><code>Int64DataType</code>: Data type containing a 64-bit integer (maps to <code>long</code> in Java).</li>
+	<li><code>ListDataType</code>: Data type containing a list of other data types, not necessarily equal. The list can contain no values or can contain values from many different types including more complex data types.</li>
+	<li><code>RecordDataType</code>: Data type mapping strings (names) to data types.</li>
+	<li><code>StringDataType</code>: Data type containing a string (maps to a <code>String</code> in Java).</li>
+	<li><code>TimeDataType</code>: Data type containing time with up to microsecond precision (maps to a <code>Date</code> in Java). Note that dates in Java only have millisecond precision so extra precision is lost when reading the data type.</li>
+</ul>
+<p>Clients connect to the event bus using the <code>BusConnection</code> class. Each server opens two ports, one for publishing and one for subscribing. Each bus connection may connect to both or either. The <code>BusServer</code> implements the server. If the connection between the client and the server is lost, the client will keep trying to connect.</p>
+<p>Several other classes are defined that allow input and output of data types in a stream-like way:</p>
+<ul>
+	<li><code>BufferedDataTypeInputStream</code>: Inputs data types with buffering.</li>
+	<li><code>BufferedDataTypeOutputStream</code>: Outputs data types with buffering.</li>
+	<li><code>DataTypeInputStream</code>: Abstract interface for streams that input data types.</li>
+	<li><code>DataTypeInputStreamImpl</code>: Basic implementation of a stream that inputs data types.</li>
+	<li><code>DataTypeOutputStream</code>: Abstract interface for streams that output data types.</li>
+	<li><code>DataTypeOutputStreamImpl</code>: Basic implementation of a stream that outputs data types.</li>
+	<li><code>DualSocketDataTypeStream</code>: Implementation of a <code>InOutDataTypeStream</code> that uses sockets for both input and output.</li>
+	<li><code>InOutDataTypeStream</code>: Stream that has both an input and an output channel. Both channels are kept synchronized: if one fails, both are closed.</li>
+	<li><code>InvalidDataFormatException</code>: Exception thrown when the data received in an input stream cannot be converted to a data type.</li>
+</ul>
+</body>
+</html>
+

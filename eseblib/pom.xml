@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  - POM file for common project.
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>edu.cmu.cs.able</groupId>
+	<artifactId>eseblib</artifactId>
+	<packaging>jar</packaging>
+	<version>1-SNAPSHOT</version>
+	<name>eseblib</name>
+
+	<description>
+	</description>
+	
+	<licenses>
+		<license>
+			<comments>
+				The authors of the project do not know what the project license
+				is. We know it sounds strange but it is true.
+			</comments>
+			<distribution>manual</distribution>
+			<name>Unknown</name>
+		</license>
+	</licenses>
+	
+	<organization>
+		<name>Carnegie Mellon University (Able Group)</name>
+		<url>http://www.cs.cmu.edu/~able</url>
+	</organization>
+	
+	<developers>
+		<developer>
+			<id>pasc</id>
+			<name>Paulo Casanova</name>
+			<email>paulo.casanova@cs.cmu.edu</email>
+			<organization>CMU</organization>
+			<timezone>0</timezone>
+			<roles>
+				<role />
+			</roles>
+		</developer>
+	</developers>
+	
+	<build>
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-webdav</artifactId>
+				<version>1.0-beta-2</version>
+			</extension>
+		</extensions>
+		
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+					<encoding>iso8859-1</encoding>
+				</configuration>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<configuration>
+					<outputEncoding>iso8859-1</outputEncoding>
+				</configuration>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>
+								edu.cmu.cs.able.eseb.MainServer
+							</mainClass>
+						</manifest>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+			</plugin>
+			<!--
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>buildnumber-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<archive>
+						<manifest>
+							<addDefaultImplementationEntries>
+								true
+							</addDefaultImplementationEntries>
+						</manifest>
+						<manifestEntries>
+							<Implementation-Build>
+								${buildNumber}
+							</Implementation-Build>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>-->
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.13</version>
+				<configuration>
+					<testFailureIgnore>true</testFailureIgnore>
+					<additionalClasspathElements>
+						<additionalClasspathElement>
+							${basedir}
+						</additionalClasspathElement>
+					</additionalClasspathElements>
+				</configuration>
+			</plugin>
+
+			<plugin> 
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId> 
+				<version>1.4.3</version>
+				<extensions>true</extensions>
+			</plugin>
+		</plugins>
+	</build>
+	
+	<dependencies>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.16</version>
+			<scope>compile</scope>
+			<type>jar</type>
+			<classifier/>
+			<optional>false</optional>
+			<exclusions/>
+		</dependency>
+		<dependency>
+			<groupId>auxtestlib</groupId>
+			<artifactId>auxtestlib</artifactId>
+			<version>1.3-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>incubator</groupId>
+			<artifactId>incubator</artifactId>
+			<version>1.4.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>incubator</groupId>
+			<artifactId>incubator</artifactId>
+			<version>1.4.1-SNAPSHOT</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>edu.cmu.cs.able</groupId>
+			<artifactId>typelib</artifactId>
+			<version>1-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
+	
+	<repositories>
+		<repository>
+			<id>webdav.homenet</id>
+			<url>
+				dav:http://webdav.homenet/webdav/maven
+			</url>
+		</repository>
+	</repositories>
+
+	<profiles>
+		<profile>
+			<id>dev-std</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<includes>
+								<include>**/*Test.java</include>
+								<include>**/*TestCase.java</include>
+							</includes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		
+		<profile>
+			<id>full-test</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<includes>
+								<include>**/*Test.java</include>
+								<include>**/*TestCase.java</include>
+								<include>**/*TestSlow.java</include>
+							</includes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		
+		<profile>
+			<id>no-tests</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<includes>
+								<include>TestIgnore</include>
+							</includes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

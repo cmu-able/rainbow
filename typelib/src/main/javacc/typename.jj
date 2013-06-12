@@ -1,0 +1,97 @@
+options {
+	STATIC = false;
+}
+
+PARSER_BEGIN(TypeNameJjParser)
+
+package edu.cmu.cs.able.typelib.parser;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import edu.cmu.cs.able.typelib.scope.HierarchicalName;
+
+class TypeNameJjParser {
+}
+
+PARSER_END(TypeNameJjParser)
+
+SKIP : {
+	< ("\n" | "\r" | "\t" | " ") >
+}
+
+TOKEN : {
+	< CCOLON: "::" >
+|	< COMMA: "," >
+|	< GT: ">" >
+|	< LT: "<" >
+|	< QMARK: "?" >
+|	< BAG: "bag" >
+|	< LIST: "list" >
+|	< MAP: "map" >
+|	< SET: "set" >
+|	< TUPLE: "tuple" >
+| 	< IDENTIFIER: ["a"-"z","A"-"Z","_"](["a"-"z","A"-"Z","0"-"9","_"])* >
+}
+
+DataTypeName TypeName() : {
+ 		DataTypeName name;
+	}{
+		name = FullTypeName() <EOF> {
+			return name;
+			}
+}
+
+DataTypeName FullTypeName() : {
+ 		DataTypeName name;
+	}{
+		name = NonOptionalTypeName() (<QMARK> {
+			name = new OptionalCompositeDataTypeName(name);
+			}
+		)* {
+			return name;
+			}
+}
+
+DataTypeName NonOptionalTypeName() : { 		DataTypeName name, k_name, v_name;
+ 		List<DataTypeName> names = new ArrayList<DataTypeName>();
+	}{
+		(name = BasicTypeName()
+		| <BAG> <LT> name = FullTypeName() <GT> {
+			name = new BagCompositeDataTypeName(name);
+			}
+		| <LIST> <LT> name = FullTypeName() <GT> {
+			name = new ListCompositeDataTypeName(name);
+			}
+		| <MAP> <LT> k_name = FullTypeName()
+		<COMMA> v_name = FullTypeName() <GT> {
+			name = new MapCompositeDataTypeName(k_name, v_name);
+			}
+		| <SET> <LT> name = FullTypeName() <GT> {
+			name = new SetCompositeDataTypeName(name);
+			}
+		| <TUPLE> <LT> name = FullTypeName() {
+			names.add(name);			}
+		(<COMMA> name = FullTypeName() {			names.add(name);
+			}
+		)* <GT> {			name = new TupleCompositeDataTypeName(names);
+			}
+		) {
+			return name;			}}
+
+DataTypeName BasicTypeName() : {
+ 		DataTypeSimpleName name = new DataTypeSimpleName();
+		Token t;
+	}{
+		(<CCOLON> {
+			name.mark_absolute();
+			}
+		)? t = <IDENTIFIER> {
+			name.add(t.image);
+			}
+		(<CCOLON> t = <IDENTIFIER> {
+			name.add(t.image);
+			}
+		)* {
+			return name;			}
+}

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<document>
+	<properties>
+		<title>auxtestlib</title>
+		<author>Paulo Casanova</author>
+	</properties>
+	<body>
+		<release version="1.0.0" date="2010-04-15" desc="First version">
+			<action dev="pcasanova" type="add">Added first verison.</action>
+		</release>
+		<release version="1.0.1" date="2010-04-20"
+			desc="Helper destruction verification">
+			<action dev="pcasanova" type="add">
+				Added super class for test cases,
+				DefaultTCase, which verifies that all helpers have been
+				destroyed.
+			</action>
+		</release>
+		<release version="1.1" date="2010-12-19" desc="New minor features.">
+			<action dev="pcasanova" type="fix">
+				Translated ControlledThread to
+				English and made some minor
+				documentation / formatting improvements.
+				Translated documentation of TestPropertiesDefinition.
+				Translated the
+				documentation of ThreadFlag and removed some
+				compilation warnings.
+			</action>
+			<action dev="pcasanov" type="add" date="2010-12-13">
+				Added a class
+				(PictureBuilder) that generates random pictures.
+			</action>
+			<action dev="pcasanov" type="add" date="2010-12-16">
+				Changed DefaultTCase to
+				extend Assert.
+			</action>
+			<action dev="pcasanov" type="add" date="2010-12-16">
+				Added a class to obtain
+				the contents of a web page (WebGetter).
+			</action>
+			<action dev="pcasanov" type="add" date="2010-12-17">
+				Added a method to
+				RandomGenerator to obtain a random item from an array.
+			</action>
+		</release>
+		<release version="1.2" date="2011-03-04" desc="Version 1.2">
+			<action dev="pcasanov" type="fix" date="2010-12-21">
+				Corrected a bug which made creating a random picture would
+				sometime fail with an assertion error.
+			</action>
+			<action dev="pcasanov" type="add" date="2010-12-21">
+				Added  a method to pick a random value from a collection.
+			</action>
+			<action dev="pcasanov" type="update" date="2010-12-21">
+				Updated RandomGenerator methods to use IllegalArgumentException
+				in case of incorrect parameters (instead of using asserts).
+			</action>
+			<action dev="pcasanov" type="add" date="2010-12-24">
+				Added support for the TestHelper annotation.
+			</action>
+			<action dev="pcasanov" type="update" date="2010-12-24">
+				Translated the documentation of the CommandRunner and removed a
+				compilation warning. Made some corrections to remove findbugs
+				warnings.
+			</action>
+			<action dev="pcasanov" type="update" date="2010-12-24">
+				Added support for Eclipse and maven PMD. Configured PMD ruleset
+				file and cleaned all errors related to PMD.
+			</action>
+		</release>
+	</body>
+</document>

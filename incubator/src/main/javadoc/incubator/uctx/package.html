@@ -1,0 +1,85 @@
+<html>
+  <body>
+    <h1>
+       Introduction and concepts 
+    </h1>
+    <p>
+       The <code>uctx</code> package defines the concept of a <em>user
+context</em>. A user context (or <em>uctx</em> for brevity) represents a set of
+data which is current accessible to the user (the data is in the user's context
+-- hence the name). This concept forms a basis for user interface application in
+which users manipulate data in certain contexts. 
+    </p>
+    <p>
+       For instance, consider an invoice managing application with the user
+interface depicted below. The invoice
+screen contains a list of invoices in the left table and, in the right part of
+the screen, details of the invoice and a
+list of items of the currently selected invoice. There are three possible
+actions in the screen: print the list of invoices, print the details of the
+invoice and print the list of items in the invoice, all labeled "print".
+    </p>
+
+<p><img src="doc-files/example-screen-1.png"/></p>
+
+<p>Purposely, all buttons are labeled "print". However, for a user, it is
+clear which of the print actions each button refers to. (Tt is not under
+discussion how friendly the user interface is!) If all buttons have the same
+label, why is the user able to distinguish them?</p>
+
+<p>The concept that distinguishes the buttons is the concept of
+<em>context</em>. The context (or <em>user context</em> to be more precise,
+which will be abreviated to <em>uctx</em> in this documentation) represents
+the set of data currently available to the user. And, due to the visual
+disposition of the user interface, each action is associated to a different
+part of the context. The print button near the invoice list is associated
+with the invoice list, the one near the form is associated with the form and
+the one near the item list is associated with the item list.</p>
+
+<p>But it is not only the buttons that are associated with context. A user
+would expect from any standard GUI application that whenever the selection
+of the invoice on the list changes, the data on the form and item list would
+change accordingly. This means that the data on certain parts of the uctx
+(the invoice detail and item list) are dependent on other parts of the context
+(the selection in the current invoice list).</p>
+
+<p>Using the uctx concept the list of invoices is part of the context. The
+table showing the invoice list is dependent upon this part of the context
+and so is the print action which prints all invoices.</p>
+
+<p>The currently selected
+invoice is also part of the context. Whenever the user changes the currently
+selected invoice, that part of the context changes. Since the invoice detail
+s and item list are dependent on that context part, they will update
+automatically. So will the print actions.</p>
+
+<p>The uctx, therefore, brings to GUI construction the metaphore of indirect
+invocation with the inherent decoupling and increased maintainability.</p>
+
+<h1>Hierarchical contexts</h1>
+
+<p>
+Contexts can be defined hierarchically. If a context is a child of another
+context, then all the parent's content is available to the child. Context
+elements with the same name override the parent's value (if the parent is
+directly queried, however, its own value is returned).
+</p>
+
+<p>
+The context hierarchy is established dynamically. Cyclic hierarchies are not
+allowed.
+</p>
+
+<h1>Context listeners</h1>
+
+<p>
+MISSING DESCRIPTION
+</p>
+
+<h1>Contextual transactions</h1>
+
+<p>
+MISSING DESCRIPTION
+</p>
+  </body>
+</html>

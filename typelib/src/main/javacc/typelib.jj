@@ -1,0 +1,62 @@
+options {
+	STATIC = false;
+}
+
+PARSER_BEGIN(TypelibParser)
+
+package edu.cmu.cs.able.typelib.parser;
+
+public class TypelibParser {
+}
+
+PARSER_END(TypelibParser)
+
+SKIP : {
+	< ("\n" | "\r" | "\t" | " ") >
+}
+
+TOKEN : {
+	< ABSTRACT: "abstract" >
+|	< NAMESPACE: "namespace" >
+|	< STRUCT: "struct" >
+|	< CCOLON: "::" >
+|	< COLON: ":" >
+|	< COMMA: "," >
+| 	< IDENTIFIER: ["a"-"z","A"-"Z","_"](["a"-"z","A"-"Z","0"-"9","_"])* >
+|	< QIDENTIFIER: <IDENTIFIER>(<CCOLON><IDENTIFIER>)* >
+}
+
+TypelibBlockDeclaration TypelibBlock() : {
+		StructureDeclaration sdel;
+		Token ns;	} {
+		sdel = Structure() {
+			return new TypelibBlockDeclaration(sdel);			}
+		| <NAMESPACE> ns = <IDENTIFIER> {			return new TypelibBlockDeclaration(ns.image);
+			}}
+
+StructureDeclaration Structure() : {
+		StructureDeclaration dec;
+		Token t;
+		String p;
+		boolean abs = false;	} {
+		(<ABSTRACT> {
+			abs = true;			}		)? <STRUCT> t = <IDENTIFIER> {
+			dec = new StructureDeclaration(t.image);
+			if (abs) {
+				dec.make_abstract();				}
+			}
+		(<COLON> p = ParentName() {
+			dec.add_parent(p);			}
+		(<COMMA> p = ParentName() {			dec.add_parent(p);
+			}
+		)*)? <EOF> {
+			return dec;			}}
+
+String ParentName() : {
+		Token t;
+	}{
+		t = <IDENTIFIER> {
+			return t.image;			}
+		| t = <QIDENTIFIER> {			return t.image;
+			}
+}

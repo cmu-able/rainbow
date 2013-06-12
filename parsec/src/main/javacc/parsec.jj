@@ -1,0 +1,109 @@
+options {
+	STATIC = false;
+}
+
+PARSER_BEGIN(ParsecParser)
+
+package edu.cmu.cs.able.parsec.parser;
+
+import edu.cmu.cs.able.parsec.LCCoord;
+import edu.cmu.cs.able.parsec.ParsecParserListener;
+
+public class ParsecParser {}
+
+PARSER_END(ParsecParser)
+
+SKIP : {
+	< "//" (~["\n","\r"])* ("\n" | "\r" | "\r") >
+|	< "/*" > : COMMENT_STATE}
+
+<COMMENT_STATE> SKIP : {
+	< "*/" > : DEFAULT
+| 	< ~[] >}
+
+MORE : {
+	< "\"" > : STRING_STATE}
+
+<STRING_STATE> MORE : {
+	< "\\\"" >
+}
+
+<STRING_STATE> TOKEN : {
+	< STRING: "\"" > : DEFAULT
+}
+
+<STRING_STATE> MORE : {
+	< ~[] >
+}
+
+
+TOKEN : {
+	< OB: "{" >
+| 	< CB: "}" >
+| 	< SC: ";" >
+| 	< STUFF: ~["{","}",";"] >
+}
+
+void File(ParsecParserListener listener) : {
+		LCCoord start_loc = null;
+		Token stuff;
+		String block_text;
+		StringBuilder builder = new StringBuilder();
+  } {
+		(stuff = <STUFF> {
+			builder.append(stuff.image);
+			if (start_loc == null) {
+				start_loc = new LCCoord(stuff.beginLine, stuff.beginColumn);			}
+			}
+		| stuff = <STRING> {
+			builder.append(stuff.image);
+			if (start_loc == null) {
+				start_loc = new LCCoord(stuff.beginLine, stuff.beginColumn);
+			}
+			}
+		| stuff = <SC> {
+			if (start_loc == null) {
+				start_loc = new LCCoord(stuff.beginLine, stuff.beginColumn);			}
+			listener.statement_recognized(builder.toString(), start_loc);
+			builder = new StringBuilder();
+			start_loc = null;
+			}
+		| stuff = <OB> block_text = BlockContents() <CB> {
+			if (start_loc == null) {
+				start_loc = new LCCoord(stuff.beginLine, stuff.beginColumn);
+			}
+
+			listener.block_recognized(builder.toString(), block_text,
+					start_loc);
+			builder = new StringBuilder();
+			start_loc = null;
+			}
+		)*
+		<EOF> {
+			if (org.apache.commons.lang.StringUtils.trim(
+					builder.toString()).length() != 0) {
+				throw new ParseException("Unexpected end of file after \""
+			  			+ builder.toString() + "\".");
+			}
+		}
+}
+
+String BlockContents() : {
+		Token stuff;
+		String inner;
+		StringBuilder builder = new StringBuilder();
+	} {
+		(stuff = <STUFF> {
+				builder.append(stuff.image);			}
+		| stuff = <STRING> {
+				builder.append(stuff.image);
+			} 
+		| <SC> {
+				builder.append(";");			}
+		| <OB> inner=BlockContents() <CB> {
+				builder.append("{");
+				builder.append(inner);				builder.append("}");
+			}
+		)* {
+				return builder.toString();			} 
+}

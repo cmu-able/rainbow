@@ -1,0 +1,8 @@
+Next steps:
+- More data types: relation and map.
+- Split protocol layer and network layer.
+- Define serialization protocol.
+- Define string-based layer.
+- Add support for structures.
+- Add support for parsing with "delegate" sections.
+- Add support for name spaces.

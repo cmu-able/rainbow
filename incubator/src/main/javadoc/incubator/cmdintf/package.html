@@ -1,0 +1,60 @@
+<html>
+<body>
+
+<p>
+The <cmd>cmdintf</cmd> package a command-line interface that allows users to
+input commands and the system to process those commands. Commands can be
+easily added with this package. 
+</p>
+
+<p>
+There are three main concepts in the package: a command, a command interface and
+a command manager. A command is a general executable operation which can be
+invoked by the user. A command interface is an adapter for a text-based user
+interaction. A command manager glues the two concepts together: it contains a
+list of all commands that can be executed and reads commands from command
+interfaces.
+</p>
+
+<p>
+The highest level layer is comprised of the <code>CommandInterface</code>
+interface, the <code>Command</code> interface and the
+<code>CommandManager</code> class. These represent the most general contracts
+but, in general, more concrete ones will be used.
+</p>
+
+<p>
+Since command interfaces are text-based, a concrete implementation based on
+IO streams is provided in the <code>StreamCommandInterface</code> class. A
+subclass of this class exists, the <code>SocketStreamCommandInterface</code>
+class, which contains the particular case in which the streams derive from a
+network socket.
+</p>
+
+<p>
+In general commands will not implement directly the <code>Command</code>
+interface but will rather extend the <code>AbstractCommmand</code> class. This
+class already does part of the work and helps avoiding multi-threading issues.
+</p>
+
+<p>
+The <code>CommandManager</code> does not define how command interfaces are
+created. A specific subclass, <code>ServerSocketCommandManager</code> will
+create a server socket and accept incoming connections creating
+<code>SocketStreamCommandInterface</code> interfaces for each incoming client.
+</p>
+
+<p>
+Upon creation, the <code>CommandManager</code> creates two commands: the
+<code>HelpCommand</code> (which displays help for all commands) and the
+<code>CloseCommand</code> which closes the connection.
+</p>
+
+<p>
+Each time a client connects, the <code>CommandManager</code> will start a new
+session. Each session is identified by a single ID. The command manager keeps
+track of all sessions active and all closed sessions.
+</p>
+
+</body>
+</html>

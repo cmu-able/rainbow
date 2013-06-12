@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<document>
+	<properties>
+		<title>Incubator Library</title>
+		<author email="paulo@salazarcasanova.com">Paulo Casanova</author>
+	</properties>
+	<body>
+		<release version="1.1.0" date="2010-10-28" description="Version 1.1.0">
+			<action dev="pasc" type="update" date="2010-07-13">
+				Updated uctx package documentation.
+			</action>
+			<action dev="pasc" type="update" date="2010-07-18">
+				Updated pom.xml to include homenet webdav repository in jar search.
+			</action>
+			<action dev="pasc" type="add" date="2010-08-20">
+				Added the concept of 'session' and added to commands to list sessions and session history.
+			</action>
+			<action dev="pasc" type="add" date="2010-10-10">
+				Added a new constructor that allows creating a string property as read only.
+			</action>
+			<action dev="pasc" type="add" date="2010-10-16">
+				Updated observable list to allow observers which receive superclasses of the list type.
+			</action>
+			<action dev="pasc" type="add" date="2010-10-17">
+				Updated some documentation on rmissl. Added to the qxt package the QxtComboBoxWithTransformation property.
+			</action>
+			<action dev="pasc" type="update" date="2010-10-19">
+				Corrected a bug which prevented acquired entity managers from within entity managers to be released.
+			</action>
+			<action dev="psac" type="update" date="2010-10-19">
+				When EfwEntityManager methods are invoked, the session is now guaranteed to be flushed.
+			</action>
+			<action dev="pasc" type="add" date="2010-10-22">
+				Added an action synchronizer for combo boxes.
+			</action>
+			<action dev="pasc" type="add" date="2010-10-22">
+				Added support to draw text tables in the AbstractCommand.
+			</action>
+			<action dev="pasc" type="update" date="2010-10-22">
+				The CommandManager now prints the stack trace in case of error in executing a command.
+			</action>
+			<action dev="pasc" type="update" date="2010-10-23">
+				Corrected a bug which prevented correct print of text tables.
+			</action>
+			<action dev="pasc" type="update" date="2010-10-23">
+				Corrected a bug in ActionContextComboBoxSynchronizer which made the syncronizer put in context the value in the combo box and not the object associated with it.
+			</action>
+		</release>
+		<release version="1.2.0" date="2010-12-19" description="Version 1.2.0">
+			<action dev="pasc" type="add">
+				Added some more validations to Ensure.
+			</action>
+			<action dev="pasc" type="fix">
+				RmiSslClientSocketFactory is now really serializable and can be
+				sent from the RMI server to clients to create encrypted
+				connections.
+			</action>
+		</release>
+		<release version="1.3.0" date="2011-03-04" description="Version 1.3.0">
+			<action dev="pasc" type="update" date="2010-12-19">
+				Updated documentation on the bpref package.
+			</action>
+			<action dev="pasc" type="fix" date="2010-12-19">
+				Corrected a compilation warning in the dmgr, modulebar,
+				polling, qxt and ui packages.
+			</action>
+			<action dev="pasc" type="add" date="2011-02-28">
+				Added support to obtain the data manager of a type of an entity
+				manager (for unit tests).
+			</action>
+		</release>
+		<release version="1.4.0" date="2012-12-18" description="Version 1.4.0">
+			<action dev="pasc" type="add" date="2011-05-10">
+				Added a class that shows error dialogs from exceptions.
+			</action>
+			<action dev="pasc" type="update" date="2012-05-12">
+				Corrected some formatting issues.
+			</action>
+			<action dev="pasc" type="fix" date="2012-05-12">
+				Corrected the regex of the QxtDoubleProperty to allow better
+				editing of values.
+			</action>
+			<action dev="pasc" type="add" date="2012-05-16">
+				Added support for property display name change.
+			</action>
+			<action dev="pasc" type="add" date="2012-05-20">
+				QxtTable now allows properties to be added and removed
+				dynamically.
+			</action>
+			<action dev="pasc" type="fix" date="2012-05-20">
+				The property listener is attached and detached when properties
+				are added and removed.
+			</action>
+			<action dev="pasc" type="update" date="2012-11-24">
+				Updated incubator eclipse project.
+			</action>
+			<action dev="pasc" type="update" date="2012-09-11">
+				Updated incubtor with some minor changes for Java 7 (JComboBox
+				is now a generic class).
+			</action>
+			<action dev="pasc" type="add" date="2012-09-12">
+				Added MainfestUtil to incubator.
+			</action>
+			<action dev="pasc" type="fix" date="2012-09-16">
+				Corrected IconResourceLoader to allow the icon to be read in
+				chunks instead of assuming it would be read in one single read
+				operation.				
+			</action>
+			<action dev="pasc" type="fix" date="2012-09-17">
+				Corrected some bugs in ManifestUtil (it wasn't working).
+			</action>
+			<action dev="pasc" type="update" date="2012-11-29">
+				Updated incubator to java 7 and Eclipse Juno.
+			</action>
+			<action dev="pasc" type="fix" date="2012-12-04">
+				Updated Ensure to correct a bug.
+			</action>
+			<action dev="pasc" type="add" date="2012-12-05">
+				Added directory reader support.
+			</action>
+			<action dev="pasc" type="add" date="2012-12-12">
+				Added stateCondition without message in Ensure.
+			</action>
+		</release>
+	</body>
+</document>

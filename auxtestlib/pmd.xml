@@ -1,0 +1,198 @@
+<?xml version="1.0"?>
+<ruleset name="Custom ruleset"
+		xmlns="http://pmd.sf.net/ruleset/1.0.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://pmd.sf.net/ruleset/1.0.0
+				http://pmd.sf.net/ruleset_xml_schema.xsd"
+		xsi:noNamespaceSchemaLocation="http://pmd.sf.net/ruleset_xml_schema.xsd">
+		
+	<!-- Description of this ruleset. -->
+	<description>
+		Rules for PMD.
+	</description>
+	
+	<!--
+	  - The Basic Ruleset contains a collection of good practices which
+	  - everyone should follow.
+	  -->
+	<rule ref="rulesets/basic.xml">
+		<exclude name="EmptyCatchBlock"/>
+	</rule>
+	
+	<!--
+	  - We'll allow empty catch blocks as long as someone has commented
+	  - anything in it (hopefully a comment explaining why nothing is being
+	  - done!)
+	  -->
+	<rule ref="rulesets/basic.xml/EmptyCatchBlock">
+		<properties>
+			<property name="allowCommentedBlocks" value="true"/>
+		</properties>
+	</rule>
+	
+	<!--
+	  - The Braces Ruleset contains a collection of braces rules. 
+	  -->
+	<rule ref="rulesets/braces.xml"/>
+	
+	<!--
+	  - The Clone Implementation ruleset contains a collection of rules that
+	  - find questionable usages of the clone() method. 
+	  -->
+	<rule ref="rulesets/clone.xml"/>
+	
+	<!--
+	  - The Controversial Ruleset contains rules that, for whatever reason, are
+	  - considered controversial. They are separated out here to allow people
+	  - to include as they see fit via custom rulesets. This ruleset was
+	  - initially created in response to discussions over
+	  - UnnecessaryConstructorRule which Tom likes but most people really
+	  - dislike :-)
+	  -->
+	<rule ref="rulesets/controversial.xml">
+		<!-- This rule is generally ok but with streams it is very common. -->
+		<exclude name="AssignmentInOperand"/>
+		<!-- Required for anonymous inner classes. -->
+		<exclude name="AvoidFinalLocalVariable"/>
+		<exclude name="CallSuperInConstructor"/>
+		<!-- This generates many strange problems :) -->
+		<exclude name="DataflowAnomalyAnalysis"/>
+		<exclude name="DefaultPackage"/>
+		<exclude name="NullAssignment"/>
+		<exclude name="OnlyOneReturn"/>
+		<exclude name="UnnecessaryConstructor"/>
+	</rule>
+	
+	<!--
+	  - The Code Size Ruleset contains a collection of rules that find code
+	  - size related problems. 
+	  -->
+	<rule ref="rulesets/codesize.xml"/>
+	
+	<!--
+	  - These are rules which find instances of high or inappropriate coupling
+	  - between objects and packages. 
+	  -->
+	<rule ref="rulesets/coupling.xml"/>
+	
+	<!--
+	  - The Design Ruleset contains a collection of rules that find
+	  - questionable designs. 
+	  -->
+	<rule ref="rulesets/design.xml">
+		<!-- Generates lots of false positives. -->
+		<exclude name="AssignmentToNonFinalStatic"/>
+		<!-- Synchronized methods are not necessarily bad. -->
+		<exclude name="AvoidSynchronizedAtMethodLevel"/>
+		<!-- Sometimes it is useful to declare a variable before return for
+		debugging purposes (or at least ease to debug). -->
+		<exclude name="UnnecessaryLocalBeforeReturn"/>
+		<!-- Switches may be clearer than ifs and they may enhance
+		modifiability. -->
+		<exclude name="TooFewBranchesForASwitchStatement"/>
+	</rule>
+	
+	<!--
+	  - These rules deal with different problems that can occur with finalizers.
+	  -->
+	<rule ref="rulesets/finalizers.xml"/>
+	
+	<!--
+	  - These rules deal with different problems that can occur with a class'
+	  - import statements. 
+	  -->
+	<rule ref="rulesets/imports.xml"/>
+	
+	<!--
+	  - The JavaBeans Ruleset catches instances of bean rules not being
+	  - followed. 
+	  -->
+	<rule ref="rulesets/javabeans.xml">
+		<!-- Generates many false positives because it considers many more
+		classes as beans than there really are. -->
+		<exclude name="BeanMembersShouldSerialize"/>
+	</rule>
+	
+	<!--
+	  - These rules deal with different problems that can occur with JUnit
+	  - tests.
+	  -->
+	<rule ref="rulesets/junit.xml"/>
+	
+	<!--
+	  - The Jakarta Commons Logging ruleset contains a collection of rules that
+	  - find questionable usages of that framework.
+	  -->
+	<rule ref="rulesets/logging-jakarta-commons.xml"/>
+	
+	<!--
+	  - The Java Logging ruleset contains a collection of rules that find
+	  - questionable usages of the logger. 
+	  -->
+	<rule ref="rulesets/logging-java.xml"/>
+	
+	<!--
+	  - The Naming Ruleset contains a collection of rules about names - too
+	  - long, too short, and so forth. 
+	  -->
+	<rule ref="rulesets/naming.xml">
+		<!-- "Very local" variables can have very short names and still be
+		perfectly legible (and more practical). -->
+		<exclude name="ShortVariable"/>
+		<!-- Long variable names are not necessarily bad. -->
+		<exclude name="LongVariable"/>
+	</rule>
+	
+	<!--
+	  - These rules deal with different optimizations that generally apply to
+	  - performance best practices.
+	  -->
+	<rule ref="rulesets/optimizations.xml">
+		<!-- This is required in many situations. -->
+		<exclude name="AvoidInstantiatingObjectsInLoops"/>
+		<!-- Makes code very verbose. -->
+		<exclude name="LocalVariableCouldBeFinal"/>
+		<!-- Makes code very verbose. -->
+		<exclude name="MethodArgumentCouldBeFinal"/>
+	</rule>
+	
+	<!--
+	  - These rules provide some strict guidelines about throwing and catching 
+	  - exceptions. 
+	  -->
+	<rule ref="rulesets/strictexception.xml">
+		<!-- This is justified in some situations in which there are no real
+		useful alternatives. -->
+		<exclude name="SignatureDeclareThrowsException"/>
+	</rule>
+	
+	<!--
+	  - These rules deal with different problems that can occur with
+	  - manipulation of the class String or StringBuffer. 
+	  -->
+	<rule ref="rulesets/strings.xml">
+		<!-- StringBuffers may make sense in some classes. -->
+		<exclude name="AvoidStringBufferField"/>
+	</rule>
+	
+	<!--
+	  - These rules check the security guidelines from Sun, published at
+	  - http://java.sun.com/security/seccodeguide.html#gcg 
+	  -->
+	<rule ref="rulesets/sunsecure.xml"/>
+	
+	<!--
+	  - These are rules which resolve java Class files for comparison, as
+	  - opposed to a String 
+	  -->
+	<rule ref="rulesets/typeresolution.xml">
+		<!-- Same as in strictexception.xml -->
+		<exclude name="SignatureDeclareThrowsException"/>
+	</rule>
+	
+	<!--
+	  - The Unused Code Ruleset contains a collection of rules that find unused
+	  - code.
+	  -->
+	<rule ref="rulesets/unusedcode.xml"/>
+</ruleset>

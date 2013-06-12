@@ -1,0 +1,39 @@
+options {
+	STATIC = false;
+}
+
+PARSER_BEGIN(StructureJjParser)
+
+package edu.cmu.cs.able.typelib.parser;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import edu.cmu.cs.able.typelib.scope.HierarchicalName;
+
+class StructureJjParser {
+}
+
+PARSER_END(StructureJjParser)
+
+SKIP : {
+	< ("\n" | "\r" | "\t" | " ") >
+}
+
+TOKEN : {
+	< CCOLON: "::" >
+|	< QMARK: "?" >
+| 	< IDENTIFIER: ["a"-"z","A"-"Z","_"](["a"-"z","A"-"Z","0"-"9","_"])* >
+|	< TYPE_NAME: <IDENTIFIER>((<CCOLON>|<QMARK>)(<IDENTIFIER>)?)* >
+}
+FieldDeclaration Field() : {
+		Token name;
+		Token type;
+	} {
+		type = <TYPE_NAME > name = <IDENTIFIER> <EOF> {
+			return new FieldDeclaration(name.image, type.image);
+			}
+		| type = <IDENTIFIER > name = <IDENTIFIER> <EOF> {
+			return new FieldDeclaration(name.image, type.image);
+			}
+}
