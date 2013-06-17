@@ -178,10 +178,8 @@
 	
 	<repositories>
 		<repository>
-			<id>webdav.homenet</id>
-			<url>
-				dav:http://webdav.homenet/webdav/maven
-			</url>
+			<id>able.maven.repository</id>
+			<url>dav:http://acme.able.cs.cmu.edu/maven-repository</url>
 		</repository>
 	</repositories>
 

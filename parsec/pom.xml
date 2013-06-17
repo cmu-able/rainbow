@@ -44,14 +44,11 @@
 	</developers>
 	
 	<scm>
-		<connection>
-			scm:svn:http://svn.homenet/svn/projects/sophrosyne/trunk/parsec
+		<connection>scm:svn://acme.able.cs.cmu.edu/rainbow/v2/trunk
 		</connection>
-		<developerConnection>
-			scm:svn:http://svn.homenet/svn/projects/sophrosyne/trunk/parsec
+		<developerConnection>scm:svn:svn://acme.able.cs.cmu.edu/rainbow/v2/trunk
 		</developerConnection>
-		<!-- URL for the source control. -->
-		<url>http://svn.homenet/svn/projects/sophrosyne/trunk/parsec</url>
+		<url>svn://acme.able.cs.cmu.edu/rainbow/v2/trunk</url>
 	</scm>
 	
 	<build>
@@ -291,10 +288,8 @@
 	
 	<repositories>
 		<repository>
-			<id>webdav.homenet</id>
-			<url>
-				dav:http://webdav.homenet/webdav/maven
-			</url>
+			<id>able.maven.repository</id>
+			<url>dav:http://acme.able.cs.cmu.edu/maven-repository</url>
 		</repository>
 	</repositories>
 

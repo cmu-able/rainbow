@@ -44,11 +44,11 @@
 	</contributors>
 
 	<scm>
-		<connection>scm:svn:http://svn.homenet/svn/projects/auxtestlib/trunk
+		<connection>scm:svn://acme.able.cs.cmu.edu/rainbow/v2/trunk
 		</connection>
-		<developerConnection>scm:svn:http://svn.homenet/svn/projects/auxtestlib/trunk
+		<developerConnection>scm:svn:svn://acme.able.cs.cmu.edu/rainbow/v2/trunk
 		</developerConnection>
-		<url>http://svn.homenet/svn/projects/auxtestlib/trunk</url>
+		<url>svn://acme.able.cs.cmu.edu/rainbow/v2/trunk</url>
 	</scm>
 
 	<build>
@@ -80,7 +80,7 @@
 				<artifactId>maven-release-plugin</artifactId>
 				<configuration>
 					<tagBase>
-						http://svn.homenet/svn/projects/auxtestlib/tags/
+					svn://acme.able.cs.cmu.edu/rainbow/v2/tags
 					</tagBase>
 				</configuration>
 			</plugin>
@@ -140,7 +140,9 @@
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
-			<version>1.2.15</version>
+			<version>1.2.17</version>
+		    <type>jar</type>
+			
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -156,9 +158,15 @@
 
 	<repositories>
 		<repository>
+			<id>able.maven.repository</id>
+			<url>dav:http://acme.able.cs.cmu.edu/maven-repository</url>
+		</repository>
+		<!-- 
+		<repository>
 			<id>webdav.homenet</id>
 			<url>dav:http://webdav.homenet/webdav/maven</url>
 		</repository>
+		 -->
 	</repositories>
 
 	<reporting>
@@ -222,10 +230,17 @@
 			<site> <id>website</id> <url>
 			scp://USERNAME:PASSWORD@HOST:/home/bogus/www/XTRA_DIRS </url> </site>
 		-->
+		<!-- 
 		<repository>
 			<id>webdav.homenet</id>
 			<name>Home Webdav repository</name>
 			<url>dav:http://webdav.homenet/webdav/maven</url>
+		</repository>
+		-->
+		<repository>
+			<id>able.maven.repository</id>
+			<name>ABLE Maven Repository</name>
+			<url>dav:http://acme.able.cs.cmu.edu/maven-repository</url>
 		</repository>
 	</distributionManagement>
 

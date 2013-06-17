@@ -102,18 +102,11 @@
 	<!-- Please note that the URL of the projects will have automatically the
 	artifact name of the super-pom added to the end. -->
 	<scm>
-		<!-- Source control version, should have the format:
-		scm:svn:http://<host>[:<port>]/<path>. -->
-		<connection>
-			scm:svn:http://svn.homenet/svn/projects/incubator/trunk
+		<connection>scm:svn://acme.able.cs.cmu.edu/rainbow/v2/trunk
 		</connection>
-		<!-- Source control version, should have the format:
-		scm:svn:http://<host>[:<port>]/<path>. -->
-		<developerConnection>
-			scm:svn:http://svn.homenet/svn/projects/incubator/trunk
+		<developerConnection>scm:svn:svn://acme.able.cs.cmu.edu/rainbow/v2/trunk
 		</developerConnection>
-		<!-- URL for the source control. -->
-		<url>http://svn.homenet/svn/projects/incubator/trunk</url>
+		<url>svn://acme.able.cs.cmu.edu/rainbow/v2/trunk</url>
 	</scm>
 	
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -166,7 +159,7 @@
 				<version>2.4</version>
 				<configuration>
 					<tagBase>
-						http://svn.homenet/svn/projects/incubator/tags
+					svn://acme.able.cs.cmu.edu/rainbow/v2/tags
 					</tagBase>
 				</configuration>
 			</plugin>
@@ -271,7 +264,9 @@
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
-			<version>1.2.15</version>
+			<version>1.2.17</version>
+		    <type>jar</type>
+			
 		</dependency>
 		<dependency>
 			<groupId>org.beanshell</groupId>
@@ -321,10 +316,8 @@
 		web-dav. The format (for webdav repositories) is
 		dav:http://[<username>[:<password>]]@<host>[:<port>]/<path>-->
 		<repository>
-			<id>webdav.homenet</id>
-			<url>
-				dav:http://webdav.homenet/webdav/maven
-			</url>
+			<id>able.maven.repository</id>
+			<url>dav:http://acme.able.cs.cmu.edu/maven-repository</url>
 		</repository>
 	</repositories>
 	
@@ -449,11 +442,9 @@
 		should have the following format:
 		dav:http://<user>:<pass>@<host>[:<port>]/<path> -->
 		<repository>
-			<id>webdav.homenet</id>
-			<name>Homenet webdav filesystem</name>
-			<url>
-				dav:http://webdav.homenet/webdav/maven
-			</url>
+			<id>able.maven.repository</id>
+			<name>ABLE Maven Repository</name>
+			<url>dav:http://acme.able.cs.cmu.edu/maven-repository</url>
 		</repository>
 	</distributionManagement>
 	
