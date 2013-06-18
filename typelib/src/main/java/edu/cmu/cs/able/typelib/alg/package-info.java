@@ -1,4 +1,5 @@
 /**
- * The <code>alg</code> package provides algorithms applicable to data types.
- */
+<p>The <code>alg</code> package provides general algorithms applicable to
+data types.</p>
+*/
 package edu.cmu.cs.able.typelib.alg;

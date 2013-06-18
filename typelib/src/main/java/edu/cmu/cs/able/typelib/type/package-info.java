@@ -24,5 +24,13 @@ using <em>C++</em> terminology, <em>virtual</em>.</p>
 <p>Although the <code>type</code> package supports defining types and
 hierarchies, it does not specify how to build objects of the types: each type
 will define its own way of doing so.</p>
+
+<p>Data types are defined in <em>scopes</em> (see <code>scope</code>
+package for details on scopes). Scopes that contain data types are sub
+classes of {@link edu.cmu.cs.able.typelib.type.DataTypeScope}.</p>
+
+<p>Data type implementation should be thread-safe but data value
+implementations do not need to be. Users of data values should ensure only
+one thread is manipulating each value at every time.</p>
 */
 package edu.cmu.cs.able.typelib.type;

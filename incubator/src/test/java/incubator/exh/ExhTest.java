@@ -31,7 +31,9 @@ public class ExhTest {
 		f.setLayout(new BorderLayout());
 		
 		ExhUi exh = new ExhUi();
-		new ExhGlobalUiSynchronizer(exh);
+		@SuppressWarnings("unused")
+		ExhGlobalUiSynchronizer exhGlobalUiSynchronizer =
+				new ExhGlobalUiSynchronizer(exh);
 		
 		f.add(exh, BorderLayout.CENTER);
 		

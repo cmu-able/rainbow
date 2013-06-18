@@ -76,6 +76,10 @@ public class ScopedObject {
 	 * name
 	 */
 	public HierarchicalName absolute_hname() {
+		/*
+		 * If this test fails, then the scoped object has not yet been added
+		 * to a scope.
+		 */
 		Ensure.not_null(m_scope);
 		HierarchicalName h = m_scope.absolute_hname();
 		

@@ -561,4 +561,20 @@ public class BusClient implements Closeable {
 	public BusDataQueueGroup queue_group() {
 		return m_queue_group;
 	}
+	
+	/**
+	 * Obtains the host this client is connected (or connecting) to.
+	 * @return the host
+	 */
+	public synchronized String host() {
+		return m_host;
+	}
+	
+	/**
+	 * Obtains the port this client is connected (or connecting) to.
+	 * @return the port
+	 */
+	public synchronized short port() {
+		return m_port;
+	}
 }

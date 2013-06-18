@@ -110,6 +110,10 @@ public class TextEncoding implements DataValueEncoding {
 		Ensure.is_true(AsciiEncoding.is_ascii(dtn));
 		
 		DelegateTextEncoding sc = find(dt);
+		/*
+		 * If this fails, then there is no encoding that supports the data
+		 * type.
+		 */
 		Ensure.not_null(sc);
 		
 		w.write(hname_enc);

@@ -78,7 +78,7 @@ public class Optionality {
 	 * @param dv the data value
 	 * @return if the data value is not an optional data value, then the
 	 * data value is returned, otherwise, the value encapsulated within the
-	 * optional data value is returned
+	 * optional data value is returned (which may be <code>null</code>)
 	 */
 	public static DataValue unoptionalize(DataValue dv) {
 		Ensure.not_null(dv);

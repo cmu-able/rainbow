@@ -1,140 +1,186 @@
 package edu.cmu.cs.able.eseb.ui;
-//
-//import incubator.ui.IconResourceLoader;
-//
-//import java.awt.BorderLayout;
-//import java.awt.EventQueue;
-//import java.lang.reflect.InvocationTargetException;
-//
-//import javax.swing.ImageIcon;
-//import javax.swing.JLabel;
-//import javax.swing.JPanel;
-//
-//import org.apache.log4j.Logger;
-//
-//import edu.cmu.cs.able.eseb.BusConnection;
-//
-///**
-// * Component that shows the connection state.
-// */
-//@SuppressWarnings("serial")
-//public class ConnectionStateComponent extends JPanel {
-//	/**
-//	 * Logger to use.
-//	 */
-//	private static final Logger LOG = Logger.getLogger(
-//			ConnectionStateComponent.class);
-//	
-//	/**
-//	 * The connection.
-//	 */
-//	private BusConnection conn;
-//	
-//	/**
-//	 * Are we currently connected?
-//	 */
-//	private boolean connected;
-//	
-//	/**
-//	 * Connected text.
-//	 */
-//	private String connectedString;
-//	
-//	/**
-//	 * Disconnected text.
-//	 */
-//	private String disconnectedString;
-//	
-//	/**
-//	 * Label with text.
-//	 */
-//	private JLabel textLabel;
-//	
-//	/**
-//	 * Label with icon.
-//	 */
-//	private JLabel iconLabel;
-//	
-//	/**
-//	 * Connection is OK.
-//	 */
-//	private ImageIcon goodIcon;
-//	
-//	/**
-//	 * Connection is not OK:
-//	 */
-//	private ImageIcon badIcon;
-//	
-//	/**
-//	 * Creates a new component.
-//	 * @param c the bus connection
-//	 */
-//	public ConnectionStateComponent(BusConnection c) {
-//		if (c == null) {
-//			throw new IllegalArgumentException("connn == null");
-//		}
-//		
-//		conn = c;
-//		connected = false;
-//		
-//		String host_string = conn.host() + " ("
-//				+ (conn.pubPort() == 0? "no pub" : "pub = " + conn.pubPort())
-//				+ ", "
-//				+ (conn.subPort() == 0? "no sub" : "sub = " + conn.subPort())
-//				+ ")";
-//		
-//		connectedString = "Connected to " + host_string + ".";
-//		disconnectedString = "Connecting to " + host_string + "...";
-//		goodIcon = IconResourceLoader.loadIcon(ConnectionStateComponent.class,
-//				"circle-green-16.png");
-//		badIcon = IconResourceLoader.loadIcon(ConnectionStateComponent.class,
-//				"circle-red-16.png");
-//		if (goodIcon == null || badIcon == null) {
-//			throw new RuntimeException("Missing resource icon.");
-//		}
-//		
-//		textLabel = new JLabel(disconnectedString);
-//		iconLabel = new JLabel(badIcon);
-//		
-//		setLayout(new BorderLayout());
-//		add(textLabel, BorderLayout.CENTER);
-//		add(iconLabel, BorderLayout.WEST);
-//		
-//		new Thread() {
-//			{ setDaemon(true); }
-//			@Override
-//			public void run() {
-//				while(true) {
-//					try {
-//						Thread.sleep(250);
-//					
-//						final boolean myconn = conn.isConnected();
-//						if (myconn != connected) {
-//							EventQueue.invokeAndWait(new Runnable() {
-//								@Override
-//								public void run() {
-//									connected = myconn;
-//									textLabel.setText(connected?
-//											connectedString
-//											: disconnectedString);
-//									iconLabel.setIcon(connected?
-//											goodIcon
-//											: badIcon);
-//								}
-//							});
-//						}
-//					} catch (InterruptedException e) {
-//						/*
-//						 * We'll ignore.
-//						 */
-//					} catch (InvocationTargetException e) {
-//						/*
-//						 * This is weird.
-//						 */
-//						LOG.error(e);
-//					}
-//				}
-//			}
-//		}.start();
-//	}
-//}
+
+import incubator.ui.ColorCircles;
+import incubator.ui.ColorCircles.Color;
+import incubator.wt.WorkerThread;
+
+import java.awt.EventQueue;
+import java.awt.FlowLayout;
+
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+import edu.cmu.cs.able.eseb.BusClient;
+import edu.cmu.cs.able.eseb.BusClientListener;
+import edu.cmu.cs.able.eseb.BusClientState;
+
+/**
+ * Component that shows the state of a client bus connection.
+ */
+@SuppressWarnings("serial")
+public class ConnectionStateComponent extends JPanel {
+	/**
+	 * The connection.
+	 */
+	private BusClient m_client;
+	
+	/**
+	 * Current state.
+	 */
+	private BusClientState m_state;
+	
+	/**
+	 * Label with text.
+	 */
+	private JLabel m_text_label;
+	
+	/**
+	 * Label with icon.
+	 */
+	private JLabel m_icon_label;
+	
+	/**
+	 * Connection is OK.
+	 */
+	private ImageIcon m_connected_icon;
+	
+	/**
+	 * We're trying to connect.
+	 */
+	private ImageIcon m_trying_icon;
+	
+	/**
+	 * Connection is not established
+	 */
+	private ImageIcon m_bad_icon;
+	
+	/**
+	 * No client icon.
+	 */
+	private ImageIcon m_no_client_icon;
+	
+	/**
+	 * Client listener.
+	 */
+	private BusClientListener m_listener;
+	
+	/**
+	 * The worker thread.
+	 */
+	private WorkerThread m_wthread;
+	
+	/**
+	 * Creates a new component.
+	 * @param client the bus client (<code>null</code> if no client)
+	 */
+	public ConnectionStateComponent(BusClient client) {
+		m_client = null;
+		m_state = null;
+		m_bad_icon = ColorCircles.get_icon(Color.RED, 16);
+		m_connected_icon = ColorCircles.get_icon(Color.GREEN, 16);
+		m_no_client_icon = ColorCircles.get_icon(Color.GREY, 16);
+		m_trying_icon = ColorCircles.get_icon(Color.YELLOW, 16);
+		
+		m_text_label = new JLabel();
+		m_icon_label = new JLabel();
+		setLayout(new FlowLayout(FlowLayout.LEFT));
+		add(m_icon_label);
+		add(m_text_label);
+		
+		m_listener = new BusClientListener() {
+			@Override
+			public void client_state_changed() {
+				review_state();
+			}
+		};
+		
+		set_client(client);
+		
+		m_wthread = new WorkerThread("Connection state component") {
+			@Override
+			protected void do_cycle_operation() throws Exception {
+				synchronized (this) {
+					review_state();
+					wait(250);
+				}
+			}
+		};
+	}
+	
+	/**
+	 * Starts this component.
+	 */
+	public void start() {
+		m_wthread.start();
+	}
+	
+	/**
+	 * Stops this component.
+	 */
+	public void stop() {
+		m_wthread.stop();
+	}
+	
+	/**
+	 * Sets the client to be monitored by this component.
+	 * @param client the client or <code>null</code> if none
+	 */
+	public synchronized void set_client(BusClient client) {
+		if (m_client != null) {
+			m_client.remove_listener(m_listener);
+		}
+		
+		m_client = client;
+		if (m_client != null) {
+			m_client.add_listener(m_listener);
+		}
+		
+		review_state();
+	}
+	
+	/**
+	 * Updated the component's text depending on the component state.
+	 */
+	private synchronized void review_state() {
+		if (m_client != null) {
+			m_state = m_client.state();
+		} else {
+			m_state = null;
+		}
+		
+		ImageIcon icn = null;
+		String text = null;
+		
+		if (m_state == null) {
+			icn = m_no_client_icon;
+			text = "No connection.";
+		} else {
+			String hp = m_client.host() + ":" + m_client.port();
+			if (m_state == BusClientState.CONNECTED) {
+				icn = m_connected_icon;
+				text = "Connected to " + hp;
+			} else if (m_state == BusClientState.CONNECTING) {
+				icn = m_trying_icon;
+				text = "Connecting to " + hp;
+			} else if (m_state == BusClientState.DISCONNECTED) {
+				icn = m_bad_icon;
+				text = "Disconnected from " + hp;
+			}
+			
+			text += ". Connection count: " + m_client.connect_count()
+					+ ". Messages: " + m_client.sent_count()
+					+ "/" + m_client.receive_count() + ".";
+		}
+		
+		final String set_text = text;
+		final ImageIcon set_icon = icn;
+		EventQueue.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				m_text_label.setText(set_text);
+				m_icon_label.setIcon(set_icon);
+			}
+		});
+	}
+}

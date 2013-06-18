@@ -118,7 +118,7 @@ public class Scope<T extends ScopedObject> {
 	 * above in the hierarchy (which is possible using absolute hierarchical
 	 * names) would break the type system
 	 */
-	public final void add(Scope<T> scope) {
+	public synchronized final void add(Scope<T> scope) {
 		Ensure.not_null(scope);
 		Ensure.is_null(scope.m_parent);
 		
@@ -161,7 +161,7 @@ public class Scope<T extends ScopedObject> {
 	 * scope.
 	 * @param obj the object
 	 */
-	public final void add(T obj) {
+	public synchronized final void add(T obj) {
 		Ensure.not_null(obj);
 		Ensure.is_true(obj.name().length() > 0);
 		
@@ -201,7 +201,7 @@ public class Scope<T extends ScopedObject> {
 	 * @throws AmbiguousNameException if there is no object in this scope that
 	 * matches this name but there are more than one in the linked scopes
 	 */
-	public T find(String name) throws AmbiguousNameException {
+	public synchronized T find(String name) throws AmbiguousNameException {
 		return find(new HierarchicalName(false, name));
 	}
 	
@@ -212,7 +212,8 @@ public class Scope<T extends ScopedObject> {
 	 * @throws AmbiguousNameException if there is no scope in this scope that
 	 * matches this name but there are more than one in the linked scopes
 	 */
-	public Scope<T> find_scope(String name) throws AmbiguousNameException {
+	public synchronized Scope<T> find_scope(String name)
+			throws AmbiguousNameException {
 		return find_scope(new HierarchicalName(false, name));
 	}
 	
@@ -288,7 +289,8 @@ public class Scope<T extends ScopedObject> {
 	 * @throws AmbiguousNameException if there is no object in this scope that
 	 * matches this name but there are more than one in the linked scopes
 	 */
-	public T find(HierarchicalName hn) throws AmbiguousNameException {
+	public synchronized T find(HierarchicalName hn)
+			throws AmbiguousNameException {
 		Ensure.not_null(hn);
 		
 		Pair<T, Scope<T>> r = search(hn);
@@ -310,7 +312,7 @@ public class Scope<T extends ScopedObject> {
 	 * @throws AmbiguousNameException if there is no object in this scope that
 	 * matches this name but there are more than one in the linked scopes
 	 */
-	public Scope<T> find_scope(HierarchicalName hn)
+	public synchronized Scope<T> find_scope(HierarchicalName hn)
 			throws AmbiguousNameException {
 		Ensure.not_null(hn);
 		
@@ -326,7 +328,7 @@ public class Scope<T extends ScopedObject> {
 	 * Obtains all objects in this scope.
 	 * @return all objects
 	 */
-	public Set<T> all() {
+	public synchronized Set<T> all() {
 		return new HashSet<>(m_objects.values());
 	}
 	
@@ -336,7 +338,8 @@ public class Scope<T extends ScopedObject> {
 	 * @throws CyclicScopeLinkageException if linking this scope would produce
 	 * a cyclic graph
 	 */
-	public final void link(Scope<T> scope) throws CyclicScopeLinkageException {
+	public synchronized final void link(Scope<T> scope)
+			throws CyclicScopeLinkageException {
 		Ensure.not_null(scope);
 		Ensure.is_false(m_linked.contains(scope));
 		
@@ -406,7 +409,7 @@ public class Scope<T extends ScopedObject> {
 	 * recursively.
 	 * @return all objects
 	 */
-	public Set<T> all_recursive() {
+	public synchronized Set<T> all_recursive() {
 		Set<T> set = all();
 		set.addAll(all());
 		
@@ -428,7 +431,7 @@ public class Scope<T extends ScopedObject> {
 	 * @param scope the scope
 	 * @return is this scope a direct or indirect child of <code>scope</code>?
 	 */
-	public boolean child_scope_of(Scope<?> scope) {
+	public synchronized boolean child_scope_of(Scope<?> scope) {
 		Ensure.not_null(scope);
 		
 		for (Scope<?> p = m_parent; p != null; p = p.m_parent) {

@@ -349,8 +349,10 @@ public final class EfwManager {
 		}
 
 		try {
-			new EfwEntityListener(observerClass, observedClass, type
-					.equals(TYPE_ENTITY), add, remove, change, this);
+			@SuppressWarnings("unused")
+			EfwEntityListener efl = new EfwEntityListener(observerClass,
+					observedClass, type.equals(TYPE_ENTITY), add, remove,
+					change, this);
 		} catch (EfwException e) {
 			logger.error("Failed to create listener according to "
 					+ "registration '" + l + "': '" + reg + "'.", e);

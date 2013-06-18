@@ -23,5 +23,8 @@ a search for a field in a structure will find a parent's field.</p>
 
 <p>More information on linking scopes and when searching is considered
 ambiguous can be found in {@link edu.cmu.cs.able.typelib.scope.Scope}.</p>
+
+<p>Scopes are thread-safe although the objects placed in the scopes may
+not be.</p>
 */
 package edu.cmu.cs.able.typelib.scope;
