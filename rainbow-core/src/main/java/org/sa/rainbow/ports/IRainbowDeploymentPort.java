@@ -73,4 +73,9 @@ public interface IRainbowDeploymentPort {
      */
     public boolean terminateDelegate () throws IllegalStateException;
 
+    /**
+     * Should be called when this port is no longer required. Implementors should dispose of all resources.
+     */
+    public void dispose ();
+
 }

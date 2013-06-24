@@ -3,6 +3,7 @@ package org.sa.rainbow.ports;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
+import java.util.Properties;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
@@ -37,7 +38,7 @@ public class RainbowDeploymentPortFactory {
             }
             try {
                 Class<?> f = RainbowDeploymentPortFactory.class.forName (factory);
-                Method method = f.getMethod ("createFactory", new Class[0]);
+                Method method = f.getMethod ("getFactory", new Class[0]);
                 m_instance = (IRainbowDeploymentPortFactory )method.invoke (null, new Object[0]);
             }
             catch (ClassNotFoundException e) {
@@ -50,7 +51,7 @@ public class RainbowDeploymentPortFactory {
             catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
                     | InvocationTargetException e) {
                 String errMsg = MessageFormat.format (
-                        "The class ''{0}'' does not implement the method ''{1}''. Bailing!", factory, "createFactory");
+                        "The class ''{0}'' does not implement the method ''{1}''. Bailing!", factory, "getFactory");
                 LOGGER.error (errMsg);
                 LOGGER.error (e);
                 throw new NotImplementedException (errMsg, e);
@@ -60,20 +61,22 @@ public class RainbowDeploymentPortFactory {
         return m_instance;
     }
 
-    public static IRainbowMasterConnectionPort getDelegateMasterConnectionPort () {
-        return getFactory ().getDelegateMasterConnectionPort ();
+    public static IRainbowMasterConnectionPort createDelegateMasterConnectionPort (RainbowDelegate delegate) {
+        return getFactory ().createDelegateMasterConnectionPort (delegate);
     }
 
     public static IRainbowMasterConnectionPort createDelegateConnectionPort (RainbowMaster rainbowMaster) {
         return getFactory ().createDelegateConnectionPort (rainbowMaster);
     }
 
-    public static IRainbowDeploymentPort createMasterDelegatePort (RainbowMaster rainbowMaster, String delegateID) {
-        return getFactory ().createMasterDelegatePort (rainbowMaster, delegateID);
+    public static IRainbowDeploymentPort createMasterDeploymentPort (RainbowMaster rainbowMaster,
+            String delegateID,
+            Properties connectionProperties) {
+        return getFactory ().createMasterDeploymentePort (rainbowMaster, delegateID, connectionProperties);
     }
 
-    public static IRainbowDeploymentPort createDelegateDelegatePort (RainbowDelegate delegate, String delegateID) {
-        return getFactory ().createDelegateDelegatePort (delegate, delegateID);
+    public static IRainbowDeploymentPort createDelegateDeploymentPort (RainbowDelegate delegate, String delegateID) {
+        return getFactory ().createDelegateDeploymentPortPort (delegate, delegateID);
     }
 
 }

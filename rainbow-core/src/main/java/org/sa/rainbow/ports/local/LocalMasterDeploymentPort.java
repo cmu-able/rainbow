@@ -56,4 +56,8 @@ public class LocalMasterDeploymentPort implements IRainbowDeploymentPort {
         return m_connectedPort.terminateDelegate ();
     }
 
+    @Override
+    public void dispose () {
+    }
+
 }

@@ -148,4 +148,6 @@ public interface RainbowConstants {
     public static final String PROPKEY_DELEGATE_BEACONPERIOD       = "rainbow.delegate.beaconperiod";
     public static final String PROPKEY_DELEGATE_ID                 = "rainbow.delegate.id";
     public static final String PROPKEY_DEPLOYMENT_PORT_FACTORY     = "rainbow.deployment.factory.class";
+    public static final String PROPKEY_MASTER_DEPLOYMENT_PORT      = "rainbow.master.deployment.port";
+    public static final String PROPKEY_MASTER_CONNECTION_PORT      = "rainbow.master.connection.port";
 }

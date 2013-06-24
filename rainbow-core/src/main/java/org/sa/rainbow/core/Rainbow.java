@@ -127,7 +127,7 @@ public class Rainbow implements RainbowConstants {
      */
     public static void signalTerminate () {
         if (!instance ().m_shouldTerminate) { // log once the signalling to
-                                              // terminate
+            // terminate
             LOGGER.info ("*** Signalling Terminate ***");
         }
         instance ().m_shouldTerminate = true;
@@ -269,6 +269,16 @@ public class Rainbow implements RainbowConstants {
                 val = m_props.getProperty (key);
             }
         }
+    }
+
+    public static String canonicalizeHost2IP (String host) {
+        try {
+            host = InetAddress.getByName (host).getHostAddress ();
+        }
+        catch (UnknownHostException e) {
+            LOGGER.error (MessageFormat.format ("{0} could not be resolved to an IP using the given name.", host));
+        }
+        return host;
     }
 
     private void canonicalizeHost2IP (String string, String masterLoc) {

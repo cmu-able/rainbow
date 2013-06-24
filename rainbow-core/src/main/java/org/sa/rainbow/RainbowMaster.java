@@ -16,14 +16,13 @@ import org.sa.rainbow.ports.RainbowDeploymentPortFactory;
 import org.sa.rainbow.util.Beacon;
 
 public class RainbowMaster extends AbstractRainbowRunnable {
-    static Logger                     LOGGER               = Logger.getLogger (Rainbow.class.getCanonicalName ());
+    static Logger                       LOGGER       = Logger.getLogger (Rainbow.class.getCanonicalName ());
 
+    Map<String, IRainbowDeploymentPort> m_delegates  = new HashMap<> ();
 
-    Map<String, IRainbowDeploymentPort> m_delegates          = new HashMap<> ();
+    IRainbowMasterConnectionPort        m_delegateConnection;
 
-    IRainbowMasterConnectionPort    m_delegateConnection;
-
-    private Map<String, Beacon>       m_heartbeats = new HashMap<> ();
+    private Map<String, Beacon>         m_heartbeats = new HashMap<> ();
 
     public RainbowMaster () {
         super ("Rainbow Master");
@@ -34,21 +33,20 @@ public class RainbowMaster extends AbstractRainbowRunnable {
      * Connects a new delegate and sends the appropriate configuration information to the delegate
      * 
      * @param delegateID
-     * @param delegateIP Drop the ip address
+     * @param connectionProperties
+     * @param delegateIP
+     *            Drop the ip address
      */
-    public IRainbowDeploymentPort connectDelegate (String delegateID) {
+    public IRainbowDeploymentPort connectDelegate (String delegateID, Properties connectionProperties) {
         LOGGER.debug (MessageFormat.format ("Master received connection request from: {0}", delegateID));
-        IRainbowDeploymentPort delegatePort = RainbowDeploymentPortFactory
-                .createMasterDelegatePort (this, delegateID);
+        IRainbowDeploymentPort delegatePort = RainbowDeploymentPortFactory.createMasterDeploymentPort (this, delegateID,
+                connectionProperties);
         // Check to see if there is already a registered delegate running on the machine
         m_delegates.put (delegateID, delegatePort);
         // Add a second to the heartbeat to allow for communication time
         Beacon beacon = new Beacon (Long.parseLong (Rainbow.properties ().getProperty (
                 RainbowConstants.PROPKEY_DELEGATE_BEACONPERIOD, "1000")) + 1000);
-        m_heartbeats.put (
-                delegatePort.getDelegateId (),
-                beacon);
-        delegatePort.sendConfigurationInformation (filterPropertiesForDelegate (delegateID));
+        m_heartbeats.put (delegatePort.getDelegateId (), beacon);
         beacon.mark ();
         LOGGER.info (MessageFormat.format ("Master created management connection with delegate {0}", delegateID));
         return delegatePort;
@@ -66,8 +64,8 @@ public class RainbowMaster extends AbstractRainbowRunnable {
             delegate.sendConfigurationInformation (filterPropertiesForDelegate (delegateID));
         }
         else {
-            LOGGER.error (
-                    MessageFormat.format ("Received configuration request from unknown delegate {0}.", delegateID));
+            LOGGER.error (MessageFormat
+                    .format ("Received configuration request from unknown delegate {0}.", delegateID));
         }
     }
 
@@ -124,8 +122,9 @@ public class RainbowMaster extends AbstractRainbowRunnable {
         Set<Entry<String, Beacon>> entrySet = m_heartbeats.entrySet ();
         for (Entry<String, Beacon> entry : entrySet) {
             if (entry.getValue ().periodElapsed ()) {
-                LOGGER.error (MessageFormat.format ("Delegate {0} has not given a heartbeat withing the right time",
-                        entry.getKey ()));
+//                LOGGER.error (MessageFormat.format ("Delegate {0} has not given a heartbeat withing the right time",
+//                        entry.getKey ()));
+                entry.getValue ().mark ();
             }
         }
     }
@@ -133,7 +132,22 @@ public class RainbowMaster extends AbstractRainbowRunnable {
     public void disconnectDelegate (String id) {
         LOGGER.info (MessageFormat.format ("RM: Disconnecting delegate: {0}", id));
         m_heartbeats.remove (id);
-        m_delegates.remove (id);
+        IRainbowDeploymentPort deploymentPort = m_delegates.remove (id);
+        deploymentPort.dispose ();
+    }
+
+    @Override
+    public void terminate () {
+        for (Entry<String, IRainbowDeploymentPort> entry : m_delegates.entrySet ()) {
+            entry.getValue ().terminateDelegate ();
+        }
+        m_delegateConnection.dispose ();
+        try {
+            Thread.sleep (4000);
+        }
+        catch (InterruptedException e) {
+        }
+        super.terminate ();
     }
 
 }

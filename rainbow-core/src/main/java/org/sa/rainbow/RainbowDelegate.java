@@ -28,13 +28,15 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
         super (NAME);
         m_id = UUID.randomUUID ().toString ();
         IRainbowMasterConnectionPort masterConnectionPort = RainbowDeploymentPortFactory
-                .getDelegateMasterConnectionPort ();
-        m_masterPort = masterConnectionPort.connectDelegate (this, m_id);
+                .createDelegateMasterConnectionPort (this);
+        log ("Attempting to connecto to master.");
+        m_masterPort = masterConnectionPort.connectDelegate (m_id, new Properties ());
 //        m_masterPort = LocalRainbowDelegatePortFactory.createDelegateDelegatePort (this, m_id);
-//        m_masterPort.requestConfigurationInformation ();
+        m_masterPort.requestConfigurationInformation ();
     }
 
     public void receiveConfigurationInformation (Properties props) {
+        log ("Received configuration information.");
         long period = Long.parseLong (props.getProperty (PROPKEY_DELEGATE_BEACONPERIOD, "10000"));
         if (m_beacon != null) {
             if (m_beacon.period () != period) {
@@ -70,6 +72,7 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
 
     private void manageHeartbeat () {
         if (m_beacon != null && m_beacon.periodElapsed ()) {
+            log ("Sending heartbeat.");
             m_masterPort.receiveHeartbeat ();
             m_beacon.mark ();
         }
@@ -77,10 +80,25 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
 
     @Override
     protected void doTerminate () {
+        log ("Terminating.");
         IRainbowMasterConnectionPort masterConnectionPort = RainbowDeploymentPortFactory
-                .getDelegateMasterConnectionPort ();
-        masterConnectionPort.disconnectDelegate (this);
+                .createDelegateMasterConnectionPort (this);
+        masterConnectionPort.disconnectDelegate (getId ());
+        m_masterPort.dispose ();
+        masterConnectionPort.dispose ();
         super.doTerminate ();
+    }
+
+    @Override
+    public void start () {
+        log ("Starting.");
+        super.start ();
+    }
+
+    @Override
+    public void stop () {
+        log ("Pausing.");
+        super.stop ();
     }
 
     public String getId () {

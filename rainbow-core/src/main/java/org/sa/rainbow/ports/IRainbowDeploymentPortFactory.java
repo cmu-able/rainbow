@@ -1,5 +1,7 @@
 package org.sa.rainbow.ports;
 
+import java.util.Properties;
+
 import org.sa.rainbow.RainbowDelegate;
 import org.sa.rainbow.RainbowMaster;
 
@@ -7,10 +9,11 @@ public interface IRainbowDeploymentPortFactory {
 
     /**
      * Called by a delegate to get the master connection port
+     * @param delegate TODO
      * 
      * @return
      */
-    public abstract IRainbowMasterConnectionPort getDelegateMasterConnectionPort ();
+    public abstract IRainbowMasterConnectionPort createDelegateMasterConnectionPort (RainbowDelegate delegate);
 
     /**
      * Create the connection port on the master, which processes connection requests from delegates
@@ -30,7 +33,7 @@ public interface IRainbowDeploymentPortFactory {
      *            The delegate id of the delegate
      * @return the port associated with deployment and lifecycle information to the delegate
      */
-    public abstract IRainbowDeploymentPort createDelegateDelegatePort (RainbowDelegate delegate, String delegateID);
+    public abstract IRainbowDeploymentPort createDelegateDeploymentPortPort (RainbowDelegate delegate, String delegateID);
 
     /**
      * Create a delegate port of the rainbowMaster that will forward requests to the delegate indicated by delegateID
@@ -42,6 +45,8 @@ public interface IRainbowDeploymentPortFactory {
      * @return a new port to be used by the master to communicate deployment and configuration information to the
      *         delegate, and manager the lifecycle
      */
-    public abstract IRainbowDeploymentPort createMasterDelegatePort (RainbowMaster rainbowMaster, String delegateID);
+    public abstract IRainbowDeploymentPort createMasterDeploymentePort (RainbowMaster rainbowMaster,
+            String delegateID,
+            Properties connectionProperties);
 
 }

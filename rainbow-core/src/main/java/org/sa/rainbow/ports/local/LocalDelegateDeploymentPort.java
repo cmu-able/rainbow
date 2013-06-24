@@ -73,4 +73,8 @@ public class LocalDelegateDeploymentPort implements IRainbowDeploymentPort {
         return true;
     }
 
+    @Override
+    public void dispose () {
+    }
+
 }
