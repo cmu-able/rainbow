@@ -140,7 +140,9 @@ public class QxtDateProperty extends QxtRealProperty<Date> {
 				}
 			};
 
-			new DeepKeyListenerMaintainer(picker, kl);
+			@SuppressWarnings("unused")
+			DeepKeyListenerMaintainer dklm =
+					new DeepKeyListenerMaintainer(picker, kl);
 		}
 
 		@Override

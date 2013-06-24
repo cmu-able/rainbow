@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.junit.After;
@@ -16,27 +17,37 @@ import org.junit.Before;
  * {@link AbstractTestHelper}) may be added as private variables with the
  * {@link TestHelper} annotation. They will be automatically initialized and
  * destroyed. Note that helpers will be initialized by alphabetical order and
- * will be destroyed in reverse order.
+ * will be destroyed in reverse order. This class will save system properties
+ * on set up and will restore them at tear down.
  */
 public class DefaultTCase extends Assert {
 	/**
 	 * All helpers.
 	 */
-	private List<Field> helpers;
-
+	private List<Field> m_helpers;
+	
+	/**
+	 * Saved system properties.
+	 */
+	private Properties m_system_properties;
+	
 	/**
 	 * Runs before any preparation. Ensures there are no helpers pending from
 	 * previous test cases. It will also initialize any helpers marked with the
 	 * {@link TestHelper} annotation.
-	 * 
 	 * @throws Exception failed to initialize helpers.
 	 */
 	@Before
-	public void preSetup() throws Exception {
+	public void pre_set_up() throws Exception {
 		/*
 		 * We're in trouble if this is not true...
 		 */
-		assert helpers == null;
+		assert m_helpers == null;
+		
+		/*
+		 * Save all system properties.
+		 */
+		m_system_properties = (Properties) System.getProperties().clone();
 		
 		/*
 		 * Ensure global properties are loaded.
@@ -51,7 +62,7 @@ public class DefaultTCase extends Assert {
 		/*
 		 * Initialize helpers.
 		 */
-		helpers = new ArrayList<>();
+		m_helpers = new ArrayList<>();
 
 		for (Class<?> cls = getClass(); cls != null;
 				cls = cls.getSuperclass()) {
@@ -78,7 +89,7 @@ public class DefaultTCase extends Assert {
 								+ "AbstractTestHelper.");
 					}
 
-					helpers.add(f);
+					m_helpers.add(f);
 					f.set(this, f.getType().newInstance());
 				}
 			}
@@ -87,32 +98,35 @@ public class DefaultTCase extends Assert {
 
 	/**
 	 * Runs after tear down. Ensures all helpers have been destroyed.
-	 * 
 	 * @throws Exception failed to tear down the test case
 	 */
 	@After
-	public void postTearDown() throws Exception {
+	public void post_tear_down() throws Exception {
 		/*
 		 * Not sure what means if this doesn't hold.
 		 */
-		assert helpers != null;
+		assert m_helpers != null;
 
 		/*
 		 * Dispose of all helpers.
 		 */
-		Field[] fr = new Field[helpers.size()];
-		ArrayUtils.reverse(helpers.toArray(fr));
+		Field[] fr = new Field[m_helpers.size()];
+		ArrayUtils.reverse(m_helpers.toArray(fr));
 		for (Field f : fr) {
 			AbstractTestHelper ath = (AbstractTestHelper) f.get(this);
 			ath.tearDown();
 		}
 
-		helpers = null;
+		m_helpers = null;
 
 		/*
 		 * At the end there should be no more helpers.
 		 */
 		assertEquals(0, AbstractTestHelper.getTotalHelperCount());
 
+		/*
+		 * Sets all system properties back to their original values.
+		 */
+		System.setProperties(m_system_properties);
 	}
 }

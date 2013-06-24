@@ -41,6 +41,7 @@ public class MapDelegateTextEncoding implements DelegateTextEncoding {
 		return t instanceof MapDataType;
 	}
 
+	@SuppressWarnings("null")
 	@Override
 	public void encode(DataValue v, Writer w, TextEncoding enc)
 			throws IOException {

@@ -44,6 +44,7 @@ public class PollingRbTest extends Assert {
 	 * @throws Exception failed
 	 */
 	@Test(expected = IllegalArgumentException.class)
+	@SuppressWarnings("unused")
 	public final void cannotCreateWithNullSourceC1() throws Exception {
 		new Poller<>(new TestPollerListener(), null);
 	}
@@ -54,6 +55,7 @@ public class PollingRbTest extends Assert {
 	 * @throws Exception failed
 	 */
 	@Test(expected = IllegalArgumentException.class)
+	@SuppressWarnings("unused")
 	public final void cannotCreateWithNullListenerC1() throws Exception {
 		new Poller<>(null, new TestDataSource());
 	}
@@ -64,6 +66,7 @@ public class PollingRbTest extends Assert {
 	 * @throws Exception failed
 	 */
 	@Test(expected = IllegalArgumentException.class)
+	@SuppressWarnings("unused")
 	public final void cannotCreateWithZeroPollingTime() throws Exception {
 		new Poller<>(0, new TestPollerListener(), new TestDataSource());
 	}
@@ -74,6 +77,7 @@ public class PollingRbTest extends Assert {
 	 * @throws Exception failed
 	 */
 	@Test(expected = IllegalArgumentException.class)
+	@SuppressWarnings("unused")
 	public final void cannotCreateWithNullSourceC2() throws Exception {
 		new Poller<>(DEFAULT_POLLING, new TestPollerListener(), null);
 	}
@@ -84,6 +88,7 @@ public class PollingRbTest extends Assert {
 	 * @throws Exception failed
 	 */
 	@Test(expected = IllegalArgumentException.class)
+	@SuppressWarnings("unused")
 	public final void cannotCreateWithNullListenerC2() throws Exception {
 		new Poller<>(DEFAULT_POLLING, null, new TestDataSource());
 	}

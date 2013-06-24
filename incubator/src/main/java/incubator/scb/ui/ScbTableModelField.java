@@ -1,5 +1,6 @@
 package incubator.scb.ui;
 
+import incubator.Pair;
 import incubator.pval.Ensure;
 import incubator.scb.ScbField;
 import incubator.scb.ValidationResult;
@@ -77,9 +78,10 @@ public abstract class ScbTableModelField<T, V, F extends ScbField<T, V>> {
 	 * @param obj the object
 	 * @param display the display object
 	 * @return the result of validating the value (the field is only set if
-	 * validation succeeds)
+	 * validation succeeds); if validation succeeds the second element in the
+	 * pair is the value to which the field was set
 	 */
-	public ValidationResult from_display(T obj, Object display) {
+	public Pair<ValidationResult, V> from_display(T obj, Object display) {
 		throw new UnsupportedOperationException();
 	}
 }

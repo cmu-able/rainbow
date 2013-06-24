@@ -57,6 +57,7 @@ public class WorkerThreadTest extends DefaultTCase {
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
+	@SuppressWarnings("unused")
 	public void invalid_creation() throws Exception {
 		new WorkerThread(null);
 	}

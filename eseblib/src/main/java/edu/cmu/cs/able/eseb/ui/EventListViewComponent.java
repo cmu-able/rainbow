@@ -12,6 +12,7 @@ import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.table.AbstractTableModel;
 
 import edu.cmu.cs.able.typelib.type.DataValue;
@@ -57,9 +58,9 @@ public class EventListViewComponent extends JPanel {
 		JScrollPane scroll = new JScrollPane();
 		add(scroll, BorderLayout.CENTER);
 		scroll.setHorizontalScrollBarPolicy(
-				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		scroll.setVerticalScrollBarPolicy(
-				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+				ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		
 		m_table = new JTable(new Model());
 		scroll.setViewportView(m_table);

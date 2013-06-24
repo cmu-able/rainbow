@@ -281,7 +281,7 @@ public class ClientFrame extends JFrame {
 	
 	/**
 	 * Test method.
-	 * @param args
+	 * @param args unused
 	 */
 	@SuppressWarnings("unused")
 	public static void main(String[] args) {

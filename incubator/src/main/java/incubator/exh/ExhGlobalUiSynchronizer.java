@@ -1,5 +1,9 @@
 package incubator.exh;
 
+import java.awt.EventQueue;
+import java.util.HashSet;
+import java.util.Set;
+
 import incubator.obscol.ObservableSetListener;
 import incubator.pval.Ensure;
 
@@ -21,13 +25,34 @@ public class ExhGlobalUiSynchronizer {
 			}
 			
 			@Override
-			public void elementRemoved(ThrowableCollector e) {
-				ui.remove_collector(e);
+			public void elementRemoved(final ThrowableCollector e) {
+				EventQueue.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						ui.remove_collector(e);
+					}
+				});
 			}
 			
 			@Override
-			public void elementAdded(ThrowableCollector e) {
-				ui.add_collector(e);
+			public void elementAdded(final ThrowableCollector e) {
+				EventQueue.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						ui.add_collector(e);
+					}
+				});
+			}
+		});
+		
+		final Set<ThrowableCollector> initial = new HashSet<>(
+				GlobalCollector.instance().collectors());
+		EventQueue.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				for (ThrowableCollector tc : initial) {
+					ui.add_collector(tc);
+				}
 			}
 		});
 	}

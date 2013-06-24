@@ -145,11 +145,14 @@ public class ExhUi extends JPanel {
 	
 	/**
 	 * Adds a collector to the user interface.
-	 * @param collector the collector to add
+	 * @param collector the collector to add; if the collector is already
+	 * in the user interface, this call is ignored
 	 */
 	public void add_collector(ThrowableCollector collector) {
 		Ensure.notNull(collector);
-		Ensure.stateCondition(!m_collectors.contains(collector));
+		if (m_collectors.contains(collector)) {
+			return;
+		}
 		
 		int idx;
 		for (idx = 0; idx < m_collectors.size()

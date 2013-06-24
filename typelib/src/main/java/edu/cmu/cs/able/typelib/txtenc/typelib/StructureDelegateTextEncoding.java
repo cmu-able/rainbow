@@ -42,6 +42,7 @@ public class StructureDelegateTextEncoding implements DelegateTextEncoding {
 		return t instanceof StructureDataType;
 	}
 
+	@SuppressWarnings("null")
 	@Override
 	public void encode(DataValue v, Writer w, TextEncoding enc)
 			throws IOException {

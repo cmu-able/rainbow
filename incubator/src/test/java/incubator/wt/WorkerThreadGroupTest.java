@@ -43,6 +43,7 @@ public class WorkerThreadGroupTest extends DefaultTCase {
 	 * @throws Exception test failed
 	 */
 	@Test
+	@SuppressWarnings("unused")
 	public void invalid_creation() throws Exception {
 		try {
 			new WorkerThreadGroup(null);

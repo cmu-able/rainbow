@@ -42,6 +42,7 @@ public class CollectionDelegateTextEncoding implements DelegateTextEncoding {
 		return t instanceof CollectionDataType;
 	}
 
+	@SuppressWarnings("null")
 	@Override
 	public void encode(DataValue v, Writer w, TextEncoding enc)
 			throws IOException {

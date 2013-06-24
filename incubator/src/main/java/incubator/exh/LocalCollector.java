@@ -18,6 +18,7 @@ public class LocalCollector extends ThrowableCollector {
 	 */
 	public LocalCollector(String name) {
 		super(name);
-		new SoftCollectorProxy(this);
+		@SuppressWarnings("unused")
+		SoftCollectorProxy scp = new SoftCollectorProxy(this);
 	}
 }

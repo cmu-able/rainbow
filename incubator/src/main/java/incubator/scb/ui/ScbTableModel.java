@@ -1,12 +1,15 @@
 package incubator.scb.ui;
 
+import incubator.Pair;
 import incubator.pval.Ensure;
 import incubator.scb.ScbContainer;
 import incubator.scb.ScbContainerListener;
 import incubator.scb.ScbDateField;
 import incubator.scb.ScbDerivedTextFromDateField;
 import incubator.scb.ScbField;
+import incubator.scb.ScbIntegerField;
 import incubator.scb.ScbTextField;
+import incubator.scb.ValidationResult;
 
 import java.awt.EventQueue;
 import java.util.ArrayList;
@@ -165,6 +168,10 @@ public class ScbTableModel<T, C extends Comparator<T>>
 			@SuppressWarnings("unchecked")
 			ScbTextField<T> stf = (ScbTextField<T>) f;
 			add_field(new ScbTableModelTextField<>(stf, editable));
+		} else if (f instanceof ScbIntegerField) {
+			@SuppressWarnings("unchecked")
+			ScbIntegerField<T> stf = (ScbIntegerField<T>) f;
+			add_field(new ScbTableModelIntegerField<>(stf, editable));
 		} else if (f instanceof ScbDateField) {
 			@SuppressWarnings("unchecked")
 			ScbDateField<T> sdf = (ScbDateField<T>) f;
@@ -291,7 +298,23 @@ public class ScbTableModel<T, C extends Comparator<T>>
 		Ensure.is_true(col < m_fields.size());
 		Ensure.is_true(m_fields.get(col).editable());
 		
-		m_fields.get(col).from_display(m_objects.get(row), value);
+		Pair<ValidationResult, ?> update_result =
+				m_fields.get(col).from_display(m_objects.get(row), value);
+		updated_hook(row, col, update_result.first(), update_result.second());
+	}
+	
+	/**
+	 * Invoked when a field has been updated (successfully or unsuccessfully).
+	 * @param row the row
+	 * @param col the column
+	 * @param vr the validation result
+	 * @param value the updated value (<code>null</code> if validation failed)
+	 */
+	protected void updated_hook(int row, int col, ValidationResult vr,
+			Object value) {
+		/*
+		 * Hook method.
+		 */
 	}
 	
 	/**

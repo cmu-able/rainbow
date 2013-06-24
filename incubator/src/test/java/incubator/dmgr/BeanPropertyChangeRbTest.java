@@ -13,6 +13,7 @@ public class BeanPropertyChangeRbTest extends Assert {
 	 * @throws Exception failed
 	 */
 	@Test(expected = IllegalArgumentException.class)
+	@SuppressWarnings("unused")
 	public void cannotCreateWithNullArg1() throws Exception {
 		new BeanPropertyChange(null, null);
 	}
@@ -23,6 +24,7 @@ public class BeanPropertyChangeRbTest extends Assert {
 	 * @throws Exception failed
 	 */
 	@Test(expected = IllegalArgumentException.class)
+	@SuppressWarnings("unused")
 	public void cannotCreateWithNullArg2() throws Exception {
 		new BeanPropertyChange(new Object(), null);
 	}	

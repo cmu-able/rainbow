@@ -67,19 +67,12 @@ public class Ensure {
 	}
 
 	/**
-	 * Ensures that a value has an expected value.
-	 * 
+	 * Ensures that two values are equal (using <code>equals</code>).
 	 * @param expected the expected value (<code>null</code> accepted)
 	 * @param value the value to test (<code>null</code> accepted)
-	 * 
-	 * @throws IllegalArgumentException if the value is not equal to the
-	 * expected
 	 */
 	public static void equals(Object expected, Object value) {
-		if (!ObjectUtils.equals(expected, value)) {
-			throw new IllegalArgumentException("Expected '" + expected + "' "
-					+ " but got '" + value + "'.");
-		}
+		is_true(ObjectUtils.equals(expected, value));
 	}
 
 	/**

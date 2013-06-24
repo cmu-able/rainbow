@@ -15,13 +15,14 @@ class TestPollingUtils extends Assert {
 	 * 
 	 * @param oldData the old data
 	 * @param newData the new data
+	 * @param listener the listener
 	 */
 	static void checkListenerChanged(List<Object> oldData,
 			List<Object> newData, TestPollerListener listener) {
 		assertNotNull(oldData);
 		assertNotNull(newData);
 		
-		List<Object> trf = new ArrayList<Object>(oldData);
+		List<Object> trf = new ArrayList<>(oldData);
 		int ap = 0;
 		int rp = 0;
 		for (int i = 0; i < listener.added.size(); i++) {

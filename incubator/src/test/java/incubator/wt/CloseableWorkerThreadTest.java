@@ -30,67 +30,69 @@ public class CloseableWorkerThreadTest extends DefaultTCase {
 	@Test
 	public void reading_input_stream_until_eof() throws Exception {
 		final boolean cls[] = new boolean[1];
-		PipedInputStream pis = new PipedInputStream(15) {
-			@Override
-			public void close() throws IOException {
-				cls[0] = true;
-				super.close();
-			}
-		};
-		byte[] send_data = RandomGenerator.randBytes(500);
-		final byte[] rec_data = new byte[send_data.length + 1];
-		
-		/*
-		 * This is a weird try-with-resources statement...		
-		 */
-		try (PipedOutputStream pos = new PipedOutputStream(pis);
-				CloseableWorkerThread<PipedInputStream> cwt =
-				new CloseableWorkerThread<PipedInputStream>("x", pis, false) {
-			public int rr = 0;
-			
-			@Override
-			protected void do_cycle_operation(PipedInputStream closeable)
-					throws Exception {
-				int r = closeable.read(rec_data, rr, rec_data.length - rr);
-				if (r == -1) {
-					throw new EOFException();
+		try (PipedInputStream pis = new PipedInputStream(15) {
+				@Override
+				public void close() throws IOException {
+					cls[0] = true;
+					super.close();
 				}
+			}) {
+			byte[] send_data = RandomGenerator.randBytes(500);
+			final byte[] rec_data = new byte[send_data.length + 1];
+			
+			/*
+			 * This is a weird try-with-resources statement...		
+			 */
+			try (PipedOutputStream pos = new PipedOutputStream(pis);
+					CloseableWorkerThread<PipedInputStream> cwt =
+					new CloseableWorkerThread<PipedInputStream>("x", pis,
+							false) {
+				public int rr = 0;
 				
-				if (rr == 0) {
+				@Override
+				protected void do_cycle_operation(PipedInputStream closeable)
+						throws Exception {
+					int r = closeable.read(rec_data, rr, rec_data.length - rr);
+					if (r == -1) {
+						throw new EOFException();
+					}
+					
+					if (rr == 0) {
+						Thread.sleep(10);
+					}
+					
+					rr += r;
+				}}) {
+			
+				final int notf[] = new int[1];
+				cwt.add_listener(new CloseableListener() {
+					@Override
+					public void closed(IOException e) {
+						notf[0]++;
+					}
+				});
+				
+				cwt.start();
+				
+				for (int i = 0; i < send_data.length; ) {
+					int to_send = RandomGenerator.randInt(11, 27);
+					if (to_send > (send_data.length - i)) {
+						to_send = send_data.length - i;
+					}
+					
+					pos.write(send_data, i, to_send);
+					i += to_send;
 					Thread.sleep(10);
 				}
 				
-				rr += r;
-			}}) {
-		
-			final int notf[] = new int[1];
-			cwt.add_listener(new CloseableListener() {
-				@Override
-				public void closed(IOException e) {
-					notf[0]++;
-				}
-			});
-			
-			cwt.start();
-			
-			for (int i = 0; i < send_data.length; ) {
-				int to_send = RandomGenerator.randInt(11, 27);
-				if (to_send > (send_data.length - i)) {
-					to_send = send_data.length - i;
-				}
+				pos.close();
+				Thread.sleep(50);
 				
-				pos.write(send_data, i, to_send);
-				i += to_send;
-				Thread.sleep(10);
+				assertEquals(WtState.ABORTED, cwt.state());
+				assertEquals(true, cwt.closed());
+				assertEquals(true, cls[0]);
+				assertEquals(1, notf[0]);
 			}
-			
-			pos.close();
-			Thread.sleep(50);
-			
-			assertEquals(WtState.ABORTED, cwt.state());
-			assertEquals(true, cwt.closed());
-			assertEquals(true, cls[0]);
-			assertEquals(1, notf[0]);
 		}
 	}
 	
@@ -98,6 +100,7 @@ public class CloseableWorkerThreadTest extends DefaultTCase {
 	@Test
 	public void closing_stream_while_reading() throws Exception {
 		final boolean cls[] = new boolean[1];
+		@SuppressWarnings("resource")
 		PipedInputStream pis = new PipedInputStream(15) {
 			@Override
 			public void close() throws IOException {
@@ -144,6 +147,7 @@ public class CloseableWorkerThreadTest extends DefaultTCase {
 	@Test
 	public void removed_listeners_not_notified() throws Exception {
 		final boolean cls[] = new boolean[1];
+		@SuppressWarnings("resource")
 		PipedInputStream pis = new PipedInputStream(15) {
 			@Override
 			public void close() throws IOException {

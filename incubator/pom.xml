@@ -305,6 +305,11 @@
 			<artifactId>hibernate-core</artifactId>
 			<version>3.3.2.GA</version>
 		</dependency>
+		<dependency>
+			<groupId>rmilite</groupId>
+			<artifactId>rmi-lite</artifactId>
+			<version>1.0</version>
+		</dependency>
 	</dependencies>
 	
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

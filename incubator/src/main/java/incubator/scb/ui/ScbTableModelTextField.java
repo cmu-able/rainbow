@@ -1,5 +1,6 @@
 package incubator.scb.ui;
 
+import incubator.Pair;
 import incubator.pval.Ensure;
 import incubator.scb.ScbTextField;
 import incubator.scb.ValidationResult;
@@ -34,14 +35,16 @@ public class ScbTableModelTextField<T>
 	}
 	
 	@Override
-	public ValidationResult from_display(T obj, Object display) {
+	public Pair<ValidationResult, String> from_display(T obj, Object display) {
 		if (display == null || display instanceof String) {
+			String dstr = null;
 			ValidationResult vr = cof().valid((String) display);
 			if (vr.valid()) {
 				cof().set(obj, (String) display);
+				dstr = (String) display;
 			}
 			
-			return vr;
+			return new Pair<>(vr, dstr);
 		} else {
 			throw new IllegalArgumentException("Cannot set text field to a "
 					+ "non string value (" + display.getClass().getName()
