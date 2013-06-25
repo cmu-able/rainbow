@@ -6,6 +6,7 @@ import incubator.exh.LocalCollector;
 import incubator.pval.Ensure;
 import incubator.wt.CloseableListener;
 import incubator.wt.WorkerThread;
+import incubator.wt.WtState;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -174,18 +175,40 @@ public class BusClient implements Closeable {
 	/**
 	 * Stops and disconnects the client.
 	 */
-	public synchronized void stop() {
-		switch (m_state) {
-		case CONNECTED:
-			switch_connected_disconnected();
-			break;
-		case CONNECTING:
-			switch_connecting_disconnected();
-			break;
-		case DISCONNECTED:
-			break;
-		default:
-			assert false;
+	public void stop() {
+		/*
+		 * When stopping we want to wait for the connection establisher thread
+		 * to die. However, we can't do it from a synchronized block because
+		 * the establisher will need to acquire the lock in order to exit.
+		 */
+		WorkerThread establisher;
+		synchronized (this) {
+			establisher = m_connection_establisher;
+			
+			switch (m_state) {
+			case CONNECTED:
+				switch_connected_disconnected();
+				break;
+			case CONNECTING:
+				switch_connecting_disconnected();
+				break;
+			case DISCONNECTED:
+				break;
+			default:
+				assert false;
+			}
+		}
+		
+		if (establisher != null) {
+			while (establisher.state() != WtState.STOPPED) {
+				try {
+					Thread.sleep(10);
+				} catch (InterruptedException e) {
+					/*
+					 * Ignored.
+					 */
+				}
+			}
 		}
 	}
 	
@@ -344,9 +367,20 @@ public class BusClient implements Closeable {
 		 * for the cooling period anyway.
 		 */
 		m_state = BusClientState.DISCONNECTED;
-		m_connection_establisher.stop();
+		final WorkerThread ce = m_connection_establisher;
 		m_connection_establisher = null;
 		notify_state_changed();
+		
+		/*
+		 * The connection establisher may need to query our state to make sure
+		 * it quits. So we can't do it in this thread. 
+		 */
+		m_dispatcher.dispatch(new Runnable() {
+			@Override
+			public void run() {
+				ce.stop();
+			}
+		});
 	}
 	
 	/**

@@ -72,9 +72,19 @@ public class EventListViewComponent extends JPanel {
 	 * @param value the value
 	 */
 	public void add(DataValue value) {
+		add(new Date(), value);
+	}
+	
+	/**
+	 * Adds a new value to the view component with a given date.
+	 * @param d the date
+	 * @param value the value
+	 */
+	public void add(Date d, DataValue value) {
 		Ensure.not_null(value);
+		Ensure.not_null(d);
 		Store s = new Store();
-		s.when = new Date();
+		s.when = d;
 		s.value = value;
 		m_data.add(s);
 		((Model) m_table.getModel()).fireTableRowsInserted(m_data.size() - 1,

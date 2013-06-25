@@ -321,6 +321,7 @@ class ControlledDataTypeSocketConnectionImpl
 	@Override
 	public void close() throws IOException {
 		m_connection.close();
+		stop_pinger_if_running();
 	}
 	
 	/**

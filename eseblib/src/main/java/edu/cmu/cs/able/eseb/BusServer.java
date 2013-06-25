@@ -78,6 +78,11 @@ public class BusServer implements Closeable {
 	private LocalCollector m_collector;
 	
 	/**
+	 * The port where the server is running.
+	 */
+	private short m_port;
+	
+	/**
 	 * Creates a new bus server in the given port.
 	 * @param port the port used to accept incoming clients.
 	 * @param scope the primitive scope for types
@@ -103,6 +108,15 @@ public class BusServer implements Closeable {
 		m_next_client_id = 1;
 		m_scope = scope;
 		m_collector = new LocalCollector("Bus server (" + port + ")");
+		m_port = port;
+	}
+	
+	/**
+	 * Obtains the port where the server is listening.
+	 * @return the port
+	 */
+	public short port() {
+		return m_port;
 	}
 	
 	/**
@@ -277,6 +291,14 @@ public class BusServer implements Closeable {
 
 	@Override
 	public synchronized void close() throws IOException {
+		if (m_server == null) {
+			/*
+			 * Already closed. We need to support multiple closes because
+			 * that's the contract of Closeable.
+			 */
+			return;
+		}
+		
 		ExceptionSuppress<IOException> ex = new ExceptionSuppress<>();
 		
 		/*
@@ -300,6 +322,7 @@ public class BusServer implements Closeable {
 		LOG.info("Closing bus server.");
 		
 		m_group.stop_all();
+		m_server = null;
 		ex.maybe_throw();
 	}
 	
@@ -315,7 +338,17 @@ public class BusServer implements Closeable {
 	 * Starts the bus server.
 	 */
 	public void start() {
+		Ensure.not_null(m_server);
+		
 		LOG.info("Starting bus server.");
 		m_group.start();
+	}
+	
+	/**
+	 * Checks whether the server has been closed.
+	 * @return has the server been closed?
+	 */
+	public synchronized boolean closed() {
+		return m_server == null;
 	}
 }

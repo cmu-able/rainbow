@@ -35,12 +35,19 @@ public class ServerUiMainFrame extends MainApplicationFrame {
 		mutex_menu.add(smma.createJMenuItem(false));
 		maf.add_menu_after(mutex_menu, "File");
 		
+		ScanEsebServerAction sesa = new ScanEsebServerAction(mm, maf);
+		sesa.bind(maf.get_action_context());
+		
+		JMenu ebus_menu = new JMenu("Event Bus");
+		ebus_menu.add(sesa.createJMenuItem(false));
+		maf.add_menu_after(ebus_menu, mutex_menu.getText());
+		
 		ShowExceptionBrowserAction seba = new ShowExceptionBrowserAction(maf);
 		seba.bind(maf.get_action_context());
 		
 		JMenu tools_menu = new JMenu("Tools");
 		tools_menu.add(seba.createJMenuItem(false));
-		maf.add_menu_after(tools_menu, mutex_menu.getText());
+		maf.add_menu_after(tools_menu, ebus_menu.getText());
 		
 		maf.pack();
 		FrameUtils.center(maf);

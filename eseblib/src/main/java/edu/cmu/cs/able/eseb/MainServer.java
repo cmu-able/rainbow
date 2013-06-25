@@ -1,12 +1,9 @@
 package edu.cmu.cs.able.eseb;
 
-import incubator.cmdintf.Command;
-import incubator.cmdintf.CommandInterface;
-import incubator.cmdintf.CommandManager;
-import incubator.cmdintf.ServerSocketCommandManager;
+import incubator.rmi.RmiCommException;
+import incubator.rmi.RmiServerPublisher;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,11 +16,21 @@ import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
  */
 public class MainServer {
 	/**
+	 * Maximum number of events to get from a queue.
+	 */
+	private static final int DEFAULT_QUEUE_LIMIT = 100;
+	
+	/**
+	 * Default subscription / publishing port.
+	 */
+	private static final short DEFAULT_PORT = 2233;
+	
+	/**
 	 * Main method.
 	 * @param args command-line arguments.
-	 * @throws IOException failed to startup the program
+	 * @throws Exception failed to startup the program
 	 */
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 		/*
 		 * Load the log4j configuration.
 		 */
@@ -33,7 +40,6 @@ public class MainServer {
 		}
 		
 		short port = -1;
-		short ci_port = -1;
 		
 		Pattern p = Pattern.compile("^--([^=]+)=(.*)$");
 		for (String a : args) {
@@ -57,17 +63,6 @@ public class MainServer {
 					show_help();
 					return;
 				}
-			} else if (key.equals("cmd-port")) {
-				if (ci_port != -1) {
-					show_help();
-					return;
-				}
-				
-				ci_port = Short.parseShort(value);
-				if (ci_port <= 0) {
-					show_help();
-					return;
-				}
 			} else {
 				show_help();
 				return;
@@ -75,11 +70,7 @@ public class MainServer {
 		}
 		
 		if (port == -1) {
-			port = 2233;
-		}
-		
-		if (ci_port == -1) {
-			ci_port = 2255;
+			port = DEFAULT_PORT;
 		}
 		
 		PrimitiveScope scope = new PrimitiveScope();
@@ -89,36 +80,23 @@ public class MainServer {
 		srv.start();
 		
 		/*
-		 * Set up the command-line interface.
+		 * Set up the control interface.
 		 */
-		final ServerSocketCommandManager cmgr = new ServerSocketCommandManager(
-				ci_port);
-		cmgr.addCommand(new Command() {
-			@Override
-			public String getName() {
-				return "shutdown";
-			}
-			@Override
-			public String getDescription() {
-				return "Shuts down the ebus server.";
-			}
-			
-			@Override
-			public void execute(int sid, CommandManager manager,
-					CommandInterface cmdInterface) throws Exception {
-				srv.close();
-				cmgr.shutdown();
-				cmdInterface.writeLine("Shutdown command received. "
-						+ "Shutting down server.");
-			}
-		});
+		BusServerRemoteInterfaceImpl ri = new BusServerRemoteInterfaceImpl(
+				srv, DEFAULT_QUEUE_LIMIT);
+		try {
+			RmiServerPublisher.publish_service(BusServerRemoteInterface.class,
+					ri);
+		} catch (RmiCommException e) {
+			srv.close();
+			throw e;
+		}
 	}
 	
 	/**
 	 * Displays command-line help.
 	 */
 	private static void show_help() {
-		System.out.println("Arguments: [--pub-port=2233] [--sub-port=2244] "
-				+ "[--cmd-port=2255]");
+		System.out.println("Arguments: [--port=" + DEFAULT_PORT + "]");
 	}
 }
