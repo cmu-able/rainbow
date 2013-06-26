@@ -18,8 +18,21 @@ import org.sa.rainbow.RainbowDelegate;
 import org.sa.rainbow.RainbowMaster;
 import org.sa.rainbow.core.IRainbowRunnable.State;
 
+/**
+ * Base test class for testing lifecycle information. For each kind of connector (ESEB, Local, RMI), a test should
+ * inherit this class and override the configureTestProperties to ensure that the right property for constructing the
+ * connectors is used.
+ * 
+ * @author Bradley Schmerl: schmerl
+ * 
+ */
 public abstract class RainbowConnectionAndLifecycleTest {
 
+    /**
+     * Test that a delegate receives configuration information after connecting.
+     * 
+     * @throws Exception
+     */
     @Test
     public void testReceivedConfigurationInfo () throws Exception {
         BasicConfigurator.configure ();
@@ -45,6 +58,11 @@ public abstract class RainbowConnectionAndLifecycleTest {
 
     }
 
+    /**
+     * Tests that a master receives a heartbeat after a delegate connects and is configured
+     * 
+     * @throws Exception
+     */
     @Test
     public void testHeartbeatSetup () throws Exception {
         BasicConfigurator.configure ();
@@ -75,11 +93,16 @@ public abstract class RainbowConnectionAndLifecycleTest {
 
     protected abstract void configureTestProperties () throws IOException;
 
+    /**
+     * Tests that lifecycle operations work correctly. E.g., hearbeats are not sent if a delegate is paused, but are
+     * sent after it is restarted.
+     * 
+     * @throws Exception
+     */
     @Test
     public void testPauseAndRestart () throws Exception {
         BasicConfigurator.configure ();
 
-        Logger.getRootLogger ().setLevel (Level.ALL);
 
         configureTestProperties ();
 
@@ -89,24 +112,32 @@ public abstract class RainbowConnectionAndLifecycleTest {
         delegate.start ();
 
         // Wait for things to get connected
-        Thread.sleep (5000);
+        Thread.sleep (6000);
 
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream ();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream ();
         WriterAppender wa = new WriterAppender (new SimpleLayout (), baos);
         Logger.getRootLogger ().addAppender (wa);
+        Logger.getRootLogger ().setLevel (Level.ALL);
+
         delegate.stop ();
         Thread.sleep (1000);
         assertTrue (delegate.state () == State.STOPPED);
 
         String logMsg = baos.toString ();
+        Logger.getRootLogger ().removeAppender (wa);
         Pattern pausePattern = Pattern.compile ("RD-" + delegate.getId () + ".*: Pausing");
+
 
         Matcher m = pausePattern.matcher (logMsg);
         assertTrue (m.find ());
         int start = m.start ();
         assertTrue (logMsg.indexOf ("Received heartbeat from known delegate: " + delegate.getId (), start) == -1);
+
+        baos = new ByteArrayOutputStream ();
+        wa = new WriterAppender (new SimpleLayout (), baos);
+        Logger.getRootLogger ().addAppender (wa);
         delegate.start ();
-        Thread.sleep (5000);
+        Thread.sleep (10000);
         logMsg = baos.toString ();
         assertTrue (logMsg.indexOf ("Received heartbeat from known delegate: " + delegate.getId (), start) != -1);
 

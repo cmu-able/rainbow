@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import org.sa.rainbow.core.Rainbow;
 
 import edu.cmu.cs.able.eseb.BusClient;
+import edu.cmu.cs.able.eseb.BusClientState;
 import edu.cmu.cs.able.eseb.BusData;
 import edu.cmu.cs.able.eseb.BusDataQueue;
 import edu.cmu.cs.able.eseb.BusDataQueueListener;
@@ -37,6 +38,12 @@ import edu.cmu.cs.able.typelib.type.DataValue;
  * 
  */
 public class ESEBConnector {
+    static Logger               LOGGER             = Logger.getLogger (ESEBConnector.class);
+
+    /** The prefix that encodes properties in maps that are sent on the wire **/
+    private static final String PROP_PREFIX = "__PROP_";
+
+    private static final int    PROP_PREFIX_LENGTH = PROP_PREFIX.length ();
 
     /**
      * An interface that allows users to receive information that is published on the bus
@@ -54,7 +61,6 @@ public class ESEBConnector {
         public void receive (Map<String, String> msg);
     }
 
-    static Logger                           LOGGER               = Logger.getLogger (ESEBConnector.class);
 
     /** The set of BusServers on the local machine, keyed by the port **/
     protected static Map<Short, BusServer>  s_servers            = new HashMap<> ();
@@ -81,7 +87,7 @@ public class ESEBConnector {
      */
     protected static BusServer getBusServer (short port) throws IOException {
         BusServer s = s_servers.get (port);
-        if (s == null) {
+        if (s == null || s.closed ()) {
             LOGGER.debug (MessageFormat.format ("Constructing a new BusServer on port {0}", port));
             try {
                 s = new BusServer (port, SCOPE);
@@ -109,7 +115,7 @@ public class ESEBConnector {
         remoteHost = Rainbow.canonicalizeHost2IP (remoteHost);
         String key = clientKey (remoteHost, remotePort);
         BusClient c = s_clients.get (key);
-        if (c == null) {
+        if (c == null || c.state () == BusClientState.DISCONNECTED) {
             LOGGER.debug (MessageFormat.format ("Constructing a new BusClient on {0}", key));
             c = new BusClient (remoteHost, remotePort, SCOPE);
             s_clients.put (key, c);
@@ -221,7 +227,7 @@ public class ESEBConnector {
         for (Entry<Object, Object> entry : props.entrySet ()) {
             String key = null;
             if (entry.getKey () instanceof String) {
-                key = "__PROP_" + (String )entry.getKey ();
+                key = PROP_PREFIX + (String )entry.getKey ();
             }
             else {
                 LOGGER.error (MessageFormat.format (
@@ -248,7 +254,7 @@ public class ESEBConnector {
         for (Entry<Object, Object> entry : props.entrySet ()) {
             String key = null;
             if (entry.getKey () instanceof String) {
-                key = "__PROP_" + (String )entry.getKey ();
+                key = PROP_PREFIX + (String )entry.getKey ();
             }
             else {
                 LOGGER.error (MessageFormat.format (
@@ -279,8 +285,8 @@ public class ESEBConnector {
     public Properties decodeProperties (Map<String, String> msg) {
         Properties p = new Properties ();
         for (Entry<String, String> entry : msg.entrySet ()) {
-            if (entry.getKey ().startsWith ("__PROP_")) {
-                p.setProperty (entry.getKey ().substring (7), entry.getValue ());
+            if (entry.getKey ().startsWith (PROP_PREFIX)) {
+                p.setProperty (entry.getKey ().substring (PROP_PREFIX_LENGTH), entry.getValue ());
             }
         }
         return p;
@@ -291,7 +297,7 @@ public class ESEBConnector {
         for (Entry<DataValue, DataValue> entry : mdv.all ().entrySet ()) {
             if (entry.getKey ().type ().equals (SCOPE.string ()) && entry.getValue ().type ().equals (SCOPE.string ())) {
                 String key = ((StringValue )entry.getKey ()).value ();
-                if (key.startsWith ("__PROP_")) {
+                if (key.startsWith (PROP_PREFIX)) {
                     key = key.substring (7);
                     props.setProperty (key, ((StringValue )entry.getValue ()).value ());
                 }
