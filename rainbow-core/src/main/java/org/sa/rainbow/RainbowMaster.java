@@ -10,9 +10,9 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
-import org.sa.rainbow.ports.IRainbowDeploymentPort;
-import org.sa.rainbow.ports.IRainbowMasterConnectionPort;
-import org.sa.rainbow.ports.RainbowDeploymentPortFactory;
+import org.sa.rainbow.management.ports.IRainbowDeploymentPort;
+import org.sa.rainbow.management.ports.IRainbowMasterConnectionPort;
+import org.sa.rainbow.management.ports.RainbowDeploymentPortFactory;
 import org.sa.rainbow.util.Beacon;
 
 public class RainbowMaster extends AbstractRainbowRunnable {
@@ -44,6 +44,7 @@ public class RainbowMaster extends AbstractRainbowRunnable {
         // Check to see if there is already a registered delegate running on the machine
         m_delegates.put (delegateID, delegatePort);
         // Add a second to the heartbeat to allow for communication time
+        // TODO: Must be a better way to do this...
         Beacon beacon = new Beacon (Long.parseLong (Rainbow.properties ().getProperty (
                 RainbowConstants.PROPKEY_DELEGATE_BEACONPERIOD, "1000")) + 1000);
         m_heartbeats.put (delegatePort.getDelegateId (), beacon);
@@ -122,8 +123,8 @@ public class RainbowMaster extends AbstractRainbowRunnable {
         Set<Entry<String, Beacon>> entrySet = m_heartbeats.entrySet ();
         for (Entry<String, Beacon> entry : entrySet) {
             if (entry.getValue ().periodElapsed ()) {
-//                LOGGER.error (MessageFormat.format ("Delegate {0} has not given a heartbeat withing the right time",
-//                        entry.getKey ()));
+                LOGGER.error (MessageFormat.format ("Delegate {0} has not given a heartbeat withing the right time",
+                        entry.getKey ()));
                 entry.getValue ().mark ();
             }
         }
