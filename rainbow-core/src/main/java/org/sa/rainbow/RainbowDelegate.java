@@ -6,9 +6,9 @@ import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
-import org.sa.rainbow.ports.IRainbowDeploymentPort;
-import org.sa.rainbow.ports.IRainbowMasterConnectionPort;
-import org.sa.rainbow.ports.RainbowDeploymentPortFactory;
+import org.sa.rainbow.management.ports.IRainbowDeploymentPort;
+import org.sa.rainbow.management.ports.IRainbowMasterConnectionPort;
+import org.sa.rainbow.management.ports.RainbowDeploymentPortFactory;
 import org.sa.rainbow.util.Beacon;
 import org.sa.rainbow.util.Util;
 
@@ -24,21 +24,38 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
 
     private Beacon          m_beacon;
 
+    private IRainbowMasterConnectionPort m_masterConnectionPort;
+
+    private Properties                   m_configurationInformation;
+
     public RainbowDelegate () {
         super (NAME);
+        // Generate an ID 
         m_id = UUID.randomUUID ().toString ();
-        IRainbowMasterConnectionPort masterConnectionPort = RainbowDeploymentPortFactory
+
+        // Create the connection to the delegate
+        m_masterConnectionPort = RainbowDeploymentPortFactory
                 .createDelegateMasterConnectionPort (this);
         log ("Attempting to connecto to master.");
-        m_masterPort = masterConnectionPort.connectDelegate (m_id, new Properties ());
-//        m_masterPort = LocalRainbowDelegatePortFactory.createDelegateDelegatePort (this, m_id);
+        m_masterPort = m_masterConnectionPort.connectDelegate (m_id, new Properties ());
+        // Request configuration information
         m_masterPort.requestConfigurationInformation ();
     }
 
+    /**
+     * Called when configuration information is received from the master.
+     * 
+     * @param props
+     *            The configuration information, as a set of properties
+     */
     public void receiveConfigurationInformation (Properties props) {
+        m_configurationInformation = props;
         log ("Received configuration information.");
+
+        // Process the period for sending the heartbeat
         long period = Long.parseLong (props.getProperty (PROPKEY_DELEGATE_BEACONPERIOD, "10000"));
         if (m_beacon != null) {
+            // Reset beacon period, i it exists
             if (m_beacon.period () != period) {
                 m_beacon.setPeriod (period);
             }
@@ -48,6 +65,7 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
 
         }
         m_beacon.mark ();
+        // If the Master has a name of this delegate, use it as the name in logging and such
         String id = props.getProperty (PROPKEY_DELEGATE_ID);
         if (id != null) {
             m_name = id;
@@ -78,14 +96,15 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
         }
     }
 
+    /** 
+     * 
+     */
     @Override
     protected void doTerminate () {
         log ("Terminating.");
-        IRainbowMasterConnectionPort masterConnectionPort = RainbowDeploymentPortFactory
-                .createDelegateMasterConnectionPort (this);
-        masterConnectionPort.disconnectDelegate (getId ());
+        m_masterConnectionPort.disconnectDelegate (getId ());
         m_masterPort.dispose ();
-        masterConnectionPort.dispose ();
+        m_masterConnectionPort.dispose ();
         super.doTerminate ();
     }
 
@@ -103,6 +122,10 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
 
     public String getId () {
         return m_id;
+    }
+
+    public Properties getConfigurationInformation () {
+        return m_configurationInformation;
     }
 
     public static void main (String[] args) {
