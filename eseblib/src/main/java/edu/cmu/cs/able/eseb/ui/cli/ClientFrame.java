@@ -21,10 +21,10 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 
-import edu.cmu.cs.able.eseb.BusClient;
 import edu.cmu.cs.able.eseb.BusData;
 import edu.cmu.cs.able.eseb.BusDataQueue;
 import edu.cmu.cs.able.eseb.BusDataQueueListener;
+import edu.cmu.cs.able.eseb.conn.BusConnection;
 import edu.cmu.cs.able.eseb.ui.ConnectionStateComponent;
 import edu.cmu.cs.able.eseb.ui.EventListViewComponent;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
@@ -38,7 +38,7 @@ public class ClientFrame extends JFrame {
 	/**
 	 * The bus client.
 	 */
-	private BusClient m_client;
+	private BusConnection m_client;
 	
 	/**
 	 * Text field with the bus hostname. 
@@ -245,7 +245,7 @@ public class ClientFrame extends JFrame {
 	private void do_connect() {
 		do_disconnect();
 		
-		m_client = new BusClient(m_bus_host.getText(), Short.parseShort(
+		m_client = new BusConnection(m_bus_host.getText(), Short.parseShort(
 				m_bus_port.getText()), m_primitive_scope);
 		m_connection_state.set_client(m_client);
 		m_client.start();

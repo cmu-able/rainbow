@@ -53,16 +53,16 @@ public class RmiClientDiscovery {
 	
 	/**
 	 * Looks if there is an RMI client in the given host and port.
-	 * @param host the hostname
+	 * @param host the host name
 	 * @param port the port to look for
 	 * @param iface the remote interface
 	 * @return the found client or <code>null</code> if none
 	 */
-	public static Object find_rmi_client(String host, int port,
-			Class<?> iface) {
+	public static <T> T find_rmi_client(String host, int port,
+			Class<T> iface) {
 		try {
 			Client c = new Client(host, port);
-			return c.lookup(iface);
+			return iface.cast(c.lookup(iface));
 		} catch (Exception e) {
 			/*
 			 * It doesn't exist, it wasn't found...

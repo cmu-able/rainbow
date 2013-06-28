@@ -11,9 +11,9 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import edu.cmu.cs.able.eseb.BusClient;
-import edu.cmu.cs.able.eseb.BusClientListener;
-import edu.cmu.cs.able.eseb.BusClientState;
+import edu.cmu.cs.able.eseb.conn.BusConnectionListener;
+import edu.cmu.cs.able.eseb.conn.BusConnectionState;
+import edu.cmu.cs.able.eseb.conn.BusConnection;
 
 /**
  * Component that shows the state of a client bus connection.
@@ -23,12 +23,12 @@ public class ConnectionStateComponent extends JPanel {
 	/**
 	 * The connection.
 	 */
-	private BusClient m_client;
+	private BusConnection m_client;
 	
 	/**
 	 * Current state.
 	 */
-	private BusClientState m_state;
+	private BusConnectionState m_state;
 	
 	/**
 	 * Label with text.
@@ -63,7 +63,7 @@ public class ConnectionStateComponent extends JPanel {
 	/**
 	 * Client listener.
 	 */
-	private BusClientListener m_listener;
+	private BusConnectionListener m_listener;
 	
 	/**
 	 * The worker thread.
@@ -74,7 +74,7 @@ public class ConnectionStateComponent extends JPanel {
 	 * Creates a new component.
 	 * @param client the bus client (<code>null</code> if no client)
 	 */
-	public ConnectionStateComponent(BusClient client) {
+	public ConnectionStateComponent(BusConnection client) {
 		m_client = null;
 		m_state = null;
 		m_bad_icon = ColorCircles.get_icon(Color.RED, 16);
@@ -88,9 +88,9 @@ public class ConnectionStateComponent extends JPanel {
 		add(m_icon_label);
 		add(m_text_label);
 		
-		m_listener = new BusClientListener() {
+		m_listener = new BusConnectionListener() {
 			@Override
-			public void client_state_changed() {
+			public void connection_state_changed() {
 				review_state();
 			}
 		};
@@ -126,7 +126,7 @@ public class ConnectionStateComponent extends JPanel {
 	 * Sets the client to be monitored by this component.
 	 * @param client the client or <code>null</code> if none
 	 */
-	public synchronized void set_client(BusClient client) {
+	public synchronized void set_client(BusConnection client) {
 		if (m_client != null) {
 			m_client.remove_listener(m_listener);
 		}
@@ -157,13 +157,13 @@ public class ConnectionStateComponent extends JPanel {
 			text = "No connection.";
 		} else {
 			String hp = m_client.host() + ":" + m_client.port();
-			if (m_state == BusClientState.CONNECTED) {
+			if (m_state == BusConnectionState.CONNECTED) {
 				icn = m_connected_icon;
 				text = "Connected to " + hp;
-			} else if (m_state == BusClientState.CONNECTING) {
+			} else if (m_state == BusConnectionState.CONNECTING) {
 				icn = m_trying_icon;
 				text = "Connecting to " + hp;
-			} else if (m_state == BusClientState.DISCONNECTED) {
+			} else if (m_state == BusConnectionState.DISCONNECTED) {
 				icn = m_bad_icon;
 				text = "Disconnected from " + hp;
 			}

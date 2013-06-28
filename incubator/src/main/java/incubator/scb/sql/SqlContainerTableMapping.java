@@ -2,8 +2,9 @@ package incubator.scb.sql;
 
 import incubator.exh.LocalCollector;
 import incubator.pval.Ensure;
+import incubator.scb.Scb;
 import incubator.scb.ScbContainerListener;
-import incubator.scb.ScbEditableContainer;
+import incubator.scb.ScbFactoryContainer;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -25,7 +26,7 @@ import java.util.Set;
  * connection to the database is cleared, the container is cleared.
  * @param <T> the SCB object type
  */
-public class SqlContainerTableMapping<T> {
+public class SqlContainerTableMapping<T extends Scb<T>> {
 	/**
 	 * The name of the SQL table.
 	 */
@@ -40,7 +41,7 @@ public class SqlContainerTableMapping<T> {
 	/**
 	 * The container object.
 	 */
-	private ScbEditableContainer<T> m_container;
+	private ScbFactoryContainer<T> m_container;
 	
 	/**
 	 * Database fields.
@@ -63,7 +64,7 @@ public class SqlContainerTableMapping<T> {
 	 * @param container the container
 	 */
 	public SqlContainerTableMapping(String table_name,
-			ScbEditableContainer<T> container) {
+			ScbFactoryContainer<T> container) {
 		Ensure.notNull(table_name);
 		Ensure.notNull(container);
 		
@@ -124,7 +125,7 @@ public class SqlContainerTableMapping<T> {
 		
 		if (m_dbc != null) {
 			for(T t : m_container.all_scbs()) {
-				m_container.delete_scb(t);
+				m_container.remove_scb(t);
 			}
 		}
 		

@@ -114,7 +114,7 @@ public abstract class AbstractTestHelper extends Assert {
 	 */
 	private static void globalInit() throws Exception {
 		helperCounter = new HashMap<>();
-		TestPropertiesDefinition.loadGlobalProperties();
+		TestPropertiesDefinition.load_global_properties();
 		systemProperties = new Properties();
 		systemProperties.putAll(System.getProperties());
 	}

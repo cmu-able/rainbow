@@ -2,6 +2,7 @@ package incubator.scb.ui;
 
 import incubator.Pair;
 import incubator.pval.Ensure;
+import incubator.scb.Scb;
 import incubator.scb.ScbContainer;
 import incubator.scb.ScbContainerListener;
 import incubator.scb.ScbDateField;
@@ -24,7 +25,7 @@ import javax.swing.table.AbstractTableModel;
  * @param <C> the bean comparator used for sorting
  */
 @SuppressWarnings("serial")
-public class ScbTableModel<T, C extends Comparator<T>>
+public class ScbTableModel<T extends Scb<T>, C extends Comparator<T>>
 		extends AbstractTableModel {
 	/**
 	 * All fields.

@@ -1,21 +1,22 @@
 package incubator.scb;
 
 /**
- * Container which can create and remove objects.
- * @param <T> the bean type
+ * SCB container in which we can publicly add and remove SCBs.
+ * @param <T> the type of SCBs
  */
-public interface ScbEditableContainer<T> extends ScbContainer<T> {
+public interface ScbEditableContainer<T extends Scb<T>>
+		extends ScbContainer<T> {
 	/**
-	 * Creates a new SCB and adds it to the container.
-	 * @return the created SCB
+	 * Adds an SCB to a container.
+	 * @param t the SCB to add
 	 */
-	T new_scb();
-	
+	void add_scb(T t);
+
 	/**
 	 * Deletes an SCB that belongs to this container. Naturally, deletion
 	 * is only performed by the garbage collector after there are no more
 	 * references to it.
 	 * @param t the SCB to delete
 	 */
-	void delete_scb(T t);
+	void remove_scb(T t);
 }

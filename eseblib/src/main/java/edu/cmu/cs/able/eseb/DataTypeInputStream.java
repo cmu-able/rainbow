@@ -7,12 +7,12 @@ import java.io.IOException;
 import edu.cmu.cs.able.typelib.enc.InvalidEncodingException;
 
 /**
- * Input stream that reads data types.
+ * Input stream that reads data values.
  */
 public interface DataTypeInputStream extends Closeable {
 	/**
-	 * Reads a data type from the stream. This method will block until the
-	 * data type has been read.
+	 * Reads a data value from the stream. This method will block until the
+	 * data value has been read.
 	 * @return the data type read
 	 * @throws EOFException the end of the stream has been reached
 	 * @throws IOException I/O error; the stream is probably corrupted and
@@ -20,7 +20,8 @@ public interface DataTypeInputStream extends Closeable {
 	 * @throws InvalidEncodingException invalid data was read from the
 	 * stream
 	 */
-	public BusData read() throws EOFException, IOException, InvalidEncodingException;
+	public BusData read() throws EOFException, IOException,
+		InvalidEncodingException;
 	
 	/**
 	 * Closes the input stream and the underlying input stream.

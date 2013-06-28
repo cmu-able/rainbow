@@ -1,7 +1,8 @@
 package incubator.scb.ui;
 
 import incubator.pval.Ensure;
-import incubator.scb.ScbEditableContainer;
+import incubator.scb.Scb;
+import incubator.scb.ScbFactoryContainer;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -13,15 +14,15 @@ import javax.swing.event.ListSelectionListener;
 
 /**
  * Tool bar that provides add and remove operations on top of a
- * {@link ScbEditableContainer}.
+ * {@link ScbFactoryContainer}.
  * @param <T> the SCB type
  */
 @SuppressWarnings("serial")
-public class ScbEditableContainerToolbar<T> extends JToolBar {
+public class ScbEditableContainerToolbar<T extends Scb<T>> extends JToolBar {
 	/**
 	 * The container.
 	 */
-	private ScbEditableContainer<T> m_container;
+	private ScbFactoryContainer<T> m_container;
 	
 	/**
 	 * The table.
@@ -43,7 +44,7 @@ public class ScbEditableContainerToolbar<T> extends JToolBar {
 	 * @param container the container, <code>null</code> if none
 	 * @param table the table
 	 */
-	public ScbEditableContainerToolbar(ScbEditableContainer<T> container,
+	public ScbEditableContainerToolbar(ScbFactoryContainer<T> container,
 			ScbTable<T> table) {
 		Ensure.notNull(table);
 		setFloatable(false);
@@ -69,7 +70,7 @@ public class ScbEditableContainerToolbar<T> extends JToolBar {
 			public void actionPerformed(ActionEvent e) {
 				T t = m_table.selected();
 				if (t != null && m_container != null) {
-					m_container.delete_scb(t);
+					m_container.remove_scb(t);
 				}
 			}
 		});
@@ -89,7 +90,7 @@ public class ScbEditableContainerToolbar<T> extends JToolBar {
 	 * Changes the container associated with the tool bar.
 	 * @param container the container which can be <code>null</code>
 	 */
-	public void switch_container(ScbEditableContainer<T> container) {
+	public void switch_container(ScbFactoryContainer<T> container) {
 		m_container = container;
 		set_up_enables();
 	}

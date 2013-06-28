@@ -1,5 +1,7 @@
 package incubator;
 
+import java.io.Serializable;
+
 /**
  * Implementation of a pair in java. Adapted from <a href=
  * "http://stackoverflow.com/questions/156275/what-is-the-equivalent-of-the-c-pairl-r-in-java"
@@ -8,7 +10,12 @@ package incubator;
  * @param <A> the type of the first element
  * @param <B> the type of the second element
  */
-public class Pair<A, B> {
+public class Pair<A, B> implements Serializable {
+	/**
+	 * Version for serialization.
+	 */
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * The first element.
 	 */

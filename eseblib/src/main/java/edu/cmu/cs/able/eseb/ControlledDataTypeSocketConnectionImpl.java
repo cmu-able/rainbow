@@ -21,7 +21,7 @@ import edu.cmu.cs.able.typelib.type.DataValue;
  * Implementation of a controlled socket connection which works on top of
  * a {@link DataTypeSocketConnection}.
  */
-class ControlledDataTypeSocketConnectionImpl
+public class ControlledDataTypeSocketConnectionImpl
 		implements ControlledDataTypeSocketConnection {
 	/**
 	 * Logger to use.
@@ -139,7 +139,7 @@ class ControlledDataTypeSocketConnectionImpl
 	 * @param primitive_scope the primitive data type scope
 	 * @param conn the connection
 	 */
-	ControlledDataTypeSocketConnectionImpl(PrimitiveScope primitive_scope,
+	public ControlledDataTypeSocketConnectionImpl(PrimitiveScope primitive_scope,
 			DataTypeSocketConnection conn) {
 		Ensure.notNull(primitive_scope);
 		Ensure.notNull(conn);

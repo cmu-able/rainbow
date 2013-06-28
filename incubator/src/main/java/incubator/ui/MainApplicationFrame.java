@@ -123,7 +123,7 @@ public class MainApplicationFrame extends JFrame {
 	 * @param icon_resource resource with the application icon, which
 	 * may be <code>null</code>
 	 */
-	private void init(String icon_resource) {
+	private void init(final String icon_resource) {
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		
 		m_menu_bar = new JMenuBar();
@@ -169,7 +169,9 @@ public class MainApplicationFrame extends JFrame {
 			public void windowDeiconified(WindowEvent e) { /* */ }
 			@Override
 			public void windowIconified(WindowEvent e) {
-				setVisible(false);
+				if (icon_resource != null) {
+					setVisible(false);
+				}
 			}
 			@Override
 			public void windowOpened(WindowEvent e) { /* */ }

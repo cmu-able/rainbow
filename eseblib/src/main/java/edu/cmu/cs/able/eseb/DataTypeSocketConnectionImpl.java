@@ -22,7 +22,7 @@ import edu.cmu.cs.able.typelib.type.DataValue;
 /**
  * Implementation of a {@link DataTypeSocketConnection}.
  */
-class DataTypeSocketConnectionImpl implements DataTypeSocketConnection {
+public class DataTypeSocketConnectionImpl implements DataTypeSocketConnection {
 	/**
 	 * Milliseconds between socket read timeouts.
 	 */
@@ -61,7 +61,7 @@ class DataTypeSocketConnectionImpl implements DataTypeSocketConnection {
 	 * @param scope the primitive type scope to use
 	 * @throws IOException failed to obtain the streams from the socket
 	 */
-	DataTypeSocketConnectionImpl(String name, Socket s,
+	public DataTypeSocketConnectionImpl(String name, Socket s,
 			DataValueEncoding enc, PrimitiveScope scope) throws IOException {
 		Ensure.not_null(name);
 		Ensure.not_null(s);

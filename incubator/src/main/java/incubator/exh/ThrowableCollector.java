@@ -29,6 +29,11 @@ public class ThrowableCollector implements Serializable,
 	private static final int DEFAULT_MAX_SIZE = 20;
 	
 	/**
+	 * Should we print stack traces by default?
+	 */
+	private static boolean m_print_stack_trace;
+	
+	/**
 	 * The name of the collector.
 	 */
 	private String m_name;
@@ -48,6 +53,18 @@ public class ThrowableCollector implements Serializable,
 	 */
 	private transient LocalDispatcher<ScbContainerListener<ThrowableContext>>
 			m_dispatcher;
+	
+	static {
+		m_print_stack_trace = false;
+	}
+	
+	/**
+	 * Sets whether collected stack traces should be printed or not.
+	 * @param pst should stack traces be printed?
+	 */
+	public static void print_stack_trace(boolean pst) {
+		m_print_stack_trace = pst;
+	}
 	
 	/**
 	 * Constructor.
@@ -95,9 +112,13 @@ public class ThrowableCollector implements Serializable,
 	 * @param l an optional location for the throwable
 	 */
 	public synchronized void collect(Throwable t, String l) {
-		Ensure.notNull(t);
+		Ensure.not_null(t);
 		ThrowableContext ctx = new ThrowableContext(t, l);
 		collect(ctx);
+		
+		if (m_print_stack_trace) {
+			t.printStackTrace();
+		}
 	}
 	
 	/**

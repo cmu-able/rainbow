@@ -6,7 +6,7 @@ import java.util.Collection;
  * An interface implemented by objects which can contain SCBs.
  * @param <T> the bean type
  */
-public interface ScbContainer<T> {
+public interface ScbContainer<T extends Scb<T>> {
 	/**
 	 * Adds a listener to the container.
 	 * @param listener the listener to add

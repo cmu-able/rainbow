@@ -369,6 +369,9 @@ public class RmiScannerIFrame extends JInternalFrame
 				m_last_port_scanned - m_scanner.min_port() + 1);
 		} else {
 			m_scan_progress.setEnabled(false);
+			m_scan_progress.setMinimum(0);
+			m_scan_progress.setMaximum(1);
+			m_scan_progress.setValue(1);
 		}
 	}
 

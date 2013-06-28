@@ -2,14 +2,23 @@ package incubator.exh;
 
 import incubator.pval.Ensure;
 import incubator.scb.ScbDateField;
+import incubator.scb.ScbField;
 import incubator.scb.ScbTextField;
+import incubator.scb.SerializableScb;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Class representing the context in which a throwable was caught.
  */
-public class ThrowableContext {
+public class ThrowableContext extends SerializableScb<ThrowableContext> {
+	/**
+	 * Version for serialization.
+	 */
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * The throwable caught.
 	 */
@@ -66,7 +75,7 @@ public class ThrowableContext {
 	 * Obtains the class field description.
 	 * @return the class field description
 	 */
-	public static ScbTextField<ThrowableContext> scbf_class() {
+	public static ScbTextField<ThrowableContext> c_class() {
 		return new ScbTextField<ThrowableContext>("Class", false,
 				"The exception class.") {
 			@Override
@@ -87,7 +96,7 @@ public class ThrowableContext {
 	 * Obtains the message field description.
 	 * @return the message field description
 	 */
-	public static ScbTextField<ThrowableContext> scbf_message() {
+	public static ScbTextField<ThrowableContext> c_message() {
 		return new ScbTextField<ThrowableContext>("Message", false,
 				"The exception message.") {
 			@Override
@@ -113,7 +122,7 @@ public class ThrowableContext {
 	 * Obtains the location field description.
 	 * @return the location field description
 	 */
-	public static ScbTextField<ThrowableContext> scbf_location() {
+	public static ScbTextField<ThrowableContext> c_location() {
 		return new ScbTextField<ThrowableContext>("Location", false,
 				"The location of the exception.") {
 			@Override
@@ -139,7 +148,7 @@ public class ThrowableContext {
 	 * Obtains the when field description.
 	 * @return the when field description
 	 */
-	public static ScbDateField<ThrowableContext> scbf_when() {
+	public static ScbDateField<ThrowableContext> c_when() {
 		return new ScbDateField<ThrowableContext>("Time", false,
 				"The time at which the exception was thrown.") {
 			@Override
@@ -154,5 +163,25 @@ public class ThrowableContext {
 				return t.when();
 			}
 		};
+	}
+	
+	@SuppressWarnings("javadoc")
+	public static List<ScbField<ThrowableContext, ?>> c_fields() {
+		List<ScbField<ThrowableContext, ?>> l = new ArrayList<>();
+		l.add(c_class());
+		l.add(c_message());
+		l.add(c_location());
+		l.add(c_when());
+		return l;
+	}
+
+	@Override
+	public List<ScbField<ThrowableContext, ?>> fields() {
+		return c_fields();
+	}
+
+	@Override
+	protected Class<ThrowableContext> my_class() {
+		return ThrowableContext.class;
 	}
 }

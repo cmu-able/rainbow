@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
  * {@link AbstractTestHelper} class by using any test helpers. However, test
  * classes that do not use helpers may use this class directly. Before being
  * used, the class must be initialized through the
- * {@link #loadGlobalProperties()} method. This method is automatically
+ * {@link #load_global_properties()} method. This method is automatically
  * invoked by the {@link DefaultTCase} class during test fixture preparation.
  * </p>
  * <p>
@@ -54,7 +54,7 @@ public class TestPropertiesDefinition {
 	 * Loads the test properties (if not already done).
 	 * @throws Exception failed to load properties
 	 */
-	public static void loadGlobalProperties() throws Exception {
+	public static void load_global_properties() throws Exception {
 		if (loaded) {
 			return;
 		}

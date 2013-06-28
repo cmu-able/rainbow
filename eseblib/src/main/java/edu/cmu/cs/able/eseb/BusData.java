@@ -34,7 +34,7 @@ public class BusData {
 	 * @param encoding the encoding
 	 * @param size the number of bytes of <em>encoding</em> to consider
 	 */
-	BusData(DataValue value, byte[] encoding, int size) {
+	public BusData(DataValue value, byte[] encoding, int size) {
 		Ensure.not_null(value);
 		Ensure.not_null(encoding);
 		Ensure.greater_equal(size, 0);
@@ -44,6 +44,7 @@ public class BusData {
 		System.arraycopy(encoding, 0, m_encoding, 0, size);
 	}
 	
+
 	/**
 	 * Obtains the data value in this datum.
 	 * @return the data value
@@ -56,7 +57,7 @@ public class BusData {
 	 * Obtains the encoding in this datum, if any.
 	 * @return the encoding which may be <code>null</code>
 	 */
-	byte []encoding() {
+	public byte []encoding() {
 		return m_encoding;
 	}
 }

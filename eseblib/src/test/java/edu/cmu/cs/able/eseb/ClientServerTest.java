@@ -11,6 +11,10 @@ import auxtestlib.DefaultTCase;
 import auxtestlib.TestHelper;
 import auxtestlib.TestPropertiesDefinition;
 import auxtestlib.ThreadCountTestHelper;
+import edu.cmu.cs.able.eseb.bus.EventBus;
+import edu.cmu.cs.able.eseb.bus.EventBusConnectionData;
+import edu.cmu.cs.able.eseb.conn.BusConnectionState;
+import edu.cmu.cs.able.eseb.conn.BusConnection;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
 import edu.cmu.cs.able.typelib.type.DataValue;
 
@@ -36,23 +40,23 @@ public class ClientServerTest extends DefaultTCase {
 
 	@Test
 	public void connect_and_disconnect_client() throws Exception {
-		try (BusServer srv = new BusServer(m_port, m_scope)) {
+		try (EventBus srv = new EventBus(m_port, m_scope)) {
 			srv.start();
 			Thread.sleep(50);
-			try (BusClient c = new BusClient("localhost", m_port, m_scope)) {
-				assertEquals(BusClientState.DISCONNECTED, c.state());
+			try (BusConnection c = new BusConnection("localhost", m_port, m_scope)) {
+				assertEquals(BusConnectionState.DISCONNECTED, c.state());
 				
 				c.start();
 				/*
 				 * This may fail if the client connects *very* fast.
 				 */
-				assertEquals(BusClientState.CONNECTING, c.state());
+				assertEquals(BusConnectionState.CONNECTING, c.state());
 				
 				Thread.sleep(250);
-				assertEquals(BusClientState.CONNECTED, c.state());
+				assertEquals(BusConnectionState.CONNECTED, c.state());
 				
 				c.stop();
-				assertEquals(BusClientState.DISCONNECTED, c.state());
+				assertEquals(BusConnectionState.DISCONNECTED, c.state());
 			}
 		}
 		
@@ -68,13 +72,13 @@ public class ClientServerTest extends DefaultTCase {
 		CollectingBusServerListener bsl = new CollectingBusServerListener();
 		CollectingBusClientListener bcl = new CollectingBusClientListener();
 		Date start_time = new Date();
-		try (BusServer srv = new BusServer(m_port, m_scope)) {
+		try (EventBus srv = new EventBus(m_port, m_scope)) {
 			srv.add_listener(bsl);
 			srv.start();
 			Thread.sleep(50);
 			
 			TestArraySaveQueue asq = new TestArraySaveQueue();
-			try (BusClient c = new BusClient("localhost", m_port, m_scope)) {
+			try (BusConnection c = new BusConnection("localhost", m_port, m_scope)) {
 				c.add_listener(bcl);
 				c.queue_group().add(asq);
 				
@@ -103,7 +107,7 @@ public class ClientServerTest extends DefaultTCase {
 				
 				assertEquals(1, bsl.m_accepted.size());
 				assertEquals(1, bsl.m_distributed_sources.size());
-				BusServerClientData cd = bsl.m_distributed_sources.get(0);
+				EventBusConnectionData cd = bsl.m_distributed_sources.get(0);
 				assertEquals(cd, bsl.m_distributed_sources.get(0));
 				assertEquals(v, bsl.m_distributed_values.get(0).value());
 				assertEquals(0, bsl.m_disconnected.size());
@@ -165,12 +169,12 @@ public class ClientServerTest extends DefaultTCase {
 		Date start_time = new Date();
 		
 		@SuppressWarnings("resource")
-		BusServer srv = new BusServer(m_port, m_scope);
+		EventBus srv = new EventBus(m_port, m_scope);
 		try {
 			srv.start();
 			Thread.sleep(50);
 			
-			try (BusClient c = new BusClient("localhost", m_port, m_scope)) {
+			try (BusConnection c = new BusConnection("localhost", m_port, m_scope)) {
 				c.add_listener(bcl);
 				c.queue_group().add(asq);
 				
@@ -189,7 +193,7 @@ public class ClientServerTest extends DefaultTCase {
 				
 				srv.close();
 				
-				srv = new BusServer(m_port, m_scope);
+				srv = new EventBus(m_port, m_scope);
 				srv.start();
 				
 				Thread.sleep(500);

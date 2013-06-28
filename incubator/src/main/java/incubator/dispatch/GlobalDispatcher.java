@@ -18,7 +18,7 @@ public class GlobalDispatcher {
 	/**
 	 * Thread inactivity timeout.
 	 */
-	private static final int INACTIVITY_TIMEOUT_MS = 250;
+	private static final int INACTIVITY_TIMEOUT_MS = 30_000;
 	
 	/**
 	 * Time to wait between polls to check whether threads have terminated
@@ -35,6 +35,16 @@ public class GlobalDispatcher {
 	 * The executor pool.
 	 */
 	private ThreadPoolExecutor m_executor;
+	
+	/**
+	 * Number of tasks waiting to be executed.
+	 */
+	private int m_waiting;
+	
+	/**
+	 * Number of tasks waiting to be executed.
+	 */
+	private int m_executing;
 	
 	/**
 	 * Creates a new dispatcher. If timeout is <code>false</code> then the
@@ -54,6 +64,9 @@ public class GlobalDispatcher {
 		} else {
 			m_executor.prestartAllCoreThreads();
 		}
+		
+		m_waiting = 0;
+		m_executing = 0;
 	}
 	
 	/**
@@ -86,7 +99,15 @@ public class GlobalDispatcher {
 	static void reset_instance() {
 		synchronized (GlobalDispatcher.class) {
 			if (m_instance != null) {
-				m_instance.m_executor.shutdownNow();
+				try {
+					m_instance.m_executor.awaitTermination(1, TimeUnit.SECONDS);
+				} catch (InterruptedException e) {
+					/*
+					 * Ignored.
+					 */
+				}
+				
+				m_instance.m_executor.shutdown();
 			}
 		}
 		
@@ -120,9 +141,9 @@ public class GlobalDispatcher {
 	 * Queues a runnable.
 	 * @param r the runnable
 	 */
-	void dispatch(Runnable r) {
-		Ensure.notNull(r);
-		m_executor.execute(r);
+	synchronized void dispatch(Runnable r) {
+		Ensure.not_null(r);
+		m_executor.execute(new DispatchRunnable(r));
 	}
 	
 	/**
@@ -136,5 +157,55 @@ public class GlobalDispatcher {
 		System.err.println("Exception during dispatch: "
 				+ t.getClass().getName());
 		t.printStackTrace();
+	}
+	
+	/**
+	 * Obtains an estimate of the number of tasks executing or queued
+	 * for executing.
+	 * @return the number of tasks
+	 */
+	int pending_dispatches() {
+		return m_waiting + m_executing;
+	}
+	
+	/**
+	 * Runnable that will run another runnable but updating the counts in
+	 * the global dispatcher.
+	 */
+	private class DispatchRunnable implements Runnable {
+		/**
+		 * The runnable to run.
+		 */
+		private Runnable m_inner;
+		
+		/**
+		 * Creates a new runnable.
+		 * @param inner the inner runnable
+		 */
+		DispatchRunnable(Runnable inner) {
+			Ensure.not_null(inner);
+			m_inner = inner;
+			
+			synchronized (GlobalDispatcher.this) {
+				m_waiting++;
+			}
+		}
+
+		@Override
+		public void run() {
+			synchronized (GlobalDispatcher.instance()) {
+				m_waiting--;
+				m_executing++;
+			}
+			
+			try {
+				m_inner.run();
+			} finally {
+				synchronized (GlobalDispatcher.instance()) {
+					m_executing--;
+				}
+			}
+		}
+		
 	}
 }

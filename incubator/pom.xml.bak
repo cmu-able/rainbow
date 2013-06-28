@@ -1,0 +1,526 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+ <!--
+   - POM file for incubator project.
+   -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+			
+	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	  - GENERAL PROJECT INFORMATION
+	  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	  
+	<!-- Do not change or you'll get in trouble :) -->
+	<modelVersion>4.0.0</modelVersion>
+	<!-- Group ID contains the project group. It is some sort of namespace and
+	should follow java's conventions for packages. -->
+	<groupId>incubator</groupId>
+	<!-- The name of the artifact. -->
+	<artifactId>incubator</artifactId>
+	<!-- Should correspond to the packaging type: 'pom' for a super-pom, 'jar'
+	for a Java library and 'war' to a web application. -->
+	<packaging>jar</packaging>
+	<!-- Version. This should *always* be a snapshot version by convention. Name
+	should be <version-number>-SNAPSHOT. -->
+	<version>1.4.1-SNAPSHOT</version>
+	<!-- User readable name of the pom. -->
+	<name>Incubator</name>
+	<!-- URL for the project site. -->
+	<url>http://none</url>
+	<!-- Description of the project. -->
+	<description>
+		Incubator project.
+	</description>
+	
+	<properties>
+		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
+	</properties>
+  	
+	<!-- Software licences go here. -->
+	<licenses>
+		<!-- One block for each software license. -->
+		<license>
+			<!-- Description of the license. -->
+			<comments>
+				Not yet defined.
+			</comments>
+			<!-- How may the software be distributed? -->
+			<distribution>manual</distribution>
+			<!-- Name of the license. -->
+			<name>Unknown</name>
+		</license>
+	</licenses>
+	
+	<!-- Organization which has owns the software. -->
+	<organization>
+		<!-- Organization name. -->
+		<name>We</name>
+		<!-- Organization URL. -->
+		<url>http://www.we.com</url>
+	</organization>
+	
+	<!-- List of application developers. -->
+	<developers>
+		<!-- One block per developer. -->
+		<developer>
+			<!-- Unique ID for the developer. This ID is referenced in the
+			changelog. -->
+			<id>pasc</id>
+			<!-- Developer name. -->
+			<name>Paulo Casanova</name>
+			<!-- Developer e-mail address. -->
+			<email>paulo@salazarcasanova.com</email>
+			<!-- Organization to which the developer belongs. -->
+			<organization>EOTS</organization>
+			<!-- Developer time zone. -->
+			<timezone>0</timezone>
+			<!-- Developer roles. -->
+			<roles>
+				<!-- Role name. -->
+				<role />
+			</roles>
+		</developer>
+	</developers>
+	
+	<!-- Other people who have contributed to the project. Each 'contributor'
+	entry has the same format as the 'developer' tag above but no ID is
+	required. -->
+	<contributors>
+		<!--<contributor>
+			<name></name>
+			<email></email>
+			<organization></organization>
+			<roles>
+				<role />
+			</roles>
+		</contributor>-->
+	</contributors>
+	
+	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	  - SOURCE CONTROL VERSION CONFIGURATION
+	  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	  
+	<!-- Please note that the URL of the projects will have automatically the
+	artifact name of the super-pom added to the end. -->
+	<scm>
+		<connection>scm:svn://acme.able.cs.cmu.edu/rainbow/v2/trunk
+		</connection>
+		<developerConnection>scm:svn:svn://acme.able.cs.cmu.edu/rainbow/v2/trunk
+		</developerConnection>
+		<url>svn://acme.able.cs.cmu.edu/rainbow/v2/trunk</url>
+	</scm>
+	
+	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	  - BUILD CONFIGURATION
+	  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	
+	<build>
+		<!-- Build process extensions. -->
+		<extensions>
+			<!-- The wagon extension allows webdav access. This plugin is
+			required to deploy to the repository. -->
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-webdav</artifactId>
+				<version>1.0-beta-2</version>
+			</extension>
+		</extensions>
+		
+		<!-- This is required to generate the site with maven 3. -->
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>3.2</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		
+		<!-- Additional plugins. -->
+		<plugins>
+			<!-- Compiler extensions (sets the source code as java 6 with
+			ISO8859-1 encoding. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.0</version>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+					<encoding>iso8859-1</encoding>
+				</configuration>
+			</plugin>
+			
+			<!-- Configure the release plugin to set the place where tags should
+			be done. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<tagBase>
+					svn://acme.able.cs.cmu.edu/rainbow/v2/tags
+					</tagBase>
+				</configuration>
+			</plugin>
+			
+			<!-- Plugin which defines the build number. -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>buildnumber-maven-plugin</artifactId>
+				<version>1.1</version>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<!-- Plugin that creates the jar. We configure the plugin to place
+			the build number in the jar's manifest. The goal 'test-jar' allows
+			creating a jar file with test code. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<archive>
+						<manifest>
+							<addDefaultImplementationEntries>
+								true
+							</addDefaultImplementationEntries>
+						</manifest>
+						<manifestEntries>
+							<Implementation-Build>
+								${buildNumber}
+							</Implementation-Build>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+			
+			<!-- Configure the surefire plugin (which runs unit tests). We
+			change the default configuration in order not to stop the builds if
+			unit tests fail. We also add the project's base directory in the
+			classpath. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.12.4</version>
+				<configuration>
+					<argLine>-XX:-UseSplitVerifier</argLine>
+					<testFailureIgnore>true</testFailureIgnore>
+					<additionalClasspathElements>
+						<additionalClasspathElement>
+							${basedir}
+						</additionalClasspathElement>
+					</additionalClasspathElements>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	
+	
+	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	  - PROJECT DEPENDENCIES
+	  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	  
+	<!-- Each dependency is identified by its group ID and artifact ID. If
+	the version is ommited (which is not recommended), the latest version is
+	automatically added.
+	
+	Scope defines the dependency type:
+		* compile: dependency required to compile and use the project.
+		* provided: dependency required to compile but it is not packaged with
+		the project because in the runtime environment it will already be
+		provided in the classpath (an example would be the servlet API in web
+		application).
+		* test: dependency required to compile and run unit tests.
+	
+	Type indicates the artifact type. The default is "jar" in which case nothing
+	needs to be written. If DLLs are provided, we can use "dll".
+	
+	Dependency from other project's unit tests are added with
+	<classifier>tests</classifier>. For instance, if it is necessary the test
+	code from project C which has a.b group and version 3, then a dependency
+	with <groupId>a.b</groupId><artefactId>C</artifactId><version>3</version>
+	<scope>test</scope><classifier>tests</classifier>.-->
+	<dependencies>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.5</version>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
+		    <type>jar</type>
+			
+		</dependency>
+		<dependency>
+			<groupId>org.beanshell</groupId>
+			<artifactId>bsh</artifactId>
+			<version>2.0b4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.swinglabs</groupId>
+			<artifactId>swingx</artifactId>
+			<version>1.6</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+			<version>1.8.3</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.8.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-pool</groupId>
+			<artifactId>commons-pool</artifactId>
+			<version>1.5.4</version>
+		</dependency>
+		<dependency>
+			<groupId>auxtestlib</groupId>
+			<artifactId>auxtestlib</artifactId>
+			<version>1.3-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>3.3.2.GA</version>
+		</dependency>
+		<dependency>
+			<groupId>rmilite</groupId>
+			<artifactId>rmi-lite</artifactId>
+			<version>1.0</version>
+		</dependency>
+	</dependencies>
+	
+	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	  - JAR REPOSITORIES
+	  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	  
+	<repositories>
+		<!-- We define a single repository which is accessible through
+		web-dav. The format (for webdav repositories) is
+		dav:http://[<username>[:<password>]]@<host>[:<port>]/<path>-->
+		<repository>
+			<id>able.maven.repository</id>
+			<url>dav:http://acme.able.cs.cmu.edu/maven-repository</url>
+		</repository>
+	</repositories>
+	
+	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	  - REPORTS
+	  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>2.6</version>
+			</plugin>
+		
+			<!-- Plugin which generates the javadoc report. -->
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<docfilessubdirs>true</docfilessubdirs>
+				</configuration>
+			</plugin>
+			
+			<!-- Plugin which adds cross-referenced sources. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jxr-plugin</artifactId>
+				<version>2.3</version>
+			</plugin>
+			
+			<!-- Plugin generating the surefire report. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-report-plugin</artifactId>
+				<version>2.12.4</version>
+			</plugin>
+			
+			<!-- Plugin which generates the test coverage report. -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+				<version>2.5.2</version>
+			</plugin>
+			
+			<!-- Plugin generating the changelog. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-changes-plugin</artifactId>
+				<version>2.8</version>
+			</plugin>
+			
+			<!-- Plugin with the todo report. -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>taglist-maven-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<tags>
+						<tag>TODO</tag>
+						<tag>FIXME</tag>
+						<tag>IDEA</tag>
+						<tag>@todo</tag>
+						<tag>@deprecated</tag>
+					</tags>
+				</configuration>
+			</plugin>
+			
+			<!-- Plugin generating the PMD report ("bug" detector). -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pmd-plugin</artifactId>
+				<version>2.7.1</version>
+				<configuration>
+					<linkXref>true</linkXref>
+					<sourceEncoding>iso8859-1</sourceEncoding>
+					<minimumTokens>100</minimumTokens>
+					<targetJdk>1.6</targetJdk>
+					<excludes>
+						<exclude>**/*Bean.java</exclude>
+						<exclude>**/generated/*.java</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+			
+			<!-- Plugin generating the findbugs report. -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>findbugs-maven-plugin</artifactId>
+				<version>2.5.2</version>
+			</plugin>
+			
+			<!-- Plugin for the checkstyle report. It assumes a
+			checkstyle-config.xml file exists in the root of the project. -->
+<!-- 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>2.5</version>
+				<configuration>
+					<configLocation>checkstyle.xml</configLocation>
+				</configuration>
+			</plugin>-->
+		</plugins>
+	</reporting>
+	
+	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	  - DEPLOYMENT CONFIGURATION
+	  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	  
+	<distributionManagement>
+		<!-- Website location. Do not forget it should start with scp: and not
+		http. The user/password used for authentication should also be
+		added. -->
+		<!--
+		<site>
+			<id>website</id>
+			<url>scp://automatik:automatik@localhost:/home/pasc/mse/studio/mvnroot</url>
+		</site>
+		-->
+		
+		<!-- Location of the repository where the jars should be added. It
+		should have the following format:
+		dav:http://<user>:<pass>@<host>[:<port>]/<path> -->
+		<repository>
+			<id>able.maven.repository</id>
+			<name>ABLE Maven Repository</name>
+			<url>dav:http://acme.able.cs.cmu.edu/maven-repository</url>
+		</repository>
+	</distributionManagement>
+	
+	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	  - PROFILE CONFIGURATION
+	  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	
+	<!--
+	  - We define three profiles. One, the "dev-std" is the standard development
+	  - profile (as the name indicates). This profile is the default one.
+	  -
+	  - The full-test profile runs all "normal" tests plus the slow tests (the
+	  - tests which end in "TestSlow").
+	  -
+	  - The no-tests profile does not run any unit tests.
+	  -->
+	<profiles>
+		<profile>
+			<id>dev-std</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<includes>
+								<include>**/*Test.java</include>
+								<include>**/*TestCase.java</include>
+							</includes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>full-test</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<includes>
+								<include>**/*Test.java</include>
+								<include>**/*TestCase.java</include>
+								<include>**/*TestSlow.java</include>
+							</includes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>no-tests</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<includes>
+								<include>TestIgnore</include>
+							</includes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>
+

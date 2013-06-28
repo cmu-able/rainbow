@@ -11,6 +11,8 @@ import org.junit.Test;
 import auxtestlib.DefaultTCase;
 import auxtestlib.TestHelper;
 import auxtestlib.TestPropertiesDefinition;
+import edu.cmu.cs.able.eseb.bus.EventBus;
+import edu.cmu.cs.able.eseb.conn.BusConnection;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
 import edu.cmu.cs.able.typelib.type.DataValue;
 
@@ -111,9 +113,9 @@ public class PerformanceTest extends DefaultTCase {
 			}
 		};
 		
-		try (	BusServer srv = new BusServer(p, pscope);
-				BusClient send_cli = new BusClient("localhost", p, pscope);
-				BusClient recv_cli = new BusClient("localhost", p, pscope)) {
+		try (	EventBus srv = new EventBus(p, pscope);
+				BusConnection send_cli = new BusConnection("localhost", p, pscope);
+				BusConnection recv_cli = new BusConnection("localhost", p, pscope)) {
 			srv.start();
 			send_cli.start();
 			TestArraySaveQueue asq = new TestArraySaveQueue();
@@ -153,7 +155,7 @@ public class PerformanceTest extends DefaultTCase {
 	}
 	
 	private long check_performance(DataValue v[], int round_count,
-			BusClient send_cli, BusClient recv_cli,
+			BusConnection send_cli, BusConnection recv_cli,
 			TestArraySaveQueue asq) throws Exception {
 		/*
 		 * Wait for the connections to establish.

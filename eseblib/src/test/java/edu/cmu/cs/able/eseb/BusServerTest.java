@@ -15,6 +15,7 @@ import auxtestlib.RandomGenerator;
 import auxtestlib.TestHelper;
 import auxtestlib.TestPropertiesDefinition;
 import auxtestlib.ThreadCountTestHelper;
+import edu.cmu.cs.able.eseb.bus.EventBus;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
 
 /**
@@ -54,17 +55,20 @@ public class BusServerTest extends DefaultTCase {
 		/*
 		 * Start the bus server and connect.
 		 */
-		try (BusServer bs = new BusServer(p, new PrimitiveScope());
+		try (EventBus bs = new EventBus(p, new PrimitiveScope());
 				Socket s = new Socket("localhost", p)) {
 			/*
 			 * Wait a little bit.
 			 */
 			Thread.sleep(250);
 			
+			assertFalse(bs.closed());
+			
 			/*
 			 * Shutting down the server should shut down the sockets.
 			 */
 			bs.close();
+			assertTrue(bs.closed());
 			
 			/*
 			 * Wait a little bit.
@@ -92,12 +96,12 @@ public class BusServerTest extends DefaultTCase {
 				"free-port-zone-start");
 		short p2 = (short) (p1 + 1);
 		
-		try (BusServer b1 = new BusServer(p1, new PrimitiveScope())) {
+		try (EventBus b1 = new EventBus(p1, new PrimitiveScope())) {
 			/*
 			 * These should fail. 
 			 */
 			try {
-				new BusServer(p1, new PrimitiveScope());
+				new EventBus(p1, new PrimitiveScope());
 				fail();
 			} catch (IOException e) {
 				/*
@@ -108,12 +112,12 @@ public class BusServerTest extends DefaultTCase {
 			/*
 			 * This should succeed.
 			 */
-			try (BusServer b2 = new BusServer(p2, new PrimitiveScope())) {
+			try (EventBus b2 = new EventBus(p2, new PrimitiveScope())) {
 				/*
 				 * This one should fail now.
 				 */
 				try {
-					new BusServer(p2, new PrimitiveScope());
+					new EventBus(p2, new PrimitiveScope());
 					fail();
 				} catch (IOException e) {
 					/*
@@ -125,7 +129,7 @@ public class BusServerTest extends DefaultTCase {
 			/*
 			 * But if we shutdown b2 we should be able to create it.
 			 */
-			try (BusServer b2 = new BusServer(p2, new PrimitiveScope())) {
+			try (EventBus b2 = new EventBus(p2, new PrimitiveScope())) {
 				/*
 				 * Nothing to do.
 				 */
@@ -138,7 +142,7 @@ public class BusServerTest extends DefaultTCase {
 	public void client_that_sends_garbage_is_disconnected() throws Exception {
 		short p = (short) TestPropertiesDefinition.getInt(
 				"free-port-zone-start");
-		try (BusServer b = new BusServer(p, new PrimitiveScope())) {
+		try (EventBus b = new EventBus(p, new PrimitiveScope())) {
 			b.start();
 			Thread.sleep(250);
 			try (final Socket s = new Socket("localhost", p)) {

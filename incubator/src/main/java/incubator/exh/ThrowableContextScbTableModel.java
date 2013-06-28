@@ -17,10 +17,10 @@ public class ThrowableContextScbTableModel
 			ScbContainer<ThrowableContext> container) {
 		super(container, new ThrowableContextComparator());
 		
-		add_field_auto(ThrowableContext.scbf_class());
-		add_field_auto(ThrowableContext.scbf_message());
-		add_field_auto(ThrowableContext.scbf_location());
-		add_field_auto(ThrowableContext.scbf_when());
+		add_field_auto(ThrowableContext.c_class());
+		add_field_auto(ThrowableContext.c_message());
+		add_field_auto(ThrowableContext.c_location());
+		add_field_auto(ThrowableContext.c_when());
 	}
 
 }

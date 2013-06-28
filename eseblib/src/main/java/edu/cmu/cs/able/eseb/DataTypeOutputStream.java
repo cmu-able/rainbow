@@ -6,7 +6,7 @@ import java.io.IOException;
 import edu.cmu.cs.able.typelib.type.DataValue;
 
 /**
- * Output stream that writes data types.
+ * Output stream that writes data values.
  */
 public interface DataTypeOutputStream extends Closeable {
 	/**

@@ -1,6 +1,7 @@
 package incubator.scb.ui;
 
 import incubator.pval.Ensure;
+import incubator.scb.Scb;
 
 import java.awt.BorderLayout;
 import java.util.Comparator;
@@ -14,7 +15,7 @@ import javax.swing.ScrollPaneConstants;
  * @param <T> the bean type
  */
 @SuppressWarnings("serial")
-public class ScbTableScrollable<T> extends JPanel {
+public class ScbTableScrollable<T extends Scb<T>> extends JPanel {
 	/**
 	 * The table.
 	 */

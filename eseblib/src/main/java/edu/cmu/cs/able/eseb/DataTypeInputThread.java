@@ -4,7 +4,7 @@ import incubator.pval.Ensure;
 import incubator.wt.CloseableWorkerThread;
 
 /**
- * Thread that keeps reading data from a data type input stream and notifies
+ * Thread that keeps reading data from a data value input stream and notifies
  * objects when data is received.
  */
 public class DataTypeInputThread

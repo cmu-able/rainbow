@@ -13,7 +13,7 @@ import edu.cmu.cs.able.typelib.enc.InvalidEncodingException;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
 
 /**
- * Implementation of a data type input stream.
+ * Implementation of a data type input stream based on a data value encoding.
  */
 public class DataTypeInputStreamImpl implements DataTypeInputStream {
 	/**

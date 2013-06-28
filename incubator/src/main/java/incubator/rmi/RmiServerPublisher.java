@@ -64,8 +64,8 @@ public class RmiServerPublisher {
 		LOGGER.debug("Publishing service '" + cls.getName() + "'...");
 		
 		/*
-		 * Simulamos o trabalho que o rmilite faz num new Server().publish()
-		 * mas alteramos para guardar o registry.
+		 * We simulate what rmilite does in a Server().publish() but we
+		 * change it to keep the registry.
 		 */
 		Registry registry = null;
 		int minPort;
@@ -86,7 +86,6 @@ public class RmiServerPublisher {
 				break;
 			} catch (RemoteException e) {
 				LOGGER.debug("Failed to publish in port " + port + ".", e);
-				// Não conseguimos lançar o servidor neste porto.
 			}
 		}
 		

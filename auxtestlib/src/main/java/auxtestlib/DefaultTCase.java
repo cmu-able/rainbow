@@ -45,14 +45,15 @@ public class DefaultTCase extends Assert {
 		assert m_helpers == null;
 		
 		/*
-		 * Save all system properties.
-		 */
-		m_system_properties = (Properties) System.getProperties().clone();
-		
-		/*
 		 * Ensure global properties are loaded.
 		 */
-		TestPropertiesDefinition.loadGlobalProperties();
+		TestPropertiesDefinition.load_global_properties();
+		
+		/*
+		 * Save all system properties with the modifications from the test
+		 * properties but before test code has been run.
+		 */
+		m_system_properties = (Properties) System.getProperties().clone();
 
 		/*
 		 * Check that there are no helpers pending from previous runs.

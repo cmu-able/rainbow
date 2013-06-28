@@ -1,5 +1,7 @@
 package incubator.scb.ui;
 
+import incubator.scb.Scb;
+
 import java.util.Comparator;
 
 import javax.swing.JTable;
@@ -10,7 +12,7 @@ import javax.swing.ListSelectionModel;
  * @param <T> the bean type
  */
 @SuppressWarnings("serial")
-public class ScbTable<T> extends JTable {
+public class ScbTable<T extends Scb<T>> extends JTable {
 	/**
 	 * The model backing the table.
 	 */

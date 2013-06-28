@@ -15,7 +15,7 @@ import java.util.Set;
  * Implementation of a SCB container.
  * @param <T> the type of SCB
  */
-public class ScbContainerImpl<T> implements ScbContainer<T> {
+public class ScbContainerImpl<T extends Scb<T>> implements ScbContainer<T> {
 	/**
 	 * The children.
 	 */
@@ -33,12 +33,23 @@ public class ScbContainerImpl<T> implements ScbContainer<T> {
 	private LocalDispatcher<ScbContainerListener<T>> m_dispatcher;
 	
 	/**
+	 * Update listener that will be registered in SCBs.
+	 */
+	private ScbUpdateListener<T> m_update_listener;
+	
+	/**
 	 * Creates a new container.
 	 */
 	public ScbContainerImpl() {
 		m_children = new WrapperObservableSet<>(new HashSet<T>());
 		m_dispatcher = new LocalDispatcher<>();
 		m_copy = new HashSet<>();
+		m_update_listener = new ScbUpdateListener<T>() {
+			@Override
+			public void updated(T t) {
+				ScbContainerImpl.this.updated(t);
+			}
+		};
 		
 		m_children.addObservableSetListener(
 			new ObservableSetListener<T>() {
@@ -46,6 +57,7 @@ public class ScbContainerImpl<T> implements ScbContainer<T> {
 				public void elementAdded(final T e) {
 					synchronized (ScbContainerImpl.this) {
 						m_copy.add(e);
+						e.dispatcher().add(m_update_listener);
 						m_dispatcher.dispatch(
 								new DispatcherOp<ScbContainerListener<T>>() {
 							@Override
@@ -60,6 +72,7 @@ public class ScbContainerImpl<T> implements ScbContainer<T> {
 				public void elementRemoved(final T e) {
 					synchronized (ScbContainerImpl.this) {
 						m_copy.remove(e);
+						e.dispatcher().remove(m_update_listener);
 						m_dispatcher.dispatch(
 								new DispatcherOp<ScbContainerListener<T>>() {
 							@Override
@@ -76,6 +89,7 @@ public class ScbContainerImpl<T> implements ScbContainer<T> {
 						final Set<T> cp = new HashSet<>(m_copy);
 						m_copy.clear();
 						for (final T t : cp) {
+							t.dispatcher().remove(m_update_listener);
 							m_dispatcher.dispatch(
 									new DispatcherOp<
 									ScbContainerListener<T>>() {
@@ -119,7 +133,7 @@ public class ScbContainerImpl<T> implements ScbContainer<T> {
 	 * Invoked to inform an object has been updated.
 	 * @param t the object
 	 */
-	protected synchronized void updated(final T t) {
+	private synchronized void updated(final T t) {
 		Ensure.notNull(t);
 		Ensure.isTrue(m_children.contains(t));
 		m_dispatcher.dispatch(new DispatcherOp<ScbContainerListener<T>>() {

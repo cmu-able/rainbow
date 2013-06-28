@@ -1,6 +1,7 @@
 package incubator.scb.ui;
 
 import incubator.pval.Ensure;
+import incubator.scb.Scb;
 import incubator.scb.ScbContainer;
 import incubator.scb.ScbField;
 
@@ -14,7 +15,7 @@ import java.util.List;
  * @param <C> the type of field used for comparison
  */
 @SuppressWarnings("serial")
-public class ScbAutoTableModel<T, C extends Comparable<C>>
+public class ScbAutoTableModel<T extends Scb<T>, C extends Comparable<C>>
 		extends ScbTableModel<T, Comparator<T>> {
 	/**
 	 * Creates a new table model.

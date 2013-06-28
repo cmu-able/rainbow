@@ -13,7 +13,8 @@ import java.util.Map;
  * SCB container that aggregates the SCBs from several containers.
  * @param <T> the bean type
  */
-public class ScbAggregateContainer<T> implements ScbContainer<T> {
+public class ScbAggregateContainer<T extends Scb<T>>
+		implements ScbContainer<T> {
 	/**
 	 * Maps all SCBs to the number of containers that contain them.
 	 */
