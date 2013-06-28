@@ -6,9 +6,11 @@ import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
-import org.sa.rainbow.management.ports.IRainbowDeploymentPort;
+import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.management.ports.IRainbowManagementPort;
 import org.sa.rainbow.management.ports.IRainbowMasterConnectionPort;
-import org.sa.rainbow.management.ports.RainbowDeploymentPortFactory;
+import org.sa.rainbow.management.ports.RainbowManagementPortFactory;
 import org.sa.rainbow.util.Beacon;
 import org.sa.rainbow.util.Util;
 
@@ -18,7 +20,7 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
 
     protected static String NAME = "Rainbow Delegate";
 
-    final IRainbowDeploymentPort m_masterPort;
+    final IRainbowManagementPort m_masterPort;
     private String          m_id;
     private String          m_name = null;
 
@@ -28,18 +30,24 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
 
     private Properties                   m_configurationInformation;
 
-    public RainbowDelegate () {
+    public RainbowDelegate () throws RainbowConnectionException {
         super (NAME);
         // Generate an ID 
         m_id = UUID.randomUUID ().toString ();
 
         // Create the connection to the delegate
-        m_masterConnectionPort = RainbowDeploymentPortFactory
+        m_masterConnectionPort = RainbowManagementPortFactory
                 .createDelegateMasterConnectionPort (this);
         log ("Attempting to connecto to master.");
-        m_masterPort = m_masterConnectionPort.connectDelegate (m_id, new Properties ());
+        m_masterPort = m_masterConnectionPort.connectDelegate (m_id, getConnectionProperties ());
         // Request configuration information
         m_masterPort.requestConfigurationInformation ();
+    }
+
+    private Properties getConnectionProperties () {
+        Properties props = new Properties ();
+        props.setProperty (Rainbow.PROPKEY_DEPLOYMENT_LOCATION, Rainbow.canonicalizeHost2IP ("localhost"));
+        return props;
     }
 
     /**
@@ -91,7 +99,7 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
     private void manageHeartbeat () {
         if (m_beacon != null && m_beacon.periodElapsed ()) {
             log ("Sending heartbeat.");
-            m_masterPort.receiveHeartbeat ();
+            m_masterPort.heartbeat ();
             m_beacon.mark ();
         }
     }
@@ -102,6 +110,7 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
     @Override
     protected void doTerminate () {
         log ("Terminating.");
+        m_beacon = null;
         m_masterConnectionPort.disconnectDelegate (getId ());
         m_masterPort.dispose ();
         m_masterConnectionPort.dispose ();
@@ -128,7 +137,23 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
         return m_configurationInformation;
     }
 
-    public static void main (String[] args) {
+    public static void main (String[] args) throws RainbowConnectionException {
         new RainbowDelegate ();
+    }
+
+    public void disconnectFromMaster () {
+        terminate ();
+    }
+
+    @Override
+    public void terminate () {
+        super.terminate ();
+        while (!isTerminated ()) {
+            try {
+                Thread.sleep (500);
+            }
+            catch (InterruptedException e) {
+            }
+        }
     }
 }

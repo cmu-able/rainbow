@@ -2,6 +2,8 @@ package org.sa.rainbow.management.ports;
 
 import java.util.Properties;
 
+import org.sa.rainbow.core.error.RainbowConnectionException;
+
 /**
  * This interface represents a port through which delegates connect to the master
  * 
@@ -19,8 +21,9 @@ public interface IRainbowMasterConnectionPort {
      *            master.
      * 
      * @return A deployment port through which the delegate can be managed
+     * @throws RainbowConnectionException TODO
      */
-    public IRainbowDeploymentPort connectDelegate (String delegateID, Properties connectionProperties);
+    public IRainbowManagementPort connectDelegate (String delegateID, Properties connectionProperties) throws RainbowConnectionException;
 
     /**
      * Disconnects the delegate from the master. The master will delete the delegate from its records. Any processing

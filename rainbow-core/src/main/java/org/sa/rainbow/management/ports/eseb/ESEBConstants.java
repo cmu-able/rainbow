@@ -17,5 +17,6 @@ public class ESEBConstants {
     public static final String MSG_CONNECT_REPLY                     = ESEB_PREFIX + "CONNECT_REPLY";
     public static final String MSG_TYPE_REPLY                        = ESEB_PREFIX + "REPLY";
     public static final String MSG_REPLY_VALUE                       = ESEB_PREFIX + "REPLY_VALUE";
+    public static final String TARGET                                = ESEB_PREFIX + "TARGET";
 
 }

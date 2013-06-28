@@ -3,6 +3,7 @@ package org.sa.rainbow.management.ports;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
+import org.sa.rainbow.core.error.RainbowConnectionException;
 
 /**
  * Represetns a connection port that is not connected to anything. Any calls will be logged as an error.
@@ -23,9 +24,9 @@ public class DisconnectedRainbowMasterConnectionPort implements IRainbowMasterCo
     Logger LOGGER = Logger.getLogger (DisconnectedRainbowMasterConnectionPort.class);
 
     @Override
-    public IRainbowDeploymentPort connectDelegate (String delegateID, Properties connectionProperties) {
+    public IRainbowManagementPort connectDelegate (String delegateID, Properties connectionProperties) throws RainbowConnectionException {
         LOGGER.error ("Attempt to connect through a disconnected port!");
-        return DisconnectedRainbowDeploymentPort.instance ();
+        return DisconnectedRainbowManagementPort.instance ();
     }
 
     @Override

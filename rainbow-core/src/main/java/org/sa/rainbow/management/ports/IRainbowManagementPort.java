@@ -9,7 +9,7 @@ import java.util.Properties;
  * @author Bradley Schmerl: schmerl
  * 
  */
-public interface IRainbowDeploymentPort {
+public interface IRainbowManagementPort {
     // identification information
 
     /**
@@ -35,7 +35,7 @@ public interface IRainbowDeploymentPort {
      * This is called by the delegate periodically to indicate that it is still alive. The intent is that this method
      * forward information to the Master
      */
-    public void receiveHeartbeat ();
+    public void heartbeat ();
 
     /**
      * This is called by a delegate when it wants configuration information to be resent.

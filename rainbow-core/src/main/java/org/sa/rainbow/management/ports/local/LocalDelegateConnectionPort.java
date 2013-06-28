@@ -3,23 +3,24 @@ package org.sa.rainbow.management.ports.local;
 import java.util.Properties;
 
 import org.sa.rainbow.RainbowDelegate;
+import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.management.ports.AbstractDelegateConnectionPort;
-import org.sa.rainbow.management.ports.IRainbowDeploymentPort;
+import org.sa.rainbow.management.ports.IRainbowManagementPort;
 
 public class LocalDelegateConnectionPort extends AbstractDelegateConnectionPort {
 
     private LocalMasterConnectionPort m_masterPort;
-    private LocalRainbowDeploymentPortFactory m_factory;
+    private LocalRainbowManagementPortFactory m_factory;
 
-    public LocalDelegateConnectionPort (RainbowDelegate delegate, LocalRainbowDeploymentPortFactory factory) {
+    public LocalDelegateConnectionPort (RainbowDelegate delegate, LocalRainbowManagementPortFactory factory) {
         super (delegate);
         m_factory = factory;
     }
 
     @Override
-    public IRainbowDeploymentPort connectDelegate (String delegateID, Properties connectionProperties) {
+    public IRainbowManagementPort connectDelegate (String delegateID, Properties connectionProperties) throws RainbowConnectionException {
         if (m_masterPort != null) {
-            IRainbowDeploymentPort ddp = m_factory.createDelegateDeploymentPortPort (m_delegate, m_delegate.getId ());
+            IRainbowManagementPort ddp = m_factory.createDelegateSideManagementPort (m_delegate, m_delegate.getId ());
             m_masterPort.connectDelegate (delegateID, connectionProperties);
             return ddp;
         }

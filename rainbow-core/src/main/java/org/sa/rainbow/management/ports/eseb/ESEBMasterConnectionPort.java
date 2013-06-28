@@ -11,7 +11,7 @@ import org.sa.rainbow.RainbowConstants;
 import org.sa.rainbow.RainbowMaster;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.management.ports.AbstractMasterConnectionPort;
-import org.sa.rainbow.management.ports.IRainbowDeploymentPort;
+import org.sa.rainbow.management.ports.IRainbowManagementPort;
 
 public class ESEBMasterConnectionPort extends AbstractMasterConnectionPort {
     static Logger         LOGGER = Logger.getLogger (ESEBMasterConnectionPort.class);
@@ -36,34 +36,45 @@ public class ESEBMasterConnectionPort extends AbstractMasterConnectionPort {
                 String type = msg.get (ESEBConstants.MSG_TYPE_KEY);
                 switch (type) {
                 case ESEBConstants.MSG_TYPE_CONNECT_DELEGATE: {
-                    String delegateId = msg.get (ESEBConstants.MSG_DELEGATE_ID_KEY);
-                    Properties connectionProperties = m_connectionRole.decodeProperties (msg);
-                    String replyMsg = ESEBConstants.MSG_REPLY_OK;
-                    try {
-                        IRainbowDeploymentPort port = connectDelegate (delegateId, connectionProperties);
-                        if (port == null) {
-                            replyMsg = "Could not create a deployment port on the master.";
+                    if (msg.get (ESEBConstants.TARGET) == null) {
+                        String delegateId = msg.get (ESEBConstants.MSG_DELEGATE_ID_KEY);
+                        Properties connectionProperties = m_connectionRole.decodeProperties (msg);
+                        String replyMsg = ESEBConstants.MSG_REPLY_OK;
+                        try {
+                            IRainbowManagementPort port = connectDelegate (delegateId, connectionProperties);
+                            if (port == null) {
+                                replyMsg = "Could not create a deployment port on the master.";
+                            }
                         }
+                        catch (Throwable t) {
+                            replyMsg = MessageFormat.format ("Failed to connect with the following exception: {0}",
+                                    t.getMessage ());
+                        }
+                        Map<String, String> reply = new HashMap<> ();
+                        reply.put (ESEBConstants.MSG_REPLY_KEY, msg.get (ESEBConstants.MSG_REPLY_KEY));
+                        reply.put (ESEBConstants.MSG_CONNECT_REPLY, replyMsg);
+                        reply.put (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_REPLY);
+                        m_connectionRole.publish (reply);
                     }
-                    catch (Throwable t) {
-                        replyMsg = MessageFormat.format ("Failed to connect with the following exception: {0}",
-                                t.getMessage ());
-                    }
-                    Map<String, String> reply = new HashMap<> ();
-                    reply.put (ESEBConstants.MSG_REPLY_KEY, msg.get (ESEBConstants.MSG_REPLY_KEY));
-                    reply.put (ESEBConstants.MSG_CONNECT_REPLY, replyMsg);
-                    reply.put (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_REPLY);
-                    m_connectionRole.publish (reply);
                 }
                 break;
                 case ESEBConstants.MSG_TYPE_DISCONNECT_DELEGATE: {
                     String delegateId = msg.get (ESEBConstants.MSG_DELEGATE_ID_KEY);
-                    disconnectDelegate (delegateId);
+                    m_master.disconnectDelegate (delegateId);
                 }
                 break;
                 }
             }
         });
+    }
+
+    @Override
+    public void disconnectDelegate (String delegateId) {
+        Map<String, String> msg = new HashMap<> ();
+        msg.put (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_DISCONNECT_DELEGATE);
+        msg.put (ESEBConstants.MSG_DELEGATE_ID_KEY, delegateId);
+        msg.put (ESEBConstants.TARGET, delegateId);
+        m_connectionRole.publish (msg);
     }
 
     @Override

@@ -11,7 +11,7 @@ import org.sa.rainbow.RainbowDelegate;
  * @author Bradley Schmerl: schmerl
  * 
  */
-public abstract class AbstractDelegateDeploymentPort implements IRainbowDeploymentPort {
+public abstract class AbstractDelegateManagementPort implements IRainbowManagementPort {
 
     private RainbowDelegate m_delegate;
 
@@ -21,7 +21,7 @@ public abstract class AbstractDelegateDeploymentPort implements IRainbowDeployme
      * @param delegate
      *            The delegate for this port
      */
-    public AbstractDelegateDeploymentPort (RainbowDelegate delegate) {
+    public AbstractDelegateManagementPort (RainbowDelegate delegate) {
         m_delegate = delegate;
     }
 

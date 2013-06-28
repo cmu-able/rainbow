@@ -9,7 +9,7 @@ import org.sa.rainbow.RainbowMaster;
  * @author Bradley Schmerl: schmerl
  * 
  */
-public abstract class AbstractMasterDeploymentPort implements IRainbowDeploymentPort {
+public abstract class AbstractMasterManagementPort implements IRainbowManagementPort {
 
     private RainbowMaster m_master;
     private String        m_delegateID;
@@ -22,7 +22,7 @@ public abstract class AbstractMasterDeploymentPort implements IRainbowDeployment
      * @param delegateID
      *            The id of the delegate that is being communicated with
      */
-    protected AbstractMasterDeploymentPort (RainbowMaster master, String delegateID) {
+    protected AbstractMasterManagementPort (RainbowMaster master, String delegateID) {
         m_master = master;
         m_delegateID = delegateID;
     }
@@ -33,7 +33,7 @@ public abstract class AbstractMasterDeploymentPort implements IRainbowDeployment
     }
 
     @Override
-    public void receiveHeartbeat () {
+    public void heartbeat () {
         m_master.processHeartbeat (m_delegateID);
     }
 

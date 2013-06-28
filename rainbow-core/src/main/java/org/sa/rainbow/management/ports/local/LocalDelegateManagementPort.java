@@ -5,17 +5,17 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.sa.rainbow.RainbowDelegate;
-import org.sa.rainbow.management.ports.IRainbowDeploymentPort;
+import org.sa.rainbow.management.ports.IRainbowManagementPort;
 
-public class LocalDelegateDeploymentPort implements IRainbowDeploymentPort {
+public class LocalDelegateManagementPort implements IRainbowManagementPort {
 
-    static Logger           LOGGER = Logger.getLogger (LocalDelegateDeploymentPort.class);
+    static Logger           LOGGER = Logger.getLogger (LocalDelegateManagementPort.class);
 
     private RainbowDelegate m_delegate;
     private String          m_delegateID;
-    LocalMasterDeploymentPort m_connectedTo;
+    LocalMasterSideManagementPort m_connectedTo;
 
-    public LocalDelegateDeploymentPort (RainbowDelegate delegate, String delegateID) {
+    public LocalDelegateManagementPort (RainbowDelegate delegate, String delegateID) {
         m_delegate = delegate;
         m_delegateID = delegateID;
 
@@ -32,9 +32,9 @@ public class LocalDelegateDeploymentPort implements IRainbowDeploymentPort {
     }
 
     @Override
-    public void receiveHeartbeat () {
+    public void heartbeat () {
         checkConnected ();
-        m_connectedTo.receiveHeartbeat ();
+        m_connectedTo.heartbeat ();
     }
 
     private void checkConnected () {
@@ -51,7 +51,7 @@ public class LocalDelegateDeploymentPort implements IRainbowDeploymentPort {
         m_connectedTo.requestConfigurationInformation ();
     }
 
-    public void connect (LocalMasterDeploymentPort port) {
+    public void connect (LocalMasterSideManagementPort port) {
         m_connectedTo = port;
     }
 

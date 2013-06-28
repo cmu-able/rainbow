@@ -10,16 +10,17 @@ import org.apache.log4j.Logger;
 import org.sa.rainbow.RainbowConstants;
 import org.sa.rainbow.RainbowDelegate;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.management.ports.AbstractDelegateConnectionPort;
-import org.sa.rainbow.management.ports.DisconnectedRainbowDeploymentPort;
-import org.sa.rainbow.management.ports.IRainbowDeploymentPort;
-import org.sa.rainbow.management.ports.RainbowDeploymentPortFactory;
+import org.sa.rainbow.management.ports.DisconnectedRainbowManagementPort;
+import org.sa.rainbow.management.ports.IRainbowManagementPort;
+import org.sa.rainbow.management.ports.RainbowManagementPortFactory;
 import org.sa.rainbow.management.ports.eseb.ESEBConnector.IESEBListener;
 
 public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
     static Logger                  LOGGER = Logger.getLogger (ESEBDelegateConnectionPort.class);
     private ESEBConnector   m_connectionRole;
-    private IRainbowDeploymentPort m_deploymentPort;
+    private IRainbowManagementPort m_deploymentPort;
 
     public ESEBDelegateConnectionPort (RainbowDelegate delegate) throws IOException {
         super (delegate);
@@ -33,10 +34,24 @@ public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
         short p = Short.valueOf (port);
         m_connectionRole = new ESEBConnector (Rainbow.properties ().getProperty (
                 RainbowConstants.PROPKEY_MASTER_LOCATION), p);
+        m_connectionRole.addListener (new IESEBListener() {
+
+            @Override
+            public void receive (Map<String, String> msg) {
+                String type = msg.get (ESEBConstants.MSG_TYPE_KEY);
+                switch (type) {
+                case ESEBConstants.MSG_TYPE_CONNECT_DELEGATE: {
+                    if (m_delegate.getId ().equals (msg.get (ESEBConstants.TARGET))) {
+                        m_delegate.disconnectFromMaster ();
+                    }
+                }
+                }
+            }
+        });
     }
 
     @Override
-    public IRainbowDeploymentPort connectDelegate (String delegateID, Properties connectionProperties) {
+    public IRainbowManagementPort connectDelegate (String delegateID, Properties connectionProperties) throws RainbowConnectionException {
         /*
          * connectionProperties should contain the following information: 
          * PROPKEY_ESEB_DELEGATE_DEPLOYMENT_PORT, PROPKEY_ESEB_DELEGATE_DEPLOYMENT_HOST: 
@@ -60,9 +75,7 @@ public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
 
         m_deploymentPort = null;
 
-        // TODO: Should return if connection was successful
-        final Object lock = new Object ();
-        m_connectionRole.sendAndReceive (msg, new IESEBListener () {
+        m_connectionRole.blockingSendAndReceive (msg, new IESEBListener () {
             @Override
             public void receive (Map<String, String> msgRcvd) {
                 String reply = msgRcvd.get (ESEBConstants.MSG_CONNECT_REPLY);
@@ -72,25 +85,20 @@ public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
                             reply));
                 }
                 else {
-                    m_deploymentPort = RainbowDeploymentPortFactory.createDelegateDeploymentPort (m_delegate,
-                            m_delegate.getId ());
+                    try {
+                        m_deploymentPort = RainbowManagementPortFactory.createDelegateDeploymentPort (m_delegate,
+                                m_delegate.getId ());
+                    }
+                    catch (RainbowConnectionException e) {
+
+                    }
                 }
-                synchronized (lock) {
-                    lock.notifyAll ();
-                }
             }
-        });
-        synchronized (lock) {
-            try {
-                lock.wait (10000);
-            }
-            catch (InterruptedException e) {
-            }
-        }
+        }, 10000);
         if (m_deploymentPort == null) {
             LOGGER.error ("The call to connectDelegate timed out without returning a deployment port...");
             // REVIEW: Throw an exception instead
-            m_deploymentPort = DisconnectedRainbowDeploymentPort.instance ();
+            m_deploymentPort = DisconnectedRainbowManagementPort.instance ();
         }
         return m_deploymentPort;
     }

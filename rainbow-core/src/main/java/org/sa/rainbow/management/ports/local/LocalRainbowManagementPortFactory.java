@@ -7,34 +7,34 @@ import java.util.Properties;
 import org.eclipse.jdt.annotation.NonNull;
 import org.sa.rainbow.RainbowDelegate;
 import org.sa.rainbow.RainbowMaster;
-import org.sa.rainbow.management.ports.IRainbowDeploymentPort;
-import org.sa.rainbow.management.ports.IRainbowDeploymentPortFactory;
+import org.sa.rainbow.management.ports.IRainbowManagementPort;
+import org.sa.rainbow.management.ports.IRainbowManagementPortFactory;
 import org.sa.rainbow.management.ports.IRainbowMasterConnectionPort;
 
-public class LocalRainbowDeploymentPortFactory implements IRainbowDeploymentPortFactory {
+public class LocalRainbowManagementPortFactory implements IRainbowManagementPortFactory {
 
     /**
      * Singleton instance
      */
-    private static IRainbowDeploymentPortFactory m_instance;
-    Map<String, LocalMasterDeploymentPort>           m_masterPorts   = new HashMap<> ();
+    private static IRainbowManagementPortFactory m_instance;
+    Map<String, LocalMasterSideManagementPort>           m_masterPorts   = new HashMap<> ();
     LocalMasterConnectionPort                    m_masterConnectionPort;
-    Map<String, LocalDelegateDeploymentPort>         m_delegatePorts = new HashMap<> ();
+    Map<String, LocalDelegateManagementPort>         m_delegatePorts = new HashMap<> ();
     Map<String, LocalDelegateConnectionPort>     m_delegateConnectionPorts = new HashMap<> ();
 
-    private LocalRainbowDeploymentPortFactory () {
+    private LocalRainbowManagementPortFactory () {
     };
 
 
     @Override
     @NonNull
-    public IRainbowDeploymentPort createMasterDeploymentePort (RainbowMaster rainbowMaster,
+    public IRainbowManagementPort createMasterSideManagementPort (RainbowMaster rainbowMaster,
             String delegateID,
             Properties connectionProperties) {
 
-        LocalMasterDeploymentPort mdp = m_masterPorts.get (delegateID);
+        LocalMasterSideManagementPort mdp = m_masterPorts.get (delegateID);
         if (mdp == null) {
-            mdp = new LocalMasterDeploymentPort (rainbowMaster, delegateID);
+            mdp = new LocalMasterSideManagementPort (rainbowMaster, delegateID);
             m_masterPorts.put (delegateID, mdp);
             connectMasterAndDelegate (delegateID);
         }
@@ -44,10 +44,10 @@ public class LocalRainbowDeploymentPortFactory implements IRainbowDeploymentPort
 
     @Override
     @NonNull
-    public IRainbowDeploymentPort createDelegateDeploymentPortPort (RainbowDelegate delegate, String delegateID) {
-        LocalDelegateDeploymentPort ddp = m_delegatePorts.get (delegateID);
+    public IRainbowManagementPort createDelegateSideManagementPort (RainbowDelegate delegate, String delegateID) {
+        LocalDelegateManagementPort ddp = m_delegatePorts.get (delegateID);
         if (ddp == null) {
-            ddp = new LocalDelegateDeploymentPort (delegate, delegateID);
+            ddp = new LocalDelegateManagementPort (delegate, delegateID);
             m_delegatePorts.put (delegateID, ddp);
             connectMasterAndDelegate (delegateID);
         }
@@ -55,8 +55,8 @@ public class LocalRainbowDeploymentPortFactory implements IRainbowDeploymentPort
     }
 
     private void connectMasterAndDelegate (String delegateID) {
-        LocalMasterDeploymentPort mdp = m_masterPorts.get (delegateID);
-        LocalDelegateDeploymentPort ddp = m_delegatePorts.get (delegateID);
+        LocalMasterSideManagementPort mdp = m_masterPorts.get (delegateID);
+        LocalDelegateManagementPort ddp = m_delegatePorts.get (delegateID);
         if (mdp != null && ddp != null) {
             mdp.connect (ddp);
             ddp.connect (mdp);
@@ -65,7 +65,7 @@ public class LocalRainbowDeploymentPortFactory implements IRainbowDeploymentPort
 
     @Override
     @NonNull
-    public IRainbowMasterConnectionPort createDelegateConnectionPort (final RainbowMaster rainbowMaster) {
+    public IRainbowMasterConnectionPort createMasterSideConnectionPort (final RainbowMaster rainbowMaster) {
         if (m_masterConnectionPort == null) {
             m_masterConnectionPort = new LocalMasterConnectionPort (rainbowMaster);
         }
@@ -74,7 +74,7 @@ public class LocalRainbowDeploymentPortFactory implements IRainbowDeploymentPort
 
     @Override
     @NonNull
-    public IRainbowMasterConnectionPort createDelegateMasterConnectionPort (RainbowDelegate delegate) {
+    public IRainbowMasterConnectionPort createDelegateSideConnectionPort (RainbowDelegate delegate) {
         LocalDelegateConnectionPort ldcp = m_delegateConnectionPorts.get (delegate.getId ());
         if (ldcp == null) {
             ldcp = new LocalDelegateConnectionPort (delegate, this);
@@ -84,9 +84,9 @@ public class LocalRainbowDeploymentPortFactory implements IRainbowDeploymentPort
         return ldcp;
     }
 
-    public static IRainbowDeploymentPortFactory getFactory () {
+    public static IRainbowManagementPortFactory getFactory () {
         if (m_instance == null) {
-            m_instance = new LocalRainbowDeploymentPortFactory ();
+            m_instance = new LocalRainbowManagementPortFactory ();
         }
         return m_instance;
     }

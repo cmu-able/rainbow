@@ -9,16 +9,17 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.sa.rainbow.RainbowMaster;
 import org.sa.rainbow.core.Rainbow;
-import org.sa.rainbow.management.ports.AbstractMasterDeploymentPort;
+import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.management.ports.AbstractMasterManagementPort;
 import org.sa.rainbow.management.ports.eseb.ESEBConnector.IESEBListener;
 
-public class ESEBMasterDeploymentPort extends AbstractMasterDeploymentPort implements ESEBDeploymentPortConstants {
-    static Logger         LOGGER = Logger.getLogger (ESEBMasterDeploymentPort.class);
+public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort implements ESEBManagementPortConstants {
+    static Logger         LOGGER = Logger.getLogger (ESEBMasterSideManagementPort.class);
 
     private ESEBConnector m_role;
 
 
-    public ESEBMasterDeploymentPort (RainbowMaster master, String delegateID, Properties connectionProperties) throws IOException {
+    public ESEBMasterSideManagementPort (RainbowMaster master, String delegateID, Properties connectionProperties) throws IOException {
         super (master, delegateID);
         String delegateHost = connectionProperties.getProperty (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_HOST,
                 "localhost");
@@ -41,7 +42,7 @@ public class ESEBMasterDeploymentPort extends AbstractMasterDeploymentPort imple
                 break;
                 case RECEIVE_HEARTBEAT: {
                     if (msg.get (ESEBConstants.MSG_DELEGATE_ID_KEY).equals (getDelegateId ())) {
-                        receiveHeartbeat ();
+                        heartbeat ();
                     }
                 }
                 }
@@ -65,9 +66,7 @@ public class ESEBMasterDeploymentPort extends AbstractMasterDeploymentPort imple
         @Override
         public void receive (Map<String, String> msg) {
             m_reply = Boolean.valueOf (msg.get (ESEBConstants.MSG_REPLY_VALUE));
-            synchronized (this) {
-                this.notifyAll ();
-            }
+
         }
     }
 
@@ -77,18 +76,15 @@ public class ESEBMasterDeploymentPort extends AbstractMasterDeploymentPort imple
         msg.put (ESEBConstants.MSG_TYPE_KEY, START_DELEGATE);
         msg.put (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
 
-        BooleanReply reply = new BooleanReply ();
-        m_role.sendAndReceive (msg, reply);
-
-        synchronized (reply) {
-            try {
-                reply.wait (10000);
-            }
-            catch (InterruptedException e) {
-            }
+        try {
+            BooleanReply reply = new BooleanReply ();
+            m_role.blockingSendAndReceive (msg, reply, 10000);
+            return reply.m_reply;
         }
-
-        return reply.m_reply;
+        catch (RainbowConnectionException e) {
+            LOGGER.error (MessageFormat.format ("startDelegate did not return for delegate {0}", getDelegateId ()));
+            return false;
+        }
     }
 
     @Override
@@ -97,18 +93,15 @@ public class ESEBMasterDeploymentPort extends AbstractMasterDeploymentPort imple
         msg.put (ESEBConstants.MSG_TYPE_KEY, PAUSE_DELEGATE);
         msg.put (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
 
-        BooleanReply reply = new BooleanReply ();
-        m_role.sendAndReceive (msg, reply);
-
-        synchronized (reply) {
-            try {
-                reply.wait (10000);
-            }
-            catch (InterruptedException e) {
-            }
+        try {
+            BooleanReply reply = new BooleanReply ();
+            m_role.blockingSendAndReceive (msg, reply, 10000);
+            return reply.m_reply;
         }
-
-        return reply.m_reply;
+        catch (RainbowConnectionException e) {
+            LOGGER.error (MessageFormat.format ("pauseDelegate did not return for delegate {0}", getDelegateId ()));
+            return false;
+        }
     }
 
     @Override
@@ -117,18 +110,15 @@ public class ESEBMasterDeploymentPort extends AbstractMasterDeploymentPort imple
         msg.put (ESEBConstants.MSG_TYPE_KEY, TERMINATE_DELEGATE);
         msg.put (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
 
-        BooleanReply reply = new BooleanReply ();
-        m_role.sendAndReceive (msg, reply);
-
-        synchronized (reply) {
-            try {
-                reply.wait (10000);
-            }
-            catch (InterruptedException e) {
-            }
+        try {
+            BooleanReply reply = new BooleanReply ();
+            m_role.blockingSendAndReceive (msg, reply, 10000);
+            return reply.m_reply;
         }
-
-        return reply.m_reply;
+        catch (RainbowConnectionException e) {
+            LOGGER.error (MessageFormat.format ("terminateDelegate did not return for delegate {0}", getDelegateId ()));
+            return false;
+        }
     }
 
     @Override

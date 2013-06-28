@@ -4,8 +4,9 @@ import java.util.Properties;
 
 import org.sa.rainbow.RainbowDelegate;
 import org.sa.rainbow.RainbowMaster;
+import org.sa.rainbow.core.error.RainbowConnectionException;
 
-public interface IRainbowDeploymentPortFactory {
+public interface IRainbowManagementPortFactory {
 
     /**
      * Called by a delegate to get the master connection port
@@ -13,7 +14,8 @@ public interface IRainbowDeploymentPortFactory {
      * 
      * @return
      */
-    public abstract IRainbowMasterConnectionPort createDelegateMasterConnectionPort (RainbowDelegate delegate);
+    public abstract IRainbowMasterConnectionPort createDelegateSideConnectionPort (RainbowDelegate delegate)
+            throws RainbowConnectionException;
 
     /**
      * Create the connection port on the master, which processes connection requests from delegates
@@ -22,7 +24,8 @@ public interface IRainbowDeploymentPortFactory {
      *            The master that has this port
      * @return
      */
-    public abstract IRainbowMasterConnectionPort createDelegateConnectionPort (final RainbowMaster rainbowMaster);
+    public abstract IRainbowMasterConnectionPort createMasterSideConnectionPort (final RainbowMaster rainbowMaster)
+            throws RainbowConnectionException;
 
     /**
      * Create a delegate port of the delegate that forwards requests to the master
@@ -33,7 +36,9 @@ public interface IRainbowDeploymentPortFactory {
      *            The delegate id of the delegate
      * @return the port associated with deployment and lifecycle information to the delegate
      */
-    public abstract IRainbowDeploymentPort createDelegateDeploymentPortPort (RainbowDelegate delegate, String delegateID);
+    public abstract IRainbowManagementPort
+            createDelegateSideManagementPort (RainbowDelegate delegate, String delegateID)
+                    throws RainbowConnectionException;
 
     /**
      * Create a delegate port of the rainbowMaster that will forward requests to the delegate indicated by delegateID
@@ -45,8 +50,8 @@ public interface IRainbowDeploymentPortFactory {
      * @return a new port to be used by the master to communicate deployment and configuration information to the
      *         delegate, and manager the lifecycle
      */
-    public abstract IRainbowDeploymentPort createMasterDeploymentePort (RainbowMaster rainbowMaster,
+    public abstract IRainbowManagementPort createMasterSideManagementPort (RainbowMaster rainbowMaster,
             String delegateID,
-            Properties connectionProperties);
+            Properties connectionProperties) throws RainbowConnectionException;
 
 }

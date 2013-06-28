@@ -8,14 +8,14 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.sa.rainbow.RainbowDelegate;
 import org.sa.rainbow.core.Rainbow;
-import org.sa.rainbow.management.ports.AbstractDelegateDeploymentPort;
+import org.sa.rainbow.management.ports.AbstractDelegateManagementPort;
 import org.sa.rainbow.management.ports.eseb.ESEBConnector.IESEBListener;
 
-public class ESEBDelegateDeploymentPort extends AbstractDelegateDeploymentPort implements ESEBDeploymentPortConstants {
-    static Logger         LOGGER = Logger.getLogger (ESEBDelegateDeploymentPort.class);
+public class ESEBDelegateManagementPort extends AbstractDelegateManagementPort implements ESEBManagementPortConstants {
+    static Logger         LOGGER = Logger.getLogger (ESEBDelegateManagementPort.class);
     private ESEBConnector m_role;
 
-    public ESEBDelegateDeploymentPort (RainbowDelegate delegate) throws IOException {
+    public ESEBDelegateManagementPort (RainbowDelegate delegate) throws IOException {
         super (delegate);
         String delegatePort = Rainbow.properties ().getProperty (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_PORT,
                 Rainbow.properties ().getProperty (Rainbow.PROPKEY_DEPLOYMENT_LOCATION, "1234"));
@@ -51,7 +51,7 @@ public class ESEBDelegateDeploymentPort extends AbstractDelegateDeploymentPort i
     }
 
     @Override
-    public void receiveHeartbeat () {
+    public void heartbeat () {
         Map<String, String> msg = new HashMap<> ();
         msg.put (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
         msg.put (ESEBConstants.MSG_TYPE_KEY, RECEIVE_HEARTBEAT);
@@ -63,7 +63,7 @@ public class ESEBDelegateDeploymentPort extends AbstractDelegateDeploymentPort i
     public void requestConfigurationInformation () {
         Map<String, String> msg = new HashMap<> ();
         msg.put (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
-        msg.put (ESEBConstants.MSG_TYPE_KEY, ESEBDeploymentPortConstants.REQUEST_CONFIG_INFORMATION);
+        msg.put (ESEBConstants.MSG_TYPE_KEY, ESEBManagementPortConstants.REQUEST_CONFIG_INFORMATION);
         LOGGER.debug (MessageFormat.format ("Delegate {0} requesting configuration information.", getDelegateId ()));
         m_role.publish (msg);
     }

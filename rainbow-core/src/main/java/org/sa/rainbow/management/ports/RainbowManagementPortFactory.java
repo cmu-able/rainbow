@@ -11,15 +11,16 @@ import org.sa.rainbow.RainbowConstants;
 import org.sa.rainbow.RainbowDelegate;
 import org.sa.rainbow.RainbowMaster;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.error.RainbowConnectionException;
 
-public class RainbowDeploymentPortFactory {
+public class RainbowManagementPortFactory {
 
-    static Logger                      LOGGER          = Logger.getLogger (RainbowDeploymentPortFactory.class);
+    static Logger                      LOGGER          = Logger.getLogger (RainbowManagementPortFactory.class);
     static final String                DEFAULT_FACTORY = "org.sa.rainbow.ports.local.LocalRainbowDelegatePortFactory";
 
-    static IRainbowDeploymentPortFactory m_instance;
+    static IRainbowManagementPortFactory m_instance;
 
-    private RainbowDeploymentPortFactory () {
+    private RainbowManagementPortFactory () {
     }
 
     /**
@@ -28,7 +29,7 @@ public class RainbowDeploymentPortFactory {
      * 
      * @return
      */
-    protected static IRainbowDeploymentPortFactory getFactory () {
+    protected static IRainbowManagementPortFactory getFactory () {
         if (m_instance == null) {
             String factory = Rainbow.properties ().getProperty (RainbowConstants.PROPKEY_DEPLOYMENT_PORT_FACTORY);
             if (factory == null) {
@@ -39,7 +40,7 @@ public class RainbowDeploymentPortFactory {
             try {
                 Class<?> f = Class.forName (factory);
                 Method method = f.getMethod ("getFactory", new Class[0]);
-                m_instance = (IRainbowDeploymentPortFactory )method.invoke (null, new Object[0]);
+                m_instance = (IRainbowManagementPortFactory )method.invoke (null, new Object[0]);
             }
             catch (ClassNotFoundException e) {
                 String errMsg = MessageFormat.format (
@@ -61,22 +62,25 @@ public class RainbowDeploymentPortFactory {
         return m_instance;
     }
 
-    public static IRainbowMasterConnectionPort createDelegateMasterConnectionPort (RainbowDelegate delegate) {
-        return getFactory ().createDelegateMasterConnectionPort (delegate);
+    public static IRainbowMasterConnectionPort createDelegateMasterConnectionPort (RainbowDelegate delegate)
+            throws RainbowConnectionException {
+        return getFactory ().createDelegateSideConnectionPort (delegate);
     }
 
-    public static IRainbowMasterConnectionPort createDelegateConnectionPort (RainbowMaster rainbowMaster) {
-        return getFactory ().createDelegateConnectionPort (rainbowMaster);
+    public static IRainbowMasterConnectionPort createDelegateConnectionPort (RainbowMaster rainbowMaster)
+            throws RainbowConnectionException {
+        return getFactory ().createMasterSideConnectionPort (rainbowMaster);
     }
 
-    public static IRainbowDeploymentPort createMasterDeploymentPort (RainbowMaster rainbowMaster,
+    public static IRainbowManagementPort createMasterDeploymentPort (RainbowMaster rainbowMaster,
             String delegateID,
-            Properties connectionProperties) {
-        return getFactory ().createMasterDeploymentePort (rainbowMaster, delegateID, connectionProperties);
+            Properties connectionProperties) throws RainbowConnectionException {
+        return getFactory ().createMasterSideManagementPort (rainbowMaster, delegateID, connectionProperties);
     }
 
-    public static IRainbowDeploymentPort createDelegateDeploymentPort (RainbowDelegate delegate, String delegateID) {
-        return getFactory ().createDelegateDeploymentPortPort (delegate, delegateID);
+    public static IRainbowManagementPort createDelegateDeploymentPort (RainbowDelegate delegate, String delegateID)
+            throws RainbowConnectionException {
+        return getFactory ().createDelegateSideManagementPort (delegate, delegateID);
     }
 
 }

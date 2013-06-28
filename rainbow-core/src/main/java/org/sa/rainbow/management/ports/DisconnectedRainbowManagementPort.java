@@ -10,17 +10,17 @@ import org.apache.log4j.Logger;
  * @author Bradley Schmerl: schmerl
  * 
  */
-public class DisconnectedRainbowDeploymentPort implements IRainbowDeploymentPort {
+public class DisconnectedRainbowManagementPort implements IRainbowManagementPort {
 
-    Logger                                   LOGGER     = Logger.getLogger (DisconnectedRainbowDeploymentPort.class);
+    Logger                                   LOGGER     = Logger.getLogger (DisconnectedRainbowManagementPort.class);
 
-    static DisconnectedRainbowDeploymentPort m_instance = new DisconnectedRainbowDeploymentPort ();
+    static DisconnectedRainbowManagementPort m_instance = new DisconnectedRainbowManagementPort ();
 
-    public static IRainbowDeploymentPort instance () {
+    public static IRainbowManagementPort instance () {
         return m_instance;
     }
 
-    private DisconnectedRainbowDeploymentPort () {
+    private DisconnectedRainbowManagementPort () {
     }
 
     @Override
@@ -36,7 +36,7 @@ public class DisconnectedRainbowDeploymentPort implements IRainbowDeploymentPort
     }
 
     @Override
-    public void receiveHeartbeat () {
+    public void heartbeat () {
         LOGGER.error ("Attempt to receive heartbeat from a disconnected deployment port");
 
     }

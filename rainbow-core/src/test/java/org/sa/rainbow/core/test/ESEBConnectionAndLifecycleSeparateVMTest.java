@@ -22,7 +22,9 @@ import org.sa.rainbow.core.Rainbow;
 import auxtestlib.CommandRunner.ProcessInterface;
 import auxtestlib.DefaultTCase;
 import auxtestlib.JavaLauncher;
+import auxtestlib.TestHelper;
 import auxtestlib.TestPropertiesDefinition;
+import auxtestlib.ThreadCountTestHelper;
 
 /**
  * Tests various lifecycle methods for masters and delegates by starting delegates in separate VMs and ensuring that
@@ -32,6 +34,9 @@ import auxtestlib.TestPropertiesDefinition;
  * 
  */
 public class ESEBConnectionAndLifecycleSeparateVMTest extends DefaultTCase {
+
+    @TestHelper
+    ThreadCountTestHelper m_threadCountHelper;
 
     /**
      * The directory that the test was started in, so that it can be used subsequently to start the delegate in the same
@@ -84,7 +89,7 @@ public class ESEBConnectionAndLifecycleSeparateVMTest extends DefaultTCase {
     /** Launches teh delegate in a new VM **/
     private ProcessInterface launchDelegate (String current) throws IOException {
         JavaLauncher launcher = new JavaLauncher ();
-        ProcessInterface pi = launcher.launchJavaAsync (this.getClass ().getCanonicalName (), new File (current),
+        ProcessInterface pi = launcher.launch_java_async (this.getClass ().getCanonicalName (), new File (current),
                 Arrays.asList (""), 10000);
         return pi;
     }
@@ -113,7 +118,7 @@ public class ESEBConnectionAndLifecycleSeparateVMTest extends DefaultTCase {
 
         int extra = TestPropertiesDefinition.getInt ("heartbeat.extra.time");
         Thread.sleep (Integer.valueOf (Rainbow.properties ().getProperty (Rainbow.PROPKEY_DELEGATE_BEACONPERIOD))
-                + extra);
+                + extra * 3);
         String logMsg = baos.toString ();
         assertTrue (logMsg.contains ("Received heartbeat from known delegate: "));
 
@@ -121,7 +126,7 @@ public class ESEBConnectionAndLifecycleSeparateVMTest extends DefaultTCase {
 
     }
 
-    protected void startDelegate () throws IOException {
+    protected void startDelegate () throws Exception {
         BasicConfigurator.configure ();
         configureTestProperties ();
         final ByteArrayOutputStream baos = new ByteArrayOutputStream ();
@@ -137,10 +142,9 @@ public class ESEBConnectionAndLifecycleSeparateVMTest extends DefaultTCase {
      * Called by launchDelegate to start the delegate in a new VM
      * 
      * @param args
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws Exception
      */
-    public static void main (String[] args) throws IOException, InterruptedException {
+    public static void main (String[] args) throws Exception {
         setCurrentDirectory ();
         new ESEBConnectionAndLifecycleSeparateVMTest ().startDelegate ();
         Thread.sleep (10000);

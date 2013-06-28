@@ -10,23 +10,24 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
-import org.sa.rainbow.management.ports.IRainbowDeploymentPort;
+import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.management.ports.IRainbowManagementPort;
 import org.sa.rainbow.management.ports.IRainbowMasterConnectionPort;
-import org.sa.rainbow.management.ports.RainbowDeploymentPortFactory;
+import org.sa.rainbow.management.ports.RainbowManagementPortFactory;
 import org.sa.rainbow.util.Beacon;
 
 public class RainbowMaster extends AbstractRainbowRunnable {
     static Logger                       LOGGER       = Logger.getLogger (Rainbow.class.getCanonicalName ());
 
-    Map<String, IRainbowDeploymentPort> m_delegates  = new HashMap<> ();
+    Map<String, IRainbowManagementPort> m_delegates  = new HashMap<> ();
 
     IRainbowMasterConnectionPort        m_delegateConnection;
 
     private Map<String, Beacon>         m_heartbeats = new HashMap<> ();
 
-    public RainbowMaster () {
+    public RainbowMaster () throws RainbowConnectionException {
         super ("Rainbow Master");
-        m_delegateConnection = RainbowDeploymentPortFactory.createDelegateConnectionPort (this);
+        m_delegateConnection = RainbowManagementPortFactory.createDelegateConnectionPort (this);
     }
 
     /**
@@ -37,20 +38,29 @@ public class RainbowMaster extends AbstractRainbowRunnable {
      * @param delegateIP
      *            Drop the ip address
      */
-    public IRainbowDeploymentPort connectDelegate (String delegateID, Properties connectionProperties) {
-        LOGGER.debug (MessageFormat.format ("Master received connection request from: {0}", delegateID));
-        IRainbowDeploymentPort delegatePort = RainbowDeploymentPortFactory.createMasterDeploymentPort (this, delegateID,
-                connectionProperties);
-        // Check to see if there is already a registered delegate running on the machine
-        m_delegates.put (delegateID, delegatePort);
-        // Add a second to the heartbeat to allow for communication time
-        // TODO: Must be a better way to do this...
-        Beacon beacon = new Beacon (Long.parseLong (Rainbow.properties ().getProperty (
-                RainbowConstants.PROPKEY_DELEGATE_BEACONPERIOD, "1000")) + 1000);
-        m_heartbeats.put (delegatePort.getDelegateId (), beacon);
-        beacon.mark ();
-        LOGGER.info (MessageFormat.format ("Master created management connection with delegate {0}", delegateID));
-        return delegatePort;
+    public IRainbowManagementPort connectDelegate (String delegateID, Properties connectionProperties) {
+        LOGGER.debug (MessageFormat.format ("Master received connection request from: {0} at {1}", delegateID,
+                connectionProperties.getProperty (Rainbow.PROPKEY_DEPLOYMENT_LOCATION, "Unknown Location")));
+        try {
+            IRainbowManagementPort delegatePort = RainbowManagementPortFactory.createMasterDeploymentPort (this,
+                    delegateID, connectionProperties);
+            // Check to see if there is already a registered delegate running on the machine
+            m_delegates.put (delegateID, delegatePort);
+            // Add a second to the heartbeat to allow for communication time
+            // TODO: Must be a better way to do this...
+            Beacon beacon = new Beacon (Long.parseLong (Rainbow.properties ().getProperty (
+                    RainbowConstants.PROPKEY_DELEGATE_BEACONPERIOD, "1000")) + 1000);
+            m_heartbeats.put (delegatePort.getDelegateId (), beacon);
+            beacon.mark ();
+            LOGGER.info (MessageFormat.format ("Master created management connection with delegate {0}", delegateID));
+            return delegatePort;
+        }
+        catch (NumberFormatException | RainbowConnectionException e) {
+            LOGGER.error (MessageFormat.format (
+                    "Rainbow master could not create the management interface to the delegate {0}", delegateID));
+            m_delegateConnection.disconnectDelegate (delegateID);
+        }
+        return null;
     }
 
     /**
@@ -59,7 +69,7 @@ public class RainbowMaster extends AbstractRainbowRunnable {
      * @param delegateID
      */
     public void requestDelegateConfiguration (String delegateID) {
-        IRainbowDeploymentPort delegate = m_delegates.get (delegateID);
+        IRainbowManagementPort delegate = m_delegates.get (delegateID);
         if (delegate != null) {
             LOGGER.info (MessageFormat.format ("Sending configuration information to {0}.", delegateID));
             delegate.sendConfigurationInformation (filterPropertiesForDelegate (delegateID));
@@ -77,7 +87,7 @@ public class RainbowMaster extends AbstractRainbowRunnable {
      *            The IP of the delegate
      */
     public void processHeartbeat (String delegateID) {
-        IRainbowDeploymentPort delegate = m_delegates.get (delegateID);
+        IRainbowManagementPort delegate = m_delegates.get (delegateID);
         if (delegate != null) {
             Beacon hb = m_heartbeats.get (delegate.getDelegateId ());
             if (hb == null) {
@@ -133,22 +143,30 @@ public class RainbowMaster extends AbstractRainbowRunnable {
     public void disconnectDelegate (String id) {
         LOGGER.info (MessageFormat.format ("RM: Disconnecting delegate: {0}", id));
         m_heartbeats.remove (id);
-        IRainbowDeploymentPort deploymentPort = m_delegates.remove (id);
+        IRainbowManagementPort deploymentPort = m_delegates.remove (id);
         deploymentPort.dispose ();
     }
 
     @Override
     public void terminate () {
-        for (Entry<String, IRainbowDeploymentPort> entry : m_delegates.entrySet ()) {
+        for (Entry<String, IRainbowManagementPort> entry : m_delegates.entrySet ()) {
+            disconnectDelegate (entry.getKey ());
             entry.getValue ().terminateDelegate ();
         }
         m_delegateConnection.dispose ();
-        try {
-            Thread.sleep (4000);
-        }
-        catch (InterruptedException e) {
-        }
+//        try {
+//            Thread.sleep (4000);
+//        }
+//        catch (InterruptedException e) {
+//        }
         super.terminate ();
+        while (!isTerminated ()) {
+            try {
+                Thread.sleep (500);
+            }
+            catch (InterruptedException e) {
+            }
+        }
     }
 
 }

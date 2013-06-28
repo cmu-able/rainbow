@@ -3,15 +3,15 @@ package org.sa.rainbow.management.ports.local;
 import java.util.Properties;
 
 import org.sa.rainbow.RainbowMaster;
-import org.sa.rainbow.management.ports.IRainbowDeploymentPort;
+import org.sa.rainbow.management.ports.IRainbowManagementPort;
 
-public class LocalMasterDeploymentPort implements IRainbowDeploymentPort {
+public class LocalMasterSideManagementPort implements IRainbowManagementPort {
 
     private String m_delegateID;
     private RainbowMaster m_master;
-    private IRainbowDeploymentPort m_connectedPort;
+    private IRainbowManagementPort m_connectedPort;
 
-    public LocalMasterDeploymentPort (RainbowMaster rainbowMaster, String delegateID) {
+    public LocalMasterSideManagementPort (RainbowMaster rainbowMaster, String delegateID) {
         m_delegateID = delegateID;
         m_master = rainbowMaster;
     }
@@ -28,7 +28,7 @@ public class LocalMasterDeploymentPort implements IRainbowDeploymentPort {
     }
 
     @Override
-    public void receiveHeartbeat () {
+    public void heartbeat () {
         m_master.processHeartbeat (m_delegateID);
     }
 
@@ -37,7 +37,7 @@ public class LocalMasterDeploymentPort implements IRainbowDeploymentPort {
         m_master.requestDelegateConfiguration (m_delegateID);
     }
 
-    public void connect (LocalDelegateDeploymentPort port) {
+    public void connect (LocalDelegateManagementPort port) {
         m_connectedPort = port;
     }
 

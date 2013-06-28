@@ -10,13 +10,14 @@ import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.error.RainbowConnectionException;
 
-import edu.cmu.cs.able.eseb.BusClient;
-import edu.cmu.cs.able.eseb.BusClientState;
 import edu.cmu.cs.able.eseb.BusData;
 import edu.cmu.cs.able.eseb.BusDataQueue;
 import edu.cmu.cs.able.eseb.BusDataQueueListener;
-import edu.cmu.cs.able.eseb.BusServer;
+import edu.cmu.cs.able.eseb.bus.EventBus;
+import edu.cmu.cs.able.eseb.conn.BusConnection;
+import edu.cmu.cs.able.eseb.conn.BusConnectionState;
 import edu.cmu.cs.able.typelib.comp.MapDataType;
 import edu.cmu.cs.able.typelib.comp.MapDataValue;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
@@ -63,17 +64,17 @@ public class ESEBConnector {
 
 
     /** The set of BusServers on the local machine, keyed by the port **/
-    protected static Map<Short, BusServer>  s_servers            = new HashMap<> ();
+    protected static Map<Short, EventBus>       s_servers            = new HashMap<> ();
     /** The set of BusClients already created, keyed by host:port **/
-    protected static Map<String, BusClient> s_clients            = new HashMap<> ();
+    protected static Map<String, BusConnection> s_clients            = new HashMap<> ();
 
     protected static final PrimitiveScope   SCOPE                = new PrimitiveScope ();
     protected static final MapDataType      MAP_STRING_TO_STRING = MapDataType.map_of (SCOPE.string (),
             SCOPE.string (), SCOPE);
     /** The server corresponding to this connector **/
-    protected BusServer                     m_srvr;
+    protected EventBus                          m_srvr;
     /** The client for this connector to publish and receive information **/
-    protected BusClient                     m_client;
+    protected BusConnection                     m_client;
     /** The set of listeners that are awaiting replies. **/
     private static Map<String, IESEBListener> m_replyListeners     = new HashMap<> ();
 
@@ -85,12 +86,12 @@ public class ESEBConnector {
      * @return the cached or newly created BusServer
      * @throws IOException
      */
-    protected static BusServer getBusServer (short port) throws IOException {
-        BusServer s = s_servers.get (port);
+    protected static EventBus getBusServer (short port) throws IOException {
+        EventBus s = s_servers.get (port);
         if (s == null || s.closed ()) {
             LOGGER.debug (MessageFormat.format ("Constructing a new BusServer on port {0}", port));
             try {
-                s = new BusServer (port, SCOPE);
+                s = new EventBus (port, SCOPE);
                 s_servers.put (port, s);
                 s.start ();
             }
@@ -110,14 +111,14 @@ public class ESEBConnector {
      *            The port for the client
      * @return The cached or newly created BusClient
      */
-    protected static BusClient getBusClient (String remoteHost, short remotePort) {
+    protected static BusConnection getBusClient (String remoteHost, short remotePort) {
         // Make sure that we translate host names to IPs
         remoteHost = Rainbow.canonicalizeHost2IP (remoteHost);
         String key = clientKey (remoteHost, remotePort);
-        BusClient c = s_clients.get (key);
-        if (c == null || c.state () == BusClientState.DISCONNECTED) {
+        BusConnection c = s_clients.get (key);
+        if (c == null || c.state () == BusConnectionState.DISCONNECTED) {
             LOGGER.debug (MessageFormat.format ("Constructing a new BusClient on {0}", key));
-            c = new BusClient (remoteHost, remotePort, SCOPE);
+            c = new BusConnection (remoteHost, remotePort, SCOPE);
             s_clients.put (key, c);
             c.start ();
         }
@@ -372,6 +373,7 @@ public class ESEBConnector {
                                         "Received a reply on ESEB for which there is no listener. For reply key: {0}",
                                         repKey.value ()));
                             }
+                            replyQ.dispatcher ().remove (this);
                         }
 
                     }
@@ -382,6 +384,43 @@ public class ESEBConnector {
         // send the call
         m_client.send (encodeMap (msg));
 
+    }
+
+    public class BlockingListener implements IESEBListener {
+
+        private IESEBListener m_l;
+        boolean               ret = false;
+
+        public BlockingListener (IESEBListener l) {
+            m_l = l;
+
+        }
+
+        @Override
+        public void receive (Map<String, String> msg) {
+            m_l.receive (msg);
+            ret = true;
+            synchronized (this) {
+                this.notifyAll ();
+            }
+        }
+
+    }
+
+    public void blockingSendAndReceive (Map<String, String> msg, final IESEBListener l, long timeout)
+            throws RainbowConnectionException {
+        BlockingListener bl = new BlockingListener (l);
+        synchronized (bl) {
+            sendAndReceive (msg, bl);
+            try {
+                bl.wait (timeout);
+            }
+            catch (InterruptedException e) {
+            }
+        }
+        if (!bl.ret)
+            throw new RainbowConnectionException (MessageFormat.format (
+                    "Blocking send and receive did not return in specified time {0}", timeout));
     }
 
     /**

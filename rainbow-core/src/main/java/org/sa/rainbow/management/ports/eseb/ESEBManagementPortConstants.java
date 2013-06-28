@@ -1,6 +1,6 @@
 package org.sa.rainbow.management.ports.eseb;
 
-public interface ESEBDeploymentPortConstants {
+public interface ESEBManagementPortConstants {
 
     public static final String SEND_CONFIGURATION_INFORMATION = "sendConfigurationInformationMsg";
     public static final String REQUEST_CONFIG_INFORMATION     = "requestConfigurationInformationMsg";
