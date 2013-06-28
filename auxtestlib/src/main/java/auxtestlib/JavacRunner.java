@@ -130,7 +130,7 @@ public final class JavacRunner {
 		}
 
 		String[] cmds = cmdList.toArray(new String[cmdList.size()]);
-		CommandOutput co = cr.runCommand(cmds, dir, 60);
+		CommandOutput co = cr.run_command(cmds, dir, 60);
 		if (co == null || co.exitCode != 0) {
 			StringBuffer cmdsStr = new StringBuffer();
 			cmdsStr.append('{');

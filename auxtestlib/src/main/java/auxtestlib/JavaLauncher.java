@@ -21,46 +21,68 @@ public class JavaLauncher {
 	/**
 	 * The object used to run commands.
 	 */
-	private final CommandRunner commandRunner;
+	private final CommandRunner m_command_runner;
 
 	/**
 	 * Creates a new java launcher.
 	 */
 	public JavaLauncher() {
-		commandRunner = new CommandRunner();
+		m_command_runner = new CommandRunner();
 	}
 
 	/**
+	 * @param class_name deprecated
+	 * @param limit deprecated
+	 * @param arguments deprecated
+	 * @return deprecated
+	 * @throws IOException 
+	 * @deprecated use {@link #launch_java(String, int, String...)}
+	 */
+	@Deprecated
+	public CommandOutput launchJava(String class_name, int limit,
+			String... arguments) throws IOException {
+		return launchJava(class_name, Arrays.asList(arguments), limit);
+	}
+	
+	/**
 	 * Runs a java program and waits for its completion. This is equivalent to
-	 * invoke {@link #launchJava(String, List, List, int)} using the current
-	 * classpath.
-	 * 
-	 * @param className the Java class name
+	 * invoke {@link #launch_java(String, List, List, int)} using the current
+	 * class path.
+	 * @param class_name the Java class name
 	 * @param limit the time limit (in seconds) for the program to execute
 	 * @param arguments the program arguments
-	 * 
 	 * @return the program's output
-	 * 
 	 * @throws IOException failed to launch the program
 	 */
-	public CommandOutput launchJava(String className, int limit,
+	public CommandOutput launch_java(String class_name, int limit,
 			String... arguments) throws IOException {
-		return launchJava(className, Arrays.asList(arguments), limit);
+		return launch_java(class_name, Arrays.asList(arguments), limit);
 	}
 
 	/**
 	 * Runs a java program but doesn't wait for its completion. This is
-	 * equivalent to invoke {@link #launchJavaAsync(String, List, List, int)}
-	 * using the current JVM's classpath.
-	 * 
-	 * @param className the Java class name
+	 * equivalent to invoke {@link #launch_java_async(String, List, List, int)}
+	 * using the current JVM's class path.
+	 * @param class_name the Java class name
 	 * @param arguments the program arguments
 	 * @param limit the time limit (in seconds) for the program to execute
-	 * 
 	 * @return an interface to the running program
-	 * 
 	 * @throws IOException failed to launch the program
 	 */
+	public ProcessInterface launch_java_async(String class_name, int limit,
+			String... arguments) throws IOException {
+		return launch_java_async(class_name, Arrays.asList(arguments), limit);
+	}
+	
+	/**
+	 * @param className deprecated
+	 * @param limit deprecated
+	 * @param arguments deprecated
+	 * @return deprecated
+	 * @throws IOException deprecated
+	 * @deprecated use {@link #launch_java_async(String, int, String...)}
+	 */
+	@Deprecated
 	public ProcessInterface launchJavaAsync(String className, int limit,
 			String... arguments) throws IOException {
 		return launchJavaAsync(className, Arrays.asList(arguments), limit);
@@ -68,57 +90,111 @@ public class JavaLauncher {
 
 	/**
 	 * Runs a java program and waits for its completion. This is equivalent to
-	 * invoke {@link #launchJava(String, List, List, int)} using the current
-	 * classpath.
-	 * 
-	 * @param className the Java class name
+	 * invoke {@link #launch_java(String, List, List, int)} using the current
+	 * class path.
+	 * @param class_name the Java class name
 	 * @param arguments the program arguments
 	 * @param limit the time limit (in seconds) for the program to execute
-	 * 
 	 * @return the program's output
-	 * 
 	 * @throws IOException failed to launch the program
 	 */
-	public CommandOutput launchJava(String className, List<String> arguments,
+	public CommandOutput launch_java(String class_name, List<String> arguments,
 			int limit) throws IOException {
-		return launchJava(className, arguments, findCurrentClasspath(), limit);
+		return launchJava(class_name, arguments, find_current_classpath(), limit);
 	}
 
 	/**
+	 * @param className deprecated
+	 * @param arguments deprecated
+	 * @param limit deprecated
+	 * @return deprecated
+	 * @throws IOException deprecated
+	 * @deprecated use {@link #launch_java(String, List, int)}
+	 */
+	@Deprecated
+	public CommandOutput launchJava(String className, List<String> arguments,
+			int limit) throws IOException {
+		return launchJava(className, arguments, find_current_classpath(), limit);
+	}
+	
+	/**
 	 * Runs a java program but doesn't wait for its completion. This is
-	 * equivalent to invoke {@link #launchJavaAsync(String, List, List, int)}
-	 * using the current JVM's classpath.
-	 * 
-	 * @param className the Java class name
+	 * equivalent to invoke {@link #launch_java_async(String, List, List, int)}
+	 * using the current JVM's class path.
+	 * @param class_name the Java class name
 	 * @param arguments the program arguments
 	 * @param limit the time limit (in seconds) for the program to execute
-	 * 
 	 * @return an interface to the running program
-	 * 
 	 * @throws IOException failed to launch the program
 	 */
+	public ProcessInterface launch_java_async(String class_name,
+			List<String> arguments, int limit) throws IOException {
+		return launch_java_async(class_name, arguments, find_current_classpath(),
+				limit);
+	}
+	
+	/**
+	 * @param className deprecated
+	 * @param arguments deprecated
+	 * @param limit deprecated
+	 * @return deprecated
+	 * @throws IOException deprecated
+	 * @deprecated use {@link #launch_java_async(String, List, int)}
+	 */
+	@Deprecated
 	public ProcessInterface launchJavaAsync(String className,
 			List<String> arguments, int limit) throws IOException {
-		return launchJavaAsync(className, arguments, findCurrentClasspath(),
+		return launchJavaAsync(className, arguments, find_current_classpath(),
 				limit);
 	}
 
 	/**
 	 * Runs a java program but doesn't wait for completion.
-	 * 
-	 * @param className the Java class name
+	 * @param class_name the Java class name
 	 * @param arguments the program arguments
-	 * @param classPath the program's class path
+	 * @param class_path the program's class path
 	 * @param limit the time limit (in seconds) for the program to execute
-	 * 
 	 * @return an interface to the running program
-	 * 
 	 * @throws IOException failed to launch the program
 	 */
-	public ProcessInterface launchJavaAsync(String className,
-			List<String> arguments, List<URL> classPath, int limit)
+	public ProcessInterface launch_java_async(String class_name,
+			List<String> arguments, List<URL> class_path, int limit)
 			throws IOException {
-		if (className == null) {
+		return launch_java_async(class_name, arguments, class_path, limit,
+				null);
+	}
+	
+	/**
+	 * @param class_name deprecated
+	 * @param arguments deprecated
+	 * @param class_path deprecated
+	 * @param limit deprecated
+	 * @return deprecated
+	 * @throws IOException deprecated
+	 * @deprecated use {@link #launch_java_async(String, List, List, int)}
+	 */
+	@Deprecated
+	public ProcessInterface launchJavaAsync(String class_name,
+			List<String> arguments, List<URL> class_path, int limit)
+			throws IOException {
+		return launchJavaAsync(class_name, arguments, class_path, limit, null);
+	}
+
+	/**
+	 * Runs a java program but doesn't wait for completion.
+	 * @param class_name the Java class name
+	 * @param arguments the program arguments
+	 * @param class_path the program's class path
+	 * @param limit the time limit (in seconds) for the program to execute
+	 * @param debug_port if not <code>null</code>, a java debug port will
+	 * be open in this port
+	 * @return an interface to the running program
+	 * @throws IOException failed to launch the program
+	 */
+	public ProcessInterface launch_java_async(String class_name,
+			List<String> arguments, List<URL> class_path, int limit,
+			Short debug_port) throws IOException {
+		if (class_name == null) {
 			throw new IllegalArgumentException("className == null");
 		}
 
@@ -126,7 +202,7 @@ public class JavaLauncher {
 			throw new IllegalArgumentException("arguments == null");
 		}
 
-		if (classPath == null) {
+		if (class_path == null) {
 			throw new IllegalArgumentException("classPath == null");
 		}
 
@@ -134,30 +210,78 @@ public class JavaLauncher {
 			throw new IllegalArgumentException("limit <= 0");
 		}
 
-		File userDir = new File(SystemUtils.USER_DIR);
+		File user_dir = new File(SystemUtils.USER_DIR);
 
-		String[] cmds = buildCommands(className, arguments, classPath);
+		String[] cmds = build_commands(class_name, arguments, class_path,
+				debug_port);
 
-		ProcessInterface pi = commandRunner.runCommandAsync(cmds, userDir,
-				limit);
+		ProcessInterface pi = m_command_runner.run_command_async(cmds,
+				user_dir, limit);
 		return pi;
+	}
+	
+	/**
+	 * @param class_name deprecated
+	 * @param arguments deprecated
+	 * @param class_path deprecated
+	 * @param limit deprecated
+	 * @param debug_port deprecated
+	 * @return deprecated
+	 * @throws IOException deprecated
+	 * @deprecated use
+	 * 		{@link #launch_java_async(String, List, List, int, Short)}
+	 */
+	public ProcessInterface launchJavaAsync(String class_name,
+			List<String> arguments, List<URL> class_path, int limit,
+			Short debug_port) throws IOException {
+		return launch_java_async(class_name, arguments, class_path, limit,
+				debug_port);
 	}
 
 	/**
 	 * Runs a java program and waits for completion.
-	 * 
-	 * @param className the Java class name.
+	 * @param class_name the Java class name.
 	 * @param arguments the program arguments
-	 * @param classPath the program's class path
+	 * @param class_path the program's class path
 	 * @param limit the time limit (in seconds) for the program to execute
-	 * 
 	 * @return the program's output
-	 * 
 	 * @throws IOException failed to launch the program
 	 */
-	public CommandOutput launchJava(String className, List<String> arguments,
-			List<URL> classPath, int limit) throws IOException {
-		if (className == null) {
+	public CommandOutput launch_java(String class_name, List<String> arguments,
+			List<URL> class_path, int limit) throws IOException {
+		return launch_java(class_name, arguments, class_path, limit, null);
+	}
+
+	/**
+	 * @param class_name deprecated
+	 * @param arguments deprecated
+	 * @param class_path deprecated
+	 * @param limit deprecated
+	 * @return deprecated
+	 * @throws IOException deprecated
+	 * @deprecated use {@link #launch_java(String, List, List, int)}
+	 */
+	@Deprecated
+	public CommandOutput launchJava(String class_name, List<String> arguments,
+			List<URL> class_path, int limit) throws IOException {
+		return launchJava(class_name, arguments, class_path, limit, null);
+	}
+	
+	/**
+	 * Runs a java program and waits for completion.
+	 * @param class_name the Java class name.
+	 * @param arguments the program arguments
+	 * @param class_path the program's class path
+	 * @param limit the time limit (in seconds) for the program to execute
+	 * @param debug_port if not <code>null</code>, the jvm will open a debug
+	 * port in this address
+	 * @return the program's output
+	 * @throws IOException failed to launch the program
+	 */
+	public CommandOutput launch_java(String class_name, List<String> arguments,
+			List<URL> class_path, int limit, Short debug_port)
+			throws IOException {
+		if (class_name == null) {
 			throw new IllegalArgumentException("className == null");
 		}
 
@@ -165,7 +289,7 @@ public class JavaLauncher {
 			throw new IllegalArgumentException("arguments == null");
 		}
 
-		if (classPath == null) {
+		if (class_path == null) {
 			throw new IllegalArgumentException("classPath == null");
 		}
 
@@ -175,46 +299,70 @@ public class JavaLauncher {
 
 		File userDir = new File(SystemUtils.USER_DIR);
 
-		String[] cmds = buildCommands(className, arguments, classPath);
+		String[] cmds = build_commands(class_name, arguments, class_path,
+				debug_port);
 
-		CommandOutput output = commandRunner.runCommand(cmds, userDir, limit);
+		CommandOutput output = m_command_runner.run_command(cmds, userDir,
+				limit);
 		return output;
+	}
+	
+	/**
+	 * @param class_name deprecated
+	 * @param arguments deprecated
+	 * @param class_path deprecated
+	 * @param limit deprecated
+	 * @param debug_port deprecated
+	 * @return deprecated
+	 * @throws IOException deprecated
+	 * @deprecated use {@link #launch_java(String, List, List, int, Short)}
+	 */
+	@Deprecated
+	public CommandOutput launchJava(String class_name, List<String> arguments,
+			List<URL> class_path, int limit, Short debug_port)
+			throws IOException {
+		return launch_java(class_name, arguments, class_path, limit,
+				debug_port);
 	}
 
 	/**
 	 * Builds the command line to run a JVM with a set of arguments and class
 	 * path.
-	 * 
-	 * @param className the name of the class
+	 * @param class_name the name of the class
 	 * @param arguments the arguments to run the class
-	 * @param classPath the class path
-	 * 
+	 * @param class_path the class path
+	 * @param debug_port if not <code>null</code>, will be used as port
+	 * number to open the remote debugger
 	 * @return the commands to run
 	 */
-	private String[] buildCommands(String className, List<String> arguments,
-			List<URL> classPath) {
-		assert className != null;
+	private String[] build_commands(String class_name, List<String> arguments,
+			List<URL> class_path, Short debug_port) {
+		assert class_name != null;
 		assert arguments != null;
-		assert classPath != null;
+		assert class_path != null;
 
 		List<String> cmds = new ArrayList<>();
 		cmds.add("java");
+		if (debug_port != null) {
+			cmds.add("-agentlib:jdwp=transport=dt_socket,server=y,"
+					+ "suspend=y,address=" + debug_port);
+		}
 
-		if (!classPath.isEmpty()) {
+		if (!class_path.isEmpty()) {
 			cmds.add("-cp");
 			StringBuffer cp = new StringBuffer();
-			for (int i = 0; i < classPath.size(); i++) {
+			for (int i = 0; i < class_path.size(); i++) {
 				if (i > 0) {
 					cp.append(SystemUtils.PATH_SEPARATOR);
 				}
 
-				cp.append(classPath.get(i).getPath());
+				cp.append(class_path.get(i).getPath());
 			}
 
 			cmds.add(cp.toString());
 		}
 
-		cmds.add(className);
+		cmds.add(class_name);
 		cmds.addAll(arguments);
 
 		return cmds.toArray(new String[cmds.size()]);
@@ -222,10 +370,9 @@ public class JavaLauncher {
 
 	/**
 	 * Obtains the URLs in the current class path.
-	 * 
 	 * @return a list with all URLS
 	 */
-	public List<URL> findCurrentClasspath() {
+	public List<URL> find_current_classpath() {
 		List<URL> cp = new ArrayList<>();
 		ClassLoader cl = JavaLauncher.class.getClassLoader();
 		for (; cl != null; cl = cl.getParent()) {

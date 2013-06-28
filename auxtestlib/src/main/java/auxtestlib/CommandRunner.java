@@ -12,7 +12,7 @@ import java.util.TimerTask;
 /**
  * Class that runs a command and captures its output.
  */
-public class CommandRunner { // NOPMD (TooManyMethods)
+public class CommandRunner {
 	/**
 	 * Class that represents the output of a command.
 	 */
@@ -61,16 +61,13 @@ public class CommandRunner { // NOPMD (TooManyMethods)
 	 * Runs a command and captures the output. This method will return
 	 * immediately (the process keeps running in the background). The process
 	 * can me monitored and accessed through the {@link ProcessInterface} class.
-	 * 
 	 * @param cmds the command and its arguments
 	 * @param directory the directory where the command should bd executed
 	 * @param limit execution time limit (in seconds)
-	 * 
 	 * @return an interface to control the process
-	 * 
 	 * @throws IOException failed to launch the process
 	 */
-	public ProcessInterface runCommandAsync(String[] cmds, File directory,
+	public ProcessInterface run_command_async(String[] cmds, File directory,
 			int limit) throws IOException {
 		if (cmds == null) {
 			throw new IllegalArgumentException("cmds == null");
@@ -91,19 +88,30 @@ public class CommandRunner { // NOPMD (TooManyMethods)
 	}
 
 	/**
+	 * @param cmds deprecated
+	 * @param directory deprecated
+	 * @param limit deprecated
+	 * @return deprecated
+	 * @throws IOException deprecated
+	 * @deprecated use {@link #run_command_async(String[], File, int)}
+	 */
+	@Deprecated
+	public ProcessInterface runCommandAsync(String[] cmds, File directory,
+			int limit) throws IOException {
+		return run_command_async(cmds, directory, limit);
+	}
+	
+	/**
 	 * This method is a shortcut for the
-	 * {@link #runCommandAsync(String[], File, int)}. It will invoke the
+	 * {@link #run_command_async(String[], File, int)}. It will invoke the
 	 * command, wait for it to run and returns the command's output.
-	 * 
 	 * @param cmds the command and its arguments
 	 * @param directory the directory where the command should bd executed
 	 * @param limit execution time limit (in seconds)
-	 * 
 	 * @return the commands output in the stdout
-	 * 
 	 * @throws IOException failed to launch the process
 	 */
-	public CommandOutput runCommand(String cmds[], File directory, int limit)
+	public CommandOutput run_command(String cmds[], File directory, int limit)
 			throws IOException {
 		ProcessInterface pi = runCommandAsync(cmds, directory, limit);
 
@@ -124,6 +132,20 @@ public class CommandRunner { // NOPMD (TooManyMethods)
 	}
 
 	/**
+	 * @param cmds deprecated
+	 * @param directory deprecated
+	 * @param limit deprecated
+	 * @return deprecated
+	 * @throws IOException deprecated
+	 * @deprecated use {@link #run_command(String[], File, int)}
+	 */
+	@Deprecated
+	public CommandOutput runCommand(String cmds[], File directory, int limit)
+			throws IOException {
+		return run_command(cmds, directory, limit);
+	}
+	
+	/**
 	 * Thread that keeps reading an input stream and saves the output. The
 	 * thread will automatically stop when the stream is closed.
 	 */
@@ -131,17 +153,17 @@ public class CommandRunner { // NOPMD (TooManyMethods)
 		/**
 		 * The input stream.
 		 */
-		private final InputStream inputStream;
+		private final InputStream m_input_stream;
 
 		/**
 		 * Buffer where the text is kept.
 		 */
-		private final StringBuffer result;
+		private final StringBuffer m_result;
 
 		/**
 		 * Data read from the stream (without text conversion).
 		 */
-		private final ByteArrayOutputStream resultBytes;
+		private final ByteArrayOutputStream m_result_bytes;
 
 		/**
 		 * Creates and starts the thread.
@@ -151,9 +173,9 @@ public class CommandRunner { // NOPMD (TooManyMethods)
 		Capturer(InputStream is) {
 			assert is != null;
 
-			inputStream = is;
-			result = new StringBuffer();
-			resultBytes = new ByteArrayOutputStream();
+			m_input_stream = is;
+			m_result = new StringBuffer();
+			m_result_bytes = new ByteArrayOutputStream();
 			start();
 		}
 
@@ -161,10 +183,10 @@ public class CommandRunner { // NOPMD (TooManyMethods)
 		public void run() {
 			int read;
 			try {
-				while ((read = inputStream.read()) != -1) {
+				while ((read = m_input_stream.read()) != -1) {
 					synchronized (this) {
-						resultBytes.write(read);
-						result.append((char) read);
+						m_result_bytes.write(read);
+						m_result.append((char) read);
 					}
 				}
 			} catch (IOException e) {
@@ -179,8 +201,8 @@ public class CommandRunner { // NOPMD (TooManyMethods)
 		 * 
 		 * @return the text
 		 */
-		synchronized String getText() {
-			return result.toString();
+		synchronized String text() {
+			return m_result.toString();
 		}
 
 		/**
@@ -188,8 +210,8 @@ public class CommandRunner { // NOPMD (TooManyMethods)
 		 * 
 		 * @return the captured bytes
 		 */
-		synchronized byte[] getBytes() {
-			return resultBytes.toByteArray();
+		synchronized byte[] bytes() {
+			return m_result_bytes.toByteArray();
 		}
 	}
 
@@ -206,37 +228,37 @@ public class CommandRunner { // NOPMD (TooManyMethods)
 		/**
 		 * The process itself.
 		 */
-		private final Process process;
+		private final Process m_process;
 
 		/**
 		 * Is the process still running?
 		 */
-		private boolean running;
+		private boolean m_running;
 
 		/**
 		 * What was the exit code for the process?
 		 */
-		private int exitCode;
+		private int m_exit_code;
 
 		/**
 		 * Stdout capturer.
 		 */
-		private final Capturer out;
+		private final Capturer m_out;
 
 		/**
 		 * Stderr capturer.
 		 */
-		private final Capturer err;
+		private final Capturer m_err;
 
 		/**
 		 * Has the program timed out?
 		 */
-		private boolean timedOut;
+		private boolean m_timed_out;
 
 		/**
 		 * Listeners of the process interface.
 		 */
-		private final List<ProcessInterfaceListener> listeners;
+		private final List<ProcessInterfaceListener> m_listeners;
 
 		/**
 		 * Creates a new interface for the process. These objects are linked to
@@ -262,33 +284,33 @@ public class CommandRunner { // NOPMD (TooManyMethods)
 		private ProcessInterface(Process process, int limit) {
 			assert process != null;
 
-			this.process = process;
-			running = true;
-			exitCode = 0;
-			out = new Capturer(process.getInputStream());
-			err = new Capturer(process.getErrorStream());
-			listeners = new ArrayList<>();
-			timedOut = false;
+			this.m_process = process;
+			m_running = true;
+			m_exit_code = 0;
+			m_out = new Capturer(process.getInputStream());
+			m_err = new Capturer(process.getErrorStream());
+			m_listeners = new ArrayList<>();
+			m_timed_out = false;
 
 			Timer timer = new Timer();
 			timer.schedule(new TimerTask() {
 				@Override
 				public void run() {
 					synchronized (ProcessInterface.this) {
-						updateState();
-						if (!running) {
+						update_state();
+						if (!m_running) {
 							cancel();
 						}
 					}
 				}
 			}, PROCESS_POLLING, PROCESS_POLLING);
 
-			final TimerTask timeoutTask = new TimerTask() {
+			final TimerTask timeout_task = new TimerTask() {
 				@Override
 				public void run() {
 					synchronized (this) {
 						if (killProcess()) {
-							timedOut = true;
+							m_timed_out = true;
 						}
 					}
 				}
@@ -297,57 +319,76 @@ public class CommandRunner { // NOPMD (TooManyMethods)
 			addProcessInterfaceListener(new ProcessInterfaceListener() {
 				@Override
 				public void processFinished(ProcessInterface process) {
-					timeoutTask.cancel();
+					timeout_task.cancel();
 				}
 			});
 
-			timer.schedule(timeoutTask, limit * 1000);
+			timer.schedule(timeout_task, limit * 1000);
 		}
 
 		/**
 		 * Adds a listener to the process interface.
-		 * 
 		 * @param listener the listener
 		 */
-		public synchronized void addProcessInterfaceListener(
+		public synchronized void add_process_interface_listener(
 				ProcessInterfaceListener listener) {
 			if (listener == null) {
 				throw new IllegalArgumentException("listener == null");
 			}
 
-			listeners.add(listener);
+			m_listeners.add(listener);
+		}
+
+		/**
+		 * @param listener deprecated
+		 * @deprecated use
+		 * 	{@link #add_process_interface_listener(ProcessInterfaceListener)}
+		 */
+		@Deprecated
+		public synchronized void addProcessInterfaceListener(
+				ProcessInterfaceListener listener) {
+			add_process_interface_listener(listener);
 		}
 
 		/**
 		 * Removes a listener from the process interface.
-		 * 
 		 * @param listener the listener
 		 */
-		public synchronized void removeProcessInterfaceListener(
+		public synchronized void remove_process_interface_listener(
 				ProcessInterfaceListener listener) {
 			if (listener == null) {
 				throw new IllegalArgumentException("listener == null");
 			}
 
-			listeners.remove(listener);
+			m_listeners.remove(listener);
 		}
 
+		/**
+		 * @param listener deprecated
+		 * @deprecated use
+		 * {@link #remove_process_interface_listener(ProcessInterfaceListener)}
+		 */
+		public synchronized void removeProcessInterfaceListener(
+				ProcessInterfaceListener listener) {
+			remove_process_interface_listener(listener);
+		}
+		
 		/**
 		 * Updates the state of the process. Since the
 		 * <code>java.lang.Process</code> class doesn't provide any way of
 		 * observing its state, we must probe regularly. This method should be
 		 * called for that purpose.
 		 */
-		private synchronized void updateState() {
-			if (!running) {
+		private synchronized void update_state() {
+			if (!m_running) {
 				return;
 			}
 
 			try {
-				exitCode = process.exitValue();
-				running = false;
+				m_exit_code = m_process.exitValue();
+				m_running = false;
 				for (ProcessInterfaceListener l : new ArrayList<>(
-						listeners)) {
+						m_listeners)) {
 					l.processFinished(this);
 				}
 			} catch (IllegalThreadStateException e) {
@@ -364,14 +405,14 @@ public class CommandRunner { // NOPMD (TooManyMethods)
 		 * dead (<code>false</code>)?
 		 */
 		public synchronized boolean killProcess() {
-			if (!running) {
+			if (!m_running) {
 				return false;
 			}
 
-			process.destroy();
+			m_process.destroy();
 			while (true) {
 				try {
-					process.exitValue();
+					m_process.exitValue();
 					break;
 				} catch (IllegalThreadStateException e) {
 					/*
@@ -380,8 +421,8 @@ public class CommandRunner { // NOPMD (TooManyMethods)
 				}
 			}
 
-			updateState();
-			assert !running;
+			update_state();
+			assert !m_running;
 			return true;
 		}
 
@@ -391,7 +432,7 @@ public class CommandRunner { // NOPMD (TooManyMethods)
 		 * @return is the process running?
 		 */
 		public synchronized boolean isRunning() {
-			return running;
+			return m_running;
 		}
 
 		/**
@@ -403,18 +444,18 @@ public class CommandRunner { // NOPMD (TooManyMethods)
 		 * @throws IllegalStateException if the process is still running
 		 */
 		public synchronized CommandOutput getOutput() {
-			if (running) {
+			if (m_running) {
 				throw new IllegalStateException("Process still running.");
 			}
 
 			CommandOutput co = new CommandOutput();
 
-			co.exitCode = exitCode;
-			co.output = out.getText();
-			co.error = err.getText();
-			co.outputBytes = out.getBytes();
-			co.errorBytes = err.getBytes();
-			co.timedOut = timedOut;
+			co.exitCode = m_exit_code;
+			co.output = m_out.text();
+			co.error = m_err.text();
+			co.outputBytes = m_out.bytes();
+			co.errorBytes = m_err.bytes();
+			co.timedOut = m_timed_out;
 			return co;
 		}
 
@@ -424,7 +465,7 @@ public class CommandRunner { // NOPMD (TooManyMethods)
 		 * @return the text written
 		 */
 		public synchronized String getOutputText() {
-			return out.getText();
+			return m_out.text();
 		}
 
 		/**
@@ -433,7 +474,7 @@ public class CommandRunner { // NOPMD (TooManyMethods)
 		 * @return the text written
 		 */
 		public synchronized String getErrorText() {
-			return err.getText();
+			return m_err.text();
 		}
 	}
 

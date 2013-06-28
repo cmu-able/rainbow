@@ -67,7 +67,7 @@ public final class JarUtils {
 		CommandRunner cr = new CommandRunner();
 
 		// TODO: We must find some way to handle the timeout.
-		cr.runCommand(args, parent, 60);
+		cr.run_command(args, parent, 60);
 		return jfile;
 	}
 
@@ -121,7 +121,7 @@ public final class JarUtils {
 		CommandRunner cr = new CommandRunner();
 
 		// TODO: We must handle the timeout
-		cr.runCommand(args, directory, 60);
+		cr.run_command(args, directory, 60);
 		return jarFile;
 	}
 }
