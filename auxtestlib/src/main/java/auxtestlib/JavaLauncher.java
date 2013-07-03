@@ -198,7 +198,21 @@ public class JavaLauncher {
 				limit, debug_port);
 	}
 	
-
+	/**
+	 * Runs a java program but doesn't wait for completion.
+	 * @param class_name the Java class name
+	 * @param w_dir the working directory to run the program
+	 * @param arguments the program arguments
+	 * @param limit the time limit (in seconds) for the program to execute
+	 * @return an interface to the running program
+	 * @throws IOException failed to launch the program
+	 */
+	public ProcessInterface launch_java_async(String class_name,
+			File w_dir, List<String> arguments, int limit) throws IOException {
+		return launch_java_async(class_name, w_dir, arguments,
+				find_current_classpath(), limit, null);
+	}
+	
 	/**
 	 * Runs a java program but doesn't wait for completion.
 	 * @param class_name the Java class name
