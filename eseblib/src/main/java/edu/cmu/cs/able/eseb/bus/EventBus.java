@@ -16,7 +16,9 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -27,6 +29,7 @@ import edu.cmu.cs.able.eseb.BusDataQueueListener;
 import edu.cmu.cs.able.eseb.ControlledDataTypeSocketConnectionImpl;
 import edu.cmu.cs.able.eseb.DataTypeSocketConnection;
 import edu.cmu.cs.able.eseb.DataTypeSocketConnectionImpl;
+import edu.cmu.cs.able.eseb.filter.EventFilterChain;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
 import edu.cmu.cs.able.typelib.txtenc.TextEncoding;
 import edu.cmu.cs.able.typelib.txtenc.typelib.DefaultTextEncoding;
@@ -89,6 +92,11 @@ public class EventBus implements Closeable {
 	private short m_port;
 	
 	/**
+	 * Preprocessors of connections.
+	 */
+	private List<EventBusAcceptPreprocessor> m_preprocessors;
+	
+	/**
 	 * Creates a new event bus in the given port.
 	 * @param port the port used to accept incoming clients.
 	 * @param scope the primitive scope for types
@@ -115,13 +123,34 @@ public class EventBus implements Closeable {
 		m_scope = scope;
 		m_collector = new LocalCollector("Event bus (" + port + ")");
 		m_port = port;
+		m_preprocessors = new ArrayList<>();
+	}
+	
+	/**
+	 * Adds a new event bus accept preprocessor to the event bus.
+	 * @param p the preprocessor
+	 */
+	public synchronized void add_preprocessor(EventBusAcceptPreprocessor p) {
+		Ensure.not_null(p);
+		m_preprocessors.add(p);
+	}
+	
+	/**
+	 * Removes a previously added event bus accept preprocessor from the
+	 * event bus.
+	 * @param p the preprocessor
+	 */
+	public synchronized void remove_preprocessor(EventBusAcceptPreprocessor p) {
+		Ensure.not_null(p);
+		boolean removed = m_preprocessors.remove(p);
+		Ensure.is_true(removed);
 	}
 	
 	/**
 	 * Obtains the port where the event bus is listening.
 	 * @return the port
 	 */
-	public short port() {
+	public synchronized short port() {
 		return m_port;
 	}
 	
@@ -212,6 +241,22 @@ public class EventBus implements Closeable {
 		final EventBusConnectionData data = new EventBusConnectionData(id, addr,
 				impl, input_queue, cl);
 		m_connections.put(id, data);
+		
+		/*
+		 * Run all preprocessors on the connection.
+		 */
+		for (EventBusAcceptPreprocessor p : new ArrayList<>(m_preprocessors)) {
+			if (!p.preprocess(impl)) {
+				m_connections.remove(id);
+				impl.stop();
+				LOG.info("Connection with ID " + id + " from address "
+						+ addr + " was rejected by pre-processor.");
+				impl.close();
+				conn.close();
+				return;
+			}
+		}
+		
 		m_dispatcher.dispatch(new DispatcherOp<EventBusListener>() {
 			@Override
 			public void dispatch(EventBusListener l) {
@@ -358,4 +403,33 @@ public class EventBus implements Closeable {
 		return m_accept_socket == null;
 	}
 	
+	/**
+	 * Obtains the incoming event chain for a client.
+	 * @param client_id the client ID
+	 * @return the incoming event chain, <code>null</code> if the client
+	 * is not found
+	 */
+	public synchronized EventFilterChain incoming_chain(int client_id) {
+		EventBusConnectionData cdata = m_connections.get(client_id);
+		if (cdata == null) {
+			return null;
+		}
+		
+		return cdata.connection().incoming_chain();
+	}
+	
+	/**
+	 * Obtains the outgoing event chain for a client.
+	 * @param client_id the client ID
+	 * @return the outgoing event chain, <code>null</code> if the client
+	 * is not found
+	 */
+	public synchronized EventFilterChain outgoing_chain(int client_id) {
+		EventBusConnectionData cdata = m_connections.get(client_id);
+		if (cdata == null) {
+			return null;
+		}
+		
+		return cdata.connection().outgoing_chain();
+	}
 }

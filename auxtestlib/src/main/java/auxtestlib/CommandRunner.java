@@ -368,6 +368,7 @@ public class CommandRunner {
 		 * @deprecated use
 		 * {@link #remove_process_interface_listener(ProcessInterfaceListener)}
 		 */
+		@Deprecated
 		public synchronized void removeProcessInterfaceListener(
 				ProcessInterfaceListener listener) {
 			remove_process_interface_listener(listener);

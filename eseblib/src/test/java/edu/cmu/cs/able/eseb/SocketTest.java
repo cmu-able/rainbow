@@ -1,7 +1,5 @@
 package edu.cmu.cs.able.eseb;
 
-import incubator.dispatch.DispatchHelper;
-
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -13,9 +11,7 @@ import org.junit.Test;
 
 import auxtestlib.AbstractControlledThread;
 import auxtestlib.DefaultTCase;
-import auxtestlib.TestHelper;
 import auxtestlib.TestPropertiesDefinition;
-import auxtestlib.ThreadCountTestHelper;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
 import edu.cmu.cs.able.typelib.txtenc.typelib.DefaultTextEncoding;
 import edu.cmu.cs.able.typelib.type.DataValue;
@@ -25,10 +21,6 @@ import edu.cmu.cs.able.typelib.type.DataValue;
  */
 @SuppressWarnings("javadoc")
 public class SocketTest extends DefaultTCase {
-	@TestHelper
-	private DispatchHelper m_dispatcher_helper;
-	@TestHelper
-	private ThreadCountTestHelper m_thread_count_helper;
 	private PrimitiveScope m_scope;
 	
 	@Before

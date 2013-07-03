@@ -8,6 +8,7 @@ import java.util.Date;
 
 import edu.cmu.cs.able.eseb.BusDataQueue;
 import edu.cmu.cs.able.eseb.ControlledDataTypeSocketConnection;
+import edu.cmu.cs.able.eseb.filter.EventFilterChainInfo;
 
 /**
  * Class with data kept by the bus server for each connection.
@@ -156,5 +157,21 @@ public class EventBusConnectionData {
 	 */
 	CloseableListener closeable_listener() {
 		return m_closeable_listener;
+	}
+	
+	/**
+	 * Obtains the connection's incoming chain.
+	 * @return the incoming chain
+	 */
+	public EventFilterChainInfo incoming_chain() {
+		return m_connection.incoming_chain().info();
+	}
+	
+	/**
+	 * Obtains the connection's outgoing chain.
+	 * @return the outgoing chain
+	 */
+	public EventFilterChainInfo outgoing_chain() {
+		return m_connection.outgoing_chain().info();
 	}
 }

@@ -1,17 +1,13 @@
 package edu.cmu.cs.able.eseb;
 
-import java.io.IOException;
-
-import incubator.dispatch.DispatchHelper;
 import incubator.dispatch.DispatcherOp;
 import incubator.wt.CloseableListener;
+
+import java.io.IOException;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import auxtestlib.DefaultTCase;
-import auxtestlib.TestHelper;
-import auxtestlib.ThreadCountTestHelper;
 import edu.cmu.cs.able.typelib.prim.Int32Value;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
 import edu.cmu.cs.able.typelib.prim.StringValue;
@@ -21,15 +17,9 @@ import edu.cmu.cs.able.typelib.type.DataValue;
  * Test case that checks how the controlled connection works.
  */
 @SuppressWarnings("javadoc")
-public class ControlledConnectionTest extends DefaultTCase {
+public class ControlledConnectionTest extends EsebTestCase {
 	private static final int TIME_UNIT_MS = 5;
 	private static final int MULT = 10;
-	
-	@TestHelper
-	public DispatchHelper m_dispatch_helper;
-	
-	@TestHelper
-	public ThreadCountTestHelper m_thread_helper;
 	
 	private PrimitiveScope m_pscope;
 	private TestDataTypeSocketConnection m_connection;

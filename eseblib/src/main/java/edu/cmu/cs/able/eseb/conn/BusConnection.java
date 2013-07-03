@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.Date;
 import java.util.LinkedList;
-import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -25,6 +24,9 @@ import edu.cmu.cs.able.eseb.BusDataQueueListener;
 import edu.cmu.cs.able.eseb.ControlledDataTypeSocketConnection;
 import edu.cmu.cs.able.eseb.ControlledDataTypeSocketConnectionImpl;
 import edu.cmu.cs.able.eseb.DataTypeSocketConnectionImpl;
+import edu.cmu.cs.able.eseb.filter.BusDataQueueGroupSink;
+import edu.cmu.cs.able.eseb.filter.EventFilterChain;
+import edu.cmu.cs.able.eseb.filter.EventSink;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
 import edu.cmu.cs.able.typelib.txtenc.typelib.DefaultTextEncoding;
 import edu.cmu.cs.able.typelib.type.DataValue;
@@ -127,6 +129,18 @@ public class BusConnection implements Closeable {
 	private BusDataQueueGroupImpl m_queue_group;
 	
 	/**
+	 * Incoming filter chain. Because the connection is reset every time we
+	 * reconnect, we need to have our own chain.
+	 */
+	private EventFilterChain m_incoming_chain;
+	
+	/**
+	 * Outgoing filter chain. Because the connection is reset every time we
+	 * reconnect, we need to have our own chain.
+	 */
+	private EventFilterChain m_outgoing_chain;
+	
+	/**
 	 * Creates a new client.
 	 * @param host the host to connect to
 	 * @param port the port
@@ -160,6 +174,15 @@ public class BusConnection implements Closeable {
 		});
 		
 		m_queue_group = new BusDataQueueGroupImpl(); 
+		m_incoming_chain = new EventFilterChain(new BusDataQueueGroupSink(
+				m_queue_group));
+		m_outgoing_chain = new EventFilterChain(new EventSink() {
+			@Override
+			public void sink(BusData data) throws IOException {
+				Ensure.not_null(data);
+				internal_send(data.value());
+			}
+		});
 	}
 	
 	/**
@@ -287,6 +310,19 @@ public class BusConnection implements Closeable {
 	 * @param value the value to send
 	 */
 	public synchronized void send(DataValue value) {
+		try {
+			m_outgoing_chain.sink(new BusData(value));
+		} catch (IOException e) {
+			Ensure.never_thrown(e);
+		}
+	}
+	
+	/**
+	 * Method that actually does the send, after the outgoing chain has been
+	 * processed.
+	 * @param value the value to send
+	 */
+	private synchronized void internal_send(DataValue value) {
 		Ensure.notNull(value);
 		m_send_count++;
 		
@@ -561,10 +597,15 @@ public class BusConnection implements Closeable {
 	 * Data may have been received in the queue.
 	 */
 	private synchronized void received() {
-		List<BusData> received = m_queue_group.transfer_from(m_queue);
-		for (BusData d : received) {
+		BusData data;
+		while ((data = m_queue.poll()) != null) {
 			m_receive_count++;
-			LOG.debug("Received: {" + d.value() + "}.");
+			LOG.debug("Received: {" + data.value() + "}.");
+			try {
+				m_incoming_chain.sink(data);
+			} catch (IOException e) {
+				Ensure.never_thrown(e);
+			}
 		}
 	}
 	
@@ -618,5 +659,21 @@ public class BusConnection implements Closeable {
 	 */
 	public synchronized short port() {
 		return m_port;
+	}
+
+	/**
+	 * Obtains the incoming event filter chain.
+	 * @return the chain
+	 */
+	public synchronized EventFilterChain incoming_chain() {
+		return m_incoming_chain;
+	}
+	
+	/**
+	 * Obtains the outgoing event filter chain.
+	 * @return the chain
+	 */
+	public synchronized EventFilterChain outgoing_chain() {
+		return m_outgoing_chain;
 	}
 }

@@ -12,10 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import auxtestlib.AbstractControlledThread;
-import auxtestlib.DefaultTCase;
 import auxtestlib.RandomGenerator;
-import auxtestlib.TestHelper;
-import auxtestlib.ThreadCountTestHelper;
 import edu.cmu.cs.able.typelib.enc.DataValueEncoding;
 import edu.cmu.cs.able.typelib.prim.Int32Value;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
@@ -25,13 +22,7 @@ import edu.cmu.cs.able.typelib.txtenc.typelib.DefaultTextEncoding;
 /**
  * Test suite that verifies reading and writing to/from data streams.
  */
-public class DataStreamTest extends DefaultTCase {
-	/**
-	 * Helper that ensures that all threads are shut down.
-	 */
-	@TestHelper
-	protected ThreadCountTestHelper threadCountHelper;
-	
+public class DataStreamTest extends EsebTestCase {
 	/**
 	 * The primitive data type scope.
 	 */

@@ -1,7 +1,5 @@
 package edu.cmu.cs.able.eseb;
 
-import incubator.dispatch.DispatchHelper;
-
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
@@ -10,30 +8,15 @@ import java.net.SocketTimeoutException;
 import org.junit.Test;
 
 import auxtestlib.AbstractControlledThread;
-import auxtestlib.DefaultTCase;
 import auxtestlib.RandomGenerator;
-import auxtestlib.TestHelper;
 import auxtestlib.TestPropertiesDefinition;
-import auxtestlib.ThreadCountTestHelper;
 import edu.cmu.cs.able.eseb.bus.EventBus;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
 
 /**
  * Test class that makes basic checks on a bus server.
  */
-public class BusServerTest extends DefaultTCase {
-	/**
-	 * Dispatcher helper.
-	 */
-	@TestHelper
-	protected DispatchHelper m_dispatcher_helper;
-	
-	/**
-	 * Helper that ensures that all threads are shut down.
-	 */
-	@TestHelper
-	protected ThreadCountTestHelper m_thread_count_helper;
-	
+public class BusServerTest extends EsebTestCase {
 	@SuppressWarnings({"javadoc","unused"})
 	@Test
 	public void start_opens_ports_and_stop_closes() throws Exception {

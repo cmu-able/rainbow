@@ -1,14 +1,13 @@
 package edu.cmu.cs.able.eseb;
 
-import java.util.Date;
-
 import incubator.dispatch.DispatchHelper;
+
+import java.util.Date;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.math.RandomUtils;
 import org.junit.Test;
 
-import auxtestlib.DefaultTCase;
 import auxtestlib.TestHelper;
 import auxtestlib.TestPropertiesDefinition;
 import edu.cmu.cs.able.eseb.bus.EventBus;
@@ -20,7 +19,7 @@ import edu.cmu.cs.able.typelib.type.DataValue;
  * Test case that tests the performance of the eseblib.
  */
 @SuppressWarnings("javadoc")
-public class PerformanceTest extends DefaultTCase {
+public class PerformanceTest extends EsebTestCase {
 	private static final int VALUE_ARRAY_SIZE = 100;
 	private static final int ROUND_COUNT = 1;
 	private static final int STRING_SIZE = 50;
@@ -114,8 +113,10 @@ public class PerformanceTest extends DefaultTCase {
 		};
 		
 		try (	EventBus srv = new EventBus(p, pscope);
-				BusConnection send_cli = new BusConnection("localhost", p, pscope);
-				BusConnection recv_cli = new BusConnection("localhost", p, pscope)) {
+				BusConnection send_cli = new BusConnection("localhost",
+						p, pscope);
+				BusConnection recv_cli = new BusConnection("localhost",
+						p, pscope)) {
 			srv.start();
 			send_cli.start();
 			TestArraySaveQueue asq = new TestArraySaveQueue();

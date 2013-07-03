@@ -1,7 +1,5 @@
 package edu.cmu.cs.able.eseb;
 
-import incubator.dispatch.DispatchHelper;
-
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 
@@ -9,10 +7,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import auxtestlib.DefaultTCase;
-import auxtestlib.TestHelper;
 import auxtestlib.TestPropertiesDefinition;
-import auxtestlib.ThreadCountTestHelper;
 import edu.cmu.cs.able.eseb.bus.EventBus;
 import edu.cmu.cs.able.eseb.bus.rci.EventBusRemoteControlInterfaceImpl;
 import edu.cmu.cs.able.eseb.bus.rci.LimitedDistributionQueue;
@@ -26,23 +21,11 @@ import edu.cmu.cs.able.typelib.type.DataValue;
  * Test suite that verifies the bus server remote interface.
  */
 @SuppressWarnings("javadoc")
-public class BusServerRemoteInterfaceTest extends DefaultTCase {
+public class BusServerRemoteInterfaceTest extends EsebTestCase {
 	/**
 	 * Minimum network time quantum, in milliseconds.
 	 */
 	private static final long TIME_NQ_MS = 150;
-	
-	/**
-	 * Helper that counts running threads.
-	 */
-	@TestHelper
-	public ThreadCountTestHelper m_tc_helper;
-	
-	/**
-	 * Helper that clears the dispatch queue.
-	 */
-	@TestHelper
-	public DispatchHelper m_dispatch_helper;
 	
 	/**
 	 * The primitive data scope.

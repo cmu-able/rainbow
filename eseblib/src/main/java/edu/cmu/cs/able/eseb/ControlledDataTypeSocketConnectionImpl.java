@@ -13,6 +13,9 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
+import edu.cmu.cs.able.eseb.filter.BusDataQueueGroupSink;
+import edu.cmu.cs.able.eseb.filter.DataTypeSocketConnectionSink;
+import edu.cmu.cs.able.eseb.filter.EventFilterChain;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
 import edu.cmu.cs.able.typelib.prim.StringValue;
 import edu.cmu.cs.able.typelib.type.DataValue;
@@ -114,6 +117,16 @@ public class ControlledDataTypeSocketConnectionImpl
 	private BusDataQueue m_receive_queue;
 	
 	/**
+	 * Filter chain for outgoing events.
+	 */
+	private EventFilterChain m_outgoing_chain;
+	
+	/**
+	 * Fitler chain for incoming events.
+	 */
+	private EventFilterChain m_incoming_chain;
+	
+	/**
 	 * Interval to check for pings. Will be equal to
 	 * {@link #PING_CHECK_INTERVAL_MS} unless set otherwise (usually by unit
 	 * tests).
@@ -145,8 +158,12 @@ public class ControlledDataTypeSocketConnectionImpl
 		Ensure.notNull(conn);
 		m_primitive_scope = primitive_scope;
 		m_connection = conn;
+		m_outgoing_chain = new EventFilterChain(
+				new DataTypeSocketConnectionSink(m_connection));
 		m_closeable_dispatcher = new LocalDispatcher<>();
 		m_queue_group = new BusDataQueueGroupImpl();
+		m_incoming_chain = new EventFilterChain(
+				new BusDataQueueGroupSink(m_queue_group));
 		m_send_data = true;
 		m_closed = false;
 		m_receive_queue = new BusDataQueue();
@@ -232,7 +249,11 @@ public class ControlledDataTypeSocketConnectionImpl
 					}
 				}
 				
-				m_queue_group.add(bd);
+				try {
+					m_incoming_chain.sink(bd);
+				} catch (IOException e) {
+					Ensure.never_thrown(e);
+				}
 			}
 		}
 	}
@@ -267,7 +288,7 @@ public class ControlledDataTypeSocketConnectionImpl
 	public void write(BusData bd) throws IOException {
 		Ensure.not_null(bd);
 		if (!m_closed && m_send_data) {
-			m_connection.write(bd);
+			m_outgoing_chain.sink(bd);
 		}
 	}
 	
@@ -335,5 +356,15 @@ public class ControlledDataTypeSocketConnectionImpl
 				m_pinger.stop();
 			}
 		}
+	}
+	
+	@Override
+	public EventFilterChain incoming_chain() {
+		return m_incoming_chain;
+	}
+	
+	@Override
+	public EventFilterChain outgoing_chain() {
+		return m_outgoing_chain;
 	}
 }

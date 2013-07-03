@@ -22,6 +22,16 @@ import org.junit.Before;
  */
 public class DefaultTCase extends Assert {
 	/**
+	 * Interval between checking for an expression becoming <code>true</code>.
+	 */
+	private static final long WAIT_FOR_TRUE_SLEEP_MS = 10;
+	
+	/**
+	 * Default timeout to wait for an expression to become <code>true</code>.
+	 */
+	private static final long WAIT_FOR_TRUE_DEFAULT_TIMEOUT_MS = 1000;
+	
+	/**
 	 * All helpers.
 	 */
 	private List<Field> m_helpers;
@@ -129,5 +139,69 @@ public class DefaultTCase extends Assert {
 		 * Sets all system properties back to their original values.
 		 */
 		System.setProperties(m_system_properties);
+	}
+	
+	/**
+	 * Artificially invoke all automatically generated methods of an
+	 * enumeration to make sure they are not missing in the code coverage
+	 * report.
+	 * @param cls the enumeration class
+	 * @throws Exception failed to invoke
+	 */
+	protected <E extends Enum<E>> void cover_enumeration(Class<E> cls)
+			throws Exception {
+		E[] values = cls.getEnumConstants();
+		for (E e : values) {
+			e.toString();
+			Enum.valueOf(cls, e.name());
+			cls.getMethod("valueOf", String.class).invoke(null, e.name());
+		}
+		
+		cls.getMethod("values").invoke(null);
+	}
+	
+	/**
+	 * Keeps evaluating an expression until it returns <code>true</code> or
+	 * until it times out. This method is usually used on unit tests to avoid
+	 * having to code thread sleeps. This method will invoke
+	 * <code>fail()</code> if <code>eval</code> didn't become
+	 * <code>true</code> after <code>timeout_ms</code> milliseconds have
+	 * elapsed
+	 * @param eval the expression to evaluate; this expression will be invoked
+	 * multiple times and it should compute quickly
+	 * @param timeout_ms the timeout in milliseconds
+	 * @throws Exception failed to evaluate
+	 */
+	protected void wait_for_true(BooleanEvaluation eval, long timeout_ms)
+			throws Exception {
+		if (eval == null) {
+			throw new IllegalArgumentException("eval == null");
+		}
+		
+		if (timeout_ms <= 0) {
+			throw new IllegalArgumentException("timeout_ms <= 0");
+		}
+		
+		long end = System.currentTimeMillis() + timeout_ms;
+		do {
+			if (eval.evaluate()) {
+				return;
+			}
+			
+			Thread.sleep(WAIT_FOR_TRUE_SLEEP_MS);
+		} while (System.currentTimeMillis() < end);
+		
+		fail();
+	}
+	
+	/**
+	 * Equivalent to invoke {@link #wait_for_true(BooleanEvaluation, long)}
+	 * with {@link #WAIT_FOR_TRUE_DEFAULT_TIMEOUT_MS} as timeout.
+	 * @param eval the expression to evaluate; this expression will be invoked
+	 * multiple times and it should compute quickly
+	 * @throws Exception failed to evaluate
+	 */
+	protected void wait_for_true(BooleanEvaluation eval) throws Exception {
+		wait_for_true(eval, WAIT_FOR_TRUE_DEFAULT_TIMEOUT_MS);
 	}
 }

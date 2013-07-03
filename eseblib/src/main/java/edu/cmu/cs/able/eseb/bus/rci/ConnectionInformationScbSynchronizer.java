@@ -138,7 +138,8 @@ public class ConnectionInformationScbSynchronizer {
 		Ensure.is_false(m_local.containsKey(data.id()));
 		EventBusRemoteConnectionInfo c = new EventBusRemoteConnectionInfo(
 				data.id(), data.address().toString(), data.connect_time(),
-				data.publish_count(), data.subscribe_count());
+				data.publish_count(), data.subscribe_count(),
+				data.incoming_chain(), data.outgoing_chain());
 		m_container.add_scb(c);
 		m_connections.put(data.id(), c);
 		m_local.put(data.id(), data);
@@ -153,6 +154,8 @@ public class ConnectionInformationScbSynchronizer {
 			Ensure.not_null(i);
 			i.publish_count(dt.publish_count());
 			i.subscribe_count(dt.subscribe_count());
+			i.incoming_chain(dt.incoming_chain());
+			i.outgoing_chain(dt.outgoing_chain());
 		}
 	}
 }

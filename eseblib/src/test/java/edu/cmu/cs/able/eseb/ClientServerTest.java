@@ -2,19 +2,15 @@ package edu.cmu.cs.able.eseb;
 
 import java.util.Date;
 
-import incubator.dispatch.DispatchHelper;
-
 import org.junit.Before;
 import org.junit.Test;
 
-import auxtestlib.DefaultTCase;
-import auxtestlib.TestHelper;
 import auxtestlib.TestPropertiesDefinition;
-import auxtestlib.ThreadCountTestHelper;
 import edu.cmu.cs.able.eseb.bus.EventBus;
+import edu.cmu.cs.able.eseb.bus.EventBusAcceptPreprocessor;
 import edu.cmu.cs.able.eseb.bus.EventBusConnectionData;
-import edu.cmu.cs.able.eseb.conn.BusConnectionState;
 import edu.cmu.cs.able.eseb.conn.BusConnection;
+import edu.cmu.cs.able.eseb.conn.BusConnectionState;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
 import edu.cmu.cs.able.typelib.type.DataValue;
 
@@ -23,11 +19,8 @@ import edu.cmu.cs.able.typelib.type.DataValue;
  * subscribing work.
  */
 @SuppressWarnings("javadoc")
-public class ClientServerTest extends DefaultTCase {
-	@TestHelper
-	private DispatchHelper m_dispatcher_helper;
-	@TestHelper
-	private ThreadCountTestHelper m_thread_count_helper;
+public class ClientServerTest extends EsebTestCase {
+	private static final long ENOUGH_TIME_TO_CONNECT_IF_WE_COULD_MS = 5000;
 	private short m_port;
 	private PrimitiveScope m_scope;
 	
@@ -43,7 +36,8 @@ public class ClientServerTest extends DefaultTCase {
 		try (EventBus srv = new EventBus(m_port, m_scope)) {
 			srv.start();
 			Thread.sleep(50);
-			try (BusConnection c = new BusConnection("localhost", m_port, m_scope)) {
+			try (BusConnection c = new BusConnection("localhost", m_port,
+					m_scope)) {
 				assertEquals(BusConnectionState.DISCONNECTED, c.state());
 				
 				c.start();
@@ -78,7 +72,8 @@ public class ClientServerTest extends DefaultTCase {
 			Thread.sleep(50);
 			
 			TestArraySaveQueue asq = new TestArraySaveQueue();
-			try (BusConnection c = new BusConnection("localhost", m_port, m_scope)) {
+			try (BusConnection c = new BusConnection("localhost", m_port,
+					m_scope)) {
 				c.add_listener(bcl);
 				c.queue_group().add(asq);
 				
@@ -174,7 +169,8 @@ public class ClientServerTest extends DefaultTCase {
 			srv.start();
 			Thread.sleep(50);
 			
-			try (BusConnection c = new BusConnection("localhost", m_port, m_scope)) {
+			try (BusConnection c = new BusConnection("localhost", m_port,
+					m_scope)) {
 				c.add_listener(bcl);
 				c.queue_group().add(asq);
 				
@@ -217,5 +213,29 @@ public class ClientServerTest extends DefaultTCase {
 		 * Wait for all threads to die...
 		 */
 		Thread.sleep(250);
+	}
+	
+	@Test
+	public void server_preprocessor_can_deny_connection() throws Exception {
+		try (EventBus srv = new EventBus(m_port, m_scope)) {
+			srv.start();
+			
+			srv.add_preprocessor(new EventBusAcceptPreprocessor() {
+				@Override
+				public boolean preprocess(ControlledDataTypeSocketConnection
+						connection) {
+					return false;
+				}
+			});
+			
+			try (BusConnection c = new BusConnection("localhost", m_port,
+					m_scope)) {
+				c.start();
+				
+				Thread.sleep(ENOUGH_TIME_TO_CONNECT_IF_WE_COULD_MS);
+				
+				assertNotSame(BusConnectionState.CONNECTED, c.state());
+ 			}
+		}
 	}
 }

@@ -9,17 +9,16 @@ import java.util.Date;
 import org.apache.commons.lang.math.RandomUtils;
 import org.junit.Test;
 
+import auxtestlib.ComparisonUtils;
+import auxtestlib.RandomGenerator;
 import edu.cmu.cs.able.eseb.bus.rci.LimitedDistributionQueue;
 import edu.cmu.cs.able.eseb.bus.rci.LimitedDistributionQueueElement;
-import auxtestlib.ComparisonUtils;
-import auxtestlib.DefaultTCase;
-import auxtestlib.RandomGenerator;
 
 /**
  * Test case checking the limited distribution queue.
  */
 @SuppressWarnings("javadoc")
-public class LimitedDistributionQueueTest extends DefaultTCase {
+public class LimitedDistributionQueueTest extends EsebTestCase {
 	@Test
 	public void queue_element_keeps_data() throws Exception {
 		Date d = new Date();

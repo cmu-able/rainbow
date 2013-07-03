@@ -1,7 +1,5 @@
 package edu.cmu.cs.able.eseb;
 
-import incubator.dispatch.DispatchHelper;
-
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
@@ -10,9 +8,6 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import auxtestlib.DefaultTCase;
-import auxtestlib.TestHelper;
-import auxtestlib.ThreadCountTestHelper;
 import edu.cmu.cs.able.typelib.enc.DataValueEncoding;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
 import edu.cmu.cs.able.typelib.txtenc.typelib.DefaultTextEncoding;
@@ -22,11 +17,7 @@ import edu.cmu.cs.able.typelib.type.DataValue;
  * Checks that input threads work.
  */
 @SuppressWarnings("javadoc")
-public class InputOutputThreadTest extends DefaultTCase {
-	@TestHelper
-	private DispatchHelper m_dispatch_helper;
-	@TestHelper
-	private ThreadCountTestHelper m_count_helper;
+public class InputOutputThreadTest extends EsebTestCase {
 	private PrimitiveScope m_scope;
 	private DataValueEncoding m_enc;
 	
@@ -67,7 +58,7 @@ public class InputOutputThreadTest extends DefaultTCase {
 				dot.write(to_write[2]);
 				Thread.sleep(5);
 				pos.flush();
-				Thread.sleep(50);
+				Thread.sleep(100);
 				pos.close();
 				dot.write(m_scope.int32().make(0));
 				Thread.sleep(50);

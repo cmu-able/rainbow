@@ -6,6 +6,7 @@ import incubator.wt.CloseableListener;
 import java.io.Closeable;
 import java.io.IOException;
 
+import edu.cmu.cs.able.eseb.filter.EventFilterChain;
 import edu.cmu.cs.able.typelib.type.DataValue;
 
 /**
@@ -56,4 +57,16 @@ public interface ControlledDataTypeSocketConnection extends Closeable {
 	 * @throws IOException failed to mark the connection
 	 */
 	void publish_only() throws IOException;
+	
+	/**
+	 * Obtains the incoming event filter chain.
+	 * @return the chain
+	 */
+	EventFilterChain incoming_chain();
+	
+	/**
+	 * Obtains the outgoing event filter chain.
+	 * @return the chain
+	 */
+	EventFilterChain outgoing_chain();
 }

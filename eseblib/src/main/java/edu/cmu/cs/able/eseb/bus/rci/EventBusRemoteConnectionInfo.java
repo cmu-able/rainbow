@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import edu.cmu.cs.able.eseb.filter.EventFilterChainInfo;
+
 /**
  * Class with remote information about a connection.
  */
@@ -48,15 +50,29 @@ public class EventBusRemoteConnectionInfo
 	private int m_subscribe_count;
 	
 	/**
+	 * Information about the connection's incoming chain.
+	 */
+	private EventFilterChainInfo m_incoming_chain;
+	
+	/**
+	 * Information about the connection's outgoing chain.
+	 */
+	private EventFilterChainInfo m_outgoing_chain;
+	
+	/**
 	 * Creates a new structure with information about a connection.
 	 * @param connection_id the ID of the connection
 	 * @param inet_address the connection's address
 	 * @param connect_date the date in which the connection started
 	 * @param publish_count the number of published events
 	 * @param subscribe_count the number of subscribed events
+	 * @param incoming_chain the connection's incoming chain
+	 * @param outgoing_chain the connection's outgoing chain
 	 */
 	public EventBusRemoteConnectionInfo(int connection_id, String inet_address,
-			Date connect_date, int publish_count, int subscribe_count) {
+			Date connect_date, int publish_count, int subscribe_count,
+			EventFilterChainInfo incoming_chain,
+			EventFilterChainInfo outgoing_chain) {
 		super(connection_id, SyncStatus.UNKNOWN,
 				EventBusRemoteConnectionInfo.class);
 		
@@ -64,12 +80,16 @@ public class EventBusRemoteConnectionInfo
 		Ensure.not_null(connect_date);
 		Ensure.greater_equal(publish_count, 0);
 		Ensure.greater_equal(subscribe_count, 0);
+		Ensure.not_null(incoming_chain);
+		Ensure.not_null(outgoing_chain);
 		
 		m_connection_id = connection_id;
 		m_inet_address = inet_address;
 		m_connect_date = connect_date;
 		m_publish_count = publish_count;
 		m_subscribe_count = subscribe_count;
+		m_incoming_chain = incoming_chain;
+		m_outgoing_chain = outgoing_chain;
 	}
 	
 	/**
@@ -132,6 +152,46 @@ public class EventBusRemoteConnectionInfo
 		Ensure.greater_equal(sc, 0);
 		if (m_subscribe_count != sc) {
 			m_subscribe_count = sc;
+			fire_update();
+		}
+	}
+	
+	/**
+	 * Obtains the connection's incoming chain.
+	 * @return the incoming chain
+	 */
+	public EventFilterChainInfo incoming_chain() {
+		return m_incoming_chain;
+	}
+	
+	/**
+	 * Obtains the connection's outgoing chain.
+	 * @return the outgoing chain
+	 */
+	public EventFilterChainInfo outgoing_chain() {
+		return m_outgoing_chain;
+	}
+	
+	/**
+	 * Defines the connection's incoming chain.
+	 * @param i the incoming chain.
+	 */
+	public void incoming_chain(EventFilterChainInfo i) {
+		Ensure.not_null(i);
+		if (!i.equals(m_incoming_chain)) {
+			m_incoming_chain = i;
+			fire_update();
+		}
+	}
+	
+	/**
+	 * Defines the connection's outgoing chain.
+	 * @param o the outgoing chain.
+	 */
+	public void outgoing_chain(EventFilterChainInfo o) {
+		Ensure.not_null(o);
+		if (!o.equals(m_outgoing_chain)) {
+			m_outgoing_chain = o;
 			fire_update();
 		}
 	}
