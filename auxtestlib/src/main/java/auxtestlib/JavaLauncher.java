@@ -194,6 +194,26 @@ public class JavaLauncher {
 	public ProcessInterface launch_java_async(String class_name,
 			List<String> arguments, List<URL> class_path, int limit,
 			Short debug_port) throws IOException {
+		return launch_java_async(class_name, null, arguments, class_path,
+				limit, debug_port);
+	}
+	
+
+	/**
+	 * Runs a java program but doesn't wait for completion.
+	 * @param class_name the Java class name
+	 * @param w_dir the working directory to run the program
+	 * @param arguments the program arguments
+	 * @param class_path the program's class path
+	 * @param limit the time limit (in seconds) for the program to execute
+	 * @param debug_port if not <code>null</code>, a java debug port will
+	 * be open in this port
+	 * @return an interface to the running program
+	 * @throws IOException failed to launch the program
+	 */
+	public ProcessInterface launch_java_async(String class_name,
+			File w_dir, List<String> arguments, List<URL> class_path,
+			int limit, Short debug_port) throws IOException {
 		if (class_name == null) {
 			throw new IllegalArgumentException("className == null");
 		}
@@ -210,13 +230,15 @@ public class JavaLauncher {
 			throw new IllegalArgumentException("limit <= 0");
 		}
 
-		File user_dir = new File(SystemUtils.USER_DIR);
+		if (w_dir == null) {
+			w_dir = new File(SystemUtils.USER_DIR);
+		}
 
 		String[] cmds = build_commands(class_name, arguments, class_path,
 				debug_port);
 
 		ProcessInterface pi = m_command_runner.run_command_async(cmds,
-				user_dir, limit);
+				w_dir, limit);
 		return pi;
 	}
 	
