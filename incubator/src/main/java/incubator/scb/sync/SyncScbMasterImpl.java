@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 
 /**
  * The <code>SyncScbMaster</code> keeps several master containers, indexed by
@@ -18,6 +20,12 @@ import java.util.Set;
  * as send in changes.
  */
 public class SyncScbMasterImpl implements SyncScbMaster {
+	/**
+	 * Logger to use.
+	 */
+	private static final Logger LOG =
+			Logger.getLogger(SyncScbMasterImpl.class);
+	
 	/**
 	 * Number of times to check for slave expiration in each slave expiration
 	 * interval.
@@ -92,6 +100,7 @@ public class SyncScbMasterImpl implements SyncScbMaster {
 		}
 		
 		for (String k : to_expire) {
+			LOG.info("Slave with UID=" + k + " has expired.");
 			m_slaves.remove(k);
 		}
 	}
@@ -119,7 +128,12 @@ public class SyncScbMasterImpl implements SyncScbMaster {
 		
 		ContainerWrapper<ID_TYPE, T> w = new ContainerWrapper<>(idclass,
 				tclass);
-		m_wrappers.put(k,  w);
+		m_wrappers.put(k, w);
+		
+		LOG.info("Created container with key " + k + " of type "
+				+ tclass.getName() + ", with ID of type " + idclass.getName()
+				+ ".");
+		
 		return w.container();
 	}
 	
@@ -166,7 +180,7 @@ public class SyncScbMasterImpl implements SyncScbMaster {
 				throw new UnknownContainerException(op.container_key());
 			}
 			
-			w.process(op);
+			w.process(op, rk);
 			add_to_all(op, rk);
 		}
 	}
@@ -186,6 +200,8 @@ public class SyncScbMasterImpl implements SyncScbMaster {
 			List<ScbOperation> ret_ops = si.contact();
 			return new Pair<>(false, ret_ops); 
 		} else {
+			LOG.info("New slave contact with UID=" + key + ".");
+			
 			SlaveInfo si = new SlaveInfo();
 			m_slaves.put(key, si);
 			
@@ -264,14 +280,20 @@ public class SyncScbMasterImpl implements SyncScbMaster {
 		/**
 		 * Processes an operation on the container.
 		 * @param op the operation
+		 * @param rk the key of the slave requesting the processing
 		 */
-		void process(ScbOperation op) {
+		void process(ScbOperation op, String rk) {
 			Ensure.not_null(op);
 			if (op.incoming() != null) {
 				Ensure.is_null(op.delete_key());
+				LOG.debug("Slave UID=" + rk + " requested create/update of "
+						+ "SCB with ID=" + m_tclass.cast(op.incoming()).id()
+						+ ".");
 				m_container.incoming(m_tclass.cast(op.incoming()));
 			} else {
 				Ensure.not_null(op.delete_key());
+				LOG.debug("Slave UID=" + rk + " requested delete of "
+						+ "SCB with ID=" + op.delete_key() + ".");
 				m_container.delete(m_idclass.cast(op.delete_key()));
 			}
 		}

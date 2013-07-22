@@ -33,7 +33,8 @@ class SoftCollectorProxy {
 		
 		m_proxy = new ThrowableCollector(collector.name());
 		
-		collector.add_listener(new ScbContainerListener<ThrowableContext>() {
+		collector.dispatcher().add(
+				new ScbContainerListener<ThrowableContext>() {
 			@Override
 			public void scb_updated(ThrowableContext t) {
 				/*

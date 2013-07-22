@@ -1,5 +1,7 @@
 package incubator.scb;
 
+import incubator.dispatch.Dispatcher;
+
 import java.util.Collection;
 
 /**
@@ -8,16 +10,11 @@ import java.util.Collection;
  */
 public interface ScbContainer<T extends Scb<T>> {
 	/**
-	 * Adds a listener to the container.
-	 * @param listener the listener to add
+	 * Obtains the event dispatcher where we can register to be notified of
+	 * events.
+	 * @return the dispatcher
 	 */
-	void add_listener(ScbContainerListener<T> listener);
-	
-	/**
-	 * Removes a previously added listener from the container. 
-	 * @param listener the listener to remove
-	 */
-	void remove_listener(ScbContainerListener<T> listener);
+	Dispatcher<ScbContainerListener<T>> dispatcher();
 	
 	/**
 	 * Obtains all SCBs in the container.

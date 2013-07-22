@@ -80,10 +80,12 @@ public class ModifyServerFilterChainTest extends EsebTestCase {
 		m_bus.add_listener(new EventBusListener() {
 			@Override
 			public void distributed(BusData v, EventBusConnectionData source) {
+				/* */
 			}
 			
 			@Override
 			public void connection_disconnected(EventBusConnectionData data) {
+				/* */
 			}
 			
 			@Override

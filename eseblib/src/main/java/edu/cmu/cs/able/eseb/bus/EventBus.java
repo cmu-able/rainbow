@@ -35,9 +35,18 @@ import edu.cmu.cs.able.typelib.txtenc.TextEncoding;
 import edu.cmu.cs.able.typelib.txtenc.typelib.DefaultTextEncoding;
 
 /**
- * Implementation of an event bus which opens a port and receives
- * connections in the port. All messages sent by one connection are forward to
- * all other connections.
+ * <p>Implementation of an event bus which opens a port and receives
+ * connections in the port. All messages sent by one connection are generally
+ * forward to all other connections.</p>
+ * <p>Multiple event buses can coexist in the same process as long as they
+ * do not share ports. Information on main events associated with the event bus
+ * can be obtained by installing listeners.</p>
+ * <p>Accept preprocessors ({@link EventBusAcceptPreprocessor} can be added
+ * to the event and will be invoked before a connection is added to the
+ * bus.</p>
+ * <p>All connections in the bus have a bus-side input filter chain and
+ * bus-side output filter chain that are independent of any other chain that
+ * may exist in the other side of the connection.</p>
  */
 public class EventBus implements Closeable {
 	/**

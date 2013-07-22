@@ -34,7 +34,7 @@ public class SyncScbMasterContainerTest extends DefaultTCase {
 	public void set_up() {
 		m_master = new SyncScbMasterContainerImpl<>();
 		m_master_listener = new TestScbContainerListener<>();
-		m_master.add_listener(m_master_listener);
+		m_master.dispatcher().add(m_master_listener);
 	}
 	
 	@Test

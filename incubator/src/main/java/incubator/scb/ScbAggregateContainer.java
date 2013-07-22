@@ -1,5 +1,6 @@
 package incubator.scb;
 
+import incubator.dispatch.Dispatcher;
 import incubator.dispatch.DispatcherOp;
 import incubator.dispatch.LocalDispatcher;
 import incubator.pval.Ensure;
@@ -68,7 +69,7 @@ public class ScbAggregateContainer<T extends Scb<T>>
 			added(container, t);
 		}
 		
-		container.add_listener(m_listeners.get(container));
+		container.dispatcher().add(m_listeners.get(container));
 		
 		for (T t : container.all_scbs()) {
 			added(container, t);
@@ -83,7 +84,7 @@ public class ScbAggregateContainer<T extends Scb<T>>
 		Ensure.notNull(container);
 		Ensure.isTrue(m_listeners.containsKey(container));
 		
-		container.remove_listener(m_listeners.get(container));
+		container.dispatcher().remove(m_listeners.get(container));
 		m_listeners.remove(container);
 		
 		for (T t : container.all_scbs()) {
@@ -148,15 +149,10 @@ public class ScbAggregateContainer<T extends Scb<T>>
 			}
 		});
 	}
-
+	
 	@Override
-	public void add_listener(ScbContainerListener<T> listener) {
-		m_dispatcher.add(listener);
-	}
-
-	@Override
-	public void remove_listener(ScbContainerListener<T> listener) {
-		m_dispatcher.remove(listener);
+	public Dispatcher<ScbContainerListener<T>> dispatcher() {
+		return m_dispatcher;
 	}
 
 	@Override

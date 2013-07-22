@@ -103,6 +103,7 @@ public class EventFilterTest extends FilterTestCase {
 		EventFilter f2 = new EventFilter() {
 			@Override
 			public void sink(BusData data) throws IOException {
+				/* */
 			}
 		};
 		

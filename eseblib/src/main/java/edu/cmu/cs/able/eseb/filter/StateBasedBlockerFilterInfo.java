@@ -35,4 +35,30 @@ public class StateBasedBlockerFilterInfo<S extends Enum<S> & Blocker>
 	public S state() {
 		return m_state;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((m_state == null) ? 0 : m_state.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		@SuppressWarnings("rawtypes")
+		StateBasedBlockerFilterInfo other = (StateBasedBlockerFilterInfo) obj;
+		if (m_state == null) {
+			if (other.m_state != null)
+				return false;
+		} else if (!m_state.equals(other.m_state))
+			return false;
+		return true;
+	}
 }

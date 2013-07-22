@@ -11,6 +11,10 @@ import edu.cmu.cs.able.eseb.BusData;
 import edu.cmu.cs.able.eseb.bus.EventBus;
 import edu.cmu.cs.able.eseb.bus.EventBusConnectionData;
 import edu.cmu.cs.able.eseb.bus.EventBusListener;
+import edu.cmu.cs.able.eseb.filter.BlockUnblockFilter;
+import edu.cmu.cs.able.eseb.filter.BlockedUnblockedState;
+import edu.cmu.cs.able.eseb.filter.EventFilter;
+import edu.cmu.cs.able.eseb.filter.EventFilterChain;
 
 /**
  * Implementation of the remote interface access to an event bus.
@@ -163,6 +167,62 @@ public class EventBusRemoteControlInterfaceImpl
 	@Override
 	public short data_master_port() {
 		return m_data_master_port;
+	}
+
+	@Override
+	public void incoming_blocking_status(int id, BlockingStatus status) {
+		Ensure.not_null(status);
+		EventFilterChain chain = m_bus.incoming_chain(id);
+		if (chain != null) {
+			blocking_status(chain, status);
+		}
+	}
+
+	@Override
+	public void outgoing_blocking_status(int id, BlockingStatus status) {
+		Ensure.not_null(status);
+		EventFilterChain chain = m_bus.outgoing_chain(id);
+		if (chain != null) {
+			blocking_status(chain, status);
+		}
+	}
+
+	/**
+	 * Sets the blocking status of a chain.
+	 * @param c the chain
+	 * @param status the blocking status
+	 */
+	private void blocking_status(EventFilterChain c, BlockingStatus status) {
+		Ensure.not_null(c);
+		Ensure.not_null(status);
+		
+		synchronized (c) {
+			BlockUnblockFilter buf = null;
+			for (EventFilter f : c.filters()) {
+				if (f instanceof BlockUnblockFilter) {
+					buf = (BlockUnblockFilter) f;
+					break;
+				}
+			}
+			
+			if (buf == null) {
+				if (status != BlockingStatus.NO_BLOCKING_FILTER) {
+					buf = new BlockUnblockFilter(
+							status == BlockingStatus.BLOCKING?
+							BlockedUnblockedState.BLOCK
+							: BlockedUnblockedState.UNBLOCK);
+					c.add_filter(buf);
+				}
+			} else {
+				if (status == BlockingStatus.NO_BLOCKING_FILTER) {
+					c.remove_filter(buf);
+				} else if (status == BlockingStatus.BLOCKING) {
+					buf.block();
+				} else {
+					buf.unblock();
+				}
+			}
+		}
 	}
 	
 	/**

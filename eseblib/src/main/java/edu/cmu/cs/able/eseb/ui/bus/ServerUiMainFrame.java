@@ -38,8 +38,36 @@ public class ServerUiMainFrame extends MainApplicationFrame {
 		ScanEsebServerAction sesa = new ScanEsebServerAction(mm, maf);
 		sesa.bind(maf.get_action_context());
 		
+		BlockIncomingAction bia = new BlockIncomingAction();
+		bia.bind(maf.get_action_context());
+		
+		UnblockIncomingAction uia = new UnblockIncomingAction();
+		uia.bind(maf.get_action_context());
+		
+		RemoveBlockingFilterIncomingAction rbfia =
+				new RemoveBlockingFilterIncomingAction();
+		rbfia.bind(maf.get_action_context());
+		
+		BlockOutgoingAction boa = new BlockOutgoingAction();
+		boa.bind(maf.get_action_context());
+		
+		UnblockOutgoingAction uoa = new UnblockOutgoingAction();
+		uoa.bind(maf.get_action_context());
+		
+		RemoveBlockingFilterOutgoingAction rbfoa =
+				new RemoveBlockingFilterOutgoingAction();
+		rbfoa.bind(maf.get_action_context());
+		
 		JMenu ebus_menu = new JMenu("Event Bus");
 		ebus_menu.add(sesa.createJMenuItem(false));
+		ebus_menu.addSeparator();
+		ebus_menu.add(bia.createJMenuItem(false));
+		ebus_menu.add(uia.createJMenuItem(false));
+		ebus_menu.add(rbfia.createJMenuItem(false));
+		ebus_menu.addSeparator();
+		ebus_menu.add(boa.createJMenuItem(false));
+		ebus_menu.add(uoa.createJMenuItem(false));
+		ebus_menu.add(rbfoa.createJMenuItem(false));
 		maf.add_menu_after(ebus_menu, mutex_menu.getText());
 		
 		ShowExceptionBrowserAction seba = new ShowExceptionBrowserAction(maf);

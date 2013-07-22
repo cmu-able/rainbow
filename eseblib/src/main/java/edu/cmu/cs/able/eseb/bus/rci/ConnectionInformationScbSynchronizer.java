@@ -68,7 +68,6 @@ public class ConnectionInformationScbSynchronizer {
 		m_connections = new HashMap<>();
 		m_local = new HashMap<>();
 		m_worker = new WorkerThread("Connection information updater") {
-
 			@Override
 			protected void do_cycle_operation() throws Exception {
 				update_counts();

@@ -201,6 +201,8 @@ public class EventBusRemoteConnectionInfo
 		Ensure.not_null(t);
 		publish_count(t.publish_count());
 		subscribe_count(t.subscribe_count());
+		incoming_chain(t.incoming_chain());
+		outgoing_chain(t.outgoing_chain());
 	}
 	
 	@SuppressWarnings("javadoc")

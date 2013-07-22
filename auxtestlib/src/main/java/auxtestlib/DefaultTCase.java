@@ -29,7 +29,7 @@ public class DefaultTCase extends Assert {
 	/**
 	 * Default timeout to wait for an expression to become <code>true</code>.
 	 */
-	private static final long WAIT_FOR_TRUE_DEFAULT_TIMEOUT_MS = 1000;
+	private static final long WAIT_FOR_TRUE_DEFAULT_TIMEOUT_MS = 10_000;
 	
 	/**
 	 * All helpers.

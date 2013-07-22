@@ -1,15 +1,22 @@
 package edu.cmu.cs.able.eseb.filter;
 
+import incubator.dispatch.Dispatcher;
+import incubator.dispatch.LocalDispatcher;
 import incubator.pval.Ensure;
+import incubator.scb.ScbContainer;
+import incubator.scb.ScbContainerListener;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
  * Information about a filter chain.
  */
-public class EventFilterChainInfo implements Serializable {
+public class EventFilterChainInfo implements Serializable,
+		ScbContainer<EventFilterInfo> {
 	/**
 	 * Version for serialization.
 	 */
@@ -21,6 +28,12 @@ public class EventFilterChainInfo implements Serializable {
 	private List<EventFilterInfo> m_filters;
 	
 	/**
+	 * Dispatcher used to send events.
+	 */
+	private transient LocalDispatcher<ScbContainerListener<EventFilterInfo>>
+			m_dispatcher;
+	
+	/**
 	 * Creates a new information object collecting data from the chain.
 	 * @param chain the chain
 	 */
@@ -30,6 +43,8 @@ public class EventFilterChainInfo implements Serializable {
 		for (EventFilter f : chain.filters()) {
 			m_filters.add(f.info());
 		}
+		
+		m_dispatcher = new LocalDispatcher<>();
 	}
 	
 	/**
@@ -64,5 +79,23 @@ public class EventFilterChainInfo implements Serializable {
 		} else if (!m_filters.equals(other.m_filters))
 			return false;
 		return true;
+	}
+	
+	@Override
+	public Dispatcher<ScbContainerListener<EventFilterInfo>> dispatcher() {
+		return m_dispatcher;
+	}
+
+	@Override
+	public Collection<EventFilterInfo> all_scbs() {
+		return filters();
+	}
+	
+	@SuppressWarnings("javadoc")
+	private void readObject(java.io.ObjectInputStream in)
+			throws IOException, ClassNotFoundException {
+		Ensure.not_null(in);
+		in.defaultReadObject();
+		m_dispatcher = new LocalDispatcher<>();
 	}
 }

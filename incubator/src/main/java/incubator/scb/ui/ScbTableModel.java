@@ -7,6 +7,7 @@ import incubator.scb.ScbContainer;
 import incubator.scb.ScbContainerListener;
 import incubator.scb.ScbDateField;
 import incubator.scb.ScbDerivedTextFromDateField;
+import incubator.scb.ScbEnumField;
 import incubator.scb.ScbField;
 import incubator.scb.ScbIntegerField;
 import incubator.scb.ScbTextField;
@@ -105,7 +106,7 @@ public class ScbTableModel<T extends Scb<T>, C extends Comparator<T>>
 		m_container = container;
 		
 		if (container != null) {
-			container.add_listener(m_listener);
+			container.dispatcher().add(m_listener);
 		}
 	}
 	
@@ -120,11 +121,11 @@ public class ScbTableModel<T extends Scb<T>, C extends Comparator<T>>
 		}
 		
 		if (m_container != null) {
-			m_container.remove_listener(m_listener);
+			m_container.dispatcher().remove(m_listener);
 		}
 		
 		if (new_container != null) {
-			new_container.add_listener(m_listener);
+			new_container.dispatcher().add(m_listener);
 		}
 		
 		m_container = new_container;
@@ -178,6 +179,9 @@ public class ScbTableModel<T extends Scb<T>, C extends Comparator<T>>
 			ScbDateField<T> sdf = (ScbDateField<T>) f;
 			add_field(new ScbTableModelTextField<>(
 					new ScbDerivedTextFromDateField<>(sdf), editable));
+		} else if (f instanceof ScbEnumField) {
+			ScbEnumField<T, ?> sef = (ScbEnumField<T, ?>) f;
+			add_field(new ScbTableModelEnumTextField<>(sef));
 		} else {
 			Ensure.isTrue(false);
 		}

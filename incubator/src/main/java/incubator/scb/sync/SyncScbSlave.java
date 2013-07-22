@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.log4j.Logger;
 
 /**
  * The <code>SyncScbSlave</code> will keep several containers (mapped by
@@ -25,6 +26,11 @@ import org.apache.commons.lang.RandomStringUtils;
  * and receive updates the server updating the beans in the container.
  */
 public class SyncScbSlave {
+	/**
+	 * Logger to use.
+	 */
+	private static final Logger LOG = Logger.getLogger(SyncScbSlave.class);
+	
 	/**
 	 * Length of the client's unique ID.
 	 */
@@ -159,10 +165,15 @@ public class SyncScbSlave {
 		
 		Pair<Boolean, List<ScbOperation>> r = null;
 		try {
+			LOG.trace("Sync slave (UID=" + uid +") sending " + pending.size()
+					+ " commands to the master.");
 			r = m_master.slave_contact(uid, pending);
 			
 			synchronized (this) {
 				if (r.first()) {
+					LOG.debug("Sync slave (UID=" + uid + ") resetting by "
+							+ "master command.");
+					
 					/*
 					 * We need to reset everything.
 					 */
@@ -171,6 +182,8 @@ public class SyncScbSlave {
 					}
 				}
 				
+				LOG.trace("Sync slave (UID=" + uid + ") received "
+							+ r.second().size() + " commands from master.");
 				for (ScbOperation op : r.second()) {
 					ContainerWrapper<?, ?> w = m_containers.get(
 							op.container_key());
@@ -265,6 +278,9 @@ public class SyncScbSlave {
 		Ensure.not_null(scb);
 		Ensure.is_true(m_containers.containsKey(key));
 		
+		LOG.debug("Sync slave (UID=" + m_uid + ") detected SCB with ID="
+				+ m_containers.get(key).m_tclass.cast(scb).id() + " added in "
+				+ "container with key=" + key + ".");
 		m_pending.add(ScbOperation.make_incoming(key, scb));
 		
 	}
@@ -279,6 +295,9 @@ public class SyncScbSlave {
 		Ensure.not_null(scb);
 		Ensure.is_true(m_containers.containsKey(key));
 		
+		LOG.debug("Sync slave (UID=" + m_uid + ") detected SCB with ID="
+				+ m_containers.get(key).m_tclass.cast(scb).id() + " updated "
+				+ "in container with key=" + key + ".");
 		m_pending.add(ScbOperation.make_incoming(key, scb));
 	}
 	
@@ -293,6 +312,8 @@ public class SyncScbSlave {
 		Ensure.not_null(id);
 		Ensure.is_true(m_containers.containsKey(key));
 		
+		LOG.debug("Sync slave (UID=" + m_uid + ") detected SCB with "
+				+ "ID=" + id + " deleted from container with key=" + key + ".");
 		m_pending.add(ScbOperation.make_delete(key, id));
 	}
 	
@@ -413,16 +434,21 @@ public class SyncScbSlave {
 				}
 			};
 			
-			ec.add_listener(m_clistner);
+			ec.dispatcher().add(m_clistner);
 		}
 		
 		/**
 		 * Resets the container removing all elements.
 		 */
 		private synchronized void reset() {
-			Set<T> all = new HashSet<>(m_container.all_scbs());
-			for (T t : all) {
-				m_container.remove_scb(t);
+			synchronized (m_container) {
+				Set<T> all = new HashSet<>(m_container.all_scbs());
+				m_container.dispatcher().remove(m_clistner);
+				for (T t : all) {
+					t.dispatcher().remove(m_ulistener);
+					m_container.remove_scb(t);
+				}
+				m_container.dispatcher().add(m_clistner);
 			}
 			
 			Ensure.equals(0, m_container.all_scbs().size());
@@ -448,16 +474,27 @@ public class SyncScbSlave {
 		 */
 		private void process_delete(ID_TYPE id) {
 			Ensure.not_null(id);
+			boolean found = false;
 			for (T t : m_container.all_scbs()) {
 				if (t.id().equals(id)) {
 					synchronized (m_container) {
-						m_container.remove_listener(m_clistner);
+						m_container.dispatcher().remove(m_clistner);
 						t.dispatcher().remove(m_ulistener);
 						m_container.remove_scb(t);
-						m_container.add_listener(m_clistner);
+						m_container.dispatcher().add(m_clistner);
 					}
+					
+					LOG.debug("Sync slave (UID=" + m_uid + ") deleting "
+							+ "SCB with ID=" + id + " by master command.");
+					found = true;
 					break;
 				}
+			}
+			
+			if (!found) {
+				LOG.debug("Sync slave (UID=" + m_uid + ") ignored "
+						+ "master command to delete SCB with ID=" + id
+						+ " because no such SCB is known.");
 			}
 		}
 		
@@ -484,10 +521,17 @@ public class SyncScbSlave {
 				t.sync_status(SyncStatus.SYNCHRONIZED);
 				t.dispatcher().add(m_ulistener);
 				synchronized (m_container) {
-					m_container.remove_listener(m_clistner);
+					m_container.dispatcher().remove(m_clistner);
 					m_container.add_scb(t);
-					m_container.add_listener(m_clistner);
+					m_container.dispatcher().add(m_clistner);
 				}
+				
+				LOG.debug("Sync slave (UID=" + m_uid + ") created SCB "
+						+ "with ID=" + t.id() + " by master command.");
+			} else {
+				
+				LOG.debug("Sync slave (UID=" + m_uid + ") updated SCB "
+						+ "with ID=" + t.id() + " by master command.");
 			}
 		}
 	}

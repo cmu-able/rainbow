@@ -1,5 +1,6 @@
 package incubator.scb;
 
+import incubator.dispatch.Dispatcher;
 import incubator.dispatch.DispatcherOp;
 import incubator.dispatch.LocalDispatcher;
 import incubator.obscol.ObservableSet;
@@ -104,15 +105,10 @@ public class ScbContainerImpl<T extends Scb<T>> implements ScbContainer<T> {
 				}
 		});
 	}
-
+	
 	@Override
-	public void add_listener(ScbContainerListener<T> listener) {
-		m_dispatcher.add(listener);
-	}
-
-	@Override
-	public void remove_listener(ScbContainerListener<T> listener) {
-		m_dispatcher.remove(listener);
+	public Dispatcher<ScbContainerListener<T>> dispatcher() {
+		return m_dispatcher;
 	}
 
 	@Override

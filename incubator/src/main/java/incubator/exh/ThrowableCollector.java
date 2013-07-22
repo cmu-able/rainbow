@@ -1,5 +1,6 @@
 package incubator.exh;
 
+import incubator.dispatch.Dispatcher;
 import incubator.dispatch.DispatcherOp;
 import incubator.dispatch.LocalDispatcher;
 import incubator.pval.Ensure;
@@ -80,13 +81,8 @@ public class ThrowableCollector implements Serializable,
 	}
 	
 	@Override
-	public void add_listener(ScbContainerListener<ThrowableContext> l) {
-		m_dispatcher.add(l);
-	}
-	
-	@Override
-	public void remove_listener(ScbContainerListener<ThrowableContext> l) {
-		m_dispatcher.remove(l);
+	public Dispatcher<ScbContainerListener<ThrowableContext>> dispatcher() {
+		return m_dispatcher;
 	}
 	
 	/**

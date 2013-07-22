@@ -31,4 +31,18 @@ public interface EventBusRemoteControlInterface {
 	 * @return the queue update
 	 */
 	LimitedDistributionQueue distribution_queue(String key);
+	
+	/**
+	 * Sets the incoming chain filter blocking status.
+	 * @param id the client ID
+	 * @param status the blocking status
+	 */
+	void incoming_blocking_status(int id, BlockingStatus status);
+	
+	/**
+	 * Sets the outgoing chain filter blocking status.
+	 * @param id the client ID
+	 * @param status the blocking status
+	 */
+	void outgoing_blocking_status(int id, BlockingStatus status);
 }

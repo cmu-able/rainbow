@@ -19,7 +19,8 @@ public class ScbAutoTableModel<T extends Scb<T>, C extends Comparable<C>>
 		extends ScbTableModel<T, Comparator<T>> {
 	/**
 	 * Creates a new table model.
-	 * @param container the SCB container
+	 * @param container the SCB container, which can be <code>null</code> if
+	 * no data is to be shown in the table
 	 * @param fields the fields
 	 * @param order_field field used for sorting
 	 */

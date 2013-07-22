@@ -76,7 +76,7 @@ public class SqlContainerTableMapping<T extends Scb<T>> {
 		m_collector = new LocalCollector("SQL container '" + table_name
 				+ "'.");
 		
-		m_container.add_listener(new ScbContainerListener<T>() {
+		m_container.dispatcher().add(new ScbContainerListener<T>() {
 			@Override
 			public void scb_added(T t) {
 				created(t);
