@@ -22,4 +22,10 @@ public class LCCoordEqTest extends DefaultTCase {
 		assertEquals(1, c.line());
 		assertEquals(1, c.column());
 	}
+	
+	@Test
+	public void to_string() throws Exception {
+		LCCoord c = new LCCoord(1, 2);
+		assertEquals("1:2", c.toString());
+	}
 }

@@ -5,7 +5,12 @@ import incubator.pval.Ensure;
 /**
  * Class representing a location within a text region.
  */
-class TextRegionMatch {
+public class TextRegionMatch {
+	/**
+	 * Filename reported in {@link #toString()} when no file exists.
+	 */
+	public static final String NO_FILE_NAME = "(no file)";
+	
 	/**
 	 * The region.
 	 */
@@ -60,5 +65,18 @@ class TextRegionMatch {
 	 */
 	public LCCoord coord_in_region() {
 		return m_coord;
+	}
+	
+	@Override
+	public String toString() {
+		String fn;
+		if (m_region.file() != null) {
+			fn = m_region.file().file().getAbsolutePath();
+		} else {
+			fn = NO_FILE_NAME;
+		}
+		
+		LCCoord c = coord_in_region();
+		return fn + ":" + c;
 	}
 }

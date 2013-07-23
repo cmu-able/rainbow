@@ -71,7 +71,7 @@ public class TextContainer {
 	 * @param c the coordinate
 	 * @return the match
 	 */
-	TextRegionMatch locate(LCCoord c) {
+	public TextRegionMatch locate(LCCoord c) {
 		Ensure.not_null(c);
 		Ensure.greater(c.line(), 0);
 		Ensure.less_equal(c.line(), m_index.size());

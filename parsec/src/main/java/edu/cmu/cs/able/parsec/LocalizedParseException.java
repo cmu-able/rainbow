@@ -17,6 +17,29 @@ public class LocalizedParseException extends ParseException {
 	 * Creates a new exception.
 	 * @param message the exception message which should <em>not</em> include
 	 * a location
+	 * @param location the location, which may <em>not</em> be
+	 * <code>null</code>
+	 * @param cause the cause of the exception, which may be
+	 * <code>null</code>
+	 */
+	public LocalizedParseException(String message, LCCoord location,
+			Throwable cause) {
+		super(message);
+		m_location = location;
+		
+		/*
+		 * ParseException does not allow adding a causing exception so we'll
+		 * add it as suppressed.
+		 */
+		if (cause != null) {
+			addSuppressed(cause);
+		}
+	}
+	
+	/**
+	 * Creates a new exception.
+	 * @param message the exception message which should <em>not</em> include
+	 * a location
 	 * @param location the location which may <em>not</em> be <code>null</code>
 	 */
 	public LocalizedParseException(String message, LCCoord location) {

@@ -48,6 +48,7 @@ class ParsecDelegationPostListener<T> extends ParsecParserPostListener {
 			}
 		}
 		
+		Ensure.greater(exceptions.size(), 0);
 		handle_exceptions(exceptions, loc);
 	}
 
@@ -89,10 +90,12 @@ class ParsecDelegationPostListener<T> extends ParsecParserPostListener {
 	 * @throws LocalizedParseException the exception to throw; this is always
 	 * thrown in all invocations of this method
 	 */
+	@SuppressWarnings("null")
 	private void handle_exceptions(List<LocalizedParseException> exceptions,
 			TextRegionMatch loc) throws LocalizedParseException {
-		assert exceptions != null;
-		assert loc != null;
+		Ensure.not_null(exceptions);
+		Ensure.not_null(loc);
+		Ensure.greater(exceptions.size(), 0);
 		
 		LocalizedParseException last = null;
 		LCCoord last_c = null;
@@ -106,6 +109,8 @@ class ParsecDelegationPostListener<T> extends ParsecParserPostListener {
 			}
 		}
 		
+		Ensure.not_null(last);
+		Ensure.not_null(last_c);
 		LCCoord report_c;
 		if (last_c.line() == 1) {
 			report_c = new LCCoord(loc.coord_in_region().line(),
@@ -115,6 +120,6 @@ class ParsecDelegationPostListener<T> extends ParsecParserPostListener {
 					+ last_c.line() - 1, last_c.column());
 		}
 		
-		throw new LocalizedParseException(last.getMessage(), report_c);
+		throw new LocalizedParseException(last.getMessage(), report_c, last);
 	}
 }

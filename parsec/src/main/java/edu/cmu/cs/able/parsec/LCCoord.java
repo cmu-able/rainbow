@@ -60,4 +60,9 @@ public class LCCoord {
 	public int column() {
 		return m_column;
 	}
+	
+	@Override
+	public String toString() {
+		return m_line + ":" + m_column;
+	}
 }
