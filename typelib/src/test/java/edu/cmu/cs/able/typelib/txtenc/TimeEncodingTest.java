@@ -100,13 +100,13 @@ public class TimeEncodingTest extends AbstractEncodingTestCase {
 			v[i] = m_pscope.time().make(l);
 		}
 		
-		double unit_value = encode_decode(v, 500);
-		System.out.println("Time encoding time: " + unit_value + "ms.");
+		double unit_value = encode_decode(v, 500) * 1000;
+		System.out.println("Time encoding time: " + unit_value + "us.");
 		
 		/*
 		 * 50us is OK.
 		 */
-		assertTrue(0.05 > unit_value);
+		assertTrue(50 > unit_value);
 	}
 
 	@Test
@@ -116,12 +116,12 @@ public class TimeEncodingTest extends AbstractEncodingTestCase {
 			v[i] = m_pscope.time().make(RandomUtils.nextLong());
 		}
 		
-		double unit_value = encode_decode(v, 500);
-		System.out.println("Period encoding time: " + unit_value + "ms.");
+		double unit_value = encode_decode(v, 500) * 1000;
+		System.out.println("Period encoding time: " + unit_value + "us.");
 		
 		/*
 		 * 50us is OK.
 		 */
-		assertTrue(0.05 > unit_value);
+		assertTrue(50 > unit_value);
 	}
 }

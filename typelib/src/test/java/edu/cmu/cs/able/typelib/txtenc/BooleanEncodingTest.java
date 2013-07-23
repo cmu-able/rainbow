@@ -52,12 +52,12 @@ public class BooleanEncodingTest extends AbstractEncodingTestCase {
 			v[i] = m_pscope.bool().make(RandomUtils.nextBoolean());
 		}
 		
-		double unit_value = encode_decode(v, 500);
-		System.out.println("Boolean encoding time: " + unit_value + "ms.");
+		double unit_value = encode_decode(v, 500) * 1000;
+		System.out.println("Boolean encoding time: " + unit_value + "us.");
 		
 		/*
 		 * 50us is OK.
 		 */
-		assertTrue(0.05 > unit_value);
+		assertTrue(50 > unit_value);
 	}
 }

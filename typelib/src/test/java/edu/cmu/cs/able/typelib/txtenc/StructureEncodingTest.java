@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edu.cmu.cs.able.typelib.enc.InvalidEncodingException;
+import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
 import edu.cmu.cs.able.typelib.struct.Field;
 import edu.cmu.cs.able.typelib.struct.FieldDescription;
 import edu.cmu.cs.able.typelib.struct.StructureDataType;
@@ -96,6 +97,24 @@ public class StructureEncodingTest extends AbstractEncodingTestCase {
 				 * Expected.
 				 */
 			}
+		}
+	}
+	
+	@Test
+	public void decoding_non_existent_structure() throws Exception {
+		PrimitiveScope ps2 = new PrimitiveScope();
+		StructureDataType sdt = new StructureDataType("x_y", false,
+				new HashSet<FieldDescription>(), ps2.any());
+		ps2.add(sdt);
+		
+		m_enc.encode(sdt.make(new HashMap<Field, DataValue>()), m_doutput);
+		try {
+			m_enc.decode(make_din(), m_pscope);
+			fail();
+		} catch (InvalidEncodingException e) {
+			/*
+			 * Expected.
+			 */
 		}
 	}
 }

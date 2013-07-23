@@ -22,18 +22,22 @@ SKIP : {
 
 TOKEN : {
 	< CCOLON: "::" >
+|	< COMMA: "," >
+|	< GT: ">" >
+|	< LT: "<" >
 |	< QMARK: "?" >
 | 	< IDENTIFIER: ["a"-"z","A"-"Z","_"](["a"-"z","A"-"Z","0"-"9","_"])* >
-|	< TYPE_NAME: <IDENTIFIER>((<CCOLON>|<QMARK>)(<IDENTIFIER>)?)* >
+|	< TYPE_NAME: <IDENTIFIER>(
+		(<COMMA>|<CCOLON>|<QMARK>|<LT>|<GT>)(<IDENTIFIER>)?)* >
 }
 FieldDeclaration Field() : {
 		Token name;
 		Token type;
 	} {
-		type = <TYPE_NAME > name = <IDENTIFIER> <EOF> {
+		type = <TYPE_NAME> name = <IDENTIFIER> <EOF> {
 			return new FieldDeclaration(name.image, type.image);
 			}
-		| type = <IDENTIFIER > name = <IDENTIFIER> <EOF> {
+		| type = <IDENTIFIER> name = <IDENTIFIER> <EOF> {
 			return new FieldDeclaration(name.image, type.image);
 			}
 }

@@ -7,6 +7,8 @@ import org.junit.Test;
 import auxtestlib.FileContentWorker;
 import edu.cmu.cs.able.parsec.LocalizedParseException;
 import edu.cmu.cs.able.parsec.ParsecFileReader;
+import edu.cmu.cs.able.typelib.comp.MapDataType;
+import edu.cmu.cs.able.typelib.comp.SetDataType;
 import edu.cmu.cs.able.typelib.scope.HierarchicalName;
 import edu.cmu.cs.able.typelib.type.DataType;
 import edu.cmu.cs.able.typelib.type.DataTypeScope;
@@ -181,5 +183,25 @@ public class StructParseTest extends StructureTestCase {
 		
 		assertSame(sdt, foo.find("bar"));
 		assertNotSame(foo, m_pscope);
+	}
+	
+	@Test
+	public void parse_structure_with_complex_field() throws Exception {
+		StructureDataType bar = parse_declaration("foo",
+				"struct foo { set<string> bar; }");
+		assertEquals(1, bar.fields().size());
+		Field f = bar.fields().iterator().next();
+		assertEquals("bar", f.description().name());
+		assertTrue(f.description().type() instanceof SetDataType);
+	}
+	
+	@Test
+	public void parse_structure_with_complex_field_2() throws Exception {
+		StructureDataType bar = parse_declaration("foo",
+				"struct foo { map<string,int32> bar; }");
+		assertEquals(1, bar.fields().size());
+		Field f = bar.fields().iterator().next();
+		assertEquals("bar", f.description().name());
+		assertTrue(f.description().type() instanceof MapDataType);
 	}
 }

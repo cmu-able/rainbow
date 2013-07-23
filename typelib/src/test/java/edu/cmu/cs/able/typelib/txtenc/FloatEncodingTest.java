@@ -99,13 +99,13 @@ public class FloatEncodingTest extends AbstractEncodingTestCase {
 			v[i] = m_pscope.float_type().make(RandomUtils.nextFloat());
 		}
 		
-		double unit_value = encode_decode(v, 500);
-		System.out.println("Float encoding time: " + unit_value + "ms.");
+		double unit_value = encode_decode(v, 500) * 1000;
+		System.out.println("Float encoding time: " + unit_value + "us.");
 		
 		/*
 		 * 50us is OK.
 		 */
-		assertTrue(0.05 > unit_value);
+		assertTrue(50 > unit_value);
 	}
 	
 	@Test
@@ -115,12 +115,12 @@ public class FloatEncodingTest extends AbstractEncodingTestCase {
 			v[i] = m_pscope.double_type().make(RandomUtils.nextDouble());
 		}
 		
-		double unit_value = encode_decode(v, 500);
-		System.out.println("Double encoding time: " + unit_value + "ms.");
+		double unit_value = encode_decode(v, 500) * 1000;
+		System.out.println("Double encoding time: " + unit_value + "us.");
 		
 		/*
 		 * 50us is OK.
 		 */
-		assertTrue(0.05 > unit_value);
+		assertTrue(50 > unit_value);
 	}
 }

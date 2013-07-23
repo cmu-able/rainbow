@@ -95,14 +95,14 @@ public class StringEncodingTest extends AbstractEncodingTestCase {
 					1 + RandomUtils.nextInt(18)));
 		}
 		
-		double unit_value = encode_decode(v, 500);
+		double unit_value = encode_decode(v, 500) * 1000;
 		System.out.println("String (avg. 10 chars) encoding time: "
-				+ unit_value + "ms.");
+				+ unit_value + "us.");
 		
 		/*
 		 * 50us is OK.
 		 */
-		assertTrue(0.05 > unit_value);
+		assertTrue(50 > unit_value);
 	}
 	
 	@Test
@@ -113,13 +113,13 @@ public class StringEncodingTest extends AbstractEncodingTestCase {
 					1 + RandomUtils.nextInt(18)));
 		}
 		
-		double unit_value = encode_decode(v, 500);
+		double unit_value = encode_decode(v, 500) * 1000;
 		System.out.println("Ascii (avg. 10 chars) encoding time: "
-				+ unit_value + "ms.");
+				+ unit_value + "us.");
 		
 		/*
 		 * 50us is OK.
 		 */
-		assertTrue(0.05 > unit_value);
+		assertTrue(50 > unit_value);
 	}
 }

@@ -215,11 +215,19 @@ public class TextEncoding implements DataValueEncoding {
 		 * Find the data type.
 		 */
 		DataType dt = null;
+		Exception dt_fail_ex = null;
 		try {
 			dt = scope.find(hn);
 		} catch (AmbiguousNameException e) {
+			/*
+			 * dt will be null.
+			 */
+			dt_fail_ex = e;
+		}
+		
+		if (dt == null) {
 			throw new InvalidEncodingException("Cannot find data type '"
-					+ hn.toString() + "'.", e);
+					+ hn.toString() + "'.", dt_fail_ex);
 		}
 		
 		DelegateTextEncoding sc = find(dt);

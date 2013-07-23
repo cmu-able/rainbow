@@ -2,9 +2,10 @@
 <p>The <code>scope</code> package provides support for the concept of
 <em>scopes</em>, a fundamental concept in <em>typelib</em>.</p>
 
-<p>A scope is named collection of named objects, meaning each object has a
-name and the scope itself also has a name. All objects in a scope must have
-a unique name. Scopes can themselves be placed into other scopes building
+<p>A scope is named collection of named objects: it is a collection where
+each object has a name and the scope itself also has a name. All objects in
+a scope must have a unique name. Scopes can themselves be placed into other
+scopes building
 a hierarchical tree. The most elementary use of scopes is to build name spaces
 (or packages) of types. Scopes are implemented in the 
 {@link edu.cmu.cs.able.typelib.scope.Scope} class

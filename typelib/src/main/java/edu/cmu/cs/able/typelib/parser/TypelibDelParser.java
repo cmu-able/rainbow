@@ -14,6 +14,7 @@ import edu.cmu.cs.able.parsec.LocalizedParseException;
 import edu.cmu.cs.able.parsec.Parsec;
 import edu.cmu.cs.able.parsec.ParsecFileReader;
 import edu.cmu.cs.able.typelib.scope.AmbiguousNameException;
+import edu.cmu.cs.able.typelib.scope.CyclicScopeLinkageException;
 import edu.cmu.cs.able.typelib.struct.InvalidTypeDefinitionException;
 import edu.cmu.cs.able.typelib.struct.StructureDataType;
 import edu.cmu.cs.able.typelib.type.DataType;
@@ -164,6 +165,15 @@ public class TypelibDelParser implements DelegateParser<TypelibParsingContext> {
 			if (sub_scope == null) {
 				sub_scope = new DataTypeScope(nsdel);
 				ctx.scope().add(sub_scope);
+				
+				try {
+					sub_scope.link(ctx.scope());
+				} catch (CyclicScopeLinkageException e) {
+					throw new BlockTextParseException(
+							new LocalizedParseException("Cyclic namespace "
+									+ "graph detected.", new LCCoord(1, 1),
+									e));
+				}
 			}
 			
 			TypelibParsingContext sub_ctx = new TypelibParsingContext(

@@ -178,13 +178,13 @@ public class IntegerEncodingTest extends AbstractEncodingTestCase {
 					- 128));
 		}
 		
-		double unit_value = encode_decode(v, 500);
-		System.out.println("Int8 encoding time: " + unit_value + "ms.");
+		double unit_value = encode_decode(v, 500) * 1000;
+		System.out.println("Int8 encoding time: " + unit_value + "us.");
 		
 		/*
 		 * 50us is OK.
 		 */
-		assertTrue(0.05 > unit_value);
+		assertTrue(50 > unit_value);
 	}
 	
 	@Test
@@ -195,13 +195,13 @@ public class IntegerEncodingTest extends AbstractEncodingTestCase {
 					- 32768));
 		}
 		
-		double unit_value = encode_decode(v, 500);
-		System.out.println("Int16 encoding time: " + unit_value + "ms.");
+		double unit_value = encode_decode(v, 500) * 1000;
+		System.out.println("Int16 encoding time: " + unit_value + "us.");
 		
 		/*
 		 * 50us is OK.
 		 */
-		assertTrue(0.05 > unit_value);
+		assertTrue(50 > unit_value);
 	}
 	
 	@Test
@@ -211,13 +211,13 @@ public class IntegerEncodingTest extends AbstractEncodingTestCase {
 			v[i] = m_pscope.int32().make(RandomUtils.nextInt());
 		}
 		
-		double unit_value = encode_decode(v, 500);
-		System.out.println("Int32 encoding time: " + unit_value + "ms.");
+		double unit_value = encode_decode(v, 500) * 1000;
+		System.out.println("Int32 encoding time: " + unit_value + "us.");
 		
 		/*
 		 * 50us is OK.
 		 */
-		assertTrue(0.05 > unit_value);
+		assertTrue(50 > unit_value);
 	}
 	
 	@Test
@@ -227,12 +227,12 @@ public class IntegerEncodingTest extends AbstractEncodingTestCase {
 			v[i] = m_pscope.int64().make(RandomUtils.nextLong());
 		}
 		
-		double unit_value = encode_decode(v, 500);
-		System.out.println("Int64 encoding time: " + unit_value + "ms.");
+		double unit_value = encode_decode(v, 500) * 1000;
+		System.out.println("Int64 encoding time: " + unit_value + "us.");
 		
 		/*
 		 * 50us is OK.
 		 */
-		assertTrue(0.05 > unit_value);
+		assertTrue(50 > unit_value);
 	}
 }

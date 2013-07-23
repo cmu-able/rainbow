@@ -21,5 +21,6 @@ public class DefaultTextEncoding extends TextEncoding {
 		add(new TupleDelegateTextEncoding());
 		add(new MapDelegateTextEncoding());
 		add(new StructureDelegateTextEncoding());
+		add(new TypeDelegateTextEncoding());
 	}
 }
