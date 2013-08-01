@@ -27,6 +27,7 @@ import edu.cmu.cs.able.eseb.DataTypeSocketConnectionImpl;
 import edu.cmu.cs.able.eseb.filter.BusDataQueueGroupSink;
 import edu.cmu.cs.able.eseb.filter.EventFilterChain;
 import edu.cmu.cs.able.eseb.filter.EventSink;
+import edu.cmu.cs.able.typelib.enc.DataValueEncoding;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
 import edu.cmu.cs.able.typelib.txtenc.typelib.DefaultTextEncoding;
 import edu.cmu.cs.able.typelib.type.DataValue;
@@ -141,15 +142,33 @@ public class BusConnection implements Closeable {
 	private EventFilterChain m_outgoing_chain;
 	
 	/**
-	 * Creates a new client.
+	 * Encoding to use.
+	 */
+	private DataValueEncoding m_encoding;
+	
+	/**
+	 * Creates a new client with the default encoding.
 	 * @param host the host to connect to
 	 * @param port the port
 	 * @param scope the data type scope
 	 */
 	public BusConnection(String host, short port, PrimitiveScope scope) {
+		this(host, port, scope, new DefaultTextEncoding(scope));
+	}
+	
+	/**
+	 * Creates a new client.
+	 * @param host the host to connect to
+	 * @param port the port
+	 * @param scope the data type scope
+	 * @param encoding the encoding to use
+	 */
+	public BusConnection(String host, short port, PrimitiveScope scope,
+			DataValueEncoding encoding) {
 		Ensure.not_null(host);
 		Ensure.greater(port, 0);
 		Ensure.not_null(scope);
+		Ensure.not_null(encoding);
 		
 		m_host = host;
 		m_port = port;
@@ -162,6 +181,7 @@ public class BusConnection implements Closeable {
 		m_connect_count = 0;
 		m_receive_count = 0;
 		m_send_count = 0;
+		m_encoding = encoding;
 		m_collector = new LocalCollector("BusClient (" + host + ":" + port
 				+ ")");
 		m_primitive_scope = scope;
@@ -453,7 +473,7 @@ public class BusConnection implements Closeable {
 				new ControlledDataTypeSocketConnectionImpl(
 				m_primitive_scope,
 				new DataTypeSocketConnectionImpl("Connection " + m_host
-						+ ":" + m_port, s, new DefaultTextEncoding(),
+						+ ":" + m_port, s, m_encoding,
 						m_primitive_scope));
 		m_connection = impl;
 		m_connection_establisher = null;
@@ -675,5 +695,21 @@ public class BusConnection implements Closeable {
 	 */
 	public synchronized EventFilterChain outgoing_chain() {
 		return m_outgoing_chain;
+	}
+	
+	/**
+	 * Obtains the primitive scope used in this connection.
+	 * @return the connection
+	 */
+	public PrimitiveScope primitive_scope() {
+		return m_primitive_scope;
+	}
+	
+	/**
+	 * Obtains the encoding used in the connection.
+	 * @return the encoding used
+	 */
+	public DataValueEncoding encoding() {
+		return m_encoding;
 	}
 }

@@ -86,7 +86,7 @@ public class BusEventsFrame extends JInternalFrame {
 		
 		m_remote = remote;
 		m_pscope = new PrimitiveScope();
-		m_encoding = new DefaultTextEncoding();
+		m_encoding = new DefaultTextEncoding(m_pscope);
 		m_queue_key = RandomStringUtils.randomAlphanumeric(10);
 		m_total_lost = 0;
 		

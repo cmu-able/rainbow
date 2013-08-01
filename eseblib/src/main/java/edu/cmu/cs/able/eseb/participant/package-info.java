@@ -8,4 +8,4 @@ optional information. The input filter will remove these messages and will
 interpret them providing an interface to query which are the existing
 participants in the bus.
 */
-package edu.cmu.cs.able.eseb.filter.participant;
+package edu.cmu.cs.able.eseb.participant;

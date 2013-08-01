@@ -53,11 +53,11 @@ public class SocketTest extends DefaultTCase {
 		@SuppressWarnings("resource")
 		DataTypeSocketConnectionImpl cli_conn =
 				new DataTypeSocketConnectionImpl("cli", cli_side,
-				new DefaultTextEncoding(), m_scope);
+				new DefaultTextEncoding(m_scope), m_scope);
 		@SuppressWarnings("resource")
 		DataTypeSocketConnectionImpl srv_conn =
 				new DataTypeSocketConnectionImpl("srv", srv_side,
-				new DefaultTextEncoding(), m_scope);
+				new DefaultTextEncoding(m_scope), m_scope);
 		
 		cli_conn.thread_group().start();
 		srv_conn.thread_group().start();

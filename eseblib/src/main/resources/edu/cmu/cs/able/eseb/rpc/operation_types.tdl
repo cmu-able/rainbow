@@ -1,0 +1,136 @@
+namespace eseb {
+	/*
+	 * Namespace with data types for RPCs over eseb.
+	 */
+	namespace rpc {
+		/*
+		 * Direction of parameters in operations.
+		 */
+		enum parameter_direction {
+			/*
+			 * Parameter is an input parameter.
+			 */
+			input;
+			
+			/*
+			 * Parameter is an output parameter.
+			 */
+			output;
+		}
+	
+		/*
+		 * Structure with a description of an operation parameter.
+		 */
+		struct parameter {
+			/*
+			 * The parameter name.
+			 */
+			string name;
+			
+			/*
+			 * The parameter direction.
+			 */
+			parameter_direction direction;
+			
+			/*
+			 * The parameter data type.
+			 */
+			type data_type;
+		}
+	
+		/*
+		 * Description of an operation.
+		 */
+		struct operation {
+			/*
+			 * The operation name.
+			 */
+			string name;
+			
+			/*
+			 * The operation parameters.
+			 */
+			set<parameter> parameters;
+		}
+		
+		/*
+		 * Group of operations.
+		 */
+		struct group {
+			/*
+			 * The operations, mapped by their names.
+			 */
+			map<string,operation> operations;
+		}
+		
+		/*
+		 * Request to execute an operation.
+		 */
+		struct execution_request {
+			/*
+			 * Identifier of the request.
+			 */
+			int64 exec_id;
+			
+			/*
+			 * Identifier of the destination of the request.
+			 */
+			int64 dst_id;
+			
+			/*
+			 * Object ID used to execute the operation on.
+			 */
+			int64 obj_id;
+			
+			/*
+			 * Name of operation to execute.
+			 */
+			string operation_name;
+			
+			/*
+			 * Input parameters.
+			 */
+			map<string,any> inputs;
+		}
+		
+		/*
+		 * Response to an execution request.
+		 */
+		abstract struct execution_response {
+			/*
+			 * Identifier of the request.
+			 */
+			int64 exec_id;
+		}
+		
+		/*
+		 * Successful response to an execution request.
+		 */
+		struct execution_response_success : execution_response {
+			/*
+			 * Maps output parameters to their values.
+			 */
+			map<string,any> outputs;
+		}
+		
+		/*
+		 * Unsuccessful response to an execution request.
+		 */
+		struct execution_response_failure : execution_response {
+			/*
+			 * The type of failure.
+			 */
+			string type;
+			
+			/*
+			 * A description of the failure.
+			 */
+			string description;
+			
+			/*
+			 * Failure data.
+			 */
+			string data;
+		}
+	}
+}

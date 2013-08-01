@@ -1,21 +1,27 @@
-package edu.cmu.cs.able.eseb.filter.participant;
+package edu.cmu.cs.able.eseb.participant;
 
 import incubator.pval.Ensure;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.codec.binary.Base64;
+
 import edu.cmu.cs.able.parsec.LocalizedParseException;
 import edu.cmu.cs.able.parsec.ParsecFileReader;
 import edu.cmu.cs.able.typelib.comp.MapDataType;
 import edu.cmu.cs.able.typelib.comp.MapDataValue;
+import edu.cmu.cs.able.typelib.enc.DataValueEncoding;
 import edu.cmu.cs.able.typelib.enc.InvalidEncodingException;
 import edu.cmu.cs.able.typelib.parser.DefaultTypelibParser;
 import edu.cmu.cs.able.typelib.parser.TypelibParsingContext;
@@ -27,7 +33,6 @@ import edu.cmu.cs.able.typelib.scope.HierarchicalName;
 import edu.cmu.cs.able.typelib.struct.Field;
 import edu.cmu.cs.able.typelib.struct.StructureDataType;
 import edu.cmu.cs.able.typelib.struct.StructureDataValue;
-import edu.cmu.cs.able.typelib.txtenc.TextEncoding;
 import edu.cmu.cs.able.typelib.type.DataType;
 import edu.cmu.cs.able.typelib.type.DataValue;
 
@@ -94,23 +99,23 @@ public class ParticipantTypes {
 	/**
 	 * Text encoding used to encode data type.
 	 */
-	private TextEncoding m_txt_encoding;
+	private DataValueEncoding m_encoding;
 	
 	/**
 	 * Creates a new accessor class.
 	 * @param pscope the primitive data type scope
-	 * @param encoding an encoding that can convert between data tyeps and
+	 * @param encoding an encoding that can convert between data types and
 	 * text
 	 * @throws ParticipantException failed to instantiate the participant
 	 * data types
 	 */
-	public ParticipantTypes(PrimitiveScope pscope, TextEncoding encoding)
+	public ParticipantTypes(PrimitiveScope pscope, DataValueEncoding encoding)
 			throws ParticipantException {
 		Ensure.not_null(pscope);
 		Ensure.not_null(encoding);
 		
 		m_pscope = pscope;
-		m_txt_encoding = encoding;
+		m_encoding = encoding;
 		if (!read_types(pscope)) {
 			load_types(pscope);
 			boolean read = read_types(pscope);
@@ -177,7 +182,8 @@ public class ParticipantTypes {
 		Ensure.not_null(pscope);
 		
 		String types_text;
-		try (InputStream is = getClass().getResourceAsStream(TDL_RESOURCE);
+		try (InputStream is = Ensure.not_null(getClass().getResourceAsStream(
+				TDL_RESOURCE));
 				InputStreamReader isr = new InputStreamReader(is);
 				StringWriter sw = new StringWriter()) {
 			
@@ -222,16 +228,17 @@ public class ParticipantTypes {
 			Ensure.not_null(e.getKey());
 			Ensure.not_null(e.getValue());
 			
-			StringWriter sw = new StringWriter();
-			
-			try {
-				m_txt_encoding.encode(e.getValue(), sw);
+			try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+					DataOutputStream dos = new DataOutputStream(bos)) {
+				m_encoding.encode(e.getValue(), dos);
+				
+				String s = new String(Base64.encodeBase64(bos.toByteArray()));
+				
+				mdv.put(m_pscope.string().make(e.getKey()),
+						m_pscope.string().make(s));
 			} catch (IOException ex) {
 				Ensure.never_thrown(ex);
 			}
-			
-			mdv.put(m_pscope.string().make(e.getKey()),
-					m_pscope.string().make(sw.toString()));
 		}
 		
 		values.put(m_announce_id_field, m_pscope.int64().make(id));
@@ -300,9 +307,11 @@ public class ParticipantTypes {
 				m_announce_meta_data_field);
 		StringValue v_enc = (StringValue) mdv.get(m_pscope.string().make(k));
 		DataValue r = null;
-		try {
-			r = m_txt_encoding.decode(new StringReader(v_enc.value()),
-					m_pscope);
+		byte[] data = Base64.decodeBase64(v_enc.value().getBytes());
+		
+		try (ByteArrayInputStream bis = new ByteArrayInputStream(data);
+				DataInputStream dis = new DataInputStream(bis)) {
+			r = m_encoding.decode(dis, m_pscope);
 		} catch (IOException e) {
 			Ensure.never_thrown(e);
 		}

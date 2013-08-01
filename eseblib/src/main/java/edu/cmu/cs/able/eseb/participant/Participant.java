@@ -1,4 +1,4 @@
-package edu.cmu.cs.able.eseb.filter.participant;
+package edu.cmu.cs.able.eseb.participant;
 
 import incubator.dispatch.Dispatcher;
 import incubator.dispatch.DispatcherOp;

@@ -33,4 +33,8 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 	public void remote_rpc_not_exists_operation() throws Exception {
 		fail("NYI");
 	}
+	
+	public void remote_rpc_with_custom_type_mapping() throws Exception {
+		fail("NYI");
+	}
 }

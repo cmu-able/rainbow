@@ -1,4 +1,4 @@
-package edu.cmu.cs.able.eseb.filter.participant;
+package edu.cmu.cs.able.eseb.participant;
 
 /**
  * Exception thrown when there is a problem related to participants.

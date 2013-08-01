@@ -30,8 +30,8 @@ import edu.cmu.cs.able.eseb.ControlledDataTypeSocketConnectionImpl;
 import edu.cmu.cs.able.eseb.DataTypeSocketConnection;
 import edu.cmu.cs.able.eseb.DataTypeSocketConnectionImpl;
 import edu.cmu.cs.able.eseb.filter.EventFilterChain;
+import edu.cmu.cs.able.typelib.enc.DataValueEncoding;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
-import edu.cmu.cs.able.typelib.txtenc.TextEncoding;
 import edu.cmu.cs.able.typelib.txtenc.typelib.DefaultTextEncoding;
 
 /**
@@ -106,15 +106,34 @@ public class EventBus implements Closeable {
 	private List<EventBusAcceptPreprocessor> m_preprocessors;
 	
 	/**
-	 * Creates a new event bus in the given port.
+	 * Encoding used in the bus.
+	 */
+	private DataValueEncoding m_encoding;
+	
+	/**
+	 * Creates a new event bus in the given port with the default encoding.
 	 * @param port the port used to accept incoming clients.
 	 * @param scope the primitive scope for types
 	 * @throws IOException failed to open the server socket
 	 */
 	public EventBus(short port, PrimitiveScope scope) throws IOException {
-		Ensure.isTrue(port > 0);
-		Ensure.notNull(scope);
+		this(port, scope, new DefaultTextEncoding(scope));
+	}
+	
+	/**
+	 * Creates a new event bus in the given port.
+	 * @param port the port used to accept incoming clients.
+	 * @param scope the primitive scope for types
+	 * @param encoding the encoding to use
+	 * @throws IOException failed to open the server socket
+	 */
+	public EventBus(short port, PrimitiveScope scope,
+			DataValueEncoding encoding) throws IOException {
+		Ensure.is_true(port > 0);
+		Ensure.not_null(scope);
+		Ensure.not_null(encoding);
 		m_group = new WorkerThreadGroup("Event Bus (" + port + ")");
+		m_encoding = encoding;
 		m_connections = new HashMap<>();
 		m_accept_socket = new ServerSocket(port);
 		m_accept_socket.setSoTimeout(SOCKET_TMEOUT_MS);
@@ -219,11 +238,9 @@ public class EventBus implements Closeable {
 		 * This actually *may* leak if the event bus connection data fails in 
 		 * the constructor although this is not a testable situation.
 		 */
-		TextEncoding te = new DefaultTextEncoding();
-		
 		@SuppressWarnings("resource")
 		DataTypeSocketConnection conn = new DataTypeSocketConnectionImpl(
-				"Client " + id, incoming, te, m_scope);
+				"Client " + id, incoming, m_encoding, m_scope);
 		final BusDataQueue input_queue = new BusDataQueue();
 		input_queue.dispatcher().add(new BusDataQueueListener() {
 			@Override
@@ -347,42 +364,46 @@ public class EventBus implements Closeable {
 		});
 		
 		LOG.info("Client " + id + " disconnected (e = " + e + ").");
+		LOG.debug("Exception that closed client " + id + ":", e);
 	}
 
 	@Override
-	public synchronized void close() throws IOException {
-		if (m_accept_socket == null) {
-			/*
-			 * Already closed. We need to support multiple closes because
-			 * that's the contract of Closeable.
-			 */
-			return;
-		}
-		
+	public void close() throws IOException {
 		ExceptionSuppress<IOException> ex = new ExceptionSuppress<>();
 		
-		/*
-		 * We need to close the server socket first otherwise clients may
-		 * connect while we're disconnecting them.
-		 */
-		try {
-			m_accept_socket.close();
-		} catch (IOException e) {
-			ex.add(e);
-		}
-		
-		for (EventBusConnectionData c : m_connections.values()) {
+		synchronized (this) {
+			if (m_accept_socket == null) {
+				/*
+				 * Already closed. We need to support multiple closes because
+				 * that's the contract of Closeable.
+				 */
+				return;
+			}
+			
+			/*
+			 * We need to close the server socket first otherwise clients may
+			 * connect while we're disconnecting them.
+			 */
 			try {
-				c.connection().close();
+				m_accept_socket.close();
 			} catch (IOException e) {
 				ex.add(e);
 			}
+			
+			for (EventBusConnectionData c : m_connections.values()) {
+				try {
+					c.connection().close();
+				} catch (IOException e) {
+					ex.add(e);
+				}
+			}
+			
+			LOG.info("Closing event bus.");
+			
+			m_accept_socket = null;
 		}
 		
-		LOG.info("Closing event bus.");
-		
 		m_group.stop_all();
-		m_accept_socket = null;
 		ex.maybe_throw();
 	}
 	

@@ -1,4 +1,4 @@
-package edu.cmu.cs.able.eseb.filter.participant;
+package edu.cmu.cs.able.eseb.participant;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import auxtestlib.DefaultTCase;
+import edu.cmu.cs.able.eseb.participant.ParticipantTypes;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
 import edu.cmu.cs.able.typelib.txtenc.typelib.DefaultTextEncoding;
 import edu.cmu.cs.able.typelib.type.DataValue;
@@ -35,7 +36,7 @@ public class ParticipantTypeTest extends DefaultTCase {
 	@Before
 	public void set_up() throws Exception {
 		m_pscope = new PrimitiveScope();
-		m_enc = new DefaultTextEncoding();
+		m_enc = new DefaultTextEncoding(m_pscope);
 		m_types = new ParticipantTypes(m_pscope, m_enc);
 	}
 	

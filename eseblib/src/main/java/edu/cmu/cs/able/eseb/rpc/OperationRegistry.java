@@ -6,12 +6,9 @@ import edu.cmu.cs.able.eseb.conn.BusConnection;
 import edu.cmu.cs.able.typelib.type.DataValue;
 
 /**
- * The operation registry represents the "server side" of the RPC. An operation
- * groups is registered for an object with a given ID. An execution listener
- * will be triggered to perform the operation when an execution is requested.
- * The listener is responsible for doing the
- * actual work of executing the operation and informing the registry of the
- * result of the operation which is sent back to the original caller.
+ * The operation registry represents a "server". An operation registry
+ * receives incoming requests to execute operations and forwards them to
+ * {@link ServiceObjectRegistration} objects which handle registered objects.
  */
 public class OperationRegistry {
 	/**
@@ -25,7 +22,29 @@ public class OperationRegistry {
 	 */
 	public OperationRegistry(BusConnection connection,
 			OperationInformation op_info, DataValue group,
-			OperationExecuter executer, long obj_id) {
+			ServiceOperationExecuter executer, long obj_id) {
+	}
+	
+	/**
+	 * Installs the registry, making published objects available remotely.
+	 */
+	public void install() {
+	}
+	
+	/**
+	 * Uninstalls the registry, making objects no longer available.
+	 * The result of executions that are running will not be sent to the
+	 * invokers. 
+	 */
+	public void uninstall() {
+	}
+	
+	/**
+	 * Checks whether the registry is installed.
+	 * @return is installed?
+	 */
+	public boolean installed() {
+		return false;
 	}
 	
 	/**

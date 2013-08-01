@@ -1,4 +1,4 @@
-package edu.cmu.cs.able.eseb.filter.participant;
+package edu.cmu.cs.able.eseb.participant;
 
 import incubator.dispatch.DispatchHelper;
 
@@ -18,6 +18,9 @@ import auxtestlib.ThreadCountTestHelper;
 import edu.cmu.cs.able.eseb.TestArraySaveQueue;
 import edu.cmu.cs.able.eseb.bus.EventBus;
 import edu.cmu.cs.able.eseb.conn.BusConnection;
+import edu.cmu.cs.able.eseb.participant.Participant;
+import edu.cmu.cs.able.eseb.participant.ParticipantIdentifier;
+import edu.cmu.cs.able.eseb.participant.ParticipantModelFilter;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
 import edu.cmu.cs.able.typelib.struct.Field;
 import edu.cmu.cs.able.typelib.struct.FieldDescription;
@@ -63,7 +66,7 @@ public class ParticipantIdentificationTest extends DefaultTCase {
 		m_port = (short) TestPropertiesDefinition.getInt(
 				"free-port-zone-start");
 		m_renew_ms = 100;
-		m_enc = new DefaultTextEncoding();
+		m_enc = new DefaultTextEncoding(m_scope);
 	}
 	
 	@Test
@@ -73,21 +76,19 @@ public class ParticipantIdentificationTest extends DefaultTCase {
 				BusConnection bc1 = new BusConnection("localhost", m_port,
 				m_scope);
 				BusConnection bc2 = new BusConnection("localhost", m_port,
-				m_scope)) {
+				m_scope);
+				ParticipantIdentifier pi1 = new ParticipantIdentifier(bc1,
+						m_renew_ms);
+				ParticipantIdentifier pi2 = new ParticipantIdentifier(bc2,
+						m_renew_ms)) {
 			bs.start();
 			bc1.start();
 			bc2.start();
 			
-			ParticipantIdentifier pi1 = new ParticipantIdentifier(m_scope,
-					m_enc, m_renew_ms);
-			pi1.install(bc1.outgoing_chain());
 			ParticipantModelFilter f1 = new ParticipantModelFilter(m_renew_ms,
 					0, m_scope, m_enc);
 			bc1.incoming_chain().add_filter(f1);
 			
-			ParticipantIdentifier pi2 = new ParticipantIdentifier(m_scope,
-					m_enc, m_renew_ms);
-			pi2.install(bc2.outgoing_chain());
 			ParticipantModelFilter f2 = new ParticipantModelFilter(m_renew_ms,
 					0, m_scope, m_enc);
 			bc2.incoming_chain().add_filter(f2);
@@ -116,8 +117,6 @@ public class ParticipantIdentificationTest extends DefaultTCase {
 			assertTrue(pl2_1.id() == pi1.id() || pl2_2.id() == pi1.id());
 			assertTrue(pl2_1.id() == pi2.id() || pl2_2.id() == pi2.id());
 			
-			pi1.shutdown();
-			pi2.shutdown();
 			f1.shutdown();
 			f2.shutdown();
 		}
@@ -129,21 +128,19 @@ public class ParticipantIdentificationTest extends DefaultTCase {
 				BusConnection bc1 = new BusConnection("localhost", m_port,
 				m_scope);
 				BusConnection bc2 = new BusConnection("localhost", m_port,
-				m_scope)) {
+				m_scope);
+				ParticipantIdentifier pi1 = new ParticipantIdentifier(bc1,
+						m_renew_ms);
+				ParticipantIdentifier pi2 = new ParticipantIdentifier(bc2,
+						m_renew_ms)) {
 			bs.start();
 			bc1.start();
 			bc2.start();
 			
-			ParticipantIdentifier pi1 = new ParticipantIdentifier(m_scope,
-					m_enc, m_renew_ms);
-			pi1.install(bc1.outgoing_chain());
 			ParticipantModelFilter f1 = new ParticipantModelFilter(m_renew_ms,
 					0, m_scope, m_enc);
 			bc1.incoming_chain().add_filter(f1);
 			
-			ParticipantIdentifier pi2 = new ParticipantIdentifier(m_scope,
-					m_enc, m_renew_ms);
-			pi2.install(bc2.outgoing_chain());
 			ParticipantModelFilter f2 = new ParticipantModelFilter(m_renew_ms,
 					0, m_scope, m_enc);
 			bc2.incoming_chain().add_filter(f2);
@@ -166,8 +163,6 @@ public class ParticipantIdentificationTest extends DefaultTCase {
 			
 			assertEquals(pi1.id(), pl1.iterator().next().id());
 			
-			pi1.shutdown();
-			pi2.shutdown();
 			f1.shutdown();
 			f2.shutdown();
 		}
@@ -179,7 +174,11 @@ public class ParticipantIdentificationTest extends DefaultTCase {
 				BusConnection bc1 = new BusConnection("localhost", m_port,
 				m_scope);
 				BusConnection bc2 = new BusConnection("localhost", m_port,
-				m_scope)) {
+				m_scope);
+				ParticipantIdentifier pi1 = new ParticipantIdentifier(bc1,
+						m_renew_ms);
+				ParticipantIdentifier pi2 = new ParticipantIdentifier(bc2,
+						m_renew_ms)) {
 			bs.start();
 			bc1.start();
 			bc2.start();
@@ -187,16 +186,10 @@ public class ParticipantIdentificationTest extends DefaultTCase {
 			final TestArraySaveQueue q2 = new TestArraySaveQueue();
 			bc2.queue_group().add(q2);
 			
-			ParticipantIdentifier pi1 = new ParticipantIdentifier(m_scope,
-					m_enc, m_renew_ms);
-			pi1.install(bc1.outgoing_chain());
 			ParticipantModelFilter f1 = new ParticipantModelFilter(m_renew_ms,
 					0, m_scope, m_enc);
 			bc1.incoming_chain().add_filter(f1);
 			
-			ParticipantIdentifier pi2 = new ParticipantIdentifier(m_scope,
-					m_enc, m_renew_ms);
-			pi2.install(bc2.outgoing_chain());
 			ParticipantModelFilter f2 = new ParticipantModelFilter(m_renew_ms,
 					0, m_scope, m_enc);
 			bc2.incoming_chain().add_filter(f2);
@@ -215,27 +208,8 @@ public class ParticipantIdentificationTest extends DefaultTCase {
 			assertEquals(1, q2.m_values.size());
 			assertEquals(m_scope.int32().make(5), q2.m_values.get(0));
 			
-			pi1.shutdown();
-			pi2.shutdown();
 			f1.shutdown();
 			f2.shutdown();
-		}
-	}
-	
-	@Test
-	public void check_filter_is_installed() throws Exception {
-		try (BusConnection bc1 = new BusConnection("localhost", m_port,
-				m_scope)) {
-			bc1.start();
-			
-			ParticipantIdentifier pi1 = new ParticipantIdentifier(m_scope,
-					m_enc, m_renew_ms);
-			assertFalse(pi1.installed(bc1.outgoing_chain()));
-			
-			pi1.install(bc1.outgoing_chain());
-			assertTrue(pi1.installed(bc1.outgoing_chain()));
-			
-			pi1.shutdown();
 		}
 	}
 	
@@ -245,14 +219,12 @@ public class ParticipantIdentificationTest extends DefaultTCase {
 				BusConnection bc1 = new BusConnection("localhost", m_port,
 				m_scope);
 				BusConnection bc2 = new BusConnection("localhost", m_port,
-				m_scope)) {
+				m_scope);
+				ParticipantIdentifier pi1 = new ParticipantIdentifier(bc1,
+						m_renew_ms)) {
 			bs.start();
 			bc1.start();
 			bc2.start();
-			
-			ParticipantIdentifier pi1 = new ParticipantIdentifier(m_scope,
-					m_enc, m_renew_ms);
-			pi1.install(bc1.outgoing_chain());
 			
 			pi1.meta_data("X", m_scope.ascii().make("foo"));
 			
@@ -268,7 +240,6 @@ public class ParticipantIdentificationTest extends DefaultTCase {
 			assertEquals("X", p.meta_data_keys().iterator().next());
 			assertEquals(m_scope.ascii().make("foo"), p.meta_data("X"));
 			
-			pi1.shutdown();
 			f2.shutdown();
 		}
 	}
@@ -279,14 +250,12 @@ public class ParticipantIdentificationTest extends DefaultTCase {
 				BusConnection bc1 = new BusConnection("localhost", m_port,
 				m_scope);
 				BusConnection bc2 = new BusConnection("localhost", m_port,
-				m_scope)) {
+				m_scope);
+				ParticipantIdentifier pi1 = new ParticipantIdentifier(bc1,
+						m_renew_ms)) {
 			bs.start();
 			bc1.start();
 			bc2.start();
-			
-			ParticipantIdentifier pi1 = new ParticipantIdentifier(m_scope,
-					m_enc, m_renew_ms);
-			pi1.install(bc1.outgoing_chain());
 			
 			pi1.meta_data("X", m_scope.ascii().make("foo"));
 			
@@ -306,7 +275,6 @@ public class ParticipantIdentificationTest extends DefaultTCase {
 			Thread.sleep(2 * m_renew_ms);
 			assertEquals(m_scope.ascii().make("bar"), p.meta_data("X"));
 			
-			pi1.shutdown();
 			f2.shutdown();
 		}
 	}
@@ -318,7 +286,9 @@ public class ParticipantIdentificationTest extends DefaultTCase {
 				BusConnection bc1 = new BusConnection("localhost", m_port,
 				m_scope);
 				BusConnection bc2 = new BusConnection("localhost", m_port,
-				pscope2)) {
+				pscope2);
+				ParticipantIdentifier pi1 = new ParticipantIdentifier(bc1,
+						m_renew_ms)) {
 			bs.start();
 			bc1.start();
 			bc2.start();
@@ -326,10 +296,6 @@ public class ParticipantIdentificationTest extends DefaultTCase {
 			StructureDataType new_type = new StructureDataType("fu", false,
 					new HashSet<FieldDescription>(), m_scope.any());
 			m_scope.add(new_type);
-			
-			ParticipantIdentifier pi1 = new ParticipantIdentifier(m_scope,
-					m_enc, m_renew_ms);
-			pi1.install(bc1.outgoing_chain());
 			
 			pi1.meta_data("X", new_type.make(new HashMap<Field, DataValue>()));
 			
@@ -345,7 +311,6 @@ public class ParticipantIdentificationTest extends DefaultTCase {
 			assertEquals("X", p.meta_data_keys().iterator().next());
 			assertNull(p.meta_data("X"));
 			
-			pi1.shutdown();
 			f2.shutdown();
 		}
 	}

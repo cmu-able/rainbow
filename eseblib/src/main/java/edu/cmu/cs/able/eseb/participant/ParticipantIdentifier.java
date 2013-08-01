@@ -1,5 +1,10 @@
-package edu.cmu.cs.able.eseb.filter.participant;
+package edu.cmu.cs.able.eseb.participant;
 
+import incubator.exh.LocalCollector;
+import incubator.pval.Ensure;
+import incubator.wt.WorkerThread;
+
+import java.io.Closeable;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
@@ -7,17 +12,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import incubator.exh.LocalCollector;
-import incubator.pval.Ensure;
-import incubator.wt.WorkerThread;
-
 import org.apache.commons.lang.math.RandomUtils;
 
 import edu.cmu.cs.able.eseb.BusData;
+import edu.cmu.cs.able.eseb.conn.BusConnection;
 import edu.cmu.cs.able.eseb.filter.EventFilter;
 import edu.cmu.cs.able.eseb.filter.EventFilterChain;
-import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
-import edu.cmu.cs.able.typelib.txtenc.TextEncoding;
 import edu.cmu.cs.able.typelib.type.DataValue;
 
 /**
@@ -26,16 +26,11 @@ import edu.cmu.cs.able.typelib.type.DataValue;
  * Associated with it one may provide a <em>description</em> of the
  * participant. The description is any data value which can be encoded.</p>
  */
-public class ParticipantIdentifier {
+public class ParticipantIdentifier implements Closeable {
 	/**
 	 * The randomly-generated participant identifier.
 	 */
 	private long m_id;
-	
-	/**
-	 * The primitive type scope.
-	 */
-	private PrimitiveScope m_pscope;
 	
 	/**
 	 * Access to the participant types.
@@ -63,35 +58,36 @@ public class ParticipantIdentifier {
 	private Map<String, DataValue> m_meta_data;
 	
 	/**
+	 * The bus connection.
+	 */
+	private BusConnection m_connection;
+	
+	/**
 	 * Creates a new identifier with the default renewal time.
-	 * @param pscope the primitive type scope
-	 * @param encoding encoding use to encode and decode participant
-	 * meta data
+	 * @param connection the event bus connection to build the identifier on
 	 * @throws ParticipantException failed to initialize the participant
 	 * identifier
 	 */
-	public ParticipantIdentifier(PrimitiveScope pscope, TextEncoding encoding)
+	public ParticipantIdentifier(BusConnection connection)
 			throws ParticipantException {
-		this(pscope, encoding, Participant.PARTICIPANT_RENEW_TIME_MS);
+		this(connection, Participant.PARTICIPANT_RENEW_TIME_MS);
 	}
 	
 	/**
 	 * Creates a new identifier.
-	 * @param pscope the primitive type scope
-	 * @param encoding encoding use to encode and decode participant
-	 * meta data
+	 * @param connection the event bus connection to build the identifier on
 	 * @param participant_renew_time how much time, in milliseconds, between
 	 * renewal requests
 	 * @throws ParticipantException failed to initialize the participant
 	 * identifier
 	 */
-	public ParticipantIdentifier(PrimitiveScope pscope, TextEncoding encoding,
+	public ParticipantIdentifier(BusConnection connection,
 			final long participant_renew_time) throws ParticipantException {
-		Ensure.not_null(pscope);
-		Ensure.not_null(encoding);
+		Ensure.not_null(connection);
 		
-		m_pscope = pscope;
-		m_ptypes = new ParticipantTypes(m_pscope, encoding);
+		m_connection = connection;
+		m_ptypes = new ParticipantTypes(connection.primitive_scope(),
+				connection.encoding());
 		m_id = RandomUtils.nextLong();
 		m_collector = new LocalCollector("Participant " + m_id
 				+ " identifier.");
@@ -106,16 +102,28 @@ public class ParticipantIdentifier {
 			}
 		};
 		m_send_thread.start();
+		
+		install(connection.outgoing_chain());
 	}
 	
-	/**
-	 * Shuts down the participant.
-	 */
-	public synchronized void shutdown() {
-		Ensure.not_null(m_send_thread);
+	@Override
+	public void close() throws IOException {
+		WorkerThread wt = null;
+		synchronized (this) {
+			wt = m_send_thread;
+			m_send_thread = null;
+			
+			for (EventFilter f : m_connection.outgoing_chain().filters()) {
+				if (f instanceof SendFilter) {
+					m_connection.outgoing_chain().remove_filter(f);
+					break;
+				}
+			}
+		}
 		
-		m_send_thread.stop();
-		m_send_thread = null;
+		if (wt != null) {
+			wt.stop();
+		}
 	}
 	
 	/**
@@ -141,7 +149,7 @@ public class ParticipantIdentifier {
 	 * @param chain the chains
 	 * @return is the client installed?
 	 */
-	public boolean installed(EventFilterChain chain) {
+	private boolean installed(EventFilterChain chain) {
 		Ensure.not_null(chain);
 		
 		for (EventFilter f : chain.filters()) {
@@ -157,7 +165,7 @@ public class ParticipantIdentifier {
 	 * Installs the client in the given chain.
 	 * @param chain the chain
 	 */
-	public synchronized void install(EventFilterChain chain) {
+	private void install(EventFilterChain chain) {
 		Ensure.not_null(chain);
 		Ensure.is_false(installed(chain));
 		SendFilter f = new SendFilter();

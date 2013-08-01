@@ -80,7 +80,7 @@ public class BusServerRemoteInterfaceTest extends EsebTestCase {
 		assertNotNull(b);
 		assertTrue(b.length > 0);
 		
-		DataValueEncoding dve = new DefaultTextEncoding();
+		DataValueEncoding dve = new DefaultTextEncoding(m_pscope);
 		return dve.decode(new DataInputStream(new ByteArrayInputStream(b)),
 				m_pscope);
 	}

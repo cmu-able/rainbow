@@ -24,7 +24,7 @@ public class InputOutputThreadTest extends EsebTestCase {
 	@Before
 	public void set_up() {
 		m_scope = new PrimitiveScope();
-		m_enc = new DefaultTextEncoding();
+		m_enc = new DefaultTextEncoding(m_scope);
 	}
 	
 	@Test

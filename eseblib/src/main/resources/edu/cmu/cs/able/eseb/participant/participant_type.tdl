@@ -1,0 +1,17 @@
+/*
+ * Type definition language declaration of participant data types.
+ * Note that the names here must be synchronized with the constants in
+ * ParticipantTypes.
+ */
+ 
+namespace eseb {
+	namespace participant {
+		/*
+		 * Structure used to announce that a participant exists.
+		 */
+		struct announce_id {
+			int64 id;
+			map<string,string> meta_data;
+		}
+	}
+}
