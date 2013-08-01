@@ -56,8 +56,8 @@ public class OptionalDataTypeEqTest extends OptionalDataTypeTestFixture
 		OptionalDataValue o1 = m_opt_1.make(m_v1_t1);
 		OptionalDataValue o2 = m_opt_2.make(m_v1_t2);
 		
+		assertFalse(m_v1_t1.equals(m_v1_t2));
 		assertFalse(o1.equals(o2));
-		assertFalse(m_null_1.equals(m_null_2));
 	}
 
 	@Override
@@ -134,5 +134,25 @@ public class OptionalDataTypeEqTest extends OptionalDataTypeTestFixture
 	public void compare_to_itself() throws Exception {
 		OptionalDataValue o1 = m_opt_1.make(m_v2_t1);
 		assertTrue(o1.equals(o1));
+	}
+	
+	@Test
+	public void compare_optional_with_non_optional_same_value()
+			throws Exception {
+		assertFalse(m_opt_1.make(m_v1_t1).equals(m_v1_t1));
+	}
+	
+	@Test
+	public void compare_nulls_different_types() throws Exception {
+		assertEquals(m_null_1, m_null_2);
+		assertEquals(m_null_1.hashCode(), m_null_2.hashCode());
+	}
+	
+	@Test
+	public void optional_value_of_sub_type() throws Exception {
+		OptionalDataType op_sub_1 = OptionalDataType.optional_of(m_sub_type_1);
+		OptionalDataValue v = m_opt_1.make(m_vsub);
+		assertNotSame(op_sub_1, m_opt_1);
+		assertSame(op_sub_1, v.type());
 	}
 }

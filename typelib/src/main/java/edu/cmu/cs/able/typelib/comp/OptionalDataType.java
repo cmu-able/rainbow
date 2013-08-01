@@ -88,11 +88,19 @@ public class OptionalDataType extends SingleCompositeDataType {
 	/**
 	 * Makes a new data value.
 	 * @param v the value or <code>null</code> if there is none
-	 * @return the optional data value
+	 * @return the optional data value whose data type will this data type if
+	 * <code>v</code> is <code>null</code> and will be the optional data type
+	 * of <code>v</code>'s type if <code>v</code> is not <code>null</code>;
+	 * consequently, the resulting value will always be an instance of this
+	 * type but it may be an instance of a sub type if <code>v</code> is an
+	 * instance of a sub type of this type's inner type  
 	 */
 	public OptionalDataValue make(DataValue v) {
 		if (v != null) {
 			Ensure.isTrue(inner_type().is_instance(v));
+			if (v.type() != inner_type()) {
+				return OptionalDataType.optional_of(v.type()).make(v);
+			}
 		}
 		
 		return new OptionalDataValue(this, v);

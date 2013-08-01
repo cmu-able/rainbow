@@ -17,12 +17,26 @@ class TypelibBlockDeclaration {
 	private String m_nsdel;
 	
 	/**
+	 * The enumeration declared, if any.
+	 */
+	private EnumerationDeclaration m_edel;
+	
+	/**
 	 * Creates a new declaration containing a structure declaration.
 	 * @param sdel the structure declaration
 	 */
 	TypelibBlockDeclaration(StructureDeclaration sdel) {
 		Ensure.not_null(sdel);
 		m_sdel = sdel;
+	}
+	
+	/**
+	 * Creates a new declaration containing an enumeration declaration.
+	 * @param edel the enumeration declaration
+	 */
+	TypelibBlockDeclaration(EnumerationDeclaration edel) {
+		Ensure.not_null(edel);
+		m_edel = edel;
 	}
 	
 	/**
@@ -48,5 +62,13 @@ class TypelibBlockDeclaration {
 	 */
 	String namespace_declaration() {
 		return m_nsdel;
+	}
+	
+	/**
+	 * Obtains the declared enumeration.
+	 * @return the enumeration or <code>null</code> if none
+	 */
+	EnumerationDeclaration enumeration_declaration() {
+		return m_edel;
 	}
 }

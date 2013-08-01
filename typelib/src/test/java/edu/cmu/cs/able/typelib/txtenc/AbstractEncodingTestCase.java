@@ -55,7 +55,7 @@ public class AbstractEncodingTestCase extends DefaultTCase {
 	@Before
 	public void set_up() throws Exception {
 		m_pscope = new PrimitiveScope();
-		m_enc = new DefaultTextEncoding();
+		m_enc = new DefaultTextEncoding(m_pscope);
 		m_output = new ByteArrayOutputStream();
 		m_doutput = new DataOutputStream(m_output);
 	}

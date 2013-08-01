@@ -1,0 +1,31 @@
+options {
+	STATIC = false;
+}
+
+PARSER_BEGIN(EnumerationJjParser)
+
+package edu.cmu.cs.able.typelib.parser;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import edu.cmu.cs.able.typelib.scope.HierarchicalName;
+
+class EnumerationJjParser {
+}
+
+PARSER_END(EnumerationJjParser)
+
+SKIP : {
+	< ("\n" | "\r" | "\t" | " ") >
+}
+
+TOKEN : {
+ 	< IDENTIFIER: ["a"-"z","A"-"Z","_"](["a"-"z","A"-"Z","0"-"9","_"])* >
+}
+
+String EnumerationValueName() : {
+		Token name;	} {
+		name = <IDENTIFIER> {
+			return name.image;			}
+}

@@ -7,11 +7,6 @@ import edu.cmu.cs.able.parsec.Parsec;
  */
 public class DefaultTypelibParser extends Parsec<TypelibParsingContext> {
 	/**
-	 * The parser that parses the contents of a structure.
-	 */
-	private Parsec<StructureParsingContext> m_structure_parsec;
-	
-	/**
 	 * Creates a new parser.
 	 */
 	private DefaultTypelibParser() {
@@ -26,10 +21,14 @@ public class DefaultTypelibParser extends Parsec<TypelibParsingContext> {
 	 */
 	public static DefaultTypelibParser make() {
 		DefaultTypelibParser p = new DefaultTypelibParser();
-		p.m_structure_parsec = new Parsec<>();
 		
-		p.add(new TypelibDelParser(p, p.m_structure_parsec));
-		p.m_structure_parsec.add(new StructureDelParser());
+		Parsec<StructureParsingContext> structure_parsec = new Parsec<>();
+		structure_parsec.add(new StructureDelParser());
+		
+		Parsec<EnumerationParsingContext> enum_parsec = new Parsec<>();
+		enum_parsec.add(new EnumerationDelParser());
+		
+		p.add(new TypelibDelParser(p, structure_parsec, enum_parsec));
 		
 		return p;
 	}

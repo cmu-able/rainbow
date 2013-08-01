@@ -13,6 +13,7 @@ import edu.cmu.cs.able.parsec.LCCoord;
 import edu.cmu.cs.able.parsec.LocalizedParseException;
 import edu.cmu.cs.able.parsec.Parsec;
 import edu.cmu.cs.able.parsec.ParsecFileReader;
+import edu.cmu.cs.able.typelib.enumeration.EnumerationType;
 import edu.cmu.cs.able.typelib.scope.AmbiguousNameException;
 import edu.cmu.cs.able.typelib.scope.CyclicScopeLinkageException;
 import edu.cmu.cs.able.typelib.struct.InvalidTypeDefinitionException;
@@ -35,19 +36,30 @@ public class TypelibDelParser implements DelegateParser<TypelibParsingContext> {
 	private Parsec<TypelibParsingContext> m_namespace_parser;
 	
 	/**
+	 * The parsed used to parse the content of enumerations.
+	 */
+	private Parsec<EnumerationParsingContext> m_enumeration_parser;
+	
+	/**
 	 * Creates a new parser.
 	 * @param namespace_parser the parser used to parse namespaces; this will
 	 * generally be the same parser this delegate is added to
 	 * @param structure_parser the parser used to parse content of
 	 * structures; this parser will generally include
 	 * {@link StructureDelParser} as a delegate
+	 * @param enumeration_parser the parser used to parse content of
+	 * structures; this parser will generally include
+	 * {@link EnumerationDelParser} as a delegate
 	 */
 	public TypelibDelParser(Parsec<TypelibParsingContext> namespace_parser,
-			Parsec<StructureParsingContext> structure_parser) {
+			Parsec<StructureParsingContext> structure_parser,
+			Parsec<EnumerationParsingContext> enumeration_parser) {
 		Ensure.not_null(structure_parser);
 		Ensure.not_null(namespace_parser);
+		Ensure.not_null(enumeration_parser);
 		m_structure_parser = structure_parser;
 		m_namespace_parser = namespace_parser;
+		m_enumeration_parser = enumeration_parser;
 	}
 
 	@Override
@@ -77,6 +89,7 @@ public class TypelibDelParser implements DelegateParser<TypelibParsingContext> {
 		
 		StructureDeclaration sdel = tbdel.structure_declaration();
 		String nsdel = tbdel.namespace_declaration();
+		EnumerationDeclaration edel = tbdel.enumeration_declaration();
 		
 		if (sdel != null) {
 			try {
@@ -184,6 +197,36 @@ public class TypelibDelParser implements DelegateParser<TypelibParsingContext> {
 			} catch (LocalizedParseException e) {
 				throw new BlockTextParseException(e);
 			}
+		}
+		
+		if (edel != null) {
+			try {
+				if (ctx.scope().find(edel.name()) != null) {
+					throw new BlockHeaderParseException(
+							new LocalizedParseException(
+							"Duplicate data type name: '" + edel.name()
+							+ "'.", new LCCoord(1, 1)));
+				}
+			} catch (AmbiguousNameException e) {
+				/*
+				 * This is OK. If the enumeration name is ambiguous it is
+				 * because it is not defined in the scope and, therefore, we
+				 * can set it.
+				 */
+			}
+			
+			EnumerationParsingContext spc = new EnumerationParsingContext(ctx,
+					edel);
+			try {
+				m_enumeration_parser.parse(new ParsecFileReader().read_memory(
+						block_text), spc);
+			} catch (LocalizedParseException e) {
+				throw new BlockTextParseException(e);
+			}
+			
+			EnumerationType new_enum = EnumerationType.make(edel.name(),
+					edel.names(), ctx.primitive_scope().any());
+			ctx.scope().add(new_enum);
 		}
 	}
 }

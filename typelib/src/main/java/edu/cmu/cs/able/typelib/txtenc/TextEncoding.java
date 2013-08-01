@@ -211,23 +211,10 @@ public class TextEncoding implements DataValueEncoding {
 		
 		HierarchicalName hn = new HNameAsciiEncoding().decode(data_type_name);
 		
-		/*
-		 * Find the data type.
-		 */
-		DataType dt = null;
-		Exception dt_fail_ex = null;
-		try {
-			dt = scope.find(hn);
-		} catch (AmbiguousNameException e) {
-			/*
-			 * dt will be null.
-			 */
-			dt_fail_ex = e;
-		}
-		
+		DataType dt = find_data_type(hn, scope);
 		if (dt == null) {
 			throw new InvalidEncodingException("Cannot find data type '"
-					+ hn.toString() + "'.", dt_fail_ex);
+					+ hn.toString() + "'.");
 		}
 		
 		DelegateTextEncoding sc = find(dt);
@@ -251,5 +238,28 @@ public class TextEncoding implements DataValueEncoding {
 		}
 		
 		return null;
+	}
+	
+	/**
+	 * Finds a data type with the given name.
+	 * @param name the name
+	 * @param scope the scope where to look for the data type
+	 * @return the data type or <code>null</code> if not found
+	 * @throws InvalidEncodingException failed to find the data type
+	 */
+	protected DataType find_data_type(HierarchicalName name,
+			DataTypeScope scope) throws InvalidEncodingException {
+		Ensure.not_null(name);
+		
+		DataType dt = null;
+		
+		try {
+			dt = scope.find(name);
+		} catch (AmbiguousNameException e) {
+			throw new InvalidEncodingException("Data type '"
+					+ name.toString() + "' is ambiguous.", e);
+		}
+		
+		return dt;
 	}
 }

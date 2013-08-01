@@ -17,6 +17,7 @@ SKIP : {
 
 TOKEN : {
 	< ABSTRACT: "abstract" >
+|	< ENUMERATION: "enum" >
 |	< NAMESPACE: "namespace" >
 |	< STRUCT: "struct" >
 |	< CCOLON: "::" >
@@ -28,9 +29,12 @@ TOKEN : {
 
 TypelibBlockDeclaration TypelibBlock() : {
 		StructureDeclaration sdel;
+		EnumerationDeclaration edel;
 		Token ns;	} {
 		sdel = Structure() {
 			return new TypelibBlockDeclaration(sdel);			}
+		| edel = Enumeration() {
+			return new TypelibBlockDeclaration(edel);			}
 		| <NAMESPACE> ns = <IDENTIFIER> {			return new TypelibBlockDeclaration(ns.image);
 			}}
 
@@ -54,9 +58,16 @@ StructureDeclaration Structure() : {
 
 String ParentName() : {
 		Token t;
-	}{
+	} {
 		t = <IDENTIFIER> {
 			return t.image;			}
 		| t = <QIDENTIFIER> {			return t.image;
 			}
+}
+
+EnumerationDeclaration Enumeration() : {
+		Token t;
+	} {
+		<ENUMERATION> t = <IDENTIFIER> {
+			return new EnumerationDeclaration(t.image);			}
 }

@@ -1,5 +1,7 @@
 package edu.cmu.cs.able.typelib.comp;
 
+import org.apache.commons.lang.ObjectUtils;
+
 import edu.cmu.cs.able.typelib.type.DataValue;
 
 /**
@@ -31,27 +33,29 @@ public class OptionalDataValue extends DataValue {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((m_value == null) ? 0 : m_value.hashCode());
-		return result;
+		if (m_value == null) {
+			return 0;
+		} else {
+			return m_value.hashCode();
+		}
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (!super.equals(obj))
+		}
+		
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		
+		if (!(obj instanceof OptionalDataValue)) {
 			return false;
-		OptionalDataValue other = (OptionalDataValue) obj;
-		if (m_value == null) {
-			if (other.m_value != null)
-				return false;
-		} else if (!m_value.equals(other.m_value))
-			return false;
-		return true;
+		}
+		
+		OptionalDataValue oobj = (OptionalDataValue) obj;
+		return ObjectUtils.equals(m_value, oobj.m_value);
 	}
 	
 	@Override

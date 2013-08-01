@@ -5,16 +5,17 @@ import java.util.Map;
 
 import org.junit.Before;
 
+import auxtestlib.DefaultTCase;
+import auxtestlib.TemporaryFile;
 import edu.cmu.cs.able.parsec.Parsec;
 import edu.cmu.cs.able.parsec.ParsecFileReader;
+import edu.cmu.cs.able.typelib.parser.EnumerationParsingContext;
 import edu.cmu.cs.able.typelib.parser.StructureDelParser;
 import edu.cmu.cs.able.typelib.parser.StructureParsingContext;
 import edu.cmu.cs.able.typelib.parser.TypelibDelParser;
 import edu.cmu.cs.able.typelib.parser.TypelibParsingContext;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
 import edu.cmu.cs.able.typelib.type.DataValue;
-import auxtestlib.DefaultTCase;
-import auxtestlib.TemporaryFile;
 
 /**
  * Abstract test case for structures.
@@ -37,7 +38,7 @@ public class StructureTestCase extends DefaultTCase {
 		m_structure_parsec.add(new StructureDelParser());
 		m_general_parsec = new Parsec<>();
 		m_general_parsec.add(new TypelibDelParser(m_general_parsec,
-				m_structure_parsec));
+				m_structure_parsec, new Parsec<EnumerationParsingContext>()));
 		m_reader = new ParsecFileReader();
 	}
 
