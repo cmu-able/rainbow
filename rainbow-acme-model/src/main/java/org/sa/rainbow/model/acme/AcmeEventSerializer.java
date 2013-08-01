@@ -20,7 +20,7 @@ import org.acmestudio.acme.model.event.AcmeRoleEvent;
 import org.acmestudio.standalone.resource.StandaloneLanguagePackHelper;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
-import org.sa.rainbow.models.ports.IEventAnnouncePort;
+import org.sa.rainbow.models.ports.IRainbowModelChangeBusPort;
 
 public class AcmeEventSerializer {
     public void serialize (AcmeEvent event, IRainbowMessage msg, IRainbowMessage parent) {
@@ -58,13 +58,13 @@ public class AcmeEventSerializer {
 
         try {
             addCommonProperties (event, msg, parent);
-            msg.setProperty (IEventAnnouncePort.EVENT_TYPE_PROP, event.getEventType ().name ());
-            msg.setProperty (IEventAnnouncePort.ID_PROP, UUID.randomUUID ().toString ());
-            msg.setProperty (IEventAnnouncePort.COMMAND_PROP, event.getCommand ().getCommandName ());
-            msg.setProperty (IEventAnnouncePort.TARGET_PROP, event.getCommand ().getTarget ());
-            msg.setProperty (IEventAnnouncePort.MODEL_NAME_PROP, event.getCommand ().getModelName ());
+            msg.setProperty (IRainbowModelChangeBusPort.EVENT_TYPE_PROP, event.getEventType ().name ());
+            msg.setProperty (IRainbowModelChangeBusPort.ID_PROP, UUID.randomUUID ().toString ());
+            msg.setProperty (IRainbowModelChangeBusPort.COMMAND_PROP, event.getCommand ().getCommandName ());
+            msg.setProperty (IRainbowModelChangeBusPort.TARGET_PROP, event.getCommand ().getTarget ());
+            msg.setProperty (IRainbowModelChangeBusPort.MODEL_NAME_PROP, event.getCommand ().getModelName ());
             for (int i = 0; i < event.getCommand ().getParameters ().length; i++) {
-                msg.setProperty (IEventAnnouncePort.PARAMETER_PROP + i, event.getCommand ().getParameters ()[i]);
+                msg.setProperty (IRainbowModelChangeBusPort.PARAMETER_PROP + i, event.getCommand ().getParameters ()[i]);
             }
         }
         catch (RainbowException e) {
@@ -74,9 +74,9 @@ public class AcmeEventSerializer {
 
     private void addCommonProperties (AcmeEvent event, IRainbowMessage msg, IRainbowMessage parent)
             throws RainbowException {
-        msg.setProperty (IEventAnnouncePort.EVENT_TYPE_PROP, event.getType ().name ());
+        msg.setProperty (IRainbowModelChangeBusPort.EVENT_TYPE_PROP, event.getType ().name ());
         if (parent != null) {
-            msg.setProperty (IEventAnnouncePort.PARENT_ID_PROP, parent.getProperty (IEventAnnouncePort.ID_PROP));
+            msg.setProperty (IRainbowModelChangeBusPort.PARENT_ID_PROP, parent.getProperty (IRainbowModelChangeBusPort.ID_PROP));
         }
     }
 
@@ -223,7 +223,7 @@ public class AcmeEventSerializer {
         }
     }
 
-    public List<IRainbowMessage> serialize (List<? extends AcmeEvent> events, IEventAnnouncePort port) {
+    public List<IRainbowMessage> serialize (List<? extends AcmeEvent> events, IRainbowModelChangeBusPort port) {
         List<IRainbowMessage> msgs = new LinkedList<> ();
         IRainbowMessage parent = null;
         Iterator<? extends AcmeEvent> iterator = events.iterator ();

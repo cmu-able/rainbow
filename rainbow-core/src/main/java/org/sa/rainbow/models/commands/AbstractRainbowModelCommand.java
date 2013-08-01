@@ -3,7 +3,7 @@ package org.sa.rainbow.models.commands;
 import org.sa.rainbow.core.error.RainbowDelegationException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.models.IModelInstance;
-import org.sa.rainbow.models.ports.IEventAnnouncePort;
+import org.sa.rainbow.models.ports.IRainbowModelChangeBusPort;
 
 public abstract class AbstractRainbowModelCommand<Type, Model> implements IRainbowModelCommand<Type, Model> {
 
@@ -25,9 +25,9 @@ public abstract class AbstractRainbowModelCommand<Type, Model> implements IRainb
 
     private RainbowCompoundCommand<Model> m_parentCommand   = null;
 
-    private IEventAnnouncePort            m_announcePort;
+    private IRainbowModelChangeBusPort            m_announcePort;
 
-    public IEventAnnouncePort getAnnouncePort () {
+    public IRainbowModelChangeBusPort getAnnouncePort () {
         return m_announcePort;
     }
 
@@ -145,7 +145,7 @@ public abstract class AbstractRainbowModelCommand<Type, Model> implements IRainb
     }
 
     @Override
-    public void setEventAnnouncePort (IEventAnnouncePort announcePort) {
+    public void setEventAnnouncePort (IRainbowModelChangeBusPort announcePort) {
         m_announcePort = announcePort;
     }
 

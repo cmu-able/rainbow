@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.sa.rainbow.core.event.IRainbowMessage;
 
-public interface IEventAnnouncePort {
+public interface IRainbowModelChangeBusPort {
     public static final String ID_PROP         = "ID";
     public static final String COMMAND_PROP    = "COMMAND";
     public static final String TARGET_PROP     = "TARGET";

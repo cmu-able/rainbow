@@ -72,18 +72,21 @@ IRainbowModelCommand<T, IAcmeSystem> {
 
     @Override
     protected void subExecute () throws RainbowException {
-        try {
-            doConstructCommand ();
-            synchronized (m_model) {
+        doConstructCommand ();
+        synchronized (m_model) {
+            try {
                 setUpEventListeners ();
                 m_events.add (new AcmeRainbowCommandEvent (CommandEventT.START_COMMAND, this));
                 m_command.execute ();
                 removeEventListener ();
                 m_events.add (new AcmeRainbowCommandEvent (CommandEventT.FINISH_COMMAND, this));
             }
-        }
-        catch (IllegalStateException | AcmeException e) {
-            throw new RainbowDelegationException (e);
+            catch (IllegalStateException | AcmeException e) {
+                m_events.clear ();
+                // Need to work out how to undo partially complete commands, in a transactional way
+                // Maybe look at the events that have been done so far, and undo them...?
+                throw new RainbowDelegationException (e);
+            }
         }
     }
 
@@ -133,6 +136,7 @@ IRainbowModelCommand<T, IAcmeSystem> {
         return "Acme";
     }
 
+    @Override
     public List<? extends IRainbowMessage> getGeneratedEvents () {
 //        LinkedList<IRainbowMessage> msgs = new LinkedList<> ();
 //        for (AcmeEvent event : m_events) {

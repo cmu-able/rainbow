@@ -25,7 +25,9 @@ import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.models.commands.AbstractLoadModelCmd;
 import org.sa.rainbow.models.commands.IRainbowModelCommand;
 import org.sa.rainbow.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.models.ports.IRainbowModelChangeBusPort;
 import org.sa.rainbow.models.ports.IRainbowModelUSBusPort;
+import org.sa.rainbow.models.ports.eseb.ESEBModelChangeBusAnnouncePort;
 import org.sa.rainbow.models.ports.eseb.ESEBModelManagerModelUpdatePort;
 import org.sa.rainbow.util.Util;
 
@@ -40,8 +42,9 @@ import org.sa.rainbow.util.Util;
 public class ModelsManager implements IModelsManager {
     static Logger                                      LOGGER     = Logger.getLogger (ModelsManager.class);
 
-//    protected IRainbowChangeBusPort                    m_changeBusPort;
+    protected IRainbowModelChangeBusPort               m_changeBusPort;
     protected IRainbowModelUSBusPort                   m_upstreamBusPort;
+
 
     /** Contains all the models -- keyed by Type then name **/
     protected Map<String, Map<String, IModelInstance>> m_modelMap = new HashMap<> ();
@@ -114,7 +117,9 @@ public class ModelsManager implements IModelsManager {
 
     private void initializeConnections () throws IOException {
         // This needs to be done via a factory
-//        m_changeBusPort = RainbowManagementPortFactory.createChangeBusPort (this);
+        m_changeBusPort = new ESEBModelChangeBusAnnouncePort (this);
+
+//        RainbowManagementPortFactory.createChangeBusPort (this);
         m_upstreamBusPort = new ESEBModelManagerModelUpdatePort (this);
     }
 
@@ -226,11 +231,14 @@ public class ModelsManager implements IModelsManager {
 
     @Override
     public void requestModelUpdate (IRainbowModelCommandRepresentation command) throws IllegalStateException,
-            RainbowException {
+    RainbowException {
         IModelInstance<?> modelInstance = getModelInstance (command.getModelType (), command.getModelName ());
         IRainbowModelCommand cmd = (IRainbowModelCommand )command;
         cmd.setModel (modelInstance.getModelInstance ());
         cmd.execute (modelInstance);
+        if (!cmd.canUndo ()) {
+            m_changeBusPort.announce (cmd.getGeneratedEvents ());
+        }
     }
 
     @Override

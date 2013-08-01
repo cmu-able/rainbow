@@ -1,8 +1,11 @@
 package org.sa.rainbow.models.commands;
 
+import java.util.List;
+
 import org.sa.rainbow.core.error.RainbowException;
+import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.models.IModelInstance;
-import org.sa.rainbow.models.ports.IEventAnnouncePort;
+import org.sa.rainbow.models.ports.IRainbowModelChangeBusPort;
 
 public interface IRainbowModelCommand<Type, Model> extends IRainbowModelCommandRepresentation {
 
@@ -18,8 +21,10 @@ public interface IRainbowModelCommand<Type, Model> extends IRainbowModelCommandR
 
     public Type undo () throws IllegalStateException, RainbowException;
 
-    public void setEventAnnouncePort (IEventAnnouncePort announcPort);
+    public void setEventAnnouncePort (IRainbowModelChangeBusPort announcPort);
 
     public void setModel (Model m);
+
+    public List<? extends IRainbowMessage> getGeneratedEvents ();
 
 }

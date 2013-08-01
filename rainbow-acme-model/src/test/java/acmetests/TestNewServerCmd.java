@@ -11,7 +11,7 @@ import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.management.ports.eseb.RainbowESEBMessage;
 import org.sa.rainbow.model.acme.AcmeModelCommand;
 import org.sa.rainbow.model.acme.znn.ZNNModelUpdateOperatorsImpl;
-import org.sa.rainbow.models.ports.IEventAnnouncePort;
+import org.sa.rainbow.models.ports.IRainbowModelChangeBusPort;
 
 import auxtestlib.DefaultTCase;
 
@@ -27,7 +27,7 @@ public class TestNewServerCmd extends DefaultTCase {
         ZNNModelUpdateOperatorsImpl znn = new ZNNModelUpdateOperatorsImpl (sys);
         IAcmeComponent proxy = sys.getComponent ("lbproxy");
         AcmeModelCommand<IAcmeComponent> cns = znn.getCommandFactory ().connectNewServerCmd (proxy, "server");
-        cns.setEventAnnouncePort (new IEventAnnouncePort () {
+        cns.setEventAnnouncePort (new IRainbowModelChangeBusPort () {
 
             @Override
             public IRainbowMessage createMessage () {
