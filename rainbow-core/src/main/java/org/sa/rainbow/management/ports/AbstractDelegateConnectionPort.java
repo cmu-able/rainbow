@@ -1,6 +1,6 @@
 package org.sa.rainbow.management.ports;
 
-import org.sa.rainbow.RainbowDelegate;
+import org.sa.rainbow.core.RainbowDelegate;
 
 public abstract class AbstractDelegateConnectionPort implements IRainbowMasterConnectionPort {
 

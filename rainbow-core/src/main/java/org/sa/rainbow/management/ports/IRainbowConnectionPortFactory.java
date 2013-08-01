@@ -2,11 +2,15 @@ package org.sa.rainbow.management.ports;
 
 import java.util.Properties;
 
-import org.sa.rainbow.RainbowDelegate;
-import org.sa.rainbow.RainbowMaster;
+import org.sa.rainbow.core.Identifiable;
+import org.sa.rainbow.core.RainbowDelegate;
+import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.gauges.IRainbowGaugeLifecycleBusPort;
+import org.sa.rainbow.models.IModelsManager;
+import org.sa.rainbow.models.ports.IRainbowModelUSBusPort;
 
-public interface IRainbowManagementPortFactory {
+public interface IRainbowConnectionPortFactory {
 
     /**
      * Called by a delegate to get the master connection port
@@ -37,8 +41,8 @@ public interface IRainbowManagementPortFactory {
      * @return the port associated with deployment and lifecycle information to the delegate
      */
     public abstract IRainbowManagementPort
-            createDelegateSideManagementPort (RainbowDelegate delegate, String delegateID)
-                    throws RainbowConnectionException;
+    createDelegateSideManagementPort (RainbowDelegate delegate, String delegateID)
+            throws RainbowConnectionException;
 
     /**
      * Create a delegate port of the rainbowMaster that will forward requests to the delegate indicated by delegateID
@@ -53,5 +57,13 @@ public interface IRainbowManagementPortFactory {
     public abstract IRainbowManagementPort createMasterSideManagementPort (RainbowMaster rainbowMaster,
             String delegateID,
             Properties connectionProperties) throws RainbowConnectionException;
+
+    public abstract IRainbowModelUSBusPort createModelsManagerUSPort (IModelsManager m)
+            throws RainbowConnectionException;
+
+    public abstract IRainbowModelUSBusPort createModelsManagerClientUSPort (Identifiable client)
+            throws RainbowConnectionException;
+
+    public abstract IRainbowGaugeLifecycleBusPort createGaugeSideLifecyclePort () throws RainbowConnectionException;
 
 }

@@ -3,15 +3,22 @@ package org.sa.rainbow.management.ports.eseb;
 import java.io.IOException;
 import java.util.Properties;
 
-import org.sa.rainbow.RainbowDelegate;
-import org.sa.rainbow.RainbowMaster;
+import org.sa.rainbow.core.Identifiable;
+import org.sa.rainbow.core.RainbowDelegate;
+import org.sa.rainbow.core.RainbowMaster;
+import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.gauges.IRainbowGaugeLifecycleBusPort;
 import org.sa.rainbow.management.ports.DisconnectedRainbowManagementPort;
 import org.sa.rainbow.management.ports.DisconnectedRainbowMasterConnectionPort;
+import org.sa.rainbow.management.ports.IRainbowConnectionPortFactory;
 import org.sa.rainbow.management.ports.IRainbowManagementPort;
-import org.sa.rainbow.management.ports.IRainbowManagementPortFactory;
 import org.sa.rainbow.management.ports.IRainbowMasterConnectionPort;
+import org.sa.rainbow.models.IModelsManager;
+import org.sa.rainbow.models.ports.IRainbowModelUSBusPort;
+import org.sa.rainbow.models.ports.eseb.ESEBGaugeModelUSBusPort;
+import org.sa.rainbow.models.ports.eseb.ESEBModelManagerModelUpdatePort;
 
-public class ESEBRainbowManagementPortFactory implements IRainbowManagementPortFactory {
+public class ESEBRainbowManagementPortFactory implements IRainbowConnectionPortFactory {
 
     private static ESEBRainbowManagementPortFactory m_instance;
 
@@ -64,11 +71,42 @@ public class ESEBRainbowManagementPortFactory implements IRainbowManagementPortF
 
     }
 
-    public static IRainbowManagementPortFactory getFactory () {
+    public static IRainbowConnectionPortFactory getFactory () {
         if (m_instance == null) {
             m_instance = new ESEBRainbowManagementPortFactory ();
         }
         return m_instance;
+    }
+
+    @Override
+    public IRainbowModelUSBusPort createModelsManagerUSPort (IModelsManager m) throws RainbowConnectionException {
+        try {
+            return new ESEBModelManagerModelUpdatePort (m);
+        }
+        catch (IOException e) {
+            throw new RainbowConnectionException ("Failed to connect", e);
+        }
+    }
+
+    @Override
+    public IRainbowModelUSBusPort createModelsManagerClientUSPort (Identifiable client)
+            throws RainbowConnectionException {
+        try {
+            return new ESEBGaugeModelUSBusPort (client);
+        }
+        catch (IOException e) {
+            throw new RainbowConnectionException ("Failed to connect", e);
+        }
+    }
+
+    @Override
+    public IRainbowGaugeLifecycleBusPort createGaugeSideLifecyclePort () throws RainbowConnectionException {
+        try {
+            return new ESEBGaugeSideLifecyclePort ();
+        }
+        catch (IOException e) {
+            throw new RainbowConnectionException ("Failed to connect", e);
+        }
     }
 
 }

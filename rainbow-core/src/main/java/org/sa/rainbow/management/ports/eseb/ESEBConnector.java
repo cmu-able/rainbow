@@ -4,13 +4,12 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowException;
 
 import edu.cmu.cs.able.eseb.BusData;
 import edu.cmu.cs.able.eseb.BusDataQueue;
@@ -18,10 +17,7 @@ import edu.cmu.cs.able.eseb.BusDataQueueListener;
 import edu.cmu.cs.able.eseb.bus.EventBus;
 import edu.cmu.cs.able.eseb.conn.BusConnection;
 import edu.cmu.cs.able.eseb.conn.BusConnectionState;
-import edu.cmu.cs.able.typelib.comp.MapDataType;
 import edu.cmu.cs.able.typelib.comp.MapDataValue;
-import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
-import edu.cmu.cs.able.typelib.prim.StringValue;
 import edu.cmu.cs.able.typelib.type.DataValue;
 
 /**
@@ -41,10 +37,10 @@ import edu.cmu.cs.able.typelib.type.DataValue;
 public class ESEBConnector {
     static Logger               LOGGER             = Logger.getLogger (ESEBConnector.class);
 
-    /** The prefix that encodes properties in maps that are sent on the wire **/
-    private static final String PROP_PREFIX = "__PROP_";
+    public static enum ChannelT {
+        HEALTH, MODEL_US, MODE_DS, MODEL_CHANGE
+    };
 
-    private static final int    PROP_PREFIX_LENGTH = PROP_PREFIX.length ();
 
     /**
      * An interface that allows users to receive information that is published on the bus
@@ -59,7 +55,7 @@ public class ESEBConnector {
          * @param msg
          *            The message that is received
          */
-        public void receive (Map<String, String> msg);
+        public void receive (RainbowESEBMessage msg);
     }
 
 
@@ -68,9 +64,6 @@ public class ESEBConnector {
     /** The set of BusClients already created, keyed by host:port **/
     protected static Map<String, BusConnection> s_clients            = new HashMap<> ();
 
-    protected static final PrimitiveScope   SCOPE                = new PrimitiveScope ();
-    protected static final MapDataType      MAP_STRING_TO_STRING = MapDataType.map_of (SCOPE.string (),
-            SCOPE.string (), SCOPE);
     /** The server corresponding to this connector **/
     protected EventBus                          m_srvr;
     /** The client for this connector to publish and receive information **/
@@ -91,7 +84,7 @@ public class ESEBConnector {
         if (s == null || s.closed ()) {
             LOGGER.debug (MessageFormat.format ("Constructing a new BusServer on port {0}", port));
             try {
-                s = new EventBus (port, SCOPE);
+                s = new EventBus (port, RainbowESEBMessage.SCOPE);
                 s_servers.put (port, s);
                 s.start ();
             }
@@ -118,7 +111,7 @@ public class ESEBConnector {
         BusConnection c = s_clients.get (key);
         if (c == null || c.state () == BusConnectionState.DISCONNECTED) {
             LOGGER.debug (MessageFormat.format ("Constructing a new BusClient on {0}", key));
-            c = new BusConnection (remoteHost, remotePort, SCOPE);
+            c = new BusConnection (remoteHost, remotePort, RainbowESEBMessage.SCOPE);
             s_clients.put (key, c);
             c.start ();
         }
@@ -184,137 +177,14 @@ public class ESEBConnector {
     }
 
     /**
-     * Encodes a map as an ESEB string to string map
-     * 
-     * @param map
-     *            The map to encode
-     * @return The ESEB value corresponding to the map
-     */
-    protected MapDataValue encodeMap (Map<String, String> map) {
-        MapDataValue v = MAP_STRING_TO_STRING.make ();
-        for (Entry<String, String> entry : map.entrySet ()) {
-            v.put (SCOPE.string ().make (entry.getKey ()), SCOPE.string ().make (entry.getValue ()));
-        }
-        return v;
-    }
-
-    /**
-     * Decodes an ESEB map into a Java Map
-     * 
-     * @param mdv
-     *            The ESEB string to stirng map
-     * @return The corresponding map
-     */
-    protected Map<String, String> decodeMap (MapDataValue mdv) {
-        Map<String, String> m = new HashMap<> ();
-        for (Entry<DataValue, DataValue> entry : mdv.all ().entrySet ()) {
-            if (entry.getKey ().type ().equals (SCOPE.string ()) && entry.getValue ().type ().equals (SCOPE.string ())) {
-                m.put (((StringValue )entry.getKey ()).value (), ((StringValue )entry.getValue ()).value ());
-            }
-        }
-        return m;
-    }
-
-
-    /**
-     * Encodes a Properties object as an ESEB string to string map
-     * 
-     * @param props
-     *            The properties object to encode
-     * @return The corresponding ESEB map value
-     */
-    protected MapDataValue encodeProperties (Properties props) {
-        MapDataValue v = MAP_STRING_TO_STRING.make ();
-        for (Entry<Object, Object> entry : props.entrySet ()) {
-            String key = null;
-            if (entry.getKey () instanceof String) {
-                key = PROP_PREFIX + (String )entry.getKey ();
-            }
-            else {
-                LOGGER.error (MessageFormat.format (
-                        "Attempting to encode a property with non-string key is not allowed: {0}", entry.getKey ()));
-                continue;
-            }
-            String value = null;
-            if (entry.getValue () instanceof String) {
-                value = (String )entry.getValue ();
-            }
-            else {
-                LOGGER.error (MessageFormat.format (
-                        "Attempting to encode a property with non-string value is not allowed: {0} -> {1}",
-                        entry.getKey (), entry.getValue ().getClass ()));
-                continue;
-            }
-            v.put (SCOPE.string ().make (key), SCOPE.string ().make (value));
-        }
-        return v;
-    }
-
-    protected Map<String, String> encodePropertiesAsMap (Properties props) {
-        Map<String, String> map = new HashMap<> ();
-        for (Entry<Object, Object> entry : props.entrySet ()) {
-            String key = null;
-            if (entry.getKey () instanceof String) {
-                key = PROP_PREFIX + (String )entry.getKey ();
-            }
-            else {
-                LOGGER.error (MessageFormat.format (
-                        "Attempting to encode a property with non-string key is not allowed: {0}", entry.getKey ()));
-                continue;
-            }
-            String value = null;
-            if (entry.getValue () instanceof String) {
-                value = (String )entry.getValue ();
-            }
-            else {
-                LOGGER.error (MessageFormat.format (
-                        "Attempting to encode a property with non-string value is not allowed: {0} -> {1}",
-                        entry.getKey (), entry.getValue ().getClass ()));
-                continue;
-            }
-            map.put (key, value);
-        }
-        return map;
-    }
-
-    /**
-     * Generates a Properties object from a Map by pulling out the __PROP_ preceded keys
-     * 
-     * @param msg
-     * @return
-     */
-    public Properties decodeProperties (Map<String, String> msg) {
-        Properties p = new Properties ();
-        for (Entry<String, String> entry : msg.entrySet ()) {
-            if (entry.getKey ().startsWith (PROP_PREFIX)) {
-                p.setProperty (entry.getKey ().substring (PROP_PREFIX_LENGTH), entry.getValue ());
-            }
-        }
-        return p;
-    }
-
-    protected Properties decodeProperties (MapDataValue mdv) {
-        Properties props = new Properties ();
-        for (Entry<DataValue, DataValue> entry : mdv.all ().entrySet ()) {
-            if (entry.getKey ().type ().equals (SCOPE.string ()) && entry.getValue ().type ().equals (SCOPE.string ())) {
-                String key = ((StringValue )entry.getKey ()).value ();
-                if (key.startsWith (PROP_PREFIX)) {
-                    key = key.substring (7);
-                    props.setProperty (key, ((StringValue )entry.getValue ()).value ());
-                }
-            }
-        }
-        return props;
-    }
-
-    /**
      * Publishes a map onto the bus
      * 
      * @param msg
      *            the message to publish, as key/value pairs
      */
-    public void publish (Map<String, String> msg) {
-        m_client.send (encodeMap (msg));
+    public void publish (RainbowESEBMessage msg) {
+        msg.setProperty (ESEBConstants.MSG_SENT, System.currentTimeMillis ());
+        m_client.send (msg.getDataValue ());
     }
 
     /**
@@ -327,10 +197,10 @@ public class ESEBConnector {
      * @param receiveListener
      *            The listener to call when a response returns
      */
-    public void sendAndReceive (Map<String, String> msg, final IESEBListener receiveListener) {
+    public void sendAndReceive (RainbowESEBMessage msg, final IESEBListener receiveListener) {
         // Generate a random reply key and put it in the message so that responder knows how to respond
         final String replyKey = UUID.randomUUID ().toString ();
-        msg.put (ESEBConstants.MSG_REPLY_KEY, replyKey);
+        msg.setProperty (ESEBConstants.MSG_REPLY_KEY, replyKey);
 
         // Add the reply listener to the reply queue
         synchronized (m_replyListeners) {
@@ -351,27 +221,27 @@ public class ESEBConnector {
                     DataValue v = bd.value ();
                     if (v instanceof MapDataValue) {
                         MapDataValue mdv = (MapDataValue )v;
-                        StringValue repKey = (StringValue )mdv.get (SCOPE.string ().make (ESEBConstants.MSG_REPLY_KEY));
-                        DataValue msgType = mdv.get (SCOPE.string ().make (ESEBConstants.MSG_TYPE_KEY));
+                        RainbowESEBMessage msg = new RainbowESEBMessage (mdv);
+                        String repKey = (String )msg.getProperty (ESEBConstants.MSG_REPLY_KEY);
+                        Object msgType = msg.getProperty (ESEBConstants.MSG_TYPE_KEY);
 
                         // Make sure that the message is a reply, otherwise ignore
                         // TODO: Bug --> if it isn't a reply, we've removed it so others now cannot process it
-                        if (SCOPE.string ().make (ESEBConstants.MSG_TYPE_REPLY).equals (msgType)) {
+                        if (ESEBConstants.MSG_TYPE_REPLY.equals (msgType)) {
                             // Get the associated reply listener
                             IESEBListener l = null;
                             synchronized (m_replyListeners) {
-                                l = m_replyListeners.remove (repKey.value ());
+                                l = m_replyListeners.remove (repKey);
                             }
                             // Call the listener
                             if (l != null) {
-                                Map<String, String> msg = decodeMap (mdv);
                                 sanitizeMessage (msg);
                                 l.receive (msg);
                             }
                             else {
                                 LOGGER.error (MessageFormat.format (
                                         "Received a reply on ESEB for which there is no listener. For reply key: {0}",
-                                        repKey.value ()));
+                                        repKey));
                             }
                             replyQ.dispatcher ().remove (this);
                         }
@@ -382,7 +252,7 @@ public class ESEBConnector {
         });
 
         // send the call
-        m_client.send (encodeMap (msg));
+        publish (msg);
 
     }
 
@@ -397,7 +267,7 @@ public class ESEBConnector {
         }
 
         @Override
-        public void receive (Map<String, String> msg) {
+        public void receive (RainbowESEBMessage msg) {
             m_l.receive (msg);
             ret = true;
             synchronized (this) {
@@ -407,7 +277,7 @@ public class ESEBConnector {
 
     }
 
-    public void blockingSendAndReceive (Map<String, String> msg, final IESEBListener l, long timeout)
+    public void blockingSendAndReceive (RainbowESEBMessage msg, final IESEBListener l, long timeout)
             throws RainbowConnectionException {
         BlockingListener bl = new BlockingListener (l);
         synchronized (bl) {
@@ -429,8 +299,8 @@ public class ESEBConnector {
      * @param msg
      *            The message to sanitize
      */
-    protected void sanitizeMessage (Map<String, String> msg) {
-        msg.remove (ESEBConstants.MSG_REPLY_KEY);
+    protected void sanitizeMessage (RainbowESEBMessage msg) {
+        msg.removeProperty (ESEBConstants.MSG_REPLY_KEY);
     }
 
 
@@ -453,9 +323,9 @@ public class ESEBConnector {
                     DataValue v = bd.value ();
                     if (v instanceof MapDataValue) {
                         MapDataValue mdv = (MapDataValue )v;
-                        Map<String, String> msg = decodeMap (mdv);
+                        RainbowESEBMessage msg = new RainbowESEBMessage (mdv);
                         // Ignore any replies on this queue
-                        if (!ESEBConstants.MSG_TYPE_REPLY.equals (msg.get (ESEBConstants.MSG_TYPE_KEY)))
+                        if (!ESEBConstants.MSG_TYPE_REPLY.equals (msg.getProperty (ESEBConstants.MSG_TYPE_KEY)))
                         {
                             l.receive (msg);
                         }
@@ -471,6 +341,28 @@ public class ESEBConnector {
         }
         if (m_srvr != null) {
             m_srvr.close ();
+        }
+    }
+
+    public RainbowESEBMessage createMessage (ChannelT channel) {
+        RainbowESEBMessage msg = new RainbowESEBMessage ();
+        msg.setProperty (ESEBConstants.MSG_CHANNEL_KEY, channel.name ());
+        return msg;
+    }
+
+    public void replyToMessage (RainbowESEBMessage msg, Object result) {
+        String repKey = (String )msg.getProperty (ESEBConstants.MSG_REPLY_KEY);
+        if (repKey != null) {
+            RainbowESEBMessage reply = createMessage (ChannelT.valueOf ((String )msg
+                    .getProperty (ESEBConstants.MSG_CHANNEL_KEY)));
+            reply.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_REPLY);
+            reply.setProperty (ESEBConstants.MSG_REPLY_KEY, repKey);
+            try {
+                reply.setProperty (ESEBConstants.MSG_REPLY_VALUE, result);
+            }
+            catch (RainbowException e) {
+            }
+            publish (reply);
         }
     }
 

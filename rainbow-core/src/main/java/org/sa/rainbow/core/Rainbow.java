@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.sa.rainbow.RainbowConstants;
 import org.sa.rainbow.core.error.RainbowAbortException;
 import org.sa.rainbow.util.Util;
 
@@ -92,6 +91,7 @@ public class Rainbow implements RainbowConstants {
     /** The thread name */
     public static final String NAME        = "Rainbow Runtime Infrastructure";
 
+
     /**
      * Exit status that Rainbow would report when it exits, default to sleeping.
      */
@@ -151,11 +151,20 @@ public class Rainbow implements RainbowConstants {
         m_exitState = state;
     }
 
+    public static boolean isMaster () {
+        return instance ().m_isMaster;
+    }
+
     private Properties m_props;
     private File       m_basePath;
     private File       m_targetPath;
 
     private ThreadGroup m_threadGroup;
+
+    /** Indicates whether this instance is the master or a delegate **/
+    private boolean     m_isMaster = false;
+
+    private RainbowMaster m_rainbowMaster;
 
     private Rainbow () {
         m_props = new Properties ();
@@ -176,10 +185,8 @@ public class Rainbow implements RainbowConstants {
      * Determines and configures the paths to the Rainbow base installation and target configuration files
      */
     private void establishPaths () {
-        String binPath = System.getProperty (PROPKEY_BIN_PATH, RAINBOW_BIN_DIR); // The location of rainbow binaries
         String cfgPath = System.getProperty (PROPKEY_CONFIG_PATH, RAINBOW_CONFIG_PATH); // The location of targets
         String target = System.getProperty (PROPKEY_TARGET_NAME, DEFAULT_TARGET_NAME); // The target to use 
-        m_props.setProperty (PROPKEY_BIN_PATH, binPath);
         m_props.setProperty (PROPKEY_CONFIG_PATH, cfgPath);
         m_props.setProperty (PROPKEY_TARGET_NAME, target);
         m_basePath = Util.computeBasePath (cfgPath);
@@ -398,6 +405,22 @@ public class Rainbow implements RainbowConstants {
 
     public ThreadGroup getThreadGroup () {
         return m_threadGroup;
+    }
+
+    public File getTargetPath () {
+        return m_targetPath;
+    }
+
+    void setIsMaster (boolean b) {
+        instance ().m_isMaster = b;
+    }
+
+    public void setMaster (RainbowMaster rainbowMaster) {
+        m_rainbowMaster = rainbowMaster;
+    }
+
+    public RainbowMaster getRainbowMaster () {
+        return m_rainbowMaster;
     }
 
 }

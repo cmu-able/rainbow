@@ -2,7 +2,7 @@ package org.sa.rainbow.management.ports;
 
 import java.util.Properties;
 
-import org.sa.rainbow.RainbowMaster;
+import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 
 public abstract class AbstractMasterConnectionPort implements IRainbowMasterConnectionPort {

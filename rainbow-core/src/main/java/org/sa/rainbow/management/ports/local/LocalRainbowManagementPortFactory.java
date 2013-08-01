@@ -5,26 +5,32 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.sa.rainbow.RainbowDelegate;
-import org.sa.rainbow.RainbowMaster;
+import org.sa.rainbow.core.Identifiable;
+import org.sa.rainbow.core.RainbowDelegate;
+import org.sa.rainbow.core.RainbowMaster;
+import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.gauges.IRainbowGaugeLifecycleBusPort;
+import org.sa.rainbow.management.ports.IRainbowConnectionPortFactory;
 import org.sa.rainbow.management.ports.IRainbowManagementPort;
-import org.sa.rainbow.management.ports.IRainbowManagementPortFactory;
 import org.sa.rainbow.management.ports.IRainbowMasterConnectionPort;
+import org.sa.rainbow.models.IModelsManager;
+import org.sa.rainbow.models.ports.IRainbowModelUSBusPort;
 
-public class LocalRainbowManagementPortFactory implements IRainbowManagementPortFactory {
+public class LocalRainbowManagementPortFactory implements IRainbowConnectionPortFactory {
 
     /**
      * Singleton instance
      */
-    private static IRainbowManagementPortFactory m_instance;
-    Map<String, LocalMasterSideManagementPort>           m_masterPorts   = new HashMap<> ();
-    LocalMasterConnectionPort                    m_masterConnectionPort;
-    Map<String, LocalDelegateManagementPort>         m_delegatePorts = new HashMap<> ();
-    Map<String, LocalDelegateConnectionPort>     m_delegateConnectionPorts = new HashMap<> ();
+    private static IRainbowConnectionPortFactory       m_instance;
+    Map<String, LocalMasterSideManagementPort>         m_masterPorts             = new HashMap<> ();
+    LocalMasterConnectionPort                          m_masterConnectionPort;
+    Map<String, LocalDelegateManagementPort>           m_delegatePorts           = new HashMap<> ();
+    Map<String, LocalDelegateConnectionPort>           m_delegateConnectionPorts = new HashMap<> ();
+    private LocalModelsManagerUSPort                   m_localModelsManagerUSPort;
+    private Map<String, LocalModelsManagerClientUSPort> m_mmClientUSPorts         = new HashMap<> ();
 
     private LocalRainbowManagementPortFactory () {
     };
-
 
     @Override
     @NonNull
@@ -40,7 +46,6 @@ public class LocalRainbowManagementPortFactory implements IRainbowManagementPort
         }
         return mdp;
     }
-
 
     @Override
     @NonNull
@@ -84,11 +89,39 @@ public class LocalRainbowManagementPortFactory implements IRainbowManagementPort
         return ldcp;
     }
 
-    public static IRainbowManagementPortFactory getFactory () {
+    public static IRainbowConnectionPortFactory getFactory () {
         if (m_instance == null) {
             m_instance = new LocalRainbowManagementPortFactory ();
         }
         return m_instance;
+    }
+
+    @Override
+    public IRainbowModelUSBusPort createModelsManagerUSPort (IModelsManager m) throws RainbowConnectionException {
+        if (m_localModelsManagerUSPort == null) {
+            m_localModelsManagerUSPort = new LocalModelsManagerUSPort (m);
+            for (LocalModelsManagerClientUSPort p : m_mmClientUSPorts.values ()) {
+                p.connect (m_localModelsManagerUSPort);
+            }
+        }
+        return m_localModelsManagerUSPort;
+    }
+
+    @Override
+    public IRainbowModelUSBusPort createModelsManagerClientUSPort (Identifiable client)
+            throws RainbowConnectionException {
+        LocalModelsManagerClientUSPort port = m_mmClientUSPorts.get (client.id ());
+        if (port == null) {
+            port = new LocalModelsManagerClientUSPort (client);
+            port.connect (m_localModelsManagerUSPort);
+            m_mmClientUSPorts.put (client.id (), port);
+        }
+        return port;
+    }
+
+    @Override
+    public IRainbowGaugeLifecycleBusPort createGaugeSideLifecyclePort () throws RainbowConnectionException {
+        return null;
     }
 
 }

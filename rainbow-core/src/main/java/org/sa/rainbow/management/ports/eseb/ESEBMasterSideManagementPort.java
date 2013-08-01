@@ -2,15 +2,14 @@ package org.sa.rainbow.management.ports.eseb;
 
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.sa.rainbow.RainbowMaster;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.management.ports.AbstractMasterManagementPort;
+import org.sa.rainbow.management.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.management.ports.eseb.ESEBConnector.IESEBListener;
 
 public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort implements ESEBManagementPortConstants {
@@ -30,18 +29,18 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
         m_role.addListener (new IESEBListener () {
 
             @Override
-            public void receive (Map<String, String> msg) {
-                String msgType = msg.get (ESEBConstants.MSG_TYPE_KEY);
+            public void receive (RainbowESEBMessage msg) {
+                String msgType = (String )msg.getProperty (ESEBConstants.MSG_TYPE_KEY);
                 switch (msgType) {
                 case REQUEST_CONFIG_INFORMATION: {
-                    if (msg.get (ESEBConstants.MSG_DELEGATE_ID_KEY).equals (getDelegateId())) {
+                    if (msg.getProperty (ESEBConstants.MSG_DELEGATE_ID_KEY).equals (getDelegateId ())) {
                         requestConfigurationInformation ();
                     }
 
                 }
                 break;
                 case RECEIVE_HEARTBEAT: {
-                    if (msg.get (ESEBConstants.MSG_DELEGATE_ID_KEY).equals (getDelegateId ())) {
+                    if (msg.getProperty (ESEBConstants.MSG_DELEGATE_ID_KEY).equals (getDelegateId ())) {
                         heartbeat ();
                     }
                 }
@@ -52,10 +51,11 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
 
     @Override
     public void sendConfigurationInformation (Properties configuration) {
-        Map<String, String> msg = m_role.encodePropertiesAsMap (configuration);
+        RainbowESEBMessage msg = m_role.createMessage (ChannelT.HEALTH);
+        msg.fillProperties (configuration);
         // No response is expected from the client, so don't do any waiting, just send
-        msg.put (ESEBConstants.MSG_TYPE_KEY, SEND_CONFIGURATION_INFORMATION);
-        msg.put (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
+        msg.setProperty (ESEBConstants.MSG_TYPE_KEY, SEND_CONFIGURATION_INFORMATION);
+        msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
         m_role.publish (msg);
     }
 
@@ -64,17 +64,17 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
         boolean m_reply = false;
 
         @Override
-        public void receive (Map<String, String> msg) {
-            m_reply = Boolean.valueOf (msg.get (ESEBConstants.MSG_REPLY_VALUE));
+        public void receive (RainbowESEBMessage msg) {
+            m_reply = (Boolean )msg.getProperty (ESEBConstants.MSG_REPLY_VALUE);
 
         }
     }
 
     @Override
     public boolean startDelegate () throws IllegalStateException {
-        Map<String, String> msg = new HashMap<String, String> ();
-        msg.put (ESEBConstants.MSG_TYPE_KEY, START_DELEGATE);
-        msg.put (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
+        RainbowESEBMessage msg = m_role.createMessage (ChannelT.HEALTH);
+        msg.setProperty (ESEBConstants.MSG_TYPE_KEY, START_DELEGATE);
+        msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
 
         try {
             BooleanReply reply = new BooleanReply ();
@@ -89,9 +89,9 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
 
     @Override
     public boolean pauseDelegate () throws IllegalStateException {
-        Map<String, String> msg = new HashMap<String, String> ();
-        msg.put (ESEBConstants.MSG_TYPE_KEY, PAUSE_DELEGATE);
-        msg.put (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
+        RainbowESEBMessage msg = m_role.createMessage (ChannelT.HEALTH);
+        msg.setProperty (ESEBConstants.MSG_TYPE_KEY, PAUSE_DELEGATE);
+        msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
 
         try {
             BooleanReply reply = new BooleanReply ();
@@ -106,9 +106,9 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
 
     @Override
     public boolean terminateDelegate () throws IllegalStateException {
-        Map<String, String> msg = new HashMap<String, String> ();
-        msg.put (ESEBConstants.MSG_TYPE_KEY, TERMINATE_DELEGATE);
-        msg.put (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
+        RainbowESEBMessage msg = m_role.createMessage (ChannelT.HEALTH);
+        msg.setProperty (ESEBConstants.MSG_TYPE_KEY, TERMINATE_DELEGATE);
+        msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
 
         try {
             BooleanReply reply = new BooleanReply ();

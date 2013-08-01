@@ -13,11 +13,12 @@ import org.apache.log4j.SimpleLayout;
 import org.apache.log4j.WriterAppender;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.sa.rainbow.RainbowDelegate;
-import org.sa.rainbow.RainbowMaster;
 import org.sa.rainbow.core.IRainbowRunnable.State;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowDelegate;
+import org.sa.rainbow.core.RainbowMaster;
 
+import auxtestlib.BooleanEvaluation;
 import auxtestlib.DefaultTCase;
 import auxtestlib.TestPropertiesDefinition;
 
@@ -51,13 +52,23 @@ public abstract class RainbowConnectionAndLifecycleTest extends DefaultTCase {
         RainbowMaster master = null;
         RainbowDelegate delegate = null;
         try {
+            int wait = TestPropertiesDefinition.getInt ("delegate.connection.time");
             master = new RainbowMaster ();
+            master.initialize ();
+
             master.start ();
             delegate = new RainbowDelegate ();
             delegate.start ();
+            final RainbowDelegate d = delegate;
 
-            int wait = TestPropertiesDefinition.getInt ("delegate.connection.time");
-            Thread.sleep (wait);
+            wait_for_true (new BooleanEvaluation () {
+
+                @Override
+                public boolean evaluate () throws Exception {
+                    return d.getConfigurationInformation () != null
+                            && d.getConfigurationInformation ().getProperty ("test.configuration.property") != null;
+                }
+            }, wait);
 //        String logMsg = baos.toString ();
 //        Pattern configPattern = Pattern.compile ("RD-" + delegate.getId () + ".*: Received configuration information");
 //        Matcher m = configPattern.matcher (logMsg);
@@ -99,6 +110,8 @@ public abstract class RainbowConnectionAndLifecycleTest extends DefaultTCase {
         RainbowDelegate delegate = null;
         try {
             master = new RainbowMaster ();
+            master.initialize ();
+
             master.start ();
             delegate = new RainbowDelegate ();
             delegate.start ();
@@ -140,6 +153,8 @@ public abstract class RainbowConnectionAndLifecycleTest extends DefaultTCase {
         RainbowDelegate delegate = null;
         try {
             master = new RainbowMaster ();
+            master.initialize ();
+
             master.start ();
             delegate = new RainbowDelegate ();
             delegate.start ();

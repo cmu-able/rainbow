@@ -1,5 +1,6 @@
-package org.sa.rainbow;
+package org.sa.rainbow.core;
 
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,12 +9,12 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.sa.rainbow.core.AbstractRainbowRunnable;
-import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.management.ports.IRainbowManagementPort;
 import org.sa.rainbow.management.ports.IRainbowMasterConnectionPort;
 import org.sa.rainbow.management.ports.RainbowManagementPortFactory;
+import org.sa.rainbow.models.ModelsManager;
 import org.sa.rainbow.util.Beacon;
 
 public class RainbowMaster extends AbstractRainbowRunnable {
@@ -25,9 +26,35 @@ public class RainbowMaster extends AbstractRainbowRunnable {
 
     private Map<String, Beacon>         m_heartbeats = new HashMap<> ();
 
+    private ModelsManager               m_modelsManager;
+
     public RainbowMaster () throws RainbowConnectionException {
         super ("Rainbow Master");
-        m_delegateConnection = RainbowManagementPortFactory.createDelegateConnectionPort (this);
+        Rainbow.instance ().setIsMaster (true);
+        Rainbow.instance ().setMaster (this);
+    }
+
+    public void initialize () throws RainbowException {
+        initializeConnections ();
+        initializeRainbowComponents ();
+    }
+
+    private void initializeRainbowComponents () throws RainbowException {
+        m_modelsManager = new ModelsManager ();
+        try {
+            m_modelsManager.initialize ();
+        }
+        catch (IOException e) {
+            throw new RainbowException ("Could not instantiate Models Manager", e);
+        }
+    }
+
+    private IRainbowMasterConnectionPort initializeConnections () throws RainbowConnectionException {
+        return m_delegateConnection = RainbowManagementPortFactory.createDelegateConnectionPort (this);
+    }
+
+    public ModelsManager modelsManager () {
+        return m_modelsManager;
     }
 
     /**
@@ -62,6 +89,7 @@ public class RainbowMaster extends AbstractRainbowRunnable {
         }
         return null;
     }
+
 
     /**
      * Called by a delegate port to request information be sent to it

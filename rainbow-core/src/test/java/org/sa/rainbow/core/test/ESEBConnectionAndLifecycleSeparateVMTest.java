@@ -15,9 +15,9 @@ import org.apache.log4j.WriterAppender;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.sa.rainbow.RainbowDelegate;
-import org.sa.rainbow.RainbowMaster;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowDelegate;
+import org.sa.rainbow.core.RainbowMaster;
 
 import auxtestlib.CommandRunner.ProcessInterface;
 import auxtestlib.DefaultTCase;
@@ -70,6 +70,7 @@ public class ESEBConnectionAndLifecycleSeparateVMTest extends DefaultTCase {
     public void testReceivedConfigurationInfo () throws Exception {
         configureTestProperties ();
         RainbowMaster master = new RainbowMaster ();
+        master.initialize ();
         try {
             master.start ();
 
@@ -112,6 +113,7 @@ public class ESEBConnectionAndLifecycleSeparateVMTest extends DefaultTCase {
 
         // Start a delegate and a master
         RainbowMaster master = new RainbowMaster ();
+        master.initialize ();
         master.start ();
 
         ProcessInterface pi = launchDelegate (s_currentDirectory);

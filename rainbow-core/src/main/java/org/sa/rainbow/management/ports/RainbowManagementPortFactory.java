@@ -7,18 +7,22 @@ import java.util.Properties;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
-import org.sa.rainbow.RainbowConstants;
-import org.sa.rainbow.RainbowDelegate;
-import org.sa.rainbow.RainbowMaster;
+import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.RainbowDelegate;
+import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.gauges.IRainbowGaugeLifecycleBusPort;
+import org.sa.rainbow.models.IModelsManager;
+import org.sa.rainbow.models.ports.IRainbowModelUSBusPort;
 
 public class RainbowManagementPortFactory {
 
     static Logger                      LOGGER          = Logger.getLogger (RainbowManagementPortFactory.class);
     static final String                DEFAULT_FACTORY = "org.sa.rainbow.ports.local.LocalRainbowDelegatePortFactory";
 
-    static IRainbowManagementPortFactory m_instance;
+    static IRainbowConnectionPortFactory m_instance;
 
     private RainbowManagementPortFactory () {
     }
@@ -29,18 +33,18 @@ public class RainbowManagementPortFactory {
      * 
      * @return
      */
-    protected static IRainbowManagementPortFactory getFactory () {
+    protected static IRainbowConnectionPortFactory getFactory () {
         if (m_instance == null) {
-            String factory = Rainbow.properties ().getProperty (RainbowConstants.PROPKEY_DEPLOYMENT_PORT_FACTORY);
+            String factory = Rainbow.properties ().getProperty (RainbowConstants.PROPKEY_PORT_FACTORY);
             if (factory == null) {
-                LOGGER.warn (MessageFormat.format ("No property defined for ''{0}''. Using default ''{1}''.", RainbowConstants.PROPKEY_DEPLOYMENT_PORT_FACTORY,
+                LOGGER.warn (MessageFormat.format ("No property defined for ''{0}''. Using default ''{1}''.", RainbowConstants.PROPKEY_PORT_FACTORY,
                         DEFAULT_FACTORY));
                 factory = DEFAULT_FACTORY;
             }
             try {
                 Class<?> f = Class.forName (factory);
                 Method method = f.getMethod ("getFactory", new Class[0]);
-                m_instance = (IRainbowManagementPortFactory )method.invoke (null, new Object[0]);
+                m_instance = (IRainbowConnectionPortFactory )method.invoke (null, new Object[0]);
             }
             catch (ClassNotFoundException e) {
                 String errMsg = MessageFormat.format (
@@ -81,6 +85,20 @@ public class RainbowManagementPortFactory {
     public static IRainbowManagementPort createDelegateDeploymentPort (RainbowDelegate delegate, String delegateID)
             throws RainbowConnectionException {
         return getFactory ().createDelegateSideManagementPort (delegate, delegateID);
+    }
+
+    public static IRainbowModelUSBusPort createModelsManagerUSPort (IModelsManager m) throws RainbowConnectionException {
+        return getFactory ().createModelsManagerUSPort (m);
+    }
+
+    public static IRainbowModelUSBusPort createModelsManagerClientUSPort (Identifiable client)
+            throws RainbowConnectionException {
+        return getFactory ().createModelsManagerClientUSPort (client);
+    }
+
+    public static IRainbowGaugeLifecycleBusPort createGaugeSideLifecyclePort () throws RainbowConnectionException {
+        return getFactory ().createGaugeSideLifecyclePort ();
+
     }
 
 }

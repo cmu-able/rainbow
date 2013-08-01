@@ -228,6 +228,7 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable {
                 }
             }
         }
+        log ("Terminated " + m_name);
     }
 
     protected Thread activeThread () {

@@ -4,7 +4,7 @@ import java.text.MessageFormat;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.sa.rainbow.RainbowDelegate;
+import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.management.ports.IRainbowManagementPort;
 
 public class LocalDelegateManagementPort implements IRainbowManagementPort {

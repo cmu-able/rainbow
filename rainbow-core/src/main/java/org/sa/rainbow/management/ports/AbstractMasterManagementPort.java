@@ -1,6 +1,6 @@
 package org.sa.rainbow.management.ports;
 
-import org.sa.rainbow.RainbowMaster;
+import org.sa.rainbow.core.RainbowMaster;
 
 /**
  * * This class represents the common methods for master deployment port. These methods correspond to those that are

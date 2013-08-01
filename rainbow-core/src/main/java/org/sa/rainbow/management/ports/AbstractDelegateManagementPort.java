@@ -2,7 +2,7 @@ package org.sa.rainbow.management.ports;
 
 import java.util.Properties;
 
-import org.sa.rainbow.RainbowDelegate;
+import org.sa.rainbow.core.RainbowDelegate;
 
 /**
  * This class represents the common methods for delegate deployment ports. These methods correspond to those that are

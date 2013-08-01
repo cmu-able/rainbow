@@ -2,19 +2,18 @@ package org.sa.rainbow.management.ports.eseb;
 
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.sa.rainbow.RainbowConstants;
-import org.sa.rainbow.RainbowDelegate;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.management.ports.AbstractDelegateConnectionPort;
 import org.sa.rainbow.management.ports.DisconnectedRainbowManagementPort;
 import org.sa.rainbow.management.ports.IRainbowManagementPort;
 import org.sa.rainbow.management.ports.RainbowManagementPortFactory;
+import org.sa.rainbow.management.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.management.ports.eseb.ESEBConnector.IESEBListener;
 
 public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
@@ -37,11 +36,12 @@ public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
         m_connectionRole.addListener (new IESEBListener() {
 
             @Override
-            public void receive (Map<String, String> msg) {
-                String type = msg.get (ESEBConstants.MSG_TYPE_KEY);
+            public void receive (RainbowESEBMessage msg) {
+                String type = (String )msg.getProperty (ESEBConstants.MSG_TYPE_KEY);
                 switch (type) {
                 case ESEBConstants.MSG_TYPE_CONNECT_DELEGATE: {
-                    if (m_delegate.getId ().equals (msg.get (ESEBConstants.TARGET))) {
+                    if (msg.hasProperty (ESEBConstants.TARGET)
+                            && m_delegate.getId ().equals (msg.getProperty (ESEBConstants.TARGET))) {
                         m_delegate.disconnectFromMaster ();
                     }
                 }
@@ -61,24 +61,25 @@ public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
          * PROPKEY_ESEB_DELEGATE_CONNECTION_PORT: The port of the delegate connection port
          * server, which will be which will be used by the master to reply to this connection port.
          */
-        Map<String, String> msg = m_connectionRole.encodePropertiesAsMap (connectionProperties);
+        RainbowESEBMessage msg = m_connectionRole.createMessage (ChannelT.HEALTH);
+        msg.fillProperties (connectionProperties);
         short deploymentPortNum;
         String port = connectionProperties.getProperty (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_PORT, Rainbow
                 .properties ().getProperty (Rainbow.PROPKEY_MASTER_DEPLOYMENT_PORT, "1234"));
-        msg.put (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_PORT, port);
+        msg.setProperty (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_PORT, port);
         deploymentPortNum = Short.valueOf (port);
         String host = connectionProperties.getProperty (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_HOST, Rainbow
                 .properties ().getProperty (Rainbow.PROPKEY_DEPLOYMENT_LOCATION, "localhost"));
-        msg.put (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_HOST, host);
-        msg.put (ESEBConstants.MSG_DELEGATE_ID_KEY, delegateID);
-        msg.put (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_CONNECT_DELEGATE);
+        msg.setProperty (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_HOST, host);
+        msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, delegateID);
+        msg.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_CONNECT_DELEGATE);
 
         m_deploymentPort = null;
 
         m_connectionRole.blockingSendAndReceive (msg, new IESEBListener () {
             @Override
-            public void receive (Map<String, String> msgRcvd) {
-                String reply = msgRcvd.get (ESEBConstants.MSG_CONNECT_REPLY);
+            public void receive (RainbowESEBMessage msgRcvd) {
+                String reply = (String )msgRcvd.getProperty (ESEBConstants.MSG_CONNECT_REPLY);
                 if (!ESEBConstants.MSG_REPLY_OK.equals (reply)) {
                     LOGGER.error (MessageFormat.format (
                             "Delegate {0}: connectDelegate received the following reply: {1}", m_delegate.getId (),
@@ -105,9 +106,9 @@ public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
 
     @Override
     public void disconnectDelegate (String delegateId) {
-        Map<String, String> msg = new HashMap<> ();
-        msg.put (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_DISCONNECT_DELEGATE);
-        msg.put (ESEBConstants.MSG_DELEGATE_ID_KEY, delegateId);
+        RainbowESEBMessage msg = m_connectionRole.createMessage (ChannelT.HEALTH);
+        msg.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_DISCONNECT_DELEGATE);
+        msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, delegateId);
         m_connectionRole.publish (msg);
     }
 

@@ -2,7 +2,7 @@ package org.sa.rainbow.management.ports.local;
 
 import java.util.Properties;
 
-import org.sa.rainbow.RainbowMaster;
+import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.management.ports.IRainbowManagementPort;
 
 public class LocalMasterSideManagementPort implements IRainbowManagementPort {

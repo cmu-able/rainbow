@@ -2,7 +2,7 @@ package org.sa.rainbow.management.ports.local;
 
 import java.util.Properties;
 
-import org.sa.rainbow.RainbowDelegate;
+import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.management.ports.AbstractDelegateConnectionPort;
 import org.sa.rainbow.management.ports.IRainbowManagementPort;

@@ -1,12 +1,10 @@
-package org.sa.rainbow;
+package org.sa.rainbow.core;
 
 import java.text.MessageFormat;
 import java.util.Properties;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
-import org.sa.rainbow.core.AbstractRainbowRunnable;
-import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.management.ports.IRainbowManagementPort;
 import org.sa.rainbow.management.ports.IRainbowMasterConnectionPort;
