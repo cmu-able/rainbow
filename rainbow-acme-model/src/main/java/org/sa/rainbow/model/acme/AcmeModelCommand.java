@@ -9,7 +9,6 @@ import java.util.List;
 import org.acmestudio.acme.core.exception.AcmeException;
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.acmestudio.acme.model.command.IAcmeCommand;
-import org.acmestudio.acme.model.command.IAcmePropertyCreateCommand;
 import org.acmestudio.acme.model.event.AcmeEvent;
 import org.acmestudio.acme.model.event.AcmeModelEventType;
 import org.acmestudio.acme.model.event.AcmeSystemEvent;
@@ -26,64 +25,63 @@ import org.sa.rainbow.models.commands.IRainbowModelCommand;
 public abstract class AcmeModelCommand<T> extends AbstractRainbowModelCommand<T, IAcmeSystem> implements
 IRainbowModelCommand<T, IAcmeSystem> {
 
-    public static final String PORT_PROP           = "ACME_PORT";
-    public static final String ROLE_PROP           = "ACME_ROLE";
-    public static final String SYSTEM_PROP         = "ACME_SYSTEM";
-    public static final String OUTER_PROP          = "ACME_OUTER";
-    public static final String INNER_PROP          = "ACME_INNER";
-    public static final String REPRESENTATION_PROP = "ACME_REPRESENTATION";
-    public static final String COMPONENT_PROP      = "ACME_COMPONENT";
-    public static final String CONNECTOR_PROP      = "ACME_CONNECTOR";
-    public static final String GROUP_PROP          = "ACME_GROUP";
-    public static final String PROPERTY_PROP       = "ACME_PROPERTY";
-    public static final String BEARER_PROP         = "ACME_BEARER";
-    public static final String VALUE_PROP          = "ACME_VALUE";
-    public static final String TYPE_PROP           = "ACME_TYPE";
-    protected IAcmeCommand<?>  m_command;
-    private IUpdate            m_eventUpdater = new IUpdate () {
+    private static final String SENTINEL_COMMAND_TYPE = "___rainbow_locked";
+    public static final String  PORT_PROP             = "ACME_PORT";
+    public static final String  ROLE_PROP             = "ACME_ROLE";
+    public static final String  SYSTEM_PROP           = "ACME_SYSTEM";
+    public static final String  OUTER_PROP            = "ACME_OUTER";
+    public static final String  INNER_PROP            = "ACME_INNER";
+    public static final String  REPRESENTATION_PROP   = "ACME_REPRESENTATION";
+    public static final String  COMPONENT_PROP        = "ACME_COMPONENT";
+    public static final String  CONNECTOR_PROP        = "ACME_CONNECTOR";
+    public static final String  GROUP_PROP            = "ACME_GROUP";
+    public static final String  PROPERTY_PROP         = "ACME_PROPERTY";
+    public static final String  BEARER_PROP           = "ACME_BEARER";
+    public static final String  VALUE_PROP            = "ACME_VALUE";
+    public static final String  TYPE_PROP             = "ACME_TYPE";
+    protected IAcmeCommand<?>   m_command;
+    private IUpdate             m_eventUpdater        = new IUpdate () {
 
-       boolean m_waitingForEnd = false;
-        
-       
-       protected void registerFinalEvent () {
-           synchronized (this) {
-               this.notifyAll ();
-           }
-       }
-        @Override
-        public void update (AcmeEvent event) {
-            if (event instanceof AcmeSystemEvent) {
-                AcmeSystemEvent ase = (AcmeSystemEvent )event;
-                if (ase.getType () == AcmeModelEventType.REMOVE_DECLARED_TYPE /*&& ase.getData (ase.getType ()).equals ("___rainbow_locked")*/) {
-                    if (m_events.get (m_events.size () - 1) instanceof AcmeRainbowCommandEvent) {
-                        AcmeRainbowCommandEvent arce = (AcmeRainbowCommandEvent )m_events.get (m_events.size () - 1);
-                        if (arce.getEventType ().isEnd ()) {
-                            m_waitingForEnd = true;
-                        }
-                        else {
-                            registerFinalEvent ();
-                        }
-                    }
-                    else 
-                        registerFinalEvent ();
-                }
-                
-            }
-            if (m_events.size () > 0 && m_events.get (m_events.size () - 1) instanceof AcmeRainbowCommandEvent
-                    && ((AcmeRainbowCommandEvent )m_events.get (m_events
-                            .size () - 1)).getEventType ().isEnd ()) {
-                m_events.add (m_events.size () - 1, event);
-            }
-            else {
-                m_events.add (event);
-                if (event instanceof AcmeRainbowCommandEvent && m_waitingForEnd) {
-                    registerFinalEvent ();
-                }
+        boolean waitingForSentinel = true;
+
+        protected void registerFinalEvent () {
+            synchronized (this) {
+                this.notifyAll ();
             }
         }
+
+        @Override
+        public void update (AcmeEvent event) {
+            // Look for the sentinel event to know whether this is the last one
+            if (event instanceof AcmeSystemEvent) {
+                AcmeSystemEvent ase = (AcmeSystemEvent )event;
+                // In undoing an "add type" command, the remove event will be sent, and so looking for this remove event
+                // will catch both doing and undoing the sequence of commands.
+                // Also, it should be the case that the FINISH event is not added until after we've received the
+                // sentinel. See subExecute below
+                if (isSentinel (ase)) {
+                    // Ok, we have all events so notify everyone
+                    registerFinalEvent ();
+                }
+
+            }
+
+            // If it's not the end command, insert it in before the end command
+
+            m_events.add (event);
+            // If it's the last rainbow command event, and we've already seen the sentinel, then signal that we're done
+            if (event instanceof AcmeRainbowCommandEvent
+                    && !waitingForSentinel) {
+                registerFinalEvent ();
+            }
+        }
+
+        private boolean isSentinel (AcmeSystemEvent ase) {
+            return ase.getType () == AcmeModelEventType.REMOVE_DECLARED_TYPE /*&& ase.getData (ase.getType ()).equals (SENTINEL_COMMAND_TYPE)*/;
+        }
     };
-    private EventUpdateAdapter m_eventListener;
-    List<AcmeEvent>            m_events       = Collections.synchronizedList (new LinkedList<AcmeEvent> ());
+    private EventUpdateAdapter  m_eventListener;
+    List<AcmeEvent>             m_events              = Collections.synchronizedList (new LinkedList<AcmeEvent> ());
 
     public AcmeModelCommand (String commandName, IAcmeSystem model, String target, String... parameters) {
         super (commandName, model, target, parameters);
@@ -104,19 +102,22 @@ IRainbowModelCommand<T, IAcmeSystem> {
     protected void subExecute () throws RainbowException {
         List<IAcmeCommand<?>> commands = doConstructCommand ();
         // Add a sentinel command that can be used to use to work out when all the events associated
-        // with executing the commands are collected
-        commands.add (0, getModel ().getCommandFactory ().systemDeclaredTypeAddCommand (getModel (), "___rainbow_locekd"));
-        commands.add (getModel ().getCommandFactory ().systemDeclaredTypeRemoveCommand (getModel (), "___rainbow_locked"));
+        // with executing the actual commands are collected
+        commands.add (0,
+                getModel ().getCommandFactory ().systemDeclaredTypeAddCommand (getModel (), SENTINEL_COMMAND_TYPE));
+        commands.add (getModel ().getCommandFactory ().systemDeclaredTypeRemoveCommand (getModel (),
+                SENTINEL_COMMAND_TYPE));
         m_command = getModel ().getCommandFactory ().compoundCommand (commands);
         synchronized (m_model) {
             try {
                 setUpEventListeners ();
                 m_events.add (new AcmeRainbowCommandEvent (CommandEventT.START_COMMAND, this));
-               
-                m_command.execute ();
-                synchronized (m_eventListener) {
+
+                synchronized (m_eventUpdater) {
+                    m_command.execute ();
                     try {
-                        m_eventListener.wait ();
+                        // wait for the sentinel to come through
+                        m_eventUpdater.wait ();
                     }
                     catch (InterruptedException e) {
                     }
@@ -139,7 +140,14 @@ IRainbowModelCommand<T, IAcmeSystem> {
             synchronized (m_model) {
                 setUpEventListeners ();
                 m_events.add (new AcmeRainbowCommandEvent (CommandEventT.START_COMMAND, this));
-                m_command.redo ();
+                synchronized (m_eventUpdater) {
+                    m_command.redo ();
+                    try {
+                        m_eventUpdater.wait ();
+                    }
+                    catch (InterruptedException e) {
+                    }
+                }
                 removeEventListener ();
                 m_events.add (new AcmeRainbowCommandEvent (CommandEventT.FINISH_COMMAND, this));
             }
@@ -155,7 +163,14 @@ IRainbowModelCommand<T, IAcmeSystem> {
             synchronized (m_model) {
                 setUpEventListeners ();
                 m_events.add (new AcmeRainbowCommandEvent (CommandEventT.START_UNDO_COMMAND, this));
-                m_command.undo ();
+                synchronized (m_eventUpdater) {
+                    m_command.undo ();
+                    try {
+                        m_eventUpdater.wait ();
+                    }
+                    catch (InterruptedException e) {
+                    }
+                }
                 removeEventListener ();
                 m_events.add (new AcmeRainbowCommandEvent (CommandEventT.FINISH_UNDO_COMMAND, this));
 
@@ -181,11 +196,6 @@ IRainbowModelCommand<T, IAcmeSystem> {
 
     @Override
     public List<? extends IRainbowMessage> getGeneratedEvents () {
-//        LinkedList<IRainbowMessage> msgs = new LinkedList<> ();
-//        for (AcmeEvent event : m_events) {
-//            IRainbowMessage msg = getAnnouncePort ().createMessage ();
-//            AcmeEventSerializer ser = 
-//        }
         AcmeEventSerializer ser = new AcmeEventSerializer ();
         return ser.serialize (m_events, getAnnouncePort ());
     }
