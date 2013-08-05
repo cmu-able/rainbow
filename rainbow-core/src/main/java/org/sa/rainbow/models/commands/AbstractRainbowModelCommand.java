@@ -130,7 +130,7 @@ public abstract class AbstractRainbowModelCommand<Type, Model> implements IRainb
         if (inCompoundCommand)
             throw new IllegalStateException (
                     "Cannot call undo() on a compounded command -- it must be called on the parent");
-        if (!canRedo ()) throw new IllegalStateException ("This command cannot currently be undone");
+        if (!canUndo ()) throw new IllegalStateException ("This command cannot currently be undone");
 
         Type t = null;
         try {

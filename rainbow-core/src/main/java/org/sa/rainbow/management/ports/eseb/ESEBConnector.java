@@ -70,6 +70,7 @@ public class ESEBConnector {
     protected BusConnection                     m_client;
     /** The set of listeners that are awaiting replies. **/
     private static Map<String, IESEBListener> m_replyListeners     = new HashMap<> ();
+    private ChannelT m_channel;
 
     /**
      * Return the cached BusServer for this port, creating a new one if it doesn't yet exist
@@ -136,7 +137,8 @@ public class ESEBConnector {
      *            The port to connect to
      * @throws IOException
      */
-    public ESEBConnector (String remoteHost, short remotePort) throws IOException {
+    public ESEBConnector (String remoteHost, short remotePort, ChannelT channel) throws IOException {
+        m_channel = channel;
         // No need to create a server, as it can't be created remotely anyway
         // So, just set the client
         setClient (remoteHost, remotePort);
@@ -149,7 +151,8 @@ public class ESEBConnector {
      *            The port to connect to
      * @throws IOException
      */
-    public ESEBConnector (short port) throws IOException {
+    public ESEBConnector (short port, ChannelT channel) throws IOException {
+        this.m_channel = channel;
         // Create the server on this port
         m_srvr = getBusServer (port);
         // Create a local client
@@ -222,6 +225,8 @@ public class ESEBConnector {
                     if (v instanceof MapDataValue) {
                         MapDataValue mdv = (MapDataValue )v;
                         RainbowESEBMessage msg = new RainbowESEBMessage (mdv);
+                        if (!msg.getProperty (ESEBConstants.MSG_CHANNEL_KEY).equals (m_channel.name ()))
+                            continue;
                         String repKey = (String )msg.getProperty (ESEBConstants.MSG_REPLY_KEY);
                         Object msgType = msg.getProperty (ESEBConstants.MSG_TYPE_KEY);
 
@@ -324,6 +329,8 @@ public class ESEBConnector {
                     if (v instanceof MapDataValue) {
                         MapDataValue mdv = (MapDataValue )v;
                         RainbowESEBMessage msg = new RainbowESEBMessage (mdv);
+                        if (!msg.getProperty (ESEBConstants.MSG_CHANNEL_KEY).equals (m_channel.name ()))
+                            continue;
                         // Ignore any replies on this queue
                         if (!ESEBConstants.MSG_TYPE_REPLY.equals (msg.getProperty (ESEBConstants.MSG_TYPE_KEY)))
                         {
@@ -344,17 +351,17 @@ public class ESEBConnector {
         }
     }
 
-    public RainbowESEBMessage createMessage (ChannelT channel) {
+    public RainbowESEBMessage createMessage () {
         RainbowESEBMessage msg = new RainbowESEBMessage ();
-        msg.setProperty (ESEBConstants.MSG_CHANNEL_KEY, channel.name ());
+        msg.setProperty (ESEBConstants.MSG_CHANNEL_KEY, m_channel.name ());
         return msg;
     }
 
     public void replyToMessage (RainbowESEBMessage msg, Object result) {
         String repKey = (String )msg.getProperty (ESEBConstants.MSG_REPLY_KEY);
         if (repKey != null) {
-            RainbowESEBMessage reply = createMessage (ChannelT.valueOf ((String )msg
-                    .getProperty (ESEBConstants.MSG_CHANNEL_KEY)));
+            RainbowESEBMessage reply = createMessage (/*ChannelT.valueOf ((String )msg
+                    .getProperty (ESEBConstants.MSG_CHANNEL_KEY))*/);
             reply.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_REPLY);
             reply.setProperty (ESEBConstants.MSG_REPLY_KEY, repKey);
             try {

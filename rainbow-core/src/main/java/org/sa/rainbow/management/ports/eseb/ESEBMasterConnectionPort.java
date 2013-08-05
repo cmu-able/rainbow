@@ -27,7 +27,7 @@ public class ESEBMasterConnectionPort extends AbstractMasterConnectionPort {
             }
         }
         short p = Short.valueOf (port);
-        m_connectionRole = new ESEBConnector (p);
+        m_connectionRole = new ESEBConnector (p, ChannelT.HEALTH);
         m_connectionRole.addListener (new ESEBConnector.IESEBListener () {
 
             @Override
@@ -49,8 +49,7 @@ public class ESEBMasterConnectionPort extends AbstractMasterConnectionPort {
                         replyMsg = MessageFormat.format ("Failed to connect with the following exception: {0}",
                                 t.getMessage ());
                     }
-                    RainbowESEBMessage reply = m_connectionRole.createMessage (ChannelT.valueOf ((String )msg
-                            .getProperty (ESEBConstants.MSG_CHANNEL_KEY)));
+                    RainbowESEBMessage reply = m_connectionRole.createMessage ();
                     reply.setProperty (ESEBConstants.MSG_REPLY_KEY,
                             (String )msg.getProperty (ESEBConstants.MSG_REPLY_KEY));
                     reply.setProperty (ESEBConstants.MSG_CONNECT_REPLY, replyMsg);
@@ -71,7 +70,7 @@ public class ESEBMasterConnectionPort extends AbstractMasterConnectionPort {
 
     @Override
     public void disconnectDelegate (String delegateId) {
-        RainbowESEBMessage msg = m_connectionRole.createMessage (ChannelT.HEALTH);
+        RainbowESEBMessage msg = m_connectionRole.createMessage (/*ChannelT.HEALTH*/);
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_DISCONNECT_DELEGATE);
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, delegateId);
         msg.setProperty (ESEBConstants.TARGET, delegateId);

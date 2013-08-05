@@ -25,7 +25,7 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
         String delegatePort = connectionProperties.getProperty (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_PORT,
                 Rainbow.properties ().getProperty (Rainbow.PROPKEY_DEPLOYMENT_LOCATION, "1234"));
         Short port = Short.valueOf (delegatePort);
-        m_role = new ESEBConnector(delegateHost, port);
+        m_role = new ESEBConnector(delegateHost, port, ChannelT.HEALTH);
         m_role.addListener (new IESEBListener () {
 
             @Override
@@ -51,7 +51,7 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
 
     @Override
     public void sendConfigurationInformation (Properties configuration) {
-        RainbowESEBMessage msg = m_role.createMessage (ChannelT.HEALTH);
+        RainbowESEBMessage msg = m_role.createMessage (/*ChannelT.HEALTH*/);
         msg.fillProperties (configuration);
         // No response is expected from the client, so don't do any waiting, just send
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, SEND_CONFIGURATION_INFORMATION);
@@ -72,7 +72,7 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
 
     @Override
     public boolean startDelegate () throws IllegalStateException {
-        RainbowESEBMessage msg = m_role.createMessage (ChannelT.HEALTH);
+        RainbowESEBMessage msg = m_role.createMessage (/*ChannelT.HEALTH*/);
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, START_DELEGATE);
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
 
@@ -89,7 +89,7 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
 
     @Override
     public boolean pauseDelegate () throws IllegalStateException {
-        RainbowESEBMessage msg = m_role.createMessage (ChannelT.HEALTH);
+        RainbowESEBMessage msg = m_role.createMessage (/*ChannelT.HEALTH*/);
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, PAUSE_DELEGATE);
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
 
@@ -106,7 +106,7 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
 
     @Override
     public boolean terminateDelegate () throws IllegalStateException {
-        RainbowESEBMessage msg = m_role.createMessage (ChannelT.HEALTH);
+        RainbowESEBMessage msg = m_role.createMessage (/*ChannelT.HEALTH*/);
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, TERMINATE_DELEGATE);
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
 

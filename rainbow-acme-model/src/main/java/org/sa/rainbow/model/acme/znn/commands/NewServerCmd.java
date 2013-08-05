@@ -38,7 +38,7 @@ public class NewServerCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
 
 
     @Override
-    protected void doConstructCommand () throws RainbowModelException {
+    protected List<IAcmeCommand<?>> doConstructCommand () throws RainbowModelException {
 
         IAcmeComponent lb = resolveInModel (m_lb, IAcmeComponent.class);
 
@@ -75,7 +75,7 @@ public class NewServerCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
         cmds.add (lbPortCmd);
         cmds.add (attachLBEnd);
         cmds.add (attachServerEnd);
-        m_command = cf.compoundCommand (cmds);
+        return cmds;
     }
 
 

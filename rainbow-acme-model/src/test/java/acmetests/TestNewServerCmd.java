@@ -8,8 +8,10 @@ import org.acmestudio.standalone.resource.StandaloneResource;
 import org.acmestudio.standalone.resource.StandaloneResourceProvider;
 import org.junit.Test;
 import org.sa.rainbow.core.event.IRainbowMessage;
+import org.sa.rainbow.management.ports.eseb.ESEBConstants;
 import org.sa.rainbow.management.ports.eseb.RainbowESEBMessage;
 import org.sa.rainbow.model.acme.AcmeModelCommand;
+import org.sa.rainbow.model.acme.AcmeRainbowCommandEvent.CommandEventT;
 import org.sa.rainbow.model.acme.znn.ZNNModelUpdateOperatorsImpl;
 import org.sa.rainbow.models.ports.IRainbowModelChangeBusPort;
 
@@ -27,7 +29,7 @@ public class TestNewServerCmd extends DefaultTCase {
         ZNNModelUpdateOperatorsImpl znn = new ZNNModelUpdateOperatorsImpl (sys);
         IAcmeComponent proxy = sys.getComponent ("lbproxy");
         AcmeModelCommand<IAcmeComponent> cns = znn.getCommandFactory ().connectNewServerCmd (proxy, "server");
-        cns.setEventAnnouncePort (new IRainbowModelChangeBusPort () {
+        IRainbowModelChangeBusPort announcePort = new IRainbowModelChangeBusPort () {
 
             @Override
             public IRainbowMessage createMessage () {
@@ -45,7 +47,8 @@ public class TestNewServerCmd extends DefaultTCase {
                 // TODO Auto-generated method stub
 
             }
-        });
+        };
+        cns.setEventAnnouncePort (announcePort);
         IAcmeComponent server = cns.execute (znn);
         assertNotNull (server);
         assertNotNull (sys.getConnector ("proxyconn"));
@@ -53,13 +56,27 @@ public class TestNewServerCmd extends DefaultTCase {
         assertNotNull (sys.getAttachment (proxy.getPort ("fwd"), sys.getConnector ("proxyconn").getRole ("req")));
         List<? extends IRainbowMessage> generatedEvents = cns.getGeneratedEvents ();
         outputMessages (generatedEvents);
+        checkEventProperties (generatedEvents);
 
         cns = znn.getCommandFactory ().connectNewServerCmd (proxy, "server");
+        cns.setEventAnnouncePort (announcePort);
+        
         server = cns.execute (znn);
         assertNotNull (server);
         assertNotNull (sys.getAttachment (proxy.getPort ("fwd4"), sys.getConnector ("proxyconn4").getRole ("req")));
         assertNotNull (sys.getAttachment (server.getPort ("http"), sys.getConnector ("proxyconn4").getRole ("rec")));
         generatedEvents = cns.getGeneratedEvents ();
+        outputMessages (generatedEvents);
+        checkEventProperties (generatedEvents);
+    }
+
+    private void checkEventProperties (List<? extends IRainbowMessage> generatedEvents) {
+        assertTrue (generatedEvents.size () > 0);
+        assertTrue (generatedEvents.iterator ().next ().getProperty (IRainbowModelChangeBusPort.EVENT_TYPE_PROP).equals (CommandEventT.START_COMMAND.name ()));
+        assertTrue (generatedEvents.get (generatedEvents.size () - 1).getProperty (IRainbowModelChangeBusPort.EVENT_TYPE_PROP).equals (CommandEventT.FINISH_COMMAND.name ()));
+        for (IRainbowMessage msg : generatedEvents) {
+            assertTrue (msg.getPropertyNames ().contains (ESEBConstants.MSG_TYPE_KEY));
+        }
     }
 
     private void outputMessages (List<? extends IRainbowMessage> events) {

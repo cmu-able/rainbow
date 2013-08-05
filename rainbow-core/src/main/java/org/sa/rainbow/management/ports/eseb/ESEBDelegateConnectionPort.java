@@ -32,7 +32,7 @@ public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
         }
         short p = Short.valueOf (port);
         m_connectionRole = new ESEBConnector (Rainbow.properties ().getProperty (
-                RainbowConstants.PROPKEY_MASTER_LOCATION), p);
+                RainbowConstants.PROPKEY_MASTER_LOCATION), p, ChannelT.HEALTH);
         m_connectionRole.addListener (new IESEBListener() {
 
             @Override
@@ -61,7 +61,7 @@ public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
          * PROPKEY_ESEB_DELEGATE_CONNECTION_PORT: The port of the delegate connection port
          * server, which will be which will be used by the master to reply to this connection port.
          */
-        RainbowESEBMessage msg = m_connectionRole.createMessage (ChannelT.HEALTH);
+        RainbowESEBMessage msg = m_connectionRole.createMessage (/*ChannelT.HEALTH*/);
         msg.fillProperties (connectionProperties);
         short deploymentPortNum;
         String port = connectionProperties.getProperty (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_PORT, Rainbow
@@ -106,7 +106,7 @@ public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
 
     @Override
     public void disconnectDelegate (String delegateId) {
-        RainbowESEBMessage msg = m_connectionRole.createMessage (ChannelT.HEALTH);
+        RainbowESEBMessage msg = m_connectionRole.createMessage (/*ChannelT.HEALTH*/);
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_DISCONNECT_DELEGATE);
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, delegateId);
         m_connectionRole.publish (msg);

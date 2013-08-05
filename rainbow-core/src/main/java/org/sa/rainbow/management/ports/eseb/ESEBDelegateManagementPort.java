@@ -19,7 +19,7 @@ public class ESEBDelegateManagementPort extends AbstractDelegateManagementPort i
         String delegatePort = Rainbow.properties ().getProperty (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_PORT,
                 Rainbow.properties ().getProperty (Rainbow.PROPKEY_DEPLOYMENT_LOCATION, "1234"));
         Short port = Short.valueOf (delegatePort);
-        m_role = new ESEBConnector (port);
+        m_role = new ESEBConnector (port, ChannelT.HEALTH);
 
         m_role.addListener (new IESEBListener () {
 
@@ -56,7 +56,7 @@ public class ESEBDelegateManagementPort extends AbstractDelegateManagementPort i
 
     @Override
     public void heartbeat () {
-        RainbowESEBMessage msg = m_role.createMessage (ChannelT.HEALTH);
+        RainbowESEBMessage msg = m_role.createMessage (/*ChannelT.HEALTH*/);
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, RECEIVE_HEARTBEAT);
         LOGGER.debug (MessageFormat.format ("Delegate {0} sending heartbeat.", getDelegateId ()));
@@ -65,7 +65,7 @@ public class ESEBDelegateManagementPort extends AbstractDelegateManagementPort i
 
     @Override
     public void requestConfigurationInformation () {
-        RainbowESEBMessage msg = m_role.createMessage (ChannelT.HEALTH);
+        RainbowESEBMessage msg = m_role.createMessage (/*ChannelT.HEALTH*/);
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBManagementPortConstants.REQUEST_CONFIG_INFORMATION);
         LOGGER.debug (MessageFormat.format ("Delegate {0} requesting configuration information.", getDelegateId ()));

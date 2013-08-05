@@ -26,13 +26,13 @@ public class ESEBGaugeSideLifecyclePort implements IRainbowGaugeLifecycleBusPort
         }
         short p = Short.valueOf (port);
         m_connectionRole = new ESEBConnector (Rainbow.properties ().getProperty (
-                RainbowConstants.PROPKEY_MASTER_LOCATION), p);
+                RainbowConstants.PROPKEY_MASTER_LOCATION), p, ChannelT.HEALTH);
 
     }
 
     @Override
     public void reportCreated (IGaugeIdentifier gauge) {
-        RainbowESEBMessage msg = m_connectionRole.createMessage (ChannelT.HEALTH);
+        RainbowESEBMessage msg = m_connectionRole.createMessage (/*ChannelT.HEALTH*/);
         setCommonGaugeProperties (msg, gauge);
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, "GAUGE_CREATED");
         m_connectionRole.publish (msg);
@@ -58,7 +58,7 @@ public class ESEBGaugeSideLifecyclePort implements IRainbowGaugeLifecycleBusPort
 
     @Override
     public void sendBeacon (IGaugeIdentifier gauge) {
-        RainbowESEBMessage msg = m_connectionRole.createMessage (ChannelT.HEALTH);
+        RainbowESEBMessage msg = m_connectionRole.createMessage (/*ChannelT.HEALTH*/);
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, IGaugeProtocol.GAUGE_HEARTBEAT);
         setCommonGaugeProperties (msg, gauge);
         m_connectionRole.publish (msg);

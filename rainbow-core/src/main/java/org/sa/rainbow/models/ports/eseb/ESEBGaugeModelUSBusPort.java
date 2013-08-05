@@ -27,13 +27,13 @@ public class ESEBGaugeModelUSBusPort implements IRainbowModelUSBusPort, ESEBCons
         String delegatePort = Rainbow.properties ().getProperty (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_PORT,
                 Rainbow.properties ().getProperty (Rainbow.PROPKEY_DEPLOYMENT_LOCATION, "1234"));
         Short port = Short.valueOf (delegatePort);
-        m_role = new ESEBConnector (delegateHost, port);
+        m_role = new ESEBConnector (delegateHost, port, ChannelT.MODEL_US);
         // Note, there is no communication from the model US bus to the gauges, so there is no need for a listener
     }
 
     @Override
     public void updateModel (IRainbowModelCommandRepresentation command) {
-        RainbowESEBMessage msg = m_role.createMessage (ChannelT.MODEL_US);
+        RainbowESEBMessage msg = m_role.createMessage (/*ChannelT.MODEL_US*/);
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, m_client.id ());
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_UPDATE_MODEL);
         ESEBCommandHelper.command2Message (command, msg);

@@ -1,5 +1,6 @@
 package org.sa.rainbow.model.acme;
 
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,6 +21,7 @@ import org.acmestudio.acme.model.event.AcmeRoleEvent;
 import org.acmestudio.standalone.resource.StandaloneLanguagePackHelper;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
+import org.sa.rainbow.management.ports.eseb.ESEBConstants;
 import org.sa.rainbow.models.ports.IRainbowModelChangeBusPort;
 
 public class AcmeEventSerializer {
@@ -75,6 +77,7 @@ public class AcmeEventSerializer {
     private void addCommonProperties (AcmeEvent event, IRainbowMessage msg, IRainbowMessage parent)
             throws RainbowException {
         msg.setProperty (IRainbowModelChangeBusPort.EVENT_TYPE_PROP, event.getType ().name ());
+        msg.setProperty (ESEBConstants.MSG_TYPE_KEY, "MODEL_CHANGE");
         if (parent != null) {
             msg.setProperty (IRainbowModelChangeBusPort.PARENT_ID_PROP, parent.getProperty (IRainbowModelChangeBusPort.ID_PROP));
         }
@@ -224,22 +227,28 @@ public class AcmeEventSerializer {
     }
 
     public List<IRainbowMessage> serialize (List<? extends AcmeEvent> events, IRainbowModelChangeBusPort port) {
+        try {
         List<IRainbowMessage> msgs = new LinkedList<> ();
         IRainbowMessage parent = null;
         Iterator<? extends AcmeEvent> iterator = events.iterator ();
         if (events.get (0) instanceof AcmeRainbowCommandEvent) {
             parent = port.createMessage ();
             serialize (iterator.next (), parent, null);
+            msgs.add (parent);
         }
         while (iterator.hasNext ()) {
             AcmeEvent e = iterator.next ();
             IRainbowMessage msg = port.createMessage ();
             serialize (e, msg, parent);
-            if (!msg.getPropertyNames ().isEmpty ()) {
+            if (msg.getPropertyNames ().contains (ESEBConstants.MSG_TYPE_KEY)) {
                 msgs.add (msg);
             }
         }
         return msgs;
+        }catch (ConcurrentModificationException e) {
+            // There could have been some stray events that got added to the list, so let's just try processing again
+            return serialize (events, port);
+        }
     }
 
 }

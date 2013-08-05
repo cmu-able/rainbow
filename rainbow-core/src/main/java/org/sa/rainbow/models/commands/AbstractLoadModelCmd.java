@@ -74,24 +74,24 @@ public abstract class AbstractLoadModelCmd<Type> extends AbstractRainbowModelCom
     public boolean canRedo () {
         return (m_executionState == ExecutionState.UNDONE);
     }
-
+    
     @Override
     public List<? extends IRainbowMessage> getGeneratedEvents () {
         List<IRainbowMessage> msgs = new LinkedList<IRainbowMessage> ();
         try {
             IRainbowMessage msg = getAnnouncePort ().createMessage ();
+            msg.setProperty (IRainbowModelChangeBusPort.EVENT_TYPE_PROP, "LOAD_MODEL");
             msg.setProperty (IRainbowModelChangeBusPort.ID_PROP, UUID.randomUUID ().toString ());
+            msg.setProperty (IRainbowModelChangeBusPort.MODEL_NAME_PROP, getModelName ());
             msg.setProperty (IRainbowModelChangeBusPort.COMMAND_PROP, getCommandName ());
             msg.setProperty (IRainbowModelChangeBusPort.TARGET_PROP, getTarget ());
-            msg.setProperty (IRainbowModelChangeBusPort.MODEL_NAME_PROP, getModelName ());
             for (int i = 0; i < getParameters ().length; i++) {
                 msg.setProperty (IRainbowModelChangeBusPort.PARAMETER_PROP + i, getParameters ()[i]);
             }
-            msg.setProperty (IRainbowModelChangeBusPort.EVENT_TYPE_PROP, "Load");
             msgs.add (msg);
         }
         catch (RainbowException e) {
-            // Should not happen
+            // Should never happen - only adding strings
             e.printStackTrace ();
         }
         return msgs;

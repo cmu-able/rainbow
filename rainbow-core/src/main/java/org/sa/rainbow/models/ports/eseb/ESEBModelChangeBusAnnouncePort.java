@@ -6,6 +6,7 @@ import java.util.List;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.management.ports.eseb.ESEBConnector;
+import org.sa.rainbow.management.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.management.ports.eseb.ESEBConstants;
 import org.sa.rainbow.management.ports.eseb.RainbowESEBMessage;
 import org.sa.rainbow.models.IModelsManager;
@@ -21,7 +22,7 @@ public class ESEBModelChangeBusAnnouncePort implements IRainbowModelChangeBusPor
         String delegatePort = Rainbow.properties ().getProperty (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_PORT,
                 Rainbow.properties ().getProperty (Rainbow.PROPKEY_DEPLOYMENT_LOCATION, "1234"));
         Short port = Short.valueOf (delegatePort);
-        m_role = new ESEBConnector (delegateHost, port);
+        m_role = new ESEBConnector (delegateHost, port, ChannelT.MODEL_CHANGE);
     }
 
     @Override

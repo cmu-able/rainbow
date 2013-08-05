@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Stack;
 
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.Rainbow;
@@ -27,7 +28,7 @@ import org.sa.rainbow.models.commands.IRainbowModelCommand;
 import org.sa.rainbow.models.commands.IRainbowModelCommandRepresentation;
 import org.sa.rainbow.models.ports.IRainbowModelChangeBusPort;
 import org.sa.rainbow.models.ports.IRainbowModelUSBusPort;
-import org.sa.rainbow.models.ports.eseb.ESEBModelChangeBusAnnouncePort;
+import org.sa.rainbow.models.ports.eseb.ESEBChangeBusAnnouncePort;
 import org.sa.rainbow.models.ports.eseb.ESEBModelManagerModelUpdatePort;
 import org.sa.rainbow.util.Util;
 
@@ -42,9 +43,8 @@ import org.sa.rainbow.util.Util;
 public class ModelsManager implements IModelsManager {
     static Logger                                      LOGGER     = Logger.getLogger (ModelsManager.class);
 
-    protected IRainbowModelChangeBusPort               m_changeBusPort;
+    protected IRainbowModelChangeBusPort                    m_changeBusPort;
     protected IRainbowModelUSBusPort                   m_upstreamBusPort;
-
 
     /** Contains all the models -- keyed by Type then name **/
     protected Map<String, Map<String, IModelInstance>> m_modelMap = new HashMap<> ();
@@ -117,9 +117,8 @@ public class ModelsManager implements IModelsManager {
 
     private void initializeConnections () throws IOException {
         // This needs to be done via a factory
-        m_changeBusPort = new ESEBModelChangeBusAnnouncePort (this);
-
-//        RainbowManagementPortFactory.createChangeBusPort (this);
+//        m_changeBusPort = RainbowManagementPortFactory.createChangeBusPort (this);
+        m_changeBusPort = new ESEBChangeBusAnnouncePort ();
         m_upstreamBusPort = new ESEBModelManagerModelUpdatePort (this);
     }
 
@@ -231,20 +230,49 @@ public class ModelsManager implements IModelsManager {
 
     @Override
     public void requestModelUpdate (IRainbowModelCommandRepresentation command) throws IllegalStateException,
-    RainbowException {
+            RainbowException {
         IModelInstance<?> modelInstance = getModelInstance (command.getModelType (), command.getModelName ());
+        if (!(command instanceof IRainbowModelCommand))
+            throw new RainbowException (MessageFormat.format ("The command {0} is not an executable command.", command.getCommandName ()));
         IRainbowModelCommand cmd = (IRainbowModelCommand )command;
         cmd.setModel (modelInstance.getModelInstance ());
+        cmd.setEventAnnouncePort (m_changeBusPort);
         cmd.execute (modelInstance);
-        if (!cmd.canUndo ()) {
+        if (cmd.canUndo ()) {
             m_changeBusPort.announce (cmd.getGeneratedEvents ());
         }
     }
 
     @Override
     public void requestModelUpdate (List<IRainbowModelCommandRepresentation> commands, boolean transaction) {
-        // TODO Auto-generated method stub
-
+        Stack<IRainbowModelCommand> executedCommands = new Stack<> ();
+        boolean complete = true;
+        for (IRainbowModelCommandRepresentation cmd : commands) {
+            try {
+                if (!(cmd instanceof IRainbowModelCommand))
+                    throw new RainbowException (MessageFormat.format ("The command {0} is not an executable command.", cmd.getCommandName ()));
+                requestModelUpdate (cmd);
+                executedCommands.push ((IRainbowModelCommand )cmd);
+            }
+            catch (IllegalStateException | RainbowException e) {
+                complete = false;
+                break;
+            }
+        }
+        if (!complete && transaction && !executedCommands.isEmpty ()) {
+            IRainbowModelCommand cmd = null;
+            while (!executedCommands.isEmpty ()) {
+                try {
+                    cmd = executedCommands.pop ();
+                    cmd.undo ();
+                    m_changeBusPort.announce (cmd.getGeneratedEvents ());
+                }
+                catch (IllegalStateException | RainbowException e) {
+                    LOGGER.error ("Could not undo the commands.", e);
+                }
+            }
+        }
+       
     }
 
 }

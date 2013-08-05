@@ -56,6 +56,8 @@ public class RainbowESEBMessage implements IRainbowMessage {
     @Override
     public Object getProperty (String id) {
         DataValue dv = m_esebMap.get (SCOPE.string ().make (id));
+        if (dv == null)
+            return null;
         try {
             return CONVERTER.to_java (dv, null);
         }

@@ -9,8 +9,10 @@ import java.util.List;
 import org.acmestudio.acme.core.exception.AcmeException;
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.acmestudio.acme.model.command.IAcmeCommand;
+import org.acmestudio.acme.model.command.IAcmePropertyCreateCommand;
 import org.acmestudio.acme.model.event.AcmeEvent;
 import org.acmestudio.acme.model.event.AcmeModelEventType;
+import org.acmestudio.acme.model.event.AcmeSystemEvent;
 import org.acmestudio.acme.util.EventUpdateAdapter;
 import org.acmestudio.acme.util.IUpdate;
 import org.sa.rainbow.core.error.RainbowDelegationException;
@@ -40,15 +42,43 @@ IRainbowModelCommand<T, IAcmeSystem> {
     protected IAcmeCommand<?>  m_command;
     private IUpdate            m_eventUpdater = new IUpdate () {
 
+       boolean m_waitingForEnd = false;
+        
+       
+       protected void registerFinalEvent () {
+           synchronized (this) {
+               this.notifyAll ();
+           }
+       }
         @Override
         public void update (AcmeEvent event) {
-            if (m_events.get (m_events.size () - 1) instanceof AcmeRainbowCommandEvent
+            if (event instanceof AcmeSystemEvent) {
+                AcmeSystemEvent ase = (AcmeSystemEvent )event;
+                if (ase.getType () == AcmeModelEventType.REMOVE_DECLARED_TYPE /*&& ase.getData (ase.getType ()).equals ("___rainbow_locked")*/) {
+                    if (m_events.get (m_events.size () - 1) instanceof AcmeRainbowCommandEvent) {
+                        AcmeRainbowCommandEvent arce = (AcmeRainbowCommandEvent )m_events.get (m_events.size () - 1);
+                        if (arce.getEventType ().isEnd ()) {
+                            m_waitingForEnd = true;
+                        }
+                        else {
+                            registerFinalEvent ();
+                        }
+                    }
+                    else 
+                        registerFinalEvent ();
+                }
+                
+            }
+            if (m_events.size () > 0 && m_events.get (m_events.size () - 1) instanceof AcmeRainbowCommandEvent
                     && ((AcmeRainbowCommandEvent )m_events.get (m_events
                             .size () - 1)).getEventType ().isEnd ()) {
                 m_events.add (m_events.size () - 1, event);
             }
             else {
                 m_events.add (event);
+                if (event instanceof AcmeRainbowCommandEvent && m_waitingForEnd) {
+                    registerFinalEvent ();
+                }
             }
         }
     };
@@ -67,17 +97,30 @@ IRainbowModelCommand<T, IAcmeSystem> {
     }
 
     protected void removeEventListener () {
-        getModel ().removeEventListener (m_eventListener);
+        getModel ().getContext ().getModel ().removeEventListener (m_eventListener);
     }
 
     @Override
     protected void subExecute () throws RainbowException {
-        doConstructCommand ();
+        List<IAcmeCommand<?>> commands = doConstructCommand ();
+        // Add a sentinel command that can be used to use to work out when all the events associated
+        // with executing the commands are collected
+        commands.add (0, getModel ().getCommandFactory ().systemDeclaredTypeAddCommand (getModel (), "___rainbow_locekd"));
+        commands.add (getModel ().getCommandFactory ().systemDeclaredTypeRemoveCommand (getModel (), "___rainbow_locked"));
+        m_command = getModel ().getCommandFactory ().compoundCommand (commands);
         synchronized (m_model) {
             try {
                 setUpEventListeners ();
                 m_events.add (new AcmeRainbowCommandEvent (CommandEventT.START_COMMAND, this));
+               
                 m_command.execute ();
+                synchronized (m_eventListener) {
+                    try {
+                        m_eventListener.wait ();
+                    }
+                    catch (InterruptedException e) {
+                    }
+                }
                 removeEventListener ();
                 m_events.add (new AcmeRainbowCommandEvent (CommandEventT.FINISH_COMMAND, this));
             }
@@ -124,7 +167,7 @@ IRainbowModelCommand<T, IAcmeSystem> {
         }
     }
 
-    protected abstract void doConstructCommand () throws RainbowModelException;
+    protected abstract List<IAcmeCommand<?>> doConstructCommand () throws RainbowModelException;
 
     @Override
     public String getModelName () {
