@@ -37,7 +37,7 @@ public class TestNewServerCmd extends DefaultTCase {
             }
 
             @Override
-            public void announce (List<IRainbowMessage> event) {
+            public void announce (List<? extends IRainbowMessage> event) {
                 // TODO Auto-generated method stub
 
             }

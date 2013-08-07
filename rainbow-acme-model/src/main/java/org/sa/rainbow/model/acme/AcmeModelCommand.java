@@ -108,49 +108,45 @@ IRainbowModelCommand<T, IAcmeSystem> {
         commands.add (getModel ().getCommandFactory ().systemDeclaredTypeRemoveCommand (getModel (),
                 SENTINEL_COMMAND_TYPE));
         m_command = getModel ().getCommandFactory ().compoundCommand (commands);
-        synchronized (m_model) {
-            try {
-                setUpEventListeners ();
-                m_events.add (new AcmeRainbowCommandEvent (CommandEventT.START_COMMAND, this));
+        try {
+            setUpEventListeners ();
+            m_events.add (new AcmeRainbowCommandEvent (CommandEventT.START_COMMAND, this));
 
-                synchronized (m_eventUpdater) {
-                    m_command.execute ();
-                    try {
-                        // wait for the sentinel to come through
-                        m_eventUpdater.wait ();
-                    }
-                    catch (InterruptedException e) {
-                    }
+            synchronized (m_eventUpdater) {
+                m_command.execute ();
+                try {
+                    // wait for the sentinel to come through
+                    m_eventUpdater.wait ();
                 }
-                removeEventListener ();
-                m_events.add (new AcmeRainbowCommandEvent (CommandEventT.FINISH_COMMAND, this));
+                catch (InterruptedException e) {
+                }
             }
-            catch (IllegalStateException | AcmeException e) {
-                m_events.clear ();
-                // Need to work out how to undo partially complete commands, in a transactional way
-                // Maybe look at the events that have been done so far, and undo them...?
-                throw new RainbowDelegationException (e);
-            }
+            removeEventListener ();
+            m_events.add (new AcmeRainbowCommandEvent (CommandEventT.FINISH_COMMAND, this));
+        }
+        catch (IllegalStateException | AcmeException e) {
+            m_events.clear ();
+            // Need to work out how to undo partially complete commands, in a transactional way
+            // Maybe look at the events that have been done so far, and undo them...?
+            throw new RainbowDelegationException (e);
         }
     }
 
     @Override
     protected void subRedo () throws RainbowException {
         try {
-            synchronized (m_model) {
-                setUpEventListeners ();
-                m_events.add (new AcmeRainbowCommandEvent (CommandEventT.START_COMMAND, this));
-                synchronized (m_eventUpdater) {
-                    m_command.redo ();
-                    try {
-                        m_eventUpdater.wait ();
-                    }
-                    catch (InterruptedException e) {
-                    }
+            setUpEventListeners ();
+            m_events.add (new AcmeRainbowCommandEvent (CommandEventT.START_COMMAND, this));
+            synchronized (m_eventUpdater) {
+                m_command.redo ();
+                try {
+                    m_eventUpdater.wait ();
                 }
-                removeEventListener ();
-                m_events.add (new AcmeRainbowCommandEvent (CommandEventT.FINISH_COMMAND, this));
+                catch (InterruptedException e) {
+                }
             }
+            removeEventListener ();
+            m_events.add (new AcmeRainbowCommandEvent (CommandEventT.FINISH_COMMAND, this));
         }
         catch (IllegalStateException | AcmeException e) {
             throw new RainbowDelegationException (e);
@@ -160,21 +156,19 @@ IRainbowModelCommand<T, IAcmeSystem> {
     @Override
     protected void subUndo () throws RainbowException {
         try {
-            synchronized (m_model) {
-                setUpEventListeners ();
-                m_events.add (new AcmeRainbowCommandEvent (CommandEventT.START_UNDO_COMMAND, this));
-                synchronized (m_eventUpdater) {
-                    m_command.undo ();
-                    try {
-                        m_eventUpdater.wait ();
-                    }
-                    catch (InterruptedException e) {
-                    }
+            setUpEventListeners ();
+            m_events.add (new AcmeRainbowCommandEvent (CommandEventT.START_UNDO_COMMAND, this));
+            synchronized (m_eventUpdater) {
+                m_command.undo ();
+                try {
+                    m_eventUpdater.wait ();
                 }
-                removeEventListener ();
-                m_events.add (new AcmeRainbowCommandEvent (CommandEventT.FINISH_UNDO_COMMAND, this));
-
+                catch (InterruptedException e) {
+                }
             }
+            removeEventListener ();
+            m_events.add (new AcmeRainbowCommandEvent (CommandEventT.FINISH_UNDO_COMMAND, this));
+
         }
         catch (IllegalStateException | AcmeException e) {
 
