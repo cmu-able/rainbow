@@ -1,6 +1,6 @@
 package org.sa.rainbow.gauges;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.sa.rainbow.models.commands.IRainbowModelCommandRepresentation;
 
@@ -25,7 +25,7 @@ public interface IGaugeQueryInterface {
      *            the AttributeValueTriple object to contain the value
      * @return boolean <code>true</code> if query succeeds, <code>false</code> otherwise
      */
-    public IRainbowModelCommandRepresentation queryLastCommand (String modelAttachment);
+    public IRainbowModelCommandRepresentation querySingleCommand (String key);
 
     /**
      * Queries for all of the values reported by this Gauge.
@@ -34,6 +34,6 @@ public interface IGaugeQueryInterface {
      *            the List of AttributeValueTriple values
      * @return boolean <code>true</code> if query succeeds, <code>false</code> otherwise
      */
-    public List<IRainbowModelCommandRepresentation> queryAllCommands ();
+    public Collection<IRainbowModelCommandRepresentation> queryAllCommands ();
 
 }

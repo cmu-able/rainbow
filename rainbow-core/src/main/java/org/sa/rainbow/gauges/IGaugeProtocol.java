@@ -59,5 +59,11 @@ public interface IGaugeProtocol {
     public static final String META_VALUE = "metaValue";  // name:type
     public static final String SIZE              = "_size";
     public static final String GAUGE_HEARTBEAT   = "gauge-heartbeat";
+    public static final String CONFIG_PARAM_VALUE = "configParamValue";
+    public static final String CONFIG_PARAM_TYPE  = "configParamType";
+    public static final String CONFIG_PARAM_NAME  = "configParam";
+    public static final String GAUGE_CONFIGURED = "GAUGE_CONFIGURED";
+    public static final String GAUGE_DELETED = "GAUGE_DELETED";
+    public static final String GAUGE_CREATED = "GAUGE_CREATED";
 
 }

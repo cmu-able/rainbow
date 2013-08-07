@@ -1,6 +1,7 @@
 package org.sa.rainbow.gauges;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
@@ -12,11 +13,11 @@ public class GaugeState implements IGaugeState {
     private Set<IRainbowModelCommandRepresentation> m_commands;
     private Set<TypedAttributeWithValue>            m_configParams;
 
-    public GaugeState (Set<TypedAttributeWithValue> setupParams, Set<TypedAttributeWithValue> configParams,
-            Set<IRainbowModelCommandRepresentation> commands) {
-        m_setupParams = setupParams;
-        m_configParams = configParams;
-        m_commands = commands;
+    public GaugeState (Collection<TypedAttributeWithValue> setupPArams,
+            Collection<TypedAttributeWithValue> configParams, Collection<IRainbowModelCommandRepresentation> commands) {
+        m_setupParams = new HashSet<> (setupPArams);
+        m_configParams = new HashSet<> (configParams);
+        m_commands = new HashSet<> (commands);
     }
 
     @Override

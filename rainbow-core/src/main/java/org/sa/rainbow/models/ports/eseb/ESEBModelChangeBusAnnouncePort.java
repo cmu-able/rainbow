@@ -35,7 +35,7 @@ public class ESEBModelChangeBusAnnouncePort implements IRainbowModelChangeBusPor
     }
 
     @Override
-    public void announce (List<IRainbowMessage> event) {
+    public void announce (List<? extends IRainbowMessage> event) {
         for (IRainbowMessage msg : event) {
             announce (msg);
         }

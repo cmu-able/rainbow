@@ -14,7 +14,7 @@ public interface IRainbowModelChangeBusPort {
     public static final String PARENT_ID_PROP  = "PARENT_ID";
 
     public void announce (IRainbowMessage event);
-    public void announce (List<IRainbowMessage> event);
+    public void announce (List<? extends IRainbowMessage> event);
 
     public IRainbowMessage createMessage ();
 }

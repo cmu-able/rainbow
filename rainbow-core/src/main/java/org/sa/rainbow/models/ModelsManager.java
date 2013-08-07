@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -23,6 +24,7 @@ import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.error.RainbowCopyException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
+import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.models.commands.AbstractLoadModelCmd;
 import org.sa.rainbow.models.commands.IRainbowModelCommand;
 import org.sa.rainbow.models.commands.IRainbowModelCommandRepresentation;
@@ -37,13 +39,19 @@ import org.sa.rainbow.util.Util;
  * reference to the model update US bus, as a subscriber to events to get information - a reference to the model change
  * bus, as a publisher - all executed commands should publish events to this bus
  * 
+ * 
+ * Question: Should this be a thread?
+ * 
  * @author Bradley Schmerl: schmerl
  * 
  */
 public class ModelsManager implements IModelsManager {
     static Logger                                      LOGGER     = Logger.getLogger (ModelsManager.class);
 
+    /** The bus on which to announce model change events **/
     protected IRainbowModelChangeBusPort                    m_changeBusPort;
+
+    /** The bus on which requests to change models are made by analyses and gauges **/
     protected IRainbowModelUSBusPort                   m_upstreamBusPort;
 
     /** Contains all the models -- keyed by Type then name **/
@@ -67,6 +75,11 @@ public class ModelsManager implements IModelsManager {
             String path = Rainbow.properties ().getProperty (Rainbow.PROPKEY_MODEL_PATH_PREFIX + modelNum);
             File modelPath = Util.getRelativeToPath (Rainbow.instance ().getTargetPath (), path);
             try {
+                // The factory class should provide a static method for generating a load command that can be
+                // called to load a model into the model manager
+                // This is currently done through a set of properties.
+                // The load command is responsible for registering the model after loading
+                // Q: is this the right place for that?
                 Class loadClass = Class.forName (factoryClassName);
                 Method method = loadClass.getMethod ("loadCommand", ModelsManager.class, String.class,
                         InputStream.class, String.class);
@@ -78,9 +91,12 @@ public class ModelsManager implements IModelsManager {
                 AbstractLoadModelCmd load = (AbstractLoadModelCmd )method.invoke (null, this, modelName,
                         new FileInputStream (modelPath), modelPath.getAbsolutePath ());
                 IModelInstance instance = load.execute (null);
+                load.setEventAnnouncePort (m_changeBusPort);
+                // Announce the loading on the change bus.
+                // Q: should this be done in clients or in the commands themselves?
+                m_changeBusPort.announce (load.getGeneratedEvents ());
                 LOGGER.info ("Successfully loaded and registered " + instance.getModelName () + ":"
                         + instance.getModelType ());
-                // m_changePort.executedCommand (load);
             }
             catch (ClassNotFoundException e) {
                 LOGGER.error (MessageFormat.format (
@@ -116,9 +132,9 @@ public class ModelsManager implements IModelsManager {
     }
 
     private void initializeConnections () throws IOException {
-        // This needs to be done via a factory
-//        m_changeBusPort = RainbowManagementPortFactory.createChangeBusPort (this);
+        // Publish to change bus
         m_changeBusPort = new ESEBChangeBusAnnouncePort ();
+        // Listen to upstream messages
         m_upstreamBusPort = new ESEBModelManagerModelUpdatePort (this);
     }
 
@@ -157,9 +173,11 @@ public class ModelsManager implements IModelsManager {
             if (model != null) {
                 if (models.get (copyName) == null) {
                     try {
-                        IModelInstance<T> copy = model.copyModelInstance (copyName);
-                        registerModel (modelType, copyName, copy);
-                        return copy;
+                        synchronized (model.getModelInstance ()) {
+                            IModelInstance<T> copy = model.copyModelInstance (copyName);
+                            registerModel (modelType, copyName, copy);
+                            return copy;
+                        }
                     }
                     catch (RainbowCopyException e) {
                         throw new RainbowModelException (e);
@@ -183,9 +201,17 @@ public class ModelsManager implements IModelsManager {
         Map<String, IModelInstance> models = m_modelMap.get (modelType);
         if (models != null) {
             // Should I check if the instance is already registered?
-            models.put (modelName, model);
+            IModelInstance existingModel = models.get (modelName);
+            if (existingModel != null) {
+                synchronized (existingModel) {
+                    models.put (modelName, model);
+                }
+            }
+            else {
+                models.put (modelName, model);
 //            model.setChangePort (m_changeBusPort);
-            // TODO: attach the change bus port to the model
+                // TODO: attach the change bus port to the model
+            }
         }
         else
             throw new RainbowModelException (MessageFormat.format ("The type ''{0}'' is not a registered model type.",
@@ -197,14 +223,18 @@ public class ModelsManager implements IModelsManager {
         Map<String, IModelInstance> models = m_modelMap.get (model.getModelType ());
         boolean success = false;
         if (models != null) {
-            success = unregisterModel (models, model);
+            synchronized (model.getModelInstance ()) {
+                success = unregisterModel (models, model);
+            }
         }
         else {
             // do it the slow way
-            for (Map<String, IModelInstance> m : m_modelMap.values ()) {
-                success = unregisterModel (m, model);
-                if (success) {
-                    break;
+            synchronized (model.getModelInstance ()) {
+                for (Map<String, IModelInstance> m : m_modelMap.values ()) {
+                    success = unregisterModel (m, model);
+                    if (success) {
+                        break;
+                    }
                 }
             }
         }
@@ -230,49 +260,95 @@ public class ModelsManager implements IModelsManager {
 
     @Override
     public void requestModelUpdate (IRainbowModelCommandRepresentation command) throws IllegalStateException,
-            RainbowException {
+    RainbowException {
         IModelInstance<?> modelInstance = getModelInstance (command.getModelType (), command.getModelName ());
+        LOGGER.info (MessageFormat.format ("Updating model {0}::{1} through command: {2}", command.getModelName (),
+                command.getModelType (), command.getCommandName ()));
+        IRainbowModelCommand cmd = setupCommand (command, modelInstance);
+        synchronized (modelInstance.getModelInstance ()) {
+            cmd.execute (modelInstance);
+        }
+        if (cmd.canUndo ()) {
+            // The command executed correctly if we can undo it.
+            List<? extends IRainbowMessage> events = cmd.getGeneratedEvents ();
+            LOGGER.info (MessageFormat.format ("Announcing {0} events on the change bus", events.size ()));
+            m_changeBusPort.announce (events);
+        }
+    }
+
+    private IRainbowModelCommand setupCommand (IRainbowModelCommandRepresentation command,
+            IModelInstance<?> modelInstance) throws RainbowException {
         if (!(command instanceof IRainbowModelCommand))
-            throw new RainbowException (MessageFormat.format ("The command {0} is not an executable command.", command.getCommandName ()));
+            throw new RainbowException (MessageFormat.format ("The command {0} is not an executable command.",
+                    command.getCommandName ()));
         IRainbowModelCommand cmd = (IRainbowModelCommand )command;
         cmd.setModel (modelInstance.getModelInstance ());
         cmd.setEventAnnouncePort (m_changeBusPort);
-        cmd.execute (modelInstance);
-        if (cmd.canUndo ()) {
-            m_changeBusPort.announce (cmd.getGeneratedEvents ());
-        }
+        return cmd;
     }
 
     @Override
     public void requestModelUpdate (List<IRainbowModelCommandRepresentation> commands, boolean transaction) {
+        LOGGER.info (MessageFormat.format ("Updating the model with {0} commands, transaction = {1}", commands.size (),
+                transaction));
+        // Keep track of successfully executed commands in case we need to undo 
+
         Stack<IRainbowModelCommand> executedCommands = new Stack<> ();
+        List<IRainbowMessage> events = new LinkedList<IRainbowMessage> ();
         boolean complete = true;
-        for (IRainbowModelCommandRepresentation cmd : commands) {
-            try {
-                if (!(cmd instanceof IRainbowModelCommand))
-                    throw new RainbowException (MessageFormat.format ("The command {0} is not an executable command.", cmd.getCommandName ()));
-                requestModelUpdate (cmd);
-                executedCommands.push ((IRainbowModelCommand )cmd);
-            }
-            catch (IllegalStateException | RainbowException e) {
-                complete = false;
-                break;
+        if (!commands.isEmpty ()) {
+            IRainbowModelCommandRepresentation c = commands.iterator ().next ();
+            IModelInstance<?> modelInstance = getModelInstance (c.getModelType (), c.getModelName ());
+            synchronized (modelInstance.getModelInstance ()) {
+
+                for (IRainbowModelCommandRepresentation cmd : commands) {
+                    try {
+                        IModelInstance mi = getModelInstance (cmd.getModelType (), cmd.getModelName ());
+                        if (mi != modelInstance) {
+                            if (transaction) {
+                                LOGGER.error ("All commands in a transaction must be on the same model.");
+                                break;
+                            }
+                            else {
+                                LOGGER.warn ("All commands in the transaction should be on the same model.");
+                            }
+                        }
+                        cmd = setupCommand (cmd, mi);
+                        if (!(cmd instanceof IRainbowModelCommand)) throw new RainbowException (MessageFormat.format ("The command {0} is not an executable command.", cmd.getCommandName ()));
+                        IRainbowModelCommand mcmd = (IRainbowModelCommand )cmd;
+                        mcmd.execute (mi);
+                        // Store all the generated events to announce later
+                        events.addAll (mcmd.getGeneratedEvents ());
+                        executedCommands.push (mcmd);
+                    }
+                    catch (IllegalStateException | RainbowException e) {
+                        complete = false;
+                        break;
+                    }
+                }
+
+                if (!complete && transaction && !executedCommands.isEmpty ()) {
+                    // Undo executed commands if we didn't complete.
+                    LOGGER.warn (MessageFormat.format (
+                            "Not all of the commands completed successfully. {0} did, so undoing them.",
+                            executedCommands.size ()));
+                    IRainbowModelCommand cmd = null;
+                    while (!executedCommands.isEmpty ()) {
+                        try {
+                            cmd = executedCommands.pop ();
+                            cmd.undo ();
+                        }
+                        catch (IllegalStateException | RainbowException e) {
+                            LOGGER.error ("Could not undo the commands.", e);
+                        }
+                    }
+                }
+                else {
+                    // Announce the changes
+                    m_changeBusPort.announce (events);
+                }
             }
         }
-        if (!complete && transaction && !executedCommands.isEmpty ()) {
-            IRainbowModelCommand cmd = null;
-            while (!executedCommands.isEmpty ()) {
-                try {
-                    cmd = executedCommands.pop ();
-                    cmd.undo ();
-                    m_changeBusPort.announce (cmd.getGeneratedEvents ());
-                }
-                catch (IllegalStateException | RainbowException e) {
-                    LOGGER.error ("Could not undo the commands.", e);
-                }
-            }
-        }
-       
     }
 
 }
