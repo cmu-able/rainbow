@@ -1,9 +1,13 @@
 package org.sa.rainbow.models.commands;
 
+import java.text.MessageFormat;
+import java.util.List;
+
 import org.sa.rainbow.core.error.RainbowDelegationException;
 import org.sa.rainbow.core.error.RainbowException;
+import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.models.IModelInstance;
-import org.sa.rainbow.models.ports.IRainbowModelChangeBusPort;
+import org.sa.rainbow.models.ports.IRainbowMessageFactory;
 
 public abstract class AbstractRainbowModelCommand<Type, Model> implements IRainbowModelCommand<Type, Model> {
 
@@ -15,8 +19,6 @@ public abstract class AbstractRainbowModelCommand<Type, Model> implements IRainb
         NOT_YET_DONE, DONE, UNDONE, ERROR, DISPOSED
     };
 
-    protected Model                       m_model;
-
     protected String                      m_label           = getClass ().getCanonicalName ();
 
     protected ExecutionState              m_executionState  = ExecutionState.NOT_YET_DONE;
@@ -25,11 +27,9 @@ public abstract class AbstractRainbowModelCommand<Type, Model> implements IRainb
 
     private RainbowCompoundCommand<Model> m_parentCommand   = null;
 
-    private IRainbowModelChangeBusPort            m_announcePort;
+    protected IRainbowMessageFactory      m_messageFactory;
 
-    public IRainbowModelChangeBusPort getAnnouncePort () {
-        return m_announcePort;
-    }
+    protected IModelInstance<Model>       m_modelContext;
 
     private String                        m_target;
 
@@ -37,26 +37,13 @@ public abstract class AbstractRainbowModelCommand<Type, Model> implements IRainb
 
     private final String                  m_commandName;
 
-    public AbstractRainbowModelCommand (String commandName, Model model, String target, String... parameters) {
+    public AbstractRainbowModelCommand (String commandName, IModelInstance<Model> model, String target,
+            String... parameters) {
         m_target = target;
         m_parameters = parameters;
         m_commandName = commandName;
-        setModel (model);
+        m_modelContext = model;
     }
-
-
-    public Model getModel () {
-        return m_model;
-    }
-
-    @Override
-    public void setModel (Model m) {
-        if (checkModelValidForCommand (m)) {
-            m_model = m;
-        }
-    }
-
-    protected abstract boolean checkModelValidForCommand (Model model);
 
 
     @Override
@@ -71,42 +58,50 @@ public abstract class AbstractRainbowModelCommand<Type, Model> implements IRainb
 
     @Override
     public boolean canExecute () {
-        return (m_executionState == ExecutionState.NOT_YET_DONE && m_model != null);
+        return (m_executionState == ExecutionState.NOT_YET_DONE);
     }
 
     @Override
     public boolean canUndo () {
-        return (m_executionState == ExecutionState.DONE && m_model != null);
+        return (m_executionState == ExecutionState.DONE);
     }
 
     @Override
     public boolean canRedo () {
-        return (m_executionState == ExecutionState.UNDONE && m_model != null);
+        return (m_executionState == ExecutionState.UNDONE);
     }
 
     @Override
-    public Type execute (IModelInstance<Model> context) throws IllegalStateException, RainbowException {
+    public List<? extends IRainbowMessage>
+    execute (IModelInstance<Model> context, IRainbowMessageFactory messageFactory)
+            throws IllegalStateException, RainbowException {
         if (inCompoundCommand)
             throw new IllegalStateException (
                     "Cannot call execute() on a compounded command -- it must be called on the parent");
         if (!canExecute ()) throw new IllegalStateException ("This command cannot currently be executed");
-        if ((m_model == null && context == null) || m_model != context.getModelInstance ())
-            throw new IllegalStateException ("Trying to execute in a different context is not allowed.");
-        Type t = null;
+        if (context == null) throw new IllegalStateException ("Trying to execute un a null model is not allowed.");
+        if (messageFactory == null)
+            throw new IllegalStateException ("Cannot execute a command with a null message factory");
+        if (m_modelContext != null && context != m_modelContext)
+            throw new IllegalStateException ("Cannot execute a command on a model that is a different context");
+        if (!checkModelValidForCommand (context.getModelInstance ()))
+            throw new RainbowException (MessageFormat.format ("The model is not valid for the command {0}",
+                    this.toString ()));
+        m_messageFactory = messageFactory;
+        m_modelContext = context;
         try {
             subExecute ();
-            t = getResult ();
         }
         catch (RainbowDelegationException rde) {
             m_executionState = ExecutionState.ERROR;
             throw rde;
         }
         m_executionState = ExecutionState.DONE;
-        return t;
+        return getGeneratedEvents (m_messageFactory);
     }
 
     @Override
-    public Type redo () throws IllegalStateException, RainbowException {
+    public List<? extends IRainbowMessage> redo () throws IllegalStateException, RainbowException {
         if (inCompoundCommand)
             throw new IllegalStateException (
                     "Cannot call redo() on a compounded command -- it must be called on the parent");
@@ -122,32 +117,28 @@ public abstract class AbstractRainbowModelCommand<Type, Model> implements IRainb
             m_executionState = ExecutionState.ERROR;
             throw rde;
         }
-        return t;
+        return getGeneratedEvents (m_messageFactory);
     }
 
+    protected abstract List<? extends IRainbowMessage> getGeneratedEvents (IRainbowMessageFactory messageFactory);
+
     @Override
-    public Type undo () throws IllegalStateException, RainbowException {
+    public List<? extends IRainbowMessage> undo () throws IllegalStateException, RainbowException {
         if (inCompoundCommand)
             throw new IllegalStateException (
                     "Cannot call undo() on a compounded command -- it must be called on the parent");
         if (!canUndo ()) throw new IllegalStateException ("This command cannot currently be undone");
 
-        Type t = null;
         try {
             subUndo ();
-            t = getResult ();
         }
         catch (RainbowDelegationException rde) {
             m_executionState = ExecutionState.ERROR;
             throw rde;
         }
-        return t;
+        return getGeneratedEvents (m_messageFactory);
     }
 
-    @Override
-    public void setEventAnnouncePort (IRainbowModelChangeBusPort announcePort) {
-        m_announcePort = announcePort;
-    }
 
     @Override
     public String getLabel () {
@@ -182,6 +173,13 @@ public abstract class AbstractRainbowModelCommand<Type, Model> implements IRainb
 
     protected abstract void subUndo () throws RainbowException;
 
-    protected abstract Type getResult ();
+
+    protected abstract boolean checkModelValidForCommand (Model model);
+
+    @Override
+    public String toString () {
+        return MessageFormat.format ("Command<{0}: {1}, {2}>", getCommandName (), getTarget (), getParameters ()
+                .toString ());
+    }
 
 }

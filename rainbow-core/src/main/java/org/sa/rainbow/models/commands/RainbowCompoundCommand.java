@@ -8,6 +8,7 @@ import java.util.List;
 import org.sa.rainbow.core.error.RainbowDelegationException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
+import org.sa.rainbow.models.ports.IRainbowMessageFactory;
 
 // NOTE: THIS CLASS SHOULD NOT BE USED YET.
 public class RainbowCompoundCommand<Model> extends AbstractRainbowModelCommand<List<Object>, Model> implements
@@ -21,9 +22,9 @@ IRainbowModelCompoundCommand<Model> {
     CommandState                                m_state    = CommandState.CAN_EXECUTE;
     List<Object>                                m_results  = Collections.emptyList ();
 
-    public RainbowCompoundCommand (Model model, List<AbstractRainbowModelCommand<?, Model>> commands) {
+    public RainbowCompoundCommand (List<AbstractRainbowModelCommand<?, Model>> commands) {
         // TODO: Do we need this?
-        super ("compound", model, null, null);
+        super ("compound", null, null);
         if (commands == null || commands.size () == 0)
             throw new IllegalArgumentException (
                     "The argument passed to the constructor for RainbowCompoundCommand cannot be null or empty.");
@@ -147,12 +148,12 @@ IRainbowModelCompoundCommand<Model> {
     }
 
     @Override
-    protected List<Object> getResult () {
+    public List<Object> getResult () {
         return getResults ();
     }
 
     @Override
-    public List<? extends IRainbowMessage> getGeneratedEvents () {
+    public List<? extends IRainbowMessage> getGeneratedEvents (IRainbowMessageFactory messageFactory) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -171,8 +172,11 @@ IRainbowModelCompoundCommand<Model> {
 
     @Override
     protected boolean checkModelValidForCommand (Model model) {
-        // TODO Auto-generated method stub
-        return false;
+        boolean ok = true;
+        for (AbstractRainbowModelCommand<?, Model> cmd : m_commands) {
+            ok &= cmd.checkModelValidForCommand (model);
+        }
+        return ok;
     }
 
 }

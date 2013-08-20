@@ -47,7 +47,7 @@ public class ZNNCommandFactory extends ModelCommandFactory {
         if (ModelHelper.getAcmeSystem (client) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        SetResponseTimeCmd cmd = new SetResponseTimeCmd ("setResponseTime", m_modelInstance.getModelInstance (),
+        SetResponseTimeCmd cmd = new SetResponseTimeCmd ("setResponseTime", m_modelInstance,
                 client.getQualifiedName (), Float.toString (rt));
         return cmd;
     }
@@ -57,7 +57,7 @@ public class ZNNCommandFactory extends ModelCommandFactory {
         if (ModelHelper.getAcmeSystem (server) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new SetLoadCmd ("setLoad", m_modelInstance.getModelInstance (), server.getQualifiedName (),
+        return new SetLoadCmd ("setLoad", m_modelInstance, server.getQualifiedName (),
                 Float.toString (load));
     }
 
@@ -66,7 +66,7 @@ public class ZNNCommandFactory extends ModelCommandFactory {
         if (ModelHelper.getAcmeSystem (proxy) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new NewServerCmd ("connectServer", m_modelInstance.getModelInstance (), proxy.getQualifiedName (), name);
+        return new NewServerCmd ("connectServer", m_modelInstance, proxy.getQualifiedName (), name);
     }
 
     @Override

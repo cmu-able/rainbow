@@ -10,7 +10,7 @@ import org.junit.Test;
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.RainbowMaster;
-import org.sa.rainbow.management.ports.RainbowManagementPortFactory;
+import org.sa.rainbow.management.ports.RainbowPortFactory;
 import org.sa.rainbow.models.IModelInstance;
 import org.sa.rainbow.models.commands.IRainbowModelCommandRepresentation;
 import org.sa.rainbow.models.commands.ModelCommandFactory;
@@ -30,7 +30,7 @@ public class GaugeCommandTest extends TestCase {
         RainbowDelegate delegate = new RainbowDelegate ();
         delegate.start ();
 
-        IRainbowModelUSBusPort usPort = RainbowManagementPortFactory
+        IRainbowModelUSBusPort usPort = RainbowPortFactory
                 .createModelsManagerClientUSPort (new Identifiable () {
 
                     @Override

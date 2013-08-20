@@ -14,6 +14,7 @@ import org.acmestudio.acme.model.command.IAcmeComponentCreateCommand;
 import org.acmestudio.acme.model.command.IAcmeConnectorCreateCommand;
 import org.acmestudio.acme.model.command.IAcmePortCreateCommand;
 import org.sa.rainbow.core.error.RainbowModelException;
+import org.sa.rainbow.models.IModelInstance;
 
 public class NewServerCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
 
@@ -30,8 +31,8 @@ public class NewServerCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
 
     private IAcmeComponentCreateCommand m_serverCommand;
 
-    public NewServerCmd (String commandName, IAcmeSystem system, String lb, String name) {
-        super (commandName, system, lb, name);
+    public NewServerCmd (String commandName, IModelInstance<IAcmeSystem> model, String lb, String name) {
+        super (commandName, model, lb, name);
         m_lb = lb;
         m_name = name;
     }
@@ -80,7 +81,7 @@ public class NewServerCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
 
 
     @Override
-    protected IAcmeComponent getResult () {
+    public IAcmeComponent getResult () {
         return m_serverCommand.getComponent ();
     }
 

@@ -10,14 +10,15 @@ import org.acmestudio.acme.element.property.IAcmeProperty;
 import org.acmestudio.acme.model.command.IAcmeCommand;
 import org.acmestudio.acme.model.command.IAcmePropertyCommand;
 import org.sa.rainbow.core.error.RainbowModelException;
+import org.sa.rainbow.models.IModelInstance;
 
 public class SetResponseTimeCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
 
     private String m_client;
     private float          m_responseTime;
 
-    public SetResponseTimeCmd (String commandName, IAcmeSystem system, String client, String rt) {
-        super (commandName, system, client, rt);
+    public SetResponseTimeCmd (String commandName, IModelInstance<IAcmeSystem> model, String client, String rt) {
+        super (commandName, model, client, rt);
         m_client = client;
         m_responseTime = Float.valueOf (rt);
     }
@@ -33,7 +34,7 @@ public class SetResponseTimeCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
     }
 
     @Override
-    protected IAcmeProperty getResult () {
+    public IAcmeProperty getResult () {
         return ((IAcmePropertyCommand )m_command).getProperty ();
     }
 

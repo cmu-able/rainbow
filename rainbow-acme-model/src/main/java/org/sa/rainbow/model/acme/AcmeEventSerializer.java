@@ -22,6 +22,7 @@ import org.acmestudio.standalone.resource.StandaloneLanguagePackHelper;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.management.ports.eseb.ESEBConstants;
+import org.sa.rainbow.models.ports.IRainbowMessageFactory;
 import org.sa.rainbow.models.ports.IRainbowModelChangeBusPort;
 
 public class AcmeEventSerializer {
@@ -226,25 +227,25 @@ public class AcmeEventSerializer {
         }
     }
 
-    public List<IRainbowMessage> serialize (List<? extends AcmeEvent> events, IRainbowModelChangeBusPort port) {
+    public List<IRainbowMessage> serialize (List<? extends AcmeEvent> events, IRainbowMessageFactory port) {
         try {
-        List<IRainbowMessage> msgs = new LinkedList<> ();
-        IRainbowMessage parent = null;
-        Iterator<? extends AcmeEvent> iterator = events.iterator ();
-        if (events.get (0) instanceof AcmeRainbowCommandEvent) {
-            parent = port.createMessage ();
-            serialize (iterator.next (), parent, null);
-            msgs.add (parent);
-        }
-        while (iterator.hasNext ()) {
-            AcmeEvent e = iterator.next ();
-            IRainbowMessage msg = port.createMessage ();
-            serialize (e, msg, parent);
-            if (msg.getPropertyNames ().contains (ESEBConstants.MSG_TYPE_KEY)) {
-                msgs.add (msg);
+            List<IRainbowMessage> msgs = new LinkedList<> ();
+            IRainbowMessage parent = null;
+            Iterator<? extends AcmeEvent> iterator = events.iterator ();
+            if (events.get (0) instanceof AcmeRainbowCommandEvent) {
+                parent = port.createMessage ();
+                serialize (iterator.next (), parent, null);
+                msgs.add (parent);
             }
-        }
-        return msgs;
+            while (iterator.hasNext ()) {
+                AcmeEvent e = iterator.next ();
+                IRainbowMessage msg = port.createMessage ();
+                serialize (e, msg, parent);
+                if (msg.getPropertyNames ().contains (ESEBConstants.MSG_TYPE_KEY)) {
+                    msgs.add (msg);
+                }
+            }
+            return msgs;
         }catch (ConcurrentModificationException e) {
             // There could have been some stray events that got added to the list, so let's just try processing again
             return serialize (events, port);

@@ -10,13 +10,14 @@ import org.acmestudio.acme.element.property.IAcmeProperty;
 import org.acmestudio.acme.model.command.IAcmeCommand;
 import org.acmestudio.acme.model.command.IAcmePropertyCommand;
 import org.sa.rainbow.core.error.RainbowModelException;
+import org.sa.rainbow.models.IModelInstance;
 
 public class SetLoadCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
 
     private String m_server;
     private float          m_load;
 
-    public SetLoadCmd (String commandName, IAcmeSystem model, String server, String load) {
+    public SetLoadCmd (String commandName, IModelInstance<IAcmeSystem> model, String server, String load) {
         super (commandName, model, server, load);
         m_server = server;
         m_load = Float.valueOf (load);
@@ -33,7 +34,7 @@ public class SetLoadCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
     }
 
     @Override
-    protected IAcmeProperty getResult () {
+    public IAcmeProperty getResult () {
         return ((IAcmePropertyCommand )m_command).getProperty ();
     }
 

@@ -15,7 +15,7 @@ public class TestModelManagerLoading extends TestCase {
     public void test () throws Throwable {
 
         File basePath = new File (System.getProperty ("user.dir"));
-        File testMasterDir = new File (basePath, "src/test/resources/RainbowModelsTest");
+        File testMasterDir = new File (basePath, "src/test/resources/RainbowTest/eseb");
         System.setProperty ("user.dir", testMasterDir.getCanonicalPath ());
 
         RainbowMaster master = new RainbowMaster ();

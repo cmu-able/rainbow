@@ -50,16 +50,14 @@ public class RainbowPortFactory {
             catch (ClassNotFoundException e) {
                 String errMsg = MessageFormat.format (
                         "The class ''{0}'' could not be found on the classpath. Bailing!", factory);
-                LOGGER.error (errMsg);
-                LOGGER.error (e);
+                LOGGER.error (errMsg, e);
                 throw new NotImplementedException (errMsg, e);
             }
             catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
                     | InvocationTargetException e) {
                 String errMsg = MessageFormat.format (
                         "The class ''{0}'' does not implement the method ''{1}''. Bailing!", factory, "getFactory");
-                LOGGER.error (errMsg);
-                LOGGER.error (e);
+                LOGGER.error (errMsg, e);
                 throw new NotImplementedException (errMsg, e);
             }
 

@@ -19,8 +19,10 @@ import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.model.acme.AcmeRainbowCommandEvent.CommandEventT;
+import org.sa.rainbow.models.IModelInstance;
 import org.sa.rainbow.models.commands.AbstractRainbowModelCommand;
 import org.sa.rainbow.models.commands.IRainbowModelCommand;
+import org.sa.rainbow.models.ports.IRainbowMessageFactory;
 
 public abstract class AcmeModelCommand<T> extends AbstractRainbowModelCommand<T, IAcmeSystem> implements
 IRainbowModelCommand<T, IAcmeSystem> {
@@ -83,7 +85,7 @@ IRainbowModelCommand<T, IAcmeSystem> {
     private EventUpdateAdapter  m_eventListener;
     List<AcmeEvent>             m_events              = Collections.synchronizedList (new LinkedList<AcmeEvent> ());
 
-    public AcmeModelCommand (String commandName, IAcmeSystem model, String target, String... parameters) {
+    public AcmeModelCommand (String commandName, IModelInstance<IAcmeSystem> model, String target, String... parameters) {
         super (commandName, model, target, parameters);
     }
 
@@ -92,6 +94,10 @@ IRainbowModelCommand<T, IAcmeSystem> {
         m_eventListener = new EventUpdateAdapter (m_eventUpdater);
         m_eventListener.addListenedTypes (EnumSet.allOf (AcmeModelEventType.class));
         getModel ().getContext ().getModel ().addEventListener (m_eventListener);
+    }
+
+    protected IAcmeSystem getModel () {
+        return m_modelContext.getModelInstance ();
     }
 
     protected void removeEventListener () {
@@ -180,7 +186,7 @@ IRainbowModelCommand<T, IAcmeSystem> {
 
     @Override
     public String getModelName () {
-        return m_model.getName ();
+        return getModel ().getName ();
     }
 
     @Override
@@ -189,9 +195,9 @@ IRainbowModelCommand<T, IAcmeSystem> {
     }
 
     @Override
-    public List<? extends IRainbowMessage> getGeneratedEvents () {
+    public List<? extends IRainbowMessage> getGeneratedEvents (IRainbowMessageFactory messageFactory) {
         AcmeEventSerializer ser = new AcmeEventSerializer ();
-        return ser.serialize (m_events, getAnnouncePort ());
+        return ser.serialize (m_events, m_messageFactory);
     }
 
     protected <T> T resolveInModel (String qname, Class<T> clazz) throws RainbowModelException {

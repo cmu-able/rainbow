@@ -9,8 +9,10 @@ import org.sa.rainbow.core.error.RainbowDelegationException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.event.IRainbowMessage;
+import org.sa.rainbow.management.ports.eseb.ESEBConstants;
 import org.sa.rainbow.models.IModelInstance;
 import org.sa.rainbow.models.IModelsManager;
+import org.sa.rainbow.models.ports.IRainbowMessageFactory;
 import org.sa.rainbow.models.ports.IRainbowModelChangeBusPort;
 
 public abstract class AbstractLoadModelCmd<Type> extends AbstractRainbowModelCommand<IModelInstance<Type>, Object> {
@@ -19,7 +21,7 @@ public abstract class AbstractLoadModelCmd<Type> extends AbstractRainbowModelCom
     private InputStream    m_is;
 
     public AbstractLoadModelCmd (String commandName, IModelsManager mm, String resource, InputStream is, String source) {
-        super (commandName, mm, resource, source);
+        super (commandName, null, resource, source);
         m_is = is;
         m_modelsManager = mm;
     }
@@ -38,22 +40,22 @@ public abstract class AbstractLoadModelCmd<Type> extends AbstractRainbowModelCom
     }
 
     @Override
-    public IModelInstance<Type> execute (IModelInstance context) throws IllegalStateException, RainbowException {
+    public List<? extends IRainbowMessage> execute (IModelInstance context, IRainbowMessageFactory messageFactory) throws IllegalStateException, RainbowException {
         if (inCompoundCommand)
             throw new IllegalStateException (
                     "Cannot call execute() on a compounded command -- it must be called on the parent");
         if (!canExecute ()) throw new IllegalStateException ("This command cannot currently be executed");
-        IModelInstance<Type> t = null;
+        m_modelContext = context;
+        m_messageFactory = messageFactory;
         try {
             subExecute ();
-            t = getResult ();
         }
         catch (RainbowDelegationException rde) {
             m_executionState = ExecutionState.ERROR;
             throw rde;
         }
         m_executionState = ExecutionState.DONE;
-        return t;
+        return getGeneratedEvents (m_messageFactory);
     }
 
     public InputStream getStream () {
@@ -74,13 +76,14 @@ public abstract class AbstractLoadModelCmd<Type> extends AbstractRainbowModelCom
     public boolean canRedo () {
         return (m_executionState == ExecutionState.UNDONE);
     }
-    
+
     @Override
-    public List<? extends IRainbowMessage> getGeneratedEvents () {
+    protected List<? extends IRainbowMessage> getGeneratedEvents (IRainbowMessageFactory messageFactory) {
         List<IRainbowMessage> msgs = new LinkedList<IRainbowMessage> ();
         try {
-            IRainbowMessage msg = getAnnouncePort ().createMessage ();
+            IRainbowMessage msg = messageFactory.createMessage ();
             msg.setProperty (IRainbowModelChangeBusPort.EVENT_TYPE_PROP, "LOAD_MODEL");
+            msg.setProperty (ESEBConstants.MSG_TYPE_KEY, "LOAD_MODEL");
             msg.setProperty (IRainbowModelChangeBusPort.ID_PROP, UUID.randomUUID ().toString ());
             msg.setProperty (IRainbowModelChangeBusPort.MODEL_NAME_PROP, getModelName ());
             msg.setProperty (IRainbowModelChangeBusPort.COMMAND_PROP, getCommandName ());

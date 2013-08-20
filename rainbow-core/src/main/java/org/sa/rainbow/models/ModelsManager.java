@@ -90,11 +90,11 @@ public class ModelsManager implements IModelsManager {
                                     method.getDeclaringClass ().getCanonicalName ()));
                 AbstractLoadModelCmd load = (AbstractLoadModelCmd )method.invoke (null, this, modelName,
                         modelPath == null ? null : new FileInputStream (modelPath), modelPath.getAbsolutePath ());
-                IModelInstance instance = load.execute (null);
-                load.setEventAnnouncePort (m_changeBusPort);
+                List<? extends IRainbowMessage> events = load.execute (null, m_changeBusPort);
                 // Announce the loading on the change bus.
                 // Q: should this be done in clients or in the commands themselves?
-                m_changeBusPort.announce (load.getGeneratedEvents ());
+                m_changeBusPort.announce (events);
+                IModelInstance instance = (IModelInstance )load.getResult ();
                 LOGGER.info ("Successfully loaded and registered " + instance.getModelName () + ":"
                         + instance.getModelType ());
             }
@@ -270,13 +270,13 @@ public class ModelsManager implements IModelsManager {
         LOGGER.info (MessageFormat.format ("Updating model {0}::{1} through command: {2}", command.getModelName (),
                 command.getModelType (), command.getCommandName ()));
         IRainbowModelCommand cmd = setupCommand (command, modelInstance);
+        List<? extends IRainbowMessage> events;
         synchronized (modelInstance.getModelInstance ()) {
-            cmd.execute (modelInstance);
+            events = cmd.execute (modelInstance, m_changeBusPort);
         }
         if (cmd.canUndo ()) {
             // The command executed correctly if we can undo it.
             // Announce all the changes on the the change bus
-            List<? extends IRainbowMessage> events = cmd.getGeneratedEvents ();
             LOGGER.info (MessageFormat.format ("Announcing {0} events on the change bus", events.size ()));
             m_changeBusPort.announce (events);
         }
@@ -299,8 +299,6 @@ public class ModelsManager implements IModelsManager {
         }
 //        if (!(command instanceof IRainbowModelCommand)) throw new RainbowException (MessageFormat.format ("The command {0} is not an executable command.",
 //                command.getCommandName ()));
-        rcmd.setModel (modelInstance.getModelInstance ());
-        rcmd.setEventAnnouncePort (m_changeBusPort);
         return rcmd;
     }
 
@@ -342,9 +340,9 @@ public class ModelsManager implements IModelsManager {
                         if (!(cmd instanceof IRainbowModelCommand)) throw new RainbowException (MessageFormat.format ("The command {0} is not an executable command.", cmd.getCommandName ()));
                         IRainbowModelCommand mcmd = (IRainbowModelCommand )cmd;
                         // Execute the command
-                        mcmd.execute (mi);
+                        List<? extends IRainbowMessage> cmdEvents = mcmd.execute (mi, m_changeBusPort);
                         // Store all the generated events to announce later
-                        events.addAll (mcmd.getGeneratedEvents ());
+                        events.addAll (cmdEvents);
                         // Recall what we executed in case we need to rollback
                         executedCommands.push (mcmd);
                     }

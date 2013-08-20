@@ -48,24 +48,26 @@ public class TestNewServerCmd extends DefaultTCase {
 
             }
         };
-        cns.setEventAnnouncePort (announcePort);
-        IAcmeComponent server = cns.execute (znn);
+        List<? extends IRainbowMessage> generatedEvents = cns.execute (znn, announcePort);
+        assertTrue (cns.canExecute ());
+        IAcmeComponent server = cns.getResult ();
+        assertTrue (cns.canUndo ());
+        assertFalse (cns.canExecute ());
+        assertFalse (cns.canRedo ());
         assertNotNull (server);
         assertNotNull (sys.getConnector ("proxyconn"));
         assertNotNull (sys.getAttachment (server.getPort ("http"), sys.getConnector ("proxyconn").getRole ("rec")));
         assertNotNull (sys.getAttachment (proxy.getPort ("fwd"), sys.getConnector ("proxyconn").getRole ("req")));
-        List<? extends IRainbowMessage> generatedEvents = cns.getGeneratedEvents ();
         outputMessages (generatedEvents);
         checkEventProperties (generatedEvents);
 
         cns = znn.getCommandFactory ().connectNewServerCmd (proxy, "server");
-        cns.setEventAnnouncePort (announcePort);
-        
-        server = cns.execute (znn);
+
+        generatedEvents = cns.execute (znn, announcePort);
+        server = cns.getResult ();
         assertNotNull (server);
         assertNotNull (sys.getAttachment (proxy.getPort ("fwd4"), sys.getConnector ("proxyconn4").getRole ("req")));
         assertNotNull (sys.getAttachment (server.getPort ("http"), sys.getConnector ("proxyconn4").getRole ("rec")));
-        generatedEvents = cns.getGeneratedEvents ();
         outputMessages (generatedEvents);
         checkEventProperties (generatedEvents);
     }

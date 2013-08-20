@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -20,10 +21,12 @@ import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.management.ports.eseb.ESEBConstants;
+import org.sa.rainbow.management.ports.eseb.RainbowESEBMessage;
 import org.sa.rainbow.model.acme.AcmeRainbowCommandEvent.CommandEventT;
 import org.sa.rainbow.model.acme.znn.commands.NewServerCmd;
 import org.sa.rainbow.models.IModelInstance;
 import org.sa.rainbow.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.models.ports.IRainbowMessageFactory;
 import org.sa.rainbow.models.ports.IRainbowModelChangeBusPort;
 
 import edu.cmu.cs.able.eseb.BusData;
@@ -59,15 +62,36 @@ public class TestModelTransactions {
             connection.start ();
             IModelInstance<IAcmeSystem> modelInstance = master.modelsManager ().<IAcmeSystem> getModelInstance ("Acme",
                     "ZNewsSys");
-            NewServerCmd cmd = new NewServerCmd ("newServer", modelInstance.getModelInstance (), "lbproxy", "server");
+            NewServerCmd cmd = new NewServerCmd ("newServer", modelInstance, "lbproxy", "server");
             master.modelsManager ().requestModelUpdate (cmd);
-            List<? extends IRainbowMessage> generatedEvents = cmd.getGeneratedEvents ();
+            List<? extends IRainbowMessage> generatedEvents = cmd.getGeneratedEvents (new IRainbowMessageFactory () {
+
+                @Override
+                public IRainbowMessage createMessage () {
+                    return new RainbowESEBMessage ();
+                }
+            });
             // each event should have a MSG_TYPE_KEY
             Thread.sleep (500);
-            for (DataValue dv : vals) {
+            for (Iterator<DataValue> iterator = vals.iterator (); iterator.hasNext ();) {
+                DataValue dv = iterator.next ();
+                if (dv == null) {
+                    continue;
+                }
                 assertTrue (dv instanceof MapDataValue);
                 MapDataValue mdv = (MapDataValue )dv;
-                assertTrue (mdv.all ().containsKey (scope.string ().make (ESEBConstants.MSG_TYPE_KEY)));
+
+                boolean containsKey = mdv.all ().containsKey (scope.string ().make (ESEBConstants.MSG_TYPE_KEY));
+                if (!containsKey) {
+                    System.out.println (mdv.toString ());
+                }
+                assertTrue (containsKey);
+                // Remove any spurious load command events that weren't processed
+                if (scope.string ().make ("LOAD_COMMAND")
+                        .equals (mdv.get (scope.string ().make (ESEBConstants.MSG_TYPE_KEY)))) {
+                    iterator.remove ();
+                    continue;
+                }
             }
             // size of events on the client should be the same as the size of the events generated
             assertEquals (generatedEvents.size (), vals.size ());
@@ -91,8 +115,8 @@ public class TestModelTransactions {
                 "ZNewsSys");
 
         List<IRainbowModelCommandRepresentation> commands = new LinkedList<> ();
-        commands.add (new NewServerCmd ("newServer", modelInstance.getModelInstance (), "lbproxy", "server"));
-        commands.add (new NewServerCmd ("newServer", modelInstance.getModelInstance (), "lbproxy", "server"));
+        commands.add (new NewServerCmd ("newServer", modelInstance, "lbproxy", "server"));
+        commands.add (new NewServerCmd ("newServer", modelInstance, "lbproxy", "server"));
         master.modelsManager ().requestModelUpdate (commands, true);
 
         assertNotNull (modelInstance.getModelInstance ().getComponent ("server"));
@@ -109,8 +133,8 @@ public class TestModelTransactions {
                 "ZNewsSys");
 
         List<IRainbowModelCommandRepresentation> commands = new LinkedList<> ();
-        commands.add (new NewServerCmd ("newServer", modelInstance.getModelInstance (), "lbproxy", "server"));
-        commands.add (new NewServerCmd ("newServer", modelInstance.getModelInstance (), "illegalproxy", "server"));
+        commands.add (new NewServerCmd ("newServer", modelInstance, "lbproxy", "server"));
+        commands.add (new NewServerCmd ("newServer", modelInstance, "illegalproxy", "server"));
         master.modelsManager ().requestModelUpdate (commands, true);
 
         assertNull (modelInstance.getModelInstance ().getComponent ("server"));
@@ -128,8 +152,8 @@ public class TestModelTransactions {
                 "ZNewsSys");
 
         List<IRainbowModelCommandRepresentation> commands = new LinkedList<> ();
-        commands.add (new NewServerCmd ("newServer", modelInstance.getModelInstance (), "lbproxy", "server"));
-        commands.add (new NewServerCmd ("newServer", modelInstance.getModelInstance (), "illegalproxy", "server"));
+        commands.add (new NewServerCmd ("newServer", modelInstance, "lbproxy", "server"));
+        commands.add (new NewServerCmd ("newServer", modelInstance, "illegalproxy", "server"));
         master.modelsManager ().requestModelUpdate (commands, false);
 
         assertNotNull (modelInstance.getModelInstance ().getComponent ("server"));

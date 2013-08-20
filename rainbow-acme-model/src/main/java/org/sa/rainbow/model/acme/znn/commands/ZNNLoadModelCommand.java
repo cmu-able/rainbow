@@ -36,11 +36,6 @@ public class ZNNLoadModelCommand extends AbstractLoadModelCmd<IAcmeSystem> {
     }
 
     @Override
-    protected boolean checkModelValidForCommand (Object model) {
-        return true;
-    }
-
-    @Override
     protected void subExecute () throws RainbowException {
         try {
             IAcmeResource resource = StandaloneResourceProvider.instance ().acmeResourceForObject (m_inputStream);
@@ -63,7 +58,7 @@ public class ZNNLoadModelCommand extends AbstractLoadModelCmd<IAcmeSystem> {
     }
 
     @Override
-    protected IModelInstance<IAcmeSystem> getResult () {
+    public IModelInstance<IAcmeSystem> getResult () {
         return m_result;
     }
 
@@ -72,5 +67,9 @@ public class ZNNLoadModelCommand extends AbstractLoadModelCmd<IAcmeSystem> {
         return "LoadZNNModel";
     }
 
+    @Override
+    protected boolean checkModelValidForCommand (Object model) {
+        return true;
+    }
 
 }
