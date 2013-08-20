@@ -15,10 +15,11 @@ import org.sa.rainbow.util.Util;
 public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowConstants {
 
     static Logger           LOGGER = Logger.getLogger (RainbowDelegate.class);
+    static enum ConnectionState {UNKNOWN, CONNECTING, CONNECTED, CONFIGURED};
 
     protected static String NAME = "Rainbow Delegate";
 
-    final IRainbowManagementPort m_masterPort;
+    private IRainbowManagementPort       m_masterPort;
     private String          m_id;
     private String          m_name = null;
 
@@ -27,17 +28,23 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
     private IRainbowMasterConnectionPort m_masterConnectionPort;
 
     private Properties                   m_configurationInformation;
+    private ConnectionState m_delegateState = ConnectionState.UNKNOWN;
 
-    public RainbowDelegate () throws RainbowConnectionException {
+    public RainbowDelegate () {
         super (NAME);
         // Generate an ID 
         m_id = UUID.randomUUID ().toString ();
 
-        // Create the connection to the delegate
+    }
+
+    public void initialize () throws RainbowConnectionException {
+        // Create the connection to the master
         m_masterConnectionPort = RainbowManagementPortFactory
                 .createDelegateMasterConnectionPort (this);
         log ("Attempting to connecto to master.");
+        m_delegateState = ConnectionState.CONNECTING;
         m_masterPort = m_masterConnectionPort.connectDelegate (m_id, getConnectionProperties ());
+        m_delegateState = ConnectionState.CONNECTED;
         // Request configuration information
         m_masterPort.requestConfigurationInformation ();
     }
@@ -76,6 +83,7 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
         if (id != null) {
             m_name = id;
         }
+        m_delegateState = ConnectionState.CONFIGURED;
     }
 
     @Override
@@ -153,5 +161,10 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
             catch (InterruptedException e) {
             }
         }
+    }
+
+    // Methods after this are used for testing
+    ConnectionState getConnectionState () {
+        return m_delegateState;
     }
 }

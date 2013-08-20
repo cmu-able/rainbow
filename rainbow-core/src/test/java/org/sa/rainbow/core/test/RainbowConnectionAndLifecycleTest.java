@@ -1,25 +1,25 @@
 package org.sa.rainbow.core.test;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.SimpleLayout;
-import org.apache.log4j.WriterAppender;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.sa.rainbow.core.DelegateTestHelper;
 import org.sa.rainbow.core.IRainbowRunnable.State;
+import org.sa.rainbow.core.MasterTestHelper;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.RainbowMaster;
+import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.util.Beacon;
 
 import auxtestlib.BooleanEvaluation;
 import auxtestlib.DefaultTCase;
+import auxtestlib.TestHelper;
 import auxtestlib.TestPropertiesDefinition;
 
 /**
@@ -32,7 +32,17 @@ import auxtestlib.TestPropertiesDefinition;
  */
 public abstract class RainbowConnectionAndLifecycleTest extends DefaultTCase {
 
-    private static String s_currentDirectory;
+    @TestHelper
+    public MasterTestHelper mth;
+
+    @TestHelper
+    public DelegateTestHelper dth;
+
+    private RainbowDelegate m_delegate;
+
+    private RainbowMaster   m_master;
+
+    private static String   s_currentDirectory;
 
     @BeforeClass
     public static void rememberUserDir () {
@@ -47,45 +57,24 @@ public abstract class RainbowConnectionAndLifecycleTest extends DefaultTCase {
     @Test
     public void testReceivedConfigurationInfo () throws Exception {
         BasicConfigurator.configure ();
-        configureTestProperties ();
 
-        RainbowMaster master = null;
-        RainbowDelegate delegate = null;
-        try {
-            int wait = TestPropertiesDefinition.getInt ("delegate.connection.time");
-            master = new RainbowMaster ();
-            master.initialize ();
+        int wait = TestPropertiesDefinition.getInt ("delegate.connection.time");
+        m_master.initialize ();
+        m_master.start ();
+        m_delegate.initialize ();
 
-            master.start ();
-            delegate = new RainbowDelegate ();
-            delegate.start ();
-            final RainbowDelegate d = delegate;
+        m_delegate.start ();
+        wait_for_true (new BooleanEvaluation () {
 
-            wait_for_true (new BooleanEvaluation () {
-
-                @Override
-                public boolean evaluate () throws Exception {
-                    return d.getConfigurationInformation () != null
-                            && d.getConfigurationInformation ().getProperty ("test.configuration.property") != null;
-                }
-            }, wait);
-//        String logMsg = baos.toString ();
-//        Pattern configPattern = Pattern.compile ("RD-" + delegate.getId () + ".*: Received configuration information");
-//        Matcher m = configPattern.matcher (logMsg);
-//        assertTrue (m.find ());
-            Properties props = delegate.getConfigurationInformation ();
-            assertNotNull (props);
-            assertEquals ("xxx", props.getProperty ("test.configuration.property"));
-        }
-        finally {
-            if (master != null) {
-                master.terminate ();
+            @Override
+            public boolean evaluate () throws Exception {
+                return m_delegate.getConfigurationInformation () != null
+                        && m_delegate.getConfigurationInformation ().getProperty ("test.configuration.property") != null;
             }
-            if (delegate != null) {
-                delegate.terminate ();
-            }
-        }
-
+        }, wait);
+        Properties props = m_delegate.getConfigurationInformation ();
+        assertNotNull (props);
+        assertEquals ("xxx", props.getProperty ("test.configuration.property"));
     }
 
     /**
@@ -97,44 +86,60 @@ public abstract class RainbowConnectionAndLifecycleTest extends DefaultTCase {
     public void testHeartbeatSetup () throws Exception {
         BasicConfigurator.configure ();
 
-        // Heartbeat message appears in log file, so use this as a way to test
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream ();
-        WriterAppender wa = new WriterAppender (new SimpleLayout (), baos);
-        Logger.getRootLogger ().addAppender (wa);
-        Logger.getRootLogger ().setLevel (Level.ALL);
-
-        configureTestProperties ();
-
         // Start a delegate and a master
-        RainbowMaster master = null;
-        RainbowDelegate delegate = null;
-        try {
-            master = new RainbowMaster ();
-            master.initialize ();
+        m_master.initialize ();
 
-            master.start ();
-            delegate = new RainbowDelegate ();
-            delegate.start ();
+        mth.setMaster (m_master);
+        m_master.start ();
 
-            int extra = TestPropertiesDefinition.getInt ("heartbeat.extra.time");
-            Thread.sleep (Integer.valueOf (Rainbow.properties ().getProperty (Rainbow.PROPKEY_DELEGATE_BEACONPERIOD))
-                    + extra);
-            String logMsg = baos.toString ();
-            assertTrue (logMsg.contains ("Received heartbeat from known delegate: " + delegate.getId ()));
+        m_delegate.initialize ();
 
-        }
-        finally {
-            if (master != null) {
-                master.terminate ();
-            }
-            if (delegate != null) {
-                delegate.terminate ();
-            }
-        }
+        m_delegate.start ();
+
+        final int extra = TestPropertiesDefinition.getInt ("heartbeat.extra.time");
+
+        // Wait for the heartbeat to arrive
+        Thread.sleep (Integer.valueOf (Rainbow.properties ().getProperty (Rainbow.PROPKEY_DELEGATE_BEACONPERIOD))
+                + extra);
+        Beacon b = mth.getBeaconFor (m_delegate.getId ());
+        assertTrue (b != null);
+        assertFalse (b.periodElapsed ());
+
 
     }
 
     protected abstract void configureTestProperties () throws IOException;
+
+    @Before
+    public void setupMasterAndDelegate () throws Exception {
+        configureTestProperties ();
+
+        try {
+            m_master = new RainbowMaster ();
+            m_delegate = new RainbowDelegate ();
+        }
+        catch (RainbowConnectionException e) {
+            fail (e.getMessage ());
+        }
+    }
+
+    @After
+    public void terminateMasterAndDelegate () throws Exception {
+        if (m_master != null) {
+            m_master.terminate ();
+        }
+        if (m_delegate != null) {
+            m_delegate.terminate ();
+        }
+        wait_for_true (new BooleanEvaluation () {
+
+            @Override
+            public boolean evaluate () throws Exception {
+                return (m_master != null ? m_master.state () == State.TERMINATED : true)
+                        && (m_delegate != null ? m_delegate.state () == State.TERMINATED : true);
+            }
+        }, 5000);
+    }
 
     /**
      * Tests that lifecycle operations work correctly. E.g., hearbeats are not sent if a delegate is paused, but are
@@ -146,60 +151,62 @@ public abstract class RainbowConnectionAndLifecycleTest extends DefaultTCase {
     public void testPauseAndRestart () throws Exception {
         BasicConfigurator.configure ();
 
+        m_master.initialize ();
+        mth.setMaster (m_master);
+        m_master.start ();
+        dth.setDelegate (m_delegate);
 
-        configureTestProperties ();
-
-        RainbowMaster master = null;
-        RainbowDelegate delegate = null;
-        try {
-            master = new RainbowMaster ();
-            master.initialize ();
-
-            master.start ();
-            delegate = new RainbowDelegate ();
-            delegate.start ();
-
-            // Wait for things to get connected
-            Thread.sleep (6000);
-
-            ByteArrayOutputStream baos = new ByteArrayOutputStream ();
-            WriterAppender wa = new WriterAppender (new SimpleLayout (), baos);
-            Logger.getRootLogger ().addAppender (wa);
-            Logger.getRootLogger ().setLevel (Level.ALL);
-
-            delegate.stop ();
-            Thread.sleep (5000);
-            assertTrue (delegate.state () == State.STOPPED);
-
-            String logMsg = baos.toString ();
-            Logger.getRootLogger ().removeAppender (wa);
-            Pattern pausePattern = Pattern.compile ("RD-" + delegate.getId () + ".*: Pausing");
+        m_delegate.initialize ();
+        m_delegate.start ();
 
 
-            Matcher m = pausePattern.matcher (logMsg);
-            assertTrue (m.find ());
-            int start = m.start ();
-            assertTrue (logMsg.indexOf ("Received heartbeat from known delegate: " + delegate.getId (), start) == -1);
+        // Wait for things to get connected
+        wait_for_true (new BooleanEvaluation () {
 
-            baos = new ByteArrayOutputStream ();
-            wa = new WriterAppender (new SimpleLayout (), baos);
-            Logger.getRootLogger ().addAppender (wa);
-            delegate.start ();
-            Thread.sleep (10000);
-            logMsg = baos.toString ();
-            assertTrue (logMsg.indexOf ("Received heartbeat from known delegate: " + delegate.getId (), start) != -1);
-
-        }
-        finally {
-            if (master != null) {
-                master.terminate ();
+            @Override
+            public boolean evaluate () throws Exception {
+                return dth.isConfigured ();
             }
-            if (delegate != null) {
-                delegate.terminate ();
-            }
-        }
+        }, 6000);
 
+
+        m_delegate.stop ();
+        wait_for_true (new BooleanEvaluation () {
+
+            @Override
+            public boolean evaluate () throws Exception {
+                return m_delegate.state () == State.STOPPED;
+            }
+        }, 5000);
+        // Wait for heartbeat period to ensure that a heartbeat isn't received, so the delegate is truly paused
+        final int extra = TestPropertiesDefinition.getInt ("heartbeat.extra.time");
+        int heartbeatTime = Integer.valueOf (Rainbow.properties ().getProperty (
+                Rainbow.PROPKEY_DELEGATE_BEACONPERIOD))
+                + extra;
+
+        final Beacon b = mth.getBeaconFor (m_delegate.getId ());
+        assertTrue (b != null);
+        wait_for_true (new BooleanEvaluation () {
+
+            @Override
+            public boolean evaluate () throws Exception {
+                return b.periodElapsed ();
+            }
+        }, heartbeatTime * 2);
+
+        m_delegate.start ();
+        wait_for_true (new BooleanEvaluation () {
+
+            @Override
+            public boolean evaluate () throws Exception {
+                return m_delegate.state () == State.STARTED;
+            }
+        }, 5000);
+
+        Thread.sleep (heartbeatTime);
+        Beacon b2 = mth.getBeaconFor (m_delegate.getId ());
+        assertTrue (b2 != null);
+        assertFalse (b2.periodElapsed ());
     }
-
 
 }

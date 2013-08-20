@@ -163,7 +163,7 @@ public class RainbowMaster extends AbstractRainbowRunnable {
             if (entry.getValue ().periodElapsed ()) {
                 LOGGER.error (MessageFormat.format ("Delegate {0} has not given a heartbeat withing the right time",
                         entry.getKey ()));
-                entry.getValue ().mark ();
+//                entry.getValue ().mark ();
             }
         }
     }
@@ -195,6 +195,11 @@ public class RainbowMaster extends AbstractRainbowRunnable {
             catch (InterruptedException e) {
             }
         }
+    }
+
+    // Methods below this point are used for testing purposes, and so are package protected.
+    Map<? extends String, ? extends Beacon> getHeartbeatInfo () {
+        return m_heartbeats;
     }
 
 }
