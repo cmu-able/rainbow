@@ -16,6 +16,19 @@
       </plugin>
     </plugins>
   </build>
+  
+  <repositories>
+		<!-- We define a single repository which is accessible through
+		web-dav. The format (for webdav repositories) is
+		dav:http://[<username>[:<password>]]@<host>[:<port>]/<path>-->
+		<repository>
+			<id>able.maven.repository</id>
+			<url>
+				dav:http://maven:maven3repo@acme.able.cs.cmu.edu/maven-repository
+			</url>
+		</repository>
+	</repositories>
+	
   <dependencies>
   	<dependency>
   		<groupId>rainbow</groupId>
