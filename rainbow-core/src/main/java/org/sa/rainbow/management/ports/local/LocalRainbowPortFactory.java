@@ -14,9 +14,10 @@ import org.sa.rainbow.management.ports.IRainbowConnectionPortFactory;
 import org.sa.rainbow.management.ports.IRainbowManagementPort;
 import org.sa.rainbow.management.ports.IRainbowMasterConnectionPort;
 import org.sa.rainbow.models.IModelsManager;
+import org.sa.rainbow.models.ports.IRainbowModelChangeBusPort;
 import org.sa.rainbow.models.ports.IRainbowModelUSBusPort;
 
-public class LocalRainbowManagementPortFactory implements IRainbowConnectionPortFactory {
+public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
 
     /**
      * Singleton instance
@@ -29,7 +30,7 @@ public class LocalRainbowManagementPortFactory implements IRainbowConnectionPort
     private LocalModelsManagerUSPort                   m_localModelsManagerUSPort;
     private Map<String, LocalModelsManagerClientUSPort> m_mmClientUSPorts         = new HashMap<> ();
 
-    private LocalRainbowManagementPortFactory () {
+    private LocalRainbowPortFactory () {
     };
 
     @Override
@@ -91,7 +92,7 @@ public class LocalRainbowManagementPortFactory implements IRainbowConnectionPort
 
     public static IRainbowConnectionPortFactory getFactory () {
         if (m_instance == null) {
-            m_instance = new LocalRainbowManagementPortFactory ();
+            m_instance = new LocalRainbowPortFactory ();
         }
         return m_instance;
     }
@@ -121,7 +122,13 @@ public class LocalRainbowManagementPortFactory implements IRainbowConnectionPort
 
     @Override
     public IRainbowGaugeLifecycleBusPort createGaugeSideLifecyclePort () throws RainbowConnectionException {
-        return null;
+        throw new UnsupportedOperationException ("NYS");
+    }
+
+    @Override
+    public IRainbowModelChangeBusPort createChangeBusAnnouncePort () throws RainbowConnectionException {
+        throw new UnsupportedOperationException ("NYS");
+
     }
 
 }

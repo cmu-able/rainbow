@@ -14,15 +14,17 @@ import org.sa.rainbow.management.ports.IRainbowConnectionPortFactory;
 import org.sa.rainbow.management.ports.IRainbowManagementPort;
 import org.sa.rainbow.management.ports.IRainbowMasterConnectionPort;
 import org.sa.rainbow.models.IModelsManager;
+import org.sa.rainbow.models.ports.IRainbowModelChangeBusPort;
 import org.sa.rainbow.models.ports.IRainbowModelUSBusPort;
+import org.sa.rainbow.models.ports.eseb.ESEBChangeBusAnnouncePort;
 import org.sa.rainbow.models.ports.eseb.ESEBGaugeModelUSBusPort;
 import org.sa.rainbow.models.ports.eseb.ESEBModelManagerModelUpdatePort;
 
-public class ESEBRainbowManagementPortFactory implements IRainbowConnectionPortFactory {
+public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
 
-    private static ESEBRainbowManagementPortFactory m_instance;
+    private static ESEBRainbowPortFactory m_instance;
 
-    private ESEBRainbowManagementPortFactory () {
+    private ESEBRainbowPortFactory () {
 
     }
 
@@ -73,7 +75,7 @@ public class ESEBRainbowManagementPortFactory implements IRainbowConnectionPortF
 
     public static IRainbowConnectionPortFactory getFactory () {
         if (m_instance == null) {
-            m_instance = new ESEBRainbowManagementPortFactory ();
+            m_instance = new ESEBRainbowPortFactory ();
         }
         return m_instance;
     }
@@ -103,6 +105,16 @@ public class ESEBRainbowManagementPortFactory implements IRainbowConnectionPortF
     public IRainbowGaugeLifecycleBusPort createGaugeSideLifecyclePort () throws RainbowConnectionException {
         try {
             return new ESEBGaugeSideLifecyclePort ();
+        }
+        catch (IOException e) {
+            throw new RainbowConnectionException ("Failed to connect", e);
+        }
+    }
+
+    @Override
+    public IRainbowModelChangeBusPort createChangeBusAnnouncePort () throws RainbowConnectionException {
+        try {
+            return new ESEBChangeBusAnnouncePort ();
         }
         catch (IOException e) {
             throw new RainbowConnectionException ("Failed to connect", e);

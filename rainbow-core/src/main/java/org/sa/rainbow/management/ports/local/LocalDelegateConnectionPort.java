@@ -10,9 +10,9 @@ import org.sa.rainbow.management.ports.IRainbowManagementPort;
 public class LocalDelegateConnectionPort extends AbstractDelegateConnectionPort {
 
     private LocalMasterConnectionPort m_masterPort;
-    private LocalRainbowManagementPortFactory m_factory;
+    private LocalRainbowPortFactory m_factory;
 
-    public LocalDelegateConnectionPort (RainbowDelegate delegate, LocalRainbowManagementPortFactory factory) {
+    public LocalDelegateConnectionPort (RainbowDelegate delegate, LocalRainbowPortFactory factory) {
         super (delegate);
         m_factory = factory;
     }

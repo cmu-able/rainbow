@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.management.ports.IRainbowManagementPort;
 import org.sa.rainbow.management.ports.IRainbowMasterConnectionPort;
-import org.sa.rainbow.management.ports.RainbowManagementPortFactory;
+import org.sa.rainbow.management.ports.RainbowPortFactory;
 import org.sa.rainbow.util.Beacon;
 import org.sa.rainbow.util.Util;
 
@@ -39,7 +39,7 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
 
     public void initialize () throws RainbowConnectionException {
         // Create the connection to the master
-        m_masterConnectionPort = RainbowManagementPortFactory
+        m_masterConnectionPort = RainbowPortFactory
                 .createDelegateMasterConnectionPort (this);
         log ("Attempting to connecto to master.");
         m_delegateState = ConnectionState.CONNECTING;

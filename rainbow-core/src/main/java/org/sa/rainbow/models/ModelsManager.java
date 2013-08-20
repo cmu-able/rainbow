@@ -21,17 +21,17 @@ import java.util.Stack;
 
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowCopyException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.event.IRainbowMessage;
+import org.sa.rainbow.management.ports.RainbowPortFactory;
 import org.sa.rainbow.models.commands.AbstractLoadModelCmd;
 import org.sa.rainbow.models.commands.IRainbowModelCommand;
 import org.sa.rainbow.models.commands.IRainbowModelCommandRepresentation;
 import org.sa.rainbow.models.ports.IRainbowModelChangeBusPort;
 import org.sa.rainbow.models.ports.IRainbowModelUSBusPort;
-import org.sa.rainbow.models.ports.eseb.ESEBChangeBusAnnouncePort;
-import org.sa.rainbow.models.ports.eseb.ESEBModelManagerModelUpdatePort;
 import org.sa.rainbow.util.Util;
 
 /**
@@ -131,11 +131,16 @@ public class ModelsManager implements IModelsManager {
         }
     }
 
-    private void initializeConnections () throws IOException {
-        // Publish to change bus
-        m_changeBusPort = new ESEBChangeBusAnnouncePort ();
-        // Listen to upstream messages
-        m_upstreamBusPort = new ESEBModelManagerModelUpdatePort (this);
+    private void initializeConnections () {
+        try {
+            // Publish to change bus
+            m_changeBusPort = RainbowPortFactory.createChangeBusAnnouncePort ();
+            // Listen to upstream messages
+            m_upstreamBusPort = RainbowPortFactory.createModelsManagerUSPort (this);
+        }
+        catch (RainbowConnectionException e) {
+            LOGGER.error ("Could not connect the appropriate ports", e);
+        }
     }
 
     @Override

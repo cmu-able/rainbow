@@ -8,6 +8,7 @@ import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.gauges.IRainbowGaugeLifecycleBusPort;
 import org.sa.rainbow.models.IModelsManager;
+import org.sa.rainbow.models.ports.IRainbowModelChangeBusPort;
 import org.sa.rainbow.models.ports.IRainbowModelUSBusPort;
 
 public interface IRainbowConnectionPortFactory {
@@ -65,5 +66,7 @@ public interface IRainbowConnectionPortFactory {
             throws RainbowConnectionException;
 
     public abstract IRainbowGaugeLifecycleBusPort createGaugeSideLifecyclePort () throws RainbowConnectionException;
+
+    public abstract IRainbowModelChangeBusPort createChangeBusAnnouncePort () throws RainbowConnectionException;
 
 }

@@ -13,7 +13,7 @@ import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.management.ports.IRainbowManagementPort;
 import org.sa.rainbow.management.ports.IRainbowMasterConnectionPort;
-import org.sa.rainbow.management.ports.RainbowManagementPortFactory;
+import org.sa.rainbow.management.ports.RainbowPortFactory;
 import org.sa.rainbow.models.ModelsManager;
 import org.sa.rainbow.util.Beacon;
 
@@ -50,7 +50,7 @@ public class RainbowMaster extends AbstractRainbowRunnable {
     }
 
     private IRainbowMasterConnectionPort initializeConnections () throws RainbowConnectionException {
-        return m_delegateConnection = RainbowManagementPortFactory.createDelegateConnectionPort (this);
+        return m_delegateConnection = RainbowPortFactory.createDelegateConnectionPort (this);
     }
 
     public ModelsManager modelsManager () {
@@ -69,7 +69,7 @@ public class RainbowMaster extends AbstractRainbowRunnable {
         LOGGER.debug (MessageFormat.format ("Master received connection request from: {0} at {1}", delegateID,
                 connectionProperties.getProperty (Rainbow.PROPKEY_DEPLOYMENT_LOCATION, "Unknown Location")));
         try {
-            IRainbowManagementPort delegatePort = RainbowManagementPortFactory.createMasterDeploymentPort (this,
+            IRainbowManagementPort delegatePort = RainbowPortFactory.createMasterDeploymentPort (this,
                     delegateID, connectionProperties);
             // Check to see if there is already a registered delegate running on the machine
             m_delegates.put (delegateID, delegatePort);

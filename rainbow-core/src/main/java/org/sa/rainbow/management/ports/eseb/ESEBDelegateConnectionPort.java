@@ -12,7 +12,7 @@ import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.management.ports.AbstractDelegateConnectionPort;
 import org.sa.rainbow.management.ports.DisconnectedRainbowManagementPort;
 import org.sa.rainbow.management.ports.IRainbowManagementPort;
-import org.sa.rainbow.management.ports.RainbowManagementPortFactory;
+import org.sa.rainbow.management.ports.RainbowPortFactory;
 import org.sa.rainbow.management.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.management.ports.eseb.ESEBConnector.IESEBListener;
 
@@ -87,7 +87,7 @@ public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
                 }
                 else {
                     try {
-                        m_deploymentPort = RainbowManagementPortFactory.createDelegateDeploymentPort (m_delegate,
+                        m_deploymentPort = RainbowPortFactory.createDelegateDeploymentPort (m_delegate,
                                 m_delegate.getId ());
                     }
                     catch (RainbowConnectionException e) {
