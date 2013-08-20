@@ -4,6 +4,12 @@ import java.util.List;
 
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
+/**
+ * This interface represents the API through which gauges might be configured at runtime
+ * 
+ * @author Bradley Schmerl: schmerl
+ * 
+ */
 public interface IGaugeConfigurationInterface {
     /**
      * Configures the parameters of this Gauge using the supplied configuration parameter values.

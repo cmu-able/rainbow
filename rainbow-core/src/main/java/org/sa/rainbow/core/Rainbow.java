@@ -13,11 +13,14 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.error.RainbowAbortException;
+import org.sa.rainbow.gauges.IGauge;
 import org.sa.rainbow.util.Util;
 
 /**
@@ -102,6 +105,8 @@ public class Rainbow implements RainbowConstants {
      */
     private static Rainbow m_instance = null;
 
+    private static Map<String, IGauge> m_id2Gauge;
+
     private boolean            m_shouldTerminate = false;
 
     public static Rainbow instance () {
@@ -168,6 +173,7 @@ public class Rainbow implements RainbowConstants {
 
     private Rainbow () {
         m_props = new Properties ();
+        m_id2Gauge = new HashMap<> ();
         m_threadGroup = new ThreadGroup (NAME);
         establishPaths ();
         loadConfigFiles ();
@@ -421,6 +427,14 @@ public class Rainbow implements RainbowConstants {
 
     public RainbowMaster getRainbowMaster () {
         return m_rainbowMaster;
+    }
+
+    public static void registerGauge (IGauge gauge) {
+        instance ().m_id2Gauge.put (gauge.id (), gauge);
+    }
+
+    public static IGauge lookupGauge (String id) {
+        return instance ().m_id2Gauge.get (id);
     }
 
 }

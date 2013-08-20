@@ -1,5 +1,6 @@
 package org.sa.rainbow.gauges;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -9,10 +10,13 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
+import org.sa.rainbow.management.ports.eseb.ESEBGaugeSideLifecyclePort;
 import org.sa.rainbow.models.commands.IRainbowModelCommandRepresentation;
 import org.sa.rainbow.models.ports.IRainbowModelUSBusPort;
+import org.sa.rainbow.models.ports.eseb.ESEBGaugeModelUSBusPort;
 import org.sa.rainbow.util.Beacon;
 
 /**
@@ -27,6 +31,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
     Logger                                                    LOGGER         = Logger.getLogger (this.getClass ());
     private final String                                      m_id;
 
+    /** The ports through which the gauge interacts with the outside world **/
     protected IRainbowModelUSBusPort                          m_announcePort;
     protected IRainbowGaugeLifecycleBusPort                   m_gaugeManagementPort;
     /**
@@ -59,10 +64,11 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
      *            the list of setup parameters with their values
      * @param mappings
      *            the list of Gauge Value to Model Property mappings
+     * @throws RainbowException
      */
     public AbstractGauge (String threadName, String id, long beaconPeriod, TypedAttribute gaugeDesc,
             TypedAttribute modelDesc, List<TypedAttributeWithValue> setupParams,
-            List<IRainbowModelCommandRepresentation> mappings) {
+            List<IRainbowModelCommandRepresentation> mappings) throws RainbowException {
         super (threadName);
         this.m_id = id;
 
@@ -88,15 +94,19 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
                 m_commands.put (pullOutParam (param), cmd);
             }
         }
-//        // store the mapping info
-//        for (ValuePropertyMappingPair mapping : mappings) {
-//            m_mappings.put(mapping.valueName(), mapping.propertyName());
-//        }
 
-        // register this Gauge with Rainbow, and report created
-        Rainbow.registerGauge (this);
-        m_gaugeManagementPort.reportCreated (this);
-        m_gaugeBeacon.mark ();
+        try {
+            m_gaugeManagementPort = new ESEBGaugeSideLifecyclePort ();
+            m_announcePort = new ESEBGaugeModelUSBusPort (this);
+            // register this Gauge with Rainbow, and report created
+            Rainbow.registerGauge (this);
+            m_gaugeManagementPort.reportCreated (this);
+            m_gaugeBeacon.mark ();
+        }
+        catch (IOException e) {
+            LOGGER.error ("Could not interact with the outside world", e);
+            throw new RainbowException ("The gauge could not be started because the ports could not be set up.");
+        }
     }
 
     private String pullOutParam (String param) {
@@ -200,7 +210,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.translator.gauges.IGauge#queryGaugeState(java.util.List, java.util.List, java.util.List)
+     * @see org.sa.rainbow.translator.gauges.IGauge#queryGaugeState()
      */
     @Override
     public IGaugeState queryGaugeState () {
@@ -226,10 +236,10 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
 
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.translator.gauges.IGauge#querySingleValue(org.sa.rainbow.util.AttributeValueTriple)
+     * @see org.sa.rainbow.translator.gauges.IGauge#queryCommand()
      */
     @Override
-    public IRainbowModelCommandRepresentation querySingleCommand (String value) {
+    public IRainbowModelCommandRepresentation queryCommand (String value) {
 
         IRainbowModelCommandRepresentation cmd = m_lastCommands.get (pullOutParam (value));
         if (cmd == null) {
@@ -239,7 +249,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.translator.gauges.IGauge#queryAllValues(java.util.List)
+     * @see org.sa.rainbow.translator.gauges.IGauge#queryAllCommands()
      */
     @Override
     public Collection<IRainbowModelCommandRepresentation> queryAllCommands () {
@@ -252,7 +262,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
     @Override
     protected void log (String txt) {
         String msg = "G[" + id () + "] " + txt;
-        RainbowCloudEventHandler.sendTranslatorLog (msg);
+//        RainbowCloudEventHandler.sendTranslatorLog (msg);
         // avoid duplicate output in the master's process
         if (!Rainbow.isMaster ()) {
             LOGGER.info (msg);
@@ -279,7 +289,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
      * @return String the string indicating the deployment location
      */
     protected String deploymentLocation () {
-        return m_setupParams.get (SETUP_LOCATION).getValue ();
+        return (String )m_setupParams.get (SETUP_LOCATION).getValue ();
     }
 
 }

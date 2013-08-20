@@ -20,16 +20,28 @@ public class GaugeState implements IGaugeState {
         m_commands = new HashSet<> (commands);
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.sa.rainbow.gauges.IGaugeState#getSetupParams()
+     */
     @Override
     public Collection<TypedAttributeWithValue> getSetupParams () {
         return m_setupParams;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.sa.rainbow.gauges.IGaugeState#getConfigParams()
+     */
     @Override
     public Collection<TypedAttributeWithValue> getConfigParams () {
         return m_configParams;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.sa.rainbow.gauges.IGaugeState#getGaugeReports()
+     */
     @Override
     public Collection<IRainbowModelCommandRepresentation> getGaugeReports () {
         return m_commands;

@@ -4,35 +4,36 @@ import java.util.Collection;
 
 import org.sa.rainbow.models.commands.IRainbowModelCommandRepresentation;
 
+/**
+ * The interface through which a gauge can be queried.
+ * 
+ * @author Bradley Schmerl: schmerl
+ * 
+ */
 public interface IGaugeQueryInterface {
     /**
      * Returns the entire state of this Gauge via the supplied lists.
      * 
-     * @param setupParams
-     *            the list of setup type-name-value triples
-     * @param configParams
-     *            the list of configuration type-name-value triples
-     * @param mappings
-     *            the list of value-property mapping pairs
-     * @return boolean <code>true</code> if query succeeds, <code>false</code> otherwise
+     * @return A gauge state representing all the setup and config params of the gauge, as well as issued commands
+     * 
      */
     public IGaugeState queryGaugeState ();
 
     /**
-     * Queries for a value identified by the property name.
+     * Queries for a command identified by the command name.
      * 
-     * @param value
-     *            the AttributeValueTriple object to contain the value
-     * @return boolean <code>true</code> if query succeeds, <code>false</code> otherwise
+     * @param commandName
+     *            the name of the command to get information for
+     * @return A representation of the command, including the model it affects, the target, and the parameters last
+     *         issued
      */
-    public IRainbowModelCommandRepresentation querySingleCommand (String key);
+    public IRainbowModelCommandRepresentation queryCommand (String commandName);
 
     /**
-     * Queries for all of the values reported by this Gauge.
+     * Queries for all of the commands reported by this Gauge.
      * 
-     * @param values
-     *            the List of AttributeValueTriple values
-     * @return boolean <code>true</code> if query succeeds, <code>false</code> otherwise
+     * @return Collection<IRainbowModelCommandRepresentation> A collection of all the commands last issued, one per
+     *         command command mapping, including the target and parameters used.
      */
     public Collection<IRainbowModelCommandRepresentation> queryAllCommands ();
 

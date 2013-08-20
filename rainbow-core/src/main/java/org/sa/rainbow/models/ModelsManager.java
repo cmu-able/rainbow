@@ -89,7 +89,7 @@ public class ModelsManager implements IModelsManager {
                                     "The class {0} does not implement a static method loadCommand, used to generate modelInstances",
                                     method.getDeclaringClass ().getCanonicalName ()));
                 AbstractLoadModelCmd load = (AbstractLoadModelCmd )method.invoke (null, this, modelName,
-                        new FileInputStream (modelPath), modelPath.getAbsolutePath ());
+                        modelPath == null ? null : new FileInputStream (modelPath), modelPath.getAbsolutePath ());
                 IModelInstance instance = load.execute (null);
                 load.setEventAnnouncePort (m_changeBusPort);
                 // Announce the loading on the change bus.
@@ -270,6 +270,7 @@ public class ModelsManager implements IModelsManager {
         }
         if (cmd.canUndo ()) {
             // The command executed correctly if we can undo it.
+            // Announce all the changes on the the change bus
             List<? extends IRainbowMessage> events = cmd.getGeneratedEvents ();
             LOGGER.info (MessageFormat.format ("Announcing {0} events on the change bus", events.size ()));
             m_changeBusPort.announce (events);
@@ -278,13 +279,24 @@ public class ModelsManager implements IModelsManager {
 
     private IRainbowModelCommand setupCommand (IRainbowModelCommandRepresentation command,
             IModelInstance<?> modelInstance) throws RainbowException {
-        if (!(command instanceof IRainbowModelCommand))
-            throw new RainbowException (MessageFormat.format ("The command {0} is not an executable command.",
-                    command.getCommandName ()));
-        IRainbowModelCommand cmd = (IRainbowModelCommand )command;
-        cmd.setModel (modelInstance.getModelInstance ());
-        cmd.setEventAnnouncePort (m_changeBusPort);
-        return cmd;
+        IRainbowModelCommand rcmd = null;
+        if (!(command instanceof IRainbowModelCommand)) {
+            // Try to use the model instanceo to turn it into an executable command
+            String[] cargs = new String[1 + command.getParameters ().length];
+            cargs[0] = command.getTarget ();
+            for (int i = 0; i < command.getParameters ().length; i++) {
+                cargs[1 + i] = command.getParameters ()[i];
+            }
+            rcmd = modelInstance.getCommandFactory ().generateCommand (command.getCommandName (), cargs);
+        }
+        else {
+            rcmd = (IRainbowModelCommand )command;
+        }
+//        if (!(command instanceof IRainbowModelCommand)) throw new RainbowException (MessageFormat.format ("The command {0} is not an executable command.",
+//                command.getCommandName ()));
+        rcmd.setModel (modelInstance.getModelInstance ());
+        rcmd.setEventAnnouncePort (m_changeBusPort);
+        return rcmd;
     }
 
     @Override
@@ -292,33 +304,43 @@ public class ModelsManager implements IModelsManager {
         LOGGER.info (MessageFormat.format ("Updating the model with {0} commands, transaction = {1}", commands.size (),
                 transaction));
         // Keep track of successfully executed commands in case we need to undo 
-
         Stack<IRainbowModelCommand> executedCommands = new Stack<> ();
+        // Stores the events that will be reported to the change bus
         List<IRainbowMessage> events = new LinkedList<IRainbowMessage> ();
+        // Indicates whether all the commands have been executed successfully so far
         boolean complete = true;
         if (!commands.isEmpty ()) {
             IRainbowModelCommandRepresentation c = commands.iterator ().next ();
+            // The model being updated should be the same for all commands, so just grab the first one
             IModelInstance<?> modelInstance = getModelInstance (c.getModelType (), c.getModelName ());
             synchronized (modelInstance.getModelInstance ()) {
 
                 for (IRainbowModelCommandRepresentation cmd : commands) {
                     try {
+                        // Make sure that the model is the same 
                         IModelInstance mi = getModelInstance (cmd.getModelType (), cmd.getModelName ());
                         if (mi != modelInstance) {
                             if (transaction) {
+                                // If not the same, this is an error so log it as such an mark as incomplete
+                                complete = false;
                                 LOGGER.error ("All commands in a transaction must be on the same model.");
                                 break;
                             }
                             else {
+                                // Otherwise, just log a warning
                                 LOGGER.warn ("All commands in the transaction should be on the same model.");
                             }
                         }
+                        // Make sure the command is executable, and add the ancilliary execution information
                         cmd = setupCommand (cmd, mi);
+                        // If it is not executable, the throw
                         if (!(cmd instanceof IRainbowModelCommand)) throw new RainbowException (MessageFormat.format ("The command {0} is not an executable command.", cmd.getCommandName ()));
                         IRainbowModelCommand mcmd = (IRainbowModelCommand )cmd;
+                        // Execute the command
                         mcmd.execute (mi);
                         // Store all the generated events to announce later
                         events.addAll (mcmd.getGeneratedEvents ());
+                        // Recall what we executed in case we need to rollback
                         executedCommands.push (mcmd);
                     }
                     catch (IllegalStateException | RainbowException e) {
@@ -339,7 +361,7 @@ public class ModelsManager implements IModelsManager {
                             cmd.undo ();
                         }
                         catch (IllegalStateException | RainbowException e) {
-                            LOGGER.error ("Could not undo the commands.", e);
+                            LOGGER.error ("Could not undo the commands. Model could be in an inconsistent state", e);
                         }
                     }
                 }

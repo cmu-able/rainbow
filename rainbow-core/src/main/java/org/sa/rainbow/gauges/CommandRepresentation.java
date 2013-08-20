@@ -25,6 +25,17 @@ public class CommandRepresentation implements IRainbowModelCommandRepresentation
 
     }
 
+    public CommandRepresentation (String label, String commandName, String modelName, String modelType, String target,
+            String... parameters) {
+        m_label = label;
+        m_commandName = commandName;
+        m_modelName = modelName;
+        m_modelType = modelType;
+        m_target = target;
+        m_parameters = parameters;
+
+    }
+
     @Override
     public String getLabel () {
         return m_label;

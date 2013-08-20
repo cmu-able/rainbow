@@ -1,6 +1,7 @@
 package org.sa.rainbow.models.ports.eseb;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -53,9 +54,14 @@ public class ESEBModelManagerModelUpdatePort implements ESEBConstants, IRainbowM
 
                     try {
                         IModelInstance model = getModelInstance (modelType, modelName);
-                        IRainbowModelCommandRepresentation command = model.getCommandFactory ().generateCommand (
-                                (String )msg.getProperty (COMMAND_NAME_KEY), params.toArray (new String[0]));
-                        updateModel (command);
+                        if (model != null) {
+                            IRainbowModelCommandRepresentation command = model.getCommandFactory ().generateCommand (
+                                    (String )msg.getProperty (COMMAND_NAME_KEY), params.toArray (new String[0]));
+                            updateModel (command);
+                        }
+                        else
+                            throw new RainbowModelException (MessageFormat.format ("Could not find the referred model ''{0}'':''{1}''.", modelName,
+                                    modelType));
                     }
                     catch (RainbowModelException e) {
                         LOGGER.error ("Could not form the command from the ESEB message", e);

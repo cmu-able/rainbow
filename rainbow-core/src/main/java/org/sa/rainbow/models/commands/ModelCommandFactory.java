@@ -14,7 +14,7 @@ public abstract class ModelCommandFactory<T> {
         throw new UnsupportedOperationException ("This method should be implemented in all subclasses and wasn't");
     }
 
-    public abstract IRainbowModelCommandRepresentation generateCommand (String commandName,
+    public abstract IRainbowModelCommand generateCommand (String commandName,
             String... args)
                     throws RainbowModelException;
 
