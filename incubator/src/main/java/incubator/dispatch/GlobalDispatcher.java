@@ -1,5 +1,6 @@
 package incubator.dispatch;
 
+import incubator.exh.LocalCollector;
 import incubator.pval.Ensure;
 
 import java.util.concurrent.LinkedBlockingQueue;
@@ -47,6 +48,11 @@ public class GlobalDispatcher {
 	private int m_executing;
 	
 	/**
+	 * Collects exceptions during dispatch.
+	 */
+	private LocalCollector m_collector;
+	
+	/**
 	 * Creates a new dispatcher. If timeout is <code>false</code> then the
 	 * dispatcher also pre-starts all threads which is useful for unit testing
 	 * if we use thread leak detection as the number of threads started at
@@ -67,6 +73,12 @@ public class GlobalDispatcher {
 		
 		m_waiting = 0;
 		m_executing = 0;
+		
+		/*
+		 * We can't set the local collector here because the collector also
+		 * uses the global dispatcher...
+		 */
+		m_collector = null;
 	}
 	
 	/**
@@ -84,10 +96,31 @@ public class GlobalDispatcher {
 	/**
 	 * Initializes the singleton instance without the thread timeout.
 	 */
-	static synchronized void junit_instance() {
-		if (m_instance != null) {
-			reset_instance();
-		}
+	static void junit_instance() {
+		/*
+		 * We can't hold the lock on the global dispatcher while we wait for
+		 * a reset because running objects may need the dispatcher to run.
+		 */
+		boolean need_reset;
+		do {
+			need_reset = false;
+			synchronized (GlobalDispatcher.class){ 
+				if (m_instance != null) {
+					need_reset = true;
+				}
+			}
+			
+			if (need_reset) {
+				reset_instance();
+				try {
+					Thread.sleep(TERMINATION_POLLING_WAIT_TIME_MS);
+				} catch (InterruptedException e) {
+					/*
+					 * We ignore this.
+					 */
+				}
+			}
+		} while (need_reset);
 		
 		m_instance = new GlobalDispatcher(false);
 	}
@@ -200,6 +233,17 @@ public class GlobalDispatcher {
 			
 			try {
 				m_inner.run();
+			} catch (Throwable t) {
+				synchronized (GlobalDispatcher.instance()) {
+					if (GlobalDispatcher.instance().m_collector == null) {
+						GlobalDispatcher.instance().m_collector =
+								new LocalCollector(
+								GlobalDispatcher.class.getCanonicalName());
+					}
+					
+					GlobalDispatcher.instance().m_collector.collect(t,
+							"dispatch");
+				}
 			} finally {
 				synchronized (GlobalDispatcher.instance()) {
 					m_executing--;

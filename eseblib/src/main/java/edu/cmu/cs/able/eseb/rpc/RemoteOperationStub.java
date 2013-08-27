@@ -70,6 +70,6 @@ public class RemoteOperationStub {
 		DataValue er = oi.create_execution_request(id, m_dst_id, m_obj_id,
 				m_operation, arguments);
 		
-		return m_environment.execute(er);
+		return m_environment.execute(er, m_operation);
 	}
 }

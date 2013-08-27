@@ -3,6 +3,8 @@ package edu.cmu.cs.able.eseb;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.ArrayUtils;
+
 import edu.cmu.cs.able.typelib.type.DataValue;
 
 /**
@@ -16,10 +18,22 @@ public class TestArraySaveQueue extends BusDataQueue {
 	public List<DataValue> m_values;
 	
 	/**
+	 * The array that receives the byte data.
+	 */
+	public List<byte[]> m_bdata;
+	
+	/**
+	 * The array that receives failure exceptions.
+	 */
+	public List<Exception> m_ex;
+	
+	/**
 	 * Creates a new queue.
 	 */
 	public TestArraySaveQueue() {
 		m_values = new ArrayList<>();
+		m_bdata = new ArrayList<>();
+		m_ex = new ArrayList<>();
 		dispatcher().add(new BusDataQueueListener() {
 			@Override
 			public void data_added_to_queue() {
@@ -35,6 +49,8 @@ public class TestArraySaveQueue extends BusDataQueue {
 		BusData bd;
 		while ((bd = poll()) != null) {
 			m_values.add(bd.value());
+			m_bdata.add(ArrayUtils.clone(bd.encoding()));
+			m_ex.add(bd.decoding_failure());
 		}
 	}
 }

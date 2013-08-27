@@ -7,9 +7,11 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import edu.cmu.cs.able.eseb.BusData;
 import edu.cmu.cs.able.eseb.filter.EventFilter;
+import edu.cmu.cs.able.typelib.type.DataType;
 import edu.cmu.cs.able.typelib.type.DataValue;
 
 /**
@@ -21,7 +23,7 @@ class ExecutionResultReadFilter extends EventFilter {
 	 * Milliseconds between clearing the {@link #m_pending} map of
 	 * garbage-collected references.
 	 */
-	private static final long MINIMUM_CLEAR_TIME_MS = 1000;
+	static final long MINIMUM_CLEAR_TIME_MS = 1000;
 	
 	/**
 	 * The operation information.
@@ -87,7 +89,54 @@ class ExecutionResultReadFilter extends EventFilter {
 			Map<String, DataValue> output =
 					m_information.execution_response_output_arguments(
 					data.value());
-			re.done(new RemoteExecutionResult(output));
+			
+			/*
+			 * Check that all return parameters are correct and that they have
+			 * the right type.
+			 */
+			DataValue operation = re.operation();
+			Ensure.is_true(m_information.is_operation(operation));
+			
+			FailureInformation fi = null;
+			
+			Set<String> out_params = m_information.parameters(operation);
+			for (Iterator<String> it = out_params.iterator(); it.hasNext(); ) {
+				String p = it.next();
+				if (m_information.parameter_direction(operation, p)
+						!= ParameterDirection.OUTPUT) {
+					it.remove();
+					continue;
+				}
+				
+				if (!output.containsKey(p)) {
+					fi = new FailureInformation("Missing output parameter",
+							"Output parameter '" + p + "' was not "
+							+ "provided by remote service.", "");
+					break;
+				}
+				
+				DataType type = m_information.parameter_type(operation, p);
+				if (!type.is_instance(output.get(p))) {
+					fi = new FailureInformation("Invalid output parameter type",
+							"Output parameter '" + p + "' has type '"
+							+ type.name() + "' but server sent value with "
+							+ "type '" + output.get(p).type().name()
+							+ "'.", "");
+					break;
+				}
+			}
+			
+			if (out_params.size() != output.size()) {
+				fi = new FailureInformation("Extra output parameters",
+						"Unexpected output parameters received from service.",
+						"");
+			}
+			
+			if (fi == null) {
+				re.done(new RemoteExecutionResult(output));
+			} else {
+				re.done(new RemoteExecutionResult(fi));
+			}
 		} else {
 			String type = m_information.execution_response_failure_type(
 					data.value());
@@ -113,9 +162,9 @@ class ExecutionResultReadFilter extends EventFilter {
 						it.remove();
 					}
 				}
+				
+				m_last_cleared = now;
 			}
-			
-			m_last_cleared = now;
 		}
 	}
 	

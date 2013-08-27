@@ -11,6 +11,7 @@ import java.io.InputStream;
 import edu.cmu.cs.able.typelib.enc.DataValueEncoding;
 import edu.cmu.cs.able.typelib.enc.InvalidEncodingException;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
+import edu.cmu.cs.able.typelib.type.DataValue;
 
 /**
  * Implementation of a data type input stream based on a data value encoding.
@@ -84,11 +85,14 @@ public class DataTypeInputStreamImpl implements DataTypeInputStream {
 			read += r;
 		}
 		
-		ByteArrayInputStream input = new ByteArrayInputStream(m_buffer, 0,
+		try (ByteArrayInputStream input = new ByteArrayInputStream(m_buffer, 0,
 				size);
-		
-		DataInputStream in = new DataInputStream(input);
-		return new BusData(m_encoding.decode(in, m_pscope), m_buffer, size);
+				DataInputStream in = new DataInputStream(input)) {
+			DataValue value = m_encoding.decode(in, m_pscope);
+			return new BusData(value, m_buffer, size);
+		} catch (Exception e) {
+			return new BusData(m_buffer, size, e);
+		}
 	}
 	
 	@Override

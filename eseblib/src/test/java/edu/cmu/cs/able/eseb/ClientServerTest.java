@@ -1,17 +1,31 @@
 package edu.cmu.cs.able.eseb;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.Date;
+import java.util.HashSet;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import auxtestlib.BooleanEvaluation;
 import auxtestlib.TestPropertiesDefinition;
 import edu.cmu.cs.able.eseb.bus.EventBus;
 import edu.cmu.cs.able.eseb.bus.EventBusAcceptPreprocessor;
 import edu.cmu.cs.able.eseb.bus.EventBusConnectionData;
 import edu.cmu.cs.able.eseb.conn.BusConnection;
 import edu.cmu.cs.able.eseb.conn.BusConnectionState;
+import edu.cmu.cs.able.typelib.TestDataType;
+import edu.cmu.cs.able.typelib.TestDataValue;
+import edu.cmu.cs.able.typelib.enc.InvalidEncodingException;
+import edu.cmu.cs.able.typelib.prim.Int64Value;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
+import edu.cmu.cs.able.typelib.txtenc.DelegateTextEncoding;
+import edu.cmu.cs.able.typelib.txtenc.TextEncoding;
+import edu.cmu.cs.able.typelib.txtenc.typelib.DefaultTextEncoding;
+import edu.cmu.cs.able.typelib.type.DataType;
+import edu.cmu.cs.able.typelib.type.DataTypeScope;
 import edu.cmu.cs.able.typelib.type.DataValue;
 
 /**
@@ -236,6 +250,142 @@ public class ClientServerTest extends EsebTestCase {
 				
 				assertNotSame(BusConnectionState.CONNECTED, c.state());
  			}
+		}
+	}
+	
+	@Test
+	public void can_send_non_understandable_data() throws Exception {
+		final PrimitiveScope ps = new PrimitiveScope();
+		final TestDataType tdt = new TestDataType("foo",
+				new HashSet<DataType>());
+		ps.add(tdt);
+		
+		DefaultTextEncoding dte = new DefaultTextEncoding(ps);
+		dte.add(new DelegateTextEncoding() {
+			@Override
+			public boolean supports(DataType t) {
+				return t instanceof TestDataType;
+			}
+			
+			@Override
+			public void encode(DataValue v, Writer w, TextEncoding enc)
+					throws IOException {
+				DataValue dv = ps.int64().make(((TestDataValue) v).m_val);
+				enc.encode(dv, w);
+			}
+			
+			@Override
+			public DataValue decode(Reader r, DataType type, DataTypeScope dts,
+					TextEncoding enc) throws IOException,
+					InvalidEncodingException {
+				Int64Value i64 = (Int64Value) enc.decode(r, dts);
+				return new TestDataValue(tdt, i64.value());
+			}
+		});
+		
+		try (EventBus srv = new EventBus(m_port, m_scope);
+				final BusConnection c1 = new BusConnection("localhost", m_port,
+				ps, dte);
+				final BusConnection c2 = new BusConnection("localhost", m_port,
+				m_scope)) {
+			srv.start();
+			c1.start();
+			c2.start();
+			wait_for_true(new BooleanEvaluation() {
+				@Override
+				public boolean evaluate() throws Exception {
+					return c1.state() == BusConnectionState.CONNECTED
+							&& c2.state() == BusConnectionState.CONNECTED;
+				}
+			});
+			
+			final TestArraySaveQueue tasq = new TestArraySaveQueue();
+			c2.queue_group().add(tasq);
+			
+			c1.send(new TestDataValue(tdt, 8));
+			
+			wait_for_true(new BooleanEvaluation() {
+				@Override
+				public boolean evaluate() throws Exception {
+					return tasq.m_bdata.size() > 0;
+				}
+			});
+			
+			assertEquals(1, tasq.m_values.size());
+			assertEquals(1, tasq.m_bdata.size());
+			assertNull(tasq.m_values.get(0));
+			assertNotNull(tasq.m_bdata.get(0));
+			assertTrue(tasq.m_bdata.get(0).length > 0);
+			assertNotNull(tasq.m_ex.get(0));
+		}
+	}
+	
+	@Test
+	public void send_receive_data_bus_does_not_understand() throws Exception {
+		final PrimitiveScope ps = new PrimitiveScope();
+		final TestDataType tdt = new TestDataType("foo",
+				new HashSet<DataType>());
+		ps.add(tdt);
+		
+		DefaultTextEncoding dte = new DefaultTextEncoding(ps);
+		dte.add(new DelegateTextEncoding() {
+			@Override
+			public boolean supports(DataType t) {
+				return t instanceof TestDataType;
+			}
+			
+			@Override
+			public void encode(DataValue v, Writer w, TextEncoding enc)
+					throws IOException {
+				DataValue dv = ps.int64().make(((TestDataValue) v).m_val);
+				enc.encode(dv, w);
+			}
+			
+			@Override
+			public DataValue decode(Reader r, DataType type, DataTypeScope dts,
+					TextEncoding enc) throws IOException,
+					InvalidEncodingException {
+				Int64Value i64 = (Int64Value) enc.decode(r, dts);
+				return new TestDataValue(tdt, i64.value());
+			}
+		});
+		
+		try (EventBus srv = new EventBus(m_port, m_scope);
+				final BusConnection c1 = new BusConnection("localhost", m_port,
+				ps, dte);
+				final BusConnection c2 = new BusConnection("localhost", m_port,
+				ps, dte)) {
+			srv.start();
+			c1.start();
+			c2.start();
+			wait_for_true(new BooleanEvaluation() {
+				@Override
+				public boolean evaluate() throws Exception {
+					return c1.state() == BusConnectionState.CONNECTED
+							&& c2.state() == BusConnectionState.CONNECTED;
+				}
+			});
+			
+			final TestArraySaveQueue tasq = new TestArraySaveQueue();
+			c2.queue_group().add(tasq);
+			
+			c1.send(new TestDataValue(tdt, 8));
+			
+			wait_for_true(new BooleanEvaluation() {
+				@Override
+				public boolean evaluate() throws Exception {
+					return tasq.m_bdata.size() > 0;
+				}
+			});
+			
+			assertEquals(1, tasq.m_values.size());
+			assertEquals(1, tasq.m_bdata.size());
+			assertNotNull(tasq.m_values.get(0));
+			assertTrue(tasq.m_values.get(0) instanceof TestDataValue);
+			assertEquals(8, ((TestDataValue) tasq.m_values.get(0)).m_val);
+			assertNotNull(tasq.m_bdata.get(0));
+			assertTrue(tasq.m_bdata.get(0).length > 0);
+			assertNull(tasq.m_ex.get(0));
 		}
 	}
 }

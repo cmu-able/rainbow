@@ -3,7 +3,7 @@ package edu.cmu.cs.able.eseb.rpc;
 /**
  * Exception thrown by the operation package.
  */
-public class OperationException extends Exception {
+public class OperationException extends RuntimeException {
 	/**
 	 * Version for serialization.
 	 */

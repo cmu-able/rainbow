@@ -7,6 +7,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import edu.cmu.cs.able.typelib.type.DataValue;
+
 /**
  * Class representing an asynchronous execution of a remote object.
  */
@@ -17,10 +19,19 @@ public class RemoteExecution implements Future<RemoteExecutionResult> {
 	private RemoteExecutionResult m_result;
 	
 	/**
-	 * Creates a remote execution which is started but not finished.
+	 * The operation to execute.
 	 */
-	public RemoteExecution() {
+	private DataValue m_operation;
+	
+	/**
+	 * Creates a remote execution which is started but not finished.
+	 * @param operation the operation to execute
+	 */
+	public RemoteExecution(DataValue operation) {
+		Ensure.not_null(operation);
+		
 		m_result = null;
+		m_operation = operation;
 	}
 	
 	/**
@@ -83,5 +94,13 @@ public class RemoteExecution implements Future<RemoteExecutionResult> {
 		}
 		
 		return m_result;
+	}
+	
+	/**
+	 * Obtains the operation this execution refers to.
+	 * @return the operation
+	 */
+	public DataValue operation() {
+		return m_operation;
 	}
 }

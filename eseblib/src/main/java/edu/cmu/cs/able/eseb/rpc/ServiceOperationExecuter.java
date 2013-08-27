@@ -8,7 +8,7 @@ import edu.cmu.cs.able.typelib.type.DataValue;
 
 /**
  * Interface implemented by the objects responsible for executing an operation
- * in an {@link OperationRegistry}.
+ * in an {@link ServiceObjectRegistration}.
  */
 public interface ServiceOperationExecuter {
 	/**

@@ -1,5 +1,7 @@
 package edu.cmu.cs.able.eseb.rpc;
 
+import incubator.pval.Ensure;
+
 /**
  * Contains information about a failure which resulted from an operation
  * execution. Every failure has three pieces of information: the
@@ -11,12 +13,34 @@ package edu.cmu.cs.able.eseb.rpc;
  */
 public class FailureInformation {
 	/**
+	 * Failure type.
+	 */
+	private String m_type;
+	
+	/**
+	 * Failure description.
+	 */
+	private String m_description;
+	
+	/**
+	 * Failure data.
+	 */
+	private String m_data;
+	
+	/**
 	 * Creates a new failure information.
 	 * @param type the type of failure
 	 * @param description the description of the failure
 	 * @param data the failure data
 	 */
 	public FailureInformation(String type, String description, String data) {
+		Ensure.not_null(type);
+		Ensure.not_null(description);
+		Ensure.not_null(data);
+		
+		m_type = type;
+		m_description = description;
+		m_data = data;
 	}
 	
 	/**
@@ -24,7 +48,7 @@ public class FailureInformation {
 	 * @return the type of failure
 	 */
 	public String type() {
-		return null;
+		return m_type;
 	}
 	
 	/**
@@ -32,7 +56,7 @@ public class FailureInformation {
 	 * @return the description of the failure
 	 */
 	public String description() {
-		return null;
+		return m_description;
 	}
 	
 	/**
@@ -40,6 +64,6 @@ public class FailureInformation {
 	 * @return the failure data
 	 */
 	public String data() {
-		return null;
+		return m_data;
 	}
 }

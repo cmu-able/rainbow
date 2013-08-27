@@ -182,6 +182,11 @@ public class SendReceiveCustomDataType extends DefaultTCase {
 		protected CustomValue(DataType type) {
 			super(type);
 		}
+
+		@Override
+		public DataValue clone() throws CloneNotSupportedException {
+			return new CustomValue(type());
+		}
 	}
 	
 	/**
