@@ -27,4 +27,5 @@ public interface IGaugeConfigurationInterface {
      * @return boolean <code>true</code> if configure call succeed, <code>false</code> otherwise
      */
     public boolean reconfigureGauge ();
+
 }

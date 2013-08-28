@@ -35,6 +35,7 @@ package org.sa.rainbow.gauges;
 public interface IGaugeProtocol {
 
     public static final String ID = "uid";
+    public static final String UID                = "luid";
     public static final String GAUGE_TYPE = "gaugeType";
     public static final String GAUGE_NAME = "gaugeName";
     public static final String MODEL_TYPE = "modelType";

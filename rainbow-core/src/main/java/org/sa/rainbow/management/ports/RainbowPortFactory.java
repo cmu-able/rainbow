@@ -13,6 +13,10 @@ import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.gauges.IGauge;
+import org.sa.rainbow.gauges.IGaugeConfigurationInterface;
+import org.sa.rainbow.gauges.IGaugeIdentifier;
+import org.sa.rainbow.gauges.IGaugeQueryInterface;
 import org.sa.rainbow.gauges.IRainbowGaugeLifecycleBusPort;
 import org.sa.rainbow.models.IModelsManager;
 import org.sa.rainbow.models.ports.IRainbowModelChangeBusPort;
@@ -100,8 +104,32 @@ public class RainbowPortFactory {
 
     }
 
+
     public static IRainbowModelChangeBusPort createChangeBusAnnouncePort () throws RainbowConnectionException {
         return getFactory ().createChangeBusAnnouncePort ();
+    }
+
+    public static IRainbowGaugeLifecycleBusPort createManagerLifecylePort (IRainbowGaugeLifecycleBusPort manager)
+            throws RainbowConnectionException {
+        return getFactory ().createManagerGaugeLifecyclePort (manager);
+    }
+
+    public static IGaugeConfigurationInterface createGaugeConfigurationPortClient (IGaugeIdentifier gauge)
+            throws RainbowConnectionException {
+        return getFactory ().createGaugeConfigurationPortClient (gauge);
+    }
+
+    public static IGaugeQueryInterface createGaugeQueryPortClient (IGaugeIdentifier gauge)
+            throws RainbowConnectionException {
+        return getFactory ().createGaugeQueryPortClient (gauge);
+    }
+
+    public static IGaugeConfigurationInterface createGaugeConfigurationPort (IGauge gauge) throws RainbowConnectionException {
+        return getFactory ().createGaugeConfigurationPort (gauge);
+    }
+
+    public static IGaugeQueryInterface createGaugeQueryPort (IGauge gauge) throws RainbowConnectionException {
+        return getFactory ().createGaugeQueryPort (gauge);
     }
 
 }

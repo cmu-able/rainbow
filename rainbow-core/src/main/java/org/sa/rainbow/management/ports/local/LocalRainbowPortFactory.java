@@ -9,6 +9,10 @@ import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.gauges.IGauge;
+import org.sa.rainbow.gauges.IGaugeConfigurationInterface;
+import org.sa.rainbow.gauges.IGaugeIdentifier;
+import org.sa.rainbow.gauges.IGaugeQueryInterface;
 import org.sa.rainbow.gauges.IRainbowGaugeLifecycleBusPort;
 import org.sa.rainbow.management.ports.IRainbowConnectionPortFactory;
 import org.sa.rainbow.management.ports.IRainbowManagementPort;
@@ -127,6 +131,36 @@ public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
 
     @Override
     public IRainbowModelChangeBusPort createChangeBusAnnouncePort () throws RainbowConnectionException {
+        throw new UnsupportedOperationException ("NYS");
+
+    }
+
+    @Override
+    public IRainbowGaugeLifecycleBusPort createManagerGaugeLifecyclePort (IRainbowGaugeLifecycleBusPort manager) {
+        throw new UnsupportedOperationException ("NYS");
+
+    }
+
+    @Override
+    public IGaugeConfigurationInterface createGaugeConfigurationPortClient (IGaugeIdentifier gauge)
+            throws RainbowConnectionException {
+        throw new UnsupportedOperationException ("NYS");
+    }
+
+    @Override
+    public IGaugeQueryInterface createGaugeQueryPortClient (IGaugeIdentifier gauge)
+            throws RainbowConnectionException {
+        throw new UnsupportedOperationException ("NYS");
+
+    }
+
+    @Override
+    public IGaugeConfigurationInterface createGaugeConfigurationPort (IGauge gauge) throws RainbowConnectionException {
+        throw new UnsupportedOperationException ("NYS");
+    }
+
+    @Override
+    public IGaugeQueryInterface createGaugeQueryPort (IGauge gauge) throws RainbowConnectionException {
         throw new UnsupportedOperationException ("NYS");
 
     }

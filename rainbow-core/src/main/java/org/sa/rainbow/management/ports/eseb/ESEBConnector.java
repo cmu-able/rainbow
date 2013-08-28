@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
-import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
 
@@ -16,7 +15,6 @@ import edu.cmu.cs.able.eseb.BusDataQueue;
 import edu.cmu.cs.able.eseb.BusDataQueueListener;
 import edu.cmu.cs.able.eseb.bus.EventBus;
 import edu.cmu.cs.able.eseb.conn.BusConnection;
-import edu.cmu.cs.able.eseb.conn.BusConnectionState;
 import edu.cmu.cs.able.typelib.comp.MapDataValue;
 import edu.cmu.cs.able.typelib.type.DataValue;
 
@@ -59,11 +57,6 @@ public class ESEBConnector {
     }
 
 
-    /** The set of BusServers on the local machine, keyed by the port **/
-    protected static Map<Short, EventBus>       s_servers            = new HashMap<> ();
-    /** The set of BusClients already created, keyed by host:port **/
-    protected static Map<String, BusConnection> s_clients            = new HashMap<> ();
-
     /** The server corresponding to this connector **/
     protected EventBus                          m_srvr;
     /** The client for this connector to publish and receive information **/
@@ -71,62 +64,6 @@ public class ESEBConnector {
     /** The set of listeners that are awaiting replies. **/
     private static Map<String, IESEBListener> m_replyListeners     = new HashMap<> ();
     private ChannelT m_channel;
-
-    /**
-     * Return the cached BusServer for this port, creating a new one if it doesn't yet exist
-     * 
-     * @param port
-     *            The port that the server is connected to
-     * @return the cached or newly created BusServer
-     * @throws IOException
-     */
-    protected static EventBus getBusServer (short port) throws IOException {
-        EventBus s = s_servers.get (port);
-        if (s == null || s.closed ()) {
-            LOGGER.debug (MessageFormat.format ("Constructing a new BusServer on port {0}", port));
-            try {
-                s = new EventBus (port, RainbowESEBMessage.SCOPE);
-                s_servers.put (port, s);
-                s.start ();
-            }
-            catch (Exception e) {
-                LOGGER.warn (MessageFormat.format ("BusServer could not be created on port {0}", port));
-            }
-        }
-        return s;
-    }
-
-    /**
-     * Return the cached BusClient for this host:port combination, or create a new one if it doesn't yet exist
-     * 
-     * @param remoteHost
-     *            The host for the client
-     * @param remotePort
-     *            The port for the client
-     * @return The cached or newly created BusClient
-     */
-    protected static BusConnection getBusClient (String remoteHost, short remotePort) {
-        // Make sure that we translate host names to IPs
-        remoteHost = Rainbow.canonicalizeHost2IP (remoteHost);
-        String key = clientKey (remoteHost, remotePort);
-        BusConnection c = s_clients.get (key);
-        if (c == null || c.state () == BusConnectionState.DISCONNECTED) {
-            LOGGER.debug (MessageFormat.format ("Constructing a new BusClient on {0}", key));
-            c = new BusConnection (remoteHost, remotePort, RainbowESEBMessage.SCOPE);
-            s_clients.put (key, c);
-            c.start ();
-        }
-        return c;
-    }
-
-    private static String clientKey (String remoteHost, short remotePort) {
-        StringBuilder sb = new StringBuilder ();
-        sb.append (remoteHost);
-        sb.append (":");
-        sb.append (remotePort);
-        String key = sb.toString ();
-        return key;
-    }
 
     /**
      * Constructs a new ESEBConnector, connecting to a remote bus
@@ -154,7 +91,7 @@ public class ESEBConnector {
     public ESEBConnector (short port, ChannelT channel) throws IOException {
         this.m_channel = channel;
         // Create the server on this port
-        m_srvr = getBusServer (port);
+        m_srvr = ESEBProvider.getBusServer (port);
         // Create a local client
         setClient ("localhost", port);
     }
@@ -176,7 +113,7 @@ public class ESEBConnector {
                 return;
         }
 
-        m_client = getBusClient (remoteHost, remotePort);
+        m_client = ESEBProvider.getBusClient (remoteHost, remotePort);
     }
 
     /**
@@ -225,8 +162,9 @@ public class ESEBConnector {
                     if (v instanceof MapDataValue) {
                         MapDataValue mdv = (MapDataValue )v;
                         RainbowESEBMessage msg = new RainbowESEBMessage (mdv);
-                        if (!msg.getProperty (ESEBConstants.MSG_CHANNEL_KEY).equals (m_channel.name ()))
+                        if (!msg.getProperty (ESEBConstants.MSG_CHANNEL_KEY).equals (m_channel.name ())) {
                             continue;
+                        }
                         String repKey = (String )msg.getProperty (ESEBConstants.MSG_REPLY_KEY);
                         Object msgType = msg.getProperty (ESEBConstants.MSG_TYPE_KEY);
 
@@ -329,8 +267,9 @@ public class ESEBConnector {
                     if (v instanceof MapDataValue) {
                         MapDataValue mdv = (MapDataValue )v;
                         RainbowESEBMessage msg = new RainbowESEBMessage (mdv);
-                        if (!msg.getProperty (ESEBConstants.MSG_CHANNEL_KEY).equals (m_channel.name ()))
+                        if (!msg.getProperty (ESEBConstants.MSG_CHANNEL_KEY).equals (m_channel.name ())) {
                             continue;
+                        }
                         // Ignore any replies on this queue
                         if (!ESEBConstants.MSG_TYPE_REPLY.equals (msg.getProperty (ESEBConstants.MSG_TYPE_KEY)))
                         {

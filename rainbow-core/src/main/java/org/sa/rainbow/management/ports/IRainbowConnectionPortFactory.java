@@ -6,6 +6,10 @@ import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.gauges.IGauge;
+import org.sa.rainbow.gauges.IGaugeConfigurationInterface;
+import org.sa.rainbow.gauges.IGaugeIdentifier;
+import org.sa.rainbow.gauges.IGaugeQueryInterface;
 import org.sa.rainbow.gauges.IRainbowGaugeLifecycleBusPort;
 import org.sa.rainbow.models.IModelsManager;
 import org.sa.rainbow.models.ports.IRainbowModelChangeBusPort;
@@ -68,5 +72,19 @@ public interface IRainbowConnectionPortFactory {
     public abstract IRainbowGaugeLifecycleBusPort createGaugeSideLifecyclePort () throws RainbowConnectionException;
 
     public abstract IRainbowModelChangeBusPort createChangeBusAnnouncePort () throws RainbowConnectionException;
+
+    public abstract IRainbowGaugeLifecycleBusPort
+    createManagerGaugeLifecyclePort (IRainbowGaugeLifecycleBusPort manager) throws RainbowConnectionException;
+
+    public abstract IGaugeConfigurationInterface createGaugeConfigurationPortClient (IGaugeIdentifier gauge)
+            throws RainbowConnectionException;
+
+    public abstract IGaugeQueryInterface createGaugeQueryPortClient (IGaugeIdentifier gauge)
+            throws RainbowConnectionException;
+
+    public abstract IGaugeConfigurationInterface createGaugeConfigurationPort (IGauge gauge)
+            throws RainbowConnectionException;
+
+    public abstract IGaugeQueryInterface createGaugeQueryPort (IGauge gauge) throws RainbowConnectionException;
 
 }

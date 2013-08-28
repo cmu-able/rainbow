@@ -1,22 +1,22 @@
 package org.sa.rainbow.gauges;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
-import org.sa.rainbow.management.ports.eseb.ESEBGaugeSideLifecyclePort;
+import org.sa.rainbow.management.ports.RainbowPortFactory;
 import org.sa.rainbow.models.commands.IRainbowModelCommandRepresentation;
 import org.sa.rainbow.models.ports.IRainbowModelUSBusPort;
-import org.sa.rainbow.models.ports.eseb.ESEBGaugeModelUSBusPort;
 import org.sa.rainbow.util.Beacon;
 
 /**
@@ -34,6 +34,8 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
     /** The ports through which the gauge interacts with the outside world **/
     protected IRainbowModelUSBusPort                          m_announcePort;
     protected IRainbowGaugeLifecycleBusPort                   m_gaugeManagementPort;
+    protected IGaugeConfigurationInterface                    m_configurationPort;
+    protected IGaugeQueryInterface                            m_queryPort;
     /**
      * Used to determine when to fire off beacon to consumers; the period will be set by the Gauge implementation
      * subclass
@@ -46,6 +48,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
     protected Map<String, String>                             m_mappings     = null;
     protected Map<String, IRainbowModelCommandRepresentation> m_commands     = null;
     protected Map<String, IRainbowModelCommandRepresentation> m_lastCommands = null;
+    private long                                              m_id_long;
 
     /**
      * Main Constructor for the Gauge.
@@ -71,6 +74,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
             List<IRainbowModelCommandRepresentation> mappings) throws RainbowException {
         super (threadName);
         this.m_id = id;
+        this.m_id_long = new Random ().nextLong ();
 
         m_gaugeBeacon = new Beacon (beaconPeriod);
         m_gaugeDesc = gaugeDesc;
@@ -96,16 +100,19 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
         }
 
         try {
-            m_gaugeManagementPort = new ESEBGaugeSideLifecyclePort ();
-            m_announcePort = new ESEBGaugeModelUSBusPort (this);
+            m_gaugeManagementPort = RainbowPortFactory.createGaugeSideLifecyclePort ();
+            m_announcePort = RainbowPortFactory.createModelsManagerClientUSPort (this);
             // register this Gauge with Rainbow, and report created
             Rainbow.registerGauge (this);
+            m_configurationPort = RainbowPortFactory.createGaugeConfigurationPort (this);
+            m_queryPort = RainbowPortFactory.createGaugeQueryPort (this);
             m_gaugeManagementPort.reportCreated (this);
             m_gaugeBeacon.mark ();
         }
-        catch (IOException e) {
+        // TODO: Remove reliance on ParticipantException
+        catch (RainbowConnectionException e) {
             LOGGER.error ("Could not interact with the outside world", e);
-            throw new RainbowException ("The gauge could not be started because the ports could not be set up.");
+            throw new RainbowException ("The gauge could not be started because the ports could not be set up.", e);
         }
     }
 
@@ -124,6 +131,11 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
     @Override
     public String id () {
         return m_id;
+    }
+
+    @Override
+    public long id_long () {
+        return m_id_long;
     }
 
     @Override

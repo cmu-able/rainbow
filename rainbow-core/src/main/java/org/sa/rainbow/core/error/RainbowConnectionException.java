@@ -1,6 +1,5 @@
 package org.sa.rainbow.core.error;
 
-import java.io.IOException;
 
 public class RainbowConnectionException extends RainbowException {
 
@@ -8,7 +7,7 @@ public class RainbowConnectionException extends RainbowException {
         super (string);
     }
 
-    public RainbowConnectionException (String message, IOException e) {
+    public RainbowConnectionException (String message, Exception e) {
         super (message, e);
     }
 

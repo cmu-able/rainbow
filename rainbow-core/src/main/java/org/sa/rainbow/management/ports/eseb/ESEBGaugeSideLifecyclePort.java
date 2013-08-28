@@ -43,6 +43,7 @@ public class ESEBGaugeSideLifecyclePort implements IRainbowGaugeLifecycleBusPort
 
     private void setCommonGaugeProperties (RainbowESEBMessage msg, IGaugeIdentifier gauge) {
         msg.setProperty (IGaugeProtocol.ID, gauge.id ());
+        msg.setProperty (IGaugeProtocol.UID, gauge.id_long ());
         msg.setProperty (IGaugeProtocol.GAUGE_NAME, gauge.gaugeDesc ().getName ());
         msg.setProperty (IGaugeProtocol.GAUGE_TYPE, gauge.gaugeDesc ().getType ());
         msg.setProperty (IGaugeProtocol.MODEL_TYPE, gauge.modelDesc ().getType ());

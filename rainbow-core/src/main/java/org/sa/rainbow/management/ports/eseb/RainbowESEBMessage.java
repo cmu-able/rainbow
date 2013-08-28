@@ -15,17 +15,13 @@ import org.sa.rainbow.core.event.IRainbowMessage;
 
 import edu.cmu.cs.able.typelib.comp.MapDataType;
 import edu.cmu.cs.able.typelib.comp.MapDataValue;
-import edu.cmu.cs.able.typelib.jconv.DefaultTypelibJavaConverter;
 import edu.cmu.cs.able.typelib.jconv.ValueConversionException;
-import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
 import edu.cmu.cs.able.typelib.prim.StringValue;
 import edu.cmu.cs.able.typelib.type.DataValue;
 
 public class RainbowESEBMessage implements IRainbowMessage {
     static Logger LOGGER = Logger.getLogger (RainbowESEBMessage.class);
-    static final PrimitiveScope                        SCOPE             = new PrimitiveScope ();
-    protected static final MapDataType    MAP_STRING_TO_ANY = MapDataType.map_of (SCOPE.string (), SCOPE.any (), SCOPE);
-    protected static final DefaultTypelibJavaConverter CONVERTER         = DefaultTypelibJavaConverter.make (SCOPE);
+    protected static final MapDataType    MAP_STRING_TO_ANY = MapDataType.map_of (ESEBProvider.SCOPE.string (), ESEBProvider.SCOPE.any (), ESEBProvider.SCOPE);
     /** The prefix that encodes properties in maps that are sent on the wire **/
     private static final String PROP_PREFIX = "__PROP_";
     private static final int    PROP_PREFIX_LENGTH = PROP_PREFIX.length ();
@@ -46,7 +42,7 @@ public class RainbowESEBMessage implements IRainbowMessage {
         Map<DataValue, DataValue> all = m_esebMap.all ();
         Set<DataValue> keySet = all.keySet ();
         for (DataValue dv : keySet) {
-            if (dv.type ().equals (SCOPE.string ())) {
+            if (dv.type ().equals (ESEBProvider.SCOPE.string ())) {
                 pns.add (((StringValue )dv).value ());
             }
         }
@@ -55,11 +51,11 @@ public class RainbowESEBMessage implements IRainbowMessage {
 
     @Override
     public Object getProperty (String id) {
-        DataValue dv = m_esebMap.get (SCOPE.string ().make (id));
+        DataValue dv = m_esebMap.get (ESEBProvider.SCOPE.string ().make (id));
         if (dv == null)
             return null;
         try {
-            return CONVERTER.to_java (dv, null);
+            return ESEBProvider.CONVERTER.to_java (dv, null);
         }
         catch (ValueConversionException e) {
         }
@@ -70,7 +66,7 @@ public class RainbowESEBMessage implements IRainbowMessage {
     @Override
     public void setProperty (String id, Object prop) throws RainbowException {
         try {
-            m_esebMap.put (CONVERTER.from_java (id, SCOPE.string ()), CONVERTER.from_java (prop, null));
+            m_esebMap.put (ESEBProvider.CONVERTER.from_java (id, ESEBProvider.SCOPE.string ()), ESEBProvider.CONVERTER.from_java (prop, null));
         }
         catch (ValueConversionException e) {
             // Should only happen on the prop
@@ -118,7 +114,7 @@ public class RainbowESEBMessage implements IRainbowMessage {
     }
 
     public void removeProperty (String key) {
-        m_esebMap.remove (SCOPE.string ().make (key));
+        m_esebMap.remove (ESEBProvider.SCOPE.string ().make (key));
     }
 
     public void fillProperties (Properties props) {
@@ -142,7 +138,7 @@ public class RainbowESEBMessage implements IRainbowMessage {
                         entry.getKey (), entry.getValue ().getClass ()));
                 continue;
             }
-            m_esebMap.put (SCOPE.string ().make (key), SCOPE.string ().make (value));
+            m_esebMap.put (ESEBProvider.SCOPE.string ().make (key), ESEBProvider.SCOPE.string ().make (value));
         }
 
     }
@@ -169,7 +165,7 @@ public class RainbowESEBMessage implements IRainbowMessage {
     }
 
     public boolean hasProperty (String key) {
-        return m_esebMap.contains (SCOPE.string ().make (key));
+        return m_esebMap.contains (ESEBProvider.SCOPE.string ().make (key));
     }
 
     @Override
