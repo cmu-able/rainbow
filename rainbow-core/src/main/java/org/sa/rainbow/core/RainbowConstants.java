@@ -121,7 +121,7 @@ public interface RainbowConstants {
 //     *  model properties, expAvg = (1 - alpha) * expAvg + alpha * newVal */
 //    public static final String PROPKEY_MODEL_ALPHA = "customize.model.expavg.alpha";
 //    /** Rainbow customization parameter: Gauge Description file path */
-//    public static final String PROPKEY_GAUGES_PATH = "customize.gauges.path";
+    public static final String PROPKEY_GAUGES_PATH             = "customize.gauges.path";
 //    /** Rainbow customization parameter: Probe Description file path */
 //    public static final String PROPKEY_PROBES_PATH = "customize.probes.path";
 //    /** Rainbow customization parameter:  Path to the architectural operator mapping file */

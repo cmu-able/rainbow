@@ -95,6 +95,7 @@ public class Rainbow implements RainbowConstants {
     public static final String NAME        = "Rainbow Runtime Infrastructure";
 
 
+
     /**
      * Exit status that Rainbow would report when it exits, default to sleeping.
      */
