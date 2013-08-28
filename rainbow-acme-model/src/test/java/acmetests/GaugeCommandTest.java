@@ -2,6 +2,7 @@ package acmetests;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
 
 import junit.framework.TestCase;
 
@@ -37,6 +38,11 @@ public class GaugeCommandTest extends TestCase {
                     public String id () {
                         return "testGaugeCommunicationSide";
                     }
+
+            @Override
+            public long id_long () {
+                return new Random ().nextLong ();
+            }
 
                 });
 
