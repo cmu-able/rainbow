@@ -405,4 +405,18 @@ public class BagDataTypeTest extends DefaultTCase {
 		int idx_2 = snapshot.lastIndexOf(m_v1);
 		assertTrue(idx != idx_2);
 	}
+	
+	@Test
+	public void cloning_values() throws Exception {
+		m_bag.add(m_v1);
+		BagDataValue bv = m_bag.clone();
+		assertNotNull(bv);
+		assertNotSame(bv, m_bag);
+		assertEquals(m_bag, bv);
+		
+		Collection<DataValue> c = bv.all();
+		assertEquals(1, c.size());
+		assertEquals(m_v1, c.iterator().next());
+		assertNotSame(m_v1, c.iterator().next());
+	}
 }

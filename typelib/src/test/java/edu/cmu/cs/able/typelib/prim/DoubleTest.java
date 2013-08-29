@@ -83,4 +83,16 @@ public class DoubleTest extends DefaultTCase {
 		DoubleValue v = m_double.make(10.125);
 		assertTrue(v.toString().contains("10.125"));
 	}
+	
+	/**
+	 * Clones data values.
+	 * @throws Exception test failed
+	 */
+	@Test
+	public void cloning_values() throws Exception {
+		DoubleValue x = m_double.make(0.5);
+		DoubleValue y = x.clone();
+		assertEquals(x, y);
+		assertNotSame(x, y);
+	}
 }

@@ -83,4 +83,16 @@ public class FloatTest extends DefaultTCase {
 		FloatValue v = m_float.make(10.125f);
 		assertTrue(v.toString().contains("10.125"));
 	}
+	
+	/**
+	 * Clones data values.
+	 * @throws Exception test failed
+	 */
+	@Test
+	public void cloning_values() throws Exception {
+		FloatValue x = m_float.make(0.5f);
+		FloatValue y = x.clone();
+		assertEquals(x, y);
+		assertNotSame(x, y);
+	}
 }

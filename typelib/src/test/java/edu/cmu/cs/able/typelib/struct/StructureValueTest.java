@@ -69,4 +69,21 @@ public class StructureValueTest extends StructureTestCase {
 		assertEquals("x{x::y=" + pval8.toString() + ",x::z=" + pval9.toString()
 				+ "}", x_v1.toString());
 	}
+	
+	@Test
+	public void cloning_values() throws Exception {
+		StructureDataType x1 = parse_declaration("x1", "struct x1 {}");
+		StructureDataValue x1_v1 = make(x1);
+		StructureDataType x2 = parse_declaration("x2", "struct x2 {x1 z;}");
+		StructureDataValue x2_v1 = make(x2, "z", x1_v1);
+		
+		StructureDataValue x2_v2 = x2_v1.clone();
+		assertEquals(x2_v2, x2_v1);
+		assertNotSame(x2_v2, x2_v1);
+		
+		StructureDataValue x1_v2 = (StructureDataValue) x2_v2.value(
+				x2.field("z"));
+		assertEquals(x1_v1, x1_v2);
+		assertNotSame(x1_v1, x1_v2);
+	}
 }

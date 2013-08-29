@@ -160,4 +160,18 @@ public class TupleDataTypeEqTest extends TupleDataTypeTestFixture
 	public void compare_to_itself() throws Exception {
 		assertTrue(m_tv1.equals(m_tv1));
 	}
+
+	@Test
+	@Override
+	public void cloning_values() throws Exception {
+		TupleDataValue tv = m_tv1.clone();
+		assertNotNull(tv);
+		assertNotSame(tv, m_tv1);
+		assertEquals(m_tv1, tv);
+		
+		List<DataValue> c = tv.data();
+		assertEquals(1, c.size());
+		assertEquals(m_v1_t1, c.get(0));
+		assertNotSame(m_v1_t1, c.get(0));
+	}
 }

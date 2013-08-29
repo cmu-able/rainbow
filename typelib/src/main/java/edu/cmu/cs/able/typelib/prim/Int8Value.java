@@ -1,5 +1,6 @@
 package edu.cmu.cs.able.typelib.prim;
 
+
 /**
  * Data value representing an 8-bit integer value.
  */
@@ -11,5 +12,10 @@ public class Int8Value extends JavaObjectDataValue<Byte> {
 	 */
 	protected Int8Value(byte value, Int8Type type) {
 		super(value, type);
+	}
+	
+	@Override
+	public Int8Value clone() throws CloneNotSupportedException {
+		return new Int8Value(value(), (Int8Type) type());
 	}
 }

@@ -155,4 +155,23 @@ public class OptionalDataTypeEqTest extends OptionalDataTypeTestFixture
 		assertNotSame(op_sub_1, m_opt_1);
 		assertSame(op_sub_1, v.type());
 	}
+
+	@Override
+	@Test
+	public void cloning_values() throws Exception {
+		OptionalDataValue ov1 = m_opt_1.make(m_v1_t1);
+		OptionalDataValue ov2 = ov1.clone();
+		
+		assertEquals(ov1, ov2);
+		assertNotSame(ov1, ov2);
+		
+		assertEquals(ov1.value(), ov2.value());
+		assertNotSame(ov1.value(), ov2.value());
+	}
+	
+	@Test
+	public void cloning_null() throws Exception {
+		OptionalDataValue null_c = m_null_1.clone();
+		assertEquals(null_c, m_null_1);
+	}
 }

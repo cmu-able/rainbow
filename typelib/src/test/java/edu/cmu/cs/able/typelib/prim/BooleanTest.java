@@ -87,4 +87,16 @@ public class BooleanTest extends DefaultTCase {
 		assertTrue(t1.toString().contains("true"));
 		assertTrue(t2.toString().contains("false"));
 	}
+	
+	/**
+	 * Clones data values.
+	 * @throws Exception test failed
+	 */
+	@Test
+	public void cloning_values() throws Exception {
+		BooleanValue x = m_bool.make(true);
+		BooleanValue y = x.clone();
+		assertEquals(x, y);
+		assertNotSame(x, y);
+	}
 }

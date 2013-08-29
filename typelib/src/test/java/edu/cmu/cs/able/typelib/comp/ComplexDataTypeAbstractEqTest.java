@@ -94,4 +94,11 @@ public interface ComplexDataTypeAbstractEqTest {
 	 */
 	@Test
 	public void obtaining_new_data_type() throws Exception;
+	
+	/**
+	 * Clones data values.
+	 * @throws Exception test failed
+	 */
+	@Test
+	public void cloning_values() throws Exception;
 }

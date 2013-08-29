@@ -132,4 +132,14 @@ public class ListDataValue extends CollectionDataValue {
 	public String toString() {
 		return "[" + m_data + "]";
 	}
+	
+	@Override
+	public ListDataValue clone() throws CloneNotSupportedException {
+		ListDataValue lv = new ListDataValue((ListDataType) type());
+		for (DataValue v : snapshot()) {
+			lv.add(v.clone());
+		}
+		
+		return lv;
+	}
 }

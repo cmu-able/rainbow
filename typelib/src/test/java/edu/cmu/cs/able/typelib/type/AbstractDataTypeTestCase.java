@@ -53,4 +53,11 @@ public abstract class AbstractDataTypeTestCase extends DefaultTCase {
 	@Test
 	public abstract void create_check_value_string_description()
 			throws Exception;
+	
+	/**
+	 * Clones data values.
+	 * @throws Exception test failed
+	 */
+	@Test
+	public abstract void cloning_values() throws Exception;
 }

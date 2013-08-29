@@ -141,4 +141,14 @@ public class MapDataValue extends DataValue {
 		
 		return sb.toString();
 	}
+	
+	@Override
+	public MapDataValue clone() throws CloneNotSupportedException {
+		MapDataValue mv = new MapDataValue((MapDataType) type());
+		for (Map.Entry<DataValue, DataValue> e : all().entrySet()) {
+			mv.put(e.getKey().clone(), e.getValue().clone());
+		}
+		
+		return mv;
+	}
 }

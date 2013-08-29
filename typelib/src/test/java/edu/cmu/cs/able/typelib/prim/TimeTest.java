@@ -96,4 +96,16 @@ public class TimeTest extends DefaultTCase {
 		TimeValue v = m_time.make(150);
 		assertTrue(v.toString().contains("150"));
 	}
+	
+	/**
+	 * Clones data values.
+	 * @throws Exception test failed
+	 */
+	@Test
+	public void cloning_values() throws Exception {
+		TimeValue x = m_time.make(9);
+		TimeValue y = x.clone();
+		assertEquals(x, y);
+		assertNotSame(x, y);
+	}
 }

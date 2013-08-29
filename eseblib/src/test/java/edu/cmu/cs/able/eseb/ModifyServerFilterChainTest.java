@@ -72,7 +72,6 @@ public class ModifyServerFilterChainTest extends EsebTestCase {
 		m_bus.start();
 		
 		m_conn_1 = new BusConnection("localhost", port, m_pscope);
-		m_conn_1.start();
 		m_save_1 = new TestArraySaveQueue();
 		m_conn_1.queue_group().add(m_save_1);
 		
@@ -93,6 +92,8 @@ public class ModifyServerFilterChainTest extends EsebTestCase {
 				ids[0] = data.id();
 			}
 		});
+		
+		m_conn_1.start();
 		
 		wait_for_true(new BooleanEvaluation() {
 			@Override

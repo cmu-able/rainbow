@@ -136,4 +136,16 @@ public class StructureDataValue extends DataValue {
 		
 		return b.toString();
 	}
+	
+	@Override
+	public StructureDataValue clone() throws CloneNotSupportedException {
+		StructureDataType stype = (StructureDataType) type();
+		
+		Map<Field, DataValue> fvalues = new HashMap<>();
+		for (Field f : stype.fields()) {
+			fvalues.put(f, value(f).clone());
+		}
+		
+		return new StructureDataValue(stype, fvalues);
+	}
 }

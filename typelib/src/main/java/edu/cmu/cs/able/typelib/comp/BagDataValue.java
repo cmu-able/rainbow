@@ -161,4 +161,14 @@ public class BagDataValue extends CollectionDataValue {
 	public String toString() {
 		return "{" + m_data + "}";
 	}
+	
+	@Override
+	public BagDataValue clone() throws CloneNotSupportedException{
+		BagDataValue cl = new BagDataValue((BagDataType) type());
+		for (DataValue v : snapshot()) {
+			cl.add(v.clone());
+		}
+		
+		return cl;
+	}
 }

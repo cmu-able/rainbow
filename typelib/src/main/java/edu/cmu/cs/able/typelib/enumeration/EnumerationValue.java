@@ -49,4 +49,9 @@ public class EnumerationValue extends DataValue {
 	public String toString() {
 		return type().name() + ":" + m_name;
 	}
+	
+	@Override
+	public EnumerationValue clone() throws CloneNotSupportedException {
+		return this;
+	}
 }

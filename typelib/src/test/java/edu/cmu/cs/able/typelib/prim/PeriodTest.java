@@ -80,4 +80,16 @@ public class PeriodTest extends DefaultTCase {
 		PeriodValue v = m_period.make(150);
 		assertTrue(v.toString().contains("150"));
 	}
+	
+	/**
+	 * Clones data values.
+	 * @throws Exception test failed
+	 */
+	@Test
+	public void cloning_values() throws Exception {
+		PeriodValue x = m_period.make(3);
+		PeriodValue y = x.clone();
+		assertEquals(x, y);
+		assertNotSame(x, y);
+	}
 }

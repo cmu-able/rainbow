@@ -114,4 +114,14 @@ public class SetDataValue extends CollectionDataValue {
 	public String toString() {
 		return "{" + m_data + "}";
 	}
+	
+	@Override
+	public SetDataValue clone() throws CloneNotSupportedException {
+		SetDataValue sv = new SetDataValue((SetDataType) type());
+		for (DataValue v : snapshot()) {
+			sv.add(v.clone());
+		}
+		
+		return sv;
+	}
 }

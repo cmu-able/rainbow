@@ -86,4 +86,16 @@ public class Int8Test extends DefaultTCase {
 		
 		assertTrue(v.toString().contains("86"));
 	}
+	
+	/**
+	 * Clones data values.
+	 * @throws Exception test failed
+	 */
+	@Test
+	public void cloning_values() throws Exception {
+		Int8Value x = m_int8.make((byte) 3);
+		Int8Value y = x.clone();
+		assertEquals(x, y);
+		assertNotSame(x, y);
+	}
 }

@@ -136,6 +136,13 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 
 			@Override
 			public void no_return(int value1, int value2) {
+				/*
+				 * Nothing to do.
+				 */
+			}
+
+			@Override
+			public void no_arguments() {
 			}
 		};
 		m_service_closeable = JavaRpcFactory.create_registry_wrapper(
@@ -150,7 +157,11 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 					public void no_return(int value1, int value2) {
 						m_java_service.no_return(value1, value2);
 					}
-			
+
+					@Override
+					public void no_arguments() {
+						m_java_service.no_arguments();
+					}
 			}, m_service_environment, 3);
 		
 		
@@ -249,6 +260,11 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 
 			@Override
 			public void no_return(int value1, int value2) {
+				/* */
+			}
+
+			@Override
+			public void no_arguments() {
 			}
 		};
 		
@@ -279,6 +295,11 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 
 			@Override
 			public void no_return(int value1, int value2) {
+				/* */
+			}
+
+			@Override
+			public void no_arguments() {
 			}
 		};
 		
@@ -308,11 +329,40 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 			public int returns_number_plus_one(int value) {
 				return 0;
 			}
+
+			@Override
+			public void no_arguments() {
+			}
 		};
 		
 		m_stub.no_return(-3, 3);
 		assertEquals(-3, x[0]);
 		assertEquals(3, x[1]);
+	}
+	
+	@Test
+	public void execute_method_no_arguments() throws Exception {
+		final int[] x = new int[1];
+		x[0] = 0;
+		
+		m_java_service = new RemoteJavaRpcTestService() {
+			@Override
+			public int returns_number_plus_one(int value) {
+				return 0;
+			}
+			
+			@Override
+			public void no_return(int value1, int value2) {
+			}
+			
+			@Override
+			public void no_arguments() {
+				x[0]++;
+			}
+		};
+		
+		m_stub.no_arguments();
+		assertEquals(1, x[0]);
 	}
 	
 	interface i_more_than_one_method_with_the_same_name {
@@ -354,37 +404,124 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 				m_invoke_environment, m_service_participant.id(), 100, 8);
 	}
 	
-	@Test(expected = IllegalServiceDefinitionException.class)
-	public void no_parameter_declaration_with_parameters_in_method()
-			throws Exception {
-		fail("NYI");
+	interface i_no_parameter_declaration_with_parameters_in_method {
+		void x(int i);
 	}
 	
 	@Test(expected = IllegalServiceDefinitionException.class)
+	public void no_parameter_declaration_with_parameters_in_method()
+			throws Exception {
+		JavaRpcFactory.create_remote_stub(
+				i_no_parameter_declaration_with_parameters_in_method.class,
+				m_invoke_environment, m_service_participant.id(), 100, 8);
+	}
+	
+	interface i_no_parameter_declaration_without_parameters_in_method{
+		void x();
+	}
+	
+	@Test
 	public void no_parameter_declaration_without_parameters_in_method()
 			throws Exception {
-		fail("NYI");
+		JavaRpcFactory.create_remote_stub(
+				i_no_parameter_declaration_without_parameters_in_method.class,
+				m_invoke_environment, m_service_participant.id(), 100, 8);
+	}
+	
+	interface i_no_return_type_with_return_type_declaration {
+		@ReturnTypeMapping("")
+		void x();
 	}
 	
 	@Test(expected = IllegalServiceDefinitionException.class)
 	public void no_return_type_with_return_type_declaration()
 			throws Exception {
-		fail("NYI");
+		JavaRpcFactory.create_remote_stub(
+				i_no_return_type_with_return_type_declaration.class,
+				m_invoke_environment, m_service_participant.id(), 100, 8);
+	}
+	
+	interface i_return_type_with_no_return_type_declaration {
+		int x();
 	}
 	
 	@Test(expected = IllegalServiceDefinitionException.class)
 	public void return_type_with_no_return_type_declaration()
 			throws Exception {
-		fail("NYI");
+		JavaRpcFactory.create_remote_stub(
+				i_return_type_with_no_return_type_declaration.class,
+				m_invoke_environment, m_service_participant.id(), 100, 8);
+	}
+	
+	interface i_invalid_data_type_name_in_parameter {
+		@ParametersTypeMapping({"int10"})
+		void x(int i);
 	}
 	
 	@Test(expected = IllegalServiceDefinitionException.class)
 	public void invalid_data_type_name_in_parameter() throws Exception {
-		fail("NYI");
+		JavaRpcFactory.create_remote_stub(
+				i_invalid_data_type_name_in_parameter.class,
+				m_invoke_environment, m_service_participant.id(), 100, 8);
+	}
+	
+	interface i_unparseble_data_type_name_in_parameter {
+		@ParametersTypeMapping({"x x"})
+		void x(int i);
+	}
+	
+	@Test(expected = IllegalServiceDefinitionException.class)
+	public void unparseble_data_type_name_in_parameter() throws Exception {
+		JavaRpcFactory.create_remote_stub(
+				i_unparseble_data_type_name_in_parameter.class,
+				m_invoke_environment, m_service_participant.id(), 100, 8);
+	}
+	
+	interface i_unparseble2_data_type_name_in_parameter {
+		@ParametersTypeMapping({"@@"})
+		void x(int i);
+	}
+	
+	@Test(expected = IllegalServiceDefinitionException.class)
+	public void unparseble2_data_type_name_in_parameter() throws Exception {
+		JavaRpcFactory.create_remote_stub(
+				i_unparseble2_data_type_name_in_parameter.class,
+				m_invoke_environment, m_service_participant.id(), 100, 8);
+	}
+	
+	interface i_invalid_data_type_name_in_return_type {
+		@ReturnTypeMapping("int10")
+		int x();
 	}
 	
 	@Test(expected = IllegalServiceDefinitionException.class)
 	public void invalid_data_type_name_in_return_type() throws Exception {
-		fail("NYI");
+		JavaRpcFactory.create_remote_stub(
+				i_invalid_data_type_name_in_return_type.class,
+				m_invoke_environment, m_service_participant.id(), 100, 8);
+	}
+	
+	interface i_unparseable_data_type_name_in_return_type {
+		@ReturnTypeMapping("x x")
+		int x();
+	}
+	
+	@Test(expected = IllegalServiceDefinitionException.class)
+	public void unparseable_data_type_name_in_return_type() throws Exception {
+		JavaRpcFactory.create_remote_stub(
+				i_unparseable_data_type_name_in_return_type.class,
+				m_invoke_environment, m_service_participant.id(), 100, 8);
+	}
+	
+	interface i_unparseable2_data_type_name_in_return_type {
+		@ReturnTypeMapping("@@")
+		int x();
+	}
+	
+	@Test(expected = IllegalServiceDefinitionException.class)
+	public void unparseable2_data_type_name_in_return_type() throws Exception {
+		JavaRpcFactory.create_remote_stub(
+				i_unparseable2_data_type_name_in_return_type.class,
+				m_invoke_environment, m_service_participant.id(), 100, 8);
 	}
 }

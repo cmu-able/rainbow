@@ -852,6 +852,7 @@ public class MetadataRpcExecutionTest extends DefaultTCase {
 	@Test
 	public void rpc_parallel_performance() throws Exception {
 		long sample_time_ms = 5000;
+		int timeout_ms = 3000;
 		
 		/*
 		 * Create the arguments and invoke the execution.
@@ -874,7 +875,7 @@ public class MetadataRpcExecutionTest extends DefaultTCase {
 				}
 				
 				for (int i = 0; i < pl; i++) {
-					re[i].get(1, TimeUnit.SECONDS);
+					re[i].get(timeout_ms, TimeUnit.MILLISECONDS);
 				}
 				
 				count += pl;

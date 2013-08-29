@@ -20,4 +20,9 @@ public interface RemoteJavaRpcTestService {
 	 */
 	@ParametersTypeMapping({"int32", "int32"})
 	void no_return(int value1, int value2);
+	
+	/**
+	 * Does even less.
+	 */
+	void no_arguments();
 }

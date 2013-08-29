@@ -1,6 +1,7 @@
 package edu.cmu.cs.able.typelib.prim;
 
 
+
 /**
  * Data value representing a period (time interval) value in microseconds.
  */
@@ -12,5 +13,10 @@ public class PeriodValue extends JavaObjectDataValue<Long> {
 	 */
 	protected PeriodValue(long value, PeriodType type) {
 		super(value, type);
+	}
+	
+	@Override
+	public PeriodValue clone() throws CloneNotSupportedException {
+		return new PeriodValue(value(), (PeriodType) type());
 	}
 }

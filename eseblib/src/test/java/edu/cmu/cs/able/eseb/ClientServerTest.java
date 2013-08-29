@@ -10,7 +10,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import auxtestlib.BooleanEvaluation;
+import auxtestlib.TestHelper;
 import auxtestlib.TestPropertiesDefinition;
+import auxtestlib.ThreadCountTestHelper;
 import edu.cmu.cs.able.eseb.bus.EventBus;
 import edu.cmu.cs.able.eseb.bus.EventBusAcceptPreprocessor;
 import edu.cmu.cs.able.eseb.bus.EventBusConnectionData;
@@ -34,6 +36,9 @@ import edu.cmu.cs.able.typelib.type.DataValue;
  */
 @SuppressWarnings("javadoc")
 public class ClientServerTest extends EsebTestCase {
+	@TestHelper
+	private ThreadCountTestHelper m_thread_count_helper;
+	
 	private static final long ENOUGH_TIME_TO_CONNECT_IF_WE_COULD_MS = 5000;
 	private short m_port;
 	private PrimitiveScope m_scope;

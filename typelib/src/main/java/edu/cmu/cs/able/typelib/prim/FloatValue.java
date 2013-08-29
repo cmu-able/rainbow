@@ -1,5 +1,6 @@
 package edu.cmu.cs.able.typelib.prim;
 
+
 /**
  * Data value representing a float value.
  */
@@ -11,5 +12,10 @@ public class FloatValue extends JavaObjectDataValue<Float> {
 	 */
 	protected FloatValue(float value, FloatType type) {
 		super(value, type);
+	}
+	
+	@Override
+	public FloatValue clone() throws CloneNotSupportedException {
+		return new FloatValue(value(), (FloatType) type());
 	}
 }

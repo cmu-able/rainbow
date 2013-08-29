@@ -79,4 +79,14 @@ public class TupleDataValue extends DataValue {
 		
 		return sb.toString();
 	}
+	
+	@Override
+	public TupleDataValue clone() throws CloneNotSupportedException {
+		List<DataValue> values = new ArrayList<>();
+		for (DataValue v : m_data) {
+			values.add(v.clone());
+		}
+		
+		return new TupleDataValue((TupleDataType) type(), values);
+	}
 }

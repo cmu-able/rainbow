@@ -19,4 +19,9 @@ public class TypeValue extends JavaObjectDataValue<DataType> {
 	public String toString() {
 		return type().name() + "[" + value().absolute_hname() + "]";
 	}
+	
+	@Override
+	public TypeValue clone() throws CloneNotSupportedException {
+		return new TypeValue(value(), (TypeType) type());
+	}
 }

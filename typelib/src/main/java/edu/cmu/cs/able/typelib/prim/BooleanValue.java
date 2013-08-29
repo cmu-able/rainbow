@@ -1,5 +1,6 @@
 package edu.cmu.cs.able.typelib.prim;
 
+
 /**
  * Data value representing a boolean value.
  */
@@ -11,5 +12,10 @@ public class BooleanValue extends JavaObjectDataValue<Boolean> {
 	 */
 	protected BooleanValue(boolean value, BooleanType type) {
 		super(value, type);
+	}
+	
+	@Override
+	public BooleanValue clone() throws CloneNotSupportedException {
+		return new BooleanValue(value(), (BooleanType) type());
 	}
 }

@@ -108,4 +108,16 @@ public class AsciiTest extends DefaultTCase {
 		AsciiValue v = m_ascii.make("foo");
 		assertTrue(v.toString().contains("foo"));
 	}
+	
+	/**
+	 * Clones data values.
+	 * @throws Exception test failed
+	 */
+	@Test
+	public void cloning_values() throws Exception {
+		AsciiValue x = m_ascii.make("foo");
+		AsciiValue y = x.clone();
+		assertEquals(x, y);
+		assertNotSame(x, y);
+	}
 }

@@ -66,4 +66,10 @@ public class OptionalDataValue extends DataValue {
 			return m_value.toString();
 		}
 	}
+	
+	@Override
+	public OptionalDataValue clone() throws CloneNotSupportedException {
+		return new OptionalDataValue((OptionalDataType) type(),
+				m_value == null? null : m_value.clone());
+	}
 }

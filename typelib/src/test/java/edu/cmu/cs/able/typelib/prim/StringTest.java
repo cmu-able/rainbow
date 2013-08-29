@@ -99,4 +99,16 @@ public class StringTest extends DefaultTCase {
 		StringValue v = m_string.make("foo");
 		assertTrue(v.toString().contains("foo"));
 	}
+	
+	/**
+	 * Clones data values.
+	 * @throws Exception test failed
+	 */
+	@Test
+	public void cloning_values() throws Exception {
+		StringValue x = m_string.make("xxx");
+		StringValue y = x.clone();
+		assertEquals(x, y);
+		assertNotSame(x, y);
+	}
 }

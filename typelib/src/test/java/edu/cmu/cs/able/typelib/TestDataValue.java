@@ -40,4 +40,9 @@ public class TestDataValue extends DataValue {
 		
 		return ((TestDataValue) o).m_val == m_val;
 	}
+
+	@Override
+	public TestDataValue clone() throws CloneNotSupportedException {
+		return new TestDataValue(type(), m_val);
+	}
 }

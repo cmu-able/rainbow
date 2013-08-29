@@ -109,4 +109,11 @@ public abstract class DataValue {
 		
 		return m_attachments.get(key);
 	}
+	
+	/**
+	 * Clones the data value.
+	 * @return a cloned data value
+	 * @throws CloneNotSupportedException failed to clone the data value
+	 */
+	public abstract DataValue clone() throws CloneNotSupportedException;
 }

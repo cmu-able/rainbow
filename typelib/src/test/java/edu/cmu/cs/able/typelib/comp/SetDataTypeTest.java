@@ -1,6 +1,7 @@
 package edu.cmu.cs.able.typelib.comp;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -382,5 +383,19 @@ public class SetDataTypeTest extends DefaultTCase {
 		assertEquals(2, snapshot.size());
 		assertTrue(snapshot.contains(m_v1));
 		assertTrue(snapshot.contains(m_v2));
+	}
+	
+	@Test
+	public void cloning_values() throws Exception {
+		m_set.add(m_v1);
+		SetDataValue sv = m_set.clone();
+		assertNotNull(sv);
+		assertNotSame(sv, m_set);
+		assertEquals(m_set, sv);
+		
+		Collection<DataValue> c = sv.all();
+		assertEquals(1, c.size());
+		assertEquals(m_v1, c.iterator().next());
+		assertNotSame(m_v1, c.iterator().next());
 	}
 }

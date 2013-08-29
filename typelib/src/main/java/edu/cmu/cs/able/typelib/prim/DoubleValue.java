@@ -1,5 +1,6 @@
 package edu.cmu.cs.able.typelib.prim;
 
+
 /**
  * Data value representing a double value.
  */
@@ -11,5 +12,10 @@ public class DoubleValue extends JavaObjectDataValue<Double> {
 	 */
 	protected DoubleValue(double value, DoubleType type) {
 		super(value, type);
+	}
+	
+	@Override
+	public DoubleValue clone() throws CloneNotSupportedException {
+		return new DoubleValue(value(), (DoubleType) type());
 	}
 }

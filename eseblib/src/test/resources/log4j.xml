@@ -10,11 +10,11 @@
 	</appender> 
 	
 	<logger name="edu.cmu.cs.able.eseb.bus.EventBus" additivity="false">
-		<level value="debug"/>
+		<level value="info"/>
 		<appender-ref ref="console"/>
 	</logger>
 	<root> 
-		<priority value ="debug" /> 
+		<priority value ="info" /> 
 		<appender-ref ref="console" /> 
 	</root>
 </log4j:configuration>

@@ -1,7 +1,7 @@
 package edu.cmu.cs.able.typelib.prim;
 
-import edu.cmu.cs.able.typelib.AsciiEncoding;
 import incubator.pval.Ensure;
+import edu.cmu.cs.able.typelib.AsciiEncoding;
 
 /**
  * Data value representing an ASCII value.
@@ -15,5 +15,10 @@ public class AsciiValue extends JavaObjectDataValue<String> {
 	protected AsciiValue(String value, AsciiType type) {
 		super(value, type);
 		Ensure.isTrue(AsciiEncoding.is_ascii(value));
+	}
+	
+	@Override
+	public AsciiValue clone() throws CloneNotSupportedException {
+		return new AsciiValue(value(), (AsciiType) type());
 	}
 }

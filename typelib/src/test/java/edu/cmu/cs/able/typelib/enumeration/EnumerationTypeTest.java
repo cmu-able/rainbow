@@ -123,4 +123,13 @@ public class EnumerationTypeTest extends DefaultTCase {
 		EnumerationValue vy = t.value("y");
 		assertEquals("x:y", vy.toString());
 	}
+	
+	@Test
+	public void cloning_values() throws Exception {
+		EnumerationType t = EnumerationType.make("x", make_set("y", "z"),
+				m_pscope.any());
+		EnumerationValue vy = t.value("y");
+		EnumerationValue vyc = vy.clone();
+		assertSame(vy, vyc);
+	}
 }

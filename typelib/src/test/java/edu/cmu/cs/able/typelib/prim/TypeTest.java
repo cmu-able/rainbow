@@ -73,4 +73,13 @@ public class TypeTest extends AbstractDataTypeTestCase {
 		TypeValue v = m_type.make(m_ps.bool());
 		assertTrue(v.toString().contains(m_ps.bool().name()));
 	}
+
+	@Override
+	@Test
+	public void cloning_values() throws Exception {
+		TypeValue x = m_type.make(m_ps.bool());
+		TypeValue y = x.clone();
+		assertEquals(x, y);
+		assertNotSame(x, y);
+	}
 }

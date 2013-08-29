@@ -149,4 +149,21 @@ public class MapDataTypeEqTest extends MapDataTypeTestFixture
 	public void compare_to_itself() throws Exception {
 		assertTrue(m_1_to_1.equals(m_1_to_1));
 	}
+
+	@Test
+	@Override
+	public void cloning_values() throws Exception {
+		m_1_to_1.put(m_v1_t1, m_v2_t1);
+		MapDataValue mv = m_1_to_1.clone();
+		assertNotNull(mv);
+		assertNotSame(mv, m_1_to_1);
+		assertEquals(m_1_to_1, mv);
+		
+		Map<DataValue, DataValue> c = mv.all();
+		assertEquals(1, c.size());
+		assertEquals(m_v1_t1, c.keySet().iterator().next());
+		assertNotSame(m_v1_t1, c.keySet().iterator().next());
+		assertEquals(m_v2_t1, c.values().iterator().next());
+		assertNotSame(m_v2_t1, c.values().iterator().next());
+	}
 }

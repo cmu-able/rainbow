@@ -15,4 +15,9 @@ public class TimeValue extends JavaObjectDataValue<Long> {
 		super(value, type);
 		Ensure.isTrue(value >= 0);
 	}
+	
+	@Override
+	public TimeValue clone() throws CloneNotSupportedException {
+		return new TimeValue(value(), (TimeType) type());
+	}
 }
