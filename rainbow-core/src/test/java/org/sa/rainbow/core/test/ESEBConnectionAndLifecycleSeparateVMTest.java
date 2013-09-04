@@ -119,7 +119,7 @@ public class ESEBConnectionAndLifecycleSeparateVMTest extends DefaultTCase {
         ProcessInterface pi = launchDelegate (s_currentDirectory);
 
         int extra = TestPropertiesDefinition.getInt ("heartbeat.extra.time");
-        Thread.sleep (Integer.valueOf (Rainbow.properties ().getProperty (Rainbow.PROPKEY_DELEGATE_BEACONPERIOD))
+        Thread.sleep (Integer.valueOf (Rainbow.getProperty (Rainbow.PROPKEY_DELEGATE_BEACONPERIOD))
                 + extra * 3);
         String logMsg = baos.toString ();
         assertTrue (logMsg.contains ("Received heartbeat from known delegate: "));

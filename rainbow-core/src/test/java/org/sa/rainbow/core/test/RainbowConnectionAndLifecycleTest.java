@@ -77,6 +77,7 @@ public abstract class RainbowConnectionAndLifecycleTest extends DefaultTCase {
         assertEquals ("xxx", props.getProperty ("test.configuration.property"));
     }
 
+
     /**
      * Tests that a master receives a heartbeat after a delegate connects and is configured
      * 
@@ -99,7 +100,7 @@ public abstract class RainbowConnectionAndLifecycleTest extends DefaultTCase {
         final int extra = TestPropertiesDefinition.getInt ("heartbeat.extra.time");
 
         // Wait for the heartbeat to arrive
-        Thread.sleep (Integer.valueOf (Rainbow.properties ().getProperty (Rainbow.PROPKEY_DELEGATE_BEACONPERIOD))
+        Thread.sleep (Integer.valueOf (Rainbow.getProperty (Rainbow.PROPKEY_DELEGATE_BEACONPERIOD))
                 + extra);
         Beacon b = mth.getBeaconFor (m_delegate.getId ());
         assertTrue (b != null);
@@ -180,7 +181,7 @@ public abstract class RainbowConnectionAndLifecycleTest extends DefaultTCase {
         }, 5000);
         // Wait for heartbeat period to ensure that a heartbeat isn't received, so the delegate is truly paused
         final int extra = TestPropertiesDefinition.getInt ("heartbeat.extra.time");
-        int heartbeatTime = Integer.valueOf (Rainbow.properties ().getProperty (
+        int heartbeatTime = Integer.valueOf (Rainbow.getProperty (
                 Rainbow.PROPKEY_DELEGATE_BEACONPERIOD))
                 + extra;
 

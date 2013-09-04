@@ -8,13 +8,13 @@ import org.sa.rainbow.core.error.RainbowCopyException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.event.IRainbowMessage;
-import org.sa.rainbow.models.IModelInstance;
-import org.sa.rainbow.models.ModelsManager;
-import org.sa.rainbow.models.commands.AbstractLoadModelCmd;
-import org.sa.rainbow.models.commands.IRainbowModelCommand;
-import org.sa.rainbow.models.commands.ModelCommandFactory;
-import org.sa.rainbow.models.ports.IRainbowMessageFactory;
-import org.sa.rainbow.models.ports.IRainbowModelChangeBusPort;
+import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelsManager;
+import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd;
+import org.sa.rainbow.core.models.commands.IRainbowModelCommand;
+import org.sa.rainbow.core.models.commands.ModelCommandFactory;
+import org.sa.rainbow.core.models.ports.IRainbowMessageFactory;
+import org.sa.rainbow.core.models.ports.IRainbowModelChangeBusPort;
 
 public class DummyCommandFactory extends ModelCommandFactory<Integer> {
     public static AbstractLoadModelCmd loadCommand (ModelsManager modelsManager,
