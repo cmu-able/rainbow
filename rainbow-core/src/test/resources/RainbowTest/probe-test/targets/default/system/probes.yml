@@ -1,0 +1,39 @@
+#
+# Probe descriptions.
+#
+vars:
+#  _probes.commonPath: "${rainbow.path}/system/probes"
+  _probes.commonPath: /home/znn/znn-benchmark/system/probes
+
+probes:
+  BlackholeProbe:
+    alias: blackhole
+    location: 127.0.0.1
+    type: java
+    javaInfo:
+      class: org.sa.rainbow.translator.probes.BlackholeProbe
+      period: 2000
+      args.length: 1
+      args.0: /home/znn/lb0/sw/httpd-2.4.2/conf/blocked.conf   
+  ClientProxyProbe0:
+    alias: clientproxy
+    location: 127.0.0.1
+    type: java
+    javaInfo:
+      class: org.sa.rainbow.translator.znews.probes.ClientProxyProbe
+      period: 2000
+      args.length: 1
+#      args.0: "http://delegate.oracle/"
+      args.0: "http://localhost:10100/"
+  PingRTTProbe1:
+    alias: pingrtt
+    location: 128.2.6.7
+    type: java
+    javaInfo:
+      class: org.sa.rainbow.translator.znews.probes.PingRTTProbe
+# sample period in milliseconds
+      period: 1500
+      args.length: 1
+      args.0: "${rainbow.master.location.host}"
+#      args.1: "${customize.system.target.2}"
+ 

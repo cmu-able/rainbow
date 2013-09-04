@@ -1,0 +1,26 @@
+# Created January 30, 2007 (Shang-Wen Cheng)
+#
+# Effector descriptions.
+#
+vars:
+#  _effectors.commonPath: "${rainbow.path}/system/effectors"
+# @ZNN_HOME will be replaced by the rainbow-install script
+  _effectors.commonPath: "@ZNN_HOME/effectors" 
+  
+
+effectors:
+
+  blackhole:
+    location: 127.0.0.1
+    type: script
+    scriptInfo:
+      path : "${_effectors.commonPath}/ip-block-mgmt"
+      argument: "block {client}"
+      
+  unblackhole:
+    location: 128.2.4.5
+    type: script
+    scriptInfo:
+      path: "${_effectors.commonPath}/ip-block-mgmt"
+      argument: "unblock {client}"
+
