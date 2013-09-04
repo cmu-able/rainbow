@@ -1,34 +1,50 @@
 package org.sa.rainbow.core;
 
 import java.text.MessageFormat;
+import java.util.List;
 import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.error.RainbowConnectionException;
-import org.sa.rainbow.management.ports.IRainbowManagementPort;
-import org.sa.rainbow.management.ports.IRainbowMasterConnectionPort;
-import org.sa.rainbow.management.ports.RainbowPortFactory;
+import org.sa.rainbow.core.management.ports.IRainbowDelegateConfigurationPort;
+import org.sa.rainbow.core.management.ports.IRainbowManagementPort;
+import org.sa.rainbow.core.management.ports.IRainbowMasterConnectionPort;
+import org.sa.rainbow.core.management.ports.RainbowPortFactory;
+import org.sa.rainbow.core.models.EffectorDescription;
+import org.sa.rainbow.core.models.ProbeDescription;
+import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
+import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
 import org.sa.rainbow.util.Beacon;
 import org.sa.rainbow.util.Util;
 
 public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowConstants {
 
-    static Logger           LOGGER = Logger.getLogger (RainbowDelegate.class);
-    static enum ConnectionState {UNKNOWN, CONNECTING, CONNECTED, CONFIGURED};
+    static Logger LOGGER = Logger.getLogger (RainbowDelegate.class);
 
-    protected static String NAME = "Rainbow Delegate";
+    static enum ConnectionState {
+        UNKNOWN, CONNECTING, CONNECTED, CONFIGURED
+    };
 
-    private IRainbowManagementPort       m_masterPort;
-    private String          m_id;
-    private String          m_name = null;
+    protected static String                   NAME            = "Rainbow Delegate";
 
-    private Beacon          m_beacon;
+    private IRainbowManagementPort            m_masterPort;
+    private String                            m_id;
+    private String                            m_name          = null;
 
-    private IRainbowMasterConnectionPort m_masterConnectionPort;
+    private Beacon                            m_beacon;
 
-    private Properties                   m_configurationInformation;
-    private ConnectionState m_delegateState = ConnectionState.UNKNOWN;
+    private IRainbowMasterConnectionPort      m_masterConnectionPort;
+    private IRainbowDelegateConfigurationPort m_configurationPort;
+
+    private Properties                        m_configurationInformation;
+    private ConnectionState                   m_delegateState = ConnectionState.UNKNOWN;
+
+    private ProbeDescription                  m_localProbeDesc;
+
+    private EffectorDescription               m_localEffectorDesc;
 
     public RainbowDelegate () {
         super (NAME);
@@ -39,13 +55,15 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
 
     public void initialize () throws RainbowConnectionException {
         // Create the connection to the master
-        m_masterConnectionPort = RainbowPortFactory
-                .createDelegateMasterConnectionPort (this);
+        m_masterConnectionPort = RainbowPortFactory.createDelegateMasterConnectionPort (this);
         log ("Attempting to connecto to master.");
         m_delegateState = ConnectionState.CONNECTING;
         m_masterPort = m_masterConnectionPort.connectDelegate (m_id, getConnectionProperties ());
         m_delegateState = ConnectionState.CONNECTED;
         // Request configuration information
+
+        m_configurationPort = RainbowPortFactory.createDelegateConfigurationPort (this);
+
         m_masterPort.requestConfigurationInformation ();
     }
 
@@ -61,8 +79,16 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
      * @param props
      *            The configuration information, as a set of properties
      */
-    public void receiveConfigurationInformation (Properties props) {
+    public synchronized void receiveConfigurationInformation (Properties props,
+            List<ProbeAttributes> probes,
+            List<EffectorAttributes> effectors) {
         m_configurationInformation = props;
+        m_localProbeDesc = new ProbeDescription ();
+        m_localProbeDesc.probes = new TreeSet<> (probes);
+
+        m_localEffectorDesc = new EffectorDescription ();
+        m_localEffectorDesc.effectors = new TreeSet<> (effectors);
+
         log ("Received configuration information.");
 
         // Process the period for sending the heartbeat
@@ -88,7 +114,8 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
 
     @Override
     public void dispose () {
-
+        m_masterPort.dispose ();
+        m_masterConnectionPort.dispose ();
     }
 
     @Override
@@ -118,8 +145,7 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
         log ("Terminating.");
         m_beacon = null;
         m_masterConnectionPort.disconnectDelegate (getId ());
-        m_masterPort.dispose ();
-        m_masterConnectionPort.dispose ();
+
         super.doTerminate ();
     }
 
@@ -164,7 +190,15 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
     }
 
     // Methods after this are used for testing
-    ConnectionState getConnectionState () {
+    synchronized ConnectionState getConnectionState () {
         return m_delegateState;
+    }
+
+    synchronized Set<ProbeAttributes> getProbeConfiguration () {
+        return m_localProbeDesc.probes;
+    }
+
+    synchronized Set<EffectorAttributes> getEffectorConfiguration () {
+        return m_localEffectorDesc.effectors;
     }
 }

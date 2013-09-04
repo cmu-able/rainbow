@@ -14,6 +14,5 @@ public interface Identifiable {
      */
     public String id ();
 
-    public long id_long ();
 
 }

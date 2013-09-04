@@ -201,5 +201,8 @@ public class Util {
         return primVal;
     }
 
+    public static Logger logger () {
+        return LOGGER;
+    }
 
 }

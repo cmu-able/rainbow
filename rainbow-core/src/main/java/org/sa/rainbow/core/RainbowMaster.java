@@ -2,7 +2,10 @@ package org.sa.rainbow.core;
 
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -11,22 +14,34 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
-import org.sa.rainbow.management.ports.IRainbowManagementPort;
-import org.sa.rainbow.management.ports.IRainbowMasterConnectionPort;
-import org.sa.rainbow.management.ports.RainbowPortFactory;
-import org.sa.rainbow.models.ModelsManager;
+import org.sa.rainbow.core.management.ports.IRainbowDelegateConfigurationPort;
+import org.sa.rainbow.core.management.ports.IRainbowManagementPort;
+import org.sa.rainbow.core.management.ports.IRainbowMasterConnectionPort;
+import org.sa.rainbow.core.management.ports.RainbowPortFactory;
+import org.sa.rainbow.core.models.EffectorDescription;
+import org.sa.rainbow.core.models.ModelsManager;
+import org.sa.rainbow.core.models.ProbeDescription;
+import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
+import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
 import org.sa.rainbow.util.Beacon;
+import org.sa.rainbow.util.YamlUtil;
 
 public class RainbowMaster extends AbstractRainbowRunnable {
     static Logger                       LOGGER       = Logger.getLogger (Rainbow.class.getCanonicalName ());
 
     Map<String, IRainbowManagementPort> m_delegates  = new HashMap<> ();
+    Map<String, IRainbowDelegateConfigurationPort> m_delegateConfigurtationPorts = new HashMap<> ();
+    Map<String, Properties>                        m_delegateInfo                = new HashMap<> ();
 
     IRainbowMasterConnectionPort        m_delegateConnection;
 
     private Map<String, Beacon>         m_heartbeats = new HashMap<> ();
 
     private ModelsManager               m_modelsManager;
+
+    private ProbeDescription                       m_probeDesc;
+
+    private EffectorDescription                    m_effectorDesc;
 
     public RainbowMaster () throws RainbowConnectionException {
         super ("Rainbow Master");
@@ -35,8 +50,14 @@ public class RainbowMaster extends AbstractRainbowRunnable {
     }
 
     public void initialize () throws RainbowException {
+        readConfiguration ();
         initializeConnections ();
         initializeRainbowComponents ();
+    }
+
+    private void readConfiguration () {
+        probeDesc ();
+        effectorDesc ();
     }
 
     private void initializeRainbowComponents () throws RainbowException {
@@ -69,13 +90,17 @@ public class RainbowMaster extends AbstractRainbowRunnable {
         LOGGER.debug (MessageFormat.format ("Master received connection request from: {0} at {1}", delegateID,
                 connectionProperties.getProperty (Rainbow.PROPKEY_DEPLOYMENT_LOCATION, "Unknown Location")));
         try {
+            m_delegateInfo.put (delegateID, connectionProperties);
             IRainbowManagementPort delegatePort = RainbowPortFactory.createMasterDeploymentPort (this,
                     delegateID, connectionProperties);
             // Check to see if there is already a registered delegate running on the machine
             m_delegates.put (delegateID, delegatePort);
+            IRainbowDelegateConfigurationPort delegateConfigurationPort = RainbowPortFactory
+                    .createDelegateConfigurationPortClient (delegateID);
+            m_delegateConfigurtationPorts.put (delegateID, delegateConfigurationPort);
             // Add a second to the heartbeat to allow for communication time
             // TODO: Must be a better way to do this...
-            Beacon beacon = new Beacon (Long.parseLong (Rainbow.properties ().getProperty (
+            Beacon beacon = new Beacon (Long.parseLong (Rainbow.getProperty (
                     RainbowConstants.PROPKEY_DELEGATE_BEACONPERIOD, "1000")) + 1000);
             m_heartbeats.put (delegatePort.getDelegateId (), beacon);
             beacon.mark ();
@@ -97,14 +122,37 @@ public class RainbowMaster extends AbstractRainbowRunnable {
      * @param delegateID
      */
     public void requestDelegateConfiguration (String delegateID) {
-        IRainbowManagementPort delegate = m_delegates.get (delegateID);
+        IRainbowDelegateConfigurationPort delegate = m_delegateConfigurtationPorts.get (delegateID);
         if (delegate != null) {
             LOGGER.info (MessageFormat.format ("Sending configuration information to {0}.", delegateID));
-            delegate.sendConfigurationInformation (filterPropertiesForDelegate (delegateID));
+            delegate.sendConfigurationInformation (filterPropertiesForDelegate (delegateID),
+                    filterProbesForDelegate (delegateID), filterEffectorsForDelegate (delegateID));
         }
         else {
             LOGGER.error (MessageFormat
                     .format ("Received configuration request from unknown delegate {0}.", delegateID));
+        }
+    }
+
+    private List<EffectorAttributes> filterEffectorsForDelegate (String delegateID) {
+        if (effectorDesc ().effectors == null)
+            return Collections.<EffectorAttributes> emptyList ();
+        else {
+            Properties delegateInfo = m_delegateInfo.get (delegateID);
+            String deploymentInfo = null;
+            ;
+            if (delegateInfo == null
+                    || (deploymentInfo = delegateInfo.getProperty (Rainbow.PROPKEY_DEPLOYMENT_LOCATION)) == null) {
+                LOGGER.error ("There is no location information associated with " + delegateID);
+                return Collections.<EffectorAttributes> emptyList ();
+            }
+            List<EffectorAttributes> effectors = new LinkedList<EffectorAttributes> ();
+            for (EffectorAttributes probe : effectorDesc ().effectors) {
+                if (probe.location.equals (deploymentInfo)) {
+                    effectors.add (probe);
+                }
+            }
+            return effectors;
         }
     }
 
@@ -138,7 +186,27 @@ public class RainbowMaster extends AbstractRainbowRunnable {
      * @return
      */
     private Properties filterPropertiesForDelegate (String delegateID) {
-        return Rainbow.properties ();
+        return Rainbow.allProperties ();
+    }
+
+    private List<ProbeAttributes> filterProbesForDelegate (String delegateID) {
+        if (probeDesc ().probes == null)
+            return Collections.<ProbeAttributes> emptyList ();
+        else {
+            Properties delegateInfo = m_delegateInfo.get (delegateID);
+            String deploymentInfo = null;;
+            if (delegateInfo == null || (deploymentInfo =delegateInfo.getProperty (Rainbow.PROPKEY_DEPLOYMENT_LOCATION)) == null) {
+                LOGGER.error ("There is no location information associated with " + delegateID);
+                return Collections.<ProbeAttributes>emptyList ();
+            }
+            List<ProbeAttributes> probes = new LinkedList<ProbeAttributes> ();
+            for (ProbeAttributes probe : probeDesc ().probes) {
+                if (probe.location.equals (deploymentInfo)) {
+                    probes.add (probe);
+                }
+            }
+            return probes;
+        }
     }
 
     @Override
@@ -200,6 +268,20 @@ public class RainbowMaster extends AbstractRainbowRunnable {
     // Methods below this point are used for testing purposes, and so are package protected.
     Map<? extends String, ? extends Beacon> getHeartbeatInfo () {
         return m_heartbeats;
+    }
+
+    public ProbeDescription probeDesc () {
+        if (m_probeDesc == null) {
+            m_probeDesc = YamlUtil.loadProbeDesc ();
+        }
+        return m_probeDesc;
+    }
+
+    public EffectorDescription effectorDesc () {
+        if (m_effectorDesc == null) {
+            m_effectorDesc = YamlUtil.loadEffectorDesc ();
+        }
+        return m_effectorDesc;
     }
 
 }

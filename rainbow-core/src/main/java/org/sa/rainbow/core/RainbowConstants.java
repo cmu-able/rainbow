@@ -25,11 +25,11 @@ public interface RainbowConstants {
 //    public static final int RAINBOW_SERVICE_PORT = 9210;
 //    /** Sets the byte arrays to the usual buffer size of 8 KB. */
 //    public static final int MAX_BYTES = 8*1024;
-//    /**
-//     * This number determines how many times the Rainbow Runtime will tolerate
-//     * unexpected errors before propagating it up, e.g., to the user.
-//     */
-//    public static final int MAX_ERROR_CNT = 10;
+    /**
+     * This number determines how many times the Rainbow Runtime will tolerate unexpected errors before propagating it
+     * up, e.g., to the user.
+     */
+    public static final int    MAX_ERROR_CNT                   = 10;
 //
 //    /** Usual newline sequence of character. */
 //    public static final String NEWLINE = "\n";
@@ -123,11 +123,11 @@ public interface RainbowConstants {
 //    /** Rainbow customization parameter: Gauge Description file path */
     public static final String PROPKEY_GAUGES_PATH             = "customize.gauges.path";
 //    /** Rainbow customization parameter: Probe Description file path */
-//    public static final String PROPKEY_PROBES_PATH = "customize.probes.path";
+    public static final String PROPKEY_PROBES_PATH             = "customize.probes.path";
 //    /** Rainbow customization parameter:  Path to the architectural operator mapping file */
 //    public static final String PROPKEY_OP_MAP_PATH = "customize.archop.map.path";
 //    /** Rainbow customization parameter: Effector Description file path */
-//    public static final String PROPKEY_EFFECTORS_PATH = "customize.effectors.path";
+    public static final String PROPKEY_EFFECTORS_PATH          = "customize.effectors.path";
 //    /** Rainbow customization parameter:  Path to the Stitch scripts */
 //    public static final String PROPKEY_SCRIPT_PATH = "customize.scripts.path";
 //    /** Rainbow customization parameter:  Path to the file for persiting Tactic execution time profile */

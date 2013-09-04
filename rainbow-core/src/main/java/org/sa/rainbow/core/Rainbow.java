@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -20,7 +21,7 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.error.RainbowAbortException;
-import org.sa.rainbow.gauges.IGauge;
+import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.util.Util;
 
 /**
@@ -172,6 +173,8 @@ public class Rainbow implements RainbowConstants {
 
     private RainbowMaster m_rainbowMaster;
 
+    private Properties    m_defaultProps;
+
     private Rainbow () {
         m_props = new Properties ();
         m_id2Gauge = new HashMap<> ();
@@ -182,11 +185,22 @@ public class Rainbow implements RainbowConstants {
         evalPropertySubstitution ();
     }
 
+    public static String getProperty (String key, String defaultProperty) {
+        return instance ().m_props.getProperty (key, instance ().m_defaultProps.getProperty (key, defaultProperty));
+    }
 
+    public static String getProperty (String key) {
+        return instance ().m_props.getProperty (key, instance ().m_defaultProps.getProperty (key));
+    }
 
-    public static Properties properties () {
+    public static void setProperty (String key, String val) {
+        instance ().m_props.setProperty (key, val);
+    }
+
+    public static Properties allProperties () {
         return instance ().m_props;
     }
+
 
     /**
      * Determines and configures the paths to the Rainbow base installation and target configuration files
@@ -222,6 +236,18 @@ public class Rainbow implements RainbowConstants {
      * Determine and load the appropriate sequence of Rainbow's config files
      */
     private void loadConfigFiles () {
+
+        InputStream propStream = this.getClass ().getClassLoader ()
+                .getResourceAsStream ("org/sa/rainbow/core/default.properties");
+
+        m_defaultProps = new Properties ();
+        try {
+            m_defaultProps.load (propStream);
+        }
+        catch (IOException e1) {
+            LOGGER.error (e1);
+        }
+
         LOGGER.debug (MessageFormat.format ("Rainbow config path: {0}", m_targetPath.getAbsolutePath ()));
 
         computeHostSpecificConfig ();
@@ -437,5 +463,7 @@ public class Rainbow implements RainbowConstants {
     public static IGauge lookupGauge (String id) {
         return instance ().m_id2Gauge.get (id);
     }
+
+
 
 }
