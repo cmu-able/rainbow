@@ -1,6 +1,7 @@
 package edu.cmu.cs.able.typelib.jconv;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -279,5 +280,86 @@ public class TypelibJavaComplexConversionTest extends DefaultTCase {
 		MapDataType vt = MapDataType.map_of(m_i32, m_pscope.string(),
 				m_pscope);
 		m_converter.from_java(new Object(), vt);
+	}
+	
+	@Test
+	public void very_complex_to_java_with_class() throws Exception {
+		Map<List<Set<Integer>>, Set<List<String>>> j = new HashMap<>();
+		j.put(Arrays.asList((Set<Integer>) new HashSet<>(
+				Arrays.asList((Integer) 0))),
+				new HashSet<>(Arrays.asList(Arrays.asList("foo"))));
+		
+		SetDataType is = SetDataType.set_of(m_i32, m_pscope);
+		ListDataType il = ListDataType.list_of(is, m_pscope);
+		ListDataType sl = ListDataType.list_of(m_pscope.string(), m_pscope);
+		SetDataType ss = SetDataType.set_of(sl, m_pscope);
+		MapDataType vt = MapDataType.map_of(il, ss, m_pscope);
+		
+		MapDataValue v = vt.make();
+		SetDataValue is1 = is.make();
+		is1.add(m_i32.make(0));
+		ListDataValue il1 = il.make();
+		il1.add(is1);
+		ListDataValue sl1 = sl.make();
+		sl1.add(m_pscope.string().make("foo"));
+		SetDataValue ss1 = ss.make();
+		ss1.add(sl1);
+		v.put(il1, ss1);
+		
+		assertEquals(j, m_converter.to_java(v, HashMap.class));
+	}
+	
+	@Test
+	public void very_complex_to_java_with_interface() throws Exception {
+		Map<List<Set<Integer>>, Set<List<String>>> j = new HashMap<>();
+		j.put(Arrays.asList((Set<Integer>) new HashSet<>(
+				Arrays.asList((Integer) 0))),
+				new HashSet<>(Arrays.asList(Arrays.asList("foo"))));
+		
+		SetDataType is = SetDataType.set_of(m_i32, m_pscope);
+		ListDataType il = ListDataType.list_of(is, m_pscope);
+		ListDataType sl = ListDataType.list_of(m_pscope.string(), m_pscope);
+		SetDataType ss = SetDataType.set_of(sl, m_pscope);
+		MapDataType vt = MapDataType.map_of(il, ss, m_pscope);
+		
+		MapDataValue v = vt.make();
+		SetDataValue is1 = is.make();
+		is1.add(m_i32.make(0));
+		ListDataValue il1 = il.make();
+		il1.add(is1);
+		ListDataValue sl1 = sl.make();
+		sl1.add(m_pscope.string().make("foo"));
+		SetDataValue ss1 = ss.make();
+		ss1.add(sl1);
+		v.put(il1, ss1);
+		
+		assertEquals(j, m_converter.to_java(v, Map.class));
+	}
+	
+	@Test
+	public void very_complex_from_java_with_type() throws Exception {
+		Map<List<Set<Integer>>, Set<List<String>>> j = new HashMap<>();
+		j.put(Arrays.asList((Set<Integer>) new HashSet<>(
+				Arrays.asList((Integer) 0))),
+				new HashSet<>(Arrays.asList(Arrays.asList("foo"))));
+		
+		SetDataType is = SetDataType.set_of(m_i32, m_pscope);
+		ListDataType il = ListDataType.list_of(is, m_pscope);
+		ListDataType sl = ListDataType.list_of(m_pscope.string(), m_pscope);
+		SetDataType ss = SetDataType.set_of(sl, m_pscope);
+		MapDataType vt = MapDataType.map_of(il, ss, m_pscope);
+		
+		MapDataValue v = vt.make();
+		SetDataValue is1 = is.make();
+		is1.add(m_i32.make(0));
+		ListDataValue il1 = il.make();
+		il1.add(is1);
+		ListDataValue sl1 = sl.make();
+		sl1.add(m_pscope.string().make("foo"));
+		SetDataValue ss1 = ss.make();
+		ss1.add(sl1);
+		v.put(il1, ss1);
+		
+		assertEquals(v, m_converter.from_java(j, vt));
 	}
 }

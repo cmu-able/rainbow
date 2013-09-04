@@ -26,7 +26,7 @@ public class RemoteOperationStub {
 	/**
 	 * The remote object ID.
 	 */
-	private long m_obj_id;
+	private String m_obj_id;
 	
 	/**
 	 * The remote operation.
@@ -43,11 +43,12 @@ public class RemoteOperationStub {
 	 * operation
 	 */
 	public RemoteOperationStub(RpcEnvironment environment, long dst_id,
-			DataValue operation, long obj_id) {
+			DataValue operation, String obj_id) {
 		Ensure.not_null(environment);
 		Ensure.not_null(operation);
 		Ensure.is_true(environment.operation_information().is_operation(
 				operation));
+		Ensure.not_null(obj_id);
 		
 		m_dst_id = dst_id;
 		m_obj_id = obj_id;

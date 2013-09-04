@@ -56,7 +56,7 @@ public class SetConversionRule
 		SetDataType sdt = (SetDataType) dst;
 		SetDataValue sdv = sdt.make();
 		for (Object o : (Set<?>) value) {
-			sdv.add(converter.from_java(o, null));
+			sdv.add(converter.from_java(o, sdt.inner_type()));
 		}
 		
 		return sdv;

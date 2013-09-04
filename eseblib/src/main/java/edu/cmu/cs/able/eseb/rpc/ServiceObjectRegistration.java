@@ -27,7 +27,7 @@ public class ServiceObjectRegistration implements Closeable {
 	/**
 	 * The object ID.
 	 */
-	private long m_obj_id;
+	private String m_obj_id;
 	
 	/**
 	 * The environment, <code>null</code> if the registration closed.
@@ -42,9 +42,10 @@ public class ServiceObjectRegistration implements Closeable {
 	 * @param environment the environment where the service is available
 	 */
 	private ServiceObjectRegistration(ServiceOperationExecuter executer,
-			DataValue group, long obj_id, RpcEnvironment environment) {
+			DataValue group, String obj_id, RpcEnvironment environment) {
 		Ensure.not_null(executer);
 		Ensure.not_null(group);
+		Ensure.not_null(obj_id);
 		Ensure.not_null(environment);
 		
 		m_executer = executer;
@@ -62,10 +63,11 @@ public class ServiceObjectRegistration implements Closeable {
 	 * @return the registration
 	 */
 	public static ServiceObjectRegistration make(
-			ServiceOperationExecuter executer, DataValue group, long obj_id,
+			ServiceOperationExecuter executer, DataValue group, String obj_id,
 			RpcEnvironment environment) {
 		Ensure.not_null(executer);
 		Ensure.not_null(group);
+		Ensure.not_null(obj_id);
 		Ensure.not_null(environment);
 		
 		ServiceObjectRegistration s = new ServiceObjectRegistration(executer,
@@ -78,7 +80,7 @@ public class ServiceObjectRegistration implements Closeable {
 	 * Obtains the object ID.
 	 * @return the object ID
 	 */
-	public long object_id() {
+	public String object_id() {
 		return m_obj_id;
 	}
 	

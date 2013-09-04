@@ -56,8 +56,9 @@ public class MapConversionRule
 		MapDataType mdt = (MapDataType) dst;
 		MapDataValue mdv = mdt.make();
 		for (Object o : ((Map<?, ?>) value).keySet()) {
-			mdv.put(converter.from_java(o, null),
-					converter.from_java(((Map<?, ?>) value).get(o), null));
+			mdv.put(converter.from_java(o, mdt.key_type()),
+					converter.from_java(((Map<?, ?>) value).get(o),
+					mdt.value_type()));
 		}
 		
 		return mdv;

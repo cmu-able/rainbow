@@ -183,7 +183,7 @@ public class MetadataRpcExecutionTest extends DefaultTCase {
 		 * Create the object registration. The ID used, 3, must be known
 		 * by both client and server.
 		 */
-		m_sor = ServiceObjectRegistration.make(executer, s_g, 3,
+		m_sor = ServiceObjectRegistration.make(executer, s_g, "3",
 				m_service_environment);
 		
 		/*
@@ -223,7 +223,7 @@ public class MetadataRpcExecutionTest extends DefaultTCase {
 		 * object ID, 3, has to be known by the remote invoker.
 		 */
 		m_execution = new RemoteOperationStub(m_invoke_environment,
-				m_service_participant.id(), i_op, 3);
+				m_service_participant.id(), i_op, "3");
 		
 		/*
 		 * Wait for all connections to establish.
@@ -393,7 +393,7 @@ public class MetadataRpcExecutionTest extends DefaultTCase {
 		 * but in an object which does not exist -- object 4.
 		 */
 		RemoteOperationStub ros = new RemoteOperationStub(m_invoke_environment,
-				m_service_participant.id(), i_op, 4);
+				m_service_participant.id(), i_op, "4");
 		
 		/*
 		 * Perform the remote invocation. We should get an error.
@@ -423,7 +423,7 @@ public class MetadataRpcExecutionTest extends DefaultTCase {
 		 * operation.
 		 */
 		RemoteOperationStub ros = new RemoteOperationStub(m_invoke_environment,
-				m_service_participant.id(), i_op, 3);
+				m_service_participant.id(), i_op, "3");
 		
 		/*
 		 * Perform the remote invocation. We should get an error.
@@ -485,7 +485,7 @@ public class MetadataRpcExecutionTest extends DefaultTCase {
 		 * Create the stub that is used to invoke the operation.
 		 */
 		RemoteOperationStub ros = new RemoteOperationStub(m_invoke_environment,
-				m_service_participant.id(), i_op, 3);
+				m_service_participant.id(), i_op, "3");
 		
 		/*
 		 * Perform the remote invocation. We should get an error.
@@ -523,7 +523,7 @@ public class MetadataRpcExecutionTest extends DefaultTCase {
 		 * Create the stub that is used to invoke the operation.
 		 */
 		RemoteOperationStub ros = new RemoteOperationStub(m_invoke_environment,
-				m_service_participant.id(), i_op, 3);
+				m_service_participant.id(), i_op, "3");
 		
 		/*
 		 * Perform the remote invocation. We should get an error.
@@ -554,7 +554,7 @@ public class MetadataRpcExecutionTest extends DefaultTCase {
 		 * Create the stub that is used to invoke the operation.
 		 */
 		RemoteOperationStub ros = new RemoteOperationStub(m_invoke_environment,
-				m_service_participant.id(), i_op, 3);
+				m_service_participant.id(), i_op, "3");
 		
 		/*
 		 * Perform the remote invocation. We should get an error.
@@ -584,7 +584,7 @@ public class MetadataRpcExecutionTest extends DefaultTCase {
 		 * Create the stub that is used to invoke the operation.
 		 */
 		RemoteOperationStub ros = new RemoteOperationStub(m_invoke_environment,
-				m_service_participant.id(), i_op, 3);
+				m_service_participant.id(), i_op, "3");
 		
 		/*
 		 * Perform the remote invocation. We should get an error.
@@ -618,7 +618,7 @@ public class MetadataRpcExecutionTest extends DefaultTCase {
 		 * Create the stub that is used to invoke the operation.
 		 */
 		RemoteOperationStub ros = new RemoteOperationStub(m_invoke_environment,
-				m_service_participant.id(), i_op, 3);
+				m_service_participant.id(), i_op, "3");
 		
 		/*
 		 * Perform the remote invocation. We should get an error.
@@ -652,7 +652,7 @@ public class MetadataRpcExecutionTest extends DefaultTCase {
 		 * Create the stub that is used to invoke the operation.
 		 */
 		RemoteOperationStub ros = new RemoteOperationStub(m_invoke_environment,
-				m_service_participant.id(), i_op, 3);
+				m_service_participant.id(), i_op, "3");
 		
 		/*
 		 * Perform the remote invocation. We should get an error.
@@ -804,7 +804,7 @@ public class MetadataRpcExecutionTest extends DefaultTCase {
 		 * a reply.
 		 */
 		RemoteOperationStub ros = new RemoteOperationStub(m_invoke_environment,
-				0, i_op, 3);
+				0, i_op, "3");
 		
 		/*
 		 * Create the arguments and create an invocation.

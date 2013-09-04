@@ -38,7 +38,7 @@ class ExecutionRequestReadFilter extends EventFilter {
 	/**
 	 * Maps published service IDs to the services.
 	 */
-	private Map<Long, ServiceObjectRegistration> m_services;
+	private Map<String, ServiceObjectRegistration> m_services;
 	
 	/**
 	 * Dispatcher that executes operation requests.
@@ -117,7 +117,8 @@ class ExecutionRequestReadFilter extends EventFilter {
 		/*
 		 * Find the service object registration with the given ID.
 		 */
-		long obj_id = m_information.execution_request_obj_id(data.value());
+		String obj_id = m_information.execution_request_obj_id(data.value());
+		Ensure.not_null(obj_id);
 		
 		final ServiceObjectRegistration sor;
 		synchronized (this) {

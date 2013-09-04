@@ -56,7 +56,7 @@ public class ListConversionRule
 		ListDataType ldt = (ListDataType) dst;
 		ListDataValue ldv = ldt.make();
 		for (Object o : (List<?>) value) {
-			ldv.add(converter.from_java(o, null));
+			ldv.add(converter.from_java(o, ldt.inner_type()));
 		}
 		
 		return ldv;

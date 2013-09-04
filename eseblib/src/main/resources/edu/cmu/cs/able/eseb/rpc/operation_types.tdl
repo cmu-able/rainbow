@@ -80,7 +80,7 @@ namespace eseb {
 			/*
 			 * Object ID used to execute the operation on.
 			 */
-			int64 obj_id;
+			string obj_id;
 			
 			/*
 			 * Name of operation to execute.

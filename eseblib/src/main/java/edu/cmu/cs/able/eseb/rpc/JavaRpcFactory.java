@@ -52,7 +52,7 @@ public class JavaRpcFactory {
 	 * @param t_class the interface used to execute the remote operations;
 	 * this interface must match the one used to create the registry wrapper
 	 * with the
-	 * {@link #create_registry_wrapper(Class, Object, RpcEnvironment, long)}
+	 * {@link #create_registry_wrapper(Class, Object, RpcEnvironment, String)}
 	 * method; all methods in this interface must throw
 	 * {@link OperationException} or some super class
 	 * @param env the RPC execution environment
@@ -66,10 +66,11 @@ public class JavaRpcFactory {
 	 */
 	public static <T> T create_remote_stub(Class<T> t_class,
 			final RpcEnvironment env, final long dst_id,
-			final long time_out_ms, final long obj_id) {
+			final long time_out_ms, final String obj_id) {
 		Ensure.not_null(t_class);
 		Ensure.not_null(env);
 		Ensure.greater_equal(time_out_ms, 0);
+		Ensure.not_null(obj_id);
 		
 		final DataValue g = create_meta_data_for_service(t_class, env);
 		final Map<Method, DataValue> method_op_map = new HashMap<>();
@@ -189,10 +190,11 @@ public class JavaRpcFactory {
 	 * @return an object which should be closed to dispose of the service
 	 */
 	public static <T> Closeable create_registry_wrapper(final Class<T> t_class,
-			final T t, final RpcEnvironment env, long obj_id) {
+			final T t, final RpcEnvironment env, String obj_id) {
 		Ensure.not_null(t_class);
 		Ensure.not_null(t);
 		Ensure.not_null(env);
+		Ensure.not_null(obj_id);
 		
 		ServiceOperationExecuter executer = new ServiceOperationExecuter() {
 			@Override

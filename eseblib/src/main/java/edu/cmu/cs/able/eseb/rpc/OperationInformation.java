@@ -531,7 +531,7 @@ public class OperationInformation {
 			m_request_obj_id_field = m_request_type.field(
 					REQUEST_OBJ_ID_FIELD_NAME);
 			Ensure.not_null(m_request_obj_id_field);
-			Ensure.equals(m_pscope.int64(),
+			Ensure.equals(m_pscope.string(),
 					m_request_obj_id_field.description().type());
 			m_request_operation_field = m_request_type.field(
 					REQUEST_OPERATION_FIELD_NAME);
@@ -961,8 +961,9 @@ public class OperationInformation {
 	 * @return the execution request
 	 */
 	public DataValue create_execution_request(long exec_id, long dst_id,
-			long obj_id, DataValue op_v, Map<String,
+			String obj_id, DataValue op_v, Map<String,
 			DataValue> input_arguments) {
+		Ensure.not_null(obj_id);
 		Ensure.is_true(is_operation(op_v));
 		Ensure.not_null(input_arguments);
 		
@@ -988,7 +989,7 @@ public class OperationInformation {
 		Map<Field, DataValue> sfields = new HashMap<>();
 		sfields.put(m_request_dst_id_field, m_pscope.int64().make(dst_id));
 		sfields.put(m_request_exec_id_field, m_pscope.int64().make(exec_id));
-		sfields.put(m_request_obj_id_field, m_pscope.int64().make(obj_id));
+		sfields.put(m_request_obj_id_field, m_pscope.string().make(obj_id));
 		sfields.put(m_request_operation_field, m_pscope.string().make(
 				operation_name(op_v)));
 		sfields.put(m_request_inputs_field, mdv);
@@ -1037,11 +1038,11 @@ public class OperationInformation {
 	 * @param ereq_v the execution request
 	 * @return the object ID
 	 */
-	public long execution_request_obj_id(DataValue ereq_v) {
+	public String execution_request_obj_id(DataValue ereq_v) {
 		Ensure.is_true(is_execution_request(ereq_v));
 		
 		StructureDataValue r = (StructureDataValue) ereq_v;
-		Int64Value id = (Int64Value) r.value(m_request_obj_id_field);
+		StringValue id = (StringValue) r.value(m_request_obj_id_field);
 		return id.value();
 	}
 	

@@ -162,7 +162,7 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 					public void no_arguments() {
 						m_java_service.no_arguments();
 					}
-			}, m_service_environment, 3);
+			}, m_service_environment, "3");
 		
 		
 		/*
@@ -190,7 +190,7 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 		 */
 		m_stub = JavaRpcFactory.create_remote_stub(
 				RemoteJavaRpcTestService.class, m_invoke_environment,
-				m_service_participant.id(), 500, 3);
+				m_service_participant.id(), 500, "3");
 		
 		/*
 		 * Wait for all connections to establish.
@@ -377,7 +377,7 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 	public void more_than_one_method_with_the_same_name() throws Exception {
 		JavaRpcFactory.create_remote_stub(
 				i_more_than_one_method_with_the_same_name.class,
-				m_invoke_environment, m_service_participant.id(), 100, 8);
+				m_invoke_environment, m_service_participant.id(), 100, "8");
 	}
 	
 	interface i_too_many_parameters_in_declaration {
@@ -389,7 +389,7 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 	public void too_many_parameters_in_declaration() throws Exception {
 		JavaRpcFactory.create_remote_stub(
 				i_too_many_parameters_in_declaration.class,
-				m_invoke_environment, m_service_participant.id(), 100, 8);
+				m_invoke_environment, m_service_participant.id(), 100, "8");
 	}
 	
 	interface i_too_few_parameters_in_declaration {
@@ -401,7 +401,7 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 	public void too_few_parameters_in_declaration() throws Exception {
 		JavaRpcFactory.create_remote_stub(
 				i_too_few_parameters_in_declaration.class,
-				m_invoke_environment, m_service_participant.id(), 100, 8);
+				m_invoke_environment, m_service_participant.id(), 100, "8");
 	}
 	
 	interface i_no_parameter_declaration_with_parameters_in_method {
@@ -413,7 +413,7 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 			throws Exception {
 		JavaRpcFactory.create_remote_stub(
 				i_no_parameter_declaration_with_parameters_in_method.class,
-				m_invoke_environment, m_service_participant.id(), 100, 8);
+				m_invoke_environment, m_service_participant.id(), 100, "8");
 	}
 	
 	interface i_no_parameter_declaration_without_parameters_in_method{
@@ -425,7 +425,7 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 			throws Exception {
 		JavaRpcFactory.create_remote_stub(
 				i_no_parameter_declaration_without_parameters_in_method.class,
-				m_invoke_environment, m_service_participant.id(), 100, 8);
+				m_invoke_environment, m_service_participant.id(), 100, "8");
 	}
 	
 	interface i_no_return_type_with_return_type_declaration {
@@ -438,7 +438,7 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 			throws Exception {
 		JavaRpcFactory.create_remote_stub(
 				i_no_return_type_with_return_type_declaration.class,
-				m_invoke_environment, m_service_participant.id(), 100, 8);
+				m_invoke_environment, m_service_participant.id(), 100, "8");
 	}
 	
 	interface i_return_type_with_no_return_type_declaration {
@@ -450,7 +450,7 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 			throws Exception {
 		JavaRpcFactory.create_remote_stub(
 				i_return_type_with_no_return_type_declaration.class,
-				m_invoke_environment, m_service_participant.id(), 100, 8);
+				m_invoke_environment, m_service_participant.id(), 100, "8");
 	}
 	
 	interface i_invalid_data_type_name_in_parameter {
@@ -462,7 +462,7 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 	public void invalid_data_type_name_in_parameter() throws Exception {
 		JavaRpcFactory.create_remote_stub(
 				i_invalid_data_type_name_in_parameter.class,
-				m_invoke_environment, m_service_participant.id(), 100, 8);
+				m_invoke_environment, m_service_participant.id(), 100, "8");
 	}
 	
 	interface i_unparseble_data_type_name_in_parameter {
@@ -474,7 +474,7 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 	public void unparseble_data_type_name_in_parameter() throws Exception {
 		JavaRpcFactory.create_remote_stub(
 				i_unparseble_data_type_name_in_parameter.class,
-				m_invoke_environment, m_service_participant.id(), 100, 8);
+				m_invoke_environment, m_service_participant.id(), 100, "8");
 	}
 	
 	interface i_unparseble2_data_type_name_in_parameter {
@@ -486,7 +486,7 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 	public void unparseble2_data_type_name_in_parameter() throws Exception {
 		JavaRpcFactory.create_remote_stub(
 				i_unparseble2_data_type_name_in_parameter.class,
-				m_invoke_environment, m_service_participant.id(), 100, 8);
+				m_invoke_environment, m_service_participant.id(), 100, "8");
 	}
 	
 	interface i_invalid_data_type_name_in_return_type {
@@ -498,7 +498,7 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 	public void invalid_data_type_name_in_return_type() throws Exception {
 		JavaRpcFactory.create_remote_stub(
 				i_invalid_data_type_name_in_return_type.class,
-				m_invoke_environment, m_service_participant.id(), 100, 8);
+				m_invoke_environment, m_service_participant.id(), 100, "8");
 	}
 	
 	interface i_unparseable_data_type_name_in_return_type {
@@ -510,7 +510,7 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 	public void unparseable_data_type_name_in_return_type() throws Exception {
 		JavaRpcFactory.create_remote_stub(
 				i_unparseable_data_type_name_in_return_type.class,
-				m_invoke_environment, m_service_participant.id(), 100, 8);
+				m_invoke_environment, m_service_participant.id(), 100, "8");
 	}
 	
 	interface i_unparseable2_data_type_name_in_return_type {
@@ -522,6 +522,6 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 	public void unparseable2_data_type_name_in_return_type() throws Exception {
 		JavaRpcFactory.create_remote_stub(
 				i_unparseable2_data_type_name_in_return_type.class,
-				m_invoke_environment, m_service_participant.id(), 100, 8);
+				m_invoke_environment, m_service_participant.id(), 100, "8");
 	}
 }
