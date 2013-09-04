@@ -11,11 +11,11 @@ import org.acmestudio.acme.ModelHelper;
 import org.acmestudio.acme.element.IAcmeComponent;
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.sa.rainbow.core.error.RainbowModelException;
+import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelsManager;
+import org.sa.rainbow.core.models.commands.IRainbowModelCommand;
+import org.sa.rainbow.core.models.commands.ModelCommandFactory;
 import org.sa.rainbow.model.acme.AcmeModelCommand;
-import org.sa.rainbow.models.IModelInstance;
-import org.sa.rainbow.models.ModelsManager;
-import org.sa.rainbow.models.commands.IRainbowModelCommand;
-import org.sa.rainbow.models.commands.ModelCommandFactory;
 
 public class ZNNCommandFactory extends ModelCommandFactory {
 
@@ -78,7 +78,7 @@ public class ZNNCommandFactory extends ModelCommandFactory {
             Constructor<? extends ZNNAcmeModelCommand<?>> constructor = null;
             for (Constructor<? extends ZNNAcmeModelCommand<?>> c : constructors) {
                 Class<?>[] parameterTypes = c.getParameterTypes ();
-                if (Arrays.equals (new Class<?>[] { String.class, IAcmeSystem.class, String.class },
+                if (Arrays.equals (new Class<?>[] { String.class, IModelInstance.class, String.class },
                         Arrays.copyOfRange (parameterTypes, 0, 3))
                         && parameterTypes.length == 2 + args.length) {
                     constructor = c;
@@ -88,7 +88,7 @@ public class ZNNCommandFactory extends ModelCommandFactory {
             if (constructor == null) throw new NoSuchMethodException ();
             Object[] cargs = new Object[2 + args.length];
             cargs[0] = commandName;
-            cargs[1] = m_modelInstance.getModelInstance ();
+            cargs[1] = m_modelInstance;
             for (int i = 0; i < args.length; i++) {
                 cargs[2 + i] = args[i];
             }

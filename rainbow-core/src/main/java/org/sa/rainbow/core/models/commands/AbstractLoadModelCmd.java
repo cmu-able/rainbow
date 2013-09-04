@@ -9,11 +9,11 @@ import org.sa.rainbow.core.error.RainbowDelegationException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.event.IRainbowMessage;
-import org.sa.rainbow.core.management.ports.eseb.ESEBConstants;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.IModelsManager;
-import org.sa.rainbow.core.models.ports.IRainbowMessageFactory;
-import org.sa.rainbow.core.models.ports.IRainbowModelChangeBusPort;
+import org.sa.rainbow.core.ports.IRainbowMessageFactory;
+import org.sa.rainbow.core.ports.IRainbowModelChangeBusPort;
+import org.sa.rainbow.core.ports.eseb.ESEBConstants;
 
 public abstract class AbstractLoadModelCmd<Type> extends AbstractRainbowModelCommand<IModelInstance<Type>, Object> {
 

@@ -1,8 +1,8 @@
 package acmetests;
 
 import org.acmestudio.acme.element.IAcmeSystem;
+import org.sa.rainbow.core.models.commands.ModelCommandFactory;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
-import org.sa.rainbow.models.commands.ModelCommandFactory;
 
 public class BareAcmeModelInstance extends AcmeModelInstance {
 

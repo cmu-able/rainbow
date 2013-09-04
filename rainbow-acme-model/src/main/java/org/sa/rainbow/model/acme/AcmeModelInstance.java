@@ -16,7 +16,7 @@ import org.acmestudio.acme.model.command.IAcmeCompoundCommand;
 import org.acmestudio.acme.model.command.IAcmeElementCopyCommand;
 import org.acmestudio.armani.ArmaniLanguagePack;
 import org.sa.rainbow.core.error.RainbowCopyException;
-import org.sa.rainbow.models.IModelInstance;
+import org.sa.rainbow.core.models.IModelInstance;
 
 public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
 

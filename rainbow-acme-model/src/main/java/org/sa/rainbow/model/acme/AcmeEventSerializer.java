@@ -21,9 +21,9 @@ import org.acmestudio.acme.model.event.AcmeRoleEvent;
 import org.acmestudio.standalone.resource.StandaloneLanguagePackHelper;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
-import org.sa.rainbow.management.ports.eseb.ESEBConstants;
-import org.sa.rainbow.models.ports.IRainbowMessageFactory;
-import org.sa.rainbow.models.ports.IRainbowModelChangeBusPort;
+import org.sa.rainbow.core.ports.IRainbowMessageFactory;
+import org.sa.rainbow.core.ports.IRainbowModelChangeBusPort;
+import org.sa.rainbow.core.ports.eseb.ESEBConstants;
 
 public class AcmeEventSerializer {
     public void serialize (AcmeEvent event, IRainbowMessage msg, IRainbowMessage parent) {

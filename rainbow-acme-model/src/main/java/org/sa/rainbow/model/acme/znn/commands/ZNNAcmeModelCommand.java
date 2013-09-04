@@ -1,8 +1,8 @@
 package org.sa.rainbow.model.acme.znn.commands;
 
 import org.acmestudio.acme.element.IAcmeSystem;
+import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.model.acme.AcmeModelCommand;
-import org.sa.rainbow.models.IModelInstance;
 
 public abstract class ZNNAcmeModelCommand<T> extends AcmeModelCommand<T> {
 

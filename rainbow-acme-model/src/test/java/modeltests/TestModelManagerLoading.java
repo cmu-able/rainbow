@@ -7,7 +7,7 @@ import junit.framework.TestCase;
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.junit.Test;
 import org.sa.rainbow.core.RainbowMaster;
-import org.sa.rainbow.models.IModelInstance;
+import org.sa.rainbow.core.models.IModelInstance;
 
 public class TestModelManagerLoading extends TestCase {
 

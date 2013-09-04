@@ -18,11 +18,11 @@ import org.sa.rainbow.core.error.RainbowDelegationException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.event.IRainbowMessage;
+import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.commands.AbstractRainbowModelCommand;
+import org.sa.rainbow.core.models.commands.IRainbowModelCommand;
+import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 import org.sa.rainbow.model.acme.AcmeRainbowCommandEvent.CommandEventT;
-import org.sa.rainbow.models.IModelInstance;
-import org.sa.rainbow.models.commands.AbstractRainbowModelCommand;
-import org.sa.rainbow.models.commands.IRainbowModelCommand;
-import org.sa.rainbow.models.ports.IRainbowMessageFactory;
 
 public abstract class AcmeModelCommand<T> extends AbstractRainbowModelCommand<T, IAcmeSystem> implements
 IRainbowModelCommand<T, IAcmeSystem> {

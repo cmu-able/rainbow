@@ -7,7 +7,7 @@ import org.sa.rainbow.core.error.RainbowDelegationException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.IModelInstance;
-import org.sa.rainbow.core.models.ports.IRainbowMessageFactory;
+import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 
 public abstract class AbstractRainbowModelCommand<Type, Model> implements IRainbowModelCommand<Type, Model> {
 

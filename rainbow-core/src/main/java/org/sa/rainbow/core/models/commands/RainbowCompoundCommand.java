@@ -8,7 +8,7 @@ import java.util.List;
 import org.sa.rainbow.core.error.RainbowDelegationException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
-import org.sa.rainbow.core.models.ports.IRainbowMessageFactory;
+import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 
 // NOTE: THIS CLASS SHOULD NOT BE USED YET.
 public class RainbowCompoundCommand<Model> extends AbstractRainbowModelCommand<List<Object>, Model> implements

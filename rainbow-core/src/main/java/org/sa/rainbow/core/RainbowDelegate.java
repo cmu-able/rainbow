@@ -9,14 +9,14 @@ import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.error.RainbowConnectionException;
-import org.sa.rainbow.core.management.ports.IRainbowDelegateConfigurationPort;
-import org.sa.rainbow.core.management.ports.IRainbowManagementPort;
-import org.sa.rainbow.core.management.ports.IRainbowMasterConnectionPort;
-import org.sa.rainbow.core.management.ports.RainbowPortFactory;
 import org.sa.rainbow.core.models.EffectorDescription;
 import org.sa.rainbow.core.models.ProbeDescription;
 import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
 import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
+import org.sa.rainbow.core.ports.IRainbowDelegateConfigurationPort;
+import org.sa.rainbow.core.ports.IRainbowManagementPort;
+import org.sa.rainbow.core.ports.IRainbowMasterConnectionPort;
+import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.util.Beacon;
 import org.sa.rainbow.util.Util;
 

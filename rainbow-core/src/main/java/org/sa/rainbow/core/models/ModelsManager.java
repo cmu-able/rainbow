@@ -26,12 +26,12 @@ import org.sa.rainbow.core.error.RainbowCopyException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.event.IRainbowMessage;
-import org.sa.rainbow.core.management.ports.RainbowPortFactory;
 import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd;
 import org.sa.rainbow.core.models.commands.IRainbowModelCommand;
 import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
-import org.sa.rainbow.core.models.ports.IRainbowModelChangeBusPort;
-import org.sa.rainbow.core.models.ports.IRainbowModelUSBusPort;
+import org.sa.rainbow.core.ports.IRainbowModelChangeBusPort;
+import org.sa.rainbow.core.ports.IRainbowModelUSBusPort;
+import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.util.Util;
 
 /**

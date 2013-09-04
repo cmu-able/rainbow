@@ -10,7 +10,7 @@ import org.acmestudio.acme.element.property.IAcmeProperty;
 import org.acmestudio.acme.model.command.IAcmeCommand;
 import org.acmestudio.acme.model.command.IAcmePropertyCommand;
 import org.sa.rainbow.core.error.RainbowModelException;
-import org.sa.rainbow.models.IModelInstance;
+import org.sa.rainbow.core.models.IModelInstance;
 
 public class SetLoadCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
 

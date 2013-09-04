@@ -13,8 +13,8 @@ import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd;
 import org.sa.rainbow.core.models.commands.IRainbowModelCommand;
 import org.sa.rainbow.core.models.commands.ModelCommandFactory;
-import org.sa.rainbow.core.models.ports.IRainbowMessageFactory;
-import org.sa.rainbow.core.models.ports.IRainbowModelChangeBusPort;
+import org.sa.rainbow.core.ports.IRainbowMessageFactory;
+import org.sa.rainbow.core.ports.IRainbowModelChangeBusPort;
 
 public class DummyCommandFactory extends ModelCommandFactory<Integer> {
     public static AbstractLoadModelCmd loadCommand (ModelsManager modelsManager,

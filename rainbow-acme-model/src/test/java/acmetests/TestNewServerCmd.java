@@ -8,12 +8,12 @@ import org.acmestudio.standalone.resource.StandaloneResource;
 import org.acmestudio.standalone.resource.StandaloneResourceProvider;
 import org.junit.Test;
 import org.sa.rainbow.core.event.IRainbowMessage;
-import org.sa.rainbow.management.ports.eseb.ESEBConstants;
-import org.sa.rainbow.management.ports.eseb.RainbowESEBMessage;
+import org.sa.rainbow.core.ports.IRainbowModelChangeBusPort;
+import org.sa.rainbow.core.ports.eseb.ESEBConstants;
+import org.sa.rainbow.core.ports.eseb.RainbowESEBMessage;
 import org.sa.rainbow.model.acme.AcmeModelCommand;
 import org.sa.rainbow.model.acme.AcmeRainbowCommandEvent.CommandEventT;
 import org.sa.rainbow.model.acme.znn.ZNNModelUpdateOperatorsImpl;
-import org.sa.rainbow.models.ports.IRainbowModelChangeBusPort;
 
 import auxtestlib.DefaultTCase;
 

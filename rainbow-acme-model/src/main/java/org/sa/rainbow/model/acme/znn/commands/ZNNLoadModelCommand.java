@@ -8,10 +8,10 @@ import org.acmestudio.acme.core.resource.ParsingFailureException;
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.acmestudio.standalone.resource.StandaloneResourceProvider;
 import org.sa.rainbow.core.error.RainbowException;
+import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.IModelsManager;
+import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd;
 import org.sa.rainbow.model.acme.znn.ZNNModelUpdateOperatorsImpl;
-import org.sa.rainbow.models.IModelInstance;
-import org.sa.rainbow.models.IModelsManager;
-import org.sa.rainbow.models.commands.AbstractLoadModelCmd;
 
 public class ZNNLoadModelCommand extends AbstractLoadModelCmd<IAcmeSystem> {
 

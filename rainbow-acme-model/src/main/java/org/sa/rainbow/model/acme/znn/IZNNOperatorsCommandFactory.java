@@ -3,8 +3,8 @@ package org.sa.rainbow.model.acme.znn;
 import org.acmestudio.acme.element.IAcmeComponent;
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.acmestudio.acme.element.property.IAcmeProperty;
+import org.sa.rainbow.core.models.commands.IRainbowModelCommand;
 import org.sa.rainbow.model.acme.AcmeType;
-import org.sa.rainbow.models.commands.IRainbowModelCommand;
 
 public interface IZNNOperatorsCommandFactory {
 

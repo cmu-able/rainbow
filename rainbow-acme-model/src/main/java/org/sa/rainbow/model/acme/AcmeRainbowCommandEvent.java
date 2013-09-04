@@ -2,7 +2,7 @@ package org.sa.rainbow.model.acme;
 
 import org.acmestudio.acme.model.event.AcmeEvent;
 import org.acmestudio.acme.model.event.AcmeModelEventType;
-import org.sa.rainbow.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
 
 public class AcmeRainbowCommandEvent extends AcmeEvent {
 

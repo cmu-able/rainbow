@@ -14,7 +14,7 @@ import org.acmestudio.acme.model.command.IAcmeComponentCreateCommand;
 import org.acmestudio.acme.model.command.IAcmeConnectorCreateCommand;
 import org.acmestudio.acme.model.command.IAcmePortCreateCommand;
 import org.sa.rainbow.core.error.RainbowModelException;
-import org.sa.rainbow.models.IModelInstance;
+import org.sa.rainbow.core.models.IModelInstance;
 
 public class NewServerCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
 

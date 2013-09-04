@@ -8,7 +8,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.error.RainbowConnectionException;
-import org.sa.rainbow.core.management.ports.RainbowPortFactory;
+import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
 public class GaugeManager extends AbstractRainbowRunnable implements IRainbowGaugeLifecycleBusPort {

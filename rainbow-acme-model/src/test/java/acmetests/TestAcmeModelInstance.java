@@ -10,8 +10,8 @@ import org.acmestudio.standalone.resource.StandaloneResource;
 import org.acmestudio.standalone.resource.StandaloneResourceProvider;
 import org.junit.Test;
 import org.sa.rainbow.core.error.RainbowCopyException;
+import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
-import org.sa.rainbow.models.IModelInstance;
 
 import auxtestlib.DefaultTCase;
 

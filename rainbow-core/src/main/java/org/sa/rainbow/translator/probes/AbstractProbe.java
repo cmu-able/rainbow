@@ -8,9 +8,9 @@ import org.apache.log4j.Logger;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.error.BadLifecycleStepException;
 import org.sa.rainbow.core.error.RainbowConnectionException;
-import org.sa.rainbow.core.management.ports.RainbowPortFactory;
-import org.sa.rainbow.translator.probes.ports.IProbeConfigurationPort;
-import org.sa.rainbow.translator.probes.ports.IProbeReportPort;
+import org.sa.rainbow.core.ports.IProbeConfigurationPort;
+import org.sa.rainbow.core.ports.IProbeReportPort;
+import org.sa.rainbow.core.ports.RainbowPortFactory;
 
 /**
  * The AbstractProbe provides the probe State member and the transition of that state when a lifecycle method is
