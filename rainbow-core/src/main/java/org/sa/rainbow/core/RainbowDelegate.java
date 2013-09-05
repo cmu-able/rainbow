@@ -1,6 +1,10 @@
 package org.sa.rainbow.core;
 
+import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -10,13 +14,14 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.models.EffectorDescription;
-import org.sa.rainbow.core.models.ProbeDescription;
 import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
+import org.sa.rainbow.core.models.ProbeDescription;
 import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
 import org.sa.rainbow.core.ports.IRainbowDelegateConfigurationPort;
 import org.sa.rainbow.core.ports.IRainbowManagementPort;
 import org.sa.rainbow.core.ports.IRainbowMasterConnectionPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
+import org.sa.rainbow.translator.probes.IProbe;
 import org.sa.rainbow.util.Beacon;
 import org.sa.rainbow.util.Util;
 
@@ -83,8 +88,7 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
             List<ProbeAttributes> probes,
             List<EffectorAttributes> effectors) {
         m_configurationInformation = props;
-        m_localProbeDesc = new ProbeDescription ();
-        m_localProbeDesc.probes = new TreeSet<> (probes);
+        initProbes (probes);
 
         m_localEffectorDesc = new EffectorDescription ();
         m_localEffectorDesc.effectors = new TreeSet<> (effectors);
@@ -111,6 +115,8 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
         }
         m_delegateState = ConnectionState.CONFIGURED;
     }
+
+
 
     @Override
     public void dispose () {
@@ -186,6 +192,120 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
             }
             catch (InterruptedException e) {
             }
+        }
+    }
+
+    private void initProbes (List<ProbeAttributes> probes) {
+        m_localProbeDesc = new ProbeDescription ();
+        m_localProbeDesc.probes = new TreeSet<> (probes);
+        // obtain the list of probes to create
+        for (ProbeDescription.ProbeAttributes pbAttr : m_localProbeDesc.probes) {
+            // see if probe is for my location
+            if (!pbAttr.location.equals (Rainbow.getProperty (Rainbow.PROPKEY_DEPLOYMENT_LOCATION))) {
+                continue;
+            }
+            try {
+                IProbe probe = null;
+                // prepare class info
+                String probeClazz = null;
+                Class<?>[] params = null;
+                Object[] args = null;
+                // collect argument values
+                String refID = Util.genID (pbAttr.name, pbAttr.location);
+                switch (pbAttr.kind) {
+                case SCRIPT:
+                    // get info for a script-based probe
+                    String path = pbAttr.info.get ("path");
+                    String argument = pbAttr.info.get ("argument");
+                    if (!new File (path).exists ()) {
+                        reportError (MessageFormat
+                                .format ("Could not create probe {0}. The script \"{1}\" does not exist.",
+                                        pbAttr.location, path), null);
+                        continue; // don't create
+                    }
+                    probe = new GenericScriptBasedProbe (refID, pbAttr.alias, path, argument);
+                    LOGGER.trace ("Script-based IProbe " + pbAttr.name + ": " + path + " " + argument);
+                    break;
+                case JAVA:
+                    probeClazz = pbAttr.info.get ("class");
+                    // get argument info for Java probe, including ID and possibly sleep period
+                    List<Class<?>> paramList = new ArrayList<Class<?>> ();
+                    List<Object> argsList = new ArrayList<Object> ();
+                    paramList.add (String.class);
+                    argsList.add (refID);
+                    String periodStr = pbAttr.info.get ("period");
+                    if (periodStr != null) { // assume long
+                        paramList.add (long.class);
+                        argsList.add (Long.parseLong (periodStr));
+                    }
+                    if (pbAttr.arrays.size () > 0) {
+                        // get list of arguments for a pure Java probe
+                        for (Object vObj : pbAttr.arrays.values ()) {
+                            paramList.add (vObj.getClass ());
+                            argsList.add (vObj);
+                        }
+                    }
+                    params = paramList.toArray (new Class<?>[0]);
+                    args = argsList.toArray ();
+                    break;
+                }
+                if (probeClazz != null) {
+                    Throwable et = null;
+                    try {
+                        Class<?> probeClass = Class.forName (probeClazz);
+                        Constructor<?> cons = probeClass.getConstructor (params);
+                        probe = (IProbe )cons.newInstance (args);
+                    }
+                    catch (ClassNotFoundException e) {
+                        et = e;
+                    }
+                    catch (InstantiationException e) {
+                        et = e;
+                    }
+                    catch (IllegalAccessException e) {
+                        et = e;
+                    }
+                    catch (SecurityException e) {
+                        et = e;
+                    }
+                    catch (NoSuchMethodException e) {
+                        et = e;
+                    }
+                    catch (IllegalArgumentException e) {
+                        et = e;
+                    }
+                    catch (InvocationTargetException e) {
+                        et = e;
+                    }
+                    catch (Throwable t) {
+                        et = t;
+                    }
+                    finally {
+                        if (et != null) {
+                            String msg = MessageFormat.format ("Could not instantiate probe: {0}", probeClazz);
+                            reportError (msg, et);
+                        }
+                    }
+                }
+
+                if (probe != null) {
+                    probe.create ();
+                    // TODO: Report probe created on the probe bus
+                }
+            }
+            catch (Exception e) {
+                String msg = MessageFormat.format ("Could not instantiate probe: {0}", pbAttr.name);
+                reportError (msg, e);
+            }
+        }
+    }
+
+    private void reportError (String msg, Throwable e) {
+        if (e != null) {
+            LOGGER.error (msg, e);
+        }
+        else {
+            LOGGER.error (msg);
         }
     }
 

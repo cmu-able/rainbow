@@ -15,6 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
+import org.sa.rainbow.core.util.Pair;
 
 public class Util {
 
@@ -113,6 +114,8 @@ public class Util {
 
     private static final SimpleDateFormat m_timelogFormat = new SimpleDateFormat ("yyyy.MM.dd-HH:mm:ss.SSSZ");
 
+    private static final String           AT              = "@";
+
     /** Returns current timestamp string of the form yyyy.MM.dd-HH:mm:ss.SSSZ */
     public static String timelog () {
         return m_timelogFormat.format (Calendar.getInstance ().getTime ());
@@ -203,6 +206,33 @@ public class Util {
 
     public static Logger logger () {
         return LOGGER;
+    }
+
+    /**
+     * Generates and returns a unique identifier composed of name@target, target converted to lowercase.
+     * 
+     * @param name
+     *            the element name
+     * @param target
+     *            the element's location in lowercase
+     * @return String the concatenated string forming the unique identifier
+     */
+    public static String genID (String name, String target) {
+        return name + AT + target.toLowerCase ();
+    }
+
+    public static Pair<String, String> decomposeID (String id) {
+        String name = null;
+        String loc = null;
+        int atIdx = id.indexOf (AT);
+        if (atIdx > -1) { // got both name and target location
+            name = id.substring (0, atIdx);
+            loc = id.substring (atIdx + AT.length ()).toLowerCase ();
+        }
+        else { // name only
+            name = id;
+        }
+        return new Pair<String, String> (name, loc);
     }
 
 }
