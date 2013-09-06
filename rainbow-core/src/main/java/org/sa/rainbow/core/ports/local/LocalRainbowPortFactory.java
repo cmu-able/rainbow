@@ -15,6 +15,7 @@ import org.sa.rainbow.core.gauges.IGaugeIdentifier;
 import org.sa.rainbow.core.gauges.IGaugeQueryInterface;
 import org.sa.rainbow.core.gauges.IRainbowGaugeLifecycleBusPort;
 import org.sa.rainbow.core.models.IModelsManager;
+import org.sa.rainbow.core.ports.AbstractDelegateConnectionPort;
 import org.sa.rainbow.core.ports.IProbeConfigurationPort;
 import org.sa.rainbow.core.ports.IProbeReportPort;
 import org.sa.rainbow.core.ports.IRainbowConnectionPortFactory;
@@ -88,7 +89,7 @@ public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
 
     @Override
     @NonNull
-    public IRainbowMasterConnectionPort createDelegateSideConnectionPort (RainbowDelegate delegate) {
+    public AbstractDelegateConnectionPort createDelegateSideConnectionPort (RainbowDelegate delegate) {
         LocalDelegateConnectionPort ldcp = m_delegateConnectionPorts.get (delegate.getId ());
         if (ldcp == null) {
             ldcp = new LocalDelegateConnectionPort (delegate, this);

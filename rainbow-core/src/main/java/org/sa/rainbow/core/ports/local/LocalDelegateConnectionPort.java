@@ -47,4 +47,10 @@ public class LocalDelegateConnectionPort extends AbstractDelegateConnectionPort 
     public void dispose () {
     }
 
+    @Override
+    public void report (String delegateID, ReportType type, String msg) {
+        if (m_masterPort != null)
+            m_masterPort.report (delegateID, type, msg);
+    }
+
 }

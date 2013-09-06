@@ -13,6 +13,8 @@ import org.sa.rainbow.core.gauges.IGaugeIdentifier;
 import org.sa.rainbow.core.gauges.IGaugeQueryInterface;
 import org.sa.rainbow.core.gauges.IRainbowGaugeLifecycleBusPort;
 import org.sa.rainbow.core.models.IModelsManager;
+import org.sa.rainbow.core.ports.AbstractDelegateConnectionPort;
+import org.sa.rainbow.core.ports.DisconnectedRainbowDelegateConnectionPort;
 import org.sa.rainbow.core.ports.DisconnectedRainbowManagementPort;
 import org.sa.rainbow.core.ports.DisconnectedRainbowMasterConnectionPort;
 import org.sa.rainbow.core.ports.IProbeConfigurationPort;
@@ -36,12 +38,12 @@ public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
     }
 
     @Override
-    public IRainbowMasterConnectionPort createDelegateSideConnectionPort (RainbowDelegate delegate) {
+    public AbstractDelegateConnectionPort createDelegateSideConnectionPort (RainbowDelegate delegate) {
         try {
             return new ESEBDelegateConnectionPort (delegate);
         }
         catch (IOException e) {
-            return DisconnectedRainbowMasterConnectionPort.instance ();
+            return DisconnectedRainbowDelegateConnectionPort.instance ();
         }
 
     }

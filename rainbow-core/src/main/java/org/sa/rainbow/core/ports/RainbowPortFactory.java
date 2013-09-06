@@ -68,7 +68,7 @@ public class RainbowPortFactory {
         return m_instance;
     }
 
-    public static IRainbowMasterConnectionPort createDelegateMasterConnectionPort (RainbowDelegate delegate)
+    public static AbstractDelegateConnectionPort createDelegateMasterConnectionPort (RainbowDelegate delegate)
             throws RainbowConnectionException {
         return getFactory ().createDelegateSideConnectionPort (delegate);
     }

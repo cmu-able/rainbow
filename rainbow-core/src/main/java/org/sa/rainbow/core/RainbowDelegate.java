@@ -11,15 +11,18 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 
+import org.apache.log4j.Appender;
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.models.EffectorDescription;
 import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
 import org.sa.rainbow.core.models.ProbeDescription;
 import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
+import org.sa.rainbow.core.ports.AbstractDelegateConnectionPort;
 import org.sa.rainbow.core.ports.IRainbowDelegateConfigurationPort;
 import org.sa.rainbow.core.ports.IRainbowManagementPort;
 import org.sa.rainbow.core.ports.IRainbowMasterConnectionPort;
+import org.sa.rainbow.core.ports.IRainbowMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.translator.probes.IProbe;
 import org.sa.rainbow.util.Beacon;
@@ -35,27 +38,36 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
 
     protected static String                   NAME            = "Rainbow Delegate";
 
-    private IRainbowManagementPort            m_masterPort;
     private String                            m_id;
     private String                            m_name          = null;
 
     private Beacon                            m_beacon;
 
-    private IRainbowMasterConnectionPort      m_masterConnectionPort;
+    /** The port through which the management information comes (lifecyle, reporting, ...) **/
+    private IRainbowManagementPort            m_masterPort;
+    /** The connection port to the master **/
+    private AbstractDelegateConnectionPort      m_masterConnectionPort;
+    /**
+     * The configuration port, through which the delegate can be configured. Configuration includes which local probes
+     * and effectors to start. It "looks" unused because it calls back
+     **/
+    @SuppressWarnings ("unused")
     private IRainbowDelegateConfigurationPort m_configurationPort;
 
     private Properties                        m_configurationInformation;
+    /** Manages the connection lifecycle of the delegate. Perhaps this should be moved to the connection port?**/
     private ConnectionState                   m_delegateState = ConnectionState.UNKNOWN;
 
+    /** The local probes **/
     private ProbeDescription                  m_localProbeDesc;
 
+    /** The local effectors **/
     private EffectorDescription               m_localEffectorDesc;
 
     public RainbowDelegate () {
         super (NAME);
         // Generate an ID 
         m_id = UUID.randomUUID ().toString ();
-
     }
 
     public void initialize () throws RainbowConnectionException {
@@ -115,8 +127,6 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
         }
         m_delegateState = ConnectionState.CONFIGURED;
     }
-
-
 
     @Override
     public void dispose () {
@@ -218,8 +228,8 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
                     String path = pbAttr.info.get ("path");
                     String argument = pbAttr.info.get ("argument");
                     if (!new File (path).exists ()) {
-                        reportError (MessageFormat
-                                .format ("Could not create probe {0}. The script \"{1}\" does not exist.",
+                        reportError (
+                                MessageFormat.format ("Could not create probe {0}. The script \"{1}\" does not exist.",
                                         pbAttr.location, path), null);
                         continue; // don't create
                     }
@@ -302,9 +312,11 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
 
     private void reportError (String msg, Throwable e) {
         if (e != null) {
+            m_masterConnectionPort.report (ReportType.ERROR, msg);
             LOGGER.error (msg, e);
         }
         else {
+            m_masterConnectionPort.report (ReportType.ERROR, msg, e);
             LOGGER.error (msg);
         }
     }

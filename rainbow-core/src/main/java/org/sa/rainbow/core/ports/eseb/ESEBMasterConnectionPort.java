@@ -54,6 +54,18 @@ public class ESEBMasterConnectionPort extends AbstractMasterConnectionPort {
                     String delegateId = (String )msg.getProperty (ESEBConstants.MSG_DELEGATE_ID_KEY);
                     m_master.disconnectDelegate (delegateId);
                 }
+                case ESEBConstants.MSG_TYPE_UI_REPORT: {
+                    try {
+                        String delegateId = (String )msg.getProperty (ESEBConstants.MSG_DELEGATE_ID_KEY);
+                        String message = (String )msg.getProperty (ESEBConstants.REPORT_MSG_KEY);
+                        ReportType reportType = ReportType.valueOf ((String )msg.getProperty (ESEBConstants.REPORT_TYPE_KEY));
+                        report (delegateId, reportType, message);
+                    }
+                    catch (Exception e) {
+                        LOGGER.error ("Failed to process message: " + msg.toString ());
+                        
+                    }
+                }
                 break;
                 }
             }

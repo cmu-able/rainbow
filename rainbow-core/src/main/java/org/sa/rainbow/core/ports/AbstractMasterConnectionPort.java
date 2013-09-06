@@ -18,6 +18,11 @@ public abstract class AbstractMasterConnectionPort implements IRainbowMasterConn
         IRainbowManagementPort port = m_master.connectDelegate (delegateID, connectionProperties);
         return port;
     }
+    
+    @Override
+    public void report (String delegateID, ReportType type, String msg) {
+        m_master.report (delegateID, type, msg);
+    }
 
 
 

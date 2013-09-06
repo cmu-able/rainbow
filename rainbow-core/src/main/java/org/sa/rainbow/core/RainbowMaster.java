@@ -22,6 +22,7 @@ import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
 import org.sa.rainbow.core.ports.IRainbowDelegateConfigurationPort;
 import org.sa.rainbow.core.ports.IRainbowManagementPort;
 import org.sa.rainbow.core.ports.IRainbowMasterConnectionPort;
+import org.sa.rainbow.core.ports.IRainbowMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.util.Beacon;
 import org.sa.rainbow.util.YamlUtil;
@@ -282,6 +283,27 @@ public class RainbowMaster extends AbstractRainbowRunnable {
             m_effectorDesc = YamlUtil.loadEffectorDesc ();
         }
         return m_effectorDesc;
+    }
+
+    public void report (String delegateID, ReportType type, String msg) {
+        // TODO: Hook up to master interface?
+        String log = "Delegate: " + delegateID + ": " + msg;
+        switch (type) {
+        case INFO:
+            LOGGER.info (log);
+            break;
+        case WARNING:
+            LOGGER.warn (log);
+            break;
+        case ERROR:
+            LOGGER.error (log);
+            break;
+        case FATAL:
+            LOGGER.fatal (log);
+            break;
+        default:
+            break;
+        }
     }
 
 }

@@ -36,7 +36,7 @@ public class ESEBConnector {
     static Logger               LOGGER             = Logger.getLogger (ESEBConnector.class);
 
     public static enum ChannelT {
-        HEALTH, MODEL_US, MODE_DS, MODEL_CHANGE, SYSTEM_US
+        HEALTH, UIREPORT, MODEL_US, MODE_DS, MODEL_CHANGE, SYSTEM_US
     };
 
 

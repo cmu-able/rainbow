@@ -114,4 +114,16 @@ public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
         }
     }
 
+    @Override
+    public void report (String delegateID, ReportType type, String msg) {
+        RainbowESEBMessage esebMsg = m_connectionRole.createMessage ();
+        esebMsg.setProperty (ESEBConstants.MSG_CHANNEL_KEY, ChannelT.UIREPORT.name ());
+        esebMsg.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_UI_REPORT);
+        esebMsg.setProperty (ESEBConstants.REPORT_TYPE_KEY, type.name ());
+        esebMsg.setProperty (ESEBConstants.REPORT_MSG_KEY, msg);
+        esebMsg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, delegateID);
+        m_connectionRole.publish (esebMsg);
+           
+    }
+
 }

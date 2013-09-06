@@ -1,5 +1,6 @@
 package org.sa.rainbow.core.ports;
 
+import java.text.MessageFormat;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -18,13 +19,15 @@ public class DisconnectedRainbowMasterConnectionPort implements IRainbowMasterCo
     public static IRainbowMasterConnectionPort instance () {
         return m_instance;
     }
+
     private DisconnectedRainbowMasterConnectionPort () {
     }
 
     Logger LOGGER = Logger.getLogger (DisconnectedRainbowMasterConnectionPort.class);
 
     @Override
-    public IRainbowManagementPort connectDelegate (String delegateID, Properties connectionProperties) throws RainbowConnectionException {
+    public IRainbowManagementPort connectDelegate (String delegateID, Properties connectionProperties)
+            throws RainbowConnectionException {
         LOGGER.error ("Attempt to connect through a disconnected port!");
         return DisconnectedRainbowManagementPort.instance ();
     }
@@ -37,6 +40,25 @@ public class DisconnectedRainbowMasterConnectionPort implements IRainbowMasterCo
 
     @Override
     public void dispose () {
+    }
+
+    @Override
+    public void report (String delegateID, ReportType type, String msg) {
+        String log = MessageFormat.format ("Delegate: {0}: {1}", delegateID, msg);
+        switch (type) {
+        case INFO:
+            LOGGER.info (log);
+            break;
+        case WARNING:
+            LOGGER.warn (log);
+            break;
+        case ERROR:
+            LOGGER.error (log);
+            break;
+        case FATAL:
+            LOGGER.fatal (log);
+            break;
+        }
     }
 
 }

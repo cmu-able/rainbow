@@ -22,7 +22,7 @@ public interface IRainbowConnectionPortFactory {
      * 
      * @return
      */
-    public abstract IRainbowMasterConnectionPort createDelegateSideConnectionPort (RainbowDelegate delegate)
+    public abstract AbstractDelegateConnectionPort createDelegateSideConnectionPort (RainbowDelegate delegate)
             throws RainbowConnectionException;
 
     /**

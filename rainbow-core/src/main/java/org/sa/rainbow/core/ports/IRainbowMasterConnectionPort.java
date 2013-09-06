@@ -11,6 +11,10 @@ import org.sa.rainbow.core.error.RainbowConnectionException;
  * 
  */
 public interface IRainbowMasterConnectionPort {
+    
+    /** Message types for sending to the Rainbow Master, which could be displayed on the UI **/
+    public enum ReportType {INFO, WARNING, ERROR, FATAL};
+    
     /**
      * Connects a delegate to the master through the connection port
      * 
@@ -33,7 +37,9 @@ public interface IRainbowMasterConnectionPort {
      *            The delegate being disconnected
      */
     public void disconnectDelegate (String delegateId);
-
+    
+    public void report (String delegateID, ReportType type, String msg);
+    
     /**
      * Should be called when this port is no longer required. Implementors should dispose of all resources.
      */
