@@ -1,6 +1,5 @@
 package org.sa.rainbow.model.acme;
 
-import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedList;
@@ -8,6 +7,8 @@ import java.util.List;
 
 import org.acmestudio.acme.core.exception.AcmeException;
 import org.acmestudio.acme.element.IAcmeSystem;
+import org.acmestudio.acme.element.property.IAcmeProperty;
+import org.acmestudio.acme.element.property.IAcmePropertyValue;
 import org.acmestudio.acme.model.command.IAcmeCommand;
 import org.acmestudio.acme.model.event.AcmeEvent;
 import org.acmestudio.acme.model.event.AcmeModelEventType;
@@ -18,7 +19,6 @@ import org.sa.rainbow.core.error.RainbowDelegationException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.event.IRainbowMessage;
-import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.commands.AbstractRainbowModelCommand;
 import org.sa.rainbow.core.models.commands.IRainbowModelCommand;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
@@ -85,7 +85,7 @@ IRainbowModelCommand<T, IAcmeSystem> {
     private EventUpdateAdapter  m_eventListener;
     List<AcmeEvent>             m_events              = Collections.synchronizedList (new LinkedList<AcmeEvent> ());
 
-    public AcmeModelCommand (String commandName, IModelInstance<IAcmeSystem> model, String target, String... parameters) {
+    public AcmeModelCommand (String commandName, AcmeModelInstance model, String target, String... parameters) {
         super (commandName, model, target, parameters);
     }
 
@@ -107,6 +107,7 @@ IRainbowModelCommand<T, IAcmeSystem> {
     @Override
     protected void subExecute () throws RainbowException {
         List<IAcmeCommand<?>> commands = doConstructCommand ();
+        if (commands.isEmpty ()) return;
         // Add a sentinel command that can be used to use to work out when all the events associated
         // with executing the actual commands are collected
         commands.add (0,
@@ -141,6 +142,7 @@ IRainbowModelCommand<T, IAcmeSystem> {
     @Override
     protected void subRedo () throws RainbowException {
         try {
+            if (m_command == null) return;
             setUpEventListeners ();
             m_events.add (new AcmeRainbowCommandEvent (CommandEventT.START_COMMAND, this));
             synchronized (m_eventUpdater) {
@@ -162,6 +164,7 @@ IRainbowModelCommand<T, IAcmeSystem> {
     @Override
     protected void subUndo () throws RainbowException {
         try {
+            if (m_command == null) return;
             setUpEventListeners ();
             m_events.add (new AcmeRainbowCommandEvent (CommandEventT.START_UNDO_COMMAND, this));
             synchronized (m_eventUpdater) {
@@ -200,18 +203,14 @@ IRainbowModelCommand<T, IAcmeSystem> {
         return ser.serialize (m_events, m_messageFactory);
     }
 
-    protected <T> T resolveInModel (String qname, Class<T> clazz) throws RainbowModelException {
-        // The model is an Acme System, but the qname could include the Acme system.
-        String[] names = qname.split ("\\.");
-        if (names[0].equals (getModel ().getName ())) {
-            qname = qname.substring (qname.indexOf ('.') + 1);
-        }
-        Object resolve = getModel ().lookupName (qname);
-        if (resolve == null || !(clazz.isInstance (resolve)))
-            throw new RainbowModelException (MessageFormat.format ("Cannot find the ''{0}'' in the model as a {1}",
-                    qname, clazz.getName ()));
 
-        T lb = (T )resolve;
-        return lb;
+
+    protected boolean propertyValueChanging (IAcmeProperty property, IAcmePropertyValue acmeVal) {
+        return !acmeVal.equals (property.getValue ());
+    }
+
+    @Override
+    protected AcmeModelInstance getModelContext () {
+        return (AcmeModelInstance )super.getModelContext ();
     }
 }

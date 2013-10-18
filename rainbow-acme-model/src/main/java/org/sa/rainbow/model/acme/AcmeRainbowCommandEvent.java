@@ -7,11 +7,12 @@ import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
 public class AcmeRainbowCommandEvent extends AcmeEvent {
 
     public static enum CommandEventT {
-        START_COMMAND, FINISH_COMMAND, START_UNDO_COMMAND, FINISH_UNDO_COMMAND;
+        START_COMMAND, FINISH_COMMAND, START_UNDO_COMMAND, FINISH_UNDO_COMMAND, LOAD_MODEL;
 
         public boolean isEnd () {
             return this == FINISH_COMMAND || this == FINISH_UNDO_COMMAND;
         }
+
     };
 
     private IRainbowModelCommandRepresentation m_rep;
