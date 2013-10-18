@@ -1,0 +1,6 @@
+family f1 = {
+
+  component type CT = {
+    property p : int;
+  }
+}

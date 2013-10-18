@@ -1,0 +1,3 @@
+system s = {
+  component c;
+}
