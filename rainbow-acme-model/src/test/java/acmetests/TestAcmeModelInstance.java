@@ -1,11 +1,19 @@
 package acmetests;
 import java.io.IOException;
+import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Set;
 
+import org.acmestudio.acme.core.exception.AcmeVisitorException;
+import org.acmestudio.acme.core.globals.AcmeCategory;
 import org.acmestudio.acme.core.resource.ParsingFailureException;
 import org.acmestudio.acme.element.IAcmeComponentType;
+import org.acmestudio.acme.element.IAcmeElement;
+import org.acmestudio.acme.element.IAcmeElementInstance;
 import org.acmestudio.acme.element.IAcmeElementTypeRef;
+import org.acmestudio.acme.element.IAcmeReference;
 import org.acmestudio.acme.element.IAcmeSystem;
+import org.acmestudio.acme.util.AcmeElementCollector;
 import org.acmestudio.standalone.resource.StandaloneResource;
 import org.acmestudio.standalone.resource.StandaloneResourceProvider;
 import org.junit.Test;
@@ -17,6 +25,54 @@ import auxtestlib.DefaultTCase;
 
 
 public class TestAcmeModelInstance extends DefaultTCase {
+
+    @Test
+    public void testCopyModelInstanceComplextFamilies () throws ParsingFailureException, IOException,
+            RainbowCopyException, AcmeVisitorException {
+        StandaloneResource resource = StandaloneResourceProvider.instance ().acmeResourceForString (
+                "src/test/resources/acme/ZNewsSys.acme");
+        IAcmeSystem sys = resource.getModel ().getSystems ().iterator ().next ();
+        assertTrue (sys.getDeclaredTypes ().iterator ().next ().isSatisfied ());
+        AcmeModelInstance mi = new BareAcmeModelInstance (sys);
+
+        AcmeElementCollector allElementCollector = new AcmeElementCollector (EnumSet.of (AcmeCategory.ACME_COMPONENT,
+                AcmeCategory.ACME_CONNECTOR, AcmeCategory.ACME_PORT, AcmeCategory.ACME_ROLE));
+        Set<IAcmeElement> elements = new HashSet<> ();
+        allElementCollector.visit (sys, elements);
+
+        for (IAcmeElement element : elements) {
+            IAcmeElementInstance i = (IAcmeElementInstance )element;
+            for (Object r : i.getDeclaredTypes ()) {
+                assertTrue (
+                        i.getQualifiedName () + " refers to unresolved declared type: "
+                                + ((IAcmeReference )r).getReferencedName (), ((IAcmeReference )r).isSatisfied ());
+            }
+            for (Object r : i.getInstantiatedTypes ()) {
+                assertTrue (
+                        i.getQualifiedName () + " refers to unresolved instantiated type: "
+                                + ((IAcmeReference )r).getReferencedName (), ((IAcmeReference )r).isSatisfied ());
+            }
+        }
+
+        IModelInstance<IAcmeSystem> copy = mi.copyModelInstance ("ZNewsSysSnapshot");
+
+        elements = new HashSet<> ();
+        allElementCollector.visit (copy.getModelInstance (), elements);
+
+        for (IAcmeElement element : elements) {
+            IAcmeElementInstance i = (IAcmeElementInstance )element;
+            for (Object r : i.getDeclaredTypes ()) {
+                assertTrue (
+                        i.getQualifiedName () + " refers to unresolved declared type: "
+                                + ((IAcmeReference )r).getReferencedName (), ((IAcmeReference )r).isSatisfied ());
+            }
+            for (Object r : i.getInstantiatedTypes ()) {
+                assertTrue (
+                        i.getQualifiedName () + " refers to unresolved instantiated type: "
+                                + ((IAcmeReference )r).getReferencedName (), ((IAcmeReference )r).isSatisfied ());
+            }
+        }
+    }
 
     @Test
     public void testCopyModelInstanceWithFamily () throws ParsingFailureException, IOException, RainbowCopyException {

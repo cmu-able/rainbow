@@ -22,7 +22,7 @@ import org.sa.rainbow.core.gauges.CommandRepresentation;
 import org.sa.rainbow.core.gauges.IGaugeState;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
-import org.sa.rainbow.core.ports.eseb.ESEBGaugeQueryInterfaceRequirer;
+import org.sa.rainbow.core.ports.eseb.rpc.ESEBGaugeQueryRequirerPort;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.util.Beacon;
@@ -128,7 +128,7 @@ public class TestModelGaugeAPIs extends DefaultTCase {
             }
         });
 
-        ESEBGaugeQueryInterfaceRequirer req = new ESEBGaugeQueryInterfaceRequirer (gauge);
+        ESEBGaugeQueryRequirerPort req = new ESEBGaugeQueryRequirerPort (gauge);
         Collection<IRainbowModelCommandRepresentation> allCommands = req.queryAllCommands ();
         assertEquals (allCommands.size (), 1);
         IRainbowModelCommandRepresentation cmd = allCommands.iterator ().next ();

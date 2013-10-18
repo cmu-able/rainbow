@@ -16,7 +16,7 @@ import org.sa.rainbow.core.gauges.CommandRepresentation;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
 import org.sa.rainbow.core.models.commands.ModelCommandFactory;
-import org.sa.rainbow.core.ports.IRainbowModelUSBusPort;
+import org.sa.rainbow.core.ports.IModelUSBusPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 
 import auxtestlib.BooleanEvaluation;
@@ -34,7 +34,7 @@ public class GaugeCommandTest extends DefaultTCase {
 //        RainbowDelegate delegate = new RainbowDelegate ();
 //        delegate.start ();
 
-        IRainbowModelUSBusPort usPort = RainbowPortFactory
+        IModelUSBusPort usPort = RainbowPortFactory
                 .createModelsManagerClientUSPort (new Identifiable () {
 
                     @Override
@@ -68,7 +68,7 @@ public class GaugeCommandTest extends DefaultTCase {
 
     @Test
     public void testBadCommand () throws Exception {
-        IRainbowModelUSBusPort usPort = RainbowPortFactory.createModelsManagerClientUSPort (new Identifiable () {
+        IModelUSBusPort usPort = RainbowPortFactory.createModelsManagerClientUSPort (new Identifiable () {
 
             @Override
             public String id () {

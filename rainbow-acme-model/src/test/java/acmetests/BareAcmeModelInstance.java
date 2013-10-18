@@ -1,17 +1,17 @@
 package acmetests;
 
 import org.acmestudio.acme.element.IAcmeSystem;
-import org.sa.rainbow.core.models.commands.ModelCommandFactory;
+import org.sa.rainbow.model.acme.AcmeModelCommandFactory;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 
 public class BareAcmeModelInstance extends AcmeModelInstance {
 
     public BareAcmeModelInstance (IAcmeSystem system) {
-        super (system);
+        super (system, "");
     }
 
     @Override
-    public ModelCommandFactory<IAcmeSystem> getCommandFactory () {
+    public AcmeModelCommandFactory getCommandFactory () {
         return null;
     }
 
