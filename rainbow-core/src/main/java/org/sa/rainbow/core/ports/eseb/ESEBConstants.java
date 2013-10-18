@@ -34,5 +34,10 @@ public interface ESEBConstants {
     public static final String REPORT_TYPE_KEY                       = ESEB_PREFIX + "REPORT_TYPE";
     public static final String MSG_TYPE_UI_REPORT                    = ESEB_PREFIX + "UI_REPORT";
     public static final String REPORT_MSG_KEY                        = ESEB_PREFIX + "MSG";
+    public static final String MSG_PROBE_LOCATION_KEY                = ESEB_PREFIX + "probe_location";
+    public static final String MSG_PROBE_TYPE_KEY                    = ESEB_PREFIX + "probe_type";
+    public static final String COMPONENT_TYPE_KEY                    = ESEB_PREFIX + "component_type";
+    public static final String REPORT_MSG_ADDITIONAL_INFO            = ESEB_PREFIX + "ADDITIONAL";
+    public static final String MSG_UPDATE_MODEL_REPLY                = ESEB_PREFIX + "UPDATE_MODEL_REPLY";
 
 }

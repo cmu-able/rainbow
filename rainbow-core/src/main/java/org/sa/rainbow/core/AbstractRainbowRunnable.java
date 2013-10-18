@@ -5,7 +5,9 @@ package org.sa.rainbow.core;
 
 import java.text.MessageFormat;
 
-import org.apache.log4j.Logger;
+import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.ports.DisconnectedRainbowDelegateConnectionPort;
+import org.sa.rainbow.core.ports.IRainbowReportingPort;
 
 /**
  * Convenience abstract class that handles the usual thread start/stop/terminate
@@ -14,9 +16,8 @@ import org.apache.log4j.Logger;
  * 
  * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
  */
-public abstract class AbstractRainbowRunnable implements IRainbowRunnable {
+public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Identifiable {
 
-    static Logger   LOGGER        = Logger.getLogger (AbstractRainbowRunnable.class);
 
     private Thread m_thread = null;
     private String m_name = null;
@@ -25,6 +26,8 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable {
     private State m_nextState = State.RAW;
     private boolean m_restarting = false;
 
+    protected IRainbowReportingPort m_reportingPort;
+
     /**
      * Default Constructor with name for the thread.
      * @param name  Name of the Thread
@@ -32,6 +35,11 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable {
     public AbstractRainbowRunnable (String name) {
         m_name = name;
         m_thread = new Thread(Rainbow.instance().getThreadGroup(), this, m_name);
+        m_reportingPort = new DisconnectedRainbowDelegateConnectionPort ();
+    }
+
+    public void initialize (IRainbowReportingPort port) throws RainbowConnectionException {
+        m_reportingPort = port;
     }
 
     /* (non-Javadoc)
@@ -46,7 +54,7 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable {
      * @see org.sa.rainbow.core.IRainbowRunnable#name()
      */
     @Override
-    public String name() {
+    public String id() {
         return m_name;
     }
 
@@ -188,14 +196,12 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable {
                             String errMsg = MessageFormat
                                     .format("Runtime error in {0}! ... Continuing for {1} more attempts.",
                                             m_name, (3 - ++errorCount));
-                            LOGGER.error (errMsg, t);
-                            log(MessageFormat.format(
-                                    "{0}: {1} See log for more details.",
-                                    errMsg, t.getMessage()));
+                            m_reportingPort.error (getComponentType (), errMsg, t);
                         }
                         else {
                             // make sure Rainbow can dispose despite error... by terminating
-                            LOGGER.fatal ("Runtime error, terminating runnable " + m_name + "!", t);
+                            m_reportingPort.fatal (getComponentType (), "Runtime , terminating runnable " + m_name
+                                    + "!", t);
                             terminate();
                             // TODO: BRS work out restart strategy
 //                            // cause a Rainbow restart if we're the event service, or slave
@@ -237,6 +243,8 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable {
 
     protected abstract void log (String txt);
     protected abstract void runAction (); 
+
+    protected abstract RainbowComponentT getComponentType ();
 
     /**
      * Sets the next State to transition this Runnable to; with appropriate guard.

@@ -5,10 +5,11 @@ import java.text.MessageFormat;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
+import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.ports.AbstractMasterConnectionPort;
-import org.sa.rainbow.core.ports.IRainbowManagementPort;
+import org.sa.rainbow.core.ports.IDelegateManagementPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 
 public class ESEBMasterConnectionPort extends AbstractMasterConnectionPort {
@@ -32,7 +33,7 @@ public class ESEBMasterConnectionPort extends AbstractMasterConnectionPort {
                     Properties connectionProperties = msg.pulloutProperties ();
                     String replyMsg = ESEBConstants.MSG_REPLY_OK;
                     try {
-                        IRainbowManagementPort port = connectDelegate (delegateId, connectionProperties);
+                        IDelegateManagementPort port = connectDelegate (delegateId, connectionProperties);
                         if (port == null) {
                             replyMsg = "Could not create a deployment port on the master.";
                         }
@@ -58,12 +59,14 @@ public class ESEBMasterConnectionPort extends AbstractMasterConnectionPort {
                     try {
                         String delegateId = (String )msg.getProperty (ESEBConstants.MSG_DELEGATE_ID_KEY);
                         String message = (String )msg.getProperty (ESEBConstants.REPORT_MSG_KEY);
+                        RainbowComponentT compT = RainbowComponentT.valueOf ((String )msg
+                                .getProperty (ESEBConstants.COMPONENT_TYPE_KEY));
                         ReportType reportType = ReportType.valueOf ((String )msg.getProperty (ESEBConstants.REPORT_TYPE_KEY));
-                        report (delegateId, reportType, message);
+                        report (delegateId, reportType, compT, message);
                     }
                     catch (Exception e) {
                         LOGGER.error ("Failed to process message: " + msg.toString ());
-                        
+
                     }
                 }
                 break;

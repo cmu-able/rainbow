@@ -73,17 +73,17 @@ public class GaugeStateConverter implements TypelibJavaConversionRule {
                 fields.put (
                         commands,
                         converter.from_java (command.getGaugeReports (),
- m_scope.find ("list<command_representation>")));
+                                m_scope.find ("list<command_representation>")));
                 StructureDataValue sdv = sdt.make (fields);
                 return sdv;
             }
             catch (UnknownFieldException | AmbiguousNameException e) {
                 throw new ValueConversionException (MessageFormat.format ("Could not convert from {0} to {1}", value
-                        .getClass ().toString (), (dst == null ? "command_representation" : dst.absolute_hname ())), e);
+                        .getClass ().toString (), (dst == null ? "gauge_state" : dst.absolute_hname ())), e);
             }
         }
         throw new ValueConversionException (MessageFormat.format ("Could not convert from {0} to {1}", value
-                .getClass ().toString (), (dst == null ? "command_representation" : dst.absolute_hname ())));
+                .getClass ().toString (), (dst == null ? "gauge_state" : dst.absolute_hname ())));
 
     }
 

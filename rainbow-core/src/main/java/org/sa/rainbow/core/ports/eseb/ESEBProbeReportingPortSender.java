@@ -7,7 +7,7 @@ import org.apache.log4j.Logger;
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.ports.IProbeReportPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
-import org.sa.rainbow.translator.probes.IProbe;
+import org.sa.rainbow.translator.probes.IProbeIdentifier;
 
 public class ESEBProbeReportingPortSender implements IProbeReportPort {
     static Logger         LOGGER = Logger.getLogger (ESEBProbeReportingPortSender.class);
@@ -22,11 +22,13 @@ public class ESEBProbeReportingPortSender implements IProbeReportPort {
     }
 
     @Override
-    public void reportData (IProbe probe, String data) {
+    public void reportData (IProbeIdentifier probe, String data) {
         if (probe.id ().equals (m_sender.id ())) {
             RainbowESEBMessage msg = m_role.createMessage ();
             msg.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_PROBE_REPORT);
             msg.setProperty (ESEBConstants.MSG_PROBE_ID_KEY, m_sender.id ());
+            msg.setProperty (ESEBConstants.MSG_PROBE_LOCATION_KEY, probe.location ());
+            msg.setProperty (ESEBConstants.MSG_PROBE_TYPE_KEY, probe.type ());
             msg.setProperty (ESEBConstants.MSG_DATA_KEY, data);
             m_role.publish (msg);
         }

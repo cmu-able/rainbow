@@ -1,5 +1,8 @@
 package org.sa.rainbow.core.gauges;
 
+import org.sa.rainbow.core.ports.IGaugeConfigurationPort;
+import org.sa.rainbow.core.ports.IGaugeQueryPort;
+
 
 /**
  * Interface for a gauge...
@@ -7,7 +10,7 @@ package org.sa.rainbow.core.gauges;
  * 
  * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
  */
-public interface IGauge extends IGaugeIdentifier, IGaugeConfigurationInterface, IGaugeQueryInterface {
+public interface IGauge extends IGaugeIdentifier, IGaugeConfigurationPort, IGaugeQueryPort {
 
     public static final String SETUP_LOCATION = "targetIP";
     public static final String SETUP_BEACON_PERIOD = "beaconPeriod";
@@ -18,6 +21,8 @@ public interface IGauge extends IGaugeIdentifier, IGaugeConfigurationInterface, 
     /** Determines the max number of updates to do per instance of sleep, to
      *  prevent one Gauge from hogging CPU in case of massive updates. */
     public static final int MAX_UPDATES_PER_SLEEP = 100;
+
+    public static final String ALL_LOCATIONS             = "*";
 
     /**
      * Returns the Gauge liveness beacon period, in milliseconds.

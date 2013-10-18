@@ -54,7 +54,7 @@ public class TypedAttribute extends Pair<String, String> {
             type = m.group (2).trim ();
         }
 
-        return new TypedAttribute (type, name);
+        return new TypedAttribute (name, type);
     }
 
 }

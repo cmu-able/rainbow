@@ -4,6 +4,7 @@
 package org.sa.rainbow.core.gauges;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +37,7 @@ public class GaugeInstanceDescription extends GaugeTypeDescription {
     private String m_instName = null;
     private String m_instComment = null;
     private TypedAttribute                        m_modelDesc         = null;
-    private Map<String, IRainbowModelCommandRepresentation> m_mappings          = null;
+    private Map<String, CommandRepresentation> m_mappings          = null;
 
     private String m_id = null;
     private State m_state = State.UNINITIALIZED;
@@ -50,9 +51,18 @@ public class GaugeInstanceDescription extends GaugeTypeDescription {
 
         super(gaugeType, typeComment);
         m_instName = gaugeName;
-        m_instComment = instComment;
+        m_instComment = instComment == null ? "" : instComment;
         m_mappings = new HashMap<> ();
-        m_beacon = new Beacon();
+        TypedAttributeWithValue tav = findSetupParam (IGauge.SETUP_BEACON_PERIOD);
+        if (tav != null) {
+            String beaconPeriod = (String )tav.getValue ();
+            if (beaconPeriod != null) {
+                m_beacon = new Beacon (Long.valueOf (beaconPeriod));
+            }
+        }
+        if (m_beacon == null) {
+            m_beacon = new Beacon ();
+        }
     }
 
     public String gaugeName () {
@@ -69,20 +79,34 @@ public class GaugeInstanceDescription extends GaugeTypeDescription {
 
     public void setModelDesc (TypedAttribute modelDesc) {
         m_modelDesc = modelDesc;
+        Collection<CommandRepresentation> commands = m_commandSignatures.values ();
+        for (CommandRepresentation command : commands) {
+            command.setModel (modelDesc);
+        }
     }
 
-    public void addCommand (IRainbowModelCommandRepresentation mapping) {
+    @Override
+    public void addCommandSignature (String key, CommandRepresentation commandRep) {
+        if (m_modelDesc != null) {
+            commandRep.setModel (m_modelDesc);
+        }
+        super.addCommandSignature (key, commandRep);
+    }
+
+    public void addCommand (CommandRepresentation mapping) {
         m_mappings.put (mapping.getCommandName (), mapping);
     }
+
 
     public IRainbowModelCommandRepresentation findMapping (String name) {
         return m_mappings.get(name);
     }
 
     @SuppressWarnings("unchecked")
-    public List<IRainbowModelCommandRepresentation> mappings () {
-        List<IRainbowModelCommandRepresentation> mapList = new ArrayList<IRainbowModelCommandRepresentation> (
+    public List<CommandRepresentation> mappings () {
+        List<CommandRepresentation> mapList = new ArrayList<CommandRepresentation> (
                 m_mappings.values ());
+
         return mapList;
     }
 
@@ -126,6 +150,10 @@ public class GaugeInstanceDescription extends GaugeTypeDescription {
     }
     public boolean isAlive () {
         return m_state == State.ALIVE;
+    }
+
+    public static String genID (GaugeInstanceDescription gd) {
+        return gd.gaugeName () + ":" + gd.gaugeType () + "@" + gd.location ();
     }
 
 }

@@ -7,14 +7,14 @@ import java.io.IOException;
 import java.util.List;
 
 import org.sa.rainbow.core.event.IRainbowMessage;
-import org.sa.rainbow.core.ports.IRainbowModelChangeBusPort;
+import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 
 /**
  * @author schmerl
  *
  */
-public class ESEBChangeBusAnnouncePort implements IRainbowModelChangeBusPort {
+public class ESEBChangeBusAnnouncePort implements IModelChangeBusPort {
 
     private ESEBConnector m_role;
 

@@ -3,13 +3,13 @@ package org.sa.rainbow.core.ports.local;
 import java.util.Properties;
 
 import org.sa.rainbow.core.RainbowMaster;
-import org.sa.rainbow.core.ports.IRainbowManagementPort;
+import org.sa.rainbow.core.ports.IDelegateManagementPort;
 
-public class LocalMasterSideManagementPort implements IRainbowManagementPort {
+public class LocalMasterSideManagementPort implements IDelegateManagementPort {
 
     private String m_delegateID;
     private RainbowMaster m_master;
-    private IRainbowManagementPort m_connectedPort;
+    private IDelegateManagementPort m_connectedPort;
 
     public LocalMasterSideManagementPort (RainbowMaster rainbowMaster, String delegateID) {
         m_delegateID = delegateID;
@@ -58,6 +58,16 @@ public class LocalMasterSideManagementPort implements IRainbowManagementPort {
 
     @Override
     public void dispose () {
+    }
+
+    @Override
+    public void startProbes () throws IllegalStateException {
+        m_connectedPort.startProbes ();
+    }
+
+    @Override
+    public void killProbes () throws IllegalStateException {
+        m_connectedPort.killProbes ();
     }
 
 }

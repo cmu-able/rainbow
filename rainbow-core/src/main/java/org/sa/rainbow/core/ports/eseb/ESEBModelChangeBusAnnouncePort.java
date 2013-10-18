@@ -4,12 +4,13 @@ import java.io.IOException;
 import java.util.List;
 
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.IModelsManager;
-import org.sa.rainbow.core.ports.IRainbowModelChangeBusPort;
+import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 
-public class ESEBModelChangeBusAnnouncePort implements IRainbowModelChangeBusPort {
+public class ESEBModelChangeBusAnnouncePort implements IModelChangeBusPort {
 
     private ESEBConnector m_role;
 
@@ -17,7 +18,7 @@ public class ESEBModelChangeBusAnnouncePort implements IRainbowModelChangeBusPor
         // Runs on master
         String delegateHost = ESEBProvider.getESEBClientHost ();
         String delegatePort = Rainbow.getProperty (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_PORT,
-                Rainbow.getProperty (Rainbow.PROPKEY_DEPLOYMENT_LOCATION, "1234"));
+                Rainbow.getProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION, "1234"));
         Short port = ESEBProvider.getESEBClientPort ();
         m_role = new ESEBConnector (delegateHost, port, ChannelT.MODEL_CHANGE);
     }

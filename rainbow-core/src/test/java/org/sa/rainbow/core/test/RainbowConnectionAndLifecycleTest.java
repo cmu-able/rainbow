@@ -12,6 +12,7 @@ import org.sa.rainbow.core.DelegateTestHelper;
 import org.sa.rainbow.core.IRainbowRunnable.State;
 import org.sa.rainbow.core.MasterTestHelper;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.error.RainbowConnectionException;
@@ -100,7 +101,7 @@ public abstract class RainbowConnectionAndLifecycleTest extends DefaultTCase {
         final int extra = TestPropertiesDefinition.getInt ("heartbeat.extra.time");
 
         // Wait for the heartbeat to arrive
-        Thread.sleep (Integer.valueOf (Rainbow.getProperty (Rainbow.PROPKEY_DELEGATE_BEACONPERIOD))
+        Thread.sleep (Integer.valueOf (Rainbow.getProperty (RainbowConstants.PROPKEY_DELEGATE_BEACONPERIOD))
                 + extra);
         Beacon b = mth.getBeaconFor (m_delegate.getId ());
         assertTrue (b != null);
@@ -182,7 +183,7 @@ public abstract class RainbowConnectionAndLifecycleTest extends DefaultTCase {
         // Wait for heartbeat period to ensure that a heartbeat isn't received, so the delegate is truly paused
         final int extra = TestPropertiesDefinition.getInt ("heartbeat.extra.time");
         int heartbeatTime = Integer.valueOf (Rainbow.getProperty (
-                Rainbow.PROPKEY_DELEGATE_BEACONPERIOD))
+                RainbowConstants.PROPKEY_DELEGATE_BEACONPERIOD))
                 + extra;
 
         final Beacon b = mth.getBeaconFor (m_delegate.getId ());

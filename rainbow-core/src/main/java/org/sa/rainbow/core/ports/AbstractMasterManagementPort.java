@@ -9,7 +9,7 @@ import org.sa.rainbow.core.RainbowMaster;
  * @author Bradley Schmerl: schmerl
  * 
  */
-public abstract class AbstractMasterManagementPort implements IRainbowManagementPort {
+public abstract class AbstractMasterManagementPort implements IDelegateManagementPort {
 
     private RainbowMaster m_master;
     private String        m_delegateID;

@@ -2,10 +2,11 @@ package org.sa.rainbow.core.ports.local;
 
 import java.util.Properties;
 
+import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.ports.AbstractDelegateConnectionPort;
-import org.sa.rainbow.core.ports.IRainbowManagementPort;
+import org.sa.rainbow.core.ports.IDelegateManagementPort;
 
 public class LocalDelegateConnectionPort extends AbstractDelegateConnectionPort {
 
@@ -18,9 +19,9 @@ public class LocalDelegateConnectionPort extends AbstractDelegateConnectionPort 
     }
 
     @Override
-    public IRainbowManagementPort connectDelegate (String delegateID, Properties connectionProperties) throws RainbowConnectionException {
+    public IDelegateManagementPort connectDelegate (String delegateID, Properties connectionProperties) throws RainbowConnectionException {
         if (m_masterPort != null) {
-            IRainbowManagementPort ddp = m_factory.createDelegateSideManagementPort (m_delegate, m_delegate.getId ());
+            IDelegateManagementPort ddp = m_factory.createDelegateSideManagementPort (m_delegate, m_delegate.getId ());
             m_masterPort.connectDelegate (delegateID, connectionProperties);
             return ddp;
         }
@@ -48,9 +49,15 @@ public class LocalDelegateConnectionPort extends AbstractDelegateConnectionPort 
     }
 
     @Override
-    public void report (String delegateID, ReportType type, String msg) {
-        if (m_masterPort != null)
-            m_masterPort.report (delegateID, type, msg);
+    public void report (String delegateID, ReportType type, RainbowComponentT compT, String msg) {
+        if (m_masterPort != null) {
+            m_masterPort.report (delegateID, type, compT, msg);
+        }
+    }
+
+    @Override
+    public void trace (RainbowComponentT type, String msg) {
+
     }
 
 }

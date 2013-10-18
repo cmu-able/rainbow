@@ -1,5 +1,6 @@
 package org.sa.rainbow.util;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -9,29 +10,61 @@ import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
+import org.apache.log4j.Priority;
+import org.reflections.Reflections;
+import org.reflections.scanners.ResourcesScanner;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
+import org.reflections.util.FilterBuilder;
+import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.health.IRainbowHealthProtocol;
+import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.util.Pair;
+import org.sa.rainbow.core.util.TypedAttribute;
+import org.sa.rainbow.translator.probes.IBashBasedScript;
 
 public class Util {
 
-    static Logger               LOGGER              = Logger.getLogger (Util.class);
+    static Logger                         LOGGER                   = Logger.getLogger (Util.class);
 
-    private static final String FILESEP             = "/";
-    public static final String  DOT                 = ".";
-    public static final String  SIZE_SFX            = ".size";
+    public static final String            FILESEP                  = "/";
+    public static final String            PATHSEP                  = ":";
+    public static final String            LOGEXT                   = ".log";
+    /** Usual newline sequence of character. */
+    public static final String            NEWLINE                  = "\n";
+    /** Windows newline sequence of characters. */
+    public static final String            NEWLINE_WIN              = "\r\n";
+    public static final String            AT                       = "@";
+    public static final String            DOT                      = ".";
+    public static final String            DASH                     = "-";
+    public static final String            SIZE_SFX                 = ".size";
+    /** Sets the byte arrays to the usual buffer size of 8 KB. */
+    public static final int               MAX_BYTES                = 8 * 1024;
+    /**
+     * Sets the limit on StringBuffer to a threshold max, above which a new StringBuffer should be constructed using
+     * less than 1/8 of original.
+     */
+    public static final int               MAX_STRING_BUFFER_LENGTH = 8 * 64000;                                        // max of 500KB
 
     // Patterns for tokens to be replaced in properties
-    public static final String  TOKEN_BEGIN         = "${";
-    public static final String  TOKEN_END           = "}";
-    private static final String LB_ESC              = "\\$\\{";                     // make sure this corresponds
-    private static final String RB_ESC              = "\\}";                        // make sure this corresponds
-    private static Pattern      m_substitutePattern = Pattern.compile ("[^\\$]*" + LB_ESC + "(.+?)" + RB_ESC
-            + "[^\\$]*");
+    public static final String            TOKEN_BEGIN              = "${";
+    public static final String            TOKEN_END                = "}";
+    private static final String           LB_ESC                   = "\\$\\{";                                         // make sure this corresponds
+    private static final String           RB_ESC                   = "\\}";                                            // make sure this corresponds
+    private static Pattern                m_substitutePattern      = Pattern.compile ("[^\\$]*" + LB_ESC + "(.+?)"
+            + RB_ESC + "[^\\$]*");
+
 
     public static File computeBasePath (final String configPath) {
         // determine path to target config dir
@@ -96,7 +129,7 @@ public class Util {
 
     public static String evalTokens (String str) {
         if (str == null) return str;
-        return evalTokens (str, null);
+        return evalTokens (str, Rainbow.allProperties ());
     }
 
     public static String[] evalCommandParameters (String value) {
@@ -112,14 +145,15 @@ public class Util {
         return ret;
     }
 
-    private static final SimpleDateFormat m_timelogFormat = new SimpleDateFormat ("yyyy.MM.dd-HH:mm:ss.SSSZ");
-
-    private static final String           AT              = "@";
-
-    /** Returns current timestamp string of the form yyyy.MM.dd-HH:mm:ss.SSSZ */
-    public static String timelog () {
-        return m_timelogFormat.format (Calendar.getInstance ().getTime ());
+    public static String[] evalCommand (String value) {
+        String[] split = value.split (",|\\.|\\(|\\|");
+        for (int i = 0; i < split.length; i++) {
+            split[i] = split[i].trim ();
+        }
+        return split;
     }
+
+
 
     //////////////////////////////////////////////
     //Type manipulation utility
@@ -234,5 +268,303 @@ public class Util {
         }
         return new Pair<String, String> (name, loc);
     }
+
+    public static TypedAttribute decomposeModelReference (String modelRef) {
+        String name = null;
+        String type = null;
+        int atIdx = modelRef.indexOf (':');
+        if (atIdx > -1) { // got both name and target location
+            name = modelRef.substring (0, atIdx);
+            type = modelRef.substring (atIdx + ":".length ());
+        }
+        else { // name only
+            name = modelRef;
+        }
+        return new TypedAttribute (name, type);
+    }
+
+    public static String genModelRef (String modelName, String modelType) {
+        return modelName + ":" + modelType;
+    }
+
+    /**
+     * Reads and returns all available output from a given Process.
+     * 
+     * @param p
+     *            the process to read output from
+     * @return String the textual output, with any MS-Dos newline replaced
+     */
+    public static String getProcessOutput (Process p) {
+        String str = "";
+        try {
+            StringBuffer buf = new StringBuffer ();
+            byte[] bytes = new byte[Util.MAX_BYTES];
+            BufferedInputStream bis = new BufferedInputStream (p.getInputStream ());
+            while (bis.available () > 0) {
+                int cnt = bis.read (bytes);
+                buf.append (new String (bytes, 0, cnt));
+            }
+            str = buf.toString ().replace (NEWLINE_WIN, NEWLINE);
+        }
+        catch (IOException e) {
+            logger ().error ("Get process output failed!", e);
+        }
+        return str;
+    }
+
+    public static void setExecutablePermission (String path) {
+        String[] cmds = { IBashBasedScript.LINUX_CHMOD, IBashBasedScript.CHMOD_OPT, path };
+        ProcessBuilder pb = new ProcessBuilder (cmds);
+        pb.redirectErrorStream (true);
+        try {
+            Process p = pb.start ();
+            try {
+                p.waitFor ();
+            }
+            catch (InterruptedException e) {
+                logger ().error ("chmod interrupted?", e);
+            }
+            String pOut = Util.getProcessOutput (p);
+            if (pOut.length () > 2) { // probably some useful output
+                logger ().info ("- Chmod output: " + pOut);
+            }
+        }
+        catch (IOException e) {
+            logger ().error ("Process I/O failed!", e);
+        }
+    }
+
+//////////////////////////////////////////////
+//Date and Time utility methods
+//
+    private static final SimpleDateFormat m_timestampFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+    /** Returns current timestamp string of the form yyyyMMddHHmmssSSS */
+    public static String timestamp () {
+        return m_timestampFormat.format(Calendar.getInstance().getTime());
+    }
+    private static final SimpleDateFormat m_timestampShortFormat = new SimpleDateFormat("MMddHHmmssSSS");
+    /** Returns current timestamp string of the form MMddHHmmssSSS */
+    public static String timestampShort () {
+        return m_timestampShortFormat.format(Calendar.getInstance().getTime());
+    }
+    private static final SimpleDateFormat m_timelogFormat = new SimpleDateFormat("yyyy.MM.dd-HH:mm:ss.SSSZ");
+    /** Returns current timestamp string of the form yyyy.MM.dd-HH:mm:ss.SSSZ */
+    public static String timelog () {
+        return m_timelogFormat.format(Calendar.getInstance().getTime());
+    }
+    private static final SimpleDateFormat m_probeLogFormat = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy");
+    /** Returns current timestamp string of the form EEE MMM d HH:mm:ss yyyy */
+    public static String probeLogTimestamp () {
+        return m_probeLogFormat.format(Calendar.getInstance().getTime());
+    }
+    /** Returns timestamp string of the form EEE MMM d HH:mm:ss yyyy for the supplied time in milliseconds */
+    public static String probeLogTimestampFor (long milliseconds) {
+        return m_probeLogFormat.format(milliseconds);
+    }
+
+    public static void pause (long ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException e) {
+            // intentionally ignore
+        }
+    }
+//    public static void waitUntilDisposed (IDisposable disposable) {
+//        while (! disposable.isDisposed()) {
+//            try {
+//                Thread.sleep(IRainbowRunnable.SLEEP_TIME);
+//            } catch (InterruptedException e) {
+//                // intentional ignore
+//            }
+//        }
+//
+//
+//    }
+
+//////////////////////////////////////////////
+//Debug settings and utility methods
+//
+    public static final String   DEFAULT_LEVEL       = "WARN";
+    /** ISO8601 prints the format "yyyy-MM-dd HH:mm:ss,SSS" */
+    public static final String   DEFAULT_PATTERN     = "%d{ISO8601} [%t] %p %c %x - %m%n";
+    public static final int      DEFAULT_MAX_SIZE    = 1024;
+    public static final int      DEFAULT_MAX_BACKUPS = 5;
+    public static final String   CONSOLE_PATTERN     = "[%d{ISO8601}] %m%n";
+    public static final String   DATA_LOGGER_NAME    = "DataLogger";
+    public static final String   DATA_PATTERN        = "%d{ISO8601} %m%n";
+
+
+    public static Properties defineLoggerProperties () {
+        String filepath = Rainbow.getProperty (RainbowConstants.PROPKEY_LOG_PATH);
+        if (!filepath.startsWith ("/")) {
+            filepath = getRelativeToPath (Rainbow.instance ().getTargetPath (), filepath).toString ();
+        }
+        String datapath = Rainbow.getProperty (RainbowConstants.PROPKEY_DATA_LOG_PATH);
+        if (!datapath.startsWith ("/")) {
+            datapath = getRelativeToPath (Rainbow.instance ().getTargetPath (), datapath).toString ();
+        }
+
+// setup logging
+        Properties props = new Properties ();
+        props.setProperty ("log4j.appender.FileLog", "org.apache.log4j.RollingFileAppender");
+        props.setProperty ("log4j.appender.FileLog.layout", "org.apache.log4j.PatternLayout");
+        props.setProperty ("log4j.appender.FileLog.layout.ConversionPattern",
+                Rainbow.getProperty (RainbowConstants.PROPKEY_LOG_PATTERN, DEFAULT_PATTERN));
+        props.setProperty ("log4j.appender.FileLog.MaxFileSize",
+                Rainbow.getProperty (RainbowConstants.PROPKEY_LOG_MAX_SIZE, String.valueOf (DEFAULT_MAX_SIZE)) + "KB");
+        props.setProperty ("log4j.appender.FileLog.MaxBackupIndex",
+                Rainbow.getProperty (RainbowConstants.PROPKEY_LOG_MAX_BACKUPS, String.valueOf (DEFAULT_MAX_BACKUPS)));
+        props.setProperty ("log4j.appender.FileLog.File", filepath);
+        props.setProperty ("log4j.appender.ConsoleLog", "org.apache.log4j.ConsoleAppender");
+        props.setProperty ("log4j.appender.ConsoleLog.Target", "System.out");
+        props.setProperty ("log4j.appender.ConsoleLog.layout", "org.apache.log4j.PatternLayout");
+        props.setProperty ("log4j.appender.ConsoleLog.layout.ConversionPattern", CONSOLE_PATTERN);
+        String rootSetting = Rainbow.getProperty (RainbowConstants.PROPKEY_LOG_LEVEL, DEFAULT_LEVEL) + ",FileLog,ConsoleLog";
+        props.setProperty ("log4j.rootLogger", rootSetting);
+        // setup data logging, using trace level
+        props.setProperty ("log4j.appender.DataLog", "org.apache.log4j.RollingFileAppender");
+        props.setProperty ("log4j.appender.DataLog.layout", "org.apache.log4j.PatternLayout");
+        props.setProperty ("log4j.appender.DataLog.layout.ConversionPattern", DATA_PATTERN);
+        props.setProperty ("log4j.appender.DataLog.MaxFileSize",
+                Rainbow.getProperty (RainbowConstants.PROPKEY_LOG_MAX_SIZE, String.valueOf (DEFAULT_MAX_SIZE)) + "KB");
+        props.setProperty ("log4j.appender.DataLog.MaxBackupIndex",
+                Rainbow.getProperty (RainbowConstants.PROPKEY_LOG_MAX_BACKUPS, String.valueOf (DEFAULT_MAX_BACKUPS)));
+        props.setProperty ("log4j.appender.DataLog.File", datapath);
+        props.setProperty ("log4j.logger." + DATA_LOGGER_NAME, "INFO,DataLog");
+        // don't invoke ancester appenders
+        props.setProperty ("log4j.additivity." + DATA_LOGGER_NAME, "false");
+
+        return props;
+    }
+
+    private static Logger m_dataLogger = null;
+
+
+    public static Logger dataLogger () {
+        if (m_dataLogger == null) {
+            m_dataLogger = Logger.getLogger (DATA_LOGGER_NAME);
+        }
+        return m_dataLogger;
+    }
+
+    /**
+     * Throws and catches a {@link Throwable}, and then reports the stack. This is useful for finding call traces
+     * 
+     * @param message
+     *            the message to report
+     */
+    public static void reportStack (String message) {
+        logger ().trace (message);
+        try {
+            throw new Throwable (message);
+        }
+        catch (Throwable t) {
+            logger ().trace ("", t);
+        }
+    }
+
+    public static void reportMemUsage () {
+        StringBuffer usageStr = new StringBuffer (IRainbowHealthProtocol.DATA_MEMORY_USE);
+        usageStr.append (Runtime.getRuntime ().freeMemory ()).append (" ");
+        usageStr.append (Runtime.getRuntime ().totalMemory ()).append (" ");
+        usageStr.append (Runtime.getRuntime ().maxMemory ()).append (" ");
+        dataLogger ().info (usageStr.toString ());
+    }
+
+    /**
+     * Lists Classes inside a given package.
+     * 
+     * @author Jon Peck http://jonpeck.com (adapted from http://www.javaworld.com/javaworld/javatips/jw-javatip113.html)
+     * @param pkgname
+     *            String name of a Package, e.g., "java.lang"
+     * @return Class[] classes inside the root of the given package
+     * @throws ClassNotFoundException
+     *             if the package name points to an invalid package
+     */
+    public static Class[] getClasses (String pkgname) throws ClassNotFoundException {
+        List<ClassLoader> classLoaderList = new LinkedList<ClassLoader> ();
+        classLoaderList.add (ClasspathHelper.contextClassLoader ());
+        classLoaderList.add (ClasspathHelper.staticClassLoader ());
+
+        Reflections reflections = new Reflections (new ConfigurationBuilder ()
+        .setScanners (new SubTypesScanner (false /* don't exclude Object.class */), new ResourcesScanner ())
+        .setUrls (ClasspathHelper.forClassLoader (classLoaderList.toArray (new ClassLoader[0])))
+        .filterInputsBy (new FilterBuilder ().include (FilterBuilder.prefix (pkgname))));
+        Set<Class<?>> classes = reflections.getSubTypesOf (Object.class);
+        if (classes != null) {
+            LinkedList<Class<?>> ll = new LinkedList<> (classes);
+            return ll.toArray (new Class[0]);
+        }
+        return new Class[0];
+//        List<Class<?>> classes = new ArrayList<Class<?>> ();
+//        // either get a File or JarFile object for the package
+//        String pkgdir = pkgname.replace ('.', '/');
+//        File directory = null;
+//        JarFile jarFile = null;
+//        try {
+//            URL pkgURL = Thread.currentThread ().getContextClassLoader ().getResource (pkgdir);
+//            logger ().debug ("*~* Got resource: " + pkgURL.toExternalForm ());
+//            // see if file is inside a JAR
+//            if (pkgURL.getProtocol ().equalsIgnoreCase ("jar")) {
+//                // obtain the Jar URL connection to get the JAR file
+//                JarURLConnection jarConn = (JarURLConnection )pkgURL.openConnection ();
+//                jarFile = jarConn.getJarFile ();
+//            }
+//            else {
+//                directory = new File (pkgURL.getFile ());
+//            }
+//        }
+//        catch (Exception e) { // expect NullPointerException or IOException
+//            String msg = pkgname + " does not appear to be a valid package!";
+//            logger ().error (msg, e);
+//            throw new ClassNotFoundException (pkgname + " does not appear to be a valid package!", e);
+//        }
+//        if (directory != null && directory.exists ()) { // search ordinary directory
+//            // get the list of files contained in the package
+//            String[] files = directory.list (new FilenameFilter () {
+//                @Override
+//                public boolean accept (File dir, String name) {
+//                    // we're only interested in .class files
+//                    return name.endsWith (".class");
+//                }
+//            });
+//            for (String fname : files) { // remove .class extension and add class
+//                classes.add (Class.forName (pkgname + '.' + fname.substring (0, fname.length () - 6)));
+//            }
+//        }
+//        else if (jarFile != null) { // sift through a jar file
+//            // look for files that has 'pkgname' after ! and ends with class
+//            Pattern p = Pattern.compile ("[!]/" + pkgname + "/(.+)[.]class");
+//            Enumeration<JarEntry> entries = jarFile.entries ();
+//            while (entries.hasMoreElements ()) {
+//                JarEntry e = entries.nextElement ();
+//                Matcher m = p.matcher (e.getName ());
+//                if (m.matches ()) { // found one
+//                    classes.add (Class.forName (pkgname + '.' + m.group (1)));
+//                }
+//            }
+//        }
+//        else
+//            throw new ClassNotFoundException (pkgname + " package does not correspond to an existent directory!");
+//
+//        Class<?>[] classArray = new Class<?>[classes.size ()];
+//        classes.toArray (classArray);
+//        return classArray;
+    }
+
+    public static Priority reportTypeToPriority (ReportType type) {
+        switch (type) {
+        case INFO:
+            return Priority.INFO;
+        case ERROR:
+            return Priority.ERROR;
+        case FATAL:
+            return Priority.FATAL;
+        case WARNING:
+            return Priority.WARN;
+        }
+        return Priority.ERROR;
+    }
+
 
 }

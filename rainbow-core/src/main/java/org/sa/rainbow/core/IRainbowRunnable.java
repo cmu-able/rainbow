@@ -31,7 +31,7 @@ public interface IRainbowRunnable extends IDisposable, Runnable {
 	 * Returns the name of this runnable.
 	 * @return String  the IRainbowRunnable's name
 	 */
-	public String name ();
+	public String id ();
 
 	/**
 	 * Starts the execution of the runnable, usually via thisThread.start().

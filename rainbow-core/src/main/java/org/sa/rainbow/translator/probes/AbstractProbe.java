@@ -5,11 +5,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.BadLifecycleStepException;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.ports.AbstractDelegateConnectionPort;
 import org.sa.rainbow.core.ports.IProbeConfigurationPort;
+import org.sa.rainbow.core.ports.IProbeLifecyclePort;
 import org.sa.rainbow.core.ports.IProbeReportPort;
+import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 
 /**
@@ -20,7 +23,7 @@ import org.sa.rainbow.core.ports.RainbowPortFactory;
  */
 public abstract class AbstractProbe implements IProbe {
 
-    protected static Logger       LOGGER                    = Logger.getLogger (AbstractProbe.class);
+    protected Logger                       LOGGER                      = Logger.getLogger (AbstractProbe.class);
     protected Map<String, Object> m_configParams              = null;
 
     private String                m_name                      = null;
@@ -29,8 +32,10 @@ public abstract class AbstractProbe implements IProbe {
     private Kind                  m_kind                      = null;
     private State                 m_state                     = State.NULL;
 
-    IProbeReportPort              m_reportingPort;
-    IProbeConfigurationPort       m_configurationPort;
+    protected IProbeReportPort             m_reportingPort;
+    protected IProbeConfigurationPort      m_configurationPort;
+    protected IProbeLifecyclePort          m_probeManagementPort;
+
     IProbeConfigurationPort       m_configurationPortCallback = new IProbeConfigurationPort () {
 
         @Override
@@ -39,6 +44,7 @@ public abstract class AbstractProbe implements IProbe {
             AbstractProbe.this.configure (configParams);
         }
     };
+    private AbstractDelegateConnectionPort m_loggingPort;
 
     /**
      * Main Constuctor that initializes the ID of this Probe.
@@ -56,8 +62,21 @@ public abstract class AbstractProbe implements IProbe {
         m_configParams = Collections.synchronizedMap (new HashMap<String, Object> ());
         setID (id);
         setType (type);
+        try {
+            m_probeManagementPort = RainbowPortFactory.createProbeManagementPort (this);
+        }
+        catch (RainbowConnectionException e) {
+            LOGGER.error ("Failed to connect to management port", e);
+        }
 
+    }
 
+    public void setLoggingPort (AbstractDelegateConnectionPort dcp) {
+        m_loggingPort = dcp;
+    }
+
+    public IRainbowReportingPort getLoggingPort () {
+        return m_loggingPort;
     }
 
     /* (non-Javadoc)
@@ -133,6 +152,7 @@ public abstract class AbstractProbe implements IProbe {
             throw new BadLifecycleStepException ("Cannot " + Lifecycle.CREATE + " when Probe State is " + m_state);
 
         m_state = State.INACTIVE;
+        m_probeManagementPort.reportCreated ();
     }
 
     /* (non-Javadoc)
@@ -144,7 +164,7 @@ public abstract class AbstractProbe implements IProbe {
             throw new BadLifecycleStepException ("Cannot " + Lifecycle.ACTIVATE + " when Probe State is " + m_state);
 
         m_state = State.ACTIVE;
-
+        m_probeManagementPort.reportActivated ();
         try {
             m_reportingPort = RainbowPortFactory.createProbeReportingPortSender (this);
             m_configurationPort = RainbowPortFactory.createProbeConfigurationPort (this, m_configurationPortCallback);
@@ -164,6 +184,7 @@ public abstract class AbstractProbe implements IProbe {
             throw new BadLifecycleStepException ("Cannot " + Lifecycle.DEACTIVATE + " when Probe State is " + m_state);
 
         m_state = State.INACTIVE;
+        m_probeManagementPort.reportDeactivated ();
     }
 
     /* (non-Javadoc)
@@ -173,7 +194,7 @@ public abstract class AbstractProbe implements IProbe {
     public synchronized void destroy () {
         if (m_state != State.INACTIVE)
             throw new BadLifecycleStepException ("Cannot " + Lifecycle.DESTROY + " when Probe State is " + m_state);
-
+        m_probeManagementPort.reportDeleted ();
         m_configParams.clear ();
         m_configParams = null;
         m_state = State.NULL;
@@ -230,6 +251,7 @@ public abstract class AbstractProbe implements IProbe {
     @Override
     public void configure (Map<String, Object> configParams) {
         m_configParams.putAll (configParams);
+        m_probeManagementPort.reportConfigured (configParams);
     }
 
     /* (non-Javadoc)
@@ -242,9 +264,10 @@ public abstract class AbstractProbe implements IProbe {
 
     protected void log (String txt) {
         String msg = "P[" + name () + "] " + txt;
-//        RainbowCloudEventHandler.sendTranslatorLog(msg);
-        // avoid duplicate output in the master's process
-        if (!Rainbow.isMaster ()) {
+        if (m_loggingPort != null) {
+            m_loggingPort.info (RainbowComponentT.PROBE, msg, LOGGER);
+        }
+        else {
             LOGGER.info (msg);
         }
     }

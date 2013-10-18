@@ -6,9 +6,9 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.RainbowDelegate;
-import org.sa.rainbow.core.ports.IRainbowManagementPort;
+import org.sa.rainbow.core.ports.IDelegateManagementPort;
 
-public class LocalDelegateManagementPort implements IRainbowManagementPort {
+public class LocalDelegateManagementPort implements IDelegateManagementPort {
 
     static Logger           LOGGER = Logger.getLogger (LocalDelegateManagementPort.class);
 
@@ -29,7 +29,8 @@ public class LocalDelegateManagementPort implements IRainbowManagementPort {
 
     @Override
     public void sendConfigurationInformation (Properties configuration) {
-        m_delegate.receiveConfigurationInformation (configuration, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+        m_delegate.receiveConfigurationInformation (configuration, Collections.EMPTY_LIST, Collections.EMPTY_LIST,
+                Collections.EMPTY_LIST);
     }
 
     @Override
@@ -76,6 +77,16 @@ public class LocalDelegateManagementPort implements IRainbowManagementPort {
 
     @Override
     public void dispose () {
+    }
+
+    @Override
+    public void startProbes () throws IllegalStateException {
+        m_delegate.startProbes ();
+    }
+
+    @Override
+    public void killProbes () throws IllegalStateException {
+        m_delegate.killProbes ();
     }
 
 }

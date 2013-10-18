@@ -8,10 +8,10 @@ import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
-import org.sa.rainbow.core.ports.IRainbowModelUSBusPort;
+import org.sa.rainbow.core.ports.IModelUSBusPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 
-public class ESEBGaugeModelUSBusPort implements IRainbowModelUSBusPort, ESEBConstants {
+public class ESEBGaugeModelUSBusPort implements IModelUSBusPort, ESEBConstants {
 
     private ESEBConnector m_role;
     private Identifiable  m_client;

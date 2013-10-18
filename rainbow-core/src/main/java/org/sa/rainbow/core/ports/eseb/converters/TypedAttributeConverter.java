@@ -117,9 +117,15 @@ public class TypedAttributeConverter implements TypelibJavaConversionRule {
 
                 fields.put (name, converter.from_java (ta.getName (), null));
                 fields.put (type, converter.from_java (ta.getType (), null));
-                fields.put (v,
-                        ((OptionalDataType )m_scope.find ("any?")).make (converter.from_java (
-                                ta.getValue (), null)));
+                OptionalDataType odt = (OptionalDataType )m_scope.find ("any?");
+                if (ta.getValue () == null) {
+                    fields.put (v, odt.make (null));
+                }
+                else {
+                    fields.put (v,
+                            odt.make (converter.from_java (
+                                    ta.getValue (), null)));
+                }
                 StructureDataValue sdv = sdt.make (fields);
                 return sdv;
             }

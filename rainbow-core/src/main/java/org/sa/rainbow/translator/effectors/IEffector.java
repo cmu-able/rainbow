@@ -3,64 +3,47 @@
  */
 package org.sa.rainbow.translator.effectors;
 
-import org.sa.rainbow.core.Identifiable;
+import java.util.List;
 
+import org.sa.rainbow.core.ports.IRainbowReportingPort;
 
 /**
- * General interface for the system Effector.
- * The Identifiable.id() returns the reference ID of this effector, which is
+ * General interface for the system Effector. The Identifiable.id() returns the reference ID of this effector, which is
  * the same ID used by Rainbow to obtain access to particular effectors.
  * 
  * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
  */
-public interface IEffector extends Identifiable {
+public interface IEffector extends IEffectorIdentifier, IEffectorExecutionPort {
 
-	public static enum Outcome {
-		UNKNOWN, CONFOUNDED, FAILURE, SUCCESS, TIMEOUT
-	};
 
-	public static enum Kind {
-		/** An effector based on shell or Perl script */
-		SCRIPT,
-		/** An effector implemented purely in Java */
-		JAVA,
-		/** Null type, returned by the NULL_EFFECTOR */
-		NULL
-	}
+    public static IEffector NULL_EFFECTOR = new IEffector () {
+        @Override
+        public String id () {
+            return "NullEffector@0.0.0.0";
+        }
 
-	public static IEffector NULL_EFFECTOR = new IEffector() {
-		public String id() {
-			return "NullEffector@0.0.0.0";
-		}
-		public String service() {
-			return "ANull";
-		}
-		public Kind kind() {
-			return Kind.NULL;
-		}
-		public Outcome execute(String[] args) {
-			return Outcome.UNKNOWN;
-		}
-	};
+        @Override
+        public String service () {
+            return "ANull";
+        }
 
-	/**
-	 * Returns the name of effector service provided by this IEffector.
-	 * @return String  Service name
-	 */
-	public String service ();
+        @Override
+        public Kind kind () {
+            return Kind.NULL;
+        }
 
-	/**
-	 * Returns the implementation {@link IEffector.Kind type} of this effector
-	 * @return Type  the implementation type
-	 */
-	public Kind kind ();
+        @Override
+        public Outcome execute (List<String> args) {
+            return Outcome.UNKNOWN;
+        }
 
-	/**
-	 * Executes the effect supplied by this effector, applying any arguments.
-	 * @param args  array of String arguments
-	 * @return Outcome  the execution outcome as defined in the enum
-	 *     {@link org.sa.rainbow.translator.effectors.IEffector.Outcome <code>Outcome</code>}
-	 */
-	public Outcome execute (String[] args);
+        @Override
+        public void setReportingPort (IRainbowReportingPort port) {
+        }
+
+    };
+
+
+    public void setReportingPort (IRainbowReportingPort port);
 
 }

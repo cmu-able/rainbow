@@ -5,9 +5,9 @@ import java.util.List;
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
-import org.sa.rainbow.core.ports.IRainbowModelUSBusPort;
+import org.sa.rainbow.core.ports.IModelUSBusPort;
 
-public class LocalModelsManagerClientUSPort implements IRainbowModelUSBusPort {
+public class LocalModelsManagerClientUSPort implements IModelUSBusPort {
 
     LocalModelsManagerUSPort m_connectedPort;
 

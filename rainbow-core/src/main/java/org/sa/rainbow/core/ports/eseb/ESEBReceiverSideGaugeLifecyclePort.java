@@ -8,15 +8,15 @@ import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
 import org.sa.rainbow.core.gauges.IGaugeProtocol;
-import org.sa.rainbow.core.gauges.IRainbowGaugeLifecycleBusPort;
+import org.sa.rainbow.core.ports.IGaugeLifecycleBusPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.IESEBListener;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
-public class ESEBReceiverSideGaugeLifecyclePort implements IRainbowGaugeLifecycleBusPort {
+public class ESEBReceiverSideGaugeLifecyclePort implements IGaugeLifecycleBusPort {
 
-    private IRainbowGaugeLifecycleBusPort m_manager;
+    private IGaugeLifecycleBusPort m_manager;
     private ESEBConnector                 m_connection;
 
     class MessageGaugeIdentifier implements IGaugeIdentifier {
@@ -46,7 +46,7 @@ public class ESEBReceiverSideGaugeLifecyclePort implements IRainbowGaugeLifecycl
 
     }
 
-    public ESEBReceiverSideGaugeLifecyclePort (IRainbowGaugeLifecycleBusPort manager) throws IOException {
+    public ESEBReceiverSideGaugeLifecyclePort (IGaugeLifecycleBusPort manager) throws IOException {
         m_manager = manager;
         m_connection = new ESEBConnector (
                 ESEBProvider.getESEBClientPort (RainbowConstants.PROPKEY_MASTER_CONNECTION_PORT), ChannelT.HEALTH);

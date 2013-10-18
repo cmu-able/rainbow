@@ -36,7 +36,7 @@ public class ESEBConnector {
     static Logger               LOGGER             = Logger.getLogger (ESEBConnector.class);
 
     public static enum ChannelT {
-        HEALTH, UIREPORT, MODEL_US, MODE_DS, MODEL_CHANGE, SYSTEM_US
+        HEALTH, UIREPORT, MODEL_US, MODEL_CHANGE, SYSTEM_US, RPC, MODEL_DS
     };
 
 
@@ -226,7 +226,8 @@ public class ESEBConnector {
         synchronized (bl) {
             sendAndReceive (msg, bl);
             try {
-                bl.wait (timeout);
+                // TODO: THis should be uncommented
+                bl.wait (/*timeout*/);
             }
             catch (InterruptedException e) {
             }

@@ -6,11 +6,11 @@ import java.util.List;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
 import org.sa.rainbow.core.gauges.IGaugeProtocol;
-import org.sa.rainbow.core.gauges.IRainbowGaugeLifecycleBusPort;
+import org.sa.rainbow.core.ports.IGaugeLifecycleBusPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
-public class ESEBGaugeSideLifecyclePort implements IRainbowGaugeLifecycleBusPort {
+public class ESEBGaugeSideLifecyclePort implements IGaugeLifecycleBusPort {
 
     private ESEBConnector m_connectionRole;
 

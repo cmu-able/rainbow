@@ -3,7 +3,6 @@ package org.sa.rainbow.translator.probes;
 import java.util.Map;
 
 import org.sa.rainbow.core.IRainbowRunnable;
-import org.sa.rainbow.core.Identifiable;
 
 
 /**
@@ -26,7 +25,7 @@ import org.sa.rainbow.core.Identifiable;
  * 
  * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
  */
-public interface IProbe extends Identifiable {
+public interface IProbe extends IProbeIdentifier {
 
     public static enum State {
         /** Indicates a Probe that has not been created or has been destroyed. */
@@ -81,34 +80,12 @@ public interface IProbe extends Identifiable {
     public static final String PROBE_CMD_DELIMITER = ">";
 
     /**
-     * The name of this Probe, unique within the deployment location.
-     * @return String  the name of this Probe
-     */
-    public String name ();
-
-    /**
-     * The location name where this Probe is deployed, usually the hostname.
-     * The location is set via the string ID at Probe instantiation time.
-     * @return String  the name of the location where the Probe is deployed.
-     */
-    public String location ();
-
-    /**
-     * The type of the Probe (aka "alias" with RelayProbes) is used to map
-     * Gauges to Probes. 
-     * @return String  the type name of the Probe 
-     */
-    public String type ();
-
-    /**
      * Returns the {@link Kind} of probe, may be Java, Script, etc.
      * @return Kind  the implementation variant of the Probe 
      */
     public Kind kind ();
 
     public void create ();
-
-    public void activate ();
 
     public void deactivate ();
 
@@ -162,21 +139,7 @@ public interface IProbe extends Identifiable {
      */
     public void reportData (String data);
 
-    /**
-     * Obtains a line of report data, used by the RainbowDelegate if the Probe
-     * runs within the RainbowDelegate process.
-     * In a standalone probe, this method may have no function if the
-     * {@linkplain IProbe.enqueueData()} method already forwards the data on to
-     * the Rainbow socket.
-     * @return String  the next data String reported by this Probe
-     */
-    public String receiveData ();
+    public void activate ();
 
-    /**
-     * Checks whether the internal data queue has pending report to be processed.
-     * @return boolean  <code>true</code> if there is any pending data to process,
-     *     <code>false</code> othewise
-     */
-    public boolean dataPending ();
 
 }

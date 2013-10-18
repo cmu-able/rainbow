@@ -13,7 +13,6 @@ import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.error.RainbowConnectionException;
-import org.sa.rainbow.core.gauges.IRainbowGaugeLifecycleBusPort;
 import org.sa.rainbow.core.models.IModelsManager;
 
 public class RainbowManagementPortFactory {
@@ -65,37 +64,37 @@ public class RainbowManagementPortFactory {
         return m_instance;
     }
 
-    public static IRainbowMasterConnectionPort createDelegateMasterConnectionPort (RainbowDelegate delegate)
+    public static IMasterConnectionPort createDelegateMasterConnectionPort (RainbowDelegate delegate)
             throws RainbowConnectionException {
         return getFactory ().createDelegateSideConnectionPort (delegate);
     }
 
-    public static IRainbowMasterConnectionPort createDelegateConnectionPort (RainbowMaster rainbowMaster)
+    public static IMasterConnectionPort createDelegateConnectionPort (RainbowMaster rainbowMaster)
             throws RainbowConnectionException {
         return getFactory ().createMasterSideConnectionPort (rainbowMaster);
     }
 
-    public static IRainbowManagementPort createMasterDeploymentPort (RainbowMaster rainbowMaster,
+    public static IDelegateManagementPort createMasterDeploymentPort (RainbowMaster rainbowMaster,
             String delegateID,
             Properties connectionProperties) throws RainbowConnectionException {
         return getFactory ().createMasterSideManagementPort (rainbowMaster, delegateID, connectionProperties);
     }
 
-    public static IRainbowManagementPort createDelegateDeploymentPort (RainbowDelegate delegate, String delegateID)
+    public static IDelegateManagementPort createDelegateDeploymentPort (RainbowDelegate delegate, String delegateID)
             throws RainbowConnectionException {
         return getFactory ().createDelegateSideManagementPort (delegate, delegateID);
     }
 
-    public static IRainbowModelUSBusPort createModelsManagerUSPort (IModelsManager m) throws RainbowConnectionException {
+    public static IModelUSBusPort createModelsManagerUSPort (IModelsManager m) throws RainbowConnectionException {
         return getFactory ().createModelsManagerUSPort (m);
     }
 
-    public static IRainbowModelUSBusPort createModelsManagerClientUSPort (Identifiable client)
+    public static IModelUSBusPort createModelsManagerClientUSPort (Identifiable client)
             throws RainbowConnectionException {
         return getFactory ().createModelsManagerClientUSPort (client);
     }
 
-    public static IRainbowGaugeLifecycleBusPort createGaugeSideLifecyclePort () throws RainbowConnectionException {
+    public static IGaugeLifecycleBusPort createGaugeSideLifecyclePort () throws RainbowConnectionException {
         return getFactory ().createGaugeSideLifecyclePort ();
 
     }

@@ -35,6 +35,24 @@ public class Rainbow implements RainbowConstants {
     static Logger LOGGER = Logger.getLogger (Rainbow.class);
 
     /**
+     * States used to track the target deployment environment of Rainbow component.
+     * 
+     * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
+     */
+    public static enum Environment {
+        /** We don't yet know what deployment environment. */
+        UNKNOWN,
+        /** We're in a Linux environment. */
+        LINUX,
+        /** We're in a Cygwin environment. */
+        CYGWIN,
+        /** We're in a Mac FreeBSD environment. */
+        MAC,
+        /** We're in a Windows environment without Cygwin. */
+        WINDOWS
+    };
+
+    /**
      * States used to help the Rainbow daemon process determine what to do after this Rainbow component exits.
      * 
      * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
@@ -108,6 +126,8 @@ public class Rainbow implements RainbowConstants {
     private static Rainbow m_instance = null;
 
     private static Map<String, IGauge> m_id2Gauge;
+
+    private static Environment         m_env             = Environment.UNKNOWN;
 
     private boolean            m_shouldTerminate = false;
 
@@ -193,8 +213,80 @@ public class Rainbow implements RainbowConstants {
         return instance ().m_props.getProperty (key, instance ().m_defaultProps.getProperty (key));
     }
 
+    public static boolean getProperty (String key, boolean b) {
+        String value = instance ().m_props.getProperty (key);
+        if (value != null)
+            return Boolean.valueOf (value);
+        else
+            return b;
+    }
+
+    public static long getProperty (String key, long default_) {
+        String value = instance ().m_props.getProperty (key);
+        if (value == null) return default_;
+        try {
+            return Long.parseLong (value);
+        }
+        catch (NumberFormatException e) {
+            return default_;
+        }
+    }
+
+    public static short getProperty (String key, short default_) {
+        String value = instance ().m_props.getProperty (key);
+        if (value == null) return default_;
+        try {
+            return Short.parseShort (value);
+        }
+        catch (NumberFormatException e) {
+            return default_;
+        }
+    }
+
+    public static int getProperty (String key, int default_) {
+        String value = instance ().m_props.getProperty (key);
+        if (value == null) return default_;
+        try {
+            return Integer.parseInt (value);
+        }
+        catch (NumberFormatException e) {
+            return default_;
+        }
+    }
+
+    public static double getProperty (String key, double default_) {
+        String value = instance ().m_props.getProperty (key);
+        if (value == null) return default_;
+        try {
+            return Double.parseDouble (value);
+        }
+        catch (NumberFormatException e) {
+            return default_;
+        }
+    }
+
+    public static void setProperty (String key, short val) {
+        instance ().m_props.setProperty (key, Short.toString (val));
+    }
+
+    public static void setProperty (String key, long val) {
+        instance ().m_props.setProperty (key, Long.toString (val));
+    }
+
+    public static void setProperty (String key, boolean val) {
+        instance ().m_props.setProperty (key, Boolean.toString (val));
+    }
+
     public static void setProperty (String key, String val) {
         instance ().m_props.setProperty (key, val);
+    }
+
+    public static void setProperty (String key, double val) {
+        instance ().m_props.setProperty (key, Double.toString (val));
+    }
+
+    public static void setProperty (String key, int val) {
+        instance ().m_props.setProperty (key, Integer.toString (val));
     }
 
     public static Properties allProperties () {
@@ -282,17 +374,17 @@ public class Rainbow implements RainbowConstants {
      */
     private void canonicalizeHost2IPs () {
         String masterLoc = m_props.getProperty (PROPKEY_MASTER_LOCATION);
-        canonicalizeHost2IP ("Master Location", masterLoc);
+        canonicalizeHost2IP ("Master Location", masterLoc, PROPKEY_MASTER_LOCATION);
 
         String deployLoc = m_props.getProperty (PROPKEY_DEPLOYMENT_LOCATION);
-        canonicalizeHost2IP ("Deployment Location", deployLoc);
+        canonicalizeHost2IP ("Deployment Location", deployLoc, PROPKEY_DEPLOYMENT_LOCATION);
 
         // Resolve all of the mentioned target locations
         int cnt = Integer.parseInt (m_props.getProperty (PROPKEY_TARGET_LOCATION + Util.SIZE_SFX, "0"));
         for (int i = 0; i < cnt; i++) {
-            String propName = Rainbow.PROPKEY_TARGET_LOCATION + Util.DOT + i;
+            String propName = RainbowConstants.PROPKEY_TARGET_LOCATION + Util.DOT + i;
             String hostLoc = m_props.getProperty (propName);
-            canonicalizeHost2IP ("Target host location", hostLoc);
+            canonicalizeHost2IP ("Target host location", hostLoc, propName);
         }
 
     }
@@ -321,11 +413,11 @@ public class Rainbow implements RainbowConstants {
         return host;
     }
 
-    private void canonicalizeHost2IP (String string, String masterLoc) {
+    private void canonicalizeHost2IP (String string, String masterLoc, String key) {
         masterLoc = Util.evalTokens (masterLoc, m_props);
         try {
             masterLoc = InetAddress.getByName (masterLoc).getHostAddress ();
-            m_props.setProperty (PROPKEY_MASTER_LOCATION, masterLoc);
+            m_props.setProperty (key, masterLoc);
         }
         catch (UnknownHostException e) {
             LOGGER.warn (
@@ -428,9 +520,9 @@ public class Rainbow implements RainbowConstants {
      */
     private boolean checkSetConfig (String hostname) {
         boolean good = false;
-        String cfgFileName = Rainbow.CONFIG_FILE_TEMPLATE.replace (CONFIG_FILE_STUB_NAME, hostname);
+        String cfgFileName = RainbowConstants.CONFIG_FILE_TEMPLATE.replace (CONFIG_FILE_STUB_NAME, hostname);
         if (Util.getRelativeToPath (m_targetPath, cfgFileName).exists ()) {
-            m_props.setProperty (Rainbow.PROPKEY_CONFIG_FILE, cfgFileName);
+            m_props.setProperty (RainbowConstants.PROPKEY_CONFIG_FILE, cfgFileName);
             good = true;
         }
         return good;
@@ -463,6 +555,15 @@ public class Rainbow implements RainbowConstants {
     public static IGauge lookupGauge (String id) {
         return instance ().m_id2Gauge.get (id);
     }
+
+    public static Environment environment () {
+        if (instance ().m_env == Environment.UNKNOWN) {
+            instance ().m_env = Environment.valueOf (getProperty (PROPKEY_DEPLOYMENT_ENVIRONMENT).toUpperCase ());
+        }
+        return instance ().m_env;
+    }
+
+
 
 
 

@@ -5,19 +5,20 @@ import java.text.MessageFormat;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.IModelUpdater;
 import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
-import org.sa.rainbow.core.ports.IRainbowModelUSBusPort;
+import org.sa.rainbow.core.ports.IModelUSBusPort;
+import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.IESEBListener;
 
-public class ESEBModelManagerModelUpdatePort implements ESEBConstants, IRainbowModelUSBusPort {
+public class ESEBModelManagerModelUpdatePort implements ESEBConstants, IModelUSBusPort {
 
-    static Logger         LOGGER = Logger.getLogger (ESEBModelManagerModelUpdatePort.class);
+    private IRainbowReportingPort LOGGER = new ESEBMasterReportingPort ();
 
     private IModelUpdater m_mm;
     private ESEBConnector m_role;
@@ -46,19 +47,22 @@ public class ESEBModelManagerModelUpdatePort implements ESEBConstants, IRainbowM
                         params.add (p);
                     }
 
+                    String commandName = (String )msg.getProperty (COMMAND_NAME_KEY);
                     try {
                         IModelInstance model = getModelInstance (modelType, modelName);
                         if (model != null) {
                             IRainbowModelCommandRepresentation command = model.getCommandFactory ().generateCommand (
-                                    (String )msg.getProperty (COMMAND_NAME_KEY), params.toArray (new String[0]));
+                                    commandName, params.toArray (new String[0]));
                             updateModel (command);
                         }
                         else
                             throw new RainbowModelException (MessageFormat.format ("Could not find the referred model ''{0}'':''{1}''.", modelName,
                                     modelType));
                     }
-                    catch (RainbowModelException e) {
-                        LOGGER.error ("Could not form the command from the ESEB message", e);
+                    catch (Throwable e) {
+                        LOGGER.error (RainbowComponentT.MODEL, MessageFormat.format (
+                                "Could not form the command ''{0}'' from the ESEB message",
+                                commandName), e);
                     }
                 }
             }

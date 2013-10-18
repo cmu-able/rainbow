@@ -1,5 +1,8 @@
 package org.sa.rainbow.core.gauges;
 
+import incubator.pval.Ensure;
+
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -7,13 +10,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
-import org.sa.rainbow.core.ports.IRainbowModelUSBusPort;
+import org.sa.rainbow.core.ports.DisconnectedRainbowDelegateConnectionPort;
+import org.sa.rainbow.core.ports.IGaugeConfigurationPort;
+import org.sa.rainbow.core.ports.IGaugeLifecycleBusPort;
+import org.sa.rainbow.core.ports.IGaugeQueryPort;
+import org.sa.rainbow.core.ports.IModelUSBusPort;
+import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
@@ -28,14 +36,13 @@ import org.sa.rainbow.util.Beacon;
  * 
  */
 public abstract class AbstractGauge extends AbstractRainbowRunnable implements IGauge {
-    Logger                                                    LOGGER         = Logger.getLogger (this.getClass ());
     private final String                                      m_id;
 
     /** The ports through which the gauge interacts with the outside world **/
-    protected IRainbowModelUSBusPort                          m_announcePort;
-    protected IRainbowGaugeLifecycleBusPort                   m_gaugeManagementPort;
-    protected IGaugeConfigurationInterface                    m_configurationPort;
-    protected IGaugeQueryInterface                            m_queryPort;
+    protected IModelUSBusPort                          m_announcePort;
+    protected IGaugeLifecycleBusPort                   m_gaugeManagementPort;
+    protected IGaugeConfigurationPort                    m_configurationPort;
+    protected IGaugeQueryPort                            m_queryPort;
     /**
      * Used to determine when to fire off beacon to consumers; the period will be set by the Gauge implementation
      * subclass
@@ -45,7 +52,6 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
     protected TypedAttribute                                  m_modelDesc    = null;
     protected Map<String, TypedAttributeWithValue>            m_setupParams  = null;
     protected Map<String, TypedAttributeWithValue>            m_configParams = null;
-    protected Map<String, String>                             m_mappings     = null;
     protected Map<String, IRainbowModelCommandRepresentation> m_commands     = null;
     protected Map<String, IRainbowModelCommandRepresentation> m_lastCommands = null;
 
@@ -72,6 +78,12 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
             TypedAttribute modelDesc, List<TypedAttributeWithValue> setupParams,
             List<IRainbowModelCommandRepresentation> mappings) throws RainbowException {
         super (threadName);
+        Ensure.is_false (mappings == null || mappings.isEmpty ());
+        Ensure.is_false (modelDesc == null);
+        Ensure.is_false (modelDesc.getName () == null);
+        Ensure.is_false (modelDesc.getType () == null);
+        Ensure.is_false (setupParams == null); // can be empty
+
         this.m_id = id;
 
         m_gaugeBeacon = new Beacon (beaconPeriod);
@@ -80,7 +92,6 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
 
         m_setupParams = new HashMap<String, TypedAttributeWithValue> ();
         m_configParams = new HashMap<String, TypedAttributeWithValue> ();
-        m_mappings = new HashMap<String, String> ();
         m_lastCommands = new HashMap<String, IRainbowModelCommandRepresentation> ();
         m_commands = new HashMap<String, IRainbowModelCommandRepresentation> ();
 
@@ -109,7 +120,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
         }
         // TODO: Remove reliance on ParticipantException
         catch (RainbowConnectionException e) {
-            LOGGER.error ("Could not interact with the outside world", e);
+            m_reportingPort.error (getComponentType (), "Could not interact with the outside world", e);
             throw new RainbowException ("The gauge could not be started because the ports could not be set up.", e);
         }
     }
@@ -139,8 +150,8 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
 
         m_setupParams.clear ();
         m_configParams.clear ();
-        m_mappings.clear ();
         m_lastCommands.clear ();
+        m_commands.clear ();
 
         // null-out data members
         m_gaugeManagementPort = null;
@@ -149,8 +160,8 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
         m_modelDesc = null;
         m_setupParams = null;
         m_configParams = null;
-        m_mappings = null;
         m_lastCommands = null;
+        m_commands = null;
     }
 
     /* (non-Javadoc)
@@ -199,9 +210,6 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
             // set the runner timer directly
             setSleepTime ((Long )triple.getValue ());
         }
-        if (m_mappings.keySet ().contains (triple.getName ())) {
-            initProperty (triple.getName (), triple.getValue ());
-        }
     }
 
     abstract protected void initProperty (String name, Object value);
@@ -224,8 +232,17 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
     }
 
     public void issueCommand (IRainbowModelCommandRepresentation cmd, Map<String, String> parameters) {
-        IRainbowModelCommandRepresentation actualCmd = new CommandRepresentation (cmd);
+        CommandRepresentation actualCmd = new CommandRepresentation (cmd);
         Map<String, IRainbowModelCommandRepresentation> actualsMap = new HashMap<> ();
+        String target = cmd.getTarget ();
+        String actualTarget = parameters.get (target);
+        if (actualTarget != null) {
+            // Need to set the target
+            actualCmd = new CommandRepresentation (cmd.getLabel (), cmd.getCommandName (), cmd.getModelName (),
+                    cmd.getModelType (), actualTarget, cmd.getParameters ());
+            actualsMap.put (pullOutParam (target), actualCmd);
+        }
+
         for (int i = 0; i < cmd.getParameters ().length; i++) {
             String p = cmd.getParameters ()[i];
             String actualVal = parameters.get (p);
@@ -237,7 +254,9 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
         m_lastCommands.put (cmd.getCommandName (), actualCmd);
         m_lastCommands.putAll (actualsMap);
         m_announcePort.updateModel (actualCmd);
-
+        m_reportingPort.info (RainbowComponentT.GAUGE,
+                MessageFormat.format ("G[{0}]: {1}.{2}{3}", id (),
+                        actualCmd.getTarget (), actualCmd.getCommandName (), actualCmd.getParameters ()));
     }
 
 
@@ -249,7 +268,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
 
         IRainbowModelCommandRepresentation cmd = m_lastCommands.get (pullOutParam (value));
         if (cmd == null) {
-            LOGGER.warn ("Could not find a command associated with '" + value + "'.");
+            m_reportingPort.warn (getComponentType (), "Could not find a command associated with '" + value + "'.");
         }
         return cmd;
     }
@@ -268,11 +287,9 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
     @Override
     protected void log (String txt) {
         String msg = "G[" + id () + "] " + txt;
+        m_reportingPort.info (RainbowComponentT.GAUGE, txt);
 //        RainbowCloudEventHandler.sendTranslatorLog (msg);
         // avoid duplicate output in the master's process
-        if (!Rainbow.isMaster ()) {
-            LOGGER.info (msg);
-        }
     }
 
     /* (non-Javadoc)
@@ -296,6 +313,18 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
      */
     protected String deploymentLocation () {
         return (String )m_setupParams.get (SETUP_LOCATION).getValue ();
+    }
+
+    public IRainbowReportingPort getReportingPort () {
+        if (m_reportingPort == null) {
+            m_reportingPort = new DisconnectedRainbowDelegateConnectionPort ();
+        }
+        return m_reportingPort;
+    }
+
+    @Override
+    protected RainbowComponentT getComponentType () {
+        return RainbowComponentT.GAUGE;
     }
 
 }

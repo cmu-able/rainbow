@@ -15,10 +15,10 @@ import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.AbstractGauge;
 import org.sa.rainbow.core.gauges.CommandRepresentation;
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
-import org.sa.rainbow.core.gauges.IRainbowGaugeLifecycleBusPort;
 import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
-import org.sa.rainbow.core.ports.eseb.ESEBGaugeConfigurationInterfaceRequirer;
+import org.sa.rainbow.core.ports.IGaugeLifecycleBusPort;
 import org.sa.rainbow.core.ports.eseb.ESEBReceiverSideGaugeLifecyclePort;
+import org.sa.rainbow.core.ports.eseb.rpc.ESEBGaugeConfigurationRequirerPort;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.util.Beacon;
@@ -108,7 +108,7 @@ public class TestGaugeInfrastructure extends DefaultTCase {
     public void testGaugeConfigurationMessage () throws Exception {
         vals = null;
 
-        new ESEBReceiverSideGaugeLifecyclePort (new IRainbowGaugeLifecycleBusPort () {
+        new ESEBReceiverSideGaugeLifecyclePort (new IGaugeLifecycleBusPort () {
 
             @Override
             public void sendBeacon (IGaugeIdentifier gauge) {
@@ -155,7 +155,7 @@ public class TestGaugeInfrastructure extends DefaultTCase {
             }
         });
 
-        ESEBGaugeConfigurationInterfaceRequirer req = new ESEBGaugeConfigurationInterfaceRequirer (testGauge);
+        ESEBGaugeConfigurationRequirerPort req = new ESEBGaugeConfigurationRequirerPort (testGauge);
         List<TypedAttributeWithValue> configParams = new LinkedList<> ();
         configParams.add (new TypedAttributeWithValue ("testString", "string", "football"));
         configParams.add (new TypedAttributeWithValue ("testShort", "short", (short )1234));
@@ -185,7 +185,7 @@ public class TestGaugeInfrastructure extends DefaultTCase {
         m_gaugeCreated = false;
         m_gaugeReconfigured = false;
 
-        new ESEBReceiverSideGaugeLifecyclePort (new IRainbowGaugeLifecycleBusPort () {
+        new ESEBReceiverSideGaugeLifecyclePort (new IGaugeLifecycleBusPort () {
 
             @Override
             public void sendBeacon (IGaugeIdentifier gauge) {
@@ -231,7 +231,7 @@ public class TestGaugeInfrastructure extends DefaultTCase {
             }
         });
 
-        ESEBGaugeConfigurationInterfaceRequirer req = new ESEBGaugeConfigurationInterfaceRequirer (testGauge);
+        ESEBGaugeConfigurationRequirerPort req = new ESEBGaugeConfigurationRequirerPort (testGauge);
         req.reconfigureGauge ();
         wait_for_true (new BooleanEvaluation () {
 

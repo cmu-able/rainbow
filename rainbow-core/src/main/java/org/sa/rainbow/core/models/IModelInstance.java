@@ -1,6 +1,7 @@
 package org.sa.rainbow.core.models;
 
 import org.sa.rainbow.core.error.RainbowCopyException;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.commands.ModelCommandFactory;
 
 /**
@@ -51,4 +52,8 @@ public interface IModelInstance<T> {
     public String getModelName ();
 
     public ModelCommandFactory<T> getCommandFactory ();
+
+    public void setOriginalSource (String source);
+
+    public void dispose () throws RainbowException;
 }

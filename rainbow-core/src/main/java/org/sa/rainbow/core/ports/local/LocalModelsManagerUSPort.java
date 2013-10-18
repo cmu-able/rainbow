@@ -6,9 +6,9 @@ import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.IModelsManager;
 import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
-import org.sa.rainbow.core.ports.IRainbowModelUSBusPort;
+import org.sa.rainbow.core.ports.IModelUSBusPort;
 
-public class LocalModelsManagerUSPort implements IRainbowModelUSBusPort {
+public class LocalModelsManagerUSPort implements IModelUSBusPort {
 
     private IModelsManager m_modelsManager;
 

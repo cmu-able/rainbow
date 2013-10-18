@@ -7,6 +7,14 @@ import java.util.Map;
 
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.ports.eseb.converters.CollectionConverter;
+import org.sa.rainbow.core.ports.eseb.converters.CommandRepresentationConverter;
+import org.sa.rainbow.core.ports.eseb.converters.DescriptionAttributesConverter;
+import org.sa.rainbow.core.ports.eseb.converters.GaugeInstanceDescriptionConverter;
+import org.sa.rainbow.core.ports.eseb.converters.GaugeStateConverter;
+import org.sa.rainbow.core.ports.eseb.converters.OperationResultConverter;
+import org.sa.rainbow.core.ports.eseb.converters.OutcomeConverter;
+import org.sa.rainbow.core.ports.eseb.converters.TypedAttributeConverter;
 
 import edu.cmu.cs.able.eseb.bus.EventBus;
 import edu.cmu.cs.able.eseb.conn.BusConnection;
@@ -81,8 +89,9 @@ public class ESEBProvider {
 
     static final PrimitiveScope                        SCOPE             = new PrimitiveScope ();
     protected static final DefaultTypelibJavaConverter CONVERTER         = DefaultTypelibJavaConverter.make (SCOPE);
-
     static {
+
+
         DefaultTypelibParser parser = DefaultTypelibParser.make ();
         TypelibParsingContext context = new TypelibParsingContext (SCOPE, SCOPE);
         try {
@@ -98,12 +107,30 @@ public class ESEBProvider {
                     context);
             parser.parse (
                     new ParsecFileReader ()
-                            .read_memory ("struct probe_description {string name; string alias; string location; string kind_name; string kind; map<string,string> info; map<string,list<string>> arrays;}"),
+                    .read_memory ("struct probe_description {string name; string alias; string location; string kind_name; string kind; map<string,string> info; map<string,list<string>> arrays;}"),
                     context);
             parser.parse (
                     new ParsecFileReader ()
                     .read_memory ("struct effector_description {string name; string location; string kind_name; string kind; map<string,string> info; map<string,list<string>> arrays;}"),
                     context);
+            parser.parse (
+                    new ParsecFileReader ()
+                    .read_memory ("struct gauge_instance {string name; string comment; string type; string type_comment; string model_name; string model_type; list<typed_attribute_with_value> setup_params; list<command_representation> commands;}"),
+                    context);
+            parser.parse (
+                    new ParsecFileReader ().read_memory ("struct operation_result {string reply; string result;}"),
+                    context);
+            parser.parse (new ParsecFileReader ()
+            .read_memory ("enum outcome {unknown; confounded; failure; success; timeout;}"), context);
+
+            CONVERTER.add (new CollectionConverter ());
+            CONVERTER.add (new TypedAttributeConverter (ESEBProvider.SCOPE));
+            CONVERTER.add (new CommandRepresentationConverter (ESEBProvider.SCOPE));
+            CONVERTER.add (new GaugeStateConverter (ESEBProvider.SCOPE));
+            CONVERTER.add (new DescriptionAttributesConverter (ESEBProvider.SCOPE));
+            CONVERTER.add (new GaugeInstanceDescriptionConverter (ESEBProvider.SCOPE));
+            CONVERTER.add (new OutcomeConverter (ESEBProvider.SCOPE));
+            CONVERTER.add (new OperationResultConverter (ESEBProvider.SCOPE));
         }
         catch (LocalizedParseException e) {
             // TODO Auto-generated catch block

@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Properties;
 
 import org.sa.rainbow.core.RainbowDelegate;
+import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
 import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
 import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
 
@@ -14,7 +15,7 @@ import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
  * @author Bradley Schmerl: schmerl
  * 
  */
-public abstract class AbstractDelegateManagementPort implements IRainbowManagementPort {
+public abstract class AbstractDelegateManagementPort implements IDelegateManagementPort {
 
     private RainbowDelegate m_delegate;
 
@@ -37,7 +38,7 @@ public abstract class AbstractDelegateManagementPort implements IRainbowManageme
     //TODO: Delete this interfaces
     public void sendConfigurationInformation (Properties configuration) {
         m_delegate.receiveConfigurationInformation (configuration, Collections.<ProbeAttributes> emptyList (),
-                Collections.<EffectorAttributes> emptyList ());
+                Collections.<EffectorAttributes> emptyList (), Collections.<GaugeInstanceDescription> emptyList ());
 
     }
 
@@ -57,6 +58,16 @@ public abstract class AbstractDelegateManagementPort implements IRainbowManageme
     public boolean terminateDelegate () throws IllegalStateException {
         m_delegate.terminate ();
         return true;
+    }
+
+    @Override
+    public void startProbes () throws IllegalStateException {
+        m_delegate.startProbes ();
+    }
+
+    @Override
+    public void killProbes () throws IllegalStateException {
+        m_delegate.killProbes ();
     }
 
 }

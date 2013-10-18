@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -15,6 +16,7 @@ import java.util.TreeSet;
 
 import org.ho.yaml.Yaml;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.gauges.CommandRepresentation;
 import org.sa.rainbow.core.gauges.GaugeDescription;
 import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
@@ -22,6 +24,8 @@ import org.sa.rainbow.core.gauges.GaugeTypeDescription;
 import org.sa.rainbow.core.models.DescriptionAttributes;
 import org.sa.rainbow.core.models.EffectorDescription;
 import org.sa.rainbow.core.models.ProbeDescription;
+import org.sa.rainbow.core.models.UtilityPreferenceDescription;
+import org.sa.rainbow.core.models.UtilityPreferenceDescription.UtilityAttributes;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.translator.effectors.IEffector;
@@ -34,86 +38,90 @@ import org.sa.rainbow.translator.probes.IProbe;
  */
 public abstract class YamlUtil {
 
-//	/**
-//	 * Retrieves the utility definitions, then<ul>
-//	 * <li> store the weights
-//	 * <li> store the utility functions
-//	 * <li> for each tactic, store respective tactic attribute vectors.
-//	 * @return UtilityPreferenceDescription  the data structure of utility definitions.
-//	 */
-//	@SuppressWarnings("unchecked")
-//	public static UtilityPreferenceDescription loadUtilityPrefs () {
-//		UtilityPreferenceDescription prefDesc = new UtilityPreferenceDescription();
-//
-//		Map<String,Map<String,Map>> utilityDefMap = null;
-//		try {
-//			File defFile = Util.getRelativeToPath(Rainbow.instance().getTargetPath(), Rainbow.property(Rainbow.PROPKEY_UTILITY_PATH));
-//			Object o = Yaml.load(defFile);
-//			Util.logger().trace("Utiltiy Def Yaml file loaded: " + o.toString());
-//			utilityDefMap = (Map )o;
-//		} catch (FileNotFoundException e) {
-//			Util.logger().error("Loading Utiltiy Def Yaml file failed!", e);
-//			utilityDefMap = new HashMap<String,Map<String,Map>> ();
-//		}
-//
-//		// store weights
-//		Map<String,Map> weightMap = utilityDefMap.get("weights");
-//		if (weightMap != null) {
-//		for (Map.Entry<String,Map> e : weightMap.entrySet()) {
-//			Map<String,Double> kvMap = new HashMap<String,Double>();
-//			double sum = 0.0;
-//			for (Object k : e.getValue().keySet()) {
-//				Object v = e.getValue().get(k);
-//				if (k instanceof String && v instanceof Number) {
-//					kvMap.put((String )k, ((Number )v).doubleValue());
-//					sum += ((Number )v).doubleValue();
-//				}
-//			}
-//			if (sum < 1.0 || sum > 1.0) {  // issue warning
-//				Util.logger().warn("Weights for " + e.getKey() + " did NOT sum to 1!");
-//			}
-//			prefDesc.weights.put(e.getKey(), kvMap);
-//		}
-//		Util.logger().trace(" - Weights collected: " + prefDesc.weights);
-//		}
-//		else {
-//			Util.logger ().error(MessageFormat.format(" - No Weights exist in ''{0}''", Rainbow.property(Rainbow.PROPKEY_UTILITY_PATH)));
-//		}
-//		// create utility functions
-//		Map<String,Map> utilMap = utilityDefMap.get("utilities");
-//		if (utilMap != null) {
-//		for (String k : utilMap.keySet()) {
-//			Map vMap = utilMap.get(k);
-//			UtilityAttributes ua = new UtilityAttributes();
-//			ua.label = (String )vMap.get("label");
-//			ua.mapping = (String )vMap.get("mapping");
-//			ua.desc = (String )vMap.get("description");
-//			ua.values = (Map<Number,Number> )vMap.get("utility");
-//			prefDesc.utilities.put(k, ua);
-//		}
-//		Util.logger().trace(" - Utility functions collected: " + prefDesc.utilities);
-//		}
-//		else {
-//			Util.logger ().error (MessageFormat.format(" - No utilities exist in ''{0}''", Rainbow.property(Rainbow.PROPKEY_UTILITY_PATH)));
-//		}
-//
-//		Map<String,Map> vectorMap = utilityDefMap.get("vectors");
-//		if (vectorMap != null) {
-//		for (String k : vectorMap.keySet()) {
-//			prefDesc.attributeVectors.put(k, (Map<String,Object> )vectorMap.get(k));
-//		}
-//		Util.logger().trace(" - Utility attribute vectors collected: " + prefDesc.attributeVectors);
-//		}
-//		else {
-//			Util.logger ().error (MessageFormat.format(" - No vectors exist in ''{0}''", Rainbow.property(Rainbow.PROPKEY_UTILITY_PATH)));
-//		}
-//
-//		return prefDesc;
-//	}
+    /**
+     * Retrieves the utility definitions, then
+     * <ul>
+     * <li>store the weights
+     * <li>store the utility functions
+     * <li>for each tactic, store respective tactic attribute vectors.
+     * 
+     * @return UtilityPreferenceDescription the data structure of utility definitions.
+     */
+    @SuppressWarnings ("unchecked")
+    public static UtilityPreferenceDescription loadUtilityPrefs () {
+        UtilityPreferenceDescription prefDesc = new UtilityPreferenceDescription ();
+
+        Map<String, Map<String, Map>> utilityDefMap = null;
+        String utilityPath = Rainbow.getProperty (RainbowConstants.PROPKEY_UTILITY_PATH);
+        try {
+            File defFile = Util.getRelativeToPath (Rainbow.instance ().getTargetPath (), utilityPath);
+            Object o = Yaml.load (defFile);
+            Util.logger ().trace ("Utiltiy Def Yaml file loaded: " + o.toString ());
+            utilityDefMap = (Map )o;
+        }
+        catch (FileNotFoundException e) {
+            Util.logger ().error ("Loading Utiltiy Def Yaml file failed!", e);
+            utilityDefMap = new HashMap<String, Map<String, Map>> ();
+        }
+
+        // store weights
+        Map<String, Map> weightMap = utilityDefMap.get ("weights");
+        if (weightMap != null) {
+            for (Map.Entry<String, Map> e : weightMap.entrySet ()) {
+                Map<String, Double> kvMap = new HashMap<String, Double> ();
+                double sum = 0.0;
+                for (Object k : e.getValue ().keySet ()) {
+                    Object v = e.getValue ().get (k);
+                    if (k instanceof String && v instanceof Number) {
+                        kvMap.put ((String )k, ((Number )v).doubleValue ());
+                        sum += ((Number )v).doubleValue ();
+                    }
+                }
+                if (sum < 1.0 || sum > 1.0) { // issue warning
+                    Util.logger ().warn ("Weights for " + e.getKey () + " did NOT sum to 1!");
+                }
+                prefDesc.weights.put (e.getKey (), kvMap);
+            }
+            Util.logger ().trace (" - Weights collected: " + prefDesc.weights);
+        }
+        else {
+            Util.logger ().error (MessageFormat.format (" - No Weights exist in ''{0}''", utilityPath));
+        }
+        // create utility functions
+        Map<String, Map> utilMap = utilityDefMap.get ("utilities");
+        if (utilMap != null) {
+            for (String k : utilMap.keySet ()) {
+                Map vMap = utilMap.get (k);
+                UtilityAttributes ua = new UtilityAttributes ();
+                ua.label = (String )vMap.get ("label");
+                ua.mapping = (String )vMap.get ("mapping");
+                ua.desc = (String )vMap.get ("description");
+                ua.values = (Map<Number, Number> )vMap.get ("utility");
+                prefDesc.utilities.put (k, ua);
+            }
+            Util.logger ().trace (" - Utility functions collected: " + prefDesc.utilities);
+        }
+        else {
+            Util.logger ().error (MessageFormat.format (" - No utilities exist in ''{0}''", utilityPath));
+        }
+
+        Map<String, Map> vectorMap = utilityDefMap.get ("vectors");
+        if (vectorMap != null) {
+            for (String k : vectorMap.keySet ()) {
+                prefDesc.attributeVectors.put (k, vectorMap.get (k));
+            }
+            Util.logger ().trace (" - Utility attribute vectors collected: " + prefDesc.attributeVectors);
+        }
+        else {
+            Util.logger ().error (MessageFormat.format (" - No vectors exist in ''{0}''", utilityPath));
+        }
+
+        return prefDesc;
+    }
 
     public static GaugeDescription loadGaugeSpecs () {
         File gaugeSpec = Util.getRelativeToPath (Rainbow.instance ().getTargetPath (),
-                Rainbow.getProperty (Rainbow.PROPKEY_GAUGES_PATH));
+                Rainbow.getProperty (RainbowConstants.PROPKEY_GAUGES_PATH));
         return loadGaugeSpecs (gaugeSpec);
     }
 
@@ -142,8 +150,8 @@ public abstract class YamlUtil {
                 Map<String, String> values = (Map<String, String> )attrMap.get ("commands");
                 for (Map.Entry<String, String> value : values.entrySet ()) {
                     String valName = value.getKey ();
-                    String valType = value.getValue ();
-                    gaugeTypeSpec.addCommandSignature (new TypedAttribute (valType, valName));
+                    String signature = value.getValue ();
+                    gaugeTypeSpec.addCommandSignature (valName, signature);
                 }
                 // get mappings of setup params
                 Map<String, Map> params = (Map<String, Map> )attrMap.get ("setupParams");
@@ -158,7 +166,7 @@ public abstract class YamlUtil {
                     if (pdefault != null && pdefault instanceof String) {
                         pdefault = Util.evalTokens ((String )pdefault);
                     }
-                    gaugeTypeSpec.addSetupParam (new TypedAttributeWithValue (ptype, pname, pdefault));
+                    gaugeTypeSpec.addSetupParam (new TypedAttributeWithValue (pname, ptype, pdefault));
                 }
                 // get mappings of config params
                 params = (Map<String, Map> )attrMap.get ("configParams");
@@ -173,7 +181,7 @@ public abstract class YamlUtil {
                     if (pdefault != null && pdefault instanceof String) {
                         pdefault = Util.evalTokens ((String )pdefault);
                     }
-                    gaugeTypeSpec.addConfigParam (new TypedAttributeWithValue (ptype, pname, pdefault));
+                    gaugeTypeSpec.addConfigParam (new TypedAttributeWithValue (pname, ptype, pdefault));
                 }
             }
             Util.LOGGER.trace (" - Gauge Types collected: " + gd.typeSpec.keySet ());
@@ -201,11 +209,10 @@ public abstract class YamlUtil {
                 // get commands
                 Map<String, String> commandMappings = (Map<String, String> )attrMap.get ("commands");
                 for (Entry<String, String> cmd : commandMappings.entrySet ()) {
-                    String commandName = cmd.getKey ();
-                    String[] args = Util.evalCommandParameters (cmd.getValue ());
-                    gaugeInstSpec.addCommand (new CommandRepresentation (commandName, commandName,
-                            modelDesc.getName (), modelDesc.getType (), args[0], Arrays.copyOfRange (args, 1,
-                                    args.length)));
+                    String key = cmd.getKey ();
+                    String[] args = Util.evalCommand (cmd.getValue ());
+                    gaugeInstSpec.addCommand (new CommandRepresentation (args[1], args[1], modelDesc.getName (),
+                            modelDesc.getType (), args[0], Arrays.copyOfRange (args, 2, args.length)));
 
                 }
 
@@ -258,11 +265,11 @@ public abstract class YamlUtil {
 
         Map effectorMap = null;
         try {
-            String effectorPath = Rainbow.getProperty (Rainbow.PROPKEY_EFFECTORS_PATH);
+            String effectorPath = Rainbow.getProperty (RainbowConstants.PROPKEY_EFFECTORS_PATH);
             if (effectorPath == null) {
                 Util.logger ().error (
                         MessageFormat.format ("No property defined for ''{0}''. No effectors loaded.",
-                                Rainbow.PROPKEY_EFFECTORS_PATH));
+                                RainbowConstants.PROPKEY_EFFECTORS_PATH));
                 ed.effectors = new TreeSet<> ();
                 return ed;
             }
@@ -286,6 +293,10 @@ public abstract class YamlUtil {
                 Map<String, Object> attrMap = effInfo.getValue (); // get attribute map
                 // get location and effector type
                 ea.location = Util.evalTokens ((String )attrMap.get ("location"));
+                String commandSignature = Util.evalTokens ((String )attrMap.get ("command"));
+                if (commandSignature != null) {
+                    ea.commandPattern = CommandRepresentation.parseCommandSignature (commandSignature);
+                }
                 ea.kindName = (String )attrMap.get ("type");
                 ea.kind = IEffector.Kind.valueOf (ea.kindName.toUpperCase ());
                 Map<String, Object> addlInfoMap = (Map<String, Object> )attrMap.get (ea.infoPropName ());
@@ -307,11 +318,11 @@ public abstract class YamlUtil {
 
         Map probeMap = null;
         try {
-            String probePath = Rainbow.getProperty (Rainbow.PROPKEY_PROBES_PATH);
+            String probePath = Rainbow.getProperty (RainbowConstants.PROPKEY_PROBES_PATH);
             if (probePath == null) {
                 Util.logger ().error (
                         MessageFormat.format ("No property defined for ''{0}''. No probes loaded.",
-                                Rainbow.PROPKEY_PROBES_PATH));
+                                RainbowConstants.PROPKEY_PROBES_PATH));
                 ed.probes = new TreeSet<> ();
                 return ed;
             }

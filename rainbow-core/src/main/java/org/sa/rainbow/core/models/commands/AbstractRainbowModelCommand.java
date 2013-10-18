@@ -182,4 +182,8 @@ public abstract class AbstractRainbowModelCommand<Type, Model> implements IRainb
                 .toString ());
     }
 
+    protected IModelInstance<Model> getModelContext () {
+        return m_modelContext;
+    }
+
 }

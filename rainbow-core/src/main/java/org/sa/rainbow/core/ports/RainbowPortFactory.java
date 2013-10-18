@@ -14,11 +14,12 @@ import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.IGauge;
-import org.sa.rainbow.core.gauges.IGaugeConfigurationInterface;
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
-import org.sa.rainbow.core.gauges.IGaugeQueryInterface;
-import org.sa.rainbow.core.gauges.IRainbowGaugeLifecycleBusPort;
 import org.sa.rainbow.core.models.IModelsManager;
+import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReportingSubscriberCallback;
+import org.sa.rainbow.translator.effectors.IEffector;
+import org.sa.rainbow.translator.effectors.IEffectorExecutionPort;
+import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
 import org.sa.rainbow.translator.probes.IProbe;
 
 public class RainbowPortFactory {
@@ -73,66 +74,66 @@ public class RainbowPortFactory {
         return getFactory ().createDelegateSideConnectionPort (delegate);
     }
 
-    public static IRainbowMasterConnectionPort createDelegateConnectionPort (RainbowMaster rainbowMaster)
+    public static IMasterConnectionPort createDelegateConnectionPort (RainbowMaster rainbowMaster)
             throws RainbowConnectionException {
         return getFactory ().createMasterSideConnectionPort (rainbowMaster);
     }
 
-    public static IRainbowManagementPort createMasterDeploymentPort (RainbowMaster rainbowMaster,
+    public static IDelegateManagementPort createMasterDeploymentPort (RainbowMaster rainbowMaster,
             String delegateID,
             Properties connectionProperties) throws RainbowConnectionException {
         return getFactory ().createMasterSideManagementPort (rainbowMaster, delegateID, connectionProperties);
     }
 
-    public static IRainbowManagementPort createDelegateDeploymentPort (RainbowDelegate delegate, String delegateID)
+    public static IDelegateManagementPort createDelegateDeploymentPort (RainbowDelegate delegate, String delegateID)
             throws RainbowConnectionException {
         return getFactory ().createDelegateSideManagementPort (delegate, delegateID);
     }
 
-    public static IRainbowDelegateConfigurationPort createDelegateConfigurationPort (RainbowDelegate rainbowDelegate)
+    public static IDelegateConfigurationPort createDelegateConfigurationPort (RainbowDelegate rainbowDelegate)
             throws RainbowConnectionException {
         return getFactory ().createDelegateConfigurationPort (rainbowDelegate);
     }
 
-    public static IRainbowModelUSBusPort createModelsManagerUSPort (IModelsManager m) throws RainbowConnectionException {
+    public static IModelUSBusPort createModelsManagerUSPort (IModelsManager m) throws RainbowConnectionException {
         return getFactory ().createModelsManagerUSPort (m);
     }
 
-    public static IRainbowModelUSBusPort createModelsManagerClientUSPort (Identifiable client)
+    public static IModelUSBusPort createModelsManagerClientUSPort (Identifiable client)
             throws RainbowConnectionException {
         return getFactory ().createModelsManagerClientUSPort (client);
     }
 
-    public static IRainbowGaugeLifecycleBusPort createGaugeSideLifecyclePort () throws RainbowConnectionException {
+    public static IGaugeLifecycleBusPort createGaugeSideLifecyclePort () throws RainbowConnectionException {
         return getFactory ().createGaugeSideLifecyclePort ();
 
     }
 
 
-    public static IRainbowModelChangeBusPort createChangeBusAnnouncePort () throws RainbowConnectionException {
+    public static IModelChangeBusPort createChangeBusAnnouncePort () throws RainbowConnectionException {
         return getFactory ().createChangeBusAnnouncePort ();
     }
 
-    public static IRainbowGaugeLifecycleBusPort createManagerLifecylePort (IRainbowGaugeLifecycleBusPort manager)
+    public static IGaugeLifecycleBusPort createManagerLifecylePort (IGaugeLifecycleBusPort manager)
             throws RainbowConnectionException {
         return getFactory ().createManagerGaugeLifecyclePort (manager);
     }
 
-    public static IGaugeConfigurationInterface createGaugeConfigurationPortClient (IGaugeIdentifier gauge)
+    public static IGaugeConfigurationPort createGaugeConfigurationPortClient (IGaugeIdentifier gauge)
             throws RainbowConnectionException {
         return getFactory ().createGaugeConfigurationPortClient (gauge);
     }
 
-    public static IGaugeQueryInterface createGaugeQueryPortClient (IGaugeIdentifier gauge)
+    public static IGaugeQueryPort createGaugeQueryPortClient (IGaugeIdentifier gauge)
             throws RainbowConnectionException {
         return getFactory ().createGaugeQueryPortClient (gauge);
     }
 
-    public static IGaugeConfigurationInterface createGaugeConfigurationPort (IGauge gauge) throws RainbowConnectionException {
+    public static IGaugeConfigurationPort createGaugeConfigurationPort (IGauge gauge) throws RainbowConnectionException {
         return getFactory ().createGaugeConfigurationPort (gauge);
     }
 
-    public static IGaugeQueryInterface createGaugeQueryPort (IGauge gauge) throws RainbowConnectionException {
+    public static IGaugeQueryPort createGaugeQueryPort (IGauge gauge) throws RainbowConnectionException {
         return getFactory ().createGaugeQueryPort (gauge);
     }
 
@@ -145,9 +146,63 @@ public class RainbowPortFactory {
         return getFactory ().createProbeConfigurationPort (probe, callback);
     }
 
-    public static IRainbowDelegateConfigurationPort createDelegateConfigurationPortClient (String delegateID)
+    public static IDelegateConfigurationPort createDelegateConfigurationPortClient (String delegateID)
             throws RainbowConnectionException {
         return getFactory ().createDelegateConfigurationPortClient (delegateID);
+    }
+
+    public static IProbeLifecyclePort createProbeManagementPort (IProbe probe) throws RainbowConnectionException {
+        return getFactory ().createProbeManagementPort (probe);
+    }
+
+    public static IProbeReportSubscriberPort createProbeReportingPortSubscriber (IProbeReportPort callback)
+            throws RainbowConnectionException {
+        return getFactory ().createProbeReportingPortSubscriber (callback);
+    }
+
+    public static IEffectorLifecycleBusPort createEffectorSideLifecyclePort () throws RainbowConnectionException {
+        return getFactory ().createEffectorSideLifecyclePort ();
+    }
+
+    public static IEffectorLifecycleBusPort
+    createClientSideEffectorLifecyclePort (IEffectorLifecycleBusPort subscriber)
+            throws RainbowConnectionException {
+        return getFactory ().createSubscriberSideEffectorLifecyclePort (subscriber);
+    }
+
+    public static IEffectorExecutionPort createEffectorExecutionPort (IEffector effector)
+            throws RainbowConnectionException {
+        return getFactory ().createEffectorExecutionPort (effector);
+    }
+
+    public static IEffectorExecutionPort createEffectorExecutionPortClient (IEffectorIdentifier effector)
+            throws RainbowConnectionException {
+        return getFactory ().createEffectorExecutionPort (effector);
+    }
+
+    public static IModelChangeBusSubscriberPort createModelChangeBusSubscriptionPort ()
+            throws RainbowConnectionException {
+        return getFactory ().createModelChangeBusSubscriptionPort ();
+    }
+
+    public static IRainbowReportingPort createMasterReportingPort () throws RainbowConnectionException {
+        return getFactory ().createMasterReportingPort ();
+    }
+
+    public static IRainbowReportingSubscriberPort
+    createReportingSubscriberPort (IRainbowReportingSubscriberCallback reportTo)
+            throws RainbowConnectionException {
+        return getFactory ().createReportingSubscriberPort (reportTo);
+    }
+
+    public static IModelDSBusPublisherPort createModelDSPublishPort (Identifiable component)
+            throws RainbowConnectionException {
+        return getFactory ().createModelDSPublishPort (component);
+    }
+
+    public static IModelDSBusSubscriberPort createModelDSSubscribePort (Identifiable component)
+            throws RainbowConnectionException {
+        return getFactory ().createModelDSubscribePort (component);
     }
 
 }

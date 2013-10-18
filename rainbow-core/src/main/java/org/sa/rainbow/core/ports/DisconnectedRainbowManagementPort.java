@@ -10,13 +10,13 @@ import org.apache.log4j.Logger;
  * @author Bradley Schmerl: schmerl
  * 
  */
-public class DisconnectedRainbowManagementPort implements IRainbowManagementPort {
+public class DisconnectedRainbowManagementPort implements IDelegateManagementPort {
 
     Logger                                   LOGGER     = Logger.getLogger (DisconnectedRainbowManagementPort.class);
 
     static DisconnectedRainbowManagementPort m_instance = new DisconnectedRainbowManagementPort ();
 
-    public static IRainbowManagementPort instance () {
+    public static IDelegateManagementPort instance () {
         return m_instance;
     }
 
@@ -67,6 +67,18 @@ public class DisconnectedRainbowManagementPort implements IRainbowManagementPort
 
     @Override
     public void dispose () {
+    }
+
+    @Override
+    public void startProbes () throws IllegalStateException {
+        LOGGER.error ("Attempt to start probes on a delegate from a disconnected deployment port");
+
+    }
+
+    @Override
+    public void killProbes () throws IllegalStateException {
+        LOGGER.error ("Attempt to kill probes on a delegate from a disconnected deployment port");
+
     }
 
 }

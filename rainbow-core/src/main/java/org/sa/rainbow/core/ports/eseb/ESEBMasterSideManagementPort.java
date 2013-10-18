@@ -6,6 +6,7 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.ports.AbstractMasterManagementPort;
@@ -22,9 +23,9 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
         super (master, delegateID);
         // Runs on delegate
         String delegateHost = connectionProperties.getProperty (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_HOST,
-                "localhost");
+                Rainbow.getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION));
         String delegatePort = connectionProperties.getProperty (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_PORT,
-                Rainbow.getProperty (Rainbow.PROPKEY_DEPLOYMENT_LOCATION, "1234"));
+                Rainbow.getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION_PORT, "1234"));
         Short port = Short.valueOf (delegatePort);
         m_role = new ESEBConnector(delegateHost, port, ChannelT.HEALTH);
         m_role.addListener (new IESEBListener () {
@@ -131,6 +132,22 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
             LOGGER.warn (MessageFormat.format ("Could not close the deployment port on the master for {0}",
                     getDelegateId ()));
         }
+    }
+
+    @Override
+    public void startProbes () throws IllegalStateException {
+        RainbowESEBMessage msg = m_role.createMessage ();
+        msg.setProperty (ESEBConstants.MSG_TYPE_KEY, START_PROBES);
+        msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
+        m_role.publish (msg);
+    }
+
+    @Override
+    public void killProbes () throws IllegalStateException {
+        RainbowESEBMessage msg = m_role.createMessage ();
+        msg.setProperty (ESEBConstants.MSG_TYPE_KEY, KILL_PROBES);
+        msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
+        m_role.publish (msg);
     }
 
 }

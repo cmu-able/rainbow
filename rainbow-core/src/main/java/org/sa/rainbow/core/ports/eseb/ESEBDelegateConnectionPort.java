@@ -6,12 +6,13 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.ports.AbstractDelegateConnectionPort;
 import org.sa.rainbow.core.ports.DisconnectedRainbowManagementPort;
-import org.sa.rainbow.core.ports.IRainbowManagementPort;
+import org.sa.rainbow.core.ports.IDelegateManagementPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.IESEBListener;
@@ -19,7 +20,7 @@ import org.sa.rainbow.core.ports.eseb.ESEBConnector.IESEBListener;
 public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
     static Logger                  LOGGER = Logger.getLogger (ESEBDelegateConnectionPort.class);
     private ESEBConnector   m_connectionRole;
-    private IRainbowManagementPort m_deploymentPort;
+    private IDelegateManagementPort m_deploymentPort;
 
     public ESEBDelegateConnectionPort (RainbowDelegate delegate) throws IOException {
         super (delegate);
@@ -32,7 +33,7 @@ public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
             public void receive (RainbowESEBMessage msg) {
                 String type = (String )msg.getProperty (ESEBConstants.MSG_TYPE_KEY);
                 switch (type) {
-                case ESEBConstants.MSG_TYPE_CONNECT_DELEGATE: {
+                case ESEBConstants.MSG_TYPE_DISCONNECT_DELEGATE: {
                     if (msg.hasProperty (ESEBConstants.TARGET)
                             && m_delegate.getId ().equals (msg.getProperty (ESEBConstants.TARGET))) {
                         m_delegate.disconnectFromMaster ();
@@ -44,7 +45,7 @@ public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
     }
 
     @Override
-    public IRainbowManagementPort connectDelegate (String delegateID, Properties connectionProperties) throws RainbowConnectionException {
+    public IDelegateManagementPort connectDelegate (String delegateID, Properties connectionProperties) throws RainbowConnectionException {
         /*
          * connectionProperties should contain the following information: 
          * PROPKEY_ESEB_DELEGATE_DEPLOYMENT_PORT, PROPKEY_ESEB_DELEGATE_DEPLOYMENT_HOST: 
@@ -60,7 +61,7 @@ public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
 
         msg.setProperty (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_PORT, Short.toString (deploymentPortNum));
         String host = connectionProperties.getProperty (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_HOST, Rainbow
-                .getProperty (Rainbow.PROPKEY_DEPLOYMENT_LOCATION, "localhost"));
+                .getProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION, "localhost"));
         msg.setProperty (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_HOST, host);
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, delegateID);
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_CONNECT_DELEGATE);
@@ -115,15 +116,23 @@ public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
     }
 
     @Override
-    public void report (String delegateID, ReportType type, String msg) {
+    public void report (String delegateID, ReportType type, RainbowComponentT compT, String msg) {
         RainbowESEBMessage esebMsg = m_connectionRole.createMessage ();
         esebMsg.setProperty (ESEBConstants.MSG_CHANNEL_KEY, ChannelT.UIREPORT.name ());
+        esebMsg.setProperty (ESEBConstants.COMPONENT_TYPE_KEY, compT.name ());
         esebMsg.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_UI_REPORT);
         esebMsg.setProperty (ESEBConstants.REPORT_TYPE_KEY, type.name ());
         esebMsg.setProperty (ESEBConstants.REPORT_MSG_KEY, msg);
         esebMsg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, delegateID);
         m_connectionRole.publish (esebMsg);
-           
+
+    }
+
+    @Override
+    public void trace (RainbowComponentT type, String msg) {
+        if (LOGGER.isTraceEnabled ()) {
+            LOGGER.trace (msg);
+        }
     }
 
 }

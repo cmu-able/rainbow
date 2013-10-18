@@ -103,6 +103,14 @@ public class RainbowESEBMessage implements IRainbowMessage {
         }
     }
 
+    public void setProperty (String id, int prop) {
+        try {
+            setProperty (id, (Object )prop);
+        }
+        catch (RainbowException e) {
+        }
+    }
+
     /**
      * Returns the internal representation. Note the protection here is the default (package) because the
      * ESEBEventService will need to get the information out

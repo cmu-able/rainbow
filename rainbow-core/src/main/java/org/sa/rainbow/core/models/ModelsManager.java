@@ -3,7 +3,6 @@ package org.sa.rainbow.core.models;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -18,9 +17,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Stack;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.log4j.Logger;
+import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowComponentT;
+import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowCopyException;
 import org.sa.rainbow.core.error.RainbowException;
@@ -29,8 +33,10 @@ import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd;
 import org.sa.rainbow.core.models.commands.IRainbowModelCommand;
 import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
-import org.sa.rainbow.core.ports.IRainbowModelChangeBusPort;
-import org.sa.rainbow.core.ports.IRainbowModelUSBusPort;
+import org.sa.rainbow.core.ports.DisconnectedRainbowDelegateConnectionPort;
+import org.sa.rainbow.core.ports.IModelChangeBusPort;
+import org.sa.rainbow.core.ports.IModelUSBusPort;
+import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.util.Util;
 
@@ -45,34 +51,42 @@ import org.sa.rainbow.util.Util;
  * @author Bradley Schmerl: schmerl
  * 
  */
-public class ModelsManager implements IModelsManager {
+public class ModelsManager extends AbstractRainbowRunnable implements IModelsManager {
     static Logger                                      LOGGER     = Logger.getLogger (ModelsManager.class);
 
     /** The bus on which to announce model change events **/
-    protected IRainbowModelChangeBusPort                    m_changeBusPort;
+    protected IModelChangeBusPort                    m_changeBusPort;
 
     /** The bus on which requests to change models are made by analyses and gauges **/
-    protected IRainbowModelUSBusPort                   m_upstreamBusPort;
+    protected IModelUSBusPort                   m_upstreamBusPort;
 
     /** Contains all the models -- keyed by Type then name **/
     protected Map<String, Map<String, IModelInstance>> m_modelMap = new HashMap<> ();
 
+    /** Contains the queue of commands waiting to be executed on the models **/
+    protected BlockingQueue                            commandQ   = new LinkedBlockingQueue<> ();
+
     public ModelsManager () {
+        super ("Models Manager");
+        m_reportingPort = new DisconnectedRainbowDelegateConnectionPort ();
     }
 
-    public void initialize () throws IOException {
+
+    @Override
+    public void initialize (IRainbowReportingPort port) throws RainbowConnectionException {
+        super.initialize (port);
         initializeConnections ();
         initializeModels ();
     }
 
     private void initializeModels () {
-        String numberOfModelsStr = Rainbow.getProperty (Rainbow.PROPKEY_MODEL_NUMBER, "0");
+        String numberOfModelsStr = Rainbow.getProperty (RainbowConstants.PROPKEY_MODEL_NUMBER, "0");
         int numberOfModels = Integer.parseInt (numberOfModelsStr);
         for (int modelNum = 0; modelNum < numberOfModels; modelNum++) {
             String factoryClassName = Rainbow.getProperty (
-                    Rainbow.PROPKEY_MODEL_LOAD_CLASS_PREFIX + modelNum);
-            String modelName = Rainbow.getProperty (Rainbow.PROPKEY_MODEL_NAME_PREFIX + modelNum);
-            String path = Rainbow.getProperty (Rainbow.PROPKEY_MODEL_PATH_PREFIX + modelNum);
+                    RainbowConstants.PROPKEY_MODEL_LOAD_CLASS_PREFIX + modelNum);
+            String modelName = Rainbow.getProperty (RainbowConstants.PROPKEY_MODEL_NAME_PREFIX + modelNum);
+            String path = Rainbow.getProperty (RainbowConstants.PROPKEY_MODEL_PATH_PREFIX + modelNum);
             File modelPath = Util.getRelativeToPath (Rainbow.instance ().getTargetPath (), path);
             try {
                 // The factory class should provide a static method for generating a load command that can be
@@ -257,29 +271,33 @@ public class ModelsManager implements IModelsManager {
             Entry<String, IModelInstance> e = it.next ();
             if (e.getValue () == model) {
                 it.remove ();
+                try {
+                    model.dispose ();
+                }
+                catch (RainbowException e1) {
+                    LOGGER.warn ("Failed to dispose of the system in model manager registerd as "
+                            + model.getModelName () + ":" + model.getModelType ());
+                }
                 deleted = true;
             }
         }
         return deleted;
     }
 
+    /**
+     * Adds commands to the command queue to be processed by the models
+     * 
+     * @param command
+     *            The command to add
+     * @throws IllegalStateException
+     * @throws RainbowException
+     */
     @Override
     public void requestModelUpdate (IRainbowModelCommandRepresentation command) throws IllegalStateException,
     RainbowException {
-        IModelInstance<?> modelInstance = getModelInstance (command.getModelType (), command.getModelName ());
-        LOGGER.info (MessageFormat.format ("Updating model {0}::{1} through command: {2}", command.getModelName (),
-                command.getModelType (), command.getCommandName ()));
-        IRainbowModelCommand cmd = setupCommand (command, modelInstance);
-        List<? extends IRainbowMessage> events;
-        synchronized (modelInstance.getModelInstance ()) {
-            events = cmd.execute (modelInstance, m_changeBusPort);
-        }
-        if (cmd.canUndo ()) {
-            // The command executed correctly if we can undo it.
-            // Announce all the changes on the the change bus
-            LOGGER.info (MessageFormat.format ("Announcing {0} events on the change bus", events.size ()));
-            m_changeBusPort.announce (events);
-        }
+        commandQ.offer (command);
+
+
     }
 
     private IRainbowModelCommand setupCommand (IRainbowModelCommandRepresentation command,
@@ -306,74 +324,137 @@ public class ModelsManager implements IModelsManager {
     public void requestModelUpdate (List<IRainbowModelCommandRepresentation> commands, boolean transaction) {
         LOGGER.info (MessageFormat.format ("Updating the model with {0} commands, transaction = {1}", commands.size (),
                 transaction));
-        // Keep track of successfully executed commands in case we need to undo 
-        Stack<IRainbowModelCommand> executedCommands = new Stack<> ();
-        // Stores the events that will be reported to the change bus
-        List<IRainbowMessage> events = new LinkedList<IRainbowMessage> ();
-        // Indicates whether all the commands have been executed successfully so far
-        boolean complete = true;
-        if (!commands.isEmpty ()) {
-            IRainbowModelCommandRepresentation c = commands.iterator ().next ();
-            // The model being updated should be the same for all commands, so just grab the first one
-            IModelInstance<?> modelInstance = getModelInstance (c.getModelType (), c.getModelName ());
-            synchronized (modelInstance.getModelInstance ()) {
+        // If the command is to be executed transactionally, then add the list to the queue, otherwise add each command individually
+        if (transaction) {
+            commandQ.offer (commands);
+        }
+        else {
+            for (IRainbowModelCommandRepresentation command : commands) {
+                commandQ.offer (command);
+            }
+        }
 
-                for (IRainbowModelCommandRepresentation cmd : commands) {
-                    try {
-                        // Make sure that the model is the same 
-                        IModelInstance mi = getModelInstance (cmd.getModelType (), cmd.getModelName ());
-                        if (mi != modelInstance) {
-                            if (transaction) {
-                                // If not the same, this is an error so log it as such an mark as incomplete
-                                complete = false;
-                                LOGGER.error ("All commands in a transaction must be on the same model.");
-                                break;
-                            }
-                            else {
-                                // Otherwise, just log a warning
-                                LOGGER.warn ("All commands in the transaction should be on the same model.");
-                            }
-                        }
-                        // Make sure the command is executable, and add the ancilliary execution information
-                        cmd = setupCommand (cmd, mi);
-                        // If it is not executable, the throw
-                        if (!(cmd instanceof IRainbowModelCommand)) throw new RainbowException (MessageFormat.format ("The command {0} is not an executable command.", cmd.getCommandName ()));
-                        IRainbowModelCommand mcmd = (IRainbowModelCommand )cmd;
-                        // Execute the command
-                        List<? extends IRainbowMessage> cmdEvents = mcmd.execute (mi, m_changeBusPort);
-                        // Store all the generated events to announce later
-                        events.addAll (cmdEvents);
-                        // Recall what we executed in case we need to rollback
-                        executedCommands.push (mcmd);
-                    }
-                    catch (IllegalStateException | RainbowException e) {
-                        complete = false;
-                        break;
-                    }
-                }
+    }
 
-                if (!complete && transaction && !executedCommands.isEmpty ()) {
-                    // Undo executed commands if we didn't complete.
-                    LOGGER.warn (MessageFormat.format (
-                            "Not all of the commands completed successfully. {0} did, so undoing them.",
-                            executedCommands.size ()));
-                    IRainbowModelCommand cmd = null;
-                    while (!executedCommands.isEmpty ()) {
-                        try {
-                            cmd = executedCommands.pop ();
-                            cmd.undo ();
-                        }
-                        catch (IllegalStateException | RainbowException e) {
-                            LOGGER.error ("Could not undo the commands. Model could be in an inconsistent state", e);
-                        }
-                    }
+    @Override
+    public void dispose () {
+
+    }
+
+    @Override
+    protected void log (String txt) {
+
+    }
+
+    @Override
+    protected void runAction () {
+        Object poll = commandQ.poll ();
+        if (poll instanceof IRainbowModelCommandRepresentation) {
+            try {
+                IRainbowModelCommandRepresentation command = (IRainbowModelCommandRepresentation )poll;
+                IModelInstance<?> modelInstance = getModelInstance (command.getModelType (), command.getModelName ());
+                m_reportingPort.info (RainbowComponentT.MODEL, MessageFormat.format (
+                        "Updating model {0}::{1} through command: {2}",
+                        command.getModelName (), command.getModelType (), command.getCommandName ()));
+                IRainbowModelCommand cmd = setupCommand (command, modelInstance);
+                List<? extends IRainbowMessage> events;
+                synchronized (modelInstance.getModelInstance ()) {
+                    events = cmd.execute (modelInstance, m_changeBusPort);
                 }
-                else {
-                    // Announce the changes
+                if (cmd.canUndo () && events.size () > 0) {
+                    // The command executed correctly if we can undo it.
+                    // Announce all the changes on the the change bus
+                    m_reportingPort.info (RainbowComponentT.MODEL,
+                            MessageFormat.format ("Announcing {0} events on the change bus", events.size ()));
                     m_changeBusPort.announce (events);
                 }
             }
+            catch (IllegalStateException | RainbowException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace ();
+            }
         }
+        else if (poll instanceof List) {
+            List<IRainbowModelCommandRepresentation> commands = (List )poll;
+            boolean transaction = true;
+            // Keep track of successfully executed commands in case we need to undo 
+            Stack<IRainbowModelCommand> executedCommands = new Stack<> ();
+            // Stores the events that will be reported to the change bus
+            List<IRainbowMessage> events = new LinkedList<IRainbowMessage> ();
+            // Indicates whether all the commands have been executed successfully so far
+            boolean complete = true;
+            if (!commands.isEmpty ()) {
+                IRainbowModelCommandRepresentation c = commands.iterator ().next ();
+                // The model being updated should be the same for all commands, so just grab the first one
+                IModelInstance<?> modelInstance = getModelInstance (c.getModelType (), c.getModelName ());
+                synchronized (modelInstance.getModelInstance ()) {
+
+                    for (IRainbowModelCommandRepresentation cmd : commands) {
+                        try {
+                            // Make sure that the model is the same 
+                            IModelInstance mi = getModelInstance (cmd.getModelType (), cmd.getModelName ());
+                            if (mi != modelInstance) {
+                                if (transaction) {
+                                    // If not the same, this is an error so log it as such an mark as incomplete
+                                    complete = false;
+                                    m_reportingPort.error (RainbowComponentT.MODEL,
+                                            "All commands in a transaction must be on the same model.");
+                                    break;
+                                }
+                                else {
+                                    // Otherwise, just log a warning
+                                    m_reportingPort.warn (RainbowComponentT.MODEL,
+                                            "All commands in the transaction should be on the same model.");
+                                }
+                            }
+                            // Make sure the command is executable, and add the ancilliary execution information
+                            cmd = setupCommand (cmd, mi);
+                            // If it is not executable, the throw
+                            if (!(cmd instanceof IRainbowModelCommand))
+                                throw new RainbowException (MessageFormat.format (
+                                        "The command {0} is not an executable command.", cmd.getCommandName ()));
+                            IRainbowModelCommand mcmd = (IRainbowModelCommand )cmd;
+                            // Execute the command
+                            List<? extends IRainbowMessage> cmdEvents = mcmd.execute (mi, m_changeBusPort);
+                            // Store all the generated events to announce later
+                            events.addAll (cmdEvents);
+                            // Recall what we executed in case we need to rollback
+                            executedCommands.push (mcmd);
+                        }
+                        catch (IllegalStateException | RainbowException e) {
+                            complete = false;
+                            break;
+                        }
+                    }
+
+                    if (!complete && transaction && !executedCommands.isEmpty ()) {
+                        // Undo executed commands if we didn't complete.
+                        m_reportingPort.warn (RainbowComponentT.MODEL, MessageFormat.format (
+                                "Not all of the commands completed successfully. {0} did, so undoing them.",
+                                executedCommands.size ()));
+                        IRainbowModelCommand cmd = null;
+                        while (!executedCommands.isEmpty ()) {
+                            try {
+                                cmd = executedCommands.pop ();
+                                cmd.undo ();
+                            }
+                            catch (IllegalStateException | RainbowException e) {
+                                LOGGER.error ("Could not undo the commands. Model could be in an inconsistent state", e);
+                            }
+                        }
+                    }
+                    else {
+                        // Announce the changes
+                        m_changeBusPort.announce (events);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    protected RainbowComponentT getComponentType () {
+        return RainbowComponentT.MODEL;
     }
 
 }

@@ -1,11 +1,14 @@
 package org.sa.rainbow.core.gauges;
 
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.util.HashCodeUtil;
 
-public class CommandRepresentation implements IRainbowModelCommandRepresentation {
+public class CommandRepresentation implements IRainbowModelCommandRepresentation, Cloneable {
 
     private String[] m_parameters;
     private String   m_label;
@@ -70,6 +73,11 @@ public class CommandRepresentation implements IRainbowModelCommandRepresentation
     }
 
     @Override
+    protected CommandRepresentation clone () throws CloneNotSupportedException {
+        return (CommandRepresentation )super.clone ();
+    }
+
+    @Override
     public boolean equals (Object obj) {
         if (obj != this) {
             if (obj instanceof CommandRepresentation) {
@@ -98,6 +106,35 @@ public class CommandRepresentation implements IRainbowModelCommandRepresentation
         result = HashCodeUtil.hash (result, getTarget ());
         result = HashCodeUtil.hash (result, getParameters ());
         return result;
+    }
+
+    void setModel (String name, String type) {
+        m_modelName = name;
+        m_modelType = type;
+    }
+
+    void setModel (TypedAttribute modelRef) {
+        m_modelName = modelRef.getName ();
+        m_modelType = modelRef.getType ();
+    }
+
+    static Pattern pattern = Pattern.compile ("(([\\w\\$\\<\\>\\\"]+)\\.)?(\\w+)\\s*\\(([\\w, \\$\\<\\>\\\"]*)\\)");
+
+    public static CommandRepresentation parseCommandSignature (String commandSignature) {
+        Matcher matcher = pattern.matcher (commandSignature);
+        if (matcher.find ()) {
+            String target = matcher.group (2);
+            String commandName = matcher.group (3);
+            String unprocessedParams = matcher.group (4);
+            String[] parameters = new String[0];
+            if (unprocessedParams != null) {
+                parameters = unprocessedParams.split ("[\\s,]");
+            }
+            CommandRepresentation rep = new CommandRepresentation (commandName, commandName, null, null, target,
+                    parameters);
+            return rep;
+        }
+        return null;
     }
 
 }

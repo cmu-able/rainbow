@@ -16,6 +16,7 @@ import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.RainbowMaster;
 
@@ -119,7 +120,7 @@ public class ESEBConnectionAndLifecycleSeparateVMTest extends DefaultTCase {
         ProcessInterface pi = launchDelegate (s_currentDirectory);
 
         int extra = TestPropertiesDefinition.getInt ("heartbeat.extra.time");
-        Thread.sleep (Integer.valueOf (Rainbow.getProperty (Rainbow.PROPKEY_DELEGATE_BEACONPERIOD))
+        Thread.sleep (Integer.valueOf (Rainbow.getProperty (RainbowConstants.PROPKEY_DELEGATE_BEACONPERIOD))
                 + extra * 3);
         String logMsg = baos.toString ();
         assertTrue (logMsg.contains ("Received heartbeat from known delegate: "));

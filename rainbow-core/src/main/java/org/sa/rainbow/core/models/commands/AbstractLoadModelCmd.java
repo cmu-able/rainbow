@@ -11,26 +11,33 @@ import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.IModelsManager;
+import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
-import org.sa.rainbow.core.ports.IRainbowModelChangeBusPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConstants;
 
 public abstract class AbstractLoadModelCmd<Type> extends AbstractRainbowModelCommand<IModelInstance<Type>, Object> {
 
     private IModelsManager m_modelsManager;
     private InputStream    m_is;
+    private String         m_source;
 
     public AbstractLoadModelCmd (String commandName, IModelsManager mm, String resource, InputStream is, String source) {
         super (commandName, null, resource, source);
         m_is = is;
         m_modelsManager = mm;
+        m_source = source;
     }
 
     protected void doPostExecute () throws RainbowModelException {
         if (m_modelsManager != null) {
             m_modelsManager.registerModelType (getModelType ());
+            getResult ().setOriginalSource (m_source);
             m_modelsManager.registerModel (getModelType (), getModelName (), getResult ());
         }
+    }
+
+    protected String getOriginalSource () {
+        return m_source;
     }
 
     protected void doPostUndo () throws RainbowModelException {
@@ -82,14 +89,14 @@ public abstract class AbstractLoadModelCmd<Type> extends AbstractRainbowModelCom
         List<IRainbowMessage> msgs = new LinkedList<IRainbowMessage> ();
         try {
             IRainbowMessage msg = messageFactory.createMessage ();
-            msg.setProperty (IRainbowModelChangeBusPort.EVENT_TYPE_PROP, "LOAD_MODEL");
+            msg.setProperty (IModelChangeBusPort.EVENT_TYPE_PROP, "LOAD_MODEL");
             msg.setProperty (ESEBConstants.MSG_TYPE_KEY, "LOAD_MODEL");
-            msg.setProperty (IRainbowModelChangeBusPort.ID_PROP, UUID.randomUUID ().toString ());
-            msg.setProperty (IRainbowModelChangeBusPort.MODEL_NAME_PROP, getModelName ());
-            msg.setProperty (IRainbowModelChangeBusPort.COMMAND_PROP, getCommandName ());
-            msg.setProperty (IRainbowModelChangeBusPort.TARGET_PROP, getTarget ());
+            msg.setProperty (IModelChangeBusPort.ID_PROP, UUID.randomUUID ().toString ());
+            msg.setProperty (IModelChangeBusPort.MODEL_NAME_PROP, getModelName ());
+            msg.setProperty (IModelChangeBusPort.COMMAND_PROP, getCommandName ());
+            msg.setProperty (IModelChangeBusPort.TARGET_PROP, getTarget ());
             for (int i = 0; i < getParameters ().length; i++) {
-                msg.setProperty (IRainbowModelChangeBusPort.PARAMETER_PROP + i, getParameters ()[i]);
+                msg.setProperty (IModelChangeBusPort.PARAMETER_PROP + i, getParameters ()[i]);
             }
             msgs.add (msg);
         }

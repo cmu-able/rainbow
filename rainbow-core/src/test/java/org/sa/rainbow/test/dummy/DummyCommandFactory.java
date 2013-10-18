@@ -13,8 +13,8 @@ import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd;
 import org.sa.rainbow.core.models.commands.IRainbowModelCommand;
 import org.sa.rainbow.core.models.commands.ModelCommandFactory;
+import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
-import org.sa.rainbow.core.ports.IRainbowModelChangeBusPort;
 
 public class DummyCommandFactory extends ModelCommandFactory<Integer> {
     public static AbstractLoadModelCmd loadCommand (ModelsManager modelsManager,
@@ -85,6 +85,18 @@ public class DummyCommandFactory extends ModelCommandFactory<Integer> {
                     public ModelCommandFactory<Integer> getCommandFactory () {
                         return new DummyCommandFactory ();
                     }
+
+                    @Override
+                    public void setOriginalSource (String source) {
+                        // TODO Auto-generated method stub
+
+                    }
+
+                    @Override
+                    public void dispose () {
+                        // TODO Auto-generated method stub
+
+                    }
                 };
             }
 
@@ -99,7 +111,7 @@ public class DummyCommandFactory extends ModelCommandFactory<Integer> {
             throws RainbowModelException {
         return new IRainbowModelCommand<Integer, Integer> () {
 
-            private IRainbowModelChangeBusPort m_announcPort;
+            private IModelChangeBusPort m_announcPort;
             private Integer                    m_m;
 
             @Override

@@ -17,7 +17,7 @@ public class ESEBDelegateManagementPort extends AbstractDelegateManagementPort i
         super (delegate);
         // Runs on delegate
         short port = ESEBProvider.getESEBClientPort (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_PORT);
-        m_role = new ESEBConnector (port, ChannelT.HEALTH);
+        m_role = new ESEBConnector (ESEBProvider.getESEBClientHost (), port, ChannelT.HEALTH);
 
         m_role.addListener (new IESEBListener () {
 
@@ -43,8 +43,11 @@ public class ESEBDelegateManagementPort extends AbstractDelegateManagementPort i
                         case PAUSE_DELEGATE:
                             result = pauseDelegate ();
                             m_role.replyToMessage (msg, result);
-
+                        case START_PROBES:
+                            startProbes ();
                             break;
+                        case KILL_PROBES:
+                            killProbes ();
                         }
                     }
                 }
