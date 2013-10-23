@@ -22,18 +22,18 @@ import edu.cmu.cs.able.eseb.rpc.RpcEnvironment;
 import edu.cmu.cs.able.typelib.jconv.TypelibJavaConverter;
 
 public class ESEBRPCConnector {
-    static Logger LOGGER = Logger.getLogger (ESEBRPCConnector.class);
+    static Logger         LOGGER = Logger.getLogger (ESEBRPCConnector.class);
     private BusConnection m_client;
     private EventBus      m_srvr;
 
     private static class RPCInfo {
-        RpcEnvironment        m_env;
+        RpcEnvironment m_env;
         long           participant_id;
     }
 
     private static Map<String, RPCInfo> m_infoMap = new HashMap<> ();
 
-    private RPCInfo                            m_info;
+    private RPCInfo                     m_info;
 
     public ESEBRPCConnector (String remoteHost, short remotePort, String serverId) throws IOException,
     ParticipantException {
@@ -103,8 +103,8 @@ public class ESEBRPCConnector {
 
     public <T> T createRemoteStub (Class<T> cls, String obj_id) {
         LOGGER.info ("Creating RPC Requirer end for " + obj_id + " with participant " + getParticipantId ());
-        return JavaRpcFactory.create_remote_stub (cls, this.getRPCEnvironment (),
-                this.getParticipantId (), 1500, obj_id);
+        return JavaRpcFactory.create_remote_stub (cls, this.getRPCEnvironment (), this.getParticipantId (), 5000,
+                obj_id);
     }
 
     public <T> void createRegistryWrapper (Class<T> cls, T wrapped, String obj_id) {

@@ -12,6 +12,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.sa.rainbow.core.Rainbow.ExitState;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.analysis.IRainbowAnalysis;
@@ -28,6 +29,7 @@ import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
 import org.sa.rainbow.core.models.UtilityPreferenceDescription;
 import org.sa.rainbow.core.ports.IDelegateConfigurationPort;
 import org.sa.rainbow.core.ports.IDelegateManagementPort;
+import org.sa.rainbow.core.ports.IMasterCommandPort;
 import org.sa.rainbow.core.ports.IMasterConnectionPort;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
@@ -35,11 +37,12 @@ import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.gui.RainbowGUI;
 import org.sa.rainbow.translator.effectors.EffectorManager;
+import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 import org.sa.rainbow.util.Beacon;
 import org.sa.rainbow.util.Util;
 import org.sa.rainbow.util.YamlUtil;
 
-public class RainbowMaster extends AbstractRainbowRunnable {
+public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCommandPort {
     static Logger                            LOGGER                        = Logger.getLogger (Rainbow.class
             .getCanonicalName ());
 
@@ -66,6 +69,9 @@ public class RainbowMaster extends AbstractRainbowRunnable {
     private Map<String, IAdaptationExecutor> m_adaptationExecutors         = new HashMap<> ();
 
     private Collection<EffectorManager>      m_effectorManagers            = Collections.<EffectorManager> emptySet ();
+
+    private Map<String, Beacon>              m_terminatedDelegates         = Collections
+            .<String, Beacon> synchronizedMap (new HashMap<String, Beacon> ());
 
     public RainbowMaster () throws RainbowConnectionException {
         super ("Rainbow Master");
@@ -343,8 +349,16 @@ public class RainbowMaster extends AbstractRainbowRunnable {
                 LOGGER.error (MessageFormat.format ("Received heartbeat from unknown delegate at {0}.", delegateID));
             }
             else {
-                LOGGER.debug (MessageFormat.format ("Received heartbeat from known delegate: {0}", delegateID));
+                Properties properties = m_delegateInfo.get (delegateID);
+                String loc = "???";
+                if (properties != null) {
+                    loc = properties.getProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION);
+                }
+
+                m_reportingPort.info (RainbowComponentT.MASTER,
+                        MessageFormat.format ("Heartbeat from {0}@{1}", delegateID, loc));
                 hb.mark ();
+
             }
         }
         else {
@@ -430,13 +444,33 @@ public class RainbowMaster extends AbstractRainbowRunnable {
 
     @Override
     protected void runAction () {
+        checkTerminations ();
         checkHeartbeats ();
+    }
+
+    private void checkTerminations () {
+        if (!m_terminatedDelegates.isEmpty ()) {
+            for (Entry<String, Beacon> e : m_terminatedDelegates.entrySet ()) {
+                if (e.getValue ().periodElapsed ()) {
+                    m_reportingPort.warn (getComponentType (),
+                            "Did not hear back from terminated delegate " + e.getKey () + ". Flushing anyway.");
+                    flushDelegate (e.getKey ());
+                }
+            }
+        }
     }
 
     private void checkHeartbeats () {
         Set<Entry<String, Beacon>> entrySet = m_heartbeats.entrySet ();
         for (Entry<String, Beacon> entry : entrySet) {
             if (entry.getValue ().periodElapsed ()) {
+                Properties properties = m_delegateInfo.get (entry.getKey ());
+                String loc = "???";
+                if (properties != null) {
+                    loc = properties.getProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION);
+                }
+                m_reportingPort.error (RainbowComponentT.MASTER,
+                        MessageFormat.format ("No Heartbeat from {0}@{1}", entry.getKey (), loc));
                 LOGGER.error (MessageFormat.format ("Delegate {0} has not given a heartbeat withing the right time",
                         entry.getKey ()));
                 entry.getValue ().mark ();
@@ -446,9 +480,16 @@ public class RainbowMaster extends AbstractRainbowRunnable {
 
     public void disconnectDelegate (String id) {
         LOGGER.info (MessageFormat.format ("RM: Disconnecting delegate: {0}", id));
+        flushDelegate (id);
+    }
+
+    void flushDelegate (String id) {
+        m_terminatedDelegates.remove (id);
         m_heartbeats.remove (id);
         IDelegateManagementPort deploymentPort = m_delegates.remove (id);
         deploymentPort.dispose ();
+        m_delegateInfo.remove (id);
+        IDelegateConfigurationPort port = m_delegateConfigurtationPorts.remove (id);
     }
 
     @Override
@@ -565,11 +606,11 @@ public class RainbowMaster extends AbstractRainbowRunnable {
             System.exit (RainbowConstants.EXIT_VALUE_ABORT);
         }
 
+        RainbowMaster master = new RainbowMaster ();
         if (showGui) {
-            RainbowGUI gui = new RainbowGUI ();
+            RainbowGUI gui = new RainbowGUI (master);
             gui.display ();
         }
-        RainbowMaster master = new RainbowMaster ();
         master.initialize ();
 
 
@@ -585,6 +626,91 @@ public class RainbowMaster extends AbstractRainbowRunnable {
     @Override
     protected RainbowComponentT getComponentType () {
         return RainbowComponentT.MASTER;
+    }
+
+    @Override
+    public void startProbes () {
+        for (IDelegateManagementPort delegate : m_delegates.values ()) {
+            delegate.startProbes ();
+        }
+    }
+
+    @Override
+    public void killProbes () {
+        for (IDelegateManagementPort delegate : m_delegates.values ()) {
+            delegate.killProbes ();
+        }
+    }
+
+    @Override
+    public void enableAdaptation (boolean enabled) {
+        for (IAdaptationManager am : m_adaptationManagers.values ()) {
+            am.setEnabled (enabled);
+        }
+    }
+
+    @Override
+    public Outcome testEffector (String target, String effName, String[] args) {
+        for (EffectorManager em : m_effectorManagers) {
+            Outcome outcome = em.executeEffector (effName, target, args);
+            if (outcome != Outcome.UNKNOWN) return outcome;
+        }
+        return Outcome.UNKNOWN;
+    }
+
+    @Override
+    public void sleep () {
+        Rainbow.signalTerminate ();
+    }
+
+    @Override
+    public void terminate (ExitState exitState) {
+        Rainbow.signalTerminate (exitState);
+    }
+
+    @Override
+    public void restartDelegates () {
+        for (IDelegateManagementPort delegate : m_delegates.values ()) {
+            delegate.startDelegate ();
+        }
+    }
+
+    @Override
+    public void sleepDelegates () {
+        for (IDelegateManagementPort delegate : m_delegates.values ()) {
+            delegate.pauseDelegate ();
+        }
+    }
+
+    @Override
+    public void destroyDelegates () {
+        for (Entry<String, IDelegateManagementPort> e : m_delegates.entrySet ()) {
+            Beacon b = new Beacon (10000);
+            b.mark ();
+            m_terminatedDelegates.put (e.getKey (), b);
+            e.getValue ().terminateDelegate ();
+        }
+    }
+
+    @Override
+    public void killDelegate (String ipOfDelegate) {
+        IDelegateManagementPort port = m_delegates.get (ipOfDelegate);
+        String did = ipOfDelegate;
+        if (port == null) {
+            for (Entry<String,Properties> e : m_delegateInfo.entrySet ()) {
+                if (ipOfDelegate.equals (e.getValue ().getProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION))) {
+                    port = m_delegates.get (e.getKey ());
+                    did = e.getKey ();
+                    break;
+                }
+            }
+            if (port != null) {
+                Beacon b = new Beacon (10000);
+                b.mark ();
+                m_terminatedDelegates.put (did, b);
+                port.terminateDelegate ();
+            }
+        }
     }
 
 }

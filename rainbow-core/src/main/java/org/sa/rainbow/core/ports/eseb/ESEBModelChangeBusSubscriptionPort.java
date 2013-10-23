@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelsManager;
+import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.IESEBListener;
@@ -29,8 +30,8 @@ public class ESEBModelChangeBusSubscriptionPort implements IModelChangeBusSubscr
                     for (Pair<IRainbowChangeBusSubscription, IRainbowModelChangeCallback> pair : m_subscribers) {
                         if (pair.firstValue ().matches (msg)) {
                             IModelInstance<Object> model = mm.getModelInstance (
-                                    (String )msg.getProperty (ESEBConstants.MODEL_TYPE_KEY),
-                                    (String )msg.getProperty (ESEBConstants.MODEL_NAME_KEY));
+                                    (String )msg.getProperty (IModelChangeBusPort.MODEL_TYPE_PROP),
+                                    (String )msg.getProperty (IModelChangeBusPort.MODEL_NAME_PROP));
                             pair.secondValue ().onEvent (model, msg);
                         }
                     }

@@ -198,7 +198,7 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
         log ("Terminating.");
         m_beacon = null;
         m_masterConnectionPort.disconnectDelegate (getId ());
-
+        Rainbow.signalTerminate ();
         super.doTerminate ();
     }
 

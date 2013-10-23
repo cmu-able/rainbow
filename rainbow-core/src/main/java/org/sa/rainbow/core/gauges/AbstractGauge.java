@@ -4,6 +4,7 @@ import incubator.pval.Ensure;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -255,8 +256,8 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
         m_lastCommands.putAll (actualsMap);
         m_announcePort.updateModel (actualCmd);
         m_reportingPort.info (RainbowComponentT.GAUGE,
-                MessageFormat.format ("G[{0}]: {1}.{2}{3}", id (),
-                        actualCmd.getTarget (), actualCmd.getCommandName (), actualCmd.getParameters ()));
+                MessageFormat.format ("G[{0}]: {1}.{2}({3})", id (), actualCmd.getTarget (),
+                        actualCmd.getCommandName (), Arrays.toString (actualCmd.getParameters ())));
     }
 
 

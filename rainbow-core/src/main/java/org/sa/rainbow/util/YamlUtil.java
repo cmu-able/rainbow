@@ -242,6 +242,9 @@ public abstract class YamlUtil {
                         }
                         TypedAttributeWithValue configParam = gaugeInstSpec.findConfigParam (paramName);
                         if (configParam != null) {
+                            if (!configParam.getType ().equals ("String")) {
+                                paramValue = Util.parseObject (paramValue.toString (), configParam.getType ());
+                            }
                             configParam.setValue (paramValue);
                         }
                     }

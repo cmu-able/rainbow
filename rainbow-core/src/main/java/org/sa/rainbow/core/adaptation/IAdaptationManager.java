@@ -12,4 +12,6 @@ public interface IAdaptationManager<S> extends IRainbowRunnable {
 
     public abstract void initialize (IRainbowReportingPort port) throws RainbowConnectionException;
 
+    public abstract void setEnabled (boolean enabled);
+
 }

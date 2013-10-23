@@ -58,7 +58,7 @@ public class OperationResultConverter implements TypelibJavaConversionRule {
                 Field reply = sdt.field ("reply");
                 Map<Field, DataValue> fields = new HashMap<> ();
                 fields.put (result, m_scope.string ().make (or.result.name ()));
-                fields.put (reply, m_scope.string ().make (or.reply));
+                fields.put (reply, m_scope.string ().make (or.reply == null ? "" : or.reply));
                 StructureDataValue sdv = sdt.make (fields);
                 return sdv;
             }

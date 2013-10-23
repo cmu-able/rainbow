@@ -17,6 +17,7 @@ import java.text.MessageFormat;
 import java.util.EnumSet;
 
 import javax.swing.BorderFactory;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -35,6 +36,7 @@ import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.ports.IMasterCommandPort;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReportingSubscriberCallback;
@@ -74,13 +76,13 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
     public static final int TEXT_HALF_LENGTH = 50000;
 
     public static void main(String[] args) {
-        RainbowGUI gui = new RainbowGUI();
+        RainbowGUI gui = new RainbowGUI (null);
         gui.display();
     }
 
     private JFrame m_frame = null;
     private JTextArea[] m_textAreas = null;
-    private JScrollPane[] m_panes = null;
+    private JComponent[]       m_panes     = null;
     private Color[] m_colors = {
             /* purple */ new Color(188, 188, 250),
             /* pink */   new Color(255, 145, 255),
@@ -93,13 +95,16 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
             Color.GRAY
     };
     private int[] m_order = { 7, 2, 8, 3, 0, 1, 5, 4, 6 };
+    private IMasterCommandPort m_master;
 
-    public RainbowGUI () {
+    public RainbowGUI (IMasterCommandPort master) {
+        m_master = master;
         try {
             IRainbowReportingSubscriberPort reportingSubscriberPort = RainbowPortFactory
                     .createReportingSubscriberPort (this);
             reportingSubscriberPort.subscribe (EnumSet.allOf (RainbowComponentT.class),
                     EnumSet.allOf (ReportType.class));
+
         }
         catch (RainbowConnectionException e) {
             // TODO Auto-generated catch block
@@ -130,6 +135,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
     }
 
     public void forceQuit () {
+//        m_master.destroyDelegates ();
         Rainbow.signalTerminate ();
         Util.pause(IRainbowRunnable.LONG_SLEEP_TIME);
         System.exit(RainbowConstants.EXIT_VALUE_DESTRUCT);
@@ -154,11 +160,23 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
      * @param text
      */
     public void writeTextSL (int panelID, String text) {
+        if (panelID == ID_ORACLE_MESSAGE) {
+            OracleStatusPanel oracleStatusPanel = (OracleStatusPanel )m_panes[panelID];
+            if (oracleStatusPanel == null) return;
+            ((OracleStatusPanel )m_panes[panelID]).report (text, false);
+            return;
+        }
         if (m_textAreas[panelID] == null) return;
         m_textAreas[panelID].append(text);
         m_textAreas[panelID].setCaretPosition(m_textAreas[panelID].getText().length());
     }
     public void writeText (int panelID, String text) {
+        if (panelID == ID_ORACLE_MESSAGE) {
+            OracleStatusPanel oracleStatusPanel = (OracleStatusPanel )m_panes[panelID];
+            if (oracleStatusPanel == null) return;
+            oracleStatusPanel.report (text, true);
+            return;
+        }
         if (m_textAreas[panelID] == null) return;
         m_textAreas[panelID].append(text + "\n");
         m_textAreas[panelID].setCaretPosition(m_textAreas[panelID].getText().length());
@@ -179,7 +197,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         JDialog.setDefaultLookAndFeelDecorated(false);
 
         m_textAreas = new JTextArea[PANEL_COUNT];
-        m_panes = new JScrollPane[PANEL_COUNT];
+        m_panes = new JComponent[PANEL_COUNT];
 
         //Create and set up the window.
         m_frame = new JFrame ("Rainbow Framework GUI - Target " + Rainbow.getProperty (RainbowConstants.PROPKEY_TARGET_NAME));
@@ -220,13 +238,17 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         GridBagLayout gridBag = new GridBagLayout();
         contentPane.setLayout(gridBag);
         for (int i : m_order) {
-            m_panes[i] = createTextArea(i);
-            if (m_colors[i] == Color.GRAY) {
-                m_panes[i].setVisible(false);
+            if (i == ID_ORACLE_MESSAGE) {
+                m_panes[i] = new OracleStatusPanel (m_colors[i]);
             }
-            contentPane.add(m_panes[i]);
+            else {
+                m_panes[i] = createTextArea (i);
+                if (m_colors[i] == Color.GRAY) {
+                    m_panes[i].setVisible(false);
+                }
+            }
+            contentPane.add (m_panes[i]);
         }
-        m_textAreas[ID_ORACLE_MESSAGE].setForeground(Color.red);
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.BOTH;
         c.weightx = 0.5;
@@ -252,7 +274,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         m_frame.setVisible(true);
     }
 
-    private JScrollPane createTextArea(int area) {
+    private JComponent createTextArea (int area) {
         m_textAreas[area] = new JTextArea(TEXT_ROWS, TEXT_COLUMNS);
         m_textAreas[area].setFont(m_textAreas[area].getFont().deriveFont(TEXT_FONT_SIZE));
         m_textAreas[area].setEditable(false);
@@ -352,6 +374,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         item.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed (ActionEvent e) {
+                m_master.destroyDelegates ();
                 Rainbow.signalTerminate (Rainbow.ExitState.DESTRUCT);
             }
         });
@@ -384,8 +407,8 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         item.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed (ActionEvent e) {
-                throw new NotImplementedException ();
-//        		if (! Rainbow.inSimulation()) {
+                m_master.startProbes ();
+                //        		if (! Rainbow.inSimulation()) {
 //                	((SystemDelegate )Oracle.instance().targetSystem()).signalStartProbes();
 //        		}
             }
@@ -398,8 +421,8 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         item.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed (ActionEvent e) {
-                throw new NotImplementedException ();
-//        		if (! Rainbow.inSimulation()) {
+                m_master.killProbes ();
+                //        		if (! Rainbow.inSimulation()) {
 //                	((SystemDelegate )Oracle.instance().targetSystem()).signalKillProbes();
 //        		}
             }
@@ -415,8 +438,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
             public void actionPerformed (ActionEvent e) {
                 String hostname = JOptionPane.showInputDialog(m_frame, "Please provide hostname of Delegate to kill");
                 if (hostname != null && hostname.length() > 0) {
-                    String[] args = { "kill" };
-                    testEffector(hostname, "KillDelegate", args);
+                    m_master.killDelegate (hostname);
                 }
             }
         });
@@ -480,8 +502,8 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         item.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed (ActionEvent e) {
-                throw new NotImplementedException ();
-//        		// issues destroy to all delegates
+                m_master.destroyDelegates ();
+                //        		// issues destroy to all delegates
 //        		signalDelegates(ServiceConstants.SVC_CMD_STOP);
             }
         });

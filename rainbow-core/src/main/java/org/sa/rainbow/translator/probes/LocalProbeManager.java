@@ -6,6 +6,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,12 +51,12 @@ public class LocalProbeManager extends AbstractRainbowRunnable {
     protected void runAction () {
         Collection<IProbe> probes;
         synchronized (m_localProbes) {
-            probes = m_localProbes.values ();
+            probes = new HashSet<> (m_localProbes.values ());
         }
         for (IProbe probe : probes) {
-            if (!probe.isActive () && probe.lcState ().compareTo (IProbe.State.NULL) > 0) {
-                probe.activate ();
-            }
+//            if (!probe.isActive () && probe.lcState ().compareTo (IProbe.State.NULL) > 0) {
+//                probe.activate ();
+//            }
             if (!probe.isAlive ()) {
                 log (probe.id () + ": " + probe.id () + " appears to be dead! Deregistering...");
                 deregisterProbeAlias (probe.type ());
