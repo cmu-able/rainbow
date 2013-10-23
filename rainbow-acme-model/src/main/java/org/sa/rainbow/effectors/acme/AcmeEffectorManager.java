@@ -15,6 +15,15 @@ import org.sa.rainbow.translator.effectors.EffectorManager;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 import org.sa.rainbow.util.Util;
 
+/**
+ * An effector manager that deals with operations intended for Acme models. It assumes: 1. That commands are Acme
+ * commands 2. That the target of a command refers to an Acme object
+ * 
+ * It manages the calling of effectors associated with the command,
+ * 
+ * @author Bradley Schmerl: schmerl
+ * 
+ */
 public class AcmeEffectorManager extends EffectorManager {
 
     public AcmeEffectorManager () {
