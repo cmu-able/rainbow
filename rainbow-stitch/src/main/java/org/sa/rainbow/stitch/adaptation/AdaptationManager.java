@@ -3,6 +3,7 @@ package org.sa.rainbow.stitch.adaptation;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -291,7 +292,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
 //                    .getUserData ("TYPECHECKS");
 //            if (ext == null || ext.typechecks ()) return;
             if (m_mode == Mode.SERIAL && m_pendingStrategies.size () > 0)
-            // Only go if there are no pending strategies
+                // Only go if there are no pending strategies
                 return;
             Util.dataLogger ().info (IRainbowHealthProtocol.DATA_ADAPTATION_SELECTION_BEGIN);
             Strategy selectedStrategy = checkAdaptation ();
@@ -748,6 +749,16 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
     @Override
     protected RainbowComponentT getComponentType () {
         return RainbowComponentT.ADAPTATION_MANAGER;
+    }
+
+    @Override
+    public void setEnabled (boolean enabled) {
+        m_reportingPort.info (getComponentType (),
+                MessageFormat.format ("Turning adaptation {0}.", (enabled ? "on" : "off")));
+        if (!enabled && !m_pendingStrategies.isEmpty ()) {
+            m_reportingPort.info (getComponentType (), "There is an adaptation in progress. This will finish.");
+        }
+        m_adaptEnabled = enabled;
     }
 
 
