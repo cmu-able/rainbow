@@ -42,7 +42,7 @@ public class End2EndRespTimeGauge extends RegularPatternGauge {
     /**
      * Main constructor.
      */
-    public End2EndRespTimeGauge (String threadName, String id, long beaconPeriod, TypedAttribute gaugeDesc,
+    public End2EndRespTimeGauge (String id, long beaconPeriod, TypedAttribute gaugeDesc,
             TypedAttribute modelDesc, List<TypedAttributeWithValue> setupParams,
             List<IRainbowModelCommandRepresentation> mappings) throws RainbowException {
         super (NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);

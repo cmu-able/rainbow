@@ -49,6 +49,8 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
         m_commandMap.put ("SetMaliciousness".toLowerCase (), SetMaliciousnessCmd.class);
         m_commandMap.put ("EnableServer".toLowerCase (), EnableServerCmd.class);
         m_commandMap.put ("SetFidelity".toLowerCase (), SetFidelityCmd.class);
+        m_commandMap.put ("SetThrottled".toLowerCase (), SetThrottledCmd.class);
+        m_commandMap.put ("ForceReauthentication".toLowerCase (), ForceReauthenticationCmd.class);
     }
 
 
@@ -149,7 +151,7 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
                 Float.toString (serviceRate));
     }
 
-    public SetCaptchaEnabledCmd setCaptchaEnabled (IAcmeComponent lb, boolean enabled) {
+    public SetCaptchaEnabledCmd setCaptchaEnabledCmd (IAcmeComponent lb, boolean enabled) {
         assert lb.declaresType ("ProxyT");
         if (ModelHelper.getAcmeSystem (lb) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
@@ -171,6 +173,28 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
         sb.deleteCharAt (sb.length () - 1);
         return new SetBlackholedCmd ("setBlackholed", m_modelInstance, server.getQualifiedName (),
                 sb.toString ());
+    }
+
+    public AcmeModelCommand<IAcmeProperty> setThrottledCmd (IAcmeComponent server, Set<String> throttledIPs) {
+        Ensure.isTrue (server.declaresType ("ThrottlerT"));
+        if (ModelHelper.getAcmeSystem (server) != m_modelInstance.getModelInstance ())
+            throw new IllegalArgumentException (
+                    "Cannot create a command for a component that is not part of the system");
+        StringBuffer sb = new StringBuffer ();
+        for (String ip : throttledIPs) {
+            sb.append (ip);
+            sb.append (",");
+        }
+        sb.deleteCharAt (sb.length () - 1);
+        return new SetThrottledCmd ("setThrottled", m_modelInstance, server.getQualifiedName (), sb.toString ());
+    }
+
+    public AcmeModelCommand<IAcmeProperty> forceReauthentication (IAcmeComponent server) {
+        Ensure.isTrue (server.declaresType ("ServerT"));
+        if (ModelHelper.getAcmeSystem (server) != m_modelInstance.getModelInstance ())
+            throw new IllegalArgumentException (
+                    "Cannot create a command for a component that is not part of the system");
+        return new ForceReauthenticationCmd ("forceReauthentication", m_modelInstance, server.getQualifiedName ());
     }
 
     public AcmeModelCommand<IAcmeProperty> setMaliciousnessCmd (IAcmeComponent client, float maliciousness) {
