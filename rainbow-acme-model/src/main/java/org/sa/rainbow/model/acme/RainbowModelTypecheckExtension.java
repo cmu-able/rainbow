@@ -2,6 +2,12 @@ package org.sa.rainbow.model.acme;
 
 import org.acmestudio.acme.core.extension.IAcmeElementExtension;
 
+/**
+ * Used by the typechecking analyser to indicate whether the model typechecks or not.
+ * 
+ * @author Bradley Schmerl: schmerl
+ * 
+ */
 public class RainbowModelTypecheckExtension implements IAcmeElementExtension {
 
     protected boolean m_typechecks;

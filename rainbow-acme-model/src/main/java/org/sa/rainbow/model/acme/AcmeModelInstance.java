@@ -118,6 +118,13 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
 
     }
 
+    /**
+     * Updates the exponential average associated with a property in the model (Currently, this is not stored in the
+     * Acme model.)
+     * 
+     * @param id
+     * @param val
+     */
     protected void updateExponentialAverage (String id, double val) {
         double avg = 0.0;
         // retrieve exponential alpha
@@ -152,13 +159,14 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
     @Override
     public IModelInstance<IAcmeSystem> copyModelInstance (String newName) throws RainbowCopyException {
         synchronized (m_system) {
-
             List<IAcmeCommand<?>> cmds = new LinkedList<> ();
             IAcmeModel model = m_system.getContext ().getModel ();
             IAcmeElementCopyCommand cmd = model.getCommandFactory ().copyElementCommand (model, m_system);
             cmds.add (cmd);
             cmds.add (model.getCommandFactory ().elementRenameCommand (cmd, newName));
-
+// This is commented out because it doesn't quite work. The strategy scope establisher binds
+// binds types before tactic execution, and so during tactic execution
+// the copy of the model refers to a different type
 //            
 //            // Copy all families into this system, whether imported or local
 //            Set<IAcmeFamily> types = ModelHelper.gatherSuperFamilies (m_system);

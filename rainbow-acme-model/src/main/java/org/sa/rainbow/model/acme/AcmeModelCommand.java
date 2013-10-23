@@ -24,6 +24,11 @@ import org.sa.rainbow.core.models.commands.IRainbowModelCommand;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 import org.sa.rainbow.model.acme.AcmeRainbowCommandEvent.CommandEventT;
 
+/**
+ * An implementation of RainbowModelCommands for AcmeModelCommands
+ * 
+ **/
+
 public abstract class AcmeModelCommand<T> extends AbstractRainbowModelCommand<T, IAcmeSystem> implements
 IRainbowModelCommand<T, IAcmeSystem> {
 
@@ -82,6 +87,7 @@ IRainbowModelCommand<T, IAcmeSystem> {
             return ase.getType () == AcmeModelEventType.REMOVE_DECLARED_TYPE /*&& ase.getData (ase.getType ()).equals (SENTINEL_COMMAND_TYPE)*/;
         }
     };
+
     private EventUpdateAdapter  m_eventListener;
     List<AcmeEvent>             m_events              = Collections.synchronizedList (new LinkedList<AcmeEvent> ());
 

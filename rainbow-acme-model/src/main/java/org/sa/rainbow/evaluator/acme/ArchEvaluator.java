@@ -1,5 +1,6 @@
 package org.sa.rainbow.evaluator.acme;
 
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -9,7 +10,7 @@ import org.acmestudio.acme.element.IAcmeSystem;
 import org.acmestudio.acme.environment.IAcmeEnvironment;
 import org.acmestudio.acme.environment.error.AcmeError;
 import org.acmestudio.acme.type.IAcmeTypeChecker;
-import org.acmestudio.acme.type.verification.SynchronousTypeChecker;
+import org.acmestudio.acme.type.verification.SimpleModelTypeChecker;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.IRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
@@ -31,7 +32,11 @@ import org.sa.rainbow.model.acme.AcmeRainbowCommandEvent.CommandEventT;
 import org.sa.rainbow.model.acme.AcmeTypecheckSetCmd;
 
 /**
- * The Rainbow Architectural Evaluator, which performs change-triggered evaluation of the architectural model.
+ * The Rainbow Architectural Evaluator, which performs change-triggered evaluation of the architectural model. When a
+ * constraint fails, this is reported back to the model through the setTypecheckResult operation.
+ * 
+ * This is backward compatible with the old Rainbow: eventually, IArchEvaluations should be migrated as their own
+ * Rainbow analysis
  * 
  * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
  * @history * [2009.03.04] Removed beacon for model evaluation, set sleep period instead.
@@ -39,14 +44,16 @@ import org.sa.rainbow.model.acme.AcmeTypecheckSetCmd;
 public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAnalysis,
 IRainbowModelChangeCallback<IAcmeSystem> {
 
-    public static final String                     NAME                    = "Rainbow Acme Architecture Constraint Evaluator";
+    private static final String                    SET_TYPECHECK_OPERATION_NAME = "setTypecheckResult";
+
+    public static final String                     NAME                         = "Rainbow Acme Architecture Constraint Evaluator";
 
     /** Reference to the Rainbow model */
-    private boolean                                m_adaptationNeeded      = false;
+    private boolean                                m_adaptationNeeded           = false;
     private IModelChangeBusSubscriberPort          m_modelChangePort;
 
-    /** Matches changes the end of changes to the model **/
-    private IRainbowChangeBusSubscription          m_modelChangeSubscriber = new IRainbowChangeBusSubscription () {
+    /** Matches the end of changes to the model **/
+    private IRainbowChangeBusSubscription          m_modelChangeSubscriber      = new IRainbowChangeBusSubscription () {
 
         @Override
         public
@@ -59,7 +66,7 @@ IRainbowModelChangeCallback<IAcmeSystem> {
                     CommandEventT ct = CommandEventT
                             .valueOf (type);
                     if (ct.isEnd ()
-                            && !"setTypecheckResult"
+                            && !SET_TYPECHECK_OPERATION_NAME
                             .equals (message
                                     .getProperty (IModelChangeBusPort.COMMAND_PROP))) {
                         String modelType = (String )message
@@ -76,7 +83,8 @@ IRainbowModelChangeCallback<IAcmeSystem> {
         }
     };
 
-    private LinkedBlockingQueue<AcmeModelInstance> m_modelCheckQ           = new LinkedBlockingQueue<> ();
+    /** The models to typecheck **/
+    private LinkedBlockingQueue<AcmeModelInstance> m_modelCheckQ                = new LinkedBlockingQueue<> ();
 
     private Set<IArchEvaluation>                   m_evaluations;
 
@@ -97,7 +105,6 @@ IRainbowModelChangeCallback<IAcmeSystem> {
         installEvaluations ();
     }
 
-
     @Override
     public void initialize (IRainbowReportingPort port) throws RainbowConnectionException {
         super.initialize (port);
@@ -110,7 +117,6 @@ IRainbowModelChangeCallback<IAcmeSystem> {
     }
 
     private void initializeConnections () throws RainbowConnectionException {
-        Object modelDesc;
         m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort ();
     }
 
@@ -129,8 +135,8 @@ IRainbowModelChangeCallback<IAcmeSystem> {
                     m_evaluations.add (evaluationInstance);
                 }
                 catch (Throwable e) {
-                    m_reportingPort.error (RainbowComponentT.ANALYSIS, "Failed to instantiate " + evaluation.trim ()
-                            + " as an IArchEvaluation", e);
+                    m_reportingPort.error (RainbowComponentT.ANALYSIS, MessageFormat.format (
+                            "Failed to instantiate {0} as an IArchEvaluation", evaluation.trim ()), e);
                 }
             }
         }
@@ -159,11 +165,11 @@ IRainbowModelChangeCallback<IAcmeSystem> {
     protected void runAction () {
         final AcmeModelInstance model = m_modelCheckQ.poll ();
         if (model != null) {
+            // For each Acme model that changed, check to see if it typechecks
             IAcmeEnvironment env = model.getModelInstance ().getContext ().getEnvironment ();
             IAcmeTypeChecker typeChecker = env.getTypeChecker ();
-            if (typeChecker instanceof SynchronousTypeChecker) {
-                SynchronousTypeChecker synchChecker = (SynchronousTypeChecker )typeChecker;
-                synchChecker.typecheckAllModelsNow ();
+            if (typeChecker instanceof SimpleModelTypeChecker) {
+                SimpleModelTypeChecker synchChecker = (SimpleModelTypeChecker )typeChecker;
                 boolean constraintViolated = !synchChecker.typechecks (model.getModelInstance ());
                 AcmeTypecheckSetCmd cmd = model.getCommandFactory ().acmeTypecheckSetCmd (constraintViolated);
                 try {
@@ -216,30 +222,6 @@ IRainbowModelChangeCallback<IAcmeSystem> {
                 }
             }
         }
-
-//        AdaptationManager am = (AdaptationManager )Oracle.instance ().adaptationManager ();
-//        if (m_model.hasPropertyChanged ()) {
-//            m_model.clearPropertyChanged ();
-//            // evaluate constraints only if adaptation not already taking place
-//            if (!am.adaptationInProgress ()) {
-//                Oracle.instance ().writeEvaluatorPanelSL (m_logger, "Prop changed, eval constraints...");
-//                // evaluate model for conformance to constraints
-//                Util.dataLogger ().info (IRainbowHealthProtocol.DATA_CONSTRAINT_BEGIN);
-//                m_model.evaluateConstraints ();
-//                Util.dataLogger ().info (IRainbowHealthProtocol.DATA_CONSTRAINT_END);
-//                if (m_model.isConstraintViolated ()) {
-//                    Oracle.instance ().writeEvaluatorPanel (m_logger, "violated!");
-//                }
-//                else {
-//                    Oracle.instance ().writeEvaluatorPanel (m_logger, "pass");
-//                }
-
-// trigger adaptation if any violation
-// independent if branch allows for adaptation even if no property update occurred
-//        if ((m_model.isConstraintViolated () || m_adaptationNeeded) && !am.adaptationInProgress ()) {
-//            log ("Detecting constraint violation!! Triggering adaptation.");
-//            am.triggerAdaptation ();
-//        }
     }
 
 /* (non-Javadoc)

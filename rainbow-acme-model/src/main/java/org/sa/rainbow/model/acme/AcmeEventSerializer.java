@@ -25,6 +25,12 @@ import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 import org.sa.rainbow.core.ports.eseb.ESEBConstants;
 
+/**
+ * Serializes Acme events as Rainbow events.
+ * 
+ * @author Bradley Schmerl: schmerl
+ * 
+ */
 public class AcmeEventSerializer {
     public void serialize (AcmeEvent event, IRainbowMessage msg, IRainbowMessage parent) {
         if (event instanceof AcmeAttachmentEvent) {
