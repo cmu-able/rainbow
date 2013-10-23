@@ -2,6 +2,7 @@ package org.sa.rainbow.model.acme;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +33,11 @@ public abstract class AcmeModelCommandFactory extends ModelCommandFactory<IAcmeS
     public IRainbowModelCommand generateCommand (String commandName, String... args) throws RainbowModelException {
         try {
             Class<? extends AcmeModelCommand<?>> cmdClass = m_commandMap.get (commandName.toLowerCase ());
+            if (cmdClass == null) {
+                cmdClass = tryThroughReflection (commandName);
+            }
+            if (cmdClass == null)
+                throw new RainbowModelException ("Cannot find a command that matches " + commandName);
             Constructor<? extends AcmeModelCommand<?>>[] constructors = (Constructor<? extends AcmeModelCommand<?>>[] )cmdClass
                     .getConstructors ();
             Constructor<? extends AcmeModelCommand<?>> constructor = null;
@@ -60,4 +66,14 @@ public abstract class AcmeModelCommandFactory extends ModelCommandFactory<IAcmeS
             throw new RainbowModelException ("Cannot create a command for the commandName: " + commandName, e);
         }
     }
+
+    private Class<? extends AcmeModelCommand<?>> tryThroughReflection (String commandName) {
+        Method[] methods = this.getClass ().getMethods ();
+        for (Method method : methods) {
+            if (method.getName ().equals (commandName + "Cmd"))
+                return (Class<? extends AcmeModelCommand<?>> )method.getReturnType ();
+        }
+        return null;
+    }
+
 }
