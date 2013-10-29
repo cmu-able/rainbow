@@ -21,7 +21,7 @@ public class RemoteOperationStub {
 	/**
 	 * The destination participant ID.
 	 */
-	private long m_dst_id;
+	private String m_dst_id;
 	
 	/**
 	 * The remote object ID.
@@ -42,13 +42,15 @@ public class RemoteOperationStub {
 	 * @param obj_id the ID of the remote object that will execute the
 	 * operation
 	 */
-	public RemoteOperationStub(RpcEnvironment environment, long dst_id,
+	public RemoteOperationStub(RpcEnvironment environment, String dst_id,
 			DataValue operation, String obj_id) {
-		Ensure.not_null(environment);
-		Ensure.not_null(operation);
+		Ensure.not_null(environment, "environment == null");
+		Ensure.not_null(dst_id, "dst_id == null");
+		Ensure.not_null(operation, "operation == null");
 		Ensure.is_true(environment.operation_information().is_operation(
-				operation));
-		Ensure.not_null(obj_id);
+				operation), "Data value given for operation is not an "
+				+ "operation");
+		Ensure.not_null(obj_id, "Obj_id == null");
 		
 		m_dst_id = dst_id;
 		m_obj_id = obj_id;

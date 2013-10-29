@@ -65,12 +65,13 @@ public class JavaRpcFactory {
 	 * it or not; this can be used to close the service
 	 */
 	public static <T> T create_remote_stub(Class<T> t_class,
-			final RpcEnvironment env, final long dst_id,
+			final RpcEnvironment env, final String dst_id,
 			final long time_out_ms, final String obj_id) {
-		Ensure.not_null(t_class);
-		Ensure.not_null(env);
-		Ensure.greater_equal(time_out_ms, 0);
-		Ensure.not_null(obj_id);
+		Ensure.not_null(t_class, "t_class == null");
+		Ensure.not_null(env, "env == null");
+		Ensure.not_null(dst_id, "dst_id == null");
+		Ensure.greater_equal(time_out_ms, 0, "time_out_ms <= 0");
+		Ensure.not_null(obj_id, "obj_id == null");
 		
 		final DataValue g = create_meta_data_for_service(t_class, env);
 		final Map<Method, DataValue> method_op_map = new HashMap<>();

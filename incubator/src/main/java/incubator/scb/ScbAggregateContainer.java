@@ -5,10 +5,10 @@ import incubator.dispatch.DispatcherOp;
 import incubator.dispatch.LocalDispatcher;
 import incubator.pval.Ensure;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * SCB container that aggregates the SCBs from several containers.
@@ -156,7 +156,7 @@ public class ScbAggregateContainer<T extends Scb<T>>
 	}
 
 	@Override
-	public Collection<T> all_scbs() {
+	public Set<T> all_scbs() {
 		return new HashSet<>(m_scbs.keySet());
 	}
 }

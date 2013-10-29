@@ -107,15 +107,23 @@ public class ParticipantIdentificationTest extends DefaultTCase {
 			Participant pl2_1 = i2.next();
 			Participant pl2_2 = i2.next();
 			
-			assertTrue(pl1_1.id() == pi1.id() || pl1_1.id() == pi2.id());
-			assertTrue(pl1_2.id() == pi1.id() || pl1_2.id() == pi2.id());
-			assertTrue(pl1_1.id() == pi1.id() || pl1_2.id() == pi1.id());
-			assertTrue(pl1_1.id() == pi2.id() || pl1_2.id() == pi2.id());
+			assertTrue(pl1_1.id().equals(pi1.id())
+					|| pl1_1.id().equals(pi2.id()));
+			assertTrue(pl1_2.id().equals(pi1.id())
+					|| pl1_2.id().equals(pi2.id()));
+			assertTrue(pl1_1.id().equals(pi1.id())
+					|| pl1_2.id().equals(pi1.id()));
+			assertTrue(pl1_1.id().equals(pi2.id())
+					|| pl1_2.id().equals(pi2.id()));
 			
-			assertTrue(pl2_1.id() == pi1.id() || pl2_1.id() == pi2.id());
-			assertTrue(pl2_2.id() == pi1.id() || pl2_2.id() == pi2.id());
-			assertTrue(pl2_1.id() == pi1.id() || pl2_2.id() == pi1.id());
-			assertTrue(pl2_1.id() == pi2.id() || pl2_2.id() == pi2.id());
+			assertTrue(pl2_1.id().equals(pi1.id())
+					|| pl2_1.id().equals(pi2.id()));
+			assertTrue(pl2_2.id().equals(pi1.id())
+					|| pl2_2.id().equals(pi2.id()));
+			assertTrue(pl2_1.id().equals(pi1.id())
+					|| pl2_2.id().equals(pi1.id()));
+			assertTrue(pl2_1.id().equals(pi2.id())
+					|| pl2_2.id().equals(pi2.id()));
 			
 			f1.shutdown();
 			f2.shutdown();

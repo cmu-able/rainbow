@@ -1,6 +1,6 @@
 package incubator.scb.ui;
 
-import incubator.scb.ScbEnumField;
+import incubator.scb.ScbField;
 
 /**
  * Table field that displays an enumeration value as text.
@@ -8,12 +8,12 @@ import incubator.scb.ScbEnumField;
  * @param <E> the type of enumeration
  */
 public class ScbTableModelEnumTextField<T, E extends Enum<E>>
-		extends ScbTableModelField<T, E, ScbEnumField<T, E>> {
+		extends ScbTableModelField<T, E, ScbField<T, E>> {
 	/**
 	 * Creates a new enumeration text field.
 	 * @param cof the field
 	 */
-	public ScbTableModelEnumTextField(ScbEnumField<T, E> cof) {
+	public ScbTableModelEnumTextField(ScbField<T, E> cof) {
 		super(cof);
 	}
 

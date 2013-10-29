@@ -96,10 +96,10 @@ public class OperationInformationTest extends DefaultTCase {
 		
 		Map<String, DataValue> iargs = new HashMap<>();
 		iargs.put("foo", m_pscope.int32().make(-6));
-		DataValue er = m_oi.create_execution_request(3, -4, "5", op, iargs);
+		DataValue er = m_oi.create_execution_request(3, "-4", "5", op, iargs);
 		
 		assertEquals(3, m_oi.execution_request_id(er));
-		assertEquals(-4, m_oi.execution_request_dst(er));
+		assertEquals("-4", m_oi.execution_request_dst(er));
 		assertEquals("5", m_oi.execution_request_obj_id(er));
 		assertEquals("foo", m_oi.execution_request_operation(er));
 		assertEquals(iargs, m_oi.execution_request_input_arguments(er));
@@ -113,7 +113,7 @@ public class OperationInformationTest extends DefaultTCase {
 		
 		Map<String, DataValue> iargs = new HashMap<>();
 		iargs.put("foo", m_pscope.int32().make(-6));
-		DataValue er = m_oi.create_execution_request(3, -4, "5", op, iargs);
+		DataValue er = m_oi.create_execution_request(3, "-4", "5", op, iargs);
 		
 		assertTrue(m_oi.is_execution_request(er));
 	}
@@ -133,7 +133,7 @@ public class OperationInformationTest extends DefaultTCase {
 		
 		Map<String, DataValue> iargs = new HashMap<>();
 		iargs.put("foo", m_pscope.int32().make(-6));
-		DataValue er = m_oi.create_execution_request(3, -4, "5", op, iargs);
+		DataValue er = m_oi.create_execution_request(3, "-4", "5", op, iargs);
 		
 		Map<String, DataValue> oargs = new HashMap<>();
 		oargs.put("bar", m_pscope.int32().make(7));
@@ -154,7 +154,7 @@ public class OperationInformationTest extends DefaultTCase {
 		
 		Map<String, DataValue> iargs = new HashMap<>();
 		iargs.put("foo", m_pscope.int32().make(-6));
-		DataValue er = m_oi.create_execution_request(3, -4, "5", op, iargs);
+		DataValue er = m_oi.create_execution_request(3, "-4", "5", op, iargs);
 		
 		Map<String, DataValue> oargs = new HashMap<>();
 		oargs.put("bar", m_pscope.int32().make(7));
@@ -177,7 +177,7 @@ public class OperationInformationTest extends DefaultTCase {
 		
 		Map<String, DataValue> iargs = new HashMap<>();
 		iargs.put("foo", m_pscope.int32().make(-6));
-		DataValue er = m_oi.create_execution_request(3, -4, "5", op, iargs);
+		DataValue er = m_oi.create_execution_request(3, "-4", "5", op, iargs);
 		
 		Map<String, DataValue> oargs = new HashMap<>();
 		oargs.put("bar", m_pscope.int32().make(7));

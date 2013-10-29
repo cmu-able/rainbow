@@ -42,9 +42,9 @@ public class ParticipantTypeTest extends DefaultTCase {
 	
 	@Test
 	public void announce_write_and_read_no_meta_data() throws Exception {
-		DataValue v = m_types.announce(34, null);
+		DataValue v = m_types.announce("34", null);
 		assertNotNull(v);
-		assertEquals(34, m_types.announce_id(v));
+		assertEquals("34", m_types.announce_id(v));
 		assertEquals(0, m_types.announce_meta_data_keys(v).size());
 	}
 	
@@ -55,10 +55,10 @@ public class ParticipantTypeTest extends DefaultTCase {
 		Map<String, DataValue> md = new HashMap<>();
 		md.put("A", md1);
 		md.put("B", md2);
-		DataValue v = m_types.announce(-8, md);
+		DataValue v = m_types.announce("-8", md);
 		
 		assertTrue(m_types.is_announce(v));
-		assertEquals(-8, m_types.announce_id(v));
+		assertEquals("-8", m_types.announce_id(v));
 		Set<String> ks = m_types.announce_meta_data_keys(v);
 		assertEquals(2, ks.size());
 		assertTrue(ks.contains("A"));
@@ -69,7 +69,7 @@ public class ParticipantTypeTest extends DefaultTCase {
 	
 	@Test
 	public void announce_check_valid_value() throws Exception {
-		DataValue v = m_types.announce(34, null);
+		DataValue v = m_types.announce("34", null);
 		assertNotNull(v);
 		assertTrue(m_types.is_announce(v));
 	}

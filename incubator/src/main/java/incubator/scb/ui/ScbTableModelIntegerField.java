@@ -2,7 +2,7 @@ package incubator.scb.ui;
 
 import incubator.Pair;
 import incubator.pval.Ensure;
-import incubator.scb.ScbIntegerField;
+import incubator.scb.ScbField;
 import incubator.scb.ValidationResult;
 
 /**
@@ -10,12 +10,12 @@ import incubator.scb.ValidationResult;
  * @param <T> the type of SCB Bean
  */
 public class ScbTableModelIntegerField<T>
-		extends ScbTableModelField<T, Integer, ScbIntegerField<T>> {
+		extends ScbTableModelField<T, Integer, ScbField<T, Integer>> {
 	/**
 	 * Creates a new, non-editable, field.
 	 * @param cof the configuration object integer field
 	 */
-	public ScbTableModelIntegerField(ScbIntegerField<T> cof) {
+	public ScbTableModelIntegerField(ScbField<T, Integer> cof) {
 		super(cof);
 	}
 	
@@ -24,7 +24,8 @@ public class ScbTableModelIntegerField<T>
 	 * @param cof the configuration object integer field
 	 * @param editable is the field editable?
 	 */
-	public ScbTableModelIntegerField(ScbIntegerField<T> cof, boolean editable) {
+	public ScbTableModelIntegerField(ScbField<T, Integer> cof,
+			boolean editable) {
 		super(cof, editable);
 		Ensure.is_true(!editable || cof.can_set());
 	}

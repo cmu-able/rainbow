@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.math.RandomUtils;
+import org.apache.commons.lang.RandomStringUtils;
 
 import edu.cmu.cs.able.eseb.BusData;
 import edu.cmu.cs.able.eseb.conn.BusConnection;
@@ -22,15 +22,16 @@ import edu.cmu.cs.able.typelib.type.DataValue;
 
 /**
  * <p>The <code>ParticipantIdentifier</code> class provides the basis for
- * participant identification. When generated it creates a random ID.
- * Associated with it one may provide a <em>description</em> of the
- * participant. The description is any data value which can be encoded.</p>
+ * participant identification. When generated it creates a random ID unless
+ * a specific ID is provided. Associated with it one may provide a
+ * <em>description</em> of the participant. The description is any data value
+ * which can be encoded.</p>
  */
 public class ParticipantIdentifier implements Closeable {
 	/**
 	 * The randomly-generated participant identifier.
 	 */
-	private long m_id;
+	private String m_id;
 	
 	/**
 	 * Access to the participant types.
@@ -83,18 +84,37 @@ public class ParticipantIdentifier implements Closeable {
 	 */
 	public ParticipantIdentifier(BusConnection connection,
 			final long participant_renew_time) throws ParticipantException {
-		Ensure.not_null(connection);
+		this(connection, participant_renew_time,
+				RandomStringUtils.randomAlphanumeric(10));
+	}
+	
+	/**
+	 * Creates a new identifier with a specific participant ID.
+	 * @param connection the event bus connection to build the identifier on
+	 * @param participant_renew_time how much time, in milliseconds, between
+	 * renewal requests
+	 * @param id the ID to use for this participant identifier
+	 * @throws ParticipantException failed to initialize the participant
+	 * identifier
+	 */
+	public ParticipantIdentifier(BusConnection connection,
+			final long participant_renew_time, String id)
+			throws ParticipantException {
+		Ensure.not_null(connection, "connection == null");
+		Ensure.greater(participant_renew_time, 0,
+				"participant_renew_time <= 0");
+		Ensure.not_null(id, "id == null");
 		
 		m_connection = connection;
 		m_ptypes = new ParticipantTypes(connection.primitive_scope(),
 				connection.encoding());
-		m_id = RandomUtils.nextLong();
-		m_collector = new LocalCollector("Participant " + m_id
-				+ " identifier.");
+		m_id = id;
+		m_collector = new LocalCollector("Participant '" + m_id
+				+ "' identifier.");
 		m_filters = new HashSet<>();
 		m_meta_data = new HashMap<>();
-		m_send_thread = new WorkerThread("Participant " + m_id
-				+ " event sender") {
+		m_send_thread = new WorkerThread("Participant '" + m_id
+				+ "' event sender") {
 			@Override
 			protected synchronized void do_cycle_operation() throws Exception {
 				send_announce_all();
@@ -130,7 +150,7 @@ public class ParticipantIdentifier implements Closeable {
 	 * Obtains the participant ID.
 	 * @return the participant ID
 	 */
-	public long id() {
+	public String id() {
 		return m_id;
 	}
 	

@@ -185,6 +185,13 @@
 			<artifactId>typelib</artifactId>
 			<version>1-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>edu.cmu.cs.able</groupId>
+			<artifactId>typelib</artifactId>
+			<version>1-SNAPSHOT</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	
 	<repositories>

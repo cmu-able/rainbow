@@ -6,6 +6,7 @@ import java.io.Closeable;
 import java.io.IOException;
 
 import edu.cmu.cs.able.eseb.conn.BusConnection;
+import edu.cmu.cs.able.eseb.participant.ParticipantIdentifier;
 import edu.cmu.cs.able.typelib.jconv.DefaultTypelibJavaConverter;
 import edu.cmu.cs.able.typelib.jconv.TypelibJavaConverter;
 import edu.cmu.cs.able.typelib.type.DataValue;
@@ -29,12 +30,12 @@ public class RpcEnvironment implements Closeable {
 	/**
 	 * Execution filter.
 	 */
-	private ExecutionResultReadFilter m_exec_filter;
+	private ExecutionResultReader m_exec_reader;
 	
 	/**
 	 * Request filter.
 	 */
-	private ExecutionRequestReadFilter m_req_filter;
+	private ExecutionRequestReader m_req_reader;
 	
 	/**
 	 * The typelib/java converter.
@@ -42,21 +43,33 @@ public class RpcEnvironment implements Closeable {
 	private TypelibJavaConverter m_jconv;
 	
 	/**
+	 * The participant ID.
+	 */
+	private String m_participant_id;
+	
+	/**
 	 * Creates a new environment using the given connection.
 	 * @param connection the connection
-	 * @param participant_id the ID of this participant
+	 * @param participant_id the ID of this participant; this value is
+	 * usually obtained using a {@link ParticipantIdentifier} but this
+	 * is not strictly necessary
 	 * @throws OperationException failed to create the environment
 	 */
-	public RpcEnvironment(BusConnection connection, long participant_id)
+	public RpcEnvironment(BusConnection connection, String participant_id)
 			throws OperationException {
-		Ensure.not_null(connection);
+		Ensure.not_null(connection, "connection == null");
+		Ensure.not_null(participant_id, "participant_id == null");
+		
 		m_connection = connection;
+		m_participant_id = participant_id;
 		m_information = new OperationInformation(connection.primitive_scope());
-		m_exec_filter = new ExecutionResultReadFilter(m_information);
-		m_req_filter = new ExecutionRequestReadFilter(m_information,
-				participant_id, m_connection.outgoing_chain());
-		m_connection.incoming_chain().add_filter(m_exec_filter);
-		m_connection.incoming_chain().add_filter(m_req_filter);
+		m_exec_reader = new ExecutionResultReader(m_information);
+		ExecutionResultReadFilter.add_request_reader(m_connection,
+				m_exec_reader);
+		m_req_reader = new ExecutionRequestReader(m_information,
+				m_participant_id);
+		ExecutionRequestReadFilter.add_request_reader(m_connection,
+				m_req_reader);
 		m_jconv = DefaultTypelibJavaConverter.make(
 				m_connection.primitive_scope());
 	}
@@ -79,14 +92,16 @@ public class RpcEnvironment implements Closeable {
 
 	@Override
 	public synchronized void close() throws IOException {
-		if (m_exec_filter == null) {
+		if (m_exec_reader == null) {
 			return;
 		}
 		
-		m_connection.incoming_chain().remove_filter(m_exec_filter);
-		m_connection.incoming_chain().remove_filter(m_req_filter);
-		m_exec_filter = null;
-		m_req_filter = null;
+		ExecutionResultReadFilter.remove_request_reader(m_connection,
+				m_exec_reader);
+		ExecutionRequestReadFilter.remove_request_reader(m_connection,
+				m_req_reader);
+		m_exec_reader = null;
+		m_req_reader = null;
 	}
 	
 	/**
@@ -106,9 +121,9 @@ public class RpcEnvironment implements Closeable {
 		
 		RemoteExecution re = null;
 		synchronized (this) {
-			Ensure.not_null(m_exec_filter);
+			Ensure.not_null(m_exec_reader);
 			re = new RemoteExecution(operation);
-			m_exec_filter.add_wait(re, id);
+			m_exec_reader.add_wait(re, id);
 		}
 		
 		m_connection.send(request);
@@ -120,9 +135,9 @@ public class RpcEnvironment implements Closeable {
 	 * @param sor the service to publish
 	 */
 	synchronized void publish(ServiceObjectRegistration sor) {
-		Ensure.not_null(sor);
-		Ensure.not_null(m_req_filter);
-		m_req_filter.publish(sor);
+		Ensure.not_null(sor, "sor == null");
+		Ensure.not_null(m_req_reader, "m_req_reader == null");
+		m_req_reader.publish(sor);
 	}
 	
 	/**
@@ -130,15 +145,15 @@ public class RpcEnvironment implements Closeable {
 	 * @param sor the service to unpublish
 	 */
 	synchronized void unpublish(ServiceObjectRegistration sor) {
-		Ensure.not_null(sor);
+		Ensure.not_null(sor, "sor == null");
 		/*
 		 * If m_req_filter is null then we're already closed. The SOR should
 		 * not be unpublishing if the RPC environment is already closed. This
 		 * probably means someone is trying to close stuff in the wrong
 		 * sequence.
 		 */
-		Ensure.not_null(m_req_filter);
-		m_req_filter.unpublish(sor);
+		Ensure.not_null(m_req_reader, "m_req_reader == null");
+		m_req_reader.unpublish(sor);
 	}
 	
 	/**
@@ -148,5 +163,13 @@ public class RpcEnvironment implements Closeable {
 	 */
 	public TypelibJavaConverter converter() {
 		return m_jconv;
+	}
+	
+	/**
+	 * Obtains the participant ID that was used to create this environment.
+	 * @return the participant ID
+	 */
+	public String participant_id() {
+		return m_participant_id;
 	}
 }

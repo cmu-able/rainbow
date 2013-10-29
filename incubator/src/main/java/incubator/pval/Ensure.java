@@ -24,18 +24,36 @@ public class Ensure {
 	 * @return the value tested, if not <code>null</code>
 	 */
 	public static <T> T not_null(T value) {
-		Ensure.is_true(value != null);
+		return not_null(value, "Value is null.");
+	}
+	
+	/**
+	 * Ensures that a value is not <code>null</code>.
+	 * @param value the value
+	 * @param error_msg the error message to send if value is <code>null</code>
+	 * @return the value tested, if not <code>null</code>
+	 */
+	public static <T> T not_null(T value, String error_msg) {
+		Ensure.is_true(value != null, error_msg);
 		return value;
 	}
 	
 	/**
 	 * Ensures that a value is <code>null</code>.
 	 * @param value the value
-	 * @return the value tested, if not <code>null</code>
 	 */
-	public static <T> T is_null(T value) {
+	public static void is_null(Object value) {
 		Ensure.is_true(value == null);
-		return value;
+	}
+	
+	/**
+	 * Ensures that a value is <code>null</code>.
+	 * @param value the value
+	 * @param error_message the error message to send if value is
+	 * <code>null</code>
+	 */
+	public static void is_null(Object value, String error_message) {
+		Ensure.is_true(value == null, error_message);
 	}
 
 	/**
@@ -109,8 +127,17 @@ public class Ensure {
 	 * @param value the value
 	 */
 	public static void is_true(boolean value) {
+		is_true(value, "Condition is false");
+	}
+	
+	/**
+	 * Ensures that a value is <code>true</code>.
+	 * @param value the value
+	 * @param error_message the error message to use when the condition fails
+	 */
+	public static void is_true(boolean value, String error_message) {
 		if (!value) {
-			throw new AssertionError("Condition is false");
+			throw new AssertionError(error_message);
 		}
 	}
 	
@@ -119,6 +146,15 @@ public class Ensure {
 	 * @param value the value
 	 */
 	public static void is_false(boolean value) {
+		is_false(value, "Condition is false");
+	}
+	
+	/**
+	 * Ensures that a value is <code>false</code>.
+	 * @param value the value
+	 * @param error_message the error message to use when the condition fails
+	 */
+	public static void is_false(boolean value, String error_message) {
 		is_true(!value);
 	}
 
@@ -163,7 +199,17 @@ public class Ensure {
 	 * @param v2 the second value
 	 */
 	public static void greater(long v1, long v2) {
-		Ensure.is_true(v1 > v2);
+		Ensure.greater(v1, v2, "Condition is false");
+	}
+	
+	/**
+	 * Ensures that <em>v1</em> is greater than <em>v2</em>.
+	 * @param v1 the first value
+	 * @param v2 the second value
+	 * @param error_message the error message to use when the condition fails
+	 */
+	public static void greater(long v1, long v2, String error_message) {
+		Ensure.is_true(v1 > v2, error_message);
 	}
 	
 	/**
@@ -172,7 +218,17 @@ public class Ensure {
 	 * @param v2 the second value
 	 */
 	public static void greater_equal(long v1, long v2) {
-		Ensure.is_true(v1 >= v2);
+		Ensure.greater_equal(v1, v2, "Condition is false");
+	}
+	
+	/**
+	 * Ensures that <em>v1</em> is greater than or equal to <em>v2</em>.
+	 * @param v1 the first value
+	 * @param v2 the second value
+	 * @param error_message the error message to use when the condition fails
+	 */
+	public static void greater_equal(long v1, long v2, String error_message) {
+		Ensure.is_true(v1 >= v2, error_message);
 	}
 	
 	/**
@@ -181,7 +237,17 @@ public class Ensure {
 	 * @param v2 the second value
 	 */
 	public static void less(long v1, long v2) {
-		Ensure.is_true(v1 < v2);
+		Ensure.less(v1, v2, "Condition is false");
+	}
+	
+	/**
+	 * Ensures that <em>v1</em> is less than <em>v2</em>.
+	 * @param v1 the first value
+	 * @param v2 the second value
+	 * @param error_message the error message to use when the condition fails
+	 */
+	public static void less(long v1, long v2, String error_message) {
+		Ensure.is_true(v1 < v2, error_message);
 	}
 	
 	/**
@@ -190,7 +256,17 @@ public class Ensure {
 	 * @param v2 the second value
 	 */
 	public static void less_equal(long v1, long v2) {
-		Ensure.is_true(v1 <= v2);
+		Ensure.less_equal(v1, v2, "Condition is false");
+	}
+	
+	/**
+	 * Ensures that <em>v1</em> is less than or equal to <em>v2</em>.
+	 * @param v1 the first value
+	 * @param v2 the second value
+	 * @param error_message the error message to use when the condition fails
+	 */
+	public static void less_equal(long v1, long v2, String error_message) {
+		Ensure.is_true(v1 <= v2, error_message);
 	}
 	
 	/**
@@ -224,7 +300,15 @@ public class Ensure {
 	 * Ensures that this instruction is never reached.
 	 */
 	public static void unreachable() {
-		is_true(false);
+		unreachable("Unreachable code reached.");
+	}
+	
+	/**
+	 * Ensures that this instruction is never reached.
+	 * @param error_message an optional error message
+	 */
+	public static void unreachable(String error_message) {
+		is_true(false, error_message);
 	}
 	
 	/**

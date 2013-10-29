@@ -75,7 +75,7 @@ namespace eseb {
 			/*
 			 * Identifier of the destination of the request.
 			 */
-			int64 dst_id;
+			string dst_id;
 			
 			/*
 			 * Object ID used to execute the operation on.

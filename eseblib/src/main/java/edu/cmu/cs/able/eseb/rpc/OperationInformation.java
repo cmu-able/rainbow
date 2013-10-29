@@ -516,7 +516,7 @@ public class OperationInformation {
 			m_request_dst_id_field = m_request_type.field(
 					REQUEST_DST_ID_FIELD_NAME);
 			Ensure.not_null(m_request_dst_id_field);
-			Ensure.equals(m_pscope.int64(),
+			Ensure.equals(m_pscope.string(),
 					m_request_dst_id_field.description().type());
 			m_request_exec_id_field = m_request_type.field(
 					REQUEST_EXEC_ID_FIELD_NAME);
@@ -960,12 +960,13 @@ public class OperationInformation {
 	 * @param input_arguments maps names to the values of all input arguments
 	 * @return the execution request
 	 */
-	public DataValue create_execution_request(long exec_id, long dst_id,
+	public DataValue create_execution_request(long exec_id, String dst_id,
 			String obj_id, DataValue op_v, Map<String,
 			DataValue> input_arguments) {
-		Ensure.not_null(obj_id);
-		Ensure.is_true(is_operation(op_v));
-		Ensure.not_null(input_arguments);
+		Ensure.not_null(dst_id, "dst_id == null");
+		Ensure.not_null(obj_id, "obj_id == null");
+		Ensure.is_true(is_operation(op_v), "op_v is not an operation");
+		Ensure.not_null(input_arguments, "input_arguments == null");
 		
 		Set<String> all_params = parameters(op_v);
 		Set<String> params = new HashSet<>();
@@ -987,7 +988,7 @@ public class OperationInformation {
 		}
 		
 		Map<Field, DataValue> sfields = new HashMap<>();
-		sfields.put(m_request_dst_id_field, m_pscope.int64().make(dst_id));
+		sfields.put(m_request_dst_id_field, m_pscope.string().make(dst_id));
 		sfields.put(m_request_exec_id_field, m_pscope.int64().make(exec_id));
 		sfields.put(m_request_obj_id_field, m_pscope.string().make(obj_id));
 		sfields.put(m_request_operation_field, m_pscope.string().make(
@@ -1025,11 +1026,11 @@ public class OperationInformation {
 	 * @param ereq_v the execution request
 	 * @return the ID of the destination participant
 	 */
-	public long execution_request_dst(DataValue ereq_v)  {
+	public String execution_request_dst(DataValue ereq_v)  {
 		Ensure.is_true(is_execution_request(ereq_v));
 		
 		StructureDataValue r = (StructureDataValue) ereq_v;
-		Int64Value dst = (Int64Value) r.value(m_request_dst_id_field);
+		StringValue dst = (StringValue) r.value(m_request_dst_id_field);
 		return dst.value();
 	}
 	

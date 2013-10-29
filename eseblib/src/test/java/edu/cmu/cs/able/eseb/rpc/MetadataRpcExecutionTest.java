@@ -804,7 +804,7 @@ public class MetadataRpcExecutionTest extends DefaultTCase {
 		 * a reply.
 		 */
 		RemoteOperationStub ros = new RemoteOperationStub(m_invoke_environment,
-				0, i_op, "3");
+				"0", i_op, "3");
 		
 		/*
 		 * Create the arguments and create an invocation.
@@ -817,7 +817,7 @@ public class MetadataRpcExecutionTest extends DefaultTCase {
 		 * For some time, keep creating invocations.
 		 */
 		long finish = System.currentTimeMillis()
-				+ 3 * ExecutionResultReadFilter.MINIMUM_CLEAR_TIME_MS;
+				+ 3 * ExecutionResultReader.MINIMUM_CLEAR_TIME_MS;
 		while (System.currentTimeMillis() < finish) {
 			ros.execute(args);
 			Thread.sleep(10);

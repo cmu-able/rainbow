@@ -41,7 +41,7 @@ public class ParticipantModelFilter extends EventFilter {
 	 * Time when participants were renewed. Maps participant IDs to system
 	 * milliseconds of the renew time.
 	 */
-	private Map<Long, Long> m_renewed;
+	private Map<String, Long> m_renewed;
 	
 	/**
 	 * Participant types.
@@ -139,7 +139,7 @@ public class ParticipantModelFilter extends EventFilter {
 		}
 		
 		if (m_types.is_announce(data.value())) {
-			long id = m_types.announce_id(data.value());
+			String id = m_types.announce_id(data.value());
 			Map<String, DataValue> decoded = new HashMap<>();
 			Set<String> undecodable = new HashSet<>();
 			
@@ -164,7 +164,7 @@ public class ParticipantModelFilter extends EventFilter {
 	 * @param decoded meta data keys that were successfully decoded
 	 * @param undecodable meta data keys that could not be decoded
 	 */
-	private synchronized void announce(long id, Map<String, DataValue> decoded,
+	private synchronized void announce(String id, Map<String, DataValue> decoded,
 			Set<String> undecodable) {
 		Participant p;
 		if (!m_renewed.containsKey(id)) {
@@ -181,7 +181,7 @@ public class ParticipantModelFilter extends EventFilter {
 	 * @param id the ID of the participant
 	 * @return the created participant
 	 */
-	private Participant new_participant(long id) {
+	private Participant new_participant(String id) {
 		Participant p = new Participant(id);
 		m_model.add_scb(p);
 		m_renewed.put(id, System.currentTimeMillis());
@@ -193,11 +193,11 @@ public class ParticipantModelFilter extends EventFilter {
 	 * @param id the ID of the participant
 	 * @return the participant
 	 */
-	private Participant renew(long id) {
+	private Participant renew(String id) {
 		m_renewed.put(id, System.currentTimeMillis());
 		Participant found = null;
 		for (Participant p : m_model.all_scbs()) {
-			if (p.id() == id) {
+			if (p.id().equals(id)) {
 				found = p;
 				break;
 			}

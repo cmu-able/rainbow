@@ -14,7 +14,7 @@ public abstract class ScbDateField<T> extends ScbField<T, Date> {
 	 * @param help a help message for the field (optional)
 	 */
 	public ScbDateField(String name, boolean can_set, String help) {
-		super(name, can_set, help);
+		super(name, can_set, help, Date.class);
 	}
 	
 	@Override

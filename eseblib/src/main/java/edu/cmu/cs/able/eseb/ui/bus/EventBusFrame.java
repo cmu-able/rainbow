@@ -370,7 +370,7 @@ public class EventBusFrame extends JInternalFrame
 	private static ScbEnumField<EventBusRemoteConnectionInfo, BlockingStatus>
 			create_incoming_blocking_status_field() {
 		return new ScbEnumField<EventBusRemoteConnectionInfo, BlockingStatus>(
-				"Incoming Block", false, null) {
+				"Incoming Block", false, null, BlockingStatus.class) {
 			@Override
 			public void set(EventBusRemoteConnectionInfo t,
 					BlockingStatus value) {
@@ -391,7 +391,7 @@ public class EventBusFrame extends JInternalFrame
 	private static ScbEnumField<EventBusRemoteConnectionInfo, BlockingStatus>
 			create_outgoing_blocking_status_field() {
 		return new ScbEnumField<EventBusRemoteConnectionInfo, BlockingStatus>(
-				"Outgoing Block", false, null) {
+				"Outgoing Block", false, null, BlockingStatus.class) {
 			@Override
 			public void set(EventBusRemoteConnectionInfo t,
 					BlockingStatus value) {

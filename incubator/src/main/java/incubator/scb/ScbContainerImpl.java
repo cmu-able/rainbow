@@ -8,7 +8,6 @@ import incubator.obscol.ObservableSetListener;
 import incubator.obscol.WrapperObservableSet;
 import incubator.pval.Ensure;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -112,7 +111,7 @@ public class ScbContainerImpl<T extends Scb<T>> implements ScbContainer<T> {
 	}
 
 	@Override
-	public synchronized Collection<T> all_scbs() {
+	public synchronized Set<T> all_scbs() {
 		return new HashSet<>(m_children);
 	}
 	

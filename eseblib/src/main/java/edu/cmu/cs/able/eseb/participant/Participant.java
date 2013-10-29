@@ -6,7 +6,7 @@ import incubator.dispatch.LocalDispatcher;
 import incubator.pval.Ensure;
 import incubator.scb.Scb;
 import incubator.scb.ScbField;
-import incubator.scb.ScbLongField;
+import incubator.scb.ScbTextField;
 import incubator.scb.ScbUpdateListener;
 
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ public class Participant implements Scb<Participant> {
 	/**
 	 * Participant ID.
 	 */
-	private long m_id;
+	private String m_id;
 	
 	/**
 	 * Meta data that was correctly decoded.
@@ -54,7 +54,9 @@ public class Participant implements Scb<Participant> {
 	 * Creates a participant.
 	 * @param id the participant's ID
 	 */
-	Participant(long id) {
+	Participant(String id) {
+		Ensure.not_null(id, "id == null");
+		
 		m_id = id;
 		m_meta_data = new HashMap<>();
 		m_undecodable_meta_data = new HashSet<>();
@@ -65,7 +67,7 @@ public class Participant implements Scb<Participant> {
 	 * Obtains the participant's ID.
 	 * @return the ID
 	 */
-	public long id() {
+	public String id() {
 		return m_id;
 	}
 	
@@ -136,15 +138,15 @@ public class Participant implements Scb<Participant> {
 	}
 
 	@SuppressWarnings("javadoc")
-	public static ScbLongField<Participant> c_id() {
-		return new ScbLongField<Participant>("id", false, null) {
+	public static ScbTextField<Participant> c_id() {
+		return new ScbTextField<Participant>("id", false, null) {
 			@Override
-			public void set(Participant t, Long value) {
-				Ensure.unreachable();
+			public void set(Participant t, String value) {
+				Ensure.unreachable("Cannot set the participant ID field.");
 			}
 
 			@Override
-			public Long get(Participant t) {
+			public String get(Participant t) {
 				return t.id();
 			}
 		};

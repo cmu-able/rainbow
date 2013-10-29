@@ -25,7 +25,6 @@ import edu.cmu.cs.able.typelib.enc.DataValueEncoding;
 import edu.cmu.cs.able.typelib.enc.InvalidEncodingException;
 import edu.cmu.cs.able.typelib.parser.DefaultTypelibParser;
 import edu.cmu.cs.able.typelib.parser.TypelibParsingContext;
-import edu.cmu.cs.able.typelib.prim.Int64Value;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
 import edu.cmu.cs.able.typelib.prim.StringValue;
 import edu.cmu.cs.able.typelib.scope.AmbiguousNameException;
@@ -154,7 +153,7 @@ public class ParticipantTypes {
 			m_announce_id_field = m_announce_id_structure.field(
 					ANNOUNCE_ID_FIELD_NAME);
 			Ensure.not_null(m_announce_id_field);
-			Ensure.equals(pscope.int64(),
+			Ensure.equals(pscope.string(),
 					m_announce_id_field.description().type());
 			m_announce_meta_data_field = m_announce_id_structure.field(
 					META_DATA_FIELD_NAME);
@@ -216,7 +215,7 @@ public class ParticipantTypes {
 	 * @param meta_data the participant meta data
 	 * @return the data value
 	 */
-	public DataValue announce(long id, Map<String, DataValue> meta_data) {
+	public DataValue announce(String id, Map<String, DataValue> meta_data) {
 		Map<Field, DataValue> values = new HashMap<>();
 		
 		if (meta_data == null) {
@@ -241,7 +240,7 @@ public class ParticipantTypes {
 			}
 		}
 		
-		values.put(m_announce_id_field, m_pscope.int64().make(id));
+		values.put(m_announce_id_field, m_pscope.string().make(id));
 		values.put(m_announce_meta_data_field, mdv);
 		
 		return m_announce_id_structure.make(values);
@@ -262,14 +261,14 @@ public class ParticipantTypes {
 	 * @param v the structure
 	 * @return the ID
 	 */
-	public long announce_id(DataValue v) {
+	public String announce_id(DataValue v) {
 		Ensure.not_null(v);
 		Ensure.is_true(m_announce_id_structure.is_instance(v));
 		DataValue idv = ((StructureDataValue) v).value(m_announce_id_field);
 		
 		Ensure.not_null(idv);
-		Ensure.is_true(m_pscope.int64().is_instance(idv));
-		return ((Int64Value) idv).value();
+		Ensure.is_true(m_pscope.string().is_instance(idv));
+		return ((StringValue) idv).value();
 	}
 	
 	/**

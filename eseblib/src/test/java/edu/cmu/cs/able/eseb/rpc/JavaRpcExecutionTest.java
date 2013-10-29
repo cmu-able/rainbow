@@ -143,6 +143,9 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 
 			@Override
 			public void no_arguments() {
+				/*
+				 * Nothing to do.
+				 */
 			}
 		};
 		m_service_closeable = JavaRpcFactory.create_registry_wrapper(
@@ -265,6 +268,7 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 
 			@Override
 			public void no_arguments() {
+				/* */
 			}
 		};
 		
@@ -300,6 +304,7 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 
 			@Override
 			public void no_arguments() {
+				/* */
 			}
 		};
 		
@@ -332,6 +337,7 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 
 			@Override
 			public void no_arguments() {
+				/* */
 			}
 		};
 		
@@ -353,6 +359,7 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 			
 			@Override
 			public void no_return(int value1, int value2) {
+				/* */
 			}
 			
 			@Override
@@ -523,5 +530,90 @@ public class JavaRpcExecutionTest extends DefaultTCase {
 		JavaRpcFactory.create_remote_stub(
 				i_unparseable2_data_type_name_in_return_type.class,
 				m_invoke_environment, m_service_participant.id(), 100, "8");
+	}
+	
+	@Test
+	public void multiple_services_invoked_same_environment() throws Exception {
+		invoke_multiple_services(m_service_environment, m_invoke_environment);
+	}
+	
+	@Test
+	public void multiple_services_invoked_different_environment()
+			throws Exception {
+		try (RpcEnvironment senv2 = new RpcEnvironment(m_service_client,
+				"sfoo");
+			RpcEnvironment ienv2 = new RpcEnvironment(m_invoke_client,
+				"ifoo")) {
+			invoke_multiple_services(senv2, ienv2);
+		}
+	}
+	
+	/**
+	 * Invokes multiple services.
+	 * @param senv the environment of the second service
+	 * @param renv the environment of the second invoker
+	 * @throws Exception
+	 */
+	private void invoke_multiple_services(RpcEnvironment senv, 
+			RpcEnvironment renv) throws Exception {
+		final int[] called = new int[2];
+		
+		try (Closeable s2 = JavaRpcFactory.create_registry_wrapper(
+				RemoteJavaRpcTestService.class, new RemoteJavaRpcTestService() {
+			@Override
+			public int returns_number_plus_one(int value) {
+				return 0;
+			}
+			
+			@Override
+			public void no_return(int value1, int value2) {
+				/*
+				 * Nothing to do.
+				 */
+			}
+			
+			@Override
+			public void no_arguments() {
+				called[0]++;
+			}
+		}, senv, "7")) {
+			m_java_service = new RemoteJavaRpcTestService() {
+				@Override
+				public int returns_number_plus_one(int value) {
+					return 0;
+				}
+				
+				@Override
+				public void no_return(int value1, int value2) {
+					/*
+					 * Nothing to do.
+					 */
+				}
+				
+				@Override
+				public void no_arguments() {
+					called[1]++;
+				}
+			};
+			
+			RemoteJavaRpcTestService r2 = JavaRpcFactory.create_remote_stub(
+					RemoteJavaRpcTestService.class, renv,
+					senv.participant_id(), 10000, "7");
+			
+			assertEquals(0, called[0]);
+			assertEquals(0, called[1]);
+			
+			r2.no_arguments();
+			
+			assertEquals(1, called[0]);
+			assertEquals(0, called[1]);
+			
+			m_stub.no_arguments();
+			
+			assertEquals(1, called[0]);
+			assertEquals(1, called[1]);
+		
+			((Closeable) r2).close(); 
+		}
 	}
 }

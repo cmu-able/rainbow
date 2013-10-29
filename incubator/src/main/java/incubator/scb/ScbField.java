@@ -26,17 +26,26 @@ public abstract class ScbField<T, V> {
 	private String m_help;
 	
 	/**
+	 * Type of field value.
+	 */
+	private Class<V> m_v_class;
+	
+	/**
 	 * Creates a new field describing an SCB.
 	 * @param name the field's name
 	 * @param can_set can the field be set? If <code>false</code> the field
 	 * is read-only
 	 * @param help the field's help text (optional)
+	 * @param v_class type of field value
 	 */
-	public ScbField(String name, boolean can_set, String help) {
-		Ensure.notNull(name);
+	public ScbField(String name, boolean can_set, String help,
+			Class<V> v_class) {
+		Ensure.not_null(name);
+		Ensure.not_null(v_class);
 		m_name = name;
 		m_can_set = can_set;
 		m_help = help;
+		m_v_class = v_class;
 	}
 	
 	/**
@@ -87,4 +96,12 @@ public abstract class ScbField<T, V> {
 	 * @return the value
 	 */
 	public abstract V get(T t);
+	
+	/**
+	 * Obtains the type of value.
+	 * @return the type of value
+	 */
+	public Class<V> value_type() {
+		return m_v_class;
+	}
 }

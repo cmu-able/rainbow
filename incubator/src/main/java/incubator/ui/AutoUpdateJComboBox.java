@@ -1,11 +1,18 @@
 package incubator.ui;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import javax.swing.JComboBox;
 
 import org.jdesktop.swingx.renderer.StringValue;
 
 import incubator.obscol.ObservableList;
 import incubator.obscol.ObservableListListener;
+import incubator.obscol.WrapperObservableList;
+import incubator.pval.Ensure;
 
 /**
  * Combo box that uses an observes a list and updates itself automatically
@@ -41,6 +48,45 @@ public class AutoUpdateJComboBox<T> extends JComboBox<Object> {
 	 */
 	public AutoUpdateJComboBox(ObservableList<T> data) {
 		this(data, null);
+	}
+	
+	/**
+	 * Creates a new combo box whose data comes from an enumeration.
+	 * @param e_class the enumeration class
+	 * @param sort should the enumeration values be sorted?
+	 */
+	public AutoUpdateJComboBox(Class<T> e_class, boolean sort) {
+		this(make_list(e_class, sort));
+	}
+	
+	/**
+	 * Creates an observable list with all values from an enumeration.
+	 * @param e_class the enumeration class
+	 * @param sort should the values be sorted according to their
+	 * <code>toString</code> method?
+	 * @return the list
+	 */
+	private static <T> ObservableList<T> make_list(Class<T> e_class,
+			boolean sort) {
+		Ensure.not_null(e_class, "e_class == null");
+		Ensure.is_true(e_class.isEnum(), "e_class (" + e_class.toString()
+				+ ") is not an enumeration.");
+		
+		List<T> values = new ArrayList<>();
+		for (T t : e_class.getEnumConstants()) {
+			values.add(t);
+		}
+		
+		if (sort) {
+			Collections.sort(values, new Comparator<T>() {
+				@Override
+				public int compare(T o1, T o2) {
+					return o1.toString().compareTo(o2.toString());
+				}
+			});
+		}
+		
+		return new WrapperObservableList<>(values);
 	}
 
 	/**

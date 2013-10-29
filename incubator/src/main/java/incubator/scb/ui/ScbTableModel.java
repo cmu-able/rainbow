@@ -5,17 +5,14 @@ import incubator.pval.Ensure;
 import incubator.scb.Scb;
 import incubator.scb.ScbContainer;
 import incubator.scb.ScbContainerListener;
-import incubator.scb.ScbDateField;
 import incubator.scb.ScbDerivedTextFromDateField;
-import incubator.scb.ScbEnumField;
 import incubator.scb.ScbField;
-import incubator.scb.ScbIntegerField;
-import incubator.scb.ScbTextField;
 import incubator.scb.ValidationResult;
 
 import java.awt.EventQueue;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
@@ -166,25 +163,42 @@ public class ScbTableModel<T extends Scb<T>, C extends Comparator<T>>
 	 * @param editable is the field editable?
 	 */
 	public final void add_field_auto(ScbField<T, ?> f, boolean editable) {
-		if (f instanceof ScbTextField) {
+		Ensure.not_null(f);
+		
+		if (String.class.isAssignableFrom(f.value_type())) {
 			@SuppressWarnings("unchecked")
-			ScbTextField<T> stf = (ScbTextField<T>) f;
+			ScbField<T, String> stf = (ScbField<T, String>) f;
 			add_field(new ScbTableModelTextField<>(stf, editable));
-		} else if (f instanceof ScbIntegerField) {
+		} else if (Integer.class.isAssignableFrom(f.value_type())) {
 			@SuppressWarnings("unchecked")
-			ScbIntegerField<T> stf = (ScbIntegerField<T>) f;
-			add_field(new ScbTableModelIntegerField<>(stf, editable));
-		} else if (f instanceof ScbDateField) {
+			ScbField<T, Integer> itf = (ScbField<T, Integer>) f;
+			add_field(new ScbTableModelIntegerField<>(itf, editable));
+		} else if (Date.class.isAssignableFrom(f.value_type())) {
 			@SuppressWarnings("unchecked")
-			ScbDateField<T> sdf = (ScbDateField<T>) f;
+			ScbField<T, Date> sdf = (ScbField<T, Date>) f;
 			add_field(new ScbTableModelTextField<>(
 					new ScbDerivedTextFromDateField<>(sdf), editable));
-		} else if (f instanceof ScbEnumField) {
-			ScbEnumField<T, ?> sef = (ScbEnumField<T, ?>) f;
-			add_field(new ScbTableModelEnumTextField<>(sef));
+		} else if (f.value_type().isEnum()) {
+			add_field(make_enum(f));
 		} else {
-			Ensure.isTrue(false);
+			Ensure.unreachable("Unknown field type: "
+					+ f.value_type().getName() + ". Cannot automatically "
+					+ "add it to the table model.");
 		}
+	}
+	
+	/**
+	 * Auxiliary method to create an enumeration text field based on a field
+	 * which is known to be an enumeration field. This method avoids
+	 * compiler-weirdnesses related to generics.
+	 * @param f the field
+	 * @return the field
+	 */
+	private <E extends Enum<E>> ScbTableModelEnumTextField<T, E> make_enum(
+			ScbField<T, ?> f) {
+		@SuppressWarnings("unchecked")
+		ScbField<T, E> sef = (ScbField<T, E>) f;
+		return new ScbTableModelEnumTextField<>(sef);
 	}
 	
 	/**

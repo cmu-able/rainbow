@@ -8,7 +8,7 @@ import javax.swing.JOptionPane;
 /**
  * Class implementing an abstract data refresh feature. It will regularly
  * request to refresh the data through an abstract method that should be
- * overrided by subclasses. The main advantage of using this class instead
+ * overridden by subclasses. The main advantage of using this class instead
  * of, for example, using {@link Pinger} directly, is in its interaction
  * with visual controls to stop and change the refresh rate.
  */

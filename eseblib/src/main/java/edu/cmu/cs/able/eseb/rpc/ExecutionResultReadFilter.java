@@ -3,179 +3,169 @@ package edu.cmu.cs.able.eseb.rpc;
 import incubator.pval.Ensure;
 
 import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import edu.cmu.cs.able.eseb.BusData;
+import edu.cmu.cs.able.eseb.conn.BusConnection;
 import edu.cmu.cs.able.eseb.filter.EventFilter;
-import edu.cmu.cs.able.typelib.type.DataType;
-import edu.cmu.cs.able.typelib.type.DataValue;
 
 /**
- * Event filter that reads execution results from a bus connection. In
- * general, only one event filter exists per connection.
+ * Event filter that reads execution results from a bus connection. Only
+ * one filter exists in each connection. Readers can be added or removed
+ * using the {@link #add_request_reader(BusConnection, ExecutionResultReader)}
+ * and {@link #remove_request_reader(BusConnection, ExecutionResultReader)}
+ * methods.
  */
 class ExecutionResultReadFilter extends EventFilter {
 	/**
-	 * Milliseconds between clearing the {@link #m_pending} map of
-	 * garbage-collected references.
-	 */
-	static final long MINIMUM_CLEAR_TIME_MS = 1000;
-	
-	/**
-	 * The operation information.
+	 * The filter's operation information.
 	 */
 	private OperationInformation m_information;
 	
 	/**
-	 * Pending objects.
+	 * Readers registered with this filter.
 	 */
-	private Map<Long, WeakReference<RemoteExecution>> m_pending;
+	private Set<ExecutionResultReader> m_readers;
 	
 	/**
-	 * When, in system milliseconds, was the map last cleared.
+	 * Creates a new filter with no readers.
+	 * @param information the operation information
 	 */
-	private long m_last_cleared;
-	
-	/**
-	 * Creates a new filter.
-	 * @param oinf the operation information
-	 */
-	ExecutionResultReadFilter(OperationInformation oinf) {
-		Ensure.not_null(oinf);
-		m_information = oinf;
-		m_pending = new HashMap<>();
-		m_last_cleared = System.currentTimeMillis();
+	private ExecutionResultReadFilter(OperationInformation information) {
+		Ensure.not_null(information, "information == null");
+		
+		m_information = information;
+		m_readers = new HashSet<>();
 	}
 	
+	/**
+	 * Adds a new reader to the filter.
+	 * @param reader the reader
+	 */
+	private synchronized void add_reader(ExecutionResultReader reader) {
+		Ensure.not_null(reader, "reader == null");
+		Ensure.is_false(m_readers.contains(reader), "reader is already in the "
+				+ "filter");
+		m_readers.add(reader);
+	}
+	
+	/**
+	 * Removes a reader from the filter.
+	 * @param reader the reader
+	 */
+	private synchronized void remove_reader(ExecutionResultReader reader) {
+		Ensure.not_null(reader, "reader == null");
+		Ensure.is_true(m_readers.contains(reader), "reader is not in the "
+				+ "filter");
+		m_readers.remove(reader);
+	}
+	
+	/**
+	 * Obtains the number of readers in the filter.
+	 * @return the number of readers
+	 */
+	private synchronized int reader_count() {
+		return m_readers.size();
+	}
 	
 	@Override
-	public void sink(BusData data) throws IOException {
-		Ensure.not_null(data);
+	public void sink(final BusData data) throws IOException {
+		Ensure.not_null(data, "data == null");
+		
+		/*
+		 * If the data is not an execution request, ignore.
+		 */
 		if (!m_information.is_execution_response(data.value())) {
 			forward(data);
 			return;
 		}
 		
-		long id = m_information.execution_response_id(data.value());
-		RemoteExecution re = null;
-		synchronized (this) {
-			WeakReference<RemoteExecution> wr = m_pending.get(id);
-			if (wr != null) {
-				re = wr.get();
-			}
-			
-			if (re != null) {
-				m_pending.remove(id);
-			}
-		}
-		
-		if (re == null) {
-			/*
-			 * We don't know what execution the received value refers to. It
-			 * maybe directed at some other participant or the request may
-			 * have been garbage collected already.
-			 */
-			return;
-		}
-		
 		/*
-		 * Inform the remote execution.
+		 * Check all readers to see if any handles the data.
 		 */
-		if (m_information.is_successful_execution(data.value())) {
-			Map<String, DataValue> output =
-					m_information.execution_response_output_arguments(
-					data.value());
-			
-			/*
-			 * Check that all return parameters are correct and that they have
-			 * the right type.
-			 */
-			DataValue operation = re.operation();
-			Ensure.is_true(m_information.is_operation(operation));
-			
-			FailureInformation fi = null;
-			
-			Set<String> out_params = m_information.parameters(operation);
-			for (Iterator<String> it = out_params.iterator(); it.hasNext(); ) {
-				String p = it.next();
-				if (m_information.parameter_direction(operation, p)
-						!= ParameterDirection.OUTPUT) {
-					it.remove();
-					continue;
-				}
-				
-				if (!output.containsKey(p)) {
-					fi = new FailureInformation("Missing output parameter",
-							"Output parameter '" + p + "' was not "
-							+ "provided by remote service.", "");
-					break;
-				}
-				
-				DataType type = m_information.parameter_type(operation, p);
-				if (!type.is_instance(output.get(p))) {
-					fi = new FailureInformation("Invalid output parameter type",
-							"Output parameter '" + p + "' has type '"
-							+ type.name() + "' but server sent value with "
-							+ "type '" + output.get(p).type().name()
-							+ "'.", "");
-					break;
-				}
-			}
-			
-			if (out_params.size() != output.size()) {
-				fi = new FailureInformation("Extra output parameters",
-						"Unexpected output parameters received from service.",
-						"");
-			}
-			
-			if (fi == null) {
-				re.done(new RemoteExecutionResult(output));
-			} else {
-				re.done(new RemoteExecutionResult(fi));
-			}
-		} else {
-			String type = m_information.execution_response_failure_type(
-					data.value());
-			String description =
-					m_information.execution_response_failure_description(
-					data.value());
-			String fdata = m_information.execution_response_failure_data(
-					data.value());
-			re.done(new RemoteExecutionResult(new FailureInformation(type,
-					description, fdata)));
+		Set<ExecutionResultReader> rdrs;
+		synchronized (this) {
+			rdrs = new HashSet<>(m_readers);
 		}
 		
-		/*
-		 * Clear the map if it is time to do so.
-		 */
-		synchronized (this) {
-			long now = System.currentTimeMillis();
-			if (m_last_cleared < now - MINIMUM_CLEAR_TIME_MS) {
-				for (Iterator<Map.Entry<Long,
-						WeakReference<RemoteExecution>>> it =
-						m_pending.entrySet().iterator(); it.hasNext(); ) {
-					if (it.next().getValue().get() == null) {
-						it.remove();
-					}
-				}
-				
-				m_last_cleared = now;
+		for (ExecutionResultReader r : rdrs) {
+			if (r.handles(data)) {
+				break;
 			}
 		}
 	}
 	
 	/**
-	 * Adds a new remote execution whose response we want to wait for.
-	 * @param re the remote execution 
-	 * @param id the participant ID
+	 * Adds a new result reader to a bus connection. This will create a
+	 * filter, if necessary, and will add the reader to the filter.
+	 * @param connection the bus connection
+	 * @param reader the reader
 	 */
-	synchronized void add_wait(RemoteExecution re, long id) {
-		Ensure.not_null(re);
-		Ensure.is_false(m_pending.containsKey(id));
-		m_pending.put(id, new WeakReference<>(re));
+	synchronized static void add_request_reader(BusConnection connection,
+			ExecutionResultReader reader) {
+		Ensure.not_null(connection, "connection == null");
+		Ensure.not_null(reader, "reader == null");
+		
+		/*
+		 * Try to find an existing filter to add the reader to.
+		 */
+		ExecutionResultReadFilter f = null;
+		List<EventFilter> filters = connection.incoming_chain().filters();
+		for (EventFilter ff : filters) {
+			if (ff instanceof ExecutionResultReadFilter) {
+				f = (ExecutionResultReadFilter) ff;
+				break;
+			}
+		}
+		
+		/*
+		 * If there is no filter, create one.
+		 */
+		if (f == null) {
+			f = new ExecutionResultReadFilter(new OperationInformation(
+					connection.primitive_scope()));
+			connection.incoming_chain().add_filter(f);
+		}
+		
+		f.add_reader(reader);
+	}
+	
+	/**
+	 * Removes a result reader from a bus connection. This will remove the
+	 * filter the reader is registered if there are no more readers in the
+	 * filter.
+	 * @param connection the connection
+	 * @param reader the reader
+	 */
+	synchronized static void remove_request_reader(BusConnection connection,
+			ExecutionResultReader reader) {
+		Ensure.not_null(connection, "connection == null");
+		Ensure.not_null(reader, "reader == null");
+		
+		/*
+		 * Try to find an existing filter to remove the reader to.
+		 */
+		ExecutionResultReadFilter f = null;
+		List<EventFilter> filters = connection.incoming_chain().filters();
+		for (EventFilter ff : filters) {
+			if (ff instanceof ExecutionResultReadFilter) {
+				f = (ExecutionResultReadFilter) ff;
+				break;
+			}
+		}
+		
+		if (f == null) {
+			Ensure.unreachable("No filter found meaning no reader had "
+					+ "been added");
+			return;
+		}
+		
+		f.remove_reader(reader);
+		
+		if (f.reader_count() == 0) {
+			connection.incoming_chain().remove_filter(f);
+		}
 	}
 }

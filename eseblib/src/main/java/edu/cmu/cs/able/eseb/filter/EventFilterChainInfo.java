@@ -9,8 +9,9 @@ import incubator.scb.ScbContainerListener;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Information about a filter chain.
@@ -87,8 +88,8 @@ public class EventFilterChainInfo implements Serializable,
 	}
 
 	@Override
-	public Collection<EventFilterInfo> all_scbs() {
-		return filters();
+	public Set<EventFilterInfo> all_scbs() {
+		return new HashSet<>(filters());
 	}
 	
 	@SuppressWarnings("javadoc")

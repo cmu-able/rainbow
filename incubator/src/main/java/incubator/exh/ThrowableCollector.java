@@ -9,9 +9,10 @@ import incubator.scb.ScbContainerListener;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Class that collects throwables. This class maintains up to a fixed number
@@ -170,7 +171,7 @@ public class ThrowableCollector implements Serializable,
 	}
 	
 	@Override
-	public synchronized Collection<ThrowableContext> all_scbs() {
-		return new ArrayList<>(m_throwables);
+	public synchronized Set<ThrowableContext> all_scbs() {
+		return new HashSet<>(m_throwables);
 	}
 }

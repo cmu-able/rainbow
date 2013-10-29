@@ -32,7 +32,7 @@ public abstract class ScbTextField<T> extends ScbField<T, String> {
 	 * @param help a help message for the field (optional)
 	 */
 	public ScbTextField(String name, boolean can_set, String help) {
-		super(name, can_set, help);
+		super(name, can_set, help, String.class);
 		m_must_pass = new HashMap<>();
 		m_must_fail = new HashMap<>();
 	}

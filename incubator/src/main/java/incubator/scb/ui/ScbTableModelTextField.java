@@ -2,7 +2,7 @@ package incubator.scb.ui;
 
 import incubator.Pair;
 import incubator.pval.Ensure;
-import incubator.scb.ScbTextField;
+import incubator.scb.ScbField;
 import incubator.scb.ValidationResult;
 
 /**
@@ -10,12 +10,12 @@ import incubator.scb.ValidationResult;
  * @param <T> the bean type
  */
 public class ScbTableModelTextField<T>
-		extends ScbTableModelField<T, String, ScbTextField<T>> {
+		extends ScbTableModelField<T, String, ScbField<T, String>> {
 	/**
 	 * Creates a new, non-editable, field.
 	 * @param cof the configuration object text field
 	 */
-	public ScbTableModelTextField(ScbTextField<T> cof) {
+	public ScbTableModelTextField(ScbField<T, String> cof) {
 		super(cof);
 	}
 	
@@ -24,7 +24,7 @@ public class ScbTableModelTextField<T>
 	 * @param cof the configuration object text field
 	 * @param editable is the field editable?
 	 */
-	public ScbTableModelTextField(ScbTextField<T> cof, boolean editable) {
+	public ScbTableModelTextField(ScbField<T, String> cof, boolean editable) {
 		super(cof, editable);
 		Ensure.is_true(!editable || cof.can_set());
 	}

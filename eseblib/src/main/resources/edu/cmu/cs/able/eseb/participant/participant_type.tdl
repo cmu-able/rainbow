@@ -10,7 +10,7 @@ namespace eseb {
 		 * Structure used to announce that a participant exists.
 		 */
 		struct announce_id {
-			int64 id;
+			string id;
 			map<string,string> meta_data;
 		}
 	}

@@ -12,7 +12,7 @@ import incubator.pval.Ensure;
  * @param <T> the bean type
  */
 public class ScbDerivedTextFromDateField<T>
-		extends ScbDerivedTextField<T, Date, ScbDateField<T>> {
+		extends ScbDerivedTextField<T, Date, ScbField<T, Date>> {
 	/**
 	 * The date format.
 	 */
@@ -22,7 +22,7 @@ public class ScbDerivedTextFromDateField<T>
 	 * Creates a new derived field.
 	 * @param field the field this field derives from
 	 */
-	public ScbDerivedTextFromDateField(ScbDateField<T> field) {
+	public ScbDerivedTextFromDateField(ScbField<T, Date> field) {
 		this(field.name(), true, null, field, DateFormat.getDateTimeInstance());
 	}
 	
@@ -37,7 +37,7 @@ public class ScbDerivedTextFromDateField<T>
 	 * @param format the date format to use
 	 */
 	public ScbDerivedTextFromDateField(String name, boolean can_set,
-			String help, ScbDateField<T> field, DateFormat format) {
+			String help, ScbField<T, Date> field, DateFormat format) {
 		super(name, can_set, help, field);
 		Ensure.not_null(format);
 		m_format = format;

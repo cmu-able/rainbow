@@ -2,7 +2,7 @@ package incubator.scb;
 
 import incubator.dispatch.Dispatcher;
 
-import java.util.Collection;
+import java.util.Set;
 
 /**
  * An interface implemented by objects which can contain SCBs.
@@ -20,5 +20,5 @@ public interface ScbContainer<T extends Scb<T>> {
 	 * Obtains all SCBs in the container.
 	 * @return all SCBs
 	 */
-	Collection<T> all_scbs();
+	Set<T> all_scbs();
 }
