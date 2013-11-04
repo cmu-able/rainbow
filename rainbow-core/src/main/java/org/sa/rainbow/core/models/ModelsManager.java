@@ -31,8 +31,8 @@ import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommand;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowModelOperation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.DisconnectedRainbowDelegateConnectionPort;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IModelUSBusPort;
@@ -79,7 +79,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
         initializeModels ();
     }
 
-    private void initializeModels () {
+    public void initializeModels () {
         String numberOfModelsStr = Rainbow.getProperty (RainbowConstants.PROPKEY_MODEL_NUMBER, "0");
         int numberOfModels = Integer.parseInt (numberOfModelsStr);
         for (int modelNum = 0; modelNum < numberOfModels; modelNum++) {
@@ -107,7 +107,9 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                 List<? extends IRainbowMessage> events = load.execute (null, m_changeBusPort);
                 // Announce the loading on the change bus.
                 // Q: should this be done in clients or in the commands themselves?
-                m_changeBusPort.announce (events);
+                if (m_changeBusPort != null) {
+                    m_changeBusPort.announce (events);
+                }
                 IModelInstance instance = (IModelInstance )load.getResult ();
                 LOGGER.info ("Successfully loaded and registered " + instance.getModelName () + ":"
                         + instance.getModelType ());
@@ -181,6 +183,23 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
         Map<String, IModelInstance> models = m_modelMap.get (modelType);
         if (models != null) return models.get (modelName);
         return null;
+    }
+
+    @Override
+    public <T> IModelInstance<T> getModelInstanceByResource (String resource) {
+        Collection<Map<String, IModelInstance>> values = m_modelMap.values ();
+        IModelInstance<T> foundModel = null;
+        for (Iterator iterator = values.iterator (); iterator.hasNext () && foundModel == null;) {
+            Map<String, IModelInstance> map = (Map<String, IModelInstance> )iterator.next ();
+            Collection<IModelInstance> values2 = map.values ();
+            for (Iterator it2 = values2.iterator (); it2.hasNext () && foundModel == null;) {
+                IModelInstance model = (IModelInstance )it2.next ();
+                if (resource.equals (model.getOriginalSource ())) {
+                    foundModel = model;
+                }
+            }
+        }
+        return foundModel;
     }
 
     @Override
@@ -293,27 +312,27 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
      * @throws RainbowException
      */
     @Override
-    public void requestModelUpdate (IRainbowModelCommandRepresentation command) throws IllegalStateException,
+    public void requestModelUpdate (IRainbowOperation command) throws IllegalStateException,
     RainbowException {
         commandQ.offer (command);
 
 
     }
 
-    private IRainbowModelCommand setupCommand (IRainbowModelCommandRepresentation command,
+    private IRainbowModelOperation setupCommand (IRainbowOperation command,
             IModelInstance<?> modelInstance) throws RainbowException {
-        IRainbowModelCommand rcmd = null;
-        if (!(command instanceof IRainbowModelCommand)) {
+        IRainbowModelOperation rcmd = null;
+        if (!(command instanceof IRainbowModelOperation)) {
             // Try to use the model instanceo to turn it into an executable command
             String[] cargs = new String[1 + command.getParameters ().length];
             cargs[0] = command.getTarget ();
             for (int i = 0; i < command.getParameters ().length; i++) {
                 cargs[1 + i] = command.getParameters ()[i];
             }
-            rcmd = modelInstance.getCommandFactory ().generateCommand (command.getCommandName (), cargs);
+            rcmd = modelInstance.getCommandFactory ().generateCommand (command.getName (), cargs);
         }
         else {
-            rcmd = (IRainbowModelCommand )command;
+            rcmd = (IRainbowModelOperation )command;
         }
 //        if (!(command instanceof IRainbowModelCommand)) throw new RainbowException (MessageFormat.format ("The command {0} is not an executable command.",
 //                command.getCommandName ()));
@@ -321,7 +340,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
     }
 
     @Override
-    public void requestModelUpdate (List<IRainbowModelCommandRepresentation> commands, boolean transaction) {
+    public void requestModelUpdate (List<IRainbowOperation> commands, boolean transaction) {
         LOGGER.info (MessageFormat.format ("Updating the model with {0} commands, transaction = {1}", commands.size (),
                 transaction));
         // If the command is to be executed transactionally, then add the list to the queue, otherwise add each command individually
@@ -329,7 +348,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
             commandQ.offer (commands);
         }
         else {
-            for (IRainbowModelCommandRepresentation command : commands) {
+            for (IRainbowOperation command : commands) {
                 commandQ.offer (command);
             }
         }
@@ -349,14 +368,14 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
     @Override
     protected void runAction () {
         Object poll = commandQ.poll ();
-        if (poll instanceof IRainbowModelCommandRepresentation) {
+        if (poll instanceof IRainbowOperation) {
             try {
-                IRainbowModelCommandRepresentation command = (IRainbowModelCommandRepresentation )poll;
+                IRainbowOperation command = (IRainbowOperation )poll;
                 IModelInstance<?> modelInstance = getModelInstance (command.getModelType (), command.getModelName ());
                 m_reportingPort.info (RainbowComponentT.MODEL, MessageFormat.format (
                         "Updating model {0}::{1} through command: {2}",
-                        command.getModelName (), command.getModelType (), command.getCommandName ()));
-                IRainbowModelCommand cmd = setupCommand (command, modelInstance);
+                        command.getModelName (), command.getModelType (), command.getName ()));
+                IRainbowModelOperation cmd = setupCommand (command, modelInstance);
                 List<? extends IRainbowMessage> events;
                 synchronized (modelInstance.getModelInstance ()) {
                     events = cmd.execute (modelInstance, m_changeBusPort);
@@ -375,21 +394,21 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
             }
         }
         else if (poll instanceof List) {
-            List<IRainbowModelCommandRepresentation> commands = (List )poll;
+            List<IRainbowOperation> commands = (List )poll;
             boolean transaction = true;
             // Keep track of successfully executed commands in case we need to undo 
-            Stack<IRainbowModelCommand> executedCommands = new Stack<> ();
+            Stack<IRainbowModelOperation> executedCommands = new Stack<> ();
             // Stores the events that will be reported to the change bus
             List<IRainbowMessage> events = new LinkedList<IRainbowMessage> ();
             // Indicates whether all the commands have been executed successfully so far
             boolean complete = true;
             if (!commands.isEmpty ()) {
-                IRainbowModelCommandRepresentation c = commands.iterator ().next ();
+                IRainbowOperation c = commands.iterator ().next ();
                 // The model being updated should be the same for all commands, so just grab the first one
                 IModelInstance<?> modelInstance = getModelInstance (c.getModelType (), c.getModelName ());
                 synchronized (modelInstance.getModelInstance ()) {
 
-                    for (IRainbowModelCommandRepresentation cmd : commands) {
+                    for (IRainbowOperation cmd : commands) {
                         try {
                             // Make sure that the model is the same 
                             IModelInstance mi = getModelInstance (cmd.getModelType (), cmd.getModelName ());
@@ -410,10 +429,10 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                             // Make sure the command is executable, and add the ancilliary execution information
                             cmd = setupCommand (cmd, mi);
                             // If it is not executable, the throw
-                            if (!(cmd instanceof IRainbowModelCommand))
+                            if (!(cmd instanceof IRainbowModelOperation))
                                 throw new RainbowException (MessageFormat.format (
-                                        "The command {0} is not an executable command.", cmd.getCommandName ()));
-                            IRainbowModelCommand mcmd = (IRainbowModelCommand )cmd;
+                                        "The command {0} is not an executable command.", cmd.getName ()));
+                            IRainbowModelOperation mcmd = (IRainbowModelOperation )cmd;
                             // Execute the command
                             List<? extends IRainbowMessage> cmdEvents = mcmd.execute (mi, m_changeBusPort);
                             // Store all the generated events to announce later
@@ -432,7 +451,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                         m_reportingPort.warn (RainbowComponentT.MODEL, MessageFormat.format (
                                 "Not all of the commands completed successfully. {0} did, so undoing them.",
                                 executedCommands.size ()));
-                        IRainbowModelCommand cmd = null;
+                        IRainbowModelOperation cmd = null;
                         while (!executedCommands.isEmpty ()) {
                             try {
                                 cmd = executedCommands.pop ();
@@ -456,5 +475,6 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
     protected RainbowComponentT getComponentType () {
         return RainbowComponentT.MODEL;
     }
+
 
 }

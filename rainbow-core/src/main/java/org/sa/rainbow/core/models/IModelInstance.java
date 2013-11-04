@@ -55,5 +55,7 @@ public interface IModelInstance<T> {
 
     public void setOriginalSource (String source);
 
+    public String getOriginalSource ();
+
     public void dispose () throws RainbowException;
 }

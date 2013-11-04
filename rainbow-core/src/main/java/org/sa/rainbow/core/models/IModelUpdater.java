@@ -3,7 +3,7 @@ package org.sa.rainbow.core.models;
 import java.util.List;
 
 import org.sa.rainbow.core.error.RainbowException;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 
 public interface IModelUpdater {
 
@@ -16,7 +16,7 @@ public interface IModelUpdater {
      *             thrown if the command turns out to be unexecutable
      * @throws RainbowException
      */
-    void requestModelUpdate (IRainbowModelCommandRepresentation command) throws IllegalStateException, RainbowException;
+    void requestModelUpdate (IRainbowOperation command) throws IllegalStateException, RainbowException;
 
     /**
      * Requests that a list of commands be executed to update a model. If done in a transaction, the all the commands
@@ -30,7 +30,7 @@ public interface IModelUpdater {
      * @throws IllegalStateException
      * @throws RainbowException
      */
-    void requestModelUpdate (List<IRainbowModelCommandRepresentation> commands, boolean transaction)
+    void requestModelUpdate (List<IRainbowOperation> commands, boolean transaction)
             throws IllegalStateException, RainbowException;
 
     public <T> IModelInstance<T> getModelInstance (String modelType, String modelName);

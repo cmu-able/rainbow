@@ -56,6 +56,7 @@ public interface IModelsManager extends IModelUpdater {
      * @param modelName
      * @return
      */
+    @Override
     public <T> IModelInstance<T> getModelInstance (String modelType, String modelName);
 
     /**
@@ -72,4 +73,5 @@ public interface IModelsManager extends IModelUpdater {
 
     public abstract void unregisterModel (IModelInstance<?> model) throws RainbowModelException;
 
+    public <T> IModelInstance<T> getModelInstanceByResource (String resource);
 }

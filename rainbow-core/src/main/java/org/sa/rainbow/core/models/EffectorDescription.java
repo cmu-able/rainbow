@@ -6,7 +6,7 @@ package org.sa.rainbow.core.models;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.sa.rainbow.core.gauges.CommandRepresentation;
+import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.translator.effectors.IEffector;
 
 /**
@@ -19,7 +19,7 @@ public class EffectorDescription {
 
     public static class EffectorAttributes extends DescriptionAttributes {
         public IEffector.Kind kind = null;
-        public CommandRepresentation commandPattern;
+        public OperationRepresentation commandPattern;
     }
 
     public SortedSet<EffectorAttributes> effectors = null;
