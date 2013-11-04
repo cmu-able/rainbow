@@ -6,9 +6,10 @@ import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
-import org.sa.rainbow.core.gauges.CommandRepresentation;
 import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
+import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
@@ -30,12 +31,12 @@ public class GaugeInstanceDescriptionConverter implements TypelibJavaConversionR
     private MapDataType    m_commandMapType;
     private DataType       m_commandRepresentationType;
 
-    //struct gauge_instance {string name; string comment; string type; string type_comment; list<typed_attribute_with_value> setup_params; map<string,list<command_representation> commands; }
+    //struct gauge_instance {string name; string comment; string type; string type_comment; list<typed_attribute_with_value> setup_params; map<string,list<operation_representation> commands; }
 
     public GaugeInstanceDescriptionConverter (PrimitiveScope scope) {
         m_scope = scope;
         try {
-            m_commandRepresentationType = m_scope.find ("command_representation");
+            m_commandRepresentationType = m_scope.find ("operation_representation");
             m_commandMapType = MapDataType.map_of (m_scope.string (), m_commandRepresentationType, m_scope);
         }
         catch (AmbiguousNameException e) {
@@ -88,7 +89,7 @@ public class GaugeInstanceDescriptionConverter implements TypelibJavaConversionR
                 fields.put (setupParams,
                         converter.from_java (gid.setupParams (), m_scope.find ("list<typed_attribute_with_value>")));
                 fields.put (commands,
-                        converter.from_java (gid.mappings (), m_scope.find ("list<command_representation>")));
+                        converter.from_java (gid.mappings (), m_scope.find ("map<string,operation_representation>")));
                 StructureDataValue sdv = sdt.make (fields);
                 return sdv;
 
@@ -119,15 +120,16 @@ public class GaugeInstanceDescriptionConverter implements TypelibJavaConversionR
                 String modelName = converter.<String> to_java (sdv.value (sdt.field ("model_name")), String.class);
                 List<TypedAttributeWithValue> setupParams = converter.<List> to_java (
                         sdv.value (sdt.field ("setup_params")), List.class);
-                List<CommandRepresentation> commands = converter.<List> to_java (sdv.value (sdt.field ("commands")),
-                        List.class);
+                Map<String, OperationRepresentation> commands = converter.<Map> to_java (
+                        sdv.value (sdt.field ("commands")),
+ Map.class);
                 GaugeInstanceDescription gid = new GaugeInstanceDescription (type, name, typeComment, comment);
                 gid.setModelDesc (new TypedAttribute (modelName, modelType));
                 for (TypedAttributeWithValue tav : setupParams) {
                     gid.addSetupParam (tav);
                 }
-                for (CommandRepresentation e : commands) {
-                    gid.addCommand (e);
+                for (Entry<String, OperationRepresentation> e : commands.entrySet ()) {
+                    gid.addCommand (e.getKey (), e.getValue ());
                 }
                 T t = (T )gid;
                 return t;

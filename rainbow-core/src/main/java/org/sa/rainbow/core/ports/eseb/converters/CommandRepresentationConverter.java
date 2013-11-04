@@ -10,8 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.sa.rainbow.core.gauges.CommandRepresentation;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.gauges.OperationRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 
 import edu.cmu.cs.able.typelib.jconv.TypelibJavaConversionRule;
 import edu.cmu.cs.able.typelib.jconv.TypelibJavaConverter;
@@ -36,53 +36,53 @@ public class CommandRepresentationConverter implements TypelibJavaConversionRule
     @Override
     public boolean handles_java (Object value, DataType dst) {
         Ensure.not_null (value);
-        if (value instanceof IRainbowModelCommandRepresentation) return dst == null || "command_representation".equals (dst.name ());
+        if (value instanceof IRainbowOperation) return dst == null || "operation_representation".equals (dst.name ());
         return false;
     }
 
     @Override
     public boolean handles_typelib (DataValue value, Class<?> cls) {
         Ensure.not_null (value);
-        if (value.type ().name ().equals ("command_representation")) return cls == null || IRainbowModelCommandRepresentation.class.isAssignableFrom (cls);
+        if (value.type ().name ().equals ("operation_representation"))
+            return cls == null || IRainbowOperation.class.isAssignableFrom (cls);
         return false;
     }
 
     @Override
     public DataValue from_java (Object value, DataType dst, TypelibJavaConverter converter)
             throws ValueConversionException {
-        if ((dst == null || dst instanceof StructureDataType) && value instanceof IRainbowModelCommandRepresentation) {
+        if ((dst == null || dst instanceof StructureDataType) && value instanceof IRainbowOperation) {
             try {
                 StructureDataType sdt = (StructureDataType )dst;
                 if (sdt == null) {
-                    sdt = (StructureDataType )m_scope.find ("command_representation");
+                    sdt = (StructureDataType )m_scope.find ("operation_representation");
                 }
-                IRainbowModelCommandRepresentation command = (IRainbowModelCommandRepresentation )value;
+                IRainbowOperation command = (IRainbowOperation )value;
                 Map<Field, DataValue> fields = new HashMap<> ();
-                Field label = sdt.field ("label");
                 Field target = sdt.field ("target");
                 Field modelName = sdt.field ("modelName");
                 Field modelType = sdt.field ("modelType");
                 Field commandName = sdt.field ("name");
                 Field params = sdt.field ("params");
-                fields.put (label, converter.from_java (command.getLabel (), m_scope.string ()));
                 fields.put (target, converter.from_java (command.getTarget (), m_scope.string ()));
                 fields.put (modelName, converter.from_java (command.getModelName (), m_scope.string ()));
                 fields.put (modelType, converter.from_java (command.getModelType (), m_scope.string ()));
-                fields.put (commandName, converter.from_java (command.getCommandName (), m_scope.string ()));
+                fields.put (commandName, converter.from_java (command.getName (), m_scope.string ()));
                 fields.put (
                         params,
                         converter.from_java (Arrays.asList (command.getParameters ()),
- m_scope.find ("list<string>")));
+                                m_scope.find ("list<string>")));
                 StructureDataValue sdv = sdt.make (fields);
                 return sdv;
             }
             catch (UnknownFieldException | AmbiguousNameException e) {
                 throw new ValueConversionException (MessageFormat.format ("Could not convert from {0} to {1}", value
-                        .getClass ().toString (), (dst == null ? "command_representation" : dst.absolute_hname ())), e);
+                        .getClass ().toString (), (dst == null ? "operation_representation" : dst.absolute_hname ())),
+                        e);
             }
         }
         throw new ValueConversionException (MessageFormat.format ("Could not convert from {0} to {1}", value
-                .getClass ().toString (), (dst == null ? "command_representation" : dst.absolute_hname ())));
+                .getClass ().toString (), (dst == null ? "operation_representation" : dst.absolute_hname ())));
 
     }
 
@@ -93,14 +93,13 @@ public class CommandRepresentationConverter implements TypelibJavaConversionRule
             try {
                 StructureDataValue sdv = (StructureDataValue )value;
                 StructureDataType sdt = (StructureDataType )sdv.type ();
-                String label = converter.<String> to_java (sdv.value (sdt.field ("label")), String.class);
                 String target = converter.<String> to_java (sdv.value (sdt.field ("target")), String.class);
                 String modelName = converter.<String> to_java (sdv.value (sdt.field ("modelName")), String.class);
                 String modelType = converter.<String> to_java (sdv.value (sdt.field ("modelType")), String.class);
                 String name = converter.<String> to_java (sdv.value (sdt.field ("name")), String.class);
                 List<String> parameters = converter.<List> to_java (sdv.value (sdt.field ("params")), List.class);
                 if (cls == null) {
-                    CommandRepresentation crep = new CommandRepresentation (label, name, modelName, modelType, target,
+                    OperationRepresentation crep = new OperationRepresentation (name, modelName, modelType, target,
                             parameters.toArray (new String[0]));
                     @SuppressWarnings ("unchecked")
                     T t = (T )crep;
@@ -114,7 +113,7 @@ public class CommandRepresentationConverter implements TypelibJavaConversionRule
                         Constructor<T> constructor = cls.getConstructor (String.class, String.class, String.class,
                                 String.class, String.class, String[].class);
                         if (constructor != null)
-                            return constructor.newInstance (label, name, modelName, modelType,
+                            return constructor.newInstance (name, modelName, modelType,
                                     parameters.toArray (new String[0]));
                         else
                             throw exception;
@@ -129,11 +128,11 @@ public class CommandRepresentationConverter implements TypelibJavaConversionRule
             catch (UnknownFieldException | AmbiguousNameException e) {
                 throw new ValueConversionException (MessageFormat.format ("Could not convert from {0} to {1}",
                         value.toString (),
-                        (cls == null ? "IRainbowModelCommandRepresentation" : cls.getCanonicalName ())), e);
+                        (cls == null ? "IRainbowModelOperationRepresentation" : cls.getCanonicalName ())), e);
             }
         }
         throw new ValueConversionException (MessageFormat.format ("Could not convert from {0} to {1}",
-                value.toString (), (cls == null ? "IRainbowModelCommandRepresentation" : cls.getCanonicalName ())));
+                value.toString (), (cls == null ? "IRainbowModelOperationRepresentation" : cls.getCanonicalName ())));
 
     }
 

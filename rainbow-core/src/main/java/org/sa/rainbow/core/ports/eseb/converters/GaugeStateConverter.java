@@ -54,7 +54,7 @@ public class GaugeStateConverter implements TypelibJavaConversionRule {
             try {
                 StructureDataType sdt = (StructureDataType )dst;
                 if (sdt == null) {
-                    sdt = (StructureDataType )m_scope.find ("command_representation");
+                    sdt = (StructureDataType )m_scope.find ("operation_representation");
                 }
                 IGaugeState command = (IGaugeState )value;
                 Map<Field, DataValue> fields = new HashMap<> ();
@@ -73,7 +73,7 @@ public class GaugeStateConverter implements TypelibJavaConversionRule {
                 fields.put (
                         commands,
                         converter.from_java (command.getGaugeReports (),
-                                m_scope.find ("list<command_representation>")));
+                                m_scope.find ("list<operation_representation>")));
                 StructureDataValue sdv = sdt.make (fields);
                 return sdv;
             }
