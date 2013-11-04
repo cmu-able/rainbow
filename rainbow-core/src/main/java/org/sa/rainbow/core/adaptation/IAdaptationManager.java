@@ -14,4 +14,6 @@ public interface IAdaptationManager<S> extends IRainbowRunnable {
 
     public abstract void setEnabled (boolean enabled);
 
+    public abstract boolean isEnabled ();
+
 }
