@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.RegularPatternGauge;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
@@ -43,7 +43,7 @@ public class CpuLoadGauge extends RegularPatternGauge {
      * @throws RainbowException
      */
     public CpuLoadGauge (String id, long beaconPeriod, TypedAttribute gaugeDesc, TypedAttribute modelDesc,
-            List<TypedAttributeWithValue> setupParams, List<IRainbowModelCommandRepresentation> mappings)
+            List<TypedAttributeWithValue> setupParams, List<IRainbowOperation> mappings)
                     throws RainbowException {
 
         super(NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
@@ -96,7 +96,7 @@ public class CpuLoadGauge extends RegularPatternGauge {
                 // update server comp in model with requests per sec
                 m_reportingPort.trace (getComponentType (), "Updating server prop using load = " + tLoad);
                 // ZNewsSys.s0.load
-                IRainbowModelCommandRepresentation cmd = m_commands.get (valueNames[0]);
+                IRainbowOperation cmd = m_commands.get (valueNames[0]);
                 Map<String, String> pMap = new HashMap<String, String> ();
                 pMap.put (cmd.getParameters ()[0], Double.toString (tLoad));
                 issueCommand (cmd, pMap);

@@ -10,9 +10,9 @@ import org.acmestudio.acme.element.IAcmeComponent;
 import org.acmestudio.acme.element.IAcmeConnector;
 import org.acmestudio.acme.element.property.IAcmeProperty;
 import org.sa.rainbow.core.models.ModelsManager;
-import org.sa.rainbow.model.acme.AcmeModelCommand;
 import org.sa.rainbow.model.acme.AcmeModelCommandFactory;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
+import org.sa.rainbow.model.acme.AcmeModelOperation;
 
 public class ZNNCommandFactory extends AcmeModelCommandFactory {
 
@@ -160,7 +160,7 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
                 Boolean.toString (enabled));
     }
 
-    public AcmeModelCommand<IAcmeProperty> setBlackholedCmd (IAcmeComponent server, Set<String> blackholdIps) {
+    public AcmeModelOperation<IAcmeProperty> setBlackholedCmd (IAcmeComponent server, Set<String> blackholdIps) {
         assert server.declaresType ("BlackholerT");
         if (ModelHelper.getAcmeSystem (server) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
@@ -175,7 +175,7 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
                 sb.toString ());
     }
 
-    public AcmeModelCommand<IAcmeProperty> setThrottledCmd (IAcmeComponent server, Set<String> throttledIPs) {
+    public AcmeModelOperation<IAcmeProperty> setThrottledCmd (IAcmeComponent server, Set<String> throttledIPs) {
         Ensure.isTrue (server.declaresType ("ThrottlerT"));
         if (ModelHelper.getAcmeSystem (server) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
@@ -189,7 +189,7 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
         return new SetThrottledCmd ("setThrottled", m_modelInstance, server.getQualifiedName (), sb.toString ());
     }
 
-    public AcmeModelCommand<IAcmeProperty> forceReauthentication (IAcmeComponent server) {
+    public AcmeModelOperation<IAcmeProperty> forceReauthentication (IAcmeComponent server) {
         Ensure.isTrue (server.declaresType ("ServerT"));
         if (ModelHelper.getAcmeSystem (server) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
@@ -197,7 +197,7 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
         return new ForceReauthenticationCmd ("forceReauthentication", m_modelInstance, server.getQualifiedName ());
     }
 
-    public AcmeModelCommand<IAcmeProperty> setMaliciousnessCmd (IAcmeComponent client, float maliciousness) {
+    public AcmeModelOperation<IAcmeProperty> setMaliciousnessCmd (IAcmeComponent client, float maliciousness) {
         Ensure.is_true (client.declaresType ("PotentiallyMaliciousT"));
         if (ModelHelper.getAcmeSystem (client) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
@@ -206,7 +206,7 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
                 Float.toString (maliciousness));
     }
 
-    public AcmeModelCommand<IAcmeComponent> connectNewServerCmd (IAcmeComponent proxy, String name) {
+    public AcmeModelOperation<IAcmeComponent> connectNewServerCmd (IAcmeComponent proxy, String name) {
         assert proxy.declaresType ("ProxyT");
         if (ModelHelper.getAcmeSystem (proxy) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
@@ -214,7 +214,7 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
         return new NewServerCmd ("connectServer", m_modelInstance, proxy.getQualifiedName (), name);
     }
 
-    public AcmeModelCommand<IAcmeProperty> enableServerCmd (IAcmeComponent server, boolean enabled) {
+    public AcmeModelOperation<IAcmeProperty> enableServerCmd (IAcmeComponent server, boolean enabled) {
         Ensure.is_true (server.declaresType ("ServerT"));
         if (ModelHelper.getAcmeSystem (server) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
@@ -223,13 +223,13 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
                 Boolean.toString (enabled));
     }
 
-    public AcmeModelCommand<IAcmeProperty> setFidelityCmd (IAcmeComponent server, int fidelity) {
+    public AcmeModelOperation<IAcmeProperty> setFidelityCmd (IAcmeComponent server, String fidelity) {
         Ensure.is_true (server.declaresType ("ServerT"));
         if (ModelHelper.getAcmeSystem (server) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
         return new SetFidelityCmd ("setFidelity", m_modelInstance, server.getQualifiedName (),
-                Integer.toString (fidelity));
+ fidelity);
     }
 
 

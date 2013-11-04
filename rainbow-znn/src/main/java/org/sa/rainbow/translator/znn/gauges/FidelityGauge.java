@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.RegularPatternGauge;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
@@ -36,12 +36,12 @@ public class FidelityGauge extends RegularPatternGauge {
      * @throws RainbowException
      */
     public FidelityGauge (String id, long beaconPeriod, TypedAttribute gaugeDesc, TypedAttribute modelDesc,
-            List<TypedAttributeWithValue> setupParams, List<IRainbowModelCommandRepresentation> mappings)
+            List<TypedAttributeWithValue> setupParams, List<IRainbowOperation> mappings)
                     throws RainbowException {
 
         super(NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
 
-        addPattern(DEFAULT, Pattern.compile("\\[(.+)\\] (\\d+)"));
+        addPattern (DEFAULT, Pattern.compile ("\\[(.+)\\] (\\w+)"));
     }
 
     /* (non-Javadoc)
@@ -60,16 +60,26 @@ public class FidelityGauge extends RegularPatternGauge {
         if (matchName == DEFAULT) {
             // acquire the recent CPU load data
 //			String tstamp = m.group(1);
-            int fidelity = Integer.parseInt(m.group(2));
+            String fidelity = m.group(2);
 
             // update server comp in model with requests per sec
             m_reportingPort.trace (getComponentType (), "Updating server prop using fidelity = " + fidelity);
             // ZNewsSys.s0.fidelity
             if (m_commands.containsKey (valueNames[0])) {
                 // ZNewsSys.conn0.latency
-                IRainbowModelCommandRepresentation cmd = m_commands.get (valueNames[0]);
+                IRainbowOperation cmd = m_commands.get (valueNames[0]);
                 Map<String, String> parameterMap = new HashMap<> ();
-                parameterMap.put (cmd.getParameters ()[0], Integer.toString (fidelity));
+                String acmeFidelity = "5";
+                switch (fidelity) {
+                case "low":
+                    acmeFidelity = "1";
+                    break;
+                case "text":
+                    acmeFidelity = "3";
+                    break;
+
+                }
+                parameterMap.put (cmd.getParameters ()[0], acmeFidelity);
                 issueCommand (cmd, parameterMap);
             }
         }

@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.RegularPatternGauge;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
@@ -50,7 +50,7 @@ public class ApacheTopGauge extends RegularPatternGauge {
      * @throws RainbowException
      */
     public ApacheTopGauge (String id, long beaconPeriod, TypedAttribute gaugeDesc, TypedAttribute modelDesc,
-            List<TypedAttributeWithValue> setupParams, List<IRainbowModelCommandRepresentation> mappings)
+            List<TypedAttributeWithValue> setupParams, List<IRainbowOperation> mappings)
                     throws RainbowException {
 
         super(NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
@@ -107,12 +107,12 @@ public class ApacheTopGauge extends RegularPatternGauge {
                 m_reportingPort.trace (getComponentType (), "Updating server prop using (sec,req,kBps) = (" + numSecs
                         + "," + numReqs + "," + numBytes + ")");
                 // ZNewsSys.s0.reqServiceRate
-                IRainbowModelCommandRepresentation reqServiceRateCmd = m_commands.get (valueNames[0]);
+                IRainbowOperation reqServiceRateCmd = m_commands.get (valueNames[0]);
                 Map<String, String> pMap = new HashMap<String, String> ();
                 pMap.put (reqServiceRateCmd.getParameters ()[0], Double.toString ((double )numReqs / numSecs));
                 issueCommand (reqServiceRateCmd, pMap);
                 // ZNewsSys.s0.byteServiceRate
-                IRainbowModelCommandRepresentation byteServiceRateCmd = m_commands.get (valueNames[0]);
+                IRainbowOperation byteServiceRateCmd = m_commands.get (valueNames[0]);
                 pMap = new HashMap<String, String> ();
                 pMap.put (reqServiceRateCmd.getParameters ()[0], Double.toString (numBytes / numSecs));
                 issueCommand (byteServiceRateCmd, pMap);
@@ -128,19 +128,19 @@ public class ApacheTopGauge extends RegularPatternGauge {
                             + num2x + "," + num3x + "," + num4x + "," + num5x + ")");
                 // ZNewsSys.conn0.numReqsSuccess
 
-                IRainbowModelCommandRepresentation numReqsSuccessCmd = m_commands.get (valueNames[2]);
+                IRainbowOperation numReqsSuccessCmd = m_commands.get (valueNames[2]);
                 Map<String, String> pMap = new HashMap<String, String> ();
                 pMap.put (numReqsSuccessCmd.getParameters ()[0], Integer.toString (num2x));
                 issueCommand (numReqsSuccessCmd, pMap);
-                IRainbowModelCommandRepresentation numReqsRedirect = m_commands.get (valueNames[3]);
+                IRainbowOperation numReqsRedirect = m_commands.get (valueNames[3]);
                 pMap = new HashMap<String, String> ();
                 pMap.put (numReqsRedirect.getParameters ()[0], Integer.toString (num3x));
                 issueCommand (numReqsRedirect, pMap);
-                IRainbowModelCommandRepresentation numReqsClientError = m_commands.get (valueNames[4]);
+                IRainbowOperation numReqsClientError = m_commands.get (valueNames[4]);
                 pMap = new HashMap<String, String> ();
                 pMap.put (numReqsClientError.getParameters ()[0], Integer.toString (num4x));
                 issueCommand (numReqsClientError, pMap);
-                IRainbowModelCommandRepresentation numReqsServerError = m_commands.get (valueNames[5]);
+                IRainbowOperation numReqsServerError = m_commands.get (valueNames[5]);
                 pMap = new HashMap<String, String> ();
                 pMap.put (numReqsServerError.getParameters ()[0], Integer.toString (num5x));
                 issueCommand (numReqsServerError, pMap);
@@ -157,7 +157,7 @@ public class ApacheTopGauge extends RegularPatternGauge {
                     "[ uri:string=\"" + uri + "\"; cnt:int=" + hitCnt
                     + "; kbytes:float=" + kB + "; ]";
 
-            IRainbowModelCommandRepresentation lastPageHit = m_commands.get (valueNames[6]);
+            IRainbowOperation lastPageHit = m_commands.get (valueNames[6]);
             Map<String, String> pMap = new HashMap<String, String> ();
             pMap.put (lastPageHit.getParameters ()[0], hitStr);
             issueCommand (lastPageHit, pMap);

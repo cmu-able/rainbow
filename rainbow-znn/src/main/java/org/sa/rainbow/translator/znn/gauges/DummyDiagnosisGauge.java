@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.RegularPatternGauge;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
@@ -19,7 +19,7 @@ public class DummyDiagnosisGauge extends RegularPatternGauge {
     private static final String[] valueNames = { "maliciousness" };
 
     public DummyDiagnosisGauge (String id, long beaconPeriod, TypedAttribute gaugeDesc, TypedAttribute modelDesc,
-            List<TypedAttributeWithValue> setupParams, List<IRainbowModelCommandRepresentation> mappings)
+            List<TypedAttributeWithValue> setupParams, List<IRainbowOperation> mappings)
                     throws RainbowException {
         super (NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
 
@@ -31,7 +31,7 @@ public class DummyDiagnosisGauge extends RegularPatternGauge {
     protected void doMatch (String matchName, Matcher m) {
         if (DEFAULT.equals (matchName)) {
             String LB = m.group (1);
-            IRainbowModelCommandRepresentation cmd = m_commands.values ().iterator ().next ();
+            IRainbowOperation cmd = m_commands.values ().iterator ().next ();
             Map<String, String> pm = new HashMap<> ();
             pm.put (cmd.getParameters ()[0], m.group (2));
             pm.put (cmd.getTarget (), LB);

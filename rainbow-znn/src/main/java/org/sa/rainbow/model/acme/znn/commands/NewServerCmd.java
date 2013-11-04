@@ -85,7 +85,7 @@ public class NewServerCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
     }
 
     @Override
-    public String getCommandName () {
+    public String getName () {
         return "newServer";
     }
 

@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.RegularPatternGauge;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.translator.znn.probes.PingRTTProbe;
@@ -46,7 +46,7 @@ public class RtLatencyGauge extends RegularPatternGauge {
      * Main constructor.
      */
     public RtLatencyGauge (String id, long beaconPeriod, TypedAttribute gaugeDesc, TypedAttribute modelDesc,
-            List<TypedAttributeWithValue> setupParams, List<IRainbowModelCommandRepresentation> mappings)
+            List<TypedAttributeWithValue> setupParams, List<IRainbowOperation> mappings)
                     throws RainbowException {
         super (NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
 
@@ -95,7 +95,7 @@ public class RtLatencyGauge extends RegularPatternGauge {
             // update connection in model with latency in seconds
             if (m_commands.containsKey (valueNames[0])) {
                 // ZNewsSys.conn0.latency
-                IRainbowModelCommandRepresentation cmd = m_commands.get (valueNames[0]);
+                IRainbowOperation cmd = m_commands.get (valueNames[0]);
                 Map<String, String> parameterMap = new HashMap<> ();
                 parameterMap.put (cmd.getParameters ()[0], Double.toString (latency));
                 issueCommand (cmd, parameterMap);

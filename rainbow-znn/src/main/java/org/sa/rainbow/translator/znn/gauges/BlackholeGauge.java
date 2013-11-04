@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.RegularPatternGauge;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
@@ -29,7 +29,7 @@ public class BlackholeGauge extends RegularPatternGauge {
      * @throws RainbowException 
      */
     public BlackholeGauge(String id, long beaconPeriod, TypedAttribute gaugeDesc, TypedAttribute modelDesc,
-            List<TypedAttributeWithValue> setupParams, List<IRainbowModelCommandRepresentation> mappings) throws RainbowException {
+            List<TypedAttributeWithValue> setupParams, List<IRainbowOperation> mappings) throws RainbowException {
 
         super(NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams,
                 mappings);
@@ -59,7 +59,7 @@ public class BlackholeGauge extends RegularPatternGauge {
 
             if (doReport (ips.toString ())) {
                 recordLastReport (ips.toString ());
-                IRainbowModelCommandRepresentation cmd = m_commands.values ().iterator ().next ();
+                IRainbowOperation cmd = m_commands.values ().iterator ().next ();
                 Map<String, String> pm = new HashMap<String, String> ();
                 pm.put (cmd.getParameters ()[0], ips.toString ());
                 issueCommand (cmd, pm);
@@ -69,7 +69,7 @@ public class BlackholeGauge extends RegularPatternGauge {
             // The probe reported "none" meaning that there is nothing blackholed
             if (doReport ("")) {
                 recordLastReport ("");
-                IRainbowModelCommandRepresentation cmd = m_commands.values ().iterator ().next ();
+                IRainbowOperation cmd = m_commands.values ().iterator ().next ();
                 Map<String, String> pm = new HashMap<String, String> ();
                 pm.put (cmd.getParameters ()[0], "");
                 issueCommand (cmd, pm);

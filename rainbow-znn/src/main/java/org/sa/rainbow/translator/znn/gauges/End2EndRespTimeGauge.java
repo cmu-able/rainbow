@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.RegularPatternGauge;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
@@ -44,7 +44,7 @@ public class End2EndRespTimeGauge extends RegularPatternGauge {
      */
     public End2EndRespTimeGauge (String id, long beaconPeriod, TypedAttribute gaugeDesc,
             TypedAttribute modelDesc, List<TypedAttributeWithValue> setupParams,
-            List<IRainbowModelCommandRepresentation> mappings) throws RainbowException {
+            List<IRainbowOperation> mappings) throws RainbowException {
         super (NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
 
         m_historyMap = new HashMap<String, Queue<Double>> ();
@@ -70,8 +70,9 @@ public class End2EndRespTimeGauge extends RegularPatternGauge {
         if (matchName == DEFAULT) {
             // acquire the next set of ping RTT data, we care for the average
 //			String tstamp = m.group(1);
-//			String id = m.group(2);
-            String host = m.group(3);
+            String id = m.group (2);
+            String host = id.split ("@")[1];
+//            String host = m.group(3);
             if (host.equals("")) return;
             double dur = Double.parseDouble(m.group(4));
 
@@ -101,7 +102,7 @@ public class End2EndRespTimeGauge extends RegularPatternGauge {
                 valueName = valueName.replace("*", host);
                 if (m_commands.containsKey (valueName)) {
                     // ZNewsSys.c0.experRespTime
-                    IRainbowModelCommandRepresentation cmd = m_commands.get (valueName);
+                    IRainbowOperation cmd = m_commands.get (valueName);
                     Map<String, String> parameterMap = new HashMap<> ();
                     parameterMap.put (cmd.getParameters ()[0], Double.toString (dur));
                     issueCommand (cmd, parameterMap);

@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.RegularPatternGauge;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
@@ -61,7 +61,7 @@ public class DiskIOGauge extends RegularPatternGauge {
      * @throws RainbowException
      */
     public DiskIOGauge (String id, long beaconPeriod, TypedAttribute gaugeDesc, TypedAttribute modelDesc,
-            List<TypedAttributeWithValue> setupParams, List<IRainbowModelCommandRepresentation> mappings)
+            List<TypedAttributeWithValue> setupParams, List<IRainbowOperation> mappings)
                     throws RainbowException {
 
         super(NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
@@ -168,7 +168,7 @@ public class DiskIOGauge extends RegularPatternGauge {
                 for (int i=0; i < valueNames.length; ++i) {
                     if (m_commands.containsKey (valueNames[i])) {
                         // ZNewsSys.s0.<vName>, if "vName" exists in mapping
-                        IRainbowModelCommandRepresentation cmd = m_commands.get (valueNames[i]);
+                        IRainbowOperation cmd = m_commands.get (valueNames[i]);
                         Map<String, String> pMap = new HashMap<String, String> ();
                         pMap.put (cmd.getParameters ()[0], Double.toString (values[i]));
                         issueCommand (cmd, pMap);
