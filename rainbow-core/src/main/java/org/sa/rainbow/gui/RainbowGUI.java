@@ -14,6 +14,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.EnumSet;
 
 import javax.swing.BorderFactory;
@@ -32,16 +33,22 @@ import javax.swing.border.Border;
 import org.apache.commons.lang.NotImplementedException;
 import org.sa.rainbow.core.IDisposable;
 import org.sa.rainbow.core.IRainbowRunnable;
+import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.ports.IMasterCommandPort;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
+import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
+import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.OperationResult;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReportingSubscriberCallback;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.util.Pair;
+import org.sa.rainbow.core.util.TypedAttribute;
+import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 import org.sa.rainbow.util.Util;
 
 /**
@@ -96,6 +103,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
     };
     private int[] m_order = { 7, 2, 8, 3, 0, 1, 5, 4, 6 };
     private IMasterCommandPort m_master;
+    private IModelDSBusPublisherPort m_dsPort;
 
     public RainbowGUI (IMasterCommandPort master) {
         m_master = master;
@@ -306,10 +314,12 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         item.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed (ActionEvent e) {
-                throw new NotImplementedException ();
-//        		boolean b = !((AdaptationManager )Oracle.instance().adaptationManager()).adaptationEnabled();
+                boolean b = Rainbow.instance ().getRainbowMaster ().isAdaptationEnabled ();
+                Rainbow.instance ().getRainbowMaster ().enableAdaptation (!b);
+
+                //        		boolean b = !((AdaptationManager )Oracle.instance().adaptationManager()).adaptationEnabled();
 //        		((AdaptationManager )Oracle.instance().adaptationManager()).setAdaptationEnabled(b);
-//        		writeText(ID_ORACLE_MESSAGE, "Adaptation switched " + (b?"ON":"OFF"));
+                writeText (ID_ORACLE_MESSAGE, "Adaptation switched " + (b ? "ON" : "OFF"));
             }
         });
         menu.add(item);
@@ -469,8 +479,43 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
             }
         });
         menu.add(item);
-        menu.add(new JSeparator());
+        // Test an operation menu item
+        item = new JMenuItem ("T3 Test An Operation");
+        item.setMnemonic (KeyEvent.VK_3);
+        item.addActionListener (new ActionListener () {
 
+            @Override
+            public void actionPerformed (ActionEvent e) {
+                String operationName = JOptionPane.showInputDialog (m_frame,
+                        "Please identify the Operation to test:");
+                if (operationName == null || operationName.isEmpty ()) {
+                    writeText (ID_ORACLE_MESSAGE, "Sorry, Oracel needs to know what operation to invoke.");
+                }
+
+                String argStr = JOptionPane.showInputDialog (m_frame,
+                        "Please provide string arguments, separated by ','");
+                String[] args = null;
+                if (argStr == null || argStr.isEmpty ()) {
+                    args = new String[0];
+                }
+                else {
+                    args = argStr.split ("\\s*,\\s*");
+                }
+                String modelRef = JOptionPane
+                        .showInputDialog (m_frame,
+                                "Please identify the model to run the operation on: modelName:modelType (or just 'modelName' for Acme)");
+                TypedAttribute model = Util.decomposeModelReference (modelRef);
+                if (model.getType () == null || model.getType ().isEmpty ()) {
+                    model.setType ("Acme");
+                }
+
+                // Publish the operation
+                testOperation (model, operationName, args);
+            }
+        });
+        menu.add (item);
+
+        menu.add(new JSeparator());
         // Delegate control menu item
         item = new JMenuItem("Restart Delegates");
         item.setMnemonic(KeyEvent.VK_R);
@@ -597,10 +642,42 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
 
     // GUI invoked test methods
     private void testEffector (String target, String effName, String[] args) {
-        throw new NotImplementedException ();
+        String message = "Testing Effector " + effName + "@" + target + Arrays.toString (args);
+        writeText (ID_EXECUTOR, message);
+        Outcome outcome = m_master.testEffector (target, effName, args);
+        JOptionPane.showMessageDialog (m_frame, message + " - outcome: " + outcome);
+        writeText (ID_EXECUTOR, message + " - outcome: " + outcome);
 //        writeText(ID_EXECUTOR, "Testing Effector " + effName + Arrays.toString(args));
 //        IEffector.Outcome outcome = Rainbow.instance().sysOpProvider().execute(effName, target, args);
 //        writeText(ID_EXECUTOR, "  - outcome: " + outcome);
+    }
+
+    private void testOperation (TypedAttribute modelRef, String opName, String[] args) {
+        OperationRepresentation or = new OperationRepresentation (opName, modelRef.getName (), modelRef.getType (),
+                args[0], Arrays.copyOfRange (args, 1, args.length));
+        if (m_dsPort == null) {
+            try {
+                m_dsPort = RainbowPortFactory.createModelDSPublishPort (new Identifiable () {
+
+                    @Override
+                    public String id () {
+                        return "UI";
+                    }
+                });
+
+            }
+            catch (RainbowConnectionException e) {
+                writeText (ID_ORACLE_MESSAGE, "Failed to publish the operation.");
+            }
+        }
+        OperationResult result = m_dsPort.publishOperation (or);
+        String msg = modelRef.toString () + "." + opName + Arrays.toString (args) + " - returned "
+                + result.result.name () + ": "
+                + result.reply;
+        writeText (ID_ORACLE_MESSAGE,
+                msg);
+        JOptionPane.showMessageDialog (m_frame, msg);
+
     }
 
     @Override
