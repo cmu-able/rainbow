@@ -75,11 +75,11 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
         m_masterConnectionPort = RainbowPortFactory.createDelegateMasterConnectionPort (this);
         log ("Attempting to connecto to master.");
         m_delegateState = ConnectionState.CONNECTING;
+        m_reportingPort = m_masterConnectionPort;
+        m_configurationPort = RainbowPortFactory.createDelegateConfigurationPort (this);
         m_masterPort = m_masterConnectionPort.connectDelegate (m_id, getConnectionProperties ());
         m_delegateState = ConnectionState.CONNECTED;
         // Request configuration information
-        m_reportingPort = m_masterConnectionPort;
-        m_configurationPort = RainbowPortFactory.createDelegateConfigurationPort (this);
 
         m_masterPort.requestConfigurationInformation ();
         m_probeManager = new LocalProbeManager (getId ());

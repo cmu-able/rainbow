@@ -379,13 +379,22 @@ public class Rainbow implements RainbowConstants {
         String deployLoc = m_props.getProperty (PROPKEY_DEPLOYMENT_LOCATION);
         canonicalizeHost2IP ("Deployment Location", deployLoc, PROPKEY_DEPLOYMENT_LOCATION);
 
-        // Resolve all of the mentioned target locations
-        int cnt = Integer.parseInt (m_props.getProperty (PROPKEY_TARGET_LOCATION + Util.SIZE_SFX, "0"));
-        for (int i = 0; i < cnt; i++) {
-            String propName = RainbowConstants.PROPKEY_TARGET_LOCATION + Util.DOT + i;
-            String hostLoc = m_props.getProperty (propName);
-            canonicalizeHost2IP ("Target host location", hostLoc, propName);
+        Properties customizedLocations = Util.propertiesByRegex (
+                RainbowConstants.PROPKEY_TARGET_LOCATION + "\\.[^.]*$", m_props);
+        customizedLocations.remove (RainbowConstants.PROPKEY_TARGET_LOCATION + Util.SIZE_SFX);
+        for (Object o : customizedLocations.keySet ()) {
+            String key = (String )o;
+            String hostLoc = m_props.getProperty (key);
+            canonicalizeHost2IP ("Target host location", hostLoc, key);
         }
+
+//        // Resolve all of the mentioned target locations
+//        int cnt = Integer.parseInt (m_props.getProperty (PROPKEY_TARGET_LOCATION + Util.SIZE_SFX, "0"));
+//        for (int i = 0; i < cnt; i++) {
+//            String propName = RainbowConstants.PROPKEY_TARGET_LOCATION + Util.DOT + i;
+//            String hostLoc = m_props.getProperty (propName);
+//            canonicalizeHost2IP ("Target host location", hostLoc, propName);
+//        }
 
     }
 

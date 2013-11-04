@@ -39,10 +39,13 @@ import org.sa.rainbow.gui.RainbowGUI;
 import org.sa.rainbow.translator.effectors.EffectorManager;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 import org.sa.rainbow.util.Beacon;
+import org.sa.rainbow.util.RainbowConfigurationChecker;
+import org.sa.rainbow.util.RainbowConfigurationChecker.Problem;
+import org.sa.rainbow.util.RainbowConfigurationChecker.ProblemT;
 import org.sa.rainbow.util.Util;
 import org.sa.rainbow.util.YamlUtil;
 
-public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCommandPort {
+public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCommandPort, IRainbowMaster {
     static Logger                            LOGGER                        = Logger.getLogger (Rainbow.class
             .getCanonicalName ());
 
@@ -84,6 +87,16 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
         initializeConnections ();
         super.initialize (m_reportingPort);
         initializeRainbowComponents ();
+        RainbowConfigurationChecker checker = new RainbowConfigurationChecker (this);
+        checker.checkRainbowConfiguration ();
+        for (Problem p : checker.getProblems ()) {
+            if (p.problem == ProblemT.ERROR) {
+                m_reportingPort.error (getComponentType(), p.msg);
+            }
+            else {
+                m_reportingPort.warn (getComponentType(), p.msg);
+            }
+        }
     }
 
     private void readConfiguration () {
@@ -233,6 +246,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
         m_reportingPort = RainbowPortFactory.createMasterReportingPort ();
     }
 
+    @Override
     public ModelsManager modelsManager () {
         return m_modelsManager;
     }
@@ -519,6 +533,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
         return m_heartbeats;
     }
 
+    @Override
     public ProbeDescription probeDesc () {
         if (m_probeDesc == null) {
             m_probeDesc = YamlUtil.loadProbeDesc ();
@@ -526,6 +541,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
         return m_probeDesc;
     }
 
+    @Override
     public EffectorDescription effectorDesc () {
         if (m_effectorDesc == null) {
             m_effectorDesc = YamlUtil.loadEffectorDesc ();
@@ -533,6 +549,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
         return m_effectorDesc;
     }
 
+    @Override
     public GaugeDescription gaugeDesc () {
         if (m_gaugeDesc == null) {
             m_gaugeDesc = YamlUtil.loadGaugeSpecs ();
@@ -540,6 +557,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
         return m_gaugeDesc;
     }
 
+    @Override
     public UtilityPreferenceDescription preferenceDesc () {
         if (m_prefDesc == null) {
             m_prefDesc = YamlUtil.loadUtilityPrefs ();
@@ -649,6 +667,14 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
         }
     }
 
+    public boolean isAdaptationEnabled () {
+        boolean enabled = true;
+        for (IAdaptationManager am : m_adaptationManagers.values ()) {
+            enabled &= am.isEnabled ();
+        }
+        return enabled;
+    }
+
     @Override
     public Outcome testEffector (String target, String effName, String[] args) {
         for (EffectorManager em : m_effectorManagers) {
@@ -712,5 +738,6 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
             }
         }
     }
+
 
 }
