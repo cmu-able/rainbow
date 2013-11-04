@@ -44,7 +44,7 @@ public class End2EndRespTimeGauge extends RegularPatternGauge {
      */
     public End2EndRespTimeGauge (String id, long beaconPeriod, TypedAttribute gaugeDesc,
             TypedAttribute modelDesc, List<TypedAttributeWithValue> setupParams,
-            List<IRainbowOperation> mappings) throws RainbowException {
+ Map<String, IRainbowOperation> mappings) throws RainbowException {
         super (NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
 
         m_historyMap = new HashMap<String, Queue<Double>> ();

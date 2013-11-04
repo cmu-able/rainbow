@@ -50,7 +50,7 @@ public class ApacheTopGauge extends RegularPatternGauge {
      * @throws RainbowException
      */
     public ApacheTopGauge (String id, long beaconPeriod, TypedAttribute gaugeDesc, TypedAttribute modelDesc,
-            List<TypedAttributeWithValue> setupParams, List<IRainbowOperation> mappings)
+            List<TypedAttributeWithValue> setupParams, Map<String, IRainbowOperation> mappings)
                     throws RainbowException {
 
         super(NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
@@ -125,7 +125,7 @@ public class ApacheTopGauge extends RegularPatternGauge {
             if (num2x + num3x + num4x + num5x > 0) {
                 // update http conn in model with requests per sec
                 m_reportingPort.trace (getComponentType (),"Updating server prop using (2xx,3xx,4xx,5xx) = ("
-                            + num2x + "," + num3x + "," + num4x + "," + num5x + ")");
+                        + num2x + "," + num3x + "," + num4x + "," + num5x + ")");
                 // ZNewsSys.conn0.numReqsSuccess
 
                 IRainbowOperation numReqsSuccessCmd = m_commands.get (valueNames[2]);

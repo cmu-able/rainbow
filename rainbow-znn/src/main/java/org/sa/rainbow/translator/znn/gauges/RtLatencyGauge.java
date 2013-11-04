@@ -46,7 +46,7 @@ public class RtLatencyGauge extends RegularPatternGauge {
      * Main constructor.
      */
     public RtLatencyGauge (String id, long beaconPeriod, TypedAttribute gaugeDesc, TypedAttribute modelDesc,
-            List<TypedAttributeWithValue> setupParams, List<IRainbowOperation> mappings)
+            List<TypedAttributeWithValue> setupParams, Map<String, IRainbowOperation> mappings)
                     throws RainbowException {
         super (NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
 

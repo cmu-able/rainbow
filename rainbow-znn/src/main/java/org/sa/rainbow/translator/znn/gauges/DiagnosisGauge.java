@@ -50,7 +50,7 @@ public class DiagnosisGauge extends AbstractGauge {
     private List<RequestData> m_requests;
 
     public DiagnosisGauge (String id, long beaconPeriod, TypedAttribute gaugeDesc, TypedAttribute modelDesc,
-            List<TypedAttributeWithValue> setupParams, List<IRainbowModelCommandRepresentation> mappings)
+            List<TypedAttributeWithValue> setupParams, Map<String, IRainbowModelCommandRepresentation> mappings)
                     throws IOException, RainbowException {
         super(NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams,
                 mappings);
