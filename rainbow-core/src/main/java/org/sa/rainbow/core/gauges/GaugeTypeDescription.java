@@ -24,7 +24,7 @@ public class GaugeTypeDescription {
     protected String m_typeName = null;
     protected String m_typeComment = null;
     /** Stores, by type name, a hash of type-name pairs. */
-    protected Map<String, CommandRepresentation>   m_commandSignatures = null;
+    protected Map<String, OperationRepresentation>   m_commandSignatures = null;
     /** Stores, by name, a hash of type-name and any default value of the setup parameters. */
     protected Map<String, TypedAttributeWithValue> m_setupParams    = null;
     /** Stores, by name, a hash of the type-name and any default value of the configuration parameters. */
@@ -36,7 +36,7 @@ public class GaugeTypeDescription {
     public GaugeTypeDescription (String gaugeType, String typeComment) {
         m_typeName = gaugeType;
         m_typeComment = typeComment == null ? "" : typeComment;
-        m_commandSignatures = new HashMap<String, CommandRepresentation> ();
+        m_commandSignatures = new HashMap<String, OperationRepresentation> ();
         m_setupParams = new HashMap<String, TypedAttributeWithValue> ();
         m_configParams = new HashMap<String, TypedAttributeWithValue> ();
     }
@@ -45,7 +45,7 @@ public class GaugeTypeDescription {
         // create a Gauge Instance description using type, name, and comments
         GaugeInstanceDescription inst = new GaugeInstanceDescription(m_typeName, gaugeName, m_typeComment, instComment);
         // transfer the set of reported values, setup params, and config params
-        for (Pair<String, CommandRepresentation> valPair : commandSignatures ()) {
+        for (Pair<String, OperationRepresentation> valPair : commandSignatures ()) {
             try {
                 inst.addCommandSignature (valPair.firstValue (), valPair.secondValue ().clone ());
             }
@@ -70,25 +70,25 @@ public class GaugeTypeDescription {
     }
 
     public void addCommandSignature (String key, String commandPattern) {
-        CommandRepresentation rep = CommandRepresentation.parseCommandSignature (commandPattern);
+        OperationRepresentation rep = OperationRepresentation.parseCommandSignature (commandPattern);
         if (rep != null) {
             addCommandSignature (key, rep);
         }
     }
 
-    public void addCommandSignature (String key, CommandRepresentation commandRep) {
+    public void addCommandSignature (String key, OperationRepresentation commandRep) {
         m_commandSignatures.put (key, commandRep);
     }
 
-    public CommandRepresentation findCommandSignature (String name) {
+    public OperationRepresentation findCommandSignature (String name) {
         return m_commandSignatures.get(name);
     }
 
     @SuppressWarnings("unchecked")
-    public List<Pair<String, CommandRepresentation>> commandSignatures () {
-        List<Pair<String, CommandRepresentation>> valueList = new ArrayList<> ();
-        for (Entry<String, CommandRepresentation> pair : m_commandSignatures.entrySet ()) {
-            valueList.add (new Pair<String, CommandRepresentation> (pair.getKey (), pair.getValue ()));
+    public List<Pair<String, OperationRepresentation>> commandSignatures () {
+        List<Pair<String, OperationRepresentation>> valueList = new ArrayList<> ();
+        for (Entry<String, OperationRepresentation> pair : m_commandSignatures.entrySet ()) {
+            valueList.add (new Pair<String, OperationRepresentation> (pair.getKey (), pair.getValue ()));
         }
         Collections.sort(valueList);
         return valueList;

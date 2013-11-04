@@ -9,7 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.sa.rainbow.core.error.RainbowException;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.translator.probes.IProbeIdentifier;
@@ -39,7 +39,7 @@ public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
      */
     public RegularPatternGauge (String threadName, String id, long beaconPeriod, TypedAttribute gaugeDesc,
             TypedAttribute modelDesc, List<TypedAttributeWithValue> setupParams,
-            List<IRainbowModelCommandRepresentation> mappings) throws RainbowException {
+            List<IRainbowOperation> mappings) throws RainbowException {
         super (threadName, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
 
         m_lines = new LinkedList<String>();

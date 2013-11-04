@@ -109,11 +109,19 @@ public class GaugeManager extends AbstractRainbowRunnable implements IGaugeLifec
                 if (gaugesToConfigure.isEmpty () && configurationPorts.keySet ().equals (m_gaugeDescription.keySet ())) {
                     m_state = GMState.OPERATING;
                 }
-                newGaugeIds.clear ();
             }
             for (String g : gaugesToConfigure) {
                 IGaugeConfigurationPort port = configurationPorts.get (g);
-                port.configureGauge (m_gaugeDescription.get (g).configParams ());
+                try {
+                    port.configureGauge (m_gaugeDescription.get (g).configParams ());
+                    synchronized (configurationPorts) {
+                        newGaugeIds.remove (g);
+                    }
+                }
+                catch (Exception e) {
+                    // It's possible that a new gauge hasn't registered yet.
+                    m_reportingPort.warn (getComponentType (), g + " failed to configure. Will keep trying.");
+                }
             }
         }
     }

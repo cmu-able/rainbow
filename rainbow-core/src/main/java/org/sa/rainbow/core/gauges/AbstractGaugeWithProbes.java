@@ -7,7 +7,7 @@ import java.util.StringTokenizer;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IProbeReportPort;
 import org.sa.rainbow.core.ports.IProbeReportSubscriberPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
@@ -26,7 +26,7 @@ public abstract class AbstractGaugeWithProbes extends AbstractGauge {
 
     public AbstractGaugeWithProbes (String threadName, String id, long beaconPeriod, TypedAttribute gaugeDesc,
             TypedAttribute modelDesc, List<TypedAttributeWithValue> setupParams,
-            List<IRainbowModelCommandRepresentation> mappings) throws RainbowException {
+            List<IRainbowOperation> mappings) throws RainbowException {
         super (threadName, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
 
         m_probeBeacon = new Beacon ();

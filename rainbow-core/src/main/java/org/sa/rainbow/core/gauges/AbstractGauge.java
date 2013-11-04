@@ -16,7 +16,7 @@ import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.DisconnectedRainbowDelegateConnectionPort;
 import org.sa.rainbow.core.ports.IGaugeConfigurationPort;
 import org.sa.rainbow.core.ports.IGaugeLifecycleBusPort;
@@ -53,8 +53,8 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
     protected TypedAttribute                                  m_modelDesc    = null;
     protected Map<String, TypedAttributeWithValue>            m_setupParams  = null;
     protected Map<String, TypedAttributeWithValue>            m_configParams = null;
-    protected Map<String, IRainbowModelCommandRepresentation> m_commands     = null;
-    protected Map<String, IRainbowModelCommandRepresentation> m_lastCommands = null;
+    protected Map<String, IRainbowOperation> m_commands     = null;
+    protected Map<String, IRainbowOperation> m_lastCommands = null;
 
     /**
      * Main Constructor for the Gauge.
@@ -77,7 +77,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
      */
     public AbstractGauge (String threadName, String id, long beaconPeriod, TypedAttribute gaugeDesc,
             TypedAttribute modelDesc, List<TypedAttributeWithValue> setupParams,
-            List<IRainbowModelCommandRepresentation> mappings) throws RainbowException {
+            List<IRainbowOperation> mappings) throws RainbowException {
         super (threadName);
         Ensure.is_false (mappings == null || mappings.isEmpty ());
         Ensure.is_false (modelDesc == null);
@@ -93,8 +93,8 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
 
         m_setupParams = new HashMap<String, TypedAttributeWithValue> ();
         m_configParams = new HashMap<String, TypedAttributeWithValue> ();
-        m_lastCommands = new HashMap<String, IRainbowModelCommandRepresentation> ();
-        m_commands = new HashMap<String, IRainbowModelCommandRepresentation> ();
+        m_lastCommands = new HashMap<String, IRainbowOperation> ();
+        m_commands = new HashMap<String, IRainbowOperation> ();
 
         // store the setup parameters
         for (TypedAttributeWithValue param : setupParams) {
@@ -102,8 +102,8 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
         }
 
         // Need to keep the list of commands, and also perhaps the commands by value (if they exist)
-        for (IRainbowModelCommandRepresentation cmd : mappings) {
-            m_commands.put (cmd.getCommandName (), cmd);
+        for (IRainbowOperation cmd : mappings) {
+            m_commands.put (cmd.getName (), cmd);
             for (String param : cmd.getParameters ()) {
                 m_commands.put (pullOutParam (param), cmd);
             }
@@ -232,14 +232,14 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
                 new HashSet (m_lastCommands.values ()));
     }
 
-    public void issueCommand (IRainbowModelCommandRepresentation cmd, Map<String, String> parameters) {
-        CommandRepresentation actualCmd = new CommandRepresentation (cmd);
-        Map<String, IRainbowModelCommandRepresentation> actualsMap = new HashMap<> ();
+    public void issueCommand (IRainbowOperation cmd, Map<String, String> parameters) {
+        OperationRepresentation actualCmd = new OperationRepresentation (cmd);
+        Map<String, IRainbowOperation> actualsMap = new HashMap<> ();
         String target = cmd.getTarget ();
         String actualTarget = parameters.get (target);
         if (actualTarget != null) {
             // Need to set the target
-            actualCmd = new CommandRepresentation (cmd.getLabel (), cmd.getCommandName (), cmd.getModelName (),
+            actualCmd = new OperationRepresentation (cmd.getName (), cmd.getModelName (),
                     cmd.getModelType (), actualTarget, cmd.getParameters ());
             actualsMap.put (pullOutParam (target), actualCmd);
         }
@@ -252,12 +252,12 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
                 actualsMap.put (pullOutParam (cmd.getParameters ()[i]), actualCmd);
             }
         }
-        m_lastCommands.put (cmd.getCommandName (), actualCmd);
+        m_lastCommands.put (cmd.getName (), actualCmd);
         m_lastCommands.putAll (actualsMap);
         m_announcePort.updateModel (actualCmd);
         m_reportingPort.info (RainbowComponentT.GAUGE,
                 MessageFormat.format ("G[{0}]: {1}.{2}({3})", id (), actualCmd.getTarget (),
-                        actualCmd.getCommandName (), Arrays.toString (actualCmd.getParameters ())));
+                        actualCmd.getName (), Arrays.toString (actualCmd.getParameters ())));
     }
 
 
@@ -265,9 +265,9 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
      * @see org.sa.rainbow.translator.gauges.IGauge#queryCommand()
      */
     @Override
-    public IRainbowModelCommandRepresentation queryCommand (String value) {
+    public IRainbowOperation queryCommand (String value) {
 
-        IRainbowModelCommandRepresentation cmd = m_lastCommands.get (pullOutParam (value));
+        IRainbowOperation cmd = m_lastCommands.get (pullOutParam (value));
         if (cmd == null) {
             m_reportingPort.warn (getComponentType (), "Could not find a command associated with '" + value + "'.");
         }
@@ -278,7 +278,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
      * @see org.sa.rainbow.translator.gauges.IGauge#queryAllCommands()
      */
     @Override
-    public Collection<IRainbowModelCommandRepresentation> queryAllCommands () {
+    public Collection<IRainbowOperation> queryAllCommands () {
         return new HashSet<> (m_lastCommands.values ());
     }
 

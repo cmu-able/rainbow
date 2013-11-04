@@ -3,13 +3,11 @@
  */
 package org.sa.rainbow.core.gauges;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.util.Beacon;
@@ -37,7 +35,7 @@ public class GaugeInstanceDescription extends GaugeTypeDescription {
     private String m_instName = null;
     private String m_instComment = null;
     private TypedAttribute                        m_modelDesc         = null;
-    private Map<String, CommandRepresentation> m_mappings          = null;
+    private Map<String, OperationRepresentation> m_mappings          = null;
 
     private String m_id = null;
     private State m_state = State.UNINITIALIZED;
@@ -79,35 +77,31 @@ public class GaugeInstanceDescription extends GaugeTypeDescription {
 
     public void setModelDesc (TypedAttribute modelDesc) {
         m_modelDesc = modelDesc;
-        Collection<CommandRepresentation> commands = m_commandSignatures.values ();
-        for (CommandRepresentation command : commands) {
+        Collection<OperationRepresentation> commands = m_commandSignatures.values ();
+        for (OperationRepresentation command : commands) {
             command.setModel (modelDesc);
         }
     }
 
     @Override
-    public void addCommandSignature (String key, CommandRepresentation commandRep) {
+    public void addCommandSignature (String key, OperationRepresentation commandRep) {
         if (m_modelDesc != null) {
             commandRep.setModel (m_modelDesc);
         }
         super.addCommandSignature (key, commandRep);
     }
 
-    public void addCommand (CommandRepresentation mapping) {
-        m_mappings.put (mapping.getCommandName (), mapping);
+    public void addCommand (String key, OperationRepresentation operation) {
+        m_mappings.put (key, operation);
     }
 
-
-    public IRainbowModelCommandRepresentation findMapping (String name) {
+    public IRainbowOperation findMapping (String name) {
         return m_mappings.get(name);
     }
 
     @SuppressWarnings("unchecked")
-    public List<CommandRepresentation> mappings () {
-        List<CommandRepresentation> mapList = new ArrayList<CommandRepresentation> (
-                m_mappings.values ());
-
-        return mapList;
+    public Map<String, OperationRepresentation> mappings () {
+        return m_mappings;
     }
 
     public String id () {

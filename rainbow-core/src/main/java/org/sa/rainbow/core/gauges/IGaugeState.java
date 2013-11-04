@@ -2,7 +2,7 @@ package org.sa.rainbow.core.gauges;
 
 import java.util.Collection;
 
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
 /**
@@ -29,5 +29,5 @@ public interface IGaugeState {
      * 
      * @return The set of commands that were most recently issued (one entry per command kind).
      */
-    Collection<? extends IRainbowModelCommandRepresentation> getGaugeReports ();
+    Collection<? extends IRainbowOperation> getGaugeReports ();
 }

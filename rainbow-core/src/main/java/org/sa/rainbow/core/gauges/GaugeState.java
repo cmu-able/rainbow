@@ -4,18 +4,18 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.util.HashCodeUtil;
 
 public class GaugeState implements IGaugeState {
 
     private Set<TypedAttributeWithValue>            m_setupParams;
-    private Set<IRainbowModelCommandRepresentation> m_commands;
+    private Set<IRainbowOperation> m_commands;
     private Set<TypedAttributeWithValue>            m_configParams;
 
     public GaugeState (Collection<TypedAttributeWithValue> setupPArams,
-            Collection<TypedAttributeWithValue> configParams, Collection<IRainbowModelCommandRepresentation> commands) {
+            Collection<TypedAttributeWithValue> configParams, Collection<IRainbowOperation> commands) {
         m_setupParams = new HashSet<> (setupPArams);
         m_configParams = new HashSet<> (configParams);
         m_commands = new HashSet<> (commands);
@@ -44,7 +44,7 @@ public class GaugeState implements IGaugeState {
      * @see org.sa.rainbow.gauges.IGaugeState#getGaugeReports()
      */
     @Override
-    public Collection<IRainbowModelCommandRepresentation> getGaugeReports () {
+    public Collection<IRainbowOperation> getGaugeReports () {
         return m_commands;
     }
 
