@@ -3,7 +3,7 @@ package org.sa.rainbow.core.ports;
 import java.util.List;
 
 import org.sa.rainbow.core.models.IModelInstance;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 
 public interface IModelUSBusPort {
 
@@ -15,7 +15,7 @@ public interface IModelUSBusPort {
      * @param command
      *            The command to use to update the model
      */
-    public void updateModel (IRainbowModelCommandRepresentation command);
+    public void updateModel (IRainbowOperation command);
 
     /**
      * Is used to update the model with a list of commands. The commands may be executed as a transaction (i.e., failure
@@ -26,7 +26,7 @@ public interface IModelUSBusPort {
      * @param transaction
      *            Whether this should be run as a transaction
      */
-    public void updateModel (List<IRainbowModelCommandRepresentation> commands, boolean transaction);
+    public void updateModel (List<IRainbowOperation> commands, boolean transaction);
 
     /**
      * Queries the model manager to return an instance of the model that can be used for querying. This can be used by

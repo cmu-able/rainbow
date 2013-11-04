@@ -3,7 +3,7 @@ package org.sa.rainbow.core.ports;
 import java.util.Collection;
 
 import org.sa.rainbow.core.gauges.IGaugeState;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 
 /**
  * The interface through which a gauge can be queried.
@@ -28,7 +28,7 @@ public interface IGaugeQueryPort {
      * @return A representation of the command, including the model it affects, the target, and the parameters last
      *         issued
      */
-    public IRainbowModelCommandRepresentation queryCommand (String commandName);
+    public IRainbowOperation queryCommand (String commandName);
 
     /**
      * Queries for all of the commands reported by this Gauge.
@@ -36,6 +36,6 @@ public interface IGaugeQueryPort {
      * @return Collection<IRainbowModelCommandRepresentation> A collection of all the commands last issued, one per
      *         command command mapping, including the target and parameters used.
      */
-    public Collection<IRainbowModelCommandRepresentation> queryAllCommands ();
+    public Collection<IRainbowOperation> queryAllCommands ();
 
 }

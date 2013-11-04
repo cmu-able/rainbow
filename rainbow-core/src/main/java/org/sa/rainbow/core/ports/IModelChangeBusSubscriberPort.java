@@ -14,4 +14,6 @@ public interface IModelChangeBusSubscriberPort {
     }
 
     public void subscribe (IRainbowChangeBusSubscription subscriber, IRainbowModelChangeCallback callback);
+
+    public void unsubscribe (IRainbowModelChangeCallback callback);
 }

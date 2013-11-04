@@ -1,6 +1,6 @@
 package org.sa.rainbow.core.ports;
 
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 
 public interface IModelDSBusPublisherPort {
     public enum Result {
@@ -12,5 +12,5 @@ public interface IModelDSBusPublisherPort {
         public String reply;
     }
 
-    public abstract OperationResult publishOperation (IRainbowModelCommandRepresentation cmd);
+    public abstract OperationResult publishOperation (IRainbowOperation cmd);
 }
