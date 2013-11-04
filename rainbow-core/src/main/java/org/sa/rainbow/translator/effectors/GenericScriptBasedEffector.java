@@ -54,7 +54,10 @@ public class GenericScriptBasedEffector extends AbstractEffector implements IBas
                 params = params.replace ("{" + i + "}", a);
             }
         }
-
+        // Replace all remaining parameters with ""
+        while (params.contains ("{")) {
+            params = params.replaceAll ("\\{\\d*\\}", "''");
+        }
         switch (Rainbow.environment()) {
         case CYGWIN:
             cmds[0] = CYGWIN_BASH;
