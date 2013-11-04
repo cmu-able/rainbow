@@ -24,7 +24,7 @@ import org.sa.rainbow.core.ports.IRainbowMessageFactory;
  * @param <Model>
  *            The kind of model that the command works on
  */
-public interface IRainbowModelCommand<Type, Model> extends IRainbowModelCommandRepresentation {
+public interface IRainbowModelOperation<Type, Model> extends IRainbowOperation {
 
     /**
      * Executes a command on a particular model. Unless an exception occurs, the model will be updated in which case a

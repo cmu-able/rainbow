@@ -11,28 +11,28 @@ import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 
 // NOTE: THIS CLASS SHOULD NOT BE USED YET.
-public class RainbowCompoundCommand<Model> extends AbstractRainbowModelCommand<List<Object>, Model> implements
+public class RainbowCompoundOperation<Model> extends AbstractRainbowModelOperation<List<Object>, Model> implements
 IRainbowModelCompoundCommand<Model> {
 
     enum CommandState {
         CAN_EXECUTE, CAN_UNDO, CAN_REDO, ERROR
     };
 
-    List<AbstractRainbowModelCommand<?, Model>> m_commands = new ArrayList<> ();
+    List<AbstractRainbowModelOperation<?, Model>> m_commands = new ArrayList<> ();
     CommandState                                m_state    = CommandState.CAN_EXECUTE;
     List<Object>                                m_results  = Collections.emptyList ();
 
-    public RainbowCompoundCommand (List<AbstractRainbowModelCommand<?, Model>> commands) {
+    public RainbowCompoundOperation (List<AbstractRainbowModelOperation<?, Model>> commands) {
         // TODO: Do we need this?
         super ("compound", null, null);
         if (commands == null || commands.size () == 0)
             throw new IllegalArgumentException (
-                    "The argument passed to the constructor for RainbowCompoundCommand cannot be null or empty.");
-        for (AbstractRainbowModelCommand<?, Model> c : commands) {
+                    "The argument passed to the constructor for RainbowCompoundOperation cannot be null or empty.");
+        for (AbstractRainbowModelOperation<?, Model> c : commands) {
             c.setCompoundCommand (this);
             if (c.m_executionState != ExecutionState.NOT_YET_DONE)
                 throw new IllegalStateException (MessageFormat.format (
-                        "The command {0} in the compound command has already been executed", c.getLabel ()));
+                        "The command {0} in the compound operation has already been executed", c.getName ()));
             m_commands.add (c);
         }
     }
@@ -56,12 +56,12 @@ IRainbowModelCompoundCommand<Model> {
     protected void subExecute () throws RainbowException {
         if (!canExecute ())
             throw new IllegalStateException (MessageFormat.format (
-                    "Cannot execute because this compound command is not in a legal state: {0}", m_state.name ()));
+                    "Cannot execute because this compound operation is not in a legal state: {0}", m_state.name ()));
         List<Object> result = new ArrayList<> (m_commands.size ());
         int position = 0;
         try {
             for (; position < m_commands.size (); position++) {
-                AbstractRainbowModelCommand<?, Model> command = m_commands.get (position);
+                AbstractRainbowModelOperation<?, Model> command = m_commands.get (position);
                 command.subExecute ();
                 Object o = command.getResult ();
                 if (o != null) {
@@ -96,7 +96,7 @@ IRainbowModelCompoundCommand<Model> {
         int position = 0;
         try {
             for (; position < m_commands.size (); position++) {
-                AbstractRainbowModelCommand<?, Model> command = m_commands.get (position);
+                AbstractRainbowModelOperation<?, Model> command = m_commands.get (position);
                 command.subRedo ();
                 Object o = command.getResult ();
                 if (o != null) {
@@ -127,7 +127,7 @@ IRainbowModelCompoundCommand<Model> {
         List<Object> result = new ArrayList<Object> (m_commands.size ());
         try {
             for (int i = m_commands.size () - 1; i >= 0; i--) {
-                AbstractRainbowModelCommand<?, Model> command = m_commands.get (i);
+                AbstractRainbowModelOperation<?, Model> command = m_commands.get (i);
                 command.subUndo ();
                 Object o = command.getResult ();
                 if (o != null) {
@@ -173,7 +173,7 @@ IRainbowModelCompoundCommand<Model> {
     @Override
     protected boolean checkModelValidForCommand (Model model) {
         boolean ok = true;
-        for (AbstractRainbowModelCommand<?, Model> cmd : m_commands) {
+        for (AbstractRainbowModelOperation<?, Model> cmd : m_commands) {
             ok &= cmd.checkModelValidForCommand (model);
         }
         return ok;

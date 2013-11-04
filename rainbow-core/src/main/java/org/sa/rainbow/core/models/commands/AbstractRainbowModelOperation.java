@@ -9,7 +9,7 @@ import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 
-public abstract class AbstractRainbowModelCommand<Type, Model> implements IRainbowModelCommand<Type, Model> {
+public abstract class AbstractRainbowModelOperation<Type, Model> implements IRainbowModelOperation<Type, Model> {
 
     public static final String COMPOUND_COMMAND    = "compoundCommand";
 
@@ -19,13 +19,11 @@ public abstract class AbstractRainbowModelCommand<Type, Model> implements IRainb
         NOT_YET_DONE, DONE, UNDONE, ERROR, DISPOSED
     };
 
-    protected String                      m_label           = getClass ().getCanonicalName ();
-
     protected ExecutionState              m_executionState  = ExecutionState.NOT_YET_DONE;
 
     protected boolean                     inCompoundCommand = false;
 
-    private RainbowCompoundCommand<Model> m_parentCommand   = null;
+    private RainbowCompoundOperation<Model> m_parentCommand   = null;
 
     protected IRainbowMessageFactory      m_messageFactory;
 
@@ -37,7 +35,7 @@ public abstract class AbstractRainbowModelCommand<Type, Model> implements IRainb
 
     private final String                  m_commandName;
 
-    public AbstractRainbowModelCommand (String commandName, IModelInstance<Model> model, String target,
+    public AbstractRainbowModelOperation (String commandName, IModelInstance<Model> model, String target,
             String... parameters) {
         m_target = target;
         m_parameters = parameters;
@@ -141,16 +139,7 @@ public abstract class AbstractRainbowModelCommand<Type, Model> implements IRainb
 
 
     @Override
-    public String getLabel () {
-        return m_label;
-    }
-
-    protected void setLabel (String label) {
-        m_label = label;
-    }
-
-    @Override
-    public String getCommandName () {
+    public String getName () {
         return m_commandName;
     }
 
@@ -158,12 +147,12 @@ public abstract class AbstractRainbowModelCommand<Type, Model> implements IRainb
         return inCompoundCommand;
     }
 
-    void setCompoundCommand (RainbowCompoundCommand<Model> parent) {
+    void setCompoundCommand (RainbowCompoundOperation<Model> parent) {
         inCompoundCommand = true;
         m_parentCommand = parent;
     }
 
-    RainbowCompoundCommand<Model> getParentCompound () {
+    RainbowCompoundOperation<Model> getParentCompound () {
         return m_parentCommand;
     }
 
@@ -178,7 +167,7 @@ public abstract class AbstractRainbowModelCommand<Type, Model> implements IRainb
 
     @Override
     public String toString () {
-        return MessageFormat.format ("Command<{0}: {1}, {2}>", getCommandName (), getTarget (), getParameters ()
+        return MessageFormat.format ("Command<{0}: {1}, {2}>", getName (), getTarget (), getParameters ()
                 .toString ());
     }
 

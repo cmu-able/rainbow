@@ -1,13 +1,12 @@
 package org.sa.rainbow.core.models.commands;
 
-public interface IRainbowModelCommandRepresentation {
-    public String getLabel ();
+public interface IRainbowOperation {
 
     public abstract String[] getParameters ();
 
     public abstract String getTarget ();
 
-    public abstract String getCommandName ();
+    public abstract String getName ();
 
     public String getModelName ();
 

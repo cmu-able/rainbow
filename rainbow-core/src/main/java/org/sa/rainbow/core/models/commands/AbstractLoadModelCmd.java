@@ -1,6 +1,7 @@
 package org.sa.rainbow.core.models.commands;
 
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -15,7 +16,7 @@ import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 import org.sa.rainbow.core.ports.eseb.ESEBConstants;
 
-public abstract class AbstractLoadModelCmd<Type> extends AbstractRainbowModelCommand<IModelInstance<Type>, Object> {
+public abstract class AbstractLoadModelCmd<Type> extends AbstractRainbowModelOperation<IModelInstance<Type>, Object> {
 
     private IModelsManager m_modelsManager;
     private InputStream    m_is;
@@ -29,6 +30,7 @@ public abstract class AbstractLoadModelCmd<Type> extends AbstractRainbowModelCom
     }
 
     protected void doPostExecute () throws RainbowModelException {
+
         if (m_modelsManager != null) {
             m_modelsManager.registerModelType (getModelType ());
             getResult ().setOriginalSource (m_source);
@@ -62,6 +64,7 @@ public abstract class AbstractLoadModelCmd<Type> extends AbstractRainbowModelCom
             throw rde;
         }
         m_executionState = ExecutionState.DONE;
+        if (messageFactory == null) return Collections.<IRainbowMessage> emptyList ();
         return getGeneratedEvents (m_messageFactory);
     }
 
@@ -93,7 +96,7 @@ public abstract class AbstractLoadModelCmd<Type> extends AbstractRainbowModelCom
             msg.setProperty (ESEBConstants.MSG_TYPE_KEY, "LOAD_MODEL");
             msg.setProperty (IModelChangeBusPort.ID_PROP, UUID.randomUUID ().toString ());
             msg.setProperty (IModelChangeBusPort.MODEL_NAME_PROP, getModelName ());
-            msg.setProperty (IModelChangeBusPort.COMMAND_PROP, getCommandName ());
+            msg.setProperty (IModelChangeBusPort.COMMAND_PROP, getName ());
             msg.setProperty (IModelChangeBusPort.TARGET_PROP, getTarget ());
             for (int i = 0; i < getParameters ().length; i++) {
                 msg.setProperty (IModelChangeBusPort.PARAMETER_PROP + i, getParameters ()[i]);
