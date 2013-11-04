@@ -5,7 +5,7 @@ import java.util.Collection;
 
 import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.core.gauges.IGaugeState;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.eseb.ESEBProvider;
 import org.sa.rainbow.core.ports.eseb.ESEBRPCConnector;
 
@@ -25,13 +25,13 @@ public class ESEBGaugeQueryProviderPort implements IESEBGaugeQueryRemoteInterfac
     }
 
     @Override
-    public Collection<IRainbowModelCommandRepresentation> queryAllCommands () {
+    public Collection<IRainbowOperation> queryAllCommands () {
         return m_gauge.queryAllCommands ();
 
     }
 
     @Override
-    public IRainbowModelCommandRepresentation queryCommand (String commandName) {
+    public IRainbowOperation queryCommand (String commandName) {
         return m_gauge.queryCommand (commandName);
     }
 
