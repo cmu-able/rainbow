@@ -17,10 +17,10 @@ import java.util.TreeSet;
 import org.ho.yaml.Yaml;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
-import org.sa.rainbow.core.gauges.CommandRepresentation;
 import org.sa.rainbow.core.gauges.GaugeDescription;
 import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
 import org.sa.rainbow.core.gauges.GaugeTypeDescription;
+import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.models.DescriptionAttributes;
 import org.sa.rainbow.core.models.EffectorDescription;
 import org.sa.rainbow.core.models.ProbeDescription;
@@ -211,8 +211,9 @@ public abstract class YamlUtil {
                 for (Entry<String, String> cmd : commandMappings.entrySet ()) {
                     String key = cmd.getKey ();
                     String[] args = Util.evalCommand (cmd.getValue ());
-                    gaugeInstSpec.addCommand (new CommandRepresentation (args[1], args[1], modelDesc.getName (),
-                            modelDesc.getType (), args[0], Arrays.copyOfRange (args, 2, args.length)));
+                    gaugeInstSpec.addCommand (Util.evalTokens (key),
+                            new OperationRepresentation (args[1], modelDesc.getName (),
+                                    modelDesc.getType (), args[0], Arrays.copyOfRange (args, 2, args.length)));
 
                 }
 
@@ -298,7 +299,7 @@ public abstract class YamlUtil {
                 ea.location = Util.evalTokens ((String )attrMap.get ("location"));
                 String commandSignature = Util.evalTokens ((String )attrMap.get ("command"));
                 if (commandSignature != null) {
-                    ea.commandPattern = CommandRepresentation.parseCommandSignature (commandSignature);
+                    ea.commandPattern = OperationRepresentation.parseCommandSignature (commandSignature);
                 }
                 ea.kindName = (String )attrMap.get ("type");
                 ea.kind = IEffector.Kind.valueOf (ea.kindName.toUpperCase ());

@@ -567,4 +567,26 @@ public class Util {
     }
 
 
+    public static Properties propertiesByPrefix (String prefix, Properties props) {
+        Properties result = new Properties ();
+        for (Object o : props.keySet ()) {
+            String key = (String )o;
+            if (!key.startsWith (prefix) || key.equals (prefix)) {
+                continue;
+            }
+            result.put (key, props.getProperty (key));
+        }
+        return result;
+    }
+
+    public static Properties propertiesByRegex (String regex, Properties props) {
+        Properties result = new Properties ();
+        for (Object o : props.keySet ()) {
+            String key = (String )o;
+            if (key.matches (regex)) {
+                result.put (key, props.getProperty (key));
+            }
+        }
+        return result;
+    }
 }
