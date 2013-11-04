@@ -57,19 +57,19 @@ public class AcmeEventSerializer {
         if (event instanceof AcmeRoleEvent) {
             serialize ((AcmeRoleEvent )event, msg, parent);
         }
-        if (event instanceof AcmeRainbowCommandEvent) {
-            serialize ((AcmeRainbowCommandEvent )event, msg, parent);
+        if (event instanceof AcmeRainbowOperationEvent) {
+            serialize ((AcmeRainbowOperationEvent )event, msg, parent);
         }
 
     }
 
-    public void serialize (AcmeRainbowCommandEvent event, IRainbowMessage msg, IRainbowMessage parent) {
+    public void serialize (AcmeRainbowOperationEvent event, IRainbowMessage msg, IRainbowMessage parent) {
 
         try {
             addCommonProperties (event, msg, parent);
             msg.setProperty (IModelChangeBusPort.EVENT_TYPE_PROP, event.getEventType ().name ());
             msg.setProperty (IModelChangeBusPort.ID_PROP, UUID.randomUUID ().toString ());
-            msg.setProperty (IModelChangeBusPort.COMMAND_PROP, event.getCommand ().getCommandName ());
+            msg.setProperty (IModelChangeBusPort.COMMAND_PROP, event.getCommand ().getName ());
             msg.setProperty (IModelChangeBusPort.TARGET_PROP, event.getCommand ().getTarget ());
             msg.setProperty (IModelChangeBusPort.MODEL_NAME_PROP, event.getCommand ().getModelName ());
             msg.setProperty (IModelChangeBusPort.MODEL_TYPE_PROP, event.getCommand ().getModelType ());
@@ -94,9 +94,9 @@ public class AcmeEventSerializer {
     public void serialize (AcmeAttachmentEvent event, IRainbowMessage msg, IRainbowMessage parent) {
         try {
             addCommonProperties (event, msg, parent);
-            msg.setProperty (AcmeModelCommand.PORT_PROP, event.getAttachment ().getReferencedPortName ());
-            msg.setProperty (AcmeModelCommand.ROLE_PROP, event.getAttachment ().getReferencedRoleName ());
-            msg.setProperty (AcmeModelCommand.SYSTEM_PROP, event.getSystem ().getQualifiedName ());
+            msg.setProperty (AcmeModelOperation.PORT_PROP, event.getAttachment ().getReferencedPortName ());
+            msg.setProperty (AcmeModelOperation.ROLE_PROP, event.getAttachment ().getReferencedRoleName ());
+            msg.setProperty (AcmeModelOperation.SYSTEM_PROP, event.getSystem ().getQualifiedName ());
         }
         catch (RainbowException e) {
             // Should never happen
@@ -107,9 +107,9 @@ public class AcmeEventSerializer {
     public void serialize (AcmeBindingEvent event, IRainbowMessage msg, IRainbowMessage parent) {
         try {
             addCommonProperties (event, msg, parent);
-            msg.setProperty (AcmeModelCommand.OUTER_PROP, event.getBinding ().getOuterReference ().getReferencedName ());
-            msg.setProperty (AcmeModelCommand.INNER_PROP, event.getBinding ().getInnerReference ().getReferencedName ());
-            msg.setProperty (AcmeModelCommand.REPRESENTATION_PROP, event.getRepresentation ().getQualifiedName ());
+            msg.setProperty (AcmeModelOperation.OUTER_PROP, event.getBinding ().getOuterReference ().getReferencedName ());
+            msg.setProperty (AcmeModelOperation.INNER_PROP, event.getBinding ().getInnerReference ().getReferencedName ());
+            msg.setProperty (AcmeModelOperation.REPRESENTATION_PROP, event.getRepresentation ().getQualifiedName ());
         }
         catch (RainbowException e) {
             // Should never happen
@@ -121,9 +121,9 @@ public class AcmeEventSerializer {
     public void serialize (AcmeComponentEvent event, IRainbowMessage msg, IRainbowMessage parent) {
         try {
             addCommonProperties (event, msg, parent);
-            msg.setProperty (AcmeModelCommand.COMPONENT_PROP, event.getComponent ().getQualifiedName ());
+            msg.setProperty (AcmeModelOperation.COMPONENT_PROP, event.getComponent ().getQualifiedName ());
             if (event.getSystem () != null) {
-                msg.setProperty (AcmeModelCommand.SYSTEM_PROP, event.getSystem ().getQualifiedName ());
+                msg.setProperty (AcmeModelOperation.SYSTEM_PROP, event.getSystem ().getQualifiedName ());
             }
             addTypeInformation (event, msg);
         }
@@ -136,9 +136,9 @@ public class AcmeEventSerializer {
     public void serialize (AcmeConnectorEvent event, IRainbowMessage msg, IRainbowMessage parent) {
         try {
             addCommonProperties (event, msg, parent);
-            msg.setProperty (AcmeModelCommand.CONNECTOR_PROP, event.getConnector ().getQualifiedName ());
+            msg.setProperty (AcmeModelOperation.CONNECTOR_PROP, event.getConnector ().getQualifiedName ());
             if (event.getSystem () != null) {
-                msg.setProperty (AcmeModelCommand.SYSTEM_PROP, event.getSystem ().getQualifiedName ());
+                msg.setProperty (AcmeModelOperation.SYSTEM_PROP, event.getSystem ().getQualifiedName ());
             }
             addTypeInformation (event, msg);
         }
@@ -151,9 +151,9 @@ public class AcmeEventSerializer {
     public void serialize (AcmeGroupEvent event, IRainbowMessage msg, IRainbowMessage parent) {
         try {
             addCommonProperties (event, msg, parent);
-            msg.setProperty (AcmeModelCommand.GROUP_PROP, event.getGroup ().getQualifiedName ());
+            msg.setProperty (AcmeModelOperation.GROUP_PROP, event.getGroup ().getQualifiedName ());
             if (event.getSystem () != null) {
-                msg.setProperty (AcmeModelCommand.SYSTEM_PROP, event.getSystem ().getQualifiedName ());
+                msg.setProperty (AcmeModelOperation.SYSTEM_PROP, event.getSystem ().getQualifiedName ());
             }
             addTypeInformation (event, msg);
         }
@@ -166,9 +166,9 @@ public class AcmeEventSerializer {
     public void serialize (AcmePortEvent event, IRainbowMessage msg, IRainbowMessage parent) {
         try {
             addCommonProperties (event, msg, parent);
-            msg.setProperty (AcmeModelCommand.PORT_PROP, event.getPort ().getQualifiedName ());
+            msg.setProperty (AcmeModelOperation.PORT_PROP, event.getPort ().getQualifiedName ());
             if (event.getComponent () != null) {
-                msg.setProperty (AcmeModelCommand.COMPONENT_PROP, event.getComponent ().getQualifiedName ());
+                msg.setProperty (AcmeModelOperation.COMPONENT_PROP, event.getComponent ().getQualifiedName ());
             }
             addTypeInformation (event, msg);
         }
@@ -181,16 +181,16 @@ public class AcmeEventSerializer {
     public void serialize (AcmePropertyEvent event, IRainbowMessage msg, IRainbowMessage parent) {
         try {
             addCommonProperties (event, msg, parent);
-            msg.setProperty (AcmeModelCommand.PROPERTY_PROP, event.getProperty ().getQualifiedName ());
+            msg.setProperty (AcmeModelOperation.PROPERTY_PROP, event.getProperty ().getQualifiedName ());
             if (event.getPropertyBearer () instanceof IAcmeNamedObject) {
-                msg.setProperty (AcmeModelCommand.BEARER_PROP,
+                msg.setProperty (AcmeModelOperation.BEARER_PROP,
                         ((IAcmeNamedObject )event.getPropertyBearer ()).getQualifiedName ());
             }
 
             switch (event.getType ()) {
             case SET_PROPERTY_VALUE:
                 try {
-                    msg.setProperty (AcmeModelCommand.VALUE_PROP, StandaloneLanguagePackHelper.defaultLanguageHelper ()
+                    msg.setProperty (AcmeModelOperation.VALUE_PROP, StandaloneLanguagePackHelper.defaultLanguageHelper ()
                             .propertyValueToString (event.getProperty ().getValue (), new RegionManager ()));
 
                 }
@@ -209,9 +209,9 @@ public class AcmeEventSerializer {
 
         try {
             addCommonProperties (event, msg, parent);
-            msg.setProperty (AcmeModelCommand.ROLE_PROP, event.getRole ().getQualifiedName ());
+            msg.setProperty (AcmeModelOperation.ROLE_PROP, event.getRole ().getQualifiedName ());
             if (event.getConnector () != null) {
-                msg.setProperty (AcmeModelCommand.CONNECTOR_PROP, event.getConnector ().getQualifiedName ());
+                msg.setProperty (AcmeModelOperation.CONNECTOR_PROP, event.getConnector ().getQualifiedName ());
             }
             addTypeInformation (event, msg);
         }
@@ -228,7 +228,7 @@ public class AcmeEventSerializer {
         case REMOVE_DECLARED_TYPE:
         case REMOVE_INSTANTIATED_TYPE:
             if (event.getData (event.getType ()) != null) {
-                msg.setProperty (AcmeModelCommand.TYPE_PROP, (((IAcmeReference )event.getData (event.getType ()))).getReferencedName ());
+                msg.setProperty (AcmeModelOperation.TYPE_PROP, (((IAcmeReference )event.getData (event.getType ()))).getReferencedName ());
             }
 
         }
@@ -240,7 +240,7 @@ public class AcmeEventSerializer {
             IRainbowMessage parent = null;
             Iterator<? extends AcmeEvent> iterator = events.iterator ();
             if (events.size () == 0) return msgs;
-            if (events.get (0) instanceof AcmeRainbowCommandEvent) {
+            if (events.get (0) instanceof AcmeRainbowOperationEvent) {
                 parent = port.createMessage ();
                 serialize (iterator.next (), parent, null);
                 msgs.add (parent);

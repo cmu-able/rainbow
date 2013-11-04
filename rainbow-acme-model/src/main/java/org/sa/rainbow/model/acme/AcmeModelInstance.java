@@ -93,7 +93,8 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
         m_source = source;
     }
 
-    protected String getOriginalSource () {
+    @Override
+    public String getOriginalSource () {
         return m_source;
     }
 

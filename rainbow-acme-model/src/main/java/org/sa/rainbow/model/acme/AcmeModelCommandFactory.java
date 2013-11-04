@@ -9,12 +9,12 @@ import java.util.Map;
 
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.sa.rainbow.core.error.RainbowModelException;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommand;
+import org.sa.rainbow.core.models.commands.IRainbowModelOperation;
 import org.sa.rainbow.core.models.commands.ModelCommandFactory;
 
 public abstract class AcmeModelCommandFactory extends ModelCommandFactory<IAcmeSystem> {
     protected AcmeModelInstance                                 m_modelInstance;
-    protected Map<String, Class<? extends AcmeModelCommand<?>>> m_commandMap = new HashMap<> ();
+    protected Map<String, Class<? extends AcmeModelOperation<?>>> m_commandMap = new HashMap<> ();
 
     public AcmeModelCommandFactory (AcmeModelInstance model) {
         m_modelInstance = model;
@@ -30,18 +30,18 @@ public abstract class AcmeModelCommandFactory extends ModelCommandFactory<IAcmeS
     }
 
     @Override
-    public IRainbowModelCommand generateCommand (String commandName, String... args) throws RainbowModelException {
+    public IRainbowModelOperation generateCommand (String commandName, String... args) throws RainbowModelException {
         try {
-            Class<? extends AcmeModelCommand<?>> cmdClass = m_commandMap.get (commandName.toLowerCase ());
+            Class<? extends AcmeModelOperation<?>> cmdClass = m_commandMap.get (commandName.toLowerCase ());
             if (cmdClass == null) {
                 cmdClass = tryThroughReflection (commandName);
             }
             if (cmdClass == null)
                 throw new RainbowModelException ("Cannot find a command that matches " + commandName);
-            Constructor<? extends AcmeModelCommand<?>>[] constructors = (Constructor<? extends AcmeModelCommand<?>>[] )cmdClass
+            Constructor<? extends AcmeModelOperation<?>>[] constructors = (Constructor<? extends AcmeModelOperation<?>>[] )cmdClass
                     .getConstructors ();
-            Constructor<? extends AcmeModelCommand<?>> constructor = null;
-            for (Constructor<? extends AcmeModelCommand<?>> c : constructors) {
+            Constructor<? extends AcmeModelOperation<?>> constructor = null;
+            for (Constructor<? extends AcmeModelOperation<?>> c : constructors) {
                 Class<?>[] parameterTypes = c.getParameterTypes ();
                 if (Arrays.equals (new Class<?>[] { String.class, AcmeModelInstance.class, String.class },
                         Arrays.copyOfRange (parameterTypes, 0, 3))
@@ -57,7 +57,7 @@ public abstract class AcmeModelCommandFactory extends ModelCommandFactory<IAcmeS
             for (int i = 0; i < args.length; i++) {
                 cargs[2 + i] = args[i];
             }
-            AcmeModelCommand<?> cmd = constructor.newInstance (cargs/*commandName, m_modelInstance.getModelInstance (),
+            AcmeModelOperation<?> cmd = constructor.newInstance (cargs/*commandName, m_modelInstance.getModelInstance (),
                                                                        args*/);
             return cmd;
         }
@@ -67,11 +67,11 @@ public abstract class AcmeModelCommandFactory extends ModelCommandFactory<IAcmeS
         }
     }
 
-    private Class<? extends AcmeModelCommand<?>> tryThroughReflection (String commandName) {
+    private Class<? extends AcmeModelOperation<?>> tryThroughReflection (String commandName) {
         Method[] methods = this.getClass ().getMethods ();
         for (Method method : methods) {
             if (method.getName ().equals (commandName + "Cmd"))
-                return (Class<? extends AcmeModelCommand<?>> )method.getReturnType ();
+                return (Class<? extends AcmeModelOperation<?>> )method.getReturnType ();
         }
         return null;
     }

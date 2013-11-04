@@ -28,7 +28,7 @@ import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowModelChan
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
-import org.sa.rainbow.model.acme.AcmeRainbowCommandEvent.CommandEventT;
+import org.sa.rainbow.model.acme.AcmeRainbowOperationEvent.CommandEventT;
 import org.sa.rainbow.model.acme.AcmeTypecheckSetCmd;
 
 /**

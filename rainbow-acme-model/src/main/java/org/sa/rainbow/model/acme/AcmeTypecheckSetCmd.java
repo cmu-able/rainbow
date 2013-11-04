@@ -9,7 +9,7 @@ import org.acmestudio.acme.model.command.IAcmeCommand;
 import org.acmestudio.acme.model.command.IAcmeUserDataCommand;
 import org.sa.rainbow.core.error.RainbowModelException;
 
-public class AcmeTypecheckSetCmd extends AcmeModelCommand<IAcmeElementExtension> {
+public class AcmeTypecheckSetCmd extends AcmeModelOperation<IAcmeElementExtension> {
 
     private Boolean m_typechecks;
 
