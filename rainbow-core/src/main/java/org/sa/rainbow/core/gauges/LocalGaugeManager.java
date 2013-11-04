@@ -78,7 +78,7 @@ public class LocalGaugeManager {
         paramTypes[2] = TypedAttribute.class;
         paramTypes[3] = TypedAttribute.class;
         paramTypes[4] = List.class;
-        paramTypes[5] = List.class;
+        paramTypes[5] = Map.class;
         try {
             Constructor constructor = gaugeClass.getConstructor (paramTypes);
             Object[] args = new Object[6];
