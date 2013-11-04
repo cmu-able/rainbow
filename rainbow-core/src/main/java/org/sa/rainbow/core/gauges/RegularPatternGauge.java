@@ -39,7 +39,8 @@ public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
      */
     public RegularPatternGauge (String threadName, String id, long beaconPeriod, TypedAttribute gaugeDesc,
             TypedAttribute modelDesc, List<TypedAttributeWithValue> setupParams,
-            List<IRainbowOperation> mappings) throws RainbowException {
+ Map<String, IRainbowOperation> mappings)
+            throws RainbowException {
         super (threadName, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
 
         m_lines = new LinkedList<String>();

@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
@@ -77,7 +78,8 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
      */
     public AbstractGauge (String threadName, String id, long beaconPeriod, TypedAttribute gaugeDesc,
             TypedAttribute modelDesc, List<TypedAttributeWithValue> setupParams,
-            List<IRainbowOperation> mappings) throws RainbowException {
+            Map<String, IRainbowOperation> mappings)
+                    throws RainbowException {
         super (threadName);
         Ensure.is_false (mappings == null || mappings.isEmpty ());
         Ensure.is_false (modelDesc == null);
@@ -102,10 +104,10 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
         }
 
         // Need to keep the list of commands, and also perhaps the commands by value (if they exist)
-        for (IRainbowOperation cmd : mappings) {
-            m_commands.put (cmd.getName (), cmd);
-            for (String param : cmd.getParameters ()) {
-                m_commands.put (pullOutParam (param), cmd);
+        for (Entry<String, IRainbowOperation> cmd : mappings.entrySet ()) {
+            m_commands.put (cmd.getKey (), cmd.getValue ());
+            for (String param : cmd.getValue ().getParameters ()) {
+                m_commands.put (pullOutParam (param), cmd.getValue ());
             }
         }
 
