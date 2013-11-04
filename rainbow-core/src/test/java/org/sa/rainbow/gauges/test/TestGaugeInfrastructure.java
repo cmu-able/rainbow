@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
@@ -13,9 +14,9 @@ import org.sa.rainbow.core.IRainbowRunnable.State;
 import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.AbstractGauge;
-import org.sa.rainbow.core.gauges.CommandRepresentation;
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.gauges.OperationRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IGaugeLifecycleBusPort;
 import org.sa.rainbow.core.ports.eseb.ESEBReceiverSideGaugeLifecyclePort;
 import org.sa.rainbow.core.ports.eseb.rpc.ESEBGaugeConfigurationRequirerPort;
@@ -34,7 +35,7 @@ public class TestGaugeInfrastructure extends DefaultTCase {
         private Beacon m_reportingBeacon;
 
         public TestGauge (String id, long beaconPeriod, TypedAttribute gaugeDesc, TypedAttribute modelDesc,
-                List<TypedAttributeWithValue> setupParams, List<IRainbowModelCommandRepresentation> mappings)
+                List<TypedAttributeWithValue> setupParams, Map<String, IRainbowOperation> mappings)
                         throws RainbowException {
             super ("G - TEST_GAUGE", id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
         }
@@ -58,7 +59,7 @@ public class TestGaugeInfrastructure extends DefaultTCase {
         protected void runAction () {
             super.runAction ();
             if (m_reportingBeacon.periodElapsed ()) {
-                CommandRepresentation cmd = new CommandRepresentation ("test", "test", "testModel", "Acme", "load",
+                OperationRepresentation cmd = new OperationRepresentation ("test", "test", "testModel", "Acme", "load",
                         "23");
                 issueCommand (cmd, Collections.<String, String> emptyMap ());
                 m_reportingBeacon.mark ();
@@ -132,7 +133,7 @@ public class TestGaugeInfrastructure extends DefaultTCase {
 
         AbstractGauge testGauge = new AbstractGauge ("G - TEST_GAUGE", "__TEST", 5000, new TypedAttribute ("testGauge",
                 "Test"), new TypedAttribute ("testModel", "Acme"), Collections.<TypedAttributeWithValue> emptyList (),
-                Collections.<IRainbowModelCommandRepresentation> emptyList ()) {
+                Collections.<String, IRainbowOperation> emptyMap ()) {
 
             @Override
             protected void initProperty (String name, Object value) {
@@ -209,7 +210,7 @@ public class TestGaugeInfrastructure extends DefaultTCase {
 
         AbstractGauge testGauge = new AbstractGauge ("G - TEST_GAUGE", "__TEST", 5000, new TypedAttribute ("testGauge",
                 "Test"), new TypedAttribute ("testModel", "Acme"), Collections.<TypedAttributeWithValue> emptyList (),
-                Collections.<IRainbowModelCommandRepresentation> emptyList ()) {
+                Collections.<String, IRainbowOperation> emptyMap ()) {
 
             @Override
             protected void initProperty (String name, Object value) {

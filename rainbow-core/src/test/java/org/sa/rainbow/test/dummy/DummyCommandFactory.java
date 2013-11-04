@@ -11,7 +11,7 @@ import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommand;
+import org.sa.rainbow.core.models.commands.IRainbowModelOperation;
 import org.sa.rainbow.core.models.commands.ModelCommandFactory;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
@@ -97,6 +97,12 @@ public class DummyCommandFactory extends ModelCommandFactory<Integer> {
                         // TODO Auto-generated method stub
 
                     }
+
+                    @Override
+                    public String getOriginalSource () {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
                 };
             }
 
@@ -107,17 +113,12 @@ public class DummyCommandFactory extends ModelCommandFactory<Integer> {
         };
     }
     @Override
-    public IRainbowModelCommand generateCommand (String commandName, final String... args)
+    public IRainbowModelOperation generateCommand (String commandName, final String... args)
             throws RainbowModelException {
-        return new IRainbowModelCommand<Integer, Integer> () {
+        return new IRainbowModelOperation<Integer, Integer> () {
 
             private IModelChangeBusPort m_announcPort;
             private Integer                    m_m;
-
-            @Override
-            public String getLabel () {
-                return "load";
-            }
 
             @Override
             public String[] getParameters () {
@@ -130,7 +131,7 @@ public class DummyCommandFactory extends ModelCommandFactory<Integer> {
             }
 
             @Override
-            public String getCommandName () {
+            public String getName () {
                 return "load";
             }
 
