@@ -1,13 +1,13 @@
 package org.sa.rainbow.core.ports.eseb;
 
-import org.sa.rainbow.core.gauges.CommandRepresentation;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.gauges.OperationRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 
 public class ESEBCommandHelper implements ESEBConstants {
 
-    public static void command2Message (IRainbowModelCommandRepresentation command, RainbowESEBMessage msg) {
+    public static void command2Message (IRainbowOperation command, RainbowESEBMessage msg) {
         msg.setProperty (MODEL_NAME_KEY, command.getModelName ());
-        msg.setProperty (COMMAND_NAME_KEY, command.getCommandName ());
+        msg.setProperty (COMMAND_NAME_KEY, command.getName ());
         msg.setProperty (MODEL_TYPE_KEY, command.getModelType ());
         msg.setProperty (COMMAND_TARGET_KEY, command.getTarget ());
         msg.setProperty (COMMAND_PARAMETER_KEY + "_size", command.getParameters ().length);
@@ -16,7 +16,7 @@ public class ESEBCommandHelper implements ESEBConstants {
         }
     }
 
-    public static IRainbowModelCommandRepresentation msgToCommand (RainbowESEBMessage msg) {
+    public static IRainbowOperation msgToCommand (RainbowESEBMessage msg) {
         String modelName = (String )msg.getProperty (MODEL_NAME_KEY);
         String modelType = (String )msg.getProperty (MODEL_TYPE_KEY);
         String commandName = (String )msg.getProperty (COMMAND_NAME_KEY);
@@ -26,7 +26,7 @@ public class ESEBCommandHelper implements ESEBConstants {
         for (int i = 0; i < numParams; i++) {
             parameters[i] = (String )msg.getProperty (COMMAND_PARAMETER_KEY + i);
         }
-        return new CommandRepresentation (commandName, commandName, modelName, modelType, target, parameters);
+        return new OperationRepresentation (commandName, modelName, modelType, target, parameters);
     }
 
 }

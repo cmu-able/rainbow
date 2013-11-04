@@ -7,7 +7,7 @@ import java.util.Set;
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
 import org.sa.rainbow.core.ports.IModelDSBusSubscriberPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
@@ -31,7 +31,7 @@ public class ESEBModelDSPublishPort implements IModelDSBusPublisherPort, IModelD
                 String msgType = (String )msg.getProperty (ESEBConstants.MSG_TYPE_KEY);
                 String channel = (String )msg.getProperty (ESEBConstants.MSG_CHANNEL_KEY);
                 if (ESEBConstants.MSG_TYPE_UPDATE_MODEL.equals (msgType) && ChannelT.MODEL_DS.name ().equals (channel)) {
-                    IRainbowModelCommandRepresentation cmd = ESEBCommandHelper.msgToCommand (msg);
+                    IRainbowOperation cmd = ESEBCommandHelper.msgToCommand (msg);
                     for (IModelDSBusPublisherPort callback : m_callbacks) {
                         OperationResult result = callback.publishOperation (cmd);
                         if (result != null) {
@@ -56,7 +56,7 @@ public class ESEBModelDSPublishPort implements IModelDSBusPublisherPort, IModelD
     }
 
     @Override
-    public OperationResult publishOperation (IRainbowModelCommandRepresentation cmd) {
+    public OperationResult publishOperation (IRainbowOperation cmd) {
         // Doing this the old way because more than one listener may be interested in this message. The first one to reply, wins.
         RainbowESEBMessage msg = m_connector.createMessage ();
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, m_publisher.id ());

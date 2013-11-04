@@ -28,7 +28,7 @@ public class ESEBRPCConnector {
 
     private static class RPCInfo {
         RpcEnvironment m_env;
-        long           participant_id;
+        String         participant_id;
     }
 
     private static Map<String, RPCInfo> m_infoMap = new HashMap<> ();
@@ -54,7 +54,7 @@ public class ESEBRPCConnector {
 
             if (info == null) {
                 info = new RPCInfo ();
-                info.participant_id = serverId.hashCode ();
+                info.participant_id = serverId;
                 info.m_env = new RpcEnvironment (m_client, info.participant_id);
                 m_infoMap.put (serverId, info);
                 setupConverters (info);
@@ -93,7 +93,7 @@ public class ESEBRPCConnector {
         return m_client;
     }
 
-    private long getParticipantId () {
+    private String getParticipantId () {
         return m_info.participant_id;
     }
 

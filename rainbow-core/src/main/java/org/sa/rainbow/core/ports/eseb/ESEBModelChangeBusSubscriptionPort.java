@@ -2,6 +2,7 @@ package org.sa.rainbow.core.ports.eseb;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import org.sa.rainbow.core.Rainbow;
@@ -27,12 +28,14 @@ public class ESEBModelChangeBusSubscriptionPort implements IModelChangeBusSubscr
             @Override
             public void receive (RainbowESEBMessage msg) {
                 if (msg.getProperty (ESEBConstants.MSG_CHANNEL_KEY).equals (ChannelT.MODEL_CHANGE.name ())) {
-                    for (Pair<IRainbowChangeBusSubscription, IRainbowModelChangeCallback> pair : m_subscribers) {
-                        if (pair.firstValue ().matches (msg)) {
-                            IModelInstance<Object> model = mm.getModelInstance (
-                                    (String )msg.getProperty (IModelChangeBusPort.MODEL_TYPE_PROP),
-                                    (String )msg.getProperty (IModelChangeBusPort.MODEL_NAME_PROP));
-                            pair.secondValue ().onEvent (model, msg);
+                    synchronized (m_subscribers) {
+                        for (Pair<IRainbowChangeBusSubscription, IRainbowModelChangeCallback> pair : m_subscribers) {
+                            if (pair.firstValue ().matches (msg)) {
+                                IModelInstance<Object> model = mm.getModelInstance (
+                                        (String )msg.getProperty (IModelChangeBusPort.MODEL_TYPE_PROP),
+                                        (String )msg.getProperty (IModelChangeBusPort.MODEL_NAME_PROP));
+                                pair.secondValue ().onEvent (model, msg);
+                            }
                         }
                     }
                 }
@@ -44,7 +47,21 @@ public class ESEBModelChangeBusSubscriptionPort implements IModelChangeBusSubscr
     public void subscribe (IRainbowChangeBusSubscription subscriber, IRainbowModelChangeCallback callback) {
         Pair<IRainbowChangeBusSubscription, IRainbowModelChangeCallback> subscription = new Pair<> (subscriber,
                 callback);
-        m_subscribers.add (subscription);
+        synchronized (m_subscribers) {
+            m_subscribers.add (subscription);
+        }
+    }
+
+    @Override
+    public void unsubscribe (IRainbowModelChangeCallback callback) {
+        synchronized (m_subscribers) {
+            for (Iterator i = m_subscribers.iterator (); i.hasNext ();) {
+                Pair<IRainbowChangeBusSubscription,IRainbowModelChangeCallback> subscription = (Pair<IRainbowChangeBusSubscription,IRainbowModelChangeCallback> )i.next ();
+                if (subscription.secondValue () == callback) {
+                    i.remove ();
+                }
+            }
+        }
     }
 
 }

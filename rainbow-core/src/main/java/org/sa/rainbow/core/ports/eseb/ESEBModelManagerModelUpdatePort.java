@@ -10,7 +10,7 @@ import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.IModelUpdater;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IModelUSBusPort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
@@ -51,7 +51,7 @@ public class ESEBModelManagerModelUpdatePort implements ESEBConstants, IModelUSB
                     try {
                         IModelInstance model = getModelInstance (modelType, modelName);
                         if (model != null) {
-                            IRainbowModelCommandRepresentation command = model.getCommandFactory ().generateCommand (
+                            IRainbowOperation command = model.getCommandFactory ().generateCommand (
                                     commandName, params.toArray (new String[0]));
                             updateModel (command);
                         }
@@ -71,7 +71,7 @@ public class ESEBModelManagerModelUpdatePort implements ESEBConstants, IModelUSB
     }
 
     @Override
-    public void updateModel (IRainbowModelCommandRepresentation command) {
+    public void updateModel (IRainbowOperation command) {
         try {
             m_mm.requestModelUpdate (command);
         }
@@ -82,7 +82,7 @@ public class ESEBModelManagerModelUpdatePort implements ESEBConstants, IModelUSB
     }
 
     @Override
-    public void updateModel (List<IRainbowModelCommandRepresentation> commands, boolean transaction) {
+    public void updateModel (List<IRainbowOperation> commands, boolean transaction) {
         try {
             m_mm.requestModelUpdate (commands, transaction);
         }

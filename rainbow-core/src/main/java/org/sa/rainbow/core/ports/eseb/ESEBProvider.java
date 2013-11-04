@@ -99,11 +99,11 @@ public class ESEBProvider {
             .read_memory ("struct typed_attribute_with_value {string name; string type; any? value;}"), context);
             parser.parse (
                     new ParsecFileReader ()
-                    .read_memory ("struct command_representation {string label; string target; string modelName; string modelType; string name; list<string> params;}"),
+                    .read_memory ("struct operation_representation {string target; string modelName; string modelType; string name; list<string> params;}"),
                     context);
             parser.parse (
                     new ParsecFileReader ()
-                    .read_memory ("struct gauge_state {list<typed_attribute_with_value> setup; list<typed_attribute_with_value> config; list<command_representation> commands;}"),
+                    .read_memory ("struct gauge_state {list<typed_attribute_with_value> setup; list<typed_attribute_with_value> config; list<operation_representation> commands;}"),
                     context);
             parser.parse (
                     new ParsecFileReader ()
@@ -115,7 +115,7 @@ public class ESEBProvider {
                     context);
             parser.parse (
                     new ParsecFileReader ()
-                    .read_memory ("struct gauge_instance {string name; string comment; string type; string type_comment; string model_name; string model_type; list<typed_attribute_with_value> setup_params; list<command_representation> commands;}"),
+                    .read_memory ("struct gauge_instance {string name; string comment; string type; string type_comment; string model_name; string model_type; list<typed_attribute_with_value> setup_params; map<string,operation_representation> commands;}"),
                     context);
             parser.parse (
                     new ParsecFileReader ().read_memory ("struct operation_result {string reply; string result;}"),

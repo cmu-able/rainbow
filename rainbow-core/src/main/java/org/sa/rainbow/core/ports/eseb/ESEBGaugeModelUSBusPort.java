@@ -7,7 +7,7 @@ import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.models.IModelInstance;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IModelUSBusPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 
@@ -26,7 +26,7 @@ public class ESEBGaugeModelUSBusPort implements IModelUSBusPort, ESEBConstants {
     }
 
     @Override
-    public void updateModel (IRainbowModelCommandRepresentation command) {
+    public void updateModel (IRainbowOperation command) {
         RainbowESEBMessage msg = m_role.createMessage (/*ChannelT.MODEL_US*/);
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, m_client.id ());
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_UPDATE_MODEL);
@@ -36,7 +36,7 @@ public class ESEBGaugeModelUSBusPort implements IModelUSBusPort, ESEBConstants {
     }
 
     @Override
-    public void updateModel (List<IRainbowModelCommandRepresentation> commands, boolean transaction) {
+    public void updateModel (List<IRainbowOperation> commands, boolean transaction) {
         // TODO Auto-generated method stub
 
     }
