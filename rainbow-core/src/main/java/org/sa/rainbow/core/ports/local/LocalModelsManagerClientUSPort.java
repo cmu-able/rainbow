@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.models.IModelInstance;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IModelUSBusPort;
 
 public class LocalModelsManagerClientUSPort implements IModelUSBusPort {
@@ -15,7 +15,7 @@ public class LocalModelsManagerClientUSPort implements IModelUSBusPort {
     }
 
     @Override
-    public void updateModel (IRainbowModelCommandRepresentation command) {
+    public void updateModel (IRainbowOperation command) {
         if (m_connectedPort != null) {
             m_connectedPort.updateModel (command);
         }
@@ -25,7 +25,7 @@ public class LocalModelsManagerClientUSPort implements IModelUSBusPort {
     }
 
     @Override
-    public void updateModel (List<IRainbowModelCommandRepresentation> commands, boolean transaction) {
+    public void updateModel (List<IRainbowOperation> commands, boolean transaction) {
         if (m_connectedPort != null) {
             m_connectedPort.updateModel (commands, transaction);
         }
