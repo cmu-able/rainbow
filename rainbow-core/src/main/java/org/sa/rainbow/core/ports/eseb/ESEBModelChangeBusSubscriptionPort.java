@@ -5,9 +5,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.models.IModelInstance;
-import org.sa.rainbow.core.models.ModelsManager;
+import org.sa.rainbow.core.models.IModelInstanceProvider;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
@@ -19,10 +18,16 @@ public class ESEBModelChangeBusSubscriptionPort implements IModelChangeBusSubscr
     private ESEBConnector m_connector;
     private Collection<Pair<IRainbowChangeBusSubscription, IRainbowModelChangeCallback>> m_subscribers = new LinkedList<> ();
 
-    public ESEBModelChangeBusSubscriptionPort () throws IOException {
-        m_connector = new ESEBConnector (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (),
+    public ESEBModelChangeBusSubscriptionPort (final IModelInstanceProvider mm) throws IOException {
+        this (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (), mm);
+
+    }
+
+    public ESEBModelChangeBusSubscriptionPort (String esebClientHost, short esebClientPort,
+            final IModelInstanceProvider mm)
+            throws IOException {
+        m_connector = new ESEBConnector (esebClientHost, esebClientPort,
                 ChannelT.MODEL_CHANGE);
-        final ModelsManager mm = Rainbow.instance ().getRainbowMaster ().modelsManager ();
         m_connector.addListener (new IESEBListener () {
 
             @Override

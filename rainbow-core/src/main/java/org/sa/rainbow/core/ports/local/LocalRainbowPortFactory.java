@@ -10,6 +10,7 @@ import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
+import org.sa.rainbow.core.models.IModelInstanceProvider;
 import org.sa.rainbow.core.models.IModelsManager;
 import org.sa.rainbow.core.ports.AbstractDelegateConnectionPort;
 import org.sa.rainbow.core.ports.IDelegateConfigurationPort;
@@ -250,7 +251,8 @@ public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
     }
 
     @Override
-    public IModelChangeBusSubscriberPort createModelChangeBusSubscriptionPort () throws RainbowConnectionException {
+    public IModelChangeBusSubscriberPort createModelChangeBusSubscriptionPort (IModelInstanceProvider provider)
+            throws RainbowConnectionException {
         // TODO Auto-generated method stub
         return null;
     }

@@ -8,6 +8,7 @@ import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
+import org.sa.rainbow.core.models.IModelInstanceProvider;
 import org.sa.rainbow.core.models.IModelsManager;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReportingSubscriberCallback;
 import org.sa.rainbow.translator.effectors.IEffector;
@@ -118,7 +119,8 @@ public interface IRainbowConnectionPortFactory {
 
     public abstract IRainbowReportingPort createMasterReportingPort () throws RainbowConnectionException;
 
-    public abstract IModelChangeBusSubscriberPort createModelChangeBusSubscriptionPort ()
+    public abstract IModelChangeBusSubscriberPort
+            createModelChangeBusSubscriptionPort (IModelInstanceProvider provider)
             throws RainbowConnectionException;
 
     public abstract IRainbowReportingSubscriberPort

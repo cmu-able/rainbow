@@ -11,7 +11,7 @@ import org.sa.rainbow.core.error.RainbowModelException;
  * @author Bradley Schmerl: schmerl
  * 
  */
-public interface IModelsManager extends IModelUpdater {
+public interface IModelsManager extends IModelUpdater, IModelInstanceProvider {
     /**
      * Registers a model type that will be keyed by the type name
      * 
@@ -49,15 +49,7 @@ public interface IModelsManager extends IModelUpdater {
     public void registerModel (String modelType, String modelName, IModelInstance<?> model)
             throws RainbowModelException;
 
-    /**
-     * Returns a model instance keyed by name and type
-     * 
-     * @param modelType
-     * @param modelName
-     * @return
-     */
-    @Override
-    public <T> IModelInstance<T> getModelInstance (String modelType, String modelName);
+
 
     /**
      * Copies a model instance, and registers the copy wth the model
