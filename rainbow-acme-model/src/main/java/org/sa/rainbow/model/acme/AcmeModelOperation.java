@@ -46,6 +46,8 @@ IRainbowModelOperation<T, IAcmeSystem> {
     public static final String  BEARER_PROP           = "ACME_BEARER";
     public static final String  VALUE_PROP            = "ACME_VALUE";
     public static final String  TYPE_PROP             = "ACME_TYPE";
+    public static final String  DECLARED_TYPES_PROP   = "ACME_DECLARED_TYPES";
+    public static final String  INSTANTIATED_TYPES_PROP = "ACME_INSTANTIATED_TYPES";
     protected IAcmeCommand<?>   m_command;
     private IUpdate             m_eventUpdater        = new IUpdate () {
 

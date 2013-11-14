@@ -18,10 +18,10 @@ import org.junit.Test;
 import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.AbstractGauge;
-import org.sa.rainbow.core.gauges.CommandRepresentation;
 import org.sa.rainbow.core.gauges.IGaugeState;
+import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.models.IModelInstance;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.eseb.rpc.ESEBGaugeQueryRequirerPort;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
@@ -39,7 +39,7 @@ public class TestModelGaugeAPIs extends DefaultTCase {
         private int    m_i = 0;
 
         public SetLoadGauge (String id, long beaconPeriod, TypedAttribute gaugeDesc, TypedAttribute modelDesc,
-                List<TypedAttributeWithValue> setupParams, List<IRainbowModelCommandRepresentation> mappings)
+                List<TypedAttributeWithValue> setupParams, Map<String, IRainbowOperation> mappings)
                         throws RainbowException {
             super ("SetLoadGauge", id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
         }
@@ -58,7 +58,7 @@ public class TestModelGaugeAPIs extends DefaultTCase {
         protected void runAction () {
             super.runAction ();
             if (m_reportBeacon.periodElapsed () && m_i <= 3) {
-                IRainbowModelCommandRepresentation cr = this.m_commands.get ("setLoad");
+                IRainbowOperation cr = this.m_commands.get ("setLoad");
                 Map<String, String> params = new HashMap<> ();
                 params.put ("load", Integer.toString (m_i++));
                 issueCommand (cr, params);
@@ -75,7 +75,7 @@ public class TestModelGaugeAPIs extends DefaultTCase {
 
     private static String s_userDir;
     private RainbowMaster m_master;
-    private List<IRainbowModelCommandRepresentation> m_commands;
+    private Map<String, IRainbowOperation>      m_commands;
     private LinkedList<TypedAttributeWithValue>      m_configs;
 
     @BeforeClass
@@ -93,8 +93,9 @@ public class TestModelGaugeAPIs extends DefaultTCase {
         m_master.initialize ();
         m_master.start ();
 
-        m_commands = new LinkedList<> ();
-        m_commands.add (new CommandRepresentation ("setLoad", "setLoad", "ZNewsSys", "Acme", "s0", "load"));
+        m_commands = new HashMap<> ();
+        m_commands
+                .put ("setLoad", new OperationRepresentation ("setLoad", "setLoad", "ZNewsSys", "Acme", "s0", "load"));
 
         m_configs = new LinkedList<> ();
         m_configs.add (new TypedAttributeWithValue ("reportingPeriod", "long", 2000L));
@@ -129,11 +130,10 @@ public class TestModelGaugeAPIs extends DefaultTCase {
         });
 
         ESEBGaugeQueryRequirerPort req = new ESEBGaugeQueryRequirerPort (gauge);
-        Collection<IRainbowModelCommandRepresentation> allCommands = req.queryAllCommands ();
+        Collection<IRainbowOperation> allCommands = req.queryAllCommands ();
         assertEquals (allCommands.size (), 1);
-        IRainbowModelCommandRepresentation cmd = allCommands.iterator ().next ();
-        assertEquals (cmd.getCommandName (), "setLoad");
-        assertEquals (cmd.getLabel (), "setLoad");
+        IRainbowOperation cmd = allCommands.iterator ().next ();
+        assertEquals (cmd.getName (), "setLoad");
         assertEquals (cmd.getModelName (), "ZNewsSys");
         assertEquals (cmd.getModelType (), "Acme");
         assertEquals (cmd.getTarget (), "s0");

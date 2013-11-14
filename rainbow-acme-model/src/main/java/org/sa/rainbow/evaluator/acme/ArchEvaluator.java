@@ -117,7 +117,8 @@ IRainbowModelChangeCallback<IAcmeSystem> {
     }
 
     private void initializeConnections () throws RainbowConnectionException {
-        m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort ();
+        m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort (Rainbow.instance ()
+                .getRainbowMaster ().modelsManager ());
     }
 
     private void installEvaluations () {
@@ -171,7 +172,7 @@ IRainbowModelChangeCallback<IAcmeSystem> {
             if (typeChecker instanceof SimpleModelTypeChecker) {
                 SimpleModelTypeChecker synchChecker = (SimpleModelTypeChecker )typeChecker;
                 boolean constraintViolated = !synchChecker.typechecks (model.getModelInstance ());
-                AcmeTypecheckSetCmd cmd = model.getCommandFactory ().acmeTypecheckSetCmd (constraintViolated);
+                AcmeTypecheckSetCmd cmd = model.getCommandFactory ().acmeTypecheckSetCmd (!constraintViolated);
                 try {
                     Rainbow.instance ().getRainbowMaster ().modelsManager ().requestModelUpdate (cmd);
                 }

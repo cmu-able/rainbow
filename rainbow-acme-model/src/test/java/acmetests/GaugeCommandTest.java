@@ -12,9 +12,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.RainbowMaster;
-import org.sa.rainbow.core.gauges.CommandRepresentation;
+import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.models.IModelInstance;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.models.commands.ModelCommandFactory;
 import org.sa.rainbow.core.ports.IModelUSBusPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
@@ -50,7 +50,7 @@ public class GaugeCommandTest extends DefaultTCase {
         ModelCommandFactory<IAcmeSystem> cf = modelInstance.getCommandFactory ();
         assertNotNull (cf);
 
-        IRainbowModelCommandRepresentation command = cf.generateCommand ("setLoad", "ZNewsSys.s0", "10.5");
+        IRainbowOperation command = cf.generateCommand ("setLoad", "ZNewsSys.s0", "10.5");
         assertNotNull (command);
 
         usPort.updateModel (command);
@@ -83,7 +83,7 @@ public class GaugeCommandTest extends DefaultTCase {
         ModelCommandFactory<IAcmeSystem> cf = modelInstance.getCommandFactory ();
         assertNotNull (cf);
 
-        CommandRepresentation command = new CommandRepresentation ("", "", "", "", "", "");
+        OperationRepresentation command = new OperationRepresentation ("", "", "", "", "", "");
         assertNotNull (command);
 
         usPort.updateModel (command);
