@@ -1,6 +1,7 @@
 package org.sa.rainbow.effectors.acme;
 
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -58,7 +59,7 @@ public class AcmeEffectorManager extends EffectorManager {
                         // look for an effector registered at this location that understands the command
                         cmd = resolveElementReferences (cmd, ami);
                         Set<EffectorAttributes> effectors = getEffectorsAtLocation (location);
-                        effectors.addAll (getEffectorsInterestedInLocation (location, effectors));
+                        effectors.addAll (getEffectorsInterestedInLocation (location, m_effectors.effectors));
                         filterEffectorsBasedOnCommandName (cmd, effectors);
                         filterEffectorsBasedOnCommandParameters (cmd, effectors);
                         if (!effectors.isEmpty ()) {
@@ -66,11 +67,11 @@ public class AcmeEffectorManager extends EffectorManager {
                             result.result = Result.SUCCESS;
                             StringBuffer errMsg = new StringBuffer ();
                             for (EffectorAttributes ea : effectors) {
-                                Outcome outcome = executeEffector (ea.name, location, cmd.getParameters ());
+                                Outcome outcome = executeEffector (ea.name, ea.location, cmd.getParameters ());
                                 if (outcome != Outcome.SUCCESS) {
                                     errMsg.append (MessageFormat.format (
                                             "E[{0}@{1}]: Failed to execute command {2} - ", ea.name, location,
-                                            cmd.getParameters ()));
+                                            Arrays.toString (cmd.getParameters ())));
 
                                     switch (outcome) {
                                     case CONFOUNDED:
@@ -125,7 +126,9 @@ public class AcmeEffectorManager extends EffectorManager {
         target = resolveAcmeReference (target, ami);
         String[] args = cmd.getParameters ();
         for (int i = 0; i < args.length; i++) {
-            args[i] = resolveAcmeReference (args[i], ami);
+            if (!"".equals (args[i])) {
+                args[i] = resolveAcmeReference (args[i], ami);
+            }
         }
         OperationRepresentation or = new OperationRepresentation (cmd.getName (), cmd.getModelName (),
                 cmd.getModelType (), target, args);
@@ -182,7 +185,12 @@ public class AcmeEffectorManager extends EffectorManager {
             EffectorAttributes ea = (EffectorAttributes )iterator.next ();
             OperationRepresentation commandPattern = ea.commandPattern;
             if (commandPattern != null) {
-                String target = commandPattern.getParameters ()[0];
+                String target = commandPattern.getTarget ();
+                int idxStart = 0;
+                if (target == null /*|| !target.equals (ea.location)*/) {
+                    target = commandPattern.getParameters ()[0];
+                    idxStart = 1;
+                }
                 if (target != null && !target.contains ("$<")) {
                     if (!target.equals (cmd.getTarget ())) {
                         iterator.remove ();
@@ -192,10 +200,10 @@ public class AcmeEffectorManager extends EffectorManager {
                 String[] parameters = commandPattern.getParameters ();
                 if (parameters != null) {
                     boolean removed = false;
-                    for (int i = 1; i < parameters.length && !removed; i++) {
+                    for (int i = idxStart; i < parameters.length && !removed; i++) {
                         if (!parameters[i].contains ("$<"))
-                            if (i - 1 < cmd.getParameters ().length
-                                    && !parameters[i].equals (cmd.getParameters ()[i - 1])) {
+                            if (i - idxStart < cmd.getParameters ().length
+                                    && !parameters[i].equals (cmd.getParameters ()[i - idxStart])) {
                                 iterator.remove ();
                                 break;
                             }
