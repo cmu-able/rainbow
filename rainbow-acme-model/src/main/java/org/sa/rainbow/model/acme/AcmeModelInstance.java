@@ -11,10 +11,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.Stack;
 
 import org.acmestudio.acme.ModelHelper;
 import org.acmestudio.acme.PropertyHelper;
 import org.acmestudio.acme.core.exception.AcmeException;
+import org.acmestudio.acme.core.resource.IAcmeLanguageHelper;
+import org.acmestudio.acme.core.resource.RegionManager;
 import org.acmestudio.acme.core.type.IAcmeFloatType;
 import org.acmestudio.acme.core.type.IAcmeIntType;
 import org.acmestudio.acme.element.IAcmeElementInstance;
@@ -22,13 +25,19 @@ import org.acmestudio.acme.element.IAcmeElementType;
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.acmestudio.acme.element.property.IAcmeProperty;
 import org.acmestudio.acme.element.property.IAcmePropertyBearer;
+import org.acmestudio.acme.element.property.IAcmePropertyValue;
+import org.acmestudio.acme.environment.error.AcmeError;
 import org.acmestudio.acme.model.IAcmeModel;
 import org.acmestudio.acme.model.command.IAcmeCommand;
 import org.acmestudio.acme.model.command.IAcmeCompoundCommand;
 import org.acmestudio.acme.model.command.IAcmeElementCopyCommand;
 import org.acmestudio.acme.model.event.AcmeEventListenerAdapter;
 import org.acmestudio.acme.model.event.AcmePropertyEvent;
+import org.acmestudio.acme.rule.node.IExpressionNode;
 import org.acmestudio.acme.type.AcmeTypeHelper;
+import org.acmestudio.acme.type.verification.NodeScopeLookup;
+import org.acmestudio.acme.type.verification.RuleTypeChecker;
+import org.acmestudio.standalone.resource.StandaloneResourceProvider;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.Rainbow;
@@ -44,6 +53,7 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
     public Logger              LOGGER               = Logger.getLogger (this.getClass ());
     public static final String EXP_AVG_KEY          = "[EAvg]";
     public static final String PENALTY_KEY          = "[Penalty]";
+    public static final String             EXPR_KEY                = "[EXPR]";
 
     /** The property identifier for obtaining the deployment location of an element */
     public static final String PROPKEY_LOCATION     = "deploymentLocation";
@@ -55,6 +65,7 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
     protected Map<String, Double> m_propExpAvg         = new HashMap<> ();
     /** Map of additional, non-model properties */
     protected Map<String, Double> m_moreProp           = new HashMap<> ();
+    protected Map<String, IExpressionNode> m_registeredExpressions = new HashMap<> ();
     private Properties            m_opMap;
     private String                m_source;
 
@@ -281,6 +292,32 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
         }
         else if (id.startsWith (PENALTY_KEY)) {
             prop = m_moreProp.get (id);
+        }
+        else if (id.startsWith (EXPR_KEY)) {
+            IExpressionNode expr = m_registeredExpressions.get (id);
+            if (expr == null) {
+                int idxStart = EXPR_KEY.length ();
+                String exprStr = id.substring (idxStart);
+                IAcmeLanguageHelper helper = StandaloneResourceProvider.instance ().languageHelperForResource (
+                        getModelInstance ().getContext ());
+                try {
+                    expr = helper.designRuleExpressionFromString (exprStr, new RegionManager ());
+                    m_registeredExpressions.put (id, expr);
+                }
+                catch (Exception e) {
+                    LOGGER.error ("Could not parse expression: " + id, e);
+                }
+            }
+            try {
+                Object any = RuleTypeChecker.evaluateAsFloat (getModelInstance (), null, expr, new Stack<AcmeError> (),
+                        new NodeScopeLookup ());
+                if (any instanceof IAcmePropertyValue) return PropertyHelper.toJavaVal ((IAcmePropertyValue )any);
+                return any;
+            }
+            catch (AcmeException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace ();
+            }
         }
         else {
             IAcmeModel model = getModelInstance ().getContext ().getModel ();
