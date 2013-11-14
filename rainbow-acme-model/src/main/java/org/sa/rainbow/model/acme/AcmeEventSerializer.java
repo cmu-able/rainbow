@@ -4,10 +4,13 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.acmestudio.acme.core.IAcmeNamedObject;
 import org.acmestudio.acme.core.resource.RegionManager;
+import org.acmestudio.acme.element.IAcmeElementInstance;
+import org.acmestudio.acme.element.IAcmeElementTypeRef;
 import org.acmestudio.acme.element.IAcmeReference;
 import org.acmestudio.acme.model.event.AcmeAttachmentEvent;
 import org.acmestudio.acme.model.event.AcmeBindingEvent;
@@ -125,7 +128,7 @@ public class AcmeEventSerializer {
             if (event.getSystem () != null) {
                 msg.setProperty (AcmeModelOperation.SYSTEM_PROP, event.getSystem ().getQualifiedName ());
             }
-            addTypeInformation (event, msg);
+            addTypeInformation (event.getComponent (), msg);
         }
         catch (RainbowException e) {
             // Should never happen
@@ -140,7 +143,7 @@ public class AcmeEventSerializer {
             if (event.getSystem () != null) {
                 msg.setProperty (AcmeModelOperation.SYSTEM_PROP, event.getSystem ().getQualifiedName ());
             }
-            addTypeInformation (event, msg);
+            addTypeInformation (event.getConnector (), msg);
         }
         catch (RainbowException e) {
             // Should never happen
@@ -155,7 +158,7 @@ public class AcmeEventSerializer {
             if (event.getSystem () != null) {
                 msg.setProperty (AcmeModelOperation.SYSTEM_PROP, event.getSystem ().getQualifiedName ());
             }
-            addTypeInformation (event, msg);
+            addTypeInformation (event.getGroup (), msg);
         }
         catch (RainbowException e) {
             // Should never happen
@@ -170,7 +173,7 @@ public class AcmeEventSerializer {
             if (event.getComponent () != null) {
                 msg.setProperty (AcmeModelOperation.COMPONENT_PROP, event.getComponent ().getQualifiedName ());
             }
-            addTypeInformation (event, msg);
+            addTypeInformation (event.getPort (), msg);
         }
         catch (RainbowException e) {
             // Should never happen
@@ -213,11 +216,35 @@ public class AcmeEventSerializer {
             if (event.getConnector () != null) {
                 msg.setProperty (AcmeModelOperation.CONNECTOR_PROP, event.getConnector ().getQualifiedName ());
             }
-            addTypeInformation (event, msg);
+            addTypeInformation (event.getRole (), msg);
         }
         catch (RainbowException e) {
             // Should never happen
             e.printStackTrace ();
+        }
+    }
+
+    private void addTypeInformation (IAcmeElementInstance<?, ?> instance, IRainbowMessage msg) throws RainbowException {
+        Set<? extends IAcmeElementTypeRef<?>> dt = instance.getDeclaredTypes ();
+        StringBuffer declaredTypes = new StringBuffer ();
+        for (IAcmeElementTypeRef<?> ref : dt) {
+            declaredTypes.append (ref.getReferencedName ());
+            declaredTypes.append (",");
+        }
+        if (declaredTypes.length () > 0) {
+            declaredTypes.deleteCharAt (declaredTypes.length () - 1);
+            msg.setProperty (AcmeModelOperation.DECLARED_TYPES_PROP, declaredTypes);
+        }
+        dt = instance.getInstantiatedTypes ();
+        declaredTypes = new StringBuffer ();
+        for (IAcmeElementTypeRef<?> ref : dt) {
+            declaredTypes.append (ref.getReferencedName ());
+            declaredTypes.append (",");
+        }
+        if (declaredTypes.length () > 0) {
+
+            declaredTypes.deleteCharAt (declaredTypes.length () - 1);
+            msg.setProperty (AcmeModelOperation.INSTANTIATED_TYPES_PROP, declaredTypes);
         }
     }
 
