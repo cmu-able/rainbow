@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
@@ -61,6 +62,26 @@ public class RainbowConfigurationChecker {
         checkGaugeConfiguration ();
         checkProbeConfiguration ();
         checkEffectorConfiguration ();
+//        checkPreferencesConfiguration ();
+    }
+
+    private void checkPreferencesConfiguration () {
+//        UtilityPreferenceDescription preferenceDesc = m_master.preferenceDesc ();
+//        Pattern p = Pattern.compile ("(?:\\[(.*)\\])?(.*)");
+//        for (Entry<String, UtilityAttributes> av : preferenceDesc.utilities.entrySet ()) {
+//            UtilityAttributes value = av.getValue ();
+//            Matcher matcher = p.matcher (value.mapping);
+//            if (matcher.matches ()) {
+//                String type = matcher.group (1);
+//                String expr = matcher.group (2);
+//                switch (type) {
+//                case "[EXPR]":
+//                    break;
+//                case 
+//                }
+//            }
+//
+//        }
     }
 
     private void checkEffectorConfiguration () {
@@ -349,7 +370,7 @@ public class RainbowConfigurationChecker {
                 paramTypes[2] = TypedAttribute.class;
                 paramTypes[3] = TypedAttribute.class;
                 paramTypes[4] = List.class;
-                paramTypes[5] = List.class;
+                paramTypes[5] = Map.class;
                 Constructor constructor = clazz.getConstructor (paramTypes);
 
             }

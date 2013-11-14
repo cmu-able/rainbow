@@ -62,6 +62,8 @@ IModelDSBusPublisherPort {
     public Outcome executeEffector (String effName, String target, String[] args) {
 
         String id = Util.genID (effName, target);
+        m_reportingPort.info (RainbowComponentT.EFFECTOR_MANAGER, "Attempting E[" + id + "] (" + Arrays.asList (args)
+                + ")");
         if (LOGGER.isDebugEnabled ()) {
             LOGGER.debug (MessageFormat.format ("[EffectorManager]: getEffector called, composed ID: {0}", id));
         }

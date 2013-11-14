@@ -155,7 +155,20 @@
 					<encoding>iso8859-1</encoding>
 				</configuration>
 			</plugin>
-
+<plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 			<!-- Configure the release plugin to set the place where tags should be 
 				done. -->
 			<plugin>

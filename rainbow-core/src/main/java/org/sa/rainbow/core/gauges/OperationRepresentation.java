@@ -1,5 +1,6 @@
 package org.sa.rainbow.core.gauges;
 
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,6 +16,12 @@ public class OperationRepresentation implements IRainbowOperation, Cloneable {
     private String   m_operationName;
     private String   m_modelName;
     private String   m_modelType;
+
+    @Override
+    public String toString () {
+        return MessageFormat.format ("O[{0}:{1}/{2}.{3}({4})]", m_modelName, m_modelType, m_operationName, m_target,
+                m_parameters == null ? "" : Arrays.toString (m_parameters));
+    }
 
     public OperationRepresentation (IRainbowOperation cmd) {
         m_parameters = new String[cmd.getParameters ().length];

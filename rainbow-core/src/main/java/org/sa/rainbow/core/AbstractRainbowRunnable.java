@@ -197,6 +197,7 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
                                     .format("Runtime error in {0}! ... Continuing for {1} more attempts.",
                                             m_name, (3 - ++errorCount));
                             m_reportingPort.error (getComponentType (), errMsg, t);
+                            t.printStackTrace ();
                         }
                         else {
                             // make sure Rainbow can dispose despite error... by terminating
@@ -259,6 +260,10 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
         }
 
         m_nextState = nextState;
+    }
+
+    public IRainbowReportingPort reportingPort () {
+        return m_reportingPort;
     }
 
 }

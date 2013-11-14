@@ -1,6 +1,7 @@
 package org.sa.rainbow.core.models.commands;
 
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.List;
 
 import org.sa.rainbow.core.error.RainbowDelegationException;
@@ -167,12 +168,13 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
 
     @Override
     public String toString () {
-        return MessageFormat.format ("Command<{0}: {1}, {2}>", getName (), getTarget (), getParameters ()
-                .toString ());
+        return MessageFormat.format ("O[{0}:{1}/{2}.{3}({4})]", getModelName (), getModelType (), getName (), m_target,
+                m_parameters == null ? "" : Arrays.toString (m_parameters));
     }
 
     protected IModelInstance<Model> getModelContext () {
         return m_modelContext;
     }
+
 
 }
