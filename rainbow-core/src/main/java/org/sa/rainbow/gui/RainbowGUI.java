@@ -39,6 +39,8 @@ import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
+import org.sa.rainbow.core.ports.IEffectorLifecycleBusPort;
+import org.sa.rainbow.core.ports.IGaugeLifecycleBusPort;
 import org.sa.rainbow.core.ports.IMasterCommandPort;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
@@ -104,6 +106,10 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
     private int[] m_order = { 7, 2, 8, 3, 0, 1, 5, 4, 6 };
     private IMasterCommandPort m_master;
     private IModelDSBusPublisherPort m_dsPort;
+    private GUIGaugeLifecycleListener m_gaugeListener;
+    private IGaugeLifecycleBusPort    m_gaugeLifecyclePort;
+    private IEffectorLifecycleBusPort m_effectorListener;
+    private IEffectorLifecycleBusPort m_effectorLifecyclePort;
 
     public RainbowGUI (IMasterCommandPort master) {
         m_master = master;
@@ -232,6 +238,11 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         createDelegateMenu(menu);
         menuBar.add(menu);
 
+        menu = new JMenu ("Info");
+        menu.setMnemonic (KeyEvent.VK_I);
+        createInformationMenu (menu);
+        menuBar.add (menu);
+
         menu = new JMenu("Help");
         menu.setMnemonic(KeyEvent.VK_H);
         createHelpMenu(menu);
@@ -280,6 +291,35 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         // Display the window.
         m_frame.pack();
         m_frame.setVisible(true);
+    }
+
+    private void createInformationMenu (final JMenu menu) {
+
+        JMenu gauges = new JMenu ("Gauges");
+        gauges.setMnemonic (KeyEvent.VK_G);
+        menu.add (gauges);
+
+        // Set up listener for gauge creation and deletion, and set create a port to the lifecycle port
+        m_gaugeListener = new GUIGaugeLifecycleListener (gauges);
+        try {
+            m_gaugeLifecyclePort = RainbowPortFactory.createManagerLifecylePort (m_gaugeListener);
+        }
+        catch (RainbowConnectionException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace ();
+        }
+
+        JMenu effectors = new JMenu ("Effectors");
+        gauges.setMnemonic (KeyEvent.VK_E);
+        menu.add (effectors);
+        m_effectorListener = new GUIEffectorLifecycleListener (effectors);
+        try {
+            m_effectorLifecyclePort = RainbowPortFactory.createClientSideEffectorLifecyclePort (m_effectorListener);
+        }
+        catch (RainbowConnectionException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace ();
+        }
     }
 
     private JComponent createTextArea (int area) {
@@ -690,6 +730,9 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
 //        public static final int ID_TRANSLATOR = 5;
 //        public static final int ID_EVENT_BUSES = 6;
 //        public static final int ID_ORACLE_MESSAGE = 7;
+        String msg = MessageFormat.format ("[{0}]: {1}", type.toString (), message);
+
+        Util.dataLogger ().info (msg);
         int panel = ID_ORACLE_MESSAGE;
         switch (component) {
         case ADAPTATION_MANAGER:
@@ -724,7 +767,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
             panel = ID_ADAPTATION_MANAGER;
             break;
         }
-        writeText (panel, MessageFormat.format ("[{0}]: {1}", type.toString (), message));
+        writeText (panel, msg);
     }
 
 }
