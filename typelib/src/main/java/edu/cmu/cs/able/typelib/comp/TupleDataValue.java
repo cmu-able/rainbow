@@ -23,7 +23,7 @@ public class TupleDataValue extends DataValue {
 	 */
 	TupleDataValue(TupleDataType type, List<DataValue> data) {
 		super(type);
-		Ensure.notNull(data);
+		Ensure.not_null(data, "data == null");
 		m_data = new ArrayList<>(data);
 	}
 	

@@ -44,7 +44,7 @@ public class ScbFilterContainer<T extends Scb<T>> implements ScbContainer<T> {
 		
 		m_container = container;
 		m_filter = filter;
-		m_impl = new ScbEditableContainerImpl<T>();
+		m_impl = new ScbEditableContainerImpl<>();
 		
 		synchronized (m_container) {
 			resync();

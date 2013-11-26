@@ -64,6 +64,7 @@ public class AutoUpdateJComboBox<T> extends JComboBox<Object> {
 	 * @param e_class the enumeration class
 	 * @param sort should the values be sorted according to their
 	 * <code>toString</code> method?
+	 * @param <T> the type of objects in the combo box
 	 * @return the list
 	 */
 	private static <T> ObservableList<T> make_list(Class<T> e_class,
@@ -172,6 +173,37 @@ public class AutoUpdateJComboBox<T> extends JComboBox<Object> {
 			addItem(converter.getString(data.get(i)));
 		}
 	}
+	
+	/**
+	 * Reloads an item converting it to text again and updating the
+	 * corresponding row in the combo box.
+	 * @param t the item
+	 */
+	public void reloadItem(T t) {
+		if (t == null) {
+			throw new IllegalArgumentException("t == null");
+		}
+		
+		int idx = data.indexOf(t);
+		if (idx == -1) {
+			throw new IllegalArgumentException("Object not found in list.");
+		}
+		
+		if (nullSupport == NullSupport.NULL_AT_BEGINING) {
+			idx++;
+		}
+		
+		boolean selectedIdx = (getSelectedIndex() == idx);
+		
+		String text = converter.getString(t);
+		if (!text.equals(getItemAt(idx))) {
+			removeItemAt(idx);
+			insertItemAt(text, idx);
+			if (selectedIdx) {
+				setSelectedIndex(idx);
+			}
+		}
+	}
 
 	/**
 	 * Define how <code>null</code> is supported. Invoking this method with
@@ -257,7 +289,7 @@ public class AutoUpdateJComboBox<T> extends JComboBox<Object> {
 				setSelected(getItemCount() - 1);
 			} else {
 				throw new IllegalStateException(
-						"object == null but not is not " + "allowed.");
+						"object == null but null is not " + "allowed.");
 			}
 		} else {
 			int idx = data.indexOf(object);

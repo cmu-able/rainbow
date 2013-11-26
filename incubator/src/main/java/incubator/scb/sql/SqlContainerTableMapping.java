@@ -65,8 +65,8 @@ public class SqlContainerTableMapping<T extends Scb<T>> {
 	 */
 	public SqlContainerTableMapping(String table_name,
 			ScbFactoryContainer<T> container) {
-		Ensure.notNull(table_name);
-		Ensure.notNull(container);
+		Ensure.not_null(table_name, "table_name == null");
+		Ensure.not_null(container, "container == null");
 		
 		m_table_name = table_name;
 		m_dbc = null;
@@ -99,7 +99,7 @@ public class SqlContainerTableMapping<T extends Scb<T>> {
 	 * @param f the field
 	 */
 	protected synchronized void add_field(SqlField<T, ?, ?, ?> f) {
-		Ensure.notNull(f);
+		Ensure.not_null(f, "f == null");
 		m_fields.add(f);
 	}
 	
@@ -206,7 +206,7 @@ public class SqlContainerTableMapping<T extends Scb<T>> {
 	 * @param t the object
 	 */
 	private synchronized void created(T t) {
-		Ensure.notNull(t);
+		Ensure.not_null(t, "t == null");
 		
 		if (m_ids.containsKey(t) || m_dbc == null) {
 			/*
@@ -274,7 +274,7 @@ System.out.println("Deleting: " + sql);
 	 * @param t the object
 	 */
 	private synchronized void updated(T t) {
-		Ensure.notNull(t);
+		Ensure.not_null(t, "t == null");
 		
 		if (m_dbc == null || !m_ids.containsKey(t)) {
 			/*
@@ -293,7 +293,7 @@ System.out.println("Deleting: " + sql);
 	 * @param t the object
 	 */
 	private synchronized void deleted(T t) {
-		Ensure.notNull(t);
+		Ensure.not_null(t, "t == null");
 		if (m_dbc == null || !m_ids.containsKey(t)) {
 			/*
 			 * We don't care if we don't know the object or if we're not

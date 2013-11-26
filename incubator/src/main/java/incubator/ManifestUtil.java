@@ -67,8 +67,8 @@ public class ManifestUtil {
 	 */
 	public static String getManifestMainProperty(Manifest mf,
 			String property) {
-		Ensure.notNull("mf == null", mf);
-		Ensure.notNull("property == null", property);
+		Ensure.not_null(mf, "mf == null");
+		Ensure.not_null(property, "property == null");
 		
 		Attributes attr = mf.getMainAttributes();
 		for (Object k : attr.keySet()) {

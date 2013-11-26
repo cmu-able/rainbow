@@ -36,7 +36,7 @@ public class BagDataType extends CollectionDataType {
 	 * @return the name of the data type
 	 */
 	public static final String build_bag_name(DataType inner) {
-		Ensure.notNull(inner);
+		Ensure.not_null(inner, "inner == null");
 		return BAG_NAME_PREFIX + inner.name() + BAG_NAME_SUFFIX;
 	}
 	

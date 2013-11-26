@@ -21,7 +21,7 @@ public class NamedValue extends ScopedObject {
 	 */
 	public NamedValue(String name, DataValue value) {
 		super(name);
-		Ensure.notNull(value);
+		Ensure.not_null(value, "value == null");
 		
 		m_value = value;
 	}

@@ -13,7 +13,7 @@ public class TimeValue extends JavaObjectDataValue<Long> {
 	 */
 	protected TimeValue(long value, TimeType type) {
 		super(value, type);
-		Ensure.isTrue(value >= 0);
+		Ensure.is_true(value >= 0, "value < 0");
 	}
 	
 	@Override

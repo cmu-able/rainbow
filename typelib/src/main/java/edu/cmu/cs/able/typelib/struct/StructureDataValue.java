@@ -27,7 +27,8 @@ public class StructureDataValue extends DataValue {
 	protected StructureDataValue(StructureDataType type,
 			Map<Field, DataValue> values) {
 		super(type);
-		Ensure.not_null(values);
+		Ensure.not_null(type, "type == null");
+		Ensure.not_null(values, "values == null");
 		Ensure.is_false(type.is_abstract());
 		
 		Set<Field> fields = type.fields();
@@ -38,10 +39,14 @@ public class StructureDataValue extends DataValue {
 		 * the structure.
 		 */
 		for (Field f : values.keySet()) {
-			Ensure.is_true(fields.contains(f));
-			Ensure.not_null(values.get(f));
+			Ensure.is_true(fields.contains(f), "Structure '" + type.name()
+					+ "' does not contain field '" + f.name() + "'");
+			Ensure.not_null(values.get(f), "Field '" + f.name() + "' has "
+					+ "null value");
 			DataType field_type = f.description().type();
-			Ensure.is_true(field_type.is_instance(values.get(f)));
+			Ensure.is_true(field_type.is_instance(values.get(f)), "Value of "
+					+ "field '" + f.name() + "' is not of type '"
+					+ field_type.name() + "'");
 			m_values.put(f, values.get(f));
 		}
 		
@@ -49,7 +54,8 @@ public class StructureDataValue extends DataValue {
 		 * Check that all fields have values.
 		 */
 		for (Field f : fields) {
-			Ensure.is_true(values.containsKey(f));
+			Ensure.is_true(values.containsKey(f), "No value defined for "
+					+ "field '" + f.name() + "'");
 		}
 	}
 	

@@ -57,7 +57,7 @@ public class ScbTableModel<T extends Scb<T>, C extends Comparator<T>>
 	 * @param comparator the comparator
 	 */
 	public ScbTableModel(ScbContainer<T> container, C comparator) {
-		Ensure.notNull(comparator);
+		Ensure.not_null(comparator, "comaprator == null");
 		m_fields = new ArrayList<>();
 		m_objects = new ArrayList<>();
 		m_comparator = comparator;
@@ -144,7 +144,7 @@ public class ScbTableModel<T extends Scb<T>, C extends Comparator<T>>
 	 * @param f the field
 	 */
 	public final void add_field(ScbTableModelField<T, ?, ?> f) {
-		Ensure.notNull(f);
+		Ensure.not_null(f ,"f == null");
 		m_fields.add(f);
 	}
 	
@@ -178,6 +178,10 @@ public class ScbTableModel<T extends Scb<T>, C extends Comparator<T>>
 			ScbField<T, Date> sdf = (ScbField<T, Date>) f;
 			add_field(new ScbTableModelTextField<>(
 					new ScbDerivedTextFromDateField<>(sdf), editable));
+		} else if (Boolean.class.isAssignableFrom(f.value_type())) {
+			@SuppressWarnings("unchecked")
+			ScbField<T, Boolean> sbf = (ScbField<T, Boolean>) f;
+			add_field(new ScbTableModelBooleanField<>(sbf, editable));
 		} else if (f.value_type().isEnum()) {
 			add_field(make_enum(f));
 		} else {
@@ -192,6 +196,7 @@ public class ScbTableModel<T extends Scb<T>, C extends Comparator<T>>
 	 * which is known to be an enumeration field. This method avoids
 	 * compiler-weirdnesses related to generics.
 	 * @param f the field
+	 * @param <E> the type of enumeration
 	 * @return the field
 	 */
 	private <E extends Enum<E>> ScbTableModelEnumTextField<T, E> make_enum(
@@ -206,7 +211,7 @@ public class ScbTableModel<T extends Scb<T>, C extends Comparator<T>>
 	 * @param obj the object to add
 	 */
 	private void add(T obj) {
-		Ensure.notNull(obj);
+		Ensure.not_null(obj, "obj == null");
 		
 		int idx;
 		for (idx = 0; idx < m_objects.size(); idx++) {
@@ -224,10 +229,10 @@ public class ScbTableModel<T extends Scb<T>, C extends Comparator<T>>
 	 * @param obj the object
 	 */
 	private void remove(T obj) {
-		Ensure.notNull(obj);
+		Ensure.not_null(obj, "obj == null");
 		
 		int idx = m_objects.indexOf(obj);
-		Ensure.isTrue(idx >= 0);
+		Ensure.is_true(idx >= 0, "idx < 0");
 		
 		m_objects.remove(idx);
 		fireTableRowsDeleted(idx, idx);
@@ -238,10 +243,10 @@ public class ScbTableModel<T extends Scb<T>, C extends Comparator<T>>
 	 * @param obj the object
 	 */
 	private void update(T obj) {
-		Ensure.notNull(obj);
+		Ensure.not_null(obj, "obj == null");
 		
 		int idx = m_objects.indexOf(obj);
-		Ensure.isTrue(idx >= 0);
+		Ensure.is_true(idx >= 0, "idx < 0");
 		
 		boolean same_position = true;
 		T prev = null;
@@ -277,8 +282,8 @@ public class ScbTableModel<T extends Scb<T>, C extends Comparator<T>>
 	
 	@Override
 	public String getColumnName(int col) {
-		Ensure.isTrue(col >= 0);
-		Ensure.isTrue(col < m_fields.size());
+		Ensure.is_true(col >= 0, "col < 0");
+		Ensure.is_true(col < m_fields.size(), "col >= m_fields.size()");
 		
 		return m_fields.get(col).name();
 	}
@@ -290,10 +295,10 @@ public class ScbTableModel<T extends Scb<T>, C extends Comparator<T>>
 	
 	@Override
 	public Object getValueAt(int row, int col) {
-		Ensure.isTrue(row >= 0);
-		Ensure.isTrue(row < m_objects.size());
-		Ensure.isTrue(col >= 0);
-		Ensure.isTrue(col < m_fields.size());
+		Ensure.is_true(row >= 0, "row < 0");
+		Ensure.is_true(row < m_objects.size(), "row >= m_objects.size()");
+		Ensure.is_true(col >= 0, "col < 0");
+		Ensure.is_true(col < m_fields.size(), "col >= m_fields.size()");
 		
 		T obj = m_objects.get(row);
 		return m_fields.get(col).display_object(obj);
@@ -301,10 +306,10 @@ public class ScbTableModel<T extends Scb<T>, C extends Comparator<T>>
 	
 	@Override
 	public boolean isCellEditable(int row, int col) {
-		Ensure.isTrue(row >= 0);
-		Ensure.isTrue(row < m_objects.size());
-		Ensure.isTrue(col >= 0);
-		Ensure.isTrue(col < m_fields.size());
+		Ensure.is_true(row >= 0, "row < 0");
+		Ensure.is_true(row < m_objects.size(), "row >= m_objects.size()");
+		Ensure.is_true(col >= 0, "col < 0");
+		Ensure.is_true(col < m_fields.size(), "col >= m_fields.size()");
 		
 		return m_fields.get(col).editable();
 	}
@@ -342,8 +347,8 @@ public class ScbTableModel<T extends Scb<T>, C extends Comparator<T>>
 	 * @return the object
 	 */
 	public T object(int idx) {
-		Ensure.isTrue(idx >= 0);
-		Ensure.isTrue(idx < m_objects.size());
+		Ensure.is_true(idx >= 0, "idx < 0");
+		Ensure.is_true(idx < m_objects.size(), "idx >= m_objects.size()");
 		return m_objects.get(idx);
 	}
 }

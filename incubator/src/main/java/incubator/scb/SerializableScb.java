@@ -31,10 +31,7 @@ public abstract class SerializableScb<T extends SerializableScb<T>>
 		m_dispatcher = new LocalDispatcher<>();
 	}
 	
-	/**
-	 * Obtains the notification dispatcher.
-	 * @return the dispatcher
-	 */
+	@Override
 	public Dispatcher<ScbUpdateListener<T>> dispatcher() {
 		return m_dispatcher;
 	}

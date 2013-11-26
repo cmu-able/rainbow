@@ -20,7 +20,7 @@ public class NamedType extends ScopedObject {
 	 */
 	public NamedType(String name, DataType type) {
 		super(name);
-		Ensure.notNull(type);
+		Ensure.not_null(type, "type == null");
 		m_type = type;
 	}
 	

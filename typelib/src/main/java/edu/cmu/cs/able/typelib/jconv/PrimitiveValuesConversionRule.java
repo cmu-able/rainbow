@@ -159,6 +159,7 @@ public class PrimitiveValuesConversionRule
 	 * @param value the value to convert
 	 * @param cls an optional destination data type
 	 * @return the converted value or <code>null</code> if cannot convert
+	 * @param <T> the destination data type 
 	 */
 	private <T> T to_java_fail_null(DataValue value, Class<T> cls) {
 		Ensure.not_null(value);

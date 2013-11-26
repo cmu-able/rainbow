@@ -16,12 +16,12 @@ public class ExhGlobalUiSynchronizer {
 	 * @param ui the user interface
 	 */
 	public ExhGlobalUiSynchronizer(final ExhUi ui) {
-		Ensure.notNull(ui);
+		Ensure.not_null(ui, "ui == null");
 		GlobalCollector.instance().collectors().addObservableSetListener(
 				new ObservableSetListener<ThrowableCollector>() {
 			@Override
 			public void setCleared() {
-				Ensure.isTrue(false);
+				Ensure.unreachable();
 			}
 			
 			@Override

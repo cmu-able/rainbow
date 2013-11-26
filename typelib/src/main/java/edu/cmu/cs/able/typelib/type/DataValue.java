@@ -36,7 +36,7 @@ public abstract class DataValue {
 	 * @param type the type this value belongs to
 	 */
 	protected DataValue(DataType type) {
-		Ensure.notNull(type);
+		Ensure.not_null(type, "type == null");
 		m_type = type;
 		m_attachments = null;
 	}
@@ -110,10 +110,6 @@ public abstract class DataValue {
 		return m_attachments.get(key);
 	}
 	
-	/**
-	 * Clones the data value.
-	 * @return a cloned data value
-	 * @throws CloneNotSupportedException failed to clone the data value
-	 */
+	@Override
 	public abstract DataValue clone() throws CloneNotSupportedException;
 }

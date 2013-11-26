@@ -36,7 +36,7 @@ public class ListDataType extends CollectionDataType {
 	 * @return the name of the data type
 	 */
 	public static final String build_list_name(DataType inner) {
-		Ensure.notNull(inner);
+		Ensure.not_null(inner, "inner == null");
 		return LIST_NAME_PREFIX + inner.name() + LIST_NAME_SUFFIX;
 	}
 	

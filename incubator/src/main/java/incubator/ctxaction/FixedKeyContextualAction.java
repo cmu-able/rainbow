@@ -83,10 +83,25 @@ public abstract class FixedKeyContextualAction extends ContextualAction {
 		}
 	}
 	
+	/**
+	 * Determines whether or not the action can be executed in the current
+	 * context.
+	 * @return can the action be executed?
+	 * @throws Exception failed to check if the action can be executed
+	 */
 	protected abstract boolean isValid() throws Exception;
 	
+	/**
+	 * Executes the action.
+	 * @throws Exception failed to perform the action
+	 */
 	protected abstract void perform() throws Exception;
 	
+	/**
+	 * Invoked to handle an error during validation or execution.
+	 * @param e the error
+	 * @param duringPerform did the error occur while performing the action?
+	 */
 	protected abstract void handleError(Exception e, boolean duringPerform);
 	
 	/**
@@ -128,10 +143,9 @@ public abstract class FixedKeyContextualAction extends ContextualAction {
 	
 	/**
 	 * Fills the fields with values.
-	 * 
 	 * @param context the action context
-	 * 
 	 * @return have all mandatory fields been filled in?
+	 * @throws Exception failed to fill the keys
 	 */
 	private boolean fillKeys(ActionContext context) throws Exception {
 		assert context != null;

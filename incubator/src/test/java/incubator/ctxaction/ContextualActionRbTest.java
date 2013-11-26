@@ -16,6 +16,7 @@ public class ContextualActionRbTest extends Assert {
 	 * @throws IllegalArgumentException expected
 	 * @throws Exception failed
 	 */
+	@SuppressWarnings("unused")
 	@Test(expected = IllegalArgumentException.class)
 	public void createActionWithNullTemplate() throws Exception {
 		new ContextualAction(null) {

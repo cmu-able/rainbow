@@ -25,7 +25,7 @@ public abstract class SingleCompositeDataType extends DataType {
 			Set<DataType> super_types) {
 		super(name, Ensure.not_null(super_types));
 		
-		Ensure.notNull(inner_type);
+		Ensure.not_null(inner_type, "inner type == null");
 		m_inner_type = inner_type;
 	}
 	

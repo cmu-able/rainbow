@@ -8,12 +8,11 @@ import org.apache.commons.lang.ObjectUtils;
 public class Ensure {
 	/**
 	 * Ensures none of the parameters is null.
-	 * 
 	 * @param values the values to check
-	 * 
 	 * @throws IllegalArgumentException if any of the parameters is
 	 * <code>null</code>
 	 */
+	@Deprecated
 	public static void notNull(Object... values) {
 		notNull("Invalid null parameter", values);
 	}
@@ -22,6 +21,7 @@ public class Ensure {
 	 * Ensures that a value is not <code>null</code>.
 	 * @param value the value
 	 * @return the value tested, if not <code>null</code>
+	 * @param <T> the value type
 	 */
 	public static <T> T not_null(T value) {
 		return not_null(value, "Value is null.");
@@ -32,6 +32,7 @@ public class Ensure {
 	 * @param value the value
 	 * @param error_msg the error message to send if value is <code>null</code>
 	 * @return the value tested, if not <code>null</code>
+	 * @param <T> the value type
 	 */
 	public static <T> T not_null(T value, String error_msg) {
 		Ensure.is_true(value != null, error_msg);
@@ -58,14 +59,13 @@ public class Ensure {
 
 	/**
 	 * Ensures none of the parameters is null.
-	 * 
 	 * @param message the message to place in the exception if any of the
 	 * parameters is null
 	 * @param values the values to check
-	 * 
 	 * @throws IllegalArgumentException if any of the parameters is
 	 * <code>null</code>
 	 */
+	@Deprecated
 	public static void notNull(String message, Object... values) {
 		/*
 		 * There is a tricky corner case here: if we call
@@ -90,30 +90,39 @@ public class Ensure {
 	 * @param value the value to test (<code>null</code> accepted)
 	 */
 	public static void equals(Object expected, Object value) {
-		is_true(ObjectUtils.equals(expected, value));
+		equals(expected, value, "Condition is false");
+	}
+
+	/**
+	 * Ensures that two values are equal (using <code>equals</code>).
+	 * @param expected the expected value (<code>null</code> accepted)
+	 * @param value the value to test (<code>null</code> accepted)
+	 * @param error_message the error message
+	 */
+	public static void equals(Object expected, Object value,
+			String error_message) {
+		is_true(ObjectUtils.equals(expected, value), error_message);
 	}
 
 	/**
 	 * Ensures all values are true.
-	 * 
 	 * @param values the values to check
-	 * 
 	 * @throws IllegalArgumentException if any of the values is
 	 * <code>false</code>
 	 */
+	@Deprecated
 	public static void isTrue(Boolean... values) {
 		isTrue("Condition is false", values);
 	}
 
 	/**
 	 * Ensures all values are true.
-	 * 
 	 * @param message the error message to throw
 	 * @param values the values to check
-	 * 
 	 * @throws IllegalArgumentException if any of the values is
 	 * <code>false</code>
 	 */
+	@Deprecated
 	public static void isTrue(String message, Boolean... values) {
 		for (boolean b : values) {
 			if (!b) {
@@ -160,14 +169,13 @@ public class Ensure {
 
 	/**
 	 * Checks that the some state condition is verified.
-	 * 
 	 * @param message the message to place in the exception if the condition is
 	 * not verified
 	 * @param checks the checks to perform
-	 * 
 	 * @throws IllegalStateException if any of the boolean values is
 	 * <code>false</code>
 	 */
+	@Deprecated
 	public static void stateCondition(String message, Boolean... checks) {
 		for (boolean b : checks) {
 			if (!b) {
@@ -178,12 +186,11 @@ public class Ensure {
 
 	/**
 	 * Checks that the some state condition is verified.
-	 * 
 	 * @param checks the checks to perform
-	 * 
 	 * @throws IllegalStateException if any of the boolean values is
 	 * <code>false</code>
 	 */
+	@Deprecated
 	public static void stateCondition(Boolean... checks) {
 		for (boolean b : checks) {
 			if (!b) {
@@ -275,7 +282,17 @@ public class Ensure {
 	 * @param o2 the second object
 	 */
 	public static void same(Object o1, Object o2) {
-		Ensure.is_true(o1 == o2);
+		Ensure.same(o1, o2, "Condition is false");
+	}
+	
+	/**
+	 * Ensures that <em>o1</em> is the same object as <em>o2</em>.
+	 * @param o1 the first object
+	 * @param o2 the second object
+	 * @param error_msg the error message if objects are not the same
+	 */
+	public static void same(Object o1, Object o2, String error_msg) {
+		Ensure.is_true(o1 == o2, error_msg);
 	}
 	
 	/**
@@ -293,7 +310,19 @@ public class Ensure {
 	 * @param cls the class
 	 */
 	public static void is_instance(Object obj, Class<?> cls) {
-		Ensure.is_true(cls.isInstance(obj));
+		Ensure.is_instance(obj, cls, "Object is not an instance of "
+				+ cls.getCanonicalName());
+	}
+	
+	/**
+	 * Ensures that an object is an instance of a class.
+	 * @param obj the object
+	 * @param cls the class
+	 * @param error_message an optional error message
+	 */
+	public static void is_instance(Object obj, Class<?> cls,
+			String error_message) {
+		Ensure.is_true(cls.isInstance(obj), error_message);
 	}
 	
 	/**

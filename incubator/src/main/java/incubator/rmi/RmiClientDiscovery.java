@@ -57,6 +57,7 @@ public class RmiClientDiscovery {
 	 * @param port the port to look for
 	 * @param iface the remote interface
 	 * @return the found client or <code>null</code> if none
+	 * @param <T> the type of the remote interface
 	 */
 	public static <T> T find_rmi_client(String host, int port,
 			Class<T> iface) {

@@ -14,7 +14,8 @@ public class AsciiValue extends JavaObjectDataValue<String> {
 	 */
 	protected AsciiValue(String value, AsciiType type) {
 		super(value, type);
-		Ensure.isTrue(AsciiEncoding.is_ascii(value));
+		Ensure.is_true(AsciiEncoding.is_ascii(value), "String is not an "
+				+ "ASCII string");
 	}
 	
 	@Override

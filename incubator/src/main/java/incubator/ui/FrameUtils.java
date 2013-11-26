@@ -117,7 +117,7 @@ public class FrameUtils {
 				container = container.getParent())
 			;
 		
-		if (container != null && container instanceof Window) {
+		if (container instanceof Window) {
 			center(f, (Window) container);
 		}
 	}

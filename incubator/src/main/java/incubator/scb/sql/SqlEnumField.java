@@ -25,7 +25,7 @@ public class SqlEnumField<T, E extends Enum<E>>
 	 */
 	public SqlEnumField(String sql_name, ScbEnumField<T, E> f, Class<E> ecls) {
 		super(sql_name, f, String.class);
-		Ensure.notNull(ecls);
+		Ensure.not_null(ecls, "ecls == null");
 		m_ecls = ecls;
 	}
 

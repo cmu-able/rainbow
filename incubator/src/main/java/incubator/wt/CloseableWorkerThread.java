@@ -45,7 +45,7 @@ public abstract class CloseableWorkerThread<T extends Closeable>
 			boolean close_on_abort) {
 		super(name);
 		
-		Ensure.notNull(closeable);
+		Ensure.not_null(closeable, "closeable == null");
 		m_closeable = closeable;
 		m_dispatcher = new LocalDispatcher<>();
 		m_close_on_abort = close_on_abort;

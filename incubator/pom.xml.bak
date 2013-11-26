@@ -266,7 +266,6 @@
 			<artifactId>log4j</artifactId>
 			<version>1.2.17</version>
 		    <type>jar</type>
-			
 		</dependency>
 		<dependency>
 			<groupId>org.beanshell</groupId>
@@ -309,6 +308,12 @@
 			<groupId>rmilite</groupId>
 			<artifactId>rmi-lite</artifactId>
 			<version>1.0</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>xerces</artifactId>
+					<groupId>xerces</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 	
@@ -323,6 +328,10 @@
 		<repository>
 			<id>able.maven.repository</id>
 			<url>dav:http://acme.able.cs.cmu.edu/maven-repository</url>
+		</repository>
+		<repository>
+			<id>astrogrid</id>
+			<url>http://www.astrogrid.org/maven/</url>
 		</repository>
 	</repositories>
 	

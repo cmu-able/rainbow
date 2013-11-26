@@ -73,7 +73,7 @@ public class ThrowableCollector implements Serializable,
 	 * @param name the collector name
 	 */
 	public ThrowableCollector(String name) {
-		Ensure.notNull(name);
+		Ensure.not_null(name, "name == null");
 		
 		m_max_size = DEFAULT_MAX_SIZE;
 		m_throwables = new LinkedList<>();

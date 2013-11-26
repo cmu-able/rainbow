@@ -46,7 +46,7 @@ public class ScbEditableContainerToolbar<T extends Scb<T>> extends JToolBar {
 	 */
 	public ScbEditableContainerToolbar(ScbFactoryContainer<T> container,
 			ScbTable<T> table) {
-		Ensure.notNull(table);
+		Ensure.not_null(table, "table == null");
 		setFloatable(false);
 		
 		m_container = container;

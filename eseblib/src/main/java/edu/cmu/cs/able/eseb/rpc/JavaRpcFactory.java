@@ -4,7 +4,6 @@ import incubator.Pair;
 import incubator.pval.Ensure;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationHandler;
@@ -60,6 +59,7 @@ public class JavaRpcFactory {
 	 * @param time_out_ms timeout, in milliseconds, for operation executions;
 	 * <code>0</code> means no timeout
 	 * @param obj_id the ID of the remote object to invoke the operation on
+	 * @param <T> the type of the stub
 	 * @return the remote execution stub; the returned object also implements
 	 * <code>Closeable</code> regardless of whether <code>T</code> extends
 	 * it or not; this can be used to close the service
@@ -174,7 +174,7 @@ public class JavaRpcFactory {
 				}
 			}
 			
-			private void do_close() throws IOException {
+			private void do_close() {
 				Ensure.not_null(m_stubs);
 				m_stubs = null;
 			}
@@ -188,6 +188,7 @@ public class JavaRpcFactory {
 	 * @param t the interface itself which will be invoked
 	 * @param env the RPC execution environment
 	 * @param obj_id the ID of the object to register
+	 * @param <T> the type of the wrapper
 	 * @return an object which should be closed to dispose of the service
 	 */
 	public static <T> Closeable create_registry_wrapper(final Class<T> t_class,
@@ -313,6 +314,7 @@ public class JavaRpcFactory {
 	 * Creates the service meta data for a given service.
 	 * @param t_class the service interface
 	 * @param env the RPC execution environment
+	 * @param <T> the type of the service
 	 * @return the meta data describing the service
 	 */
 	private static <T> DataValue create_meta_data_for_service(

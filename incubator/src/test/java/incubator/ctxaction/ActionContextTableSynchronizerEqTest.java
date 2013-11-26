@@ -46,6 +46,7 @@ public class ActionContextTableSynchronizerEqTest extends Assert {
 	 * 
 	 * @throws Exception test failed
 	 */
+	@SuppressWarnings("unused")
 	@Test
 	public void selectionChangesUpdatesContext() throws Exception {
 		new ActionContextTableSynchronizer(table, context, "foo");
@@ -68,6 +69,7 @@ public class ActionContextTableSynchronizerEqTest extends Assert {
 	 * 
 	 * @throws Exception test failed
 	 */
+	@SuppressWarnings("unused")
 	@Test
 	public void selectionIsSetAtStart() throws Exception {
 		table.getSelectionModel().setSelectionInterval(2, 2);
@@ -83,6 +85,7 @@ public class ActionContextTableSynchronizerEqTest extends Assert {
 	 * 
 	 * @throws Exception test failed
 	 */
+	@SuppressWarnings("unused")
 	@Test
 	public void someRowsMayReturnNullObject() throws Exception {
 		data[0] = null;

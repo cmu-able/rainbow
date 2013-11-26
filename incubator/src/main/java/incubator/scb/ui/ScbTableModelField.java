@@ -36,7 +36,7 @@ public abstract class ScbTableModelField<T, V, F extends ScbField<T, V>> {
 	 * @param editable is the field editable?
 	 */
 	public ScbTableModelField(F cof, boolean editable) {
-		Ensure.notNull(cof);
+		Ensure.not_null(cof, "cof == null");
 		m_cof = cof;
 		m_editable = editable;
 	}

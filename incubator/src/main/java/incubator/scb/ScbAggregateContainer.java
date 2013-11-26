@@ -45,8 +45,9 @@ public class ScbAggregateContainer<T extends Scb<T>>
 	 * @param container the container
 	 */
 	public synchronized void add_container(final ScbContainer<T> container) {
-		Ensure.notNull(container);
-		Ensure.isTrue(!m_listeners.containsKey(container));
+		Ensure.not_null(container, "container == null");
+		Ensure.is_false(m_listeners.containsKey(container),
+				"m_listeners.containsKey(container)");
 		
 		m_listeners.put(container, new ScbContainerListener<T>() {
 			@Override
@@ -81,8 +82,9 @@ public class ScbAggregateContainer<T extends Scb<T>>
 	 * @param container the container
 	 */
 	public synchronized void remove_container(ScbContainer<T> container) {
-		Ensure.notNull(container);
-		Ensure.isTrue(m_listeners.containsKey(container));
+		Ensure.not_null(container, "container == null");
+		Ensure.is_true(m_listeners.containsKey(container),
+				"!m_listeners.containsKey(container)");
 		
 		container.dispatcher().remove(m_listeners.get(container));
 		m_listeners.remove(container);

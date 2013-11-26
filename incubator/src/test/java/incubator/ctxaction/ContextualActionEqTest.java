@@ -149,9 +149,18 @@ public class ContextualActionEqTest extends Assert {
 		assertEquals(1, ml.invoked);
 	}
 
+	/**
+	 * Test action.
+	 */
 	private static class MyContextualAction extends ContextualAction {
+		/**
+		 * Version for serialization.
+		 */
 		private static final long serialVersionUID = 1L;
 
+		/**
+		 * Creates a new action.
+		 */
 		MyContextualAction() {
 			super();
 		}

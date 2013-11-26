@@ -15,6 +15,7 @@ public class MenuBarBuilderRbTest extends Assert {
 	/**
 	 * Creates a menu bar builder with no class given in the constructor.
 	 */
+	@SuppressWarnings("unused")
 	@Test(expected = IllegalArgumentException.class)
 	public void creationWithNoClass() {
 		new MenuBarBuilder(null, null);

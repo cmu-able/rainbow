@@ -19,6 +19,7 @@ public class ActionContextTreeSynchronizerRbTest extends Assert {
 	 * @throws IllegalArgumentException expected
 	 * @throws Exception test failed
 	 */
+	@SuppressWarnings("unused")
 	@Test(expected = IllegalArgumentException.class)
 	public void cannotCreateWithNullTree() throws Exception {
 		new ActionContextTreeSynchronizer(null, new ActionContext(), "foo");
@@ -30,6 +31,7 @@ public class ActionContextTreeSynchronizerRbTest extends Assert {
 	 * @throws IllegalArgumentException expected
 	 * @throws Exception test failed
 	 */
+	@SuppressWarnings("unused")
 	@Test(expected = IllegalArgumentException.class)
 	public void cannotCreateWithNullContext() throws Exception {
 		new ActionContextTreeSynchronizer(new JTree(new TestTreeModel(
@@ -42,6 +44,7 @@ public class ActionContextTreeSynchronizerRbTest extends Assert {
 	 * @throws IllegalArgumentException expected
 	 * @throws Exception test failed
 	 */
+	@SuppressWarnings("unused")
 	@Test(expected = IllegalArgumentException.class)
 	public void cannotCreateWithNullKey() throws Exception {
 		new ActionContextTreeSynchronizer(new JTree(new TestTreeModel(
@@ -55,6 +58,7 @@ public class ActionContextTreeSynchronizerRbTest extends Assert {
 	 * @throws IllegalArgumentException expected
 	 * @throws Exception test failed
 	 */
+	@SuppressWarnings("unused")
 	@Test(expected = IllegalArgumentException.class)
 	public void cannotCreateWithModelNotImplementingInterface()
 			throws Exception {

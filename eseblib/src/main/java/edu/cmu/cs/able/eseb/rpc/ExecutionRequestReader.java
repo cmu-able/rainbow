@@ -200,20 +200,18 @@ class ExecutionRequestReader {
 			@Override
 			public void run() {
 				Pair<Map<String, DataValue>, FailureInformation> result = null;
-				if (sor != null) {
-					try {
-						ServiceOperationExecuter soe = sor.executer();
-						Ensure.not_null(soe);
-						
-						result = soe.execute(operation, args);
-					} catch (Exception e) {
-						String msg = StringUtils.trimToEmpty(e.getMessage());
-						StringWriter str_data = new StringWriter();
-						e.printStackTrace(new PrintWriter(str_data));
-						result = new Pair<>(null, new FailureInformation(
-								e.getClass().getName(), msg,
-								str_data.toString()));
-					}
+				try {
+					ServiceOperationExecuter soe = sor.executer();
+					Ensure.not_null(soe);
+					
+					result = soe.execute(operation, args);
+				} catch (Exception e) {
+					String msg = StringUtils.trimToEmpty(e.getMessage());
+					StringWriter str_data = new StringWriter();
+					e.printStackTrace(new PrintWriter(str_data));
+					result = new Pair<>(null, new FailureInformation(
+							e.getClass().getName(), msg,
+							str_data.toString()));
 				}
 				
 				Ensure.not_null(result);

@@ -28,7 +28,7 @@ public class ExceptionSuppress<T extends Exception> {
 	 * @param t the exception
 	 */
 	public void add(T t) {
-		Ensure.notNull(t);
+		Ensure.not_null(t, "t == null");
 		
 		if (m_exception == null) {
 			m_exception = t;

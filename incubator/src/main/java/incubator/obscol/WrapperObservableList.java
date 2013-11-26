@@ -40,7 +40,8 @@ public class WrapperObservableList<E> implements ObservableList<E>,
 	}
 
 	@Override
-	public void addObservableListListener(ObservableListListener<? super E> l) {
+	public synchronized void addObservableListListener(
+			ObservableListListener<? super E> l) {
 		if (l == null) {
 			throw new IllegalArgumentException("l == null");
 		}
@@ -49,7 +50,8 @@ public class WrapperObservableList<E> implements ObservableList<E>,
 	}
 
 	@Override
-	public void removeObservableListListener(ObservableListListener<? super E> l) {
+	public synchronized void removeObservableListListener(
+			ObservableListListener<? super E> l) {
 		if (l == null) {
 			throw new IllegalArgumentException("l == null");
 		}
@@ -114,7 +116,7 @@ public class WrapperObservableList<E> implements ObservableList<E>,
 	}
 
 	@Override
-	public boolean add(E e) {
+	public synchronized boolean add(E e) {
 		list.add(e);
 
 		fireElementAdded(e, list.size() - 1);
@@ -123,13 +125,13 @@ public class WrapperObservableList<E> implements ObservableList<E>,
 	}
 
 	@Override
-	public void add(int index, E element) {
+	public synchronized void add(int index, E element) {
 		list.add(index, element);
 		fireElementAdded(element, index);
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends E> c) {
+	public synchronized boolean addAll(Collection<? extends E> c) {
 		if (c.size() == 0) {
 			return false;
 		}
@@ -142,7 +144,7 @@ public class WrapperObservableList<E> implements ObservableList<E>,
 	}
 
 	@Override
-	public boolean addAll(int index, Collection<? extends E> c) {
+	public synchronized boolean addAll(int index, Collection<? extends E> c) {
 		if (c.size() == 0) {
 			return false;
 		}
@@ -156,59 +158,59 @@ public class WrapperObservableList<E> implements ObservableList<E>,
 	}
 
 	@Override
-	public void clear() {
+	public synchronized void clear() {
 		int sz = size();
 		list.clear();
 		fireListCleared(sz);
 	}
 
 	@Override
-	public boolean contains(Object o) {
+	public synchronized boolean contains(Object o) {
 		return list.contains(o);
 	}
 
 	@Override
-	public boolean containsAll(Collection<?> c) {
+	public synchronized boolean containsAll(Collection<?> c) {
 		return list.containsAll(c);
 	}
 
 	@Override
-	public E get(int index) {
+	public synchronized E get(int index) {
 		return list.get(index);
 	}
 
 	@Override
-	public int indexOf(Object o) {
+	public synchronized int indexOf(Object o) {
 		return list.indexOf(o);
 	}
 
 	@Override
-	public boolean isEmpty() {
+	public synchronized boolean isEmpty() {
 		return list.isEmpty();
 	}
 
 	@Override
-	public Iterator<E> iterator() {
+	public synchronized Iterator<E> iterator() {
 		return list.iterator();
 	}
 
 	@Override
-	public int lastIndexOf(Object o) {
+	public synchronized int lastIndexOf(Object o) {
 		return list.lastIndexOf(o);
 	}
 
 	@Override
-	public ListIterator<E> listIterator() {
+	public synchronized ListIterator<E> listIterator() {
 		return list.listIterator();
 	}
 
 	@Override
-	public ListIterator<E> listIterator(int index) {
+	public synchronized ListIterator<E> listIterator(int index) {
 		return list.listIterator(index);
 	}
 
 	@Override
-	public boolean remove(Object o) {
+	public synchronized boolean remove(Object o) {
 		@SuppressWarnings("unchecked")
 		E e = (E) o;
 
@@ -223,14 +225,14 @@ public class WrapperObservableList<E> implements ObservableList<E>,
 	}
 
 	@Override
-	public E remove(int index) {
+	public synchronized E remove(int index) {
 		E e = list.remove(index);
 		fireElementRemoved(e, index);
 		return e;
 	}
 
 	@Override
-	public boolean removeAll(Collection<?> c) {
+	public synchronized boolean removeAll(Collection<?> c) {
 		boolean rany = false;
 		for (Object o : c) {
 			rany |= remove(o);
@@ -240,7 +242,7 @@ public class WrapperObservableList<E> implements ObservableList<E>,
 	}
 
 	@Override
-	public boolean retainAll(Collection<?> c) {
+	public synchronized boolean retainAll(Collection<?> c) {
 		boolean any = false;
 		for (int i = 0; i < list.size(); i++) {
 			if (!c.contains(get(i))) {
@@ -254,29 +256,29 @@ public class WrapperObservableList<E> implements ObservableList<E>,
 	}
 
 	@Override
-	public E set(int index, E element) {
+	public synchronized E set(int index, E element) {
 		E e = list.set(index, element);
 		fireElementChanged(e, element, index);
 		return e;
 	}
 
 	@Override
-	public int size() {
+	public synchronized int size() {
 		return list.size();
 	}
 
 	@Override
-	public List<E> subList(int fromIndex, int toIndex) {
+	public synchronized List<E> subList(int fromIndex, int toIndex) {
 		return list.subList(fromIndex, toIndex);
 	}
 
 	@Override
-	public Object[] toArray() {
+	public synchronized Object[] toArray() {
 		return list.toArray();
 	}
 
 	@Override
-	public <T> T[] toArray(T[] a) {
+	public synchronized <T> T[] toArray(T[] a) {
 		return list.toArray(a);
 	}
 }

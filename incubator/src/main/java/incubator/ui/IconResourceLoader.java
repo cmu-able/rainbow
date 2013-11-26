@@ -30,12 +30,10 @@ public final class IconResourceLoader {
 
 	/**
 	 * Loads an icon resource.
-	 * 
 	 * @param locator class used to find the resource (assumes the resource is
 	 * in the same package as the class)
 	 * @param iconName the name of the icon resource (the package name will be
 	 * prepended)
-	 * 
 	 * @return the icon or <code>null</code> if loading failed
 	 */
 	public static ImageIcon loadIcon(Class<?> locator, String iconName) {
@@ -45,8 +43,8 @@ public final class IconResourceLoader {
 		byte[] data = null;
 		try (InputStream iconIs = locator.getResourceAsStream(iconName)) {
 			if (iconIs == null) {
-				LOG.error(format("Resource '{0}' not found for class '{1}'.",
-						iconName, locator.getName()));
+				LOG.error(format("Resource \"{0}\" not found for class "
+						+ "\"{1}\".", iconName, locator.getName()));
 			} else {
 				int available = iconIs.available();
 				assert available >= 0;

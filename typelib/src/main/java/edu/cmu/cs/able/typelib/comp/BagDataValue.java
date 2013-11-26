@@ -50,8 +50,9 @@ public class BagDataValue extends CollectionDataValue {
 	
 	@Override
 	public boolean add(DataValue dv) {
-		Ensure.notNull(dv);
-		Ensure.isTrue(((BagDataType) type()).inner_type().is_instance(dv));
+		Ensure.not_null(dv, "dv == null");
+		Ensure.is_true(((BagDataType) type()).inner_type().is_instance(dv),
+				"Value does not match bag type");
 		
 		Integer count = m_data.get(dv);
 		if (count == null) {
@@ -69,8 +70,9 @@ public class BagDataValue extends CollectionDataValue {
 	 * @return was the value removed?
 	 */
 	public boolean remove(DataValue dv) {
-		Ensure.notNull(dv);
-		Ensure.isTrue(((BagDataType) type()).inner_type().is_instance(dv));
+		Ensure.not_null(dv, "dv == null");
+		Ensure.is_true(((BagDataType) type()).inner_type().is_instance(dv),
+				"Value does not match bag type");
 		
 		Integer count = m_data.get(dv);
 		if (count == null) {
@@ -100,8 +102,9 @@ public class BagDataValue extends CollectionDataValue {
 	 * contains the value
 	 */
 	public int count(DataValue dv) {
-		Ensure.notNull(dv);
-		Ensure.isTrue(((BagDataType) type()).inner_type().is_instance(dv));
+		Ensure.not_null(dv, "dv == null");
+		Ensure.is_true(((BagDataType) type()).inner_type().is_instance(dv),
+				"Value does not match bag type");
 		
 		Integer c = m_data.get(dv);
 		if (c == null) {

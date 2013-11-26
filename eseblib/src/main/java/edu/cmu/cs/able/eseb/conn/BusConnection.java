@@ -343,7 +343,7 @@ public class BusConnection implements Closeable {
 	 * @param value the value to send
 	 */
 	private synchronized void internal_send(DataValue value) {
-		Ensure.notNull(value);
+		Ensure.not_null(value, "value == null");
 		m_send_count++;
 		
 		switch (m_state) {

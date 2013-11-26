@@ -131,6 +131,8 @@ public abstract class SyncScb<ID_TYPE, T extends SyncScb<ID_TYPE, T>>
 	/**
 	 * Makes a copy of a sync SCB marshalling and unmarshalling it.
 	 * @param t the bean
+	 * @param <ID_TYPE> data type of the bean's ID
+	 * @param <T> data type of the bean
 	 * @return the bean copy
 	 */
 	static <ID_TYPE, T extends SyncScb<ID_TYPE, T>> T duplicate(T t) {

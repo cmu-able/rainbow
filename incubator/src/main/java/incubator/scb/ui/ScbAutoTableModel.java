@@ -33,8 +33,8 @@ public class ScbAutoTableModel<T extends Scb<T>, C extends Comparable<C>>
 			}
 		});
 		
-		Ensure.notNull(fields);
-		Ensure.notNull(order_field);
+		Ensure.not_null(fields, "fields == null");
+		Ensure.not_null(order_field, "order_field == null");
 		
 		for (ScbField<T, ?> f : fields) {
 			add_field_auto(f);

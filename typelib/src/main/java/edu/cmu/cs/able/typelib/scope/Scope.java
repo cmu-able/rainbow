@@ -395,7 +395,7 @@ public class Scope<T extends ScopedObject> {
 	 * <code>test</code>
 	 */
 	private Set<Scope<T>> follow_set(Set<Scope<T>> test) {
-		Ensure.notNull(test);
+		Ensure.not_null(test, "test == null");
 		Set<Scope<T>> l = new HashSet<>();
 		for (Scope<T> s : test) {
 			l.addAll(s.m_linked);

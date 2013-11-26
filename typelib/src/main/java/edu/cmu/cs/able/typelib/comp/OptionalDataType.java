@@ -38,7 +38,7 @@ public class OptionalDataType extends SingleCompositeDataType {
 	 * @return the name of the data type
 	 */
 	public static final String build_optional_name(DataType inner) {
-		Ensure.notNull(inner);
+		Ensure.not_null(inner, "inner == null");
 		return inner.name() + OPTIONAL_SUFFIX;
 	}
 	
@@ -97,7 +97,8 @@ public class OptionalDataType extends SingleCompositeDataType {
 	 */
 	public OptionalDataValue make(DataValue v) {
 		if (v != null) {
-			Ensure.isTrue(inner_type().is_instance(v));
+			Ensure.is_true(inner_type().is_instance(v), "Inner value does "
+					+ "not match inner type");
 			if (v.type() != inner_type()) {
 				return OptionalDataType.optional_of(v.type()).make(v);
 			}

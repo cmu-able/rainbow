@@ -34,7 +34,7 @@ public class DataTypeSocketConnectionSinkTest extends FilterTestCase {
 	/**
 	 * The sink.
 	 */
-	private DataTypeSocketConnectionSink m_sink;
+	private DataTypeSocketConnectionSink m_sc_sink;
 	
 	@Before
 	public void set_up() throws Exception {
@@ -84,18 +84,18 @@ public class DataTypeSocketConnectionSinkTest extends FilterTestCase {
 			}
 		};
 		
-		m_sink = new DataTypeSocketConnectionSink(m_dts);
+		m_sc_sink = new DataTypeSocketConnectionSink(m_dts);
 	}
 	
 	@Test
 	public void sink_data_is_written_to_connection() throws Exception {
-		m_sink.sink(bus_data());
+		m_sc_sink.sink(bus_data());
 		assertEquals(1, m_written.size());
 	}
 	
 	@Test(expected = AssertionError.class)
 	public void cannot_sink_null_data() throws Exception {
-		m_sink.sink(null);
+		m_sc_sink.sink(null);
 	}
 	
 	@Test(expected = AssertionError.class)

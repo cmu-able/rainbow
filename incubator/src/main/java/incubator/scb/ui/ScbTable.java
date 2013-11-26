@@ -6,6 +6,7 @@ import java.util.Comparator;
 
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.table.TableColumnModel;
 
 /**
  * Table that displays SCBs.
@@ -29,6 +30,12 @@ public class ScbTable<T extends Scb<T>> extends JTable {
 		
 		getSelectionModel().setSelectionMode(
 				ListSelectionModel.SINGLE_SELECTION);
+		
+		TableColumnModel tcm = getColumnModel();
+		for (int i = 0; i < tcm.getColumnCount(); i++) {
+			tcm.getColumn(i).setCellRenderer(
+					new ScbTableModelDefaultRenderer());
+		}
 	}
 	
 	/**

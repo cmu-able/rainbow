@@ -55,7 +55,7 @@ public abstract class DataType extends ScopedObject {
 	 */
 	protected DataType(String name, Set<DataType> super_types) {
 		super(name);
-		Ensure.notNull(name);
+		Ensure.not_null(name, "name == null");
 		
 		if (super_types != null) {
 			for (DataType d : super_types) {
@@ -73,8 +73,8 @@ public abstract class DataType extends ScopedObject {
 	
 	@Override
 	protected final void check_register(Scope<?> scope) {
-		Ensure.isTrue("Data types can only be added to DataTypeScope.",
-				scope instanceof DataTypeScope);
+		Ensure.is_instance(scope, DataTypeScope.class, "Data types can only "
+				+ "be added to DataTypeScope.");
 		for (DataType d : m_super) {
 			m_super.add(d);
 			d.m_sub.add(this);
@@ -121,7 +121,7 @@ public abstract class DataType extends ScopedObject {
 	 */
 	public boolean super_of(DataType t) {
 		Ensure.is_true(m_registered);
-		Ensure.notNull(t);
+		Ensure.not_null(t, "t == null");
 		if (m_sub.contains(t)) {
 			return true;
 		}
@@ -144,7 +144,7 @@ public abstract class DataType extends ScopedObject {
 	 */
 	public boolean sub_of(DataType t) {
 		Ensure.is_true(m_registered);
-		Ensure.notNull(t);
+		Ensure.not_null(t, "t == null");
 		if (m_super.contains(t)) {
 			return true;
 		}
@@ -166,7 +166,7 @@ public abstract class DataType extends ScopedObject {
 	 */
 	public boolean is_instance(DataValue v) {
 		Ensure.is_true(m_registered);
-		Ensure.notNull(v);
+		Ensure.not_null(v, "v == null");
 		if (v.type() == this) {
 			return true;
 		}

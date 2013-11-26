@@ -22,8 +22,8 @@ public class DirectoryReader {
 	 * @return all files; an empty list if none is found
 	 */
 	public static Set<File> listAllRecursively(File directory) {
-		Ensure.notNull(directory);
-		Ensure.isTrue(directory.isDirectory());
+		Ensure.not_null(directory, "directory == null");
+		Ensure.is_true(directory.isDirectory(), "file is not a directory");
 		
 		Set<File> result = new HashSet<>();
 		

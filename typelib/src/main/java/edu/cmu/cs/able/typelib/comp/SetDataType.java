@@ -36,7 +36,7 @@ public class SetDataType extends CollectionDataType {
 	 * @return the name of the data type
 	 */
 	public static final String build_set_name(DataType inner) {
-		Ensure.notNull(inner);
+		Ensure.not_null(inner, "inner == null");
 		return SET_NAME_PREFIX + inner.name() + SET_NAME_SUFFIX;
 	}
 	

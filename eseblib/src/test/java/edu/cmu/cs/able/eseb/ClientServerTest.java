@@ -6,13 +6,12 @@ import java.io.Writer;
 import java.util.Date;
 import java.util.HashSet;
 
+import org.apache.commons.lang.math.RandomUtils;
 import org.junit.Before;
 import org.junit.Test;
 
 import auxtestlib.BooleanEvaluation;
-import auxtestlib.TestHelper;
 import auxtestlib.TestPropertiesDefinition;
-import auxtestlib.ThreadCountTestHelper;
 import edu.cmu.cs.able.eseb.bus.EventBus;
 import edu.cmu.cs.able.eseb.bus.EventBusAcceptPreprocessor;
 import edu.cmu.cs.able.eseb.bus.EventBusConnectionData;
@@ -21,6 +20,7 @@ import edu.cmu.cs.able.eseb.conn.BusConnectionState;
 import edu.cmu.cs.able.typelib.TestDataType;
 import edu.cmu.cs.able.typelib.TestDataValue;
 import edu.cmu.cs.able.typelib.enc.InvalidEncodingException;
+import edu.cmu.cs.able.typelib.prim.Int32Value;
 import edu.cmu.cs.able.typelib.prim.Int64Value;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
 import edu.cmu.cs.able.typelib.txtenc.DelegateTextEncoding;
@@ -36,9 +36,6 @@ import edu.cmu.cs.able.typelib.type.DataValue;
  */
 @SuppressWarnings("javadoc")
 public class ClientServerTest extends EsebTestCase {
-	@TestHelper
-	private ThreadCountTestHelper m_thread_count_helper;
-	
 	private static final long ENOUGH_TIME_TO_CONNECT_IF_WE_COULD_MS = 5000;
 	private short m_port;
 	private PrimitiveScope m_scope;
@@ -392,5 +389,54 @@ public class ClientServerTest extends EsebTestCase {
 			assertTrue(tasq.m_bdata.get(0).length > 0);
 			assertNull(tasq.m_ex.get(0));
 		}
+	}
+	
+	@Test
+	public void send_multiple_values_and_receives_in_order() throws Exception {
+		final int TO_SEND_COUNT = 10000;
+		
+		try (EventBus srv = new EventBus(m_port, m_scope)) {
+			srv.start();
+			Thread.sleep(50);
+			try (BusConnection c1 = new BusConnection("localhost", m_port,
+					m_scope);
+					BusConnection c2 = new BusConnection("localhost", m_port,
+					m_scope)) {
+				c1.start();
+				c2.start();
+				
+				Int32Value[] to_send = new Int32Value[TO_SEND_COUNT];
+				for (int i = 0; i < to_send.length; i++) {
+					to_send[i] = m_scope.int32().make(RandomUtils.nextInt());
+				}
+				
+				final TestArraySaveQueue tasq1 = new TestArraySaveQueue();
+				c1.queue_group().add(tasq1);
+				final TestArraySaveQueue tasq2 = new TestArraySaveQueue();
+				c2.queue_group().add(tasq2);
+				
+				for (int i = 0; i < to_send.length; i++) {
+					c1.send(to_send[i]);
+				}
+				
+				wait_for_true(new BooleanEvaluation() {
+					@Override
+					public boolean evaluate() throws Exception {
+						return tasq1.m_values.size() == TO_SEND_COUNT
+								&& tasq2.m_values.size() == TO_SEND_COUNT;
+					}
+				});
+				
+				for (int i = 0; i < to_send.length; i++) {
+					assertEquals(to_send[i], tasq1.m_values.get(i));
+					assertEquals(to_send[i], tasq2.m_values.get(i));
+				}
+			}
+		}
+		
+		/*
+		 * Wait for threads to stop.
+		 */
+		Thread.sleep(250);
 	}
 }

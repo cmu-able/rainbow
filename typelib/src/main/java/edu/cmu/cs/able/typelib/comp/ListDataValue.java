@@ -40,8 +40,9 @@ public class ListDataValue extends CollectionDataValue {
 	
 	@Override
 	public boolean add(DataValue dv) {
-		Ensure.notNull(dv);
-		Ensure.isTrue(((ListDataType) type()).inner_type().is_instance(dv));
+		Ensure.not_null(dv, "dv == null");
+		Ensure.is_true(((ListDataType) type()).inner_type().is_instance(dv),
+				"Data value type does not match list inner type");
 		m_data.add(dv);
 		return true;
 	}
@@ -61,8 +62,9 @@ public class ListDataValue extends CollectionDataValue {
 	 * @return the index or <code>-1</code> if none
 	 */
 	public int index_of(DataValue dv) {
-		Ensure.notNull(dv);
-		Ensure.isTrue(((ListDataType) type()).inner_type().is_instance(dv));
+		Ensure.not_null(dv, "dv == null");
+		Ensure.is_true(((ListDataType) type()).inner_type().is_instance(dv),
+				"Data value type does not match list inner type");
 		return m_data.indexOf(dv);
 	}
 	
@@ -80,8 +82,8 @@ public class ListDataValue extends CollectionDataValue {
 	 * @return the removed element
 	 */
 	public DataValue remove(int idx) {
-		Ensure.isTrue(idx >= 0);
-		Ensure.isTrue(idx < m_data.size());
+		Ensure.is_true(idx >= 0, "idx < 0");
+		Ensure.is_true(idx < m_data.size(), "idx >= m_data.size()");
 		return m_data.remove(idx);
 	}
 	
@@ -91,8 +93,8 @@ public class ListDataValue extends CollectionDataValue {
 	 * @return the value at the given index
 	 */
 	public DataValue get(int idx) {
-		Ensure.isTrue(idx >= 0);
-		Ensure.isTrue(idx < m_data.size());
+		Ensure.is_true(idx >= 0, "idx < 0");
+		Ensure.is_true(idx < m_data.size(), "idx >= m_data.size()");
 		return m_data.get(idx);
 	}
 	

@@ -56,13 +56,13 @@ public class WorkerThreadTest extends DefaultTCase {
 		}
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = AssertionError.class)
 	@SuppressWarnings("unused")
 	public void invalid_creation() throws Exception {
 		new WorkerThread(null);
 	}
 	
-	@Test(expected = IllegalStateException.class)
+	@Test(expected = AssertionError.class)
 	public void start_running_thread() throws Exception {
 		WorkerThread wt = new WorkerThread("x");
 		wt.start();
@@ -74,7 +74,7 @@ public class WorkerThreadTest extends DefaultTCase {
 		}
 	}
 	
-	@Test(expected = IllegalStateException.class)
+	@Test(expected = AssertionError.class)
 	public void stop_stopped_thread() throws Exception {
 		WorkerThread wt = new WorkerThread("x");
 		wt.start();
@@ -82,7 +82,7 @@ public class WorkerThreadTest extends DefaultTCase {
 		wt.stop();
 	}
 	
-	@Test(expected = IllegalStateException.class)
+	@Test(expected = AssertionError.class)
 	public void stop_thread_before_starting() throws Exception {
 		WorkerThread wt = new WorkerThread("x");
 		wt.stop();

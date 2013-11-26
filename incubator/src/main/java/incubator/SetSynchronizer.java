@@ -18,6 +18,7 @@ public class SetSynchronizer {
 	 * @return returns a pair with the elements that need to be added to the
 	 * destination set and a set with the elements that need to be removed from
 	 * the destination set.
+	 * @param <T> the type of elements in the set
 	 */
 	public static <T> Pair<Set<T>, Set<T>> synchronization_changes(
 			Set<T> dst, Set<T> src) {
@@ -25,11 +26,10 @@ public class SetSynchronizer {
 		Ensure.not_null(src);
 		
 		if (src == dst) {
-			return new Pair<>((Set<T>) new HashSet<T>(),
-					(Set<T>) new HashSet<T>());
+			return new Pair<Set<T>, Set<T>>(new HashSet<T>(), new HashSet<T>());
 		}
 		
-		Set<T> to_add = new HashSet<T>(src);
+		Set<T> to_add = new HashSet<>(src);
 		to_add.removeAll(dst);
 		Set<T> to_del = new HashSet<>(dst);
 		to_del.removeAll(src);
@@ -41,6 +41,7 @@ public class SetSynchronizer {
 	 * Synchronizes two sets.
 	 * @param dst the destination set
 	 * @param src the source set
+	 * @param <T> the type of elements in the set
 	 */
 	public static <T> void synchronize(Set<T> dst, Set<T> src) {
 		Ensure.not_null(dst);

@@ -57,9 +57,9 @@ public class SampleQxt extends JXFrame {
 	public SampleQxt() {
 		super("Sample QXT");
 
-		beans = new WrapperObservableList<SampleQxtBean>(
+		beans = new WrapperObservableList<>(
 				new ArrayList<SampleQxtBean>());
-		sexes = new WrapperObservableList<String>(new ArrayList<String>());
+		sexes = new WrapperObservableList<>(new ArrayList<String>());
 		sexes.add("Male");
 		sexes.add("Female");
 		sexes.add("Undefined");
@@ -118,6 +118,7 @@ public class SampleQxt extends JXFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				new Thread(new Runnable() {
+					@Override
 					public void run() {
 						try {
 							Thread.sleep(5000);
@@ -126,6 +127,7 @@ public class SampleQxt extends JXFrame {
 						}
 
 						EventQueue.invokeLater(new Runnable() {
+							@Override
 							public void run() {
 								for (int i = 0; i < 10; i++) {
 									beans.add(0, SampleQxtBeanCreator
@@ -269,7 +271,7 @@ public class SampleQxt extends JXFrame {
 		QxtIntegerProperty ageProperty = new QxtIntegerProperty("age", "Age");
 		QxtCheckBoxBooleanProperty intelProperty = new QxtCheckBoxBooleanProperty(
 				"intelligent", "Intelligent");
-		QxtComboBoxProperty<String> sexesProperty = new QxtComboBoxProperty<String>(
+		QxtComboBoxProperty<String> sexesProperty = new QxtComboBoxProperty<>(
 				"sex", "Sex", String.class, sexes);
 		QxtDateProperty laProperty = new QxtDateProperty("lastAccess",
 				"Last Access", DateFormat.getDateInstance());
@@ -282,7 +284,7 @@ public class SampleQxt extends JXFrame {
 			}
 		};
 
-		qxt = new QxtTable<SampleQxtBean>(beans, SampleQxtBean.class,
+		qxt = new QxtTable<>(beans, SampleQxtBean.class,
 				idProperty, nameProperty, ageProperty, intelProperty,
 				sexesProperty, laProperty, c1);
 		sp.setViewportView(qxt);
@@ -324,6 +326,9 @@ public class SampleQxt extends JXFrame {
 		qxt.setLineFactory(new LineFactory<SampleQxtBean>() {
 			@Override
 			public void destroyLine(SampleQxtBean line) {
+				/*
+				 * Nothing to do.
+				 */
 			}
 
 			@Override
@@ -348,6 +353,7 @@ public class SampleQxt extends JXFrame {
 		setVisible(true);
 	}
 
+	@SuppressWarnings("unused")
 	public static void main(String args[]) throws Exception {
 		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 

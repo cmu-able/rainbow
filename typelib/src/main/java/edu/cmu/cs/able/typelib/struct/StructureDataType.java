@@ -76,14 +76,14 @@ public class StructureDataType extends DataType {
 	private void init(String name, boolean abs, Set<FieldDescription> fields,
 			Set<StructureDataType> parents, AnyType any)
 			throws InvalidTypeDefinitionException {
-		Ensure.notNull(fields);
-		Ensure.notNull(parents);
+		Ensure.not_null(fields, "fields == null");
+		Ensure.not_null(parents, "parents == null");
 		m_abstract = abs;
 		m_scope = new Scope<>(null);
 		
 		Set<String> names = new HashSet<>();
 		for (FieldDescription fd : fields) {
-			Ensure.notNull(fd);
+			Ensure.not_null(fd, "field is null");
 			
 			if (names.contains(fd.name())) {
 				throw new InvalidTypeDefinitionException("Duplicate field '"
@@ -96,7 +96,7 @@ public class StructureDataType extends DataType {
 		}
 		
 		for (StructureDataType p : parents) {
-			Ensure.notNull(p);
+			Ensure.not_null(p, "parent is null");
 			try {
 				m_scope.link(p.m_scope);
 				

@@ -1,5 +1,6 @@
 package incubator.scb;
 
+import incubator.ListSet;
 import incubator.dispatch.Dispatcher;
 import incubator.dispatch.DispatcherOp;
 import incubator.dispatch.LocalDispatcher;
@@ -41,7 +42,7 @@ public class ScbContainerImpl<T extends Scb<T>> implements ScbContainer<T> {
 	 * Creates a new container.
 	 */
 	public ScbContainerImpl() {
-		m_children = new WrapperObservableSet<>(new HashSet<T>());
+		m_children = new WrapperObservableSet<>(new ListSet<T>());
 		m_dispatcher = new LocalDispatcher<>();
 		m_copy = new HashSet<>();
 		m_update_listener = new ScbUpdateListener<T>() {
@@ -129,8 +130,8 @@ public class ScbContainerImpl<T extends Scb<T>> implements ScbContainer<T> {
 	 * @param t the object
 	 */
 	private synchronized void updated(final T t) {
-		Ensure.notNull(t);
-		Ensure.isTrue(m_children.contains(t));
+		Ensure.not_null(t, "t == null");
+		Ensure.is_true(m_children.contains(t), "!m_children.contains(t)");
 		m_dispatcher.dispatch(new DispatcherOp<ScbContainerListener<T>>() {
 			@Override
 			public void dispatch(ScbContainerListener<T> l) {

@@ -24,7 +24,7 @@ public class CloseableWorkerThreadGroupOps {
 	 * may not have been closed
 	 */
 	public static void close_all(WorkerThreadGroupCI g) throws IOException {
-		Ensure.notNull(g);
+		Ensure.not_null(g, "g == null");
 		
 		Set<WorkerThreadGroupCI> all = g.all_subgroups();
 		all.add(g);

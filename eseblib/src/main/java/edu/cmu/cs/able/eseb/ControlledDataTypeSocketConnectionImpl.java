@@ -154,8 +154,8 @@ public class ControlledDataTypeSocketConnectionImpl
 	 */
 	public ControlledDataTypeSocketConnectionImpl(PrimitiveScope primitive_scope,
 			DataTypeSocketConnection conn) {
-		Ensure.notNull(primitive_scope);
-		Ensure.notNull(conn);
+		Ensure.not_null(primitive_scope, "primitive_scope == null");
+		Ensure.not_null(conn, "conn == null");
 		m_primitive_scope = primitive_scope;
 		m_connection = conn;
 		m_outgoing_chain = new EventFilterChain(

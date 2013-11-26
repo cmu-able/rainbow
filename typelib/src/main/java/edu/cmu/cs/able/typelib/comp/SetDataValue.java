@@ -42,8 +42,9 @@ public class SetDataValue extends CollectionDataValue {
 	
 	@Override
 	public boolean add(DataValue dv) {
-		Ensure.notNull(dv);
-		Ensure.isTrue(((SetDataType) type()).inner_type().is_instance(dv));
+		Ensure.not_null(dv, "dv == null");
+		Ensure.is_true(((SetDataType) type()).inner_type().is_instance(dv),
+				"Inner value does not match inner type");
 		return m_data.add(dv);
 	}
 	
@@ -54,8 +55,9 @@ public class SetDataValue extends CollectionDataValue {
 	 * did not contain the specified element)
 	 */
 	public boolean remove(DataValue dv) {
-		Ensure.notNull(dv);
-		Ensure.isTrue(((SetDataType) type()).inner_type().is_instance(dv));
+		Ensure.not_null(dv, "dv == null");
+		Ensure.is_true(((SetDataType) type()).inner_type().is_instance(dv),
+				"Inner value does not match inner type");
 		return m_data.remove(dv);
 	}
 	
@@ -65,8 +67,9 @@ public class SetDataValue extends CollectionDataValue {
 	 * @return does the set contain the give element?
 	 */
 	public boolean contains(DataValue dv) {
-		Ensure.notNull(dv);
-		Ensure.isTrue(((SetDataType) type()).inner_type().is_instance(dv));
+		Ensure.not_null(dv, "dv == null");
+		Ensure.is_true(((SetDataType) type()).inner_type().is_instance(dv),
+				"Inner value does not match inner type");
 		return m_data.contains(dv);
 	}
 	

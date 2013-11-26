@@ -30,8 +30,8 @@ public class DataTypeOutputStreamImpl implements DataTypeOutputStream {
 	 * @param enc the encoding to use
 	 */
 	public DataTypeOutputStreamImpl(OutputStream os, DataValueEncoding enc) {
-		Ensure.notNull(os);
-		Ensure.notNull(enc);
+		Ensure.not_null(os, "os == null");
+		Ensure.not_null(enc, "enc == null");
 		
 		m_dos = new DataOutputStream(os);
 		m_encoding = enc;
@@ -39,14 +39,14 @@ public class DataTypeOutputStreamImpl implements DataTypeOutputStream {
 	
 	@Override
 	public void write(DataValue dt) throws IOException {
-		Ensure.notNull(dt);
+		Ensure.not_null(dt, "dt == null");
 		write(new BusData(dt));
 	}
 	
 	@Override
 	public void write(BusData bd) throws IOException {
-		Ensure.notNull(bd);
-		Ensure.stateCondition("Stream closed.", m_dos != null);
+		Ensure.not_null(bd, "bd == null");
+		Ensure.not_null(m_dos, "Stream is already closed");
 		
 		byte[] bytes = bd.encoding();
 		if (bytes == null) {

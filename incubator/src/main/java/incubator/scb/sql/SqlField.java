@@ -35,9 +35,9 @@ public abstract class SqlField<T, V, F extends ScbField<T, V>, SV> {
 	 * @param sv_class the type of the SQL field value
 	 */
 	public SqlField(String sql_name, F sf, Class<SV> sv_class) {
-		Ensure.notNull(sql_name);
-		Ensure.notNull(sf);
-		Ensure.notNull(sv_class);
+		Ensure.not_null(sql_name, "sql_name == null");
+		Ensure.not_null(sf, "sf == null");
+		Ensure.not_null(sv_class, "sv_class == null");
 		
 		m_sf = sf;
 		m_sql_name = sql_name;
@@ -73,7 +73,7 @@ public abstract class SqlField<T, V, F extends ScbField<T, V>, SV> {
 	 * @throws SQLException the value in the database is invalid
 	 */
 	public void load(T obj, Object value) throws SQLException {
-		Ensure.notNull(obj);
+		Ensure.not_null(obj, "obj == null");
 		if (value == null) {
 			m_sf.set(obj, null);
 		} else {

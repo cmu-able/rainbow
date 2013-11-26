@@ -1,5 +1,7 @@
 package incubator.ctxaction;
 
+import incubator.pval.Ensure;
+
 import java.util.Map;
 
 import bsh.EvalError;
@@ -230,7 +232,7 @@ public class DynamicContextualAction extends ContextualAction {
 				 * We know this is always true but the compiler doesn't care
 				 * and warns that javaClass may be null...
 				 */
-				assert javaClass != null;
+				Ensure.not_null(javaClass, "unexpected javaClass == null");
 				if (javaClass != null) {
 					try {
 						Class<?> cls = Class.forName(javaClassName);
@@ -265,7 +267,7 @@ public class DynamicContextualAction extends ContextualAction {
 				 * We know this is always true but the compiler doesn't care
 				 * and warns that javaClass may be null...
 				 */
-				assert javaClass != null;
+				Ensure.not_null(javaClass, "unexpected javaClass == null");
 				if (javaClass != null) {
 					try {
 						Class<?> cls = Class.forName(javaClassName);

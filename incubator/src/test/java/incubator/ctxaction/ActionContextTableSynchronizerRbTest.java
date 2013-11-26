@@ -19,6 +19,7 @@ public class ActionContextTableSynchronizerRbTest extends Assert {
 	 * @throws IllegalArgumentException expected
 	 * @throws Exception test failed
 	 */
+	@SuppressWarnings("unused")
 	@Test(expected = IllegalArgumentException.class)
 	public void cannotCreateWithNullTable() throws Exception {
 		new ActionContextTableSynchronizer(null, new ActionContext(), "foo");
@@ -30,6 +31,7 @@ public class ActionContextTableSynchronizerRbTest extends Assert {
 	 * @throws IllegalArgumentException expected
 	 * @throws Exception test failed
 	 */
+	@SuppressWarnings("unused")
 	@Test(expected = IllegalArgumentException.class)
 	public void cannotCreateWithNullContext() throws Exception {
 		new ActionContextTableSynchronizer(new JTable(new TestTableModel(null)),
@@ -42,6 +44,7 @@ public class ActionContextTableSynchronizerRbTest extends Assert {
 	 * @throws IllegalArgumentException expected
 	 * @throws Exception test failed
 	 */
+	@SuppressWarnings("unused")
 	@Test(expected = IllegalArgumentException.class)
 	public void cannotCreateWithNullKey() throws Exception {
 		new ActionContextTableSynchronizer(new JTable(new TestTableModel(null)),
@@ -55,6 +58,7 @@ public class ActionContextTableSynchronizerRbTest extends Assert {
 	 * @throws IllegalArgumentException expected
 	 * @throws Exception test failed
 	 */
+	@SuppressWarnings("unused")
 	@Test(expected = IllegalArgumentException.class)
 	public void cannotCreateWithModelNotImplementingInterface()
 			throws Exception {

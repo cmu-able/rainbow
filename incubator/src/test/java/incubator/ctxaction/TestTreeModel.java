@@ -11,18 +11,35 @@ import incubator.ctxaction.NodeContextTreeModel;
  */
 class TestTreeModel extends DefaultTreeModel
 		implements NodeContextTreeModel {
+	/**
+	 * Version for serialization.
+	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Creates a new tree model.
+	 * @param data the model data
+	 */
 	public TestTreeModel(Object data[]) {
 		super(buildRoot(data));
 	}
 	
+	/**
+	 * Creates the root node.
+	 * @param data the model data
+	 * @return the root node
+	 */
 	private static DefaultMutableTreeNode buildRoot(Object data[]) {
 		DefaultMutableTreeNode root = new DefaultMutableTreeNode(data[0]);
 		buildChildren(root, data);
 		return root;
 	}
 	
+	/**
+	 * Builds all children of a parent.
+	 * @param parent the parent
+	 * @param data the data with the children which is processed recursively
+	 */
 	private static void buildChildren(DefaultMutableTreeNode parent,
 			Object data[]) {
 		for (int i = 1; i < data.length; i++) {
@@ -42,6 +59,11 @@ class TestTreeModel extends DefaultTreeModel
 		}
 	}
 	
+	/**
+	 * Obtains a path.
+	 * @param path the path
+	 * @return the path
+	 */
 	TreePath getPath(Object ...path) {
 		DefaultMutableTreeNode curr = null;
 		for (Object p : path) {
@@ -74,10 +96,6 @@ class TestTreeModel extends DefaultTreeModel
 		 * compiler will complain.
 		 */
 		assert curr != null;
-		if (curr == null) {
-			throw new AssertionError("curr == null");
-		}
-		
 		return new TreePath(curr.getPath());
 	}
 

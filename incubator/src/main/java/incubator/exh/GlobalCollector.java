@@ -49,8 +49,9 @@ public class GlobalCollector {
 	 * @param collector the collector to add
 	 */
 	synchronized void add_proxy_collector(ThrowableCollector collector) {
-		Ensure.notNull(collector);
-		Ensure.stateCondition(!m_proxy_collectors.contains(collector));
+		Ensure.not_null(collector, "collector == null");
+		Ensure.is_false(m_proxy_collectors.contains(collector), "Collector "
+				+ "already added");
 		m_proxy_collectors.add(collector);
 	}
 	
@@ -59,8 +60,9 @@ public class GlobalCollector {
 	 * @param collector the collector to remove
 	 */
 	synchronized void remove_proxy_collector(ThrowableCollector collector) {
-		Ensure.notNull(collector);
-		Ensure.stateCondition(m_proxy_collectors.remove(collector) == true);
+		Ensure.not_null(collector, "collector == null");
+		Ensure.is_true(m_proxy_collectors.remove(collector), "Collector not "
+				+ "found");
 	}
 	
 	/**

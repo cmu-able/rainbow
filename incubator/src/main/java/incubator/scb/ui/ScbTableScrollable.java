@@ -27,7 +27,7 @@ public class ScbTableScrollable<T extends Scb<T>> extends JPanel {
 	 * @param model the model
 	 */
 	public ScbTableScrollable(ScbTableModel<T, ? extends Comparator<T>> model) {
-		Ensure.notNull(model);
+		Ensure.not_null(model, "model == null");
 		
 		m_table = new ScbTable<>(model);
 		

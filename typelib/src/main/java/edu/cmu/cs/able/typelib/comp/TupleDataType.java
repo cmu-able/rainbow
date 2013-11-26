@@ -48,7 +48,7 @@ public class TupleDataType extends DataType {
 	public TupleDataType(List<DataType> inner_types, AnyType any) {
 		super(build_tuple_name(inner_types),
 				new HashSet<DataType>(Arrays.asList(any)));
-		Ensure.notNull(inner_types);
+		Ensure.not_null(inner_types, "inner_types == null");
 		m_inner = new ArrayList<>(inner_types);
 	}
 	
@@ -58,7 +58,7 @@ public class TupleDataType extends DataType {
 	 * @return the tuple name
 	 */
 	public static String build_tuple_name(List<DataType> types) {
-		Ensure.notNull(types);
+		Ensure.not_null(types, "types == null");
 		String name = TUPLE_NAME_PREFIX;
 		for (int i = 0; i < types.size(); i++) {
 			if (i > 0) {
@@ -123,10 +123,12 @@ public class TupleDataType extends DataType {
 	 * @return the new tuple
 	 */
 	public TupleDataValue make(List<DataValue> values) {
-		Ensure.notNull(values);
-		Ensure.isTrue(m_inner.size() == values.size());
+		Ensure.not_null(values, "values == null");
+		Ensure.is_true(m_inner.size() == values.size(), "Incorrect size "
+				+ "of values list");
 		for (int i = 0; i < m_inner.size(); i++) {
-			Ensure.isTrue(m_inner.get(i).is_instance(values.get(i)));
+			Ensure.is_true(m_inner.get(i).is_instance(values.get(i)),
+					"Value in value list does not match type");
 		}
 		
 		return new TupleDataValue(this, values);

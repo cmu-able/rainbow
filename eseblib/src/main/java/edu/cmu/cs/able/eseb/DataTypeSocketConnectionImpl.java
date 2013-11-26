@@ -132,13 +132,13 @@ public class DataTypeSocketConnectionImpl implements DataTypeSocketConnection {
 
 	@Override
 	public void write(DataValue dt) throws IOException {
-		Ensure.notNull(dt);
+		Ensure.not_null(dt, "dt == null");
 		m_output.write(dt);
 	}
 
 	@Override
 	public void write(BusData bd) throws IOException {
-		Ensure.notNull(bd);
+		Ensure.not_null(bd, "bd == null");
 		m_output.write(bd);
 	}
 

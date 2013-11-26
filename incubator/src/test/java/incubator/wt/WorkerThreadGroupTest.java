@@ -42,17 +42,10 @@ public class WorkerThreadGroupTest extends DefaultTCase {
 	 * Thread groups cannot be created with invalid data.
 	 * @throws Exception test failed
 	 */
-	@Test
+	@Test(expected = AssertionError.class)
 	@SuppressWarnings("unused")
 	public void invalid_creation() throws Exception {
-		try {
-			new WorkerThreadGroup(null);
-			fail();
-		} catch (IllegalArgumentException e) {
-			/*
-			 * Expected.
-			 */
-		}
+		new WorkerThreadGroup(null);
 	}
 	
 	/**
@@ -86,10 +79,11 @@ public class WorkerThreadGroupTest extends DefaultTCase {
 	@Test
 	public void add_remove_invalid_thread() throws Exception {
 		WorkerThreadGroup wtg = new WorkerThreadGroup("foo");
+		boolean fail = false;
 		try {
 			wtg.add_thread(null);
-			fail();
-		} catch (IllegalArgumentException e) {
+			fail = true;
+		} catch (AssertionError e) {
 			/*
 			 * Expected.
 			 */
@@ -97,8 +91,8 @@ public class WorkerThreadGroupTest extends DefaultTCase {
 		
 		try {
 			wtg.remove_thread(null);
-			fail();
-		} catch (IllegalArgumentException e) {
+			fail = true;
+		} catch (AssertionError e) {
 			/*
 			 * Expected.
 			 */
@@ -107,8 +101,8 @@ public class WorkerThreadGroupTest extends DefaultTCase {
 		WorkerThread wt1 = new WorkerThread("wt1");
 		try {
 			wtg.remove_thread(wt1);
-			fail();
-		} catch (IllegalStateException e) {
+			fail = true;
+		} catch (AssertionError e) {
 			/*
 			 * Expected.
 			 */
@@ -117,8 +111,8 @@ public class WorkerThreadGroupTest extends DefaultTCase {
 		wtg.add_thread(wt1);
 		try {
 			wtg.add_thread(wt1);
-			fail();
-		} catch (IllegalStateException e) {
+			fail = true;
+		} catch (AssertionError e) {
 			/*
 			 * Expected.
 			 */
@@ -127,11 +121,15 @@ public class WorkerThreadGroupTest extends DefaultTCase {
 		wtg.remove_thread(wt1);
 		try {
 			wtg.remove_thread(wt1);
-			fail();
-		} catch (IllegalStateException e) {
+			fail = true;
+		} catch (AssertionError e) {
 			/*
 			 * Expected.
 			 */
+		}
+		
+		if (fail) {
+			fail();
 		}
 	}
 	
@@ -267,13 +265,18 @@ public class WorkerThreadGroupTest extends DefaultTCase {
 		wtg1.add_subgroup(wtg2);
 		wtg2.add_subgroup(wtg3);
 		
+		boolean fail = false;
 		try {
 			wtg3.add_subgroup(wtg1);
-			fail();
-		} catch (IllegalStateException e) {
+			fail = true;
+		} catch (AssertionError e) {
 			/*
 			 * Expected.
 			 */
+		}
+		
+		if (fail) {
+			fail();
 		}
 	}
 	
@@ -358,10 +361,11 @@ public class WorkerThreadGroupTest extends DefaultTCase {
 	public void adding_removing_self_group() throws Exception {
 		WorkerThreadGroup wtg1 = new WorkerThreadGroup("g1");
 		
+		boolean fail = false;
 		try {
 			wtg1.add_subgroup(wtg1);
-			fail();
-		} catch (IllegalArgumentException e) {
+			fail = true;
+		} catch (AssertionError e) {
 			/*
 			 * Expected.
 			 */
@@ -369,11 +373,15 @@ public class WorkerThreadGroupTest extends DefaultTCase {
 		
 		try {
 			wtg1.remove_subgroup(wtg1);
-			fail();
-		} catch (IllegalArgumentException e) {
+			fail = true;
+		} catch (AssertionError e) {
 			/*
 			 * Expected.
 			 */
+		}
+		
+		if (fail) {
+			fail = true;
 		}
 	}
 	
@@ -385,10 +393,11 @@ public class WorkerThreadGroupTest extends DefaultTCase {
 	public void adding_removing_null_group() throws Exception {
 		WorkerThreadGroup wtg1 = new WorkerThreadGroup("g1");
 		
+		boolean fail = false;
 		try {
 			wtg1.add_subgroup(null);
-			fail();
-		} catch (IllegalArgumentException e) {
+			fail = true;
+		} catch (AssertionError e) {
 			/*
 			 * Expected.
 			 */
@@ -396,11 +405,15 @@ public class WorkerThreadGroupTest extends DefaultTCase {
 		
 		try {
 			wtg1.remove_subgroup(null);
-			fail();
-		} catch (IllegalArgumentException e) {
+			fail = true;
+		} catch (AssertionError e) {
 			/*
 			 * Expected.
 			 */
+		}
+		
+		if (fail) {
+			fail();
 		}
 	}
 }

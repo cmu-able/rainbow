@@ -56,7 +56,7 @@ public class WorkerThread implements WorkerThreadCI {
 	 * @param name the thread name
 	 */
 	public WorkerThread(String name) {
-		Ensure.notNull(name);
+		Ensure.not_null(name, "name == null");
 		m_name = name;
 		m_state = WtState.STOPPED;
 		m_description = null;
@@ -111,8 +111,9 @@ public class WorkerThread implements WorkerThreadCI {
 	
 	@Override
 	public final synchronized void start() {
-		Ensure.stateCondition(m_state == WtState.STOPPED
-				|| m_state == WtState.ABORTED);
+		Ensure.is_true(m_state == WtState.STOPPED
+				|| m_state == WtState.ABORTED, "m_state != WtState.STOPPED "
+				+ "&& m_state != WtState.ABORTED");
 		assert m_thread == null;
 		m_state = WtState.STARTING;
 		
@@ -152,7 +153,8 @@ public class WorkerThread implements WorkerThreadCI {
 	
 	@Override
 	public final synchronized void stop() {
-		Ensure.stateCondition(m_state == WtState.RUNNING);
+		Ensure.is_true(m_state == WtState.RUNNING,
+				"w_state != WtState.RUNNING");
 		
 		if (Thread.currentThread() == m_thread) {
 			throw new ClosingWorkerThreadFromWithinException();

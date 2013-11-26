@@ -1,0 +1,219 @@
+options {
+	STATIC = false;
+}
+
+PARSER_BEGIN(SdlJjParser)
+
+package incubator.scb.sdl.parser;
+
+import java.util.HashMap;
+import java.util.Map;
+import incubator.scb.sdl.GeneratorRegistry;
+import incubator.scb.sdl.SdlAttribute;
+import incubator.scb.sdl.SdlAttributeInvariant;
+import incubator.scb.sdl.SdlAttributeNotNullInvariant;
+import incubator.scb.sdl.SdlBean;
+import incubator.scb.sdl.SdlBeanGenerator;
+import incubator.scb.sdl.SdlBeanType;
+import incubator.scb.sdl.SdlDefinition;
+import incubator.scb.sdl.SdlEnumerationType;
+import incubator.scb.sdl.SdlPackage;
+import incubator.scb.sdl.SdlType;
+
+public class SdlJjParser {
+	/**
+	 * Bean modifier that marks a bean as being read-only.
+	 */
+	public static final String BEAN_MODIFIER_READ_ONLY = "read_only";
+	
+	/**
+	 * Attribute invariant that states that the attribute is not null.
+	 */
+	public static final String ATTR_INV_NOT_NULL = "not_null";
+}
+
+PARSER_END(SdlJjParser)
+
+SKIP : {
+	" "
+|	"\t"
+|	"\n"
+|	"\r"
+|	< "/*" > : ML_COMMENT_STATE
+|	< "//" > : SL_COMMENT_STATE
+}
+
+<ML_COMMENT_STATE> SKIP : {
+	< "*/" > : DEFAULT
+|	< ~[] >
+}
+
+<SL_COMMENT_STATE> SKIP : {
+	< "\n" > : DEFAULT
+|	< ~[] >
+}
+
+TOKEN : {
+	< COLON: ":" >
+|	< COMMA: "," >
+|	< DOT: "." >
+|	< EQUALS: "=" >
+|	< GT: ">" >
+|	< LPAREN: "(" >
+|	< LT: "<" >
+|	< RPAREN: ")" >
+|	< SEMICOLON: ";" >
+|	< LBRACE: "{" >
+|	< RBRACE: "}" >
+|	< ATTRIBUTES: "attributes" >
+|	< BEAN: "bean" >
+|	< ENUM: "enum" >
+|	< GENERATORS: "generators" >
+|	< PACKAGE: "package" >
+| 	< IDENTIFIER: ["a"-"z","A"-"Z","_"](["a"-"z","A"-"Z","0"-"9","_"])* >
+}
+
+SdlDefinition SDL(GeneratorRegistry gr) : {
+		SdlDefinition sd = new SdlDefinition();
+		String pn;
+		SdlPackage p;
+	} {
+		(<PACKAGE> pn=PackageName() <LBRACE> {			p = new SdlPackage(pn);
+			}
+		Package(p, gr, sd) {
+			sd.add_package(p);			}		<RBRACE>)* <EOF> {
+			return sd;			}
+}
+
+String PackageName() : {
+		String pn;
+	} {
+		pn = DotName() {
+			return pn;			}
+}
+
+String DotName() : {
+		String dn;
+		Token t;
+	} {
+		t = <IDENTIFIER> {
+			dn = t.image;			}
+		(<DOT> t = <IDENTIFIER> {
+			dn = dn + '.' + t.image;			}		)* {
+			return dn;			}}
+
+void Package(SdlPackage p, GeneratorRegistry gr, SdlDefinition sd) : {
+		Token t;
+ 	} {
+ 		(<BEAN> t = <IDENTIFIER> <LBRACE> {
+ 			SdlBean b = new SdlBean(t.image, p);
+ 			if (p.bean(t.image) != null) {
+ 				throw new ParseException("Duplicate bean name: '" + t.image
+ 						+ "'."); 			}
+ 			p.add_bean(b); 			}
+ 		Bean(b, gr, sd, p) <RBRACE>)*
+}
+
+void Bean(SdlBean b, GeneratorRegistry gr, SdlDefinition sd, SdlPackage p) :  {
+		Token t;
+	} {
+		((<GENERATORS> <LBRACE> (BeanGenerator(b, gr)
+		(<COMMA> BeanGenerator(b, gr))*)? <RBRACE>)
+		|(<ATTRIBUTES> <LBRACE> (BeanAttribute(b, gr, sd, p))* <RBRACE>)
+		| BeanModifier(b, gr))*
+}
+
+void BeanGenerator(SdlBean b, GeneratorRegistry gr) : {
+		Token t, p, v;
+		Map<String, String> props = new HashMap<String, String>();
+	} {
+		t = <IDENTIFIER> {
+			SdlBeanGenerator bg = gr.bean_generator(t.image);
+			if (bg == null) {
+				throw new ParseException("Unknown bean generator: '"
+						+ t.image + "'.");
+			}
+			}
+		(<LPAREN>(
+		p = <IDENTIFIER> {
+			v = null;
+			}
+		(<EQUALS> v = <IDENTIFIER>)? {
+			props.put(p.image, v == null? "true" : v.image);
+			}
+		(<COMMA> p = <IDENTIFIER> {
+			v = null; 
+			}
+		<EQUALS> v = <IDENTIFIER> {
+			props.put(p.image, v == null? "true" : v.image);
+			}
+		)*)?<RPAREN>)? {
+			b.add_generator(bg, props);
+			}
+}
+
+void BeanAttribute(SdlBean b, GeneratorRegistry gr, SdlDefinition sd,
+	SdlPackage p) : {
+		Token tn;
+		SdlType st;
+		SdlAttribute sa;
+		SdlAttributeInvariant iv;
+	} {
+		tn = <IDENTIFIER> <COLON> st = Type(sd, p) {
+			sa = b.make_attribute(tn.image, st);
+			}
+		(<COMMA> iv = AttributeInvariant() {
+			sa.add_invariant(iv);
+			}
+		)* <SEMICOLON>
+}
+
+void BeanModifier(SdlBean b, GeneratorRegistry gr) : {
+ 		Token t;
+	} {
+		t = <IDENTIFIER> <SEMICOLON> {
+			if (t.image.equals(BEAN_MODIFIER_READ_ONLY)) {
+				b.set_read_only();
+			} else {
+				throw new ParseException("Unknown bean modifier: '"
+						+ t.image + "'.");
+			}
+			}
+}
+
+SdlType Type(SdlDefinition sd, SdlPackage p) : {
+		String  s;
+		SdlBean b;
+	} {
+		s = DotName() {
+			return new SdlType(s);
+			}
+		| <ENUM> <LT> s = DotName() <GT> {
+			return new SdlEnumerationType(s);
+			}
+		| <BEAN> <LT> s = DotName() <GT> {
+			b = sd.find_bean(s);
+			if (b == null) {
+				b = p.bean(s);
+			}
+			
+			if (b == null) {
+				throw new ParseException("Could not find bean '" + s + "'.");
+			}
+			
+			return new SdlBeanType(b);
+			}
+}
+
+SdlAttributeInvariant AttributeInvariant() : {
+		Token t;
+	} {
+		t = <IDENTIFIER> {
+			if (t.image.equals(ATTR_INV_NOT_NULL)) {
+				return new SdlAttributeNotNullInvariant();
+			} else {
+				throw new ParseException("Unknown attribute invariant: '"
+						+ t.image + "'.");
+			}
+		}
+}

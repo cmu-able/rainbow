@@ -43,8 +43,8 @@ public abstract class ScbTextField<T> extends ScbField<T, String> {
 	 * @param msg the message explaining when validation fails
 	 */
 	protected void add_pass_rule(Pattern p, String msg) {
-		Ensure.notNull(p);
-		Ensure.notNull(msg);
+		Ensure.not_null(p, "p == null");
+		Ensure.not_null(msg, "msg == null");
 		m_must_pass.put(p, msg);
 	}
 	
@@ -54,8 +54,8 @@ public abstract class ScbTextField<T> extends ScbField<T, String> {
 	 * @param msg the message explaining when validation fails
 	 */
 	protected void add_fail_rule(Pattern p, String msg) {
-		Ensure.notNull(p);
-		Ensure.notNull(msg);
+		Ensure.not_null(p, "p == null");
+		Ensure.not_null(msg, "msg == null");
 		m_must_fail.put(p, msg);
 	}
 	

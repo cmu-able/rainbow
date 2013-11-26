@@ -20,6 +20,7 @@ public class FixedKeyActionRbTest {
 	 * 
 	 * @throws Exception expected
 	 */
+	@SuppressWarnings("unused")
 	@Test(expected = KeyConfigurationException.class)
 	public void privateContextKey() throws Exception  {
 		/**
@@ -60,6 +61,7 @@ public class FixedKeyActionRbTest {
 	 * 
 	 * @throws Exception expected
 	 */
+	@SuppressWarnings("unused")
 	@Test(expected = KeyConfigurationException.class)
 	public void defaultProtectionContextKey() throws Exception  {
 		/**
@@ -100,6 +102,7 @@ public class FixedKeyActionRbTest {
 	 * 
 	 * @throws Exception expected
 	 */
+	@SuppressWarnings("unused")
 	@Test(expected = KeyConfigurationException.class)
 	public void protectedContextKey() throws Exception  {
 		/**

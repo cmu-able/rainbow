@@ -63,6 +63,7 @@ public class ActionContextTreeSynchronizerEqTest extends Assert {
 	 * 
 	 * @throws Exception test failed
 	 */
+	@SuppressWarnings("unused")
 	@Test
 	public void selectionChangesUpdatesContext() throws Exception {
 		new ActionContextTreeSynchronizer(tree, context, "foo");
@@ -87,6 +88,7 @@ public class ActionContextTreeSynchronizerEqTest extends Assert {
 	 * 
 	 * @throws Exception test failed
 	 */
+	@SuppressWarnings("unused")
 	@Test
 	public void selectionIsSetAtStart() throws Exception {
 		tree.getSelectionModel().setSelectionPath(fooPath);
@@ -102,6 +104,7 @@ public class ActionContextTreeSynchronizerEqTest extends Assert {
 	 * 
 	 * @throws Exception test failed
 	 */
+	@SuppressWarnings("unused")
 	@Test
 	public void someRowsMayReturnNullObject() throws Exception {
 		new ActionContextTreeSynchronizer(tree, context, "foo");

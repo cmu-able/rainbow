@@ -160,10 +160,10 @@ public abstract class ContextualAction extends AbstractAction {
 	/**
 	 * Binds the action to an action context. This method must be invoked
 	 * before invoking the action. It can only be called once.
-	 * 
 	 * @param context the context to bind the action to.
+	 * @return the same action (<code>this</code>)
 	 */
-	public void bind(ActionContext context) {
+	public ContextualAction bind(ActionContext context) {
 		if (context == null) {
 			throw new IllegalArgumentException("context == null");
 		}
@@ -175,6 +175,8 @@ public abstract class ContextualAction extends AbstractAction {
 		
 		this.context = context;
 		init();
+		
+		return this;
 	}
 
 	/**

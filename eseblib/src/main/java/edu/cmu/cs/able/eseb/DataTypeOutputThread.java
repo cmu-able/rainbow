@@ -32,13 +32,13 @@ public class DataTypeOutputThread
 
 	@Override
 	public synchronized void write(DataValue dt) throws IOException {
-		Ensure.notNull(dt);
+		Ensure.not_null(dt, "dt == null");
 		write(new BusData(dt));
 	}
 	
 	@Override
 	public synchronized void write(BusData datum) throws IOException {
-		Ensure.notNull(datum);
+		Ensure.not_null(datum, "datum == null");
 		m_queue.addLast(datum);
 		notifyAll();
 	}

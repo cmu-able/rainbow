@@ -248,6 +248,8 @@ public class SyncScbSlave {
 	 * @param container the container
 	 * @param idclass the type of the ID field
 	 * @param tclass the type of the bean
+	 * @param <ID_TYPE> data type of the bean's ID
+	 * @param <T> data type of the bean
 	 */
 	public synchronized <ID_TYPE, T extends SyncScb<ID_TYPE, T>> void
 			add_container(String key, ScbEditableContainer<T> container,

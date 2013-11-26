@@ -29,7 +29,7 @@ class SoftCollectorProxy {
 	 * @param collector the local collector
 	 */
 	SoftCollectorProxy(ThrowableCollector collector) {
-		Ensure.notNull(collector);
+		Ensure.not_null(collector, "collector == null");
 		
 		m_proxy = new ThrowableCollector(collector.name());
 		

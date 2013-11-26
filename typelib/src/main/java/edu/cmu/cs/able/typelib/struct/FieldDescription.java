@@ -23,8 +23,8 @@ public class FieldDescription {
 	 * @param type the field type
 	 */
 	public FieldDescription(String name, DataType type) {
-		Ensure.notNull(name);
-		Ensure.notNull(type);
+		Ensure.not_null(name, "name == null");
+		Ensure.not_null(type, "type == null");
 		m_name = name;
 		m_type = type;
 	}

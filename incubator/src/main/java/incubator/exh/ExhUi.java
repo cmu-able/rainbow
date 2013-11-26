@@ -149,7 +149,7 @@ public class ExhUi extends JPanel {
 	 * in the user interface, this call is ignored
 	 */
 	public void add_collector(ThrowableCollector collector) {
-		Ensure.notNull(collector);
+		Ensure.not_null(collector, "collector == null");
 		if (m_collectors.contains(collector)) {
 			return;
 		}
@@ -167,8 +167,8 @@ public class ExhUi extends JPanel {
 	 * @param collector the collector to remove
 	 */
 	public void remove_collector(ThrowableCollector collector) {
-		Ensure.notNull(collector);
-		Ensure.stateCondition(m_collectors.remove(collector) == true);
+		Ensure.not_null(collector, "collector == null");
+		Ensure.is_true(m_collectors.remove(collector), "collector not found");
 		m_aggregator.remove_container(collector);
 	}
 	

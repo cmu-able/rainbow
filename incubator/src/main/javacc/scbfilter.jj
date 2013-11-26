@@ -1,0 +1,201 @@
+options {
+	STATIC = false;
+}
+
+PARSER_BEGIN(ScbFilterJjParser)
+
+package incubator.scb.filter.parser;
+
+import java.util.Set;
+
+import incubator.pval.Ensure;
+import incubator.scb.Scb;
+import incubator.scb.ScbField;
+import incubator.scb.ScbEnumField;
+import incubator.scb.ScbTextField;
+import incubator.scb.filter.ScbAndFilter;
+import incubator.scb.filter.ScbFilter;
+import incubator.scb.filter.ScbNotFilter;
+import incubator.scb.filter.ScbOrFilter;
+
+public class ScbFilterJjParser<T extends Scb> {
+	private ScbField<T, ?> field(Set<ScbField<T, ?>> fields, String n)
+				throws ParseException {		Ensure.not_null(fields, "fields == null");
+		Ensure.not_null(n, "n == null");
+
+		for (ScbField<T, ?> f : fields) {
+			if (f.name().equals(n)) {
+				return f;			}
+		}
+
+		throw new ParseException("No field found with name '" + n + "'.");
+	}
+
+	private void throw_field_type_error(Set<ScbField<T, ? >> fields, String n,
+			String type) throws ParseException {
+		Ensure.not_null(fields, "fields == null");
+		Ensure.not_null(n, "n == null");
+		Ensure.not_null(type, "type == null");
+
+		ScbField<T, ? > f = field(fields, n);
+			  
+		throw new ParseException("Field '" + n + "' (" + f.getClass().getName()
+				+ ") is not a " + type + " field.");	}
+
+	private boolean is_text_field(Set<ScbField<T, ? >> fields, String n)
+			throws ParseException {		Ensure.not_null(fields, "fields == null");
+		Ensure.not_null(n, "n == null");
+
+		return field(fields, n).value_type() == String.class;
+	}
+  
+	private ScbField<T, String> text_field(Set<ScbField<T, ? >> fields,
+			String n) throws ParseException {
+		Ensure.not_null(fields, "fields == null");
+		Ensure.not_null(n, "n == null");
+		
+		if (!is_text_field(fields, n)) {
+			throw new ParseException("Field '" + n + "' is not a text "
+					+ "field.");		}
+
+		return (ScbField<T, String>) field(fields, n);	}
+
+	private boolean is_enum_field(Set<ScbField<T, ?>> fields, String n)
+			throws ParseException {
+		Ensure.not_null(fields, "fields == null");
+		Ensure.not_null(n, "n == null");
+		
+		return field(fields, n).value_type().isEnum();
+	}
+  
+	private ScbField<T, ?> enum_field(Set<ScbField<T, ? >> fields, String n)
+			throws ParseException {
+		Ensure.not_null(fields, "fields == null");
+		Ensure.not_null(n, "n == null");
+		
+		if (!is_enum_field(fields, n)) {
+			throw new ParseException("Field '" + n + "' is not an "
+					+ "enumeration field.");
+		}
+
+		return (ScbField<T, ?>) field(fields, n);
+	}
+
+	private ScbFilter<T> make_text_equals(final ScbField<T, String> tf,
+			final String value) {
+		Ensure.not_null(tf, "tf == null");
+		Ensure.not_null(value, "value == null");
+
+		return new ScbFilter<T>() {
+			@Override
+			public boolean accepts(T t) {
+				Ensure.not_null(t, "t == null");
+				return value.equals(tf.get(t));
+			}
+		};
+	}	  
+
+	private ScbFilter<T> make_enum_equals(final ScbField<T, ?> ef,
+			final String value) {
+		Ensure.not_null(ef, "ef == null");
+		Ensure.not_null(value, "value == null");
+
+		return new ScbFilter<T>() {
+			@Override
+			public boolean accepts(T t) {
+				Ensure.not_null(t, "t == null");
+				if (ef.get(t) != null) {					return value.equals(ef.get(t).toString());
+				} else {
+					return false;				}
+			}
+		};
+	}	  
+}
+
+PARSER_END(ScbFilterJjParser)
+
+SKIP : {
+	" "
+|	"\t"
+|	"\n"
+|	"\r"
+}
+
+MORE : {
+	< "\"" > : STRING_STATE
+}
+<STRING_STATE> MORE : {
+	< "\\\"" >
+}
+<STRING_STATE> TOKEN : {
+	< STRING: "\"" > : DEFAULT
+}
+<STRING_STATE> MORE : {
+	< ~[] >
+}
+
+MORE : {
+	< "[" > : COMPLEX_IDENTIFIER_STATE}
+<COMPLEX_IDENTIFIER_STATE> TOKEN : {
+	< CIDENTIFIER: "]" > : DEFAULT}
+<COMPLEX_IDENTIFIER_STATE> MORE : {
+	< ~[] >
+}
+
+TOKEN : {
+	< AND: "and" >
+|	< NOT: "not" >
+|	< OR: "or" >
+|	< EQUALS: "=" >
+|	< LPAREN: "(" >
+|	< RPAREN: ")" >
+| 	< IDENTIFIER: ["a"-"z","A"-"Z","_"](["a"-"z","A"-"Z","0"-"9","_"])* >
+}
+
+ScbFilter<T> Filter(Set<ScbField<T, ?>> fields) : {
+		ScbFilter<T> f;
+	} {
+		f = BooleanCompositeFilter(fields) <EOF> {
+			return f;		}
+}
+
+ScbFilter<T> BooleanCompositeFilter(Set<ScbField<T, ?>> fields) : {
+		ScbFilter<T> f1, f2;	} {
+		f1 = SimpleFilter(fields)
+		((<AND> f2 = SimpleFilter(fields) {
+			f1 = ScbAndFilter.make(f1 ,f2); 			}
+		)+|(<OR> f2 = SimpleFilter(fields) {
+			f1 = ScbOrFilter.make(f1, f2);			}
+		)+)? {
+			return f1;			}}
+
+ScbFilter<T> SimpleFilter(Set<ScbField<T, ?>> fields) : {
+		ScbFilter<T> f;	} {
+		f = ComparisonFilter(fields) {
+			return f;			}
+		| <NOT> f = SimpleFilter(fields) {
+			return new ScbNotFilter(f);			}
+		| <LPAREN> f = BooleanCompositeFilter(fields) <RPAREN> {
+			return f;			}}
+
+ScbFilter<T> ComparisonFilter(Set<ScbField<T, ?>> fields) : {
+		String id;
+		Token s;
+		String str;	} {
+		id = Identifier() <EQUALS> s = <STRING> {
+			str = s.image.substring(1, s.image.length() - 1);
+			if (is_text_field(fields, id)) {				return make_text_equals(text_field(fields, id), str);
+			} else if (is_enum_field(fields, id)) {
+				return make_enum_equals(enum_field(fields, id), str);			} else {
+				throw_field_type_error(fields, id,
+						"text or enumeration");			}
+			}}
+
+String Identifier() : {
+		Token t;
+	}{
+		t = <IDENTIFIER> {
+			return t.image;		}
+		| t = <CIDENTIFIER> {
+			return t.image.substring(1, t.image.length() - 1);		}
+}

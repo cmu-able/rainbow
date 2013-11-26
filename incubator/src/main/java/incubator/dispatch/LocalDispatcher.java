@@ -30,14 +30,14 @@ public class LocalDispatcher<L> implements Dispatcher<L> {
 	
 	@Override
 	public synchronized void add(L listener) {
-		Ensure.notNull(listener);
+		Ensure.not_null(listener, "listener == null");
 		m_listeners.add(listener);
 	}
 	
 	@Override
 	public synchronized void remove(L listener) {
-		Ensure.notNull(listener);
-		Ensure.stateCondition(m_listeners.remove(listener) == true);
+		Ensure.not_null(listener, "listener == null");
+		Ensure.is_true(m_listeners.remove(listener), "Listener not known");
 	}
 	
 	/**
@@ -45,14 +45,17 @@ public class LocalDispatcher<L> implements Dispatcher<L> {
 	 * @param op the event dispatching operation
 	 */
 	public synchronized void dispatch(DispatcherOp<L> op) {
-		Ensure.notNull(op);
+		Ensure.not_null(op, "op == null");
 		
 		if (m_listeners.size() == 0) {
 			return;
 		}
 		
 		List<L> listeners_copy = new ArrayList<>(m_listeners);
-		m_global.dispatch(new QueuedDispatch<>(listeners_copy, op));
+		RuntimeException stack_marker = new RuntimeException("Dispatch was "
+				+ "invoked here.");
+		m_global.dispatch(new QueuedDispatch<>(listeners_copy, op,
+				stack_marker), stack_marker);
 	}
 	
 	/**
@@ -60,7 +63,9 @@ public class LocalDispatcher<L> implements Dispatcher<L> {
 	 * @param r the runnable to dispatch
 	 */
 	public synchronized void dispatch(Runnable r) {
-		Ensure.notNull(r);
-		m_global.dispatch(r);
+		Ensure.not_null(r, "r == null");
+		RuntimeException stack_marker = new RuntimeException("Dispatch was "
+				+ "invoked here.");
+		m_global.dispatch(r, stack_marker);
 	}
 }

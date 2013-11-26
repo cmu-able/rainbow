@@ -24,7 +24,7 @@ public abstract class JavaObjectDataValue<T> extends DataValue {
 	 */
 	public JavaObjectDataValue(T value, DataType type) {
 		super(type);
-		Ensure.notNull(value);
+		Ensure.not_null(value, "value == null");
 		m_value = value;
 	}
 	

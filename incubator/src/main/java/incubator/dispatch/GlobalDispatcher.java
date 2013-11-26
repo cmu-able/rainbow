@@ -173,10 +173,13 @@ public class GlobalDispatcher {
 	/**
 	 * Queues a runnable.
 	 * @param r the runnable
+	 * @param dispatch_marker an exception with the stack trace when the
+	 * dispatch was invoked
 	 */
-	synchronized void dispatch(Runnable r) {
-		Ensure.not_null(r);
-		m_executor.execute(new DispatchRunnable(r));
+	synchronized void dispatch(Runnable r, RuntimeException dispatch_marker) {
+		Ensure.not_null(r, "r == null");
+		Ensure.not_null(dispatch_marker, "dispatch_marker == null");
+		m_executor.execute(new DispatchRunnable(r, dispatch_marker));
 	}
 	
 	/**
@@ -187,9 +190,25 @@ public class GlobalDispatcher {
 	 * @param <L> the type of listener
 	 */
 	<L> void handle_exception(QueuedDispatch<L> qd, L listener, Throwable t) {
-		System.err.println("Exception during dispatch: "
-				+ t.getClass().getName());
-		t.printStackTrace();
+		handle_exception(new Exception("Error during dispatch to listener {"
+				+ listener + "}.", t));
+	}
+	
+	/**
+	 * Invoked when an exception is thrown during dispatch
+	 * @param t the exception
+	 */
+	private void handle_exception(Throwable t) {
+		synchronized (GlobalDispatcher.instance()) {
+			if (GlobalDispatcher.instance().m_collector == null) {
+				GlobalDispatcher.instance().m_collector =
+						new LocalCollector(
+						GlobalDispatcher.class.getCanonicalName());
+			}
+			
+			GlobalDispatcher.instance().m_collector.collect(t,
+					"dispatch");
+		}
 	}
 	
 	/**
@@ -212,12 +231,21 @@ public class GlobalDispatcher {
 		private Runnable m_inner;
 		
 		/**
+		 * The dispatch marker.
+		 */
+		private RuntimeException m_dispatch_marker;
+		
+		/**
 		 * Creates a new runnable.
 		 * @param inner the inner runnable
+		 * @param dispatch_marker the dispatch marker that has the stack
+		 * trace of the thread when it sent the dispatcher
 		 */
-		DispatchRunnable(Runnable inner) {
-			Ensure.not_null(inner);
+		DispatchRunnable(Runnable inner, RuntimeException dispatch_marker) {
+			Ensure.not_null(inner, "inner == null");
+			Ensure.not_null(dispatch_marker, "dispatch_marker == null");
 			m_inner = inner;
+			m_dispatch_marker = dispatch_marker;
 			
 			synchronized (GlobalDispatcher.this) {
 				m_waiting++;
@@ -234,16 +262,8 @@ public class GlobalDispatcher {
 			try {
 				m_inner.run();
 			} catch (Throwable t) {
-				synchronized (GlobalDispatcher.instance()) {
-					if (GlobalDispatcher.instance().m_collector == null) {
-						GlobalDispatcher.instance().m_collector =
-								new LocalCollector(
-								GlobalDispatcher.class.getCanonicalName());
-					}
-					
-					GlobalDispatcher.instance().m_collector.collect(t,
-							"dispatch");
-				}
+				t.addSuppressed(m_dispatch_marker);
+				handle_exception(t);
 			} finally {
 				synchronized (GlobalDispatcher.instance()) {
 					m_executing--;

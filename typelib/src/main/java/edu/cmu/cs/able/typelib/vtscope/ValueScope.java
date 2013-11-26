@@ -23,7 +23,7 @@ public class ValueScope extends Scope<NamedValue> {
 	 */
 	public ValueScope(TypeScope types) {
 		super(null);
-		Ensure.notNull(types);
+		Ensure.not_null(types, "types == null");
 		m_types = types;
 	}
 	
@@ -43,7 +43,7 @@ public class ValueScope extends Scope<NamedValue> {
 	 * @throws AmbiguousNameException the name is ambiguous
 	 */
 	public DataType type(String name) throws AmbiguousNameException {
-		Ensure.notNull(name);
+		Ensure.not_null(name, "name == null");
 		return m_types.type(name);
 	}
 	
@@ -54,7 +54,7 @@ public class ValueScope extends Scope<NamedValue> {
 	 * @throws AmbiguousNameException the name is ambiguous
 	 */
 	public DataValue value(String name) throws AmbiguousNameException {
-		Ensure.notNull(name);
+		Ensure.not_null(name, "name == null");
 		NamedValue nv = find(name);
 		if (nv == null) {
 			return null;

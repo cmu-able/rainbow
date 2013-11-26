@@ -43,6 +43,7 @@ public class ScbAndFilter<T> implements ScbFilter<T> {
 	 * with both filtrers.
 	 * @param f1 the first filter
 	 * @param f2 the second filter
+	 * @param <T> the type of SCB
 	 * @return the filter
 	 */
 	public static <T> ScbFilter<T> make(ScbFilter<T> f1, ScbFilter<T> f2) {

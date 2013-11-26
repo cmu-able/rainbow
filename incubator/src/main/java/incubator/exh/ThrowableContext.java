@@ -41,7 +41,7 @@ public class ThrowableContext extends SerializableScb<ThrowableContext> {
 	 * has been caught 
 	 */
 	public ThrowableContext(Throwable t, String location) {
-		Ensure.notNull(t);
+		Ensure.not_null(t, "t == null");
 		m_throwable = t;
 		m_location = location;
 		m_when = new Date();
