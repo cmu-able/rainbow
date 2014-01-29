@@ -1,6 +1,9 @@
 package incubator.scb.ui;
 
 import incubator.Pair;
+import incubator.SetSynchronizer;
+import incubator.exh.LocalCollector;
+import incubator.exh.ThrowableCollector;
 import incubator.pval.Ensure;
 import incubator.scb.Scb;
 import incubator.scb.ScbContainer;
@@ -10,10 +13,14 @@ import incubator.scb.ScbField;
 import incubator.scb.ValidationResult;
 
 import java.awt.EventQueue;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -51,6 +58,21 @@ public class ScbTableModel<T extends Scb<T>, C extends Comparator<T>>
 	private ScbContainer<T> m_container;
 	
 	/**
+	 * The first synchronization lock.
+	 */
+	private ReentrantLock m_sync_lock_1;
+	
+	/**
+	 * The second synchronization lock.
+	 */
+	private ReentrantLock m_sync_lock_2;
+	
+	/**
+	 * Exception collector.
+	 */
+	private ThrowableCollector m_collector;
+	
+	/**
 	 * Creates a new table model.
 	 * @param container the SCB container; if <code>null</code> no data is
 	 * shown
@@ -61,6 +83,10 @@ public class ScbTableModel<T extends Scb<T>, C extends Comparator<T>>
 		m_fields = new ArrayList<>();
 		m_objects = new ArrayList<>();
 		m_comparator = comparator;
+		m_sync_lock_1 = new ReentrantLock();
+		m_sync_lock_2 = new ReentrantLock();
+		m_collector = new LocalCollector("ScbTableModel: "
+				+ getClass().getName());
 		
 		if (container != null) {
 			for (T t : container.all_scbs()) {
@@ -71,22 +97,12 @@ public class ScbTableModel<T extends Scb<T>, C extends Comparator<T>>
 		m_listener = new ScbContainerListener<T>() {
 			@Override
 			public void scb_added(final T t) {
-				EventQueue.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						add(t);
-					}
-				});
+				sync_container();
 			}
 
 			@Override
 			public void scb_removed(final T t) {
-				EventQueue.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						remove(t);
-					}
-				});
+				sync_container();
 			}
 			
 			@Override
@@ -105,6 +121,48 @@ public class ScbTableModel<T extends Scb<T>, C extends Comparator<T>>
 		if (container != null) {
 			container.dispatcher().add(m_listener);
 		}
+	}
+	
+	/**
+	 * Synchronizes the table data with the container.
+	 */
+	private void sync_container() {
+		if (!m_sync_lock_1.tryLock()) {
+			return;
+		}
+		
+		m_sync_lock_2.lock();
+		
+		final Set<T> other_scbs = m_container.all_scbs();
+		final Set<T> mine_scbs;
+		synchronized (this) {
+			mine_scbs = new HashSet<>(m_objects);
+		}
+		
+		m_sync_lock_1.unlock();
+		
+		try {
+			EventQueue.invokeAndWait(new Runnable() {
+				@Override
+				public void run() {
+					Pair<Set<T>, Set<T>> sync =
+							SetSynchronizer.synchronization_changes(
+							mine_scbs, other_scbs);
+					for (T t : sync.first()) {
+						add(t);
+					}
+					
+					for (T t : sync.second()) {
+						remove(t);
+					}
+				}
+			});
+		} catch (InterruptedException|InvocationTargetException e) {
+			m_collector.collect(e, "Synchronize container");
+		} finally {
+			m_sync_lock_2.unlock();
+		}
+		
 	}
 	
 	/**
@@ -163,7 +221,7 @@ public class ScbTableModel<T extends Scb<T>, C extends Comparator<T>>
 	 * @param editable is the field editable?
 	 */
 	public final void add_field_auto(ScbField<T, ?> f, boolean editable) {
-		Ensure.not_null(f);
+		Ensure.not_null(f, "f == null");
 		
 		if (String.class.isAssignableFrom(f.value_type())) {
 			@SuppressWarnings("unchecked")
@@ -183,7 +241,7 @@ public class ScbTableModel<T extends Scb<T>, C extends Comparator<T>>
 			ScbField<T, Boolean> sbf = (ScbField<T, Boolean>) f;
 			add_field(new ScbTableModelBooleanField<>(sbf, editable));
 		} else if (f.value_type().isEnum()) {
-			add_field(make_enum(f));
+			add_field(make_enum(f, editable));
 		} else {
 			Ensure.unreachable("Unknown field type: "
 					+ f.value_type().getName() + ". Cannot automatically "
@@ -197,13 +255,15 @@ public class ScbTableModel<T extends Scb<T>, C extends Comparator<T>>
 	 * compiler-weirdnesses related to generics.
 	 * @param f the field
 	 * @param <E> the type of enumeration
+	 * @param editable is the field editable?
 	 * @return the field
 	 */
-	private <E extends Enum<E>> ScbTableModelEnumTextField<T, E> make_enum(
-			ScbField<T, ?> f) {
+	private <E extends Enum<E>> ScbTableModelEnumTextField<T, E>
+			make_enum(ScbField<T, ?> f, boolean editable) {
 		@SuppressWarnings("unchecked")
 		ScbField<T, E> sef = (ScbField<T, E>) f;
-		return new ScbTableModelEnumTextField<>(sef);
+		sef.value_type();
+		return new ScbTableModelEnumTextField<>(sef, editable);
 	}
 	
 	/**
@@ -246,7 +306,13 @@ public class ScbTableModel<T extends Scb<T>, C extends Comparator<T>>
 		Ensure.not_null(obj, "obj == null");
 		
 		int idx = m_objects.indexOf(obj);
-		Ensure.is_true(idx >= 0, "idx < 0");
+		if (idx == -1) {
+			/*
+			 * Object is not in the table. This may happen if the object is
+			 * removed but a change event was pending.
+			 */
+			return;
+		}
 		
 		boolean same_position = true;
 		T prev = null;
@@ -350,5 +416,17 @@ public class ScbTableModel<T extends Scb<T>, C extends Comparator<T>>
 		Ensure.is_true(idx >= 0, "idx < 0");
 		Ensure.is_true(idx < m_objects.size(), "idx >= m_objects.size()");
 		return m_objects.get(idx);
+	}
+	
+	/**
+	 * Obtains the field in a given index.
+	 * @param idx the index
+	 * @return the field
+	 */
+	public ScbTableModelField<T, ?, ?> field(int idx) {
+		Ensure.greater_equal(idx, 0, "idx < 0");
+		Ensure.less(idx, getColumnCount(), "idx >= 0");
+		
+		return m_fields.get(idx);
 	}
 }

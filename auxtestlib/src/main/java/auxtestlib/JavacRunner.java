@@ -226,8 +226,8 @@ public final class JavacRunner {
 			files[pos] = new File(files[pos - 1], parts[pos] + ".java");
 
 			// We define the file contents.
-			FileContentWorker.setContentsBin(files[pos], FileContentWorker
-					.readResourceContentsBin(resources[j]));
+			FileContentWorker.set_contents_bin(files[pos], FileContentWorker
+					.read_resource_bin(resources[j]));
 			classes[j] = cls[j].replace('.', '/') + ".java";
 		}
 

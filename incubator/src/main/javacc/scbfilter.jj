@@ -6,7 +6,7 @@ PARSER_BEGIN(ScbFilterJjParser)
 
 package incubator.scb.filter.parser;
 
-import java.util.Set;
+import java.util.Collection;
 
 import incubator.pval.Ensure;
 import incubator.scb.Scb;
@@ -19,7 +19,7 @@ import incubator.scb.filter.ScbNotFilter;
 import incubator.scb.filter.ScbOrFilter;
 
 public class ScbFilterJjParser<T extends Scb> {
-	private ScbField<T, ?> field(Set<ScbField<T, ?>> fields, String n)
+	private ScbField<T, ?> field(Collection<ScbField<T, ?>> fields, String n)
 				throws ParseException {		Ensure.not_null(fields, "fields == null");
 		Ensure.not_null(n, "n == null");
 
@@ -31,8 +31,8 @@ public class ScbFilterJjParser<T extends Scb> {
 		throw new ParseException("No field found with name '" + n + "'.");
 	}
 
-	private void throw_field_type_error(Set<ScbField<T, ? >> fields, String n,
-			String type) throws ParseException {
+	private void throw_field_type_error(Collection<ScbField<T, ? >> fields,
+			String n, String type) throws ParseException {
 		Ensure.not_null(fields, "fields == null");
 		Ensure.not_null(n, "n == null");
 		Ensure.not_null(type, "type == null");
@@ -42,14 +42,14 @@ public class ScbFilterJjParser<T extends Scb> {
 		throw new ParseException("Field '" + n + "' (" + f.getClass().getName()
 				+ ") is not a " + type + " field.");	}
 
-	private boolean is_text_field(Set<ScbField<T, ? >> fields, String n)
+	private boolean is_text_field(Collection<ScbField<T, ? >> fields, String n)
 			throws ParseException {		Ensure.not_null(fields, "fields == null");
 		Ensure.not_null(n, "n == null");
 
 		return field(fields, n).value_type() == String.class;
 	}
   
-	private ScbField<T, String> text_field(Set<ScbField<T, ? >> fields,
+	private ScbField<T, String> text_field(Collection<ScbField<T, ? >> fields,
 			String n) throws ParseException {
 		Ensure.not_null(fields, "fields == null");
 		Ensure.not_null(n, "n == null");
@@ -60,7 +60,7 @@ public class ScbFilterJjParser<T extends Scb> {
 
 		return (ScbField<T, String>) field(fields, n);	}
 
-	private boolean is_enum_field(Set<ScbField<T, ?>> fields, String n)
+	private boolean is_enum_field(Collection<ScbField<T, ?>> fields, String n)
 			throws ParseException {
 		Ensure.not_null(fields, "fields == null");
 		Ensure.not_null(n, "n == null");
@@ -68,8 +68,8 @@ public class ScbFilterJjParser<T extends Scb> {
 		return field(fields, n).value_type().isEnum();
 	}
   
-	private ScbField<T, ?> enum_field(Set<ScbField<T, ? >> fields, String n)
-			throws ParseException {
+	private ScbField<T, ?> enum_field(Collection<ScbField<T, ? >> fields,
+			String n) throws ParseException {
 		Ensure.not_null(fields, "fields == null");
 		Ensure.not_null(n, "n == null");
 		
@@ -152,14 +152,14 @@ TOKEN : {
 | 	< IDENTIFIER: ["a"-"z","A"-"Z","_"](["a"-"z","A"-"Z","0"-"9","_"])* >
 }
 
-ScbFilter<T> Filter(Set<ScbField<T, ?>> fields) : {
+ScbFilter<T> Filter(Collection<ScbField<T, ?>> fields) : {
 		ScbFilter<T> f;
 	} {
 		f = BooleanCompositeFilter(fields) <EOF> {
 			return f;		}
 }
 
-ScbFilter<T> BooleanCompositeFilter(Set<ScbField<T, ?>> fields) : {
+ScbFilter<T> BooleanCompositeFilter(Collection<ScbField<T, ?>> fields) : {
 		ScbFilter<T> f1, f2;	} {
 		f1 = SimpleFilter(fields)
 		((<AND> f2 = SimpleFilter(fields) {
@@ -169,7 +169,7 @@ ScbFilter<T> BooleanCompositeFilter(Set<ScbField<T, ?>> fields) : {
 		)+)? {
 			return f1;			}}
 
-ScbFilter<T> SimpleFilter(Set<ScbField<T, ?>> fields) : {
+ScbFilter<T> SimpleFilter(Collection<ScbField<T, ?>> fields) : {
 		ScbFilter<T> f;	} {
 		f = ComparisonFilter(fields) {
 			return f;			}
@@ -178,7 +178,7 @@ ScbFilter<T> SimpleFilter(Set<ScbField<T, ?>> fields) : {
 		| <LPAREN> f = BooleanCompositeFilter(fields) <RPAREN> {
 			return f;			}}
 
-ScbFilter<T> ComparisonFilter(Set<ScbField<T, ?>> fields) : {
+ScbFilter<T> ComparisonFilter(Collection<ScbField<T, ?>> fields) : {
 		String id;
 		Token s;
 		String str;	} {

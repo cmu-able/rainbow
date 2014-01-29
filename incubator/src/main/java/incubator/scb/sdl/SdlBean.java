@@ -15,6 +15,14 @@ import java.util.Map;
  */
 public class SdlBean extends PropertyObject {
 	/**
+	 * Name of bean SDL property with the default constructor method. This
+	 * property is attached to the {@link SdlBean} and, if available, should
+	 * contains a {@link JavaMethod}.
+	 */
+	public static final String SDL_PROP_DEFAULT_CONSTRUCTOR =
+			"default_constructor";
+	
+	/**
 	 * Name of bean SDL property with the copy constructor method. This
 	 * property is attached to the {@link SdlBean} and, if available, should
 	 * contains a {@link JavaMethod}.
@@ -56,14 +64,21 @@ public class SdlBean extends PropertyObject {
 	 */
 	private Map<SdlBeanGenerator, Map<String, String>> m_generator_properties;
 	
+	/**
+	 * The parent bean.
+	 */
+	private SdlBean m_parent;
+	
 	
 	/**
 	 * Creates a new bean.
 	 * @param name the bean name
 	 * @param pkg the package this bean is in
+	 * @param parent the parent bean, which may be <code>null</code>
 	 */
-	public SdlBean(String name, SdlPackage pkg) {
+	public SdlBean(String name, SdlPackage pkg, SdlBean parent) {
 		Ensure.not_null(name, "name == null");
+		Ensure.not_null(pkg, "pkg == null");
 		m_name = name;
 		m_generators = new ArrayList<>();
 		m_attribute_names = new ArrayList<>();
@@ -71,6 +86,15 @@ public class SdlBean extends PropertyObject {
 		m_read_only = false;
 		m_type = new SdlType(pkg.name() + "." + name);
 		m_generator_properties = new HashMap<>();
+		m_parent = parent;
+	}
+	
+	/**
+	 * Obtains the parent bean.
+	 * @return the bean or <code>null</code> if there is none
+	 */
+	public SdlBean parent() {
+		return m_parent;
 	}
 	
 	/**
@@ -134,48 +158,27 @@ public class SdlBean extends PropertyObject {
 	 * Generates the bean in the given code.
 	 * @param jc the code to generate
 	 * @param pkg the package where the bean is to be generated
+	 * @return the result of generation
 	 * @throws SdlGenerationException failed to generate the SDL code
 	 */
-	public void generate(JavaCode jc, JavaPackage pkg)
+	public GenerationInfo generate(final JavaCode jc, final JavaPackage pkg)
 			throws SdlGenerationException {
 		Ensure.not_null(jc, "jc == null");
 		Ensure.not_null(pkg, "pkg == null");
 		
-		do {
-			int generated_count = 0;
-			int cannot_run_count = 0;
-			
-			StringBuilder sb = new StringBuilder();
-			
-			for (SdlBeanGenerator g : m_generators) {
-				Map<String, String> properties = m_generator_properties.get(g);
-				switch (g.generate(this, jc, pkg, properties)) {
-				case CANNOT_RUN:
-					cannot_run_count++;
-					if (sb.length() > 0) {
-						sb.append(",");
-					}
-					
-					sb.append(g.getClass().getCanonicalName());
-					break;
-				case GENERATED_CODE:
-					generated_count++;
-					break;
-				case NOTHING_TO_DO:
-					break;
+		List<Generator> gens = new ArrayList<>();
+		for (final SdlBeanGenerator g : m_generators) {
+			gens.add(new Generator() {
+				@Override
+				public GenerationInfo generate() throws SdlGenerationException {
+					Map<String, String> properties = m_generator_properties.get(
+							g);
+					return g.generate(SdlBean.this, jc, pkg, properties);
 				}
-			}
-			
-			if (generated_count == 0 && cannot_run_count == 0) {
-				break;
-			}
-			
-			if (generated_count == 0 && cannot_run_count > 0) {
-				throw new SdlGenerationException("Failed to generate bean "
-						+ "because some generators were not able to run: "
-						+ sb);
-			}
-		} while (true);
+			});
+		}
+		
+		return GenerationAlgorithm.generate(gens);
 	}
 	
 	/**

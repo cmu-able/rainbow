@@ -42,6 +42,7 @@ public class MutexRequestTest extends DefaultTCase {
 	@Test
 	public void testWaitTime() throws Exception {
 		IMutexRequestImpl impl = new IMutexRequestImpl();
+		impl.mark_waited();
 		assertTrue(impl.wait_time() < 50);
 		
 		Thread.sleep(100);

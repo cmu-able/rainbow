@@ -1,14 +1,16 @@
 package incubator.scb.sdl;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import incubator.Pair;
 import incubator.jcodegen.JavaCode;
 import incubator.jcodegen.JavaPackage;
 import incubator.pval.Ensure;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Definition of a package in SDL.
@@ -73,10 +75,14 @@ public class SdlPackage {
 	/**
 	 * Generates <em>java</em> code for this package.
 	 * @param jc where to generate the java code
+	 * @return the generation info
 	 * @throws SdlGenerationException failed to generate the SDL code
 	 */
-	public void generate(JavaCode jc) throws SdlGenerationException {
+	public GenerationInfo generate(JavaCode jc) throws SdlGenerationException {
 		Ensure.not_null(jc, "jc == null");
+		
+		boolean generated = false;
+		
 		JavaPackage jp = jc.pkg(m_name);
 		if (jp == null) {
 			String n = m_name;
@@ -87,11 +93,13 @@ public class SdlPackage {
 					jp = jc.pkg(r.first());
 					if (jp == null) {
 						jp = jc.make_package(r.first());
+						generated = true;
 					}
 				} else {
 					JavaPackage jpc = jp.child(r.first());
 					if (jpc == null) {
 						jpc = jp.make_child(r.first());
+						generated = true;
 					}
 					
 					jp = jpc;
@@ -101,8 +109,23 @@ public class SdlPackage {
 			} while (r.second() != null);
 		}
 		
-		for (SdlBean b : m_beans.values()) {
-			b.generate(jc, jp);
+		List<Generator> gens = new ArrayList<>();
+		for (final SdlBean b : m_beans.values()) {
+			final JavaPackage jpp = jp;
+			final JavaCode jcc = jc;
+			gens.add(new Generator() {
+				@Override
+				public GenerationInfo generate() throws SdlGenerationException {
+					return b.generate(jcc, jpp);
+				}
+			});
+		}
+		
+		GenerationInfo gi = GenerationAlgorithm.generate(gens);
+		if (gi.result() == GenerationResult.NOTHING_TO_DO && generated) {
+			return new GenerationInfo(GenerationResult.GENERATED_CODE);
+		} else {
+			return gi;
 		}
 	}
 }

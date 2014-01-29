@@ -346,7 +346,7 @@
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
-			<version>3.3.2.GA</version>
+			<version>4.2.8.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>rmilite</groupId>

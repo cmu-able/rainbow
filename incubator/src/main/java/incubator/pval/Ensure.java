@@ -164,7 +164,7 @@ public class Ensure {
 	 * @param error_message the error message to use when the condition fails
 	 */
 	public static void is_false(boolean value, String error_message) {
-		is_true(!value);
+		is_true(!value, error_message);
 	}
 
 	/**

@@ -1,6 +1,7 @@
 package incubator.rmi;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import net.ladypleaser.rmilite.Client;
@@ -9,6 +10,11 @@ import net.ladypleaser.rmilite.Client;
  * Class responsible for discovering where RMI clients are.
  */
 public class RmiClientDiscovery {
+	/**
+	 * How many ms to wait for a socket connection.
+	 */
+	private static final int MAX_WAIT_OPEN_MS = 1000;
+	
 	/**
 	 * Looks for open ports in a host.
 	 * @param host the host
@@ -36,14 +42,17 @@ public class RmiClientDiscovery {
 		}
 		
 		for (int i = min_port; i <= max_port; i++) {
-			try (Socket s = new Socket(host, i)) {
+			try (Socket s = new Socket()) {
+				s.connect(new InetSocketAddress(host, i), MAX_WAIT_OPEN_MS);
 				if (scan_listener != null) {
 					scan_listener.port_scanned(i);
 				}
 				s.close();
 				listener.port_found(i);
 			} catch (IOException e) {
-				// Não está aberto.
+				/*
+				 * Port is not open.
+				 */
 				if (scan_listener != null) {
 					scan_listener.port_scanned(i);
 				}

@@ -149,10 +149,10 @@ public class SdlParsingTests extends DefaultTCase {
 		GeneratorRegistry reg = new GeneratorRegistry();
 		reg.add_generator("foo", new SdlBeanGenerator() {
 			@Override
-			public GenerationResult generate(SdlBean b, JavaCode jc,
+			public GenerationInfo generate(SdlBean b, JavaCode jc,
 					JavaPackage jp, Map<String, String> properties)
 					throws SdlGenerationException {
-				return GenerationResult.NOTHING_TO_DO;
+				return new GenerationInfo(GenerationResult.NOTHING_TO_DO);
 			}
 		});
 		
@@ -165,10 +165,10 @@ public class SdlParsingTests extends DefaultTCase {
 		GeneratorRegistry reg = new GeneratorRegistry();
 		reg.add_generator("foo", new SdlBeanGenerator() {
 			@Override
-			public GenerationResult generate(SdlBean b, JavaCode jc,
+			public GenerationInfo generate(SdlBean b, JavaCode jc,
 					JavaPackage jp, Map<String, String> properties)
 					throws SdlGenerationException {
-				return GenerationResult.NOTHING_TO_DO;
+				return new GenerationInfo(GenerationResult.NOTHING_TO_DO);
 			}
 		});
 		
@@ -181,10 +181,10 @@ public class SdlParsingTests extends DefaultTCase {
 		GeneratorRegistry reg = new GeneratorRegistry();
 		reg.add_generator("foo", new SdlBeanGenerator() {
 			@Override
-			public GenerationResult generate(SdlBean b, JavaCode jc,
+			public GenerationInfo generate(SdlBean b, JavaCode jc,
 					JavaPackage jp, Map<String, String> properties)
 					throws SdlGenerationException {
-				return GenerationResult.NOTHING_TO_DO;
+				return new GenerationInfo(GenerationResult.NOTHING_TO_DO);
 			}
 		});
 		
@@ -198,10 +198,10 @@ public class SdlParsingTests extends DefaultTCase {
 		GeneratorRegistry reg = new GeneratorRegistry();
 		reg.add_generator("foo", new SdlBeanGenerator() {
 			@Override
-			public GenerationResult generate(SdlBean b, JavaCode jc,
+			public GenerationInfo generate(SdlBean b, JavaCode jc,
 					JavaPackage jp, Map<String, String> properties)
 					throws SdlGenerationException {
-				return GenerationResult.NOTHING_TO_DO;
+				return new GenerationInfo(GenerationResult.NOTHING_TO_DO);
 			}
 		});
 		
@@ -254,6 +254,7 @@ public class SdlParsingTests extends DefaultTCase {
 	public void reference_to_same_package() throws Exception {
 		String text = "package a { bean B {} bean C { "
 				+ "attributes { d : bean<B>; } } }";
+		
 		SdlDefinition sd = new SdlParser(new GeneratorRegistry()).parse(text);
 		assertNotNull(sd);
 		assertEquals(1, sd.package_names().size());
@@ -269,4 +270,33 @@ public class SdlParsingTests extends DefaultTCase {
 		assertTrue(d.type() instanceof SdlBeanType);
 		assertSame(b, ((SdlBeanType) d.type()).bean());
 	}
+	
+	@Test
+	public void parent_bean() throws Exception {
+		String text = "package a { bean B {} bean C extends B {} }";
+		SdlDefinition sd = new SdlParser(new GeneratorRegistry()).parse(text);
+		assertNotNull(sd);
+		assertEquals(1, sd.package_names().size());
+		SdlPackage a = sd.pkg("a");
+		assertNotNull(a);
+		SdlBean b = a.bean("B");
+		assertNotNull(b);
+		assertNull(b.parent());
+		SdlBean c = a.bean("C");
+		assertNotNull(c);
+		assertSame(b, c.parent());
+	}
+	
+	@Test
+	public void bean_with_set_attribute() throws Exception {
+		String text = "package x{bean A{attributes{a:set<string>;}}}";
+		SdlDefinition sd = new SdlParser(new GeneratorRegistry()).parse(text);
+		SdlPackage p = sd.pkg("x");
+		SdlBean b = p.bean("A");
+		assertEquals(1, b.attribute_names().size());
+		assertTrue(b.attribute_names().contains("a"));
+		assertEquals("a", b.attribute("a").name());
+		assertEquals("set<string>", b.attribute("a").type().name());
+	}
 }
+

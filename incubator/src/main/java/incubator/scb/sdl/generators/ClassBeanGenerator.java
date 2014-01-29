@@ -6,6 +6,7 @@ import incubator.jcodegen.JavaClass;
 import incubator.jcodegen.JavaCode;
 import incubator.jcodegen.JavaPackage;
 import incubator.pval.Ensure;
+import incubator.scb.sdl.GenerationInfo;
 import incubator.scb.sdl.GenerationResult;
 import incubator.scb.sdl.SdlBean;
 import incubator.scb.sdl.SdlBeanGenerator;
@@ -37,7 +38,7 @@ public class ClassBeanGenerator implements SdlBeanGenerator {
 	}
 	
 	@Override
-	public GenerationResult generate(SdlBean b, JavaCode jc, JavaPackage jp,
+	public GenerationInfo generate(SdlBean b, JavaCode jc, JavaPackage jp,
 			Map<String, String> properties) throws SdlGenerationException {
 		Ensure.not_null(b, "b == null");
 		Ensure.not_null(jc, "jc == null");
@@ -46,7 +47,7 @@ public class ClassBeanGenerator implements SdlBeanGenerator {
 		
 		JavaClass cls = b.property(JavaClass.class, SDL_PROP_CLASS);
 		if (cls != null) {
-			return GenerationResult.NOTHING_TO_DO;
+			return new GenerationInfo(GenerationResult.NOTHING_TO_DO);
 		}
 		
 		cls = jp.child_class(b.name());
@@ -55,9 +56,19 @@ public class ClassBeanGenerator implements SdlBeanGenerator {
 					+ "already exists in package '" + jp.fqn() + "'.");
 		}
 		
-		cls = jp.make_class(b.name());
+		JavaClass pclass = null;
+		if (b.parent() != null) {
+			pclass = b.parent().property(JavaClass.class, SDL_PROP_CLASS);
+			if (pclass == null) {
+				return new GenerationInfo(GenerationResult.CANNOT_RUN,
+						ClassBeanGenerator.class.getCanonicalName()
+						+ ": class found but is not what was expected");
+			}
+		}
+		
+		cls = jp.make_class(b.name(), pclass);
 		b.property(SDL_PROP_CLASS, cls);
 		
-		return GenerationResult.GENERATED_CODE;
+		return new GenerationInfo(GenerationResult.GENERATED_CODE);
 	}
 }

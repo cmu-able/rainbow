@@ -1,9 +1,13 @@
 package incubator.scb.sdl;
 
+import incubator.Pair;
 import incubator.jcodegen.JavaCode;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,6 +56,69 @@ public class SdlToJavaTests extends DefaultTCase {
 		m_td.delete();
 	}
 	
+	/**
+	 * Reads a resource with java code.
+	 * @param name the resource name
+	 * @return the code
+	 * @throws Exception failed to read the resource
+	 */
+	private String read_resource_code(String name) throws Exception {
+		return strip(FileContentWorker.read_resource(
+				"/incubator/scb/sdl/" + name + ".java"));
+	}
+	
+	/**
+	 * Strips some source code of all empty lines and trims each individual
+	 * lines.
+	 * @param c the source code
+	 * @return the stripped code
+	 */
+	private String strip(String c) {
+		List<String> split = Arrays.asList(c.split("\n"));
+		StringBuilder r = new StringBuilder();
+		for (String s : split) {
+			s = StringUtils.trimToNull(s);
+			if (s != null) {
+				r.append(s);
+				r.append('\n');
+			}
+		}
+		
+		return r.toString();
+	}
+	
+	/**
+	 * Runs a test.
+	 * @param sdl_code name of the resource with the SDL code
+	 * @param java_code a pair with the java code in the first argument and
+	 * the path to the generated java file in the other
+	 * @throws Exception failed to run the test
+	 */
+	@SafeVarargs
+	private final void run_test(String sdl_code,
+			Pair<String, String[]> ...java_code) throws Exception {
+		m_sp.parse(FileContentWorker.read_resource("/incubator/scb/sdl/"
+				+ sdl_code + ".sdl")).generate(m_jc);
+		m_jc.generate(m_td.getFile());
+		
+		for (Pair<String, String[]> p : java_code) {
+			String expected = read_resource_code(p.first());
+			File f = null;
+			for (String s : p.second()) {
+				if (f == null) {
+					f = new File(m_td.getFile(), s);
+				} else {
+					f = new File(f, s);
+				}
+			}
+			
+			assertTrue(f.exists());
+			String f_contents = FileContentWorker.read_contents(f);
+			
+			assertEquals(expected, f_contents);
+		}
+	}
+	
 	@Test
 	public void empty_simple_package() throws Exception {
 		String text = "package foo {}";
@@ -96,7 +163,7 @@ public class SdlToJavaTests extends DefaultTCase {
 		File x_dir = new File(m_td.getFile(), "x");
 		File y_file = new File(x_dir, "y.java");
 		assertTrue(y_file.exists());
-		String y_contents = FileContentWorker.readContents(y_file);
+		String y_contents = FileContentWorker.read_contents(y_file);
 		assertEquals("package x;\npublic class y {\n}\n", y_contents);
 	}
 	
@@ -110,7 +177,7 @@ public class SdlToJavaTests extends DefaultTCase {
 		File x_dir = new File(m_td.getFile(), "x");
 		File y_file = new File(x_dir, "y.java");
 		assertTrue(y_file.exists());
-		String y_contents = FileContentWorker.readContents(y_file);
+		String y_contents = FileContentWorker.read_contents(y_file);
 		assertEquals("package x;\npublic class y {\nprivate String m_a;\n"
 				+ "private int m_b;\n}\n", y_contents);
 	}
@@ -126,7 +193,7 @@ public class SdlToJavaTests extends DefaultTCase {
 		File x_dir = new File(m_td.getFile(), "x");
 		File y_file = new File(x_dir, "y.java");
 		assertTrue(y_file.exists());
-		String y_contents = FileContentWorker.readContents(y_file);
+		String y_contents = FileContentWorker.read_contents(y_file);
 		assertEquals("package x;\npublic class y {\nprivate String m_a;\n"
 				+ "private int m_b;\npublic y(String a,int b) {\n"
 				+ "this.m_a = a;\nthis.m_b = b;\n}\n}\n", y_contents);
@@ -143,7 +210,7 @@ public class SdlToJavaTests extends DefaultTCase {
 		File x_dir = new File(m_td.getFile(), "x");
 		File y_file = new File(x_dir, "y.java");
 		assertTrue(y_file.exists());
-		String y_contents = FileContentWorker.readContents(y_file);
+		String y_contents = FileContentWorker.read_contents(y_file);
 		assertEquals("package x;\npublic class y {\nprivate String m_a;\n"
 				+ "private int m_b;\npublic y(x.y src) {\n"
 				+ "incubator.pval.Ensure.not_null(src, \"src == null\");\n"
@@ -162,7 +229,7 @@ public class SdlToJavaTests extends DefaultTCase {
 		File x_dir = new File(m_td.getFile(), "x");
 		File y_file = new File(x_dir, "y.java");
 		assertTrue(y_file.exists());
-		String y_contents = FileContentWorker.readContents(y_file);
+		String y_contents = FileContentWorker.read_contents(y_file);
 		assertEquals("package x;\npublic class y {\nprivate String m_a;\n"
 				+ "private int m_b;\npublic String a() {\n"
 				+ "return m_a;\n}\npublic int b() {\nreturn m_b;\n}\n}\n",
@@ -181,7 +248,7 @@ public class SdlToJavaTests extends DefaultTCase {
 		File x_dir = new File(m_td.getFile(), "x");
 		File y_file = new File(x_dir, "y.java");
 		assertTrue(y_file.exists());
-		String y_contents = FileContentWorker.readContents(y_file);
+		String y_contents = FileContentWorker.read_contents(y_file);
 		assertEquals("package x;\n"
 				+ "public class y {\n"
 				+ "private String m_a;\n"
@@ -1022,55 +1089,8 @@ public class SdlToJavaTests extends DefaultTCase {
 	
 	@Test
 	public void mergeable_scb() throws Exception {
-		String text = "package a { bean B { attributes { c : int; } "
-				+ "generators { class, attributes_as_fields, "
-				+ "simple_attribute_accessors, copy_constructor, "
-				+ "mergeable_scb, simple_constructor } } }";
-		m_sp.parse(text).generate(m_jc);
-		m_jc.generate(m_td.getFile());
-		
-		File a_dir = new File(m_td.getFile(), "a");
-		File b_file = new File(a_dir, "B.java");
-		assertTrue(b_file.exists());
-		String y_contents = FileContentWorker.readContents(b_file);
-		assertEquals("package a;\n"
-				+ "public class B implements "
-				+ "incubator.scb.MergeableIdScb<a.B> {\n"
-				+ "private int m_c;\n"
-				+ "private int m_id;\n"
-				+ "public int c() {\n"
-				+ "return m_c;\n"
-				+ "}\n"
-				+ "public void c(int v) {\n"
-				+ "if (org.apache.commons.lang.ObjectUtils.equals(m_c, v)) {\n"
-				+ "return;\n"
-				+ "}\n"
-				+ "this.m_c = v;\n"
-				+ "}\n"
-				+ "public B(a.B src) {\n"
-				+ "incubator.pval.Ensure.not_null(src, \"src == null\");\n"
-				+ "this.m_c = src.m_c;\n"
-				+ "this.m_id = src.m_id;\n"
-				+ "}\n"
-				+ "public int id() {\n"
-				+ "return m_id;\n"
-				+ "}\n"
-				+ "public void merge(a.B v) {\n"
-				+ "incubator.pval.Ensure.not_null(v, \"v == null\");\n"
-				+ "incubator.pval.Ensure.equals(m_id, v.m_id, "
-				+ "\"Objects to merge do not have the same ID.\");\n"
-				+ "if (!org.apache.commons.lang.ObjectUtils.equals(m_c, "
-				+ "v.m_c)) {\n"
-				+ "c(v.m_c);\n"
-				+ "}\n"
-				+ "}\n"
-				+ "public B(int c,int id) {\n"
-				+ "this.m_c = c;\n"
-				+ "incubator.pval.Ensure.greater(id, 0, \"id <= 0\");\n"
-				+ "this.m_id = id;\n"
-				+ "}\n"
-				+ "}\n",
-				y_contents);
+		run_test("mergeable_scb", new Pair<>("mergeable_scb_B", new String [] {
+				"a", "B.java" }));
 	}
 	
 	@Test
@@ -1108,11 +1128,27 @@ public class SdlToJavaTests extends DefaultTCase {
 	}
 	
 	@Test
+	public void hashcode_equals_mergeable_with_id() throws Exception {
+		String text = "package a { bean B { attributes { c : int; } "
+				+ "generators { class,attributes_as_fields,hashcode_equals,"
+				+ "simple_attribute_accessors, mergeable_scb, basic_scb}}}";
+		m_sp.parse(text).generate(m_jc);
+		m_jc.generate(m_td.getFile());
+		
+		File a_dir = new File(m_td.getFile(), "a");
+		File b_file = new File(a_dir, "B.java");
+		assertTrue(b_file.exists());
+		String y_contents = FileContentWorker.readContents(b_file);
+		assertEquals(read_resource_code("hashcode_equals_mergeable_with_id"),
+				y_contents);
+	}
+	
+	@Test
 	public void mergeable_inside_mergeable() throws Exception {
 		String text = "package a { bean B { generators { class, "
-				+ "mergeable_scb } } bean C { generators { class, "
+				+ "basic_scb, mergeable_scb } } bean C { generators { class, "
 				+ "attributes_as_fields, simple_attribute_accessors, "
-				+ "mergeable_scb} attributes "
+				+ "basic_scb, mergeable_scb} attributes "
 				+ "{ b : bean<B>; } } }";
 		m_sp.parse(text).generate(m_jc);
 		m_jc.generate(m_td.getFile());
@@ -1121,76 +1157,19 @@ public class SdlToJavaTests extends DefaultTCase {
 		File b_file = new File(a_dir, "B.java");
 		assertTrue(b_file.exists());
 		String b_contents = FileContentWorker.readContents(b_file);
-		assertEquals("package a;\n"
-				+ "public class B implements "
-				+ "incubator.scb.MergeableIdScb<a.B> {\n"
-				+ "private int m_id;\n"
-				+ "public int id() {\n"
-				+ "return m_id;\n"
-				+ "}\n"
-				+ "public void merge(a.B v) {\n"
-				+ "incubator.pval.Ensure.not_null(v, \"v == null\");\n"
-				+ "incubator.pval.Ensure.equals(m_id, v.m_id, "
-				+ "\"Objects to merge do not have the same ID.\");\n"
-				+ "}\n"
-				+ "}\n",
+		assertEquals(read_resource_code("mergeable_inside_mergeable_B"),
 				b_contents);
 		File c_file = new File(a_dir, "C.java");
 		assertTrue(c_file.exists());
 		String c_contents = FileContentWorker.readContents(c_file);
-		assertEquals("package a;\n"
-				+ "public class C implements "
-				+ "incubator.scb.MergeableIdScb<a.C> {\n"
-				+ "private B m_b;\n"
-				+ "private int m_id;\n"
-				+ "public B b() {\n"
-				+ "return m_b;\n"
-				+ "}\n"
-				+ "public void b(B v) {\n"
-				+ "if (org.apache.commons.lang.ObjectUtils.equals(m_b, v)) {\n"
-				+ "return;\n"
-				+ "}\n"
-				+ "this.m_b = v;\n"
-				+ "}\n"
-				+ "public int id() {\n"
-				+ "return m_id;\n"
-				+ "}\n"
-				+ "public void merge(a.C v) {\n"
-				+ "incubator.pval.Ensure.not_null(v, \"v == null\");\n"
-				+ "incubator.pval.Ensure.equals(m_id, v.m_id, "
-				+ "\"Objects to merge do not have the same ID.\");\n"
-				+ "if (!org.apache.commons.lang.ObjectUtils.equals(m_b, "
-				+ "v.m_b)) {\n"
-				+ "if (m_b == null || v.m_b == null) {\n"
-				+ "b(v.m_b);\n"
-				+ "} else {\n"
-				+ "m_b.merge(v.m_b);\n"
-				+ "}\n"
-				+ "}\n"
-				+ "}\n"
-				+ "}\n",
+		assertEquals(read_resource_code("mergeable_inside_mergeable_C"),
 				c_contents);
 	}
 	
 	@Test
 	public void mergeable_without_id() throws Exception {
-		String text = "package a { bean B { generators { class, "
-				+ "mergeable_scb (no_id) } } }";
-		m_sp.parse(text).generate(m_jc);
-		m_jc.generate(m_td.getFile());
-		
-		File a_dir = new File(m_td.getFile(), "a");
-		File b_file = new File(a_dir, "B.java");
-		assertTrue(b_file.exists());
-		String b_contents = FileContentWorker.readContents(b_file);
-		assertEquals("package a;\n"
-				+ "public class B implements "
-				+ "incubator.scb.MergeableScb<a.B> {\n"
-				+ "public void merge(a.B v) {\n"
-				+ "incubator.pval.Ensure.not_null(v, \"v == null\");\n"
-				+ "}\n"
-				+ "}\n",
-				b_contents);
+		run_test("mergeable_without_id", new Pair<>(
+				"mergeable_without_id_B", new String[] {"a", "B.java"}));
 	}
 	
 	@Test
@@ -1303,5 +1282,316 @@ public class SdlToJavaTests extends DefaultTCase {
 				+ "}\n"
 				+ "}\n",
 				c_contents);
+	}
+	
+	@Test
+	public void no_argument_constructor() throws Exception {
+		String text = "package a { bean B { generators { class, "
+				+ "no_arg_constructor } } }";
+		m_sp.parse(text).generate(m_jc);
+		m_jc.generate(m_td.getFile());
+		
+		File a_dir = new File(m_td.getFile(), "a");
+		File b_file = new File(a_dir, "B.java");
+		assertTrue(b_file.exists());
+		String b_contents = FileContentWorker.readContents(b_file);
+		assertEquals("package a;\n"
+				+ "public class B {\n"
+				+ "public B() {\n"
+				+ "}\n"
+				+ "}\n",
+				b_contents);
+	}
+	
+	@Test
+	public void no_argument_constructor_scb() throws Exception {
+		String text = "package a { bean B { generators { class, "
+				+ "no_arg_constructor, basic_scb } } }";
+		m_sp.parse(text).generate(m_jc);
+		m_jc.generate(m_td.getFile());
+		
+		File a_dir = new File(m_td.getFile(), "a");
+		File b_file = new File(a_dir, "B.java");
+		assertTrue(b_file.exists());
+		String b_contents = FileContentWorker.readContents(b_file);
+		assertEquals("package a;\n"
+				+ "public class B implements incubator.scb.Scb<B> {\n"
+				+ "private incubator.dispatch.LocalDispatcher<"
+				+ "incubator.scb.ScbUpdateListener<B>> m_update_dispatcher;\n"
+				+ "public B() {\n"
+				+ "this.m_update_dispatcher = new incubator.dispatch."
+				+ "LocalDispatcher<>();\n"
+				+ "}\n"
+				+ "public incubator.dispatch.Dispatcher<"
+				+ "incubator.scb.ScbUpdateListener<B>> dispatcher() {\n"
+				+ "return m_update_dispatcher;\n"
+				+ "}\n"
+				+ "protected void notify_update() {\n"
+				+ "this.m_update_dispatcher.dispatch(new "
+				+ "incubator.dispatch.DispatcherOp<"
+				+ "incubator.scb.ScbUpdateListener<B>>() {\n"
+				+ "@Override\n"
+				+ "public void dispatch(incubator.scb.ScbUpdateListener<B>"
+				+ " l) {\n"
+				+ "incubator.pval.Ensure.not_null(l, \"l == null\");\n"
+				+ "l.updated(B.this);\n"
+				+ "}\n"
+				+ "});\n"
+				+ "}\n"
+				+ "public static java.util.List<incubator.scb.ScbField"
+				+ "<B, ?>> c_fields() {\n"
+				+ "java.util.List<incubator.scb.ScbField<B, ?>> "
+				+ "fields = new java.util.ArrayList<>();\n"
+				+ "return fields;\n"
+				+ "}\n"
+				+ "public java.util.List<incubator.scb.ScbField"
+				+ "<B, ?>> fields() {\n"
+				+ "return c_fields();\n"
+				+ "}\n"
+				+ "}\n",
+				b_contents);
+	}
+	
+	@Test
+	public void simple_parent_child_generation() throws Exception {
+		String text = "package a { bean B { generators { class } } "
+				+ " bean C extends B { generators { class } } }";
+		m_sp.parse(text).generate(m_jc);
+		m_jc.generate(m_td.getFile());
+		
+		File a_dir = new File(m_td.getFile(), "a");
+		File b_file = new File(a_dir, "B.java");
+		assertTrue(b_file.exists());
+		String b_contents = FileContentWorker.readContents(b_file);
+		assertEquals("package a;\n"
+				+ "public class B {\n"
+				+ "}\n", b_contents);
+		File c_file = new File(a_dir, "C.java");
+		assertTrue(c_file.exists());
+		String c_contents = FileContentWorker.readContents(c_file);
+		assertEquals("package a;\n"
+				+ "public class C extends a.B {\n"
+				+ "}\n", c_contents);
+	}
+	
+	@Test
+	public void scb_child_generation() throws Exception {
+		String text = "package a { bean B { generators { class, basic_scb } } "
+				+ " bean C extends B { generators { class, basic_scb } } }";
+		m_sp.parse(text).generate(m_jc);
+		m_jc.generate(m_td.getFile());
+		
+		File a_dir = new File(m_td.getFile(), "a");
+		File b_file = new File(a_dir, "B.java");
+		assertTrue(b_file.exists());
+		String b_contents = FileContentWorker.readContents(b_file);
+		assertEquals("package a;\npublic class B implements "
+				+ "incubator.scb.Scb<B> {\n"
+				+ "private incubator.dispatch.LocalDispatcher<"
+				+ "incubator.scb.ScbUpdateListener<B>> m_update_dispatcher;\n"
+				+ "public incubator.dispatch.Dispatcher<"
+				+ "incubator.scb.ScbUpdateListener<B>> dispatcher() {\n"
+				+ "return m_update_dispatcher;\n"
+				+ "}\n"
+				+ "protected void notify_update() {\n"
+				+ "this.m_update_dispatcher.dispatch(new "
+				+ "incubator.dispatch.DispatcherOp<"
+				+ "incubator.scb.ScbUpdateListener<B>>() {\n"
+				+ "@Override\n"
+				+ "public void dispatch(incubator.scb.ScbUpdateListener<B>"
+				+ " l) {\n"
+				+ "incubator.pval.Ensure.not_null(l, \"l == null\");\n"
+				+ "l.updated(B.this);\n"
+				+ "}\n"
+				+ "});\n"
+				+ "}\n"
+				+ "public static java.util.List<incubator.scb.ScbField"
+				+ "<B, ?>> c_fields() {\n"
+				+ "java.util.List<incubator.scb.ScbField<B, ?>> "
+				+ "fields = new java.util.ArrayList<>();\n"
+				+ "return fields;\n"
+				+ "}\n"
+				+ "public java.util.List<incubator.scb.ScbField"
+				+ "<B, ?>> fields() {\n"
+				+ "return c_fields();\n"
+				+ "}\n"
+				+ "}\n",
+				b_contents);
+		File c_file = new File(a_dir, "C.java");
+		assertTrue(c_file.exists());
+		String c_contents = FileContentWorker.readContents(c_file);
+		assertEquals("package a;\n"
+				+ "public class C extends a.B {\n"
+				+ "private incubator.dispatch.LocalDispatcher<"
+				+ "incubator.scb.ScbUpdateListener<C>> m_C_update_dispatcher;\n"
+				+ "public incubator.dispatch.Dispatcher<"
+				+ "incubator.scb.ScbUpdateListener<C>> C_dispatcher() {\n"
+				+ "return m_C_update_dispatcher;\n"
+				+ "}\n"
+				+ "protected void notify_update() {\n"
+				+ "this.m_C_update_dispatcher.dispatch(new "
+				+ "incubator.dispatch.DispatcherOp<"
+				+ "incubator.scb.ScbUpdateListener<C>>() {\n"
+				+ "@Override\n"
+				+ "public void dispatch(incubator.scb.ScbUpdateListener<C>"
+				+ " l) {\n"
+				+ "incubator.pval.Ensure.not_null(l, \"l == null\");\n"
+				+ "l.updated(C.this);\n"
+				+ "}\n"
+				+ "});\n"
+				+ "super.notify_update();\n"
+				+ "}\n"
+				+ "public static java.util.List<incubator.scb.ScbField"
+				+ "<B, ?>> c_fields() {\n"
+				+ "java.util.List<incubator.scb.ScbField<B, ?>> "
+				+ "fields = new java.util.ArrayList<>();\n"
+				+ "return fields;\n"
+				+ "}\n"
+				+ "public java.util.List<incubator.scb.ScbField"
+				+ "<B, ?>> fields() {\n"
+				+ "return c_fields();\n"
+				+ "}\n"
+				+ "}\n",
+				c_contents);
+	}
+	
+	@Test
+	public void hashcode_equals_in_child() throws Exception {
+		String text = "package a { bean B { generators { class, "
+				+ "hashcode_equals } } bean C extends B { generators "
+				+ "{ class,hashcode_equals } } }";
+		m_sp.parse(text).generate(m_jc);
+		m_jc.generate(m_td.getFile());
+		
+		File a_dir = new File(m_td.getFile(), "a");
+		File b_file = new File(a_dir, "B.java");
+		assertTrue(b_file.exists());
+		String b_contents = FileContentWorker.readContents(b_file);
+		assertEquals("package a;\n"
+				+ "public class B {\n"
+				+ "public int hashCode() {\n"
+				+ "final int prime = 31;\n"
+				+ "int result = 1;\n"
+				+ "return result;\n"
+				+ "}\n"
+				+ "public boolean equals(Object obj) {\n"
+				+ "if (this == obj) return true;\n"
+				+ "if (obj == null) return false;\n"
+				+ "if (getClass() != obj.getClass()) return false;\n"
+				+ "a.B other = (a.B) obj;\n"
+				+ "return true;\n"
+				+ "}\n"
+				+ "}\n", b_contents);
+		File c_file = new File(a_dir, "C.java");
+		assertTrue(c_file.exists());
+		String c_contents = FileContentWorker.readContents(c_file);
+		assertEquals("package a;\n"
+				+ "public class C extends a.B {\n"
+				+ "public int hashCode() {\n"
+				+ "final int prime = 31;\n"
+				+ "int result = 1;\n"
+				+ "result = prime * result + super.hashCode();\n"
+				+ "return result;\n"
+				+ "}\n"
+				+ "public boolean equals(Object obj) {\n"
+				+ "if (this == obj) return true;\n"
+				+ "if (obj == null) return false;\n"
+				+ "if (getClass() != obj.getClass()) return false;\n"
+				+ "if (!super.equals(obj)) return false;\n"
+				+ "a.C other = (a.C) obj;\n"
+				+ "return true;\n"
+				+ "}\n"
+				+ "}\n", c_contents);
+	}
+	
+	@Test
+	public void set_field() throws Exception {
+		String text = "package a { bean B { attributes { c : set<Integer>; } "
+				+ "generators { class, attributes_as_fields, "
+				+ "simple_constructor, simple_attribute_accessors, "
+				+ "basic_scb } } }";
+		m_sp.parse(text).generate(m_jc);
+		m_jc.generate(m_td.getFile());
+		
+		File a_dir = new File(m_td.getFile(), "a");
+		File b_file = new File(a_dir, "B.java");
+		assertTrue(b_file.exists());
+		String b_contents = FileContentWorker.readContents(b_file);
+		assertEquals("package a;\npublic class B implements "
+				+ "incubator.scb.Scb<B> {\n"
+				+ "private java.util.Set<Integer> m_c;\n"
+				+ "private incubator.dispatch.LocalDispatcher<"
+				+ "incubator.scb.ScbUpdateListener<B>> m_update_dispatcher;\n"
+				+ "public B(java.util.Set<Integer> c) {\n"
+				+ "this.m_c = new java.util.HashSet<>(c);\n"
+				+ "this.m_update_dispatcher = new incubator.dispatch."
+				+ "LocalDispatcher<>();\n"
+				+ "}\n"
+				+ "public java.util.Set<Integer> c() {\n"
+				+ "return new java.util.HashSet<>(m_c);\n"
+				+ "}\n"
+				+ "public void c(java.util.Set<Integer> v) {\n"
+				+ "if (org.apache.commons.lang.ObjectUtils.equals(m_c, v)) {\n"
+				+ "return;\n"
+				+ "}\n"
+				+ "this.m_c = new java.util.HashSet<>(v);\n"
+				+ "notify_update();\n"
+				+ "}\n"
+				+ "public incubator.dispatch.Dispatcher<"
+				+ "incubator.scb.ScbUpdateListener<B>> dispatcher() {\n"
+				+ "return m_update_dispatcher;\n"
+				+ "}\n"
+				+ "protected void notify_update() {\n"
+				+ "this.m_update_dispatcher.dispatch(new "
+				+ "incubator.dispatch.DispatcherOp<"
+				+ "incubator.scb.ScbUpdateListener<B>>() {\n"
+				+ "@Override\n"
+				+ "public void dispatch(incubator.scb.ScbUpdateListener<B>"
+				+ " l) {\n"
+				+ "incubator.pval.Ensure.not_null(l, \"l == null\");\n"
+				+ "l.updated(B.this);\n"
+				+ "}\n"
+				+ "});\n"
+				+ "}\n"
+				+ "public static incubator.scb.ScbField"
+				+ "<B,java.util.Set<Integer>> c_c() {\n"
+				+ "return new incubator.scb.ScbField"
+				+ "<B,java.util.Set<Integer>>(\"c\", "
+				+ "true, null, (Class<java.util.Set<Integer>>) (Object) "
+				+ "java.util.Set.class) {\n"
+				+ "@Override\n"
+				+ "public java.util.Set<Integer> get(B bean) {\n"
+				+ "incubator.pval.Ensure.not_null(bean, \"bean == null\");\n"
+				+ "return bean.c();\n"
+				+ "}\n"
+				+ "@Override\n"
+				+ "public void set(B bean, java.util.Set<Integer> v) {\n"
+				+ "incubator.pval.Ensure.not_null(bean, \"bean == null\");\n"
+				+ "bean.c(v);\n"
+				+ "}\n"
+				+ "};\n"
+				+ "}\n"
+				+ "public static java.util.List<incubator.scb.ScbField<B, ?>> "
+				+ "c_fields() {\n"
+				+ "java.util.List<incubator.scb.ScbField<B, ?>> fields ="
+				+ " new java.util.ArrayList<>();\n"
+				+ "fields.add(c_c());\n"
+				+ "return fields;\n"
+				+ "}\n"
+				+ "public java.util.List<incubator.scb.ScbField<B, ?>> "
+				+ "fields() {\n"
+				+ "return c_fields();\n"
+				+ "}\n"
+				+ "}\n",
+				b_contents);
+	}
+	
+	@Test
+	public void mergeable_inside_mergeable_set() throws Exception {
+		run_test("mergeable_inside_mergeable_set",
+				new Pair<>("mergeable_inside_mergeable_set_B",
+				new String[] { "a", "B.java" }),
+				new Pair<>("mergeable_inside_mergeable_set_C",
+				new String[] { "a", "C.java" }));
 	}
 }

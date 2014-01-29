@@ -129,6 +129,7 @@ class IMutexImpl implements IMutex {
 		synchronized(this) {
 			while(m_owner != null || m_waiting.get(0) != req) {
 				try {
+					req.mark_waited();
 					wait();
 				} catch (InterruptedException e) {
 					// Ignoramos.

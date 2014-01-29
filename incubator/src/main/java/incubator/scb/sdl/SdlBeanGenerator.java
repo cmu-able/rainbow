@@ -18,7 +18,7 @@ public interface SdlBeanGenerator {
 	 * @return the generation result
 	 * @throws SdlGenerationException failed to generate the SDL code
 	 */
-	GenerationResult generate(SdlBean b, JavaCode jc, JavaPackage jp,
+	GenerationInfo generate(SdlBean b, JavaCode jc, JavaPackage jp,
 			Map<String, String> properties)
 			throws SdlGenerationException;
 }

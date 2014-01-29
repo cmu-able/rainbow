@@ -1,5 +1,10 @@
 package incubator.scb.ui;
 
+import javax.swing.DefaultCellEditor;
+import javax.swing.JTextField;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+
 import incubator.Pair;
 import incubator.pval.Ensure;
 import incubator.scb.ScbField;
@@ -39,6 +44,10 @@ public abstract class ScbTableModelField<T, V, F extends ScbField<T, V>> {
 		Ensure.not_null(cof, "cof == null");
 		m_cof = cof;
 		m_editable = editable;
+		
+		if (editable) {
+			Ensure.is_true(cof.can_set(), "Cannot have an editable table field ");
+		}
 	}
 	
 	/**
@@ -67,7 +76,7 @@ public abstract class ScbTableModelField<T, V, F extends ScbField<T, V>> {
 	
 	/**
 	 * Returns the field as a table display object.
-	 * @param obj the object hose value should be displayed
+	 * @param obj the object whose value should be displayed
 	 * @return the display object
 	 */
 	public abstract Object display_object(T obj);
@@ -83,5 +92,21 @@ public abstract class ScbTableModelField<T, V, F extends ScbField<T, V>> {
 	 */
 	public Pair<ValidationResult, V> from_display(T obj, Object display) {
 		throw new UnsupportedOperationException();
+	}
+	
+	/**
+	 * Obtains the table cell editor to use.
+	 * @return the table cell editor
+	 */
+	public TableCellEditor cell_editor() {
+		return new DefaultCellEditor(new JTextField());
+	}
+	
+	/**
+	 * Obtains the table cell renderer to use.
+	 * @return the table cell renderer
+	 */
+	public TableCellRenderer cell_renderer() {
+		return new ScbTableDefaultRenderer();
 	}
 }

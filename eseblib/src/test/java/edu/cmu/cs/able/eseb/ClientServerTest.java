@@ -439,4 +439,67 @@ public class ClientServerTest extends EsebTestCase {
 		 */
 		Thread.sleep(250);
 	}
+	
+	@Test
+	public void removed_queues_do_not_get_more_data() throws Exception {
+		try (EventBus srv = new EventBus(m_port, m_scope)) {
+			srv.start();
+			Thread.sleep(50);
+			try (BusConnection c1 = new BusConnection("localhost", m_port,
+					m_scope)) {
+				c1.start();
+				
+				/*
+				 * Create a save queue and add it.
+				 */
+				final TestArraySaveQueue tasq1 = new TestArraySaveQueue();
+				c1.queue_group().add(tasq1);
+				
+				/*
+				 * Send which should be received in the queue.
+				 */
+				c1.send(m_scope.int32().make(RandomUtils.nextInt()));
+				
+				wait_for_true(new BooleanEvaluation() {
+					@Override
+					public boolean evaluate() throws Exception {
+						return tasq1.m_values.size() == 1;
+					}
+				});
+				
+				/*
+				 * Now remove the queue and add another one.
+				 */
+				c1.queue_group().remove(tasq1);
+				final TestArraySaveQueue tasq2 = new TestArraySaveQueue();
+				c1.queue_group().add(tasq2);
+				
+				/*
+				 * Send data which should only be received in the second
+				 * queue.
+				 */
+				c1.send(m_scope.int32().make(RandomUtils.nextInt()));
+				
+				wait_for_true(new BooleanEvaluation() {
+					@Override
+					public boolean evaluate() throws Exception {
+						return tasq2.m_values.size() == 1;
+					}
+				});
+				
+				/*
+				 * Wait a little bit to make sure we don't get the data in
+				 * Q1.
+				 */
+				m_dispatch_helper.wait_dispatch_clear();
+				assertEquals(1, tasq1.m_values.size());
+				
+			}
+		}
+		
+		/*
+		 * Wait for threads to stop.
+		 */
+		Thread.sleep(250);
+	}
 }

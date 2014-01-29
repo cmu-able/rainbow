@@ -9,6 +9,8 @@ import incubator.jcodegen.JavaType;
 import incubator.pval.Ensure;
 import incubator.scb.MergeableIdScb;
 import incubator.scb.MergeableScb;
+import incubator.scb.delta.ScbDelta;
+import incubator.scb.sdl.GenerationInfo;
 import incubator.scb.sdl.GenerationResult;
 import incubator.scb.sdl.SdlAttribute;
 import incubator.scb.sdl.SdlBean;
@@ -53,6 +55,11 @@ public class MergeableScbGenerator implements SdlBeanGenerator {
 	public static final String SDL_PROP_MERGE_METHOD = "merge_method";
 	
 	/**
+	 * Property set in the bean with the diff method.
+	 */
+	public static final String SDL_PROP_DIFF_METHOD = "diff_method";
+	
+	/**
 	 * Property set in the bean to state that the mergeable interface has
 	 * already been added.
 	 */
@@ -64,6 +71,18 @@ public class MergeableScbGenerator implements SdlBeanGenerator {
 	public static final String GEN_PROP_NO_ID = "no_id";
 	
 	/**
+	 * Has the ID been added into the hashcode methods?
+	 */
+	public static final String SDL_PROP_ID_IN_HASHCODE =
+			"mergeable_id_in_hashcode";
+	
+	/**
+	 * Has the ID been added into the equals methods?
+	 */
+	public static final String SDL_PROP_ID_IN_EQUALS =
+			"mergeable_id_in_equals";
+	
+	/**
 	 * Constructor.
 	 */
 	public MergeableScbGenerator() {
@@ -73,7 +92,7 @@ public class MergeableScbGenerator implements SdlBeanGenerator {
 	}
 	
 	@Override
-	public GenerationResult generate(SdlBean b, JavaCode jc, JavaPackage jp,
+	public GenerationInfo generate(SdlBean b, JavaCode jc, JavaPackage jp,
 			Map<String, String> properties) throws SdlGenerationException {
 		Ensure.not_null(b, "b == null");
 		Ensure.not_null(jc, "jc == null");
@@ -95,7 +114,9 @@ public class MergeableScbGenerator implements SdlBeanGenerator {
 		JavaClass cls = b.property(JavaClass.class,
 				ClassBeanGenerator.SDL_PROP_CLASS);
 		if (cls == null) {
-			return GenerationResult.CANNOT_RUN;
+			return new GenerationInfo(GenerationResult.CANNOT_RUN,
+					MergeableScbGenerator.class.getCanonicalName()
+					+ ": bean class not found");
 		}
 		
 		boolean any = false;
@@ -128,38 +149,53 @@ public class MergeableScbGenerator implements SdlBeanGenerator {
 					SDL_PROP_ID_ADDED_TO_SC);
 			if (added_sc == null || !added_sc) {
 				sc.make_parameter("id", new JavaType("int"));
-				sc.append_contents("incubator.pval.Ensure.greater(id, 0, "
-						+ "\"id <= 0\");\n");
+				sc.append_contents("incubator.pval.Ensure.greater_equal(id, 0, "
+						+ "\"id < 0\");\n");
 				sc.append_contents("this.m_id = id;\n");
 				b.property(SDL_PROP_ID_ADDED_TO_SC, true);
 				any = true;
 			}
 		}
 		
-		JavaMethod mm = b.property(JavaMethod.class, SDL_PROP_MERGE_METHOD);
-		if (mm == null) {
-			List<SdlAttribute> attrs = new ArrayList<>();
-			List<JavaField> fields = new ArrayList<>();
-			List<JavaMethod> setters = new ArrayList<>();
-			for (String an : b.attribute_names()) {
-				SdlAttribute a = b.attribute(an);
-				JavaField f = a.property(JavaField.class, 
-						AttributesAsFieldsGenerator.SDL_PROP_FIELD);
-				if (f == null) {
-					return GenerationResult.CANNOT_RUN;
-				}
-				
-				JavaMethod s = a.property(JavaMethod.class,
-						SimpleAttributeAccessorsGenerator.SDL_PROP_SETTER);
-				if (s == null) {
-					return GenerationResult.CANNOT_RUN;
-				}
-				
-				attrs.add(a);
-				fields.add(f);
-				setters.add(s);
+		List<SdlAttribute> attrs = new ArrayList<>();
+		List<JavaField> fields = new ArrayList<>();
+		List<JavaMethod> descs = new ArrayList<>();
+		List<JavaMethod> setters = new ArrayList<>();
+		for (String an : b.attribute_names()) {
+			SdlAttribute a = b.attribute(an);
+			JavaField f = a.property(JavaField.class, 
+					AttributesAsFieldsGenerator.SDL_PROP_FIELD);
+			if (f == null) {
+				return new GenerationInfo(GenerationResult.CANNOT_RUN,
+						MergeableScbGenerator.class.getCanonicalName()
+						+ ": no field found for attribute '" + an + "'");
 			}
 			
+			JavaMethod s = a.property(JavaMethod.class,
+					SimpleAttributeAccessorsGenerator.SDL_PROP_SETTER);
+			if (s == null) {
+				return new GenerationInfo(GenerationResult.CANNOT_RUN,
+						MergeableScbGenerator.class.getCanonicalName()
+						+ ": no setter found for attribute '" + an + "'");
+			}
+			
+			JavaMethod d = a.property(JavaMethod.class,
+					BasicScbGenerator.SDL_PROP_SCB_FIELD_METHOD);
+			if (d == null) {
+				return new GenerationInfo(GenerationResult.CANNOT_RUN,
+						MergeableScbGenerator.class.getCanonicalName()
+						+ ": no SCB field description method found for "
+						+ "attribute '" + an + "'");
+			}
+			
+			attrs.add(a);
+			fields.add(f);
+			setters.add(s);
+			descs.add(d);
+		}
+		
+		JavaMethod mm = b.property(JavaMethod.class, SDL_PROP_MERGE_METHOD);
+		if (mm == null) {
 			mm = cls.make_method("merge", new JavaType("void"));
 			b.property(SDL_PROP_MERGE_METHOD, mm);
 			mm.make_parameter("v", b.type().generate_type());
@@ -195,6 +231,36 @@ public class MergeableScbGenerator implements SdlBeanGenerator {
 			any = true;
 		}
 		
+		JavaMethod dm = b.property(JavaMethod.class, SDL_PROP_DIFF_METHOD);
+		if (dm == null) {
+			dm = cls.make_method("diff_from", new JavaType(
+					ScbDelta.class.getName() + "<"
+					+ b.type().generate_type().name() + ">"));
+			b.property(SDL_PROP_DIFF_METHOD, dm);
+			dm.make_parameter("old", b.type().generate_type());
+			dm.append_contents("incubator.pval.Ensure.not_null(old, \""
+					+ "old == null\");\n");
+			dm.append_contents("java.util.List<" + ScbDelta.class.getName()
+					+ "<" + b.type().generate_type().name() + ">> "
+					+ "delta = new java.util.ArrayList<>();\n");
+			
+			for (int i = 0; i < attrs.size(); i++) {
+				JavaField f = fields.get(i);
+				JavaField of = new JavaField("old." + f.name(), f.type());
+				
+				dm.append_contents("if (!("
+						+ attrs.get(i).type().generate_comparison(f, of)
+						+ ")) {\n");
+				dm.append_contents(attrs.get(i).type().generate_delta_assign(
+						"old", "this", descs.get(i), "delta"));
+				dm.append_contents("\n}\n");
+			}
+			
+			dm.append_contents("return new "
+					+ "incubator.scb.delta.ScbDeltaContainer(this, old, "
+					+ "delta);\n");
+		}
+		
 		Boolean iadded = b.property(Boolean.class, SDL_PROP_INTERFACE_ADDED);
 		if (iadded == null) {
 			b.property(SDL_PROP_INTERFACE_ADDED, true);
@@ -207,10 +273,46 @@ public class MergeableScbGenerator implements SdlBeanGenerator {
 			}
 		}
 		
+		JavaMethod hc_method = b.property(JavaMethod.class,
+				HashcodeEqualsGenerator.SDL_PROP_HASHCODE_METHOD);
+		Boolean id_in_hc = b.property(Boolean.class, SDL_PROP_ID_IN_HASHCODE);
+		if (hc_method != null && id_in_hc == null && !no_id) {
+			boolean appended = hc_method.append_contents_before(
+					"result = prime * result "
+					+ "+ org.apache.commons.lang.ObjectUtils.hashCode(m_id);\n",
+					"^return(\\s|;).*");
+			if (!appended) {
+				return new GenerationInfo(GenerationResult.CANNOT_RUN,
+						MergeableScbGenerator.class.getCanonicalName()
+						+ ": Did not find return line in hashCode method.");
+			}
+			
+			b.property(SDL_PROP_ID_IN_HASHCODE, true);
+			any = true;
+		}
+		
+		JavaMethod eq_method = b.property(JavaMethod.class,
+				HashcodeEqualsGenerator.SDL_PROP_EQUALS_METHOD);
+		Boolean id_in_eq = b.property(Boolean.class, SDL_PROP_ID_IN_EQUALS);
+		if (eq_method != null && id_in_eq == null && !no_id) {
+			boolean appended = eq_method.append_contents_before(
+					"if (!org.apache.commons.lang.ObjectUtils.equals(m_id, "
+					+ "other.m_id)) return false;\n",
+					"^return true.*");
+			if (!appended) {
+				return new GenerationInfo(GenerationResult.CANNOT_RUN,
+						MergeableScbGenerator.class.getCanonicalName()
+						+ ": Did not find return line in equals method.");
+			}
+			
+			b.property(SDL_PROP_ID_IN_EQUALS, true);
+			any = true;
+		}
+		
 		if (any) {
-			return GenerationResult.GENERATED_CODE;
+			return new GenerationInfo(GenerationResult.GENERATED_CODE);
 		} else {
-			return GenerationResult.NOTHING_TO_DO;
+			return new GenerationInfo(GenerationResult.NOTHING_TO_DO);
 		}
 	}
 }

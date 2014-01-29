@@ -30,7 +30,9 @@ import org.jdesktop.swingx.renderer.StringValue;
 
 /**
  * GUI component showing information of the <code>exh</code> package. It
- * shows one or more collectors and allows browsing the exceptions.
+ * shows one or more collectors and allows browsing the exceptions. If you
+ * want to show all exceptions collected, then a
+ * {@link ExhGlobalUiSynchronizer} should be created.
  */
 @SuppressWarnings("serial")
 public class ExhUi extends JPanel {

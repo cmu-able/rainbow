@@ -1,7 +1,11 @@
 package incubator.jcodegen;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang.StringUtils;
 
 import incubator.pval.Ensure;
 
@@ -102,6 +106,41 @@ public class JavaMethod {
 	public void append_contents(String text) {
 		Ensure.not_null(text);
 		m_contents.append(text);
+	}
+	
+	/**
+	 * Appends contents to the method contents before a line that matches
+	 * a given pattern.
+	 * @param text the text to append
+	 * @param pattern the pattern
+	 * @return were the contents added?
+	 */
+	public boolean append_contents_before(String text, String pattern) {
+		Ensure.not_null(text, "text == null");
+		Ensure.not_null(pattern, "pattern == null");
+		
+		String[] lines = StringUtils.splitByWholeSeparatorPreserveAllTokens(
+				m_contents.toString(), "\n");
+		int idx = 0;
+		for (; idx < lines.length; idx++) {
+			if (Pattern.matches(pattern, lines[idx])) {
+				break;
+			}
+		}
+		
+		if (idx == lines.length) {
+			return false;
+		}
+		
+		List<String> lines_l = Arrays.asList(lines);
+		m_contents = new StringBuilder();
+		m_contents.append(StringUtils.join(lines_l.subList(0, idx), '\n'));
+		m_contents.append("\n");
+		m_contents.append(text);
+		m_contents.append(StringUtils.join(lines_l.subList(idx,
+				lines_l.size()), '\n'));
+		
+		return true;
 	}
 	
 	/**

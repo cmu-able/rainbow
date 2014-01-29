@@ -67,13 +67,14 @@ public class JavaPackage {
 	/**
 	 * Creates a class in this package.
 	 * @param name the class name
+	 * @param super_class the super class name
 	 * @return the class
 	 */
-	public JavaClass make_class(String name) {
+	public JavaClass make_class(String name, JavaClass super_class) {
 		Ensure.not_null(name, "name == null");
 		Ensure.is_false(m_classes.containsKey(name));
 		
-		JavaClass jc = new JavaClass(name, this);
+		JavaClass jc = new JavaClass(name, this, super_class);
 		m_classes.put(name, jc);
 		return jc;
 	}

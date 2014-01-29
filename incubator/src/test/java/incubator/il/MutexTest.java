@@ -167,15 +167,18 @@ public class MutexTest extends DefaultTCase {
 	@Test
 	public void get_and_reset_statistics() throws Exception {
 		IMutex m = new IMutexImpl();
+		final int run_count = 10;
 		
-		m.acquire();
-		Thread.sleep(80);
-		m.release();
+		for (int i = 0; i < run_count; i++) {
+			m.acquire();
+			Thread.sleep(80);
+			m.release();
+		}
 		
 		IMutexStatistics stats = m.status_snapshot().statistics();
-		assertEquals(1, stats.total_acquisition_count());
+		assertEquals(run_count, stats.total_acquisition_count());
 		assertEquals(0, stats.average_acquire_time());
-		assertEquals(1, stats.counts_with_no_wait());
+		assertEquals(run_count, stats.counts_with_no_wait());
 		assertTrue(stats.average_usage_time() >= 50);
 		
 		m.reset_statistics();

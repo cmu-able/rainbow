@@ -1,0 +1,28 @@
+package a {
+	bean B {
+		attributes {
+		}
+		
+		generators {
+			class,
+			attributes_as_fields,
+			basic_scb,
+			mergeable_scb,
+			copy_constructor
+		}
+	}
+	
+	bean C {
+		attributes {
+			b : set<bean<B>>;
+		}
+		
+		generators {
+			class,
+			attributes_as_fields,
+			simple_attribute_accessors,
+			basic_scb,
+			mergeable_scb
+		}
+	}
+}

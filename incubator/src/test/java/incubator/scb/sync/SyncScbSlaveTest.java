@@ -165,71 +165,73 @@ public class SyncScbSlaveTest extends DefaultTCase {
 	public void remote_changes_are_propagated_to_server_and_to_client()
 			throws Exception {
 		SyncScbSlave slave = new SyncScbSlave(m_master, 3600_000);
-		ScbEditableContainerImpl<TestSyncScb> cont =
-				new ScbEditableContainerImpl<>();
-		slave.sync_now_wait();
-		m_dispatcher_helper.wait_dispatch_clear();
-		
-		slave.add_container("c0", cont, Integer.class, TestSyncScb.class);
-		slave.sync_now_wait();
-		m_dispatcher_helper.wait_dispatch_clear();
-		
-		/*
-		 * Initially, the slave should be empty.
-		 */
-		assertEquals(0, cont.all_scbs().size());
-		
-		/*
-		 * If we add an SCB to another slave and force both to synchronize,
-		 * we should get the SCB here.
-		 */
-		TestSyncScb r_scb = new TestSyncScb(0, SyncStatus.UNKNOWN, "glu");
-		m_c0.add_scb(r_scb);
-		m_dispatcher_helper.wait_dispatch_clear();
-		m_slave.sync_now_wait();
-		m_dispatcher_helper.wait_dispatch_clear();
-		slave.sync_now_wait();
-		m_dispatcher_helper.wait_dispatch_clear();
-		
-		assertEquals(1, cont.all_scbs().size());
-		TestSyncScb scb = cont.all_scbs().iterator().next();
-		assertEquals(0, scb.id().intValue());
-		assertEquals("glu", scb.data());
-		assertEquals(SyncStatus.SYNCHRONIZED, scb.sync_status());
-		
-		/*
-		 * If we update the SCB in another container, it should be updated
-		 * here.
-		 */
-		r_scb.data("gloo");
-		m_dispatcher_helper.wait_dispatch_clear();
-		m_slave.sync_now_wait();
-		m_dispatcher_helper.wait_dispatch_clear();
-		slave.sync_now_wait();
-		m_dispatcher_helper.wait_dispatch_clear();
-		
-		assertEquals(1, cont.all_scbs().size());
-		assertTrue(cont.all_scbs().contains(scb));
-		assertEquals(0, scb.id().intValue());
-		assertEquals("gloo", scb.data());
-		assertEquals(SyncStatus.SYNCHRONIZED, scb.sync_status());
-		
-		/*
-		 * If we delete the SCB in another container, it should be updated
-		 * here.
-		 */
-		m_c0.remove_scb(r_scb);
-		m_dispatcher_helper.wait_dispatch_clear();
-		m_slave.sync_now_wait();
-		m_dispatcher_helper.wait_dispatch_clear();
-		slave.sync_now_wait();
-		m_dispatcher_helper.wait_dispatch_clear();
-		
-		assertEquals(0, cont.all_scbs().size());
-		
-		/*
-		 * Terminate the slave.
-		 */
-		slave.shutdown();
+		try {
+			ScbEditableContainerImpl<TestSyncScb> cont =
+					new ScbEditableContainerImpl<>();
+			slave.sync_now_wait();
+			m_dispatcher_helper.wait_dispatch_clear();
+			
+			slave.add_container("c0", cont, Integer.class, TestSyncScb.class);
+			slave.sync_now_wait();
+			m_dispatcher_helper.wait_dispatch_clear();
+			
+			/*
+			 * Initially, the slave should be empty.
+			 */
+			assertEquals(0, cont.all_scbs().size());
+			
+			/*
+			 * If we add an SCB to another slave and force both to synchronize,
+			 * we should get the SCB here.
+			 */
+			TestSyncScb r_scb = new TestSyncScb(0, SyncStatus.UNKNOWN, "glu");
+			m_c0.add_scb(r_scb);
+			m_dispatcher_helper.wait_dispatch_clear();
+			m_slave.sync_now_wait();
+			m_dispatcher_helper.wait_dispatch_clear();
+			slave.sync_now_wait();
+			m_dispatcher_helper.wait_dispatch_clear();
+			
+			assertEquals(1, cont.all_scbs().size());
+			TestSyncScb scb = cont.all_scbs().iterator().next();
+			assertEquals(0, scb.id().intValue());
+			assertEquals("glu", scb.data());
+			assertEquals(SyncStatus.SYNCHRONIZED, scb.sync_status());
+			
+			/*
+			 * If we update the SCB in another container, it should be updated
+			 * here.
+			 */
+			r_scb.data("gloo");
+			m_dispatcher_helper.wait_dispatch_clear();
+			m_slave.sync_now_wait();
+			m_dispatcher_helper.wait_dispatch_clear();
+			slave.sync_now_wait();
+			m_dispatcher_helper.wait_dispatch_clear();
+			
+			assertEquals(1, cont.all_scbs().size());
+			assertTrue(cont.all_scbs().contains(scb));
+			assertEquals(0, scb.id().intValue());
+			assertEquals("gloo", scb.data());
+			assertEquals(SyncStatus.SYNCHRONIZED, scb.sync_status());
+			
+			/*
+			 * If we delete the SCB in another container, it should be updated
+			 * here.
+			 */
+			m_c0.remove_scb(r_scb);
+			m_dispatcher_helper.wait_dispatch_clear();
+			m_slave.sync_now_wait();
+			m_dispatcher_helper.wait_dispatch_clear();
+			slave.sync_now_wait();
+			m_dispatcher_helper.wait_dispatch_clear();
+			
+			assertEquals(0, cont.all_scbs().size());
+		} finally {
+			/*
+			 * Terminate the slave.
+			 */
+			slave.shutdown();
+		}
 	}
 }

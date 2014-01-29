@@ -48,4 +48,22 @@ public class JavaType {
 		Ensure.not_null(variable);
 		return variable;
 	}
+	
+	/**
+	 * Obtains the raw name of the class that represents this type (no
+	 * generics).
+	 * @return the raw class name
+	 */
+	public String raw_class_name() {
+		return m_name;
+	}
+	
+	/**
+	 * Obtains the expression that evaluates to Class&lt;type&gt;. For most
+	 * types, this is just the class name followed by <code>.class</code>.
+	 * @return the expression
+	 */
+	public String class_expression() {
+		return raw_class_name() + ".class";
+	}
 }

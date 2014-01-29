@@ -6,6 +6,7 @@ import incubator.jcodegen.JavaField;
 import incubator.jcodegen.JavaMethod;
 import incubator.jcodegen.JavaPackage;
 import incubator.pval.Ensure;
+import incubator.scb.sdl.GenerationInfo;
 import incubator.scb.sdl.GenerationResult;
 import incubator.scb.sdl.SdlAttribute;
 import incubator.scb.sdl.SdlBean;
@@ -40,7 +41,7 @@ public class CowGenerator implements SdlBeanGenerator {
 	}
 	
 	@Override
-	public GenerationResult generate(SdlBean b, JavaCode jc, JavaPackage jp,
+	public GenerationInfo generate(SdlBean b, JavaCode jc, JavaPackage jp,
 			Map<String, String> properties) throws SdlGenerationException {
 		Ensure.not_null(b, "b == null");
 		Ensure.not_null(jc, "jc == null");
@@ -50,13 +51,17 @@ public class CowGenerator implements SdlBeanGenerator {
 		JavaClass cls = b.property(JavaClass.class,
 				ClassBeanGenerator.SDL_PROP_CLASS);
 		if (cls == null) {
-			return GenerationResult.CANNOT_RUN;
+			return new GenerationInfo(GenerationResult.CANNOT_RUN,
+					CowGenerator.class.getCanonicalName()
+					+ ": bean class not found");
 		}
 		
 		JavaMethod cc = b.property(JavaMethod.class,
 				SdlBean.SDL_PROP_COPY_CONSTRUCTOR);
 		if (cc == null) {
-			return GenerationResult.CANNOT_RUN;
+			return new GenerationInfo(GenerationResult.CANNOT_RUN,
+					CowGenerator.class.getCanonicalName()
+					+ ": copy constructor not found");
 		}
 		
 		List<SdlAttribute> attrs = new ArrayList<>();
@@ -67,13 +72,17 @@ public class CowGenerator implements SdlBeanGenerator {
 			JavaField f = a.property(JavaField.class,
 					AttributesAsFieldsGenerator.SDL_PROP_FIELD);
 			if (f == null) {
-				return GenerationResult.CANNOT_RUN;
+				return new GenerationInfo(GenerationResult.CANNOT_RUN,
+						CowGenerator.class.getCanonicalName()
+						+ ": field not found for attribute '" + an + "'");
 			}
 			
 			JavaMethod m = a.property(JavaMethod.class,
 					SimpleAttributeAccessorsGenerator.SDL_PROP_SETTER);
 			if (m == null) {
-				return GenerationResult.CANNOT_RUN;
+				return new GenerationInfo(GenerationResult.CANNOT_RUN,
+						CowGenerator.class.getCanonicalName()
+						+ ": setter not found for attribute '" + an + "'");
 			}
 			
 			attrs.add(a);
@@ -99,9 +108,9 @@ public class CowGenerator implements SdlBeanGenerator {
 		}
 		
 		if (any) {
-			return GenerationResult.GENERATED_CODE;
+			return new GenerationInfo(GenerationResult.GENERATED_CODE);
 		} else {
-			return GenerationResult.NOTHING_TO_DO;
+			return new GenerationInfo(GenerationResult.NOTHING_TO_DO);
 		}
 	}
 }

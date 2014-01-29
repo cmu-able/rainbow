@@ -43,7 +43,7 @@ public class JavaCodeTests extends DefaultTCase {
 		File d = new File(m_dir.getFile(), "foo");
 		d.mkdir();
 		File dd = new File(d, "bar");
-		FileContentWorker.setContents(dd, "foo");
+		FileContentWorker.set_contents(dd, "foo");
 		JavaCode jc = new JavaCode();
 		
 		assertTrue(d.exists());

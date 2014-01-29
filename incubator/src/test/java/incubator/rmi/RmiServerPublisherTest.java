@@ -1,18 +1,19 @@
 package incubator.rmi;
 
-import incubator.rmi.RmiCommunicationPorts;
-import incubator.rmi.RmiServerPublisher;
-
 import java.net.ConnectException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.rmi.RemoteException;
+
+import net.ladypleaser.rmilite.Client;
 
 import org.apache.commons.lang.math.RandomUtils;
 import org.junit.Test;
 
 import auxtestlib.DefaultTCase;
 import auxtestlib.TestHelper;
-import net.ladypleaser.rmilite.Client;
 
 /**
  * Test suite for the {@link RmiServerPublisher} class.
@@ -146,9 +147,11 @@ public class RmiServerPublisherTest extends DefaultTCase {
 		 */
 		for (int i = 0; i < iterationCount; i++) {
 			int p = 1025 + RandomUtils.nextInt(10000);
-			try (Socket s = new Socket("localhost", p)){
+			try (Socket s = new Socket()) {
+				s.connect(new InetSocketAddress(InetAddress.getLocalHost(), p),
+						50);
 				continue;
-			} catch (ConnectException e) {
+			} catch (ConnectException|SocketTimeoutException e) {
 				/*
 				 * Port is free.
 				 */

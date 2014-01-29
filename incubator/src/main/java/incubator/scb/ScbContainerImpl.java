@@ -26,7 +26,7 @@ public class ScbContainerImpl<T extends Scb<T>> implements ScbContainer<T> {
 	 * Copy of the children set in case it is cleared: we need to inform of
 	 * all removals one by one.
 	 */
-	private Set<T> m_copy;
+	private ListSet<T> m_copy;
 	
 	/**
 	 * The dispatcher.
@@ -44,7 +44,7 @@ public class ScbContainerImpl<T extends Scb<T>> implements ScbContainer<T> {
 	public ScbContainerImpl() {
 		m_children = new WrapperObservableSet<>(new ListSet<T>());
 		m_dispatcher = new LocalDispatcher<>();
-		m_copy = new HashSet<>();
+		m_copy = new ListSet<>();
 		m_update_listener = new ScbUpdateListener<T>() {
 			@Override
 			public void updated(T t) {
@@ -55,53 +55,33 @@ public class ScbContainerImpl<T extends Scb<T>> implements ScbContainer<T> {
 		m_children.addObservableSetListener(
 			new ObservableSetListener<T>() {
 				@Override
-				public void elementAdded(final T e) {
-					synchronized (ScbContainerImpl.this) {
-						m_copy.add(e);
-						e.dispatcher().add(m_update_listener);
-						m_dispatcher.dispatch(
-								new DispatcherOp<ScbContainerListener<T>>() {
-							@Override
-							public void dispatch(ScbContainerListener<T> l) {
-								l.scb_added(e);
-							}
-						});
-					}
+				public void elementAdded(T e) {
+					m_dispatcher.dispatch(new Runnable() {
+						@Override
+						public void run() {
+							sync();
+						}
+					});
 				}
 
 				@Override
 				public void elementRemoved(final T e) {
-					synchronized (ScbContainerImpl.this) {
-						m_copy.remove(e);
-						e.dispatcher().remove(m_update_listener);
-						m_dispatcher.dispatch(
-								new DispatcherOp<ScbContainerListener<T>>() {
-							@Override
-							public void dispatch(ScbContainerListener<T> l) {
-								l.scb_removed(e);
-							}
-						});
-					}
+					m_dispatcher.dispatch(new Runnable() {
+						@Override
+						public void run() {
+							sync();
+						}
+					});
 				}
 
 				@Override
 				public void setCleared() {
-					synchronized (ScbContainerImpl.this) {
-						final Set<T> cp = new HashSet<>(m_copy);
-						m_copy.clear();
-						for (final T t : cp) {
-							t.dispatcher().remove(m_update_listener);
-							m_dispatcher.dispatch(
-									new DispatcherOp<
-									ScbContainerListener<T>>() {
-								@Override
-								public void dispatch(
-										ScbContainerListener<T> l) {
-									l.scb_removed(t);
-								}
-							});
+					m_dispatcher.dispatch(new Runnable() {
+						@Override
+						public void run() {
+							sync();
 						}
-					}
+					});
 				}
 		});
 	}
@@ -138,5 +118,52 @@ public class ScbContainerImpl<T extends Scb<T>> implements ScbContainer<T> {
 				l.scb_updated(t);
 			}
 		});
+	}
+	
+	/**
+	 * Synchronizes the list of known children with the set.
+	 */
+	private synchronized void sync() {
+		for (T t : m_copy) {
+			t.dispatcher().remove(m_update_listener);
+			t.dispatcher().add(m_update_listener);
+		}
+		
+		ListSet<T> bkp = new ListSet<>(m_copy);
+		ListSet<T> new_copy = new ListSet<>(m_children);
+		Set<T> new_t = new ListSet<>(new_copy);
+		new_t.removeAll(m_copy);
+		Set<T> del_t = new ListSet<>(m_copy);
+		del_t.removeAll(new_copy);
+		m_copy = new_copy;
+		
+		for (final T t : new_t) {
+			t.dispatcher().add(m_update_listener);
+			m_dispatcher.dispatch(new DispatcherOp<ScbContainerListener<T>>() {
+				@Override
+				public void dispatch(ScbContainerListener<T> l) {
+					l.scb_added(t);
+				}
+			});
+		}
+		
+		for (final T t : del_t) {
+			t.dispatcher().remove(m_update_listener);
+			m_dispatcher.dispatch(new DispatcherOp<ScbContainerListener<T>>() {
+				@Override
+				public void dispatch(ScbContainerListener<T> l) {
+					l.scb_removed(t);
+				}
+			});
+		}
+		
+		for (T t : m_copy) {
+			try {
+				t.dispatcher().remove(m_update_listener);
+			} catch (AssertionError e) {
+				e.printStackTrace();
+			}
+			t.dispatcher().add(m_update_listener);
+		}
 	}
 }

@@ -6,6 +6,7 @@ import incubator.jcodegen.JavaField;
 import incubator.jcodegen.JavaMethod;
 import incubator.jcodegen.JavaPackage;
 import incubator.pval.Ensure;
+import incubator.scb.sdl.GenerationInfo;
 import incubator.scb.sdl.GenerationResult;
 import incubator.scb.sdl.SdlAttribute;
 import incubator.scb.sdl.SdlBean;
@@ -35,7 +36,7 @@ public class CopyConstructorGenerator implements SdlBeanGenerator {
 	}
 	
 	@Override
-	public GenerationResult generate(SdlBean b, JavaCode jc, JavaPackage jp,
+	public GenerationInfo generate(SdlBean b, JavaCode jc, JavaPackage jp,
 			Map<String, String> properties) throws SdlGenerationException {
 		Ensure.not_null(b, "b == null");
 		Ensure.not_null(jc, "jc == null");
@@ -45,7 +46,9 @@ public class CopyConstructorGenerator implements SdlBeanGenerator {
 		JavaClass cls = b.property(JavaClass.class,
 				ClassBeanGenerator.SDL_PROP_CLASS);
 		if (cls == null) {
-			return GenerationResult.CANNOT_RUN;
+			return new GenerationInfo(GenerationResult.CANNOT_RUN,
+					CopyConstructorGenerator.class.getCanonicalName()
+					+ ": bean class not found");
 		}
 		
 		List<JavaField> fields = new ArrayList<>();
@@ -55,7 +58,9 @@ public class CopyConstructorGenerator implements SdlBeanGenerator {
 			JavaField jf = attr.property(JavaField.class,
 					AttributesAsFieldsGenerator.SDL_PROP_FIELD);
 			if (jf == null) {
-				return GenerationResult.CANNOT_RUN;
+				return new GenerationInfo(GenerationResult.CANNOT_RUN,
+						CopyConstructorGenerator.class.getCanonicalName()
+						+ ": no field found for attribute '" + an + "'");
 			}
 			
 			fields.add(jf);
@@ -77,9 +82,9 @@ public class CopyConstructorGenerator implements SdlBeanGenerator {
 			}
 			
 			b.property(SdlBean.SDL_PROP_COPY_CONSTRUCTOR, m);
-			return GenerationResult.GENERATED_CODE;
+			return new GenerationInfo(GenerationResult.GENERATED_CODE);
 		} else {
-			return GenerationResult.NOTHING_TO_DO;
+			return new GenerationInfo(GenerationResult.NOTHING_TO_DO);
 		}
 	}
 }

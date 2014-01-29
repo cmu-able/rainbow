@@ -37,6 +37,11 @@ class IMutexRequestImpl implements IMutexRequest, Serializable {
 	private long m_wait_time;
 	
 	/**
+	 * Have we waited for this lock? 
+	 */
+	private boolean m_waited;
+	
+	/**
 	 * Creates a new mutex request. The request data is obtained automatically
 	 * from the current context.
 	 */
@@ -49,6 +54,7 @@ class IMutexRequestImpl implements IMutexRequest, Serializable {
 		StringWriter sw = new StringWriter();
 		e.printStackTrace(new PrintWriter(sw));
 		m_trace = sw.toString();
+		m_waited = false;
 	}
 	
 	@Override
@@ -68,11 +74,22 @@ class IMutexRequestImpl implements IMutexRequest, Serializable {
 
 	@Override
 	public long wait_time() {
-		if (m_wait_time == -1) {
-			return new Date().getTime() - m_request.getTime();
+		if (m_waited) {
+			if (m_wait_time == -1) {
+				return new Date().getTime() - m_request.getTime();
+			} else {
+				return m_wait_time;
+			}
 		} else {
-			return m_wait_time;
+			return 0;
 		}
+	}
+	
+	/**
+	 * Marks that we have waited for the lock.
+	 */
+	void mark_waited() {
+		m_waited = true;
 	}
 	
 	/**

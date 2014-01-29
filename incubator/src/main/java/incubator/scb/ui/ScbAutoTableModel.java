@@ -25,7 +25,8 @@ public class ScbAutoTableModel<T extends Scb<T>, C extends Comparable<C>>
 	 * @param order_field field used for sorting
 	 */
 	public ScbAutoTableModel(ScbContainer<T> container,
-			List<ScbField<T, ?>> fields, final ScbField<T, C> order_field) {
+			List<ScbField<T, ?>> fields,
+			final ScbField<T, C> order_field) {
 		super(container, new Comparator<T>() {
 			@Override
 			public int compare(T o1, T o2) {

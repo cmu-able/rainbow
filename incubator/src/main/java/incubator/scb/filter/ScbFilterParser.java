@@ -8,7 +8,7 @@ import incubator.scb.filter.parser.ScbFilterJjParser;
 import incubator.scb.filter.parser.TokenMgrError;
 
 import java.io.StringReader;
-import java.util.Set;
+import java.util.Collection;
 
 /**
  * Parser that constructs an {@link ScbFilter} from a text description.
@@ -18,13 +18,13 @@ public class ScbFilterParser<T extends Scb<T>> {
 	/**
 	 * The SCB's fields.
 	 */
-	private Set<ScbField<T, ?>> m_fields;
+	private Collection<ScbField<T, ?>> m_fields;
 	
 	/**
 	 * Creates a new parser.
 	 * @param fields the fields of the SCB that can be used for parsing
 	 */
-	public ScbFilterParser(Set<ScbField<T, ?>> fields) {
+	public ScbFilterParser(Collection<ScbField<T, ?>> fields) {
 		Ensure.not_null(fields, "fields == null");
 		m_fields = fields;
 	}

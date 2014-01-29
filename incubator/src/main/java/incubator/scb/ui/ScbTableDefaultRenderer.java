@@ -14,11 +14,11 @@ import javax.swing.table.DefaultTableCellRenderer;
  * displays the icon.
  */
 @SuppressWarnings("serial")
-public class ScbTableModelDefaultRenderer extends DefaultTableCellRenderer {
+public class ScbTableDefaultRenderer extends DefaultTableCellRenderer {
 	/**
 	 * Creates a new renderer.
 	 */
-	public ScbTableModelDefaultRenderer() {
+	public ScbTableDefaultRenderer() {
 	}
 	
 	@Override
@@ -28,6 +28,10 @@ public class ScbTableModelDefaultRenderer extends DefaultTableCellRenderer {
 		
 		setText("");
 		setIcon(null);
+		
+		if (value instanceof Component) {
+			return (Component) value;
+		}
 		
 		Component r = null;
 		if (value == null || !(value instanceof ImageIcon)) {

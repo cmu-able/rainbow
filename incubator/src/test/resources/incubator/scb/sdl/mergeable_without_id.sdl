@@ -1,0 +1,8 @@
+package a {
+	bean B {
+		generators {
+			class,
+			mergeable_scb (no_id)
+		}
+	}
+}

@@ -52,11 +52,17 @@ public class JavaClass {
 	private List<String> m_implements;
 	
 	/**
+	 * The super class.
+	 */
+	private JavaClass m_super_class;
+	
+	/**
 	 * Creates a new class.
 	 * @param name the class name
 	 * @param pkg the package this class belongs to
+	 * @param super_class an optional superclass
 	 */
-	public JavaClass(String name, JavaPackage pkg) {
+	public JavaClass(String name, JavaPackage pkg, JavaClass super_class) {
 		Ensure.not_null(name, "name == null");
 		Ensure.not_null(pkg, "pkg == null");
 		
@@ -66,6 +72,15 @@ public class JavaClass {
 		m_field_names = new ArrayList<>();
 		m_methods = new ArrayList<>();
 		m_implements = new ArrayList<>();
+		m_super_class = super_class;
+	}
+	
+	/**
+	 * Obtains the super class.
+	 * @return the super classor <code>null</code> if none
+	 */
+	public JavaClass super_class() {
+		return m_super_class;
 	}
 	
 	/**
@@ -175,6 +190,11 @@ public class JavaClass {
 		try (FileWriter fw = new FileWriter(class_file)) {
 			fw.write("package " + m_package.fqn() + ";\n");
 			fw.write("public class " + m_name);
+			if (m_super_class != null) {
+				fw.write(" extends " + m_super_class.m_package.fqn()
+						+ "." + m_super_class.m_name);
+			}
+			
 			if (m_implements.size() > 0) {
 				fw.write(" implements " + m_implements.get(0));
 				for (int i = 1; i < m_implements.size(); i++) {

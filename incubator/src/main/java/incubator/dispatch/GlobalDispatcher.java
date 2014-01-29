@@ -133,7 +133,8 @@ public class GlobalDispatcher {
 		synchronized (GlobalDispatcher.class) {
 			if (m_instance != null) {
 				try {
-					m_instance.m_executor.awaitTermination(1, TimeUnit.SECONDS);
+					m_instance.m_executor.awaitTermination(100,
+							TimeUnit.MILLISECONDS);
 				} catch (InterruptedException e) {
 					/*
 					 * Ignored.
@@ -168,6 +169,15 @@ public class GlobalDispatcher {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Adds a runner to the dispatch queue.
+	 * @param r the runner
+	 */
+	public void dispatch(Runnable r) {
+		Ensure.not_null(r, "r == null");
+		dispatch(r, new RuntimeException());
 	}
 	
 	/**

@@ -7,6 +7,7 @@ import incubator.jcodegen.JavaCode;
 import incubator.jcodegen.JavaField;
 import incubator.jcodegen.JavaPackage;
 import incubator.pval.Ensure;
+import incubator.scb.sdl.GenerationInfo;
 import incubator.scb.sdl.GenerationResult;
 import incubator.scb.sdl.SdlAttribute;
 import incubator.scb.sdl.SdlBean;
@@ -39,7 +40,7 @@ public class AttributesAsFieldsGenerator implements SdlBeanGenerator {
 	}
 	
 	@Override
-	public GenerationResult generate(SdlBean b, JavaCode jc, JavaPackage jp,
+	public GenerationInfo generate(SdlBean b, JavaCode jc, JavaPackage jp,
 			Map<String, String> properties) throws SdlGenerationException {
 		Ensure.not_null(b, "b == null");
 		Ensure.not_null(jc, "jc == null");
@@ -49,7 +50,9 @@ public class AttributesAsFieldsGenerator implements SdlBeanGenerator {
 		JavaClass cls = b.property(JavaClass.class,
 				ClassBeanGenerator.SDL_PROP_CLASS);
 		if (cls == null) {
-			return GenerationResult.CANNOT_RUN;
+			return new GenerationInfo(GenerationResult.CANNOT_RUN,
+					AttributesAsFieldsGenerator.class.getCanonicalName()
+					+ ": bean class not found");
 		}
 		
 		boolean done_any = false;
@@ -65,9 +68,9 @@ public class AttributesAsFieldsGenerator implements SdlBeanGenerator {
 		}
 		
 		if (done_any) {
-			return GenerationResult.GENERATED_CODE;
+			return new GenerationInfo(GenerationResult.GENERATED_CODE);
 		} else {
-			return GenerationResult.NOTHING_TO_DO;
+			return new GenerationInfo(GenerationResult.NOTHING_TO_DO);
 		}
 	}
 }

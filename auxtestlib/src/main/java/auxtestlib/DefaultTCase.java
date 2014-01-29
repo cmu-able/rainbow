@@ -146,6 +146,7 @@ public class DefaultTCase extends Assert {
 	 * enumeration to make sure they are not missing in the code coverage
 	 * report.
 	 * @param cls the enumeration class
+	 * @param <E> the enumeration type
 	 * @throws Exception failed to invoke
 	 */
 	protected <E extends Enum<E>> void cover_enumeration(Class<E> cls)

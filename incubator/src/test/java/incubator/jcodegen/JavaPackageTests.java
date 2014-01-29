@@ -112,7 +112,7 @@ public class JavaPackageTests extends DefaultTCase {
 	@Test
 	public void find_existing_class() throws Exception {
 		JavaPackage p = m_p.make_child("x");
-		p.make_class("foo");
+		p.make_class("foo", null);
 		assertNotNull(p.child_class("foo"));
 		assertEquals("foo", p.child_class("foo").name());
 	}

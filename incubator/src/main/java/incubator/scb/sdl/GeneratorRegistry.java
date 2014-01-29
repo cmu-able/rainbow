@@ -8,6 +8,7 @@ import incubator.scb.sdl.generators.CopyConstructorGenerator;
 import incubator.scb.sdl.generators.CowGenerator;
 import incubator.scb.sdl.generators.HashcodeEqualsGenerator;
 import incubator.scb.sdl.generators.MergeableScbGenerator;
+import incubator.scb.sdl.generators.NoArgumentConstructorGenerator;
 import incubator.scb.sdl.generators.SimpleAttributeAccessorsGenerator;
 import incubator.scb.sdl.generators.SimpleConstructorGenerator;
 
@@ -42,6 +43,8 @@ public class GeneratorRegistry {
 		add_generator(MergeableScbGenerator.NAME, new MergeableScbGenerator());
 		add_generator(HashcodeEqualsGenerator.NAME,
 				new HashcodeEqualsGenerator());
+		add_generator(NoArgumentConstructorGenerator.NAME,
+				new NoArgumentConstructorGenerator());
 	}
 	
 	/**

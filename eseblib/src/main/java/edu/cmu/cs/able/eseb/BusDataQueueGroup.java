@@ -11,4 +11,10 @@ public interface BusDataQueueGroup {
 	 * @param q the queue
 	 */
 	void add(BusDataQueue q);
+	
+	/**
+	 * Removes a queue from the group.
+	 * @param q the queue
+	 */
+	void remove(BusDataQueue q);
 }

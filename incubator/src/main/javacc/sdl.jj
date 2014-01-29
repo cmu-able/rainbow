@@ -18,6 +18,7 @@ import incubator.scb.sdl.SdlBeanType;
 import incubator.scb.sdl.SdlDefinition;
 import incubator.scb.sdl.SdlEnumerationType;
 import incubator.scb.sdl.SdlPackage;
+import incubator.scb.sdl.SdlSetType;
 import incubator.scb.sdl.SdlType;
 
 public class SdlJjParser {
@@ -68,8 +69,10 @@ TOKEN : {
 |	< ATTRIBUTES: "attributes" >
 |	< BEAN: "bean" >
 |	< ENUM: "enum" >
+|	< EXTENDS: "extends" >
 |	< GENERATORS: "generators" >
 |	< PACKAGE: "package" >
+|	< SET: "set" >
 | 	< IDENTIFIER: ["a"-"z","A"-"Z","_"](["a"-"z","A"-"Z","0"-"9","_"])* >
 }
 
@@ -104,9 +107,21 @@ String DotName() : {
 
 void Package(SdlPackage p, GeneratorRegistry gr, SdlDefinition sd) : {
 		Token t;
+		String s;
+		SdlBean parent = null;
  	} {
- 		(<BEAN> t = <IDENTIFIER> <LBRACE> {
- 			SdlBean b = new SdlBean(t.image, p);
+ 		(<BEAN> t = <IDENTIFIER> (<EXTENDS> s = DotName() {
+			parent = sd.find_bean(s);
+			if (parent == null) {
+				parent = p.bean(s);
+			}
+			
+			if (parent == null) {
+				throw new ParseException("Could not find bean '" + s + "'.");
+			}
+ 			}
+ 		)? <LBRACE> {
+ 			SdlBean b = new SdlBean(t.image, p, parent);
  			if (p.bean(t.image) != null) {
  				throw new ParseException("Duplicate bean name: '" + t.image
  						+ "'."); 			}
@@ -184,6 +199,7 @@ void BeanModifier(SdlBean b, GeneratorRegistry gr) : {
 SdlType Type(SdlDefinition sd, SdlPackage p) : {
 		String  s;
 		SdlBean b;
+		SdlType t;
 	} {
 		s = DotName() {
 			return new SdlType(s);
@@ -202,6 +218,9 @@ SdlType Type(SdlDefinition sd, SdlPackage p) : {
 			}
 			
 			return new SdlBeanType(b);
+			}
+		| <SET> <LT> t = Type(sd, p) <GT> {
+			return new SdlSetType(t);
 			}
 }
 

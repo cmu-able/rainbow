@@ -23,7 +23,7 @@ public class BusDataQueueGroupImpl implements BusDataQueueGroup {
 
 	@Override
 	public synchronized void add(BusDataQueue q) {
-		Ensure.not_null(q);
+		Ensure.not_null(q, "q == null");
 		m_queues.add(q);
 	}
 	
@@ -36,6 +36,12 @@ public class BusDataQueueGroupImpl implements BusDataQueueGroup {
 		for (BusDataQueue q : m_queues) {
 			q.add(d);
 		}
+	}
+	
+	public synchronized void remove(BusDataQueue q) {
+		Ensure.not_null(q, "q == null");
+		Ensure.is_true(m_queues.contains(q), "queue not known");
+		m_queues.remove(q);
 	}
 	
 	/**

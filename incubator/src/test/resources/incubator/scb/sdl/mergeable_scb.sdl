@@ -1,0 +1,17 @@
+package a {
+	bean B {
+		attributes {
+			c : int;
+		}
+		
+		generators {
+			class,
+			attributes_as_fields,
+			simple_attribute_accessors,
+			copy_constructor,
+			mergeable_scb,
+			simple_constructor,
+			basic_scb
+		}
+	}
+}

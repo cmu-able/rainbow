@@ -172,19 +172,31 @@ public abstract class AbstractControlledThread extends Thread {
 	}
 
 	/**
-	 * Calls the {@link #invoke()} method on all threads in the array. If some
-	 * of the methods fails with an exception, the exception is thrown and the
-	 * {@link #invoke()} method is not called on subsequent threads.
-	 * 
+	 * Calls the {@link #invoke()} method on all threads in the array. If one
+	 * of the methods fail with an exception, the exception is thrown. If
+	 * more than one method fails with an exception, one of the exceptions is
+	 * thrown and the others suppressed.
 	 * @param threads the thread array
-	 * 
 	 * @throws Exception at least one threads failed. This is the exception
 	 * thrown by the thread
 	 */
 	public static void invokeAll(AbstractControlledThread threads[])
 			throws Exception {
+		Exception thrown = null;
 		for (int i = 0; i < threads.length; i++) {
-			threads[i].invoke();
+			try {
+				threads[i].invoke();
+			} catch (Exception e) {
+				if (thrown == null) {
+					thrown = e;
+				} else {
+					thrown.addSuppressed(e);
+				}
+			}
+		}
+		
+		if (thrown != null) {
+			throw thrown;
 		}
 	}
 }

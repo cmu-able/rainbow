@@ -60,7 +60,12 @@ public class SdlDefinition {
 	public void generate(JavaCode jc) throws SdlGenerationException {
 		Ensure.not_null(jc, "jc == null");
 		for (SdlPackage p : m_packages.values()) {
-			p.generate(jc);
+			GenerationInfo gi = p.generate(jc);
+			Ensure.not_null(gi, "gi == null");
+			if (gi.result() == GenerationResult.CANNOT_RUN) {
+				throw new SdlGenerationException("Failed to generate java "
+						+ "code from SDL: " + gi.message());
+			}
 		}
 	}
 	
