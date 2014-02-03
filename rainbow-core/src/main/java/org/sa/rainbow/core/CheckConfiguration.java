@@ -36,9 +36,7 @@ public class CheckConfiguration {
         System.out.print ("Loading models...");
         System.out.flush ();
         final ModelsManager mm = new ModelsManager ();
-        mm.initializeModels ();
-        System.out.println ("found " + mm.getRegisteredModelTypes () + " model *types*");
-        System.out.println ("Checking configuration consistency...");
+
         RainbowConfigurationChecker checker = new RainbowConfigurationChecker (new IRainbowMaster () {
 
             @Override
@@ -66,6 +64,10 @@ public class CheckConfiguration {
                 return mm;
             }
         });
+        mm.m_reportingPort = checker;
+        mm.initializeModels ();
+        System.out.println ("found " + mm.getRegisteredModelTypes () + " model *types*");
+        System.out.println ("Checking configuration consistency...");
         checker.checkRainbowConfiguration ();
         if (checker.getProblems ().size () > 0) {
             System.out.println ("Problems with the configuration were reported:");

@@ -317,6 +317,10 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
             LOGGER.error ("There is no location information associated with " + delegateID);
             return Collections.<GaugeInstanceDescription> emptyList ();
         }
+        return filterGaugesForLocation (deploymentInfo);
+    }
+
+    List<GaugeInstanceDescription> filterGaugesForLocation (String deploymentInfo) {
         List<GaugeInstanceDescription> gauges = new LinkedList<GaugeInstanceDescription> ();
         for (GaugeInstanceDescription gid : gaugeDesc ().instSpec.values ()) {
             TypedAttributeWithValue targetIP = gid.findSetupParam ("targetIP");
@@ -333,20 +337,24 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
         else {
             Properties delegateInfo = m_delegateInfo.get (delegateID);
             String deploymentInfo = null;
-            ;
+
             if (delegateInfo == null
                     || (deploymentInfo = delegateInfo.getProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION)) == null) {
                 LOGGER.error ("There is no location information associated with " + delegateID);
                 return Collections.<EffectorAttributes> emptyList ();
             }
-            List<EffectorAttributes> effectors = new LinkedList<EffectorAttributes> ();
-            for (EffectorAttributes probe : effectorDesc ().effectors) {
-                if (probe.location.equals (deploymentInfo)) {
-                    effectors.add (probe);
-                }
-            }
-            return effectors;
+            return filterEffectorsForLocation (deploymentInfo);
         }
+    }
+
+    List<EffectorAttributes> filterEffectorsForLocation (String deploymentInfo) {
+        List<EffectorAttributes> effectors = new LinkedList<EffectorAttributes> ();
+        for (EffectorAttributes probe : effectorDesc ().effectors) {
+            if (probe.location.equals (deploymentInfo)) {
+                effectors.add (probe);
+            }
+        }
+        return effectors;
     }
 
     /**
@@ -402,14 +410,18 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
                 LOGGER.error ("There is no location information associated with " + delegateID);
                 return Collections.<ProbeAttributes> emptyList ();
             }
-            List<ProbeAttributes> probes = new LinkedList<ProbeAttributes> ();
-            for (ProbeAttributes probe : probeDesc ().probes) {
-                if (probe.location.equals (deploymentInfo)) {
-                    probes.add (probe);
-                }
-            }
-            return probes;
+            return filterProbesForLocation (deploymentInfo);
         }
+    }
+
+    List<ProbeAttributes> filterProbesForLocation (String deploymentInfo) {
+        List<ProbeAttributes> probes = new LinkedList<ProbeAttributes> ();
+        for (ProbeAttributes probe : probeDesc ().probes) {
+            if (probe.location.equals (deploymentInfo)) {
+                probes.add (probe);
+            }
+        }
+        return probes;
     }
 
     @Override
@@ -463,12 +475,14 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
     }
 
     private void checkTerminations () {
-        if (!m_terminatedDelegates.isEmpty ()) {
-            for (Entry<String, Beacon> e : m_terminatedDelegates.entrySet ()) {
-                if (e.getValue ().periodElapsed ()) {
-                    m_reportingPort.warn (getComponentType (),
-                            "Did not hear back from terminated delegate " + e.getKey () + ". Flushing anyway.");
-                    flushDelegate (e.getKey ());
+        synchronized (m_terminatedDelegates) {
+            if (!m_terminatedDelegates.isEmpty ()) {
+                for (Entry<String, Beacon> e : m_terminatedDelegates.entrySet ()) {
+                    if (e.getValue ().periodElapsed ()) {
+                        m_reportingPort.warn (getComponentType (),
+                                "Did not hear back from terminated delegate " + e.getKey () + ". Flushing anyway.");
+                        flushDelegate (e.getKey ());
+                    }
                 }
             }
         }
@@ -498,7 +512,9 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
     }
 
     void flushDelegate (String id) {
-        m_terminatedDelegates.remove (id);
+        synchronized (m_terminatedDelegates) {
+            m_terminatedDelegates.remove (id);
+        }
         m_heartbeats.remove (id);
         IDelegateManagementPort deploymentPort = m_delegates.remove (id);
         deploymentPort.dispose ();
@@ -713,7 +729,9 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
         for (Entry<String, IDelegateManagementPort> e : m_delegates.entrySet ()) {
             Beacon b = new Beacon (10000);
             b.mark ();
-            m_terminatedDelegates.put (e.getKey (), b);
+            synchronized (m_terminatedDelegates) {
+                m_terminatedDelegates.put (e.getKey (), b);
+            }
             e.getValue ().terminateDelegate ();
         }
     }
@@ -733,11 +751,29 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
             if (port != null) {
                 Beacon b = new Beacon (10000);
                 b.mark ();
-                m_terminatedDelegates.put (did, b);
+                synchronized (m_terminatedDelegates) {
+                    m_terminatedDelegates.put (did, b);
+                }
                 port.terminateDelegate ();
             }
         }
     }
 
+    public List<String> getExpectedDelegateLocations () {
+        List<String> ret = new LinkedList<String> ();
+        Properties allProperties = Rainbow.allProperties ();
+        for (Map.Entry o : allProperties.entrySet ()) {
+            String k = (String )o.getKey ();
+            if (k.startsWith ("customize.system.")) {
+                String location = (String )o.getValue ();
+                if (!filterEffectorsForLocation (location).isEmpty () || !filterGaugesForLocation (location).isEmpty ()
+                        || !filterProbesForLocation (location).isEmpty ()) {
+                    ret.add (location);
+                }
+            }
+        }
+        Collections.sort (ret);
+        return ret;
+    }
 
 }

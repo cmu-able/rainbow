@@ -1,5 +1,7 @@
 package org.sa.rainbow.util;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
@@ -12,7 +14,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
+import org.apache.log4j.Logger;
 import org.sa.rainbow.core.IRainbowMaster;
+import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.gauges.GaugeDescription;
 import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
@@ -24,13 +28,14 @@ import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ProbeDescription;
 import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
 import org.sa.rainbow.core.models.commands.ModelCommandFactory;
+import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
 import org.sa.rainbow.translator.probes.IProbe.Kind;
 
-public class RainbowConfigurationChecker {
+public class RainbowConfigurationChecker implements IRainbowReportingPort {
 
     public enum ProblemT {
         WARNING, ERROR
@@ -153,6 +158,11 @@ public class RainbowConfigurationChecker {
                     probe.name)));
         }
 
+        if (probe.location != null && probe.location.startsWith ("$")) {
+            m_problems.add (new Problem (ProblemT.ERROR, MessageFormat.format (
+                    "{0}: Has an unexpanded location ''{1}''", probe.name, probe.location)));
+        }
+
         if (probe.kind == Kind.JAVA) {
             String probeClazz = probe.info.get ("class");
             if (probeClazz == null) {
@@ -242,6 +252,7 @@ public class RainbowConfigurationChecker {
                 p.msg = MessageFormat.format ("{0}: The model ''{1}:{2}'' is unknown.", gid.gaugeName (), gid
                         .modelDesc ().getName (), gid.modelDesc ().getType ());
                 m_problems.add (p);
+                return;
             }
             // Check if command exists in model
 
@@ -329,7 +340,7 @@ public class RainbowConfigurationChecker {
         // Check if probe exists in probe desc
         TypedAttributeWithValue probe;
         if ((probe = gid.findConfigParam ("targetProbeType")) != null
-                || (probe = gid.findConfigParam ("targetProbeTypes")) != null) {
+                || (probe = gid.findConfigParam ("targetProbeList")) != null) {
             String[] probes = ((String )probe.getValue ()).split (",");
             for (String probe2 : probes) {
                 probe2 = Util.decomposeID (probe2).firstValue ();
@@ -427,6 +438,102 @@ public class RainbowConfigurationChecker {
 
     public Collection<Problem> getProblems () {
         return m_problems;
+    }
+
+    @Override
+    public void fatal (RainbowComponentT type, String msg, Throwable e, Logger logger) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream ();
+        PrintStream ps = new PrintStream (baos);
+        e.printStackTrace (ps);
+        ps.close ();
+        fatal (type, MessageFormat.format ("{0}.\nException: {1}\n{2}", msg, e.getMessage (), baos.toString ()));
+
+    }
+
+    @Override
+    public void fatal (RainbowComponentT type, String msg, Logger logger) {
+        fatal (type, msg);
+    }
+
+    @Override
+    public void fatal (RainbowComponentT type, String msg, Throwable e) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream ();
+        PrintStream ps = new PrintStream (baos);
+        e.printStackTrace (ps);
+        ps.close ();
+        fatal (type, MessageFormat.format ("{0}.\nException: {1}\n{2}", msg, e.getMessage (), baos.toString ()));
+    }
+
+    @Override
+    public void fatal (RainbowComponentT type, String msg) {
+        Problem p = new Problem (ProblemT.ERROR, msg);
+        m_problems.add (p);
+    }
+
+    @Override
+    public void error (RainbowComponentT type, String msg, Throwable e, Logger logger) {
+        error (type, msg, e);
+    }
+
+    @Override
+    public void error (RainbowComponentT type, String msg, Logger logger) {
+        error (type, msg);
+    }
+
+    @Override
+    public void error (RainbowComponentT type, String msg, Throwable e) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream ();
+        PrintStream ps = new PrintStream (baos);
+        e.printStackTrace (ps);
+        ps.close ();
+        error (type, MessageFormat.format ("{0}.\nException: {1}\n{2}", msg, e.getMessage (), baos.toString ()));
+    }
+
+    @Override
+    public void error (RainbowComponentT type, String msg) {
+        Problem p = new Problem (ProblemT.ERROR, msg);
+        m_problems.add (p);
+    }
+
+    @Override
+    public void warn (RainbowComponentT type, String msg, Throwable e, Logger logger) {
+        warn (type, msg, e);
+    }
+
+    @Override
+    public void warn (RainbowComponentT type, String msg, Logger logger) {
+        warn (type, msg);
+    }
+
+    @Override
+    public void warn (RainbowComponentT type, String msg, Throwable e) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream ();
+        PrintStream ps = new PrintStream (baos);
+        e.printStackTrace (ps);
+        ps.close ();
+        warn (type, MessageFormat.format ("{0}.\nException: {1}\n{2}", msg, e.getMessage (), baos.toString ()));
+
+    }
+
+    @Override
+    public void warn (RainbowComponentT type, String msg) {
+        Problem p = new Problem (ProblemT.WARNING, msg);
+        m_problems.add (p);
+    }
+
+    @Override
+    public void info (RainbowComponentT type, String msg, Logger logger) {
+
+    }
+
+    @Override
+    public void info (RainbowComponentT type, String msg) {
+
+    }
+
+    @Override
+    public void trace (RainbowComponentT type, String msg) {
+
     }
 
 }

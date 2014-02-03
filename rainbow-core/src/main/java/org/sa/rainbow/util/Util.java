@@ -442,6 +442,7 @@ public class Util {
 
     public static Logger dataLogger () {
         if (m_dataLogger == null) {
+//            PropertyConfigurator.configure (defineLoggerProperties ());
             m_dataLogger = Logger.getLogger (DATA_LOGGER_NAME);
         }
         return m_dataLogger;

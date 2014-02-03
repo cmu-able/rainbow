@@ -111,38 +111,46 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                     m_changeBusPort.announce (events);
                 }
                 IModelInstance instance = (IModelInstance )load.getResult ();
-                LOGGER.info ("Successfully loaded and registered " + instance.getModelName () + ":"
-                        + instance.getModelType ());
+                m_reportingPort.info (
+                        getComponentType (),
+                        "Successfully loaded and registered " + instance.getModelName () + ":"
+                                + instance.getModelType (), LOGGER);
             }
             catch (ClassNotFoundException e) {
-                LOGGER.error (MessageFormat.format (
+
+                String msg = MessageFormat.format (
                         "Could not locate the class ''{0}'' to load the model. ''{1}'' not loaded.", factoryClassName,
-                        modelPath), e);
+                        modelPath);
+                m_reportingPort.error (getComponentType (), msg, e, LOGGER);
             }
             catch (IllegalAccessException e) {
-                LOGGER.error (e);
+                m_reportingPort.error (getComponentType (), "Exception", e, LOGGER);
             }
             catch (FileNotFoundException e) {
-                LOGGER.error (MessageFormat.format (
+                String msg = MessageFormat.format (
                         "Could not load the model file ''{0}''. It was resolved to the path ''{1}''.", path,
-                        modelPath.getAbsolutePath ()), e);
+                        modelPath.getAbsolutePath ());
+                m_reportingPort.error (getComponentType (), msg, e, LOGGER);
             }
             catch (IllegalStateException | RainbowException e) {
-                LOGGER.error (MessageFormat.format (
+                String msg = MessageFormat.format (
                         "Could not execute the load command for the model ''{0}''. ''{1}'' not loaded.", modelName,
-                        modelPath), e);
+                        modelPath);
+                m_reportingPort.error (getComponentType (), msg, e, LOGGER);
             }
             catch (NoSuchMethodException | SecurityException e) {
-                LOGGER.error (MessageFormat.format (
+                String msg = MessageFormat.format (
                         "Could not access static method loadCommand in ''{0}''. ''{1}'' not loaded.", factoryClassName,
-                        modelPath));
+                        modelPath);
+                m_reportingPort.error (getComponentType (), msg, e, LOGGER);
             }
             catch (UnsupportedOperationException e) {
-                LOGGER.error (e.getMessage (), e);
+                m_reportingPort.error (getComponentType (), e.getMessage (), e, LOGGER);
             }
             catch (IllegalArgumentException | InvocationTargetException e) {
-                LOGGER.error (MessageFormat.format ("Error calling loadCommand in {0}. {1} not loaded.",
-                        factoryClassName, modelPath));
+                String msg = MessageFormat.format ("Error calling loadCommand in {0}. {1} not loaded.",
+                        factoryClassName, modelPath);
+                m_reportingPort.error (getComponentType (), msg, e, LOGGER);
             }
         }
     }
@@ -330,10 +338,12 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                 cargs[1 + i] = command.getParameters ()[i];
             }
             rcmd = modelInstance.getCommandFactory ().generateCommand (command.getName (), cargs);
+            rcmd.setOrigin (command.getOrigin ());
         }
         else {
             rcmd = (IRainbowModelOperation )command;
         }
+
 //        if (!(command instanceof IRainbowModelCommand)) throw new RainbowException (MessageFormat.format ("The command {0} is not an executable command.",
 //                command.getCommandName ()));
         return rcmd;
@@ -372,19 +382,18 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
             try {
                 IRainbowOperation command = (IRainbowOperation )poll;
                 IModelInstance<?> modelInstance = getModelInstance (command.getModelType (), command.getModelName ());
-                m_reportingPort.info (RainbowComponentT.MODEL, MessageFormat.format (
-                        "Updating model {0}::{1} through command: {2}",
-                        command.getModelName (), command.getModelType (), command.getName ()));
                 IRainbowModelOperation cmd = setupCommand (command, modelInstance);
                 List<? extends IRainbowMessage> events;
                 synchronized (modelInstance.getModelInstance ()) {
                     events = cmd.execute (modelInstance, m_changeBusPort);
                 }
+                if (events.size () > 0) {
+                    m_reportingPort.info (RainbowComponentT.MODEL, MessageFormat.format (
+                            "Executing {0}", command.toString ()));
+                }
                 if (cmd.canUndo () && events.size () > 0) {
                     // The command executed correctly if we can undo it.
                     // Announce all the changes on the the change bus
-                    m_reportingPort.info (RainbowComponentT.MODEL,
-                            MessageFormat.format ("Announcing {0} events on the change bus", events.size ()));
                     m_changeBusPort.announce (events);
                 }
             }
@@ -435,6 +444,11 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                             IRainbowModelOperation mcmd = (IRainbowModelOperation )cmd;
                             // Execute the command
                             List<? extends IRainbowMessage> cmdEvents = mcmd.execute (mi, m_changeBusPort);
+                            if (cmdEvents.size () > 0) {
+                                m_reportingPort.info (RainbowComponentT.MODEL,
+                                        MessageFormat.format ("Executing {0}", mcmd.toString ()));
+                            }
+
                             // Store all the generated events to announce later
                             events.addAll (cmdEvents);
                             // Recall what we executed in case we need to rollback

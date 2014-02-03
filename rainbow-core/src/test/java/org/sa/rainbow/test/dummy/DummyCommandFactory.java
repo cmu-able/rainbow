@@ -110,6 +110,12 @@ public class DummyCommandFactory extends ModelCommandFactory<Integer> {
             protected boolean checkModelValidForCommand (Object model) {
                 return true;
             }
+
+            @Override
+            public String getOrigin () {
+                // TODO Auto-generated method stub
+                return null;
+            }
         };
     }
     @Override
@@ -181,6 +187,18 @@ public class DummyCommandFactory extends ModelCommandFactory<Integer> {
             @Override
             public Integer getResult () throws IllegalStateException {
                 return Integer.parseInt (args[1]);
+            }
+
+            @Override
+            public String getOrigin () {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public void setOrigin (String o) {
+                // TODO Auto-generated method stub
+
             }
 
         };

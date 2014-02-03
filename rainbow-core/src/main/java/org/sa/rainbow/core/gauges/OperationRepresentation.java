@@ -16,11 +16,12 @@ public class OperationRepresentation implements IRainbowOperation, Cloneable {
     private String   m_operationName;
     private String   m_modelName;
     private String   m_modelType;
+    private String   m_origin;
 
     @Override
     public String toString () {
-        return MessageFormat.format ("O[{0}:{1}/{2}.{3}({4})]", m_modelName, m_modelType, m_operationName, m_target,
-                m_parameters == null ? "" : Arrays.toString (m_parameters));
+        return MessageFormat.format ("O[{0}:{1}/{2}.{3}({4}){5}]", m_modelName, m_modelType, m_operationName, m_target,
+                m_parameters == null ? "" : Arrays.toString (m_parameters), m_origin == null ? "" : ("<" + m_origin));
     }
 
     public OperationRepresentation (IRainbowOperation cmd) {
@@ -33,6 +34,7 @@ public class OperationRepresentation implements IRainbowOperation, Cloneable {
         m_operationName = cmd.getName ();
         m_modelName = cmd.getModelName ();
         m_modelType = cmd.getModelType ();
+        m_origin = cmd.getOrigin ();
 
     }
 
@@ -116,6 +118,10 @@ public class OperationRepresentation implements IRainbowOperation, Cloneable {
         m_modelType = modelRef.getType ();
     }
 
+    public void setOrigin (String o) {
+        m_origin = o;
+    }
+
     static Pattern pattern = Pattern
             .compile ("\\\"?(([\\w\\$\\<\\>\\\"\\.]+)\\.)?(\\w+)\\s*\\(([\\w, \\.{}\\$\\<\\>\\\"]*)\\)\\\"?");
 
@@ -134,6 +140,11 @@ public class OperationRepresentation implements IRainbowOperation, Cloneable {
             return rep;
         }
         return null;
+    }
+
+    @Override
+    public String getOrigin () {
+        return m_origin;
     }
 
 }

@@ -237,6 +237,18 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
     public void issueCommand (IRainbowOperation cmd, Map<String, String> parameters) {
         OperationRepresentation actualCmd = new OperationRepresentation (cmd);
         Map<String, IRainbowOperation> actualsMap = new HashMap<> ();
+        actualCmd = formOperation (cmd, parameters, actualCmd, actualsMap);
+        m_lastCommands.put (cmd.getName (), actualCmd);
+        m_lastCommands.putAll (actualsMap);
+        m_announcePort.updateModel (actualCmd);
+        m_reportingPort.info (RainbowComponentT.GAUGE, MessageFormat.format ("G[{0}]: {1}.{2}({3})", id (),
+                actualCmd.getTarget (), actualCmd.getName (), Arrays.toString (actualCmd.getParameters ())));
+    }
+
+    private OperationRepresentation formOperation (IRainbowOperation cmd,
+            Map<String, String> parameters,
+            OperationRepresentation actualCmd,
+            Map<String, IRainbowOperation> actualsMap) {
         String target = cmd.getTarget ();
         String actualTarget = parameters.get (target);
         if (actualTarget != null) {
@@ -254,12 +266,30 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
                 actualsMap.put (pullOutParam (cmd.getParameters ()[i]), actualCmd);
             }
         }
-        m_lastCommands.put (cmd.getName (), actualCmd);
-        m_lastCommands.putAll (actualsMap);
-        m_announcePort.updateModel (actualCmd);
-        m_reportingPort.info (RainbowComponentT.GAUGE,
-                MessageFormat.format ("G[{0}]: {1}.{2}({3})", id (), actualCmd.getTarget (),
-                        actualCmd.getName (), Arrays.toString (actualCmd.getParameters ())));
+        actualCmd.setOrigin (id ());
+        return actualCmd;
+    }
+
+    public void issueCommands (List<IRainbowOperation> operations, List<Map<String, String>> parameters) {
+        Ensure.is_true (operations.size () == parameters.size ());
+        List<IRainbowOperation> actualCommands = new ArrayList<> (operations.size ());
+        for (int i = 0; i < operations.size (); i++) {
+            IRainbowOperation op = operations.get (i);
+            Map<String, String> params = parameters.get (i);
+            OperationRepresentation actualCmd = new OperationRepresentation (op);
+            Map<String, IRainbowOperation> actualsMap = new HashMap<> ();
+            actualCmd = formOperation (op, params, actualCmd, actualsMap);
+            actualCommands.add (actualCmd);
+            m_lastCommands.put (op.getName (), actualCmd);
+            m_lastCommands.putAll (actualsMap);
+        }
+        m_announcePort.updateModel (actualCommands, true);
+        for (IRainbowOperation op : actualCommands) {
+            m_reportingPort.info (
+                    RainbowComponentT.GAUGE,
+                    MessageFormat.format ("G[{0}]: {1}.{2}({3})", id (), op.getTarget (), op.getName (),
+                            Arrays.toString (op.getParameters ())));
+        }
     }
 
 

@@ -166,8 +166,12 @@ public abstract class AbstractProbe implements IProbe {
         m_state = State.ACTIVE;
         m_probeManagementPort.reportActivated ();
         try {
-            m_reportingPort = RainbowPortFactory.createProbeReportingPortSender (this);
-            m_configurationPort = RainbowPortFactory.createProbeConfigurationPort (this, m_configurationPortCallback);
+            if (m_reportingPort == null) {
+                m_reportingPort = RainbowPortFactory.createProbeReportingPortSender (this);
+            }
+            if (m_configurationPort == null) {
+                m_configurationPort = RainbowPortFactory.createProbeConfigurationPort (this, m_configurationPortCallback);
+            }
         }
         catch (RainbowConnectionException e) {
             LOGGER.fatal ("Could not connect to Rainbow infrastructure", e);
