@@ -9,7 +9,6 @@ import org.acmestudio.acme.core.IAcmeType;
 import org.acmestudio.acme.core.type.IAcmeFloatValue;
 import org.acmestudio.acme.core.type.IAcmeIntValue;
 import org.acmestudio.acme.element.IAcmeElementInstance;
-import org.acmestudio.acme.element.IAcmeElementType;
 import org.acmestudio.acme.element.property.IAcmeProperty;
 import org.acmestudio.acme.element.property.IAcmePropertyValue;
 import org.acmestudio.acme.model.DefaultAcmeModel;
@@ -70,16 +69,6 @@ public abstract class Model {
 
     }
 
-    public static int availableServices (IAcmeElementType<?,?> elemType) {
-//		return ((IModelManager )Oracle.instance().modelManager()).availableServices(elemType);
-        throw new NotImplementedException ("Model.availableServices");
 
-    }
-
-    public static Set<IAcmeElementInstance<?,?>> findServices (IAcmeElementType<?,?> type) {
-//		Map<String,String> filters = new HashMap<String,String>();
-//		return ((IModelManager )Oracle.instance().modelManager()).findServices(type, filters);
-        throw new NotImplementedException ("Model.findServices");
-    }
 
 }

@@ -19,30 +19,30 @@ import java.io.IOException;
  */
 public interface ModelRepository {
 
-	/**
-	 * A dummy implementation of the model repository that only provides a File
-	 * object corresponding to the resource name.
-	 */
-	public static final ModelRepository NULL_REPO = new ModelRepository() {
-		public Object getModelForResource (String resName) throws IOException {
-			return new File(resName);
-		}
-		public Object getSnapshotModel (Object model) {
-			return model;  // no snapshot support
-		}
-		public void markDisruption (double level) {
-		}
-		public File tacticExecutionHistoryFile() {
-			return null;
-		}
-	};
+    /**
+     * A dummy implementation of the model repository that only provides a File
+     * object corresponding to the resource name.
+     */
+    public static final ModelRepository NULL_REPO = new ModelRepository() {
+        public Object getModelForResource (String resName) throws IOException {
+            return new File(resName);
+        }
+        public Object getSnapshotModel (Object model) {
+            return model;  // no snapshot support
+        }
+        public void markDisruption (double level) {
+        }
+        public File tacticExecutionHistoryFile() {
+            return null;
+        }
+    };
 
-	public Object getModelForResource (String resName) throws IOException;
-
-	public Object getSnapshotModel (Object model);
-
-	public void markDisruption (double level);
-
-	public File tacticExecutionHistoryFile ();
+//	public Object getModelForResource (String resName) throws IOException;
+//
+//	public Object getSnapshotModel (Object model);
+//
+//	public void markDisruption (double level);
+//
+//	public File tacticExecutionHistoryFile ();
 
 }

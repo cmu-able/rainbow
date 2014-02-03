@@ -35,7 +35,7 @@ import org.sa.rainbow.core.ports.IRainbowAdaptationEnqueuePort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
-import org.sa.rainbow.model.acme.AcmeRainbowCommandEvent.CommandEventT;
+import org.sa.rainbow.model.acme.AcmeRainbowOperationEvent.CommandEventT;
 import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.core.Tactic;
@@ -163,7 +163,8 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
     }
 
     private void initConnectors () throws RainbowConnectionException {
-        m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort ();
+        m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort (Rainbow.instance ()
+                .getRainbowMaster ().modelsManager ());
         m_modelChangePort.subscribe (m_modelTypecheckingChanged, this);
     }
 
@@ -213,7 +214,8 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
         m_reportingPort.info (RainbowComponentT.ADAPTATION_MANAGER, txt);
     }
 
-    public boolean adaptationEnabled () {
+    @Override
+    public boolean isEnabled () {
         return m_adaptEnabled;
     }
 
@@ -267,9 +269,19 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
             // add attribute value from current condition to accumulated agg
             // value
             Object condVal = m_model.getProperty (u.mapping ());
-            if (condVal != null && condVal instanceof Double) {
+            if (condVal != null) {
+                double val = 0.0;
+                if (condVal instanceof Double) {
+                    val = ((Double )condVal).doubleValue ();
+                }
+                else if (condVal instanceof Float) {
+                    val = ((Float )condVal).doubleValue ();
+                }
+                else if (condVal instanceof Integer) {
+                    val = ((Integer )condVal).doubleValue ();
+                }
                 m_reportingPort.trace (getComponentType (), "Avg value of prop: " + u.mapping () + " == " + condVal);
-                conds[i] = ((Double )condVal).doubleValue ();
+                conds[i] = val;
                 v += conds[i];
             }
             // now compute the utility, apply weight, and accumulate to sum
@@ -470,13 +482,27 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
      * @return a map of score-strategy pairs, sorted in increasing order by score.
      */
     private SortedMap<Double, Strategy> scoreStrategies (Map<String, Strategy> subset) {
+        String scenario = Rainbow.getProperty (RainbowConstants.PROPKEY_SCENARIO);
+//        Set<String> scenarios = Rainbow.instance ().getRainbowMaster ().preferenceDesc ().weights.keySet ();
+//        for (String s : scenarios) {
+//            if (scenarios.equals (s)) {
+//                continue;
+//            }
+//            log ("--------- hypothetical scoring for " + s);
+//            scoreForScenario (s, subset);
+//            log ("--------- done hypothetical");
+//        }
+        return scoreForScenario (scenario, subset);
+    }
+
+    SortedMap<Double, Strategy> scoreForScenario (String scenario, Map<String, Strategy> subset) {
+        Map<String, Double> weights = Rainbow.instance ().getRainbowMaster ().preferenceDesc ().weights.get (scenario);
         SortedMap<Double, Strategy> scored = new TreeMap<Double, Strategy> ();
         boolean predictionEnabled = false; //Rainbow.predictionEnabled () && Rainbow.utilityPredictionDuration () > 0;
         double[] conds = null; // store the conditions to output for diagnosis
         double[] condsPred = null; // store predicted conditions
         // find the weights of the applicable scenario
-        Map<String, Double> weights = Rainbow.instance ().getRainbowMaster ().preferenceDesc ().weights.get (Rainbow
-                .getProperty (RainbowConstants.PROPKEY_SCENARIO));
+        log ("Scoring for " + scenario);
         for (Strategy strategy : subset.values ()) {
             SortedMap<String, Double> aggAtt = strategy.computeAggregateAttributes ();
             // add the strategy failure history as another attribute
@@ -491,6 +517,8 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
              */
             double[] items = new double[aggAtt.size ()];
             double[] itemsPred = new double[aggAtt.size ()];
+            double[] utilityOfItem = new double[aggAtt.size ()];
+            double[] currentUtility = new double[aggAtt.size ()];
             if (conds == null) {
                 conds = new double[aggAtt.size ()];
             }
@@ -514,14 +542,27 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
                 // value
                 condVal = m_model.getProperty (u.mapping ());
                 items[i] = v;
-                if (condVal != null && condVal instanceof Double) {
+                if (condVal != null) {
+                    double val = 0.0;
+                    if (condVal instanceof Double) {
+                        val = ((Double )condVal).doubleValue ();
+                    }
+                    else if (condVal instanceof Float) {
+                        val = ((Float )condVal).doubleValue ();
+                    }
+                    else if (condVal instanceof Integer) {
+                        val = ((Integer )condVal).doubleValue ();
+                    }
+
                     m_reportingPort
                     .trace (getComponentType (), "Avg value of prop: " + u.mapping () + " == " + condVal);
-                    conds[i] = ((Double )condVal).doubleValue ();
+                    conds[i] = val;
                     items[i] += conds[i];
                 }
                 // now compute the utility, apply weight, and accumulate to sum
-                score += weights.get (k) * u.f (items[i]);
+                utilityOfItem[i] = u.f (items[i]);
+                currentUtility[i] = u.f (conds[i]);
+                score += weights.get (k) * utilityOfItem[i];
 
                 // if applicable, process the same set of info using predicted
                 // values
@@ -562,6 +603,10 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
             else {
                 scored.put (score, strategy);
             }
+            log ("current model properties: " + Arrays.toString (conds));
+            log ("current model utilities: " + Arrays.toString (currentUtility));
+            log (strategy.getName () + ": predicted utilities: " + Arrays.toString (utilityOfItem));
+            log (strategy.getName () + ": score = " + score);
             Util.dataLogger ().info (IRainbowHealthProtocol.DATA_ADAPTATION_STRATEGY_ATTR2 + s);
             log ("aggAtt': " + s);
         }
@@ -593,6 +638,8 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
                         DummyStitchProblemHandler stitchProblemHandler = new DummyStitchProblemHandler ();
                         stitch = Stitch.newInstance (f.getCanonicalPath (), stitchProblemHandler);
                         Ohana.instance ().parseFile (stitch);
+//                        StitchTypechecker behavior = (StitchTypechecker )stitch.getBehavior (Stitch.TYPECHECKER_PASS);
+
                         reportProblems (f, stitchProblemHandler);
 
                         // apply attribute vectors to tactics, if available

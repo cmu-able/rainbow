@@ -7,9 +7,18 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import org.acmestudio.acme.model.IAcmeModel;
 import org.apache.commons.lang.NotImplementedException;
+import org.reflections.Reflections;
+import org.reflections.scanners.ResourcesScanner;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
+import org.reflections.util.FilterBuilder;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
@@ -1209,8 +1218,8 @@ ILiloBehavior {
                     // TODO: Assumes that we run on same VM as the models manager
 
                     try {
-                        Object o = Ohana.instance ().modelRepository ()
-                                .getModelForResource (determinePath (imp.path).getCanonicalPath ());
+                        Object o = Rainbow.instance ().getRainbowMaster ().modelsManager ()
+                                .getModelInstanceByResource (determinePath (imp.path).getCanonicalPath ());
 
                         if (o instanceof IAcmeModel) {
                             IAcmeModel model = (IAcmeModel )o;
@@ -1252,18 +1261,32 @@ ILiloBehavior {
                         continue;
                     }
                 } else {
+
                     // Treat imported name as name of class
                     classes = new Class<?>[1];
                     String className = imp.path;
-                    if (className.endsWith(".class")) { // truncate
-                        className = className.substring(0,
-                                className.length() - 6);
+                    if (className.endsWith (".class")) { // truncate
+                        className = className.substring (0, className.length () - 6);
                     }
-                    try {
-                        classes[0] = Class.forName(className);
-                    } catch (ClassNotFoundException e) {
-                        Tool.warn("Class name in OP import appears invalid: "
-                                + className, e, imp.ast, stitchProblemHandler());
+                    String packageName = imp.path.substring (0, imp.path.lastIndexOf ("."));
+                    List<ClassLoader> classLoaderList = new LinkedList<ClassLoader> ();
+                    classLoaderList.add (ClasspathHelper.contextClassLoader ());
+                    classLoaderList.add (ClasspathHelper.staticClassLoader ());
+                    Reflections reflections = new Reflections (new ConfigurationBuilder ()
+                    .setScanners (new SubTypesScanner (false), new ResourcesScanner ())
+                    .setUrls (ClasspathHelper.forClassLoader (classLoaderList.toArray (new ClassLoader[0])))
+                    .filterInputsBy (new FilterBuilder ().include (FilterBuilder.prefix (packageName))));
+                    Set<Class<?>> foundClasses = reflections.getSubTypesOf (Object.class);
+                    for (Class<?> candidate : foundClasses) {
+                        String name = candidate.getName ();
+                        if (name.equals (className)) {
+                            classes[0] = candidate;
+                            break;
+                        }
+                    }
+                    if (classes[0] == null) {
+                        Tool.warn ("Class name in OP import appears invalid: " + className, null, imp.ast,
+                                stitchProblemHandler ());
                         continue;
                     }
                 }

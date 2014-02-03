@@ -5,7 +5,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.acmestudio.acme.element.IAcmeElement;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
@@ -17,6 +19,8 @@ import org.sa.rainbow.stitch.util.Tool;
 import antlr.collections.AST;
 
 public class StitchTypechecker extends LiloScopeEstablisher implements ILiloBehavior {
+
+    public Set<String> m_modelOperationsReferenced = new HashSet<> ();
 
     public StitchTypechecker (Stitch stitch) {
         super (stitch);
@@ -96,6 +100,8 @@ public class StitchTypechecker extends LiloScopeEstablisher implements ILiloBeha
                 for (int i = 0; i < methods.length && nameObj == null; i++) {
                     if (methods[i].getName ().equals (m)) {
                         nameObj = methods[i];
+                        m_modelOperationsReferenced.add (name.substring (dotIdx + 1));
+                        break;
                     }
                 }
 

@@ -3,7 +3,6 @@
  */
 package org.sa.rainbow.stitch.visitor;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.text.MessageFormat;
@@ -36,11 +35,14 @@ import org.acmestudio.acme.rule.node.TypeReferenceNode;
 import org.acmestudio.acme.type.verification.NodeScopeLookup;
 import org.acmestudio.acme.type.verification.RuleTypeChecker;
 import org.acmestudio.standalone.resource.StandaloneLanguagePackHelper;
+import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.OperationResult;
+import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.Result;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.core.Expression;
@@ -269,7 +271,17 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
         for (Object elem : subset) {
             v.setValue (elem);
             expr.evaluate (null);
-            boolean b = (Boolean )expr.getResult ();
+            boolean b = false;
+            if (expr.getResult () instanceof Boolean) {
+                b = (Boolean )expr.getResult ();
+            }
+            else if (expr.getResult () instanceof IAcmeProperty) {
+                IAcmeProperty prop = (IAcmeProperty )expr.getResult ();
+                if (prop.getValue () instanceof IAcmeBooleanValue) {
+                    b = ((IAcmeBooleanValue )prop.getValue ()).getValue ();
+                }
+
+            }
 
             switch (type) {
             case StitchTreeWalkerTokenTypes.FORALL:
@@ -1030,6 +1042,7 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
     // suppress error on Class.isAssignableFrom()
     private
     Object executeMethod (String name, Object[] args) {
+        String origName = name;
         Object rv = null;
         Method method = null;
         int dotIdx = name.indexOf (".");
@@ -1041,7 +1054,10 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
                 nameObj = ((IAcmeElement )n).lookupName (name.substring (dotIdx + 1), true);
             }
             else if (n instanceof AcmeModelInstance) {
+
                 AcmeModelInstance ami = (AcmeModelInstance )n;
+                IAdaptationExecutor<Object> executor = Rainbow.instance ().getRainbowMaster ()
+                        .strategyExecutor (Util.genModelRef (ami.getModelName (), ami.getModelType ()));
                 nameObj = ami.getModelInstance ().lookupName (name.substring (dotIdx + 1), true);
                 if (nameObj == null) {
                     // Look for the <name>Cmd method in the Command Factory
@@ -1066,22 +1082,27 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
                             try {
                                 rv = method.invoke (ami.getCommandFactory (), args);
                             }
-                            catch (IllegalAccessException e) {
-                                debug (e.toString ());
-                            }
-                            catch (InvocationTargetException e) {
+                            catch (Throwable e) {
                                 scope ().setError (true);
                                 Tool.error ("Method invocation failed! " + method.toString (), e, null,
                                         stitchProblemHandler ());
                                 e.printStackTrace ();
+                                OperationResult or = new OperationResult ();
+                                or.result = Result.FAILURE;
+                                or.reply = "Method invocation failed! + " + method.toString () + ". Reason: "
+                                        + e.getMessage ();
+                                rv = or;
+
                             }
-                            if (rv instanceof IRainbowModelCommandRepresentation) {
+                            if (rv instanceof IRainbowOperation) {
                                 // Submit this to the effector manager to call the right effectors
-                                IAdaptationExecutor<Object> executor = Rainbow.instance ().getRainbowMaster ()
-                                        .strategyExecutor (Util.genModelRef (ami.getModelName (), ami.getModelType ()));
+                                IRainbowOperation op = (IRainbowOperation )rv;
+
                                 IModelDSBusPublisherPort port = executor.getOperationPublishingPort ();
+                                ((AbstractRainbowRunnable )executor).reportingPort ().info (RainbowComponentT.EXECUTOR,
+                                        "Attempting operation: " + op.toString ());
                                 OperationResult result = port
-                                        .publishOperation ((IRainbowModelCommandRepresentation )rv);
+                                        .publishOperation (op);
                                 rv = result;
                             }
                         }
@@ -1092,14 +1113,15 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
                                         .parseEffectorResult ((String )rv);
                                 switch (opResult) {
                                 case UNKNOWN:
-                                    Tool.error ("No effector found corresponding to method '" + name + "'!", null,
-                                            stitchProblemHandler ());
+                                    ((AbstractRainbowRunnable )executor).reportingPort ().info (
+                                            RainbowComponentT.EXECUTOR,
+                                            "No effector found corresponding to method '" + name + "'!");
                                     break;
                                 case FAILURE:
                                     // bad, set state to indicate failure occurred
                                     scope ().setError (true);
-                                    Tool.error ("Method invocation did not succeeed! " + name, null,
-                                            stitchProblemHandler ());
+                                    ((AbstractRainbowRunnable )executor).reportingPort ().info (
+                                            RainbowComponentT.EXECUTOR, "Method invocation did not succeeed! " + name);
                                     break;
                                 }
                             }
@@ -1107,11 +1129,13 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
                                 OperationResult or = (OperationResult )rv;
                                 switch (or.result) {
                                 case UNKNOWN:
-                                    Tool.error ("No effector found: " + or.reply, null, stitchProblemHandler ());
+                                    ((AbstractRainbowRunnable )executor).reportingPort ().info (
+                                            RainbowComponentT.EXECUTOR, "No effector found: " + or.reply);
                                     break;
                                 case FAILURE:
                                     scope ().setError (true);
-                                    Tool.error ("Failed to execute operation " + name, null, stitchProblemHandler ());
+                                    ((AbstractRainbowRunnable )executor).reportingPort ().info (
+                                            RainbowComponentT.EXECUTOR, "Failed to execute operation " + name);
                                     break;
                                 }
 
@@ -1212,13 +1236,14 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
                     try {
                         rv = method.invoke (null, args);
                     }
-                    catch (IllegalAccessException e) {
-                        debug (e.toString ());
-                    }
-                    catch (InvocationTargetException e) {
+                    catch (Throwable e) {
                         scope ().setError (true);
                         Tool.error ("Method invocation failed! " + method.toString (), e, null, stitchProblemHandler ());
                         e.printStackTrace ();
+                        OperationResult or = new OperationResult ();
+                        or.result = Result.FAILURE;
+                        or.reply = "Method invocation failed! + " + method.toString () + ". Reason: " + e.getMessage ();
+                        rv = or;
                     }
                 }
                 // check if OperatorResult, and if result is a failure
@@ -1284,6 +1309,9 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
             }
             allParamClassOk &= matchPrimitive;
             ++i;
+        }
+        if (!allParamClassOk) {
+            checkMethodParams (m, params, args);
         }
         return allParamClassOk;
     }
