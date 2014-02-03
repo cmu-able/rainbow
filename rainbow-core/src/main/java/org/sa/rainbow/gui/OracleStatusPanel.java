@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,6 +17,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
+
+import org.sa.rainbow.core.Rainbow;
 
 public class OracleStatusPanel extends JPanel {
 
@@ -62,6 +65,15 @@ public class OracleStatusPanel extends JPanel {
                 RainbowGUI.PANEL_BORDER, RainbowGUI.PANEL_BORDER, color);
 
         add (sp);
+
+        expectedDelegates (Rainbow.instance ().getRainbowMaster ().getExpectedDelegateLocations ());
+    }
+
+    public void expectedDelegates (List<String> locations) {
+        for (String loc : locations) {
+            JLabel label = getDelegateLabel (null, loc);
+            label.setBorder (new LineBorder (Color.black));
+        }
     }
 
     public void report (String report, boolean nl) {
@@ -89,11 +101,11 @@ public class OracleStatusPanel extends JPanel {
     }
 
     JLabel getDelegateLabel (String did, String location) {
-        JLabel label = labels.get (did);
+        JLabel label = labels.get (location);
         if (label == null) {
             label = new JLabel (location);
             label.setOpaque (true);
-            labels.put (did, label);
+            labels.put (location, label);
             m_statusPane.add (label);
             m_statusPane.validate ();
         }
