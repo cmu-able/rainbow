@@ -53,6 +53,9 @@ public class ESEBModelManagerModelUpdatePort implements ESEBConstants, IModelUSB
                         if (model != null) {
                             IRainbowOperation command = model.getCommandFactory ().generateCommand (
                                     commandName, params.toArray (new String[0]));
+                            if (msg.hasProperty (COMMAND_ORIGIN)) {
+                                command.setOrigin ((String )msg.getProperty (COMMAND_ORIGIN));
+                            }
                             updateModel (command);
                         }
                         else
@@ -64,6 +67,41 @@ public class ESEBModelManagerModelUpdatePort implements ESEBConstants, IModelUSB
                                 "Could not form the command ''{0}'' from the ESEB message",
                                 commandName), e);
                     }
+                }
+                else if ((ESEBConstants.MSG_TYPE_UPDATE_MODEL + "_multi").equals (msgType)) {
+                    int i = 0;
+                    IRainbowOperation cmd = null;
+                    List<IRainbowOperation> ops = new LinkedList<> ();
+                    do {
+                        cmd = ESEBCommandHelper.msgToCommand (msg, "_" + i + "_");
+                        if (cmd != null) {
+                            try {
+                                IModelInstance model = getModelInstance (cmd.getModelType (), cmd.getModelName ());
+                                if (model != null) {
+                                    String[] params = new String[cmd.getParameters ().length + 1];
+                                    params[0] = cmd.getTarget ();
+                                    for (int j = 0; j < cmd.getParameters ().length; j++) {
+                                        params[j + 1] = cmd.getParameters ()[j];
+                                    }
+                                    IRainbowOperation command = model.getCommandFactory ().generateCommand (
+                                            cmd.getName (), params);
+                                    if (msg.hasProperty (COMMAND_ORIGIN)) {
+                                        command.setOrigin ((String )msg.getProperty (COMMAND_ORIGIN));
+                                    }
+                                    ops.add (command);
+
+                                }
+                            }
+                            catch (Throwable e) {
+                                LOGGER.error (RainbowComponentT.MODEL, MessageFormat.format (
+                                        "Could not form the command ''{0}'' from the ESEB message", cmd.getName ()), e);
+                            }
+                        }
+                        i++;
+                    } while (cmd != null);
+                    boolean b = (Boolean )msg.getProperty (ESEBConstants.MSG_TRANSACTION);
+                    updateModel (ops, b);
+
                 }
             }
         });

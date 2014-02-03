@@ -112,15 +112,9 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, TERMINATE_DELEGATE);
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
 
-        try {
-            BooleanReply reply = new BooleanReply ();
-            m_role.blockingSendAndReceive (msg, reply, 10000);
-            return reply.m_reply;
-        }
-        catch (RainbowConnectionException e) {
-            LOGGER.error (MessageFormat.format ("terminateDelegate did not return for delegate {0}", getDelegateId ()));
-            return false;
-        }
+        BooleanReply reply = new BooleanReply ();
+        m_role.sendAndReceive (msg, reply);
+        return reply.m_reply;
     }
 
     @Override

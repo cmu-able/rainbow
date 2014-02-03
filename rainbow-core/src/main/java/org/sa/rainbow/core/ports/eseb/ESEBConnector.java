@@ -187,6 +187,7 @@ public class ESEBConnector {
                                         repKey));
                             }
                             replyQ.dispatcher ().remove (this);
+                            m_client.queue_group ().remove (replyQ);
                         }
 
                     }

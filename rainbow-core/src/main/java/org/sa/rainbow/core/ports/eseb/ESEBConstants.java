@@ -39,5 +39,7 @@ public interface ESEBConstants {
     public static final String COMPONENT_TYPE_KEY                    = ESEB_PREFIX + "component_type";
     public static final String REPORT_MSG_ADDITIONAL_INFO            = ESEB_PREFIX + "ADDITIONAL";
     public static final String MSG_UPDATE_MODEL_REPLY                = ESEB_PREFIX + "UPDATE_MODEL_REPLY";
+    public static final String MSG_TRANSACTION                       = ESEB_PREFIX + "TRANSACTION";
+    public static final String COMMAND_ORIGIN                        = ESEB_PREFIX + "ORIGIN";
 
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowMaster;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IModelUSBusPort;
@@ -37,7 +38,18 @@ public class ESEBGaugeModelUSBusPort implements IModelUSBusPort, ESEBConstants {
 
     @Override
     public void updateModel (List<IRainbowOperation> commands, boolean transaction) {
-        // TODO Auto-generated method stub
+        RainbowESEBMessage msg = m_role.createMessage ();
+        msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, m_client.id ());
+        msg.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_UPDATE_MODEL + "_multi");
+        for (int i = 0; i < commands.size (); i++) {
+            ESEBCommandHelper.command2Message (commands.get (i), msg, "_" + i + "_");
+        }
+        try {
+            msg.setProperty (ESEBCommandHelper.MSG_TRANSACTION, Boolean.valueOf (transaction));
+        }
+        catch (RainbowException e) {
+        }
+        m_role.publish (msg);
 
     }
 
