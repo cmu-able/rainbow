@@ -12,13 +12,17 @@ import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.core.Var;
+import org.sa.rainbow.stitch.tactic.history.ExecutionHistoryModelInstance;
+import org.sa.rainbow.stitch.util.ExecutionHistoryData;
 
 /**
  * The Strategy Executor serves the role of maintaining the active thread(s) to
@@ -71,6 +75,7 @@ public class Executor extends AbstractRainbowRunnable implements IAdaptationExec
             m_reportingPort.error (RainbowComponentT.EXECUTOR, "Referring to unknown model " + name + ":" + type);
         }
     }
+
 
     /* (non-Javadoc)
      * @see org.sa.rainbow.core.IDisposable#dispose()
@@ -386,6 +391,18 @@ public class Executor extends AbstractRainbowRunnable implements IAdaptationExec
     public void initialize (IRainbowReportingPort port) throws RainbowConnectionException {
         super.initialize (port);
         m_modelDSPort = RainbowPortFactory.createModelDSPublishPort (this);
+        // Create a tactics execution model
+        ModelsManager mm = Rainbow.instance ().getRainbowMaster ().modelsManager ();
+        try {
+            if (!mm.getRegisteredModelTypes ().contains (ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE)) {
+                mm.registerModelType (ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE);
+            }
+            mm.registerModel (ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE, "history",
+                    new ExecutionHistoryModelInstance (new HashMap<String, ExecutionHistoryData> (), "history", "memory"));
+        }
+        catch (RainbowModelException e) {
+            m_reportingPort.warn (getComponentType (), "Ccould not create a tactic execution history model", e);
+        }
     }
 
 }
