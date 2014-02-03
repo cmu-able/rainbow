@@ -14,17 +14,15 @@ import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
-public class CaptchaGauge extends RegularPatternGauge {
-    public static final String    NAME       = "G - Captcha Enablement";
+public class AuthenticationEnablementGauge extends RegularPatternGauge {
 
-    private static final String   OFF        = "off";
-    private static final String   ON         = "on";
+    public static final String  NAME = "G - Authentication Enablement";
 
-    /** List of values reported by this Gauge */
-    private static final String[] valueNames = { "enabled" };
+    private static final String OFF  = "off";
+    private static final String ON   = "on";
 
-    public CaptchaGauge (String id, long beaconPeriod, TypedAttribute gaugeDesc, TypedAttribute modelDesc,
-            List<TypedAttributeWithValue> setupParams, Map<String, IRainbowOperation> mappings)
+    public AuthenticationEnablementGauge (String id, long beaconPeriod, TypedAttribute gaugeDesc,
+            TypedAttribute modelDesc, List<TypedAttributeWithValue> setupParams, Map<String, IRainbowOperation> mappings)
                     throws RainbowException {
         super (NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
         addPattern (ON, Pattern.compile ("^on$"));
@@ -33,24 +31,16 @@ public class CaptchaGauge extends RegularPatternGauge {
 
     @Override
     protected void doMatch (String matchName, Matcher m) {
-        boolean captchaOn = ON.equals (matchName);
-        IRainbowOperation cmd = m_commands.values ().iterator ().next ();
-        Map<String, String> pMap = new HashMap<String, String> ();
-        pMap.put (cmd.getParameters ()[0], Boolean.toString (captchaOn));
-        if (captchaOn) {
-            issueCommand (cmd, pMap);
-        }
-        else {
+        boolean authenticationOff = OFF.equals (matchName);
+        if (authenticationOff) {
+            // Reset everything to unknown
             List<IRainbowOperation> ops = new LinkedList<> ();
             List<Map<String, String>> params = new LinkedList<> ();
-
-            ops.add (cmd);
-            params.add (pMap);
 
             for (Entry<String, IRainbowOperation> entry : m_commands.entrySet ()) {
                 if (entry.getKey ().startsWith ("clientMgmt(")) {
                     IRainbowOperation op = entry.getValue ();
-                    pMap = new HashMap<> ();
+                    Map<String, String> pMap = new HashMap<> ();
                     pMap.put (op.getParameters ()[0], "0");
                     ops.add (op);
                     params.add (pMap);

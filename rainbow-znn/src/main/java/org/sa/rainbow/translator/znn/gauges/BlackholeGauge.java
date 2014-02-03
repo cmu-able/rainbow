@@ -50,9 +50,9 @@ public class BlackholeGauge extends RegularPatternGauge {
             int c = m.groupCount();
             StringBuffer ips = new StringBuffer ();
 //			String[] ips = new String[c];
-            for (int i = 0; i < c; i++) {
+            for (int i = 1; i < c; i++) {
 //				ips[i] = m.group(i + 1);
-                ips.append (m.group (i + 1));
+                ips.append (m.group (i));
                 ips.append (",");
             }
             ips.deleteCharAt (ips.length () - 1);

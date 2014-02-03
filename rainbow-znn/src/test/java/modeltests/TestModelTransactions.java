@@ -20,13 +20,13 @@ import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 import org.sa.rainbow.core.ports.eseb.ESEBConstants;
 import org.sa.rainbow.core.ports.eseb.RainbowESEBMessage;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
-import org.sa.rainbow.model.acme.AcmeRainbowCommandEvent.CommandEventT;
+import org.sa.rainbow.model.acme.AcmeRainbowOperationEvent.CommandEventT;
 import org.sa.rainbow.model.acme.znn.commands.NewServerCmd;
 
 import edu.cmu.cs.able.eseb.BusData;
@@ -116,7 +116,7 @@ public class TestModelTransactions {
                 "Acme",
                 "ZNewsSys");
 
-        List<IRainbowModelCommandRepresentation> commands = new LinkedList<> ();
+        List<IRainbowOperation> commands = new LinkedList<> ();
         commands.add (new NewServerCmd ("newServer", modelInstance, "lbproxy", "server"));
         commands.add (new NewServerCmd ("newServer", modelInstance, "lbproxy", "server"));
         master.modelsManager ().requestModelUpdate (commands, true);
@@ -135,7 +135,7 @@ public class TestModelTransactions {
                 "Acme",
                 "ZNewsSys");
 
-        List<IRainbowModelCommandRepresentation> commands = new LinkedList<> ();
+        List<IRainbowOperation> commands = new LinkedList<> ();
         commands.add (new NewServerCmd ("newServer", modelInstance, "lbproxy", "server"));
         commands.add (new NewServerCmd ("newServer", modelInstance, "illegalproxy", "server"));
         master.modelsManager ().requestModelUpdate (commands, true);
@@ -155,7 +155,7 @@ public class TestModelTransactions {
                 "Acme",
                 "ZNewsSys");
 
-        List<IRainbowModelCommandRepresentation> commands = new LinkedList<> ();
+        List<IRainbowOperation> commands = new LinkedList<> ();
         commands.add (new NewServerCmd ("newServer", modelInstance, "lbproxy", "server"));
         commands.add (new NewServerCmd ("newServer", modelInstance, "illegalproxy", "server"));
         master.modelsManager ().requestModelUpdate (commands, false);

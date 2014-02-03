@@ -11,8 +11,8 @@ import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConstants;
 import org.sa.rainbow.core.ports.eseb.RainbowESEBMessage;
-import org.sa.rainbow.model.acme.AcmeModelCommand;
-import org.sa.rainbow.model.acme.AcmeRainbowCommandEvent.CommandEventT;
+import org.sa.rainbow.model.acme.AcmeModelOperation;
+import org.sa.rainbow.model.acme.AcmeRainbowOperationEvent.CommandEventT;
 import org.sa.rainbow.model.acme.znn.ZNNModelUpdateOperatorsImpl;
 
 import auxtestlib.DefaultTCase;
@@ -28,7 +28,7 @@ public class TestNewServerCmd extends DefaultTCase {
         assertTrue (sys.getDeclaredTypes ().iterator ().next ().isSatisfied ());
         ZNNModelUpdateOperatorsImpl znn = new ZNNModelUpdateOperatorsImpl (sys, "src/test/resources/acme/znn.acme");
         IAcmeComponent proxy = sys.getComponent ("lbproxy");
-        AcmeModelCommand<IAcmeComponent> cns = znn.getCommandFactory ().connectNewServerCmd (proxy, "server");
+        AcmeModelOperation<IAcmeComponent> cns = znn.getCommandFactory ().connectNewServerCmd (proxy, "server");
         IModelChangeBusPort announcePort = new IModelChangeBusPort () {
 
             @Override

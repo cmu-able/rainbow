@@ -1,14 +1,22 @@
 package org.sa.rainbow.translator.znn.gauges;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.acmestudio.acme.PropertyHelper;
+import org.acmestudio.acme.element.IAcmeSystem;
+import org.acmestudio.acme.element.property.IAcmeProperty;
+import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.RegularPatternGauge;
+import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
+import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
@@ -16,7 +24,12 @@ public class DummyDiagnosisGauge extends RegularPatternGauge {
 
     private static final String   NAME       = "G - Dummy Diagnosis Gauge";
     private static final String   DEFAULT    = "default";
-    private static final String[] valueNames = { "maliciousness" };
+    private static final String[] valueNames = { "maliciousness(x)", "captcha(x)", "authenticate(x)" };
+    private static final String   AUTHENTICATION_ON       = "AUTH_ON";
+    private static final String   AUTHENTICATION_OFF      = "AUTH_OFF";
+
+    IModelChangeBusSubscriberPort m_modelChanges;
+    private boolean               m_authenticationEnabled = false;
 
     public DummyDiagnosisGauge (String id, long beaconPeriod, TypedAttribute gaugeDesc, TypedAttribute modelDesc,
             List<TypedAttributeWithValue> setupParams, Map<String, IRainbowOperation> mappings)
@@ -24,6 +37,8 @@ public class DummyDiagnosisGauge extends RegularPatternGauge {
         super (NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
 
         addPattern (DEFAULT, Pattern.compile ("([\\w_]+)=([\\d]+(\\.[\\d]*))"));
+        addPattern (AUTHENTICATION_ON, Pattern.compile ("^on$"));
+        addPattern (AUTHENTICATION_OFF, Pattern.compile ("^off$"));
 
     }
 
@@ -31,14 +46,90 @@ public class DummyDiagnosisGauge extends RegularPatternGauge {
     protected void doMatch (String matchName, Matcher m) {
         if (DEFAULT.equals (matchName)) {
             String LB = m.group (1);
-            IRainbowOperation cmd = m_commands.values ().iterator ().next ();
+            IRainbowOperation cmd = m_commands.get (valueNames[0]);
             Map<String, String> pm = new HashMap<> ();
             pm.put (cmd.getParameters ()[0], m.group (2));
             pm.put (cmd.getTarget (), LB);
             issueCommand (cmd, pm);
 
+            // Issue the command that sets the captcha and authentication properties, in lieu of an actual gauge to do this
+            // ClientX.maliciousness >= 0.9 -> ClientX.captcha = ClientX.authenticate = -1
+            // ClientX.maliciousness >= 0.5 -> ClientX.captcha = ClientX.authentica = rand ()
+            String mal = m.group (2);
+            float maliciousness = Float.valueOf (mal);
+            if (maliciousness >= 0.9f) {
+                boolean captchaEnabled = false;
+                ModelsManager modelsManager = Rainbow.instance ().getRainbowMaster ().modelsManager ();
+                IModelInstance<IAcmeSystem> modelInstance = modelsManager.<IAcmeSystem> getModelInstance (modelDesc ()
+                        .getType (), modelDesc ().getName ());
+                if (modelInstance != null) {
+                    IAcmeProperty cProp = modelInstance.getModelInstance ().getComponent ("LB0")
+                            .getProperty ("captchaEnabled");
+                    if (cProp != null && cProp.getValue () != null
+                            && PropertyHelper.toJavaVal (cProp.getValue ()) == Boolean.TRUE) {
+                        captchaEnabled = true;
+                    }
+                }
+                if (captchaEnabled) {
+                    List<IRainbowOperation> ops = new ArrayList<> (2);
+                    List<Map<String, String>> params = new ArrayList<> (2);
+                    cmd = m_commands.get (valueNames[1]);
+                    pm = new HashMap<> ();
+                    pm.put (cmd.getParameters ()[0], "-1");
+                    pm.put (cmd.getTarget (), LB);
+                    ops.add (cmd);
+                    params.add (pm);
+
+                    cmd = m_commands.get (valueNames[2]);
+                    pm = new HashMap<> ();
+                    pm.put (cmd.getParameters ()[0], "-1");
+                    pm.put (cmd.getTarget (), LB);
+                    ops.add (cmd);
+                    params.add (pm);
+
+                    issueCommands (ops, params);
+                }
+            }
+            else if (maliciousness >= 0.5f) {
+
+                if (m_authenticationEnabled) {
+
+                    List<IRainbowOperation> ops = new ArrayList<> (2);
+                    List<Map<String, String>> params = new ArrayList<> (2);
+                    cmd = m_commands.get (valueNames[1]);
+                    pm = new HashMap<> ();
+                    String response = "-1";
+                    if (Math.random () < 0.5) {
+                        response = "1";
+                    }
+                    pm.put (cmd.getParameters ()[0], response);
+                    pm.put (cmd.getTarget (), LB);
+                    ops.add (cmd);
+                    params.add (pm);
+
+                    cmd = m_commands.get (valueNames[2]);
+                    pm = new HashMap<> ();
+                    response = "-1";
+                    if (Math.random () < 0.5) {
+                        response = "1";
+                    }
+                    pm.put (cmd.getParameters ()[0], response);
+                    pm.put (cmd.getTarget (), LB);
+                    ops.add (cmd);
+                    params.add (pm);
+
+                    issueCommands (ops, params);
+                }
+            }
+
 //            String pClient = m_modelDesc.getName () + Util.DOT + m.group (1) + Util.DOT + "maliciousness";
 //            eventHandler ().reportValue (new AttributeValueTriple (pClient, valueNames[0], m.group (2)));
+        }
+        else if (AUTHENTICATION_ON.equals (matchName)) {
+            m_authenticationEnabled = true;
+        }
+        else if (AUTHENTICATION_OFF.equals (matchName)) {
+            m_authenticationEnabled = false;
         }
     }
 

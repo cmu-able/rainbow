@@ -30,7 +30,9 @@ public class SetThrottledCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
         IAcmeComponent server = getModelContext ().resolveInModel (getTarget (), IAcmeComponent.class);
         String[] ips = getParameters ()[0].split (",");
         HashSet<String> ipSet = new HashSet<> ();
-        ipSet.addAll (Arrays.asList (ips));
+        if (!getParameters ()[0].isEmpty ()) {
+            ipSet.addAll (Arrays.asList (ips));
+        }
         List<IAcmeCommand<?>> cmds = new LinkedList<> ();
         IAcmeProperty property = server.getProperty ("throttled");
         IAcmePropertyValue acmeVal = PropertyHelper.toAcmeVal (ipSet);

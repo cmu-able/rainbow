@@ -1,23 +1,21 @@
 package org.sa.rainbow.model.acme.znn.commands;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.acmestudio.acme.PropertyHelper;
+import org.acmestudio.acme.core.type.IAcmeIntValue;
 import org.acmestudio.acme.element.IAcmeComponent;
 import org.acmestudio.acme.element.property.IAcmeProperty;
-import org.acmestudio.acme.element.property.IAcmePropertyValue;
 import org.acmestudio.acme.model.command.IAcmeCommand;
 import org.acmestudio.acme.model.command.IAcmePropertyCommand;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 
-public class SetBlackholedCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
+public class SetCaptchaResponseCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
 
-    public SetBlackholedCmd (String commandName, AcmeModelInstance model, String target, String ipSet) {
-        super (commandName, model, target, ipSet);
+    public SetCaptchaResponseCmd (String name, AcmeModelInstance modelInstance, String client, String response) {
+        super (name, modelInstance, client, response);
     }
 
     @Override
@@ -25,23 +23,19 @@ public class SetBlackholedCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
         return ((IAcmePropertyCommand )m_command).getProperty ();
     }
 
-
     @Override
     protected List<IAcmeCommand<?>> doConstructCommand () throws RainbowModelException {
-        IAcmeComponent server = getModelContext ().resolveInModel (getTarget (), IAcmeComponent.class);
-        String[] split = getParameters ()[0].split (",");
-        HashSet<String> set = new HashSet<> ();
-        if (!getParameters ()[0].isEmpty ()) {
-            set.addAll (Arrays.asList (split));
-        }
-        IAcmeProperty property = server.getProperty ("blackholed");
-        IAcmePropertyValue acmeVal = PropertyHelper.toAcmeVal (set);
+        IAcmeComponent client = getModelContext ().resolveInModel (getTarget (), IAcmeComponent.class);
+        int response = Integer.valueOf (getParameters ()[0]);
+        IAcmeProperty property = client.getProperty ("captcha");
+        IAcmeIntValue acmeVal = PropertyHelper.toAcmeVal (response);
         List<IAcmeCommand<?>> cmds = new LinkedList<> ();
         if (propertyValueChanging (property, acmeVal)) {
-            m_command = server.getCommandFactory ().propertyValueSetCommand (property, acmeVal);
+            m_command = client.getCommandFactory ().propertyValueSetCommand (property, acmeVal);
             cmds.add (m_command);
         }
         return cmds;
     }
+
 
 }
