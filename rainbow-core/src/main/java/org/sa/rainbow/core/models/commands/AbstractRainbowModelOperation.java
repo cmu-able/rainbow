@@ -36,6 +36,8 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
 
     private final String                  m_commandName;
 
+    private String                          m_origin;
+
     public AbstractRainbowModelOperation (String commandName, IModelInstance<Model> model, String target,
             String... parameters) {
         m_target = target;
@@ -53,6 +55,15 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
     @Override
     public String[] getParameters () {
         return m_parameters;
+    }
+
+    @Override
+    public String getOrigin () {
+        return m_origin;
+    }
+
+    public void setOrigin (String o) {
+        m_origin = o;
     }
 
     @Override
@@ -168,8 +179,9 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
 
     @Override
     public String toString () {
-        return MessageFormat.format ("O[{0}:{1}/{2}.{3}({4})]", getModelName (), getModelType (), getName (), m_target,
-                m_parameters == null ? "" : Arrays.toString (m_parameters));
+        return MessageFormat.format ("O[{0}:{1}/{2}.{3}({4})]{5}", getModelName (), getModelType (), getName (),
+                m_target, m_parameters == null ? "" : Arrays.toString (m_parameters), m_origin == null ? ""
+                        : ("<" + m_origin));
     }
 
     protected IModelInstance<Model> getModelContext () {
