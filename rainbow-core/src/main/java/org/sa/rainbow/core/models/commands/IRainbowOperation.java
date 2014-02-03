@@ -11,4 +11,8 @@ public interface IRainbowOperation {
     public String getModelName ();
 
     public String getModelType ();
+
+    public String getOrigin ();
+
+    public void setOrigin (String o);
 }

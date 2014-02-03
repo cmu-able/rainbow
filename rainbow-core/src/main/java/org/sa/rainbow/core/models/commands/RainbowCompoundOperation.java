@@ -179,4 +179,10 @@ IRainbowModelCompoundCommand<Model> {
         return ok;
     }
 
+    @Override
+    public String getOrigin () {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }
