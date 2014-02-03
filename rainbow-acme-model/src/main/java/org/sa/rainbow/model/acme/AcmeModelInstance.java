@@ -19,7 +19,9 @@ import org.acmestudio.acme.core.exception.AcmeException;
 import org.acmestudio.acme.core.resource.IAcmeLanguageHelper;
 import org.acmestudio.acme.core.resource.RegionManager;
 import org.acmestudio.acme.core.type.IAcmeFloatType;
+import org.acmestudio.acme.core.type.IAcmeFloatValue;
 import org.acmestudio.acme.core.type.IAcmeIntType;
+import org.acmestudio.acme.core.type.IAcmeIntValue;
 import org.acmestudio.acme.element.IAcmeElementInstance;
 import org.acmestudio.acme.element.IAcmeElementType;
 import org.acmestudio.acme.element.IAcmeSystem;
@@ -72,7 +74,7 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
     /** Map of paths to IAcmeResources to make sure the same is retrieved */
 
     public AcmeModelInstance (IAcmeSystem system, String source) {
-        m_system = system;
+        setModelInstance (system);
         setOriginalSource (source);
         // TODO: This may need to change to either be in the model already, or to make several op maps possible
         m_opMap = new Properties ();
@@ -119,10 +121,16 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
                 IAcmePropertyBearer parent = event.getPropertyBearer ();
                 if (parent instanceof IAcmeElementInstance)
                     if (ModelHelper.getAcmeSystem ((IAcmeElementInstance )event.getPropertyBearer ()) == m_system)
-                        if (event.getProperty ().getType () instanceof IAcmeFloatType
-                                || event.getProperty ().getType () instanceof IAcmeIntType) {
+                        if (event.getProperty ().getType () instanceof IAcmeFloatType) {
+                            updateExponentialAverage (event.getProperty ().getQualifiedName (), Float
+                                    .valueOf (PropertyHelper.toJavaVal ((IAcmeFloatValue )event.getProperty ()
+                                            .getValue ())));
+                        }
+                        else if (event.getProperty ().getType () instanceof IAcmeIntType) {
                             updateExponentialAverage (event.getProperty ().getQualifiedName (),
-                                    (double )PropertyHelper.toJavaVal (event.getProperty ().getValue ()));
+ Integer
+                                    .valueOf (PropertyHelper.toJavaVal ((IAcmeIntValue )event.getProperty ()
+                                            .getValue ())));
                         }
 
             }

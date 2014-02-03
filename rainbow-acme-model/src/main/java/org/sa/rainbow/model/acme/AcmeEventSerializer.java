@@ -91,6 +91,10 @@ public class AcmeEventSerializer {
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, "MODEL_CHANGE");
         if (parent != null) {
             msg.setProperty (IModelChangeBusPort.PARENT_ID_PROP, parent.getProperty (IModelChangeBusPort.ID_PROP));
+            msg.setProperty (IModelChangeBusPort.MODEL_NAME_PROP,
+                    parent.getProperty (IModelChangeBusPort.MODEL_NAME_PROP));
+            msg.setProperty (IModelChangeBusPort.MODEL_TYPE_PROP,
+                    parent.getProperty (IModelChangeBusPort.MODEL_TYPE_PROP));
         }
     }
 
