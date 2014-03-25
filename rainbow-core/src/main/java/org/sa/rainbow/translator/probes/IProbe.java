@@ -3,6 +3,7 @@ package org.sa.rainbow.translator.probes;
 import java.util.Map;
 
 import org.sa.rainbow.core.IRainbowRunnable;
+import org.sa.rainbow.core.ports.IRainbowReportingPort;
 
 
 /**
@@ -140,6 +141,8 @@ public interface IProbe extends IProbeIdentifier {
     public void reportData (String data);
 
     public void activate ();
+
+    public abstract void setLoggingPort (IRainbowReportingPort dcp);
 
 
 }

@@ -128,6 +128,7 @@ public class LocalProbeManager extends AbstractRainbowRunnable {
                         Class<?> probeClass = Class.forName (probeClazz);
                         Constructor<?> cons = probeClass.getConstructor (params);
                         probe = (IProbe )cons.newInstance (args);
+                        probe.setLoggingPort (m_reportingPort);
                     }
                     catch (Throwable e) {
                         String msg = MessageFormat.format ("Could not instantiate probe: {0}", probeClazz);
@@ -137,6 +138,7 @@ public class LocalProbeManager extends AbstractRainbowRunnable {
 
                 if (probe != null) {
                     probe.create ();
+                    log (probe.id () + " created.");
                     m_localProbes.put (probe.id (), probe);
                     m_alias2Probe.put (probe.type (), probe);
                 }

@@ -18,12 +18,14 @@ public class ESEBGaugeModelUSBusPort implements IModelUSBusPort, ESEBConstants {
     private Identifiable  m_client;
 
     public ESEBGaugeModelUSBusPort (Identifiable client) throws IOException {
+        this (client, ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort ());
 
+    }
+
+    public ESEBGaugeModelUSBusPort (Identifiable client, String host, short port) throws IOException {
         m_client = client;
-        String delegateHost = ESEBProvider.getESEBClientHost ();
-        Short port = ESEBProvider.getESEBClientPort ();
-        m_role = new ESEBConnector (delegateHost, port, ChannelT.MODEL_US);
-        // Note, there is no communication from the model US bus to the gauges, so there is no need for a listener
+        m_role = new ESEBConnector (host, port, ChannelT.MODEL_US);
+        // Note, there is no communication from the model US bus to the gauges, so there is no need for a listener    
     }
 
     @Override

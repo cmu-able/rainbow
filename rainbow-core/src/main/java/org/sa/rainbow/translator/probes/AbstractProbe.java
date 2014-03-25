@@ -8,7 +8,6 @@ import org.apache.log4j.Logger;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.BadLifecycleStepException;
 import org.sa.rainbow.core.error.RainbowConnectionException;
-import org.sa.rainbow.core.ports.AbstractDelegateConnectionPort;
 import org.sa.rainbow.core.ports.IProbeConfigurationPort;
 import org.sa.rainbow.core.ports.IProbeLifecyclePort;
 import org.sa.rainbow.core.ports.IProbeReportPort;
@@ -44,7 +43,7 @@ public abstract class AbstractProbe implements IProbe {
             AbstractProbe.this.configure (configParams);
         }
     };
-    private AbstractDelegateConnectionPort m_loggingPort;
+    private IRainbowReportingPort     m_loggingPort;
 
     /**
      * Main Constuctor that initializes the ID of this Probe.
@@ -71,7 +70,8 @@ public abstract class AbstractProbe implements IProbe {
 
     }
 
-    public void setLoggingPort (AbstractDelegateConnectionPort dcp) {
+    @Override
+    public void setLoggingPort (IRainbowReportingPort dcp) {
         m_loggingPort = dcp;
     }
 
@@ -264,10 +264,11 @@ public abstract class AbstractProbe implements IProbe {
     @Override
     public void reportData (String data) {
         m_reportingPort.reportData (this, data);
+        log (data);
     }
 
     protected void log (String txt) {
-        String msg = "P[" + name () + "] " + txt;
+        String msg = "P[" + id () + "] " + txt;
         if (m_loggingPort != null) {
             m_loggingPort.info (RainbowComponentT.PROBE, msg, LOGGER);
         }
