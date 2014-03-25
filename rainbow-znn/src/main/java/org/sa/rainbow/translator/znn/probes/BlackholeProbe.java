@@ -131,13 +131,10 @@ public class BlackholeProbe extends AbstractRunnableProbe {
                 }
                 // send the report. If nothing to report, say this explicitly rather
                 // than reporting an empty string
-                if (!reportingBlackhole) {
-                    reportData("none");
-                } else {
-                    reportData(rpt.toString());
-                }
+                String report = reportingBlackhole ? rpt.toString () : "none";
+                reportData (report);
 
-                Util.dataLogger().info(rpt.toString());
+                Util.dataLogger ().info (report);
 
             } catch (Exception e) {
                 RainbowLogger.error (RainbowComponentT.PROBE, "Process execution error!", e, getLoggingPort (), LOGGER);
