@@ -2,29 +2,83 @@ package org.sa.rainbow.translator.znn.gauges;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.acmestudio.acme.PropertyHelper;
+import org.acmestudio.acme.element.IAcmeComponent;
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.acmestudio.acme.element.property.IAcmeProperty;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowException;
+import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.gauges.RegularPatternGauge;
 import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.IModelInstanceProvider;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
+import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
+import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowChangeBusSubscription;
+import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowModelChangeCallback;
+import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
 public class DummyDiagnosisGauge extends RegularPatternGauge {
 
-    private static final String   NAME       = "G - Dummy Diagnosis Gauge";
-    private static final String   DEFAULT    = "default";
-    private static final String[] valueNames = { "maliciousness(x)", "captcha(x)", "authenticate(x)" };
+    private final class CaptchaWatcher implements IRainbowModelChangeCallback {
+        @Override
+        public void onEvent (IModelInstance model, IRainbowMessage message) {
+            Object property = message.getProperty (IModelChangeBusPort.PARAMETER_PROP + "0");
+            Object target = message.getProperty (IModelChangeBusPort.TARGET_PROP);
+            if (target instanceof String && property instanceof String) {
+                Boolean captchaEnabled = Boolean.valueOf ((String )property);
+                IAcmeSystem system = (IAcmeSystem )model.getModelInstance ();
+                Set<? extends IAcmeComponent> components = system.getComponents ();
+                Set<IAcmeComponent> maliciousComponents = new HashSet<> ();
+                for (IAcmeComponent c : components) {
+                    if (c.declaresType ("ClientT") && c.getProperty ("maliciousness") != null) {
+                        IAcmeProperty m = c.getProperty ("maliciousness");
+                        float maliciousness = (float )PropertyHelper.toJavaVal (m.getValue ());
+                        if (maliciousness >= 0.9) {
+                            maliciousComponents.add (c);
+                        }
+                    }
+                }
+                getReportingPort ().info (RainbowComponentT.GAUGE, "Dummy gauge responding to captcha enablement");
+                for (IAcmeComponent m : maliciousComponents) {
+                    Map<String, String> pm = new HashMap<> ();
+                    List<IRainbowOperation> ops = new ArrayList<> (2);
+                    List<Map<String, String>> params = new ArrayList<> (2);
+                    IRainbowOperation cmd = m_commands.get (valueNames[1]);
+                    pm = new HashMap<> ();
+                    pm.put (cmd.getParameters ()[0], captchaEnabled ? "-1" : "0");
+                    pm.put (cmd.getTarget (), m.getQualifiedName ());
+                    ops.add (cmd);
+                    params.add (pm);
+
+                    cmd = m_commands.get (valueNames[2]);
+                    pm = new HashMap<> ();
+                    pm.put (cmd.getParameters ()[0], captchaEnabled ? "-1" : "0");
+                    pm.put (cmd.getTarget (), m.getQualifiedName ());
+                    ops.add (cmd);
+                    params.add (pm);
+
+                    issueCommands (ops, params);
+                }
+            }
+        }
+    }
+
+    private static final String   NAME                    = "G - Dummy Diagnosis Gauge";
+    private static final String   DEFAULT                 = "default";
+    private static final String[] valueNames              = { "maliciousness(x)", "captcha(x)", "authenticate(x)" };
     private static final String   AUTHENTICATION_ON       = "AUTH_ON";
     private static final String   AUTHENTICATION_OFF      = "AUTH_OFF";
 
@@ -32,13 +86,33 @@ public class DummyDiagnosisGauge extends RegularPatternGauge {
     private boolean               m_authenticationEnabled = false;
 
     public DummyDiagnosisGauge (String id, long beaconPeriod, TypedAttribute gaugeDesc, TypedAttribute modelDesc,
-            List<TypedAttributeWithValue> setupParams, Map<String, IRainbowOperation> mappings)
-                    throws RainbowException {
+            List<TypedAttributeWithValue> setupParams, Map<String, IRainbowOperation> mappings) throws RainbowException {
         super (NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
 
         addPattern (DEFAULT, Pattern.compile ("([\\w_]+)=([\\d]+(\\.[\\d]*))"));
         addPattern (AUTHENTICATION_ON, Pattern.compile ("^on$"));
         addPattern (AUTHENTICATION_OFF, Pattern.compile ("^off$"));
+
+        m_modelChanges = RainbowPortFactory.createModelChangeBusSubscriptionPort (new IModelInstanceProvider () {
+
+            @Override
+            public <T> IModelInstance<T> getModelInstance (String modelType, String modelName) {
+                ModelsManager modelsManager = Rainbow.instance ().getRainbowMaster ().modelsManager ();
+                IModelInstance<T> modelInstance = modelsManager.<T> getModelInstance (modelType, modelName);
+                return modelInstance;
+            }
+        });
+
+        m_modelChanges.subscribe (new IRainbowChangeBusSubscription () {
+
+            @Override
+            public boolean matches (IRainbowMessage message) {
+                boolean b = message.getPropertyNames ().contains (IModelChangeBusPort.COMMAND_PROP)
+                        && message.getProperty (IModelChangeBusPort.COMMAND_PROP).equals ("setCaptchaEnabled");
+                return b;
+            }
+
+        }, new CaptchaWatcher ());
 
     }
 
@@ -57,70 +131,70 @@ public class DummyDiagnosisGauge extends RegularPatternGauge {
             // ClientX.maliciousness >= 0.5 -> ClientX.captcha = ClientX.authentica = rand ()
             String mal = m.group (2);
             float maliciousness = Float.valueOf (mal);
-            if (maliciousness >= 0.9f) {
-                boolean captchaEnabled = false;
-                ModelsManager modelsManager = Rainbow.instance ().getRainbowMaster ().modelsManager ();
-                IModelInstance<IAcmeSystem> modelInstance = modelsManager.<IAcmeSystem> getModelInstance (modelDesc ()
-                        .getType (), modelDesc ().getName ());
-                if (modelInstance != null) {
-                    IAcmeProperty cProp = modelInstance.getModelInstance ().getComponent ("LB0")
-                            .getProperty ("captchaEnabled");
-                    if (cProp != null && cProp.getValue () != null
-                            && PropertyHelper.toJavaVal (cProp.getValue ()) == Boolean.TRUE) {
-                        captchaEnabled = true;
-                    }
-                }
-                if (captchaEnabled) {
-                    List<IRainbowOperation> ops = new ArrayList<> (2);
-                    List<Map<String, String>> params = new ArrayList<> (2);
-                    cmd = m_commands.get (valueNames[1]);
-                    pm = new HashMap<> ();
-                    pm.put (cmd.getParameters ()[0], "-1");
-                    pm.put (cmd.getTarget (), LB);
-                    ops.add (cmd);
-                    params.add (pm);
-
-                    cmd = m_commands.get (valueNames[2]);
-                    pm = new HashMap<> ();
-                    pm.put (cmd.getParameters ()[0], "-1");
-                    pm.put (cmd.getTarget (), LB);
-                    ops.add (cmd);
-                    params.add (pm);
-
-                    issueCommands (ops, params);
-                }
-            }
-            else if (maliciousness >= 0.5f) {
-
-                if (m_authenticationEnabled) {
-
-                    List<IRainbowOperation> ops = new ArrayList<> (2);
-                    List<Map<String, String>> params = new ArrayList<> (2);
-                    cmd = m_commands.get (valueNames[1]);
-                    pm = new HashMap<> ();
-                    String response = "-1";
-                    if (Math.random () < 0.5) {
-                        response = "1";
-                    }
-                    pm.put (cmd.getParameters ()[0], response);
-                    pm.put (cmd.getTarget (), LB);
-                    ops.add (cmd);
-                    params.add (pm);
-
-                    cmd = m_commands.get (valueNames[2]);
-                    pm = new HashMap<> ();
-                    response = "-1";
-                    if (Math.random () < 0.5) {
-                        response = "1";
-                    }
-                    pm.put (cmd.getParameters ()[0], response);
-                    pm.put (cmd.getTarget (), LB);
-                    ops.add (cmd);
-                    params.add (pm);
-
-                    issueCommands (ops, params);
-                }
-            }
+//            if (maliciousness >= 0.9f) {
+//                boolean captchaEnabled = false;
+//                ModelsManager modelsManager = Rainbow.instance ().getRainbowMaster ().modelsManager ();
+//                IModelInstance<IAcmeSystem> modelInstance = modelsManager.<IAcmeSystem> getModelInstance (modelDesc ()
+//                        .getType (), modelDesc ().getName ());
+//                if (modelInstance != null) {
+//                    IAcmeProperty cProp = modelInstance.getModelInstance ().getComponent ("LB0")
+//                            .getProperty ("captchaEnabled");
+//                    if (cProp != null && cProp.getValue () != null
+//                            && PropertyHelper.toJavaVal (cProp.getValue ()) == Boolean.TRUE) {
+//                        captchaEnabled = true;
+//                    }
+//                }
+//                if (captchaEnabled) {
+//                    List<IRainbowOperation> ops = new ArrayList<> (2);
+//                    List<Map<String, String>> params = new ArrayList<> (2);
+//                    cmd = m_commands.get (valueNames[1]);
+//                    pm = new HashMap<> ();
+//                    pm.put (cmd.getParameters ()[0], "-1");
+//                    pm.put (cmd.getTarget (), LB);
+//                    ops.add (cmd);
+//                    params.add (pm);
+//
+//                    cmd = m_commands.get (valueNames[2]);
+//                    pm = new HashMap<> ();
+//                    pm.put (cmd.getParameters ()[0], "-1");
+//                    pm.put (cmd.getTarget (), LB);
+//                    ops.add (cmd);
+//                    params.add (pm);
+//
+//                    issueCommands (ops, params);
+//                }
+//            }
+//            else if (maliciousness >= 0.5f) {
+//
+//                if (m_authenticationEnabled) {
+//
+//                    List<IRainbowOperation> ops = new ArrayList<> (2);
+//                    List<Map<String, String>> params = new ArrayList<> (2);
+//                    cmd = m_commands.get (valueNames[1]);
+//                    pm = new HashMap<> ();
+//                    String response = "-1";
+//                    if (Math.random () < 0.5) {
+//                        response = "1";
+//                    }
+//                    pm.put (cmd.getParameters ()[0], response);
+//                    pm.put (cmd.getTarget (), LB);
+//                    ops.add (cmd);
+//                    params.add (pm);
+//
+//                    cmd = m_commands.get (valueNames[2]);
+//                    pm = new HashMap<> ();
+//                    response = "-1";
+//                    if (Math.random () < 0.5) {
+//                        response = "1";
+//                    }
+//                    pm.put (cmd.getParameters ()[0], response);
+//                    pm.put (cmd.getTarget (), LB);
+//                    ops.add (cmd);
+//                    params.add (pm);
+//
+//                    issueCommands (ops, params);
+//                }
+//            }
 
 //            String pClient = m_modelDesc.getName () + Util.DOT + m.group (1) + Util.DOT + "maliciousness";
 //            eventHandler ().reportValue (new AttributeValueTriple (pClient, valueNames[0], m.group (2)));
