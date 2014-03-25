@@ -44,6 +44,7 @@ import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.error.RainbowAbortException;
 import org.sa.rainbow.core.error.RainbowCopyException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
@@ -52,24 +53,24 @@ import org.sa.rainbow.util.Util;
 
 public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
 
-    public Logger              LOGGER               = Logger.getLogger (this.getClass ());
-    public static final String EXP_AVG_KEY          = "[EAvg]";
-    public static final String PENALTY_KEY          = "[Penalty]";
+    public Logger                          LOGGER                  = Logger.getLogger (this.getClass ());
+    public static final String             EXP_AVG_KEY             = "[EAvg]";
+    public static final String             PENALTY_KEY             = "[Penalty]";
     public static final String             EXPR_KEY                = "[EXPR]";
 
     /** The property identifier for obtaining the deployment location of an element */
-    public static final String PROPKEY_LOCATION     = "deploymentLocation";
+    public static final String             PROPKEY_LOCATION        = "deploymentLocation";
     /** The property identifier for determining whether an element is in the architecture or the env't */
-    public static final String PROPKEY_ARCH_ENABLED = "isArchEnabled";
+    public static final String             PROPKEY_ARCH_ENABLED    = "isArchEnabled";
 
-    private IAcmeSystem m_system;
+    private IAcmeSystem                    m_system;
     /** Map of qualified name to average values */
-    protected Map<String, Double> m_propExpAvg         = new HashMap<> ();
+    protected Map<String, Double>          m_propExpAvg            = new HashMap<> ();
     /** Map of additional, non-model properties */
-    protected Map<String, Double> m_moreProp           = new HashMap<> ();
+    protected Map<String, Double>          m_moreProp              = new HashMap<> ();
     protected Map<String, IExpressionNode> m_registeredExpressions = new HashMap<> ();
-    private Properties            m_opMap;
-    private String                m_source;
+    private Properties                     m_opMap;
+    private String                         m_source;
 
     /** Map of paths to IAcmeResources to make sure the same is retrieved */
 
@@ -115,26 +116,31 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
     public void setModelInstance (IAcmeSystem model) {
         m_system = model;
         // Add listener to update exponential averages for the properties
-        m_system.getContext ().getModel ().addEventListener (new AcmeEventListenerAdapter () {
+        final AcmeEventListenerAdapter propertyListener = new AcmeEventListenerAdapter () {
             @Override
             public void propertyValueSet (AcmePropertyEvent event) {
-                IAcmePropertyBearer parent = event.getPropertyBearer ();
-                if (parent instanceof IAcmeElementInstance)
-                    if (ModelHelper.getAcmeSystem ((IAcmeElementInstance )event.getPropertyBearer ()) == m_system)
-                        if (event.getProperty ().getType () instanceof IAcmeFloatType) {
-                            updateExponentialAverage (event.getProperty ().getQualifiedName (), Float
-                                    .valueOf (PropertyHelper.toJavaVal ((IAcmeFloatValue )event.getProperty ()
-                                            .getValue ())));
-                        }
-                        else if (event.getProperty ().getType () instanceof IAcmeIntType) {
-                            updateExponentialAverage (event.getProperty ().getQualifiedName (),
- Integer
-                                    .valueOf (PropertyHelper.toJavaVal ((IAcmeIntValue )event.getProperty ()
-                                            .getValue ())));
-                        }
+                try {
+                    IAcmePropertyBearer parent = event.getPropertyBearer ();
+                    if (parent instanceof IAcmeElementInstance)
+                        if (ModelHelper.getAcmeSystem ((IAcmeElementInstance )event.getPropertyBearer ()) == m_system)
+                            if (event.getProperty ().getType () instanceof IAcmeFloatType) {
+                                updateExponentialAverage (event.getProperty ().getQualifiedName (),
+                                        Float.valueOf (PropertyHelper.toJavaVal ((IAcmeFloatValue )event.getProperty ()
+                                                .getValue ())));
+                            }
+                            else if (event.getProperty ().getType () instanceof IAcmeIntType) {
+                                updateExponentialAverage (event.getProperty ().getQualifiedName (),
+                                        Integer.valueOf (PropertyHelper.toJavaVal ((IAcmeIntValue )event.getProperty ()
+                                                .getValue ())));
+                            }
+                }
+                catch (RainbowAbortException e) {
+                    m_system.getContext ().getModel ().removeEventListener (this);
+                }
 
             }
-        });
+        };
+        m_system.getContext ().getModel ().addEventListener (propertyListener);
 
     }
 
