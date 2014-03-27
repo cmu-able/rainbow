@@ -1,7 +1,15 @@
 package org.acmestudio.rainbow;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+
 import org.acmestudio.rainbow.model.events.RainbowModelEventListener;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -29,6 +37,21 @@ public class Rainbow extends AbstractUIPlugin {
      */
     public void start(BundleContext context) throws Exception {
         super.start(context);
+        Bundle bundle = Platform.getBundle("org.mozilla.xulrunner");
+        if (bundle != null) {
+            URL resourceUrl = bundle.getResource("xulrunner");
+            if (resourceUrl != null) {
+                try {
+                    URL fileUrl = FileLocator.toFileURL(resourceUrl);
+                    File file = new File (fileUrl.toURI ());
+                    System.setProperty("org.eclipse.swt.browser.XULRunnerPath", file.getAbsolutePath());
+                }
+                catch (IOException | URISyntaxException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        }
         Rainbow.plugin = this;
     }
 

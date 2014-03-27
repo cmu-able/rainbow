@@ -1,0 +1,725 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content='text/html;charset=utf-8'>
+<title>%PROPERTY gauges</title>
+<style>
+body {
+	font: 10px arial;
+}
+</style>
+<script type='text/javascript' src='http://mbostock.github.com/d3/d3.js'></script>
+<script type='text/javascript'>
+
+    function MovingLineGauge (placeholderName, configuration, nextDatum) {
+    	this.placeholderName = placeholderName;
+    	var self = this;
+    	
+    	this.data = [];
+    	
+    	this.configure = function (configuration) {
+    		this.config = configuration;
+    		// The width of the gauge
+    		this.config.width = configuration.width || 100;
+    		// The height of the gauge
+    		this.config.height = configuration.height || 50;
+    		this.config.graphHeight = configuration.height || 50;
+    		// Whether to smooth or not: linear, basis
+    		this.config.interpolation = configuration.smooth?"basis":"linear";
+    		// Whether to animate the transition each interval
+    		this.config.animate = configuration.animate || false;
+    		// The interval for new values, ms
+    		this.config.interval = configuration.interval || 1000;
+    		// If animating, how long the transition should take
+    		this.config.transition = configuration.transition || this.config.interval;
+    		// The maximum number of values to display
+    		this.config.windowSize = configuration.windowSize || Math.floor (this.config.width / 10);
+    		// The minumum expected value
+    		this.config.min = configuration.min || 0;
+    		// The maximum expected value
+			this.config.max = configuration.max || 100;
+			this.config.range = this.config.max - this.config.min;
+    		// Any initial data that should be displayed
+    		if (this.config.initialData != null) {
+    			this.data = this.config.initialData.slice (0);
+    			this.max = Math.max (this.config.max, d3.max(this.data));
+    			this.min = Math.min (this.config.min, d3.min(this.data));
+    		}
+    		else {
+    			this.min = this.config.min;
+    			this.max = this.config.max;
+    		}
+    		
+    		if (this.config.label) {
+    			this.config.graphHeight = this.config.graphHeight - 9;
+    		}
+    		
+    		// Set up the x and y scales
+    		// The X scale will fit windowSize values within the width of the widget
+    		this.xScale = d3.scale.linear ().domain ([0,this.config.windowSize]).range ([-5,this.config.width]); // starting point is -5 so the first value doesn't show and slides off the edge as part of the transition
+    		// The Y scale will fit values min,max within the height
+    		this.yScale = d3.scale.linear ().domain([this.max, this.min]).range([0,this.config.graphHeight]);
+    	}
+    	this.resetYScale = function (max, min) {
+    		this.max = max;
+    		this.min = min;
+    		this.yScale = d3.scale.linear ().domain([this.max, this.min]).range([0,this.config.graphHeight]);
+			this.drawThreshold ();
+    	}
+    	
+    	this.render = function () {
+    		var div = d3.select("#" + placeholderName);
+    		this.group = div.append ("svg:svg").attr ("class", "movingGraphContainer").attr("width", this.config.width).attr("height",this.config.height);
+    		this.graph = this.group.append ("svg:svg").attr ("width", this.config.width).attr("height", this.config.graphHeight);
+    		
+    		
+    		// Create axes and thresholds (todo)
+    		
+    		// Create the line
+    		this.line = d3.svg.line ()
+    			// assign the X functino to plot the line
+    			.x (function (d,i) {
+    				return self.xScale(i);
+    			})
+    			.y (function (d) {
+    				return self.yScale(d);
+    			})
+    			.interpolate (this.config.interpolation);
+    		// display the line by appending an svg:path element with the data line above
+    		this.graph.append("svg:path").attr("class", "data").attr("d", this.line (this.data)).style("stroke", "steelblue").style ("stroke-width", "1").style ("fill","none");
+    		this.yAxis = d3.svg.axis ().scale (this.yScale).orient("left");
+    		var axis = this.graph.append ("g").attr("class", "y axis").call(this.yAxis)
+    			.style("fill","none").style("stroke","#000").style("shape-rendering","crispEdges");
+    		if (this.config.yLabel) {
+    			axis.append("text").attr("transform", "rotate(-90)").attr("y", 6).attr("dy",".5em").style("font-size", "8px").style("text-anchor","end").text(this.config.yLabel);
+    		}
+    		if (this.config.label) {
+    			this.group.append ("svg:text").attr("x", this.config.width / 2).attr ("y", this.config.height).attr("dy", "-4").attr("text-anchor", "middle").style("font-size", "9px").style("stroke-width", "1").style("fill", "#000").text (this.config.label);
+    		}
+    		this.group.append ("svg:text").attr ("class", "MLCurrentValue").attr("x", this.config.width - 25).attr ("y", 9).attr("text-anchor", "right").style("font-size", "8px").style("stroke-width", 1).style ("fill", "#000");
+    		
+    		this.drawThreshold ();
+    	}
+    	
+    	this.drawThreshold = function () {
+    		if (this.config.threshold) {
+    			var threshold = this.graph.selectAll (".threshold");
+    			if (threshold.empty ())
+	    			this.graph.append("svg:line").attr("class","threshold").attr("x1", this.xScale (0)).attr(
+							"y1", this.yScale (this.config.threshold)).attr("x2", this.xScale (this.config.width)).attr("y2",
+							this.yScale(this.config.threshold)).style("stroke", "#600").style(
+							"stroke-width", "1px").style("stroke-dasharray", ("3","3"));
+    			else
+    				threshold
+    					.attr("x1", this.xScale (0)).attr(
+						"y1", this.yScale(this.config.threshold)).attr("x2", this.xScale (this.config.width)).attr("y2",
+								this.yScale(this.config.threshold)).style("stroke", "#600").style(
+								"stroke-width", "1px").style("stroke-dasharray", ("3","3"));
+    			
+    		}
+    	}
+    	
+    	
+    	
+    	// Starts the gauge animation (ignored if already started)
+    	this.start = function () {
+    		if (this.timer == null) {
+	    		this.timer = setInterval (function() {
+	    			var nxt = nextDatum ();
+	    			if (nxt == null && self.data.length > 0) {
+	    				self.data.shift ();
+	    			}
+	    			else if (nxt == null) {
+	    				return;
+	    			}
+	    			else {
+		    			if (self.data.length < self.config.windowSize) {
+		    				self.data.push(nxt);
+		    			}
+		    			else {
+		    				self.data.shift ();
+		    				self.data.push(nxt);
+		    			}
+	    			}
+	    			if (self.config.animate) {
+	    				self.redrawWithAnimation ();
+	    			}
+	    			else {
+	    				self.redrawWithoutAnimation ();
+	    			}
+	    			var currentValue = self.group.select (".MLCurrentValue");
+	    			currentValue.text (self.data.slice(-1));
+
+	    			
+	    		}, this.config.interval);
+    		}
+    	}
+    	
+    	// Stops the gauge animation (ignored if already started)
+    	this.stop = function () {
+    		if (this.timer != null) {
+    			clearInterval (this.timer);
+    			this.timer == null;
+    		}
+    	}
+    	
+    	this.redrawWithAnimation = function () {
+    		// todo: reset the yscale if the max and mins differ with the new data
+    		var max = Math.max (this.config.max, d3.max(this.data));
+    		var min = Math.min (this.config.min, d3.min (this.data));
+    		if (max > this.max || min < this.min) {
+    			this.resetYScale (max, min);
+    		}
+    		else if (max <= this.config.max || min >= this.config.min) {
+    			this.resetYScale (Math.max (this.config.max,max), Math.min (this.config.min,min));
+    		}
+    		if (this.data.length < this.config.windowSize) {
+    			this.redrawWithoutAnimation ();
+    		}
+    		else {
+	    		this.graph.selectAll(".data")
+	    			.data([this.data]) // set the new data
+	    			.attr("transform", "translate(" + this.xScale(1) + ")") // set the transform to the right by xScale (1)
+	    			.attr("d", this.line) // apply the new data values ... but the new value is hidden at this point off the right of the canvas
+	    			.transition () // start the transition to bring in the new value
+	    			.ease("linear")
+	    			.duration (this.config.transition)
+	    			.style("stroke", "steelblue").style ("stroke-width", "1").style ("fill","none")
+	    			.attr("transform", "translate(" + this.xScale(0) + ")"); // animate a slide to the left back to x(0) pixels to reveal the new value
+	    	}
+    		
+    		
+    	}
+    	
+    	this.redrawWithoutAnimation = function () {
+    		this.graph.selectAll(".data")
+    			.data([this.data]) // set the new data
+    			.style("stroke", "steelblue").style ("stroke-width", "1").style ("fill","none")
+    			.attr ("d", this.line); // apply the new data values
+    	}
+    	
+    	// Initialization
+    	this.configure (configuration);
+    }
+
+	function TrinaryGauge(placeholderName, configuration) {
+		this.placeholderName = placeholderName;
+		
+		var self = this;
+		
+		this.configure = function (configuration) {
+			this.config = configuration;
+			this.config.fontSize = configuration.fontSize || 10;
+			this.config.radius = configuration.size * 0.90 / 2;
+			this.config.size = configuration.size + this.config.fontSize;
+			if (this.config.label)
+				this.config.size += this.config.fontSize;
+			
+			this.config.cx = configuration.size / 2;
+			this.config.cy = configuration.size / 2;
+			if (configuration.greenConfig) {
+				this.config.greenConfig = {};
+				this.config.greenConfig.color = configuration.greenConfig.color || "#109618";
+				this.config.greenConfig.value = configuration.greenConfig.value || "1";
+				this.config.greenConfig.label = configuration.greenConfig.label || "passed";
+			}
+			else {
+				this.config.greenConfig = {color : "#109618", value : "1", label : "passed"};
+			}
+			if (configuration.redConfig) {
+				this.config.redConfig = {};
+				this.config.redConfig.color = configuration.redConfig.color || "#DC3912";
+				this.config.redConfig.value = configuration.redConfig.value || "-1";
+				this.config.redConfig.label = configuration.redConfig.label || "failed";
+			}
+			else {
+				this.config.redConfig = {color : "#DC3912", value : "-1", label : "failed"};
+			}
+			if (configuration.noConfig) {
+				this.config.noConfig = {};
+				this.config.noConfig.color = configuration.noConfig.color || "#FFFFFF";
+				this.config.noConfig.value = configuration.noConfig.value || "0";
+				this.config.noConfig.label = configuration.noConfig.label || "unknown";
+			}
+			else {
+				this.config.noConfig = {color : "#FFFFFF", value : "0", label : "unknown"};
+			}
+					
+		}
+		
+		this.render = function () {
+			this.body = d3.select("#" + this.placeholderName).append("svg:svg")
+								.attr("class", "trigauge")
+								.attr("width", this.config.size)
+								.attr("height", this.config.size);
+			
+			if (undefined != this.config.label) {
+				this.body.append ("svg:text")
+							.attr("x", this.config.cx)
+							.attr("y", this.config.fontSize)
+							//.attr("dy", this.config.fontSize/2)
+							.attr("text-anchor", "middle")
+							.text(this.config.label)
+							.style("font-size", this.config.fontSize + "px")
+							.style("fill", "#333")
+							.style("stroke-width", "0px");
+			}
+			
+			var valueContainer = this.body.append ("svg:g").attr("class", "valueContainer");
+			valueContainer.append ("svg:circle")
+							.attr("cx", this.config.cx)
+							.attr("cy", this.config.cy)
+							.attr("r", 0.9 * this.config.radius)
+							.style("fill", this.config.noConfig.color)
+							.style("stroke", "#e0e0e0")
+							.style("stroke-width", "2px");
+			valueContainer.append ("svg:text")
+							.attr("x", this.config.cx)
+							.attr("y", this.config.size - this.config.fontSize + 2)
+							.attr("text-anchor", "middle")
+							.style("font-size", this.config.fontSize)
+							.style("fill", "#000")
+							.style("stroke-width", "0px");
+			this.redraw (this.config.noConfig.value);		
+		}
+		
+		this.redraw = function(value) {
+			var valueContainer = this.body.select (".valueContainer");
+			var label = this.config.noConfig.label;
+			var color = this.config.noConfig.color;
+			if (value == this.config.greenConfig.value) {
+				label = this.config.greenConfig.label;
+				color = this.config.greenConfig.color;
+			}
+			else if (value == this.config.redConfig.value) {
+				label = this.config.redConfig.label;
+				color = this.config.redConfig.color;
+			}
+			valueContainer.selectAll("text").text(label);
+			valueContainer.selectAll("circle").style("fill", color);
+		}
+		
+		// initialization
+		this.configure(configuration);
+	}
+
+	// This is from gauge.js
+	function Gauge(placeholderName, configuration) {
+		this.placeholderName = placeholderName;
+
+		var self = this; // for internal d3 functions
+
+		this.configure = function(configuration) {
+			this.config = configuration;
+
+			this.config.size = this.config.size * 0.9;
+
+			this.config.raduis = this.config.size * 0.9 / 2;
+			this.config.cx = this.config.size / 2;
+			this.config.cy = this.config.size / 2;
+
+			this.config.min = undefined != configuration.min ? configuration.min
+					: 0;
+			this.config.max = undefined != configuration.max ? configuration.max
+					: 100;
+			this.config.range = this.config.max - this.config.min;
+
+			this.config.majorTicks = configuration.majorTicks || 5;
+			this.config.minorTicks = configuration.minorTicks || 2;
+
+			this.config.greenColor = configuration.greenColor || "#109618";
+			this.config.yellowColor = configuration.yellowColor || "#FF9900";
+			this.config.redColor = configuration.redColor || "#DC3912";
+
+			this.config.transitionDuration = configuration.transitionDuration || 500;
+		}
+
+		this.render = function() {
+
+			var height = this.config.size + 4;
+			if (this.config.editFun) {
+				height = height + 10;
+			}
+			this.body = d3.select("#" + this.placeholderName).append("svg:svg")
+					.attr("class", "gauge").attr("width", this.config.size)
+					.attr("height", height);
+			
+
+			this.body.append("svg:circle").attr("cx", this.config.cx).attr(
+					"cy", this.config.cy).attr("r", this.config.raduis).style(
+					"fill", "#ccc").style("stroke", "#000").style(
+					"stroke-width", "0.5px");
+
+			this.body.append("svg:circle").attr("cx", this.config.cx).attr(
+					"cy", this.config.cy).attr("r", 0.9 * this.config.raduis)
+					.style("fill", "#fff").style("stroke", "#e0e0e0").style(
+							"stroke-width", "2px");
+
+			for ( var index in this.config.greenZones) {
+				this.drawBand(this.config.greenZones[index].from,
+						this.config.greenZones[index].to,
+						self.config.greenColor);
+			}
+
+			for ( var index in this.config.yellowZones) {
+				this.drawBand(this.config.yellowZones[index].from,
+						this.config.yellowZones[index].to,
+						self.config.yellowColor);
+			}
+
+			for ( var index in this.config.redZones) {
+				this.drawBand(this.config.redZones[index].from,
+						this.config.redZones[index].to, self.config.redColor);
+			}
+
+			if (undefined != this.config.label) {
+				var fontSize = Math.round(this.config.size / 12);
+				this.body.append("svg:text").attr("x", this.config.cx).attr(
+						"y", this.config.size  - fontSize / 2).attr("dy",
+						fontSize /2 + 2).attr("text-anchor", "middle").text(
+						this.config.label).style("font-size", fontSize + "px")
+						.style("fill", "#333").style("stroke-width", "0px");
+			}
+			
+			if (undefined != this.config.editFun) {
+				this.body.append ("svg:text").attr("x", this.config.cx).attr ("y", this.config.size + 14).attr("text-anchor", "middle").text("Edit").style("font-size", Math.round(this.config.size / 12) + "px")
+					.style("stroke-width", "0px").attr ("onclick", "triggerUpdateValue('" + this.config.reference + "')");
+				
+			}
+
+			var fontSize = Math.round(this.config.size / 16);
+			var majorDelta = this.config.range / (this.config.majorTicks - 1);
+			for ( var major = this.config.min; major <= this.config.max; major += majorDelta) {
+				var minorDelta = majorDelta / this.config.minorTicks;
+				for ( var minor = major + minorDelta; minor < Math.min(major
+						+ majorDelta, this.config.max); minor += minorDelta) {
+					var point1 = this.valueToPoint(minor, 0.75);
+					var point2 = this.valueToPoint(minor, 0.85);
+
+					this.body.append("svg:line").attr("x1", point1.x).attr(
+							"y1", point1.y).attr("x2", point2.x).attr("y2",
+							point2.y).style("stroke", "#666").style(
+							"stroke-width", "1px");
+				}
+
+				var point1 = this.valueToPoint(major, 0.7);
+				var point2 = this.valueToPoint(major, 0.85);
+
+				this.body.append("svg:line").attr("x1", point1.x).attr("y1",
+						point1.y).attr("x2", point2.x).attr("y2", point2.y)
+						.style("stroke", "#333").style("stroke-width", "2px");
+
+				if (major == this.config.min || major == this.config.max) {
+					var point = this.valueToPoint(major, 0.63);
+
+					this.body.append("svg:text").attr("x", point.x).attr("y",
+							point.y).attr("dy", fontSize / 3).attr(
+							"text-anchor",
+							major == this.config.min ? "start" : "end").text(
+							major).style("font-size", fontSize + "px").style(
+							"fill", "#333").style("stroke-width", "0px");
+				}
+			}
+
+			var pointerContainer = this.body.append("svg:g").attr("class",
+					"pointerContainer");
+
+			var midValue = (this.config.min + this.config.max) / 2;
+
+			var pointerPath = this.buildPointerPath(midValue);
+
+			var pointerLine = d3.svg.line().x(function(d) {
+				return d.x
+			}).y(function(d) {
+				return d.y
+			}).interpolate("basis");
+
+			pointerContainer.selectAll("path").data([ pointerPath ]).enter()
+					.append("svg:path").attr("d", pointerLine).style("fill",
+							"#dc3912").style("stroke", "#c63310").style(
+							"fill-opacity", 0.7)
+
+			pointerContainer.append("svg:circle").attr("cx", this.config.cx)
+					.attr("cy", this.config.cy).attr("r",
+							0.12 * this.config.raduis).style("fill", "#4684EE")
+					.style("stroke", "#666").style("opacity", 1);
+
+			var fontSize = Math.round(this.config.size / 10);
+			pointerContainer.selectAll("text").data([ midValue ]).enter()
+					.append("svg:text").attr("x", this.config.cx).attr("y",
+							this.config.size - this.config.cy / 4 - fontSize)
+					.attr("dy", fontSize / 2).attr("text-anchor", "middle")
+					.style("font-size", fontSize + "px").style("fill", "#000")
+					.style("stroke-width", "0px");
+
+			this.redraw(this.config.min, 0);
+		}
+
+		this.buildPointerPath = function(value) {
+			var delta = this.config.range / 13;
+
+			var head = valueToPoint(value, 0.85);
+			var head1 = valueToPoint(value - delta, 0.12);
+			var head2 = valueToPoint(value + delta, 0.12);
+
+			var tailValue = value - (this.config.range * (1 / (270 / 360)) / 2);
+			var tail = valueToPoint(tailValue, 0.28);
+			var tail1 = valueToPoint(tailValue - delta, 0.12);
+			var tail2 = valueToPoint(tailValue + delta, 0.12);
+
+			return [ head, head1, tail2, tail, tail1, head2, head ];
+
+			function valueToPoint(value, factor) {
+				var point = self.valueToPoint(value, factor);
+				point.x -= self.config.cx;
+				point.y -= self.config.cy;
+				return point;
+			}
+		}
+
+		this.drawBand = function(start, end, color) {
+			if (0 >= end - start)
+				return;
+
+			this.body.append("svg:path").style("fill", color).attr(
+					"d",
+					d3.svg.arc().startAngle(this.valueToRadians(start))
+							.endAngle(this.valueToRadians(end)).innerRadius(
+									0.65 * this.config.raduis).outerRadius(
+									0.85 * this.config.raduis)).attr(
+					"transform",
+					function() {
+						return "translate(" + self.config.cx + ", "
+								+ self.config.cy + ") rotate(270)"
+					});
+		}
+
+		this.redraw = function(value, transitionDuration) {
+			var pointerContainer = this.body.select(".pointerContainer");
+
+			pointerContainer.selectAll("text").text(Math.round(value));
+
+			var pointer = pointerContainer.selectAll("path");
+			pointer
+					.transition()
+					.duration(
+							undefined != transitionDuration ? transitionDuration
+									: this.config.transitionDuration)
+					//.delay(0)
+					//.ease("linear")
+					//.attr("transform", function(d) 
+					.attrTween(
+							"transform",
+							function() {
+								var pointerValue = value;
+								if (value > self.config.max)
+									pointerValue = self.config.max + 0.02
+											* self.config.range;
+								else if (value < self.config.min)
+									pointerValue = self.config.min - 0.02
+											* self.config.range;
+								var targetRotation = (self
+										.valueToDegrees(pointerValue) - 90);
+								var currentRotation = self._currentRotation
+										|| targetRotation;
+								self._currentRotation = targetRotation;
+
+								return function(step) {
+									var rotation = currentRotation
+											+ (targetRotation - currentRotation)
+											* step;
+									return "translate(" + self.config.cx + ", "
+											+ self.config.cy + ") rotate("
+											+ rotation + ")";
+								}
+							});
+		}
+
+		this.valueToDegrees = function(value) {
+			// thanks @closealert
+			//return value / this.config.range * 270 - 45;
+			return value / this.config.range * 270
+					- (this.config.min / this.config.range * 270 + 45);
+		}
+
+		this.valueToRadians = function(value) {
+			return this.valueToDegrees(value) * Math.PI / 180;
+		}
+
+		this.valueToPoint = function(value, factor) {
+			return {
+				x : this.config.cx - this.config.raduis * factor
+						* Math.cos(this.valueToRadians(value)),
+				y : this.config.cy - this.config.raduis * factor
+						* Math.sin(this.valueToRadians(value))
+			};
+		}
+
+		// initialization
+		this.configure(configuration);
+	}
+
+	// End of gauge.js
+
+	var gauges = [];
+
+	function updateValueGen(name) {
+		return function () {
+			triggerUpdateValue (name);
+		}
+	}
+	
+	function createPressureGauge(name, label, min, max, red, yellow, editable) {
+
+		var div = document.getElementById('text');
+		if (gauges[name] != null) {
+			return;		
+		}
+		
+		var config = {
+			size : 120,
+			label : label,
+			min : undefined != min ? min : 0,
+			max : undefined != max ? max : 100,
+			minorTicks : 5
+		}
+		
+		if (editable) {
+			config.editFun = updateValueGen (name);
+			config.reference = label;
+		}
+
+		var range = config.max - config.min;
+		config.redZones = undefined != red ? [ {
+			from : red,
+			to : config.max
+		} ] : [ {
+			from : config.min + range * 0.9,
+			to : config.max
+		} ];
+		config.yellowZones = undefined != yellow ? [ {
+			from : yellow,
+			to : config.redZones[0].from
+		} ] : [ {
+			from : config.min + range * 0.75,
+			to : config.redZones[0].from
+		} ];
+		var container = document.getElementById(name + "PressureContainer");
+		if (container == null) {
+			container = document.createElement("span");
+			container.id = name + "PressureContainer";
+			if (document.body != null)
+				document.body.appendChild(container);
+			else
+				document.getElementsByTagName('body')[0].appendChild(container);
+		}
+
+		gauges[name] = new Gauge(container.id, config);
+
+		gauges[name].render();
+	}
+	
+	function createTrinaryGauge (name, label, good, bad) {
+		if (gauges[name] != null)
+			return;
+		var config = {
+				size : 50,
+				label : label
+		}
+		
+		var container = document.getElementById(name + "TriContainer");
+		if (container == null) {
+			container = document.createElement("span");
+			container.id = name + "TriContainer";
+			if (document.body != null)
+				document.body.appendChild(container);
+			else
+				document.getElementsByTagName('body')[0].appendChild(container);
+		}
+
+		gauges[name] = new TrinaryGauge(container.id, config);
+
+		gauges[name].render();
+	}
+
+	function createMovingLineGauge (name, label, min, max, window, nextData, params) {
+		var div = document.getElementById('text');
+		if (gauges[name] != null) {
+			gauges[name].start ();
+			return;
+		}
+		var config = {
+				width: 100,
+				height: 50,
+				label: label,
+				interval: 1000,
+				windowSize: window,
+				animate:true,
+				min:min,
+				max:max,
+		}
+		
+		if (params && params.initialData) config.initialData = params.initialData;
+		if (params && params.ylabel) config.yLabel = params.yLabel;
+		if (params && params.threshold) config.threshold = params.threshold;
+		
+		var container = document.getElementById(name + "MovingLineContainer");
+		if (container == null) {
+			container = document.createElement ("span");
+			container.id = name + "MovingLineContainer";
+			if (document.body != null)
+				document.body.appendChild (container);
+			else
+				document.getElementsByTagName('body')[0].appendChild(container);
+		}
+		gauges[name] = new MovingLineGauge(container.id, config, nextData);
+		gauges[name].render ();
+		gauges[name].start ();
+		
+	}
+	
+	function updateGauge(gaugeId, val) {
+		gauges[gaugeId].redraw(val);
+	};
+	function removeGauge(gaugeId) {
+		var element = document.getElementById(gaugeId);
+		element.parentNode.removeChild(element);
+		if (gauges[gaugeId].stop != null)
+			gauges[gaugeId].stop ();
+		delete gauges[gaugeId];
+	};
+	function test() {
+		alert('test');
+	}
+</script>
+<body>
+
+	<div id='text'>
+	</div>
+	<!-- 
+	<div id='linegauge'></div>
+	<script type="text/javascript">
+	
+	  function triggerUpdateValue (refernce) {
+		  alert ("update for " + refernce);
+	  }
+	
+	  createPressureGauge ("respTime", "responseTime", 0, 6000, 2000, 1800, true);
+	  updateGauge ("respTime", 1200);
+	  
+	  createTrinaryGauge ("captcha", "Captcha'd");
+	  updateGauge ("captcha", 1);
+	  
+	  var data = [0, 10, 1100, 1159, 1200, 1000, 1500, 1549, 1600, 1800, 2500, 3000, 2500, 3500, 3500, 3000, 2500, 2000, 3000, 4000, 5000, 1800, 2000, 1000, 3000, 5800, 6900, 2000, 5000, 4900, 2000, 6700, 5000, 2000, 1000, 3000, 4800, 4900, 2000, 5000, 5990, 3000, 5600, 5200, 5700, 5000, 5200, 5100, 4300, 2800, 1900, 1200, 900];
+
+	  function nextValueForexperRespTime () {
+		  d = data.shift ();
+		  data.push (d);
+		  return d;
+	  }
+	  
+	  createMovingLineGauge('responseTime', 'experRespTime', 0, 5000, 10, nextValueForexperRespTime);	  
+	</script>
+	-->
+</body>
+</html>

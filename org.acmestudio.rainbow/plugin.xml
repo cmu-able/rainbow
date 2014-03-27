@@ -21,7 +21,7 @@
             commandId="org.acmestudio.rainbow.commands.connect">
       </handler>
       <handler
-            class="RainbowDisconnectionHandler"
+            class="org.acmestudio.rainbow.handlers.RainbowDisconnectionHandler"
             commandId="org.acmestudio.rainbow.commands.disconnect">
       </handler>
    </extension>
@@ -49,6 +49,31 @@
             </command>
          </menu>
       </menuContribution>
+   </extension>
+   <extension
+         point="org.acmestudio.ui.property.tabbed.propertyTabs">
+      <propertyTabs
+            contributorId="org.acmestudio.ui.MultiPageEditor">
+         <propertyTab
+               category="acmeelements"
+               id="org.acmestudio.rainbow.gauges"
+               indented="true"
+               indentedUnder="org.acmestudio.ui.view.property.properties"
+               label="Rainbow">
+         </propertyTab>
+      </propertyTabs>
+   </extension>
+   <extension
+         point="org.acmestudio.ui.property.tabbed.propertySections">
+      <propertySections
+            contributorId="org.acmestudio.ui.MultiPageEditor">
+         <propertySection
+               class="org.acmestudio.rainbow.ui.part.GaugesSectionAdapter"
+               filter="org.acmestudio.rainbow.ui.part.GaugesSection$Filter"
+               id="org.acmestudio.rainbow.gauges.section"
+               tab="org.acmestudio.rainbow.gauges">
+         </propertySection>
+      </propertySections>
    </extension>
 
 </plugin>

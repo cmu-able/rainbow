@@ -42,6 +42,8 @@ public class AcmeEventDeserializer {
         return model.getCommandFactory().compoundCommand(cmds);
     }
 
+    // Takes an event and turns it into a command. Currently, this does not use the operators for Rainbow (like addServer), but uses
+    // the raw Acme commands that are reported by Rainbow as sub events of the operators
     public IAcmeCommand<?> deserialize (IRainbowMessage event, IAcmeSystem model) throws RainbowDeserializationException {
         List<Pair<String, IAcmeCommand<?>>> commands = new LinkedList<>();
         deserialize(event, model, commands);
