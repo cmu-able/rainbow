@@ -129,6 +129,12 @@ public class TestGaugeInfrastructure extends DefaultTCase {
             @Override
             public void reportConfigured (IGaugeIdentifier gauge, List<TypedAttributeWithValue> configParams) {
             }
+
+            @Override
+            public void dispose () {
+                // TODO Auto-generated method stub
+
+            }
         });
 
         AbstractGauge testGauge = new AbstractGauge ("G - TEST_GAUGE", "__TEST", 5000, new TypedAttribute ("testGauge",
@@ -205,6 +211,12 @@ public class TestGaugeInfrastructure extends DefaultTCase {
 
             @Override
             public void reportConfigured (IGaugeIdentifier gauge, List<TypedAttributeWithValue> configParams) {
+            }
+
+            @Override
+            public void dispose () {
+                // TODO Auto-generated method stub
+
             }
         });
 

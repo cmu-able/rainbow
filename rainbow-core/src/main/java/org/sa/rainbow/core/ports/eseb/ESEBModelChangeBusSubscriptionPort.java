@@ -5,17 +5,17 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.IModelInstanceProvider;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.IESEBListener;
 import org.sa.rainbow.core.util.Pair;
 
-public class ESEBModelChangeBusSubscriptionPort implements IModelChangeBusSubscriberPort {
+public class ESEBModelChangeBusSubscriptionPort extends AbstractESEBDisposablePort implements
+IModelChangeBusSubscriberPort {
 
-    private ESEBConnector m_connector;
     private Collection<Pair<IRainbowChangeBusSubscription, IRainbowModelChangeCallback>> m_subscribers = new LinkedList<> ();
 
     public ESEBModelChangeBusSubscriptionPort (final IModelInstanceProvider mm) throws IOException {
@@ -25,10 +25,10 @@ public class ESEBModelChangeBusSubscriptionPort implements IModelChangeBusSubscr
 
     public ESEBModelChangeBusSubscriptionPort (String esebClientHost, short esebClientPort,
             final IModelInstanceProvider mm)
-            throws IOException {
-        m_connector = new ESEBConnector (esebClientHost, esebClientPort,
+                    throws IOException {
+        super (esebClientHost, esebClientPort,
                 ChannelT.MODEL_CHANGE);
-        m_connector.addListener (new IESEBListener () {
+        getConnectionRole().addListener (new IESEBListener () {
 
             @Override
             public void receive (RainbowESEBMessage msg) {
@@ -36,10 +36,10 @@ public class ESEBModelChangeBusSubscriptionPort implements IModelChangeBusSubscr
                     synchronized (m_subscribers) {
                         for (Pair<IRainbowChangeBusSubscription, IRainbowModelChangeCallback> pair : m_subscribers) {
                             if (pair.firstValue ().matches (msg)) {
-                                IModelInstance<Object> model = mm.getModelInstance (
+                                ModelReference mr = new ModelReference (
                                         (String )msg.getProperty (IModelChangeBusPort.MODEL_TYPE_PROP),
                                         (String )msg.getProperty (IModelChangeBusPort.MODEL_NAME_PROP));
-                                pair.secondValue ().onEvent (model, msg);
+                                pair.secondValue ().onEvent (mr, msg);
                             }
                         }
                     }

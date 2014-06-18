@@ -1,5 +1,6 @@
 package org.sa.rainbow.core.ports.local;
 
+import java.io.IOException;
 import java.util.Properties;
 
 import org.sa.rainbow.core.RainbowComponentT;
@@ -13,8 +14,8 @@ public class LocalDelegateConnectionPort extends AbstractDelegateConnectionPort 
     private LocalMasterConnectionPort m_masterPort;
     private LocalRainbowPortFactory m_factory;
 
-    public LocalDelegateConnectionPort (RainbowDelegate delegate, LocalRainbowPortFactory factory) {
-        super (delegate);
+    public LocalDelegateConnectionPort (RainbowDelegate delegate, LocalRainbowPortFactory factory) throws IOException {
+        super (delegate, null, (short )-1, null);
         m_factory = factory;
     }
 

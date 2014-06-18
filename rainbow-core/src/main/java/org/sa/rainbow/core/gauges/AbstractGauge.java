@@ -2,6 +2,7 @@ package org.sa.rainbow.core.gauges;
 
 import incubator.pval.Ensure;
 
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -156,8 +157,15 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
         m_lastCommands.clear ();
         m_commands.clear ();
 
+        m_gaugeManagementPort.dispose ();
+        m_announcePort.dispose ();
+        m_queryPort.dispose ();
+        m_configurationPort.dispose ();
         // null-out data members
         m_gaugeManagementPort = null;
+        m_announcePort = null;
+        m_queryPort = null;
+        m_configurationPort = null;
 //		m_id = null;  // keep value for log output
         m_gaugeDesc = null;
         m_modelDesc = null;
@@ -350,7 +358,13 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
 
     public IRainbowReportingPort getReportingPort () {
         if (m_reportingPort == null) {
-            m_reportingPort = new DisconnectedRainbowDelegateConnectionPort ();
+            try {
+                m_reportingPort = new DisconnectedRainbowDelegateConnectionPort ();
+            }
+            catch (IOException e) {
+                // Should never happen
+                e.printStackTrace ();
+            }
         }
         return m_reportingPort;
     }

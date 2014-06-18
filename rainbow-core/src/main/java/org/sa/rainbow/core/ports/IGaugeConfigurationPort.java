@@ -10,7 +10,7 @@ import org.sa.rainbow.core.util.TypedAttributeWithValue;
  * @author Bradley Schmerl: schmerl
  * 
  */
-public interface IGaugeConfigurationPort {
+public interface IGaugeConfigurationPort extends IDisposablePort {
     /**
      * Configures the parameters of this Gauge using the supplied configuration parameter values.
      * 
@@ -27,5 +27,6 @@ public interface IGaugeConfigurationPort {
      * @return boolean <code>true</code> if configure call succeed, <code>false</code> otherwise
      */
     public boolean reconfigureGauge ();
+
 
 }

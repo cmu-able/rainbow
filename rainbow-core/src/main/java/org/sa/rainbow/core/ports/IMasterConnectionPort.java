@@ -11,7 +11,7 @@ import org.sa.rainbow.core.error.RainbowConnectionException;
  * @author Bradley Schmerl: schmerl
  * 
  */
-public interface IMasterConnectionPort {
+public interface IMasterConnectionPort extends IDisposablePort {
 
     /** Message types for sending to the Rainbow Master, which could be displayed on the UI **/
     public enum ReportType {INFO, WARNING, ERROR, FATAL};
@@ -41,8 +41,5 @@ public interface IMasterConnectionPort {
 
     public void report (String delegateID, ReportType type, RainbowComponentT compT, String msg);
 
-    /**
-     * Should be called when this port is no longer required. Implementors should dispose of all resources.
-     */
-    public void dispose ();
+
 }

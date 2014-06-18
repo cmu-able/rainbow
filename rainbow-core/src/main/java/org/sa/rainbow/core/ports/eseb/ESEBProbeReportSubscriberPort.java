@@ -12,17 +12,15 @@ import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.IESEBListener;
 import org.sa.rainbow.translator.probes.IProbeIdentifier;
 
-public class ESEBProbeReportSubscriberPort implements IProbeReportSubscriberPort {
+public class ESEBProbeReportSubscriberPort extends AbstractESEBDisposablePort implements IProbeReportSubscriberPort {
 
     private IProbeReportPort m_callback;
-    private ESEBConnector    m_role;
     private Map<String, Set<String>> m_subscriptions = new HashMap<> ();
 
     public ESEBProbeReportSubscriberPort (IProbeReportPort callback) throws IOException {
+        super (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (), ChannelT.SYSTEM_US);
         m_callback = callback;
-        m_role = new ESEBConnector (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (),
-                ChannelT.SYSTEM_US);
-        m_role.addListener (new IESEBListener() {
+        getConnectionRole().addListener (new IESEBListener () {
 
             @Override
             public void receive (RainbowESEBMessage msg) {
@@ -32,7 +30,8 @@ public class ESEBProbeReportSubscriberPort implements IProbeReportSubscriberPort
     }
 
     // Should only be used for testing
-    ESEBProbeReportSubscriberPort () {
+    ESEBProbeReportSubscriberPort () throws IOException {
+        super (null, (short )-1, null);
     }
 
     @Override

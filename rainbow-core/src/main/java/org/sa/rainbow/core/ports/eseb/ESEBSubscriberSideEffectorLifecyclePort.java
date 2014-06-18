@@ -12,7 +12,8 @@ import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
 import org.sa.rainbow.translator.effectors.IEffectorProtocol;
 
-public class ESEBSubscriberSideEffectorLifecyclePort implements IEffectorLifecycleBusPort {
+public class ESEBSubscriberSideEffectorLifecyclePort extends AbstractESEBDisposablePort implements
+        IEffectorLifecycleBusPort {
 
     class MessageEffectorIdentifier implements IEffectorIdentifier {
 
@@ -46,13 +47,11 @@ public class ESEBSubscriberSideEffectorLifecyclePort implements IEffectorLifecyc
     }
 
     private IEffectorLifecycleBusPort m_delegate;
-    private ESEBConnector             m_connectionRole;
 
     public ESEBSubscriberSideEffectorLifecyclePort (IEffectorLifecycleBusPort client) throws IOException {
+        super (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (), ChannelT.HEALTH);
         m_delegate = client;
-        m_connectionRole = new ESEBConnector (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (),
-                ChannelT.HEALTH);
-        m_connectionRole.addListener (new IESEBListener () {
+        getConnectionRole().addListener (new IESEBListener () {
 
             @Override
             public void receive (RainbowESEBMessage msg) {

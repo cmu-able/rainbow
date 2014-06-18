@@ -9,18 +9,17 @@ import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.IESEBListener;
 
-public class ESEBRainbowReportingSubscriberPort implements IRainbowReportingSubscriberPort {
+public class ESEBRainbowReportingSubscriberPort extends AbstractESEBDisposablePort implements
+        IRainbowReportingSubscriberPort {
 
-    private ESEBConnector m_connector;
     private IRainbowReportingSubscriberCallback m_reportTo;
     private EnumSet<RainbowComponentT>          m_components = EnumSet.noneOf (RainbowComponentT.class);
     private EnumSet<ReportType>                 m_reports    = EnumSet.noneOf (ReportType.class);
 
     public ESEBRainbowReportingSubscriberPort (IRainbowReportingSubscriberCallback reportTo) throws IOException {
+        super (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (), ChannelT.UIREPORT);
         m_reportTo = reportTo;
-        m_connector = new ESEBConnector (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (),
-                ChannelT.UIREPORT);
-        m_connector.addListener (new IESEBListener () {
+        getConnectionRole().addListener (new IESEBListener () {
 
             @Override
             public void receive (RainbowESEBMessage msg) {

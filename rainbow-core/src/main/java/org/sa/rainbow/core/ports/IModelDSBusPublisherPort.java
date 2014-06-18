@@ -2,7 +2,7 @@ package org.sa.rainbow.core.ports;
 
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 
-public interface IModelDSBusPublisherPort {
+public interface IModelDSBusPublisherPort extends IDisposablePort {
     public enum Result {
         SUCCESS, FAILURE, UNKNOWN
     };
@@ -13,4 +13,5 @@ public interface IModelDSBusPublisherPort {
     }
 
     public abstract OperationResult publishOperation (IRainbowOperation cmd);
+
 }

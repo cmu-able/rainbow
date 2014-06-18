@@ -3,6 +3,7 @@
  */
 package org.sa.rainbow.core;
 
+import java.io.IOException;
 import java.text.MessageFormat;
 
 import org.sa.rainbow.core.error.RainbowConnectionException;
@@ -35,7 +36,13 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
     public AbstractRainbowRunnable (String name) {
         m_name = name;
         m_thread = new Thread(Rainbow.instance().getThreadGroup(), this, m_name);
-        m_reportingPort = new DisconnectedRainbowDelegateConnectionPort ();
+        try {
+            m_reportingPort = new DisconnectedRainbowDelegateConnectionPort ();
+        }
+        catch (IOException e) {
+            // Should never happen
+            e.printStackTrace ();
+        }
     }
 
     public void initialize (IRainbowReportingPort port) throws RainbowConnectionException {

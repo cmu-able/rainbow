@@ -5,7 +5,7 @@ import java.util.List;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 
-public interface IModelUSBusPort {
+public interface IModelUSBusPort extends IDisposablePort {
 
     /**
      * Is used to update the model. On the Model manager side, it calls the model manager to request an update to the
@@ -39,4 +39,5 @@ public interface IModelUSBusPort {
      * @return A model instance. NOTE: currently in Rainbow only local models are supported.
      */
     public <T> IModelInstance<T> getModelInstance (String modelType, String modelName);
+
 }

@@ -1,5 +1,7 @@
 package org.sa.rainbow.core.ports.eseb;
 
+import java.io.IOException;
+
 import auxtestlib.AbstractTestHelper;
 
 public class ESEBProbeSubscriberPortHelper extends AbstractTestHelper {
@@ -10,7 +12,13 @@ public class ESEBProbeSubscriberPortHelper extends AbstractTestHelper {
     }
 
     public ESEBProbeReportSubscriberPort disconnectedPort () {
-        return new ESEBProbeReportSubscriberPort ();
+        try {
+            return new ESEBProbeReportSubscriberPort ();
+        }
+        catch (IOException e) {
+            // Should never happen
+        }
+        return null;
     }
 
     @Override

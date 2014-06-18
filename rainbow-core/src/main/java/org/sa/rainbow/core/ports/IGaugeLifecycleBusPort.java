@@ -11,7 +11,7 @@ import org.sa.rainbow.core.util.TypedAttributeWithValue;
  * @author Bradley Schmerl: schmerl
  * 
  */
-public interface IGaugeLifecycleBusPort {
+public interface IGaugeLifecycleBusPort extends IDisposablePort {
 
     /**
      * Reports that a gauge has been created, giving it's id, type, and associated model
@@ -45,4 +45,5 @@ public interface IGaugeLifecycleBusPort {
      *            The gauge sending the beacon
      */
     public void sendBeacon (IGaugeIdentifier gauge);
+
 }

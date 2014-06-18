@@ -1,9 +1,15 @@
 package org.sa.rainbow.core.ports.eseb;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
@@ -22,6 +28,7 @@ import edu.cmu.cs.able.eseb.conn.BusConnectionState;
 import edu.cmu.cs.able.parsec.LocalizedParseException;
 import edu.cmu.cs.able.parsec.ParsecFileReader;
 import edu.cmu.cs.able.typelib.jconv.DefaultTypelibJavaConverter;
+import edu.cmu.cs.able.typelib.jconv.TypelibJavaConversionRule;
 import edu.cmu.cs.able.typelib.parser.DefaultTypelibParser;
 import edu.cmu.cs.able.typelib.parser.TypelibParsingContext;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
@@ -32,6 +39,13 @@ public class ESEBProvider {
     protected static Map<Short, EventBus>       s_servers            = new HashMap<> ();
     /** The set of BusClients already created, keyed by host:port **/
     protected static Map<String, BusConnection> s_clients            = new HashMap<> ();
+
+    /**
+     * Connections are reused for the same host,port pair, so keep a count of the number of references (for the server
+     * and the client) so that they can be better managed
+     */
+    protected static Map<BusConnection, Integer> s_clientReferences = new HashMap<> ();
+    protected static Map<EventBus, Integer>      s_serverReferences = new HashMap<> ();
     /**
      * Return the cached BusServer for this port, creating a new one if it doesn't yet exist
      * 
@@ -89,6 +103,8 @@ public class ESEBProvider {
 
     static final PrimitiveScope                        SCOPE             = new PrimitiveScope ();
     protected static final DefaultTypelibJavaConverter CONVERTER         = DefaultTypelibJavaConverter.make (SCOPE);
+    protected static final Set<String>                 REGISTERED_CONVERTERS = new HashSet<> ();
+    protected static List<TypelibJavaConversionRule>   RULES;
     static {
 
 
@@ -122,20 +138,48 @@ public class ESEBProvider {
                     context);
             parser.parse (new ParsecFileReader ()
             .read_memory ("enum outcome {unknown; confounded; failure; success; timeout;}"), context);
-
-            CONVERTER.add (new CollectionConverter ());
-            CONVERTER.add (new TypedAttributeConverter (ESEBProvider.SCOPE));
-            CONVERTER.add (new CommandRepresentationConverter (ESEBProvider.SCOPE));
-            CONVERTER.add (new GaugeStateConverter (ESEBProvider.SCOPE));
-            CONVERTER.add (new DescriptionAttributesConverter (ESEBProvider.SCOPE));
-            CONVERTER.add (new GaugeInstanceDescriptionConverter (ESEBProvider.SCOPE));
-            CONVERTER.add (new OutcomeConverter (ESEBProvider.SCOPE));
-            CONVERTER.add (new OperationResultConverter (ESEBProvider.SCOPE));
+            parser.parse (
+                    new ParsecFileReader ()
+                    .read_memory ("struct rainbow_model {string name; string type; string source; string cls; string system_name; string serialization;}"),
+                    context);
+            RULES = new LinkedList<TypelibJavaConversionRule> ();
+            RULES.add (new CollectionConverter ());
+            RULES.add (new TypedAttributeConverter (ESEBProvider.SCOPE));
+            RULES.add (new CommandRepresentationConverter (ESEBProvider.SCOPE));
+            RULES.add (new GaugeStateConverter (ESEBProvider.SCOPE));
+            RULES.add (new DescriptionAttributesConverter (ESEBProvider.SCOPE));
+            RULES.add (new GaugeInstanceDescriptionConverter (ESEBProvider.SCOPE));
+            RULES.add (new OutcomeConverter (ESEBProvider.SCOPE));
+            RULES.add (new OperationResultConverter (ESEBProvider.SCOPE));
+            for (TypelibJavaConversionRule r : RULES) {
+                CONVERTER.add (r);
+            }
         }
         catch (LocalizedParseException e) {
             // TODO Auto-generated catch block
             e.printStackTrace ();
         }
+    }
+
+    public static void registerConverter (Class<TypelibJavaConversionRule> converterClass) {
+        if (!REGISTERED_CONVERTERS.contains (converterClass.getCanonicalName ())) {
+            try {
+                Constructor<?> constructor = converterClass.getConstructor (PrimitiveScope.class);
+                TypelibJavaConversionRule r = (TypelibJavaConversionRule )constructor.newInstance (SCOPE);
+                REGISTERED_CONVERTERS.add (converterClass.getCanonicalName ());
+                RULES.add (r);
+                CONVERTER.add (r);
+            }
+            catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
+                    | IllegalArgumentException | InvocationTargetException e) {
+                ESEBConnector.LOGGER.error (MessageFormat.format ("Could not construct model converter ''{0}''.",
+                        converterClass.getCanonicalName ()));
+            }
+        }
+    }
+
+    public static List<? extends TypelibJavaConversionRule> getConversionRules () {
+        return RULES;
     }
 
     public static short getESEBClientPort () {
@@ -170,6 +214,73 @@ public class ESEBProvider {
     public static String getESEBClientHost () {
         String host = Rainbow.getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION, "localhost");
         return host;
+    }
+
+    /**
+     * Release a client connection. If there are no more references left, then stop the client altogether
+     * 
+     * @param client
+     */
+    public static void releaseClient (BusConnection client) {
+        Integer counts = s_clientReferences.get (client);
+        if (counts != null) {
+            counts--;
+            if (counts == 0) {
+                client.stop ();
+            }
+            else {
+                s_clientReferences.put (client, counts);
+            }
+        }
+    }
+
+    /**
+     * Register the use of a client.
+     * 
+     * @param client
+     */
+    public static void useClient (BusConnection client) {
+        Integer counts = s_clientReferences.get (client);
+        if (counts == null) {
+            counts = 1;
+        }
+        s_clientReferences.put (client, counts);
+    }
+
+    /**
+     * Register a use of the server
+     * 
+     * @param srvr
+     */
+    public static void useServer (EventBus srvr) {
+        Integer counts = s_serverReferences.get (srvr);
+        if (counts == null) {
+            counts = 1;
+        }
+        s_serverReferences.put (srvr, counts);
+    }
+
+    /**
+     * Release a server. If there are no more references left, then stop the server
+     * 
+     * @param srvr
+     */
+    public static void releaseServer (EventBus srvr) {
+        Integer counts = s_serverReferences.get (srvr);
+        if (counts != null) {
+            counts--;
+            if (counts == 0) {
+                try {
+                    srvr.close ();
+                }
+                catch (IOException e) {
+                    ESEBConnector.LOGGER.error (e.getMessage (), e);
+                }
+            }
+            else {
+                s_serverReferences.put (srvr, counts);
+            }
+        }
     }
 
 }

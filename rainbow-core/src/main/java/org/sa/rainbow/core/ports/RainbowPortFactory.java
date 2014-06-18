@@ -3,6 +3,7 @@ package org.sa.rainbow.core.ports;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.Properties;
 
 import org.apache.commons.lang.NotImplementedException;
@@ -15,8 +16,10 @@ import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
+import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.IModelInstanceProvider;
 import org.sa.rainbow.core.models.IModelsManager;
+import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReportingSubscriberCallback;
 import org.sa.rainbow.translator.effectors.IEffector;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort;
@@ -25,8 +28,8 @@ import org.sa.rainbow.translator.probes.IProbe;
 
 public class RainbowPortFactory {
 
-    static Logger                      LOGGER          = Logger.getLogger (RainbowPortFactory.class);
-    static final String                DEFAULT_FACTORY = "org.sa.rainbow.ports.local.LocalRainbowDelegatePortFactory";
+    static Logger                        LOGGER          = Logger.getLogger (RainbowPortFactory.class);
+    static final String                  DEFAULT_FACTORY = "org.sa.rainbow.ports.local.LocalRainbowDelegatePortFactory";
 
     static IRainbowConnectionPortFactory m_instance;
 
@@ -43,8 +46,8 @@ public class RainbowPortFactory {
         if (m_instance == null) {
             String factory = Rainbow.getProperty (RainbowConstants.PROPKEY_PORT_FACTORY);
             if (factory == null) {
-                LOGGER.warn (MessageFormat.format ("No property defined for ''{0}''. Using default ''{1}''.", RainbowConstants.PROPKEY_PORT_FACTORY,
-                        DEFAULT_FACTORY));
+                LOGGER.warn (MessageFormat.format ("No property defined for ''{0}''. Using default ''{1}''.",
+                        RainbowConstants.PROPKEY_PORT_FACTORY, DEFAULT_FACTORY));
                 factory = DEFAULT_FACTORY;
             }
             try {
@@ -110,7 +113,6 @@ public class RainbowPortFactory {
 
     }
 
-
     public static IModelChangeBusPort createChangeBusAnnouncePort () throws RainbowConnectionException {
         return getFactory ().createChangeBusAnnouncePort ();
     }
@@ -125,8 +127,7 @@ public class RainbowPortFactory {
         return getFactory ().createGaugeConfigurationPortClient (gauge);
     }
 
-    public static IGaugeQueryPort createGaugeQueryPortClient (IGaugeIdentifier gauge)
-            throws RainbowConnectionException {
+    public static IGaugeQueryPort createGaugeQueryPortClient (IGaugeIdentifier gauge) throws RainbowConnectionException {
         return getFactory ().createGaugeQueryPortClient (gauge);
     }
 
@@ -206,4 +207,27 @@ public class RainbowPortFactory {
         return getFactory ().createModelDSubscribePort (component);
     }
 
+    public static IModelsManagerPort createModelsManagerProviderPort (IModelsManager modelsManager)
+            throws RainbowConnectionException {
+        return getFactory ().createModelsManagerProviderPort (modelsManager);
+    }
+
+    public static IModelsManagerPort createModelsManagerRequirerPort () throws RainbowConnectionException {
+        if (Rainbow.isMaster ()) {
+            final ModelsManager mm = Rainbow.instance ().getRainbowMaster ().modelsManager ();
+            return new IModelsManagerPort () {
+
+                @Override
+                public Collection<? extends String> getRegisteredModelTypes () {
+                    return mm.getRegisteredModelTypes ();
+                }
+
+                @Override
+                public IModelInstance getModelInstance (String modelType, String modelName) {
+                    return mm.getModelInstance (modelType, modelName);
+                }
+            };
+        }
+        return getFactory ().createModeslManagerRequirerPort ();
+    }
 }

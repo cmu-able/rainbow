@@ -15,13 +15,11 @@ import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 public class ESEBMasterConnectionPort extends AbstractMasterConnectionPort {
     static Logger         LOGGER = Logger.getLogger (ESEBMasterConnectionPort.class);
 
-    private ESEBConnector m_connectionRole;
 
     public ESEBMasterConnectionPort (RainbowMaster master) throws IOException {
-        super (master);
-        m_connectionRole = new ESEBConnector (
-                ESEBProvider.getESEBClientPort (RainbowConstants.PROPKEY_MASTER_CONNECTION_PORT), ChannelT.HEALTH);
-        m_connectionRole.addListener (new ESEBConnector.IESEBListener () {
+        super (master, ESEBProvider.getESEBClientPort (RainbowConstants.PROPKEY_MASTER_CONNECTION_PORT),
+                ChannelT.HEALTH);
+        getConnectionRole().addListener (new ESEBConnector.IESEBListener () {
 
             @Override
             public void receive (RainbowESEBMessage msg) {
@@ -42,12 +40,12 @@ public class ESEBMasterConnectionPort extends AbstractMasterConnectionPort {
                         replyMsg = MessageFormat.format ("Failed to connect with the following exception: {0}",
                                 t.getMessage ());
                     }
-                    RainbowESEBMessage reply = m_connectionRole.createMessage ();
+                    RainbowESEBMessage reply = getConnectionRole().createMessage ();
                     reply.setProperty (ESEBConstants.MSG_REPLY_KEY,
                             (String )msg.getProperty (ESEBConstants.MSG_REPLY_KEY));
                     reply.setProperty (ESEBConstants.MSG_CONNECT_REPLY, replyMsg);
                     reply.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_REPLY);
-                    m_connectionRole.publish (reply);
+                    getConnectionRole().publish (reply);
 //                    }
                 }
                 break;
@@ -77,17 +75,17 @@ public class ESEBMasterConnectionPort extends AbstractMasterConnectionPort {
 
     @Override
     public void disconnectDelegate (String delegateId) {
-        RainbowESEBMessage msg = m_connectionRole.createMessage (/*ChannelT.HEALTH*/);
+        RainbowESEBMessage msg = getConnectionRole().createMessage (/*ChannelT.HEALTH*/);
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_DISCONNECT_DELEGATE);
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, delegateId);
         msg.setProperty (ESEBConstants.TARGET, delegateId);
-        m_connectionRole.publish (msg);
+        getConnectionRole().publish (msg);
     }
 
     @Override
     public void dispose () {
         try {
-            m_connectionRole.close ();
+            getConnectionRole().close ();
         }
         catch (IOException e) {
             LOGGER.warn ("Could not close down the connection port on the master");

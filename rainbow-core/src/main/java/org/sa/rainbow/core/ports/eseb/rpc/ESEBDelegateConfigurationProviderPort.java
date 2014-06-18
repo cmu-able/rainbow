@@ -9,23 +9,21 @@ import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
 import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
 import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
 import org.sa.rainbow.core.ports.eseb.ESEBProvider;
-import org.sa.rainbow.core.ports.eseb.ESEBRPCConnector;
 
 import edu.cmu.cs.able.eseb.participant.ParticipantException;
 
-public class ESEBDelegateConfigurationProviderPort implements IESEBDelegateConfigurationPort {
+public class ESEBDelegateConfigurationProviderPort extends AbstractESEBDisposableRPCPort implements
+        IESEBDelegateConfigurationPort {
 
     private RainbowDelegate m_delegate;
-    private ESEBRPCConnector m_connector;
 
     public ESEBDelegateConfigurationProviderPort (RainbowDelegate delegate) throws IOException, ParticipantException {
+        super (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (), delegate.getId ());
         m_delegate = delegate;
 
         // Port runs on the master
-        m_connector = new ESEBRPCConnector (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (),
-                delegate.getId ());
 
-        m_connector.createRegistryWrapper (IESEBDelegateConfigurationPort.class, this,
+        getConnectionRole().createRegistryWrapper (IESEBDelegateConfigurationPort.class, this,
                 m_delegate.getId () + IESEBDelegateConfigurationPort.class.getSimpleName ());
 
     }

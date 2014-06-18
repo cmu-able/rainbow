@@ -13,17 +13,16 @@ import org.sa.rainbow.core.ports.IModelDSBusSubscriberPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.IESEBListener;
 
-public class ESEBModelDSPublishPort implements IModelDSBusPublisherPort, IModelDSBusSubscriberPort {
+public class ESEBModelDSPublishPort extends AbstractESEBDisposablePort implements IModelDSBusPublisherPort,
+IModelDSBusSubscriberPort {
 
-    private ESEBConnector m_connector;
     private Identifiable  m_publisher;
     private Set<IModelDSBusPublisherPort> m_callbacks = new HashSet<> ();
 
     public ESEBModelDSPublishPort (Identifiable publisher) throws IOException {
+        super (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (), ChannelT.MODEL_DS);
         m_publisher = publisher;
-        m_connector = new ESEBConnector (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (),
-                ChannelT.MODEL_DS);
-        m_connector.addListener (new IESEBListener () {
+        getConnectionRole().addListener (new IESEBListener () {
 
             @Override
             public void receive (RainbowESEBMessage msg) {
@@ -36,13 +35,13 @@ public class ESEBModelDSPublishPort implements IModelDSBusPublisherPort, IModelD
                         OperationResult result = callback.publishOperation (cmd);
                         if (result != null) {
                             try {
-                                RainbowESEBMessage reply = m_connector.createMessage ();
+                                RainbowESEBMessage reply = getConnectionRole().createMessage ();
                                 reply.setProperty (ESEBConstants.MSG_REPLY_KEY,
                                         msg.getProperty (ESEBConstants.MSG_REPLY_KEY));
                                 reply.setProperty (ESEBConstants.MSG_UPDATE_MODEL_REPLY, result);
                                 reply.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_REPLY);
                                 msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, m_publisher.id ());
-                                m_connector.publish (reply);
+                                getConnectionRole().publish (reply);
                             }
                             catch (RainbowException e) {
                                 // TODO: What to do?
@@ -58,7 +57,7 @@ public class ESEBModelDSPublishPort implements IModelDSBusPublisherPort, IModelD
     @Override
     public OperationResult publishOperation (IRainbowOperation cmd) {
         // Doing this the old way because more than one listener may be interested in this message. The first one to reply, wins.
-        RainbowESEBMessage msg = m_connector.createMessage ();
+        RainbowESEBMessage msg = getConnectionRole().createMessage ();
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, m_publisher.id ());
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_UPDATE_MODEL);
         ESEBCommandHelper.command2Message (cmd, msg);
@@ -68,7 +67,7 @@ public class ESEBModelDSPublishPort implements IModelDSBusPublisherPort, IModelD
         result.reply = "Operation timed out";
 
         try {
-            m_connector.blockingSendAndReceive (msg, new IESEBListener () {
+            getConnectionRole().blockingSendAndReceive (msg, new IESEBListener () {
 
                 @Override
                 public void receive (RainbowESEBMessage msg) {

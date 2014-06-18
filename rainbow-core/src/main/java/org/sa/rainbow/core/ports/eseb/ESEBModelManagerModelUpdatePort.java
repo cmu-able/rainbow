@@ -16,21 +16,18 @@ import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.IESEBListener;
 
-public class ESEBModelManagerModelUpdatePort implements ESEBConstants, IModelUSBusPort {
+public class ESEBModelManagerModelUpdatePort extends AbstractESEBDisposablePort implements ESEBConstants,
+        IModelUSBusPort {
 
     private IRainbowReportingPort LOGGER = new ESEBMasterReportingPort ();
 
     private IModelUpdater m_mm;
-    private ESEBConnector m_role;
 
     public ESEBModelManagerModelUpdatePort (IModelUpdater mm) throws IOException {
+        super (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (), ChannelT.MODEL_US);
         m_mm = mm;
         // Runs on master
-
-        String delegateHost = ESEBProvider.getESEBClientHost ();
-        Short port = ESEBProvider.getESEBClientPort ();
-        m_role = new ESEBConnector (delegateHost, port, ChannelT.MODEL_US);
-        m_role.addListener (new IESEBListener() {
+        getConnectionRole().addListener (new IESEBListener() {
 
             @Override
             public void receive (RainbowESEBMessage msg) {

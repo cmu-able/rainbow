@@ -11,21 +11,20 @@ import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
 import org.sa.rainbow.translator.effectors.IEffectorProtocol;
 
-public class ESEBEffectorSideLifecyclePort implements IEffectorLifecycleBusPort {
+public class ESEBEffectorSideLifecyclePort extends AbstractESEBDisposablePort implements IEffectorLifecycleBusPort {
 
-    private ESEBConnector m_connectionRole;
 
     public ESEBEffectorSideLifecyclePort () throws IOException {
-        m_connectionRole = new ESEBConnector (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (),
+        super (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (),
                 ChannelT.HEALTH);
     }
 
     @Override
     public void reportCreated (IEffectorIdentifier effector) {
-        RainbowESEBMessage msg = m_connectionRole.createMessage ();
+        RainbowESEBMessage msg = getConnectionRole().createMessage ();
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, IEffectorProtocol.EFFECTOR_CREATED);
         setCommonEffectorProperties (effector, msg);
-        m_connectionRole.publish (msg);
+        getConnectionRole().publish (msg);
     }
 
     void setCommonEffectorProperties (IEffectorIdentifier effector, RainbowESEBMessage msg) {
@@ -37,15 +36,15 @@ public class ESEBEffectorSideLifecyclePort implements IEffectorLifecycleBusPort 
 
     @Override
     public void reportDeleted (IEffectorIdentifier effector) {
-        RainbowESEBMessage msg = m_connectionRole.createMessage ();
+        RainbowESEBMessage msg = getConnectionRole().createMessage ();
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, IEffectorProtocol.EFFECTOR_DELETED);
         setCommonEffectorProperties (effector, msg);
-        m_connectionRole.publish (msg);
+        getConnectionRole().publish (msg);
     }
 
     @Override
     public void reportExecuted (IEffectorIdentifier effector, Outcome outcome, List<String> args) {
-        RainbowESEBMessage msg = m_connectionRole.createMessage ();
+        RainbowESEBMessage msg = getConnectionRole().createMessage ();
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, IEffectorProtocol.EFFECTOR_EXECUTED);
         setCommonEffectorProperties (effector, msg);
         msg.setProperty (IEffectorProtocol.OUTCOME, outcome.name ());
@@ -53,7 +52,8 @@ public class ESEBEffectorSideLifecyclePort implements IEffectorLifecycleBusPort 
         for (int i = 0; i < args.size (); i++) {
             msg.setProperty (IEffectorProtocol.ARGUMENT + i, args.get (i));
         }
-        m_connectionRole.publish (msg);
+        getConnectionRole().publish (msg);
     }
+
 
 }

@@ -41,6 +41,11 @@ public interface IEffector extends IEffectorIdentifier, IEffectorExecutionPort {
         public void setReportingPort (IRainbowReportingPort port) {
         }
 
+                                              @Override
+                                              public void dispose () {
+
+                                              }
+
     };
 
 

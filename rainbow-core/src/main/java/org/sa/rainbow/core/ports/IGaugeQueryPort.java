@@ -11,7 +11,7 @@ import org.sa.rainbow.core.models.commands.IRainbowOperation;
  * @author Bradley Schmerl: schmerl
  * 
  */
-public interface IGaugeQueryPort {
+public interface IGaugeQueryPort extends IDisposablePort {
     /**
      * Returns the entire state of this Gauge via the supplied lists.
      * 
@@ -37,5 +37,6 @@ public interface IGaugeQueryPort {
      *         command command mapping, including the target and parameters used.
      */
     public Collection<IRainbowOperation> queryAllCommands ();
+
 
 }

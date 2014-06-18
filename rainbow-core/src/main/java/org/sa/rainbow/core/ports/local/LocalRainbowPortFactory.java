@@ -1,5 +1,6 @@
 package org.sa.rainbow.core.ports.local;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -25,6 +26,7 @@ import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
 import org.sa.rainbow.core.ports.IModelDSBusSubscriberPort;
 import org.sa.rainbow.core.ports.IModelUSBusPort;
+import org.sa.rainbow.core.ports.IModelsManagerPort;
 import org.sa.rainbow.core.ports.IProbeConfigurationPort;
 import org.sa.rainbow.core.ports.IProbeLifecyclePort;
 import org.sa.rainbow.core.ports.IProbeReportPort;
@@ -91,7 +93,13 @@ public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
     @Override
     public IMasterConnectionPort createMasterSideConnectionPort (final RainbowMaster rainbowMaster) {
         if (m_masterConnectionPort == null) {
-            m_masterConnectionPort = new LocalMasterConnectionPort (rainbowMaster);
+            try {
+                m_masterConnectionPort = new LocalMasterConnectionPort (rainbowMaster);
+            }
+            catch (IOException e) {
+                // Should never happen
+                e.printStackTrace ();
+            }
         }
         return m_masterConnectionPort;
     }
@@ -100,7 +108,12 @@ public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
     public AbstractDelegateConnectionPort createDelegateSideConnectionPort (RainbowDelegate delegate) {
         LocalDelegateConnectionPort ldcp = m_delegateConnectionPorts.get (delegate.getId ());
         if (ldcp == null) {
-            ldcp = new LocalDelegateConnectionPort (delegate, this);
+            try {
+                ldcp = new LocalDelegateConnectionPort (delegate, this);
+            }
+            catch (IOException e) {
+                // Should never happen
+            }
             ldcp.connect (m_masterConnectionPort);
             m_delegateConnectionPorts.put (delegate.getId (), ldcp);
         }
@@ -220,61 +233,73 @@ public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
 
     @Override
     public IEffectorLifecycleBusPort createEffectorSideLifecyclePort () throws RainbowConnectionException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException ("NYS");
+
     }
 
     @Override
     public IEffectorLifecycleBusPort createSubscriberSideEffectorLifecyclePort (IEffectorLifecycleBusPort delegate)
             throws RainbowConnectionException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException ("NYS");
+
     }
 
     @Override
     public IEffectorExecutionPort createEffectorExecutionPort (IEffector effector) throws RainbowConnectionException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException ("NYS");
+
     }
 
     @Override
     public IEffectorExecutionPort createEffectorExecutionPort (IEffectorIdentifier effector)
             throws RainbowConnectionException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException ("NYS");
     }
 
     @Override
     public IRainbowReportingPort createMasterReportingPort () throws RainbowConnectionException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException ("NYS");
+
     }
 
     @Override
     public IModelChangeBusSubscriberPort createModelChangeBusSubscriptionPort (IModelInstanceProvider provider)
             throws RainbowConnectionException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException ("NYS");
+
     }
 
     @Override
     public IRainbowReportingSubscriberPort createReportingSubscriberPort (IRainbowReportingSubscriberCallback reportT)
             throws RainbowConnectionException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException ("NYS");
+
     }
 
 
     @Override
     public IModelDSBusPublisherPort createModelDSPublishPort (Identifiable id) throws RainbowConnectionException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException ("NYS");
+
     }
 
     @Override
     public IModelDSBusSubscriberPort createModelDSubscribePort (Identifiable id) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException ("NYS");
+
+    }
+
+    @Override
+    public IModelsManagerPort createModelsManagerProviderPort (IModelsManager modelsManager)
+            throws RainbowConnectionException {
+        throw new UnsupportedOperationException ("NYS");
+
+    }
+
+    @Override
+    public IModelsManagerPort createModeslManagerRequirerPort () throws RainbowConnectionException {
+        throw new UnsupportedOperationException ("NYS");
+
     }
 
 }

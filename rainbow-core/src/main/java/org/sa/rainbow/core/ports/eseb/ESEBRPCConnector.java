@@ -2,27 +2,21 @@ package org.sa.rainbow.core.ports.eseb;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.sa.rainbow.core.ports.eseb.converters.CollectionConverter;
-import org.sa.rainbow.core.ports.eseb.converters.CommandRepresentationConverter;
-import org.sa.rainbow.core.ports.eseb.converters.DescriptionAttributesConverter;
-import org.sa.rainbow.core.ports.eseb.converters.GaugeInstanceDescriptionConverter;
-import org.sa.rainbow.core.ports.eseb.converters.GaugeStateConverter;
-import org.sa.rainbow.core.ports.eseb.converters.OperationResultConverter;
-import org.sa.rainbow.core.ports.eseb.converters.OutcomeConverter;
-import org.sa.rainbow.core.ports.eseb.converters.TypedAttributeConverter;
 
 import edu.cmu.cs.able.eseb.bus.EventBus;
 import edu.cmu.cs.able.eseb.conn.BusConnection;
 import edu.cmu.cs.able.eseb.participant.ParticipantException;
 import edu.cmu.cs.able.eseb.rpc.JavaRpcFactory;
 import edu.cmu.cs.able.eseb.rpc.RpcEnvironment;
+import edu.cmu.cs.able.typelib.jconv.TypelibJavaConversionRule;
 import edu.cmu.cs.able.typelib.jconv.TypelibJavaConverter;
 
 public class ESEBRPCConnector {
-    static Logger         LOGGER = Logger.getLogger (ESEBRPCConnector.class);
+    public static Logger  LOGGER = Logger.getLogger (ESEBRPCConnector.class);
     private BusConnection m_client;
     private EventBus      m_srvr;
 
@@ -43,6 +37,7 @@ public class ESEBRPCConnector {
 
     public ESEBRPCConnector (short port, String serverId) throws IOException, ParticipantException {
         m_srvr = ESEBProvider.getBusServer (port);
+        ESEBProvider.useServer (m_srvr);
         setClient ("localhost", port);
         setUpEnvironment (serverId);
 
@@ -66,14 +61,11 @@ public class ESEBRPCConnector {
     private void setupConverters (RPCInfo info) {
         // Share the participant, environment, and then you can share the connection 
         TypelibJavaConverter converter = info.m_env.converter ();
-        converter.add (new CollectionConverter ());
-        converter.add (new TypedAttributeConverter (ESEBProvider.SCOPE));
-        converter.add (new CommandRepresentationConverter (ESEBProvider.SCOPE));
-        converter.add (new GaugeStateConverter (ESEBProvider.SCOPE));
-        converter.add (new DescriptionAttributesConverter (ESEBProvider.SCOPE));
-        converter.add (new GaugeInstanceDescriptionConverter (ESEBProvider.SCOPE));
-        converter.add (new OutcomeConverter (ESEBProvider.SCOPE));
-        converter.add (new OperationResultConverter (ESEBProvider.SCOPE));
+        List<? extends TypelibJavaConversionRule> rules = ESEBProvider.getConversionRules ();
+        for (TypelibJavaConversionRule r : rules) {
+            converter.add (r);
+        }
+
     }
 
     protected void setClient (String remoteHost, short remotePort) {
@@ -81,12 +73,14 @@ public class ESEBRPCConnector {
         if (m_client != null) {
             if (!m_client.host ().equals (remoteHost) || m_client.port () != remotePort) {
                 m_client.stop ();
+                ESEBProvider.releaseClient (m_client);
                 m_client = null;
             }
             else
                 return;
         }
         m_client = ESEBProvider.getBusClient (remoteHost, remotePort);
+        ESEBProvider.useClient (m_client);
     }
 
     public BusConnection getESEBConnection () {
@@ -110,6 +104,15 @@ public class ESEBRPCConnector {
     public <T> void createRegistryWrapper (Class<T> cls, T wrapped, String obj_id) {
         LOGGER.info ("Creating RPC Provider end for " + obj_id + " with participant " + getParticipantId ());
         JavaRpcFactory.create_registry_wrapper (cls, wrapped, getRPCEnvironment (), obj_id);
+    }
+
+    public void close () throws IOException {
+        if (m_client != null) {
+            ESEBProvider.releaseClient (m_client);
+        }
+        if (m_srvr != null) {
+            ESEBProvider.releaseServer (m_srvr);
+        }
     }
 
 }

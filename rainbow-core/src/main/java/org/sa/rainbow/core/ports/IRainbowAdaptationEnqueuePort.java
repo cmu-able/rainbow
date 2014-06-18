@@ -1,8 +1,8 @@
 package org.sa.rainbow.core.ports;
 
 
-public interface IRainbowAdaptationEnqueuePort<S> {
+public interface IRainbowAdaptationEnqueuePort<S> extends IDisposablePort {
 
-    void offer (S selectedStrategy, Object[] args);
+    public void offer (S selectedStrategy, Object[] args);
 
 }

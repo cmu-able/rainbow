@@ -8,7 +8,7 @@ import java.util.Map;
  * @author Bradley Schmerl: schmerl
  * 
  */
-public interface IProbeLifecyclePort {
+public interface IProbeLifecyclePort extends IDisposablePort {
 
     public String PROBE_CREATED      = "probeCreated";
     public String PROBE_ID           = "probeId";
@@ -44,5 +44,6 @@ public interface IProbeLifecyclePort {
     public void reportDeactivated ();
 
     public void reportActivated ();
+
 
 }

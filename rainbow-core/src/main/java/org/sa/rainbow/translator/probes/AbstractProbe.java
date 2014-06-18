@@ -42,6 +42,11 @@ public abstract class AbstractProbe implements IProbe {
         configure (Map<String, Object> configParams) {
             AbstractProbe.this.configure (configParams);
         }
+
+        @Override
+        public void dispose () {
+
+        }
     };
     private IRainbowReportingPort     m_loggingPort;
 
@@ -202,6 +207,11 @@ public abstract class AbstractProbe implements IProbe {
         m_configParams.clear ();
         m_configParams = null;
         m_state = State.NULL;
+
+        m_reportingPort.dispose ();
+        m_configurationPort.dispose ();
+        m_probeManagementPort.dispose ();
+
     }
 
     /* (non-Javadoc)

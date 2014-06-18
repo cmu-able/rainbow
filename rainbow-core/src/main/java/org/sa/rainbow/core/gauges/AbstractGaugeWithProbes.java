@@ -27,8 +27,8 @@ public abstract class AbstractGaugeWithProbes extends AbstractGauge {
 
     public AbstractGaugeWithProbes (String threadName, String id, long beaconPeriod, TypedAttribute gaugeDesc,
             TypedAttribute modelDesc, List<TypedAttributeWithValue> setupParams,
- Map<String, IRainbowOperation> mappings)
-            throws RainbowException {
+            Map<String, IRainbowOperation> mappings)
+                    throws RainbowException {
         super (threadName, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
 
         m_probeBeacon = new Beacon ();
@@ -82,6 +82,10 @@ public abstract class AbstractGaugeWithProbes extends AbstractGauge {
                     public void reportData (IProbeIdentifier probe, String data) {
                         AbstractGaugeWithProbes.this.reportFromProbe (probe, data);
                     }
+
+                    @Override
+                    public void dispose () {
+                    }
                 });
                 m_subscribedToProbePort = true;
             }
@@ -93,6 +97,11 @@ public abstract class AbstractGaugeWithProbes extends AbstractGauge {
         m_probeReportingPort.subscribeToProbe (nameLocPair.firstValue (), nameLocPair.secondValue ());
     }
 
-
+    @Override
+    public void dispose () {
+        super.dispose ();
+        m_probeReportingPort.dispose ();
+        m_probeReportingPort = null;
+    }
 
 }

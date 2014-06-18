@@ -27,6 +27,7 @@ import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
 import org.sa.rainbow.core.ports.IModelDSBusSubscriberPort;
 import org.sa.rainbow.core.ports.IModelUSBusPort;
+import org.sa.rainbow.core.ports.IModelsManagerPort;
 import org.sa.rainbow.core.ports.IProbeConfigurationPort;
 import org.sa.rainbow.core.ports.IProbeLifecyclePort;
 import org.sa.rainbow.core.ports.IProbeReportPort;
@@ -43,6 +44,8 @@ import org.sa.rainbow.core.ports.eseb.rpc.ESEBGaugeConfigurationProviderPort;
 import org.sa.rainbow.core.ports.eseb.rpc.ESEBGaugeConfigurationRequirerPort;
 import org.sa.rainbow.core.ports.eseb.rpc.ESEBGaugeQueryProviderPort;
 import org.sa.rainbow.core.ports.eseb.rpc.ESEBGaugeQueryRequirerPort;
+import org.sa.rainbow.core.ports.eseb.rpc.ESEBModelsManagerProviderPort;
+import org.sa.rainbow.core.ports.eseb.rpc.ESEBModelsManagerRequirerPort;
 import org.sa.rainbow.core.ports.eseb.rpc.ESEBProbeConfigurationProviderPort;
 import org.sa.rainbow.translator.effectors.IEffector;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort;
@@ -370,6 +373,27 @@ public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
         catch (IOException e) {
             throw new RainbowConnectionException ("Failed to connect", e);
 
+        }
+    }
+
+    @Override
+    public IModelsManagerPort createModelsManagerProviderPort (IModelsManager modelsManager)
+            throws RainbowConnectionException {
+        try {
+            return new ESEBModelsManagerProviderPort (modelsManager);
+        }
+        catch (IOException | ParticipantException e) {
+            throw new RainbowConnectionException ("Failed to connect", e);
+        }
+    }
+
+    @Override
+    public IModelsManagerPort createModeslManagerRequirerPort () throws RainbowConnectionException {
+        try {
+            return new ESEBModelsManagerRequirerPort ();
+        }
+        catch (IOException | ParticipantException e) {
+            throw new RainbowConnectionException ("Failed to connect", e);
         }
     }
 

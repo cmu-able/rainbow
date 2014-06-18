@@ -118,4 +118,9 @@ public class GUIGaugeLifecycleListener implements IGaugeLifecycleBusPort {
 
     }
 
+    @Override
+    public void dispose () {
+
+    }
+
 }

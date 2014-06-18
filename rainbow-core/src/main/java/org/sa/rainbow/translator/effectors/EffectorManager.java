@@ -128,7 +128,15 @@ IModelDSBusPublisherPort {
 
     @Override
     public void dispose () {
-        // TODO Auto-generated method stub
+        m_modelDSSubscribePort.dispose ();
+        m_effectorLifecyclePort.dispose ();
+        for (IEffectorExecutionPort p : m_effectorExecutionPorts.values ()) {
+            p.dispose ();
+        }
+        m_effectorExecutionPorts.clear ();
+        m_modelDSSubscribePort = null;
+        m_effectorLifecyclePort = null;
+        m_effectorExecutionPorts = null;
 
     }
 

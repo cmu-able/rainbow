@@ -4,20 +4,19 @@ import java.io.IOException;
 import java.util.List;
 
 import org.sa.rainbow.core.ports.eseb.ESEBProvider;
-import org.sa.rainbow.core.ports.eseb.ESEBRPCConnector;
 import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
 
 import edu.cmu.cs.able.eseb.participant.ParticipantException;
 
-public class ESEBEffectorExecutionRequirerPort implements IESEBEffectorExecutionRemoteInterface {
+public class ESEBEffectorExecutionRequirerPort extends AbstractESEBDisposableRPCPort implements
+IESEBEffectorExecutionRemoteInterface {
 
-    private ESEBRPCConnector m_connectionRole;
     private IESEBEffectorExecutionRemoteInterface m_stub;
 
     public ESEBEffectorExecutionRequirerPort (IEffectorIdentifier effector) throws IOException, ParticipantException {
-        m_connectionRole = new ESEBRPCConnector (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (),
+        super (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (),
                 effector.id ());
-        m_stub = m_connectionRole.createRemoteStub (IESEBEffectorExecutionRemoteInterface.class,
+        m_stub = getConnectionRole().createRemoteStub (IESEBEffectorExecutionRemoteInterface.class,
                 effector.id () + IESEBEffectorExecutionRemoteInterface.class.getSimpleName ());
     }
 

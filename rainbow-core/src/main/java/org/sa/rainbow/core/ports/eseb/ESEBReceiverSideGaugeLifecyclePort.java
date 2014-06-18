@@ -14,10 +14,9 @@ import org.sa.rainbow.core.ports.eseb.ESEBConnector.IESEBListener;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
-public class ESEBReceiverSideGaugeLifecyclePort implements IGaugeLifecycleBusPort {
+public class ESEBReceiverSideGaugeLifecyclePort extends AbstractESEBDisposablePort implements IGaugeLifecycleBusPort {
 
     private IGaugeLifecycleBusPort m_manager;
-    private ESEBConnector                 m_connection;
 
     class MessageGaugeIdentifier implements IGaugeIdentifier {
 
@@ -47,10 +46,9 @@ public class ESEBReceiverSideGaugeLifecyclePort implements IGaugeLifecycleBusPor
     }
 
     public ESEBReceiverSideGaugeLifecyclePort (IGaugeLifecycleBusPort manager) throws IOException {
+        super (ESEBProvider.getESEBClientPort (RainbowConstants.PROPKEY_MASTER_CONNECTION_PORT), ChannelT.HEALTH);
         m_manager = manager;
-        m_connection = new ESEBConnector (
-                ESEBProvider.getESEBClientPort (RainbowConstants.PROPKEY_MASTER_CONNECTION_PORT), ChannelT.HEALTH);
-        m_connection.addListener (new IESEBListener () {
+        getConnectionRole().addListener (new IESEBListener () {
 
             @Override
             public void receive (RainbowESEBMessage msg) {

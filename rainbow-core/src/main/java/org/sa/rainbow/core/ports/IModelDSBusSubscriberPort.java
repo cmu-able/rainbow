@@ -1,6 +1,6 @@
 package org.sa.rainbow.core.ports;
 
-public interface IModelDSBusSubscriberPort {
+public interface IModelDSBusSubscriberPort extends IDisposablePort {
 
     public abstract void unsubscribeToOperations (IModelDSBusPublisherPort callback);
 

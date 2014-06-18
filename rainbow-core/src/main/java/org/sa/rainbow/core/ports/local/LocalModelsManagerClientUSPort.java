@@ -45,4 +45,11 @@ public class LocalModelsManagerClientUSPort implements IModelUSBusPort {
         m_connectedPort = localModelsManagerUSPort;
     }
 
+    @Override
+    public void dispose () {
+        // TODO Auto-generated method stub
+
+    }
+
+
 }

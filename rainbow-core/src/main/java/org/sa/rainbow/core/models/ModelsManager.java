@@ -3,6 +3,7 @@ package org.sa.rainbow.core.models;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -36,6 +37,7 @@ import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.DisconnectedRainbowDelegateConnectionPort;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IModelUSBusPort;
+import org.sa.rainbow.core.ports.IModelsManagerPort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.util.Util;
@@ -60,15 +62,24 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
     /** The bus on which requests to change models are made by analyses and gauges **/
     protected IModelUSBusPort                   m_upstreamBusPort;
 
+    /** Provides remote access to the models **/
+    private IModelsManagerPort                         m_remoteModelManagerPort;
+
     /** Contains all the models -- keyed by Type then name **/
     protected Map<String, Map<String, IModelInstance>> m_modelMap = new HashMap<> ();
 
     /** Contains the queue of commands waiting to be executed on the models **/
     protected BlockingQueue                            commandQ   = new LinkedBlockingQueue<> ();
 
+
     public ModelsManager () {
         super ("Models Manager");
-        m_reportingPort = new DisconnectedRainbowDelegateConnectionPort ();
+        try {
+            m_reportingPort = new DisconnectedRainbowDelegateConnectionPort ();
+        }
+        catch (IOException e) {
+            // Should never happen
+        }
     }
 
 
@@ -161,6 +172,8 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
             m_changeBusPort = RainbowPortFactory.createChangeBusAnnouncePort ();
             // Listen to upstream messages
             m_upstreamBusPort = RainbowPortFactory.createModelsManagerUSPort (this);
+            // Create a remote port for model access
+            m_remoteModelManagerPort = RainbowPortFactory.createModelsManagerProviderPort (this);
         }
         catch (RainbowConnectionException e) {
             LOGGER.error ("Could not connect the appropriate ports", e);
@@ -187,14 +200,14 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
     }
 
     @Override
-    public <T> IModelInstance<T> getModelInstance (String modelType, String modelName) {
+    public synchronized <T> IModelInstance<T> getModelInstance (String modelType, String modelName) {
         Map<String, IModelInstance> models = m_modelMap.get (modelType);
         if (models != null) return models.get (modelName);
         return null;
     }
 
     @Override
-    public <T> IModelInstance<T> getModelInstanceByResource (String resource) {
+    public synchronized <T> IModelInstance<T> getModelInstanceByResource (String resource) {
         Collection<Map<String, IModelInstance>> values = m_modelMap.values ();
         IModelInstance<T> foundModel = null;
         for (Iterator iterator = values.iterator (); iterator.hasNext () && foundModel == null;) {
@@ -211,7 +224,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
     }
 
     @Override
-    public <T> IModelInstance<T> copyInstance (String modelType, String modelName, String copyName)
+    public synchronized <T> IModelInstance<T> copyInstance (String modelType, String modelName, String copyName)
             throws RainbowModelException {
         Map<String, IModelInstance> models = m_modelMap.get (modelType);
         if (models != null) {
@@ -242,7 +255,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
     }
 
     @Override
-    public void registerModel (String modelType, String modelName, IModelInstance<?> model)
+    public synchronized void registerModel (String modelType, String modelName, IModelInstance<?> model)
             throws RainbowModelException {
         Map<String, IModelInstance> models = m_modelMap.get (modelType);
         if (models != null) {
@@ -265,7 +278,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
     }
 
     @Override
-    public void unregisterModel (IModelInstance<?> model) throws RainbowModelException {
+    public synchronized void unregisterModel (IModelInstance<?> model) throws RainbowModelException {
         Map<String, IModelInstance> models = m_modelMap.get (model.getModelType ());
         boolean success = false;
         if (models != null) {
@@ -291,7 +304,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
         }
     }
 
-    private boolean unregisterModel (Map<String, IModelInstance> models, IModelInstance<?> model) {
+    private synchronized boolean unregisterModel (Map<String, IModelInstance> models, IModelInstance<?> model) {
         Iterator<Entry<String, IModelInstance>> it = models.entrySet ().iterator ();
         boolean deleted = false;
         while (it.hasNext () && !deleted) {
@@ -367,7 +380,11 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
 
     @Override
     public void dispose () {
+        m_changeBusPort.dispose ();
+        m_upstreamBusPort.dispose ();
 
+        m_changeBusPort = null;
+        m_upstreamBusPort = null;
     }
 
     @Override
@@ -376,7 +393,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
     }
 
     @Override
-    protected void runAction () {
+    protected synchronized void runAction () {
         Object poll = commandQ.poll ();
         if (poll instanceof IRainbowOperation) {
             try {

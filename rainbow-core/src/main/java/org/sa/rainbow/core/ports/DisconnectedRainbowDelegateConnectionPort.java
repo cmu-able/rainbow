@@ -1,21 +1,31 @@
 package org.sa.rainbow.core.ports;
 
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 
 public class DisconnectedRainbowDelegateConnectionPort extends AbstractDelegateConnectionPort {
 
-    public DisconnectedRainbowDelegateConnectionPort () {
-        super (null);
+    public DisconnectedRainbowDelegateConnectionPort () throws IOException {
+        super (null, null, (short )-1, ChannelT.HEALTH);
     }
 
     Logger                                   LOGGER     = Logger.getLogger (DisconnectedRainbowDelegateConnectionPort.class);
 
-    static DisconnectedRainbowDelegateConnectionPort m_instance = new DisconnectedRainbowDelegateConnectionPort ();
+    static DisconnectedRainbowDelegateConnectionPort m_instance;
+
+    static {
+        try {
+            m_instance = new DisconnectedRainbowDelegateConnectionPort ();
+        }
+        catch (IOException e) {
+        }
+    }
 
     public static AbstractDelegateConnectionPort instance () {
         return m_instance;

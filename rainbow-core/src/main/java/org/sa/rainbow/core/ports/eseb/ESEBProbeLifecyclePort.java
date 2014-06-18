@@ -9,24 +9,22 @@ import org.sa.rainbow.core.ports.IProbeLifecyclePort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.translator.probes.IProbe;
 
-public class ESEBProbeLifecyclePort implements IProbeLifecyclePort {
+public class ESEBProbeLifecyclePort extends AbstractESEBDisposablePort implements IProbeLifecyclePort {
 
     private IProbe m_probe;
-    private ESEBConnector m_connectionRole;
 
     public ESEBProbeLifecyclePort (IProbe probe) throws IOException {
+        super (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (), ChannelT.HEALTH);
         m_probe = probe;
         // All these messages go on the HEALTH channel. Runs on master
-        m_connectionRole = new ESEBConnector (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (),
-                ChannelT.HEALTH);
     }
 
     @Override
     public void reportCreated () {
-        RainbowESEBMessage msg = m_connectionRole.createMessage (/*ChannelT.HEALTH*/);
+        RainbowESEBMessage msg = getConnectionRole().createMessage (/*ChannelT.HEALTH*/);
         setCommonGaugeProperties (msg);
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, IProbeLifecyclePort.PROBE_CREATED);
-        m_connectionRole.publish (msg);
+        getConnectionRole().publish (msg);
     }
 
     private void setCommonGaugeProperties (RainbowESEBMessage msg) {
@@ -37,15 +35,15 @@ public class ESEBProbeLifecyclePort implements IProbeLifecyclePort {
 
     @Override
     public void reportDeleted () {
-        RainbowESEBMessage msg = m_connectionRole.createMessage ();
+        RainbowESEBMessage msg = getConnectionRole().createMessage ();
         setCommonGaugeProperties (msg);
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, IProbeLifecyclePort.PROBE_DELETED);
-        m_connectionRole.publish (msg);
+        getConnectionRole().publish (msg);
     }
 
     @Override
     public void reportConfigured (Map<String, Object> configParams) {
-        RainbowESEBMessage msg = m_connectionRole.createMessage ();
+        RainbowESEBMessage msg = getConnectionRole().createMessage ();
         setCommonGaugeProperties (msg);
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, IProbeLifecyclePort.PROBE_CONFIGURED);
         int i = 0;
@@ -59,24 +57,24 @@ public class ESEBProbeLifecyclePort implements IProbeLifecyclePort {
                 e1.printStackTrace ();
             }
         }
-        m_connectionRole.publish (msg);
+        getConnectionRole().publish (msg);
     }
 
     @Override
     public void reportDeactivated () {
-        RainbowESEBMessage msg = m_connectionRole.createMessage ();
+        RainbowESEBMessage msg = getConnectionRole().createMessage ();
         setCommonGaugeProperties (msg);
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, IProbeLifecyclePort.PROBE_DEACTIVATED);
-        m_connectionRole.publish (msg);
+        getConnectionRole().publish (msg);
 
     }
 
     @Override
     public void reportActivated () {
-        RainbowESEBMessage msg = m_connectionRole.createMessage ();
+        RainbowESEBMessage msg = getConnectionRole().createMessage ();
         setCommonGaugeProperties (msg);
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, IProbeLifecyclePort.PROBE_ACTIVATED);
-        m_connectionRole.publish (msg);
+        getConnectionRole().publish (msg);
 
     }
 

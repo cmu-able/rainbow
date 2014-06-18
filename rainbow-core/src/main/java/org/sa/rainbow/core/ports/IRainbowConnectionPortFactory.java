@@ -120,7 +120,7 @@ public interface IRainbowConnectionPortFactory {
     public abstract IRainbowReportingPort createMasterReportingPort () throws RainbowConnectionException;
 
     public abstract IModelChangeBusSubscriberPort
-            createModelChangeBusSubscriptionPort (IModelInstanceProvider provider)
+    createModelChangeBusSubscriptionPort (IModelInstanceProvider provider)
             throws RainbowConnectionException;
 
     public abstract IRainbowReportingSubscriberPort
@@ -132,5 +132,10 @@ public interface IRainbowConnectionPortFactory {
 
     public abstract IModelDSBusSubscriberPort createModelDSubscribePort (Identifiable component)
             throws RainbowConnectionException;
+
+    public abstract IModelsManagerPort createModelsManagerProviderPort (IModelsManager modelsManager)
+            throws RainbowConnectionException;
+
+    public abstract IModelsManagerPort createModeslManagerRequirerPort () throws RainbowConnectionException;
 
 }

@@ -101,4 +101,13 @@ public abstract class AbstractEffector implements IEffector {
         m_effectorManagementPort.reportExecuted (this, r, args);
     }
 
+    public void dispose () {
+        m_reportingPort.dispose ();
+        m_effectorManagementPort.dispose ();
+        m_executionPort.dispose ();
+        m_reportingPort = null;
+        m_effectorManagementPort = null;
+        m_executionPort = null;
+    }
+
 }

@@ -12,9 +12,8 @@ import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IModelUSBusPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 
-public class ESEBGaugeModelUSBusPort implements IModelUSBusPort, ESEBConstants {
+public class ESEBGaugeModelUSBusPort extends AbstractESEBDisposablePort implements IModelUSBusPort, ESEBConstants {
 
-    private ESEBConnector m_role;
     private Identifiable  m_client;
 
     public ESEBGaugeModelUSBusPort (Identifiable client) throws IOException {
@@ -23,24 +22,24 @@ public class ESEBGaugeModelUSBusPort implements IModelUSBusPort, ESEBConstants {
     }
 
     public ESEBGaugeModelUSBusPort (Identifiable client, String host, short port) throws IOException {
+        super (host, port, ChannelT.MODEL_US);
         m_client = client;
-        m_role = new ESEBConnector (host, port, ChannelT.MODEL_US);
         // Note, there is no communication from the model US bus to the gauges, so there is no need for a listener    
     }
 
     @Override
     public void updateModel (IRainbowOperation command) {
-        RainbowESEBMessage msg = m_role.createMessage (/*ChannelT.MODEL_US*/);
+        RainbowESEBMessage msg = getConnectionRole().createMessage (/*ChannelT.MODEL_US*/);
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, m_client.id ());
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_UPDATE_MODEL);
         ESEBCommandHelper.command2Message (command, msg);
-        m_role.publish (msg);
+        getConnectionRole().publish (msg);
 
     }
 
     @Override
     public void updateModel (List<IRainbowOperation> commands, boolean transaction) {
-        RainbowESEBMessage msg = m_role.createMessage ();
+        RainbowESEBMessage msg = getConnectionRole().createMessage ();
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, m_client.id ());
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_UPDATE_MODEL + "_multi");
         for (int i = 0; i < commands.size (); i++) {
@@ -51,7 +50,7 @@ public class ESEBGaugeModelUSBusPort implements IModelUSBusPort, ESEBConstants {
         }
         catch (RainbowException e) {
         }
-        m_role.publish (msg);
+        getConnectionRole().publish (msg);
 
     }
 

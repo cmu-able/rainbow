@@ -536,4 +536,10 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
 
     }
 
+    @Override
+    public void dispose () {
+        // TODO Auto-generated method stub
+
+    }
+
 }

@@ -527,8 +527,12 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
         for (Entry<String, IDelegateManagementPort> entry : m_delegates.entrySet ()) {
             disconnectDelegate (entry.getKey ());
             entry.getValue ().terminateDelegate ();
+            entry.getValue ().dispose ();
         }
         m_delegateConnection.dispose ();
+
+        m_reportingPort.dispose ();
+        // TODO: Terminate threads
 //        try {
 //            Thread.sleep (4000);
 //        }

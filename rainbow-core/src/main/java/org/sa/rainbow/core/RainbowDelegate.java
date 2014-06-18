@@ -152,6 +152,10 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
 
     @Override
     public void dispose () {
+
+        m_probeManager.terminate ();
+        m_effectorManager.terminate ();
+
         m_masterPort.dispose ();
         m_masterConnectionPort.dispose ();
     }

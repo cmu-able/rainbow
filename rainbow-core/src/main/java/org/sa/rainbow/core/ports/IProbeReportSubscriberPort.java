@@ -1,6 +1,6 @@
 package org.sa.rainbow.core.ports;
 
-public interface IProbeReportSubscriberPort {
+public interface IProbeReportSubscriberPort extends IDisposablePort {
 
     /**
      * Indicate interest in reports from a particular probe, indicated by type and location. This is cumulative, i.e.,
@@ -26,5 +26,6 @@ public interface IProbeReportSubscriberPort {
      *            be subscribed to. If this value is null, then probe types from all locations will be unsubscribed.
      */
     public abstract void unsubscribeToProbe (String probeType, String location);
+
 
 }

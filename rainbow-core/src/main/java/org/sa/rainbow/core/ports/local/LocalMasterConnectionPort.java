@@ -1,5 +1,7 @@
 package org.sa.rainbow.core.ports.local;
 
+import java.io.IOException;
+
 import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.ports.AbstractMasterConnectionPort;
 
@@ -7,8 +9,8 @@ final class LocalMasterConnectionPort extends AbstractMasterConnectionPort {
 
     private LocalDelegateConnectionPort m_connectedPort;
 
-    LocalMasterConnectionPort (RainbowMaster rainbowMaster) {
-        super (rainbowMaster);
+    LocalMasterConnectionPort (RainbowMaster rainbowMaster) throws IOException {
+        super (rainbowMaster, (short )-1, null);
     }
 
     @Override

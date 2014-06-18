@@ -92,6 +92,7 @@ public class ESEBConnector {
         this.m_channel = channel;
         // Create the server on this port
         m_srvr = ESEBProvider.getBusServer (port);
+        ESEBProvider.useServer (m_srvr);
         // Create a local client
         setClient ("localhost", port);
     }
@@ -107,6 +108,7 @@ public class ESEBConnector {
         if (m_client != null) {
             if (!m_client.host ().equals (remoteHost) || m_client.port () != remotePort) {
                 m_client.stop ();
+                ESEBProvider.releaseClient (m_client);
                 m_client = null;
             }
             else
@@ -114,6 +116,8 @@ public class ESEBConnector {
         }
 
         m_client = ESEBProvider.getBusClient (remoteHost, remotePort);
+        // Create a reference to the client
+        ESEBProvider.useClient (m_client);
     }
 
     /**
@@ -285,10 +289,10 @@ public class ESEBConnector {
 
     public void close () throws IOException {
         if (m_client != null) {
-            m_client.close ();
+            ESEBProvider.releaseClient (m_client);
         }
         if (m_srvr != null) {
-            m_srvr.close ();
+            ESEBProvider.releaseServer (m_srvr);
         }
     }
 

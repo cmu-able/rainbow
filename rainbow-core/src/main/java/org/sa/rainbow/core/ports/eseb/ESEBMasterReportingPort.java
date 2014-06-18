@@ -8,18 +8,18 @@ import java.text.MessageFormat;
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.error.RainbowAbortException;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.util.Util;
 
-public class ESEBMasterReportingPort implements IRainbowReportingPort {
+public class ESEBMasterReportingPort extends AbstractESEBDisposablePort implements IRainbowReportingPort {
     Logger                LOGGER = Logger.getLogger (this.getClass ());
 
-    private ESEBConnector m_connectionRole;
 
     public ESEBMasterReportingPort () throws IOException {
-        m_connectionRole = new ESEBConnector (
+        super (
                 ESEBProvider.getESEBClientPort (RainbowConstants.PROPKEY_MASTER_CONNECTION_PORT), ChannelT.HEALTH);
     }
 
@@ -114,7 +114,8 @@ public class ESEBMasterReportingPort implements IRainbowReportingPort {
     public void report (ReportType type, RainbowComponentT compT, String msg, String additionalInfo) {
         LOGGER.log (Util.reportTypeToPriority (type), compT.name () + ": " + msg);
         LOGGER.info (additionalInfo);
-        RainbowESEBMessage esebMsg = m_connectionRole.createMessage ();
+        if (getConnectionRole() == null) throw new RainbowAbortException ("The port has no connection");
+        RainbowESEBMessage esebMsg = getConnectionRole().createMessage ();
         esebMsg.setProperty (ESEBConstants.MSG_CHANNEL_KEY, ChannelT.UIREPORT.name ());
         esebMsg.setProperty (ESEBConstants.COMPONENT_TYPE_KEY, compT.name ());
         esebMsg.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_UI_REPORT);
@@ -124,7 +125,7 @@ public class ESEBMasterReportingPort implements IRainbowReportingPort {
         if (additionalInfo != null) {
             esebMsg.setProperty (ESEBConstants.REPORT_MSG_ADDITIONAL_INFO, additionalInfo);
         }
-        m_connectionRole.publish (esebMsg);
+        getConnectionRole().publish (esebMsg);
 
     }
 

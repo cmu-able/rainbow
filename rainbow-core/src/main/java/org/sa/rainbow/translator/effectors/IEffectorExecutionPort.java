@@ -2,7 +2,9 @@ package org.sa.rainbow.translator.effectors;
 
 import java.util.List;
 
-public interface IEffectorExecutionPort {
+import org.sa.rainbow.core.ports.IDisposablePort;
+
+public interface IEffectorExecutionPort extends IDisposablePort {
     public static enum Outcome {
         UNKNOWN, CONFOUNDED, FAILURE, SUCCESS, TIMEOUT
     };

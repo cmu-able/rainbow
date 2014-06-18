@@ -43,4 +43,10 @@ public class LocalModelsManagerUSPort implements IModelUSBusPort {
         return m_modelsManager.getModelInstance (modelType, modelName);
     }
 
+    @Override
+    public void dispose () {
+        // TODO Auto-generated method stub
+
+    }
+
 }

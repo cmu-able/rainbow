@@ -96,4 +96,10 @@ public class GUIEffectorLifecycleListener implements IEffectorLifecycleBusPort {
         info.add (0, ei);
     }
 
+    @Override
+    public void dispose () {
+        // TODO Auto-generated method stub
+
+    }
+
 }

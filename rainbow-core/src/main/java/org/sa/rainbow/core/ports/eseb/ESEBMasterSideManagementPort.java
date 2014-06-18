@@ -16,19 +16,15 @@ import org.sa.rainbow.core.ports.eseb.ESEBConnector.IESEBListener;
 public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort implements ESEBManagementPortConstants {
     static Logger         LOGGER = Logger.getLogger (ESEBMasterSideManagementPort.class);
 
-    private ESEBConnector m_role;
-
 
     public ESEBMasterSideManagementPort (RainbowMaster master, String delegateID, Properties connectionProperties) throws IOException {
-        super (master, delegateID);
         // Runs on delegate
-        String delegateHost = connectionProperties.getProperty (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_HOST,
-                Rainbow.getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION));
-        String delegatePort = connectionProperties.getProperty (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_PORT,
-                Rainbow.getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION_PORT, "1234"));
-        Short port = Short.valueOf (delegatePort);
-        m_role = new ESEBConnector(delegateHost, port, ChannelT.HEALTH);
-        m_role.addListener (new IESEBListener () {
+        super (master, delegateID, connectionProperties.getProperty (
+                ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_HOST,
+                Rainbow.getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION)), Short.valueOf (connectionProperties
+                .getProperty (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_PORT,
+                        Rainbow.getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION_PORT, "1234"))), ChannelT.HEALTH);
+        getConnectionRole().addListener (new IESEBListener () {
 
             @Override
             public void receive (RainbowESEBMessage msg) {
@@ -53,12 +49,12 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
 
     @Override
     public void sendConfigurationInformation (Properties configuration) {
-        RainbowESEBMessage msg = m_role.createMessage (/*ChannelT.HEALTH*/);
+        RainbowESEBMessage msg = getConnectionRole().createMessage (/*ChannelT.HEALTH*/);
         msg.fillProperties (configuration);
         // No response is expected from the client, so don't do any waiting, just send
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, SEND_CONFIGURATION_INFORMATION);
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
-        m_role.publish (msg);
+        getConnectionRole().publish (msg);
     }
 
 
@@ -74,13 +70,13 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
 
     @Override
     public boolean startDelegate () throws IllegalStateException {
-        RainbowESEBMessage msg = m_role.createMessage (/*ChannelT.HEALTH*/);
+        RainbowESEBMessage msg = getConnectionRole().createMessage (/*ChannelT.HEALTH*/);
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, START_DELEGATE);
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
 
         try {
             BooleanReply reply = new BooleanReply ();
-            m_role.blockingSendAndReceive (msg, reply, 10000);
+            getConnectionRole().blockingSendAndReceive (msg, reply, 10000);
             return reply.m_reply;
         }
         catch (RainbowConnectionException e) {
@@ -91,13 +87,13 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
 
     @Override
     public boolean pauseDelegate () throws IllegalStateException {
-        RainbowESEBMessage msg = m_role.createMessage (/*ChannelT.HEALTH*/);
+        RainbowESEBMessage msg = getConnectionRole().createMessage (/*ChannelT.HEALTH*/);
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, PAUSE_DELEGATE);
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
 
         try {
             BooleanReply reply = new BooleanReply ();
-            m_role.blockingSendAndReceive (msg, reply, 10000);
+            getConnectionRole().blockingSendAndReceive (msg, reply, 10000);
             return reply.m_reply;
         }
         catch (RainbowConnectionException e) {
@@ -108,19 +104,19 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
 
     @Override
     public boolean terminateDelegate () throws IllegalStateException {
-        RainbowESEBMessage msg = m_role.createMessage (/*ChannelT.HEALTH*/);
+        RainbowESEBMessage msg = getConnectionRole().createMessage (/*ChannelT.HEALTH*/);
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, TERMINATE_DELEGATE);
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
 
         BooleanReply reply = new BooleanReply ();
-        m_role.sendAndReceive (msg, reply);
+        getConnectionRole().sendAndReceive (msg, reply);
         return reply.m_reply;
     }
 
     @Override
     public void dispose () {
         try {
-            m_role.close ();
+            getConnectionRole().close ();
         }
         catch (IOException e) {
             LOGGER.warn (MessageFormat.format ("Could not close the deployment port on the master for {0}",
@@ -130,18 +126,18 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
 
     @Override
     public void startProbes () throws IllegalStateException {
-        RainbowESEBMessage msg = m_role.createMessage ();
+        RainbowESEBMessage msg = getConnectionRole().createMessage ();
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, START_PROBES);
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
-        m_role.publish (msg);
+        getConnectionRole().publish (msg);
     }
 
     @Override
     public void killProbes () throws IllegalStateException {
-        RainbowESEBMessage msg = m_role.createMessage ();
+        RainbowESEBMessage msg = getConnectionRole().createMessage ();
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, KILL_PROBES);
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, getDelegateId ());
-        m_role.publish (msg);
+        getConnectionRole().publish (msg);
     }
 
 }

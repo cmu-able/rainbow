@@ -9,7 +9,7 @@ import java.util.Properties;
  * @author Bradley Schmerl: schmerl
  * 
  */
-public interface IDelegateManagementPort {
+public interface IDelegateManagementPort extends IDisposablePort {
     // identification information
 
     /**
@@ -72,11 +72,6 @@ public interface IDelegateManagementPort {
      * @throws IllegalStateException
      */
     public boolean terminateDelegate () throws IllegalStateException;
-
-    /**
-     * Should be called when this port is no longer required. Implementors should dispose of all resources.
-     */
-    public void dispose ();
 
     /**
      * Sends a signal to the delegates to start probes
