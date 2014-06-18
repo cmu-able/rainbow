@@ -21,10 +21,12 @@ import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowChangeBusSubscription;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowModelChangeCallback;
+import org.sa.rainbow.core.ports.IModelsManagerPort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
@@ -88,6 +90,8 @@ IRainbowModelChangeCallback<IAcmeSystem> {
 
     private Set<IArchEvaluation>                   m_evaluations;
 
+    private IModelsManagerPort                     m_modelsManagerPort;
+
     /**
      * Default Constructor.
      */
@@ -119,6 +123,7 @@ IRainbowModelChangeCallback<IAcmeSystem> {
     private void initializeConnections () throws RainbowConnectionException {
         m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort (Rainbow.instance ()
                 .getRainbowMaster ().modelsManager ());
+        m_modelsManagerPort = RainbowPortFactory.createModelsManagerRequirerPort ();
     }
 
     private void installEvaluations () {
@@ -149,6 +154,8 @@ IRainbowModelChangeCallback<IAcmeSystem> {
      */
     @Override
     public void dispose () {
+        m_modelChangePort.dispose ();
+        m_reportingPort.dispose ();
     }
 
     /* (non-Javadoc)
@@ -234,7 +241,8 @@ IRainbowModelChangeCallback<IAcmeSystem> {
  */
 
     @Override
-    public void onEvent (IModelInstance<IAcmeSystem> model, IRainbowMessage message) {
+    public void onEvent (ModelReference ref, IRainbowMessage message) {
+        IModelInstance model = m_modelsManagerPort.getModelInstance (ref.getModelType (), ref.getModelName ());
         if (model instanceof AcmeModelInstance) {
             m_modelCheckQ.offer ((AcmeModelInstance )model);
         }
