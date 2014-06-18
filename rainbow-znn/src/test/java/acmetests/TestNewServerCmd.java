@@ -47,6 +47,12 @@ public class TestNewServerCmd extends DefaultTCase {
                 // TODO Auto-generated method stub
 
             }
+
+            @Override
+            public void dispose () {
+                // TODO Auto-generated method stub
+
+            }
         };
         List<? extends IRainbowMessage> generatedEvents = cns.execute (znn, announcePort);
         assertTrue (cns.canExecute ());

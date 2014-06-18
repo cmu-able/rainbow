@@ -65,9 +65,11 @@ public class AuthenticationProbe extends AbstractRunnableProbe {
                         if (filename.equals (filePath)) {
                             if (kind == ENTRY_DELETE) {
                                 reportData ("off");
+
                             }
                             else {
                                 reportData ("on");
+
                             }
                         }
                     }

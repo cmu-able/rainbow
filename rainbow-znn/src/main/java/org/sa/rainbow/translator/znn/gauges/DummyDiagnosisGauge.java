@@ -20,26 +20,32 @@ import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.gauges.RegularPatternGauge;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.IModelInstanceProvider;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowChangeBusSubscription;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowModelChangeCallback;
+import org.sa.rainbow.core.ports.IModelsManagerPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
 public class DummyDiagnosisGauge extends RegularPatternGauge {
 
+    IModelsManagerPort m_modelPort;
+
     private final class CaptchaWatcher implements IRainbowModelChangeCallback {
         @Override
-        public void onEvent (IModelInstance model, IRainbowMessage message) {
+        public void onEvent (ModelReference mr, IRainbowMessage message) {
             Object property = message.getProperty (IModelChangeBusPort.PARAMETER_PROP + "0");
             Object target = message.getProperty (IModelChangeBusPort.TARGET_PROP);
             if (target instanceof String && property instanceof String) {
                 Boolean captchaEnabled = Boolean.valueOf ((String )property);
-                IAcmeSystem system = (IAcmeSystem )model.getModelInstance ();
+                IModelInstance<IAcmeSystem> model = m_modelPort.<IAcmeSystem> getModelInstance (mr.getModelType (),
+                        mr.getModelName ());
+                IAcmeSystem system = model.getModelInstance ();
                 Set<? extends IAcmeComponent> components = system.getComponents ();
                 Set<IAcmeComponent> maliciousComponents = new HashSet<> ();
                 for (IAcmeComponent c : components) {
@@ -92,6 +98,8 @@ public class DummyDiagnosisGauge extends RegularPatternGauge {
         addPattern (DEFAULT, Pattern.compile ("([\\w_]+)=([\\d]+(\\.[\\d]*))"));
         addPattern (AUTHENTICATION_ON, Pattern.compile ("^on$"));
         addPattern (AUTHENTICATION_OFF, Pattern.compile ("^off$"));
+
+        m_modelPort = RainbowPortFactory.createModelsManagerRequirerPort ();
 
         m_modelChanges = RainbowPortFactory.createModelChangeBusSubscriptionPort (new IModelInstanceProvider () {
 

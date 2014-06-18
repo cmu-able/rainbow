@@ -99,4 +99,22 @@ public class BlackholeGauge extends RegularPatternGauge {
     }
 
 
+//    // This is solely for testing remote model access
+//    @Override
+//    protected void runAction () {
+//        if (m_modelPort == null) {
+//            try {
+//                m_modelPort = RainbowPortFactory.createModelsManagerRequirerPort ();
+//                IModelInstance<IAcmeSystem> inst = m_modelPort.<IAcmeSystem> getModelInstance ("Acme", "ZNewsSys");
+//                IAcmeSystem sys = inst.getModelInstance ();
+//                System.out.println ();
+//            }
+//            catch (RainbowConnectionException e) {
+//                // TODO Auto-generated catch block
+//                e.printStackTrace ();
+//            }
+//        }
+//        super.runAction ();
+//    }
+
 }
