@@ -12,10 +12,12 @@ import org.sa.rainbow.core.analysis.IRainbowAnalysis;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowChangeBusSubscription;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowModelChangeCallback;
+import org.sa.rainbow.core.ports.IModelsManagerPort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.util.TypedAttribute;
@@ -57,6 +59,8 @@ IRainbowModelChangeCallback<Map<String, ExecutionHistoryData>> {
     private String                        m_filename;
 
     private int                           m_updateCnt                = 0;
+
+    private IModelsManagerPort            m_modelsManagerPort;
 
     public SaveTacticExecutionHistoryMonitor (TypedAttribute modelDesc, String filename) {
         m_modelDesc = modelDesc;
@@ -146,11 +150,13 @@ IRainbowModelChangeCallback<Map<String, ExecutionHistoryData>> {
         m_reportingPort = port;
         m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort (Rainbow.instance ()
                 .getRainbowMaster ().modelsManager ());
+        m_modelsManagerPort = RainbowPortFactory.createModelsManagerRequirerPort ();
     }
 
     @Override
-    public void onEvent (IModelInstance<Map<String,ExecutionHistoryData>> model, IRainbowMessage message) {
+    public void onEvent (ModelReference mr, IRainbowMessage message) {
         if (++m_updateCnt % 10 == 0) {
+            IModelInstance model = m_modelsManagerPort.getModelInstance (mr.getModelType (), mr.getModelName ());
             saveExecutionHistoryToFile (model);
         }
     }

@@ -24,13 +24,14 @@ import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.health.IRainbowHealthProtocol;
-import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.UtilityPreferenceDescription;
 import org.sa.rainbow.core.models.UtilityPreferenceDescription.UtilityAttributes;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowChangeBusSubscription;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowModelChangeCallback;
+import org.sa.rainbow.core.ports.IModelsManagerPort;
 import org.sa.rainbow.core.ports.IRainbowAdaptationEnqueuePort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
@@ -93,6 +94,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
     private Map<String, Beacon>                     m_failTimer                = null;
     private IRainbowAdaptationEnqueuePort<Strategy> m_enqueuePort              = null;
     private IModelChangeBusSubscriberPort           m_modelChangePort          = null;
+    private IModelsManagerPort                      m_modelsManagerPort        = null;
     private String                                  m_modelRef;
     private IRainbowChangeBusSubscription           m_modelTypecheckingChanged = new IRainbowChangeBusSubscription () {
 
@@ -166,6 +168,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
         m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort (Rainbow.instance ()
                 .getRainbowMaster ().modelsManager ());
         m_modelChangePort.subscribe (m_modelTypecheckingChanged, this);
+        m_modelsManagerPort = RainbowPortFactory.createModelsManagerRequirerPort ();
     }
 
     @Override
@@ -195,6 +198,9 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
             m_historyCnt = null;
             m_failTimer = null;
         }
+
+        m_enqueuePort.dispose ();
+        m_modelChangePort.dispose ();
 
         // null-out data members
         m_repertoire = null;
@@ -783,7 +789,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
     }
 
     @Override
-    public void onEvent (IModelInstance model, IRainbowMessage message) {
+    public void onEvent (ModelReference mr, IRainbowMessage message) {
         // Because of the subscription, the model should be the model ref so no need to check
         String typecheckSt = (String )message.getProperty (IModelChangeBusPort.PARAMETER_PROP + "0");
         Boolean typechecks = Boolean.valueOf (typecheckSt);

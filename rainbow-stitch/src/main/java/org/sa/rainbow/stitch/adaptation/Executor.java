@@ -85,6 +85,9 @@ public class Executor extends AbstractRainbowRunnable implements IAdaptationExec
         m_queue.clear();
         m_args.clear();
 
+        m_modelDSPort.dispose ();
+        m_reportingPort.dispose ();
+
         // null-out data members
         m_queue = null;
         m_args = null;
