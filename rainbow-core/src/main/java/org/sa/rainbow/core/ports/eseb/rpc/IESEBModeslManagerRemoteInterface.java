@@ -10,6 +10,9 @@ import edu.cmu.cs.able.eseb.rpc.ReturnTypeMapping;
 
 public interface IESEBModeslManagerRemoteInterface extends IModelsManagerPort {
 
+    static final String DEFAULT_ESEB_RPCNAME  = "rainbow_models_manager";
+    static final String MODEL_CONVERTER_CLASS = "org.sa.rainbow.model.converter.eseb.class";
+
     @Override
     @ReturnTypeMapping ("set<string>")
     public Collection<? extends String> getRegisteredModelTypes ();

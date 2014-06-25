@@ -17,9 +17,9 @@ IESEBModeslManagerRemoteInterface {
     private IModelsManager m_modelsManager;
 
     public ESEBModelsManagerProviderPort (IModelsManager mm) throws IOException, ParticipantException {
-        super (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (), "rainbow_models_manager");
+        super (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (), DEFAULT_ESEB_RPCNAME);
         m_modelsManager = mm;
-        setupModelConverters ("org.sa.rainbow.model.converter.eseb.class");
+        setupModelConverters (MODEL_CONVERTER_CLASS);
         getConnectionRole ().createRegistryWrapper (IESEBModeslManagerRemoteInterface.class, this,
                 IESEBModeslManagerRemoteInterface.class.getSimpleName ());
 

@@ -14,8 +14,12 @@ IESEBModeslManagerRemoteInterface {
     private IESEBModeslManagerRemoteInterface m_stub;
 
     public ESEBModelsManagerRequirerPort () throws IOException, ParticipantException {
-        super (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (), "rainbow_models_manager");
-        setupModelConverters ("org.sa.rainbow.model.converter.eseb.class");
+        this (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort ());
+    }
+
+    public ESEBModelsManagerRequirerPort (String host, short port) throws IOException, ParticipantException {
+        super (host, port, DEFAULT_ESEB_RPCNAME);
+        setupModelConverters (MODEL_CONVERTER_CLASS);
         m_stub = getConnectionRole ().createRemoteStub (IESEBModeslManagerRemoteInterface.class,
                 IESEBModeslManagerRemoteInterface.class.getSimpleName ());
     }
