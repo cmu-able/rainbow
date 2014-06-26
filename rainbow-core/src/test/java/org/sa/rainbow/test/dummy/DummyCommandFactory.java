@@ -11,6 +11,7 @@ import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd;
+import org.sa.rainbow.core.models.commands.AbstractSaveModelCmd;
 import org.sa.rainbow.core.models.commands.IRainbowModelOperation;
 import org.sa.rainbow.core.models.commands.ModelCommandFactory;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
@@ -103,6 +104,7 @@ public class DummyCommandFactory extends ModelCommandFactory<Integer> {
                         // TODO Auto-generated method stub
                         return null;
                     }
+
                 };
             }
 
@@ -202,6 +204,12 @@ public class DummyCommandFactory extends ModelCommandFactory<Integer> {
             }
 
         };
+    }
+
+    @Override
+    public AbstractSaveModelCmd<Integer> saveCommand (String location) throws RainbowModelException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

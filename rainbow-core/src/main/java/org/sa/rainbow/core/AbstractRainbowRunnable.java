@@ -141,8 +141,8 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
      * Stops the runnable thread and causes exit from fun.
      */
     protected void doTerminate () {
+        log (m_name + " terminated.");
         dispose();
-        log(m_name + " terminated.");
         finalTerminate();
     }
 

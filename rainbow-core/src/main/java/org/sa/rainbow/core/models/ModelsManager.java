@@ -32,6 +32,7 @@ import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd;
+import org.sa.rainbow.core.models.commands.AbstractSaveModelCmd;
 import org.sa.rainbow.core.models.commands.IRainbowModelOperation;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.DisconnectedRainbowDelegateConnectionPort;
@@ -47,8 +48,6 @@ import org.sa.rainbow.util.Util;
  * reference to the model update US bus, as a subscriber to events to get information - a reference to the model change
  * bus, as a publisher - all executed commands should publish events to this bus
  * 
- * 
- * Question: Should this be a thread?
  * 
  * @author Bradley Schmerl: schmerl
  * 
@@ -71,6 +70,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
     /** Contains the queue of commands waiting to be executed on the models **/
     protected BlockingQueue                            commandQ   = new LinkedBlockingQueue<> ();
 
+    protected Map<ModelReference, File>                m_modelsToSave = new HashMap<> ();
 
     public ModelsManager () {
         super ("Models Manager");
@@ -98,7 +98,13 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                     RainbowConstants.PROPKEY_MODEL_LOAD_CLASS_PREFIX + modelNum);
             String modelName = Rainbow.getProperty (RainbowConstants.PROPKEY_MODEL_NAME_PREFIX + modelNum);
             String path = Rainbow.getProperty (RainbowConstants.PROPKEY_MODEL_PATH_PREFIX + modelNum);
-            File modelPath = Util.getRelativeToPath (Rainbow.instance ().getTargetPath (), path);
+            String saveOnClose = Rainbow.getProperty (RainbowConstants.PROPKEY_MODEL_SAVE_PREFIX + modelNum);
+            // It is possible for a model not to be sourced from a file, in which case
+            // the load command may just create and register the model in the manager
+            File modelPath = null;
+            if (path != null) {
+                modelPath = Util.getRelativeToPath (Rainbow.instance ().getTargetPath (), path);
+            }
             try {
                 // The factory class should provide a static method for generating a load command that can be
                 // called to load a model into the model manager
@@ -114,7 +120,8 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                                     "The class {0} does not implement a static method loadCommand, used to generate modelInstances",
                                     method.getDeclaringClass ().getCanonicalName ()));
                 AbstractLoadModelCmd load = (AbstractLoadModelCmd )method.invoke (null, this, modelName,
-                        modelPath == null ? null : new FileInputStream (modelPath), modelPath.getAbsolutePath ());
+                        modelPath == null ? null : new FileInputStream (modelPath), modelPath == null ? null
+                                : modelPath.getAbsolutePath ());
                 List<? extends IRainbowMessage> events = load.execute (null, m_changeBusPort);
                 // Announce the loading on the change bus.
                 // Q: should this be done in clients or in the commands themselves?
@@ -122,6 +129,17 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                     m_changeBusPort.announce (events);
                 }
                 IModelInstance instance = (IModelInstance )load.getResult ();
+                boolean toSave = saveOnClose == null ? false : Boolean.valueOf (saveOnClose);
+                if (toSave) {
+                    ModelReference ref = new ModelReference (instance.getModelName (), instance.getModelType ());
+                    String saveLocation = Rainbow.getProperty (RainbowConstants.RAINBOW_MODEL_SAVE_LOCATION_PREFIX
+                            + modelNum);
+                    if (saveLocation == null) {
+                        saveLocation = path;
+                    }
+                    File savePath = Util.getRelativeToPath (Rainbow.instance ().getTargetPath (), saveLocation);
+                    m_modelsToSave.put (ref, savePath);
+                }
                 m_reportingPort.info (
                         getComponentType (),
                         "Successfully loaded and registered " + instance.getModelName () + ":"
@@ -380,6 +398,38 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
 
     @Override
     public void dispose () {
+
+        for (Entry<ModelReference, File> modelEntries : m_modelsToSave.entrySet ()) {
+            ModelReference ref = modelEntries.getKey ();
+            File saveTo = modelEntries.getValue ();
+
+            Map<String, IModelInstance> map = m_modelMap.get (ref.getModelType ());
+            if (map != null) {
+                IModelInstance model = map.get (ref.getModelName ());
+                try {
+                    AbstractSaveModelCmd saveCommand = model.getCommandFactory ().saveCommand (
+                            saveTo.getAbsolutePath ());
+                    saveCommand.execute (model, null);
+                }
+                catch (IllegalStateException | RainbowException e) {
+                    m_reportingPort.error (getComponentType (), "Failed to save " + ref.toString ());
+                }
+            }
+
+        }
+
+        for (Entry<String, Map<String, IModelInstance>> mts : m_modelMap.entrySet ()) {
+            for (Entry<String, IModelInstance> entry : mts.getValue ().entrySet ()) {
+                try {
+                    entry.getValue ().dispose ();
+                }
+                catch (RainbowException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace ();
+                }
+            }
+        }
+
         m_changeBusPort.dispose ();
         m_upstreamBusPort.dispose ();
 

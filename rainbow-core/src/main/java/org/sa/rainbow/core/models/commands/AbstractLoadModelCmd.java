@@ -99,7 +99,10 @@ public abstract class AbstractLoadModelCmd<Type> extends AbstractRainbowModelOpe
             msg.setProperty (IModelChangeBusPort.COMMAND_PROP, getName ());
             msg.setProperty (IModelChangeBusPort.TARGET_PROP, getTarget ());
             for (int i = 0; i < getParameters ().length; i++) {
-                msg.setProperty (IModelChangeBusPort.PARAMETER_PROP + i, getParameters ()[i]);
+                String prop = getParameters ()[i];
+                if (prop != null) {
+                    msg.setProperty (IModelChangeBusPort.PARAMETER_PROP + i, prop);
+                }
             }
             msgs.add (msg);
         }

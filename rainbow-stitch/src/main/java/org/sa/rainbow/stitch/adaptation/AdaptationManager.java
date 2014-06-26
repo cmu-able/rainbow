@@ -25,8 +25,8 @@ import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.health.IRainbowHealthProtocol;
 import org.sa.rainbow.core.models.ModelReference;
+import org.sa.rainbow.core.models.UtilityFunction;
 import org.sa.rainbow.core.models.UtilityPreferenceDescription;
-import org.sa.rainbow.core.models.UtilityPreferenceDescription.UtilityAttributes;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowChangeBusSubscription;
@@ -40,7 +40,6 @@ import org.sa.rainbow.model.acme.AcmeRainbowOperationEvent.CommandEventT;
 import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.core.Tactic;
-import org.sa.rainbow.stitch.core.UtilityFunction;
 import org.sa.rainbow.stitch.error.DummyStitchProblemHandler;
 import org.sa.rainbow.stitch.error.StitchProblem;
 import org.sa.rainbow.stitch.visitor.Stitch;
@@ -125,6 +124,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
             }
         }
     };
+    private UtilityPreferenceDescription            m_utilityModel;
 
     /**
      * Default constructor.
@@ -154,14 +154,6 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
     public void initialize (IRainbowReportingPort port) throws RainbowConnectionException {
         super.initialize (port);
         initConnectors ();
-        UtilityPreferenceDescription preferenceDesc = Rainbow.instance ().getRainbowMaster ().preferenceDesc ();
-        for (String k : preferenceDesc.utilities.keySet ()) {
-            UtilityAttributes ua = preferenceDesc.utilities.get (k);
-            UtilityFunction uf = new UtilityFunction (k, ua.label, ua.mapping, ua.desc, ua.values);
-            m_utils.put (k, uf);
-        }
-        initAdaptationRepertoire ();
-
     }
 
     private void initConnectors () throws RainbowConnectionException {
@@ -174,8 +166,17 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
     @Override
     public void setModelToManage (String modelName, String modelType) {
         m_modelRef = modelName + ":" + modelType;
-        m_model = (AcmeModelInstance )Rainbow.instance ().getRainbowMaster ().modelsManager ()
-                .<IAcmeSystem> getModelInstance (modelType, modelName);
+        m_model = (AcmeModelInstance )m_modelsManagerPort.<IAcmeSystem> getModelInstance (modelType, modelName);
+
+        m_utilityModel = m_modelsManagerPort
+                .<UtilityPreferenceDescription> getModelInstance ("Utility", modelName).getModelInstance ();
+//        for (String k : m_utilityModel.utilities.keySet ()) {
+//            UtilityAttributes ua = m_utilityModel.utilities.get (k);
+//            UtilityFunction uf = new UtilityFunction (k, ua.label, ua.mapping, ua.desc, ua.values);
+//            m_utils.put (k, uf);
+//        }
+        initAdaptationRepertoire ();
+
     }
 
 
@@ -189,6 +190,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
         for (Stitch stitch : m_repertoire) {
             stitch.dispose ();
         }
+        Ohana.instance ().dispose ();
         m_repertoire.clear ();
         m_utils.clear ();
         m_pendingStrategies.clear ();
@@ -199,7 +201,9 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
             m_failTimer = null;
         }
 
-        m_enqueuePort.dispose ();
+        if (m_enqueuePort != null) {
+            m_enqueuePort.dispose ();
+        }
         m_modelChangePort.dispose ();
 
         // null-out data members
@@ -263,7 +267,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
      * @return double the instantaneous utility of current conditions
      */
     public double computeSystemInstantUtility () {
-        Map<String, Double> weights = Rainbow.instance ().getRainbowMaster ().preferenceDesc ().weights.get (Rainbow
+        Map<String, Double> weights = m_utilityModel.weights.get (Rainbow
                 .getProperty (RainbowConstants.PROPKEY_SCENARIO));
         double[] conds = new double[m_utils.size ()];
         int i = 0;
@@ -502,7 +506,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
     }
 
     SortedMap<Double, Strategy> scoreForScenario (String scenario, Map<String, Strategy> subset) {
-        Map<String, Double> weights = Rainbow.instance ().getRainbowMaster ().preferenceDesc ().weights.get (scenario);
+        Map<String, Double> weights = m_utilityModel.weights.get (scenario);
         SortedMap<Double, Strategy> scored = new TreeMap<Double, Strategy> ();
         boolean predictionEnabled = false; //Rainbow.predictionEnabled () && Rainbow.utilityPredictionDuration () > 0;
         double[] conds = null; // store the conditions to output for diagnosis
@@ -650,7 +654,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
 
                         // apply attribute vectors to tactics, if available
                         defineAttributes (stitch,
-                                Rainbow.instance ().getRainbowMaster ().preferenceDesc ().attributeVectors);
+                                m_utilityModel.attributeVectors);
                         m_repertoire.add (stitch);
                         log ("Parsed script " + stitch.path);
                     }

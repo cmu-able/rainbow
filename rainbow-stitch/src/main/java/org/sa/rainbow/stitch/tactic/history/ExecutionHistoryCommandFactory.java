@@ -6,6 +6,8 @@ import java.util.Map;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd;
+import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation;
+import org.sa.rainbow.core.models.commands.AbstractSaveModelCmd;
 import org.sa.rainbow.core.models.commands.IRainbowModelOperation;
 import org.sa.rainbow.core.models.commands.ModelCommandFactory;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData;
@@ -25,7 +27,7 @@ public class ExecutionHistoryCommandFactory extends ModelCommandFactory<Map<Stri
         m_modelInstance = model;
     }
 
-    public TacticDurationCommand recordTacticDurationCmd (String qualifiedName, long dur) {
+    public AbstractRainbowModelOperation<ExecutionHistoryData, Map<String, ExecutionHistoryData>> recordTacticDurationCmd (String qualifiedName, long dur) {
         return new TacticDurationCommand ("recordTacticDuration", m_modelInstance, qualifiedName, Long.toString (dur));
     }
 
@@ -36,6 +38,12 @@ public class ExecutionHistoryCommandFactory extends ModelCommandFactory<Map<Stri
             return new TacticDurationCommand (commandName, m_modelInstance, args[0], args[1]);
         }
         throw new RainbowModelException ("Cannot create a command for the operation: " + commandName);
+    }
+
+    @Override
+    public AbstractSaveModelCmd<Map<String, ExecutionHistoryData>> saveCommand (String location)
+            throws RainbowModelException {
+        return null;
     }
 
 }

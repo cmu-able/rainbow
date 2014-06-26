@@ -16,4 +16,9 @@ public class ModelReference {
     public String getModelType () {
         return m_modelType;
     }
+
+    @Override
+    public String toString () {
+        return getModelName () + ":" + getModelType ();
+    }
 }

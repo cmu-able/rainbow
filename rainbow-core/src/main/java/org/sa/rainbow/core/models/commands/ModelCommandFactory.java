@@ -18,4 +18,6 @@ public abstract class ModelCommandFactory<T> {
             String... args)
                     throws RainbowModelException;
 
+    public abstract AbstractSaveModelCmd<T> saveCommand (String location) throws RainbowModelException;
+
 }

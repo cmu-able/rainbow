@@ -23,6 +23,7 @@ import org.sa.rainbow.core.gauges.GaugeTypeDescription;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.models.DescriptionAttributes;
 import org.sa.rainbow.core.models.EffectorDescription;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.ProbeDescription;
 import org.sa.rainbow.core.models.UtilityPreferenceDescription;
 import org.sa.rainbow.core.models.UtilityPreferenceDescription.UtilityAttributes;
@@ -47,14 +48,21 @@ public abstract class YamlUtil {
      * 
      * @return UtilityPreferenceDescription the data structure of utility definitions.
      */
-    @SuppressWarnings ("unchecked")
-    public static UtilityPreferenceDescription loadUtilityPrefs () {
+//    @SuppressWarnings ("unchecked")
+//    public static UtilityPreferenceDescription loadUtilityPrefs () {
+//        String utilityPath = Rainbow.getProperty (RainbowConstants.PROPKEY_UTILITY_PATH);
+//        return loadUtilityPrefs (utilityPath);
+//    }
+
+    public static UtilityPreferenceDescription loadUtilityPrefs (String utilityPath) {
         UtilityPreferenceDescription prefDesc = new UtilityPreferenceDescription ();
 
         Map<String, Map<String, Map>> utilityDefMap = null;
-        String utilityPath = Rainbow.getProperty (RainbowConstants.PROPKEY_UTILITY_PATH);
         try {
-            File defFile = Util.getRelativeToPath (Rainbow.instance ().getTargetPath (), utilityPath);
+            File defFile = new File (utilityPath);
+            if (!defFile.exists ()) {
+                defFile = Util.getRelativeToPath (Rainbow.instance ().getTargetPath (), utilityPath);
+            }
             Object o = Yaml.load (defFile);
             Util.logger ().trace ("Utiltiy Def Yaml file loaded: " + o.toString ());
             utilityDefMap = (Map )o;
@@ -62,6 +70,13 @@ public abstract class YamlUtil {
         catch (FileNotFoundException e) {
             Util.logger ().error ("Loading Utiltiy Def Yaml file failed!", e);
             utilityDefMap = new HashMap<String, Map<String, Map>> ();
+        }
+        // store associated model
+        Map modelMap = utilityDefMap.get ("model");
+        // this is optional for backward compatibility
+        if (modelMap != null) {
+            ModelReference model = new ModelReference ((String )modelMap.get ("name"), (String )modelMap.get ("type"));
+            prefDesc.associatedModel = model;
         }
 
         // store weights
@@ -97,9 +112,9 @@ public abstract class YamlUtil {
                 ua.mapping = (String )vMap.get ("mapping");
                 ua.desc = (String )vMap.get ("description");
                 ua.values = (Map<Number, Number> )vMap.get ("utility");
-                prefDesc.utilities.put (k, ua);
+                prefDesc.addAttributes (k, ua);
             }
-            Util.logger ().trace (" - Utility functions collected: " + prefDesc.utilities);
+            Util.logger ().trace (" - Utility functions collected: " + prefDesc.getUtilities ());
         }
         else {
             Util.logger ().error (MessageFormat.format (" - No utilities exist in ''{0}''", utilityPath));

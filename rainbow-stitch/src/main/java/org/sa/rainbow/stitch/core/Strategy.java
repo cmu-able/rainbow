@@ -741,6 +741,9 @@ public class Strategy extends ScopedEntity implements IEvaluable {
             break;
         default:  // more than one satisfied
             // randomly pick one
+            // BRS in the new stitch semantics, this needs to change to calculate the 
+            // aggAtt for each matching node, assigning the utility, and picking the one
+            // with the greatest utility, rather than being random
             int rand = new Random().nextInt(matchingNodes.size());
             selected = matchingNodes.get(rand);
             break;

@@ -1,5 +1,7 @@
 package org.sa.rainbow.model.acme;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -72,6 +74,20 @@ public abstract class AcmeModelCommandFactory extends ModelCommandFactory<IAcmeS
         for (Method method : methods) {
             if (method.getName ().equals (commandName + "Cmd"))
                 return (Class<? extends AcmeModelOperation<?>> )method.getReturnType ();
+        }
+        return null;
+    }
+
+    @Override
+    public AcmeSaveModelCommand saveCommand (String location) throws RainbowModelException {
+        try {
+            FileOutputStream stream = new FileOutputStream (location);
+            AcmeSaveModelCommand cmd = new AcmeSaveModelCommand (m_modelInstance.getModelName (), m_modelInstance, stream);
+            return cmd;
+        }
+        catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
         return null;
     }

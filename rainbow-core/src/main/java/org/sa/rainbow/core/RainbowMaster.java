@@ -26,7 +26,6 @@ import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.ProbeDescription;
 import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
-import org.sa.rainbow.core.models.UtilityPreferenceDescription;
 import org.sa.rainbow.core.ports.IDelegateConfigurationPort;
 import org.sa.rainbow.core.ports.IDelegateManagementPort;
 import org.sa.rainbow.core.ports.IMasterCommandPort;
@@ -61,7 +60,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
     private ProbeDescription                 m_probeDesc;
     private EffectorDescription              m_effectorDesc;
     private GaugeDescription                 m_gaugeDesc;
-    private UtilityPreferenceDescription     m_prefDesc;
+//    private UtilityPreferenceDescription     m_prefDesc;
 
     private GaugeManager                     m_gaugeManager;
 
@@ -103,7 +102,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
         probeDesc ();
         effectorDesc ();
         gaugeDesc ();
-        preferenceDesc ();
+//        preferenceDesc ();
     }
 
     private void initializeRainbowComponents () throws RainbowException {
@@ -174,9 +173,9 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
                     String modelReference = Rainbow.getProperty (amModel);
                     if (modelReference != null) {
                         TypedAttribute model = Util.decomposeModelReference (modelReference);
-                        adaptationManager.setModelToManage (model.getName (), model.getType ());
                         m_adaptationManagers.put (modelReference, adaptationManager);
                         adaptationManager.initialize (m_reportingPort);
+                        adaptationManager.setModelToManage (model.getName (), model.getType ());
 
                         adaptationManager.start ();
                     }
@@ -577,13 +576,13 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
         return m_gaugeDesc;
     }
 
-    @Override
-    public UtilityPreferenceDescription preferenceDesc () {
-        if (m_prefDesc == null) {
-            m_prefDesc = YamlUtil.loadUtilityPrefs ();
-        }
-        return m_prefDesc;
-    }
+//    @Override
+//    public UtilityPreferenceDescription preferenceDesc () {
+//        if (m_prefDesc == null) {
+//            m_prefDesc = YamlUtil.loadUtilityPrefs ();
+//        }
+//        return m_prefDesc;
+//    }
 
     public void report (String delegateID, ReportType type, RainbowComponentT compT, String msg) {
         // TODO: Hook up to master interface?

@@ -2,13 +2,17 @@ package org.sa.rainbow.core.models.commands;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 import org.sa.rainbow.core.error.RainbowDelegationException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
+import org.sa.rainbow.core.ports.eseb.ESEBConstants;
 
 public abstract class AbstractRainbowModelOperation<Type, Model> implements IRainbowModelOperation<Type, Model> {
 
@@ -186,6 +190,29 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
 
     protected IModelInstance<Model> getModelContext () {
         return m_modelContext;
+    }
+
+
+    protected List<? extends IRainbowMessage> generateEvents (IRainbowMessageFactory messageFactory, String eventType) {
+        try {
+            IRainbowMessage msg = messageFactory.createMessage ();
+            msg.setProperty (IModelChangeBusPort.EVENT_TYPE_PROP, eventType);
+            msg.setProperty (IModelChangeBusPort.ID_PROP, UUID.randomUUID ().toString ());
+            msg.setProperty (IModelChangeBusPort.COMMAND_PROP, getName ());
+            msg.setProperty (IModelChangeBusPort.TARGET_PROP, getTarget ());
+            msg.setProperty (IModelChangeBusPort.MODEL_NAME_PROP, getModelName ());
+            msg.setProperty (IModelChangeBusPort.MODEL_TYPE_PROP, getModelType ());
+            for (int i = 0; i < getParameters ().length; i++) {
+                msg.setProperty (IModelChangeBusPort.PARAMETER_PROP + Integer.toString (i), getParameters ()[i]);
+            }
+            msg.setProperty (ESEBConstants.MSG_TYPE_KEY, "MODEL_CHANGE");
+            List<IRainbowMessage> events = new LinkedList<IRainbowMessage> ();
+            events.add (msg);
+            return events;
+        }
+        catch (RainbowException e) {
+        }
+        return null;
     }
 
 

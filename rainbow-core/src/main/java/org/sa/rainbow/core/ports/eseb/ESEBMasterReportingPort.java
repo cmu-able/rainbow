@@ -8,7 +8,6 @@ import java.text.MessageFormat;
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
-import org.sa.rainbow.core.error.RainbowAbortException;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
@@ -114,7 +113,7 @@ public class ESEBMasterReportingPort extends AbstractESEBDisposablePort implemen
     public void report (ReportType type, RainbowComponentT compT, String msg, String additionalInfo) {
         LOGGER.log (Util.reportTypeToPriority (type), compT.name () + ": " + msg);
         LOGGER.info (additionalInfo);
-        if (getConnectionRole() == null) throw new RainbowAbortException ("The port has no connection");
+        if (getConnectionRole () == null) return;
         RainbowESEBMessage esebMsg = getConnectionRole().createMessage ();
         esebMsg.setProperty (ESEBConstants.MSG_CHANNEL_KEY, ChannelT.UIREPORT.name ());
         esebMsg.setProperty (ESEBConstants.COMPONENT_TYPE_KEY, compT.name ());

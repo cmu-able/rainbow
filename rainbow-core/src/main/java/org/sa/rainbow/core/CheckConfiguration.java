@@ -4,7 +4,6 @@ import org.sa.rainbow.core.gauges.GaugeDescription;
 import org.sa.rainbow.core.models.EffectorDescription;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.ProbeDescription;
-import org.sa.rainbow.core.models.UtilityPreferenceDescription;
 import org.sa.rainbow.util.RainbowConfigurationChecker;
 import org.sa.rainbow.util.RainbowConfigurationChecker.Problem;
 import org.sa.rainbow.util.YamlUtil;
@@ -28,11 +27,11 @@ public class CheckConfiguration {
         final GaugeDescription loadGaugeSpecs = YamlUtil.loadGaugeSpecs ();
         System.out.println ("found " + loadGaugeSpecs.typeSpec.size () + " types, " + loadGaugeSpecs.instSpec.size ()
                 + " instances");
-        System.out.print ("Loading preferences...");
-        System.out.flush ();
-        final UtilityPreferenceDescription loadUtilityPrefs = YamlUtil.loadUtilityPrefs ();
-        System.out.println ("found " + loadUtilityPrefs.attributeVectors.size () + " attribute vectors, "
-                + loadUtilityPrefs.utilities.size () + " utilities, " + loadUtilityPrefs.weights.size () + " weights");
+//        System.out.print ("Loading preferences...");
+//        System.out.flush ();
+//        final UtilityPreferenceDescription loadUtilityPrefs = YamlUtil.loadUtilityPrefs ();
+//        System.out.println ("found " + loadUtilityPrefs.attributeVectors.size () + " attribute vectors, "
+//                + loadUtilityPrefs.utilities.size () + " utilities, " + loadUtilityPrefs.weights.size () + " weights");
         System.out.print ("Loading models...");
         System.out.flush ();
         final ModelsManager mm = new ModelsManager ();
@@ -44,10 +43,10 @@ public class CheckConfiguration {
                 return loadProbeDesc;
             }
 
-            @Override
-            public UtilityPreferenceDescription preferenceDesc () {
-                return loadUtilityPrefs;
-            }
+//            @Override
+//            public UtilityPreferenceDescription preferenceDesc () {
+//                return loadUtilityPrefs;
+//            }
 
             @Override
             public GaugeDescription gaugeDesc () {

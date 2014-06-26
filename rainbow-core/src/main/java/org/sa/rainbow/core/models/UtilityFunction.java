@@ -1,7 +1,7 @@
 /**
  * Created September 6, 2006
  */
-package org.sa.rainbow.stitch.core;
+package org.sa.rainbow.core.models;
 
 import java.util.Map;
 import java.util.SortedMap;

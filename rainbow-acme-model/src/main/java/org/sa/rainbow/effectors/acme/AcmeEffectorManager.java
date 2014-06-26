@@ -36,6 +36,9 @@ public class AcmeEffectorManager extends EffectorManager {
         super ("Acme Global Effector Manager");
     }
 
+    /**
+     * This method is called when an event is published by the by a publisher
+     */
     @Override
     public OperationResult publishOperation (IRainbowOperation cmd) {
         OperationResult badResult = new OperationResult ();

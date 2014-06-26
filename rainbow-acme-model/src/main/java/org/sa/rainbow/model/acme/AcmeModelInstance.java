@@ -172,9 +172,10 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
     public void dispose () throws RainbowException {
         synchronized (m_system) {
             try {
-                m_system.getCommandFactory ().systemDeleteCommand (m_system).execute ();
+                m_system.getContext ().getModel ().dispose ();
+//                m_system.getCommandFactory ().systemDeleteCommand (m_system).execute ();
             }
-            catch (IllegalStateException | AcmeException e) {
+            catch (IllegalStateException e) {
                 RainbowException exc = new RainbowException ("Failed to remove " + m_system.getName ());
                 exc.addSuppressed (e);
                 throw exc;

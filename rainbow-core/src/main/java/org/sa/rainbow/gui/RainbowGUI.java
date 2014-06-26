@@ -152,7 +152,16 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
 //        m_master.destroyDelegates ();
         Rainbow.signalTerminate ();
         Util.pause(IRainbowRunnable.LONG_SLEEP_TIME);
-        System.exit(RainbowConstants.EXIT_VALUE_DESTRUCT);
+        while (Rainbow.instance ().getThreadGroup ().activeCount () > 0) {
+            try {
+                Thread.sleep (100);
+            }
+            catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace ();
+            }
+        }
+        System.exit (RainbowConstants.EXIT_VALUE_DESTRUCT);
     }
 
     public void display () {
