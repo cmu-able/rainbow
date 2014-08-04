@@ -5,20 +5,35 @@ import incubator.pval.Ensure;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.acmestudio.acme.core.exception.AcmeVisitorException;
 import org.acmestudio.acme.core.resource.IAcmeResource;
 import org.acmestudio.acme.core.resource.ParsingFailureException;
+import org.acmestudio.acme.core.resource.datapersistence.UserDataIOVisitor;
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.acmestudio.acme.model.IAcmeModel;
 import org.acmestudio.armani.ArmaniExportVisitor;
 import org.acmestudio.standalone.resource.StandaloneResourceProvider;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 import edu.cmu.cs.able.typelib.jconv.TypelibJavaConversionRule;
 import edu.cmu.cs.able.typelib.jconv.TypelibJavaConverter;
@@ -84,6 +99,7 @@ public class AcmeConverter implements TypelibJavaConversionRule {
                 Field source = sdt.field ("source");
                 Field name = sdt.field ("name");
                 Field systemName = sdt.field ("system_name");
+                Field additionalInfo = sdt.field ("additional_info");
                 Map<Field, DataValue> fields = new HashMap<> ();
                 fields.put (cls, m_scope.string ().make (instance.getClass ().getCanonicalName ()));
                 fields.put (type, m_scope.string ().make (instance.getModelType ()));
@@ -100,6 +116,26 @@ public class AcmeConverter implements TypelibJavaConversionRule {
                 baos.flush ();
                 baos.close ();
                 fields.put (serialization, m_scope.string ().make (baos.toString ()));
+                String additionalUserData = "";
+                // Unparse the additional information associated with the Acme Model (user data, etc)
+                try {
+                    DocumentBuilder builder = DocumentBuilderFactory.newInstance ().newDocumentBuilder ();
+                    Document newDocument = builder.newDocument ();
+                    UserDataIOVisitor dataVis = new UserDataIOVisitor (newDocument, UserDataIOVisitor.IO.EXPORT,
+                            StandaloneResourceProvider.instance ().getPersistProviders ());
+                    model.visit (dataVis, null);
+                    TransformerFactory tf = TransformerFactory.newInstance ();
+                    Transformer tfer = tf.newTransformer ();
+                    tfer.setOutputProperty (OutputKeys.OMIT_XML_DECLARATION, "yes");
+                    StringWriter writer = new StringWriter ();
+                    tfer.transform (new DOMSource (newDocument), new StreamResult (writer));
+                    additionalUserData = writer.getBuffer ().toString ().replaceAll ("\n|\r", "");
+                }
+                catch (IllegalArgumentException | ParserConfigurationException | TransformerFactoryConfigurationError
+                        | TransformerException e) {
+                }
+                fields.put (additionalInfo, m_scope.string ().make (additionalUserData));
+
                 StructureDataValue sdv = sdt.make (fields);
                 return sdv;
             }
@@ -125,13 +161,27 @@ public class AcmeConverter implements TypelibJavaConversionRule {
                 String modelName = converter.<String> to_java (sdv.value (sdt.field ("name")), String.class);
                 String systemName = converter.<String> to_java (sdv.value (sdt.field ("system_name")), String.class);
                 String source = converter.<String> to_java (sdv.value (sdt.field ("source")), String.class);
-
+                String additionalInfo = converter.<String> to_java (sdv.value (sdt.field ("additional_info")),
+                        String.class);
                 // First, check that the class for the model is loaded, otherwise all is for naught
                 Class<?> modelClazz = this.getClass ().forName (modelClass);
                 IAcmeResource resource = StandaloneResourceProvider.instance ().acmeResourceForObject (
                         new ByteArrayInputStream (serialization.getBytes ()));
 //                StandaloneResourceProvider.instance ().makeReadOnly (resource);
-
+                try {
+                    DocumentBuilder builder = DocumentBuilderFactory.newInstance ().newDocumentBuilder ();
+                    Document userdata = builder.parse (new ByteArrayInputStream (additionalInfo.getBytes ()));
+                    UserDataIOVisitor visitor = new UserDataIOVisitor (userdata, UserDataIOVisitor.IO.IMPORT,
+                            StandaloneResourceProvider.instance ().getPersistProviders ());
+                    try {
+                        resource.getModel ().visit (visitor, null);
+                    }
+                    catch (AcmeVisitorException e) {
+                        e.printStackTrace ();
+                    }
+                }
+                catch (ParserConfigurationException | SAXException e) {
+                }
                 Constructor<?> constructor = modelClazz.getConstructor (IAcmeSystem.class, String.class);
                 Object r = constructor.newInstance (resource.getModel ().getSystem (systemName), source);
                 T o = (T )r;

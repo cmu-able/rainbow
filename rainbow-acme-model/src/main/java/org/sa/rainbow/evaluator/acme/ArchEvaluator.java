@@ -18,7 +18,6 @@ import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.analysis.IRainbowAnalysis;
 import org.sa.rainbow.core.error.RainbowConnectionException;
-import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
@@ -26,6 +25,7 @@ import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowChangeBusSubscription;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowModelChangeCallback;
+import org.sa.rainbow.core.ports.IModelUSBusPort;
 import org.sa.rainbow.core.ports.IModelsManagerPort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
@@ -53,6 +53,7 @@ IRainbowModelChangeCallback<IAcmeSystem> {
     /** Reference to the Rainbow model */
     private boolean                                m_adaptationNeeded           = false;
     private IModelChangeBusSubscriberPort          m_modelChangePort;
+    private IModelUSBusPort                        m_modelUSPort;
 
     /** Matches the end of changes to the model **/
     private IRainbowChangeBusSubscription          m_modelChangeSubscriber      = new IRainbowChangeBusSubscription () {
@@ -121,9 +122,9 @@ IRainbowModelChangeCallback<IAcmeSystem> {
     }
 
     private void initializeConnections () throws RainbowConnectionException {
-        m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort (Rainbow.instance ()
-                .getRainbowMaster ().modelsManager ());
+        m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort ();
         m_modelsManagerPort = RainbowPortFactory.createModelsManagerRequirerPort ();
+        m_modelUSPort = RainbowPortFactory.createModelsManagerClientUSPort (this);
     }
 
     private void installEvaluations () {
@@ -181,9 +182,9 @@ IRainbowModelChangeCallback<IAcmeSystem> {
                 boolean constraintViolated = !synchChecker.typechecks (model.getModelInstance ());
                 AcmeTypecheckSetCmd cmd = model.getCommandFactory ().acmeTypecheckSetCmd (!constraintViolated);
                 try {
-                    Rainbow.instance ().getRainbowMaster ().modelsManager ().requestModelUpdate (cmd);
+                    m_modelUSPort.updateModel (cmd);
                 }
-                catch (IllegalStateException | RainbowException e) {
+                catch (IllegalStateException e) {
                     m_reportingPort.error (RainbowComponentT.ANALYSIS,
                             "Could not execute set typecheck command on model", e);
                 }
@@ -210,9 +211,9 @@ IRainbowModelChangeCallback<IAcmeSystem> {
                         public void requestAdaptation () {
                             AcmeTypecheckSetCmd cmd = model.getCommandFactory ().acmeTypecheckSetCmd (false);
                             try {
-                                Rainbow.instance ().getRainbowMaster ().modelsManager ().requestModelUpdate (cmd);
+                                m_modelUSPort.updateModel (cmd);
                             }
-                            catch (IllegalStateException | RainbowException e) {
+                            catch (IllegalStateException e) {
                                 m_reportingPort.error (RainbowComponentT.ANALYSIS,
                                         "Could not execute set typecheck command on model", e);
                             }
@@ -242,6 +243,7 @@ IRainbowModelChangeCallback<IAcmeSystem> {
 
     @Override
     public void onEvent (ModelReference ref, IRainbowMessage message) {
+        // Assuming that the model manager is local, otherwise this call will be slow when done this often
         IModelInstance model = m_modelsManagerPort.getModelInstance (ref.getModelType (), ref.getModelName ());
         if (model instanceof AcmeModelInstance) {
             m_modelCheckQ.offer ((AcmeModelInstance )model);

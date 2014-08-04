@@ -237,7 +237,7 @@ public class AcmeEventSerializer {
         }
         if (declaredTypes.length () > 0) {
             declaredTypes.deleteCharAt (declaredTypes.length () - 1);
-            msg.setProperty (AcmeModelOperation.DECLARED_TYPES_PROP, declaredTypes);
+            msg.setProperty (AcmeModelOperation.DECLARED_TYPES_PROP, declaredTypes.toString ());
         }
         dt = instance.getInstantiatedTypes ();
         declaredTypes = new StringBuffer ();
@@ -248,7 +248,7 @@ public class AcmeEventSerializer {
         if (declaredTypes.length () > 0) {
 
             declaredTypes.deleteCharAt (declaredTypes.length () - 1);
-            msg.setProperty (AcmeModelOperation.INSTANTIATED_TYPES_PROP, declaredTypes);
+            msg.setProperty (AcmeModelOperation.INSTANTIATED_TYPES_PROP, declaredTypes.toString ());
         }
     }
 

@@ -22,6 +22,7 @@ import org.acmestudio.acme.core.type.IAcmeFloatType;
 import org.acmestudio.acme.core.type.IAcmeFloatValue;
 import org.acmestudio.acme.core.type.IAcmeIntType;
 import org.acmestudio.acme.core.type.IAcmeIntValue;
+import org.acmestudio.acme.element.IAcmeComponent;
 import org.acmestudio.acme.element.IAcmeElementInstance;
 import org.acmestudio.acme.element.IAcmeElementType;
 import org.acmestudio.acme.element.IAcmeSystem;
@@ -62,6 +63,7 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
     public static final String             PROPKEY_LOCATION        = "deploymentLocation";
     /** The property identifier for determining whether an element is in the architecture or the env't */
     public static final String             PROPKEY_ARCH_ENABLED    = "isArchEnabled";
+    public static final String             PROPKEY_HTTPPORT        = "httpPort";
 
     private IAcmeSystem                    m_system;
     /** Map of qualified name to average values */
@@ -375,7 +377,7 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
 
             // seek element with specified type AND specified property
             if ((useSatisfies && AcmeTypeHelper.satisfiesElementType (child,
-                    ((IAcmeElementType )child.lookupName (typeName, true))))
+                    ((IAcmeElementType )child.lookupName (typeName, true)), null))
                     || child.declaresType (typeName) || child.instantiatesType (typeName)) {
                 IAcmeProperty childProp = child.getProperty (propName);
                 if (childProp != null) {
@@ -406,6 +408,29 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
             location = PropertyHelper.toJavaVal (prop.getValue ()).toString ().toLowerCase ();
         }
         return location;
+    }
+
+    public IAcmeComponent getElementForLocation (String location, String type) {
+        String[] parts = location.split (":");
+        Set<? extends IAcmeComponent> components = m_system.getComponents ();
+        for (IAcmeComponent comp : components) {
+            if (comp.declaresType (type)) {
+                IAcmeProperty prop = comp.getProperty (PROPKEY_LOCATION);
+                if (prop != null && prop.getValue () != null) {
+                    if (PropertyHelper.toJavaVal (prop.getValue ()).equals (parts[0])) {
+                        if (parts.length == 2) {
+                            prop = comp.getProperty (PROPKEY_HTTPPORT);
+                            if (prop != null && prop.getValue () != null) {
+                                if (PropertyHelper.toJavaVal (prop.getValue ()).equals (parts[1])) return comp;
+                            }
+                        }
+                        else
+                            return comp;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     public <T> T resolveInModel (String qname, Class<T> clazz) throws RainbowModelException {

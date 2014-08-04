@@ -11,8 +11,8 @@ import org.acmestudio.acme.ModelHelper;
 import org.acmestudio.acme.element.IAcmeElementInstance;
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.acmestudio.acme.element.property.IAcmeProperty;
-import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.error.RainbowModelException;
+import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
@@ -44,8 +44,8 @@ public class AcmeEffectorManager extends EffectorManager {
         OperationResult badResult = new OperationResult ();
         badResult.result = Result.UNKNOWN;
         if (cmd.getModelType ().equals ("Acme")) {
-            AcmeModelInstance ami = (AcmeModelInstance )Rainbow.instance ().getRainbowMaster ().modelsManager ()
-                    .<IAcmeSystem> getModelInstance (cmd.getModelType (), cmd.getModelName ());
+            AcmeModelInstance ami = (AcmeModelInstance )m_modelsManagerPort.<IAcmeSystem> getModelInstance (
+                    cmd.getModelType (), cmd.getModelName ());
             if (ami == null) {
                 String errMsg = MessageFormat.format ("Could not find the model reference ''{0}'' for command {1}",
                         Util.genModelRef (cmd.getModelName (), cmd.getModelType ()), cmd.getName ());
@@ -64,7 +64,7 @@ public class AcmeEffectorManager extends EffectorManager {
                         Set<EffectorAttributes> effectors = getEffectorsAtLocation (location);
                         effectors.addAll (getEffectorsInterestedInLocation (location, m_effectors.effectors));
                         filterEffectorsBasedOnCommandName (cmd, effectors);
-                        filterEffectorsBasedOnCommandParameters (cmd, effectors);
+                        filterEffectorsBasedOnCommandParameters (cmd, effectors, ami);
                         if (!effectors.isEmpty ()) {
                             OperationResult result = new OperationResult ();
                             result.result = Result.SUCCESS;
@@ -162,6 +162,13 @@ public class AcmeEffectorManager extends EffectorManager {
         return target;
     }
 
+    /**
+     * Returns all the effectors that are registered at the location
+     * 
+     * @param location
+     * @param effectors
+     * @return
+     */
     private Collection<? extends EffectorAttributes> getEffectorsInterestedInLocation (String location,
             Set<EffectorAttributes> effectors) {
         Set<EffectorAttributes> interestedIn = new HashSet<> ();
@@ -183,7 +190,17 @@ public class AcmeEffectorManager extends EffectorManager {
         }
     }
 
-    private void filterEffectorsBasedOnCommandParameters (IRainbowOperation cmd, Set<EffectorAttributes> effectors) {
+    /**
+     * Filter so that all the effectors that match the command targets and parameters remain in the set
+     * 
+     * @param cmd
+     *            The cmd to match
+     * @param effectors
+     *            The set of effectors, which will be mutated by this method
+     * @param ami
+     *            The model used to resolve any names
+     */
+    private void filterEffectorsBasedOnCommandParameters (IRainbowOperation cmd, Set<EffectorAttributes> effectors, AcmeModelInstance ami) {
         for (Iterator iterator = effectors.iterator (); iterator.hasNext ();) {
             EffectorAttributes ea = (EffectorAttributes )iterator.next ();
             OperationRepresentation commandPattern = ea.commandPattern;
@@ -196,8 +213,13 @@ public class AcmeEffectorManager extends EffectorManager {
                 }
                 if (target != null && !target.contains ("$<")) {
                     if (!target.equals (cmd.getTarget ())) {
-                        iterator.remove ();
-                        break;
+                        if (cmd.getTarget () != null) {
+                            String resolvedTarget = resolveAcmeReference (target, ami);
+                            if (!resolvedTarget.equals (cmd.getTarget ())) {
+                                iterator.remove ();
+                                break;
+                            }
+                        }
                     }
                 }
                 String[] parameters = commandPattern.getParameters ();
@@ -214,6 +236,11 @@ public class AcmeEffectorManager extends EffectorManager {
                 }
             }
         }
+
+    }
+
+    @Override
+    public void publishMessage (IRainbowMessage msg) {
 
     }
 }
