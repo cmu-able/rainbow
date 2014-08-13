@@ -1,0 +1,1 @@
+$wnd.edu_cmu_rainbow_ui_display_AppWidgetSet.runAsyncCallback1('defineClass(1840, 1, $intern_114);\n_.onSuccess_1 = function onSuccess_1(){\n  $setLoaded_0((!impl_15 && (impl_15 = new ConnectorBundleLoaderImpl) , impl_15), this.this$1.packageName);\n}\n;\n$entry(onLoad)(1);\n\n//# sourceURL=edu.cmu.rainbow_ui.display.AppWidgetSet-1.js\n')

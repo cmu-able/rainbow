@@ -117,7 +117,7 @@ public class DummyWidget extends Widget {
     }
 
     @Override
-    public Widget getClone() {
+    public IWidget getClone() {
         return new DummyWidget(mapping);
     }
 }

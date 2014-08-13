@@ -24,16 +24,18 @@
 
 package edu.cmu.rainbow_ui.display.widgets;
 
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import edu.cmu.cs.able.typelib.jconv.ValueConversionException;
-import edu.cmu.rainbow_ui.common.DataValueSupport;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
+
+import edu.cmu.cs.able.typelib.jconv.ValueConversionException;
+import edu.cmu.rainbow_ui.common.DataValueSupport;
 
 /**
  * Simple checkbox widget.
@@ -45,32 +47,32 @@ import java.util.logging.Logger;
  * @author Denis Anisimov <dbanisimov@cmu.edu>
  */
 public class SimpleCheck extends Widget {
-    
+
     private static final WidgetDescription widgetDescription;
-    
+
     private final Label label;
     private final CheckBox checkBox;
 
     public SimpleCheck(String mapping) {
         super(mapping);
-        
+
         label = new Label();
         checkBox = new CheckBox();
         /**
          * TODO: The checkbox is actually clickable. But the disabled checkbox looks too
          * gray. Probably it should be replaced with something else.
          */
-        
+
         HorizontalLayout layout = new HorizontalLayout();
         layout.setWidth("100%");
         layout.addComponent(label);
         layout.addComponent(checkBox);
         layout.setExpandRatio(label, 1.0f);
         layout.setComponentAlignment(checkBox, Alignment.MIDDLE_RIGHT);
-        
+
         setCompositionRoot(layout);
     }
-    
+
     static {
         String name = "SimpleCheck";
         String description = "A widget that displays boolean value as a checkbox.";
@@ -85,7 +87,7 @@ public class SimpleCheck extends Widget {
         propDescr.put("name", new WidgetPropertyDescription(String.class, "Visual name of the property", ""));
         widgetDescription = new WidgetDescription(name, description, type, factory, propDescr);
     }
-    
+
     static WidgetDescription register() {
         return widgetDescription;
     }
@@ -106,15 +108,15 @@ public class SimpleCheck extends Widget {
     }
 
     @Override
-    public Widget getClone() {
-        Widget clone = new SimpleCheck(mapping);
+    public IWidget getClone() {
+        SimpleCheck clone = new SimpleCheck (mapping);
         clone.setProperties(this.getProperties());
         return clone;
     }
 
     @Override
     protected void onPropertyUpdate() {
-         String vName = (String) properties.get("name");
-         label.setValue(vName);
+        String vName = (String) properties.get("name");
+        label.setValue(vName);
     }
 }

@@ -24,10 +24,13 @@ package edu.cmu.rainbow_ui.integration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
 import java.util.List;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import edu.cmu.cs.able.typelib.jconv.ValueConversionException;
 import edu.cmu.cs.able.typelib.type.DataValue;
 import edu.cmu.rainbow_ui.common.DataValueSupport;
@@ -35,7 +38,7 @@ import edu.cmu.rainbow_ui.display.DummySystemViewProvider;
 import edu.cmu.rainbow_ui.display.ui.DummyTestUI;
 import edu.cmu.rainbow_ui.display.viewcontrol.ViewControl;
 import edu.cmu.rainbow_ui.display.widgets.DummyWidget;
-import edu.cmu.rainbow_ui.display.widgets.Widget;
+import edu.cmu.rainbow_ui.display.widgets.IWidget;
 
 /**
  * Tests for widgets and widget control
@@ -138,7 +141,7 @@ public class ViewControlIT {
         DummyWidget widget = new DummyWidget(mapping);
         assertNotNull(widget);
         control.addWidget(widget);
-        List<Widget> widgets = control.getWidgetList();
+        List<IWidget> widgets = control.getWidgetList ();
         assertNotNull(widgets);
         assertEquals(widgets.get(0), widget);
         control.removeWidget(widget);
@@ -157,7 +160,7 @@ public class ViewControlIT {
         DummyWidget widget = new DummyWidget(mapping);
         assertNotNull(widget);
         control.addWidget(widget);
-        List<Widget> widgets = control.getWidgetList();
+        List<IWidget> widgets = control.getWidgetList ();
         assertNotNull(widgets);
         assertEquals(widgets.get(0), widget);
 

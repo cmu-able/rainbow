@@ -25,9 +25,10 @@
 package edu.cmu.rainbow_ui.display.ui;
 
 import com.vaadin.event.dd.DropHandler;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.DragAndDropWrapper;
 
-import edu.cmu.rainbow_ui.display.widgets.Widget;
+import edu.cmu.rainbow_ui.display.widgets.IWidget;
 
 /**
  * Drag and Drop wrapper tailored for usage for widgets.
@@ -42,13 +43,13 @@ public class WidgetDragAndDropWrapper extends DragAndDropWrapper {
 
     private final DropHandler dropHandler;
 
-    public WidgetDragAndDropWrapper(Widget widget) {
+    public WidgetDragAndDropWrapper (Component widget) {
         super(widget);
         this.dropHandler = null;
         setDragStartMode(DragStartMode.WRAPPER);
     }
-    
-    public WidgetDragAndDropWrapper(Widget widget, DropHandler dropHandler) {
+
+    public WidgetDragAndDropWrapper (Component widget, DropHandler dropHandler) {
         super(widget);
         this.dropHandler = dropHandler;
         setDragStartMode(DragStartMode.WRAPPER);
@@ -59,7 +60,7 @@ public class WidgetDragAndDropWrapper extends DragAndDropWrapper {
         return dropHandler;
     }
 
-    public Widget getWidget() {
-        return (Widget) super.getCompositionRoot();
+    public IWidget getWidget () {
+        return (IWidget )super.getCompositionRoot ();
     }
 }

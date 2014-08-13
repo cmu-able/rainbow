@@ -23,15 +23,17 @@
  */
 package edu.cmu.rainbow_ui.display.widgets;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import edu.cmu.cs.able.typelib.jconv.ValueConversionException;
-import edu.cmu.rainbow_ui.common.DataValueSupport;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.vaadin.ui.Component;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.VerticalLayout;
+
+import edu.cmu.cs.able.typelib.jconv.ValueConversionException;
+import edu.cmu.rainbow_ui.common.DataValueSupport;
 
 /**
  * Simple text widget.
@@ -89,8 +91,8 @@ public class SimpleText extends Widget {
     }
 
     @Override
-    public Widget getClone() {
-        Widget clone = new SimpleText(mapping);
+    public IWidget getClone() {
+        SimpleText clone = new SimpleText (mapping);
         clone.setProperties(this.getProperties());
         return clone;
     }

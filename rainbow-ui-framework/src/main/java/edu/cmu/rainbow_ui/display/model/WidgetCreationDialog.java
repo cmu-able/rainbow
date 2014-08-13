@@ -23,6 +23,12 @@
  */
 package edu.cmu.rainbow_ui.display.model;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.acmestudio.acme.element.property.IAcmeProperty;
+
 import com.vaadin.data.Property;
 import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.ui.Button;
@@ -33,15 +39,12 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+
 import edu.cmu.rainbow_ui.display.ui.AbstractRainbowVaadinUI;
 import edu.cmu.rainbow_ui.display.viewcontrol.WidgetLibrary;
-import edu.cmu.rainbow_ui.display.widgets.Widget;
+import edu.cmu.rainbow_ui.display.widgets.IWidget;
 import edu.cmu.rainbow_ui.display.widgets.WidgetDescription;
 import edu.cmu.rainbow_ui.display.widgets.WidgetPropertyDescription;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.acmestudio.acme.element.property.IAcmeProperty;
 
 /**
  * Dialog to add new widget for the specified property.
@@ -127,9 +130,9 @@ abstract class WidgetCreationDialog extends Window {
                 @Override
                 public void buttonClick(Button.ClickEvent event) {
                     WidgetDescription descr = WidgetLibrary.getWidget((String) widgetSel.getValue());
-                    Widget widget = descr.getFactory().getInstance(
+                    IWidget widget = descr.getFactory ().getInstance (
                             WidgetCreationDialog.this.property.getQualifiedName()
-                    );
+                            );
                     for (String propName : widgetProperties.keySet()) {
                         widget.setProperty(propName, widgetProperties.get(propName));
                     }
@@ -193,5 +196,5 @@ abstract class WidgetCreationDialog extends Window {
      *
      * @param widget created widget
      */
-    abstract void onCreate(Widget widget);
+    abstract void onCreate (IWidget widget);
 }

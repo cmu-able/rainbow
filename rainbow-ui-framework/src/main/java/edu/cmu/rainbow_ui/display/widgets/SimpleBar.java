@@ -23,17 +23,18 @@
  */
 package edu.cmu.rainbow_ui.display.widgets;
 
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CssLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import edu.cmu.cs.able.typelib.jconv.ValueConversionException;
-import edu.cmu.rainbow_ui.common.DataValueSupport;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.vaadin.ui.Component;
+import com.vaadin.ui.CssLayout;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.VerticalLayout;
+
+import edu.cmu.cs.able.typelib.jconv.ValueConversionException;
+import edu.cmu.rainbow_ui.common.DataValueSupport;
 
 /**
  * Simple bar widget.
@@ -87,16 +88,14 @@ public class SimpleBar extends Widget {
      */
     private SimpleBar(String mapping) {
         super(mapping);
-        
+
         label = new Label(visualName);
-        
+
         /* Using CSS layout to get divs displayed full width on top of each other */
         CssLayout bar = new CssLayout() {
             @Override
             protected String getCss(Component c) {
-                if (c instanceof Label) {
-                    return "position: absolute;";
-                }
+                if (c instanceof Label) return "position: absolute;";
                 return null;
             }
         };
@@ -126,7 +125,7 @@ public class SimpleBar extends Widget {
 
             try {
                 val = DataValueSupport.converter.to_java(value, Float.class
-                );
+                        );
             } catch (ValueConversionException ex) {
                 /* Sometimes float values are reported as ints */
                 val = (float) DataValueSupport.converter.to_java(value, Integer.class);
@@ -158,8 +157,8 @@ public class SimpleBar extends Widget {
     }
 
     @Override
-    public Widget getClone() {
-        Widget clone = new SimpleBar(mapping);
+    public IWidget getClone() {
+        SimpleBar clone = new SimpleBar (mapping);
         clone.setProperties(this.getProperties());
         return clone;
     }

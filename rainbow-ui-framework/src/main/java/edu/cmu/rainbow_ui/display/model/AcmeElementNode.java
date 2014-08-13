@@ -23,11 +23,19 @@
  */
 package edu.cmu.rainbow_ui.display.model;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.acmestudio.acme.element.IAcmeElementInstance;
+import org.acmestudio.acme.element.property.IAcmeProperty;
+import org.acmestudio.acme.element.representation.IAcmeRepresentation;
+
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.ListSelect;
@@ -35,6 +43,7 @@ import com.vaadin.ui.NativeButton;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+
 import edu.cmu.rainbow_ui.display.config.ElementConfiguration;
 import edu.cmu.rainbow_ui.display.config.GraphConfiguration;
 import edu.cmu.rainbow_ui.display.config.PropertyConfiguration;
@@ -42,15 +51,8 @@ import edu.cmu.rainbow_ui.display.config.WidgetConfiguration;
 import edu.cmu.rainbow_ui.display.ui.AbstractRainbowVaadinUI;
 import edu.cmu.rainbow_ui.display.ui.WidgetDragAndDropWrapper;
 import edu.cmu.rainbow_ui.display.viewcontrol.WidgetLibrary;
-import edu.cmu.rainbow_ui.display.widgets.Widget;
+import edu.cmu.rainbow_ui.display.widgets.IWidget;
 import edu.cmu.rainbow_ui.display.widgets.WidgetDescription;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.acmestudio.acme.element.IAcmeElementInstance;
-import org.acmestudio.acme.element.property.IAcmeProperty;
-import org.acmestudio.acme.element.representation.IAcmeRepresentation;
 
 /**
  * Visual component to display an Acme element in the graph.
@@ -74,7 +76,7 @@ abstract class AcmeElementNode extends CustomComponent {
     private final AbstractRainbowVaadinUI ui;
     private final AcmeGraph graphView;
 
-    protected final Map<String, Widget> propertiesWidgets = new HashMap<>();
+    protected final Map<String, IWidget>  propertiesWidgets           = new HashMap<> ();
 
     private final HorizontalLayout labelBar;
     private final Button expButton;
@@ -180,7 +182,7 @@ abstract class AcmeElementNode extends CustomComponent {
                         Logger.getLogger(AcmeGraph.class.getName()).log(Level.WARNING,
                                 "Widget {0} isn't registered in the library",
                                 widgetConfig.id
-                        );
+                                );
                         break;
                     }
                     String widgetType = widgetDescr.getType();
@@ -195,8 +197,8 @@ abstract class AcmeElementNode extends CustomComponent {
                                         type,
                                         widgetDescr.getName(),
                                         widgetType
-                                )
-                        );
+                                        )
+                                );
                         break;
                     }
 
@@ -212,12 +214,12 @@ abstract class AcmeElementNode extends CustomComponent {
                                         prop.getName(),
                                         widgetDescr.getName(),
                                         widgetConfig.mapping
-                                )
-                        );
+                                        )
+                                );
                         break;
                     }
 
-                    Widget widget = widgetDescr.getFactory().getInstance(widgetMapping);
+                    IWidget widget = widgetDescr.getFactory ().getInstance (widgetMapping);
                     for (String widgetPropName : widgetConfig.properties.keySet()) {
                         try {
                             widget.setProperty(widgetPropName, widgetConfig.properties.get(widgetPropName));
@@ -225,12 +227,12 @@ abstract class AcmeElementNode extends CustomComponent {
                             Logger.getLogger(AcmeGraph.class.getName()).log(Level.WARNING,
                                     "Cannot set widget property from configuration.",
                                     ex
-                            );
+                                    );
                         }
                     }
                     ui.getViewControl().addWidget(widget);
-                    widget.addStyleName("graph-widget-item");
-                    WidgetDragAndDropWrapper dndWrapper = new WidgetDragAndDropWrapper(widget);
+                    widget.getAsComponent ().addStyleName ("graph-widget-item");
+                    WidgetDragAndDropWrapper dndWrapper = new WidgetDragAndDropWrapper (widget.getAsComponent ());
                     propertiesWidgets.put(prop.getName(), widget);
                     widgetsContainer.addComponent(dndWrapper);
                 }
@@ -271,7 +273,7 @@ abstract class AcmeElementNode extends CustomComponent {
                         public void buttonClick(Button.ClickEvent event) {
                             graphView.setCurrentSystem(element.getRepresentation(
                                     selectList.getValue().toString()).getSystem()
-                            );
+                                    );
                             subWindow.close();
                         }
                     });
@@ -356,7 +358,7 @@ abstract class AcmeElementNode extends CustomComponent {
         expButton.setCaption("-");
         /* Activate all widgets */
         for (int i = 0; i < widgetsContainer.getComponentCount(); i++) {
-            Widget widget = ((WidgetDragAndDropWrapper) widgetsContainer.getComponent(i)).getWidget();
+            IWidget widget = ((WidgetDragAndDropWrapper) widgetsContainer.getComponent(i)).getWidget();
             widget.activate();
         }
 
@@ -372,7 +374,7 @@ abstract class AcmeElementNode extends CustomComponent {
         expButton.setCaption("+");
         /* Deactivate all widgets */
         for (int i = 0; i < widgetsContainer.getComponentCount(); i++) {
-            Widget widget = ((WidgetDragAndDropWrapper) widgetsContainer.getComponent(i)).getWidget();
+            IWidget widget = ((WidgetDragAndDropWrapper) widgetsContainer.getComponent(i)).getWidget();
             widget.deactivate();
         }
 
@@ -443,7 +445,7 @@ abstract class AcmeElementNode extends CustomComponent {
 
                         @Override
                         public void buttonClick(Button.ClickEvent event) {
-                            Widget widget = propertiesWidgets.get(prop.getName());
+                            IWidget widget = propertiesWidgets.get (prop.getName ());
                             widget.deactivate();
                             ui.getViewControl().removeWidget(widget);
                             propertiesWidgets.remove(prop.getName());
@@ -451,7 +453,7 @@ abstract class AcmeElementNode extends CustomComponent {
                              * Widgets are wrapped in the DnD wrapper, so remove its parent from the
                              * container.
                              */
-                            widgetsContainer.removeComponent(widget.getParent());
+                            widgetsContainer.removeComponent (widget.getAsComponent ().getParent ());
 
                             if (propertiesWidgets.isEmpty()) {
                                 collapseWidgetsPanel();
@@ -475,9 +477,10 @@ abstract class AcmeElementNode extends CustomComponent {
                             Window addWindow = new WidgetCreationDialog(prop, ui) {
 
                                 @Override
-                                void onCreate(Widget widget) {
+                                void onCreate (IWidget widget) {
                                     ui.getViewControl().addWidget(widget);
-                                    widgetsContainer.addComponent(new WidgetDragAndDropWrapper(widget));
+                                    widgetsContainer.addComponent (new WidgetDragAndDropWrapper (widget
+                                            .getAsComponent ()));
                                     propertiesWidgets.put(prop.getName(), widget);
 
                                     expButton.setVisible(true);
@@ -506,7 +509,7 @@ abstract class AcmeElementNode extends CustomComponent {
      * @param prop widget property
      * @param widget created widget
      */
-    private void addWidgetToViewConfiguration(IAcmeProperty prop, Widget widget) {
+    private void addWidgetToViewConfiguration(IAcmeProperty prop, IWidget widget) {
         GraphConfiguration graphConfig = ui.getViewConfiguraion().graph;
 
         ElementConfiguration elemConfig = graphConfig.elements.get(element.getQualifiedName());
@@ -530,7 +533,7 @@ abstract class AcmeElementNode extends CustomComponent {
      * @param prop
      * @param widget
      */
-    private void removeWidgetFromViewConfiguration(IAcmeProperty prop, Widget widget) {
+    private void removeWidgetFromViewConfiguration(IAcmeProperty prop, IWidget widget) {
         GraphConfiguration graphConfig = ui.getViewConfiguraion().graph;
 
         ElementConfiguration elemConfig = graphConfig.elements.get(element.getQualifiedName());
@@ -544,9 +547,9 @@ abstract class AcmeElementNode extends CustomComponent {
             Logger.getLogger(AcmeElementNode.class.getName()).log(
                     Level.WARNING,
                     "No configuration found for an existing widget."
-                    + "\n    widget: {0}\n    maping: {1}",
-                    new Object[]{widget.getWidgetDescription().getName(), widget.getMapping()}
-            );
+                            + "\n    widget: {0}\n    maping: {1}",
+                            new Object[]{widget.getWidgetDescription().getName(), widget.getMapping()}
+                    );
         }
     }
 

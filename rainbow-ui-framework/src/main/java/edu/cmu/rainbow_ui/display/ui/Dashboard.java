@@ -62,7 +62,7 @@ import edu.cmu.rainbow_ui.display.config.ViewConfiguration;
 import edu.cmu.rainbow_ui.display.config.WidgetConfiguration;
 import edu.cmu.rainbow_ui.display.viewcontrol.ViewControl;
 import edu.cmu.rainbow_ui.display.viewcontrol.WidgetLibrary;
-import edu.cmu.rainbow_ui.display.widgets.Widget;
+import edu.cmu.rainbow_ui.display.widgets.IWidget;
 import edu.cmu.rainbow_ui.display.widgets.WidgetDescription;
 
 /**
@@ -119,7 +119,7 @@ public class Dashboard extends VerticalLayout {
     TextField txtPageName;
     protected final AbstractRainbowVaadinUI ui;
     protected List<DragAndDropWrapper> tabs;
-    private List<List<Widget>> pageWidgets;
+    private List<List<IWidget>>             pageWidgets;
     private ViewControl viewControl;
 
     private final static int DASHBOARD_WIDGET_WIDTH = 120;
@@ -189,12 +189,12 @@ public class Dashboard extends VerticalLayout {
                     if (parent != null && tabs.contains(parent)) {
                         pageWidgets.get(tabs.indexOf(parent)).remove(
                                 ((HorizontalLayout) layoutParent)
-                                        .getComponentIndex(draggedWrapper));
+                                .getComponentIndex(draggedWrapper));
                         ((HorizontalLayout) layoutParent)
-                                .removeComponent(draggedWrapper);
+                        .removeComponent(draggedWrapper);
                         Dashboard.this.viewControl
-                                .removeWidget(((WidgetDragAndDropWrapper) draggedWrapper)
-                                        .getWidget());
+                        .removeWidget(((WidgetDragAndDropWrapper) draggedWrapper)
+                                .getWidget());
                     } else {
                         Notification.show(
                                 "That component cannot be dropped here",
@@ -233,7 +233,7 @@ public class Dashboard extends VerticalLayout {
         tabs.add(layoutWrapper);
         pageContentArea.addTab(layoutWrapper, pageName);
         pageContentArea.setSelectedTab(layoutWrapper);
-        pageWidgets.add(new ArrayList<Widget>());
+        pageWidgets.add (new ArrayList<IWidget> ());
         removePageBtn.setEnabled(true);
     }
 
@@ -268,12 +268,12 @@ public class Dashboard extends VerticalLayout {
      */
     public void loadViewConfiguration() {
         ViewConfiguration viewConfiguration = ui.getViewConfiguraion();
-        
+
         for (DashboardPageConfiguration page : viewConfiguration.dashboard.pages) {
             final HorizontalLayout newLayout = new HorizontalLayout();
             DragAndDropWrapper layoutWrapper = new DragAndDropWrapper(newLayout);
             setDropHandler(newLayout, layoutWrapper);
-            ArrayList<Widget> pageWidgetList = new ArrayList<>();
+            ArrayList<IWidget> pageWidgetList = new ArrayList<> ();
             for (WidgetConfiguration widget1 : page.widgets) {
                 WidgetDescription widgetDescription = WidgetLibrary
                         .getWidgetDescriptions().get(widget1.id);
@@ -282,23 +282,24 @@ public class Dashboard extends VerticalLayout {
                             Level.SEVERE, "loadViewConfiguration",
                             "Error in view configuration: Unknown Widget");
                 } else {
-                    Widget widget = widgetDescription.getFactory().getInstance(widget1.mapping);
+                    IWidget widget = widgetDescription.getFactory ().getInstance (widget1.mapping);
                     for (String widgetPropName : widget1.properties.keySet()) {
                         try {
                             widget.setProperty(widgetPropName, widget1.properties.get(widgetPropName));
                         }catch (IllegalArgumentException ex) {
                             Logger.getLogger(Dashboard.class.getName())
-                                    .log(Level.WARNING,
-                                            "Cannot  set widget property from configuration.",
-                                            ex);
+                            .log(Level.WARNING,
+                                    "Cannot  set widget property from configuration.",
+                                    ex);
                         }
                     }
                     widget.activate();
                     this.ui.getViewControl().addWidget(widget);
-                    widget.setWidth(DASHBOARD_WIDGET_WIDTH, Unit.PIXELS);
+                    widget.getAsComponent ().setWidth (DASHBOARD_WIDGET_WIDTH, Unit.PIXELS);
                     pageWidgetList.add(widget);
                     WidgetDragAndDropWrapper wrapper = new WidgetDragAndDropWrapper(
-                            widget, new ReorderLayoutDropHandler(newLayout));
+                            widget.getAsComponent (),
+                            new ReorderLayoutDropHandler (newLayout));
                     wrapper.setDragStartMode(DragStartMode.WRAPPER);
                     wrapper.setSizeUndefined();
                     newLayout.addComponent(wrapper);
@@ -319,8 +320,8 @@ public class Dashboard extends VerticalLayout {
         for (int i = 0; i < pageWidgets.size(); i++) {
             DashboardPageConfiguration pageConfig = new DashboardPageConfiguration();
             pageConfig.name = pageContentArea.getTab(i).getCaption();
-            List<Widget> page = pageWidgets.get(i);
-            for (Widget page1 : page) {
+            List<IWidget> page = pageWidgets.get (i);
+            for (IWidget page1 : page) {
                 WidgetConfiguration widgetConfig = new WidgetConfiguration();
                 widgetConfig.id = page1.getWidgetDescription().getName();
                 widgetConfig.mapping = page1.getMapping();
@@ -380,18 +381,18 @@ public class Dashboard extends VerticalLayout {
     private void setDropHandler(final HorizontalLayout newLayout,
             DragAndDropWrapper layoutWrapper) {
         layoutWrapper.setDropHandler(new DropHandler() {
+            @Override
             public AcceptCriterion getAcceptCriterion() {
                 return AcceptAll.get();
             }
 
+            @Override
             public void drop(DragAndDropEvent event) {
                 WrapperTransferable t = (WrapperTransferable) event
                         .getTransferable();
 
                 Component draggedWrapper = t.getSourceComponent();
-                if (!(draggedWrapper instanceof WidgetDragAndDropWrapper)) {
-                    return;
-                }
+                if (!(draggedWrapper instanceof WidgetDragAndDropWrapper)) return;
                 boolean inDashAlready = false;
                 Component c = draggedWrapper;
                 while (c.getParent() != null) {
@@ -404,7 +405,7 @@ public class Dashboard extends VerticalLayout {
 
                 if (!inDashAlready) {
                     // Create the component clone
-                    Widget widgetClone = ((WidgetDragAndDropWrapper) draggedWrapper)
+                    IWidget widgetClone = ((WidgetDragAndDropWrapper) draggedWrapper)
                             .getWidget().getClone();
                     widgetClone.activate();
                     Dashboard.this.ui.getViewControl().addWidget(widgetClone);
@@ -413,12 +414,12 @@ public class Dashboard extends VerticalLayout {
                     pageWidgets.get(
                             pageContentArea.getTabPosition(pageContentArea
                                     .getTab(pageContentArea.getSelectedTab())))
-                            .add(widgetClone);
+                                    .add(widgetClone);
 
-                    widgetClone.setWidth(DASHBOARD_WIDGET_WIDTH, Unit.PIXELS);
+                    widgetClone.getAsComponent ().setWidth (DASHBOARD_WIDGET_WIDTH, Unit.PIXELS);
 
                     WidgetDragAndDropWrapper wrapper = new WidgetDragAndDropWrapper(
-                            widgetClone,
+                            (Component )widgetClone,
                             new ReorderLayoutDropHandler(newLayout));
                     wrapper.setDragStartMode(DragStartMode.WRAPPER);
                     wrapper.setSizeUndefined();
@@ -471,7 +472,7 @@ public class Dashboard extends VerticalLayout {
                 boolean found = false;
                 while (componentIterator.hasNext()) {
                     next = componentIterator.next();
-                    Widget nextWidget = null;
+                    IWidget nextWidget = null;
                     if (next instanceof WidgetDragAndDropWrapper) {
                         nextWidget = ((WidgetDragAndDropWrapper) next)
                                 .getWidget();
@@ -484,12 +485,9 @@ public class Dashboard extends VerticalLayout {
                         break;
                     }
                 }
-                if (next == null || !found) {
+                if (next == null || !found)
                     // component not found - if dragging from another layout
                     return;
-                }
-
-                // drop before the target?
                 else if (dropTargetData.getData("horizontalLocation").equals(
                         HorizontalDropLocation.LEFT.toString())) {
                     index--;

@@ -23,13 +23,16 @@
  */
 package edu.cmu.rainbow_ui.display.widgets;
 
-import com.vaadin.ui.CustomComponent;
-import edu.cmu.cs.able.typelib.type.DataValue;
-import edu.cmu.rainbow_ui.display.viewcontrol.ViewControl;
-import edu.cmu.rainbow_ui.display.viewcontrol.WidgetLibrary;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.vaadin.ui.Component;
+import com.vaadin.ui.CustomComponent;
+
+import edu.cmu.cs.able.typelib.type.DataValue;
+import edu.cmu.rainbow_ui.display.viewcontrol.ViewControl;
+import edu.cmu.rainbow_ui.display.viewcontrol.WidgetLibrary;
 
 /**
  * Common functions for widgets and a framework to build custom widgets.
@@ -86,7 +89,7 @@ import java.util.Map;
  * @author Denis Anisimov <dbanisimov@cmu.edu>
  * @author Zachary Sweigart <zsweigar@andrew.cmu.edu>
  */
-public abstract class Widget extends CustomComponent implements IUpdatableWidget {
+public abstract class Widget extends CustomComponent implements IWidget, IUpdatableWidget {
 
     /**
      * Identifier of the property displayed by this widget.
@@ -125,6 +128,7 @@ public abstract class Widget extends CustomComponent implements IUpdatableWidget
      *
      * @return the mapping of the widget
      */
+    @Override
     public String getMapping() {
         return mapping;
     }
@@ -134,6 +138,7 @@ public abstract class Widget extends CustomComponent implements IUpdatableWidget
      *
      * @return widget description
      */
+    @Override
     public abstract WidgetDescription getWidgetDescription();
 
     /**
@@ -141,6 +146,7 @@ public abstract class Widget extends CustomComponent implements IUpdatableWidget
      *
      * @return the value of the widget
      */
+    @Override
     public DataValue getValue() {
         return value;
     }
@@ -150,6 +156,7 @@ public abstract class Widget extends CustomComponent implements IUpdatableWidget
      *
      * @param value the value of the widget
      */
+    @Override
     public void setValue(DataValue value) {
         this.value = value;
     }
@@ -177,7 +184,8 @@ public abstract class Widget extends CustomComponent implements IUpdatableWidget
      *
      * @return a clone of the widget
      */
-    public abstract Widget getClone();
+    @Override
+    public abstract IWidget getClone ();
 
     /**
      * Set a property.
@@ -185,17 +193,14 @@ public abstract class Widget extends CustomComponent implements IUpdatableWidget
      * @param propName property name
      * @param propValue property value
      */
+    @Override
     public void setProperty(String propName, Object propValue) throws IllegalArgumentException {
         WidgetPropertyDescription propDescr = getWidgetDescription().getProperties().get(propName);
-        if (propDescr == null) {
-            throw new IllegalArgumentException("Widget doesn't have a property: " + propName);
-        }
-        if (!propDescr.getValueClass().isAssignableFrom(propValue.getClass())) {
-            throw new IllegalArgumentException("Widget property value class missmatch."
-                    + "\n    expected: " + propDescr.getValueClass().toString()
-                    + "\n    actual: " + propValue.getClass().toString()
-            );
-        }
+        if (propDescr == null) throw new IllegalArgumentException("Widget doesn't have a property: " + propName);
+        if (!propDescr.getValueClass().isAssignableFrom(propValue.getClass())) throw new IllegalArgumentException("Widget property value class missmatch."
+                + "\n    expected: " + propDescr.getValueClass().toString()
+                + "\n    actual: " + propValue.getClass().toString()
+                );
         properties.put(propName, propValue);
         onPropertyUpdate();
     }
@@ -216,6 +221,7 @@ public abstract class Widget extends CustomComponent implements IUpdatableWidget
      * @param propName property name
      * @return property value
      */
+    @Override
     public Object getProperty(String propName) {
         return properties.get(propName);
     }
@@ -225,8 +231,14 @@ public abstract class Widget extends CustomComponent implements IUpdatableWidget
      *
      * @return properties map
      */
+    @Override
     public Map<String, Object> getProperties() {
         return Collections.unmodifiableMap(properties);
+    }
+
+    @Override
+    public Component getAsComponent () {
+        return this;
     }
 
     /**

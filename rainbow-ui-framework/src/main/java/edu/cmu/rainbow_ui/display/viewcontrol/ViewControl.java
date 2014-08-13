@@ -23,19 +23,17 @@
  */
 package edu.cmu.rainbow_ui.display.viewcontrol;
 
-import com.vaadin.server.VaadinSession;
 import java.util.ArrayList;
 import java.util.List;
-
-import edu.cmu.cs.able.typelib.type.DataValue;
-import edu.cmu.rainbow_ui.display.AcmeConversionException;
-import edu.cmu.rainbow_ui.display.AcmeSystemViewProvider;
-import edu.cmu.rainbow_ui.display.ISystemViewProvider;
-import edu.cmu.rainbow_ui.display.ui.AbstractRainbowVaadinUI;
-import edu.cmu.rainbow_ui.display.widgets.IUpdatableWidget;
-import edu.cmu.rainbow_ui.display.widgets.Widget;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.vaadin.server.VaadinSession;
+
+import edu.cmu.cs.able.typelib.type.DataValue;
+import edu.cmu.rainbow_ui.display.ui.AbstractRainbowVaadinUI;
+import edu.cmu.rainbow_ui.display.widgets.IUpdatableWidget;
+import edu.cmu.rainbow_ui.display.widgets.IWidget;
 
 /**
  * Maintains a list of all widgets and pushes updates to their visual representation
@@ -50,7 +48,7 @@ public class ViewControl {
      * List of widgets under control. These widgets receives data through view control. They are
      * also updated through view control.
      */
-    private final List<Widget> widgets;
+    private final List<IWidget>           widgets;
     /**
      * List of widgets that should be updated, but not controlled.
      */
@@ -72,7 +70,7 @@ public class ViewControl {
      *
      * @param w a widget to be added to the list of widgets
      */
-    public void addWidget(Widget w) {
+    public void addWidget (IWidget w) {
         widgets.add(w);
     }
 
@@ -81,7 +79,7 @@ public class ViewControl {
      *
      * @param w a widget to be removed from the list of widgets
      */
-    public void removeWidget(Widget w) {
+    public void removeWidget(IWidget w) {
         // ArrayList allows removal by reference
         widgets.remove(w);
     }
@@ -91,7 +89,7 @@ public class ViewControl {
      *
      * @return the list of known widgets
      */
-    public List<Widget> getWidgetList() {
+    public List<IWidget> getWidgetList () {
         return widgets;
     }
 
@@ -137,7 +135,7 @@ public class ViewControl {
             session.lock();
             try {
                 /* Pass the data to all widgets under control */
-                for (Widget widget : widgets) {
+                for (IWidget widget : widgets) {
                     DataValue value;
                     try {
                         value = ui.getSystemViewProvider().getValue(widget.getMapping());
@@ -149,7 +147,7 @@ public class ViewControl {
                 }
 
                 /* Update all widgets */
-                for (Widget widget : widgets) {
+                for (IWidget widget : widgets) {
                     if (widget.isActive()) {
                         widget.update();
                     }

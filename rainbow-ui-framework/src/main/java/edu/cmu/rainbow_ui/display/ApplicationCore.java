@@ -38,7 +38,7 @@ import edu.cmu.rainbow_ui.common.SystemConfiguration;
 import edu.cmu.rainbow_ui.display.config.ViewConfiguration;
 import edu.cmu.rainbow_ui.display.config.YamlViewConfigurationLoader;
 import edu.cmu.rainbow_ui.display.viewcontrol.WidgetLibrary;
-import edu.cmu.rainbow_ui.display.widgets.Widget;
+import edu.cmu.rainbow_ui.display.widgets.IWidget;
 import edu.cmu.rainbow_ui.display.widgets.WidgetDescription;
 import edu.cmu.rainbow_ui.ingestion.AcmeRuntimeAggregator;
 import edu.cmu.rainbow_ui.ingestion.IRuntimeAggregator;
@@ -204,9 +204,8 @@ public class ApplicationCore {
     public static void registerWidgets() {
         Reflections reflection = new Reflections(
                 "edu.cmu.rainbow_ui.display.widgets");
-        Set<Class<? extends Widget>> allClasses = reflection
-                .getSubTypesOf(Widget.class);
-        for (Class<? extends Widget> classObj : allClasses) {
+        Set<Class<? extends IWidget>> allClasses = reflection.getSubTypesOf (IWidget.class);
+        for (Class<? extends IWidget> classObj : allClasses) {
             try {
                 Method method = classObj.getDeclaredMethod("register");
                 method.setAccessible(true);

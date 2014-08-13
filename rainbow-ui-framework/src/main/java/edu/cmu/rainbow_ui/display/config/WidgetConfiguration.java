@@ -23,7 +23,8 @@
  */
 package edu.cmu.rainbow_ui.display.config;
 
-import edu.cmu.rainbow_ui.display.widgets.Widget;
+import edu.cmu.rainbow_ui.display.widgets.IWidget;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,7 +59,7 @@ public class WidgetConfiguration {
      *
      * @param widget widget to make configuration for
      */
-    public WidgetConfiguration(Widget widget) {
+    public WidgetConfiguration(IWidget widget) {
         this.id = widget.getWidgetDescription().getName();
         this.mapping = widget.getMapping();
         properties.putAll(widget.getProperties());

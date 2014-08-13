@@ -42,5 +42,5 @@ public interface WidgetFactory {
      * @param mapping mapping to a parameter in the model
      * @return an instance of the widget
      */
-    public Widget getInstance(String mapping);
+    public IWidget getInstance (String mapping);
 }
