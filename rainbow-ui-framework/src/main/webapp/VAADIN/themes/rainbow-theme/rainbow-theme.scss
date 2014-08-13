@@ -1,0 +1,69 @@
+/* Import the reindeer theme. */
+/* This only allows us to use the mixins defined in it and does not add any styles by itself. */
+@import "../reindeer/reindeer.scss";
+
+/* This contains all of your theme. */
+/* If somebody wants to extend the theme she will include this mixin. */
+@mixin rainbow-theme {
+    /* Include all the styles from the reindeer theme */
+    @include reindeer;
+
+    /* Insert your theme rules here */
+
+    .v-table-cell-wrapper {
+        white-space: normal;
+    }
+
+    /* Graph interactive widgets */
+    .graph-widget {
+        border: 2px solid black;
+        background-color: white;
+    }
+
+    /* Graph interactive widgets */
+    .graph-widget.highlighted {
+        border: 2px solid blue;
+    }
+
+    .v-slot-graph-widget-item {
+        border: 1px solid gray;
+    }
+
+    /* Simple bar */
+    .bar {
+        border: 1px green solid;
+    }
+    .barvalue {
+        text-align: center;
+        z-index: 1;
+    }
+    .barfill {
+        background: palegreen;
+        z-index: 0;
+    }
+    
+    /* Timeline */
+    .currentTimeLoc.popup {
+  		background-color: white;
+  		margin: 2px 1px 1px;
+	    padding: 2px 1px 1px;
+	    border-top: medium;
+	    border-right: medium;
+	    border-bottom: medium;
+	    border-left: medium;
+		border-style:solid;
+		border-color:#000000;
+	    font-size: 10pt;
+	    letter-spacing: normal;
+    }
+
+    /* Breadcrumbs */
+    .v-horizontallayout-breadcrumbs {
+        font-weight: bold;
+    }
+    
+    /* For bold captions */
+    .v-caption {
+        font-weight: bold;        
+    }
+}

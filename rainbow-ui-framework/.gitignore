@@ -1,0 +1,11 @@
+# Generated files
+target
+src/main/webapp/VAADIN/widgetsets/
+src/main/webapp/VAADIN/themes/rainbow-theme/styles.css
+# Netbeans stuff
+.classpath
+.project
+.settings/
+nb-configuration.xml
+# Temp test files
+tmp/

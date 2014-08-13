@@ -1,0 +1,135 @@
+graph:
+    elements:
+        ZNewsSys.Server0:
+            visinformation:
+                x : 263
+                y : -2
+            properties:
+                load :
+                    widget : 
+                        id      : SimpleBar
+                        mapping : ZNewsSys.Server0.load
+                        properties :
+                            name : Server0.load
+                            max  : 100.0
+        ZNewsSys.Server1:
+            visinformation:
+                x : 262
+                y : 83
+            properties:
+                load :
+                    widget : 
+                        id      : SimpleBar
+                        mapping : ZNewsSys.Server1.load
+                        properties :
+                            name : Server1.load
+                            max  : 100.0
+        ZNewsSys.ServerB0:
+            visinformation:
+                x : 258
+                y : 263
+            properties:
+                load :
+                    widget : 
+                        id      : SimpleBar
+                        mapping : ZNewsSys.ServerB0.load
+                        properties :
+                            name : ServerB0.load
+                            max  : 100.0
+        ZNewsSys.ServerB0.details1.details1.Application1:
+            visinformation:
+                x : 100
+                y : -100
+        ZNewsSys.ServerB0.details1.details1.Application2:
+            visinformation:
+                x : -100
+                y : 100
+        ZNewsSys.ServerB0.details2.details2.Application3:
+            visinformation:
+                x : -100
+                y : -100
+        ZNewsSys.ServerB0.details2.details2.Application4:
+            visinformation:
+                x : 100
+                y : 100
+        ZNewsSys.LB0:
+            visinformation:
+                x : 81
+                y : 69
+            properties:
+                load :
+                    widget : 
+                        id      : SimpleBar
+                        mapping : ZNewsSys.LB0.load
+                        properties :
+                            name : LB0.load
+                            max  : 100.0
+        ZNewsSys.DB0:
+            visinformation:
+                x : 479
+                y : 61
+            properties:
+                load :
+                    widget : 
+                        id      : SimpleBar
+                        mapping : ZNewsSys.DB0.load
+                        properties :
+                            name : LB0.load
+                            max  : 100.0
+        ZNewsSys.Client0:
+            visinformation:
+                x : -92
+                y : -12
+            properties:
+                experRespTime :
+                    widget : 
+                        id      : SimpleBar
+                        mapping : ZNewsSys.Client0.experRespTime
+                        properties :
+                            name : Client0.experRespTime
+                            max  : 100.0
+        ZNewsSys.Client1:
+            visinformation:
+                x : -92
+                y : 210
+            properties:
+                experRespTime :
+                    widget : 
+                        id      : SimpleBar
+                        mapping : ZNewsSys.Client1.experRespTime
+                        properties :
+                            name : Client1.experRespTime
+                            max  : 100.0
+        ZNewsSys.httpConn_0_0:
+            visinformation:
+                x : 1
+                y : 161
+        ZNewsSys.httpConn_1_0:
+            visinformation:
+                x : 0
+                y : 26
+        ZNewsSys.proxyConn_0_0:
+            visinformation:
+                x : 178
+                y : 32
+        ZNewsSys.proxyConn_1_0:
+            visinformation:
+                x : 175
+                y : 133
+        ZNewsSys.dbConn_0_0:
+            visinformation:
+                x : 377
+                y : 27
+        ZNewsSys.dbConn_1_0:
+            visinformation:
+                x : 374
+                y : 125
+        ZNewsSys.ProxyConnT0:
+            visinformation:
+                x : 177
+                y : 84
+        ZNewsSys.SQLConnT0:
+            visinformation:
+                x : 376
+                y : 77
+

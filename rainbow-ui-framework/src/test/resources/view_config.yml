@@ -1,0 +1,25 @@
+!!edu.cmu.rainbow_ui.display.config.ViewConfiguration
+dashboard:
+    pages:
+        - name: page1
+          widgets:
+            - id        : BarChart
+              mapping   : Server0.load
+              properties :
+                  name : Server0 Load
+                  max  : 100.0
+        - name: page2
+          widgets:
+            - id        : PieChart
+              mapping   : Server2.load
+graph:
+    elements:
+        ZNewsSys.Server0:
+            properties:
+                load :
+                    widget : 
+                        id      : SimpleBar
+                        mapping : ZNewsSys.Server0.load
+                        properties :
+                            name : Server0.load
+                            max  : 100.0

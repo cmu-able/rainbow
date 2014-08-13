@@ -1,0 +1,13 @@
+!!edu.cmu.rainbow_ui.display.config.ViewConfiguration
+dashboard:
+    pages:
+        - name: page1
+          widgets:
+            - id        : Test
+              mapping   : Server0.load
+            - id        : Test
+              mapping   : Server0.fidelity
+        - name: page2
+          widgets:
+            - id        : Test
+              mapping   : Server0.load
