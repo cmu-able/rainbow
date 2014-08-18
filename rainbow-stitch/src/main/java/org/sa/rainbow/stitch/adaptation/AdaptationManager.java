@@ -157,8 +157,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
     }
 
     private void initConnectors () throws RainbowConnectionException {
-        m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort (Rainbow.instance ()
-                .getRainbowMaster ().modelsManager ());
+        m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort ();
         m_modelChangePort.subscribe (m_modelTypecheckingChanged, this);
         m_modelsManagerPort = RainbowPortFactory.createModelsManagerRequirerPort ();
     }
@@ -169,7 +168,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
         m_model = (AcmeModelInstance )m_modelsManagerPort.<IAcmeSystem> getModelInstance (modelType, modelName);
 
         m_utilityModel = m_modelsManagerPort
-                .<UtilityPreferenceDescription> getModelInstance ("Utility", modelName).getModelInstance ();
+                .<UtilityPreferenceDescription> getModelInstance ("UtilityModel", modelName).getModelInstance ();
 //        for (String k : m_utilityModel.utilities.keySet ()) {
 //            UtilityAttributes ua = m_utilityModel.utilities.get (k);
 //            UtilityFunction uf = new UtilityFunction (k, ua.label, ua.mapping, ua.desc, ua.values);

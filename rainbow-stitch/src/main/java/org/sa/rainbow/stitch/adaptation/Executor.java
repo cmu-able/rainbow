@@ -110,6 +110,7 @@ public class Executor extends AbstractRainbowRunnable implements IAdaptationExec
             // retrieve the next strategy in the queue and execute it
             Strategy strategy = m_queue.poll();
             Object[] args = m_args.remove(strategy);
+            strategy.setExecutor (this);
             log("Executing Strategy " + strategy.getName() + "...");
             Strategy.Outcome o = null;
             try {

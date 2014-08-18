@@ -24,7 +24,7 @@ public class ExecutionHistoryCommandFactory extends ModelCommandFactory<Map<Stri
     private ExecutionHistoryModelInstance m_modelInstance;
 
     public ExecutionHistoryCommandFactory (ExecutionHistoryModelInstance model) {
-        m_modelInstance = model;
+        super (ExecutionHistoryModelInstance.class, model);
     }
 
     public AbstractRainbowModelOperation<ExecutionHistoryData, Map<String, ExecutionHistoryData>> recordTacticDurationCmd (String qualifiedName, long dur) {
@@ -44,6 +44,10 @@ public class ExecutionHistoryCommandFactory extends ModelCommandFactory<Map<Stri
     public AbstractSaveModelCmd<Map<String, ExecutionHistoryData>> saveCommand (String location)
             throws RainbowModelException {
         return null;
+    }
+
+    @Override
+    protected void fillInCommandMap () {
     }
 
 }

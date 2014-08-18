@@ -6,7 +6,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
 
-import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.analysis.IRainbowAnalysis;
 import org.sa.rainbow.core.error.RainbowConnectionException;
@@ -148,8 +147,7 @@ IRainbowModelChangeCallback<Map<String, ExecutionHistoryData>> {
     @Override
     public void initialize (IRainbowReportingPort port) throws RainbowConnectionException {
         m_reportingPort = port;
-        m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort (Rainbow.instance ()
-                .getRainbowMaster ().modelsManager ());
+        m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort ();
         m_modelsManagerPort = RainbowPortFactory.createModelsManagerRequirerPort ();
     }
 
@@ -174,5 +172,17 @@ IRainbowModelChangeCallback<Map<String, ExecutionHistoryData>> {
         catch (IOException e) {
             m_reportingPort.error (RainbowComponentT.ANALYSIS, "Could not save tactic execution history file");
         }
+    }
+
+    @Override
+    public void setProperty (String key, String value) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public String getProperty (String key) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
