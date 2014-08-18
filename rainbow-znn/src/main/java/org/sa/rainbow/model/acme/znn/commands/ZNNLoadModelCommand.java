@@ -1,5 +1,6 @@
 package org.sa.rainbow.model.acme.znn.commands;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
@@ -75,7 +76,9 @@ public class ZNNLoadModelCommand extends AbstractLoadModelCmd<IAcmeSystem> {
     @Override
     protected void subExecute () throws RainbowException {
         try {
-            IAcmeResource resource = StandaloneResourceProvider.instance ().acmeResourceForObject (m_inputStream);
+            IAcmeResource resource = StandaloneResourceProvider.instance ()
+                    .acmeResourceForObject (
+                            new File (getOriginalSource ()));
             m_result = new ZNNModelUpdateOperatorsImpl (resource.getModel ().getSystem (m_systemName),
                     getOriginalSource ());
 

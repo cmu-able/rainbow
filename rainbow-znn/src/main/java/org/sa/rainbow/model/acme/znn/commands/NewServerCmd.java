@@ -12,6 +12,9 @@ import org.acmestudio.acme.model.command.IAcmeCommand;
 import org.acmestudio.acme.model.command.IAcmeComponentCreateCommand;
 import org.acmestudio.acme.model.command.IAcmeConnectorCreateCommand;
 import org.acmestudio.acme.model.command.IAcmePortCreateCommand;
+import org.acmestudio.acme.model.command.IAcmePropertyCommand;
+import org.acmestudio.acme.model.command.IAcmePropertyCreateCommand;
+import org.acmestudio.acme.model.util.core.UMStringValue;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 
@@ -30,10 +33,16 @@ public class NewServerCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
 
     private IAcmeComponentCreateCommand m_serverCommand;
 
-    public NewServerCmd (String commandName, AcmeModelInstance model, String lb, String name) {
-        super (commandName, model, lb, name);
+    private String                      m_host;
+
+    private String                      m_port;
+
+    public NewServerCmd (String commandName, AcmeModelInstance model, String lb, String name, String host, String port) {
+        super (commandName, model, lb, name, host, port);
         m_lb = lb;
         m_name = name;
+        m_host = host;
+        m_port = port;
     }
 
 
@@ -68,6 +77,12 @@ public class NewServerCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
         // attachment <m_name>.http to proxyconn.rec;
         final IAcmeAttachmentCommand attachServerEnd = cf.attachmentCreateCommand (getModel (), m_name + ".http",
                 lbName + ".rec");
+
+        final IAcmePropertyCommand setLocation = cf.propertyCreateCommand (m_serverCommand, "deploymentLocation",
+                "String",
+                new UMStringValue (m_host));
+        final IAcmePropertyCreateCommand setPort = cf.propertyCreateCommand (m_serverCommand, "httpPort", "String",
+                new UMStringValue (m_port));
         List<IAcmeCommand<?>> cmds = new LinkedList<> ();
         cmds.add (m_serverCommand);
         cmds.add (httpCreateCommand);
@@ -75,6 +90,9 @@ public class NewServerCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
         cmds.add (lbPortCmd);
         cmds.add (attachLBEnd);
         cmds.add (attachServerEnd);
+        cmds.add (setLocation);
+        cmds.add (setPort);
+
         return cmds;
     }
 

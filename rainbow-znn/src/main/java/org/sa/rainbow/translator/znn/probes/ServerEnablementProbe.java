@@ -12,11 +12,14 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.text.MessageFormat;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import org.sa.rainbow.translator.probes.AbstractRunnableProbe;
 
 public class ServerEnablementProbe extends AbstractRunnableProbe {
-    private static final String PROBE_TYPE = "serverenablement";
+    private static final String PROBE_TYPE = "enablementprobe";
     private String              m_configurationFile;
 
     public ServerEnablementProbe (String id, long sleepTime) {
@@ -32,43 +35,75 @@ public class ServerEnablementProbe extends AbstractRunnableProbe {
 
     @Override
     public void run () {
+
         Path filePath = new File (m_configurationFile).toPath ();
         Path dir = filePath.getParent ();
         if (!dir.toFile ().exists ()) {
-            LOGGER.error (MessageFormat.format ("The directory to watch for configuration changes: ''{0}'' does not exist", m_configurationFile));
+            LOGGER.error (MessageFormat.format (
+                    "The directory to watch for configuration changes: ''{0}'' does not exist", m_configurationFile));
             return;
         }
 
+        Set<String> initialIPs = readBalancerFile (filePath);
+
         try {
             WatchService watcher = FileSystems.getDefault ().newWatchService ();
-            WatchKey key = dir.register (watcher, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_CREATE);
+            WatchKey key = dir.register (watcher, StandardWatchEventKinds.ENTRY_MODIFY,
+                    StandardWatchEventKinds.ENTRY_CREATE);
 
             Thread currentThread = Thread.currentThread ();
             while (thread () == currentThread && isActive ()) {
                 try {
                     Thread.sleep (sleepTime ());
                 }
-                catch (InterruptedException e) {}
+                catch (InterruptedException e) {
+                }
                 key = watcher.poll ();
                 if (key != null) {
                     for (WatchEvent<?> event : key.pollEvents ()) {
                         WatchEvent.Kind<?> kind = event.kind ();
-                        if (kind == StandardWatchEventKinds.ENTRY_MODIFY || kind == StandardWatchEventKinds.ENTRY_CREATE) {
+                        if (kind == StandardWatchEventKinds.ENTRY_MODIFY
+                                || kind == StandardWatchEventKinds.ENTRY_CREATE) {
                             WatchEvent<Path> ev = (WatchEvent<Path> )event;
                             Path filename = ev.context ();
-                            if (filename.equals (filePath)) {
-                                try (BufferedReader reader = Files.newBufferedReader (filePath, Charset.forName ("US-ASCII"))) {
-                                    String line = null;
-//                                while ((line = reader.readLine ()))
+                            if (filename.equals (filePath.getFileName ())) {
+                                Set<String> oldIPs = new HashSet<> (initialIPs);
+                                initialIPs = readBalancerFile (filePath);
+                                Set<String> ipsInFile = new HashSet<> (initialIPs);
+                                for (Iterator i = ipsInFile.iterator (); i.hasNext ();) {
+                                    String ip = (String )i.next ();
+                                    if (oldIPs.contains (ip)) {
+                                        i.remove ();
+                                        oldIPs.remove (ip);
+                                    }
                                 }
-                                catch (IOException e) {
-                                    // TODO Auto-generated catch block
-                                    e.printStackTrace();
+                                // oldIPs now contains IPs that are no longer active
+                                // ipsInFile now contains IPs that are new
+                                StringBuffer report = new StringBuffer ();
+                                if (!oldIPs.isEmpty ()) {
+                                    for (String ip : oldIPs) {
+                                        report.append ("f ");
+                                        report.append (ip);
+                                        report.append (" ");
+                                    }
                                 }
-
+                                if (!ipsInFile.isEmpty ()) {
+                                    for (String ip : ipsInFile) {
+                                        report.append ("o ");
+                                        report.append (ip);
+                                        report.append (" ");
+                                    }
+                                }
+                                if (report.length () > 0) {
+                                    report.deleteCharAt (report.length () - 1);
+                                    reportData (report.toString ());
+                                }
                             }
                         }
                     }
+                    watcher = FileSystems.getDefault ().newWatchService ();
+                    key = dir.register (watcher, StandardWatchEventKinds.ENTRY_MODIFY,
+                            StandardWatchEventKinds.ENTRY_CREATE);
                 }
             }
         }
@@ -76,6 +111,25 @@ public class ServerEnablementProbe extends AbstractRunnableProbe {
             LOGGER.error (MessageFormat.format ("Could not start a watcher on: ''{0}''", m_configurationFile), e);
 
         }
+    }
+
+    Set<String> readBalancerFile (Path filePath) {
+        Set<String> ipsInFile = new HashSet<> ();
+        try (BufferedReader reader = Files.newBufferedReader (filePath, Charset.forName ("US-ASCII"))) {
+            String line = null;
+            while ((line = reader.readLine ()) != null) {
+                String[] tokens = line.split (" ");
+                if ("BalancerMember".equals (tokens[0])) {
+                    tokens = tokens[1].split ("/");
+                    ipsInFile.add (tokens[2]);
+                }
+            }
+        }
+        catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace ();
+        }
+        return ipsInFile;
     }
 
 }

@@ -13,15 +13,12 @@ import org.acmestudio.acme.PropertyHelper;
 import org.acmestudio.acme.element.IAcmeComponent;
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.acmestudio.acme.element.property.IAcmeProperty;
-import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.gauges.RegularPatternGauge;
 import org.sa.rainbow.core.models.IModelInstance;
-import org.sa.rainbow.core.models.IModelInstanceProvider;
 import org.sa.rainbow.core.models.ModelReference;
-import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
@@ -101,15 +98,7 @@ public class DummyDiagnosisGauge extends RegularPatternGauge {
 
         m_modelPort = RainbowPortFactory.createModelsManagerRequirerPort ();
 
-        m_modelChanges = RainbowPortFactory.createModelChangeBusSubscriptionPort (new IModelInstanceProvider () {
-
-            @Override
-            public <T> IModelInstance<T> getModelInstance (String modelType, String modelName) {
-                ModelsManager modelsManager = Rainbow.instance ().getRainbowMaster ().modelsManager ();
-                IModelInstance<T> modelInstance = modelsManager.<T> getModelInstance (modelType, modelName);
-                return modelInstance;
-            }
-        });
+        m_modelChanges = RainbowPortFactory.createModelChangeBusSubscriptionPort ();
 
         m_modelChanges.subscribe (new IRainbowChangeBusSubscription () {
 

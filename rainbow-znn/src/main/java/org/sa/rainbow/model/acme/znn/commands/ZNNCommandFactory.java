@@ -34,7 +34,8 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
         super.fillInCommandMap ();
         m_commandMap.put ("setResponseTime".toLowerCase (), SetResponseTimeCmd.class);
         m_commandMap.put ("setLoad".toLowerCase (), SetLoadCmd.class);
-        m_commandMap.put ("connectServer".toLowerCase (), NewServerCmd.class);
+        m_commandMap.put ("connectNewServer".toLowerCase (), NewServerCmd.class);
+        m_commandMap.put ("deleteServer".toLowerCase (), RemoveServerCmd.class);
         m_commandMap.put ("setReqServiceRate".toLowerCase (), SetReqServiceRateCmd.class);
         m_commandMap.put ("setByteServiceRate".toLowerCase (), SetByteServiceRateCmd.class);
         m_commandMap.put ("setLatencyRate".toLowerCase (), SetLatencyRateCmd.class);
@@ -53,7 +54,6 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
         m_commandMap.put ("forceReauthentication".toLowerCase (), ForceReauthenticationCmd.class);
         m_commandMap.put ("SetCaptchaResponse".toLowerCase (), SetCaptchaResponseCmd.class);
         m_commandMap.put ("SetAuthenticationResponse".toLowerCase (), SetAuthenticationResponseCmd.class);
-
     }
 
 
@@ -62,7 +62,7 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
         if (ModelHelper.getAcmeSystem (client) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        SetResponseTimeCmd cmd = new SetResponseTimeCmd ("setResponseTime", m_modelInstance,
+        SetResponseTimeCmd cmd = new SetResponseTimeCmd ("setResponseTime", (AcmeModelInstance )m_modelInstance,
                 client.getQualifiedName (), Float.toString (rt));
         return cmd;
     }
@@ -72,7 +72,7 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
         if (ModelHelper.getAcmeSystem (server) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new SetLoadCmd ("setLoad", m_modelInstance, server.getQualifiedName (),
+        return new SetLoadCmd ("setLoad", (AcmeModelInstance )m_modelInstance, server.getQualifiedName (),
                 Float.toString (load));
     }
 
@@ -81,7 +81,7 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
         if (ModelHelper.getAcmeSystem (conn) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new SetLatencyRateCmd ("setLatency", m_modelInstance, conn.getQualifiedName (),
+        return new SetLatencyRateCmd ("setLatency", (AcmeModelInstance )m_modelInstance, conn.getQualifiedName (),
                 Float.toString (latencyRate));
     }
 
@@ -90,7 +90,8 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
         if (ModelHelper.getAcmeSystem (server) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new SetLastPageHitCmd ("setLastPageHit", m_modelInstance, server.getQualifiedName (), page);
+        return new SetLastPageHitCmd ("setLastPageHit", (AcmeModelInstance )m_modelInstance,
+                server.getQualifiedName (), page);
     }
 
     public SetByteServiceRateCmd setByteServiceRateCmd (IAcmeComponent server, float load) {
@@ -98,7 +99,8 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
         if (ModelHelper.getAcmeSystem (server) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new SetByteServiceRateCmd ("setByteServiceRate", m_modelInstance, server.getQualifiedName (),
+        return new SetByteServiceRateCmd ("setByteServiceRate", (AcmeModelInstance )m_modelInstance,
+                server.getQualifiedName (),
                 Float.toString (load));
     }
 
@@ -107,7 +109,8 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
         if (ModelHelper.getAcmeSystem (server) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new SetReqServiceRateCmd ("setReqServiceRate", m_modelInstance, server.getQualifiedName (),
+        return new SetReqServiceRateCmd ("setReqServiceRate", (AcmeModelInstance )m_modelInstance,
+                server.getQualifiedName (),
                 Float.toString (load));
     }
 
@@ -117,7 +120,7 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
         if (ModelHelper.getAcmeSystem (httpConn) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new SetLatencyCmd ("setLatency", m_modelInstance, httpConn.getQualifiedName (),
+        return new SetLatencyCmd ("setLatency", (AcmeModelInstance )m_modelInstance, httpConn.getQualifiedName (),
                 Float.toString (latency));
     }
     public SetNumRedirectedRequestsCmd setNumRedirectedRequestsCmd (IAcmeConnector httpConn, float serviceRate) {
@@ -125,7 +128,7 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
         if (ModelHelper.getAcmeSystem (httpConn) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new SetNumRedirectedRequestsCmd ("setNumRedirectedRequests", m_modelInstance,
+        return new SetNumRedirectedRequestsCmd ("setNumRedirectedRequests", (AcmeModelInstance )m_modelInstance,
                 httpConn.getQualifiedName (),
                 Float.toString (serviceRate));
     }
@@ -135,7 +138,7 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
         if (ModelHelper.getAcmeSystem (httpConn) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new SetNumRequestsClientErrorCmd ("setNumRequestsClientError", m_modelInstance,
+        return new SetNumRequestsClientErrorCmd ("setNumRequestsClientError", (AcmeModelInstance )m_modelInstance,
                 httpConn.getQualifiedName (),
                 Float.toString (serviceRate));
     }
@@ -145,7 +148,7 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
         if (ModelHelper.getAcmeSystem (httpConn) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new SetNumRequestsServerErrorCmd ("setNumRequestsServerError", m_modelInstance,
+        return new SetNumRequestsServerErrorCmd ("setNumRequestsServerError", (AcmeModelInstance )m_modelInstance,
                 httpConn.getQualifiedName (),
                 Float.toString (serviceRate));
     }
@@ -155,7 +158,7 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
         if (ModelHelper.getAcmeSystem (httpConn) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new SetNumSuccessfulRequestsCmd ("setNumSuccessfulRequests", m_modelInstance,
+        return new SetNumSuccessfulRequestsCmd ("setNumSuccessfulRequests", (AcmeModelInstance )m_modelInstance,
                 httpConn.getQualifiedName (),
                 Float.toString (serviceRate));
     }
@@ -165,7 +168,8 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
         if (ModelHelper.getAcmeSystem (lb) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new SetCaptchaEnabledCmd ("setCaptchaEnabled", m_modelInstance, lb.getQualifiedName (),
+        return new SetCaptchaEnabledCmd ("setCaptchaEnabled", (AcmeModelInstance )m_modelInstance,
+                lb.getQualifiedName (),
                 Boolean.toString (enabled));
     }
 
@@ -182,7 +186,7 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
             }
             sb.deleteCharAt (sb.length () - 1);
         }
-        return new SetBlackholedCmd ("setBlackholed", m_modelInstance, server.getQualifiedName (),
+        return new SetBlackholedCmd ("setBlackholed", (AcmeModelInstance )m_modelInstance, server.getQualifiedName (),
                 sb.toString ());
     }
 
@@ -199,7 +203,8 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
             }
             sb.deleteCharAt (sb.length () - 1);
         }
-        return new SetThrottledCmd ("setThrottled", m_modelInstance, server.getQualifiedName (), sb.toString ());
+        return new SetThrottledCmd ("setThrottled", (AcmeModelInstance )m_modelInstance, server.getQualifiedName (),
+                sb.toString ());
     }
 
     public AcmeModelOperation<IAcmeProperty> forceReauthentication (IAcmeComponent server) {
@@ -207,7 +212,8 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
         if (ModelHelper.getAcmeSystem (server) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new ForceReauthenticationCmd ("forceReauthentication", m_modelInstance, server.getQualifiedName ());
+        return new ForceReauthenticationCmd ("forceReauthentication", (AcmeModelInstance )m_modelInstance,
+                server.getQualifiedName ());
     }
 
     public AcmeModelOperation<IAcmeProperty> setMaliciousnessCmd (IAcmeComponent client, float maliciousness) {
@@ -215,16 +221,29 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
         if (ModelHelper.getAcmeSystem (client) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new SetMaliciousnessCmd ("setMaliciousness", m_modelInstance, client.getQualifiedName (),
+        return new SetMaliciousnessCmd ("setMaliciousness", (AcmeModelInstance )m_modelInstance,
+                client.getQualifiedName (),
                 Float.toString (maliciousness));
     }
 
-    public AcmeModelOperation<IAcmeComponent> connectNewServerCmd (IAcmeComponent proxy, String name) {
+    public AcmeModelOperation<IAcmeComponent> connectNewServerCmd (IAcmeComponent proxy,
+            String name,
+            String deploymentLocation,
+            String port) {
         assert proxy.declaresType ("ProxyT");
         if (ModelHelper.getAcmeSystem (proxy) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new NewServerCmd ("connectServer", m_modelInstance, proxy.getQualifiedName (), name);
+        return new NewServerCmd ("connectNewServer", (AcmeModelInstance )m_modelInstance, proxy.getQualifiedName (),
+                name,
+                deploymentLocation, port);
+    }
+
+    public AcmeModelOperation<IAcmeComponent> deleteServerCmd (IAcmeComponent server) {
+        assert server.declaresType ("ServerT");
+        if (ModelHelper.getAcmeSystem (server) != m_modelInstance.getModelInstance ())
+            throw new IllegalArgumentException ("Cannot delete a server that is not part of this model");
+        return new RemoveServerCmd ("removeServer", (AcmeModelInstance )m_modelInstance, server.getQualifiedName ());
     }
 
     public AcmeModelOperation<IAcmeProperty> enableServerCmd (IAcmeComponent server, boolean enabled) {
@@ -232,7 +251,7 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
         if (ModelHelper.getAcmeSystem (server) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new EnableServerCmd ("enableServer", m_modelInstance, server.getQualifiedName (),
+        return new EnableServerCmd ("enableServer", (AcmeModelInstance )m_modelInstance, server.getQualifiedName (),
                 Boolean.toString (enabled));
     }
 
@@ -241,7 +260,7 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
         if (ModelHelper.getAcmeSystem (server) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new SetFidelityCmd ("setFidelity", m_modelInstance, server.getQualifiedName (),
+        return new SetFidelityCmd ("setFidelity", (AcmeModelInstance )m_modelInstance, server.getQualifiedName (),
                 fidelity);
     }
 
@@ -250,7 +269,8 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
         if (ModelHelper.getAcmeSystem (client) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new SetCaptchaResponseCmd ("setCaptchaResponse", m_modelInstance, client.getQualifiedName (),
+        return new SetCaptchaResponseCmd ("setCaptchaResponse", (AcmeModelInstance )m_modelInstance,
+                client.getQualifiedName (),
                 Integer.toString (response));
     }
 
@@ -259,9 +279,10 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
         if (ModelHelper.getAcmeSystem (client) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new SetAuthenticationResponseCmd ("setAuthenticationResponse", m_modelInstance,
+        return new SetAuthenticationResponseCmd ("setAuthenticationResponse", (AcmeModelInstance )m_modelInstance,
                 client.getQualifiedName (), Integer.toString (response));
     }
+
 
 
 

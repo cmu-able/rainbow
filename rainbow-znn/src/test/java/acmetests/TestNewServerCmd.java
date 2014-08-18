@@ -28,7 +28,8 @@ public class TestNewServerCmd extends DefaultTCase {
         assertTrue (sys.getDeclaredTypes ().iterator ().next ().isSatisfied ());
         ZNNModelUpdateOperatorsImpl znn = new ZNNModelUpdateOperatorsImpl (sys, "src/test/resources/acme/znn.acme");
         IAcmeComponent proxy = sys.getComponent ("lbproxy");
-        AcmeModelOperation<IAcmeComponent> cns = znn.getCommandFactory ().connectNewServerCmd (proxy, "server");
+        AcmeModelOperation<IAcmeComponent> cns = znn.getCommandFactory ().connectNewServerCmd (proxy, "server",
+                "10.5.6.6", "1080");
         IModelChangeBusPort announcePort = new IModelChangeBusPort () {
 
             @Override
@@ -54,8 +55,8 @@ public class TestNewServerCmd extends DefaultTCase {
 
             }
         };
-        List<? extends IRainbowMessage> generatedEvents = cns.execute (znn, announcePort);
         assertTrue (cns.canExecute ());
+        List<? extends IRainbowMessage> generatedEvents = cns.execute (znn, announcePort);
         IAcmeComponent server = cns.getResult ();
         assertTrue (cns.canUndo ());
         assertFalse (cns.canExecute ());
@@ -67,7 +68,7 @@ public class TestNewServerCmd extends DefaultTCase {
         outputMessages (generatedEvents);
         checkEventProperties (generatedEvents);
 
-        cns = znn.getCommandFactory ().connectNewServerCmd (proxy, "server");
+        cns = znn.getCommandFactory ().connectNewServerCmd (proxy, "server", "10.5.6.6", "1080");
 
         generatedEvents = cns.execute (znn, announcePort);
         server = cns.getResult ();
