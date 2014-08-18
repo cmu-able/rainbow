@@ -13,12 +13,10 @@ import org.sa.rainbow.core.models.commands.AbstractSaveModelCmd;
 public class AcmeSaveModelCommand extends AbstractSaveModelCmd<IAcmeSystem> {
 
     private String m_systemName;
-    private AcmeModelInstance m_model;
 
     public AcmeSaveModelCommand (String systemName, AcmeModelInstance model, OutputStream os) {
         super ("SaveAcmeModel", null, systemName, os, "");
         m_systemName = systemName;
-        m_model = model;
     }
 
     @Override

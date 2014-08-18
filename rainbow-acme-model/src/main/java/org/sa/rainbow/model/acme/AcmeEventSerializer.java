@@ -11,7 +11,6 @@ import org.acmestudio.acme.core.IAcmeNamedObject;
 import org.acmestudio.acme.core.resource.RegionManager;
 import org.acmestudio.acme.element.IAcmeElementInstance;
 import org.acmestudio.acme.element.IAcmeElementTypeRef;
-import org.acmestudio.acme.element.IAcmeReference;
 import org.acmestudio.acme.model.event.AcmeAttachmentEvent;
 import org.acmestudio.acme.model.event.AcmeBindingEvent;
 import org.acmestudio.acme.model.event.AcmeComponentEvent;
@@ -203,6 +202,8 @@ public class AcmeEventSerializer {
                 }
                 catch (Exception e) {
                 }
+            default:
+                break;
             }
         }
         catch (RainbowException e) {
@@ -249,19 +250,6 @@ public class AcmeEventSerializer {
 
             declaredTypes.deleteCharAt (declaredTypes.length () - 1);
             msg.setProperty (AcmeModelOperation.INSTANTIATED_TYPES_PROP, declaredTypes.toString ());
-        }
-    }
-
-    private void addTypeInformation (AcmeEvent event, IRainbowMessage msg) throws RainbowException {
-        switch (event.getType ()) {
-        case ASSIGN_DECLARED_TYPE:
-        case ASSIGN_INSTANTIATED_TYPE:
-        case REMOVE_DECLARED_TYPE:
-        case REMOVE_INSTANTIATED_TYPE:
-            if (event.getData (event.getType ()) != null) {
-                msg.setProperty (AcmeModelOperation.TYPE_PROP, (((IAcmeReference )event.getData (event.getType ()))).getReferencedName ());
-            }
-
         }
     }
 

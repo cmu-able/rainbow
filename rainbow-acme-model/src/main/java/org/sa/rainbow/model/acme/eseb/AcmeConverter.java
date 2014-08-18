@@ -157,14 +157,15 @@ public class AcmeConverter implements TypelibJavaConversionRule {
                 String serialization = converter.<String> to_java (sdv.value (sdt.field ("serialization")),
                         String.class);
                 String modelClass = converter.<String> to_java (sdv.value (sdt.field ("cls")), String.class);
-                String modelType = converter.<String> to_java (sdv.value (sdt.field ("type")), String.class);
-                String modelName = converter.<String> to_java (sdv.value (sdt.field ("name")), String.class);
+//                String modelType = converter.<String> to_java (sdv.value (sdt.field ("type")), String.class);
+//                String modelName = converter.<String> to_java (sdv.value (sdt.field ("name")), String.class);
                 String systemName = converter.<String> to_java (sdv.value (sdt.field ("system_name")), String.class);
                 String source = converter.<String> to_java (sdv.value (sdt.field ("source")), String.class);
                 String additionalInfo = converter.<String> to_java (sdv.value (sdt.field ("additional_info")),
                         String.class);
+                this.getClass ();
                 // First, check that the class for the model is loaded, otherwise all is for naught
-                Class<?> modelClazz = this.getClass ().forName (modelClass);
+                Class<?> modelClazz = Class.forName (modelClass);
                 IAcmeResource resource = StandaloneResourceProvider.instance ().acmeResourceForObject (
                         new ByteArrayInputStream (serialization.getBytes ()));
 //                StandaloneResourceProvider.instance ().makeReadOnly (resource);
@@ -184,6 +185,7 @@ public class AcmeConverter implements TypelibJavaConversionRule {
                 }
                 Constructor<?> constructor = modelClazz.getConstructor (IAcmeSystem.class, String.class);
                 Object r = constructor.newInstance (resource.getModel ().getSystem (systemName), source);
+                @SuppressWarnings ("unchecked")
                 T o = (T )r;
                 return o;
 

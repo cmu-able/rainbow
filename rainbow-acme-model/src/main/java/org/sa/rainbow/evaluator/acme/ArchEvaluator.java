@@ -2,7 +2,9 @@ package org.sa.rainbow.evaluator.acme;
 
 import java.text.MessageFormat;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -50,10 +52,10 @@ IRainbowModelChangeCallback<IAcmeSystem> {
 
     public static final String                     NAME                         = "Rainbow Acme Architecture Constraint Evaluator";
 
-    /** Reference to the Rainbow model */
-    private boolean                                m_adaptationNeeded           = false;
     private IModelChangeBusSubscriberPort          m_modelChangePort;
     private IModelUSBusPort                        m_modelUSPort;
+
+    Map<String, String>                            properties                   = new HashMap<> ();
 
     /** Matches the end of changes to the model **/
     private IRainbowChangeBusSubscription          m_modelChangeSubscriber      = new IRainbowChangeBusSubscription () {
@@ -244,6 +246,7 @@ IRainbowModelChangeCallback<IAcmeSystem> {
     @Override
     public void onEvent (ModelReference ref, IRainbowMessage message) {
         // Assuming that the model manager is local, otherwise this call will be slow when done this often
+        @SuppressWarnings ("rawtypes")
         IModelInstance model = m_modelsManagerPort.getModelInstance (ref.getModelType (), ref.getModelName ());
         if (model instanceof AcmeModelInstance) {
             m_modelCheckQ.offer ((AcmeModelInstance )model);
@@ -258,6 +261,16 @@ IRainbowModelChangeCallback<IAcmeSystem> {
     @Override
     protected RainbowComponentT getComponentType () {
         return RainbowComponentT.ANALYSIS;
+    }
+
+    @Override
+    public void setProperty (String key, String value) {
+        properties.put (key, value);
+    }
+
+    @Override
+    public String getProperty (String key) {
+        return properties.get (key);
     }
 
 }

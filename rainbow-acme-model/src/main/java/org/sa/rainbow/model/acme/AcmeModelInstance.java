@@ -119,6 +119,7 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
         m_system = model;
         // Add listener to update exponential averages for the properties
         final AcmeEventListenerAdapter propertyListener = new AcmeEventListenerAdapter () {
+            @SuppressWarnings ("rawtypes")
             @Override
             public void propertyValueSet (AcmePropertyEvent event) {
                 try {
@@ -377,7 +378,7 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
 
             // seek element with specified type AND specified property
             if ((useSatisfies && AcmeTypeHelper.satisfiesElementType (child,
-                    ((IAcmeElementType )child.lookupName (typeName, true)), null))
+                    ((IAcmeElementType<?, ?> )child.lookupName (typeName, true)), null))
                     || child.declaresType (typeName) || child.instantiatesType (typeName)) {
                 IAcmeProperty childProp = child.getProperty (propName);
                 if (childProp != null) {
@@ -444,6 +445,7 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
             throw new RainbowModelException (MessageFormat.format ("Cannot find the ''{0}'' in the model as a {1}",
                     qname, clazz.getName ()));
 
+        @SuppressWarnings ("unchecked")
         T lb = (T )resolve;
         return lb;
     }
