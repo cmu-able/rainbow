@@ -67,7 +67,7 @@ public class SimpleBar extends Widget {
         String type = "float";
         WidgetFactory factory = new WidgetFactory() {
             @Override
-            public Widget getInstance(String mapping) {
+            public IWidget getInstance(String mapping) {
                 return new SimpleBar(mapping);
             }
         };
@@ -115,7 +115,7 @@ public class SimpleBar extends Widget {
         bar.addComponent(barValue);
         bar.addComponent(barFill);
 
-        this.setCompositionRoot(new VerticalLayout(label, bar));
+        getRoot ().addComponent (new VerticalLayout (label, bar));
     }
 
     @Override

@@ -70,7 +70,7 @@ public class SimpleCheck extends Widget {
         layout.setExpandRatio(label, 1.0f);
         layout.setComponentAlignment(checkBox, Alignment.MIDDLE_RIGHT);
 
-        setCompositionRoot(layout);
+        getRoot ().addComponent (layout);
     }
 
     static {
@@ -79,7 +79,7 @@ public class SimpleCheck extends Widget {
         String type = "boolean";
         WidgetFactory factory = new WidgetFactory() {
             @Override
-            public Widget getInstance(String mapping) {
+            public IWidget getInstance(String mapping) {
                 return new SimpleCheck(mapping);
             }
         };

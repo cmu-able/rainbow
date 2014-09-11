@@ -27,7 +27,7 @@ public class BooleanState extends Widget {
         WidgetFactory factory = new WidgetFactory () {
 
             @Override
-            public Widget getInstance (String mapping) {
+            public IWidget getInstance (String mapping) {
                 return new BooleanState (mapping);
             }
         };
@@ -57,7 +57,7 @@ public class BooleanState extends Widget {
         layout.addComponent (valLabel);
         layout.setExpandRatio (label, 1.0f);
         layout.setComponentAlignment (valLabel, Alignment.MIDDLE_RIGHT);
-        setCompositionRoot (layout);
+        getRoot ().addComponent (layout);
     }
 
     private void getImages () {

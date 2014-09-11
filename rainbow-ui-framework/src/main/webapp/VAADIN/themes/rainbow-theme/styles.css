@@ -7121,3 +7121,13 @@ body .rainbow-theme.v-app .v-app-loading {
 .rainbow-theme .v-caption {
 	font-weight: bold;
 }
+
+.rainbow-theme .rainbow-widget .buttons {
+	visibility: hidden;
+	position: absolute;
+	z-index: 99;
+}
+
+.rainbow-theme .rainbow-widget:hover .buttons {
+	visibility: visible;
+}

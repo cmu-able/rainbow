@@ -62,7 +62,7 @@ public class SimpleText extends Widget {
         WidgetFactory factory = new WidgetFactory() {
 
             @Override
-            public Widget getInstance(String mapping) {
+            public IWidget getInstance(String mapping) {
                 return new SimpleText(mapping);
             }
         };
@@ -82,7 +82,7 @@ public class SimpleText extends Widget {
         label = new Label(mapping);
         text = new Label();
         displayComponent = new VerticalLayout(label, text);
-        this.setCompositionRoot(displayComponent);
+        getRoot ().addComponent (displayComponent);
     }
 
     @Override

@@ -61,7 +61,7 @@ public class LineGauge extends Widget {
         layout.setExpandRatio (m_gauge, 1.0f);
         layout.setComponentAlignment (m_gauge, Alignment.MIDDLE_CENTER);
 
-        setCompositionRoot (layout);
+        getRoot ().addComponent (layout);
     }
 
     @Override
@@ -73,14 +73,21 @@ public class LineGauge extends Widget {
 
     @Override
     public void update () {
+        Double val = 0.0;
         try {
-            Double val = DataValueSupport.converter.to_java (value, Double.class);
-            m_gauge.updateValue (val);
+            val = DataValueSupport.converter.to_java (value, Double.class);
         }
         catch (ValueConversionException ex) {
-            Logger.getLogger (LineGauge.class.getName ()).log (Level.SEVERE, null, ex);
+            try {
+                val = (double )DataValueSupport.converter.to_java (value, Float.class);
+            }
+            catch (ValueConversionException e) {
+                Logger.getLogger (LineGauge.class.getName ()).log (Level.SEVERE, null, ex);
+
+            }
 
         }
+        m_gauge.updateValue (val);
     }
 
     @Override

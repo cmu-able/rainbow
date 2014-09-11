@@ -23,12 +23,23 @@
  */
 package edu.cmu.rainbow_ui.display.widgets;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.vaadin.event.LayoutEvents.LayoutClickEvent;
+import com.vaadin.event.LayoutEvents.LayoutClickListener;
+import com.vaadin.server.FileResource;
+import com.vaadin.server.VaadinService;
+import com.vaadin.ui.AbstractLayout;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Image;
+import com.vaadin.ui.Layout;
+import com.vaadin.ui.VerticalLayout;
 
 import edu.cmu.cs.able.typelib.type.DataValue;
 import edu.cmu.rainbow_ui.display.viewcontrol.ViewControl;
@@ -108,7 +119,15 @@ public abstract class Widget extends CustomComponent implements IWidget, IUpdata
      * Map of widget properties.
      */
     protected Map<String, Object> properties = new HashMap<>();
-
+    private String                propertyMonitoring;
+    private AbstractLayout        widgetLayout;
+    private IHandler              closeHandler;
+    private static final FileResource closeResource;
+    static {
+        String basePath = VaadinService.getCurrent ().getBaseDirectory ().getAbsolutePath ();
+        File buttonPath = new File (basePath + "/WEB-INF/images/buttons/");
+        closeResource = new FileResource (new File (buttonPath, "close.png"));
+    }
     /**
      * Constructor for a widget
      *
@@ -116,11 +135,41 @@ public abstract class Widget extends CustomComponent implements IWidget, IUpdata
      */
     public Widget(String mapping) {
         this.mapping = mapping;
+        widgetLayout = new VerticalLayout ();
+        widgetLayout.addStyleName ("rainbow-widget");
+        final HorizontalLayout buttons = new HorizontalLayout ();
+        buttons.setWidth (100, Unit.PERCENTAGE);
+        widgetLayout.addComponent (buttons);
+        final Image close = new Image (null, closeResource);
+        buttons.addComponent (close);
+        buttons.setComponentAlignment (close, Alignment.MIDDLE_RIGHT);
+        buttons.addStyleName ("buttons");
+        setCompositionRoot (widgetLayout);
         active = false;
         /* Fill default properties */
         for (String prop : getWidgetDescription().getProperties().keySet()) {
             properties.put(prop, getWidgetDescription().getProperties().get(prop).getDefaultValue());
         }
+
+        buttons.addLayoutClickListener (new LayoutClickListener () {
+
+            @Override
+            public void layoutClick (LayoutClickEvent event) {
+                if (event.getClickedComponent () == close && closeHandler != null) {
+                    closeHandler.handle ();
+                }
+            }
+        });
+
+    }
+
+    @Override
+    public void setCloseHandler (IHandler closeHandler) {
+        this.closeHandler = closeHandler;
+    }
+
+    protected Layout getRoot () {
+        return widgetLayout;
     }
 
     /**
@@ -245,5 +294,15 @@ public abstract class Widget extends CustomComponent implements IWidget, IUpdata
      * Signals the widget implementation that properties were updated.
      */
     protected abstract void onPropertyUpdate();
+
+    @Override
+    public void setPropertyMonitoring (String propertyName) {
+        propertyMonitoring = propertyName;
+    }
+
+    @Override
+    public String getPropertyMonitoring () {
+        return propertyMonitoring;
+    }
 
 }

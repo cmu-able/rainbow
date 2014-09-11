@@ -9,6 +9,10 @@ import edu.cmu.cs.able.typelib.type.DataValue;
 public interface IWidget {
 
 
+    public static interface IHandler {
+        public void handle ();
+    }
+
     public abstract Map<String, Object> getProperties ();
 
     public abstract Object getProperty (String propName);
@@ -34,5 +38,11 @@ public interface IWidget {
     public abstract String getMapping ();
 
     public abstract Component getAsComponent ();
+
+    public abstract String getPropertyMonitoring ();
+
+    public abstract void setPropertyMonitoring (String propertyName);
+
+    public abstract void setCloseHandler (IHandler closeHandler);
 
 }

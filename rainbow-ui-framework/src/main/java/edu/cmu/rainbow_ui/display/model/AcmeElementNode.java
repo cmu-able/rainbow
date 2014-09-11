@@ -23,7 +23,10 @@
  */
 package edu.cmu.rainbow_ui.display.model;
 
+import java.io.File;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,11 +35,16 @@ import org.acmestudio.acme.element.IAcmeElementInstance;
 import org.acmestudio.acme.element.property.IAcmeProperty;
 import org.acmestudio.acme.element.representation.IAcmeRepresentation;
 
+import com.vaadin.event.MouseEvents.ClickEvent;
+import com.vaadin.event.MouseEvents.ClickListener;
+import com.vaadin.server.FileResource;
+import com.vaadin.server.VaadinService;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.NativeButton;
@@ -52,6 +60,7 @@ import edu.cmu.rainbow_ui.display.ui.AbstractRainbowVaadinUI;
 import edu.cmu.rainbow_ui.display.ui.WidgetDragAndDropWrapper;
 import edu.cmu.rainbow_ui.display.viewcontrol.WidgetLibrary;
 import edu.cmu.rainbow_ui.display.widgets.IWidget;
+import edu.cmu.rainbow_ui.display.widgets.IWidget.IHandler;
 import edu.cmu.rainbow_ui.display.widgets.WidgetDescription;
 
 /**
@@ -76,14 +85,28 @@ abstract class AcmeElementNode extends CustomComponent {
     private final AbstractRainbowVaadinUI ui;
     private final AcmeGraph graphView;
 
-    protected final Map<String, IWidget>  propertiesWidgets           = new HashMap<> ();
+    protected final Map<String, List<IWidget>> propertiesWidgets           = new HashMap<> ();
 
     private final HorizontalLayout labelBar;
-    private final Button expButton;
+    private final Image                   expButton;
 
     private final Panel widgetsPanel;
 
     final VerticalLayout container;
+
+    final static FileResource             collapsedResource;
+    final static FileResource             expandedResource;
+    final static FileResource             configureResource;
+    final static FileResource             openResource;
+
+    static {
+        String basePath = VaadinService.getCurrent ().getBaseDirectory ().getAbsolutePath ();
+        File buttonPath = new File (basePath + "/WEB-INF/images/buttons/");
+        collapsedResource = new FileResource (new File (buttonPath, "collapsed.png"));
+        expandedResource = new FileResource (new File (buttonPath, "expanded.png"));
+        configureResource = new FileResource (new File (buttonPath, "configure.png"));
+        openResource = new FileResource (new File (buttonPath, "open.png"));
+    }
 
     /**
      * Container to hold widgets for visual properties
@@ -129,7 +152,7 @@ abstract class AcmeElementNode extends CustomComponent {
         }
 
         /* Make configuration button */
-        Button confButton = makeConfigurationButton();
+        Image confButton = makeConfigurationButton ();
         labelBar.addComponent(confButton);
         labelBar.setComponentAlignment(confButton, Alignment.MIDDLE_RIGHT);
 
@@ -220,6 +243,7 @@ abstract class AcmeElementNode extends CustomComponent {
                     }
 
                     IWidget widget = widgetDescr.getFactory ().getInstance (widgetMapping);
+                    widget.setPropertyMonitoring (prop.getName ());
                     for (String widgetPropName : widgetConfig.properties.keySet()) {
                         try {
                             widget.setProperty(widgetPropName, widgetConfig.properties.get(widgetPropName));
@@ -233,12 +257,15 @@ abstract class AcmeElementNode extends CustomComponent {
                     ui.getViewControl().addWidget(widget);
                     widget.getAsComponent ().addStyleName ("graph-widget-item");
                     WidgetDragAndDropWrapper dndWrapper = new WidgetDragAndDropWrapper (widget.getAsComponent ());
-                    propertiesWidgets.put(prop.getName(), widget);
+                    addWidgetForProperty (prop, widget);
+                    widget.setCloseHandler (new WidgetCloseHandler (prop, widget));
                     widgetsContainer.addComponent(dndWrapper);
                 }
             }
         }
     }
+
+
 
     /**
      * Make button to access internal representations of the component.
@@ -247,7 +274,8 @@ abstract class AcmeElementNode extends CustomComponent {
      */
     private Button makeInternalRepresentationsButton() {
 
-        final NativeButton reprButton = new NativeButton("R");
+        final Button reprButton = new NativeButton (null);
+        reprButton.setIcon (openResource);
 
         reprButton.addClickListener(new Button.ClickListener() {
 
@@ -330,20 +358,28 @@ abstract class AcmeElementNode extends CustomComponent {
      *
      * @return created button
      */
-    private Button makeExpansionButton() {
-        final NativeButton button = new NativeButton("+");
-        button.addClickListener(new Button.ClickListener() {
+    private Image makeExpansionButton () {
+        Image button = new Image (null, collapsedResource);
+//        final Label button = new Label (null);
+//        button.setIcon (collapsedResource);
+        button.addClickListener (new ClickListener () {
+
+//            @Override
+//            public void buttonClick(Button.ClickEvent event) {
+//                /**
+//                 * TODO: add changing of node state width/height on expansion/collapse
+//                 */
+//                
+//            }
 
             @Override
-            public void buttonClick(Button.ClickEvent event) {
-                /**
-                 * TODO: add changing of node state width/height on expansion/collapse
-                 */
+            public void click (ClickEvent event) {
                 if (widgetsPanel.isVisible()) {
                     collapseWidgetsPanel();
                 } else {
                     expandWidgetsPanel();
                 }
+
             }
         });
         return button;
@@ -355,7 +391,7 @@ abstract class AcmeElementNode extends CustomComponent {
     private void expandWidgetsPanel() {
         widgetsPanel.setVisible(true);
         AcmeElementNode.this.setHeight(computeContainerHeight(container), Unit.PIXELS);
-        expButton.setCaption("-");
+        expButton.setSource (expandedResource);
         /* Activate all widgets */
         for (int i = 0; i < widgetsContainer.getComponentCount(); i++) {
             IWidget widget = ((WidgetDragAndDropWrapper) widgetsContainer.getComponent(i)).getWidget();
@@ -371,7 +407,7 @@ abstract class AcmeElementNode extends CustomComponent {
     private void collapseWidgetsPanel() {
         widgetsPanel.setVisible(false);
         AcmeElementNode.this.setHeight(computeContainerHeight(container), Unit.PIXELS);
-        expButton.setCaption("+");
+        expButton.setSource (collapsedResource);
         /* Deactivate all widgets */
         for (int i = 0; i < widgetsContainer.getComponentCount(); i++) {
             IWidget widget = ((WidgetDragAndDropWrapper) widgetsContainer.getComponent(i)).getWidget();
@@ -386,12 +422,19 @@ abstract class AcmeElementNode extends CustomComponent {
      *
      * @return created button
      */
-    private Button makeConfigurationButton() {
-        Button confButton = new NativeButton("C");
-        confButton.addClickListener(new Button.ClickListener() {
+    private Image makeConfigurationButton () {
+        Image confButton = new Image (null, configureResource);
+        confButton.addClickListener (new ClickListener () {
+
+//            @Override
+//            public void buttonClick(Button.ClickEvent event) {
+//                Window confWindow = new ElementConfigurationWindow();
+//                confWindow.center();
+//                ui.addWindow(confWindow);
+//            }
 
             @Override
-            public void buttonClick(Button.ClickEvent event) {
+            public void click (ClickEvent event) {
                 Window confWindow = new ElementConfigurationWindow();
                 confWindow.center();
                 ui.addWindow(confWindow);
@@ -430,75 +473,120 @@ abstract class AcmeElementNode extends CustomComponent {
          */
         private void populateElementProps() {
             vlayout.removeAllComponents();
+            for (final IAcmeProperty prop : element.getProperties ()) {
+                HorizontalLayout hlayout = new HorizontalLayout ();
+                hlayout.setWidth (100, Unit.PERCENTAGE);
+                Label propName = new Label (prop.getName ());
+                hlayout.addComponent (propName);
+                hlayout.setComponentAlignment (propName, Alignment.MIDDLE_LEFT);
 
-            for (final IAcmeProperty prop : element.getProperties()) {
-                HorizontalLayout hlayout = new HorizontalLayout();
-                hlayout.setWidth("100%");
-                Label propName = new Label(prop.getName());
-                hlayout.addComponent(propName);
-                hlayout.setComponentAlignment(propName, Alignment.MIDDLE_LEFT);
-                if (propertiesWidgets.containsKey(prop.getName())) {
-                    Button removeButton = new Button("Remove");
-                    hlayout.addComponent(removeButton);
-                    hlayout.setComponentAlignment(removeButton, Alignment.MIDDLE_RIGHT);
-                    removeButton.addClickListener(new Button.ClickListener() {
+//            }
 
-                        @Override
-                        public void buttonClick(Button.ClickEvent event) {
-                            IWidget widget = propertiesWidgets.get (prop.getName ());
-                            widget.deactivate();
-                            ui.getViewControl().removeWidget(widget);
-                            propertiesWidgets.remove(prop.getName());
-                            /**
-                             * Widgets are wrapped in the DnD wrapper, so remove its parent from the
-                             * container.
-                             */
-                            widgetsContainer.removeComponent (widget.getAsComponent ().getParent ());
+//            for (final IAcmeProperty prop : element.getProperties()) {
+//                HorizontalLayout hlayout = new HorizontalLayout();
+//                hlayout.setWidth("100%");
+//                Label propName = new Label(prop.getName());
+//                hlayout.addComponent(propName);
+//                hlayout.setComponentAlignment(propName, Alignment.MIDDLE_LEFT);
+//                if (propertiesWidgets.containsKey(prop.getName())) {
+//                    Button removeButton = new Button("Remove");
+//                    hlayout.addComponent(removeButton);
+//                    hlayout.setComponentAlignment(removeButton, Alignment.MIDDLE_RIGHT);
+//                    removeButton.addClickListener(new Button.ClickListener() {
+//
+//                        @Override
+//                        public void buttonClick(Button.ClickEvent event) {
+//                            IWidget widget = propertiesWidgets.get (prop.getName ());
+//                            widget.deactivate();
+//                            ui.getViewControl().removeWidget(widget);
+//                            removeWidgetForProperty (prop, widget);
+//                            /**
+//                             * Widgets are wrapped in the DnD wrapper, so remove its parent from the
+//                             * container.
+//                             */
+//                            widgetsContainer.removeComponent (widget.getAsComponent ().getParent ());
+//
+//                            if (propertiesWidgets.isEmpty()) {
+//                                collapseWidgetsPanel();
+//                                expButton.setVisible(false);
+//                            }
+//
+//                            removeWidgetFromViewConfiguration(prop, widget);
+//
+//                            populateElementProps();
+//                        }
+//                    });
+//                } else {
+                // No widget for the property is set
+                Button addButton = new Button("Add");
+                hlayout.addComponent(addButton);
+                hlayout.setComponentAlignment(addButton, Alignment.MIDDLE_RIGHT);
+                addButton.addClickListener(new Button.ClickListener() {
 
-                            if (propertiesWidgets.isEmpty()) {
-                                collapseWidgetsPanel();
-                                expButton.setVisible(false);
-                            }
+                    @Override
+                    public void buttonClick(Button.ClickEvent event) {
+                        Window addWindow = new WidgetCreationDialog(prop, ui) {
 
-                            removeWidgetFromViewConfiguration(prop, widget);
-
-                            populateElementProps();
-                        }
-                    });
-                } else {
-                    // No widget for the property is set
-                    Button addButton = new Button("Add");
-                    hlayout.addComponent(addButton);
-                    hlayout.setComponentAlignment(addButton, Alignment.MIDDLE_RIGHT);
-                    addButton.addClickListener(new Button.ClickListener() {
-
-                        @Override
-                        public void buttonClick(Button.ClickEvent event) {
-                            Window addWindow = new WidgetCreationDialog(prop, ui) {
-
-                                @Override
-                                void onCreate (IWidget widget) {
-                                    ui.getViewControl().addWidget(widget);
-                                    widgetsContainer.addComponent (new WidgetDragAndDropWrapper (widget
-                                            .getAsComponent ()));
-                                    propertiesWidgets.put(prop.getName(), widget);
-
-                                    expButton.setVisible(true);
-                                    if (widgetsPanel.isVisible()) {
-                                        widget.activate();
+                            @Override
+                            void onCreate (final IWidget widget) {
+                                ui.getViewControl().addWidget(widget);
+                                widgetsContainer.addComponent (new WidgetDragAndDropWrapper (widget
+                                        .getAsComponent ()));
+                                widget.setPropertyMonitoring (prop.getName ());
+                                addWidgetForProperty (prop, widget);
+                                widget.setCloseHandler (new WidgetCloseHandler (prop, widget) {
+                                    @Override
+                                    public void handle () {
+                                        super.handle ();
+                                        populateElementProps ();
                                     }
-
-                                    addWidgetToViewConfiguration(prop, widget);
-
-                                    populateElementProps();
+                                });
+                                expButton.setVisible(true);
+                                if (widgetsPanel.isVisible()) {
+                                    widget.activate();
                                 }
-                            };
-                            ui.addWindow(addWindow);
-                        }
-                    });
-                }
+
+                                addWidgetToViewConfiguration(prop, widget);
+
+                                populateElementProps();
+                            }
+                        };
+                        ui.addWindow(addWindow);
+                    }
+                });
                 vlayout.addComponent(hlayout);
             }
+        }
+    }
+
+    private class WidgetCloseHandler implements IHandler {
+        private final IAcmeProperty m_prop;
+        private final IWidget       m_widget;
+
+        private WidgetCloseHandler (IAcmeProperty prop, IWidget widget) {
+            m_prop = prop;
+            m_widget = widget;
+        }
+
+        @Override
+        public void handle () {
+            m_widget.deactivate ();
+            ui.getViewControl ().removeWidget (m_widget);
+            removeWidgetForProperty (m_prop, m_widget);
+            /**
+             * Widgets are wrapped in the DnD wrapper, so remove its parent from the
+             * container.
+             */
+            widgetsContainer.removeComponent (m_widget.getAsComponent ().getParent ());
+
+            if (propertiesWidgets.isEmpty ()) {
+                collapseWidgetsPanel ();
+                expButton.setVisible (false);
+            }
+
+            removeWidgetFromViewConfiguration (m_prop, m_widget);
+
+
         }
     }
 
@@ -573,4 +661,26 @@ abstract class AcmeElementNode extends CustomComponent {
         this.setHeight(computeContainerHeight(container), Unit.PIXELS);
     }
 
+    protected IWidget removeWidgetForProperty (final IAcmeProperty prop, IWidget widget) {
+        List<IWidget> widgets = propertiesWidgets.get (prop.getName ());
+        IWidget w = null;
+        if (widgets != null) {
+            boolean removed = widgets.remove (widget);
+            if (widgets.isEmpty ()) {
+                propertiesWidgets.remove (prop.getName ());
+            }
+            if (removed) return widget;
+
+        }
+        return null;
+    }
+
+    protected void addWidgetForProperty (IAcmeProperty prop, IWidget widget) {
+        List<IWidget> widgets = propertiesWidgets.get (prop.getName ());
+        if (widgets == null) {
+            widgets = new LinkedList<> ();
+            propertiesWidgets.put (prop.getName (), widgets);
+        }
+        widgets.add (widget);
+    }
 }

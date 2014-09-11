@@ -21,6 +21,10 @@ public abstract class JSWidget extends AbstractJavaScriptComponent implements IW
 
     protected Map<String, Object> properties = new HashMap<> ();
 
+    private String                propertyMonitoring;
+
+    private IHandler              closeHandler;
+
     public JSWidget (String mapping) {
         this.mapping = mapping;
         active = false;
@@ -119,6 +123,21 @@ public abstract class JSWidget extends AbstractJavaScriptComponent implements IW
     @Override
     public Component getAsComponent () {
         return this;
+    }
+
+    @Override
+    public void setPropertyMonitoring (String propertyName) {
+        propertyMonitoring = propertyName;
+    }
+
+    @Override
+    public String getPropertyMonitoring () {
+        return propertyMonitoring;
+    }
+
+    @Override
+    public void setCloseHandler (IHandler closeHandler) {
+        this.closeHandler = closeHandler;
     }
 
 }

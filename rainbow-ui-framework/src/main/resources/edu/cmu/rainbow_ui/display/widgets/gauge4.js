@@ -255,7 +255,7 @@ window.edu_cmu_rainbow_ui_display_widgets_Tachometer = function() {
 	this.createGauge = function(name, label, min, max, red, yellow, editable) {
 
 		var config = {
-			size : 120,
+			size : 60,
 			label : label,
 			min : undefined != min ? min : 0,
 			max : undefined != max ? max : 100,

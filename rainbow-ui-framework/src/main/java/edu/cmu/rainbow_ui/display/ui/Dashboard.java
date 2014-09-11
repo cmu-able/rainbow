@@ -63,6 +63,7 @@ import edu.cmu.rainbow_ui.display.config.WidgetConfiguration;
 import edu.cmu.rainbow_ui.display.viewcontrol.ViewControl;
 import edu.cmu.rainbow_ui.display.viewcontrol.WidgetLibrary;
 import edu.cmu.rainbow_ui.display.widgets.IWidget;
+import edu.cmu.rainbow_ui.display.widgets.IWidget.IHandler;
 import edu.cmu.rainbow_ui.display.widgets.WidgetDescription;
 
 /**
@@ -408,6 +409,7 @@ public class Dashboard extends VerticalLayout {
                     IWidget widgetClone = ((WidgetDragAndDropWrapper) draggedWrapper)
                             .getWidget().getClone();
                     widgetClone.activate();
+
                     Dashboard.this.ui.getViewControl().addWidget(widgetClone);
 
                     // Add the widget to the page widget list
@@ -418,11 +420,19 @@ public class Dashboard extends VerticalLayout {
 
                     widgetClone.getAsComponent ().setWidth (DASHBOARD_WIDGET_WIDTH, Unit.PIXELS);
 
-                    WidgetDragAndDropWrapper wrapper = new WidgetDragAndDropWrapper(
+                    final WidgetDragAndDropWrapper wrapper = new WidgetDragAndDropWrapper (
                             (Component )widgetClone,
                             new ReorderLayoutDropHandler(newLayout));
                     wrapper.setDragStartMode(DragStartMode.WRAPPER);
                     wrapper.setSizeUndefined();
+                    widgetClone.setCloseHandler (new IHandler () {
+
+                        @Override
+                        public void handle () {
+                            newLayout.removeComponent (wrapper);
+                        }
+
+                    });
                     newLayout.addComponent(wrapper);
                 }
             }

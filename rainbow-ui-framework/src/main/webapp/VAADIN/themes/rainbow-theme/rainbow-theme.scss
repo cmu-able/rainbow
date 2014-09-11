@@ -66,4 +66,15 @@
     .v-caption {
         font-weight: bold;        
     }
+    
+    .rainbow-widget .buttons {
+        visibility: hidden;
+        position: absolute;
+        z-index: 99;
+    }
+
+    .rainbow-widget:hover .buttons {
+        visibility: visible;
+    }
+    
 }
