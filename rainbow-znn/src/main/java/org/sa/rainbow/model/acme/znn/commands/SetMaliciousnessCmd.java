@@ -1,5 +1,6 @@
 package org.sa.rainbow.model.acme.znn.commands;
 
+import java.text.MessageFormat;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -26,16 +27,28 @@ public class SetMaliciousnessCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
 
     @Override
     protected List<IAcmeCommand<?>> doConstructCommand () throws RainbowModelException {
-        IAcmeComponent server = getModelContext ().resolveInModel (getTarget (), IAcmeComponent.class);
-        IAcmeProperty property = server.getProperty ("maliciousness");
-        IAcmePropertyValue acmeVal = PropertyHelper.toAcmeVal (Float.valueOf (getParameters ()[0]));
-        List<IAcmeCommand<?>> cmds = new LinkedList<> ();
-        if (propertyValueChanging (property, acmeVal)) {
-            m_command = server.getCommandFactory ().propertyValueSetCommand (property,
-                    acmeVal);
-            cmds.add (m_command);
+        IAcmeComponent client = getModelContext ().resolveInModel (getTarget (), IAcmeComponent.class);
+        if (client == null)
+            throw new RainbowModelException (MessageFormat.format (
+                    "The client ''{0}'' could not be found in the model", getTarget ()));
+        if (!client.declaresType ("ClientT"))
+            throw new RainbowModelException (MessageFormat.format (
+                    "The client ''{0}'' is not of the right type. It does not have a property ''maliciousness''",
+                    getTarget ()));
+        IAcmeProperty property = client.getProperty ("maliciousness");
+        try {
+            IAcmePropertyValue acmeVal = PropertyHelper.toAcmeVal (Float.valueOf (getParameters ()[0]));
+            List<IAcmeCommand<?>> cmds = new LinkedList<> ();
+            if (propertyValueChanging (property, acmeVal)) {
+                m_command = client.getCommandFactory ().propertyValueSetCommand (property, acmeVal);
+                cmds.add (m_command);
+            }
+            return cmds;
         }
-        return cmds;
+        catch (NumberFormatException e) {
+            throw new RainbowModelException (MessageFormat.format ("Could not parse ''{0}'' as a float number.",
+                    getParameters ()[0]));
+        }
     }
 
 }

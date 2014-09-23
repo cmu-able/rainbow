@@ -4,6 +4,12 @@ import org.acmestudio.acme.element.IAcmeSystem;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.model.acme.znn.commands.ZNNCommandFactory;
 
+/**
+ * An Acme model that embodies the ZNN architecture and the associated style-specific operations
+ * 
+ * @author Bradley Schmerl: schmerl
+ *
+ */
 public class ZNNModelUpdateOperatorsImpl extends AcmeModelInstance {
 
     private ZNNCommandFactory m_commandFactory;

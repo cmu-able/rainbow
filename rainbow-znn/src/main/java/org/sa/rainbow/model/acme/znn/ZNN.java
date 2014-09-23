@@ -14,12 +14,32 @@ import org.acmestudio.acme.type.verification.NodeScopeLookup;
 import org.acmestudio.acme.type.verification.RuleTypeChecker;
 import org.acmestudio.standalone.resource.StandaloneLanguagePackHelper;
 
+/**
+ * This class provides ZNN-specific operators that can be referred to in strategies and tactics. This class can be
+ * imported into Stitch and the static members called from there.
+ * 
+ * @author Bradley Schmerl: schmerl
+ *
+ */
 public class ZNN {
+    // Acme expressions for evaluating the methods
     private static final String    FIND_SERVICES_EXPR      = "/self/components:T[!isArchEnabled]";
     private static final String    AVAILABLE_SERVICES_EXPR = "size (" + FIND_SERVICES_EXPR + ")";
+    // Holder objects for caching parsed Acme expressions
     private static IExpressionNode s_availableServicesExpr = null;
     private static IExpressionNode s_findServicesExpression;
 
+    /**
+     * Returns the number services of a particular type that are available. Availability here means that they are not
+     * yet marked in the architecture as available Assumes: exists property called isArchEnabled on elements of the type
+     * 
+     * @param model
+     *            The model to find availabile services in
+     * @param elemType
+     *            The type of service to find
+     * @return the number of services that are available.
+     * @throws Exception
+     */
     public static int availableServices (ZNNModelUpdateOperatorsImpl model, IAcmeElementType<?, ?> elemType)
             throws Exception {
         if (s_availableServicesExpr == null) {
@@ -28,6 +48,7 @@ public class ZNN {
                             AVAILABLE_SERVICES_EXPR, new RegionManager ());
         }
 
+        // Add "T" as a name in scope, referring to the type that we are looking for
         NodeScopeLookup nameLookup = new NodeScopeLookup ();
         nameLookup.put ("T", elemType);
         return RuleTypeChecker.evaluateAsInt (model.getModelInstance (), null, s_availableServicesExpr,
@@ -36,9 +57,20 @@ public class ZNN {
 
     }
 
+    /**
+     * Returns the services of a particular type that are available. Availability here means that they are not yet
+     * marked in the architecture as available Assumes: exists property called isArchEnabled on elements of the type
+     * 
+     * @param model
+     *            The model to find availabile services in
+     * @param type
+     *            The type of service to find
+     * @return the number of services that are available.
+     * @throws Exception
+     */
     public static Set<IAcmeElementInstance<?, ?>> findServices (ZNNModelUpdateOperatorsImpl model,
             IAcmeElementType<?, ?> type)
-            throws Exception {
+                    throws Exception {
         if (s_findServicesExpression == null) {
             s_findServicesExpression = StandaloneLanguagePackHelper.defaultLanguageHelper ()
                     .designRuleExpressionFromString (FIND_SERVICES_EXPR, new RegionManager ());

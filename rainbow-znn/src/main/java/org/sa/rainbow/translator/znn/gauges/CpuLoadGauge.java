@@ -104,4 +104,8 @@ public class CpuLoadGauge extends RegularPatternGauge {
         }
     }
 
+    @Override
+    protected void runAction () {
+        super.runAction ();
+    }
 }

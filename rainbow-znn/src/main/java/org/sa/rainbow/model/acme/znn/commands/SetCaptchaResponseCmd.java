@@ -1,5 +1,6 @@
 package org.sa.rainbow.model.acme.znn.commands;
 
+import java.text.MessageFormat;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -26,15 +27,29 @@ public class SetCaptchaResponseCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
     @Override
     protected List<IAcmeCommand<?>> doConstructCommand () throws RainbowModelException {
         IAcmeComponent client = getModelContext ().resolveInModel (getTarget (), IAcmeComponent.class);
-        int response = Integer.valueOf (getParameters ()[0]);
-        IAcmeProperty property = client.getProperty ("captcha");
-        IAcmeIntValue acmeVal = PropertyHelper.toAcmeVal (response);
-        List<IAcmeCommand<?>> cmds = new LinkedList<> ();
-        if (propertyValueChanging (property, acmeVal)) {
-            m_command = client.getCommandFactory ().propertyValueSetCommand (property, acmeVal);
-            cmds.add (m_command);
+        if (client == null)
+            throw new RainbowModelException (MessageFormat.format (
+                    "The load balancer ''{0}'' could not be found in the model", getTarget ()));
+        if (!client.declaresType ("CaptchaHandlerT"))
+            throw new RainbowModelException (MessageFormat.format (
+                    "The client ''{0}'' is not of the right type. It does not have a property ''captcha''",
+                    getTarget ()));
+
+        try {
+            int response = Integer.valueOf (getParameters ()[0]);
+            IAcmeProperty property = client.getProperty ("captcha");
+            IAcmeIntValue acmeVal = PropertyHelper.toAcmeVal (response);
+            List<IAcmeCommand<?>> cmds = new LinkedList<> ();
+            if (propertyValueChanging (property, acmeVal)) {
+                m_command = client.getCommandFactory ().propertyValueSetCommand (property, acmeVal);
+                cmds.add (m_command);
+            }
+            return cmds;
         }
-        return cmds;
+        catch (NumberFormatException e) {
+            throw new RainbowModelException (MessageFormat.format ("Could not parse ''{0]'' as an integer",
+                    getParameters ()[0]));
+        }
     }
 
 

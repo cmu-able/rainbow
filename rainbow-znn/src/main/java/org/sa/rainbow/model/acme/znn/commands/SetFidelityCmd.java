@@ -1,5 +1,6 @@
 package org.sa.rainbow.model.acme.znn.commands;
 
+import java.text.MessageFormat;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -26,15 +27,27 @@ public class SetFidelityCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
     @Override
     protected List<IAcmeCommand<?>> doConstructCommand () throws RainbowModelException {
         IAcmeComponent server = getModelContext ().resolveInModel (m_server, IAcmeComponent.class);
+        if (server == null)
+            throw new RainbowModelException (MessageFormat.format (
+                    "The server ''{0}'' could not be found in the model", getTarget ()));
+        if (!server.declaresType ("ArchElementT"))
+            throw new RainbowModelException (MessageFormat.format (
+                    "The server ''{0}'' is not of the right type. It does not have a property ''fidelity''",
+                    getTarget ()));
         IAcmeProperty property = server.getProperty ("fidelity");
-        IAcmeIntValue acmeVal = PropertyHelper.toAcmeVal (m_fidelity);
-        List<IAcmeCommand<?>> cmds = new LinkedList<> ();
-        if (propertyValueChanging (property, acmeVal)) {
-            m_command = server.getCommandFactory ().propertyValueSetCommand (property,
-                    acmeVal);
-            cmds.add (m_command);
+        try {
+            IAcmeIntValue acmeVal = PropertyHelper.toAcmeVal (m_fidelity);
+            List<IAcmeCommand<?>> cmds = new LinkedList<> ();
+            if (propertyValueChanging (property, acmeVal)) {
+                m_command = server.getCommandFactory ().propertyValueSetCommand (property, acmeVal);
+                cmds.add (m_command);
+            }
+            return cmds;
         }
-        return cmds;
+        catch (Exception e) {
+            throw new RainbowModelException (MessageFormat.format ("Could not parse ''{0}'' as an integer.",
+                    getParameters ()[0]));
+        }
     }
 
     @Override

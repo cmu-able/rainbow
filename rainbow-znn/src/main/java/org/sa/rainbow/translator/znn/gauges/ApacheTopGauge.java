@@ -18,6 +18,8 @@ import org.sa.rainbow.core.util.TypedAttributeWithValue;
 /**
  * Gauge for consuming Apache Top's monitoring output.
  * 
+ * <b>This is no longer used in the experiments.</b>
+ * 
  * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
  */
 public class ApacheTopGauge extends RegularPatternGauge {

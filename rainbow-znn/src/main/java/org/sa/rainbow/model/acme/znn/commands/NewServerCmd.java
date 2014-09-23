@@ -18,6 +18,12 @@ import org.acmestudio.acme.model.util.core.UMStringValue;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 
+/**
+ * Creates a new server in Znn and attaches it to the indicated load balancer
+ * 
+ * @author Bradley Schmerl: schmerl
+ *
+ */
 public class NewServerCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
 
     private static final List<String>   SERVER_TYPE        = Arrays.asList ("ServerT");
@@ -37,6 +43,21 @@ public class NewServerCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
 
     private String                      m_port;
 
+    /**
+     * 
+     * @param commandName
+     *            The name for the command
+     * @param model
+     *            The model in which the new server will be created
+     * @param lb
+     *            The name of the load balancer to which the server will be attached
+     * @param name
+     *            The name to give the new server
+     * @param host
+     *            The host on which the server is running
+     * @param port
+     *            The port on which the server will accept HTTP requests
+     */
     public NewServerCmd (String commandName, AcmeModelInstance model, String lb, String name, String host, String port) {
         super (commandName, model, lb, name, host, port);
         m_lb = lb;
@@ -46,6 +67,22 @@ public class NewServerCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
     }
 
 
+    /**
+     * Executes the list of commands to execute the following operations
+     * 
+     * <pre>
+     * {@code
+     *   ServerT name = new ServerT ();
+     *   HttpTPortT http = new HttpPortT () in name;
+     *   ProxyConnT proxyconn = new ProxyConnT ();
+     *   ProxyForwardPortT fwd = new ProxyForwardPortT () in lb;
+     *   attach lb.fwd to proxyconn.req;
+     *   attach http to proxyconn.rec; // maybe name.http?
+     *   name.deploymentLocation = host;
+     *   name.httpPort = port;
+     * }
+     * </pre>
+     */
     @Override
     protected List<IAcmeCommand<?>> doConstructCommand () throws RainbowModelException {
 

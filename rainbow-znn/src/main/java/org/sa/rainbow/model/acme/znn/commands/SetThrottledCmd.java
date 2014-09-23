@@ -1,5 +1,6 @@
 package org.sa.rainbow.model.acme.znn.commands;
 
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -28,6 +29,13 @@ public class SetThrottledCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
     @Override
     protected List<IAcmeCommand<?>> doConstructCommand () throws RainbowModelException {
         IAcmeComponent server = getModelContext ().resolveInModel (getTarget (), IAcmeComponent.class);
+        if (server == null)
+            throw new RainbowModelException (MessageFormat.format (
+                    "The server ''{0}'' could not be found in the model", getTarget ()));
+        if (!server.declaresType ("ThrottlerT"))
+            throw new RainbowModelException (MessageFormat.format (
+                    "The server ''{0}'' is not of the right type. It does not have a property ''throttled''",
+                    getTarget ()));
         String[] ips = getParameters ()[0].split (",");
         HashSet<String> ipSet = new HashSet<> ();
         if (!getParameters ()[0].isEmpty ()) {

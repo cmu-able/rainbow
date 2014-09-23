@@ -16,6 +16,12 @@ import org.acmestudio.acme.model.command.IAcmeComponentDeleteCommand;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 
+/**
+ * Removes the a server from the model, and deletes any binary connectors that are connected to it
+ * 
+ * @author Bradley Schmerl: schmerl
+ *
+ */
 public class RemoveServerCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
 
     private IAcmeComponentDeleteCommand m_deleteServerCmd;
@@ -29,6 +35,27 @@ public class RemoveServerCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
         return m_deleteServerCmd.getComponent ();
     }
 
+    /**
+     * <pre>
+     * {@code
+     * set{roles} roles = server/ports/attachedRoles;
+     * set{connector} attachedConnectors = select c in connectors | exists r in c.roles | contains (roles, r);
+     * set{connector} binaryConnectors = select c in attachedConnectors | size (r.roles) <= 2;
+     * set{connector} otherConnectors = select c in attachedConnectors | size (r.roles) > 2;
+     * set{port} portsToRemove = binaryConnectors/roles/attachedPorts;
+     * set{role} rolesToRemove = otherConnectors/r:roles[connected(r, server)]
+     * foreach p in  portsToRemove {
+     *   delete p;
+     * }
+     * foreach r in rolesToRemove {
+     *   delete r;
+     * }
+     * foreach c in binaryConnectors {
+     *   delete c;
+     * }
+     * delete server;
+     * </pre>
+     */
     @Override
     protected List<IAcmeCommand<?>> doConstructCommand () throws RainbowModelException {
         IAcmeComponent server = getModelContext ().resolveInModel (getTarget (), IAcmeComponent.class);
@@ -58,8 +85,6 @@ public class RemoveServerCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
             }
         }
         List<IAcmeCommand<?>> cmds = new LinkedList<> ();
-        m_deleteServerCmd = system.getCommandFactory ().componentDeleteCommand (server);
-        cmds.add (m_deleteServerCmd);
         for (IAcmeConnector conn : connectorsToRemove) {
             cmds.add (system.getCommandFactory ().connectorDeleteCommand (conn));
         }
@@ -69,6 +94,8 @@ public class RemoveServerCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
         for (IAcmePort port : portsToRemove) {
             cmds.add (system.getCommandFactory ().portDeleteCommand (port));
         }
+        m_deleteServerCmd = system.getCommandFactory ().componentDeleteCommand (server);
+        cmds.add (m_deleteServerCmd);
         return cmds;
     }
 

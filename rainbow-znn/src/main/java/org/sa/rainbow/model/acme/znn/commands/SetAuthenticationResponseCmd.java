@@ -12,6 +12,12 @@ import org.acmestudio.acme.model.command.IAcmePropertyCommand;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 
+/**
+ * This command sets whether a client has responded to an authentication request.
+ * 
+ * @author Bradley Schmerl: schmerl
+ *
+ */
 public class SetAuthenticationResponseCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
 
     public SetAuthenticationResponseCmd (String name, AcmeModelInstance modelInstance, String client, String response) {

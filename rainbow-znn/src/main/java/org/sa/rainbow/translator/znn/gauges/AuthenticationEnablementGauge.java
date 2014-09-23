@@ -14,6 +14,39 @@ import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
+/**
+ * Sets whether authentication has been enabled in ZNN. This information is reported by an authentication probe. The
+ * gauge issues the appropriate model command.
+ * 
+ * <p>
+ * The command that is issued on the model is named "clientMgmt" and is mapped to the setAuthenticationResponse command.
+ * 
+ * <p>
+ * The gauge type is as follows:
+ * 
+ * <pre>
+ *  AuthenticationEnablementGaugeT:
+ *     commands:
+ *       clientMgmt: AuthenticationHandlerT.setAuthenticationResponse (int)
+ *     setupParams:
+ *       targetIP:
+ *         type: String
+ *         default: "localhost"
+ *       beaconPeriod:
+ *         type: long
+ *         default: 5000
+ *       javaClass:
+ *         type: String
+ *         default: "org.sa.rainbow.translator.znn.gauges.AuthenticationEnablementGauge"
+ *     configParams:
+ *       targetProbeType:
+ *         type: String
+ *         default: ~
+ * </pre>
+ * 
+ * @author Bradley Schmerl: schmerl
+ *
+ */
 public class AuthenticationEnablementGauge extends RegularPatternGauge {
 
     public static final String  NAME = "G - Authentication Enablement";

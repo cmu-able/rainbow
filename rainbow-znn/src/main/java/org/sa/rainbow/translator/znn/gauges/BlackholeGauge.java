@@ -12,6 +12,32 @@ import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
+/**
+ * Reports the set of clients that are blacklisted, by setting the blackholed property of the load balancer
+ * 
+ * <pre>
+ *    BlackHoleGaugeT:
+ *     commands:
+ *       blockedIPs: "BlackholerT.setBlackholed({String})"
+ *     setupParams:
+ *       targetIP:
+ *         type: String
+ *         default: "localhost"
+ *       beaconPeriod:
+ *         type: long
+ *         default: 30000
+ *       javaClass:
+ *         type: String
+ *         default: "org.sa.rainbow.translator.znn.gauges.BlackholeGauge"
+ *     configParams:
+ *       targetProbeType:
+ *         type: String
+ *         default: ~
+ * </pre>
+ * 
+ * @author Bradley Schmerl: schmerl
+ *
+ */
 public class BlackholeGauge extends RegularPatternGauge {
 
     public static final String NAME = "G - Blackholed Clients";
@@ -34,8 +60,7 @@ public class BlackholeGauge extends RegularPatternGauge {
         super(NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams,
                 mappings);
 
-        // match a list of IP addresses
-        // TODO: How to match empty reports? (I.e., nothing is blackholed)
+        // match a list of IP addresses, comma separated
         addPattern(
                 DEFAULT,
                 Pattern.compile("((?:\\d{1,3}\\.){3}\\d{1,3})(?:,\\s*((?:\\d{1,3}\\.){3}\\d{1,3}))*"));
@@ -84,10 +109,10 @@ public class BlackholeGauge extends RegularPatternGauge {
     }
 
     private boolean doReport (String report) {
-        boolean doReport;
-        synchronized (lastReport) {
-            doReport = !lastReport.equals(report);
-        }
+//        boolean doReport;
+//        synchronized (lastReport) {
+//            doReport = !lastReport.equals(report);
+//        }
 //		return doReport;
         return true;
     }
