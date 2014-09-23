@@ -26,11 +26,14 @@ import edu.cmu.cs.able.typelib.jconv.ValueConversionException;
 import edu.cmu.rainbow_ui.common.DataValueSupport;
 import edu.cmu.rainbow_ui.display.viewcontrol.WidgetLibrary;
 import edu.cmu.rainbow_ui.display.widgets.DummyWidget;
-import edu.cmu.rainbow_ui.display.widgets.Widget;
+import edu.cmu.rainbow_ui.display.widgets.IWidget;
 import edu.cmu.rainbow_ui.display.widgets.WidgetDescription;
 import edu.cmu.rainbow_ui.display.widgets.WidgetFactory;
+
 import java.util.Map;
+
 import org.junit.After;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -47,7 +50,7 @@ public class WidgetInfrastructureIT {
     private final WidgetFactory dummyFactory = new WidgetFactory() {
 
         @Override
-        public Widget getInstance(String mapping) {
+        public IWidget getInstance(String mapping) {
             return new DummyWidget(mapping);
         }
     };

@@ -111,7 +111,7 @@ public class DummyWidget extends Widget {
          * @return a instance of DummyWidget
          */
         @Override
-        public Widget getInstance(String mapping) {
+        public IWidget getInstance(String mapping) {
             return new DummyWidget(mapping);
         }
     }
