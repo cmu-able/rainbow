@@ -590,4 +590,8 @@ public class Util {
         }
         return result;
     }
+
+    public static boolean safeEquals (Object a, Object b) {
+        return a != null ? a.equals (b) : b == null;
+    }
 }

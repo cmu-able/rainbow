@@ -81,7 +81,7 @@ public class ESEBProbeReportSubscriberPort extends AbstractESEBDisposablePort im
         if (ESEBConstants.MSG_TYPE_PROBE_REPORT.equals (type)) {
             final String probeType = (String )msg.getProperty (ESEBConstants.MSG_PROBE_TYPE_KEY);
             final String probeLocation = (String )msg.getProperty (ESEBConstants.MSG_PROBE_LOCATION_KEY);
-            boolean subscribedToMessage = subscribedToProbe (probeType, probeLocation);
+                       boolean subscribedToMessage = subscribedToProbe (probeType, probeLocation);
             if (subscribedToMessage) {
                 m_callback.reportData (new IProbeIdentifier () {
 
@@ -110,7 +110,7 @@ public class ESEBProbeReportSubscriberPort extends AbstractESEBDisposablePort im
         }
     }
 
-    public boolean subscribedToProbe (final String probeType, final String probeLocation) {
+    public boolean subscribedToProbe (String probeType, String probeLocation) {
         Set<String> locationsInterestedIn;
         synchronized (m_subscriptions) {
             locationsInterestedIn = m_subscriptions.get (probeType);

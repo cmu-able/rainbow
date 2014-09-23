@@ -558,18 +558,21 @@ public class Rainbow implements RainbowConstants {
     }
 
     public static void registerGauge (IGauge gauge) {
-        instance ().m_id2Gauge.put (gauge.id (), gauge);
+        instance ();
+        Rainbow.m_id2Gauge.put (gauge.id (), gauge);
     }
 
     public static IGauge lookupGauge (String id) {
-        return instance ().m_id2Gauge.get (id);
+        instance ();
+        return Rainbow.m_id2Gauge.get (id);
     }
 
     public static Environment environment () {
-        if (instance ().m_env == Environment.UNKNOWN) {
-            instance ().m_env = Environment.valueOf (getProperty (PROPKEY_DEPLOYMENT_ENVIRONMENT).toUpperCase ());
+        instance ();
+        if (Rainbow.m_env == Environment.UNKNOWN) {
+            Rainbow.m_env = Environment.valueOf (getProperty (PROPKEY_DEPLOYMENT_ENVIRONMENT).toUpperCase ());
         }
-        return instance ().m_env;
+        return Rainbow.m_env;
     }
 
 

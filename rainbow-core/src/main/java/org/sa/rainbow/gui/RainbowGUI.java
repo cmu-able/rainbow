@@ -149,19 +149,30 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
     }
 
     public void forceQuit () {
-//        m_master.destroyDelegates ();
-        Rainbow.signalTerminate ();
-        Util.pause(IRainbowRunnable.LONG_SLEEP_TIME);
-        while (Rainbow.instance ().getThreadGroup ().activeCount () > 0) {
-            try {
-                Thread.sleep (100);
+        new Thread (new Runnable () {
+            @Override
+            public void run () {
+                m_master.destroyDelegates ();
+                Rainbow.signalTerminate ();
+                Util.pause (IRainbowRunnable.LONG_SLEEP_TIME);
+                while (Rainbow.instance ().getThreadGroup ().activeCount () > 0) {
+                    try {
+                        Thread.sleep (100);
+                    }
+                    catch (InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace ();
+                    }
+                }
+                System.exit (RainbowConstants.EXIT_VALUE_DESTRUCT);
             }
-            catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace ();
-            }
+        }).start ();
+        int ret = JOptionPane.showOptionDialog (m_frame, "Waiting for Rainbow to shutdown. Continue to wait?",
+                "Quitting", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, null, null);
+
+        if (ret == JOptionPane.NO_OPTION) {
+            System.exit (RainbowConstants.EXIT_VALUE_ABORT);
         }
-        System.exit (RainbowConstants.EXIT_VALUE_DESTRUCT);
     }
 
     public void display () {

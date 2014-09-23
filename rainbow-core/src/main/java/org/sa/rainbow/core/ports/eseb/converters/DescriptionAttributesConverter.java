@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.sa.rainbow.core.models.DescriptionAttributes;
-import org.sa.rainbow.core.models.ProbeDescription;
 import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
+import org.sa.rainbow.core.models.ProbeDescription;
 import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
 import org.sa.rainbow.translator.effectors.IEffector;
 import org.sa.rainbow.translator.probes.IProbe;
@@ -59,6 +59,7 @@ public class DescriptionAttributesConverter implements TypelibJavaConversionRule
 
                     ProbeDescription.ProbeAttributes pd = new ProbeDescription.ProbeAttributes ();
                     pd.kind = IProbe.Kind.valueOf (kind);
+                    pd.alias = alias;
                     atts = pd;
                 }
                 else if ("effector_description".equals (sdt.name ()) || EffectorAttributes.class == cls) {

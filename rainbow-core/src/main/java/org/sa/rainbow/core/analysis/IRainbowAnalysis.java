@@ -9,5 +9,8 @@ public interface IRainbowAnalysis extends Identifiable, IRainbowRunnable {
 
     public abstract void initialize (IRainbowReportingPort port) throws RainbowConnectionException;
 
+    public abstract void setProperty (String key, String value);
+
+    public abstract String getProperty (String key);
 
 }

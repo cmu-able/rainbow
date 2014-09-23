@@ -140,7 +140,7 @@ public class ESEBProvider {
             .read_memory ("enum outcome {unknown; confounded; failure; success; timeout;}"), context);
             parser.parse (
                     new ParsecFileReader ()
-                    .read_memory ("struct rainbow_model {string name; string type; string source; string cls; string system_name; string serialization;}"),
+                            .read_memory ("struct rainbow_model {string name; string type; string source; string cls; string system_name; string serialization; string additional_info;}"),
                     context);
             RULES = new LinkedList<TypelibJavaConversionRule> ();
             RULES.add (new CollectionConverter ());

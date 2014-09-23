@@ -16,11 +16,13 @@ import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.EffectorDescription;
 import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
 import org.sa.rainbow.core.ports.IEffectorLifecycleBusPort;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
 import org.sa.rainbow.core.ports.IModelDSBusSubscriberPort;
+import org.sa.rainbow.core.ports.IModelsManagerPort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
@@ -36,6 +38,7 @@ IModelDSBusPublisherPort {
     private Map<String, IEffectorExecutionPort> m_effectorExecutionPorts = new HashMap<> ();
 
     private IModelDSBusSubscriberPort           m_modelDSSubscribePort;
+    protected IModelsManagerPort                m_modelsManagerPort;
 
     protected EffectorDescription               m_effectors;
 
@@ -57,6 +60,7 @@ IModelDSBusPublisherPort {
     private void initializeConnections () throws RainbowConnectionException {
         m_effectorLifecyclePort = RainbowPortFactory.createClientSideEffectorLifecyclePort (this);
         m_modelDSSubscribePort = RainbowPortFactory.createModelDSSubscribePort (this);
+        m_modelsManagerPort = RainbowPortFactory.createModelsManagerRequirerPort ();
     }
 
     public Outcome executeEffector (String effName, String target, String[] args) {
@@ -167,6 +171,9 @@ IModelDSBusPublisherPort {
         return effectors;
     }
 
-
+    @Override
+    public IRainbowMessage createMessage () {
+        return null;
+    }
 
 }

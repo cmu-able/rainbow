@@ -18,6 +18,11 @@ public interface IRainbowMessage {
     public static final String CHANNEL = "channel";
     public static final String MESSAGE_CREATED = "msg-created";
     public static final String MESSAGE_SENT = "msg-sent";
+    public static final String START_STRATEGY_TYPE      = "START_STRATEGY";
+    public static final String END_STRATEGY_TYPE        = "END_STRATEGY";
+    public static final String START_TACTIC_TYPE        = "START_TACTIC";
+    public static final String END_TACTIC_TYPE          = "END_TACTIC";
+    public static final String AWAIT_TACTIC_SETTLE_TYPE = "AWAIT_TACTIC_SETTLE";
 
     public List<String> getPropertyNames ();
 

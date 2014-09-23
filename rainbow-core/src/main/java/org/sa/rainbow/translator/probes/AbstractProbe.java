@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.BadLifecycleStepException;
 import org.sa.rainbow.core.error.RainbowConnectionException;
@@ -248,7 +249,7 @@ public abstract class AbstractProbe implements IProbe {
      */
     @Override
     public boolean isActive () {
-        return m_state == State.ACTIVE;
+        return m_state == State.ACTIVE && !Rainbow.shouldTerminate ();
     }
 
     /* (non-Javadoc)

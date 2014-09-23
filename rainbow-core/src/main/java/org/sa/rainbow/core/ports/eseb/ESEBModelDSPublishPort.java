@@ -7,6 +7,7 @@ import java.util.Set;
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
+import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
 import org.sa.rainbow.core.ports.IModelDSBusSubscriberPort;
@@ -29,24 +30,31 @@ IModelDSBusSubscriberPort {
                 if (m_callbacks == null || m_callbacks.isEmpty ()) return; // no one interested
                 String msgType = (String )msg.getProperty (ESEBConstants.MSG_TYPE_KEY);
                 String channel = (String )msg.getProperty (ESEBConstants.MSG_CHANNEL_KEY);
-                if (ESEBConstants.MSG_TYPE_UPDATE_MODEL.equals (msgType) && ChannelT.MODEL_DS.name ().equals (channel)) {
-                    IRainbowOperation cmd = ESEBCommandHelper.msgToCommand (msg);
-                    for (IModelDSBusPublisherPort callback : m_callbacks) {
-                        OperationResult result = callback.publishOperation (cmd);
-                        if (result != null) {
-                            try {
-                                RainbowESEBMessage reply = getConnectionRole().createMessage ();
-                                reply.setProperty (ESEBConstants.MSG_REPLY_KEY,
-                                        msg.getProperty (ESEBConstants.MSG_REPLY_KEY));
-                                reply.setProperty (ESEBConstants.MSG_UPDATE_MODEL_REPLY, result);
-                                reply.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_REPLY);
-                                msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, m_publisher.id ());
-                                getConnectionRole().publish (reply);
+                if (ChannelT.MODEL_DS.name ().equals (channel)) {
+                    if (ESEBConstants.MSG_TYPE_UPDATE_MODEL.equals (msgType)) {
+                        IRainbowOperation cmd = ESEBCommandHelper.msgToCommand (msg);
+                        for (IModelDSBusPublisherPort callback : m_callbacks) {
+                            OperationResult result = callback.publishOperation (cmd);
+                            if (result != null) {
+                                try {
+                                    RainbowESEBMessage reply = getConnectionRole ().createMessage ();
+                                    reply.setProperty (ESEBConstants.MSG_REPLY_KEY,
+                                            msg.getProperty (ESEBConstants.MSG_REPLY_KEY));
+                                    reply.setProperty (ESEBConstants.MSG_UPDATE_MODEL_REPLY, result);
+                                    reply.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_REPLY);
+                                    msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, m_publisher.id ());
+                                    getConnectionRole ().publish (reply);
+                                }
+                                catch (RainbowException e) {
+                                    // TODO: What to do?
+                                    e.printStackTrace ();
+                                }
                             }
-                            catch (RainbowException e) {
-                                // TODO: What to do?
-                                e.printStackTrace ();
-                            }
+                        }
+                    }
+                    else {
+                        for (IModelDSBusPublisherPort callback : m_callbacks) {
+                            callback.publishMessage (msg);
                         }
                     }
                 }
@@ -91,6 +99,19 @@ IModelDSBusSubscriberPort {
     @Override
     public void unsubscribeToOperations (IModelDSBusPublisherPort callback) {
         m_callbacks.remove (callback);
+    }
+
+    @Override
+    public void publishMessage (IRainbowMessage msg) {
+        if (msg.getProperty (ESEBConstants.MSG_CHANNEL_KEY).equals (ChannelT.MODEL_DS.name ())
+                && msg instanceof RainbowESEBMessage) {
+            getConnectionRole ().publish ((RainbowESEBMessage )msg);
+        }
+    }
+
+    @Override
+    public IRainbowMessage createMessage () {
+        return getConnectionRole ().createMessage ();
     }
 
 }

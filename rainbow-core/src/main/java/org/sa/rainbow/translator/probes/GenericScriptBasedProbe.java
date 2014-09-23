@@ -3,8 +3,11 @@
  */
 package org.sa.rainbow.translator.probes;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
@@ -20,9 +23,35 @@ import org.sa.rainbow.util.Util;
  */
 public class GenericScriptBasedProbe extends AbstractProbe implements IBashBasedScript {
 
+    public class StreamGobbler extends Thread {
+
+        private InputStream m_inputStream;
+
+        public StreamGobbler (InputStream inputStream) {
+            m_inputStream = inputStream;
+        }
+
+        @Override
+        public void run () {
+            try {
+                InputStreamReader isr = new InputStreamReader (m_inputStream);
+                BufferedReader br = new BufferedReader (isr);
+                String line = null;
+                while ((line = br.readLine ()) != null) {
+                    reportData (line);
+                }
+            }
+            catch (IOException ioe) {
+                log (ioe.getMessage ());
+            }
+        }
+
+    }
+
     private String m_path = null;
     private String m_params = null;
     private Process m_process = null;
+    private boolean m_continual;
 
     /**
      * Main Constructor.
@@ -68,9 +97,18 @@ public class GenericScriptBasedProbe extends AbstractProbe implements IBashBased
             pb.redirectErrorStream(true);
             try {
                 m_process = pb.start();
-                dumpOutput();
+                if (m_continual) {
+                    StreamGobbler outputProcessor = new StreamGobbler (m_process.getInputStream ());
+                    outputProcessor.start ();
+                }
+                else {
+                    m_process.waitFor ();
+                    dumpOutput();
+                }
             } catch (IOException e) {
                 RainbowLogger.error (RainbowComponentT.PROBE, "Process I/O failed!", e, getLoggingPort (), LOGGER);
+            }
+            catch (InterruptedException e) {
             }
         }
     }
@@ -83,6 +121,7 @@ public class GenericScriptBasedProbe extends AbstractProbe implements IBashBased
         if (m_process != null) {
             // exhaust output to make sure process completes
             dumpOutput();
+
             m_process.destroy();
             log("- Process destroyed.");
             m_process = null;
@@ -113,6 +152,10 @@ public class GenericScriptBasedProbe extends AbstractProbe implements IBashBased
 
     private void dumpOutput () {
         log("- STDOUT+STDERR: ----\n" + Util.getProcessOutput(m_process));
+    }
+
+    public void setContinual (boolean b) {
+        m_continual = b;
     }
 
 }

@@ -29,10 +29,7 @@ public class LocalGaugeManager {
     /** The list of guage descriptions started by this gauge manager **/
     private GaugeDescription    m_gauges   = new GaugeDescription ();
 
-    private String                 m_id;
-
     public LocalGaugeManager (String id, IRainbowReportingPort masterConnectionPort) {
-        m_id = id;
         m_reportingPort = masterConnectionPort;
     }
 
@@ -58,7 +55,7 @@ public class LocalGaugeManager {
             }
             String gaugeClassName = (String )javaClassAttr.getValue ();
             try {
-                Class gaugeClass = Class.forName (gaugeClassName);
+                Class<?> gaugeClass = Class.forName (gaugeClassName);
                 doCreateGauge (gaugeClass, gaugeBeaconPeriod, instDesc);
             }
             catch (ClassNotFoundException e) {
@@ -69,7 +66,7 @@ public class LocalGaugeManager {
 
     }
 
-    private IGauge doCreateGauge (Class gaugeClass, long beaconPeriod, GaugeInstanceDescription instDesc) {
+    private IGauge doCreateGauge (Class<?> gaugeClass, long beaconPeriod, GaugeInstanceDescription instDesc) {
         AbstractGauge gauge = null;
         String id = GaugeInstanceDescription.genID (instDesc);
         Class<?>[] paramTypes = new Class[6];
@@ -80,7 +77,7 @@ public class LocalGaugeManager {
         paramTypes[4] = List.class;
         paramTypes[5] = Map.class;
         try {
-            Constructor constructor = gaugeClass.getConstructor (paramTypes);
+            Constructor<?> constructor = gaugeClass.getConstructor (paramTypes);
             Object[] args = new Object[6];
             args[0] = id;
             args[1] = beaconPeriod;

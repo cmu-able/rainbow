@@ -18,7 +18,7 @@ import org.sa.rainbow.core.ports.eseb.ESEBConstants;
 
 public abstract class AbstractLoadModelCmd<Type> extends AbstractRainbowModelOperation<IModelInstance<Type>, Object> {
 
-    private IModelsManager m_modelsManager;
+    protected IModelsManager m_modelsManager;
     private InputStream    m_is;
     private String         m_source;
 
@@ -49,7 +49,8 @@ public abstract class AbstractLoadModelCmd<Type> extends AbstractRainbowModelOpe
     }
 
     @Override
-    public List<? extends IRainbowMessage> execute (IModelInstance context, IRainbowMessageFactory messageFactory) throws IllegalStateException, RainbowException {
+    public List<? extends IRainbowMessage> execute (IModelInstance<Object> context,
+            IRainbowMessageFactory messageFactory) throws IllegalStateException, RainbowException {
         if (inCompoundCommand)
             throw new IllegalStateException (
                     "Cannot call execute() on a compounded command -- it must be called on the parent");

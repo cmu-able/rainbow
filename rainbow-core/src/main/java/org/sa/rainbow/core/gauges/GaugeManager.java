@@ -3,6 +3,7 @@ package org.sa.rainbow.core.gauges;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -19,7 +20,6 @@ import org.sa.rainbow.core.ports.IGaugeQueryPort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
-import org.sa.rainbow.util.Beacon;
 
 /**
  * The "global" gauge manager that maintains information about the global state of Rainbow gauges.
@@ -36,15 +36,17 @@ public class GaugeManager extends AbstractRainbowRunnable implements IGaugeLifec
     public static final String ID = "Gauge Manager";
 
 
+    @SuppressWarnings ("unused")
     private IGaugeLifecycleBusPort m_gaugeLifecyclePort;
 
     private Map<String, IGaugeConfigurationPort> configurationPorts = new HashMap<> ();
     private Map<String, IGaugeQueryPort>         queryPorts         = new HashMap<> ();
     private Map<String, GaugeInstanceDescription>                     m_gaugeDescription;
-    private Map<String, Beacon>                   m_gaugeBeacons     = new HashMap<> ();
     private Set<String>                           newGaugeIds        = new HashSet<> ();
     private GMState                               m_state            = GMState.CREATED;
     private boolean                               m_waitForGauges;
+
+    private Set<String>                           m_nonCompliantGauges = new HashSet<> ();
 
     public GaugeManager (GaugeDescription gd) {
         super (ID);
@@ -84,8 +86,57 @@ public class GaugeManager extends AbstractRainbowRunnable implements IGaugeLifec
             tallyGaugeCreations ();
             break;
         case OPERATING:
+            checkTerminations ();
+            checkHeartbeats ();
+        default:
+            break;
         }
 
+    }
+
+    private void checkTerminations () {
+        Set<GaugeInstanceDescription> gaugesToTerminate = new HashSet<> ();
+        synchronized (m_nonCompliantGauges) {
+            if (!m_nonCompliantGauges.isEmpty ()) {
+                for (Iterator<String> iterator = m_nonCompliantGauges.iterator (); iterator.hasNext ();) {
+                    String gid = iterator.next ();
+                    GaugeInstanceDescription gaugeDesc = m_gaugeDescription.get (gid);
+                    if (gaugeDesc.beacon ().isExpired ()) {
+                        gaugesToTerminate.add (gaugeDesc);
+                        iterator.remove ();
+                    }
+                }
+            }
+        }
+        for (GaugeInstanceDescription gaugeDesc : gaugesToTerminate) {
+            forgetGauge (gaugeDesc);
+        }
+    }
+
+    public void forgetGauge (GaugeInstanceDescription gaugeDesc) {
+        configurationPorts.remove (gaugeDesc.id ());
+        queryPorts.remove (gaugeDesc.id ());
+    }
+
+    private void checkHeartbeats () {
+        synchronized (m_gaugeDescription) {
+            for (Entry<String, GaugeInstanceDescription> gaugeEntry : m_gaugeDescription.entrySet ()) {
+                if (gaugeEntry.getValue ().beacon ().periodElapsed ()) {
+                    synchronized (m_nonCompliantGauges) {
+                        if (m_nonCompliantGauges.contains (gaugeEntry.getKey ())) {
+                            m_nonCompliantGauges.add (gaugeEntry.getKey ());
+                        }
+                        else {
+                            gaugeEntry.getValue ();
+                            m_reportingPort.error (RainbowComponentT.GAUGE_MANAGER,
+                                    MessageFormat.format ("No heartbeat from {0}.",
+                                            GaugeInstanceDescription.genID (gaugeEntry.getValue ())));
+                        }
+                    }
+
+                }
+            }
+        }
     }
 
     private void tallyGaugeCreations () {
@@ -155,7 +206,6 @@ public class GaugeManager extends AbstractRainbowRunnable implements IGaugeLifec
     public void reportDeleted (IGaugeIdentifier gauge) {
         m_reportingPort.info (RainbowComponentT.GAUGE_MANAGER, MessageFormat.format ("Deleted {0}", gauge.id ()));
         synchronized (configurationPorts) {
-            IGaugeConfigurationPort p = configurationPorts.get (gauge.id ());
             configurationPorts.remove (gauge.id ());
             queryPorts.remove (gauge.id ());
         }

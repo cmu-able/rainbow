@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import org.sa.rainbow.core.models.IModelInstanceProvider;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
@@ -18,17 +17,14 @@ IModelChangeBusSubscriberPort {
 
     private Collection<Pair<IRainbowChangeBusSubscription, IRainbowModelChangeCallback>> m_subscribers = new LinkedList<> ();
 
-    public ESEBModelChangeBusSubscriptionPort (final IModelInstanceProvider mm) throws IOException {
-        this (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (), mm);
+    public ESEBModelChangeBusSubscriptionPort () throws IOException {
+        this (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort ());
 
     }
 
-    public ESEBModelChangeBusSubscriptionPort (String esebClientHost, short esebClientPort,
-            final IModelInstanceProvider mm)
-                    throws IOException {
-        super (esebClientHost, esebClientPort,
-                ChannelT.MODEL_CHANGE);
-        getConnectionRole().addListener (new IESEBListener () {
+    public ESEBModelChangeBusSubscriptionPort (String esebClientHost, short esebClientPort) throws IOException {
+        super (esebClientHost, esebClientPort, ChannelT.MODEL_CHANGE);
+        getConnectionRole ().addListener (new IESEBListener () {
 
             @Override
             public void receive (RainbowESEBMessage msg) {
@@ -36,9 +32,9 @@ IModelChangeBusSubscriberPort {
                     synchronized (m_subscribers) {
                         for (Pair<IRainbowChangeBusSubscription, IRainbowModelChangeCallback> pair : m_subscribers) {
                             if (pair.firstValue ().matches (msg)) {
-                                ModelReference mr = new ModelReference (
-                                        (String )msg.getProperty (IModelChangeBusPort.MODEL_TYPE_PROP),
-                                        (String )msg.getProperty (IModelChangeBusPort.MODEL_NAME_PROP));
+                                ModelReference mr = new ModelReference ((String )msg
+                                        .getProperty (IModelChangeBusPort.MODEL_NAME_PROP), (String )msg
+                                        .getProperty (IModelChangeBusPort.MODEL_TYPE_PROP));
                                 pair.secondValue ().onEvent (mr, msg);
                             }
                         }
@@ -61,7 +57,8 @@ IModelChangeBusSubscriberPort {
     public void unsubscribe (IRainbowModelChangeCallback callback) {
         synchronized (m_subscribers) {
             for (Iterator i = m_subscribers.iterator (); i.hasNext ();) {
-                Pair<IRainbowChangeBusSubscription,IRainbowModelChangeCallback> subscription = (Pair<IRainbowChangeBusSubscription,IRainbowModelChangeCallback> )i.next ();
+                Pair<IRainbowChangeBusSubscription, IRainbowModelChangeCallback> subscription = (Pair<IRainbowChangeBusSubscription, IRainbowModelChangeCallback> )i
+                        .next ();
                 if (subscription.secondValue () == callback) {
                     i.remove ();
                 }

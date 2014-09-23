@@ -84,7 +84,6 @@ public class GaugeTypeDescription {
         return m_commandSignatures.get(name);
     }
 
-    @SuppressWarnings("unchecked")
     public List<Pair<String, OperationRepresentation>> commandSignatures () {
         List<Pair<String, OperationRepresentation>> valueList = new ArrayList<> ();
         for (Entry<String, OperationRepresentation> pair : m_commandSignatures.entrySet ()) {
@@ -102,7 +101,6 @@ public class GaugeTypeDescription {
         return m_setupParams.get(name);
     }
 
-    @SuppressWarnings("unchecked")
     public List<TypedAttributeWithValue> setupParams () {
         List<TypedAttributeWithValue> paramList = new ArrayList<TypedAttributeWithValue> (m_setupParams.values ());
         Collections.sort(paramList);
@@ -117,7 +115,6 @@ public class GaugeTypeDescription {
         return m_configParams.get(name);
     }
 
-    @SuppressWarnings("unchecked")
     public List<TypedAttributeWithValue> configParams () {
         List<TypedAttributeWithValue> paramList = new ArrayList<TypedAttributeWithValue> (m_configParams.values ());
         Collections.sort(paramList);

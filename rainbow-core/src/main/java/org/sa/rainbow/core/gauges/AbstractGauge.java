@@ -31,7 +31,7 @@ import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.util.Beacon;
 
 /**
- * Abstract definition of a gauge that does not use probes to gather system information This allows for subclasses to
+ * Abstract definition of a gauge that does not use probes to gather system information. This allows for subclasses to
  * implement gauges that get information from other gauges, gauges that get information from probes, or gauges that get
  * information from elsewhere.
  * 
@@ -77,6 +77,8 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
      *            the list of Gauge Value to Model Property mappings
      * @throws RainbowException
      */
+    @SuppressWarnings ("null")
+    // Ensure is used to check this
     public AbstractGauge (String threadName, String id, long beaconPeriod, TypedAttribute gaugeDesc,
             TypedAttribute modelDesc, List<TypedAttributeWithValue> setupParams,
             Map<String, IRainbowOperation> mappings)
@@ -122,7 +124,6 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
             m_gaugeManagementPort.reportCreated (this);
             m_gaugeBeacon.mark ();
         }
-        // TODO: Remove reliance on ParticipantException
         catch (RainbowConnectionException e) {
             m_reportingPort.error (getComponentType (), "Could not interact with the outside world", e);
             throw new RainbowException ("The gauge could not be started because the ports could not be set up.", e);
@@ -239,7 +240,8 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
     @Override
     public IGaugeState queryGaugeState () {
         return new GaugeState (m_setupParams.values (), m_configParams.values (),
-                new HashSet (m_lastCommands.values ()));
+ new HashSet<IRainbowOperation> (
+                m_lastCommands.values ()));
     }
 
     public void issueCommand (IRainbowOperation cmd, Map<String, String> parameters) {
@@ -327,10 +329,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
      */
     @Override
     protected void log (String txt) {
-        String msg = "G[" + id () + "] " + txt;
         m_reportingPort.info (RainbowComponentT.GAUGE, txt);
-//        RainbowCloudEventHandler.sendTranslatorLog (msg);
-        // avoid duplicate output in the master's process
     }
 
     /* (non-Javadoc)

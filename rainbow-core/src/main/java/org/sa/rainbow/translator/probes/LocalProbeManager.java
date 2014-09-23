@@ -96,9 +96,14 @@ public class LocalProbeManager extends AbstractRainbowRunnable {
                                         pbAttr.location, path), m_reportingPort, LOGGER);
                         continue; // don't create
                     }
-                    probe = new GenericScriptBasedProbe (refID, pbAttr.alias, path, argument);
+                    GenericScriptBasedProbe gProbe = new GenericScriptBasedProbe (refID, pbAttr.alias, path, argument);
                     m_reportingPort.info (getComponentType (), "Script-based IProbe " + pbAttr.name + ": " + path + " "
                             + argument);
+                    String mode = pbAttr.info.get ("mode");
+                    if ("continual".equals (mode)) {
+                        gProbe.setContinual (true);
+                    }
+                    probe = gProbe;
                     break;
                 case JAVA:
                     probeClazz = pbAttr.info.get ("class");

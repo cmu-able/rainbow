@@ -99,7 +99,6 @@ public class GaugeInstanceDescription extends GaugeTypeDescription {
         return m_mappings.get(name);
     }
 
-    @SuppressWarnings("unchecked")
     public Map<String, OperationRepresentation> mappings () {
         return m_mappings;
     }

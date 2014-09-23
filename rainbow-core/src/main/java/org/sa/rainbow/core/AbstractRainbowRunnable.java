@@ -82,6 +82,8 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
             m_threadState = State.STARTED;
             log(m_name + " started.");
             break;
+        default:
+            break;
         }
     }
 
@@ -232,6 +234,8 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
                     break;
                 case TERMINATED:
                     doTerminate();
+                    break;
+                default:
                     break;
                 }
                 if (m_restarting && m_nextState == State.STOPPED) {

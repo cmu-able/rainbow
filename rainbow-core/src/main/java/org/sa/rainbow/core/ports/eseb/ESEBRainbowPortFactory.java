@@ -9,7 +9,6 @@ import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
-import org.sa.rainbow.core.models.IModelInstanceProvider;
 import org.sa.rainbow.core.models.IModelsManager;
 import org.sa.rainbow.core.ports.AbstractDelegateConnectionPort;
 import org.sa.rainbow.core.ports.DisconnectedRainbowDelegateConnectionPort;
@@ -332,10 +331,10 @@ public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
     }
 
     @Override
-    public IModelChangeBusSubscriberPort createModelChangeBusSubscriptionPort (IModelInstanceProvider provider)
+    public IModelChangeBusSubscriberPort createModelChangeBusSubscriptionPort ()
             throws RainbowConnectionException {
         try {
-            return new ESEBModelChangeBusSubscriptionPort (provider);
+            return new ESEBModelChangeBusSubscriptionPort ();
         }
         catch (IOException e) {
             throw new RainbowConnectionException ("Failed to connect", e);

@@ -33,7 +33,7 @@ public interface IModelsManager extends IModelUpdater, IModelInstanceProvider {
      *            The model type
      * @return The collection of instances of the model type
      */
-    public Collection<? extends IModelInstance> getModelsOfType (String modelType);
+    public Collection<? extends IModelInstance<?>> getModelsOfType (String modelType);
 
     /**
      * Registers a new model with the name and type with the model manager

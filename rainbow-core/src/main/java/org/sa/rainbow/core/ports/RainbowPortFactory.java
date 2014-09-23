@@ -17,7 +17,6 @@ import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
 import org.sa.rainbow.core.models.IModelInstance;
-import org.sa.rainbow.core.models.IModelInstanceProvider;
 import org.sa.rainbow.core.models.IModelsManager;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReportingSubscriberCallback;
@@ -182,9 +181,9 @@ public class RainbowPortFactory {
         return getFactory ().createEffectorExecutionPort (effector);
     }
 
-    public static IModelChangeBusSubscriberPort createModelChangeBusSubscriptionPort (IModelInstanceProvider provider)
+    public static IModelChangeBusSubscriberPort createModelChangeBusSubscriptionPort ()
             throws RainbowConnectionException {
-        return getFactory ().createModelChangeBusSubscriptionPort (provider);
+        return getFactory ().createModelChangeBusSubscriptionPort ();
     }
 
     public static IRainbowReportingPort createMasterReportingPort () throws RainbowConnectionException {
