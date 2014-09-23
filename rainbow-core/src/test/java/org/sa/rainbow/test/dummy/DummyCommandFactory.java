@@ -18,6 +18,10 @@ import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 
 public class DummyCommandFactory extends ModelCommandFactory<Integer> {
+    public DummyCommandFactory () {
+        super (null, null);
+        // TODO Auto-generated constructor stub
+    }
     public static AbstractLoadModelCmd loadCommand (ModelsManager modelsManager,
             final String modelName,
             InputStream stream,
@@ -210,6 +214,12 @@ public class DummyCommandFactory extends ModelCommandFactory<Integer> {
     public AbstractSaveModelCmd<Integer> saveCommand (String location) throws RainbowModelException {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    protected void fillInCommandMap () {
+        // TODO Auto-generated method stub
+
     }
 
 }
