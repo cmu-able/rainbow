@@ -182,7 +182,7 @@ IRainbowModelChangeCallback<IAcmeSystem> {
             if (typeChecker instanceof SimpleModelTypeChecker) {
                 SimpleModelTypeChecker synchChecker = (SimpleModelTypeChecker )typeChecker;
                 boolean constraintViolated = !synchChecker.typechecks (model.getModelInstance ());
-                AcmeTypecheckSetCmd cmd = model.getCommandFactory ().acmeTypecheckSetCmd (!constraintViolated);
+                AcmeTypecheckSetCmd cmd = model.getCommandFactory ().setTypecheckResultCmd (!constraintViolated);
                 try {
                     m_modelUSPort.updateModel (cmd);
                 }
@@ -211,7 +211,7 @@ IRainbowModelChangeCallback<IAcmeSystem> {
 
                         @Override
                         public void requestAdaptation () {
-                            AcmeTypecheckSetCmd cmd = model.getCommandFactory ().acmeTypecheckSetCmd (false);
+                            AcmeTypecheckSetCmd cmd = model.getCommandFactory ().setTypecheckResultCmd (false);
                             try {
                                 m_modelUSPort.updateModel (cmd);
                             }

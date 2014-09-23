@@ -18,7 +18,7 @@ public abstract class AcmeModelCommandFactory extends ModelCommandFactory<IAcmeS
         m_commandMap.put ("setTypecheckResult".toLowerCase (), AcmeTypecheckSetCmd.class);
     }
 
-    public AcmeTypecheckSetCmd acmeTypecheckSetCmd (boolean typechecks) {
+    public AcmeTypecheckSetCmd setTypecheckResultCmd (boolean typechecks) {
         return new AcmeTypecheckSetCmd ("setTypecheckResult", (AcmeModelInstance )m_modelInstance, "self",
                 Boolean.toString (typechecks));
     }
