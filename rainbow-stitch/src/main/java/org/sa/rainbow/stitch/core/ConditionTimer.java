@@ -1,3 +1,26 @@
+/*
+ * The MIT License
+ *
+ * Copyright 2014 CMU ABLE Group.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 /**
  * 
  */
@@ -17,116 +40,118 @@ import java.util.Observer;
  */
 public class ConditionTimer implements Endable {
 
-	public static final int SLEEP_TIME_SHORT = 10;  // ms
-	public static final int SLEEP_TIME_LONG = 100;  // ms
+    public static final int SLEEP_TIME_SHORT = 10;  // ms
+    public static final int SLEEP_TIME_LONG = 100;  // ms
 
-	private static ConditionTimer m_singleton = null;
+    private static ConditionTimer m_singleton = null;
 
-	private Thread m_thread = null;
-	private List<TimedCondition> m_conditions = null;
+    private Thread m_thread = null;
+    private List<TimedCondition> m_conditions = null;
 
-	/**
-	 * Private constructor.
-	 */
-	private ConditionTimer() {
-		m_thread = new Thread(this, "Rainbow Strategy-Condition Timer");
-		m_conditions = new ArrayList<TimedCondition>();
+    /**
+     * Private constructor.
+     */
+    private ConditionTimer() {
+        m_thread = new Thread(this, "Rainbow Strategy-Condition Timer");
+        m_conditions = new ArrayList<TimedCondition>();
 
-		m_thread.start();
-	}
+        m_thread.start();
+    }
 
-	/**
-	 * Lazy initializes the condition timer, at which point it'll be
-	 * continuously running.
-	 */
-	public static ConditionTimer instance () {
-		if (m_singleton == null) {
-			m_singleton = new ConditionTimer();
-		}
-		return m_singleton;
-	}
+    /**
+     * Lazy initializes the condition timer, at which point it'll be
+     * continuously running.
+     */
+    public static ConditionTimer instance () {
+        if (m_singleton == null) {
+            m_singleton = new ConditionTimer();
+        }
+        return m_singleton;
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Runnable#run()
-	 */
-	public void run() {
-		Thread currentThread = Thread.currentThread();
-		int idx = 0;  // index into the registered conditions array, -1 causes long sleep
-		/*
-		 * Algorithm:  We keep looping while we ARE the current thread. <ol>
-		 * <li> Index into the condition array starts at 0 (first item).
-		 * <li> At every cycle, take the current condition item and evaluate it.
-		 * Evaluating a timed condition entails the following.
-		 *   <ol>
-		 *   <li> If time is not up, evaluate the condition expression and
-		 *   update the timedCondition's result; if the condition expression
-		 *   evaluates to <code>true</code>, then the timedCondition is
-		 *   satisfied, we then deregister the observable
-		 *   <li> If time IS up, then notify observers of the result, in the
-		 *   process deregistering the observable from the list of conditions
-		 *   </ol>
-		 * <li> Sleep the short sleep if we have more items; long sleep if we've
-		 * gone through all items already
-		 * <li> Repeat the cycle either with the next item or starting from the
-		 * first item in array, depending on how index was updated
-		 * </ol> 
-		 */
-		while (m_thread == currentThread) {
-			if (idx >= m_conditions.size()) {  // reset idx
-				idx = 0;
-				try {  // sleep long
-					Thread.sleep(SLEEP_TIME_LONG);
-				} catch (InterruptedException e) {
-					// intentional ignore
-				}
-			} else {  // process a timed condition
-				TimedCondition timedCond = m_conditions.get(idx++);
-				if (timedCond.isTimeUp()) {
-					timedCond.updateResult();
-					// notify observers, whether true or false
-					timedCond.notifyObservers();
-					// remove timed condition from queue
-					m_conditions.remove(timedCond);
-					--idx;  // move index backward by one
-				} else {
-					timedCond.updateResult();
-					if (timedCond.result()) {  // evaluated to true
-						timedCond.notifyObservers();
-						m_conditions.remove(timedCond);
-						--idx;
-					}
-				}
-				try {  // sleep short
-					Thread.sleep(SLEEP_TIME_SHORT);
-				} catch (InterruptedException e) {
-					// intentional ignore
-				}
-			}
-		}
-	}
+    /* (non-Javadoc)
+     * @see java.lang.Runnable#run()
+     */
+    @Override
+    public void run() {
+        Thread currentThread = Thread.currentThread();
+        int idx = 0;  // index into the registered conditions array, -1 causes long sleep
+        /*
+         * Algorithm:  We keep looping while we ARE the current thread. <ol>
+         * <li> Index into the condition array starts at 0 (first item).
+         * <li> At every cycle, take the current condition item and evaluate it.
+         * Evaluating a timed condition entails the following.
+         *   <ol>
+         *   <li> If time is not up, evaluate the condition expression and
+         *   update the timedCondition's result; if the condition expression
+         *   evaluates to <code>true</code>, then the timedCondition is
+         *   satisfied, we then deregister the observable
+         *   <li> If time IS up, then notify observers of the result, in the
+         *   process deregistering the observable from the list of conditions
+         *   </ol>
+         * <li> Sleep the short sleep if we have more items; long sleep if we've
+         * gone through all items already
+         * <li> Repeat the cycle either with the next item or starting from the
+         * first item in array, depending on how index was updated
+         * </ol> 
+         */
+        while (m_thread == currentThread) {
+            if (idx >= m_conditions.size()) {  // reset idx
+                idx = 0;
+                try {  // sleep long
+                    Thread.sleep(SLEEP_TIME_LONG);
+                } catch (InterruptedException e) {
+                    // intentional ignore
+                }
+            } else {  // process a timed condition
+                TimedCondition timedCond = m_conditions.get(idx++);
+                if (timedCond.isTimeUp()) {
+                    timedCond.updateResult();
+                    // notify observers, whether true or false
+                    timedCond.notifyObservers();
+                    // remove timed condition from queue
+                    m_conditions.remove(timedCond);
+                    --idx;  // move index backward by one
+                } else {
+                    timedCond.updateResult();
+                    if (timedCond.result()) {  // evaluated to true
+                        timedCond.notifyObservers();
+                        m_conditions.remove(timedCond);
+                        --idx;
+                    }
+                }
+                try {  // sleep short
+                    Thread.sleep(SLEEP_TIME_SHORT);
+                } catch (InterruptedException e) {
+                    // intentional ignore
+                }
+            }
+        }
+    }
 
-	/* (non-Javadoc)
-	 * @see org.sa.rainbow.stitch.core.Endable#end()
-	 */
-	public void end() {
-		m_thread = null;  // stop running
-		m_conditions.clear();
-		m_conditions = null;
-		m_singleton = null;
-	}
+    /* (non-Javadoc)
+     * @see org.sa.rainbow.stitch.core.Endable#end()
+     */
+    @Override
+    public void end() {
+        m_thread = null;  // stop running
+        m_conditions.clear();
+        m_conditions = null;
+        m_singleton = null;
+    }
 
-	public void registerCondition (List<Expression> exprList, long dur, Observer o) {
-		// instantiate an observable with the supplied expression and duration
-		TimedCondition timedCond = new TimedCondition(exprList, dur);
-		// initiate timer!
-		timedCond.resetTimer();
-		// add to list of observables
-		timedCond.addObserver(o);
-		m_conditions.add(timedCond);
-	}
+    public void registerCondition (List<Expression> exprList, long dur, Observer o) {
+        // instantiate an observable with the supplied expression and duration
+        TimedCondition timedCond = new TimedCondition(exprList, dur);
+        // initiate timer!
+        timedCond.resetTimer();
+        // add to list of observables
+        timedCond.addObserver(o);
+        m_conditions.add(timedCond);
+    }
 
-	public void deregisterCondition (TimedCondition timedCond) {
-		m_conditions.remove(timedCond);
-	}
+    public void deregisterCondition (TimedCondition timedCond) {
+        m_conditions.remove(timedCond);
+    }
 
 }

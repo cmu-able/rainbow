@@ -1,3 +1,26 @@
+/*
+ * The MIT License
+ *
+ * Copyright 2014 CMU ABLE Group.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 /**
  * Created August 30, 2006.
  */
@@ -17,30 +40,30 @@ import org.acmestudio.acme.element.IAcmeElement;
  */
 public interface IEvaluable extends IScope {
 
-	/**
-	 * Evaluates the AST stored in the scope; return a result if applicable.
-	 * 
-	 * @param  incoming arguments
-	 * @return <code>Object</code> if evaluation has result, null otherwise
-	 */
-	public Object evaluate (Object[] argsIn);
+    /**
+     * Evaluates the AST stored in the scope; return a result if applicable.
+     * 
+     * @param  incoming arguments
+     * @return <code>Object</code> if evaluation has result, null otherwise
+     */
+    public Object evaluate (Object[] argsIn);
 
-	/**
-	 * Calculates the estimated average time duration required to perform
-	 * this evaluable construct.
-	 * @return long  estimated upper-bound time cost in milliseconds
-	 */
-	public long estimateAvgTimeCost ();
+    /**
+     * Calculates the estimated average time duration required to perform
+     * this evaluable construct.
+     * @return long  estimated upper-bound time cost in milliseconds
+     */
+    public long estimateAvgTimeCost ();
 
-	/**
-	 * Returns a set of model elements (IAcmeElement) used by this IEvaluable.
-	 * An element is considered <em>used</em> by this IEvaluable if it an
-	 * operator may have made changes to it, which usually means the element
-	 * has been passed as an argument into an operator.
-	 * 
-	 * @return <code>Set</code> of <code>IAcmeElement</code>, or empty set if none.
-	 */
-	public Set<? extends IAcmeElement> modelElementsUsed ();
-	
+    /**
+     * Returns a set of model elements (IAcmeElement) used by this IEvaluable.
+     * An element is considered <em>used</em> by this IEvaluable if it an
+     * operator may have made changes to it, which usually means the element
+     * has been passed as an argument into an operator.
+     * 
+     * @return <code>Set</code> of <code>IAcmeElement</code>, or empty set if none.
+     */
+    public Set<? extends IAcmeElement> modelElementsUsed ();
+
 
 }

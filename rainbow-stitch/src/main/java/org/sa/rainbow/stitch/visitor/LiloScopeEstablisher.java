@@ -1,3 +1,26 @@
+/*
+ * The MIT License
+ *
+ * Copyright 2014 CMU ABLE Group.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 /**
  * Created March 15, 2006, separated from class Stitch April 4, 2006. 
  */
@@ -861,33 +884,37 @@ ILiloBehavior {
      * (antlr.collections.AST, antlr.collections.AST, antlr.collections.AST)
      */
     @Override
-    public void doStrategyProbability(AST p1AST, AST p2AST, AST pLitAST) {
+    public void doStrategyProbability (/*AST p1AST, AST p2AST, AST pLitAST*/) {
         if (curNode == null) {
             Tool.error(
                     "Expected to be processing condition part of a strategy tree node, but null curNode encountered!!",
-                    p1AST, stitchProblemHandler());
+                    null, stitchProblemHandler ());
             return;
         }
-
-        // optional probability clause exists, process it
-        if (p1AST != null) { // an identifier that needs later substitution
-            curNode.setHasProbability(true);
-            String pKey = p1AST.getText();
-            if (p2AST != null) { // append "{subkey}"
-                pKey += "{" + p2AST.getText() + "}";
-            }
-            curNode.setProbKey(pKey);
-        } else if (pLitAST != null) { // a literal for probability
-            curNode.setHasProbability(true);
-            curNode.setProbKey(null); // just to be sure it'll be treated as
-            // literal
-            curNode.setProbability(Double.valueOf(pLitAST.getText()));
-        } else {
-            curNode.setHasProbability(false);
-        }
-        debug("* Probability gathered:  has it? " + curNode.hasProbability()
-                + ", key == " + curNode.getProbKey() + ", lit == "
-                + curNode.getProbability());
+        curNode.setHasProbability (true);
+        Expression expr = scope ().expressions ().get (scope ().expressions ().size () - 1);
+        curNode.setProbabilityExpr (expr);
+        debug ("* Probability gathered: has it? " + curNode.hasDuration () + ", expr == "
+                + curNode.getProbabilityExpr ().ast ().toStringList ());
+//        // optional probability clause exists, process it
+//        if (p1AST != null) { // an identifier that needs later substitution
+//            curNode.setHasProbability(true);
+//            String pKey = p1AST.getText();
+//            if (p2AST != null) { // append "{subkey}"
+//                pKey += "{" + p2AST.getText() + "}";
+//            }
+//            curNode.setProbKey(pKey);
+//        } else if (pLitAST != null) { // a literal for probability
+//            curNode.setHasProbability(true);
+//            curNode.setProbKey(null); // just to be sure it'll be treated as
+//            // literal
+//            curNode.setProbability(Double.valueOf(pLitAST.getText()));
+//        } else {
+//            curNode.setHasProbability(false);
+//        }
+//        debug("* Probability gathered:  has it? " + curNode.hasProbability()
+//                + ", key == " + curNode.getProbKey() + ", lit == "
+//                + curNode.getProbability());
     }
 
     /*

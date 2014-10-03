@@ -1,12 +1,33 @@
+/*
+ * The MIT License
+ *
+ * Copyright 2014 CMU ABLE Group.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 /**
  * Created August 16, 2006
  */
 package org.sa.rainbow.stitch.error;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
 
 /**
  * This class serves as the default problem handler when the language module
@@ -16,36 +37,37 @@ import java.util.List;
  */
 public class DummyStitchProblemHandler implements StitchProblemHandler {
 
-	private LinkedHashSet<StitchProblem> m_problems = null;
+    private LinkedHashSet<StitchProblem> m_problems = null;
 
-	/**
-	 * Default constructor
-	 */
-	public DummyStitchProblemHandler() {
-		m_problems = new LinkedHashSet<StitchProblem>();
-	}
+    /**
+     * Default constructor
+     */
+    public DummyStitchProblemHandler() {
+        m_problems = new LinkedHashSet<StitchProblem>();
+    }
 
-	/* (non-Javadoc)
-	 * @see org.sa.rainbow.stitch.error.StitchProblemHandler#setProblem(org.sa.rainbow.stitch.error.StitchProblem)
-	 */
-	public void setProblem(StitchProblem problem) {
-		m_problems.add(problem);
-	}
+    /* (non-Javadoc)
+     * @see org.sa.rainbow.stitch.error.StitchProblemHandler#setProblem(org.sa.rainbow.stitch.error.StitchProblem)
+     */
+    @Override
+    public void setProblem(StitchProblem problem) {
+        m_problems.add(problem);
+    }
 
-	public Collection<StitchProblem> getProblems () {
-		return m_problems;
-	}
-	public void clearProblems () {
-		m_problems.clear();
-	}
+    public Collection<StitchProblem> getProblems () {
+        return m_problems;
+    }
+    public void clearProblems () {
+        m_problems.clear();
+    }
 
-	@Override
-	public void addAll(Collection<StitchProblem> problems) {
-		m_problems.addAll (problems);
-	}
+    @Override
+    public void addAll(Collection<StitchProblem> problems) {
+        m_problems.addAll (problems);
+    }
 
-	@Override
-	public Collection<StitchProblem> unreportedProblems() {
-		return m_problems;
-	}
+    @Override
+    public Collection<StitchProblem> unreportedProblems() {
+        return m_problems;
+    }
 }
