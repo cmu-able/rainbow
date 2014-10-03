@@ -23,12 +23,15 @@
  */
 package edu.cmu.rainbow_ui.ingestion;
 
-import edu.cmu.cs.able.eseb.participant.ParticipantException;
-import edu.cmu.rainbow_ui.common.ISystemConfiguration;
 import java.io.IOException;
+
 import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector;
 import org.sa.rainbow.core.ports.eseb.rpc.ESEBModelsManagerRequirerPort;
+
+import edu.cmu.cs.able.eseb.participant.ParticipantException;
+import edu.cmu.rainbow_ui.common.ISystemConfiguration;
 
 /**
  * ESEB Rainbow Connector class for Rainbow UI Framework.
@@ -82,13 +85,13 @@ public class ESEBRainbowConnector implements IRainbowConnector {
 
         /* Create callbacks */
         modelChangeCallback
-                = new GenericRuntimeAggregatorCallback(runtimeAggregator, ESEBConnector.ChannelT.MODEL_CHANGE);
+        = new GenericRuntimeAggregatorCallback(runtimeAggregator, ESEBConnector.ChannelT.MODEL_CHANGE);
 
         modelDownstreamCallback
-                = new GenericRuntimeAggregatorCallback(runtimeAggregator, ESEBConnector.ChannelT.MODEL_DS);
+        = new GenericRuntimeAggregatorCallback(runtimeAggregator, ESEBConnector.ChannelT.MODEL_DS);
 
         modelUpstreamCallback
-                = new GenericRuntimeAggregatorCallback(runtimeAggregator, ESEBConnector.ChannelT.MODEL_US);
+        = new GenericRuntimeAggregatorCallback(runtimeAggregator, ESEBConnector.ChannelT.MODEL_US);
     }
 
     @Override
@@ -146,7 +149,7 @@ public class ESEBRainbowConnector implements IRainbowConnector {
             modelManagerPort = new ESEBModelsManagerRequirerPort(rainbowHost,
                     rainbowPort);
         }
-        return modelManagerPort.getModelInstance("Acme", modelName);
+        return modelManagerPort.getModelInstance (new ModelReference (modelName, "Acme"));
     }
 
 }
