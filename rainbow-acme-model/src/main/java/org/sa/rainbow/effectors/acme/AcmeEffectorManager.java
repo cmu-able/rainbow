@@ -66,12 +66,14 @@ public class AcmeEffectorManager extends EffectorManager {
     public OperationResult publishOperation (IRainbowOperation cmd) {
         OperationResult badResult = new OperationResult ();
         badResult.result = Result.UNKNOWN;
-        if (cmd.getModelType ().equals ("Acme")) {
+        if (cmd.getModelReference ().getModelType ().equals ("Acme")) {
             AcmeModelInstance ami = (AcmeModelInstance )m_modelsManagerPort.<IAcmeSystem> getModelInstance (
-                    cmd.getModelType (), cmd.getModelName ());
+cmd
+                    .getModelReference ());
             if (ami == null) {
                 String errMsg = MessageFormat.format ("Could not find the model reference ''{0}'' for command {1}",
-                        Util.genModelRef (cmd.getModelName (), cmd.getModelType ()), cmd.getName ());
+                        Util.genModelRef (cmd.getModelReference ().getModelName (), cmd.getModelReference ()
+                                .getModelType ()), cmd.getName ());
                 m_reportingPort.error (getComponentType (), errMsg);
                 badResult.reply = errMsg;
                 return badResult;
@@ -156,8 +158,8 @@ public class AcmeEffectorManager extends EffectorManager {
                 args[i] = resolveAcmeReference (args[i], ami);
             }
         }
-        OperationRepresentation or = new OperationRepresentation (cmd.getName (), cmd.getModelName (),
-                cmd.getModelType (), target, args);
+        OperationRepresentation or = new OperationRepresentation (cmd.getName (), cmd.getModelReference (), target,
+                args);
         return or;
 
     }

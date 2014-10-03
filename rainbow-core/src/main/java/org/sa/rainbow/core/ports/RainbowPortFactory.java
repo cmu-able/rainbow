@@ -41,6 +41,7 @@ import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.IModelsManager;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReportingSubscriberCallback;
 import org.sa.rainbow.translator.effectors.IEffector;
@@ -245,8 +246,8 @@ public class RainbowPortFactory {
                 }
 
                 @Override
-                public IModelInstance getModelInstance (String modelType, String modelName) {
-                    return mm.getModelInstance (modelType, modelName);
+                public IModelInstance getModelInstance (ModelReference modelRef) {
+                    return mm.getModelInstance (modelRef);
                 }
             };
         }

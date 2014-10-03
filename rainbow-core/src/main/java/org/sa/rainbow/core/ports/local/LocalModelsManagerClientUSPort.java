@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IModelUSBusPort;
 
@@ -57,9 +58,9 @@ public class LocalModelsManagerClientUSPort implements IModelUSBusPort {
     }
 
     @Override
-    public IModelInstance getModelInstance (String modelType, String modelName) {
+    public IModelInstance getModelInstance (ModelReference modelRef) {
         if (m_connectedPort != null)
-            return m_connectedPort.getModelInstance (modelType, modelName);
+            return m_connectedPort.getModelInstance (modelRef);
         else
             throw new IllegalStateException ("This port is not connected to anything");
     }

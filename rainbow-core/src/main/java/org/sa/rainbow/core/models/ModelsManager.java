@@ -246,9 +246,9 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
 
     @SuppressWarnings ("unchecked")
     @Override
-    public synchronized <T> IModelInstance<T> getModelInstance (String modelType, String modelName) {
-        Map<String, IModelInstance<?>> models = m_modelMap.get (modelType);
-        if (models != null) return (IModelInstance<T> )models.get (modelName);
+    public synchronized <T> IModelInstance<T> getModelInstance (ModelReference modelRef) {
+        Map<String, IModelInstance<?>> models = m_modelMap.get (modelRef.getModelType ());
+        if (models != null) return (IModelInstance<T> )models.get (modelRef.getModelName ());
         return null;
     }
 
@@ -271,17 +271,17 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
     }
 
     @Override
-    public synchronized <T> IModelInstance<T> copyInstance (String modelType, String modelName, String copyName)
+    public synchronized <T> IModelInstance<T> copyInstance (ModelReference modelRef, String copyName)
             throws RainbowModelException {
-        Map<String, IModelInstance<?>> models = m_modelMap.get (modelType);
+        Map<String, IModelInstance<?>> models = m_modelMap.get (modelRef.getModelType ());
         if (models != null) {
-            IModelInstance<T> model = (IModelInstance<T> )models.get (modelName);
+            IModelInstance<T> model = (IModelInstance<T> )models.get (modelRef.getModelName ());
             if (model != null) {
                 if (models.get (copyName) == null) {
                     try {
                         synchronized (model.getModelInstance ()) {
                             IModelInstance<T> copy = model.copyModelInstance (copyName);
-                            registerModel (modelType, copyName, copy);
+                            registerModel (new ModelReference (copyName, modelRef.getModelType ()), copy);
                             return copy;
                         }
                     }
@@ -291,37 +291,39 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                 }
                 else
                     throw new RainbowModelException (MessageFormat.format (
-                            "A model with the name ''{0}'' of the type ''{1}'' already exists!", copyName, modelType));
+                            "A model with the name ''{0}'' of the type ''{1}'' already exists!", copyName,
+                            modelRef.getModelType ()));
             }
             else
                 throw new RainbowModelException (MessageFormat.format (
-                        "No model of type ''{0}'' exists with name ''{1}''!", modelType, modelName));
+                        "No model of type ''{0}'' exists with name ''{1}''!", modelRef.getModelType (),
+                        modelRef.getModelName ()));
         }
         throw new RainbowModelException (MessageFormat.format ("The type ''{0}'' is not a registered model type.",
-                modelType));
+                modelRef.getModelType ()));
     }
 
     @Override
-    public synchronized void registerModel (String modelType, String modelName, IModelInstance<?> model)
+    public synchronized void registerModel (ModelReference modelRef, IModelInstance<?> model)
             throws RainbowModelException {
-        Map<String, IModelInstance<?>> models = m_modelMap.get (modelType);
+        Map<String, IModelInstance<?>> models = m_modelMap.get (modelRef.getModelType ());
         if (models != null) {
             // Should I check if the instance is already registered?
-            IModelInstance<?> existingModel = models.get (modelName);
+            IModelInstance<?> existingModel = models.get (modelRef.getModelName ());
             if (existingModel != null) {
                 synchronized (existingModel) {
-                    models.put (modelName, model);
+                    models.put (modelRef.getModelName (), model);
                 }
             }
             else {
-                models.put (modelName, model);
+                models.put (modelRef.getModelName (), model);
 //            model.setChangePort (m_changeBusPort);
                 // TODO: attach the change bus port to the model
             }
         }
         else
             throw new RainbowModelException (MessageFormat.format ("The type ''{0}'' is not a registered model type.",
-                    modelType));
+                    modelRef.getModelType ()));
     }
 
     @Override
@@ -476,7 +478,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
         if (poll instanceof IRainbowOperation) {
             try {
                 IRainbowOperation command = (IRainbowOperation )poll;
-                IModelInstance<?> modelInstance = getModelInstance (command.getModelType (), command.getModelName ());
+                IModelInstance<?> modelInstance = getModelInstance (command.getModelReference ());
                 IRainbowModelOperation cmd = setupCommand (command, modelInstance);
                 List<? extends IRainbowMessage> events;
                 synchronized (modelInstance.getModelInstance ()) {
@@ -508,13 +510,13 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
             if (!commands.isEmpty ()) {
                 IRainbowOperation c = commands.iterator ().next ();
                 // The model being updated should be the same for all commands, so just grab the first one
-                IModelInstance<?> modelInstance = getModelInstance (c.getModelType (), c.getModelName ());
+                IModelInstance<?> modelInstance = getModelInstance (c.getModelReference ()); //c.getModelReference ().getModelType (), c.getModelReference ().getModelName ());
                 synchronized (modelInstance.getModelInstance ()) {
 
                     for (IRainbowOperation cmd : commands) {
                         try {
                             // Make sure that the model is the same 
-                            IModelInstance<?> mi = getModelInstance (cmd.getModelType (), cmd.getModelName ());
+                            IModelInstance<?> mi = getModelInstance (cmd.getModelReference ()); //cmd.getModelType (), cmd.getModelName ());
                             if (mi != modelInstance) {
                                 if (transaction) {
                                     // If not the same, this is an error so log it as such an mark as incomplete

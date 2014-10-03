@@ -55,9 +55,9 @@ public abstract class AbstractLoadModelCmd<Type> extends AbstractRainbowModelOpe
     protected void doPostExecute () throws RainbowModelException {
 
         if (m_modelsManager != null) {
-            m_modelsManager.registerModelType (getModelType ());
+            m_modelsManager.registerModelType (getModelReference ().getModelType ());
             getResult ().setOriginalSource (m_source);
-            m_modelsManager.registerModel (getModelType (), getModelName (), getResult ());
+            m_modelsManager.registerModel (getModelReference (), getResult ());
         }
     }
 
@@ -119,7 +119,7 @@ public abstract class AbstractLoadModelCmd<Type> extends AbstractRainbowModelOpe
             msg.setProperty (IModelChangeBusPort.EVENT_TYPE_PROP, "LOAD_MODEL");
             msg.setProperty (ESEBConstants.MSG_TYPE_KEY, "LOAD_MODEL");
             msg.setProperty (IModelChangeBusPort.ID_PROP, UUID.randomUUID ().toString ());
-            msg.setProperty (IModelChangeBusPort.MODEL_NAME_PROP, getModelName ());
+            msg.setProperty (IModelChangeBusPort.MODEL_NAME_PROP, getModelReference ().getModelName ());
             msg.setProperty (IModelChangeBusPort.COMMAND_PROP, getName ());
             msg.setProperty (IModelChangeBusPort.TARGET_PROP, getTarget ());
             for (int i = 0; i < getParameters ().length; i++) {

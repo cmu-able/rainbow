@@ -25,6 +25,7 @@ package org.sa.rainbow.core.adaptation;
 
 import org.sa.rainbow.core.IRainbowRunnable;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 
 /**
@@ -39,12 +40,10 @@ public interface IAdaptationManager<S> extends IRainbowRunnable {
     /**
      * Which model in the models manager are the adaptations in this manager for.
      * 
-     * @param modelName
-     *            The name of the model
-     * @param modelType
-     *            The type of the model
+     * @param modelRef
+     *            The model to manage
      */
-    public abstract void setModelToManage (String modelName, String modelType);
+    public abstract void setModelToManage (ModelReference modelRef);
 
     /**
      * Marks a particular adaptation as executed by an adaptation executor

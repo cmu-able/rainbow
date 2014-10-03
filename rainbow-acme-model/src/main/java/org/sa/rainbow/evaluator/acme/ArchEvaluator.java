@@ -270,7 +270,7 @@ IRainbowModelChangeCallback<IAcmeSystem> {
     public void onEvent (ModelReference ref, IRainbowMessage message) {
         // Assuming that the model manager is local, otherwise this call will be slow when done this often
         @SuppressWarnings ("rawtypes")
-        IModelInstance model = m_modelsManagerPort.getModelInstance (ref.getModelType (), ref.getModelName ());
+        IModelInstance model = m_modelsManagerPort.getModelInstance (ref); //ref.getModelType (), ref.getModelName ());
         if (model instanceof AcmeModelInstance) {
             m_modelCheckQ.offer ((AcmeModelInstance )model);
         }

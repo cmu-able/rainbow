@@ -250,8 +250,8 @@ public abstract class YamlUtil {
                     String key = cmd.getKey ();
                     String[] args = Util.evalCommand (cmd.getValue ());
                     gaugeInstSpec.addCommand (Util.evalTokens (key),
-                            new OperationRepresentation (args[1], modelDesc.getName (),
-                                    modelDesc.getType (), args[0], Arrays.copyOfRange (args, 2, args.length)));
+                            new OperationRepresentation (args[1], new ModelReference (modelDesc.getName (), modelDesc
+                                    .getType ()), args[0], Arrays.copyOfRange (args, 2, args.length)));
 
                 }
 

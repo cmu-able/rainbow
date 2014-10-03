@@ -16,6 +16,7 @@ import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.AbstractGauge;
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IGaugeLifecycleBusPort;
 import org.sa.rainbow.core.ports.eseb.ESEBReceiverSideGaugeLifecyclePort;
@@ -59,7 +60,8 @@ public class TestGaugeInfrastructure extends DefaultTCase {
         protected void runAction () {
             super.runAction ();
             if (m_reportingBeacon.periodElapsed ()) {
-                OperationRepresentation cmd = new OperationRepresentation ("test", "test", "testModel", "Acme", "load",
+                OperationRepresentation cmd = new OperationRepresentation ("test", new ModelReference (
+                        "testModel", "Acme"), "load",
                         "23");
                 issueCommand (cmd, Collections.<String, String> emptyMap ());
                 m_reportingBeacon.mark ();

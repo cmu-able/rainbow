@@ -27,11 +27,12 @@ import java.util.Collection;
 
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.IModelInstanceProvider;
+import org.sa.rainbow.core.models.ModelReference;
 
 public interface IModelsManagerPort extends IModelInstanceProvider {
     public Collection<? extends String> getRegisteredModelTypes ();
 
     @Override
-    public <T> IModelInstance<T> getModelInstance (String modelType, String modelName);
+    public <T> IModelInstance<T> getModelInstance (ModelReference modelRef);
 
 }

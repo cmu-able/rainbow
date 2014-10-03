@@ -35,6 +35,11 @@ public class ModelReference {
         m_modelType = modelType;
     }
 
+    public ModelReference (ModelReference modelRef) {
+        m_modelName = modelRef.getModelName ();
+        m_modelType = modelRef.getModelType ();
+    }
+
     public String getModelName () {
         return m_modelName;
     }

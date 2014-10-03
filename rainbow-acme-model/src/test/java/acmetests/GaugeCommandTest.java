@@ -37,6 +37,7 @@ import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.models.commands.ModelCommandFactory;
 import org.sa.rainbow.core.ports.IModelUSBusPort;
@@ -67,7 +68,8 @@ public class GaugeCommandTest extends DefaultTCase {
 
                 });
 
-        final IModelInstance<IAcmeSystem> modelInstance = usPort.<IAcmeSystem> getModelInstance ("Acme", "ZNewsSys");
+        final IModelInstance<IAcmeSystem> modelInstance = usPort.<IAcmeSystem> getModelInstance (new ModelReference (
+                "ZNewsSys", "Acme"));
         assertNotNull (modelInstance);
 
         ModelCommandFactory<IAcmeSystem> cf = modelInstance.getCommandFactory ();
@@ -100,13 +102,14 @@ public class GaugeCommandTest extends DefaultTCase {
 
         });
 
-        final IModelInstance<IAcmeSystem> modelInstance = usPort.<IAcmeSystem> getModelInstance ("Acme", "ZNewsSys");
+        final IModelInstance<IAcmeSystem> modelInstance = usPort.<IAcmeSystem> getModelInstance (new ModelReference (
+                "ZNewsSys", "Acme"));
         assertNotNull (modelInstance);
 
         ModelCommandFactory<IAcmeSystem> cf = modelInstance.getCommandFactory ();
         assertNotNull (cf);
 
-        OperationRepresentation command = new OperationRepresentation ("", "", "", "", "", "");
+        OperationRepresentation command = new OperationRepresentation ("", new ModelReference ("", ""), "", "", "");
         assertNotNull (command);
 
         usPort.updateModel (command);

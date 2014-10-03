@@ -165,6 +165,8 @@ public class ESEBProvider {
                     new ParsecFileReader ()
                     .read_memory ("struct rainbow_model {string name; string type; string source; string cls; string system_name; string serialization; string additional_info;}"),
                     context);
+            parser.parse (new ParsecFileReader ()
+            .read_memory ("struct model_reference {string model_name; string model_type;}"), context);
             RULES = new LinkedList<TypelibJavaConversionRule> ();
             RULES.add (new CollectionConverter ());
             RULES.add (new TypedAttributeConverter (ESEBProvider.SCOPE));

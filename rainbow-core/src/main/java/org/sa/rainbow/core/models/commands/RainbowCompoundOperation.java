@@ -31,6 +31,7 @@ import java.util.List;
 import org.sa.rainbow.core.error.RainbowDelegationException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 
 // NOTE: THIS CLASS SHOULD NOT BE USED YET.
@@ -181,17 +182,7 @@ IRainbowModelCompoundCommand<Model> {
         return null;
     }
 
-    @Override
-    public String getModelName () {
-        // TODO Auto-generated method stub
-        return null;
-    }
 
-    @Override
-    public String getModelType () {
-        // TODO Auto-generated method stub
-        return null;
-    }
 
     @Override
     protected boolean checkModelValidForCommand (Model model) {
@@ -205,6 +196,11 @@ IRainbowModelCompoundCommand<Model> {
     @Override
     public String getOrigin () {
         // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public ModelReference getModelReference () {
         return null;
     }
 

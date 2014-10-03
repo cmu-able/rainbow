@@ -44,6 +44,7 @@ import org.sa.rainbow.core.gauges.AbstractGauge;
 import org.sa.rainbow.core.gauges.IGaugeState;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.eseb.rpc.ESEBGaugeQueryRequirerPort;
 import org.sa.rainbow.core.util.TypedAttribute;
@@ -118,7 +119,8 @@ public class TestModelGaugeAPIs extends DefaultTCase {
 
         m_commands = new HashMap<> ();
         m_commands
-        .put ("setLoad", new OperationRepresentation ("setLoad", "setLoad", "ZNewsSys", "Acme", "s0", "load"));
+.put ("setLoad", new OperationRepresentation ("setLoad", new ModelReference ("ZNewsSys", "Acme"),
+                "s0", "load"));
 
         m_configs = new LinkedList<> ();
         m_configs.add (new TypedAttributeWithValue ("reportingPeriod", "long", 2000L));
@@ -138,8 +140,8 @@ public class TestModelGaugeAPIs extends DefaultTCase {
 
         gauge.configureGauge (m_configs);
 
-        IModelInstance<IAcmeSystem> modelInstance = m_master.modelsManager ().<IAcmeSystem> getModelInstance ("Acme",
-                "ZNewsSys");
+        IModelInstance<IAcmeSystem> modelInstance = m_master.modelsManager ().<IAcmeSystem> getModelInstance (
+                new ModelReference ("ZNewsSys", "Acme"));
         final IAcmeComponent server = modelInstance.getModelInstance ().getComponent ("s0");
         gauge.start ();
 
@@ -157,8 +159,8 @@ public class TestModelGaugeAPIs extends DefaultTCase {
         assertEquals (allCommands.size (), 1);
         IRainbowOperation cmd = allCommands.iterator ().next ();
         assertEquals (cmd.getName (), "setLoad");
-        assertEquals (cmd.getModelName (), "ZNewsSys");
-        assertEquals (cmd.getModelType (), "Acme");
+        assertEquals (cmd.getModelReference ().getModelName (), "ZNewsSys");
+        assertEquals (cmd.getModelReference ().getModelType (), "Acme");
         assertEquals (cmd.getTarget (), "s0");
         assertNotNull (cmd.getParameters ());
         assertEquals (cmd.getParameters ().length, 1);

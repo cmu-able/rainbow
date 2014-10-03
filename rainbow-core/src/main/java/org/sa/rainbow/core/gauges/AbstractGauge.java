@@ -286,8 +286,8 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
         String actualTarget = parameters.get (target);
         if (actualTarget != null) {
             // Need to set the target
-            actualCmd = new OperationRepresentation (cmd.getName (), cmd.getModelName (),
-                    cmd.getModelType (), actualTarget, cmd.getParameters ());
+            actualCmd = new OperationRepresentation (cmd.getName (), cmd.getModelReference (), actualTarget,
+                    cmd.getParameters ());
             actualsMap.put (pullOutParam (target), actualCmd);
         }
 

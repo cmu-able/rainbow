@@ -63,8 +63,7 @@ public class DummyDiagnosisGauge extends RegularPatternGauge {
             Object target = message.getProperty (IModelChangeBusPort.TARGET_PROP);
             if (target instanceof String && property instanceof String) {
                 Boolean captchaEnabled = Boolean.valueOf ((String )property);
-                IModelInstance<IAcmeSystem> model = m_modelPort.<IAcmeSystem> getModelInstance (mr.getModelType (),
-                        mr.getModelName ());
+                IModelInstance<IAcmeSystem> model = m_modelPort.<IAcmeSystem> getModelInstance (mr);
                 IAcmeSystem system = model.getModelInstance ();
                 Set<? extends IAcmeComponent> components = system.getComponents ();
                 Set<IAcmeComponent> maliciousComponents = new HashSet<> ();

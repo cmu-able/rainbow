@@ -28,6 +28,7 @@ import java.util.List;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.IModelsManager;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IModelUSBusPort;
 
@@ -62,8 +63,8 @@ public class LocalModelsManagerUSPort implements IModelUSBusPort {
     }
 
     @Override
-    public IModelInstance getModelInstance (String modelType, String modelName) {
-        return m_modelsManager.getModelInstance (modelType, modelName);
+    public IModelInstance getModelInstance (ModelReference modelRef) {
+        return m_modelsManager.getModelInstance (modelRef);
     }
 
     @Override

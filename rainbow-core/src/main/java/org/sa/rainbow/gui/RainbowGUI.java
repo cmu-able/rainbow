@@ -62,6 +62,7 @@ import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IEffectorLifecycleBusPort;
 import org.sa.rainbow.core.ports.IGaugeLifecycleBusPort;
 import org.sa.rainbow.core.ports.IMasterCommandPort;
@@ -72,7 +73,6 @@ import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReportingSubscriberCallback;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.util.Pair;
-import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 import org.sa.rainbow.util.Util;
 
@@ -587,9 +587,9 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
                 String modelRef = JOptionPane
                         .showInputDialog (m_frame,
                                 "Please identify the model to run the operation on: modelName:modelType (or just 'modelName' for Acme)");
-                TypedAttribute model = Util.decomposeModelReference (modelRef);
-                if (model.getType () == null || model.getType ().isEmpty ()) {
-                    model.setType ("Acme");
+                ModelReference model = Util.decomposeModelReference (modelRef);
+                if (model.getModelType () == null || model.getModelType ().isEmpty ()) {
+                    model = new ModelReference (model.getModelName (), "Acme");
                 }
 
                 // Publish the operation
@@ -735,8 +735,8 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
 //        writeText(ID_EXECUTOR, "  - outcome: " + outcome);
     }
 
-    private void testOperation (TypedAttribute modelRef, String opName, String[] args) {
-        OperationRepresentation or = new OperationRepresentation (opName, modelRef.getName (), modelRef.getType (),
+    private void testOperation (ModelReference modelRef, String opName, String[] args) {
+        OperationRepresentation or = new OperationRepresentation (opName, modelRef,
                 args[0], Arrays.copyOfRange (args, 1, args.length));
         if (m_dsPort == null) {
             try {

@@ -31,6 +31,7 @@ import org.acmestudio.acme.element.IAcmeSystem;
 import org.junit.Test;
 import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelReference;
 
 public class TestModelManagerLoading extends TestCase {
 
@@ -47,8 +48,8 @@ public class TestModelManagerLoading extends TestCase {
         assertTrue (!master.modelsManager ().getRegisteredModelTypes ().isEmpty ());
         assertTrue (master.modelsManager ().getRegisteredModelTypes ().contains ("Acme"));
 
-        IModelInstance<IAcmeSystem> modelInstance = master.modelsManager ().<IAcmeSystem> getModelInstance ("Acme",
-                "ZNewsSys");
+        IModelInstance<IAcmeSystem> modelInstance = master.modelsManager ().<IAcmeSystem> getModelInstance (
+                new ModelReference ("ZNewsSys", "Acme"));
         assertNotNull (modelInstance);
         IAcmeSystem system = modelInstance.getModelInstance ();
         assertNotNull (system);

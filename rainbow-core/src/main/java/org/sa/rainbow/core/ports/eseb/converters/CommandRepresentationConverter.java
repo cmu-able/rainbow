@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.sa.rainbow.core.gauges.OperationRepresentation;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 
 import edu.cmu.cs.able.typelib.jconv.TypelibJavaConversionRule;
@@ -88,8 +89,10 @@ public class CommandRepresentationConverter implements TypelibJavaConversionRule
                 Field commandName = sdt.field ("name");
                 Field params = sdt.field ("params");
                 fields.put (target, converter.from_java (command.getTarget (), m_scope.string ()));
-                fields.put (modelName, converter.from_java (command.getModelName (), m_scope.string ()));
-                fields.put (modelType, converter.from_java (command.getModelType (), m_scope.string ()));
+                fields.put (modelName,
+                        converter.from_java (command.getModelReference ().getModelName (), m_scope.string ()));
+                fields.put (modelType,
+                        converter.from_java (command.getModelReference ().getModelType (), m_scope.string ()));
                 fields.put (commandName, converter.from_java (command.getName (), m_scope.string ()));
                 fields.put (
                         params,
@@ -122,7 +125,8 @@ public class CommandRepresentationConverter implements TypelibJavaConversionRule
                 String name = converter.<String> to_java (sdv.value (sdt.field ("name")), String.class);
                 List<String> parameters = converter.<List> to_java (sdv.value (sdt.field ("params")), List.class);
                 if (cls == null) {
-                    OperationRepresentation crep = new OperationRepresentation (name, modelName, modelType, target,
+                    OperationRepresentation crep = new OperationRepresentation (name, new ModelReference (modelName,
+                            modelType), target,
                             parameters.toArray (new String[0]));
                     @SuppressWarnings ("unchecked")
                     T t = (T )crep;

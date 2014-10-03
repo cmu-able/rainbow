@@ -177,7 +177,7 @@ IRainbowModelChangeCallback<Map<String, ExecutionHistoryData>> {
     @Override
     public void onEvent (ModelReference mr, IRainbowMessage message) {
         if (++m_updateCnt % 10 == 0) {
-            IModelInstance model = m_modelsManagerPort.getModelInstance (mr.getModelType (), mr.getModelName ());
+            IModelInstance model = m_modelsManagerPort.getModelInstance (mr);
             saveExecutionHistoryToFile (model);
         }
     }

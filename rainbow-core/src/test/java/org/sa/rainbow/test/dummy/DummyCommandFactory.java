@@ -9,6 +9,7 @@ import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd;
 import org.sa.rainbow.core.models.commands.AbstractSaveModelCmd;
@@ -29,13 +30,8 @@ public class DummyCommandFactory extends ModelCommandFactory<Integer> {
         return new AbstractLoadModelCmd<Integer> ("load", modelsManager, modelName, stream, source) {
 
             @Override
-            public String getModelName () {
-                return modelName;
-            }
-
-            @Override
-            public String getModelType () {
-                return "Acme";
+            public ModelReference getModelReference () {
+                return new ModelReference (modelName, "Acme");
             }
 
 
@@ -148,13 +144,9 @@ public class DummyCommandFactory extends ModelCommandFactory<Integer> {
             }
 
             @Override
-            public String getModelName () {
-                return "test";
-            }
+            public ModelReference getModelReference () {
+                return new ModelReference ("test", "test");
 
-            @Override
-            public String getModelType () {
-                return "test";
             }
 
             @Override

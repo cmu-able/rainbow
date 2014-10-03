@@ -69,7 +69,7 @@ public interface IModelsManager extends IModelUpdater, IModelInstanceProvider {
      *            The model instance
      * @throws RainbowModelException
      */
-    public void registerModel (String modelType, String modelName, IModelInstance<?> model)
+    public void registerModel (ModelReference modelRef, IModelInstance<?> model)
             throws RainbowModelException;
 
 
@@ -83,7 +83,7 @@ public interface IModelsManager extends IModelUpdater, IModelInstanceProvider {
      * @return
      * @throws RainbowModelException
      */
-    public <T> IModelInstance<T> copyInstance (String modelType, String modelName, String copyName)
+    public <T> IModelInstance<T> copyInstance (ModelReference modelRef, String copyName)
             throws RainbowModelException;
 
     public abstract void unregisterModel (IModelInstance<?> model) throws RainbowModelException;

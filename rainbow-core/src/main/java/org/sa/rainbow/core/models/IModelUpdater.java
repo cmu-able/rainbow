@@ -56,6 +56,6 @@ public interface IModelUpdater {
     void requestModelUpdate (List<IRainbowOperation> commands, boolean transaction)
             throws IllegalStateException, RainbowException;
 
-    public <T> IModelInstance<T> getModelInstance (String modelType, String modelName);
+    public <T> IModelInstance<T> getModelInstance (ModelReference modelRef);
 
 }

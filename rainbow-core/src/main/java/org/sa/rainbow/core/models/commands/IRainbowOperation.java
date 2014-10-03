@@ -23,6 +23,8 @@
  */
 package org.sa.rainbow.core.models.commands;
 
+import org.sa.rainbow.core.models.ModelReference;
+
 public interface IRainbowOperation {
 
     public abstract String[] getParameters ();
@@ -31,9 +33,7 @@ public interface IRainbowOperation {
 
     public abstract String getName ();
 
-    public String getModelName ();
-
-    public String getModelType ();
+    public ModelReference getModelReference ();
 
     public String getOrigin ();
 

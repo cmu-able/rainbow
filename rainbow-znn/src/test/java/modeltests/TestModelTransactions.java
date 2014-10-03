@@ -20,6 +20,7 @@ import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
@@ -61,8 +62,7 @@ public class TestModelTransactions {
             });
             connection.start ();
             AcmeModelInstance modelInstance = (AcmeModelInstance )master.modelsManager ()
-                    .<IAcmeSystem> getModelInstance ("Acme",
-                            "ZNewsSys");
+                    .<IAcmeSystem> getModelInstance (new ModelReference ("ZNewsSys", "Acme"));
             NewServerCmd cmd = new NewServerCmd ("newServer", modelInstance, "lbproxy", "server", "10.5.6.6", "1080");
             master.modelsManager ().requestModelUpdate (cmd);
             List<? extends IRainbowMessage> generatedEvents = cmd.getGeneratedEvents (new IRainbowMessageFactory () {
@@ -113,8 +113,7 @@ public class TestModelTransactions {
         assertTrue (master.modelsManager ().getRegisteredModelTypes ().contains ("Acme"));
 
         AcmeModelInstance modelInstance = (AcmeModelInstance )master.modelsManager ().<IAcmeSystem> getModelInstance (
-                "Acme",
-                "ZNewsSys");
+                new ModelReference ("ZNewsSys", "Acme"));
 
         List<IRainbowOperation> commands = new LinkedList<> ();
         commands.add (new NewServerCmd ("newServer", modelInstance, "lbproxy", "server", "10.5.6.6", "1080"));
@@ -132,8 +131,7 @@ public class TestModelTransactions {
         assertTrue (master.modelsManager ().getRegisteredModelTypes ().contains ("Acme"));
 
         AcmeModelInstance modelInstance = (AcmeModelInstance )master.modelsManager ().<IAcmeSystem> getModelInstance (
-                "Acme",
-                "ZNewsSys");
+                new ModelReference ("ZNewsSys", "Acme"));
 
         List<IRainbowOperation> commands = new LinkedList<> ();
         commands.add (new NewServerCmd ("newServer", modelInstance, "lbproxy", "server", "10.5.6.6", "1080"));
@@ -152,8 +150,7 @@ public class TestModelTransactions {
         assertTrue (master.modelsManager ().getRegisteredModelTypes ().contains ("Acme"));
 
         AcmeModelInstance modelInstance = (AcmeModelInstance )master.modelsManager ().<IAcmeSystem> getModelInstance (
-                "Acme",
-                "ZNewsSys");
+                new ModelReference ("ZNewsSys", "Acme"));
 
         List<IRainbowOperation> commands = new LinkedList<> ();
         commands.add (new NewServerCmd ("newServer", modelInstance, "lbproxy", "server", "10.5.6.6", "1080"));

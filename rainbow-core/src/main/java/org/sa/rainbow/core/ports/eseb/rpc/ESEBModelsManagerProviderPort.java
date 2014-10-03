@@ -29,6 +29,7 @@ import java.util.Collection;
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.IModelsManager;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.eseb.ESEBProvider;
 
 import edu.cmu.cs.able.eseb.participant.ParticipantException;
@@ -54,8 +55,8 @@ IESEBModeslManagerRemoteInterface {
     }
 
     @Override
-    public IModelInstance getModelInstance (String modelType, String modelName) {
-        IModelInstance modelInstance = m_modelsManager.getModelInstance (modelType, modelName);
+    public IModelInstance getModelInstance (ModelReference modelRef) {
+        IModelInstance modelInstance = m_modelsManager.getModelInstance (modelRef);
         return modelInstance;
     }
 

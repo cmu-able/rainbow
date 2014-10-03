@@ -36,6 +36,7 @@ import org.acmestudio.acme.element.IAcmeComponent;
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.RegularPatternGauge;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IModelsManagerPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
@@ -150,8 +151,8 @@ public class ServerEnablementGauge extends RegularPatternGauge {
 
     private AcmeModelInstance getModel () {
         if (m_model == null) {
-            m_model = (AcmeModelInstance )m_modelsPort.<IAcmeSystem> getModelInstance (m_modelDesc.getType (),
-                    m_modelDesc.getName ());
+            m_model = (AcmeModelInstance )m_modelsPort.<IAcmeSystem> getModelInstance (new ModelReference (m_modelDesc
+                    .getName (), m_modelDesc.getType ()));
         }
         return m_model;
     }

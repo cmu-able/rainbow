@@ -42,6 +42,7 @@ import org.sa.rainbow.core.error.RainbowDelegationException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.event.IRainbowMessage;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation;
 import org.sa.rainbow.core.models.commands.IRainbowModelOperation;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
@@ -219,13 +220,8 @@ IRainbowModelOperation<T, IAcmeSystem> {
     protected abstract List<IAcmeCommand<?>> doConstructCommand () throws RainbowModelException;
 
     @Override
-    public String getModelName () {
-        return getModel ().getName ();
-    }
-
-    @Override
-    public String getModelType () {
-        return "Acme";
+    public ModelReference getModelReference () {
+        return new ModelReference (getModel ().getName (), "Acme");
     }
 
     @Override

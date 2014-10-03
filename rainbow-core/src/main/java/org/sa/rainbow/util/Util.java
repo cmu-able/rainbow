@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package org.sa.rainbow.util;
 
 import java.io.BufferedInputStream;
@@ -52,9 +53,9 @@ import org.reflections.util.FilterBuilder;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.health.IRainbowHealthProtocol;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.util.Pair;
-import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.translator.probes.IBashBasedScript;
 
 public class Util {
@@ -292,7 +293,7 @@ public class Util {
         return new Pair<String, String> (name, loc);
     }
 
-    public static TypedAttribute decomposeModelReference (String modelRef) {
+    public static ModelReference decomposeModelReference (String modelRef) {
         String name = null;
         String type = null;
         int atIdx = modelRef.indexOf (':');
@@ -303,7 +304,7 @@ public class Util {
         else { // name only
             name = modelRef;
         }
-        return new TypedAttribute (name, type);
+        return new ModelReference (name, type);
     }
 
     public static String genModelRef (String modelName, String modelType) {
@@ -487,7 +488,7 @@ public class Util {
         }
     }
 
-    public static void reportMemUsage () {
+    public static void reportMemUsage () { 
         StringBuffer usageStr = new StringBuffer (IRainbowHealthProtocol.DATA_MEMORY_USE);
         usageStr.append (Runtime.getRuntime ().freeMemory ()).append (" ");
         usageStr.append (Runtime.getRuntime ().totalMemory ()).append (" ");

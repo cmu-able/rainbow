@@ -51,15 +51,7 @@ AbstractRainbowModelOperation<org.sa.rainbow.stitch.util.ExecutionHistoryData, M
         return m_newDatum;
     }
 
-    @Override
-    public String getModelName () {
-        return m_modelContext.getModelName ();
-    }
 
-    @Override
-    public String getModelType () {
-        return m_modelContext.getModelType ();
-    }
 
     @Override
     protected List<? extends IRainbowMessage> getGeneratedEvents (IRainbowMessageFactory messageFactory) {

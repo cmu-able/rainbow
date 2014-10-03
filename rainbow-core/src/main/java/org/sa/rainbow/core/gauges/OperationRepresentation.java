@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.util.HashCodeUtil;
@@ -37,13 +38,13 @@ public class OperationRepresentation implements IRainbowOperation, Cloneable {
     private String[] m_parameters;
     private String   m_target;
     private String   m_operationName;
-    private String   m_modelName;
-    private String   m_modelType;
+    private ModelReference m_modelRef;
     private String   m_origin;
 
     @Override
     public String toString () {
-        return MessageFormat.format ("O[{0}:{1}/{2}.{3}({4}){5}]", m_modelName, m_modelType, m_operationName, m_target,
+        return MessageFormat.format ("O[{0}:{1}/{2}.{3}({4}){5}]", m_modelRef.getModelName (),
+                m_modelRef.getModelType (), m_operationName, m_target,
                 m_parameters == null ? "" : Arrays.toString (m_parameters), m_origin == null ? "" : ("<" + m_origin));
     }
 
@@ -55,17 +56,15 @@ public class OperationRepresentation implements IRainbowOperation, Cloneable {
         }
         m_target = cmd.getTarget ();
         m_operationName = cmd.getName ();
-        m_modelName = cmd.getModelName ();
-        m_modelType = cmd.getModelType ();
+        m_modelRef = new ModelReference (cmd.getModelReference ());
         m_origin = cmd.getOrigin ();
 
     }
 
-    public OperationRepresentation (String name, String modelName, String modelType, String target,
+    public OperationRepresentation (String name, ModelReference modelRef, String target,
             String... parameters) {
         m_operationName = name;
-        m_modelName = modelName;
-        m_modelType = modelType;
+        m_modelRef = modelRef == null ? null : new ModelReference (modelRef);
         m_target = target;
         m_parameters = parameters;
 
@@ -88,14 +87,10 @@ public class OperationRepresentation implements IRainbowOperation, Cloneable {
     }
 
     @Override
-    public String getModelName () {
-        return m_modelName;
+    public ModelReference getModelReference () {
+        return new ModelReference (m_modelRef);
     }
 
-    @Override
-    public String getModelType () {
-        return m_modelType;
-    }
 
     @Override
     protected OperationRepresentation clone () throws CloneNotSupportedException {
@@ -107,13 +102,14 @@ public class OperationRepresentation implements IRainbowOperation, Cloneable {
         if (obj != this) {
             if (obj instanceof OperationRepresentation) {
                 OperationRepresentation cr = (OperationRepresentation )obj;
-                return (cr.getModelType () == getModelType () || (getModelType () != null && getModelType ().equals (
-                        cr.getModelType ())))
-                        && (cr.getName () == getName () || (getName () != null && getName ()
-                        .equals (cr.getName ())))
+                return (cr.getModelReference ().getModelType () == getModelReference ().getModelType () || (getModelReference ()
+                        .getModelType () != null && getModelReference ().getModelType ().equals (
+                                cr.getModelReference ().getModelType ())))
+                                && (cr.getName () == getName () || (getName () != null && getName ()
+                                .equals (cr.getName ())))
 
-                        && (cr.getTarget () == getTarget () || (getTarget () != null && getTarget ().equals (
-                                cr.getTarget ()))) && Arrays.equals (getParameters (), cr.getParameters ());
+                                && (cr.getTarget () == getTarget () || (getTarget () != null && getTarget ().equals (
+                                        cr.getTarget ()))) && Arrays.equals (getParameters (), cr.getParameters ());
             }
             return false;
         }
@@ -123,22 +119,20 @@ public class OperationRepresentation implements IRainbowOperation, Cloneable {
     @Override
     public int hashCode () {
         int result = HashCodeUtil.SEED;
-        result = HashCodeUtil.hash (result, getModelType ());
-        result = HashCodeUtil.hash (result, getModelName ());
+        result = HashCodeUtil.hash (result, getModelReference ().getModelType ());
+        result = HashCodeUtil.hash (result, getModelReference ().getModelName ());
         result = HashCodeUtil.hash (result, getName ());
         result = HashCodeUtil.hash (result, getTarget ());
         result = HashCodeUtil.hash (result, getParameters ());
         return result;
     }
 
-    void setModel (String name, String type) {
-        m_modelName = name;
-        m_modelType = type;
+    void setModel (ModelReference modelRef) {
+        m_modelRef = new ModelReference (modelRef);
     }
 
     void setModel (TypedAttribute modelRef) {
-        m_modelName = modelRef.getName ();
-        m_modelType = modelRef.getType ();
+        m_modelRef = new ModelReference (modelRef.getName (), modelRef.getType ());
     }
 
     @Override
@@ -159,7 +153,7 @@ public class OperationRepresentation implements IRainbowOperation, Cloneable {
             if (unprocessedParams != null) {
                 parameters = unprocessedParams.split ("\\s*,\\s*");
             }
-            OperationRepresentation rep = new OperationRepresentation (commandName, null, null, target,
+            OperationRepresentation rep = new OperationRepresentation (commandName, null, target,
                     parameters);
             return rep;
         }

@@ -48,6 +48,7 @@ import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.models.EffectorDescription;
 import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
 import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.ProbeDescription;
 import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
 import org.sa.rainbow.core.models.commands.ModelCommandFactory;
@@ -268,7 +269,7 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
         }
         else {
             IModelInstance<Object> modelInstance = m_master.modelsManager ().getModelInstance (
-                    gid.modelDesc ().getType (), gid.modelDesc ().getName ());
+                    new ModelReference (gid.modelDesc ().getName (), gid.modelDesc ().getType ()));
             if (modelInstance == null) {
                 Problem p = new Problem ();
                 p.problem = ProblemT.ERROR;

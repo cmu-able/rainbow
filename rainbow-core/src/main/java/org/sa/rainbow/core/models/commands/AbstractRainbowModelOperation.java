@@ -33,6 +33,7 @@ import org.sa.rainbow.core.error.RainbowDelegationException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 import org.sa.rainbow.core.ports.eseb.ESEBConstants;
@@ -207,7 +208,8 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
 
     @Override
     public String toString () {
-        return MessageFormat.format ("O[{0}:{1}/{2}.{3}({4})]{5}", getModelName (), getModelType (), getName (),
+        return MessageFormat.format ("O[{0}:{1}/{2}.{3}({4})]{5}", getModelReference ().getModelName (),
+                getModelReference ().getModelType (), getName (),
                 m_target, m_parameters == null ? "" : Arrays.toString (m_parameters), m_origin == null ? ""
                         : ("<" + m_origin));
     }
@@ -224,8 +226,8 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
             msg.setProperty (IModelChangeBusPort.ID_PROP, UUID.randomUUID ().toString ());
             msg.setProperty (IModelChangeBusPort.COMMAND_PROP, getName ());
             msg.setProperty (IModelChangeBusPort.TARGET_PROP, getTarget ());
-            msg.setProperty (IModelChangeBusPort.MODEL_NAME_PROP, getModelName ());
-            msg.setProperty (IModelChangeBusPort.MODEL_TYPE_PROP, getModelType ());
+            msg.setProperty (IModelChangeBusPort.MODEL_NAME_PROP, getModelReference ().getModelName ());
+            msg.setProperty (IModelChangeBusPort.MODEL_TYPE_PROP, getModelReference ().getModelType ());
             for (int i = 0; i < getParameters ().length; i++) {
                 msg.setProperty (IModelChangeBusPort.PARAMETER_PROP + Integer.toString (i), getParameters ()[i]);
             }
@@ -237,6 +239,12 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
         catch (RainbowException e) {
         }
         return null;
+    }
+
+
+    @Override
+    public ModelReference getModelReference () {
+        return new ModelReference (getModelContext ().getModelName (), getModelContext ().getModelType ());
     }
 
 

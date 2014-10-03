@@ -33,6 +33,7 @@ import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.IModelUpdater;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IModelUSBusPort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
@@ -69,7 +70,7 @@ IModelUSBusPort {
 
                     String commandName = (String )msg.getProperty (COMMAND_NAME_KEY);
                     try {
-                        IModelInstance model = getModelInstance (modelType, modelName);
+                        IModelInstance model = getModelInstance (new ModelReference (modelName, modelType));
                         if (model != null) {
                             IRainbowOperation command = model.getCommandFactory ().generateCommand (
                                     commandName, params.toArray (new String[0]));
@@ -96,7 +97,7 @@ IModelUSBusPort {
                         cmd = ESEBCommandHelper.msgToCommand (msg, "_" + i + "_");
                         if (cmd != null) {
                             try {
-                                IModelInstance model = getModelInstance (cmd.getModelType (), cmd.getModelName ());
+                                IModelInstance model = getModelInstance (cmd.getModelReference ());
                                 if (model != null) {
                                     String[] params = new String[cmd.getParameters ().length + 1];
                                     params[0] = cmd.getTarget ();
@@ -155,8 +156,8 @@ IModelUSBusPort {
     }
 
     @Override
-    public IModelInstance getModelInstance (String modelType, String modelName) {
-        return m_mm.getModelInstance (modelType, modelName);
+    public IModelInstance getModelInstance (ModelReference modelRef) {
+        return m_mm.getModelInstance (modelRef);
     }
 
 }

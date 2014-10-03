@@ -31,6 +31,7 @@ import org.acmestudio.acme.model.IAcmeModel;
 import org.acmestudio.armani.ArmaniExportVisitor;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.AbstractSaveModelCmd;
 
 public class AcmeSaveModelCommand extends AbstractSaveModelCmd<IAcmeSystem> {
@@ -48,13 +49,8 @@ public class AcmeSaveModelCommand extends AbstractSaveModelCmd<IAcmeSystem> {
     }
 
     @Override
-    public String getModelName () {
-        return m_systemName;
-    }
-
-    @Override
-    public String getModelType () {
-        return "Acme";
+    public ModelReference getModelReference () {
+        return new ModelReference (m_systemName, "Acme");
     }
 
     @Override

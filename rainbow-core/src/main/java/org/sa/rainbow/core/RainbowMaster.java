@@ -48,6 +48,7 @@ import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
 import org.sa.rainbow.core.gauges.GaugeManager;
 import org.sa.rainbow.core.models.EffectorDescription;
 import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.ProbeDescription;
 import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
@@ -57,7 +58,6 @@ import org.sa.rainbow.core.ports.IMasterCommandPort;
 import org.sa.rainbow.core.ports.IMasterConnectionPort;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
-import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.gui.RainbowGUI;
 import org.sa.rainbow.translator.effectors.EffectorManager;
@@ -216,10 +216,10 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
                     String amModel = RainbowConstants.PROPKEY_ADAPTATION_MANAGER_MODEL + "_" + i;
                     String modelReference = Rainbow.getProperty (amModel);
                     if (modelReference != null) {
-                        TypedAttribute model = Util.decomposeModelReference (modelReference);
+                        ModelReference model = Util.decomposeModelReference (modelReference);
                         m_adaptationManagers.put (modelReference, adaptationManager);
                         adaptationManager.initialize (m_reportingPort);
-                        adaptationManager.setModelToManage (model.getName (), model.getType ());
+                        adaptationManager.setModelToManage (model);
 
                         adaptationManager.start ();
                     }
@@ -259,8 +259,8 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
                     String amModel = RainbowConstants.PROPKEY_ADAPTATION_EXECUTOR_MODEL + "_" + i;
                     String modelReference = Rainbow.getProperty (amModel);
                     if (modelReference != null) {
-                        TypedAttribute model = Util.decomposeModelReference (modelReference);
-                        adaptationExecutor.setModelToManage (model.getName (), model.getType ());
+                        ModelReference model = Util.decomposeModelReference (modelReference);
+                        adaptationExecutor.setModelToManage (model);
                         m_adaptationExecutors.put (modelReference, adaptationExecutor);
                         adaptationExecutor.start ();
                     }

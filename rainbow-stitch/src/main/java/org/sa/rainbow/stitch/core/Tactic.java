@@ -36,6 +36,7 @@ import java.util.Set;
 import org.acmestudio.acme.element.IAcmeElement;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.error.ArgumentMismatchException;
 import org.sa.rainbow.stitch.tactic.history.ExecutionHistoryModelInstance;
@@ -283,7 +284,7 @@ public class Tactic extends ScopedEntity implements IEvaluable {
                 .getRainbowMaster ()
                 .modelsManager ()
                 .<Map<String, ExecutionHistoryData>> getModelInstance (
-                        ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE, "history");
+                        new ModelReference ("history", ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE));
 
         // mark disruption level with model
         double level = computeAttribute("uD");
@@ -353,7 +354,9 @@ public class Tactic extends ScopedEntity implements IEvaluable {
         // first check if we have history data on tactic execution
         IModelInstance<Map<String, ExecutionHistoryData>> historyModel = Rainbow.instance ().getRainbowMaster ()
                 .modelsManager ()
-                .getModelInstance (ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE, "tacticExecutionHistoryModel");
+                .getModelInstance (
+                        new ModelReference ("tacticExecutionHistoryModel",
+                                ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE));
         ExecutionHistoryData ehd = null;
         if (historyModel != null && ((ehd = historyModel.getModelInstance ().get (getQualifiedName ()))) != null) {
             t = (long )ehd.getMeanDuration();

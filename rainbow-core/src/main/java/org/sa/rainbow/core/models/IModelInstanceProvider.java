@@ -32,5 +32,5 @@ public interface IModelInstanceProvider {
      * @param modelName
      * @return
      */
-    public <T> IModelInstance<T> getModelInstance (String modelType, String modelName);
+    public <T> IModelInstance<T> getModelInstance (ModelReference modelRef);
 }

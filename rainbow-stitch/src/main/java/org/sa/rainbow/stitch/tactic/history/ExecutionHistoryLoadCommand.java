@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData;
@@ -58,13 +59,8 @@ public class ExecutionHistoryLoadCommand extends AbstractLoadModelCmd<Map<String
     }
 
     @Override
-    public String getModelName () {
-        return m_name;
-    }
-
-    @Override
-    public String getModelType () {
-        return ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE;
+    public ModelReference getModelReference () {
+        return new ModelReference (m_name, ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE);
     }
 
     @Override
@@ -92,7 +88,8 @@ public class ExecutionHistoryLoadCommand extends AbstractLoadModelCmd<Map<String
                 else
                     throw new RainbowException ("Tactic history formatting error? " + line);
             }
-            m_result = new ExecutionHistoryModelInstance (map, getModelName (), getOriginalSource ());
+            m_result = new ExecutionHistoryModelInstance (map, getModelReference ().getModelName (),
+                    getOriginalSource ());
             doPostExecute ();
         }
         catch (IOException e) {

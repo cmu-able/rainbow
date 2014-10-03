@@ -37,6 +37,7 @@ import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
@@ -89,13 +90,14 @@ public class Executor extends AbstractRainbowRunnable implements IAdaptationExec
 
 
     @Override
-    public void setModelToManage (String name, String type) {
-        m_modelRef = name + ":" + type;
+    public void setModelToManage (ModelReference model) {
+        m_modelRef = model.getModelName () + ":" + model.getModelType ();
         IModelInstance<IAcmeSystem> mi = Rainbow.instance ().getRainbowMaster ().modelsManager ()
-                .getModelInstance (type, name);
+                .getModelInstance (model);
         m_model = (AcmeModelInstance )mi;
         if (m_model == null) {
-            m_reportingPort.error (RainbowComponentT.EXECUTOR, "Referring to unknown model " + name + ":" + type);
+            m_reportingPort.error (RainbowComponentT.EXECUTOR, "Referring to unknown model " + model.getModelName ()
+                    + ":" + model.getModelType ());
         }
     }
 
@@ -424,7 +426,7 @@ public class Executor extends AbstractRainbowRunnable implements IAdaptationExec
             if (!mm.getRegisteredModelTypes ().contains (ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE)) {
                 mm.registerModelType (ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE);
             }
-            mm.registerModel (ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE, "history",
+            mm.registerModel (new ModelReference ("history", ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE),
                     new ExecutionHistoryModelInstance (new HashMap<String, ExecutionHistoryData> (), "history", "memory"));
         }
         catch (RainbowModelException e) {

@@ -43,7 +43,7 @@ import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
 import org.sa.rainbow.core.Rainbow;
-import org.sa.rainbow.core.util.TypedAttribute;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.core.Expression;
@@ -1226,13 +1226,13 @@ ILiloBehavior {
                 }
             } else if (imp.type == Import.Kind.MODEL) {
                 if (Rainbow.instance ().getRainbowMaster ().modelsManager () != null) {
-                    TypedAttribute model = Util.decomposeModelReference (imp.path);
-                    if (model.getType () == null) {
+                    ModelReference model = Util.decomposeModelReference (imp.path);
+                    if (model.getModelType () == null) {
 
-                        model = new TypedAttribute (imp.path.split ("\\.")[0], "Acme");
+                        model = new ModelReference (imp.path.split ("\\.")[0], "Acme");
                     }
                     Object o = Rainbow.instance ().getRainbowMaster ().modelsManager ()
-                            .getModelInstance (model.getType (), model.getName ());
+.getModelInstance (model);
                     if (o instanceof AcmeModelInstance) {
                         AcmeModelInstance ami = (AcmeModelInstance )o;
                         m_stitch.script.models.add (ami);

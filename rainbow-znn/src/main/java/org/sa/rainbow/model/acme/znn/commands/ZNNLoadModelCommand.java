@@ -44,6 +44,7 @@ import org.acmestudio.standalone.resource.StandaloneResourceProvider;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.IModelsManager;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd;
 import org.sa.rainbow.model.acme.znn.ZNNModelUpdateOperatorsImpl;
 import org.sa.rainbow.util.Util;
@@ -87,14 +88,10 @@ public class ZNNLoadModelCommand extends AbstractLoadModelCmd<IAcmeSystem> {
     }
 
     @Override
-    public String getModelName () {
-        return m_systemName;
+    public ModelReference getModelReference () {
+        return new ModelReference (m_systemName, "Acme");
     }
 
-    @Override
-    public String getModelType () {
-        return "Acme";
-    }
 
     @Override
     protected void subExecute () throws RainbowException {

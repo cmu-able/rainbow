@@ -186,12 +186,13 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
     }
 
     @Override
-    public void setModelToManage (String modelName, String modelType) {
-        m_modelRef = modelName + ":" + modelType;
-        m_model = (AcmeModelInstance )m_modelsManagerPort.<IAcmeSystem> getModelInstance (modelType, modelName);
+    public void setModelToManage (ModelReference model) {
+        m_modelRef = model.getModelName () + ":" + model.getModelType ();
+        m_model = (AcmeModelInstance )m_modelsManagerPort.<IAcmeSystem> getModelInstance (model);
 
         m_utilityModel = m_modelsManagerPort
-                .<UtilityPreferenceDescription> getModelInstance ("UtilityModel", modelName).getModelInstance ();
+.<UtilityPreferenceDescription> getModelInstance (
+                new ModelReference (model.getModelName (), "UtilityModel")).getModelInstance ();
 //        for (String k : m_utilityModel.utilities.keySet ()) {
 //            UtilityAttributes ua = m_utilityModel.utilities.get (k);
 //            UtilityFunction uf = new UtilityFunction (k, ua.label, ua.mapping, ua.desc, ua.values);

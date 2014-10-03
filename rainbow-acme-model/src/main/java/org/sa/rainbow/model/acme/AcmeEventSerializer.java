@@ -96,8 +96,10 @@ public class AcmeEventSerializer {
             msg.setProperty (IModelChangeBusPort.ID_PROP, UUID.randomUUID ().toString ());
             msg.setProperty (IModelChangeBusPort.COMMAND_PROP, event.getCommand ().getName ());
             msg.setProperty (IModelChangeBusPort.TARGET_PROP, event.getCommand ().getTarget ());
-            msg.setProperty (IModelChangeBusPort.MODEL_NAME_PROP, event.getCommand ().getModelName ());
-            msg.setProperty (IModelChangeBusPort.MODEL_TYPE_PROP, event.getCommand ().getModelType ());
+            msg.setProperty (IModelChangeBusPort.MODEL_NAME_PROP, event.getCommand ().getModelReference ()
+                    .getModelName ());
+            msg.setProperty (IModelChangeBusPort.MODEL_TYPE_PROP, event.getCommand ().getModelReference ()
+                    .getModelType ());
             for (int i = 0; i < event.getCommand ().getParameters ().length; i++) {
                 msg.setProperty (IModelChangeBusPort.PARAMETER_PROP + i, event.getCommand ().getParameters ()[i]);
             }
