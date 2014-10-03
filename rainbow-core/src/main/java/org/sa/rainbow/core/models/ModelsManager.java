@@ -1,3 +1,26 @@
+/*
+ * The MIT License
+ *
+ * Copyright 2014 CMU ABLE Group.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package org.sa.rainbow.core.models;
 
 import java.io.File;
@@ -65,10 +88,10 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
     private IModelsManagerPort                         m_remoteModelManagerPort;
 
     /** Contains all the models -- keyed by Type then name **/
-    protected Map<String, Map<String, IModelInstance>> m_modelMap = new HashMap<> ();
+    protected Map<String, Map<String, IModelInstance<?>>> m_modelMap     = new HashMap<> ();
 
     /** Contains the queue of commands waiting to be executed on the models **/
-    protected BlockingQueue                            commandQ   = new LinkedBlockingQueue<> ();
+    protected BlockingQueue<Object>                       commandQ       = new LinkedBlockingQueue<> ();
 
     protected Map<ModelReference, File>                m_modelsToSave = new HashMap<> ();
 
@@ -181,6 +204,10 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                         factoryClassName, modelPath);
                 m_reportingPort.error (getComponentType (), msg, e, LOGGER);
             }
+            catch (Throwable e) {
+                m_reportingPort.error (getComponentType (), MessageFormat.format (
+                        "There was an error creating the model in {0}. Exception: {1}", modelPath, e.getMessage ()), e);
+            }
         }
     }
 
@@ -201,7 +228,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
     @Override
     public void registerModelType (String typeName) {
         if (!m_modelMap.containsKey (typeName)) {
-            m_modelMap.put (typeName, new HashMap<String, IModelInstance> ());
+            m_modelMap.put (typeName, new HashMap<String, IModelInstance<?>> ());
         }
     }
 
@@ -211,30 +238,32 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
     }
 
     @Override
-    public Collection<? extends IModelInstance> getModelsOfType (String modelType) {
-        Map<String, IModelInstance> map = m_modelMap.get (modelType);
+    public Collection<? extends IModelInstance<?>> getModelsOfType (String modelType) {
+        Map<String, IModelInstance<?>> map = m_modelMap.get (modelType);
         if (map != null) return map.values ();
-        return Collections.<IModelInstance> emptySet ();
+        return Collections.<IModelInstance<?>> emptySet ();
     }
 
+    @SuppressWarnings ("unchecked")
     @Override
     public synchronized <T> IModelInstance<T> getModelInstance (String modelType, String modelName) {
-        Map<String, IModelInstance> models = m_modelMap.get (modelType);
-        if (models != null) return models.get (modelName);
+        Map<String, IModelInstance<?>> models = m_modelMap.get (modelType);
+        if (models != null) return (IModelInstance<T> )models.get (modelName);
         return null;
     }
 
     @Override
     public synchronized <T> IModelInstance<T> getModelInstanceByResource (String resource) {
-        Collection<Map<String, IModelInstance>> values = m_modelMap.values ();
+        Collection<Map<String, IModelInstance<?>>> values = m_modelMap.values ();
         IModelInstance<T> foundModel = null;
-        for (Iterator iterator = values.iterator (); iterator.hasNext () && foundModel == null;) {
-            Map<String, IModelInstance> map = (Map<String, IModelInstance> )iterator.next ();
-            Collection<IModelInstance> values2 = map.values ();
-            for (Iterator it2 = values2.iterator (); it2.hasNext () && foundModel == null;) {
-                IModelInstance model = (IModelInstance )it2.next ();
+        for (Iterator<Map<String, IModelInstance<?>>> iterator = values.iterator (); iterator.hasNext ()
+                && foundModel == null;) {
+            Map<String, IModelInstance<?>> map = iterator.next ();
+            Collection<IModelInstance<?>> values2 = map.values ();
+            for (Iterator<IModelInstance<?>> it2 = values2.iterator (); it2.hasNext () && foundModel == null;) {
+                IModelInstance<?> model = it2.next ();
                 if (resource.equals (model.getOriginalSource ())) {
-                    foundModel = model;
+                    foundModel = (IModelInstance<T> )model;
                 }
             }
         }
@@ -244,9 +273,9 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
     @Override
     public synchronized <T> IModelInstance<T> copyInstance (String modelType, String modelName, String copyName)
             throws RainbowModelException {
-        Map<String, IModelInstance> models = m_modelMap.get (modelType);
+        Map<String, IModelInstance<?>> models = m_modelMap.get (modelType);
         if (models != null) {
-            IModelInstance<T> model = models.get (modelName);
+            IModelInstance<T> model = (IModelInstance<T> )models.get (modelName);
             if (model != null) {
                 if (models.get (copyName) == null) {
                     try {
@@ -275,10 +304,10 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
     @Override
     public synchronized void registerModel (String modelType, String modelName, IModelInstance<?> model)
             throws RainbowModelException {
-        Map<String, IModelInstance> models = m_modelMap.get (modelType);
+        Map<String, IModelInstance<?>> models = m_modelMap.get (modelType);
         if (models != null) {
             // Should I check if the instance is already registered?
-            IModelInstance existingModel = models.get (modelName);
+            IModelInstance<?> existingModel = models.get (modelName);
             if (existingModel != null) {
                 synchronized (existingModel) {
                     models.put (modelName, model);
@@ -297,7 +326,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
 
     @Override
     public synchronized void unregisterModel (IModelInstance<?> model) throws RainbowModelException {
-        Map<String, IModelInstance> models = m_modelMap.get (model.getModelType ());
+        Map<String, IModelInstance<?>> models = m_modelMap.get (model.getModelType ());
         boolean success = false;
         if (models != null) {
             synchronized (model.getModelInstance ()) {
@@ -307,7 +336,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
         else {
             // do it the slow way
             synchronized (model.getModelInstance ()) {
-                for (Map<String, IModelInstance> m : m_modelMap.values ()) {
+                for (Map<String, IModelInstance<?>> m : m_modelMap.values ()) {
                     success = unregisterModel (m, model);
                     if (success) {
                         break;
@@ -322,11 +351,11 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
         }
     }
 
-    private synchronized boolean unregisterModel (Map<String, IModelInstance> models, IModelInstance<?> model) {
-        Iterator<Entry<String, IModelInstance>> it = models.entrySet ().iterator ();
+    private synchronized boolean unregisterModel (Map<String, IModelInstance<?>> models, IModelInstance<?> model) {
+        Iterator<Entry<String, IModelInstance<?>>> it = models.entrySet ().iterator ();
         boolean deleted = false;
         while (it.hasNext () && !deleted) {
-            Entry<String, IModelInstance> e = it.next ();
+            Entry<String, IModelInstance<?>> e = it.next ();
             if (e.getValue () == model) {
                 it.remove ();
                 try {
@@ -403,9 +432,9 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
             ModelReference ref = modelEntries.getKey ();
             File saveTo = modelEntries.getValue ();
 
-            Map<String, IModelInstance> map = m_modelMap.get (ref.getModelType ());
+            Map<String, IModelInstance<?>> map = m_modelMap.get (ref.getModelType ());
             if (map != null) {
-                IModelInstance model = map.get (ref.getModelName ());
+                IModelInstance<?> model = map.get (ref.getModelName ());
                 try {
                     AbstractSaveModelCmd saveCommand = model.getCommandFactory ().saveCommand (
                             saveTo.getAbsolutePath ());
@@ -418,13 +447,12 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
 
         }
 
-        for (Entry<String, Map<String, IModelInstance>> mts : m_modelMap.entrySet ()) {
-            for (Entry<String, IModelInstance> entry : mts.getValue ().entrySet ()) {
+        for (Entry<String, Map<String, IModelInstance<?>>> mts : m_modelMap.entrySet ()) {
+            for (Entry<String, IModelInstance<?>> entry : mts.getValue ().entrySet ()) {
                 try {
                     entry.getValue ().dispose ();
                 }
                 catch (RainbowException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace ();
                 }
             }
@@ -465,12 +493,11 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                 }
             }
             catch (IllegalStateException | RainbowException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace ();
             }
         }
         else if (poll instanceof List) {
-            List<IRainbowOperation> commands = (List )poll;
+            List<IRainbowOperation> commands = (List<IRainbowOperation> )poll;
             boolean transaction = true;
             // Keep track of successfully executed commands in case we need to undo 
             Stack<IRainbowModelOperation> executedCommands = new Stack<> ();
@@ -487,7 +514,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                     for (IRainbowOperation cmd : commands) {
                         try {
                             // Make sure that the model is the same 
-                            IModelInstance mi = getModelInstance (cmd.getModelType (), cmd.getModelName ());
+                            IModelInstance<?> mi = getModelInstance (cmd.getModelType (), cmd.getModelName ());
                             if (mi != modelInstance) {
                                 if (transaction) {
                                     // If not the same, this is an error so log it as such an mark as incomplete
@@ -532,7 +559,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                         m_reportingPort.warn (RainbowComponentT.MODEL, MessageFormat.format (
                                 "Not all of the commands completed successfully. {0} did, so undoing them.",
                                 executedCommands.size ()));
-                        IRainbowModelOperation cmd = null;
+                        IRainbowModelOperation<?, ?> cmd = null;
                         while (!executedCommands.isEmpty ()) {
                             try {
                                 cmd = executedCommands.pop ();
