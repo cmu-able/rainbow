@@ -154,7 +154,7 @@ public class Rainbow implements RainbowConstants {
 
     private boolean            m_shouldTerminate = false;
 
-    public static Rainbow instance () {
+    public synchronized static Rainbow instance () {
         if (m_instance == null) {
             m_instance = new Rainbow ();
         }

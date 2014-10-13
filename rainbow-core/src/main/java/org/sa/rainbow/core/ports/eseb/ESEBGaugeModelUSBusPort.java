@@ -31,6 +31,7 @@ import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IModelUSBusPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
@@ -78,13 +79,13 @@ public class ESEBGaugeModelUSBusPort extends AbstractESEBDisposablePort implemen
     }
 
     @Override
-    public IModelInstance getModelInstance (String modelType, String modelName) {
+    public IModelInstance getModelInstance (ModelReference modelRef) {
         // if we're on the same host as the master, just return the model instance. 
         // Issue: don't want commands to be executable by the gauge - they can only be passed
         // to the bus. 
         if (Rainbow.isMaster ()) {
             RainbowMaster master = Rainbow.instance ().getRainbowMaster ();
-            return master.modelsManager ().getModelInstance (modelType, modelName);
+            return master.modelsManager ().getModelInstance (modelRef);
         }
         throw new UnsupportedOperationException (
                 "A model instance cannot be retrieved currently if not running in the RainbowMaster.");
