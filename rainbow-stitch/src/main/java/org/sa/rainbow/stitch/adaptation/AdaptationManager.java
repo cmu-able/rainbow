@@ -42,11 +42,12 @@ import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
-import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
+import org.sa.rainbow.core.adaptation.AdaptationTree;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.health.IRainbowHealthProtocol;
+import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.UtilityFunction;
 import org.sa.rainbow.core.models.UtilityPreferenceDescription;
@@ -74,41 +75,41 @@ import org.sa.rainbow.util.Util;
  * 
  * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
  */
-public final class AdaptationManager extends AbstractRainbowRunnable implements IAdaptationManager<Strategy>/*
+public final class AdaptationManager extends AbstractRainbowRunnable
+implements IAdaptationManager<Strategy>/*
  * implements
  * IRainbowLearner
  */, IRainbowModelChangeCallback {
-
 
     public enum Mode {
         SERIAL, MULTI_PRONE
     };
 
-    public static final String                      NAME                       = "Rainbow Adaptation Manager";
-    public static final double                      FAILURE_RATE_THRESHOLD     = 0.95;
-    public static final double                      MIN_UTILITY_THRESHOLD      = 0.40;
-    private static double                           m_minUtilityThreshold      = 0.0;
-    public static final long                        FAILURE_EFFECTIVE_WINDOW   = 2000 /* ms */;
-    public static final long                        FAILURE_WINDOW_CHUNK       = 1000 /* ms */;
-    private static final int                        SLEEP_TIME                 = 10000;
+    public static final String NAME                     = "Rainbow Adaptation Manager";
+    public static final double FAILURE_RATE_THRESHOLD   = 0.95;
+    public static final double MIN_UTILITY_THRESHOLD    = 0.40;
+    private static double      m_minUtilityThreshold    = 0.0;
+    public static final long   FAILURE_EFFECTIVE_WINDOW = 2000 /* ms */;
+    public static final long   FAILURE_WINDOW_CHUNK     = 1000 /* ms */;
+    private static final int   SLEEP_TIME               = 10000;
     /**
      * The prefix to be used by the strategy which takes a "leap" by achieving a similar adaptation that would have
      * taken multiple increments of the non-leap version, but at a potential "cost" in non-dire scenarios.
      */
-    public static final String                      LEAP_STRATEGY_PREFIX       = "Leap-";
+    public static final String LEAP_STRATEGY_PREFIX     = "Leap-";
     /**
      * The prefix to represent the corresponding multi-step strategy of the leap-version strategy.
      */
-    public static final String                      MULTI_STRATEGY_PREFIX      = "Multi-";
+    public static final String MULTI_STRATEGY_PREFIX    = "Multi-";
 
-    private Mode                                    m_mode                     = Mode.SERIAL;
-    private AcmeModelInstance                       m_model                    = null;
-    private boolean                                 m_adaptNeeded              = false;                       // treat as synonymous with
+    private Mode                               m_mode              = Mode.SERIAL;
+    private AcmeModelInstance                  m_model             = null;
+    private boolean                            m_adaptNeeded       = false;      // treat as synonymous with
     // constraint being violated
-    private boolean                                 m_adaptEnabled             = true;                        // by default, we adapt
-    private List<Stitch>                            m_repertoire               = null;
-    private SortedMap<String, UtilityFunction>      m_utils                    = null;
-    private List<Strategy>                          m_pendingStrategies        = null;
+    private boolean                            m_adaptEnabled      = true;       // by default, we adapt
+    private List<Stitch>                       m_repertoire        = null;
+    private SortedMap<String, UtilityFunction> m_utils             = null;
+    private List<Strategy>                     m_pendingStrategies = null;
 
     // track history
     private String                                  m_historyTrackUtilName     = null;
@@ -121,26 +122,15 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
     private IRainbowChangeBusSubscription           m_modelTypecheckingChanged = new IRainbowChangeBusSubscription () {
 
         @Override
-        public
-        boolean
-        matches (IRainbowMessage message) {
-            String type = (String )message
-                    .getProperty (IModelChangeBusPort.EVENT_TYPE_PROP);
-            String modelName = (String )message
-                    .getProperty (IModelChangeBusPort.MODEL_NAME_PROP);
-            String modelType = (String )message
-                    .getProperty (IModelChangeBusPort.MODEL_TYPE_PROP);
+        public boolean matches (IRainbowMessage message) {
+            String type = (String )message.getProperty (IModelChangeBusPort.EVENT_TYPE_PROP);
+            String modelName = (String )message.getProperty (IModelChangeBusPort.MODEL_NAME_PROP);
+            String modelType = (String )message.getProperty (IModelChangeBusPort.MODEL_TYPE_PROP);
             try {
-                CommandEventT ct = CommandEventT
-                        .valueOf (type);
+                CommandEventT ct = CommandEventT.valueOf (type);
                 return (ct.isEnd ()
-                        && "setTypecheckResult"
-                        .equals (message
-                                .getProperty (IModelChangeBusPort.COMMAND_PROP)) && m_modelRef
-                                .equals (Util
-                                        .genModelRef (
-                                                modelName,
-                                                modelType)));
+                        && "setTypecheckResult".equals (message.getProperty (IModelChangeBusPort.COMMAND_PROP))
+                        && m_modelRef.equals (Util.genModelRef (modelName, modelType)));
             }
             catch (Exception e) {
                 return false;
@@ -173,6 +163,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
         setSleepTime (SLEEP_TIME);
 
     }
+
     @Override
     public void initialize (IRainbowReportingPort port) throws RainbowConnectionException {
         super.initialize (port);
@@ -189,10 +180,24 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
     public void setModelToManage (ModelReference model) {
         m_modelRef = model.getModelName () + ":" + model.getModelType ();
         m_model = (AcmeModelInstance )m_modelsManagerPort.<IAcmeSystem> getModelInstance (model);
+        if (m_model == null) {
+            m_reportingPort.error (RainbowComponentT.ADAPTATION_MANAGER,
+                    MessageFormat.format ("Could not find reference to {0}", model.toString ()));
+        }
+        m_enqueuePort = RainbowPortFactory.createAdaptationEnqueuePort (model);
+        ModelReference utilityModelRef = new ModelReference (model.getModelName (), "UtilityModel");
+        IModelInstance<UtilityPreferenceDescription> modelInstance = m_modelsManagerPort
+                .<UtilityPreferenceDescription> getModelInstance (utilityModelRef);
+        if (modelInstance == null) {
+            m_reportingPort.error (RainbowComponentT.ADAPTATION_MANAGER,
+                    MessageFormat.format (
+                            "There is no utility model associated with this model. Expecting to find ''{0}''. Perhaps it is not specified in the rainbow.properties file?",
+                            utilityModelRef.toString ()));
 
-        m_utilityModel = m_modelsManagerPort
-.<UtilityPreferenceDescription> getModelInstance (
-                new ModelReference (model.getModelName (), "UtilityModel")).getModelInstance ();
+        }
+        else {
+            m_utilityModel = modelInstance.getModelInstance ();
+        }
 //        for (String k : m_utilityModel.utilities.keySet ()) {
 //            UtilityAttributes ua = m_utilityModel.utilities.get (k);
 //            UtilityFunction uf = new UtilityFunction (k, ua.label, ua.mapping, ua.desc, ua.values);
@@ -201,7 +206,6 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
         initAdaptationRepertoire ();
 
     }
-
 
     /*
      * (non-Javadoc)
@@ -290,8 +294,8 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
      * @return double the instantaneous utility of current conditions
      */
     public double computeSystemInstantUtility () {
-        Map<String, Double> weights = m_utilityModel.weights.get (Rainbow
-                .getProperty (RainbowConstants.PROPKEY_SCENARIO));
+        Map<String, Double> weights = m_utilityModel.weights
+                .get (Rainbow.getProperty (RainbowConstants.PROPKEY_SCENARIO));
         double[] conds = new double[m_utils.size ()];
         int i = 0;
         double score = 0.0;
@@ -347,13 +351,8 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
                 // strategy args removed...
                 Object[] args = new Object[0];
                 m_pendingStrategies.add (selectedStrategy);
-//                m_enqueuePort.offer (selectedStrategy, args);
-                IAdaptationExecutor<Strategy> executor = Rainbow.instance ().getRainbowMaster ()
-                        .<Strategy> strategyExecutor (m_modelRef);
-                if (executor != null) {
-                    executor.enqueueStrategy (selectedStrategy, args);
-                    log ("<< Adaptation cycle awaits Executor...");
-                }
+                AdaptationTree<Strategy> at = new AdaptationTree<Strategy> (selectedStrategy);
+                m_enqueuePort.offerAdaptation (at, null);
             }
 
         }
@@ -587,8 +586,8 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
                         val = ((Integer )condVal).doubleValue ();
                     }
 
-                    m_reportingPort
-                    .trace (getComponentType (), "Avg value of prop: " + u.mapping () + " == " + condVal);
+                    m_reportingPort.trace (getComponentType (),
+                            "Avg value of prop: " + u.mapping () + " == " + condVal);
                     conds[i] = val;
                     items[i] += conds[i];
                 }
@@ -676,8 +675,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
                         reportProblems (f, stitchProblemHandler);
 
                         // apply attribute vectors to tactics, if available
-                        defineAttributes (stitch,
-                                m_utilityModel.attributeVectors);
+                        defineAttributes (stitch, m_utilityModel.attributeVectors);
                         m_repertoire.add (stitch);
                         log ("Parsed script " + stitch.path);
                     }
@@ -730,8 +728,8 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
             Map<String, Object> attributes = attrVectorMap.get (t.getName ());
             if (attributes != null) {
                 // found attribute def for tactic, save all key-value pairs
-                m_reportingPort.trace (getComponentType (), "Found attributes for tactic " + t.getName ()
-                        + ", saving pairs...");
+                m_reportingPort.trace (getComponentType (),
+                        "Found attributes for tactic " + t.getName () + ", saving pairs...");
                 for (Map.Entry<String, Object> e : attributes.entrySet ()) {
                     t.putAttribute (e.getKey (), e.getValue ());
                     m_reportingPort.trace (getComponentType (), " - (" + e.getKey () + ", " + e.getValue () + ")");
@@ -840,6 +838,5 @@ public final class AdaptationManager extends AbstractRainbowRunnable implements 
         }
         m_adaptEnabled = enabled;
     }
-
 
 }
