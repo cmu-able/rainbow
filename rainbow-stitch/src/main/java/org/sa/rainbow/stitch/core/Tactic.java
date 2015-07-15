@@ -27,6 +27,7 @@
 package org.sa.rainbow.stitch.core;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -51,7 +52,7 @@ import org.sa.rainbow.stitch.visitor.Stitch;
  * 
  * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
  */
-public class Tactic extends ScopedEntity implements IEvaluable {
+public class Tactic extends ScopedEntity implements IEvaluableScope {
 
     /**
      * Declares the states that the Tactic object might be in during parsing.
@@ -276,7 +277,8 @@ public class Tactic extends ScopedEntity implements IEvaluable {
      * @param argsIn  the input arguments
      */
     @Override
-    public Object evaluate (Object[] argsIn) {
+    public synchronized Object evaluate (Object[] argsIn) {
+        long start = new Date ().getTime ();
         setArgs(argsIn);
 
         ExecutionHistoryModelInstance modelInstance = (ExecutionHistoryModelInstance )Rainbow
@@ -332,8 +334,12 @@ public class Tactic extends ScopedEntity implements IEvaluable {
         }
 
         // evaluate the effect statements
+        boolean effectObserved = checkEffect ();
+        long end = new Date ().getTime ();
+        modelInstance.getCommandFactory ().recordTacticDurationCmd (this.getQualifiedName (), end - start,
+                effectObserved);
         if (Tool.logger().isInfoEnabled()) {
-            Tool.logger().info("Tactic expected effect: " + checkEffect());
+            Tool.logger().info("Tactic expected effect: " + effectObserved);
         }
 
         // "unfreeze" model

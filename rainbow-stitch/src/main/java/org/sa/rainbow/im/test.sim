@@ -1,0 +1,33 @@
+
+architecture znn {
+	T.ServerT s1 { int isArchEnabled [0,1]:1; 
+	               int isTextualMode [0,1]:1;
+	             }
+	T.ServerT s2 { int isArchEnabled [0,1]:1; }
+	T.ClientT c1 { int expRspTime [0,500]:100; }
+	T.ClientT c2 { int expRspTime [0,500]:100; }
+}
+
+
+define set S={select s:T.ServerT in M.components | s.isArchEnabled==false};
+
+define function es_f(x)= x * ( 1- (1/log(100*m,2))  *  ( m/ ( 2*m+1 ) )  );
+
+impactmodel enlistServer {
+	
+	 (Set.size>0){
+	 		{ [0.95] { foreach s:{T.ServerT in M.components | s.isArchEnabled==false} | s.isArchEnabled'=true 
+	 				   &
+	 		           { [0.7] forall c:T.ClientT in M.components | c.expRspTime'=f 
+	 		             ++
+			             [0.3] forall c:T.ClientT in M.components | c.expRspTime'=g
+	 	               }
+	 	             }
+	 	   	  ++
+	 	   	  [0.05] { forall s:T.ServerT in M.components | s.isArchEnabled'=s.isArchEnabled 
+	 	   	  	       &
+	 	   	  		   forall c:T.ClientT in M.components | c.expRspTime'=c.expRspTime	
+	 	   	  		 }
+	 	   	  }
+	 	}       
+}

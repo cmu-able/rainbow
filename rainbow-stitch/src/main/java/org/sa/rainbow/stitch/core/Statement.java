@@ -40,7 +40,7 @@ import org.sa.rainbow.stitch.visitor.Stitch;
 import antlr.RecognitionException;
 import antlr.collections.AST;
 
-public class Statement extends ScopedEntity implements IEvaluable {
+public class Statement extends ScopedEntity implements IEvaluableScope {
 
     /**
      * Declares types of Statements that exist in script.

@@ -24,105 +24,100 @@
 package org.sa.rainbow.stitch.adaptation;
 
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
+import java.util.concurrent.CountDownLatch;
 
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
+import org.sa.rainbow.core.adaptation.AdaptationTree;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
-import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
+import org.sa.rainbow.core.ports.IModelUSBusPort;
+import org.sa.rainbow.core.ports.IRainbowAdaptationDequeuePort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.stitch.core.Strategy;
-import org.sa.rainbow.stitch.core.Var;
 import org.sa.rainbow.stitch.tactic.history.ExecutionHistoryModelInstance;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData;
 
 /**
- * The Strategy Executor serves the role of maintaining the active thread(s) to
- * carry a strategy/ies.  This design allows, in the future, for simultaneous
- * execution of multiple strategies if Rainbow should support that ability.
+ * The Strategy Executor serves the role of maintaining the active thread(s) to carry a strategy/ies. This design
+ * allows, in the future, for simultaneous execution of multiple strategies if Rainbow should support that ability.
  * <p>
- * Generic architectural operators:
- * - connect (comp1, comp2)
- * - disconnect (comp1, comp2)
- * - start (comp)
- * - shutdown (comp)
- * - changeState (element, prop, val)
- * - execute (element, args)
+ * Generic architectural operators: - connect (comp1, comp2) - disconnect (comp1, comp2) - start (comp) - shutdown
+ * (comp) - changeState (element, prop, val) - execute (element, args)
  * 
  * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
  */
-public class Executor extends AbstractRainbowRunnable implements IAdaptationExecutor<Strategy> {
+public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptationExecutor<Strategy> {
 
-    public static final String NAME = "Rainbow Strategy Executor";
+    public static final String                      NAME = "Rainbow Strategy Executor";
 
     /* A queue of strategies to execute, this could be enriched later with
      * priorities and such... */
-    private Queue<Strategy> m_queue = null;
-    private Map<Strategy,Object[]> m_args = null;
 
-    private String                  m_modelRef;
+    private ModelReference                          m_modelRef;
 
-    private AcmeModelInstance       m_model;
+    private AcmeModelInstance                       m_model;
+    private IRainbowAdaptationDequeuePort<Strategy> m_adapationDQPort;
+    private IModelUSBusPort                         m_modelUSBusPort;
+    private IModelDSBusPublisherPort                m_modelDSPort;
+    private ThreadGroup                             m_executionThreadGroup;
 
-    private IModelDSBusPublisherPort m_modelDSPort;
+    private ExecutionHistoryModelInstance           m_historyModel;
 
     /**
      * @param name
      */
-    public Executor () {
-        super(NAME);
+    public StitchExecutor () {
+        super (NAME);
 
-        m_queue = new LinkedList<Strategy>();
-        m_args = new HashMap<Strategy,Object[]>();
     }
 
+    public ExecutionHistoryModelInstance getExecutionHistoryModel () {
+        return m_historyModel;
+    }
 
     @Override
     public void setModelToManage (ModelReference model) {
-        m_modelRef = model.getModelName () + ":" + model.getModelType ();
+        m_modelRef = model;
         IModelInstance<IAcmeSystem> mi = Rainbow.instance ().getRainbowMaster ().modelsManager ()
                 .getModelInstance (model);
+        m_adapationDQPort = RainbowPortFactory.createAdaptationDequeuePort (model);
         m_model = (AcmeModelInstance )mi;
         if (m_model == null) {
             m_reportingPort.error (RainbowComponentT.EXECUTOR, "Referring to unknown model " + model.getModelName ()
                     + ":" + model.getModelType ());
         }
+        m_executionThreadGroup = new ThreadGroup (m_modelRef.toString () + " ThreadGroup");
     }
-
 
     /* (non-Javadoc)
      * @see org.sa.rainbow.core.IDisposable#dispose()
      */
     @Override
     public void dispose () {
-        m_queue.clear();
-        m_args.clear();
 
         m_modelDSPort.dispose ();
         m_reportingPort.dispose ();
+        if (m_adapationDQPort != null) {
+            m_adapationDQPort.dispose ();
+        }
 
-        // null-out data members
-        m_queue = null;
-        m_args = null;
     }
 
     /* (non-Javadoc)
      * @see org.sa.rainbow.core.AbstractRainbowRunnable#log(java.lang.String)
      */
     @Override
-    protected void log (String txt) {
+    public void log (String txt) {
         m_reportingPort.info (RainbowComponentT.EXECUTOR, txt);
     }
 
@@ -131,63 +126,55 @@ public class Executor extends AbstractRainbowRunnable implements IAdaptationExec
      */
     @Override
     protected void runAction () {
-        if (! m_queue.isEmpty()) {
-            // retrieve the next strategy in the queue and execute it
-            Strategy strategy = m_queue.poll();
-            Object[] args = m_args.remove(strategy);
-            strategy.setExecutor (this);
-            log("Executing Strategy " + strategy.getName() + "...");
-            Strategy.Outcome o = null;
-            try {
-                // provide var for _dur_
-                Var v = new Var();
-                v.scope = strategy.stitch().scope;
-                v.setType("long");
-                v.name = "_dur_";
-//                if (Rainbow.predictionEnabled()) {  // provide future duration
-//                    v.setValue(strategy.estimateAvgTimeCost());
-//                } else {
-                v.setValue(0L);
+        if (!m_adapationDQPort.isEmpty ()) {
+            // retrieve the next adaptation in the queue and execute it
+            // Because we are dealing only in stitch in this executor, then
+            // use a StitchExecutionVisitor to visit this adaptation
+            AdaptationTree<Strategy> at = m_adapationDQPort.dequeue ();
+            StitchExecutionVisitor stitchVisitor = new StitchExecutionVisitor (this, this.m_modelRef,
+                    m_historyModel.getCommandFactory (), at, m_executionThreadGroup, new CountDownLatch (1));
+            stitchVisitor.start ();
+//            
+//            
+//            
+//            Strategy strategy = at.getHead ();
+//            strategy.setExecutor (this);
+//            log("Executing Strategy " + strategy.getName() + "...");
+//            Strategy.Outcome o = null;
+//            try {
+//                // provide var for _dur_
+//                Var v = new Var();
+//                v.scope = strategy.stitch().scope;
+//                v.setType("long");
+//                v.name = "_dur_";
+////                if (Rainbow.predictionEnabled()) {  // provide future duration
+////                    v.setValue(strategy.estimateAvgTimeCost());
+////                } else {
+//                v.setValue(0L);
+////                }
+//                strategy.stitch().script.addVar(v.name, v);
+//                // execute strategy
+//                o = (Strategy.Outcome )strategy.evaluate (null);
+//                // cleanup, remove temp var
+//                strategy.stitch().script.vars().remove(v.name);
+//            } catch (NullPointerException e) {
+//                // see if cause of NPE is Rainbow termination
+//                if (!Rainbow.shouldTerminate()) {  // nope, terminate and re-throw
+//                    terminate();
+//                    throw e;
 //                }
-                strategy.stitch().script.addVar(v.name, v);
-                // execute strategy
-                o = (Strategy.Outcome )strategy.evaluate(args);
-                // cleanup, remove temp var
-                strategy.stitch().script.vars().remove(v.name);
-            } catch (NullPointerException e) {
-                // see if cause of NPE is Rainbow termination
-                if (!Rainbow.shouldTerminate()) {  // nope, terminate and re-throw
-                    terminate();
-                    throw e;
-                }
-            }
-            log(" - Outcome: " + o);
-            if (! Rainbow.shouldTerminate()) {
-                // TODO: Should we check for evaluation outcome?
-                IAdaptationManager<Strategy> adaptationManager = Rainbow.instance ()
-                        .getRainbowMaster ().adaptationManagerForModel (m_modelRef);
-                if (adaptationManager != null) {
-                    adaptationManager
-                    .markStrategyExecuted (strategy);
-                }
-            }
+//            }
+//            log(" - Outcome: " + o);
+//            if (! Rainbow.shouldTerminate()) {
+//                // TODO: Should we check for evaluation outcome?
+//                IAdaptationManager<Strategy> adaptationManager = Rainbow.instance ()
+//                        .getRainbowMaster ().adaptationManagerForModel (m_modelRef);
+//                if (adaptationManager != null) {
+//                    adaptationManager
+//                    .markStrategyExecuted (strategy);
+//                }
+//            }
         }
-    }
-
-    @Override
-    public void enqueueStrategy (Strategy strategy, Object[] args) {
-        m_queue.offer(strategy);
-        m_args.put(strategy, args);
-    }
-
-    public void dequeueStrategy (Strategy strategy) {
-        if (m_queue.contains(strategy)) {
-            m_queue.remove(strategy);
-        }
-    }
-
-    Queue<Strategy> _retrieveStrategyQueueForTesting () {
-        return m_queue;
     }
 
 //////////////////////////////////////////
@@ -416,18 +403,26 @@ public class Executor extends AbstractRainbowRunnable implements IAdaptationExec
         return m_modelDSPort;
     }
 
+    public IModelUSBusPort getHistoryModelUSPort () {
+        return m_modelUSBusPort;
+    }
+
     @Override
     public void initialize (IRainbowReportingPort port) throws RainbowConnectionException {
         super.initialize (port);
         m_modelDSPort = RainbowPortFactory.createModelDSPublishPort (this);
+        m_modelUSBusPort = RainbowPortFactory.createModelsManagerClientUSPort (this);
         // Create a tactics execution model
         ModelsManager mm = Rainbow.instance ().getRainbowMaster ().modelsManager ();
         try {
             if (!mm.getRegisteredModelTypes ().contains (ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE)) {
                 mm.registerModelType (ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE);
             }
-            mm.registerModel (new ModelReference ("history", ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE),
-                    new ExecutionHistoryModelInstance (new HashMap<String, ExecutionHistoryData> (), "history", "memory"));
+            String historyModelName = "strategy-execution-" + this.id ();
+            m_historyModel = new ExecutionHistoryModelInstance (new HashMap<String, ExecutionHistoryData> (),
+                    "history", "memory");
+            mm.registerModel (new ModelReference (historyModelName,
+                    ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE), m_historyModel);
         }
         catch (RainbowModelException e) {
             m_reportingPort.warn (getComponentType (), "Ccould not create a tactic execution history model", e);

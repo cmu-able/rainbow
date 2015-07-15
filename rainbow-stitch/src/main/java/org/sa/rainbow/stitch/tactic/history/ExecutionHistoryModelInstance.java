@@ -35,6 +35,9 @@ import org.sa.rainbow.stitch.util.ExecutionHistoryData;
 public class ExecutionHistoryModelInstance implements IModelInstance<Map<String, ExecutionHistoryData>> {
 
     public static final String        EXECUTION_HISTORY_TYPE = "ExecutionHistory";
+    public static final String        TACTIC                 = "Tactic";
+    public static final String        STRATEGY               = "Strategy";
+
     Map<String, ExecutionHistoryData> m_tacticHistoryMap;
     private String                    m_name;
     private String                    m_source;

@@ -27,6 +27,7 @@
 package org.sa.rainbow.stitch.core;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -43,12 +44,11 @@ import java.util.TreeMap;
 import org.acmestudio.acme.element.IAcmeElement;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
-import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
-import org.sa.rainbow.core.error.RainbowException;
-import org.sa.rainbow.core.event.IRainbowMessage;
-import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
-import org.sa.rainbow.core.ports.IRainbowMessageFactory;
+import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation;
+import org.sa.rainbow.stitch.adaptation.StitchExecutor;
 import org.sa.rainbow.stitch.error.ArgumentMismatchException;
+import org.sa.rainbow.stitch.tactic.history.ExecutionHistoryModelInstance;
+import org.sa.rainbow.stitch.util.ExecutionHistoryData.ExecutionStateT;
 import org.sa.rainbow.stitch.util.Tool;
 import org.sa.rainbow.stitch.visitor.Stitch;
 
@@ -57,7 +57,7 @@ import org.sa.rainbow.stitch.visitor.Stitch;
  * 
  * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
  */
-public class Strategy extends ScopedEntity implements IEvaluable {
+public class Strategy extends ScopedEntity implements IEvaluableScope {
 
     /**
      * Declares the states that the Strategy object might be in during parsing.
@@ -202,28 +202,28 @@ public class Strategy extends ScopedEntity implements IEvaluable {
         }
     }
 
-    private static final String           ROOT_NODE_LABEL     = "*0*";
+    private static final String        ROOT_NODE_LABEL     = "*0*";
 
-    public ParseState                     state               = ParseState.UNKNOWN;
-    public Map<String, StrategyNode>      nodes               = new TreeMap<String, StrategyNode> ();
+    public ParseState                  state               = ParseState.UNKNOWN;
+    public Map<String, StrategyNode>   nodes               = new TreeMap<String, StrategyNode> ();
     /**
      * This value indicates how many times this Strategy is expected to have to execute consecutively if it is chosen to
      * run; this is affected by the presence of a strategy named like this one with "Leap-" prepended. The value affects
      * only the computation of aggregate attribute vector.
      */
-    public int                            multiples           = 1;
+    public int                         multiples           = 1;
 
     /** Tracks the current strategy node being evaluated */
-    private StrategyNode                  m_lastNode          = null;
+    private StrategyNode               m_lastNode          = null;
     /** Tracks stack of executed nodes */
-    Stack<String>                         m_nodeStack         = new Stack<String> ();
+    Stack<String>                      m_nodeStack         = new Stack<String> ();
     /** Tracks current do-loop counter */
-    private Map<StrategyNode, Integer>    m_doCntMap          = new HashMap<StrategyNode, Integer> ();
-    private Outcome                       m_outcome           = Outcome.UNKNOWN;
-    private long                          m_avgExecutionTime  = 0L;
+    private Map<StrategyNode, Integer> m_doCntMap          = new HashMap<StrategyNode, Integer> ();
+    private Outcome                    m_outcome           = Outcome.UNKNOWN;
+    private long                       m_avgExecutionTime  = 0L;
 
-    private Boolean                       m_settlingCondition = null;
-    private Observer                      m_conditionObserver = new Observer () {
+    private Boolean                    m_settlingCondition = null;
+    private Observer                   m_conditionObserver = new Observer () {
         /* (non-Javadoc)
          * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
          */
@@ -231,13 +231,13 @@ public class Strategy extends ScopedEntity implements IEvaluable {
         public void update (Observable o, Object arg) {
             m_settlingCondition = (Boolean )arg;
             if (Tool.logger ().isDebugEnabled ()) {
-                Tool.logger ()
-                .debug ("Settling condition observer updated!");
+                Tool.logger ().debug (
+                        "Settling condition observer updated!");
             }
         }
     };
 
-    private IAdaptationExecutor<Strategy> m_executor;
+    private StitchExecutor             m_executor;
 
     /**
      * Main Constructor for a new Strategy object.
@@ -655,7 +655,7 @@ public class Strategy extends ScopedEntity implements IEvaluable {
         // track current node, starting with root, push onto stack
         m_lastNode = getRootNode ();
         m_nodeStack.push (m_lastNode.label ());
-        m_executor.getOperationPublishingPort ().publishMessage (getStartMessage ());
+//        m_executor.getOperationPublishingPort ().publishMessage (getStartMessage ());
         while (m_outcome == Outcome.UNKNOWN && !m_stitch.isCanceled ()) {
             StrategyNode curNode = m_lastNode;
             boolean ok = evaluateFromNode (curNode);
@@ -678,35 +678,35 @@ public class Strategy extends ScopedEntity implements IEvaluable {
         if (m_outcome != Outcome.UNKNOWN) {
             m_lastNode = null;
         }
-        m_executor.getOperationPublishingPort ().publishMessage (getEndMessage ());
+//        m_executor.getOperationPublishingPort ().publishMessage (getEndMessage ());
         return m_outcome;
     }
 
-    private IRainbowMessage getEndMessage () {
-        IRainbowMessage msg = m_executor.getOperationPublishingPort ().createMessage ();
-        try {
-            msg.setProperty (IRainbowMessageFactory.EVENT_TYPE_PROP, IRainbowMessage.END_STRATEGY_TYPE);
-            msg.setProperty (IModelDSBusPublisherPort.STRATEGY_NAME, m_name);
-            msg.setProperty (IModelDSBusPublisherPort.STRATEGY_OUTCOME, m_outcome.name ());
-        }
-        catch (RainbowException e) {
-            // Should never happen
-        }
-        return msg;
-    }
-
-    private IRainbowMessage getStartMessage () {
-        IRainbowMessage msg = m_executor.getOperationPublishingPort ().createMessage ();
-        try {
-            msg.setProperty (IRainbowMessageFactory.EVENT_TYPE_PROP, IRainbowMessage.START_STRATEGY_TYPE);
-            msg.setProperty (IModelDSBusPublisherPort.STRATEGY_NAME, m_name);
-        }
-        catch (RainbowException e) {
-            // Should never happen
-        }
-        return msg;
-
-    }
+//    private IRainbowMessage getEndMessage () {
+//        IRainbowMessage msg = m_executor.getOperationPublishingPort ().createMessage ();
+//        try {
+//            msg.setProperty (IRainbowMessageFactory.EVENT_TYPE_PROP, IRainbowMessage.END_STRATEGY_TYPE);
+//            msg.setProperty (IModelDSBusPublisherPort.STRATEGY_NAME, m_name);
+//            msg.setProperty (IModelDSBusPublisherPort.STRATEGY_OUTCOME, m_outcome.name ());
+//        }
+//        catch (RainbowException e) {
+//            // Should never happen
+//        }
+//        return msg;
+//    }
+//
+//    private IRainbowMessage getStartMessage () {
+//        IRainbowMessage msg = m_executor.getOperationPublishingPort ().createMessage ();
+//        try {
+//            msg.setProperty (IRainbowMessageFactory.EVENT_TYPE_PROP, IRainbowMessage.START_STRATEGY_TYPE);
+//            msg.setProperty (IModelDSBusPublisherPort.STRATEGY_NAME, m_name);
+//        }
+//        catch (RainbowException e) {
+//            // Should never happen
+//        }
+//        return msg;
+//
+//    }
 
     /**
      * Like {@link #evaluate(Object[])}, this method evaluates the Strategy, but from the lastNode.
@@ -922,14 +922,28 @@ public class Strategy extends ScopedEntity implements IEvaluable {
         }
         Object[] args = Tool.evaluateArgs (curNode.getTacticArgExprs ());
         Tactic tactic = stitch ().findTactic (curNode.getTactic ());
-        // BRS: Message > BEGIN_TACTIC (tactic)
-        m_executor.getOperationPublishingPort ().publishMessage (getStartTacticMessage (tactic, args));
+        m_executor.getHistoryModelUSPort ().updateModel (
+                m_executor.getExecutionHistoryModel ().getCommandFactory ()
+                .strategyExecutionStateCommand (tactic.getQualifiedName (),
+                        ExecutionHistoryModelInstance.TACTIC, ExecutionStateT.STARTED, null));
+        long start = new Date ().getTime ();
         tactic.evaluate (args);
-        m_executor.getOperationPublishingPort ().publishMessage (
-                getTacticAwaitEndingMessage (tactic, curNode.getDuration ()));
-        // BRS: Message > END_TACTIC (tactic, expect effect in curNode.getDuration ())
+        m_executor.getHistoryModelUSPort ().updateModel (
+                m_executor.getExecutionHistoryModel ().getCommandFactory ()
+                .strategyExecutionStateCommand (tactic.getQualifiedName (),
+                        ExecutionHistoryModelInstance.TACTIC, ExecutionStateT.WAITING,
+                        Long.toString (curNode.getDuration ())));
         boolean effectGood = awaitSettling (curNode);
-        m_executor.getOperationPublishingPort ().publishMessage (getTacticEnd (tactic, effectGood));
+        long end = new Date ().getTime ();
+        m_executor.getHistoryModelUSPort ().updateModel (
+                m_executor
+                        .getExecutionHistoryModel ()
+                        .getCommandFactory ()
+                .strategyExecutionStateCommand (tactic.getQualifiedName (),
+                        ExecutionHistoryModelInstance.TACTIC, ExecutionStateT.FINISHED, null));
+        AbstractRainbowModelOperation recordTacticDurationCmd = m_executor.getExecutionHistoryModel ()
+                .getCommandFactory ().recordTacticDurationCmd (tactic.getQualifiedName (), end - start, effectGood);
+        m_executor.getHistoryModelUSPort ().updateModel (recordTacticDurationCmd);
         // proceed with any branching
         if (curNode.getChildren ().size () == 0) {
             // Tactic without branching, must be followed by done!
@@ -946,46 +960,7 @@ public class Strategy extends ScopedEntity implements IEvaluable {
         }
     }
 
-    private IRainbowMessage getTacticEnd (Tactic tactic, boolean effectGood) {
-        IRainbowMessage msg = m_executor.getOperationPublishingPort ().createMessage ();
-        try {
-            msg.setProperty (IRainbowMessageFactory.EVENT_TYPE_PROP, IRainbowMessage.END_TACTIC_TYPE);
-            msg.setProperty (IModelDSBusPublisherPort.TACTIC_NAME, tactic.m_name);
-            msg.setProperty (IModelDSBusPublisherPort.TACTIC_SUCCESS, effectGood);
-        }
-        catch (RainbowException e) {
-            // Should never happen
-        }
-        return msg;
-    }
 
-    private IRainbowMessage getTacticAwaitEndingMessage (Tactic tactic, long duration) {
-        IRainbowMessage msg = m_executor.getOperationPublishingPort ().createMessage ();
-        try {
-            msg.setProperty (IRainbowMessageFactory.EVENT_TYPE_PROP, IRainbowMessage.AWAIT_TACTIC_SETTLE_TYPE);
-            msg.setProperty (IModelDSBusPublisherPort.TACTIC_NAME, tactic.m_name);
-            msg.setProperty (IModelDSBusPublisherPort.TACTIC_DURATION, duration);
-        }
-        catch (RainbowException e) {
-            // Should never happen
-        }
-        return msg;
-    }
-
-    private IRainbowMessage getStartTacticMessage (Tactic tactic, Object[] args) {
-        IRainbowMessage msg = m_executor.getOperationPublishingPort ().createMessage ();
-        try {
-            msg.setProperty (IRainbowMessageFactory.EVENT_TYPE_PROP, IRainbowMessage.START_TACTIC_TYPE);
-            msg.setProperty (IModelDSBusPublisherPort.TACTIC_NAME, tactic.m_name);
-            for (int i = 0; i < args.length; i++) {
-                msg.setProperty (IModelDSBusPublisherPort.TACTIC_PARAM + i, args[i]);
-            }
-        }
-        catch (RainbowException e) {
-            // Should never happen
-        }
-        return msg;
-    }
 
     /**
      * Given a node, awaits the effect of the node's tactic to evaluate to true, or until the node's duration times out.
@@ -1029,8 +1004,9 @@ public class Strategy extends ScopedEntity implements IEvaluable {
         return children;
     }
 
-    public void setExecutor (IAdaptationExecutor<Strategy> executor) {
+    public void setExecutor (StitchExecutor executor) {
         m_executor = executor;
+
     }
 
 }

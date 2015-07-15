@@ -34,8 +34,11 @@ import org.sa.rainbow.core.models.commands.AbstractSaveModelCmd;
 import org.sa.rainbow.core.models.commands.IRainbowModelOperation;
 import org.sa.rainbow.core.models.commands.ModelCommandFactory;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData;
+import org.sa.rainbow.stitch.util.ExecutionHistoryData.ExecutionStateT;
 
 public class ExecutionHistoryCommandFactory extends ModelCommandFactory<Map<String, ExecutionHistoryData>> {
+
+    public static final String STRATEGY_EXECUTION_STATE_CMD = "strategyExecutionState";
 
     public static AbstractLoadModelCmd<Map<String, ExecutionHistoryData>> loadCOmmand (ModelsManager modelsManager,
             String modelName,
@@ -50,15 +53,27 @@ public class ExecutionHistoryCommandFactory extends ModelCommandFactory<Map<Stri
         super (ExecutionHistoryModelInstance.class, model);
     }
 
-    public AbstractRainbowModelOperation<ExecutionHistoryData, Map<String, ExecutionHistoryData>> recordTacticDurationCmd (String qualifiedName, long dur) {
-        return new TacticDurationCommand ("recordTacticDuration", m_modelInstance, qualifiedName, Long.toString (dur));
+    public AbstractRainbowModelOperation<ExecutionHistoryData, Map<String, ExecutionHistoryData>>
+    recordTacticDurationCmd (String qualifiedName, long dur, boolean successful) {
+        return new TacticDurationCommand ("recordTacticDuration", m_modelInstance, qualifiedName, Long.toString (dur),
+                Boolean.toString (successful));
+    }
+
+    public StrategyExecutionStateCommand strategyExecutionStateCommand (String qualifiedName,
+            String type,
+            ExecutionStateT newState,
+            String data) {
+        return new StrategyExecutionStateCommand (STRATEGY_EXECUTION_STATE_CMD, m_modelInstance, qualifiedName, type,
+                newState.toString (), data == null ? "" : data);
     }
 
     @Override
     public IRainbowModelOperation generateCommand (String commandName, String... args) throws RainbowModelException {
         switch (commandName) {
         case "recordTacticDuration":
-            return new TacticDurationCommand (commandName, m_modelInstance, args[0], args[1]);
+            return new TacticDurationCommand (commandName, m_modelInstance, args[0], args[1], args[2]);
+        case STRATEGY_EXECUTION_STATE_CMD:
+            return new StrategyExecutionStateCommand (commandName, m_modelInstance, args[0], args[1], args[2], args[3]);
         }
         throw new RainbowModelException ("Cannot create a command for the operation: " + commandName);
     }

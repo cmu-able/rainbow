@@ -41,8 +41,8 @@ AbstractRainbowModelOperation<org.sa.rainbow.stitch.util.ExecutionHistoryData, M
     private ExecutionHistoryData m_newDatum;
 
     public TacticDurationCommand (String commandName, IModelInstance<Map<String, ExecutionHistoryData>> model,
-            String target, String duration) {
-        super (commandName, model, target, duration);
+            String target, String duration, String successful) {
+        super (commandName, model, target, duration, successful);
     }
 
 
@@ -56,7 +56,6 @@ AbstractRainbowModelOperation<org.sa.rainbow.stitch.util.ExecutionHistoryData, M
     @Override
     protected List<? extends IRainbowMessage> getGeneratedEvents (IRainbowMessageFactory messageFactory) {
         return generateEvents (messageFactory, "TacticHistoryOperation");
-
     }
 
 
@@ -72,7 +71,7 @@ AbstractRainbowModelOperation<org.sa.rainbow.stitch.util.ExecutionHistoryData, M
         else {
             m_oldDatum = new ExecutionHistoryData (datum);
         }
-        datum.addDurationSample (Long.parseLong (getParameters ()[0]));
+        datum.addDurationSample (Long.parseLong (getParameters ()[0]), Boolean.parseBoolean (getParameters ()[1]));
         m_newDatum = datum;
     }
 

@@ -27,6 +27,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -38,6 +39,7 @@ import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData;
+import org.sa.rainbow.stitch.util.ExecutionHistoryData.ExecutionPoint;
 
 public class ExecutionHistoryLoadCommand extends AbstractLoadModelCmd<Map<String, ExecutionHistoryData>> {
 
@@ -67,7 +69,7 @@ public class ExecutionHistoryLoadCommand extends AbstractLoadModelCmd<Map<String
     protected void subExecute () throws RainbowException {
         Map<String, ExecutionHistoryData> map = new HashMap<> ();
         BufferedReader br = new BufferedReader (new InputStreamReader (m_inputStream));
-        Pattern p = Pattern.compile ("^(\\S+)\\s+(\\d+)\\s+(\\S+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)$");
+        Pattern p = Pattern.compile ("^(\\S+)\\s+(\\d+)\\s+(\\S+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+(\\S+)$");
         String line = null;
         try {
             while ((line = br.readLine ()) != null) {
@@ -77,7 +79,8 @@ public class ExecutionHistoryLoadCommand extends AbstractLoadModelCmd<Map<String
                         String iden = m.group (1);
                         ExecutionHistoryData datum = new ExecutionHistoryData (iden, Integer.parseInt (m.group (2)),
                                 Double.parseDouble (m.group (3)), Double.parseDouble (m.group (4)), Long.parseLong (m
-                                        .group (5)), Long.parseLong (m.group (6)));
+                                        .group (5)), Long.parseLong (m.group (6)), Double.parseDouble (m.group (7)),
+                                        Collections.<ExecutionPoint> emptyList ());
                         map.put (iden, datum);
                     }
                     catch (NumberFormatException e) {

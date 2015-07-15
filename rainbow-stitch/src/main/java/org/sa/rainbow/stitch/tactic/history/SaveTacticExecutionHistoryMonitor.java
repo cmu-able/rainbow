@@ -27,6 +27,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import org.sa.rainbow.core.RainbowComponentT;
@@ -44,6 +45,7 @@ import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData;
+import org.sa.rainbow.stitch.util.ExecutionHistoryData.ExecutionPoint;
 
 public class SaveTacticExecutionHistoryMonitor implements IRainbowAnalysis,
 IRainbowModelChangeCallback<Map<String, ExecutionHistoryData>> {
@@ -184,10 +186,24 @@ IRainbowModelChangeCallback<Map<String, ExecutionHistoryData>> {
 
     private void saveExecutionHistoryToFile (IModelInstance<Map<String, ExecutionHistoryData>> model) {
         try {
-            BufferedWriter bw = new BufferedWriter (new FileWriter (new File (m_filename)));
+            File file = new File (m_filename);
+            BufferedWriter bw = new BufferedWriter (new FileWriter (file));
             for (ExecutionHistoryData ed : model.getModelInstance ().values ()) {
                 bw.write (ed.toString ());
                 bw.newLine ();
+            }
+            bw.flush ();
+            bw.close ();
+
+            File history = new File (file.getParentFile (), file.getName () + "-states.csv");
+            bw = new BufferedWriter (new FileWriter (history));
+            for (ExecutionHistoryData ed : model.getModelInstance ().values ()) {
+                List<ExecutionPoint> list = ed.getExecutionHistory ();
+                for (ExecutionPoint p : list) {
+                    bw.write (ed.getIdentifier ());
+                    bw.write (",");
+                    bw.write (p.toString ());
+                }
             }
             bw.flush ();
             bw.close ();

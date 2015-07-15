@@ -52,7 +52,7 @@ import antlr.collections.AST;
  * 
  * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
  */
-public class Expression extends ScopedEntity implements IEvaluable {
+public class Expression extends ScopedEntity implements IEvaluableScope {
 
     /**
      * Declares the kind of Expression.  QUANTIFIED includes forall, exists,
