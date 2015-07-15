@@ -24,15 +24,19 @@
 package org.sa.rainbow.core.ports.eseb;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.RainbowMaster;
+import org.sa.rainbow.core.adaptation.IEvaluable;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
 import org.sa.rainbow.core.models.IModelsManager;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.AbstractDelegateConnectionPort;
 import org.sa.rainbow.core.ports.DisconnectedRainbowDelegateConnectionPort;
 import org.sa.rainbow.core.ports.DisconnectedRainbowManagementPort;
@@ -54,6 +58,8 @@ import org.sa.rainbow.core.ports.IProbeConfigurationPort;
 import org.sa.rainbow.core.ports.IProbeLifecyclePort;
 import org.sa.rainbow.core.ports.IProbeReportPort;
 import org.sa.rainbow.core.ports.IProbeReportSubscriberPort;
+import org.sa.rainbow.core.ports.IRainbowAdaptationDequeuePort;
+import org.sa.rainbow.core.ports.IRainbowAdaptationEnqueuePort;
 import org.sa.rainbow.core.ports.IRainbowConnectionPortFactory;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort;
@@ -416,6 +422,38 @@ public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
         }
         catch (IOException | ParticipantException e) {
             throw new RainbowConnectionException ("Failed to connect", e);
+        }
+    }
+
+    private Map<String, ESEBAdaptationQConnector> m_adaptationConnectors = new HashMap<> ();
+
+    @Override
+    public <S extends IEvaluable> IRainbowAdaptationEnqueuePort<S> createAdaptationEnqueuePort (ModelReference model) {
+        return getAdaptationConnectorForModel (model);
+    }
+
+    private <S extends IEvaluable> IRainbowAdaptationEnqueuePort<S>
+    getAdaptationConnectorForModel (ModelReference model) {
+        synchronized (m_adaptationConnectors) {
+            ESEBAdaptationQConnector<S> conn = m_adaptationConnectors.get (model.toString ());
+            if (conn == null) {
+                conn = new ESEBAdaptationQConnector<S> ();
+                m_adaptationConnectors.put (model.toString (), conn);
+            }
+            return conn;
+        }
+    }
+
+    @Override
+    public <S extends IEvaluable> IRainbowAdaptationDequeuePort<S> createAdaptationDequeuePort (ModelReference model) {
+        synchronized (m_adaptationConnectors) {
+
+            ESEBAdaptationQConnector<S> conn = m_adaptationConnectors.get (model.toString ());
+            if (conn == null) {
+                conn = new ESEBAdaptationQConnector<S> ();
+                m_adaptationConnectors.put (model.toString (), conn);
+            }
+            return conn;
         }
     }
 

@@ -53,6 +53,11 @@ public class ModelReference {
         return getModelName () + ":" + getModelType ();
     }
 
+    public static ModelReference fromString (String ref) {
+        String[] split = ref.split (":");
+        return new ModelReference (split[0], split[1]);
+    }
+
     @Override
     public boolean equals (Object obj) {
         if (obj instanceof ModelReference) {

@@ -325,6 +325,22 @@ public abstract class YamlUtil {
                 Rainbow.instance ().setProperty (varPair.getKey (), Util.evalTokens (varPair.getValue ()));
             }
 
+            // store effector type info
+            Map<String, Map> effTypeMap = (Map<String, Map> )effectorMap.get ("effector_types");
+            for (Map.Entry<String, Map> etInfo : effTypeMap.entrySet ()) {
+                EffectorDescription.EffectorAttributes ea = new EffectorDescription.EffectorAttributes ();
+                ea.name = etInfo.getKey ();
+                Map<String, Object> attrMap = etInfo.getValue ();
+                ea.setLocation (Util.evalTokens ((String )attrMap.get ("location"))); // the default location
+                String commandSignature = Util.evalTokens ((String )attrMap.get ("command"));
+                if (commandSignature != null) {
+                    ea.setCommandPattern (OperationRepresentation.parseCommandSignature (commandSignature));
+                }
+                Map<String, Object> addlInfoMap = (Map<String, Object> )attrMap.get (ea.infoPropName ());
+                extractArrays (ea, addlInfoMap);
+                ed.effectorTypes.put (ea.name, ea);
+            }
+
             // store effector description info
             Map<String, Map> effMap = (Map<String, Map> )effectorMap.get ("effectors");
             for (Map.Entry<String, Map> effInfo : effMap.entrySet ()) {
@@ -333,14 +349,23 @@ public abstract class YamlUtil {
                 // get effector name
                 ea.name = effInfo.getKey ();
                 Map<String, Object> attrMap = effInfo.getValue (); // get attribute map
+                ea.setKindName ((String )attrMap.get ("type"));
+                if (ea.getKindName () != null) {
+                    ea.kind = IEffector.Kind.valueOf (ea.getKindName ().toUpperCase ());
+                }
+
+                String effectorType = (String )attrMap.get ("effector-type");
+                if (effectorType != null) {
+                    ea.effectorType = ed.effectorTypes.get (effectorType);
+                }
+
                 // get location and effector type
-                ea.location = Util.evalTokens ((String )attrMap.get ("location"));
+                ea.setLocation (Util.evalTokens ((String )attrMap.get ("location")));
                 String commandSignature = Util.evalTokens ((String )attrMap.get ("command"));
                 if (commandSignature != null) {
-                    ea.commandPattern = OperationRepresentation.parseCommandSignature (commandSignature);
+                    ea.setCommandPattern (OperationRepresentation.parseCommandSignature (commandSignature));
                 }
-                ea.kindName = (String )attrMap.get ("type");
-                ea.kind = IEffector.Kind.valueOf (ea.kindName.toUpperCase ());
+
                 Map<String, Object> addlInfoMap = (Map<String, Object> )attrMap.get (ea.infoPropName ());
                 extractArrays (ea, addlInfoMap);
                 ed.effectors.add (ea);
@@ -386,10 +411,10 @@ public abstract class YamlUtil {
                 pa.name = pbInfo.getKey ();
                 Map<String, Object> attrMap = pbInfo.getValue (); // get attribute map
                 // get location, alias, and probe type
-                pa.location = Util.evalTokens ((String )attrMap.get ("location"));
+                pa.setLocation (Util.evalTokens ((String )attrMap.get ("location")));
                 pa.alias = (String )attrMap.get ("alias");
-                pa.kindName = (String )attrMap.get ("type");
-                pa.kind = IProbe.Kind.valueOf (pa.kindName.toUpperCase ());
+                pa.setKindName ((String )attrMap.get ("type"));
+                pa.kind = IProbe.Kind.valueOf (pa.getKindName ().toUpperCase ());
                 Map<String, Object> addlInfoMap = (Map<String, Object> )attrMap.get (pa.infoPropName ());
                 extractArrays (pa, addlInfoMap);
                 ed.probes.add (pa);
@@ -420,21 +445,23 @@ public abstract class YamlUtil {
                 arrayKeys.add (pair.getKey ().replace (".length", ""));
             }
             String valStr = String.valueOf (pair.getValue ());
-            attr.info.put (pair.getKey (), Util.evalTokens (valStr));
+//            attr.getInfo().put (pair.getKey (), Util.evalTokens (valStr));
+            attr.putInfo (pair.getKey (), Util.evalTokens (valStr));
         }
         /* Get any key-value pair named "key.length", remove it, find all
          * key.# items, and construct an array out of the list of values
          */
         for (String arrayKey : arrayKeys) {
-            int length = Integer.parseInt (attr.info.remove (arrayKey + ".length"));
+            int length = Integer.parseInt (attr.getInfo().remove (arrayKey + ".length"));
             String[] valArray = new String[length]; // new array
             for (int i = 0; i < length; ++i) { // store item in array
                 String itemKey = arrayKey + Util.DOT + i;
-                if (attr.info.containsKey (itemKey)) {
-                    valArray[i] = attr.info.remove (itemKey);
+                if (attr.getInfo().containsKey (itemKey)) {
+                    valArray[i] = attr.getInfo().remove (itemKey);
                 }
             }
-            attr.arrays.put (arrayKey, valArray); // store array
+            attr.putArray (arrayKey, valArray);
+//            attr.getArrays().put (arrayKey, valArray); // store array
         }
     }
 

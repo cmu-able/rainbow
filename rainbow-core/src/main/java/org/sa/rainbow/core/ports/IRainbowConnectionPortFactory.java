@@ -28,10 +28,12 @@ import java.util.Properties;
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.RainbowMaster;
+import org.sa.rainbow.core.adaptation.IEvaluable;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
 import org.sa.rainbow.core.models.IModelsManager;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReportingSubscriberCallback;
 import org.sa.rainbow.translator.effectors.IEffector;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort;
@@ -159,5 +161,11 @@ public interface IRainbowConnectionPortFactory {
             throws RainbowConnectionException;
 
     public abstract IModelsManagerPort createModeslManagerRequirerPort () throws RainbowConnectionException;
+
+    public abstract <S extends IEvaluable> IRainbowAdaptationEnqueuePort<S>
+            createAdaptationEnqueuePort (ModelReference model);
+
+    public abstract <S extends IEvaluable> IRainbowAdaptationDequeuePort<S>
+            createAdaptationDequeuePort (ModelReference model);
 
 }

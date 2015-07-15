@@ -23,7 +23,6 @@
  */
 package org.sa.rainbow.core.ports;
 
-import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 
 public interface IModelDSBusPublisherPort extends IRainbowMessageFactory, IDisposablePort {
@@ -45,6 +44,6 @@ public interface IModelDSBusPublisherPort extends IRainbowMessageFactory, IDispo
 
     public abstract OperationResult publishOperation (IRainbowOperation cmd);
 
-    public abstract void publishMessage (IRainbowMessage msg);
+//    public abstract void publishMessage (IRainbowMessage msg);
 
 }

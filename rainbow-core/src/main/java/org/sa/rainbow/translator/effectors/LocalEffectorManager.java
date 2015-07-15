@@ -72,7 +72,7 @@ public class LocalEffectorManager extends AbstractRainbowRunnable {
         for (EffectorAttributes effAttr : effectors.effectors) {
             // Ignore any effectors that shouldn't start on this machine
             // This should not happen
-            if (!effAttr.location.equals (Rainbow.getProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION))) {
+            if (!effAttr.getLocation().equals (Rainbow.getProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION))) {
                 continue;
             }
             IEffector effector = null;
@@ -81,12 +81,12 @@ public class LocalEffectorManager extends AbstractRainbowRunnable {
             Class<?>[] params = null;
             Object[] args = null;
             // collect argument values
-            String refId = Util.genID (effAttr.name, effAttr.location);
+            String refId = Util.genID (effAttr.name, effAttr.getLocation());
             switch (effAttr.kind) {
             case SCRIPT:
                 // get info for a script based effector
-                String path = effAttr.info.get ("path");
-                String argument = effAttr.info.get ("argument");
+                String path = effAttr.getInfo().get ("path");
+                String argument = effAttr.getInfo().get ("argument");
                 if (!new File (path).exists ()) {
                     String msg = MessageFormat.format (
                             "Could not create effector {0} because script does not exist: {1}", refId, path);
@@ -99,14 +99,14 @@ public class LocalEffectorManager extends AbstractRainbowRunnable {
                         + argument);
                 break;
             case JAVA:
-                effectorClass = effAttr.info.get ("class");
+                effectorClass = effAttr.getInfo().get ("class");
                 List<Class<?>> paramList = new ArrayList<> ();
                 List<Object> argsList = new ArrayList<> ();
                 paramList.add (String.class);
                 argsList.add (refId);
-                if (effAttr.arrays.size () > 0) {
+                if (effAttr.getArrays().size () > 0) {
                     // get list of arguments for a pure Java effector
-                    for (Object vObj : effAttr.arrays.values ()) {
+                    for (Object vObj : effAttr.getArrays().values ()) {
                         paramList.add (vObj.getClass ());
                         argsList.add (vObj);
                     }

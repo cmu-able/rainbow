@@ -23,9 +23,11 @@
  */
 package org.sa.rainbow.core.ports;
 
+import org.sa.rainbow.core.adaptation.AdaptationTree;
+import org.sa.rainbow.core.adaptation.IEvaluable;
 
-public interface IRainbowAdaptationEnqueuePort<S> extends IDisposablePort {
+public interface IRainbowAdaptationEnqueuePort<S extends IEvaluable> extends IDisposablePort {
 
-    public void offer (S selectedStrategy, Object[] args);
+    public void offerAdaptation (AdaptationTree<S> selectedStrategy, Object[] args);
 
 }

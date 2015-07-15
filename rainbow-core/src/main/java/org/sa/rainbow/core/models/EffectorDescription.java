@@ -26,7 +26,11 @@
  */
 package org.sa.rainbow.core.models;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.sa.rainbow.core.gauges.OperationRepresentation;
@@ -42,16 +46,63 @@ public class EffectorDescription {
 
     public static class EffectorAttributes extends DescriptionAttributes {
         public IEffector.Kind kind = null;
-        public OperationRepresentation commandPattern;
+        protected OperationRepresentation commandPattern;
+        public EffectorAttributes      effectorType;
+
+        @Override
+        public String getKindName () {
+            String kindName = super.getKindName ();
+            if (kindName == null && effectorType != null) return effectorType.getKindName ();
+            return kindName;
+        }
+
+        @Override
+        public String getLocation () {
+            String location = super.getLocation ();
+            if (location == null && effectorType != null) return effectorType.getLocation ();
+            return location;
+        }
+
+        public OperationRepresentation getCommandPattern () {
+            if (commandPattern == null && effectorType != null) return effectorType.commandPattern;
+            return commandPattern;
+        }
+
+        public void setCommandPattern (OperationRepresentation commandPattern) {
+            this.commandPattern = commandPattern;
+        }
+
+        @Override
+        public Map<String, String[]> getArrays () {
+            Map<String, String[]> a = new HashMap<String, String[]> ();
+            if (effectorType != null) {
+                a.putAll (effectorType.getArrays ());
+            }
+            a.putAll (super.getArrays ());
+            return Collections.<String, String[]> unmodifiableMap (a);
+        }
+
+        @Override
+        public Map<String, String> getInfo () {
+            Map<String, String> a = new HashMap<> ();
+            if (effectorType != null) {
+                a.putAll (effectorType.getInfo ());
+            }
+            a.putAll (super.getInfo ());
+            return Collections.<String, String> unmodifiableMap (a);
+        }
     }
 
     public SortedSet<EffectorAttributes> effectors = null;
+    public TreeMap<String, EffectorAttributes> effectorTypes;
 
     /**
      * Default Constructor.
      */
     public EffectorDescription() {
         effectors = new TreeSet<EffectorAttributes>();
+        effectorTypes = new TreeMap<String, EffectorAttributes> ();
     }
+
 
 }

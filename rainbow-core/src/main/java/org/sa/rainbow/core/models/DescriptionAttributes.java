@@ -43,20 +43,20 @@ public class DescriptionAttributes implements Comparable<DescriptionAttributes> 
     /** The name of the element */
     public String name = null;
     /** The target location, e.g., hostname, of the element */
-    public String location = null;
+    private String location = null;
     /** The String name of the "kind" for this element */
-    public String kindName = null;
+    private String kindName = null;
     /** Key'd map of info attributes, not sorted. */
-    public Map<String,String> info = null;
+    private Map<String,String> info = null;
     /** Key'd map of String arrays, sorted by natural order of key. */
-    public Map<String,String[]> arrays = null;
+    private Map<String,String[]> arrays = null;
 
     /**
      * Default Constructor.
      */
     public DescriptionAttributes () {
-        info = new HashMap<String,String>();
-        arrays = new TreeMap<String,String[]>();
+        setInfo (new HashMap<String,String>());
+        setArrays (new TreeMap<String,String[]>());
     }
 
     /* (non-Javadoc)
@@ -68,7 +68,47 @@ public class DescriptionAttributes implements Comparable<DescriptionAttributes> 
     }
 
     public String infoPropName () {
-        return kindName + INFO_SUFFIX;
+        return getKindName() + INFO_SUFFIX;
+    }
+
+    public String getLocation () {
+        return location;
+    }
+
+    public void setLocation (String location) {
+        this.location = location;
+    }
+
+    public String getKindName () {
+        return kindName;
+    }
+
+    public void setKindName (String kindName) {
+        this.kindName = kindName;
+    }
+
+    public Map<String,String> getInfo () {
+        return info;
+    }
+
+    public void putInfo (String key, String val) {
+        info.put (key, val);
+    }
+
+    public void setInfo (Map<String,String> info) {
+        this.info = info;
+    }
+
+    public Map<String,String[]> getArrays () {
+        return arrays;
+    }
+
+    public void setArrays (Map<String,String[]> arrays) {
+        this.arrays = arrays;
+    }
+
+    public void putArray (String arrayKey, String[] valArray) {
+        arrays.put (arrayKey, valArray);
     }
 
 }

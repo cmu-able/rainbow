@@ -31,10 +31,12 @@ import java.util.Properties;
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.RainbowMaster;
+import org.sa.rainbow.core.adaptation.IEvaluable;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
 import org.sa.rainbow.core.models.IModelsManager;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.AbstractDelegateConnectionPort;
 import org.sa.rainbow.core.ports.IDelegateConfigurationPort;
 import org.sa.rainbow.core.ports.IDelegateManagementPort;
@@ -53,6 +55,8 @@ import org.sa.rainbow.core.ports.IProbeConfigurationPort;
 import org.sa.rainbow.core.ports.IProbeLifecyclePort;
 import org.sa.rainbow.core.ports.IProbeReportPort;
 import org.sa.rainbow.core.ports.IProbeReportSubscriberPort;
+import org.sa.rainbow.core.ports.IRainbowAdaptationDequeuePort;
+import org.sa.rainbow.core.ports.IRainbowAdaptationEnqueuePort;
 import org.sa.rainbow.core.ports.IRainbowConnectionPortFactory;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort;
@@ -320,6 +324,18 @@ public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
 
     @Override
     public IModelsManagerPort createModeslManagerRequirerPort () throws RainbowConnectionException {
+        throw new UnsupportedOperationException ("NYS");
+
+    }
+
+    @Override
+    public <S extends IEvaluable> IRainbowAdaptationEnqueuePort<S> createAdaptationEnqueuePort (ModelReference model) {
+        throw new UnsupportedOperationException ("NYS");
+
+    }
+
+    @Override
+    public <S extends IEvaluable> IRainbowAdaptationDequeuePort<S> createAdaptationDequeuePort (ModelReference model) {
         throw new UnsupportedOperationException ("NYS");
 
     }

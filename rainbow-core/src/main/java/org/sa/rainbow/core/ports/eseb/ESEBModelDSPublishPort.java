@@ -75,11 +75,11 @@ IModelDSBusSubscriberPort {
                             }
                         }
                     }
-                    else {
-                        for (IModelDSBusPublisherPort callback : m_callbacks) {
-                            callback.publishMessage (msg);
-                        }
-                    }
+//                    else {
+//                        for (IModelDSBusPublisherPort callback : m_callbacks) {
+//                            callback.publishMessage (msg);
+//                        }
+//                    }
                 }
             }
         });
@@ -124,13 +124,13 @@ IModelDSBusSubscriberPort {
         m_callbacks.remove (callback);
     }
 
-    @Override
-    public void publishMessage (IRainbowMessage msg) {
-        if (msg.getProperty (ESEBConstants.MSG_CHANNEL_KEY).equals (ChannelT.MODEL_DS.name ())
-                && msg instanceof RainbowESEBMessage) {
-            getConnectionRole ().publish ((RainbowESEBMessage )msg);
-        }
-    }
+//    @Override
+//    public void publishMessage (IRainbowMessage msg) {
+//        if (msg.getProperty (ESEBConstants.MSG_CHANNEL_KEY).equals (ChannelT.MODEL_DS.name ())
+//                && msg instanceof RainbowESEBMessage) {
+//            getConnectionRole ().publish ((RainbowESEBMessage )msg);
+//        }
+//    }
 
     @Override
     public IRainbowMessage createMessage () {

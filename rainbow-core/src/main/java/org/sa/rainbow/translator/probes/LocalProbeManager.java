@@ -97,7 +97,7 @@ public class LocalProbeManager extends AbstractRainbowRunnable {
         // obtain the list of probes to create
         for (ProbeDescription.ProbeAttributes pbAttr : m_localProbeDesc.probes) {
             // see if probe is for my location
-            if (!pbAttr.location.equals (Rainbow.getProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION))) {
+            if (!pbAttr.getLocation().equals (Rainbow.getProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION))) {
                 continue;
             }
             try {
@@ -107,42 +107,42 @@ public class LocalProbeManager extends AbstractRainbowRunnable {
                 Class<?>[] params = null;
                 Object[] args = null;
                 // collect argument values
-                String refID = Util.genID (pbAttr.name, pbAttr.location);
+                String refID = Util.genID (pbAttr.name, pbAttr.getLocation());
                 switch (pbAttr.kind) {
                 case SCRIPT:
                     // get info for a script-based probe
-                    String path = pbAttr.info.get ("path");
-                    String argument = pbAttr.info.get ("argument");
+                    String path = pbAttr.getInfo().get ("path");
+                    String argument = pbAttr.getInfo().get ("argument");
                     if (!new File (path).exists ()) {
                         RainbowLogger.error (RainbowComponentT.PROBE_MANAGER,
                                 MessageFormat.format ("Could not create probe {0}. The script \"{1}\" does not exist.",
-                                        pbAttr.location, path), m_reportingPort, LOGGER);
+                                        pbAttr.getLocation(), path), m_reportingPort, LOGGER);
                         continue; // don't create
                     }
                     GenericScriptBasedProbe gProbe = new GenericScriptBasedProbe (refID, pbAttr.alias, path, argument);
                     m_reportingPort.info (getComponentType (), "Script-based IProbe " + pbAttr.name + ": " + path + " "
                             + argument);
-                    String mode = pbAttr.info.get ("mode");
+                    String mode = pbAttr.getInfo().get ("mode");
                     if ("continual".equals (mode)) {
                         gProbe.setContinual (true);
                     }
                     probe = gProbe;
                     break;
                 case JAVA:
-                    probeClazz = pbAttr.info.get ("class");
+                    probeClazz = pbAttr.getInfo().get ("class");
                     // get argument info for Java probe, including ID and possibly sleep period
                     List<Class<?>> paramList = new ArrayList<Class<?>> ();
                     List<Object> argsList = new ArrayList<Object> ();
                     paramList.add (String.class);
                     argsList.add (refID);
-                    String periodStr = pbAttr.info.get ("period");
+                    String periodStr = pbAttr.getInfo().get ("period");
                     if (periodStr != null) { // assume long
                         paramList.add (long.class);
                         argsList.add (Long.parseLong (periodStr));
                     }
-                    if (pbAttr.arrays.size () > 0) {
+                    if (pbAttr.getArrays().size () > 0) {
                         // get list of arguments for a pure Java probe
-                        for (Object vObj : pbAttr.arrays.values ()) {
+                        for (Object vObj : pbAttr.getArrays().values ()) {
                             paramList.add (vObj.getClass ());
                             argsList.add (vObj);
                         }

@@ -93,13 +93,13 @@ public class DescriptionAttributesConverter implements TypelibJavaConversionRule
                 else
                     throw new ValueConversionException ("Cannot convert a value of " + value + " to "
                             + cls.getCanonicalName ());
-                atts.arrays = new HashMap<> ();
+                atts.setArrays (new HashMap<String, String[]> ());
                 for (Entry<String, List<String>> e : arrays.entrySet ()) {
-                    atts.arrays.put (e.getKey (), e.getValue ().toArray (new String[0]));
+                    atts.putArray (e.getKey (), e.getValue ().toArray (new String[0]));
                 }
-                atts.info = info;
-                atts.kindName = kindName;
-                atts.location = location;
+                atts.setInfo (info);
+                atts.setKindName (kindName);
+                atts.setLocation (location);
                 atts.name = name;
                 @SuppressWarnings ("unchecked")
                 T t = (T )atts;
@@ -188,12 +188,12 @@ public class DescriptionAttributesConverter implements TypelibJavaConversionRule
         Field arrays = sdt.field ("arrays");
 
         fields.put (name, converter.from_java (da.name, m_scope.string ()));
-        fields.put (location, converter.from_java (da.location, m_scope.string ()));
-        fields.put (kind_name, converter.from_java (da.kindName, m_scope.string ()));
-        fields.put (info, converter.from_java (da.info, m_scope.find ("map<string,string>")));
+        fields.put (location, converter.from_java (da.getLocation(), m_scope.string ()));
+        fields.put (kind_name, converter.from_java (da.getKindName(), m_scope.string ()));
+        fields.put (info, converter.from_java (da.getInfo(), m_scope.find ("map<string,string>")));
 
         Map<String, List<String>> arraysC = new HashMap<> ();
-        for (Entry<String, String[]> e : da.arrays.entrySet ()) {
+        for (Entry<String, String[]> e : da.getArrays().entrySet ()) {
             arraysC.put (e.getKey (), Arrays.asList (e.getValue ()));
         }
         fields.put (arrays, converter.from_java (arraysC, m_scope.find ("map<string,list<string>>")));

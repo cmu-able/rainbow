@@ -36,6 +36,7 @@ import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.RainbowMaster;
+import org.sa.rainbow.core.adaptation.IEvaluable;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
@@ -252,5 +253,15 @@ public class RainbowPortFactory {
             };
         }
         return getFactory ().createModeslManagerRequirerPort ();
+    }
+
+    public static <S extends IEvaluable> IRainbowAdaptationEnqueuePort<S>
+            createAdaptationEnqueuePort (ModelReference model) {
+        return getFactory ().createAdaptationEnqueuePort (model);
+    }
+
+    public static <S extends IEvaluable> IRainbowAdaptationDequeuePort<S>
+            createAdaptationDequeuePort (ModelReference model) {
+        return getFactory ().createAdaptationDequeuePort (model);
     }
 }

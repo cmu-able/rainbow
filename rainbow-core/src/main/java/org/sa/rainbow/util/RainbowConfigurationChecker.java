@@ -122,18 +122,20 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
 
     private void checkEffector (EffectorAttributes effector) {
 
-        if (effector.location == null || "".equals (effector.location)) {
+        // Should add checks for the type
+
+        if (effector.getLocation() == null || "".equals (effector.getLocation())) {
             m_problems.add (new Problem (ProblemT.ERROR, MessageFormat.format ("{0}: Does not have a location",
                     effector.name)));
         }
 
-        if (effector.commandPattern == null) {
+        if (effector.getCommandPattern () == null) {
             m_problems.add (new Problem (ProblemT.ERROR, MessageFormat.format (
                     "{0}: does not have a command and so cannot be called.", effector.name)));
         }
 
         if (effector.kind == IEffectorIdentifier.Kind.JAVA) {
-            String effClass = effector.info.get ("class");
+            String effClass = effector.getInfo().get ("class");
             if (effClass == null) {
                 m_problems.add (new Problem (ProblemT.ERROR, MessageFormat.format (
                         "{0}: Is a JAVA effector without a 'class' attribute", effector.name)));
@@ -149,7 +151,7 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
             }
         }
         else if (effector.kind == IEffectorIdentifier.Kind.SCRIPT) {
-            String path = effector.info.get ("path");
+            String path = effector.getInfo().get ("path");
             if (path == null) {
                 m_problems.add (new Problem (ProblemT.ERROR, MessageFormat.format (
                         "{0}: Is a SCRIPT effector without a 'path' attribute", effector.name)));
@@ -177,18 +179,18 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
             }
         }
 
-        if (probe.location == null || "".equals (probe.location)) {
+        if (probe.getLocation() == null || "".equals (probe.getLocation())) {
             m_problems.add (new Problem (ProblemT.ERROR, MessageFormat.format ("{0}: Does not have a location",
                     probe.name)));
         }
 
-        if (probe.location != null && probe.location.startsWith ("$")) {
+        if (probe.getLocation() != null && probe.getLocation().startsWith ("$")) {
             m_problems.add (new Problem (ProblemT.ERROR, MessageFormat.format (
-                    "{0}: Has an unexpanded location ''{1}''", probe.name, probe.location)));
+                    "{0}: Has an unexpanded location ''{1}''", probe.name, probe.getLocation())));
         }
 
         if (probe.kind == Kind.JAVA) {
-            String probeClazz = probe.info.get ("class");
+            String probeClazz = probe.getInfo().get ("class");
             if (probeClazz == null) {
                 m_problems.add (new Problem (ProblemT.ERROR, MessageFormat.format (
                         "{0}: Is a JAVA probe without a 'class' attribute", probe.name)));
@@ -204,7 +206,7 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
             }
         }
         else if (probe.kind == Kind.SCRIPT) {
-            String path = probe.info.get ("path");
+            String path = probe.getInfo().get ("path");
             if (path == null) {
                 m_problems.add (new Problem (ProblemT.ERROR, MessageFormat.format (
                         "{0}: Is a SCRIPT probe without a 'path' attribute", probe.name)));

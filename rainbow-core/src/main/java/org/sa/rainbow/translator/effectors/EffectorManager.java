@@ -187,7 +187,7 @@ IModelDSBusPublisherPort {
     protected Set<EffectorAttributes> getEffectorsAtLocation (String location) {
         Set<EffectorAttributes> effectors = new LinkedHashSet<EffectorAttributes> ();
         for (EffectorAttributes candidate : m_effectors.effectors) {
-            if (location.equals (candidate.location)) {
+            if (location.equals (candidate.getLocation())) {
                 effectors.add (candidate);
             }
         }
