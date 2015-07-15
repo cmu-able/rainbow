@@ -216,12 +216,8 @@ strategyNode
 strategyCond
 	: #(STRATEGY_COND
 	    (#( HASH
-	        (#( pid1:IDENTIFIER
-	            (pid2:IDENTIFIER)?
-	          )
-	        |   pl:FLOAT_LIT
-	        )
-	      )  { beh.doStrategyProbability(#pid1, #pid2, #pl); }
+	        expr
+	      )  { beh.doStrategyProbability(); }
 	    )?
 	    (  expr     { beh.doStrategyCondition(Strategy.ConditionKind.EXPRESSION); }
 	    |  SUCCESS  { beh.doStrategyCondition(Strategy.ConditionKind.SUCCESS); }

@@ -265,8 +265,11 @@ strategyProbExpr
 		processError(ex, $FOLLOW);
 	}
 strategyProbValue
-    :   FLOAT_LIT
+/*    :   FLOAT_LIT
     |   IDENTIFIER^ (LBRACE! IDENTIFIER RBRACE!)?
+    ;
+    */
+    : expression
     ;
 	exception catch [RecognitionException ex] {
 		processError(ex, $FOLLOW);
