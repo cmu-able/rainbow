@@ -24,12 +24,16 @@
 package org.sa.rainbow.stitch.adaptation;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -108,7 +112,6 @@ implements IAdaptationManager<Strategy>/*
     // constraint being violated
     private boolean                            m_adaptEnabled      = true;       // by default, we adapt
     private List<Stitch>                       m_repertoire        = null;
-    private SortedMap<String, UtilityFunction> m_utils             = null;
     private List<Strategy>                     m_pendingStrategies = null;
 
     // track history
@@ -119,6 +122,7 @@ implements IAdaptationManager<Strategy>/*
     private IModelChangeBusSubscriberPort           m_modelChangePort          = null;
     private IModelsManagerPort                      m_modelsManagerPort        = null;
     private String                                  m_modelRef;
+    private FileChannel                             m_strategyLog              = null;
     private IRainbowChangeBusSubscription           m_modelTypecheckingChanged = new IRainbowChangeBusSubscription () {
 
         @Override
@@ -146,7 +150,6 @@ implements IAdaptationManager<Strategy>/*
         super (NAME);
 
         m_repertoire = new ArrayList<Stitch> ();
-        m_utils = new TreeMap<String, UtilityFunction> ();
         m_pendingStrategies = new ArrayList<Strategy> ();
         m_historyTrackUtilName = Rainbow.getProperty (RainbowConstants.PROPKEY_TRACK_STRATEGY);
         if (m_historyTrackUtilName != null) {
@@ -168,6 +171,7 @@ implements IAdaptationManager<Strategy>/*
     public void initialize (IRainbowReportingPort port) throws RainbowConnectionException {
         super.initialize (port);
         initConnectors ();
+
     }
 
     private void initConnectors () throws RainbowConnectionException {
@@ -179,6 +183,14 @@ implements IAdaptationManager<Strategy>/*
     @Override
     public void setModelToManage (ModelReference model) {
         m_modelRef = model.getModelName () + ":" + model.getModelType ();
+        try {
+            m_strategyLog = new FileOutputStream (new File (new File (Rainbow.instance ().getTargetPath (), "log"),
+                    model.getModelName () + "-adaptation.log")).getChannel ();
+        }
+        catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace ();
+        }
         m_model = (AcmeModelInstance )m_modelsManagerPort.<IAcmeSystem> getModelInstance (model);
         if (m_model == null) {
             m_reportingPort.error (RainbowComponentT.ADAPTATION_MANAGER,
@@ -219,7 +231,6 @@ implements IAdaptationManager<Strategy>/*
         }
         Ohana.instance ().dispose ();
         m_repertoire.clear ();
-        m_utils.clear ();
         m_pendingStrategies.clear ();
         if (m_historyTrackUtilName != null) {
             m_historyCnt.clear ();
@@ -235,10 +246,16 @@ implements IAdaptationManager<Strategy>/*
 
         // null-out data members
         m_repertoire = null;
-        m_utils = null;
         m_pendingStrategies = null;
         m_historyTrackUtilName = null;
         m_model = null;
+        if (m_strategyLog != null) {
+            try {
+                m_strategyLog.close ();
+            }
+            catch (IOException e) {
+            }
+        }
     }
 
     /*
@@ -296,13 +313,13 @@ implements IAdaptationManager<Strategy>/*
     public double computeSystemInstantUtility () {
         Map<String, Double> weights = m_utilityModel.weights
                 .get (Rainbow.getProperty (RainbowConstants.PROPKEY_SCENARIO));
-        double[] conds = new double[m_utils.size ()];
+        double[] conds = new double[m_utilityModel.getUtilityFunctions ().size ()];
         int i = 0;
         double score = 0.0;
-        for (String k : new ArrayList<String> (m_utils.keySet ())) {
+        for (String k : new ArrayList<String> (m_utilityModel.getUtilityFunctions ().keySet ())) {
             double v = 0.0;
             // find the applicable utility function
-            UtilityFunction u = m_utils.get (k);
+            UtilityFunction u = m_utilityModel.getUtilityFunctions ().get (k);
             // add attribute value from current condition to accumulated agg
             // value
             Object condVal = m_model.getProperty (u.mapping ());
@@ -353,6 +370,17 @@ implements IAdaptationManager<Strategy>/*
                 m_pendingStrategies.add (selectedStrategy);
                 AdaptationTree<Strategy> at = new AdaptationTree<Strategy> (selectedStrategy);
                 m_enqueuePort.offerAdaptation (at, null);
+                if (m_strategyLog != null) {
+                    Date d = new Date ();
+                    String log = MessageFormat.format ("{0,number,#},queuing,{1}\n", d.getTime (),
+                            selectedStrategy.getName ());
+                    try {
+                        m_strategyLog.write (java.nio.ByteBuffer.wrap (log.getBytes ()));
+                    }
+                    catch (IOException e) {
+                        reportingPort ().error (getComponentType (), "Failed to write " + log + " to log file");
+                    }
+                }
             }
 
         }
@@ -387,7 +415,7 @@ implements IAdaptationManager<Strategy>/*
      * @return map of utility identifiers to functions.
      */
     Map<String, UtilityFunction> _retrieveUtilityProfilesForTesting () {
-        return m_utils;
+        return m_utilityModel.getUtilityFunctions ();
     }
 
     /**
@@ -563,7 +591,7 @@ implements IAdaptationManager<Strategy>/*
             for (String k : aggAtt.keySet ()) {
                 double v = aggAtt.get (k);
                 // find the applicable utility function
-                UtilityFunction u = m_utils.get (k);
+                UtilityFunction u = m_utilityModel.getUtilityFunctions ().get (k);
                 if (u == null) {
                     log ("Error: attempting to calculate for not existent function: " + k);
                     continue;
