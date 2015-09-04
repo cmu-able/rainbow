@@ -48,7 +48,7 @@ import org.sa.rainbow.stitch.util.ExecutionHistoryData;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData.ExecutionPoint;
 
 public class SaveTacticExecutionHistoryMonitor implements IRainbowAnalysis,
-IRainbowModelChangeCallback<Map<String, ExecutionHistoryData>> {
+IRainbowModelChangeCallback {
 
     public static final String            NAME                       = "Tactic History Model Saver";
 
@@ -65,9 +65,9 @@ IRainbowModelChangeCallback<Map<String, ExecutionHistoryData>> {
                     .getType ()
                     .equals (
                             message.getProperty (IModelChangeBusPort.MODEL_TYPE_PROP)) && m_modelDesc
-                            .getName ()
-                            .equals (
-                                    message.getProperty (IModelChangeBusPort.MODEL_NAME_PROP)));
+                    .getName ()
+                    .equals (
+                            message.getProperty (IModelChangeBusPort.MODEL_NAME_PROP)));
         }
     };
 
@@ -179,7 +179,7 @@ IRainbowModelChangeCallback<Map<String, ExecutionHistoryData>> {
     @Override
     public void onEvent (ModelReference mr, IRainbowMessage message) {
         if (++m_updateCnt % 10 == 0) {
-            IModelInstance model = m_modelsManagerPort.getModelInstance (mr);
+            IModelInstance<Map<String, ExecutionHistoryData>> model = m_modelsManagerPort.getModelInstance (mr);
             saveExecutionHistoryToFile (model);
         }
     }
