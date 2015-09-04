@@ -25,6 +25,7 @@ package org.sa.rainbow.evaluator.utility;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,39 +68,39 @@ import org.sa.rainbow.model.utility.UtilityModelInstance;
  */
 public class UtilityEvaluator extends AbstractRainbowRunnable implements IRainbowAnalysis, IRainbowModelChangeCallback {
 
-    private static final String                 OVERALL_UTILITY_KEY     = "globalUtility";
-    private static final String                 NAME                    = "Rainbow Utility Evaluator";
+    private static final String OVERALL_UTILITY_KEY = "globalUtility";
+    private static final String NAME                = "Rainbow Utility Evaluator";
+    private static final Long   INTERVAL            = 5000L;
 
     /** Used to get the current state of a model, e.g., the Acme model and the utility model **/
-    private IModelsManagerPort                  m_modelsManagerPort;
+    private IModelsManagerPort            m_modelsManagerPort;
     /** Subscribes to changes to the Acme model on this port **/
-    private IModelChangeBusSubscriberPort       m_modelChangePort;
+    private IModelChangeBusSubscriberPort m_modelChangePort;
     /** Changes to the Utility History model are announced on this port **/
-    private IModelUSBusPort                     m_modelUpstreamPort;
+    private IModelUSBusPort               m_modelUpstreamPort;
 
     /**
      * Used to store the models that the evaluator is interested in that has changed, to be picked up in the execution
      * thread
      **/
-    private LinkedBlockingQueue<ModelReference> m_modelQ                = new LinkedBlockingQueue<> ();
+    private LinkedBlockingQueue<ModelReference> m_modelQ = new LinkedBlockingQueue<> ();
+    private Long                                m_lastCheck = 0L;
 
     /** Matches the end of changes to an Acme model **/
-    private IRainbowChangeBusSubscription       m_modelChangeSubscriber = new IRainbowChangeBusSubscription () {
+    private IRainbowChangeBusSubscription m_modelChangeSubscriber = new IRainbowChangeBusSubscription () {
 
         @Override
-        public boolean
-        matches (IRainbowMessage message) {
-            String type = (String )message
-                    .getProperty (IModelChangeBusPort.EVENT_TYPE_PROP);
+        public boolean matches (IRainbowMessage message) {
+            String type = (String )message.getProperty (IModelChangeBusPort.EVENT_TYPE_PROP);
             if (type != null) {
                 try {
-                    CommandEventT ct = CommandEventT
-                            .valueOf (type);
+                    CommandEventT ct = CommandEventT.valueOf (type);
                     if (ct.isEnd ()) {
-                        String modelType = (String )message
-                                .getProperty (IModelChangeBusPort.MODEL_TYPE_PROP);
-                        if ("Acme"
-                                .equals (modelType))
+                        String modelType = (String )message.getProperty (IModelChangeBusPort.MODEL_TYPE_PROP);
+                        if ("Acme".equals (modelType)
+                                && (message.getPropertyNames ().contains (IModelChangeBusPort.COMMAND_PROP)
+                                        && !"setTypecheckResult"
+                                        .equals (message.getProperty (IModelChangeBusPort.COMMAND_PROP))))
                             return true;
                     }
                 }
@@ -148,22 +149,22 @@ public class UtilityEvaluator extends AbstractRainbowRunnable implements IRainbo
         synchronized (m_modelQ) {
             ref = m_modelQ.poll ();
         }
-        if (ref != null) {
+        if (ref != null && new Date ().getTime () - m_lastCheck > INTERVAL) {
             Collection<? extends String> forTracing = m_modelsManagerPort.getRegisteredModelTypes ();
             UtilityModelInstance utilityModel = (UtilityModelInstance )m_modelsManagerPort
-                    .<UtilityPreferenceDescription> getModelInstance (new ModelReference (ref.getModelName (), UtilityModelInstance.UTILITY_MODEL_TYPE));
+                    .<UtilityPreferenceDescription> getModelInstance (
+                            new ModelReference (ref.getModelName (), UtilityModelInstance.UTILITY_MODEL_TYPE));
             AcmeModelInstance acmeModel = (AcmeModelInstance )m_modelsManagerPort.<IAcmeSystem> getModelInstance (ref);
             if (utilityModel != null && acmeModel != null) {
                 Map<String, Double> utilities = computeSystemInstantUtility (utilityModel.getModelInstance (),
-                        acmeModel,
-                        m_reportingPort);
+                        acmeModel, m_reportingPort);
                 UtilityHistoryModelInstance historyModel = (UtilityHistoryModelInstance )m_modelsManagerPort
                         .<UtilityHistory> getModelInstance (new ModelReference (ref.getModelName (),
                                 UtilityHistoryModelInstance.UTILITY_HISTORY_TYPE));
                 List<IRainbowOperation> cmds = new ArrayList<> (utilities.size ());
 
-                AddUtilityMeasureCmd command = historyModel.getCommandFactory ().addUtilityMeasureCmd (
-                        OVERALL_UTILITY_KEY, utilities.get (OVERALL_UTILITY_KEY));
+                AddUtilityMeasureCmd command = historyModel.getCommandFactory ()
+                        .addUtilityMeasureCmd (OVERALL_UTILITY_KEY, utilities.get (OVERALL_UTILITY_KEY));
                 cmds.add (command);
                 for (Entry<String, Double> e : utilities.entrySet ()) {
                     if (OVERALL_UTILITY_KEY.equals (e.getKey ())) {
@@ -172,7 +173,9 @@ public class UtilityEvaluator extends AbstractRainbowRunnable implements IRainbo
                     cmds.add (historyModel.getCommandFactory ().addUtilityMeasureCmd (e.getKey (), e.getValue ()));
                 }
                 m_modelUpstreamPort.updateModel (cmds, true);
+
             }
+            m_lastCheck = new Date ().getTime ();
         }
     }
 
