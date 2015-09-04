@@ -55,7 +55,7 @@ public class End2EndRespTimeGauge extends RegularPatternGauge {
 
     /** List of values reported by this Gauge */
     private static final String[] valueNames = {
-        "end2endRespTime(*)"
+            "end2endRespTime(*)"
     };
     private static final String DEFAULT = "DEFAULT";
 
@@ -76,14 +76,6 @@ public class End2EndRespTimeGauge extends RegularPatternGauge {
         addPattern (DEFAULT, Pattern.compile ("\\[(.+)\\]<(.+)>\\s+(.+?):([0-9.]+)ms"));
     }
 
-
-    /* (non-Javadoc)
-     * @see org.sa.rainbow.translator.gauges.AbstractGauge#initProperty(java.lang.String, java.lang.Object)
-     */
-    @Override
-    protected void initProperty (String name, Object value) {
-        // no prop to init, do nothing
-    }
 
     /* (non-Javadoc)
      * @see org.sa.rainbow.translator.gauges.RegularPatternGauge#doMatch(java.lang.String, java.util.regex.Matcher)
@@ -125,7 +117,7 @@ public class End2EndRespTimeGauge extends RegularPatternGauge {
                 valueName = valueName.replace("*", host);
                 if (m_commands.containsKey (valueName)) {
                     // ZNewsSys.c0.experRespTime
-                    IRainbowOperation cmd = m_commands.get (valueName);
+                    IRainbowOperation cmd = getCommand (valueName);
                     Map<String, String> parameterMap = new HashMap<> ();
                     parameterMap.put (cmd.getParameters ()[0], Double.toString (dur));
                     issueCommand (cmd, parameterMap);

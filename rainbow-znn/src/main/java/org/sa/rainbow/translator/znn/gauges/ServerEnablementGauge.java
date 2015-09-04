@@ -100,7 +100,7 @@ public class ServerEnablementGauge extends RegularPatternGauge {
             }
 
             if (m_configParams.get (MODE_PARAM).equals (ENABLE_MODE)) {
-                IRainbowOperation op = m_commands.get ("enableServer(x)");
+                IRainbowOperation op = getCommand ("enableServer(x)");
                 List<IRainbowOperation> ops = new ArrayList<> (enabled.size () + disabled.size ());
                 List<Map<String, String>> params = new ArrayList<> (ops.size ());
                 for (String ip : enabled) {
@@ -122,8 +122,8 @@ public class ServerEnablementGauge extends RegularPatternGauge {
                 issueCommands (ops, params);
             }
             else {
-                IRainbowOperation addOp = m_commands.get ("connectServer(x)");
-                IRainbowOperation delOp = m_commands.get ("removeServer(x)");
+                IRainbowOperation addOp = getCommand ("connectServer(x)");
+                IRainbowOperation delOp = getCommand ("removeServer(x)");
                 List<IRainbowOperation> ops = new ArrayList<> (enabled.size () + disabled.size ());
                 List<Map<String, String>> params = new ArrayList<> (ops.size ());
                 for (String ip : enabled) {
@@ -163,10 +163,5 @@ public class ServerEnablementGauge extends RegularPatternGauge {
         return null;
     }
 
-    @Override
-    protected void initProperty (String name, Object value) {
-        // TODO Auto-generated method stub
-
-    }
 
 }

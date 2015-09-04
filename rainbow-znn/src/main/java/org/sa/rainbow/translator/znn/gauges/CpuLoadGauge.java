@@ -53,7 +53,7 @@ public class CpuLoadGauge extends RegularPatternGauge {
 
     /** List of values reported by this Gauge */
     private static final String[] valueNames = {
-        "load"
+            "load"
     };
     private static final String DEFAULT = "DEFAULT";
 
@@ -74,19 +74,12 @@ public class CpuLoadGauge extends RegularPatternGauge {
         m_history = new LinkedList<Double>();
 
         addPattern(DEFAULT, Pattern.compile("\\[(.+)\\]\\s+([0-9.]+)\\s+([0-9.]+)\\s+([0-9.]+)\\s+([0-9.]+)(\\s+([0-9.]+))?"));
-    }
 
-    /* (non-Javadoc)
-     * @see org.sa.rainbow.translator.gauges.AbstractGauge#initProperty(java.lang.String, java.lang.Object)
-     */
-    @Override
-    protected void initProperty (String name, Object value) {
-        if (!valueNames[0].equals(name) || !(value instanceof String)) return;
-
-        // store model property value of "load" as initial value in cumulation
-        double val = Double.parseDouble((String )value);
-        m_cumulation = val;
-        m_history.offer(val);
+        Double initialLoad = getSetupValue ("initialLoad", Double.class);
+        if (initialLoad != null) {
+            m_cumulation = initialLoad;
+            m_history.offer (initialLoad);
+        }
     }
 
     /* (non-Javadoc)
@@ -119,7 +112,7 @@ public class CpuLoadGauge extends RegularPatternGauge {
                 // update server comp in model with requests per sec
                 m_reportingPort.trace (getComponentType (), "Updating server prop using load = " + tLoad);
                 // ZNewsSys.s0.load
-                IRainbowOperation cmd = m_commands.get (valueNames[0]);
+                IRainbowOperation cmd = getCommand (valueNames[0]);
                 Map<String, String> pMap = new HashMap<String, String> ();
                 pMap.put (cmd.getParameters ()[0], Double.toString (tLoad));
                 issueCommand (cmd, pMap);

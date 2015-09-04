@@ -63,11 +63,11 @@ public class DiskIOGauge extends RegularPatternGauge {
 
     /** List of values reported by this Gauge */
     private static final String[] valueNames = {
-        "transferRate",
-        "readRate",
-        "writeRate",
-        "readSize",
-        "writeSize"
+            "transferRate",
+            "readRate",
+            "writeRate",
+            "readSize",
+            "writeSize"
     };
     private static final String DEFAULT = "DEFAULT";
 
@@ -97,33 +97,24 @@ public class DiskIOGauge extends RegularPatternGauge {
         m_dateFormat = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy");
 
         addPattern(DEFAULT, Pattern.compile("\\[(.+)\\]\\s+(\\w+)\\s+([0-9.]+)\\s+([0-9.]+)\\s+([0-9.]+)\\s+([0-9.]+)\\s+([0-9.]+)"));
-    }
 
-    /* (non-Javadoc)
-     * @see org.sa.rainbow.translator.gauges.AbstractGauge#initProperty(java.lang.String, java.lang.Object)
-     */
-    @Override
-    protected void initProperty (String name, Object value) {
-        if (name != null && !(value instanceof String)) return;
-
-        // store model property values as initial values in cumulations
-        for (int i=0; i < valueNames.length; ++i) {
-            if (valueNames[i].equals(name)) {  // matched
-                double val = Double.parseDouble((String )value);
+        for (int i = 0; i < valueNames.length; ++i) {
+            Double val = getSetupValue (valueNames[i], Double.class);
+            if (val != null) {
                 if (m_cumulations == null) {
                     m_cumulations = new Double[valueNames.length];
                 }
                 m_cumulations[i] = val;
-                Double[] values = m_history.peek();
+                Double[] values = m_history.peek ();
                 if (values == null) {
                     values = new Double[valueNames.length];
-                    m_history.offer(values);
+                    m_history.offer (values);
                 }
                 values[i] = val;
-                break;
             }
         }
     }
+
 
     /* (non-Javadoc)
      * @see org.sa.rainbow.translator.gauges.RegularPatternGauge#doMatch(java.lang.String, java.util.regex.Matcher)
@@ -191,7 +182,7 @@ public class DiskIOGauge extends RegularPatternGauge {
                 for (int i=0; i < valueNames.length; ++i) {
                     if (m_commands.containsKey (valueNames[i])) {
                         // ZNewsSys.s0.<vName>, if "vName" exists in mapping
-                        IRainbowOperation cmd = m_commands.get (valueNames[i]);
+                        IRainbowOperation cmd = getCommand (valueNames[i]);
                         Map<String, String> pMap = new HashMap<String, String> ();
                         pMap.put (cmd.getParameters ()[0], Double.toString (values[i]));
                         issueCommand (cmd, pMap);

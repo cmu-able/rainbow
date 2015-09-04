@@ -58,7 +58,7 @@ public class RtLatencyGauge extends RegularPatternGauge {
 
     /** List of values reported by this Gauge */
     private static final String[] valueNames = {
-        "latency"
+            "latency"
     };
     private static final String DEFAULT = "DEFAULT";
 
@@ -76,21 +76,14 @@ public class RtLatencyGauge extends RegularPatternGauge {
         m_history = new LinkedList<Double> ();
 
         addPattern (DEFAULT, Pattern.compile ("\\[(.+)\\]\\s+(.+?):([0-9.]+)[/]([0-9.]+)[/]([0-9.]+)"));
+
+        Double initalLatency = getSetupValue (valueNames[0], Double.class);
+        if (initalLatency != null) {
+            m_cumulation = initalLatency;
+            m_history.offer (initalLatency);
+        }
     }
 
-
-    /* (non-Javadoc)
-     * @see org.sa.rainbow.translator.gauges.AbstractGauge#initProperty(java.lang.String, java.lang.Object)
-     */
-    @Override
-    protected void initProperty (String name, Object value) {
-        if (!valueNames[0].equals(name) || !(value instanceof String)) return;
-
-        // store model property value of "load" as initial value in cumulation
-        double val = Double.parseDouble((String )value);
-        m_cumulation = val;
-        m_history.offer(val);
-    }
 
     /* (non-Javadoc)
      * @see org.sa.rainbow.translator.gauges.RegularPatternGauge#doMatch(java.lang.String, java.util.regex.Matcher)
@@ -118,7 +111,7 @@ public class RtLatencyGauge extends RegularPatternGauge {
             // update connection in model with latency in seconds
             if (m_commands.containsKey (valueNames[0])) {
                 // ZNewsSys.conn0.latency
-                IRainbowOperation cmd = m_commands.get (valueNames[0]);
+                IRainbowOperation cmd = getCommand (valueNames[0]);
                 Map<String, String> parameterMap = new HashMap<> ();
                 parameterMap.put (cmd.getParameters ()[0], Double.toString (latency));
                 issueCommand (cmd, parameterMap);

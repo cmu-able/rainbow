@@ -60,7 +60,7 @@ public class RtLatencyMultiHostGauge extends RegularPatternGauge {
 
     /** List of values reported by this Gauge */
     private static final String[] valueNames = {
-        "latency(*)"
+            "latency(*)"
     };
     private static final String DEFAULT = "DEFAULT";
 
@@ -83,14 +83,6 @@ public class RtLatencyMultiHostGauge extends RegularPatternGauge {
         m_cumulationMap = new HashMap<String,Double>();
 
         addPattern(DEFAULT, Pattern.compile("\\[(.+)\\]\\s+(.+?):([0-9.]+)[/]([0-9.]+)[/]([0-9.]+)"));
-    }
-
-    /* (non-Javadoc)
-     * @see org.sa.rainbow.translator.gauges.AbstractGauge#initProperty(java.lang.String, java.lang.Object)
-     */
-    @Override
-    protected void initProperty (String name, Object value) {
-        // no prop to init, do nothing
     }
 
     /* (non-Javadoc)
@@ -135,7 +127,7 @@ public class RtLatencyMultiHostGauge extends RegularPatternGauge {
                 valueName = valueName.replace("*", host);
                 if (m_commands.containsKey (valueName)) {
                     // ZNewsSys.conn0.latency
-                    IRainbowOperation cmd = m_commands.get (valueName);
+                    IRainbowOperation cmd = getCommand (valueName);
                     Map<String, String> parameterMap = new HashMap<> ();
                     parameterMap.put (cmd.getParameters ()[0], Double.toString (latency));
                     issueCommand (cmd, parameterMap);

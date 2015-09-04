@@ -81,14 +81,14 @@ public class DummyDiagnosisGauge extends RegularPatternGauge {
                     Map<String, String> pm = new HashMap<> ();
                     List<IRainbowOperation> ops = new ArrayList<> (2);
                     List<Map<String, String>> params = new ArrayList<> (2);
-                    IRainbowOperation cmd = m_commands.get (valueNames[1]);
+                    IRainbowOperation cmd = getCommand (valueNames[1]);
                     pm = new HashMap<> ();
                     pm.put (cmd.getParameters ()[0], captchaEnabled ? "-1" : "0");
                     pm.put (cmd.getTarget (), m.getQualifiedName ());
                     ops.add (cmd);
                     params.add (pm);
 
-                    cmd = m_commands.get (valueNames[2]);
+                    cmd = getCommand (valueNames[2]);
                     pm = new HashMap<> ();
                     pm.put (cmd.getParameters ()[0], captchaEnabled ? "-1" : "0");
                     pm.put (cmd.getTarget (), m.getQualifiedName ());
@@ -139,7 +139,7 @@ public class DummyDiagnosisGauge extends RegularPatternGauge {
     protected void doMatch (String matchName, Matcher m) {
         if (DEFAULT.equals (matchName)) {
             String LB = m.group (1);
-            IRainbowOperation cmd = m_commands.get (valueNames[0]);
+            IRainbowOperation cmd = getCommand (valueNames[0]);
             Map<String, String> pm = new HashMap<> ();
             pm.put (cmd.getParameters ()[0], m.group (2));
             pm.put (cmd.getTarget (), LB);
@@ -226,10 +226,5 @@ public class DummyDiagnosisGauge extends RegularPatternGauge {
         }
     }
 
-    @Override
-    protected void initProperty (String name, Object value) {
-        // TODO Auto-generated method stub
-
-    }
 
 }

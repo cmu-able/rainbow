@@ -49,7 +49,7 @@ public class FidelityGauge extends RegularPatternGauge {
 
     /** List of values reported by this Gauge */
     private static final String[] valueNames = {
-        "fidelity"
+            "fidelity"
     };
     private static final String DEFAULT = "DEFAULT";
 
@@ -71,14 +71,6 @@ public class FidelityGauge extends RegularPatternGauge {
      * @see org.sa.rainbow.translator.gauges.AbstractGauge#initProperty(java.lang.String, java.lang.Object)
      */
     @Override
-    protected void initProperty (String name, Object value) {
-        // no prop to init, do nothing
-    }
-
-    /* (non-Javadoc)
-     * @see org.sa.rainbow.translator.gauges.RegularPatternGauge#doMatch(java.lang.String, java.util.regex.Matcher)
-     */
-    @Override
     protected void doMatch (String matchName, Matcher m) {
         if (matchName == DEFAULT) {
             // acquire the recent CPU load data
@@ -90,7 +82,7 @@ public class FidelityGauge extends RegularPatternGauge {
             // ZNewsSys.s0.fidelity
             if (m_commands.containsKey (valueNames[0])) {
                 // ZNewsSys.conn0.latency
-                IRainbowOperation cmd = m_commands.get (valueNames[0]);
+                IRainbowOperation cmd = getCommand (valueNames[0]);
                 Map<String, String> parameterMap = new HashMap<> ();
                 String acmeFidelity = "5";
                 switch (fidelity) {

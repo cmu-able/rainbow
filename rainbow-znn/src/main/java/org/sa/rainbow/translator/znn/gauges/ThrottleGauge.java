@@ -105,10 +105,4 @@ public class ThrottleGauge extends RegularPatternGauge {
         return true;
     }
 
-    @Override
-    protected void initProperty (String name, Object value) {
-        // TODO Auto-generated method stub
-
-    }
-
 }

@@ -107,10 +107,4 @@ public class AuthenticationEnablementGauge extends RegularPatternGauge {
         }
     }
 
-    @Override
-    protected void initProperty (String name, Object value) {
-        // TODO Auto-generated method stub
-
-    }
-
 }

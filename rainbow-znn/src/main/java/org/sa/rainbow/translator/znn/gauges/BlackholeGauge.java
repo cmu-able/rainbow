@@ -140,12 +140,6 @@ public class BlackholeGauge extends RegularPatternGauge {
         return true;
     }
 
-    @Override
-    protected void initProperty(String name, Object value) {
-        // TODO Auto-generated method stub
-
-    }
-
 
 //    // This is solely for testing remote model access
 //    @Override
