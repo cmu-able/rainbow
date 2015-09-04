@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.acmestudio.acme.element.IAcmeSystem;
 import org.acmestudio.acme.environment.IAcmeEnvironment;
 import org.acmestudio.acme.environment.error.AcmeError;
 import org.acmestudio.acme.type.IAcmeTypeChecker;
@@ -69,7 +68,7 @@ import org.sa.rainbow.model.acme.AcmeTypecheckSetCmd;
  * @history * [2009.03.04] Removed beacon for model evaluation, set sleep period instead.
  */
 public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAnalysis,
-IRainbowModelChangeCallback<IAcmeSystem> {
+IRainbowModelChangeCallback {
 
     private static final String                    SET_TYPECHECK_OPERATION_NAME = "setTypecheckResult";
 
@@ -113,6 +112,7 @@ IRainbowModelChangeCallback<IAcmeSystem> {
 
     /** The models to typecheck **/
     private LinkedBlockingQueue<AcmeModelInstance> m_modelCheckQ                = new LinkedBlockingQueue<> ();
+    private Map<ModelReference, Boolean>           m_lastResult  = new HashMap<> ();
 
     private Set<IArchEvaluation>                   m_evaluations;
 
@@ -205,13 +205,19 @@ IRainbowModelChangeCallback<IAcmeSystem> {
             if (typeChecker instanceof SimpleModelTypeChecker) {
                 SimpleModelTypeChecker synchChecker = (SimpleModelTypeChecker )typeChecker;
                 boolean constraintViolated = !synchChecker.typechecks (model.getModelInstance ());
-                AcmeTypecheckSetCmd cmd = model.getCommandFactory ().setTypecheckResultCmd (!constraintViolated);
-                try {
-                    m_modelUSPort.updateModel (cmd);
-                }
-                catch (IllegalStateException e) {
-                    m_reportingPort.error (RainbowComponentT.ANALYSIS,
-                            "Could not execute set typecheck command on model", e);
+                ModelReference ref = new ModelReference (model.getModelName (), model.getModelType ());
+                Boolean last = m_lastResult.get (ref);
+                if (last == null || last.booleanValue () != constraintViolated) {
+                    m_lastResult.put (ref, constraintViolated);
+                    AcmeTypecheckSetCmd cmd = model.getCommandFactory ().setTypecheckResultCmd (!constraintViolated);
+
+                    try {
+                        m_modelUSPort.updateModel (cmd);
+                    }
+                    catch (IllegalStateException e) {
+                        m_reportingPort.error (RainbowComponentT.ANALYSIS,
+                                "Could not execute set typecheck command on model", e);
+                    }
                 }
                 if (constraintViolated) {
                     Set<? extends AcmeError> errors = env.getAllRegisteredErrors ();
