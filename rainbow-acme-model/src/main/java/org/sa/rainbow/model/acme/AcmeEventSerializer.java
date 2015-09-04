@@ -227,7 +227,19 @@ public class AcmeEventSerializer {
                 }
                 catch (Exception e) {
                 }
+            case ADD_PROPERTY:
+                if (event.getProperty ().getValue () != null) {
+                    try {
+                        msg.setProperty (AcmeModelOperation.VALUE_PROP,
+                                StandaloneLanguagePackHelper.defaultLanguageHelper ().propertyValueToString (
+                                        event.getProperty ().getValue (), new RegionManager ()));
+                    }
+                    catch (Exception e) {
+                    }
+
+                }
             default:
+
                 break;
             }
         }
