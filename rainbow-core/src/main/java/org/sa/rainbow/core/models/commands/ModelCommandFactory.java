@@ -89,7 +89,8 @@ public abstract class ModelCommandFactory<T> {
     public IRainbowModelOperation<?, T> generateCommand (String commandName, String... args)
             throws RainbowModelException {
         try {
-            Class<? extends AbstractRainbowModelOperation<?, T>> cmdClass = m_commandMap.get (commandName);
+            Class<? extends AbstractRainbowModelOperation<?, T>> cmdClass = m_commandMap
+                    .get (commandName.toLowerCase ());
             if (cmdClass == null) {
                 cmdClass = tryThroughReflection (commandName);
             }
