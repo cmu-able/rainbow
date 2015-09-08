@@ -43,4 +43,6 @@ public interface IAdaptationExecutor<S> extends IRainbowRunnable {
     public abstract void initialize (IRainbowReportingPort reportingPort) throws RainbowConnectionException;
 
     public abstract IModelDSBusPublisherPort getOperationPublishingPort ();
+
+    public abstract IRainbowReportingPort getReportingPort ();
 }

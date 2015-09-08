@@ -5,6 +5,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import org.sa.rainbow.core.RainbowComponentT;
+import org.sa.rainbow.core.ports.IRainbowReportingPort;
+
 /**
  * An abstract class that defines the semantics for executing adaptation trees. Subclasses will define how to evaluate a
  * particular adapatation leaf, and how to return a new visitor in the case of requiring separate threads. This visitor
@@ -22,12 +25,14 @@ public abstract class DefaultAdaptationExecutorVisitor<S extends IEvaluable> ext
     protected CountDownLatch    m_done;
     /** The result of executing this tree **/
     protected boolean           m_result = true;
+    private IRainbowReportingPort m_reporter;
 
     public DefaultAdaptationExecutorVisitor (AdaptationTree<S> adt, ThreadGroup tg, String threadName,
-            CountDownLatch done) {
+            CountDownLatch done, IRainbowReportingPort reporter) {
         super (tg, threadName);
         m_adtToVisit = adt;
         m_done = done;
+        m_reporter = reporter;
     }
 
     @Override
@@ -44,6 +49,7 @@ public abstract class DefaultAdaptationExecutorVisitor<S extends IEvaluable> ext
     @Override
     public final boolean visitLeaf (AdaptationTree<S> tree) {
         S s = tree.getHead ();
+        m_reporter.info (RainbowComponentT.EXECUTOR, "Visiting execution leaf");
         Object evaluate = this.evaluate (s);
         if (evaluate instanceof Boolean) return (Boolean )evaluate;
         return false;
