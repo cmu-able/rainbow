@@ -26,14 +26,17 @@ package org.sa.rainbow.core.models;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.nio.channels.FileChannel;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -95,6 +98,8 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
 
     protected Map<ModelReference, File>                m_modelsToSave = new HashMap<> ();
 
+    protected Map<ModelReference, FileChannel> m_modelLogs = new HashMap<> ();
+
     public ModelsManager () {
         super ("Models Manager");
         try {
@@ -153,8 +158,8 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                 }
                 IModelInstance instance = (IModelInstance )load.getResult ();
                 boolean toSave = saveOnClose == null ? false : Boolean.valueOf (saveOnClose);
+                ModelReference ref = new ModelReference (instance.getModelName (), instance.getModelType ());
                 if (toSave) {
-                    ModelReference ref = new ModelReference (instance.getModelName (), instance.getModelType ());
                     String saveLocation = Rainbow.getProperty (RainbowConstants.RAINBOW_MODEL_SAVE_LOCATION_PREFIX
                             + modelNum);
                     if (saveLocation == null) {
@@ -163,6 +168,14 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                     File savePath = Util.getRelativeToPath (Rainbow.instance ().getTargetPath (), saveLocation);
                     m_modelsToSave.put (ref, savePath);
                 }
+
+                // Open log files
+                File targetPath = Rainbow.instance ().getTargetPath ();
+                File logPath = new File (targetPath, "log");
+                File logFile = new File (logPath, ref.getModelName () + "-" + ref.getModelType () + ".log");
+                FileOutputStream fos = new FileOutputStream (logFile);
+                m_modelLogs.put (ref, fos.getChannel ());
+
                 m_reportingPort.info (
                         getComponentType (),
                         "Successfully loaded and registered " + instance.getModelName () + ":"
@@ -492,6 +505,10 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                     // The command executed correctly if we can undo it.
                     // Announce all the changes on the the change bus
                     m_changeBusPort.announce (events);
+                    logModelOperation (command, true);
+                }
+                else {
+                    logModelOperation (command, false);
                 }
             }
             catch (IllegalStateException | RainbowException e) {
@@ -561,6 +578,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                         m_reportingPort.warn (RainbowComponentT.MODEL, MessageFormat.format (
                                 "Not all of the commands completed successfully. {0} did, so undoing them.",
                                 executedCommands.size ()));
+                        logModelOperations (commands, false);
                         IRainbowModelOperation<?, ?> cmd = null;
                         while (!executedCommands.isEmpty ()) {
                             try {
@@ -575,10 +593,32 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                     else {
                         // Announce the changes
                         m_changeBusPort.announce (events);
+                        logModelOperations (commands, true);
                     }
                 }
             }
         }
+    }
+
+    private void logModelOperations (List<IRainbowOperation> commands, boolean b) {
+        for (IRainbowOperation op : commands) {
+            logModelOperation (op, b);
+        }
+    }
+
+    private void logModelOperation (IRainbowOperation command, boolean success) {
+        FileChannel file = m_modelLogs.get (command.getModelReference ());
+        if (file != null) {
+            Date d = new Date ();
+            String log = MessageFormat.format ("{0,number,#},{1},{2}\n", d.getTime (), command.toString (), success);
+            try {
+                file.write (java.nio.ByteBuffer.wrap (log.getBytes ()));
+            }
+            catch (IOException e) {
+                LOGGER.error ("Failed to write " + log + " to log file");
+            }
+        }
+
     }
 
     @Override
@@ -586,5 +626,16 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
         return RainbowComponentT.MODEL;
     }
 
+    @Override
+    protected void doTerminate () {
+        for (FileChannel c : m_modelLogs.values ()) {
+            try {
+                c.close ();
+            }
+            catch (IOException e) {
+            }
+        }
+        super.doTerminate ();
+    }
 
 }
