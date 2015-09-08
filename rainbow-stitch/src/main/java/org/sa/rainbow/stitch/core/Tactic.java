@@ -71,6 +71,8 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
 
     private Map<String,Object> m_attributes = new HashMap<String,Object>();
 
+    private ExecutionHistoryModelInstance m_executionHistoryModel;
+
     /**
      * Main Constructor for a new Tactic object.
      * @param parent  the parent scope
@@ -280,13 +282,7 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
     public synchronized Object evaluate (Object[] argsIn) {
         long start = new Date ().getTime ();
         setArgs(argsIn);
-
-        ExecutionHistoryModelInstance modelInstance = (ExecutionHistoryModelInstance )Rainbow
-                .instance ()
-                .getRainbowMaster ()
-                .modelsManager ()
-                .<Map<String, ExecutionHistoryData>> getModelInstance (
-                        new ModelReference ("history", ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE));
+        ExecutionHistoryModelInstance modelInstance = m_executionHistoryModel;
 
         // mark disruption level with model
         double level = computeAttribute("uD");
@@ -336,8 +332,7 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
         // evaluate the effect statements
         boolean effectObserved = checkEffect ();
         long end = new Date ().getTime ();
-        modelInstance.getCommandFactory ().recordTacticDurationCmd (this.getQualifiedName (), end - start,
-                effectObserved);
+
         if (Tool.logger().isInfoEnabled()) {
             Tool.logger().info("Tactic expected effect: " + effectObserved);
         }
@@ -425,6 +420,10 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
 
     protected void addEffect (Expression effect) {
         effects.add(effect);
+    }
+
+    public void setHistoryModel (ExecutionHistoryModelInstance executionHistoryModel) {
+        m_executionHistoryModel = executionHistoryModel;
     }
 
 }

@@ -47,8 +47,6 @@ public class ExecutionHistoryCommandFactory extends ModelCommandFactory<Map<Stri
         return new ExecutionHistoryLoadCommand (modelsManager, modelName, stream, source);
     }
 
-    private ExecutionHistoryModelInstance m_modelInstance;
-
     public ExecutionHistoryCommandFactory (ExecutionHistoryModelInstance model) {
         super (ExecutionHistoryModelInstance.class, model);
     }

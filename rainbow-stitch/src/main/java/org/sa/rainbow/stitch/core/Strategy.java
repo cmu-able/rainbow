@@ -120,7 +120,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
             String tRef = (curNode.getActionFlag () == ActionKind.TACTIC) ? curNode.getTactic () : null;
             Tactic tactic = (tRef != null ? stitch ().findTactic (tRef) : null);
             String nullCaseSuffix = (curNode.getActionFlag () == ActionKind.NULL) ? "." + ActionKind.NULL.name ()
-                    : null;
+            : null;
             double prob = curNode.getProbability ();
             if (tactic != null) {
                 tactic.setArgs (Tool.evaluateArgs (curNode.getTacticArgExprs ()));
@@ -922,6 +922,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
         }
         Object[] args = Tool.evaluateArgs (curNode.getTacticArgExprs ());
         Tactic tactic = stitch ().findTactic (curNode.getTactic ());
+        tactic.setHistoryModel (m_executor.getExecutionHistoryModel ());
         m_executor.getHistoryModelUSPort ().updateModel (
                 m_executor.getExecutionHistoryModel ().getCommandFactory ()
                 .strategyExecutionStateCommand (tactic.getQualifiedName (),
@@ -937,8 +938,8 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
         long end = new Date ().getTime ();
         m_executor.getHistoryModelUSPort ().updateModel (
                 m_executor
-                        .getExecutionHistoryModel ()
-                        .getCommandFactory ()
+                .getExecutionHistoryModel ()
+                .getCommandFactory ()
                 .strategyExecutionStateCommand (tactic.getQualifiedName (),
                         ExecutionHistoryModelInstance.TACTIC, ExecutionStateT.FINISHED, null));
         AbstractRainbowModelOperation recordTacticDurationCmd = m_executor.getExecutionHistoryModel ()

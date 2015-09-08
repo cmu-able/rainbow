@@ -94,7 +94,7 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
         m_model = (AcmeModelInstance )mi;
         if (m_model == null) {
             m_reportingPort.error (RainbowComponentT.EXECUTOR, "Referring to unknown model " + model.getModelName ()
-                    + ":" + model.getModelType ());
+            + ":" + model.getModelType ());
         }
         m_executionThreadGroup = new ThreadGroup (m_modelRef.toString () + " ThreadGroup");
     }
@@ -131,6 +131,7 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
             // Because we are dealing only in stitch in this executor, then
             // use a StitchExecutionVisitor to visit this adaptation
             AdaptationTree<Strategy> at = m_adapationDQPort.dequeue ();
+            log ("Dequeued an adaptation");
             StitchExecutionVisitor stitchVisitor = new StitchExecutionVisitor (this, this.m_modelRef,
                     m_historyModel.getCommandFactory (), at, m_executionThreadGroup, new CountDownLatch (1));
             stitchVisitor.start ();
@@ -420,13 +421,20 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
             }
             String historyModelName = "strategy-execution-" + this.id ();
             m_historyModel = new ExecutionHistoryModelInstance (new HashMap<String, ExecutionHistoryData> (),
-                    "history", "memory");
+                    historyModelName, "memory");
             mm.registerModel (new ModelReference (historyModelName,
                     ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE), m_historyModel);
         }
         catch (RainbowModelException e) {
-            m_reportingPort.warn (getComponentType (), "Ccould not create a tactic execution history model", e);
+            m_reportingPort.warn (getComponentType (), "Could not create a tactic execution history model", e);
         }
+        log ("Strategy executor initialized");
     }
+
+    @Override
+    public IRainbowReportingPort getReportingPort () {
+        return m_reportingPort;
+    }
+
 
 }
