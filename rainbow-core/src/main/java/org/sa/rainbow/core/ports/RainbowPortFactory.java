@@ -236,6 +236,14 @@ public class RainbowPortFactory {
         return getFactory ().createModelsManagerProviderPort (modelsManager);
     }
 
+    public static IMasterCommandPort createMasterCommandPort () throws RainbowConnectionException {
+
+        if (Rainbow.isMaster ())
+            return getFactory ().createMasterCommandProviderPort (Rainbow.instance ().getRainbowMaster ());
+
+        return getFactory ().createMasterCommandRequirerPort ();
+    }
+
     public static IModelsManagerPort createModelsManagerRequirerPort () throws RainbowConnectionException {
         if (Rainbow.isMaster ()) {
             final ModelsManager mm = Rainbow.instance ().getRainbowMaster ().modelsManager ();
@@ -256,12 +264,12 @@ public class RainbowPortFactory {
     }
 
     public static <S extends IEvaluable> IRainbowAdaptationEnqueuePort<S>
-            createAdaptationEnqueuePort (ModelReference model) {
+    createAdaptationEnqueuePort (ModelReference model) {
         return getFactory ().createAdaptationEnqueuePort (model);
     }
 
     public static <S extends IEvaluable> IRainbowAdaptationDequeuePort<S>
-            createAdaptationDequeuePort (ModelReference model) {
+    createAdaptationDequeuePort (ModelReference model) {
         return getFactory ().createAdaptationDequeuePort (model);
     }
 }

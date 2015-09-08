@@ -53,7 +53,7 @@ public interface IModelChangeBusSubscriberPort extends IDisposablePort {
      * @param <T>
      *            The type of the model
      */
-    public interface IRainbowModelChangeCallback<T> {
+    public interface IRainbowModelChangeCallback {
         /**
          * The method will to be called. The message represents the event. The model is the model in Rainbow that the
          * event is associated with.

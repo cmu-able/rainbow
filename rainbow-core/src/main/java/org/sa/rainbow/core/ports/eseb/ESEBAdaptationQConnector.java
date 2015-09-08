@@ -17,7 +17,9 @@ public class ESEBAdaptationQConnector<S extends IEvaluable> implements IRainbowA
 
     @Override
     public void dispose () {
-        m_Q.clear ();
+        if (m_Q != null) {
+            m_Q.clear ();
+        }
         m_Q = null;
     }
 

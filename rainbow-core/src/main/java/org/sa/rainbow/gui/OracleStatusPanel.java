@@ -41,8 +41,6 @@ import javax.swing.JTextArea;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 
-import org.sa.rainbow.core.Rainbow;
-
 public class OracleStatusPanel extends JPanel {
 
     private JTextArea    m_textArea;
@@ -57,7 +55,7 @@ public class OracleStatusPanel extends JPanel {
     /**
      * Create the panel.
      */
-    public OracleStatusPanel (Color color) {
+    public OracleStatusPanel (Color color, List<String> delegates) {
         setLayout (new BorderLayout (0, 0));
 
         m_statusPane = new JPanel ();
@@ -89,7 +87,7 @@ public class OracleStatusPanel extends JPanel {
 
         add (sp);
 
-        expectedDelegates (Rainbow.instance ().getRainbowMaster ().getExpectedDelegateLocations ());
+        expectedDelegates (delegates);
     }
 
     public void expectedDelegates (List<String> locations) {

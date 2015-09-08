@@ -22,6 +22,8 @@ ftware and associated documentation files (the "Software"), to deal
  */
 package org.sa.rainbow.core.ports;
 
+import java.util.List;
+
 import org.sa.rainbow.core.Rainbow.ExitState;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 
@@ -45,5 +47,7 @@ public interface IMasterCommandPort {
     public void destroyDelegates ();
 
     public void killDelegate (String ipOfDelegate);
+
+    public List<String> getExpectedDelegateLocations ();
 
 }

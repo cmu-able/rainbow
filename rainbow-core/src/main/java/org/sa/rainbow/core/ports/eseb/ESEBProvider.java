@@ -39,6 +39,7 @@ import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.ports.eseb.converters.CollectionConverter;
 import org.sa.rainbow.core.ports.eseb.converters.CommandRepresentationConverter;
 import org.sa.rainbow.core.ports.eseb.converters.DescriptionAttributesConverter;
+import org.sa.rainbow.core.ports.eseb.converters.ExitStateConverter;
 import org.sa.rainbow.core.ports.eseb.converters.GaugeInstanceDescriptionConverter;
 import org.sa.rainbow.core.ports.eseb.converters.GaugeStateConverter;
 import org.sa.rainbow.core.ports.eseb.converters.OperationResultConverter;
@@ -135,7 +136,7 @@ public class ESEBProvider {
         TypelibParsingContext context = new TypelibParsingContext (SCOPE, SCOPE);
         try {
             parser.parse (new ParsecFileReader ()
-            .read_memory ("struct typed_attribute_with_value {string name; string type; any? value;}"), context);
+                    .read_memory ("struct typed_attribute_with_value {string name; string type; any? value;}"), context);
             parser.parse (
                     new ParsecFileReader ()
                     .read_memory ("struct operation_representation {string target; string modelName; string modelType; string name; list<string> params;}"),
@@ -160,13 +161,15 @@ public class ESEBProvider {
                     new ParsecFileReader ().read_memory ("struct operation_result {string reply; string result;}"),
                     context);
             parser.parse (new ParsecFileReader ()
-            .read_memory ("enum outcome {unknown; confounded; failure; success; timeout;}"), context);
+                    .read_memory ("enum outcome {unknown; confounded; failure; success; timeout;}"), context);
+            parser.parse (new ParsecFileReader ().read_memory ("enum exit_state {destruct; restart; sleep; abort;}"),
+                    context);
             parser.parse (
                     new ParsecFileReader ()
                     .read_memory ("struct rainbow_model {string name; string type; string source; string cls; string system_name; string serialization; string additional_info;}"),
                     context);
             parser.parse (new ParsecFileReader ()
-            .read_memory ("struct model_reference {string model_name; string model_type;}"), context);
+                    .read_memory ("struct model_reference {string model_name; string model_type;}"), context);
             RULES = new LinkedList<TypelibJavaConversionRule> ();
             RULES.add (new CollectionConverter ());
             RULES.add (new TypedAttributeConverter (ESEBProvider.SCOPE));
@@ -175,6 +178,7 @@ public class ESEBProvider {
             RULES.add (new DescriptionAttributesConverter (ESEBProvider.SCOPE));
             RULES.add (new GaugeInstanceDescriptionConverter (ESEBProvider.SCOPE));
             RULES.add (new OutcomeConverter (ESEBProvider.SCOPE));
+            RULES.add (new ExitStateConverter (ESEBProvider.SCOPE));
             RULES.add (new OperationResultConverter (ESEBProvider.SCOPE));
             for (TypelibJavaConversionRule r : RULES) {
                 CONVERTER.add (r);

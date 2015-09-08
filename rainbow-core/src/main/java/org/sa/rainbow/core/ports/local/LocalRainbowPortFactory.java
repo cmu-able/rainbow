@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.sa.rainbow.core.Identifiable;
+import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.adaptation.IEvaluable;
@@ -44,6 +45,7 @@ import org.sa.rainbow.core.ports.IEffectorLifecycleBusPort;
 import org.sa.rainbow.core.ports.IGaugeConfigurationPort;
 import org.sa.rainbow.core.ports.IGaugeLifecycleBusPort;
 import org.sa.rainbow.core.ports.IGaugeQueryPort;
+import org.sa.rainbow.core.ports.IMasterCommandPort;
 import org.sa.rainbow.core.ports.IMasterConnectionPort;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
@@ -338,6 +340,17 @@ public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
     public <S extends IEvaluable> IRainbowAdaptationDequeuePort<S> createAdaptationDequeuePort (ModelReference model) {
         throw new UnsupportedOperationException ("NYS");
 
+    }
+
+    @Override
+    public IMasterCommandPort createMasterCommandProviderPort (RainbowMaster rainbowMaster)
+            throws RainbowConnectionException {
+        return rainbowMaster;
+    }
+
+    @Override
+    public IMasterCommandPort createMasterCommandRequirerPort () throws RainbowConnectionException {
+        return Rainbow.instance ().getRainbowMaster ();
     }
 
 }

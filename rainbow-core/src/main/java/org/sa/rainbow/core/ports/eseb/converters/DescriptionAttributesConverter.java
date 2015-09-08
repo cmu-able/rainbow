@@ -23,8 +23,6 @@
  */
 package org.sa.rainbow.core.ports.eseb.converters;
 
-import incubator.pval.Ensure;
-
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -50,6 +48,7 @@ import edu.cmu.cs.able.typelib.struct.StructureDataValue;
 import edu.cmu.cs.able.typelib.struct.UnknownFieldException;
 import edu.cmu.cs.able.typelib.type.DataType;
 import edu.cmu.cs.able.typelib.type.DataValue;
+import incubator.pval.Ensure;
 
 public class DescriptionAttributesConverter implements TypelibJavaConversionRule {
     // Thesea are the current types converted
@@ -87,7 +86,7 @@ public class DescriptionAttributesConverter implements TypelibJavaConversionRule
                 }
                 else if ("effector_description".equals (sdt.name ()) || EffectorAttributes.class == cls) {
                     EffectorAttributes ed = new EffectorAttributes ();
-                    ed.kind = IEffector.Kind.valueOf (kind);
+                    ed.setKind (IEffector.Kind.valueOf (kind));
                     atts = ed;
                 }
                 else
@@ -159,7 +158,7 @@ public class DescriptionAttributesConverter implements TypelibJavaConversionRule
                 Field kind = sdt.field ("kind");
                 Map<Field, DataValue> fields = from_java (ea, sdt, converter);
 
-                fields.put (kind, converter.from_java (ea.kind.name (), m_scope.string ()));
+                fields.put (kind, converter.from_java (ea.getKind ().name (), m_scope.string ()));
                 StructureDataValue sdv = sdt.make (fields);
                 return sdv;
             }

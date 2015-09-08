@@ -163,9 +163,14 @@ public interface IRainbowConnectionPortFactory {
     public abstract IModelsManagerPort createModeslManagerRequirerPort () throws RainbowConnectionException;
 
     public abstract <S extends IEvaluable> IRainbowAdaptationEnqueuePort<S>
-            createAdaptationEnqueuePort (ModelReference model);
+    createAdaptationEnqueuePort (ModelReference model);
 
     public abstract <S extends IEvaluable> IRainbowAdaptationDequeuePort<S>
-            createAdaptationDequeuePort (ModelReference model);
+    createAdaptationDequeuePort (ModelReference model);
+
+    public abstract IMasterCommandPort createMasterCommandProviderPort (RainbowMaster rainbowMaster)
+            throws RainbowConnectionException;
+
+    public abstract IMasterCommandPort createMasterCommandRequirerPort () throws RainbowConnectionException;
 
 }

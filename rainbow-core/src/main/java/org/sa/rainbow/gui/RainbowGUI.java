@@ -38,7 +38,9 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -108,6 +110,27 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
     public static final int TEXT_HALF_LENGTH = 50000;
 
     public static void main(String[] args) {
+        boolean showHelp = false;
+
+        int lastIdx = args.length - 1;
+        for (int i = 0; i <= lastIdx; i++) {
+            if (args[i].equals ("-h")) {
+                showHelp = true;
+            }
+            else {
+                System.err.println ("Unrecognized or incomplete argument " + args[i]);
+                showHelp = true;
+            }
+        }
+        if (showHelp) {
+            System.out.println ("Usage:\n" + "  system property options {default}:\n"
+                    + "    rainbow.target    name of target configuration {default}\n"
+                    + "    rainbow.config    top config directory (org.sa.rainbow.config)\n" + "  options: \n"
+                    + "    -h          Show this help message\n" + "    -nogui      Don't show the Rainbow GUI\n" + "\n"
+                    + "Option defaults are defined in <rainbow.target>/rainbow.properties");
+            System.exit (RainbowConstants.EXIT_VALUE_ABORT);
+        }
+
         RainbowGUI gui = new RainbowGUI (null);
         gui.display();
     }
@@ -137,6 +160,10 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
     public RainbowGUI (IMasterCommandPort master) {
         m_master = master;
         try {
+            if (m_master == null) {
+//                RainbowPortFactory.createDelegateMasterConnectionPort (null);
+                m_master = RainbowPortFactory.createMasterCommandPort ();
+            }
             IRainbowReportingSubscriberPort reportingSubscriberPort = RainbowPortFactory
                     .createReportingSubscriberPort (this);
             reportingSubscriberPort.subscribe (EnumSet.allOf (RainbowComponentT.class),
@@ -299,9 +326,18 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         contentPane.getInsets().set(10, 10, 10, 10);
         GridBagLayout gridBag = new GridBagLayout();
         contentPane.setLayout(gridBag);
+        Throwable error = null;
         for (int i : m_order) {
             if (i == ID_ORACLE_MESSAGE) {
-                m_panes[i] = new OracleStatusPanel (m_colors[i]);
+                List<String> expectedDelegateLocations = Collections.<String> emptyList ();
+                try {
+                    expectedDelegateLocations = m_master.getExpectedDelegateLocations ();
+                }
+                catch (Throwable e) {
+                    expectedDelegateLocations = Arrays.asList (new String[] { "Error" });
+                    error = e;
+                }
+                m_panes[i] = new OracleStatusPanel (m_colors[i], expectedDelegateLocations);
             }
             else {
                 m_panes[i] = createTextArea (i);
@@ -334,6 +370,12 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         // Display the window.
         m_frame.pack();
         m_frame.setVisible(true);
+
+        if (error != null) {
+            JOptionPane.showMessageDialog (m_frame, "Could not connect to the master", "Connection error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+
     }
 
     private void createInformationMenu (final JMenu menu) {
