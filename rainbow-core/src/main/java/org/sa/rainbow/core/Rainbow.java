@@ -138,6 +138,8 @@ public class Rainbow implements RainbowConstants {
 
 
 
+    private static final String PROPKEY_PROPFILENAME = "rainbow.properties";
+
     /**
      * Exit status that Rainbow would report when it exits, default to sleeping.
      */
@@ -322,9 +324,14 @@ public class Rainbow implements RainbowConstants {
      */
     private void establishPaths () {
         String cfgPath = System.getProperty (PROPKEY_CONFIG_PATH, RAINBOW_CONFIG_PATH); // The location of targets
-        String target = System.getProperty (PROPKEY_TARGET_NAME, DEFAULT_TARGET_NAME); // The target to use 
+        String target = System.getProperty (PROPKEY_TARGET_NAME, DEFAULT_TARGET_NAME); // The target to use
+        String propFile = System.getProperty (PROPKEY_CONFIG_FILE, null);
+
         m_props.setProperty (PROPKEY_CONFIG_PATH, cfgPath);
         m_props.setProperty (PROPKEY_TARGET_NAME, target);
+        if (propFile != null) {
+            m_props.setProperty (PROPKEY_CONFIG_FILE, propFile);
+        }
         m_basePath = Util.computeBasePath (cfgPath);
         if (m_basePath == null) {
             String errorMsg = MessageFormat.format ("Configuration path {0} NOT found,  bailing.", cfgPath);
@@ -368,10 +375,10 @@ public class Rainbow implements RainbowConstants {
         computeHostSpecificConfig ();
         String cfgFile = m_props.getProperty (PROPKEY_CONFIG_FILE, DEFAULT_CONFIG_FILE);
         List<String> cfgFiles = new ArrayList<> ();
-        if (!cfgFile.equals (DEFAULT_CONFIG_FILE)) {
-            // load commong config file first
-            cfgFiles.add (DEFAULT_CONFIG_FILE);
-        }
+//        if (!cfgFile.equals (DEFAULT_CONFIG_FILE)) { 
+//            // load commong config file first
+//            cfgFiles.add (DEFAULT_CONFIG_FILE);
+//        }
         cfgFiles.add (cfgFile);
         LOGGER.debug (
                 MessageFormat.format ("Loading Rainbow config file(s): {0}", Arrays.toString (cfgFiles.toArray ())));
@@ -456,7 +463,7 @@ public class Rainbow implements RainbowConstants {
                     MessageFormat.format (
                             "{1} ''{0}'' could not be resolved to an IP using the given name.",
                             masterLoc, string),
-                            e);
+                    e);
         }
     }
 
