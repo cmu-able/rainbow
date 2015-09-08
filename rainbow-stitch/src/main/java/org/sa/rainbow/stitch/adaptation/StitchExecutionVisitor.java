@@ -28,15 +28,15 @@ public class StitchExecutionVisitor extends DefaultAdaptationExecutorVisitor<Str
             ExecutionHistoryCommandFactory factory, AdaptationTree<Strategy> adt,
             ThreadGroup tg,
             CountDownLatch done) {
-        super (adt, tg, modelRef + " Visitor", done);
+        super (adt, tg, modelRef + " Visitor", done, executor.getReportingPort ());
         m_executor = executor;
         m_modelRef = modelRef;
         m_historyFactory = factory;
     }
 
     /**
-     * Evaluate the stitch strategy. This evaluation should store the success or otherwise in a model of the strategy,
-     * and should mark it executed on the strategy model.
+     * Evaluate the stitch strSttategy. This evaluation should store the success or otherwise in a model of the
+     * strategy, and should mark it executed on the strategy model.
      */
     @Override
     protected boolean evaluate (Strategy adaptation) {
