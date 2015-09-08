@@ -35,6 +35,7 @@ import java.util.TreeSet;
 
 import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.translator.effectors.IEffector;
+import org.sa.rainbow.translator.effectors.IEffectorIdentifier.Kind;
 
 /**
  * This class holds effector description information parsed from its description
@@ -45,7 +46,7 @@ import org.sa.rainbow.translator.effectors.IEffector;
 public class EffectorDescription {
 
     public static class EffectorAttributes extends DescriptionAttributes {
-        public IEffector.Kind kind = null;
+        protected IEffector.Kind          kind = null;
         protected OperationRepresentation commandPattern;
         public EffectorAttributes      effectorType;
 
@@ -90,6 +91,17 @@ public class EffectorDescription {
             }
             a.putAll (super.getInfo ());
             return Collections.<String, String> unmodifiableMap (a);
+        }
+
+        public IEffector.Kind getKind () {
+            if (kind == null && effectorType != null)
+                return effectorType.getKind ();
+            else if (kind == null) return Kind.NULL;
+            return kind;
+        }
+
+        public void setKind (Kind kind) {
+            this.kind = kind;
         }
     }
 

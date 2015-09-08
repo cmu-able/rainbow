@@ -44,12 +44,13 @@ public class CheckConfiguration {
         System.out.print ("Loading effecors...");
         System.out.flush ();
         final EffectorDescription loadEffectorDesc = YamlUtil.loadEffectorDesc ();
-        System.out.println ("found " + loadEffectorDesc.effectors.size () + " effectors");
+        System.out.println ("found " + loadEffectorDesc.effectorTypes.size () + " effector types, "
+                + loadEffectorDesc.effectors.size () + " effectors");
         System.out.print ("Loading gauges...");
         System.out.flush ();
         final GaugeDescription loadGaugeSpecs = YamlUtil.loadGaugeSpecs ();
         System.out.println ("found " + loadGaugeSpecs.typeSpec.size () + " types, " + loadGaugeSpecs.instSpec.size ()
-                + " instances");
+        + " instances");
 //        System.out.print ("Loading preferences...");
 //        System.out.flush ();
 //        final UtilityPreferenceDescription loadUtilityPrefs = YamlUtil.loadUtilityPrefs ();

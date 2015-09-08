@@ -122,7 +122,13 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
 
     private void checkEffector (EffectorAttributes effector) {
 
-        // Should add checks for the type
+        if (effector.effectorType != null) {
+            if (m_master.effectorDesc ().effectorTypes.get (effector.effectorType.name) == null) {
+                m_problems.add (new Problem (ProblemT.ERROR,
+                        MessageFormat.format ("{0}: Refers to an effector type that does not exist: {1}", effector.name,
+                                effector.effectorType.name)));
+            }
+        }
 
         if (effector.getLocation() == null || "".equals (effector.getLocation())) {
             m_problems.add (new Problem (ProblemT.ERROR, MessageFormat.format ("{0}: Does not have a location",
@@ -134,7 +140,7 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
                     "{0}: does not have a command and so cannot be called.", effector.name)));
         }
 
-        if (effector.kind == IEffectorIdentifier.Kind.JAVA) {
+        if (effector.getKind () == IEffectorIdentifier.Kind.JAVA) {
             String effClass = effector.getInfo().get ("class");
             if (effClass == null) {
                 m_problems.add (new Problem (ProblemT.ERROR, MessageFormat.format (
@@ -150,7 +156,7 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
                 }
             }
         }
-        else if (effector.kind == IEffectorIdentifier.Kind.SCRIPT) {
+        else if (effector.getKind () == IEffectorIdentifier.Kind.SCRIPT) {
             String path = effector.getInfo().get ("path");
             if (path == null) {
                 m_problems.add (new Problem (ProblemT.ERROR, MessageFormat.format (

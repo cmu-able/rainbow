@@ -250,8 +250,9 @@ public abstract class YamlUtil {
                     String key = cmd.getKey ();
                     String[] args = Util.evalCommand (cmd.getValue ());
                     gaugeInstSpec.addCommand (Util.evalTokens (key),
-                            new OperationRepresentation (args[1], new ModelReference (modelDesc.getName (), modelDesc
-                                    .getType ()), args[0], Arrays.copyOfRange (args, 2, args.length)));
+                            new OperationRepresentation (args[1],
+                                    new ModelReference (modelDesc.getName (), modelDesc.getType ()), args[0],
+                                    Arrays.copyOfRange (args, 2, args.length)));
 
                 }
 
@@ -309,9 +310,8 @@ public abstract class YamlUtil {
         try {
             String effectorPath = Rainbow.getProperty (RainbowConstants.PROPKEY_EFFECTORS_PATH);
             if (effectorPath == null) {
-                Util.logger ().error (
-                        MessageFormat.format ("No property defined for ''{0}''. No effectors loaded.",
-                                RainbowConstants.PROPKEY_EFFECTORS_PATH));
+                Util.logger ().error (MessageFormat.format ("No property defined for ''{0}''. No effectors loaded.",
+                        RainbowConstants.PROPKEY_EFFECTORS_PATH));
                 ed.effectors = new TreeSet<> ();
                 return ed;
             }
@@ -326,19 +326,22 @@ public abstract class YamlUtil {
             }
 
             // store effector type info
-            Map<String, Map> effTypeMap = (Map<String, Map> )effectorMap.get ("effector_types");
-            for (Map.Entry<String, Map> etInfo : effTypeMap.entrySet ()) {
-                EffectorDescription.EffectorAttributes ea = new EffectorDescription.EffectorAttributes ();
-                ea.name = etInfo.getKey ();
-                Map<String, Object> attrMap = etInfo.getValue ();
-                ea.setLocation (Util.evalTokens ((String )attrMap.get ("location"))); // the default location
-                String commandSignature = Util.evalTokens ((String )attrMap.get ("command"));
-                if (commandSignature != null) {
-                    ea.setCommandPattern (OperationRepresentation.parseCommandSignature (commandSignature));
+            Map<String, Map> effTypeMap = (Map<String, Map> )effectorMap.get ("effector-types");
+            if (effTypeMap != null) {
+                for (Map.Entry<String, Map> etInfo : effTypeMap.entrySet ()) {
+                    EffectorDescription.EffectorAttributes ea = new EffectorDescription.EffectorAttributes ();
+                    ea.name = etInfo.getKey ();
+                    Map<String, Object> attrMap = etInfo.getValue ();
+                    ea.setKindName ((String )attrMap.get ("type"));
+                    ea.setLocation (Util.evalTokens ((String )attrMap.get ("location"))); // the default location
+                    String commandSignature = Util.evalTokens ((String )attrMap.get ("command"));
+                    if (commandSignature != null) {
+                        ea.setCommandPattern (OperationRepresentation.parseCommandSignature (commandSignature));
+                    }
+                    Map<String, Object> addlInfoMap = (Map<String, Object> )attrMap.get (ea.infoPropName ());
+                    extractArrays (ea, addlInfoMap);
+                    ed.effectorTypes.put (ea.name, ea);
                 }
-                Map<String, Object> addlInfoMap = (Map<String, Object> )attrMap.get (ea.infoPropName ());
-                extractArrays (ea, addlInfoMap);
-                ed.effectorTypes.put (ea.name, ea);
             }
 
             // store effector description info
@@ -351,7 +354,7 @@ public abstract class YamlUtil {
                 Map<String, Object> attrMap = effInfo.getValue (); // get attribute map
                 ea.setKindName ((String )attrMap.get ("type"));
                 if (ea.getKindName () != null) {
-                    ea.kind = IEffector.Kind.valueOf (ea.getKindName ().toUpperCase ());
+                    ea.setKind (IEffector.Kind.valueOf (ea.getKindName ().toUpperCase ()));
                 }
 
                 String effectorType = (String )attrMap.get ("effector-type");
@@ -387,9 +390,8 @@ public abstract class YamlUtil {
         try {
             String probePath = Rainbow.getProperty (RainbowConstants.PROPKEY_PROBES_PATH);
             if (probePath == null) {
-                Util.logger ().error (
-                        MessageFormat.format ("No property defined for ''{0}''. No probes loaded.",
-                                RainbowConstants.PROPKEY_PROBES_PATH));
+                Util.logger ().error (MessageFormat.format ("No property defined for ''{0}''. No probes loaded.",
+                        RainbowConstants.PROPKEY_PROBES_PATH));
                 ed.probes = new TreeSet<> ();
                 return ed;
             }
@@ -440,6 +442,7 @@ public abstract class YamlUtil {
      */
     public static void extractArrays (DescriptionAttributes attr, Map<String, Object> infoMap) {
         List<String> arrayKeys = new ArrayList<String> ();
+        if (infoMap == null) return;
         for (Map.Entry<String, Object> pair : infoMap.entrySet ()) {
             if (pair.getKey ().endsWith (".length")) { // store just the key
                 arrayKeys.add (pair.getKey ().replace (".length", ""));
@@ -452,12 +455,12 @@ public abstract class YamlUtil {
          * key.# items, and construct an array out of the list of values
          */
         for (String arrayKey : arrayKeys) {
-            int length = Integer.parseInt (attr.getInfo().remove (arrayKey + ".length"));
+            int length = Integer.parseInt (attr.getInfo ().remove (arrayKey + ".length"));
             String[] valArray = new String[length]; // new array
             for (int i = 0; i < length; ++i) { // store item in array
                 String itemKey = arrayKey + Util.DOT + i;
-                if (attr.getInfo().containsKey (itemKey)) {
-                    valArray[i] = attr.getInfo().remove (itemKey);
+                if (attr.getInfo ().containsKey (itemKey)) {
+                    valArray[i] = attr.getInfo ().remove (itemKey);
                 }
             }
             attr.putArray (arrayKey, valArray);

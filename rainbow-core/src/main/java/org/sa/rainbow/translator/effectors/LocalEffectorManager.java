@@ -82,7 +82,7 @@ public class LocalEffectorManager extends AbstractRainbowRunnable {
             Object[] args = null;
             // collect argument values
             String refId = Util.genID (effAttr.name, effAttr.getLocation());
-            switch (effAttr.kind) {
+            switch (effAttr.getKind ()) {
             case SCRIPT:
                 // get info for a script based effector
                 String path = effAttr.getInfo().get ("path");
