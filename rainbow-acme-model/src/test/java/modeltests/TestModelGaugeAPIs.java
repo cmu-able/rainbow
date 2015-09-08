@@ -82,18 +82,13 @@ public class TestModelGaugeAPIs extends DefaultTCase {
         protected void runAction () {
             super.runAction ();
             if (m_reportBeacon.periodElapsed () && m_i <= 3) {
-                IRainbowOperation cr = this.m_commands.get ("setLoad");
+                IRainbowOperation cr = getCommand ("setLoad");
                 Map<String, String> params = new HashMap<> ();
                 params.put ("load", Integer.toString (m_i++));
                 issueCommand (cr, params);
             }
         }
 
-        @Override
-        protected void initProperty (String name, Object value) {
-            // TODO Auto-generated method stub
-
-        }
 
     }
 
@@ -119,7 +114,7 @@ public class TestModelGaugeAPIs extends DefaultTCase {
 
         m_commands = new HashMap<> ();
         m_commands
-.put ("setLoad", new OperationRepresentation ("setLoad", new ModelReference ("ZNewsSys", "Acme"),
+        .put ("setLoad", new OperationRepresentation ("setLoad", new ModelReference ("ZNewsSys", "Acme"),
                 "s0", "load"));
 
         m_configs = new LinkedList<> ();
