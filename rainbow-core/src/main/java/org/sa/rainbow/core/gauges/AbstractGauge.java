@@ -23,8 +23,6 @@
  */
 package org.sa.rainbow.core.gauges;
 
-import incubator.pval.Ensure;
-
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -53,6 +51,8 @@ import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.util.Beacon;
 
+import incubator.pval.Ensure;
+
 /**
  * Abstract definition of a gauge that does not use probes to gather system information. This allows for subclasses to
  * implement gauges that get information from other gauges, gauges that get information from probes, or gauges that get
@@ -78,7 +78,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
     protected TypedAttribute                                  m_modelDesc    = null;
     protected Map<String, TypedAttributeWithValue>            m_setupParams  = null;
     protected Map<String, TypedAttributeWithValue>            m_configParams = null;
-    protected Map<String, IRainbowOperation> m_commands     = null;
+    protected Map<String, IRainbowOperation>       m_commands     = null;
     protected Map<String, IRainbowOperation> m_lastCommands = null;
 
     /**
@@ -122,7 +122,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
         m_setupParams = new HashMap<String, TypedAttributeWithValue> ();
         m_configParams = new HashMap<String, TypedAttributeWithValue> ();
         m_lastCommands = new HashMap<String, IRainbowOperation> ();
-        m_commands = new HashMap<String, IRainbowOperation> ();
+        setCommands (new HashMap<String, IRainbowOperation> ());
 
         // store the setup parameters
         for (TypedAttributeWithValue param : setupParams) {
@@ -196,7 +196,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
         m_setupParams = null;
         m_configParams = null;
         m_lastCommands = null;
-        m_commands = null;
+        setCommands (null);
     }
 
     /* (non-Javadoc)
@@ -246,8 +246,6 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
             setSleepTime ((Long )triple.getValue ());
         }
     }
-
-    abstract protected void initProperty (String name, Object value);
 
     /* (non-Javadoc)
      * @see org.sa.rainbow.translator.gauges.IGauge#reconfigureGauge()
@@ -394,6 +392,66 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
     @Override
     protected RainbowComponentT getComponentType () {
         return RainbowComponentT.GAUGE;
+    }
+
+    protected <T> T getSetupValue (String key, Class<T> t) {
+        TypedAttributeWithValue setupParam = m_setupParams.get (key);
+        if (setupParam == null) return null;
+        Object o = setupParam.getValue ();
+        if (o == null) return null;
+        if (o instanceof String) {
+            String s = (String )o;
+            if (t == String.class) return (T )s;
+            if (t == Double.class) {
+                Double d = Double.parseDouble (s);
+                return (T )d;
+            }
+            if (t == Float.class) {
+                Float f = Float.parseFloat (s);
+                return (T )f;
+            }
+            if (t == Integer.class) {
+                Integer i = Integer.parseInt (s);
+                return (T )i;
+            }
+            if (t == Long.class) {
+                Long l = Long.parseLong (s);
+                return (T )l;
+            }
+        }
+        else if (o instanceof Integer) {
+            Integer i = (Integer )o;
+            if (t == Integer.class) return (T )i;
+            if (t == Long.class) return (T )Long.valueOf (i);
+            if (t == String.class) return (T )i.toString ();
+        }
+        else if (o instanceof Long) {
+            Long l = (Long )o;
+            if (t == Long.class) return (T )l;
+            if (t == String.class) return (T )l.toString ();
+        }
+        else if (o instanceof Float) {
+            Float f = (Float )o;
+            if (t == Float.class) return (T )f;
+            if (t == Double.class) return (T )Double.valueOf (f);
+            if (t == String.class) return (T )Double.toString (f);
+        }
+        else if (o instanceof Double) {
+            Double d = (Double )o;
+            if (t == Double.class) return (T )d;
+            if (t == String.class) return (T )Double.toString (d);
+
+        }
+
+        return null;
+    }
+
+    protected IRainbowOperation getCommand (String cmd) {
+        return new OperationRepresentation (m_commands.get (cmd));
+    }
+
+    protected void setCommands (Map<String, IRainbowOperation> commands) {
+        m_commands = commands;
     }
 
 }
