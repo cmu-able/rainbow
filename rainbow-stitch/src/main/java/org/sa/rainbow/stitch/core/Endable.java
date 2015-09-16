@@ -33,5 +33,5 @@ package org.sa.rainbow.stitch.core;
  * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
  */
 public interface Endable extends Runnable {
-    public void end ();
+    void end ();
 }

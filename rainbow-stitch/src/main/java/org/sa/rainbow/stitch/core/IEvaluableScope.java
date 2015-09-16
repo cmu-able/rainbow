@@ -26,9 +26,9 @@
  */
 package org.sa.rainbow.stitch.core;
 
-import java.util.Set;
-
 import org.sa.rainbow.core.adaptation.IEvaluable;
+
+import java.util.Set;
 
 
 
@@ -48,6 +48,6 @@ public interface IEvaluableScope<T> extends IEvaluable, IScope {
      * 
      * @return <code>Set</code> of <code>IAcmeElement</code>, or empty set if none.
      */
-    public Set<? extends T> modelElementsUsed ();
+    Set<? extends T> modelElementsUsed ();
 
 }

@@ -36,7 +36,7 @@ public class Import {
      */
     public enum Kind {
         UNKNOWN, LIB, MODEL, OP
-    };
+    }
 
     public IScope scope = null;
     public Kind type = Kind.UNKNOWN; 

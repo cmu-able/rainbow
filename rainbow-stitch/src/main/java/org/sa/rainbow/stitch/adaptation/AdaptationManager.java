@@ -23,23 +23,6 @@
  */
 package org.sa.rainbow.stitch.adaptation;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.apache.commons.lang.time.StopWatch;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
@@ -55,14 +38,9 @@ import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.UtilityFunction;
 import org.sa.rainbow.core.models.UtilityPreferenceDescription;
-import org.sa.rainbow.core.ports.IModelChangeBusPort;
-import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
+import org.sa.rainbow.core.ports.*;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowChangeBusSubscription;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowModelChangeCallback;
-import org.sa.rainbow.core.ports.IModelsManagerPort;
-import org.sa.rainbow.core.ports.IRainbowAdaptationEnqueuePort;
-import org.sa.rainbow.core.ports.IRainbowReportingPort;
-import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.model.acme.AcmeRainbowOperationEvent.CommandEventT;
 import org.sa.rainbow.stitch.Ohana;
@@ -73,6 +51,11 @@ import org.sa.rainbow.stitch.error.StitchProblem;
 import org.sa.rainbow.stitch.visitor.Stitch;
 import org.sa.rainbow.util.Beacon;
 import org.sa.rainbow.util.Util;
+
+import java.io.*;
+import java.nio.channels.FileChannel;
+import java.text.MessageFormat;
+import java.util.*;
 
 /**
  * The Rainbow Adaptation Engine... Currently implements a learner interface to interact with Nick Lynn's learner.
@@ -87,7 +70,7 @@ implements IAdaptationManager<Strategy>/*
 
     public enum Mode {
         SERIAL, MULTI_PRONE
-    };
+    }
 
     public static final String NAME                     = "Rainbow Adaptation Manager";
     public static final double FAILURE_RATE_THRESHOLD   = 0.95;
@@ -122,7 +105,7 @@ implements IAdaptationManager<Strategy>/*
     private IModelChangeBusSubscriberPort           m_modelChangePort          = null;
     private IModelsManagerPort                      m_modelsManagerPort        = null;
     private String                                  m_modelRef;
-    private FileChannel                             m_strategyLog              = null;
+    private FileChannel m_strategyLog = null;
     private IRainbowChangeBusSubscription           m_modelTypecheckingChanged = new IRainbowChangeBusSubscription () {
 
         @Override
@@ -199,7 +182,7 @@ implements IAdaptationManager<Strategy>/*
         m_enqueuePort = RainbowPortFactory.createAdaptationEnqueuePort (model);
         ModelReference utilityModelRef = new ModelReference (model.getModelName (), "UtilityModel");
         IModelInstance<UtilityPreferenceDescription> modelInstance = m_modelsManagerPort
-                .<UtilityPreferenceDescription> getModelInstance (utilityModelRef);
+                .getModelInstance (utilityModelRef);
         if (modelInstance == null) {
             m_reportingPort.error (RainbowComponentT.ADAPTATION_MANAGER,
                     MessageFormat.format (
@@ -252,17 +235,28 @@ implements IAdaptationManager<Strategy>/*
         if (m_strategyLog != null) {
             try {
                 m_strategyLog.close ();
-            }
-            catch (IOException e) {
+            } catch (IOException ignored) {
             }
         }
     }
 
+    @Override
+    protected void doTerminate () {
+        if (m_strategyLog != null) {
+            try {
+                m_strategyLog.close ();
+            } catch (IOException ignore) {
+            }
+            m_strategyLog = null;
+        }
+        super.doTerminate ();
+    }
+
     /*
-     * (non-Javadoc)
-     * 
-     * @see org.sa.rainbow.core.AbstractRainbowRunnable#log(java.lang.String)
-     */
+         * (non-Javadoc)
+         *
+         * @see org.sa.rainbow.core.AbstractRainbowRunnable#log(java.lang.String)
+         */
     @Override
     protected void log (String txt) {
         m_reportingPort.info (RainbowComponentT.ADAPTATION_MANAGER, txt);
@@ -326,7 +320,7 @@ implements IAdaptationManager<Strategy>/*
             if (condVal != null) {
                 double val = 0.0;
                 if (condVal instanceof Double) {
-                    val = ((Double )condVal).doubleValue ();
+                    val = (Double) condVal;
                 }
                 else if (condVal instanceof Float) {
                     val = ((Float )condVal).doubleValue ();
@@ -370,17 +364,8 @@ implements IAdaptationManager<Strategy>/*
                 m_pendingStrategies.add (selectedStrategy);
                 AdaptationTree<Strategy> at = new AdaptationTree<Strategy> (selectedStrategy);
                 m_enqueuePort.offerAdaptation (at, null);
-                if (m_strategyLog != null) {
-                    Date d = new Date ();
-                    String log = MessageFormat.format ("{0,number,#},queuing,{1}\n", d.getTime (),
-                            selectedStrategy.getName ());
-                    try {
-                        m_strategyLog.write (java.nio.ByteBuffer.wrap (log.getBytes ()));
-                    }
-                    catch (IOException e) {
-                        reportingPort ().error (getComponentType (), "Failed to write " + log + " to log file");
-                    }
-                }
+                String logMessage = selectedStrategy.getName ();
+                strategyLog (logMessage);
             }
 
         }
@@ -393,6 +378,19 @@ implements IAdaptationManager<Strategy>/*
 //                doAdaptation ();
 //            }
 //        }
+    }
+
+    private void strategyLog (String logMessage) {
+        if (m_strategyLog != null) {
+            Date d = new Date ();
+            String log = MessageFormat.format ("{0,number,#},queuing,{1}\n", d.getTime (),
+                    logMessage);
+            try {
+                m_strategyLog.write (java.nio.ByteBuffer.wrap (log.getBytes ()));
+            } catch (IOException e) {
+                reportingPort ().error (getComponentType (), "Failed to write " + log + " to log file");
+            }
+        }
     }
 
     /**
@@ -422,8 +420,7 @@ implements IAdaptationManager<Strategy>/*
      * For JUnit testing, allows re-invoking defineAttributes to artificially increase the number of quality dimensions
      * in tactic attribute vectors.
      * 
-     * @param stitch
-     * @param attrVectorMap
+
      */
     void _defineAttributesFromTester (Stitch stitch, Map<String, Map<String, Object>> attrVectorMap) {
         defineAttributes (stitch, attrVectorMap);
@@ -479,7 +476,8 @@ implements IAdaptationManager<Strategy>/*
 
         // check for leap-version strategy to see whether to "chain" util
         // computation 
-        for (String name : appSubsetByName.keySet ().toArray (new String[0])) {
+        Set<String> applicableSubsetNames = appSubsetByName.keySet ();
+        for (String name : applicableSubsetNames.toArray (new String[applicableSubsetNames.size ()])) {
             Strategy strategy = appSubsetByName.get (name);
             Strategy leap = appSubsetByName.get (LEAP_STRATEGY_PREFIX + name);
             if (leap != null) { // Leap-version exists
@@ -492,7 +490,7 @@ implements IAdaptationManager<Strategy>/*
                 int factor = 1;
                 double stratArgVal = strategy.getFirstTacticArgumentValue ();
                 double leapArgVal = leap.getFirstTacticArgumentValue ();
-                if (stratArgVal != Double.NaN && leapArgVal != Double.NaN) {
+                if (stratArgVal != Double.NaN) {
                     // compute multiple now
                     factor = (int )(leapArgVal / stratArgVal);
                 }
@@ -605,7 +603,7 @@ implements IAdaptationManager<Strategy>/*
                 if (condVal != null) {
                     double val = 0.0;
                     if (condVal instanceof Double) {
-                        val = ((Double )condVal).doubleValue ();
+                        val = (Double) condVal;
                     }
                     else if (condVal instanceof Float) {
                         val = ((Float )condVal).doubleValue ();
@@ -634,7 +632,7 @@ implements IAdaptationManager<Strategy>/*
                     if (condValPred != null && condValPred instanceof Double) {
                         // if (m_logger.isTraceEnabled())
                         log ("Avg value of predicted prop: " + u.mapping () + " == " + condValPred);
-                        condsPred[i] = ((Double )condValPred).doubleValue ();
+                        condsPred[i] = (Double) condValPred;
                         itemsPred[i] += condsPred[i];
                     }
                     // now compute the utility, apply weight, and accumulate to
@@ -683,7 +681,9 @@ implements IAdaptationManager<Strategy>/*
     private void initAdaptationRepertoire () {
         File stitchPath = Util.getRelativeToPath (Rainbow.instance ().getTargetPath (),
                 Rainbow.getProperty (RainbowConstants.PROPKEY_SCRIPT_PATH));
-        if (stitchPath.exists () && stitchPath.isDirectory ()) {
+        if (stitchPath == null) {
+            m_reportingPort.error (RainbowComponentT.ADAPTATION_MANAGER, "The stitch path is not set!");
+        } else if (stitchPath.exists () && stitchPath.isDirectory ()) {
             FilenameFilter ff = new FilenameFilter () { // find only ".s" files
                 @Override
                 public boolean accept (File dir, String name) {
@@ -727,7 +727,7 @@ implements IAdaptationManager<Strategy>/*
             log ("Errors exist in strategy: " + f.getName () + ", or one of its included files");
         }
         for (StitchProblem p : problem) {
-            StringBuffer out = new StringBuffer ();
+            StringBuilder out = new StringBuilder ();
             switch (p.getSeverity ()) {
             case StitchProblem.ERROR:
                 out.append ("ERROR: ");
@@ -742,10 +742,10 @@ implements IAdaptationManager<Strategy>/*
                 out.append ("UNKNOWN PROBLEM: ");
                 break;
             }
-            out.append ("Line: " + p.getLine ());
+            out.append ("Line: ").append (p.getLine ());
             out.append (", ");
-            out.append (" Column: " + p.getColumn ());
-            out.append (": " + p.getMessage ());
+            out.append (" Column: ").append (p.getColumn ());
+            out.append (": ").append (p.getMessage ());
             log (out.toString ());
         }
         sph.clearProblems ();

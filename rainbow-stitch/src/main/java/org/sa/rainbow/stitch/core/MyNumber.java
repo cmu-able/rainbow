@@ -26,10 +26,12 @@
  */
 package org.sa.rainbow.stitch.core;
 
-import org.acmestudio.acme.core.type.IAcmeFloatValue;
+import org.acmestudio.acme.core.type.IAcmeFloatingPointValue;
 import org.acmestudio.acme.core.type.IAcmeIntValue;
 import org.acmestudio.acme.element.property.IAcmeProperty;
 import org.sa.rainbow.stitch.util.Tool;
+
+import java.text.MessageFormat;
 
 /**
  * Custom implementation of Number to support polymorphic arithmetic operation.
@@ -49,10 +51,10 @@ public abstract class MyNumber extends Number {
         MyNumber num = null;
         if (prop.getValue() instanceof IAcmeIntValue) {
             num = new MyInteger(((IAcmeIntValue )prop.getValue()).getValue());
-        } else if (prop.getValue() instanceof IAcmeFloatValue) {
-            num = new MyDouble((double )((IAcmeFloatValue )prop.getValue()).getValue());
+        } else if (prop.getValue () instanceof IAcmeFloatingPointValue) {
+            num = new MyDouble (((IAcmeFloatingPointValue) prop.getValue ()).getDoubleValue ());
         } else {  // unhandled type
-            Tool.logger().error("Unsupported IAcmeProperty value type! " + prop.getValue());
+            Tool.logger ().error (MessageFormat.format ("Unsupported IAcmeProperty value type! {0}", prop.getValue ()));
         }
 
         return num;

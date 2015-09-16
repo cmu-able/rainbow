@@ -26,16 +26,16 @@
  */
 package org.sa.rainbow.stitch.lib;
 
-import java.util.Set;
-
 import org.acmestudio.acme.core.IAcmeType;
-import org.acmestudio.acme.core.type.IAcmeFloatValue;
+import org.acmestudio.acme.core.type.IAcmeFloatingPointValue;
 import org.acmestudio.acme.core.type.IAcmeIntValue;
 import org.acmestudio.acme.element.IAcmeElementInstance;
 import org.acmestudio.acme.element.property.IAcmeProperty;
 import org.acmestudio.acme.element.property.IAcmePropertyValue;
 import org.acmestudio.acme.model.DefaultAcmeModel;
 import org.apache.commons.lang.NotImplementedException;
+
+import java.util.Set;
 
 /**
  * This utility class provides useful operations that can be performed on the
@@ -78,7 +78,7 @@ public abstract class Model {
                 if (type == DefaultAcmeModel.defaultIntType()) {
                     sum += ((IAcmeIntValue )val).getValue();
                 } else if (type == DefaultAcmeModel.defaultFloatType()) {
-                    sum += ((IAcmeFloatValue )val).getValue();
+                    sum += ((IAcmeFloatingPointValue) val).getDoubleValue ();
                 }
             }
         }

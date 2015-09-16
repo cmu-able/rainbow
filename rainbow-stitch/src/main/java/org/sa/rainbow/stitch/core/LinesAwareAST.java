@@ -73,8 +73,8 @@ public class LinesAwareAST extends CommonAST {
     public void initialize (AST ast) {	
         super.initialize(ast);
         if (ast instanceof LinesAwareAST){
-            col = ((LinesAwareAST)ast).getColumn();
-            line = ((LinesAwareAST)ast).getLine();
+            col = ast.getColumn ();
+            line = ast.getLine ();
         }
         //Tool.debug("[LinesAwareAST] Line for this node is: "+line);
     }

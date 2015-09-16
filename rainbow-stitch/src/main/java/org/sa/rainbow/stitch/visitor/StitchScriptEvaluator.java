@@ -26,21 +26,13 @@
  */
 package org.sa.rainbow.stitch.visitor;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.Stack;
-
+import antlr.collections.AST;
 import org.acmestudio.acme.ModelHelper;
 import org.acmestudio.acme.core.IAcmeType;
 import org.acmestudio.acme.core.exception.AcmeException;
 import org.acmestudio.acme.core.type.IAcmeBooleanValue;
+import org.acmestudio.acme.core.type.IAcmeFloatingPointValue;
+import org.acmestudio.acme.core.type.IAcmeIntValue;
 import org.acmestudio.acme.core.type.IAcmeSetValue;
 import org.acmestudio.acme.element.IAcmeDesignAnalysisDeclaration;
 import org.acmestudio.acme.element.IAcmeElement;
@@ -62,25 +54,24 @@ import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
+import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.OperationResult;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.Result;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.stitch.Ohana;
-import org.sa.rainbow.stitch.core.Expression;
-import org.sa.rainbow.stitch.core.MyDouble;
-import org.sa.rainbow.stitch.core.MyInteger;
-import org.sa.rainbow.stitch.core.MyNumber;
-import org.sa.rainbow.stitch.core.Statement;
-import org.sa.rainbow.stitch.core.Var;
+import org.sa.rainbow.stitch.core.*;
 import org.sa.rainbow.stitch.model.ModelOperator;
 import org.sa.rainbow.stitch.parser.StitchLexerTokenTypes;
 import org.sa.rainbow.stitch.parser.StitchTreeWalkerTokenTypes;
 import org.sa.rainbow.stitch.util.Tool;
 import org.sa.rainbow.util.Util;
 
-import antlr.collections.AST;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.text.MessageFormat;
+import java.util.*;
 
 /**
  * Process Pass 3 of Tree walking: evaluation.
@@ -625,6 +616,8 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
             Object val = ModelHelper.propertyValueToJava (prop.getValue ());
             if (val instanceof Float) {
                 expr.lrOps[LOP].push (new MyDouble ((double )((Float )val)));
+            } else if (val instanceof Double) {
+                expr.lrOps[LOP].push (new MyDouble ((Double) val));
             }
             else if (val instanceof Integer) {
                 expr.lrOps[LOP].push (new MyInteger ((Integer )val));
@@ -639,6 +632,9 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
             Object val = ModelHelper.propertyValueToJava (prop.getValue ());
             if (val instanceof Float) {
                 expr.lrOps[ROP].push (new MyDouble ((double )((Float )val)));
+            } else if (val instanceof Double) {
+                expr.lrOps[ROP].push (new MyDouble ((Double) val));
+
             }
             else if (val instanceof Integer) {
                 expr.lrOps[ROP].push (new MyInteger (((Integer )val)));
@@ -858,11 +854,13 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
         // deal with IAcmeProperty operand
         if (expr.lrOps[LOP].peek () instanceof IAcmeProperty) {
 
-            IAcmeProperty pop = (IAcmeProperty )expr.lrOps[LOP].peek ();
-            MyNumber newNum = MyNumber.newNumber (pop);
-            if (newNum != null) {
-                expr.lrOps[LOP].pop ();
-                expr.lrOps[LOP].push (newNum);
+            IAcmeProperty pop = (IAcmeProperty) expr.lrOps[LOP].peek ();
+            if (pop.getValue () instanceof IAcmeIntValue || pop.getValue () instanceof IAcmeFloatingPointValue) {
+                MyNumber newNum = MyNumber.newNumber (pop);
+                if (newNum != null) {
+                    expr.lrOps[LOP].pop ();
+                    expr.lrOps[LOP].push (newNum);
+                }
             }
         }
         if (expr.lrOps[LOP].peek () instanceof MyNumber) {
@@ -1445,6 +1443,11 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
             else if (arg instanceof IAcmeElement) {
                 lookup.put (formalParamName, arg);
                 argList.add (arg);
+            } else if (arg instanceof IModelInstance) {
+                IModelInstance inst = (IModelInstance) arg;
+                lookup.put (formalParamName, inst.getModelInstance ());
+                argList.add (inst.getModelInstance ());
+
             }
         }
 

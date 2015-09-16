@@ -23,12 +23,8 @@
  */
 package org.sa.rainbow.stitch.core;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.Stack;
-
+import antlr.RecognitionException;
+import antlr.collections.AST;
 import org.acmestudio.acme.core.type.IAcmeBooleanValue;
 import org.acmestudio.acme.element.IAcmeElement;
 import org.acmestudio.acme.element.property.IAcmeProperty;
@@ -37,8 +33,7 @@ import org.sa.rainbow.stitch.util.Tool;
 import org.sa.rainbow.stitch.visitor.ILiloBehavior;
 import org.sa.rainbow.stitch.visitor.Stitch;
 
-import antlr.RecognitionException;
-import antlr.collections.AST;
+import java.util.*;
 
 /**
  * Represents an Expression, with its scope and AST stored for later
@@ -59,11 +54,11 @@ public class Expression extends ScopedEntity implements IEvaluableScope {
      * exists unique, and select expressions.  LIST includes literal set,
      * method call (for its parameters), and tactic reference
      */
-    public static enum Kind {
+    public enum Kind {
         UNKNOWN, NULL, BOOLEAN, INTEGER, FLOAT, CHAR, STRING, IDENTIFIER,
         ARITHMETIC, LOGICAL, RELATIONAL, UNARY, ASSIGNMENT,
         QUANTIFIED, LIST
-    };
+    }
 
     public static final int LOP = 0;
     public static final int ROP = 1;

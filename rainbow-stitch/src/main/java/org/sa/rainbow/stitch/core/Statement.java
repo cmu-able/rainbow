@@ -26,10 +26,8 @@
  */
 package org.sa.rainbow.stitch.core;
 
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
-
+import antlr.RecognitionException;
+import antlr.collections.AST;
 import org.acmestudio.acme.element.IAcmeElement;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
@@ -37,15 +35,16 @@ import org.sa.rainbow.stitch.parser.StitchTreeWalkerTokenTypes;
 import org.sa.rainbow.stitch.util.Tool;
 import org.sa.rainbow.stitch.visitor.Stitch;
 
-import antlr.RecognitionException;
-import antlr.collections.AST;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
 
 public class Statement extends ScopedEntity implements IEvaluableScope {
 
     /**
      * Declares types of Statements that exist in script.
      */
-    public static enum Kind {
+    public enum Kind {
         UNKNOWN, COMPOUND, ERROR, DECLARATION, EXPRESSION,
         IF, WHILE, FOR, FOREACH, EMPTY
     }

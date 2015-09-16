@@ -26,10 +26,10 @@
  */
 package org.sa.rainbow.stitch.adaptation;
 
-import java.util.Map;
-
 import org.sa.rainbow.translator.effectors.IEffector;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
+
+import java.util.Map;
 
 
 /**
@@ -56,7 +56,7 @@ import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 public interface IGenericArchOperators {
 
     /** The NULL effect implementation of this interface */
-    public static IGenericArchOperators NULL_OP = new IGenericArchOperators() {
+    IGenericArchOperators NULL_OP = new IGenericArchOperators () {
         @Override
         public Outcome start (String effName, Object component, String[] optArgs) {
             return IEffector.Outcome.UNKNOWN;
@@ -95,7 +95,7 @@ public interface IGenericArchOperators {
      * @param optArgs     the array of any optional String arguments to supply to the Effector
      * @return {@link IEffector.Outcome}  the "start" Effector execution outcome
      */
-    public Outcome start (String effName, Object component, String[] optArgs);
+    Outcome start (String effName, Object component, String[] optArgs);
 
     /**
      * Stops the system component represented by the <code>component</code>
@@ -109,7 +109,7 @@ public interface IGenericArchOperators {
      * @param optArgs     the array of any optional String arguments to supply to the Effector
      * @return {@link IEffector.Outcome}  the "stop" Effector execution outcome
      */
-    public Outcome stop (String effName, Object component, String[] optArgs);
+    Outcome stop (String effName, Object component, String[] optArgs);
 
     /**
      * Changes some known internal state of a system element represented by the
@@ -126,7 +126,7 @@ public interface IGenericArchOperators {
      * @param statePairs  the key-value pairs for updaing states
      * @return {@link IEffector.Outcome}  the "changeState" Effector execution outcome
      */
-    public Outcome changeState (String effName, Object element, Map<String,String> statePairs);
+    Outcome changeState (String effName, Object element, Map<String, String> statePairs);
 
     /**
      * Connects two system components, identified by <code>initiatingComp</code>
@@ -147,8 +147,8 @@ public interface IGenericArchOperators {
      * @param optArgs     the array of any optional String arguments to supply to the Effector
      * @return {@link IEffector.Outcome}  the "connect" Effector execution outcome
      */
-    public Outcome connect (String effName, Object initiatingComp, Object targetComp,
-            String[] optArgs);
+    Outcome connect (String effName, Object initiatingComp, Object targetComp,
+                     String[] optArgs);
 
     /**
      * Disconnects the connector connecting two system components,
@@ -171,8 +171,8 @@ public interface IGenericArchOperators {
      * @param optArgs     the array of any optional String arguments to supply to the Effector
      * @return {@link IEffector.Outcome}  the "disconnect" Effector execution outcome
      */
-    public Outcome disconnect (String effName, Object comp1, Object comp2,
-            Object conn, String[] optArgs);
+    Outcome disconnect (String effName, Object comp1, Object comp2,
+                        Object conn, String[] optArgs);
 
     /**
      * Executes an Effector identified by <code>effName</code> on the architecture
@@ -185,6 +185,6 @@ public interface IGenericArchOperators {
      * @param args     the array of String arguments to supply to the Effector
      * @return {@link IEffector.Outcome}  the generic Effector execution outcome
      */
-    public Outcome execute (String effName, Object element, String[] args);
+    Outcome execute (String effName, Object element, String[] args);
 
 }

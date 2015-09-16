@@ -26,14 +26,7 @@
  */
 package org.sa.rainbow.stitch.visitor;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
+import antlr.collections.AST;
 import org.acmestudio.acme.model.IAcmeModel;
 import org.apache.commons.lang.NotImplementedException;
 import org.reflections.Reflections;
@@ -46,22 +39,19 @@ import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.stitch.Ohana;
-import org.sa.rainbow.stitch.core.Expression;
-import org.sa.rainbow.stitch.core.IScope;
-import org.sa.rainbow.stitch.core.Import;
-import org.sa.rainbow.stitch.core.ScopedEntity;
-import org.sa.rainbow.stitch.core.Statement;
-import org.sa.rainbow.stitch.core.StitchScript;
-import org.sa.rainbow.stitch.core.Strategy;
+import org.sa.rainbow.stitch.core.*;
 import org.sa.rainbow.stitch.core.Strategy.ActionKind;
 import org.sa.rainbow.stitch.core.Strategy.ConditionKind;
-import org.sa.rainbow.stitch.core.StrategyNode;
-import org.sa.rainbow.stitch.core.Tactic;
-import org.sa.rainbow.stitch.core.Var;
 import org.sa.rainbow.stitch.util.Tool;
 import org.sa.rainbow.util.Util;
 
-import antlr.collections.AST;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * The main purpose of this class is to serve as the behavior of the treewalker
@@ -645,7 +635,7 @@ ILiloBehavior {
         popScope();
         // check if scope closing occurs now
         if (prevScope instanceof Statement
-                && ((Statement) prevScope).isDistinctScope()) {
+                && prevScope.isDistinctScope ()) {
             debug("<$ End statement \"" + prevScope.getName() + "\"");
         }
     }

@@ -38,11 +38,11 @@ public interface IDeclaration {
      * Returns the Scope within which this declaration was created
      * @return  the declaring Scope
      */
-    public IScope scope ();
+    IScope scope ();
 
     /**
      * Returns the type signature of this declaration to be used as key
      * @return  the type signature string
      */
-    public String signature ();
+    String signature ();
 }

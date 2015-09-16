@@ -26,14 +26,6 @@
  */
 package org.sa.rainbow.stitch.core;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.acmestudio.acme.element.IAcmeElement;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.models.IModelInstance;
@@ -44,6 +36,8 @@ import org.sa.rainbow.stitch.tactic.history.ExecutionHistoryModelInstance;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData;
 import org.sa.rainbow.stitch.util.Tool;
 import org.sa.rainbow.stitch.visitor.Stitch;
+
+import java.util.*;
 
 
 
@@ -57,7 +51,7 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
     /**
      * Declares the states that the Tactic object might be in during parsing.
      */
-    public static enum ParseState {
+    public enum ParseState {
         UNKNOWN, IN_PARAMS, IN_VARS, IN_CONDITION, IN_ACTION, IN_EFFECT, PARSED
     }
     private static final String ATTRIBUTE_ARG_PREF = "_arg_";
@@ -196,7 +190,7 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
             m_attributes.put(name, ((Number )vObj).doubleValue());
         } else {
             // otherwise, grab expression string, munge it, and evaluate
-            String exprStr = ((String )vObj) + ";";  // append ending semicolon
+            String exprStr = vObj + ";";  // append ending semicolon
             for (int i=0; i < args.size(); ++i) {
                 exprStr = exprStr.replace("{" + i + "}", ATTRIBUTE_ARG_PREF + i);
             }

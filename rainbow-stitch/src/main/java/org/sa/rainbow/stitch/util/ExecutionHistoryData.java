@@ -26,13 +26,8 @@
  */
 package org.sa.rainbow.stitch.util;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
 import javax.annotation.Nonnull;
+import java.util.*;
 
 /**
  * Captures one data entry of execution history for the Strategy or Tactic (or any unit of adaptation execution as
@@ -44,9 +39,9 @@ import javax.annotation.Nonnull;
  */
 public final class ExecutionHistoryData {
 
-    public static enum ExecutionStateT {
+    public enum ExecutionStateT {
         NOT_EXECUTING, STARTED, EXECUTING, WAITING, FINISHED
-    };
+    }
 
     public static class ExecutionPoint {
         final ExecutionStateT m_state;

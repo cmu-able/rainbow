@@ -26,36 +26,16 @@
  */
 package org.sa.rainbow.stitch.util;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import antlr.RecognitionException;
+import antlr.collections.AST;
 import org.acmestudio.acme.ModelHelper;
-import org.acmestudio.acme.core.type.IAcmeBooleanValue;
-import org.acmestudio.acme.core.type.IAcmeEnumValue;
-import org.acmestudio.acme.core.type.IAcmeFloatValue;
-import org.acmestudio.acme.core.type.IAcmeIntValue;
-import org.acmestudio.acme.core.type.IAcmeRecordField;
-import org.acmestudio.acme.core.type.IAcmeRecordValue;
-import org.acmestudio.acme.core.type.IAcmeSequenceValue;
-import org.acmestudio.acme.core.type.IAcmeSetValue;
-import org.acmestudio.acme.core.type.IAcmeStringValue;
+import org.acmestudio.acme.core.type.*;
 import org.acmestudio.acme.element.IAcmeElement;
 import org.acmestudio.acme.element.IAcmeElementInstance;
 import org.acmestudio.acme.element.IAcmeElementType;
 import org.acmestudio.acme.element.property.IAcmeProperty;
 import org.acmestudio.acme.element.property.IAcmePropertyValue;
-import org.acmestudio.acme.model.util.core.UMBooleanValue;
-import org.acmestudio.acme.model.util.core.UMFloatValue;
-import org.acmestudio.acme.model.util.core.UMIntValue;
-import org.acmestudio.acme.model.util.core.UMRecordField;
-import org.acmestudio.acme.model.util.core.UMRecordValue;
-import org.acmestudio.acme.model.util.core.UMSequenceValue;
-import org.acmestudio.acme.model.util.core.UMSetValue;
-import org.acmestudio.acme.model.util.core.UMStringValue;
+import org.acmestudio.acme.model.util.core.*;
 import org.apache.log4j.Logger;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.stitch.Ohana;
@@ -66,8 +46,7 @@ import org.sa.rainbow.stitch.core.Var;
 import org.sa.rainbow.stitch.error.StitchProblem;
 import org.sa.rainbow.stitch.error.StitchProblemHandler;
 
-import antlr.RecognitionException;
-import antlr.collections.AST;
+import java.util.*;
 
 /**
  * Utility tool class for various functions, like debug.
@@ -178,8 +157,8 @@ public abstract class Tool {
         Object val = null;
         if (pVal instanceof IAcmeIntValue) {
             val = new MyInteger(((IAcmeIntValue )pVal).getValue());
-        } else if (pVal instanceof IAcmeFloatValue) {
-            val = new MyDouble(((Float )((IAcmeFloatValue )pVal).getValue()).doubleValue());
+        } else if (pVal instanceof IAcmeFloatingPointValue) {
+            val = new MyDouble (((IAcmeFloatingPointValue) pVal).getDoubleValue ());
         } else if (pVal instanceof IAcmeBooleanValue) {
             val = ((IAcmeBooleanValue )pVal).getValue();
         } else if (pVal instanceof IAcmeStringValue) {
@@ -216,7 +195,7 @@ public abstract class Tool {
         if (val instanceof MyInteger) {
             pVal = new UMIntValue(((MyInteger )val).intValue());
         } else if (val instanceof MyDouble) {
-            pVal = new UMFloatValue(((MyDouble )val).floatValue());
+            pVal = new UMFloatingPointValue (((MyDouble) val).floatValue ());
         } else if (val instanceof Boolean) {
             pVal = new UMBooleanValue((Boolean )val);
         } else if (val instanceof String) {

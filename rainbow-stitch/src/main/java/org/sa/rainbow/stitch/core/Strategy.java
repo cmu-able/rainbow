@@ -26,21 +26,6 @@
  */
 package org.sa.rainbow.stitch.core;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Random;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.Stack;
-import java.util.TreeMap;
-
 import org.acmestudio.acme.element.IAcmeElement;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
@@ -52,6 +37,8 @@ import org.sa.rainbow.stitch.util.ExecutionHistoryData.ExecutionStateT;
 import org.sa.rainbow.stitch.util.Tool;
 import org.sa.rainbow.stitch.visitor.Stitch;
 
+import java.util.*;
+
 /**
  * Represents a Strategy scoped object parsed from the script.
  * 
@@ -62,35 +49,35 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
     /**
      * Declares the states that the Strategy object might be in during parsing.
      */
-    public static enum ParseState {
+    public enum ParseState {
         UNKNOWN, IN_PARAMS, IN_VARS, PARSED
     }
 
     /**
      * Enumerates the kinds of conditions that a StrategyNode can have.
      */
-    public static enum ConditionKind {
+    public enum ConditionKind {
         UNKNOWN, APPLICABILITY /* a strategy applicability condition */, EXPRESSION /* a full expression */, SUCCESS /* "success", meaning effect of parent tactic true */, FAILURE /* "failure", meaning parent tactic didn't complete execution */, DEFAULT /* "default" match, when no other ones match */
     }
 
     /**
      * Enumerates the kinds of actions that a StrategyNode can have.
      */
-    public static enum ActionKind {
+    public enum ActionKind {
         UNKNOWN, TACTIC /* a Tactic */, DOLOOP /* a do loop */, DONE /* "done" action, terminating Strategy with success */, NULL /* no-op, a null tactic */
     }
 
     /**
      * Declares the states of results in which Strategy might be during evaluation
      */
-    public static enum Outcome {
+    public enum Outcome {
         UNKNOWN, SUCCESS, FAILURE, STATUSQUO
     }
 
-    public static interface NodeAction {
-        public void applyTactic (Tactic tactic);
+    public interface NodeAction {
+        void applyTactic (Tactic tactic);
 
-        public void execute (Map<String, Double> aggAtt, StrategyNode curNode, int level);
+        void execute (Map<String, Double> aggAtt, StrategyNode curNode, int level);
     }
 
     public class AttributeCollector implements NodeAction {

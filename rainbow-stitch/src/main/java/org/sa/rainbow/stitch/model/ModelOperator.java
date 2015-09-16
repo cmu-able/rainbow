@@ -34,7 +34,7 @@ package org.sa.rainbow.stitch.model;
  */
 public interface ModelOperator {
 
-    public static enum OperatorResult {
+    enum OperatorResult {
         UNKNOWN, SUCCESS, FAILURE;
         public static OperatorResult parseEffectorResult (String result) {
             OperatorResult rv = FAILURE;
@@ -51,7 +51,7 @@ public interface ModelOperator {
      * A No-op instance of this interface, used when a ModelOperator
      * implementation has not yet been set when required.
      */
-    public static final ModelOperator NO_OP = new ModelOperator() {
+    ModelOperator NO_OP = new ModelOperator () {
         @Override
         public Object invoke(String name, Object[] args) {
             return null;
@@ -60,7 +60,7 @@ public interface ModelOperator {
         @Override
         public Object lookupOperator(String name) {
             return null;
-        };
+        }
     };
 
     /**
@@ -75,8 +75,8 @@ public interface ModelOperator {
      * @return Object  a String representation of the return value, which should be
      *     parsed into an {@link OperatorResult} enum..
      */
-    public Object invoke (String name, Object[] args);
+    Object invoke (String name, Object[] args);
 
-    public Object lookupOperator (String name);
+    Object lookupOperator (String name);
 
 }

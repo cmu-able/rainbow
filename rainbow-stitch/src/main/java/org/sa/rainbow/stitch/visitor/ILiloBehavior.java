@@ -24,33 +24,40 @@
 package org.sa.rainbow.stitch.visitor;
 
 
+import antlr.collections.AST;
 import org.sa.rainbow.stitch.core.Expression;
 import org.sa.rainbow.stitch.core.IScope;
 import org.sa.rainbow.stitch.core.Import;
 import org.sa.rainbow.stitch.core.Strategy;
 
-import antlr.collections.AST;
-
 public interface ILiloBehavior {
 
-    public abstract void beginScript (IScope scriptScope);
-    public abstract void endScript ();
-    public abstract void createModule (AST modAST);
+    void beginScript (IScope scriptScope);
 
-    public abstract Import createImport (AST impAST, AST pathAST);
-    public abstract void addImportRename (AST origAST, AST renAST);
-    public abstract void doImports ();
+    void endScript ();
 
-    public abstract void createVar (AST typeAST, AST nameAST);
-    public abstract void beginVarList ();
-    public abstract void endVarList ();
-    public abstract void beginParamList ();
-    public abstract void endParamList ();
+    void createModule (AST modAST);
+
+    Import createImport (AST impAST, AST pathAST);
+
+    void addImportRename (AST origAST, AST renAST);
+
+    void doImports ();
+
+    void createVar (AST typeAST, AST nameAST);
+
+    void beginVarList ();
+
+    void endVarList ();
+
+    void beginParamList ();
+
+    void endParamList ();
 
     /** For expression, indicate that we're now processing the left operand */
-    public abstract void lOp ();
+    void lOp ();
     /** For expression, indicate that we're now processing the right operand */
-    public abstract void rOp ();
+    void rOp ();
     /**
      * Begin walking an expression node, processing intermediate expressions.
      * If expression is a quantified one, a new scope is created.
@@ -61,16 +68,18 @@ public interface ILiloBehavior {
      * ensures that only the outermost, and most interesting Expression clause
      * gets saved for later evaluation.
      */
-    public abstract void beginExpression ();
+    void beginExpression ();
     /**
      * End walk of an expression node.  If sublevel count is non-zero, decrement
      * count first before "popping" the current Expression object.
      */
-    public abstract void endExpression ();
+    void endExpression ();
 
-    public abstract void beginQuantifiedExpression ();
-    public abstract void doQuantifiedExpression ();
-    public abstract void endQuantifiedExpression (AST quanAST);
+    void beginQuantifiedExpression ();
+
+    void doQuantifiedExpression ();
+
+    void endQuantifiedExpression (AST quanAST);
 
     /**
      * Although a method call doesn't really create a new scope, the params
@@ -79,18 +88,27 @@ public interface ILiloBehavior {
      * @param mcAST    the AST of the method call root
      * @param idAST    the AST of the method identifier
      */
-    public abstract void beginMethodCallExpression ();
-    public abstract void endMethodCallExpression (AST mcAST, AST idAST);
-    public abstract void beginSetExpression ();
-    public abstract void endSetExpression (AST setAST);
+    void beginMethodCallExpression ();
 
-    public abstract void doExpression (AST exprAST);
-    public abstract void doAssignExpression (AST opAST, AST lValAST);
-    public abstract void doLogicalExpression (AST opAST);
-    public abstract void doRelationalExpression (AST opAST);
-    public abstract void doArithmeticExpression (AST opAST);
-    public abstract void doUnaryExpression (AST opAST);
-    public abstract void doIdentifierExpression (AST idAST, Expression.Kind kind);
+    void endMethodCallExpression (AST mcAST, AST idAST);
+
+    void beginSetExpression ();
+
+    void endSetExpression (AST setAST);
+
+    void doExpression (AST exprAST);
+
+    void doAssignExpression (AST opAST, AST lValAST);
+
+    void doLogicalExpression (AST opAST);
+
+    void doRelationalExpression (AST opAST);
+
+    void doArithmeticExpression (AST opAST);
+
+    void doUnaryExpression (AST opAST);
+
+    void doIdentifierExpression (AST idAST, Expression.Kind kind);
 
     /**
      * Begin walking a statement node, and end call to set the resulting AST.
@@ -101,35 +119,54 @@ public interface ILiloBehavior {
      * 
      * @param stmtAST  the Statement AST node
      */
-    public abstract void beginStatement (AST stmtAST);
-    public abstract void markForCondition ();
-    public abstract void markForEach ();
-    public abstract void endStatement ();
+    void beginStatement (AST stmtAST);
 
-    public abstract void beginTactic (AST nameAST);
-    public abstract void endTactic ();
+    void markForCondition ();
 
-    public abstract void beginConditionBlock (AST nameAST);
-    public abstract void endConditionBlock ();
-    public abstract void beginActionBlock (AST nameAST);
-    public abstract void endActionBlock ();
-    public abstract void beginEffectBlock (AST nameAST);
-    public abstract void endEffectBlock ();
+    void markForEach ();
 
-    public abstract void beginStrategy (AST nameAST);
-    public abstract void endStrategy ();
+    void endStatement ();
 
-    public abstract void beginBranching ();
-    public abstract void endBranching ();
-    public abstract void beginStrategyNode (AST labelAST);
-    public abstract void endStrategyNode ();
+    void beginTactic (AST nameAST);
 
-    public abstract void doStrategyProbability (/*AST p1AST, AST p2AST, AST pLitAST*/);
-    public abstract void doStrategyCondition (Strategy.ConditionKind type);
-    public abstract void doStrategyDuration ();
-    public abstract void beginReferencedTactic (AST labelAST);
-    public abstract void endReferencedTactic ();
-    public abstract void doStrategyAction (Strategy.ActionKind type);
-    public abstract void doStrategyLoop (AST vAST, AST iAST, AST labelAST);
+    void endTactic ();
+
+    void beginConditionBlock (AST nameAST);
+
+    void endConditionBlock ();
+
+    void beginActionBlock (AST nameAST);
+
+    void endActionBlock ();
+
+    void beginEffectBlock (AST nameAST);
+
+    void endEffectBlock ();
+
+    void beginStrategy (AST nameAST);
+
+    void endStrategy ();
+
+    void beginBranching ();
+
+    void endBranching ();
+
+    void beginStrategyNode (AST labelAST);
+
+    void endStrategyNode ();
+
+    void doStrategyProbability (/*AST p1AST, AST p2AST, AST pLitAST*/);
+
+    void doStrategyCondition (Strategy.ConditionKind type);
+
+    void doStrategyDuration ();
+
+    void beginReferencedTactic (AST labelAST);
+
+    void endReferencedTactic ();
+
+    void doStrategyAction (Strategy.ActionKind type);
+
+    void doStrategyLoop (AST vAST, AST iAST, AST labelAST);
 
 }
