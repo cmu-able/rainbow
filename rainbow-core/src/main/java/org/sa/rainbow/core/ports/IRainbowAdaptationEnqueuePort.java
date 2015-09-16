@@ -28,6 +28,6 @@ import org.sa.rainbow.core.adaptation.IEvaluable;
 
 public interface IRainbowAdaptationEnqueuePort<S extends IEvaluable> extends IDisposablePort {
 
-    public void offerAdaptation (AdaptationTree<S> selectedStrategy, Object[] args);
+    void offerAdaptation (AdaptationTree<S> selectedStrategy, Object[] args);
 
 }

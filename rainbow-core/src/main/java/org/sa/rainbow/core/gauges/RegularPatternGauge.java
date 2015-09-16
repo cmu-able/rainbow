@@ -23,19 +23,17 @@
  */
 package org.sa.rainbow.core.gauges;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.translator.probes.IProbeIdentifier;
+
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class implements the common methods for a Gauge that processes Probe
@@ -47,7 +45,9 @@ import org.sa.rainbow.translator.probes.IProbeIdentifier;
 public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
 
 
+    @Nullable
     protected Queue<String> m_lines = null;
+    @Nullable
     private Map<String,Pattern> m_patternMap = null;
 
     /**
@@ -66,8 +66,8 @@ public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
                     throws RainbowException {
         super (threadName, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
 
-        m_lines = new LinkedList<String>();
-        m_patternMap = new HashMap<String,Pattern>();
+        m_lines = new LinkedList<> ();
+        m_patternMap = new HashMap<> ();
     }
 
 
@@ -107,7 +107,6 @@ public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
         String name = null;
         int cnt = MAX_UPDATES_PER_SLEEP;
         while (m_lines.size() > 0 && cnt-- > 0) {
-            System.out.println ("m_lines.size = " + m_lines.size ());
             String line = m_lines.poll();
             // process the line for stats
             //log("Got line: " + line);
@@ -126,7 +125,7 @@ public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
         super.runAction();
     }
 
-    protected void addPattern (String matchName, Pattern p) {
+    protected void addPattern (@NotNull String matchName, Pattern p) {
         m_patternMap.put(matchName.intern(), p);
     }
 

@@ -23,19 +23,6 @@
  */
 package org.sa.rainbow.core.ports.eseb.converters;
 
-import incubator.pval.Ensure;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.text.MessageFormat;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.sa.rainbow.core.gauges.GaugeState;
-import org.sa.rainbow.core.gauges.IGaugeState;
-
 import edu.cmu.cs.able.typelib.jconv.TypelibJavaConversionRule;
 import edu.cmu.cs.able.typelib.jconv.TypelibJavaConverter;
 import edu.cmu.cs.able.typelib.jconv.ValueConversionException;
@@ -47,31 +34,42 @@ import edu.cmu.cs.able.typelib.struct.StructureDataValue;
 import edu.cmu.cs.able.typelib.struct.UnknownFieldException;
 import edu.cmu.cs.able.typelib.type.DataType;
 import edu.cmu.cs.able.typelib.type.DataValue;
+import incubator.pval.Ensure;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.sa.rainbow.core.gauges.GaugeState;
+import org.sa.rainbow.core.gauges.IGaugeState;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class GaugeStateConverter implements TypelibJavaConversionRule {
 
-    private PrimitiveScope m_scope;
+    private final PrimitiveScope m_scope;
 
     public GaugeStateConverter (PrimitiveScope scope) {
         m_scope = scope;
     }
 
     @Override
-    public boolean handles_java (Object value, DataType dst) {
+    public boolean handles_java (Object value, @Nullable DataType dst) {
         Ensure.not_null (value);
-        if (value instanceof IGaugeState) return dst == null || "gauge_state".equals (dst.name ());
-        return false;
+        return value instanceof IGaugeState && (dst == null || "gauge_state".equals (dst.name ()));
     }
 
     @Override
-    public boolean handles_typelib (DataValue value, Class<?> cls) {
+    public boolean handles_typelib (@NotNull DataValue value, @Nullable Class<?> cls) {
         Ensure.not_null (value);
-        if (value.type ().name ().equals ("gauge_state")) return cls == null || IGaugeState.class.isAssignableFrom (cls);
-        return false;
+        return value.type ().name ().equals ("gauge_state") && (cls == null || IGaugeState.class.isAssignableFrom (cls));
     }
 
     @Override
-    public DataValue from_java (Object value, DataType dst, TypelibJavaConverter converter)
+    public DataValue from_java (Object value, @Nullable DataType dst, @NotNull TypelibJavaConverter converter)
             throws ValueConversionException {
         if ((dst == null || dst instanceof StructureDataType) && value instanceof IGaugeState) {
             try {
@@ -97,10 +95,8 @@ public class GaugeStateConverter implements TypelibJavaConversionRule {
                         commands,
                         converter.from_java (command.getGaugeReports (),
                                 m_scope.find ("list<operation_representation>")));
-                StructureDataValue sdv = sdt.make (fields);
-                return sdv;
-            }
-            catch (UnknownFieldException | AmbiguousNameException e) {
+                return sdt.make (fields);
+            } catch (@NotNull UnknownFieldException | AmbiguousNameException e) {
                 throw new ValueConversionException (MessageFormat.format ("Could not convert from {0} to {1}", value
                         .getClass ().toString (), (dst == null ? "gauge_state" : dst.absolute_hname ())), e);
             }
@@ -110,16 +106,17 @@ public class GaugeStateConverter implements TypelibJavaConversionRule {
 
     }
 
+    @NotNull
     @Override
-    public <T> T to_java (DataValue value, Class<T> cls, TypelibJavaConverter converter)
+    public <T> T to_java (DataValue value, @Nullable Class<T> cls, @NotNull TypelibJavaConverter converter)
             throws ValueConversionException {
         if (value instanceof StructureDataValue) {
             try {
                 StructureDataValue sdv = (StructureDataValue )value;
                 StructureDataType sdt = (StructureDataType )sdv.type ();
-                List setup = converter.<List> to_java (sdv.value (sdt.field ("setup")), List.class);
-                List config = converter.<List> to_java (sdv.value (sdt.field ("config")), List.class);
-                List commands = converter.<List> to_java (sdv.value (sdt.field ("commands")), List.class);
+                List setup = converter.to_java (sdv.value (sdt.field ("setup")), List.class);
+                List config = converter.to_java (sdv.value (sdt.field ("config")), List.class);
+                List commands = converter.to_java (sdv.value (sdt.field ("commands")), List.class);
                 if (cls == null || cls == IGaugeState.class) {
                     cls = (Class<T> )GaugeState.class;
                 }
@@ -133,14 +130,12 @@ public class GaugeStateConverter implements TypelibJavaConversionRule {
                         return constructor.newInstance (setup, config, commands);
                     else
                         throw exception;
-                }
-                catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
+                } catch (@NotNull NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
                         | IllegalArgumentException | InvocationTargetException e) {
                     exception.addSuppressed (e);
                     throw exception;
                 }
-            }
-            catch (UnknownFieldException | AmbiguousNameException e) {
+            } catch (@NotNull UnknownFieldException | AmbiguousNameException e) {
                 throw new ValueConversionException (MessageFormat.format ("Could not convert from {0} to {1}",
                         value.toString (),
                         (cls == null ? "IRainbowModelCommandRepresentation" : cls.getCanonicalName ())), e);

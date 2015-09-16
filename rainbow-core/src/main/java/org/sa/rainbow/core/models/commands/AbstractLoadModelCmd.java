@@ -23,12 +23,8 @@
  */
 package org.sa.rainbow.core.models.commands;
 
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
-
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.error.RainbowDelegationException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
@@ -39,11 +35,17 @@ import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 import org.sa.rainbow.core.ports.eseb.ESEBConstants;
 
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
+
 public abstract class AbstractLoadModelCmd<Type> extends AbstractRainbowModelOperation<IModelInstance<Type>, Object> {
 
-    protected IModelsManager m_modelsManager;
-    private InputStream    m_is;
-    private String         m_source;
+    private final IModelsManager m_modelsManager;
+    private final InputStream m_is;
+    private final String m_source;
 
     public AbstractLoadModelCmd (String commandName, IModelsManager mm, String resource, InputStream is, String source) {
         super (commandName, null, resource, source);
@@ -71,9 +73,10 @@ public abstract class AbstractLoadModelCmd<Type> extends AbstractRainbowModelOpe
         }
     }
 
+    @NotNull
     @Override
     public List<? extends IRainbowMessage> execute (IModelInstance<Object> context,
-            IRainbowMessageFactory messageFactory) throws IllegalStateException, RainbowException {
+                                                    @Nullable IRainbowMessageFactory messageFactory) throws IllegalStateException, RainbowException {
         if (inCompoundCommand)
             throw new IllegalStateException (
                     "Cannot call execute() on a compounded command -- it must be called on the parent");
@@ -111,9 +114,10 @@ public abstract class AbstractLoadModelCmd<Type> extends AbstractRainbowModelOpe
         return (m_executionState == ExecutionState.UNDONE);
     }
 
+    @NotNull
     @Override
-    protected List<? extends IRainbowMessage> getGeneratedEvents (IRainbowMessageFactory messageFactory) {
-        List<IRainbowMessage> msgs = new LinkedList<IRainbowMessage> ();
+    protected List<? extends IRainbowMessage> getGeneratedEvents (@NotNull IRainbowMessageFactory messageFactory) {
+        List<IRainbowMessage> msgs = new LinkedList<> ();
         try {
             IRainbowMessage msg = messageFactory.createMessage ();
             msg.setProperty (IModelChangeBusPort.EVENT_TYPE_PROP, "LOAD_MODEL");

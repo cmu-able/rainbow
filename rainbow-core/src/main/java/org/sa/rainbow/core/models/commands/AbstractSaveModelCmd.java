@@ -23,10 +23,8 @@
  */
 package org.sa.rainbow.core.models.commands;
 
-import java.io.OutputStream;
-import java.util.Collections;
-import java.util.List;
-
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.error.RainbowDelegationException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
@@ -34,23 +32,26 @@ import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.IModelsManager;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 
+import java.io.OutputStream;
+import java.util.Collections;
+import java.util.List;
+
 public abstract class AbstractSaveModelCmd<Type> extends AbstractRainbowModelOperation<Object, Type> {
 
-    private OutputStream   m_os;
-    private IModelsManager m_modelsManager;
-    private String         m_source;
+    private final OutputStream m_os;
+    private final String m_source;
 
     public AbstractSaveModelCmd (String commandName, IModelsManager mm, String resource, OutputStream os, String source) {
         super (commandName, null, resource, source);
-        m_modelsManager = mm;
         m_os = os;
         m_source = source;
     }
 
+    @NotNull
     @Override
     public List<? extends IRainbowMessage>
     execute (IModelInstance<Type> context,
-            IRainbowMessageFactory messageFactory) throws IllegalStateException, RainbowException {
+             @Nullable IRainbowMessageFactory messageFactory) throws IllegalStateException, RainbowException {
         if (inCompoundCommand)
             throw new IllegalStateException (
                     "Cannot call execute() on a compounded command -- it must be called on the parent");
@@ -92,6 +93,7 @@ public abstract class AbstractSaveModelCmd<Type> extends AbstractRainbowModelOpe
         return (m_executionState == ExecutionState.UNDONE);
     }
 
+    @NotNull
     @Override
     protected List<? extends IRainbowMessage> getGeneratedEvents (IRainbowMessageFactory messageFactory) {
         return Collections.<IRainbowMessage> emptyList ();

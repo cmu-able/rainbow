@@ -23,16 +23,7 @@
  */
 package org.sa.rainbow.gui;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-
+import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
 import org.sa.rainbow.core.gauges.IGaugeState;
@@ -42,17 +33,25 @@ import org.sa.rainbow.core.ports.IGaugeQueryPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class GUIGaugeLifecycleListener implements IGaugeLifecycleBusPort {
 
-    private JMenu          m_menu;
-    Map<String, JMenuItem> itemMap = new HashMap<> ();
+    private final JMenu m_menu;
+    private final Map<String, JMenuItem> itemMap = new HashMap<> ();
 
     public GUIGaugeLifecycleListener (JMenu gauges) {
         m_menu = gauges;
     }
 
     @Override
-    public void reportCreated (final IGaugeIdentifier gauge) {
+    public void reportCreated (@NotNull final IGaugeIdentifier gauge) {
         if (!itemMap.containsKey (gauge.id ())) {
             JMenuItem item = new JMenuItem (gauge.id ());
             itemMap.put (gauge.id (), item);
@@ -64,7 +63,7 @@ public class GUIGaugeLifecycleListener implements IGaugeLifecycleBusPort {
                         IGaugeQueryPort qPort = RainbowPortFactory.createGaugeQueryPortClient (gauge);
                         IGaugeState state = qPort.queryGaugeState ();
                         Collection<IRainbowOperation> commands = qPort.queryAllCommands ();
-                        StringBuffer info = new StringBuffer ();
+                        StringBuilder info = new StringBuilder ();
                         info.append ("---- Last Opertions ----\n");
                         if (commands.isEmpty ()) {
                             info.append ("  No operations issued.\n");
@@ -121,7 +120,7 @@ public class GUIGaugeLifecycleListener implements IGaugeLifecycleBusPort {
     }
 
     @Override
-    public void reportDeleted (IGaugeIdentifier gauge) {
+    public void reportDeleted (@NotNull IGaugeIdentifier gauge) {
         if (itemMap.containsKey (gauge.id ())) {
             JMenuItem item = itemMap.get (gauge.id ());
             m_menu.remove (item);

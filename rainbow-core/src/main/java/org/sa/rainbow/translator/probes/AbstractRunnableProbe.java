@@ -24,6 +24,8 @@
 package org.sa.rainbow.translator.probes;
 
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.IRainbowRunnable;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.error.ErrorsReachedThresholdException;
@@ -36,6 +38,7 @@ import org.sa.rainbow.core.error.ErrorsReachedThresholdException;
  */
 public abstract class AbstractRunnableProbe extends AbstractProbe implements Runnable {
 
+    @Nullable
     private Thread m_thread = null;
     private int m_errorCnt = 0;
     private long m_sleepTime = IRainbowRunnable.LONG_SLEEP_TIME;
@@ -48,7 +51,7 @@ public abstract class AbstractRunnableProbe extends AbstractProbe implements Run
      *     this Probe would be handled by the ProbeBusRelay
      * @param long  sleep period in milliseconds
      */
-    public AbstractRunnableProbe (String id, String type, Kind kind, long sleepTime) {
+    public AbstractRunnableProbe (@NotNull String id, String type, Kind kind, long sleepTime) {
         super(id, type, kind);
         m_sleepTime = sleepTime;
         LOGGER = Logger.getLogger (getClass ());
@@ -103,6 +106,7 @@ public abstract class AbstractRunnableProbe extends AbstractProbe implements Run
      * Returns the current Thread instance.
      * @return Thread  current thread instance for this Runnable.
      */
+    @Nullable
     protected Thread thread () {
         return m_thread;
     }

@@ -9,7 +9,7 @@ public interface IEvaluable {
      *            arguments
      * @return <code>Object</code> if evaluation has result, null otherwise
      */
-    public Object evaluate (Object[] argsIn);
+    Object evaluate (Object[] argsIn);
 
     /**
      * Calculates the estimated average time duration required to perform this evaluable construct.
@@ -18,7 +18,7 @@ public interface IEvaluable {
      * @deprecated
      */
     @Deprecated
-    public long estimateAvgTimeCost ();
+    long estimateAvgTimeCost ();
 
 
 }

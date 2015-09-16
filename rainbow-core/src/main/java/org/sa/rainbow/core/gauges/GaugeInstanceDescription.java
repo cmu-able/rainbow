@@ -26,14 +26,16 @@
  */
 package org.sa.rainbow.core.gauges;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.util.Beacon;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This Class captures the information in a Gauge Instance description, though
@@ -44,7 +46,7 @@ import org.sa.rainbow.util.Beacon;
  */
 public class GaugeInstanceDescription extends GaugeTypeDescription {
 
-    public static enum State {
+    public enum State {
         UNINITIALIZED, CREATING, CREATED, CONFIGURING,
         /** Although a Gauge can technically be configured, but not yet alive,
          *  for simplicity, we'll consider configured to be alive.  Pausing
@@ -53,22 +55,28 @@ public class GaugeInstanceDescription extends GaugeTypeDescription {
         TERMINATED 
     }
 
-    public static final String LOCATION_PARAM_NAME = "targetIP";
+    private static final String LOCATION_PARAM_NAME = "targetIP";
 
+    @Nullable
     private String m_instName = null;
+    @Nullable
     private String m_instComment = null;
+    @Nullable
     private TypedAttribute                        m_modelDesc         = null;
+    @Nullable
     private Map<String, OperationRepresentation> m_mappings          = null;
 
+    @Nullable
     private String m_id = null;
     private State m_state = State.UNINITIALIZED;
+    @Nullable
     private Beacon m_beacon = null;
 
     /**
      * Main Constructor.
      */
     public GaugeInstanceDescription (String gaugeType, String gaugeName,
-            String typeComment, String instComment) {
+                                     String typeComment, @Nullable String instComment) {
 
         super(gaugeType, typeComment);
         m_instName = gaugeName;
@@ -86,19 +94,22 @@ public class GaugeInstanceDescription extends GaugeTypeDescription {
         }
     }
 
+    @Nullable
     public String gaugeName () {
         return m_instName;
     }
 
+    @Nullable
     public String instanceComment () {
         return m_instComment;
     }
 
+    @Nullable
     public TypedAttribute modelDesc () {
         return m_modelDesc;
     }
 
-    public void setModelDesc (TypedAttribute modelDesc) {
+    public void setModelDesc (@NotNull TypedAttribute modelDesc) {
         m_modelDesc = modelDesc;
         Collection<OperationRepresentation> commands = m_commandSignatures.values ();
         for (OperationRepresentation command : commands) {
@@ -107,7 +118,7 @@ public class GaugeInstanceDescription extends GaugeTypeDescription {
     }
 
     @Override
-    public void addCommandSignature (String key, OperationRepresentation commandRep) {
+    public void addCommandSignature (String key, @NotNull OperationRepresentation commandRep) {
         if (m_modelDesc != null) {
             commandRep.setModel (m_modelDesc);
         }
@@ -122,10 +133,12 @@ public class GaugeInstanceDescription extends GaugeTypeDescription {
         return m_mappings.get(name);
     }
 
+    @Nullable
     public Map<String, OperationRepresentation> mappings () {
         return m_mappings;
     }
 
+    @Nullable
     public String id () {
         return m_id;
     }
@@ -138,7 +151,8 @@ public class GaugeInstanceDescription extends GaugeTypeDescription {
      * this method returns the value of that location.
      * @return String  the string indicating the location of the target host
      */
-    public String location () {
+    @Nullable
+    private String location () {
         String location = null;
         TypedAttributeWithValue loc = findSetupParam (LOCATION_PARAM_NAME);
         if (loc != null) {
@@ -147,6 +161,7 @@ public class GaugeInstanceDescription extends GaugeTypeDescription {
         return location;
     }
 
+    @Nullable
     public Beacon beacon () {
         return m_beacon;
     }
@@ -168,7 +183,8 @@ public class GaugeInstanceDescription extends GaugeTypeDescription {
         return m_state == State.ALIVE;
     }
 
-    public static String genID (GaugeInstanceDescription gd) {
+    @Nullable
+    public static String genID (@NotNull GaugeInstanceDescription gd) {
         return gd.gaugeName () + ":" + gd.gaugeType () + "@" + gd.location ();
     }
 

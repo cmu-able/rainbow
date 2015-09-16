@@ -39,7 +39,7 @@ public interface IDelegateManagementPort extends IDisposablePort {
      * 
      * @return an ID of the delegate
      */
-    public String getDelegateId ();
+    String getDelegateId ();
 
     // Master --> Delegate
 
@@ -51,19 +51,19 @@ public interface IDelegateManagementPort extends IDisposablePort {
      * 
      * @param configuration
      */
-    public void sendConfigurationInformation (Properties configuration);
+    void sendConfigurationInformation (Properties configuration);
 
     // Delegate --> Master
     /**
      * This is called by the delegate periodically to indicate that it is still alive. The intent is that this method
      * forward information to the Master
      */
-    public void heartbeat ();
+    void heartbeat ();
 
     /**
      * This is called by a delegate when it wants configuration information to be resent.
      */
-    public void requestConfigurationInformation ();
+    void requestConfigurationInformation ();
 
     // Lifecycle commands
     // Master --> Delegate
@@ -75,7 +75,7 @@ public interface IDelegateManagementPort extends IDisposablePort {
      * @throws IllegalStateException
      *             Thrown if the delegate is not in a state where it can be started. (e.g., it was terminated)
      */
-    public boolean startDelegate () throws IllegalStateException;
+    boolean startDelegate () throws IllegalStateException;
 
     /**
      * Tells the delegate to pause, blocking until the delegate has successfully paused (in which case it will return
@@ -85,7 +85,7 @@ public interface IDelegateManagementPort extends IDisposablePort {
      * @throws IllegalStateException
      *             Thrown if the delegate is not in a state where it can be paused.
      */
-    public boolean pauseDelegate () throws IllegalStateException;
+    boolean pauseDelegate () throws IllegalStateException;
 
     /**
      * Tells the delegate to terminate, effectively shutting it down. Ideally, before terminating, the delegate will
@@ -94,20 +94,20 @@ public interface IDelegateManagementPort extends IDisposablePort {
      * @return
      * @throws IllegalStateException
      */
-    public boolean terminateDelegate () throws IllegalStateException;
+    boolean terminateDelegate () throws IllegalStateException;
 
     /**
      * Sends a signal to the delegates to start probes
      * 
      * @throws IllegalStateException
      */
-    public void startProbes () throws IllegalStateException;
+    void startProbes () throws IllegalStateException;
 
     /**
      * Sends a signal to the delegates to kill probes
      * 
      * @throws IllegalStateException
      */
-    public void killProbes () throws IllegalStateException;
+    void killProbes () throws IllegalStateException;
 
 }

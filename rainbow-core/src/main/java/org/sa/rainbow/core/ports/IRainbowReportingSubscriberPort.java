@@ -24,18 +24,20 @@ import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
  */
 package org.sa.rainbow.core.ports;
 
-import java.util.EnumSet;
-
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 
+import java.util.EnumSet;
+
 public interface IRainbowReportingSubscriberPort extends IDisposablePort {
 
-    public interface IRainbowReportingSubscriberCallback {
-        public void report (RainbowComponentT component, ReportType type, String message);
+    interface IRainbowReportingSubscriberCallback {
+        void report (RainbowComponentT component, ReportType type, String message);
     }
-    public void subscribe (EnumSet<RainbowComponentT> components, EnumSet<ReportType> reports);
-    public void unsubscribe (EnumSet<RainbowComponentT> components, EnumSet<ReportType> reports);
+
+    void subscribe (EnumSet<RainbowComponentT> components, EnumSet<ReportType> reports);
+
+    void unsubscribe (EnumSet<RainbowComponentT> components, EnumSet<ReportType> reports);
 
 
 }

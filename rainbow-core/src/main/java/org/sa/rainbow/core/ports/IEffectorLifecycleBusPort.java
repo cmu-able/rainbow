@@ -24,16 +24,16 @@ he "Software"), to deal
  */
 package org.sa.rainbow.core.ports;
 
-import java.util.List;
-
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
 
+import java.util.List;
+
 public interface IEffectorLifecycleBusPort extends IDisposablePort {
-    public void reportCreated (IEffectorIdentifier effector);
+    void reportCreated (IEffectorIdentifier effector);
 
-    public void reportDeleted (IEffectorIdentifier effector);
+    void reportDeleted (IEffectorIdentifier effector);
 
-    public void reportExecuted (IEffectorIdentifier effector, Outcome outcome, List<String> args);
+    void reportExecuted (IEffectorIdentifier effector, Outcome outcome, List<String> args);
 
 }

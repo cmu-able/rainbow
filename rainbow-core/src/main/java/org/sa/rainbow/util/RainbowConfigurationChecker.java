@@ -23,21 +23,8 @@
  */
 package org.sa.rainbow.util;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.text.MessageFormat;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.IRainbowMaster;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowModelException;
@@ -59,11 +46,18 @@ import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
 import org.sa.rainbow.translator.probes.IProbe.Kind;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.text.MessageFormat;
+import java.util.*;
+
 public class RainbowConfigurationChecker implements IRainbowReportingPort {
 
     public enum ProblemT {
         WARNING, ERROR
-    };
+    }
 
     public class Problem {
 
@@ -79,9 +73,9 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
         public String   msg;
     }
 
-    List<Problem>         m_problems = new LinkedList<> ();
-    private IRainbowMaster m_master;
-    Set<String>           m_referredToProbes = new HashSet<> ();
+    final List<Problem> m_problems = new LinkedList<> ();
+    private final IRainbowMaster m_master;
+    final Set<String> m_referredToProbes = new HashSet<> ();
 
     public RainbowConfigurationChecker (IRainbowMaster master) {
         m_master = master;
@@ -120,7 +114,7 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
         }
     }
 
-    private void checkEffector (EffectorAttributes effector) {
+    private void checkEffector (@NotNull EffectorAttributes effector) {
 
         if (effector.effectorType != null) {
             if (m_master.effectorDesc ().effectorTypes.get (effector.effectorType.name) == null) {
@@ -148,7 +142,7 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
             }
             else {
                 try {
-                    this.getClass ().forName (effClass);
+                    Class.forName (effClass);
                 }
                 catch (ClassNotFoundException e) {
                     m_problems.add (new Problem (ProblemT.WARNING, MessageFormat.format (
@@ -173,7 +167,7 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
         }
     }
 
-    private void checkProbe (ProbeAttributes probe) {
+    private void checkProbe (@NotNull ProbeAttributes probe) {
         if (probe.alias == null || "".equals (probe.alias)) {
             m_problems.add (new Problem (ProblemT.ERROR, MessageFormat.format ("{0}: Does not have an alias",
                     probe.name)));
@@ -236,12 +230,12 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
         }
     }
 
-    private void checkGaugeType (GaugeTypeDescription gtd) {
+    private void checkGaugeType (@NotNull GaugeTypeDescription gtd) {
         checkSetupParam (gtd, "targetIP");
         checkSetupParam (gtd, "beaconPeriod");
     }
 
-    void checkSetupParam (GaugeTypeDescription gtd, String param) {
+    void checkSetupParam (@NotNull GaugeTypeDescription gtd, String param) {
         if (gtd.findSetupParam (param) == null) {
             Problem p = new Problem ();
             p.problem = ProblemT.ERROR;
@@ -250,7 +244,7 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
         }
     }
 
-    private void checkGaugeConsistent (GaugeInstanceDescription gid) {
+    private void checkGaugeConsistent (@NotNull GaugeInstanceDescription gid) {
         // Errors
         // Check if gauge type exsits in gauge spec
         GaugeTypeDescription type = m_master.gaugeDesc ().typeSpec.get (gid.gaugeType ());
@@ -355,7 +349,7 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
             if (!commandsFromType.isEmpty ()) {
                 Problem p = new Problem ();
                 p.problem = ProblemT.WARNING;
-                StringBuffer cmd = new StringBuffer ();
+                StringBuilder cmd = new StringBuilder ();
                 for (String c : commandsFromType) {
                     cmd.append (c);
                     cmd.append (", ");
@@ -423,8 +417,7 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
                 p.msg = MessageFormat.format ("{0}: refers to a class ''{1}'' that cannot be found on the class path.",
                         gid.gaugeName (), className);
                 m_problems.add (p);
-            }
-            catch (NoSuchMethodException | SecurityException e) {
+            } catch (@NotNull NoSuchMethodException | SecurityException e) {
                 Problem p = new Problem ();
                 p.problem = ProblemT.ERROR;
                 p.msg = MessageFormat.format ("{0}: The class ''{1}'' does not seem to have a valid constructor.",
@@ -455,7 +448,7 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
 
     }
 
-    protected boolean findCommand (ModelCommandFactory<?> cf, String commandName) throws RainbowModelException {
+    protected boolean findCommand (@NotNull ModelCommandFactory<?> cf, @NotNull String commandName) throws RainbowModelException {
         Method[] methods = cf.getClass ().getMethods ();
         Method method = null;
         boolean found = false;
@@ -468,12 +461,13 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
         return found;
     }
 
+    @NotNull
     public Collection<Problem> getProblems () {
         return m_problems;
     }
 
     @Override
-    public void fatal (RainbowComponentT type, String msg, Throwable e, Logger logger) {
+    public void fatal (RainbowComponentT type, String msg, @NotNull Throwable e, Logger logger) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream ();
         PrintStream ps = new PrintStream (baos);
         e.printStackTrace (ps);
@@ -488,7 +482,7 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
     }
 
     @Override
-    public void fatal (RainbowComponentT type, String msg, Throwable e) {
+    public void fatal (RainbowComponentT type, String msg, @NotNull Throwable e) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream ();
         PrintStream ps = new PrintStream (baos);
         e.printStackTrace (ps);
@@ -503,7 +497,7 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
     }
 
     @Override
-    public void error (RainbowComponentT type, String msg, Throwable e, Logger logger) {
+    public void error (RainbowComponentT type, String msg, @NotNull Throwable e, Logger logger) {
         error (type, msg, e);
     }
 
@@ -513,7 +507,7 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
     }
 
     @Override
-    public void error (RainbowComponentT type, String msg, Throwable e) {
+    public void error (RainbowComponentT type, String msg, @NotNull Throwable e) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream ();
         PrintStream ps = new PrintStream (baos);
         e.printStackTrace (ps);
@@ -528,7 +522,7 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
     }
 
     @Override
-    public void warn (RainbowComponentT type, String msg, Throwable e, Logger logger) {
+    public void warn (RainbowComponentT type, String msg, @NotNull Throwable e, Logger logger) {
         warn (type, msg, e);
     }
 
@@ -538,7 +532,7 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
     }
 
     @Override
-    public void warn (RainbowComponentT type, String msg, Throwable e) {
+    public void warn (RainbowComponentT type, String msg, @NotNull Throwable e) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream ();
         PrintStream ps = new PrintStream (baos);
         e.printStackTrace (ps);

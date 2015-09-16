@@ -1,9 +1,5 @@
 package org.sa.rainbow.core.ports.eseb.converters;
 
-import java.text.MessageFormat;
-
-import org.sa.rainbow.core.Rainbow.ExitState;
-
 import edu.cmu.cs.able.typelib.enumeration.EnumerationType;
 import edu.cmu.cs.able.typelib.enumeration.EnumerationValue;
 import edu.cmu.cs.able.typelib.jconv.TypelibJavaConversionRule;
@@ -14,31 +10,34 @@ import edu.cmu.cs.able.typelib.scope.AmbiguousNameException;
 import edu.cmu.cs.able.typelib.type.DataType;
 import edu.cmu.cs.able.typelib.type.DataValue;
 import incubator.pval.Ensure;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.sa.rainbow.core.Rainbow.ExitState;
+
+import java.text.MessageFormat;
 
 public class ExitStateConverter implements TypelibJavaConversionRule {
 
-    private PrimitiveScope m_scope;
+    private final PrimitiveScope m_scope;
 
     public ExitStateConverter (PrimitiveScope scope) {
         m_scope = scope;
     }
 
     @Override
-    public boolean handles_java (Object value, DataType dst) {
+    public boolean handles_java (Object value, @Nullable DataType dst) {
         Ensure.not_null (value);
-        if (value instanceof ExitState) return dst == null || "exit_state".equals (dst.name ());
-        return false;
+        return value instanceof ExitState && (dst == null || "exit_state".equals (dst.name ()));
     }
 
     @Override
-    public boolean handles_typelib (DataValue value, Class<?> cls) {
+    public boolean handles_typelib (@NotNull DataValue value, @Nullable Class<?> cls) {
         Ensure.not_null (value);
-        if ("exit_state".equals (value.type ().name ())) return cls == null || ExitState.class.isAssignableFrom (cls);
-        return false;
+        return "exit_state".equals (value.type ().name ()) && (cls == null || ExitState.class.isAssignableFrom (cls));
     }
 
     @Override
-    public DataValue from_java (Object value, DataType dst, TypelibJavaConverter converter)
+    public DataValue from_java (Object value, @Nullable DataType dst, TypelibJavaConverter converter)
             throws ValueConversionException {
         if ((dst == null || dst instanceof EnumerationType) && value instanceof ExitState) {
             try {
@@ -73,8 +72,9 @@ public class ExitStateConverter implements TypelibJavaConversionRule {
                         (dst == null ? "exit_state" : dst.absolute_hname ().toString ())));
     }
 
+    @NotNull
     @Override
-    public <T> T to_java (DataValue value, Class<T> cls, TypelibJavaConverter converter)
+    public <T> T to_java (DataValue value, @Nullable Class<T> cls, TypelibJavaConverter converter)
             throws ValueConversionException {
         if (value instanceof EnumerationValue) {
             EnumerationValue ev = (EnumerationValue )value;

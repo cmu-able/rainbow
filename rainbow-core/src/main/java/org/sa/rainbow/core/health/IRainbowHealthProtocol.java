@@ -43,34 +43,34 @@ package org.sa.rainbow.core.health;
  */
 public interface IRainbowHealthProtocol {
 
-    public static enum CloudType {
+    enum CloudType {
         DELEGATE, PB_RELAY, GAUGE, PROBE, EFFECTOR
     }
 
-    public static final String ID = "id";
-    public static final String CLOUD_TYPE = "cloudT";
-    public static final String LOCATION = "location";
-    public static final String SERVICE_NAME = "svcName";
-    public static final String EFFECTOR_KIND = "effK";
-    public static final String PROBE_KIND = "probeK";
-    public static final String TEXT = "txt";
-    public static final String BEACON_PERIOD = "beaconPer";
-    public static final String EXIT_VALUE = "exitVal";
+    String ID = "id";
+    String CLOUD_TYPE = "cloudT";
+    String LOCATION = "location";
+    String SERVICE_NAME = "svcName";
+    String EFFECTOR_KIND = "effK";
+    String PROBE_KIND = "probeK";
+    String TEXT = "txt";
+    String BEACON_PERIOD = "beaconPer";
+    String EXIT_VALUE = "exitVal";
 
-    public static final String DATA_RAINBOW_INIT = "=init=";
-    public static final String DATA_RAINBOW_TERM = "=term=";
-    public static final String DATA_MEMORY_USE = "#mem: ";
-    public static final String DATA_MODEL_PROPERTY = "#prop: ";
-    public static final String DATA_CONSTRAINT_BEGIN = "#eval-begin";
-    public static final String DATA_CONSTRAINT_END = "#eval-end";
-    public static final String DATA_ADAPTATION_BEGIN = "#adapt-begin";
-    public static final String DATA_ADAPTATION_SELECTION_BEGIN = "#adapt-select-begin";
-    public static final String DATA_ADAPTATION_SELECTION_END   = "#adapt-select-end";
-    public static final String DATA_ADAPTATION_STRATEGY_ATTR = "#adapt-aggAtt: ";
-    public static final String DATA_ADAPTATION_STRATEGY_ATTR2 = "#adapt-aggAt': ";
-    public static final String DATA_ADAPTATION_SCORE = "#adapt-score: ";
-    public static final String DATA_ADAPTATION_STRATEGY = "#adapt-outcome: ";
-    public static final String DATA_ADAPTATION_STAT = "#adapt-stat: ";
-    public static final String DATA_ADAPTATION_END = "#adapt-end";
+    String DATA_RAINBOW_INIT = "=init=";
+    String DATA_RAINBOW_TERM = "=term=";
+    String DATA_MEMORY_USE = "#mem: ";
+    String DATA_MODEL_PROPERTY = "#prop: ";
+    String DATA_CONSTRAINT_BEGIN = "#eval-begin";
+    String DATA_CONSTRAINT_END = "#eval-end";
+    String DATA_ADAPTATION_BEGIN = "#adapt-begin";
+    String DATA_ADAPTATION_SELECTION_BEGIN = "#adapt-select-begin";
+    String DATA_ADAPTATION_SELECTION_END = "#adapt-select-end";
+    String DATA_ADAPTATION_STRATEGY_ATTR = "#adapt-aggAtt: ";
+    String DATA_ADAPTATION_STRATEGY_ATTR2 = "#adapt-aggAt': ";
+    String DATA_ADAPTATION_SCORE = "#adapt-score: ";
+    String DATA_ADAPTATION_STRATEGY = "#adapt-outcome: ";
+    String DATA_ADAPTATION_STAT = "#adapt-stat: ";
+    String DATA_ADAPTATION_END = "#adapt-end";
 
 }

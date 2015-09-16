@@ -23,11 +23,11 @@
  */
 package org.sa.rainbow.core.ports;
 
-import java.util.List;
-
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
+
+import java.util.List;
 
 public interface IModelUSBusPort extends IDisposablePort {
 
@@ -39,7 +39,7 @@ public interface IModelUSBusPort extends IDisposablePort {
      * @param command
      *            The command to use to update the model
      */
-    public void updateModel (IRainbowOperation command);
+    void updateModel (IRainbowOperation command);
 
     /**
      * Is used to update the model with a list of commands. The commands may be executed as a transaction (i.e., failure
@@ -50,7 +50,7 @@ public interface IModelUSBusPort extends IDisposablePort {
      * @param transaction
      *            Whether this should be run as a transaction
      */
-    public void updateModel (List<IRainbowOperation> commands, boolean transaction);
+    void updateModel (List<IRainbowOperation> commands, boolean transaction);
 
     /**
      * Queries the model manager to return an instance of the model that can be used for querying. This can be used by
@@ -60,6 +60,6 @@ public interface IModelUSBusPort extends IDisposablePort {
      *            The reference to the model in the models manager
      * @return A model instance. NOTE: currently in Rainbow only local models are supported.
      */
-    public <T> IModelInstance<T> getModelInstance (ModelReference modelRef);
+    <T> IModelInstance<T> getModelInstance (ModelReference modelRef);
 
 }

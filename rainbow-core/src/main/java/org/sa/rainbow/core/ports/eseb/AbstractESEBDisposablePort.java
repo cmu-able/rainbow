@@ -23,10 +23,11 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import java.io.IOException;
-
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.ports.IDisposablePort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
+
+import java.io.IOException;
 
 /**
  * The parent class of all ESEB publishing ports. This class manages the connection to ESEB, as well as disposing
@@ -37,15 +38,16 @@ import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
  */
 public abstract class AbstractESEBDisposablePort implements IDisposablePort {
 
+    @Nullable
     private ESEBConnector m_connectionRole;
 
-    protected AbstractESEBDisposablePort (String host, short port, ChannelT channel) throws IOException {
+    protected AbstractESEBDisposablePort (@Nullable String host, short port, ChannelT channel) throws IOException {
         if (host != null) {
             m_connectionRole = new ESEBConnector (host, port, channel);
         }
     }
 
-    public AbstractESEBDisposablePort (short port, ChannelT channel) throws IOException {
+    protected AbstractESEBDisposablePort (short port, ChannelT channel) throws IOException {
         m_connectionRole = new ESEBConnector (port, channel);
     }
 
@@ -55,16 +57,12 @@ public abstract class AbstractESEBDisposablePort implements IDisposablePort {
     @Override
     public void dispose () {
         if (getConnectionRole () == null) return;
-        try {
-            getConnectionRole().close ();
-            m_connectionRole = null;
-        }
-        catch (IOException e) {
-            ESEBConnector.LOGGER.error (e);
-        }
+        getConnectionRole ().close ();
+        m_connectionRole = null;
     }
 
-    protected ESEBConnector getConnectionRole () {
+    @Nullable
+    public ESEBConnector getConnectionRole () {
         return m_connectionRole;
     }
 

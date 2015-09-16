@@ -32,7 +32,7 @@ package org.sa.rainbow.util;
 public class Beacon {
 
     /** The factor multiple of beacon period used to determine expiration */
-    public static final int EXPIRY_FACTOR = 10;
+    private static final int EXPIRY_FACTOR = 10;
 
     private long m_beaconPer = 0L;
     private long m_lastBeacon = 0L;
@@ -97,7 +97,7 @@ public class Beacon {
      *     <code>false</code> otherwise
      */
     public boolean isExpired () {
-        return (m_beaconPer == 0L) ? false : (EXPIRY_FACTOR*m_beaconPer < elapsedTime());
+        return (m_beaconPer != 0L) && (EXPIRY_FACTOR * m_beaconPer < elapsedTime ());
     }
 
     /**
@@ -108,7 +108,7 @@ public class Beacon {
      */
     public boolean periodElapsed () {
         long elapsedTime = elapsedTime();
-        return (m_beaconPer == 0L) ? false : (m_beaconPer < elapsedTime);
+        return (m_beaconPer != 0L) && (m_beaconPer < elapsedTime);
     }
 
 }

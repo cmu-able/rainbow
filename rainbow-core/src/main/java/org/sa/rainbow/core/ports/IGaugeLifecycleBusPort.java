@@ -23,10 +23,10 @@
  */
 package org.sa.rainbow.core.ports;
 
-import java.util.List;
-
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
+
+import java.util.List;
 
 /**
  * The API through which gauges report their lifeculce (from creation, configuration, to deletion)
@@ -41,14 +41,14 @@ public interface IGaugeLifecycleBusPort extends IDisposablePort {
      * 
      * @param gauge
      */
-    public void reportCreated (IGaugeIdentifier gauge);
+    void reportCreated (IGaugeIdentifier gauge);
 
     /**
      * Reports that a gauge has been deleted, giving it's id, type, and associated model
      * 
      * @param gauge
      */
-    public void reportDeleted (IGaugeIdentifier gauge);
+    void reportDeleted (IGaugeIdentifier gauge);
 
     /**
      * Reports that a gauge has been configured, along with the configuration parameters
@@ -58,7 +58,7 @@ public interface IGaugeLifecycleBusPort extends IDisposablePort {
      * @param configParams
      *            The parameters with which it was configured
      */
-    public void reportConfigured (IGaugeIdentifier gauge, List<TypedAttributeWithValue> configParams);
+    void reportConfigured (IGaugeIdentifier gauge, List<TypedAttributeWithValue> configParams);
 
     /**
      * The method through which a gauge sends its heartbeat, or beacon, so that listeners can be sure that it is still
@@ -67,6 +67,6 @@ public interface IGaugeLifecycleBusPort extends IDisposablePort {
      * @param gauge
      *            The gauge sending the beacon
      */
-    public void sendBeacon (IGaugeIdentifier gauge);
+    void sendBeacon (IGaugeIdentifier gauge);
 
 }

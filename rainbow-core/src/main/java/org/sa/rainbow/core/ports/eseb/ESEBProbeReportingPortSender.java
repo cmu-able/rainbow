@@ -23,17 +23,18 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import java.io.IOException;
-import java.text.MessageFormat;
-
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.ports.IProbeReportPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.translator.probes.IProbeIdentifier;
 
+import java.io.IOException;
+import java.text.MessageFormat;
+
 public class ESEBProbeReportingPortSender extends AbstractESEBDisposablePort implements IProbeReportPort {
-    static Logger         LOGGER = Logger.getLogger (ESEBProbeReportingPortSender.class);
+    private static final Logger LOGGER = Logger.getLogger (ESEBProbeReportingPortSender.class);
     private Identifiable  m_sender;
 
     public ESEBProbeReportingPortSender (Identifiable probe) throws IOException {
@@ -43,7 +44,7 @@ public class ESEBProbeReportingPortSender extends AbstractESEBDisposablePort imp
     }
 
     @Override
-    public void reportData (IProbeIdentifier probe, String data) {
+    public void reportData (@NotNull IProbeIdentifier probe, String data) {
         if (probe.id ().equals (m_sender.id ())) {
             RainbowESEBMessage msg = getConnectionRole().createMessage ();
             msg.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_PROBE_REPORT);

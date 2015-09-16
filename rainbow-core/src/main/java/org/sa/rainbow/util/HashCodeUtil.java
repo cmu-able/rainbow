@@ -23,6 +23,9 @@
  */
 package org.sa.rainbow.util;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.lang.reflect.Array;
 
 /**
@@ -102,7 +105,7 @@ public final class HashCodeUtil {
      * If <code>aObject</code> is an array, then each element may be a primitive
      * or a possibly-null object.
      */
-    public static int hash( int aSeed , Object aObject ) {
+    public static int hash (int aSeed, @Nullable Object aObject) {
         int result = aSeed;
         if ( aObject == null) {
             result = hash(result, 0);
@@ -129,7 +132,7 @@ public final class HashCodeUtil {
         return fODD_PRIME_NUMBER * aSeed;
     }
 
-    private static boolean isArray(Object aObject){
+    private static boolean isArray (@NotNull Object aObject) {
         return aObject.getClass().isArray();
     }
 }

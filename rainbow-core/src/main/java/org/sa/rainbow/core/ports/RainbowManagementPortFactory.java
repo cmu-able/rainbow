@@ -23,24 +23,21 @@
  */
 package org.sa.rainbow.core.ports;
 
+import org.apache.commons.lang.NotImplementedException;
+import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.sa.rainbow.core.*;
+import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.models.IModelsManager;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.Properties;
 
-import org.apache.commons.lang.NotImplementedException;
-import org.apache.log4j.Logger;
-import org.sa.rainbow.core.Identifiable;
-import org.sa.rainbow.core.Rainbow;
-import org.sa.rainbow.core.RainbowConstants;
-import org.sa.rainbow.core.RainbowDelegate;
-import org.sa.rainbow.core.RainbowMaster;
-import org.sa.rainbow.core.error.RainbowConnectionException;
-import org.sa.rainbow.core.models.IModelsManager;
-
 public class RainbowManagementPortFactory {
 
-    static Logger                      LOGGER          = Logger.getLogger (RainbowManagementPortFactory.class);
+    static final Logger LOGGER = Logger.getLogger (RainbowManagementPortFactory.class);
     static final String                DEFAULT_FACTORY = "org.sa.rainbow.ports.local.LocalRainbowDelegatePortFactory";
 
     static IRainbowConnectionPortFactory m_instance;
@@ -64,8 +61,8 @@ public class RainbowManagementPortFactory {
             }
             try {
                 Class<?> f = Class.forName (factory);
-                Method method = f.getMethod ("getFactory", new Class[0]);
-                m_instance = (IRainbowConnectionPortFactory )method.invoke (null, new Object[0]);
+                Method method = f.getMethod ("getFactory");
+                m_instance = (IRainbowConnectionPortFactory) method.invoke (null);
             }
             catch (ClassNotFoundException e) {
                 String errMsg = MessageFormat.format (
@@ -73,8 +70,7 @@ public class RainbowManagementPortFactory {
                 LOGGER.error (errMsg);
                 LOGGER.error (e);
                 throw new NotImplementedException (errMsg, e);
-            }
-            catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+            } catch (@NotNull NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
                     | InvocationTargetException e) {
                 String errMsg = MessageFormat.format (
                         "The class ''{0}'' does not implement the method ''{1}''. Bailing!", factory, "getFactory");

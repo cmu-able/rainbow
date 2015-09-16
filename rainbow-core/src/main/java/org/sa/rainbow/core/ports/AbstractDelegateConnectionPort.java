@@ -1,15 +1,16 @@
 package org.sa.rainbow.core.ports;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.text.MessageFormat;
-
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.ports.eseb.AbstractESEBDisposablePort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.text.MessageFormat;
 
 /*
  * The MIT License
@@ -39,17 +40,17 @@ IMasterConnectionPort, IRainbowReportingPort {
 
     protected RainbowDelegate m_delegate;
 
-    public AbstractDelegateConnectionPort (RainbowDelegate delegate, String host, short port, ChannelT channel)
+    protected AbstractDelegateConnectionPort (RainbowDelegate delegate, String host, short port, ChannelT channel)
             throws IOException {
         super (host, port, channel);
         m_delegate = delegate;
     }
 
-    public void report (ReportType type, RainbowComponentT compType, String msg) {
+    private void report (ReportType type, RainbowComponentT compType, String msg) {
         report (m_delegate.getId (), type, compType, msg);
     }
 
-    public void report (ReportType type, RainbowComponentT compType, String msg, Throwable t) {
+    private void report (ReportType type, RainbowComponentT compType, String msg, @NotNull Throwable t) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream ();
         PrintStream ps = new PrintStream (baos);
         t.printStackTrace (ps);
@@ -64,7 +65,7 @@ IMasterConnectionPort, IRainbowReportingPort {
     }
 
     @Override
-    public void info (RainbowComponentT type, String msg, Logger logger) {
+    public void info (RainbowComponentT type, String msg, @NotNull Logger logger) {
         logger.info (msg);
         report (ReportType.INFO, type, msg);
     }
@@ -75,18 +76,18 @@ IMasterConnectionPort, IRainbowReportingPort {
     }
 
     @Override
-    public void warn (RainbowComponentT type, String msg, Throwable e) {
+    public void warn (RainbowComponentT type, String msg, @NotNull Throwable e) {
         report (ReportType.WARNING, type, msg, e);
     }
 
     @Override
-    public void warn (RainbowComponentT type, String msg, Logger logger) {
+    public void warn (RainbowComponentT type, String msg, @NotNull Logger logger) {
         logger.warn (msg);
         report (ReportType.WARNING, type, msg);
     }
 
     @Override
-    public void warn (RainbowComponentT type, String msg, Throwable e, Logger logger) {
+    public void warn (RainbowComponentT type, String msg, @NotNull Throwable e, @NotNull Logger logger) {
         logger.warn (msg, e);
         report (ReportType.WARNING, type, msg, e);
     }
@@ -97,18 +98,18 @@ IMasterConnectionPort, IRainbowReportingPort {
     }
 
     @Override
-    public void error (RainbowComponentT type, String msg, Throwable e) {
+    public void error (RainbowComponentT type, String msg, @NotNull Throwable e) {
         report (ReportType.ERROR, type, msg, e);
     }
 
     @Override
-    public void error (RainbowComponentT type, String msg, Logger logger) {
+    public void error (RainbowComponentT type, String msg, @NotNull Logger logger) {
         logger.error (msg);
         report (ReportType.ERROR, type, msg);
     }
 
     @Override
-    public void error (RainbowComponentT type, String msg, Throwable e, Logger logger) {
+    public void error (RainbowComponentT type, String msg, @NotNull Throwable e, @NotNull Logger logger) {
         logger.error (msg, e);
         report (ReportType.ERROR, type, msg, e);
     }
@@ -119,18 +120,18 @@ IMasterConnectionPort, IRainbowReportingPort {
     }
 
     @Override
-    public void fatal (RainbowComponentT type, String msg, Throwable e) {
+    public void fatal (RainbowComponentT type, String msg, @NotNull Throwable e) {
         report (ReportType.FATAL, type, msg, e);
     }
 
     @Override
-    public void fatal (RainbowComponentT type, String msg, Logger logger) {
+    public void fatal (RainbowComponentT type, String msg, @NotNull Logger logger) {
         logger.fatal (msg);
         report (ReportType.FATAL, type, msg);
     }
 
     @Override
-    public void fatal (RainbowComponentT type, String msg, Throwable e, Logger logger) {
+    public void fatal (RainbowComponentT type, String msg, @NotNull Throwable e, @NotNull Logger logger) {
         logger.fatal (msg, e);
         report (ReportType.FATAL, type, msg, e);
     }

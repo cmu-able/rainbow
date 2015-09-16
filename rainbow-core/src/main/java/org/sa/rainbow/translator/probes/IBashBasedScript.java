@@ -31,11 +31,11 @@ package org.sa.rainbow.translator.probes;
 public interface IBashBasedScript {
 
     /* We're using UNIX path */
-    public static final String FILESEP = "/";
-    public static final String CYGWIN_BASH = "c:/server/cygwin/bin/bash.exe";
-    public static final String LINUX_BASH = "/bin/bash";
-    public static final String BASH_OPT = "-c";
-    public static final String LINUX_CHMOD = "/bin/chmod";
-    public static final String CHMOD_OPT = "u+x";
+    String FILESEP = "/";
+    String CYGWIN_BASH = "c:/server/cygwin/bin/bash.exe";
+    String LINUX_BASH = "/bin/bash";
+    String BASH_OPT = "-c";
+    String LINUX_CHMOD = "/bin/chmod";
+    String CHMOD_OPT = "u+x";
 
 }

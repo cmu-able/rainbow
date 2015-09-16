@@ -24,9 +24,9 @@ import org.sa.rainbow.core.event.IRainbowMessage;
  */
 package org.sa.rainbow.core.ports;
 
-import java.util.List;
-
 import org.sa.rainbow.core.event.IRainbowMessage;
+
+import java.util.List;
 
 public interface IModelChangeBusPort extends IRainbowMessageFactory, IDisposablePort {
 
@@ -35,14 +35,14 @@ public interface IModelChangeBusPort extends IRainbowMessageFactory, IDisposable
      * 
      * @param event
      */
-    public void announce (IRainbowMessage event);
+    void announce (IRainbowMessage event);
 
     /**
      * Announce a list of messages on the change bus
      * 
      * @param events
      */
-    public void announce (List<? extends IRainbowMessage> events);
+    void announce (List<? extends IRainbowMessage> events);
 
 
 }

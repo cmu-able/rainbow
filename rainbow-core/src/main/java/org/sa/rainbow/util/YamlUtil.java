@@ -26,34 +26,27 @@
  */
 package org.sa.rainbow.util;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeSet;
-
 import org.ho.yaml.Yaml;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.gauges.GaugeDescription;
 import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
 import org.sa.rainbow.core.gauges.GaugeTypeDescription;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
-import org.sa.rainbow.core.models.DescriptionAttributes;
-import org.sa.rainbow.core.models.EffectorDescription;
-import org.sa.rainbow.core.models.ModelReference;
-import org.sa.rainbow.core.models.ProbeDescription;
-import org.sa.rainbow.core.models.UtilityPreferenceDescription;
+import org.sa.rainbow.core.models.*;
 import org.sa.rainbow.core.models.UtilityPreferenceDescription.UtilityAttributes;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.translator.effectors.IEffector;
 import org.sa.rainbow.translator.probes.IProbe;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * This utility class provides methods for parsing specific Yaml files for Rainbow. The class is non-instantiable.
@@ -76,8 +69,8 @@ public abstract class YamlUtil {
 //        String utilityPath = Rainbow.getProperty (RainbowConstants.PROPKEY_UTILITY_PATH);
 //        return loadUtilityPrefs (utilityPath);
 //    }
-
-    public static UtilityPreferenceDescription loadUtilityPrefs (String utilityPath) {
+    @NotNull
+    public static UtilityPreferenceDescription loadUtilityPrefs (@NotNull String utilityPath) {
         UtilityPreferenceDescription prefDesc = new UtilityPreferenceDescription ();
 
         Map<String, Map<String, Map>> utilityDefMap = null;
@@ -92,21 +85,20 @@ public abstract class YamlUtil {
         }
         catch (FileNotFoundException e) {
             Util.logger ().error ("Loading Utiltiy Def Yaml file failed!", e);
-            utilityDefMap = new HashMap<String, Map<String, Map>> ();
+            utilityDefMap = new HashMap<> ();
         }
         // store associated model
         Map modelMap = utilityDefMap.get ("model");
         // this is optional for backward compatibility
         if (modelMap != null) {
-            ModelReference model = new ModelReference ((String )modelMap.get ("name"), (String )modelMap.get ("type"));
-            prefDesc.associatedModel = model;
+            prefDesc.associatedModel = new ModelReference ((String) modelMap.get ("name"), (String) modelMap.get ("type"));
         }
 
         // store weights
         Map<String, Map> weightMap = utilityDefMap.get ("weights");
         if (weightMap != null) {
             for (Map.Entry<String, Map> e : weightMap.entrySet ()) {
-                Map<String, Double> kvMap = new HashMap<String, Double> ();
+                Map<String, Double> kvMap = new HashMap<> ();
                 double sum = 0.0;
                 for (Object k : e.getValue ().keySet ()) {
                     Object v = e.getValue ().get (k);
@@ -157,12 +149,14 @@ public abstract class YamlUtil {
         return prefDesc;
     }
 
+    @NotNull
     public static GaugeDescription loadGaugeSpecs () {
         File gaugeSpec = Util.getRelativeToPath (Rainbow.instance ().getTargetPath (),
                 Rainbow.getProperty (RainbowConstants.PROPKEY_GAUGES_PATH));
         return loadGaugeSpecs (gaugeSpec);
     }
 
+    @NotNull
     @SuppressWarnings ("unchecked")
     public static GaugeDescription loadGaugeSpecs (File gaugeSpec) {
         GaugeDescription gd = new GaugeDescription ();
@@ -302,6 +296,7 @@ public abstract class YamlUtil {
         return gd;
     }
 
+    @NotNull
     @SuppressWarnings ("unchecked")
     public static EffectorDescription loadEffectorDesc () {
         EffectorDescription ed = new EffectorDescription ();
@@ -322,7 +317,7 @@ public abstract class YamlUtil {
             // acquire "variable" declarations and store as rainbow properties
             Map<String, String> varMap = (Map<String, String> )effectorMap.get ("vars");
             for (Map.Entry<String, String> varPair : varMap.entrySet ()) {
-                Rainbow.instance ().setProperty (varPair.getKey (), Util.evalTokens (varPair.getValue ()));
+                Rainbow.setProperty (varPair.getKey (), Util.evalTokens (varPair.getValue ()));
             }
 
             // store effector type info
@@ -382,6 +377,7 @@ public abstract class YamlUtil {
         return ed;
     }
 
+    @NotNull
     @SuppressWarnings ("unchecked")
     public static ProbeDescription loadProbeDesc () {
         ProbeDescription ed = new ProbeDescription ();
@@ -401,7 +397,7 @@ public abstract class YamlUtil {
             probeMap = (Map )o;
             Map<String, String> varMap = (Map<String, String> )probeMap.get ("vars");
             for (Map.Entry<String, String> varPair : varMap.entrySet ()) {
-                Rainbow.instance ().setProperty (varPair.getKey (), Util.evalTokens (varPair.getValue ()));
+                Rainbow.setProperty (varPair.getKey (), Util.evalTokens (varPair.getValue ()));
             }
 
             // store probe description info
@@ -440,8 +436,8 @@ public abstract class YamlUtil {
      * @param infoMap
      *            the map of key-value info pairs
      */
-    public static void extractArrays (DescriptionAttributes attr, Map<String, Object> infoMap) {
-        List<String> arrayKeys = new ArrayList<String> ();
+    public static void extractArrays (@NotNull DescriptionAttributes attr, @Nullable Map<String, Object> infoMap) {
+        List<String> arrayKeys = new ArrayList<> ();
         if (infoMap == null) return;
         for (Map.Entry<String, Object> pair : infoMap.entrySet ()) {
             if (pair.getKey ().endsWith (".length")) { // store just the key

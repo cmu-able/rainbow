@@ -26,9 +26,10 @@
  */
 package org.sa.rainbow.translator.effectors;
 
-import java.util.List;
-
+import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
+
+import java.util.List;
 
 /**
  * General interface for the system Effector. The Identifiable.id() returns the reference ID of this effector, which is
@@ -39,22 +40,26 @@ import org.sa.rainbow.core.ports.IRainbowReportingPort;
 public interface IEffector extends IEffectorIdentifier, IEffectorExecutionPort {
 
 
-    public static IEffector NULL_EFFECTOR = new IEffector () {
+    IEffector NULL_EFFECTOR = new IEffector () {
+        @NotNull
         @Override
         public String id () {
             return "NullEffector@0.0.0.0";
         }
 
+        @NotNull
         @Override
         public String service () {
             return "ANull";
         }
 
+        @NotNull
         @Override
         public Kind kind () {
             return Kind.NULL;
         }
 
+        @NotNull
         @Override
         public Outcome execute (List<String> args) {
             return Outcome.UNKNOWN;
@@ -72,6 +77,6 @@ public interface IEffector extends IEffectorIdentifier, IEffectorExecutionPort {
     };
 
 
-    public void setReportingPort (IRainbowReportingPort port);
+    void setReportingPort (IRainbowReportingPort port);
 
 }

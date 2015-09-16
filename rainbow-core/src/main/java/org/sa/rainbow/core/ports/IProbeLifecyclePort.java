@@ -33,28 +33,28 @@ import java.util.Map;
  */
 public interface IProbeLifecyclePort extends IDisposablePort {
 
-    public String PROBE_CREATED      = "probeCreated";
-    public String PROBE_ID           = "probeId";
-    public String PROBE_LOCATION     = "probeLocation";
-    public String PROBE_NAME         = "probeName";
-    public String PROBE_DELETED      = "probeDeleted";
-    public String PROBE_CONFIGURED   = "probeConfigured";
-    public String CONFIG_PARAM_NAME  = "probeConfigParamName";
-    public String CONFIG_PARAM_VALUE = "probeConfigParamValue";
-    public String PROBE_DEACTIVATED  = "probeDeactivated";
-    public String PROBE_ACTIVATED    = "probeActivated";
+    String PROBE_CREATED = "probeCreated";
+    String PROBE_ID = "probeId";
+    String PROBE_LOCATION = "probeLocation";
+    String PROBE_NAME = "probeName";
+    String PROBE_DELETED = "probeDeleted";
+    String PROBE_CONFIGURED = "probeConfigured";
+    String CONFIG_PARAM_NAME = "probeConfigParamName";
+    String CONFIG_PARAM_VALUE = "probeConfigParamValue";
+    String PROBE_DEACTIVATED = "probeDeactivated";
+    String PROBE_ACTIVATED = "probeActivated";
 
     /**
      * Reports that a probes has been created, giving it's id, type, and associated model
      * 
      */
-    public void reportCreated ();
+    void reportCreated ();
 
     /**
      * Reports that a probes has been deleted, giving it's id, type, and associated model
      * 
      */
-    public void reportDeleted ();
+    void reportDeleted ();
 
     /**
      * Reports that a gaugprobese has been configured, along with the configuration parameters
@@ -62,11 +62,11 @@ public interface IProbeLifecyclePort extends IDisposablePort {
      * @param configParams
      *            The parameters with which it was configured
      */
-    public void reportConfigured (Map<String, Object> configParams);
+    void reportConfigured (Map<String, Object> configParams);
 
-    public void reportDeactivated ();
+    void reportDeactivated ();
 
-    public void reportActivated ();
+    void reportActivated ();
 
 
 }

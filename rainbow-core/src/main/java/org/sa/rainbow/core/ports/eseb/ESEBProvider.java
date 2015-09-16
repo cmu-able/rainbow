@@ -23,29 +23,6 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.sa.rainbow.core.Rainbow;
-import org.sa.rainbow.core.RainbowConstants;
-import org.sa.rainbow.core.ports.eseb.converters.CollectionConverter;
-import org.sa.rainbow.core.ports.eseb.converters.CommandRepresentationConverter;
-import org.sa.rainbow.core.ports.eseb.converters.DescriptionAttributesConverter;
-import org.sa.rainbow.core.ports.eseb.converters.ExitStateConverter;
-import org.sa.rainbow.core.ports.eseb.converters.GaugeInstanceDescriptionConverter;
-import org.sa.rainbow.core.ports.eseb.converters.GaugeStateConverter;
-import org.sa.rainbow.core.ports.eseb.converters.OperationResultConverter;
-import org.sa.rainbow.core.ports.eseb.converters.OutcomeConverter;
-import org.sa.rainbow.core.ports.eseb.converters.TypedAttributeConverter;
-
 import edu.cmu.cs.able.eseb.bus.EventBus;
 import edu.cmu.cs.able.eseb.conn.BusConnection;
 import edu.cmu.cs.able.eseb.conn.BusConnectionState;
@@ -56,20 +33,30 @@ import edu.cmu.cs.able.typelib.jconv.TypelibJavaConversionRule;
 import edu.cmu.cs.able.typelib.parser.DefaultTypelibParser;
 import edu.cmu.cs.able.typelib.parser.TypelibParsingContext;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
+import org.jetbrains.annotations.NotNull;
+import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.ports.eseb.converters.*;
+
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
+import java.util.*;
 
 public class ESEBProvider {
 
     /** The set of BusServers on the local machine, keyed by the port **/
-    protected static Map<Short, EventBus>       s_servers            = new HashMap<> ();
+    private static final Map<Short, EventBus> s_servers = new HashMap<> ();
     /** The set of BusClients already created, keyed by host:port **/
-    protected static Map<String, BusConnection> s_clients            = new HashMap<> ();
+    private static final Map<String, BusConnection> s_clients = new HashMap<> ();
 
     /**
      * Connections are reused for the same host,port pair, so keep a count of the number of references (for the server
      * and the client) so that they can be better managed
      */
-    protected static Map<BusConnection, Integer> s_clientReferences = new HashMap<> ();
-    protected static Map<EventBus, Integer>      s_serverReferences = new HashMap<> ();
+    private static final Map<BusConnection, Integer> s_clientReferences = new HashMap<> ();
+    private static final Map<EventBus, Integer> s_serverReferences = new HashMap<> ();
     /**
      * Return the cached BusServer for this port, creating a new one if it doesn't yet exist
      * 
@@ -78,7 +65,7 @@ public class ESEBProvider {
      * @return the cached or newly created BusServer
      * @throws IOException
      */
-    static EventBus getBusServer (short port) throws IOException {
+    static EventBus getBusServer (short port) {
         EventBus s = s_servers.get (port);
         if (s == null || s.closed ()) {
             ESEBConnector.LOGGER.debug (MessageFormat.format ("Constructing a new BusServer on port {0}", port));
@@ -116,19 +103,15 @@ public class ESEBProvider {
         return c;
     }
 
+    @NotNull
     private static String clientKey (String remoteHost, short remotePort) {
-        StringBuilder sb = new StringBuilder ();
-        sb.append (remoteHost);
-        sb.append (":");
-        sb.append (remotePort);
-        String key = sb.toString ();
-        return key;
+        return remoteHost + ":" + remotePort;
     }
 
     static final PrimitiveScope                        SCOPE             = new PrimitiveScope ();
-    protected static final DefaultTypelibJavaConverter CONVERTER         = DefaultTypelibJavaConverter.make (SCOPE);
-    protected static final Set<String>                 REGISTERED_CONVERTERS = new HashSet<> ();
-    protected static List<TypelibJavaConversionRule>   RULES;
+    static final DefaultTypelibJavaConverter CONVERTER = DefaultTypelibJavaConverter.make (SCOPE);
+    private static final Set<String> REGISTERED_CONVERTERS = new HashSet<> ();
+    private static List<TypelibJavaConversionRule> RULES;
     static {
 
 
@@ -170,7 +153,7 @@ public class ESEBProvider {
                     context);
             parser.parse (new ParsecFileReader ()
                     .read_memory ("struct model_reference {string model_name; string model_type;}"), context);
-            RULES = new LinkedList<TypelibJavaConversionRule> ();
+            RULES = new LinkedList<> ();
             RULES.add (new CollectionConverter ());
             RULES.add (new TypedAttributeConverter (ESEBProvider.SCOPE));
             RULES.add (new CommandRepresentationConverter (ESEBProvider.SCOPE));
@@ -190,7 +173,7 @@ public class ESEBProvider {
         }
     }
 
-    public static void registerConverter (Class<TypelibJavaConversionRule> converterClass) {
+    public static void registerConverter (@NotNull Class<TypelibJavaConversionRule> converterClass) {
         if (!REGISTERED_CONVERTERS.contains (converterClass.getCanonicalName ())) {
             try {
                 Constructor<?> constructor = converterClass.getConstructor (PrimitiveScope.class);
@@ -198,8 +181,7 @@ public class ESEBProvider {
                 REGISTERED_CONVERTERS.add (converterClass.getCanonicalName ());
                 RULES.add (r);
                 CONVERTER.add (r);
-            }
-            catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
+            } catch (@NotNull NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
                     | IllegalArgumentException | InvocationTargetException e) {
                 ESEBConnector.LOGGER.error (MessageFormat.format ("Could not construct model converter ''{0}''.",
                         converterClass.getCanonicalName ()));
@@ -216,8 +198,7 @@ public class ESEBProvider {
         if (port == null) {
             port = "1234";
         }
-        short p = Short.valueOf (port);
-        return p;
+        return Short.valueOf (port);
     }
 
     public static short getESEBClientPort (String property) {
@@ -228,8 +209,7 @@ public class ESEBProvider {
                 port = "1234";
             }
         }
-        short p = Short.valueOf (port);
-        return p;
+        return Short.valueOf (port);
     }
 
     public static String getESEBClientHost (String property) {
@@ -241,8 +221,7 @@ public class ESEBProvider {
     }
 
     public static String getESEBClientHost () {
-        String host = Rainbow.getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION, "localhost");
-        return host;
+        return Rainbow.getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION, "localhost");
     }
 
     /**
@@ -250,7 +229,7 @@ public class ESEBProvider {
      * 
      * @param client
      */
-    public static void releaseClient (BusConnection client) {
+    public static void releaseClient (@NotNull BusConnection client) {
         Integer counts = s_clientReferences.get (client);
         if (counts != null) {
             counts--;
@@ -294,7 +273,7 @@ public class ESEBProvider {
      * 
      * @param srvr
      */
-    public static void releaseServer (EventBus srvr) {
+    public static void releaseServer (@NotNull EventBus srvr) {
         Integer counts = s_serverReferences.get (srvr);
         if (counts != null) {
             counts--;

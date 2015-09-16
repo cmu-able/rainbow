@@ -24,26 +24,10 @@
 
 package org.sa.rainbow.util;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.log4j.Priority;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 import org.reflections.scanners.SubTypesScanner;
@@ -58,9 +42,21 @@ import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.translator.probes.IBashBasedScript;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class Util {
 
-    static Logger                         LOGGER                   = Logger.getLogger (Util.class);
+    static final Logger LOGGER = Logger.getLogger (Util.class);
 
     public static final String            FILESEP                  = "/";
     public static final String            PATHSEP                  = ":";
@@ -86,17 +82,18 @@ public class Util {
     public static final String            TOKEN_END                = "}";
     private static final String           LB_ESC                   = "\\$\\{";                                         // make sure this corresponds
     private static final String           RB_ESC                   = "\\}";                                            // make sure this corresponds
-    private static Pattern                m_substitutePattern      = Pattern.compile ("[^\\$]*" + LB_ESC + "(.+?)"
+    private static final Pattern m_substitutePattern = Pattern.compile ("[^\\$]*" + LB_ESC + "(.+?)"
             + RB_ESC + "[^\\$]*");
 
 
+    @Nullable
     public static File computeBasePath (final String configPath) {
         // determine path to target config dir
         File basePath = new File (System.getProperty ("user.dir"));
         LOGGER.debug (MessageFormat.format ("CWD: {0}, looking for config \"{1}\"", basePath, configPath));
         FilenameFilter configFilter = new FilenameFilter () {
             @Override
-            public boolean accept (File dir, String name) {
+            public boolean accept (File dir, @NotNull String name) {
                 return name.equals (configPath);
             }
         };
@@ -114,10 +111,9 @@ public class Util {
         return basePath;
     }
 
-    public static File getRelativeToPath (File parent, String relPath) {
+    public static File getRelativeToPath (@NotNull File parent, @NotNull String relPath) {
         try {
-            File newF = new File (parent, relPath).getCanonicalFile ();
-            return newF;
+            return new File (parent, relPath).getCanonicalFile ();
         }
         catch (IOException e) {
             LOGGER.error (MessageFormat.format ("Failed to get relative to path {0}{2}{1}", parent.getAbsolutePath (),
@@ -126,12 +122,13 @@ public class Util {
         return null;
     }
 
-    public static String unifyPath (String path) {
+    public static String unifyPath (@NotNull String path) {
         if (File.separator != FILESEP) return path.replace (File.separator, FILESEP);
         return path;
     }
 
-    public static String evalTokens (String str, Properties props) {
+    @Nullable
+    public static String evalTokens (@Nullable String str, @Nullable Properties props) {
         if (str == null) return str;
         if (props == null) return str;
         String result = str;
@@ -151,25 +148,26 @@ public class Util {
         return result;
     }
 
-    public static String evalTokens (String str) {
+    @Nullable
+    public static String evalTokens (@Nullable String str) {
         if (str == null) return str;
         return evalTokens (str, Rainbow.allProperties ());
     }
 
-    public static String[] evalCommandParameters (String value) {
+    @NotNull
+    public static String[] evalCommandParameters (@NotNull String value) {
         String regex = ",|\\.|\\(|\\)";
         String[] split = value.split (regex);
 
         String[] ret = new String[split.length - 1];
         ret[0] = split[0];
         // The command name is the second in the split, so skip over it.
-        for (int i = 1; i < split.length - 1; i++) {
-            ret[i] = split[i + 1];
-        }
+        System.arraycopy (split, 2, ret, 1, split.length - 1 - 1);
         return ret;
     }
 
-    public static String[] evalCommand (String value) {
+    @NotNull
+    public static String[] evalCommand (@NotNull String value) {
         String[] split = value.split (",|\\.|\\(|\\|");
         for (int i = 0; i < split.length; i++) {
             split[i] = split[i].trim ();
@@ -182,13 +180,15 @@ public class Util {
     //////////////////////////////////////////////
     //Type manipulation utility
     //
+    @Nullable
     private static Map<String, Class<?>>   m_primName2Class  = null;
+    @Nullable
     private static Map<Class<?>, Class<?>> m_primClass2Class = null;
 
     private static void lazyInitMaps () {
         if (m_primName2Class != null) return; // already init'd
         // Map of primitive type names to Java Class
-        m_primName2Class = new HashMap<String, Class<?>> ();
+        m_primName2Class = new HashMap<> ();
         m_primName2Class.put ("int", Integer.class);
         m_primName2Class.put ("short", Short.class);
         m_primName2Class.put ("long", Long.class);
@@ -198,7 +198,7 @@ public class Util {
         m_primName2Class.put ("byte", Byte.class);
         m_primName2Class.put ("char", Character.class);
         // Map of primitive type class to Java Class
-        m_primClass2Class = new HashMap<Class<?>, Class<?>> ();
+        m_primClass2Class = new HashMap<> ();
         m_primClass2Class.put (int.class, Integer.class);
         m_primClass2Class.put (short.class, Short.class);
         m_primClass2Class.put (long.class, Long.class);
@@ -209,7 +209,7 @@ public class Util {
         m_primClass2Class.put (char.class, Character.class);
     }
 
-    public static Object parseObject (String val, String classStr) {
+    public static Object parseObject (String val, @NotNull String classStr) {
         Object valObj = val; // by default, return just the String value
         try {
             Class<?> typeClass = Class.forName (classStr);
@@ -223,15 +223,12 @@ public class Util {
             // see if it's one of the primitive types
             lazyInitMaps ();
             valObj = parsePrimitiveValue (val, m_primName2Class.get (classStr.intern ()));
-        }
-        catch (InstantiationException e) {
-        }
-        catch (IllegalAccessException e) {
+        } catch (@NotNull InstantiationException | IllegalAccessException e) {
         }
         return valObj;
     }
 
-    public static Object parsePrimitiveValue (String val, Class<?> clazz) {
+    public static Object parsePrimitiveValue (String val, @Nullable Class<?> clazz) {
         if (clazz == null) return val;
 
         Object primVal = val; // by default, return the String value
@@ -248,16 +245,7 @@ public class Util {
             Object[] args = new Object[1];
             args[0] = val;
             primVal = m.invoke (null, args);
-        }
-        catch (SecurityException e) {
-        }
-        catch (NoSuchMethodException e) {
-        }
-        catch (IllegalArgumentException e) {
-        }
-        catch (IllegalAccessException e) {
-        }
-        catch (InvocationTargetException e) {
+        } catch (@NotNull SecurityException | InvocationTargetException | IllegalAccessException | IllegalArgumentException | NoSuchMethodException e) {
         }
         return primVal;
     }
@@ -275,11 +263,13 @@ public class Util {
      *            the element's location in lowercase
      * @return String the concatenated string forming the unique identifier
      */
-    public static String genID (String name, String target) {
+    @NotNull
+    public static String genID (String name, @NotNull String target) {
         return name + AT + target.toLowerCase ();
     }
 
-    public static Pair<String, String> decomposeID (String id) {
+    @Nullable
+    public static Pair<String, String> decomposeID (@NotNull String id) {
         String name = null;
         String loc = null;
         int atIdx = id.indexOf (AT);
@@ -290,10 +280,11 @@ public class Util {
         else { // name only
             name = id;
         }
-        return new Pair<String, String> (name, loc);
+        return new Pair<> (name, loc);
     }
 
-    public static ModelReference decomposeModelReference (String modelRef) {
+    @Nullable
+    public static ModelReference decomposeModelReference (@NotNull String modelRef) {
         String name = null;
         String type = null;
         int atIdx = modelRef.indexOf (':');
@@ -307,6 +298,7 @@ public class Util {
         return new ModelReference (name, type);
     }
 
+    @NotNull
     public static String genModelRef (String modelName, String modelType) {
         return modelName + ":" + modelType;
     }
@@ -318,10 +310,10 @@ public class Util {
      *            the process to read output from
      * @return String the textual output, with any MS-Dos newline replaced
      */
-    public static String getProcessOutput (Process p) {
+    public static String getProcessOutput (@NotNull Process p) {
         String str = "";
         try {
-            StringBuffer buf = new StringBuffer ();
+            StringBuilder buf = new StringBuilder ();
             byte[] bytes = new byte[Util.MAX_BYTES];
             BufferedInputStream bis = new BufferedInputStream (p.getInputStream ());
             while (bis.available () > 0) {
@@ -418,6 +410,7 @@ public class Util {
     public static final String   DATA_PATTERN        = "%d{ISO8601} %m%n";
 
 
+    @NotNull
     public static Properties defineLoggerProperties () {
         String filepath = Rainbow.getProperty (RainbowConstants.PROPKEY_LOG_PATH);
         if (!filepath.startsWith ("/")) {
@@ -461,9 +454,11 @@ public class Util {
         return props;
     }
 
+    @Nullable
     private static Logger m_dataLogger = null;
 
 
+    @Nullable
     public static Logger dataLogger () {
         if (m_dataLogger == null) {
 //            PropertyConfigurator.configure (defineLoggerProperties ());
@@ -488,12 +483,8 @@ public class Util {
         }
     }
 
-    public static void reportMemUsage () { 
-        StringBuffer usageStr = new StringBuffer (IRainbowHealthProtocol.DATA_MEMORY_USE);
-        usageStr.append (Runtime.getRuntime ().freeMemory ()).append (" ");
-        usageStr.append (Runtime.getRuntime ().totalMemory ()).append (" ");
-        usageStr.append (Runtime.getRuntime ().maxMemory ()).append (" ");
-        dataLogger ().info (usageStr.toString ());
+    public static void reportMemUsage () {
+        dataLogger ().info (IRainbowHealthProtocol.DATA_MEMORY_USE + Runtime.getRuntime ().freeMemory () + " " + Runtime.getRuntime ().totalMemory () + " " + Runtime.getRuntime ().maxMemory () + " ");
     }
 
     /**
@@ -506,19 +497,20 @@ public class Util {
      * @throws ClassNotFoundException
      *             if the package name points to an invalid package
      */
-    public static Class[] getClasses (String pkgname) throws ClassNotFoundException {
-        List<ClassLoader> classLoaderList = new LinkedList<ClassLoader> ();
+    @NotNull
+    public static Class[] getClasses (@NotNull String pkgname) throws ClassNotFoundException {
+        List<ClassLoader> classLoaderList = new LinkedList<> ();
         classLoaderList.add (ClasspathHelper.contextClassLoader ());
         classLoaderList.add (ClasspathHelper.staticClassLoader ());
 
         Reflections reflections = new Reflections (new ConfigurationBuilder ()
         .setScanners (new SubTypesScanner (false /* don't exclude Object.class */), new ResourcesScanner ())
-        .setUrls (ClasspathHelper.forClassLoader (classLoaderList.toArray (new ClassLoader[0])))
+                .setUrls (ClasspathHelper.forClassLoader (classLoaderList.toArray (new ClassLoader[classLoaderList.size ()])))
         .filterInputsBy (new FilterBuilder ().include (FilterBuilder.prefix (pkgname))));
         Set<Class<?>> classes = reflections.getSubTypesOf (Object.class);
         if (classes != null) {
             LinkedList<Class<?>> ll = new LinkedList<> (classes);
-            return ll.toArray (new Class[0]);
+            return ll.toArray (new Class[ll.size ()]);
         }
         return new Class[0];
 //        List<Class<?>> classes = new ArrayList<Class<?>> ();
@@ -577,22 +569,23 @@ public class Util {
 //        return classArray;
     }
 
-    public static Priority reportTypeToPriority (ReportType type) {
+    public static Level reportTypeToPriority (@NotNull ReportType type) {
         switch (type) {
         case INFO:
-            return Priority.INFO;
+            return Level.INFO;
         case ERROR:
-            return Priority.ERROR;
+            return Level.ERROR;
         case FATAL:
-            return Priority.FATAL;
+            return Level.FATAL;
         case WARNING:
-            return Priority.WARN;
+            return Level.WARN;
         }
-        return Priority.ERROR;
+        return Level.ERROR;
     }
 
 
-    public static Properties propertiesByPrefix (String prefix, Properties props) {
+    @NotNull
+    public static Properties propertiesByPrefix (@NotNull String prefix, @NotNull Properties props) {
         Properties result = new Properties ();
         for (Object o : props.keySet ()) {
             String key = (String )o;
@@ -604,7 +597,8 @@ public class Util {
         return result;
     }
 
-    public static Properties propertiesByRegex (String regex, Properties props) {
+    @NotNull
+    public static Properties propertiesByRegex (@NotNull String regex, @NotNull Properties props) {
         Properties result = new Properties ();
         for (Object o : props.keySet ()) {
             String key = (String )o;
@@ -615,7 +609,7 @@ public class Util {
         return result;
     }
 
-    public static boolean safeEquals (Object a, Object b) {
+    public static boolean safeEquals (@Nullable Object a, @Nullable Object b) {
         return a != null ? a.equals (b) : b == null;
     }
 }

@@ -23,6 +23,9 @@
  */
 package org.sa.rainbow.core.util;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.io.Serializable;
 
 /**
@@ -35,8 +38,10 @@ public class Pair<T,E> implements Serializable, Comparable<Pair<T,E>>, Cloneable
     private static final long serialVersionUID = -3528940665822993558L;
 
     /** First value of the pair, usually a "type" */
+    @Nullable
     private T m_t = null;
     /** Second value of the pair, usually a name or "element" */
+    @Nullable
     private E m_e = null;
 
     /**
@@ -84,9 +89,7 @@ public class Pair<T,E> implements Serializable, Comparable<Pair<T,E>>, Cloneable
     @Override
     public int hashCode() {
         // create hashcode from the strings of the pair element objects
-        StringBuilder buf = new StringBuilder();
-        buf.append(m_t).append(m_e);
-        return buf.toString().hashCode();
+        return (String.valueOf (m_t) + m_e).hashCode ();
     }
 
     /* (non-Javadoc)
@@ -104,7 +107,7 @@ public class Pair<T,E> implements Serializable, Comparable<Pair<T,E>>, Cloneable
      */
     @Override
     @SuppressWarnings("unchecked")
-    public int compareTo(Pair<T,E> p) {
+    public int compareTo (@NotNull Pair<T, E> p) {
         // now we do comparison
         int rv = ((Comparable<T> )firstValue()).compareTo(p.firstValue());
         if (rv == 0) {
@@ -121,6 +124,7 @@ public class Pair<T,E> implements Serializable, Comparable<Pair<T,E>>, Cloneable
     /* (non-Javadoc)
      * @see java.lang.Object#clone()
      */
+    @Nullable
     @SuppressWarnings("unchecked")
     @Override
     public Object clone () {
@@ -135,6 +139,7 @@ public class Pair<T,E> implements Serializable, Comparable<Pair<T,E>>, Cloneable
         return clonedPair;
     }
 
+    @Nullable
     public T firstValue () {
         return m_t;
     }
@@ -143,6 +148,7 @@ public class Pair<T,E> implements Serializable, Comparable<Pair<T,E>>, Cloneable
         m_t = t;
     }
 
+    @Nullable
     public E secondValue () {
         return m_e;
     }

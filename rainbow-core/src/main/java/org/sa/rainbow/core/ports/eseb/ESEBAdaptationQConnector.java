@@ -1,18 +1,20 @@
 package org.sa.rainbow.core.ports.eseb;
 
-import java.util.concurrent.LinkedBlockingDeque;
-
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.adaptation.AdaptationTree;
 import org.sa.rainbow.core.adaptation.IEvaluable;
 import org.sa.rainbow.core.ports.IRainbowAdaptationDequeuePort;
 import org.sa.rainbow.core.ports.IRainbowAdaptationEnqueuePort;
 
+import java.util.concurrent.LinkedBlockingDeque;
+
 public class ESEBAdaptationQConnector<S extends IEvaluable> implements IRainbowAdaptationEnqueuePort<S>, IRainbowAdaptationDequeuePort<S> {
 
+    @Nullable
     private LinkedBlockingDeque<AdaptationTree<S>> m_Q;
 
     public ESEBAdaptationQConnector () {
-        m_Q = new LinkedBlockingDeque<AdaptationTree<S>> ();
+        m_Q = new LinkedBlockingDeque<> ();
     }
 
     @Override

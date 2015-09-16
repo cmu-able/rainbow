@@ -23,27 +23,23 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import java.text.MessageFormat;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
-
-import org.apache.log4j.Logger;
-import org.sa.rainbow.core.error.RainbowException;
-import org.sa.rainbow.core.event.IRainbowMessage;
-
 import edu.cmu.cs.able.typelib.comp.MapDataType;
 import edu.cmu.cs.able.typelib.comp.MapDataValue;
 import edu.cmu.cs.able.typelib.jconv.ValueConversionException;
 import edu.cmu.cs.able.typelib.prim.StringValue;
 import edu.cmu.cs.able.typelib.type.DataValue;
+import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.sa.rainbow.core.error.RainbowException;
+import org.sa.rainbow.core.event.IRainbowMessage;
+
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.Map.Entry;
 
 public class RainbowESEBMessage implements IRainbowMessage {
-    static Logger LOGGER = Logger.getLogger (RainbowESEBMessage.class);
+    static final Logger LOGGER = Logger.getLogger (RainbowESEBMessage.class);
     protected static final MapDataType    MAP_STRING_TO_ANY = MapDataType.map_of (ESEBProvider.SCOPE.string (), ESEBProvider.SCOPE.any (), ESEBProvider.SCOPE);
     /** The prefix that encodes properties in maps that are sent on the wire **/
     private static final String PROP_PREFIX = "__PROP_";
@@ -59,9 +55,10 @@ public class RainbowESEBMessage implements IRainbowMessage {
         m_esebMap = mdv;
     }
 
+    @NotNull
     @Override
     public List<String> getPropertyNames () {
-        LinkedList<String> pns = new LinkedList<String> ();
+        LinkedList<String> pns = new LinkedList<> ();
         Map<DataValue, DataValue> all = m_esebMap.all ();
         Set<DataValue> keySet = all.keySet ();
         for (DataValue dv : keySet) {
@@ -72,6 +69,7 @@ public class RainbowESEBMessage implements IRainbowMessage {
         return pns;
     }
 
+    @Nullable
     @Override
     public Object getProperty (String id) {
         DataValue dv = m_esebMap.get (ESEBProvider.SCOPE.string ().make (id));
@@ -87,7 +85,7 @@ public class RainbowESEBMessage implements IRainbowMessage {
     }
 
     @Override
-    public void setProperty (String id, Object prop) throws RainbowException {
+    public void setProperty (String id, @NotNull Object prop) throws RainbowException {
         try {
             m_esebMap.put (ESEBProvider.CONVERTER.from_java (id, ESEBProvider.SCOPE.string ()), ESEBProvider.CONVERTER.from_java (prop, null));
         }
@@ -148,11 +146,11 @@ public class RainbowESEBMessage implements IRainbowMessage {
         m_esebMap.remove (ESEBProvider.SCOPE.string ().make (key));
     }
 
-    public void fillProperties (Properties props) {
+    public void fillProperties (@NotNull Properties props) {
         for (Entry<Object, Object> entry : props.entrySet ()) {
             String key = null;
             if (entry.getKey () instanceof String) {
-                key = PROP_PREFIX + (String )entry.getKey ();
+                key = PROP_PREFIX + entry.getKey ();
             }
             else {
                 LOGGER.error (MessageFormat.format (
@@ -174,6 +172,7 @@ public class RainbowESEBMessage implements IRainbowMessage {
 
     }
 
+    @NotNull
     public Properties pulloutProperties () {
         Properties p = new Properties ();
         Map<DataValue, DataValue> msg = m_esebMap.all ();
@@ -199,6 +198,7 @@ public class RainbowESEBMessage implements IRainbowMessage {
         return m_esebMap.contains (ESEBProvider.SCOPE.string ().make (key));
     }
 
+    @NotNull
     @Override
     public String toString () {
         StringBuilder str = new StringBuilder ();

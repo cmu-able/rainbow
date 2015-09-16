@@ -23,19 +23,9 @@
  */
 package org.sa.rainbow.translator.probes;
 
-import java.io.File;
-import java.lang.reflect.Constructor;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
@@ -45,11 +35,19 @@ import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
 import org.sa.rainbow.core.util.RainbowLogger;
 import org.sa.rainbow.util.Util;
 
+import java.io.File;
+import java.lang.reflect.Constructor;
+import java.text.MessageFormat;
+import java.util.*;
+
 public class LocalProbeManager extends AbstractRainbowRunnable {
     Logger                      LOGGER          = Logger.getLogger (this.getClass ());
+    @NotNull
     static String NAME = "ProbeManager";
     private ProbeDescription               m_localProbeDesc;
+    @NotNull
     private Map<String, IProbe>            m_localProbes = new HashMap<> ();
+    @NotNull
     private Map<String, IProbe>            m_alias2Probe = new HashMap<> ();
 
     private boolean                        m_probesStarted = false;
@@ -90,8 +88,7 @@ public class LocalProbeManager extends AbstractRainbowRunnable {
     }
 
 
-
-    public synchronized void initProbes (List<ProbeAttributes> probes) {
+    public synchronized void initProbes (@NotNull List<ProbeAttributes> probes) {
         m_localProbeDesc = new ProbeDescription ();
         m_localProbeDesc.probes = new TreeSet<> (probes);
         // obtain the list of probes to create
@@ -131,8 +128,8 @@ public class LocalProbeManager extends AbstractRainbowRunnable {
                 case JAVA:
                     probeClazz = pbAttr.getInfo().get ("class");
                     // get argument info for Java probe, including ID and possibly sleep period
-                    List<Class<?>> paramList = new ArrayList<Class<?>> ();
-                    List<Object> argsList = new ArrayList<Object> ();
+                    List<Class<?>> paramList = new ArrayList<> ();
+                    List<Object> argsList = new ArrayList<> ();
                     paramList.add (String.class);
                     argsList.add (refID);
                     String periodStr = pbAttr.getInfo().get ("period");
@@ -147,7 +144,7 @@ public class LocalProbeManager extends AbstractRainbowRunnable {
                             argsList.add (vObj);
                         }
                     }
-                    params = paramList.toArray (new Class<?>[0]);
+                    params = paramList.toArray (new Class<?>[paramList.size ()]);
                     args = argsList.toArray ();
                     break;
                 }
@@ -183,7 +180,7 @@ public class LocalProbeManager extends AbstractRainbowRunnable {
         deregisterProbe (probe);
     }
 
-    protected void deregisterProbe (IProbe probe) {
+    protected void deregisterProbe (@Nullable IProbe probe) {
         if (probe != null) {
             if (probe.isActive ()) {
                 probe.deactivate ();
@@ -197,6 +194,7 @@ public class LocalProbeManager extends AbstractRainbowRunnable {
         }
     }
 
+    @Nullable
     public Set<ProbeAttributes> getProbeConfiguration () {
         return m_localProbeDesc.probes;
     }
@@ -219,6 +217,7 @@ public class LocalProbeManager extends AbstractRainbowRunnable {
         }
     }
 
+    @NotNull
     @Override
     protected RainbowComponentT getComponentType () {
         return RainbowComponentT.PROBE_MANAGER;

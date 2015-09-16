@@ -23,9 +23,7 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import java.io.IOException;
-import java.util.List;
-
+import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowMaster;
@@ -36,6 +34,9 @@ import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IModelUSBusPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 
+import java.io.IOException;
+import java.util.List;
+
 public class ESEBGaugeModelUSBusPort extends AbstractESEBDisposablePort implements IModelUSBusPort, ESEBConstants {
 
     private Identifiable  m_client;
@@ -45,14 +46,14 @@ public class ESEBGaugeModelUSBusPort extends AbstractESEBDisposablePort implemen
 
     }
 
-    public ESEBGaugeModelUSBusPort (Identifiable client, String host, short port) throws IOException {
+    private ESEBGaugeModelUSBusPort (Identifiable client, String host, short port) throws IOException {
         super (host, port, ChannelT.MODEL_US);
         m_client = client;
         // Note, there is no communication from the model US bus to the gauges, so there is no need for a listener    
     }
 
     @Override
-    public void updateModel (IRainbowOperation command) {
+    public void updateModel (@NotNull IRainbowOperation command) {
         RainbowESEBMessage msg = getConnectionRole().createMessage (/*ChannelT.MODEL_US*/);
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, m_client.id ());
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_UPDATE_MODEL);
@@ -62,7 +63,7 @@ public class ESEBGaugeModelUSBusPort extends AbstractESEBDisposablePort implemen
     }
 
     @Override
-    public void updateModel (List<IRainbowOperation> commands, boolean transaction) {
+    public void updateModel (@NotNull List<IRainbowOperation> commands, boolean transaction) {
         RainbowESEBMessage msg = getConnectionRole().createMessage ();
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, m_client.id ());
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_UPDATE_MODEL + "_multi");

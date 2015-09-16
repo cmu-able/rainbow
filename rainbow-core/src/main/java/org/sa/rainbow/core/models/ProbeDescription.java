@@ -26,10 +26,11 @@
  */
 package org.sa.rainbow.core.models;
 
+import org.jetbrains.annotations.Nullable;
+import org.sa.rainbow.translator.probes.IProbe;
+
 import java.util.SortedSet;
 import java.util.TreeSet;
-
-import org.sa.rainbow.translator.probes.IProbe;
 
 /**
  * This class holds probe description information parsed from its description
@@ -40,17 +41,20 @@ import org.sa.rainbow.translator.probes.IProbe;
 public class ProbeDescription {
 
     public static class ProbeAttributes extends DescriptionAttributes {
+        @Nullable
         public String alias = null;
+        @Nullable
         public IProbe.Kind kind = null;
     }
 
+    @Nullable
     public SortedSet<ProbeAttributes> probes = null;
 
     /**
      * Default Constructor.
      */
     public ProbeDescription() {
-        probes = new TreeSet<ProbeAttributes>();
+        probes = new TreeSet<> ();
     }
 
 }

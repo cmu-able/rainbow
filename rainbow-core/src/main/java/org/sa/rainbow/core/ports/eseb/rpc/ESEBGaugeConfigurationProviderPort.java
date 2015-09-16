@@ -23,22 +23,22 @@
  */
 package org.sa.rainbow.core.ports.eseb.rpc;
 
-import java.io.IOException;
-import java.util.List;
-
+import edu.cmu.cs.able.eseb.participant.ParticipantException;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.core.ports.eseb.ESEBProvider;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
-import edu.cmu.cs.able.eseb.participant.ParticipantException;
+import java.io.IOException;
+import java.util.List;
 
 public class ESEBGaugeConfigurationProviderPort extends AbstractESEBDisposableRPCPort implements
 IESEBGaugeConfigurationRemoteInterface {
     static Logger            LOGGER = Logger.getLogger (ESEBGaugeConfigurationProviderPort.class);
     private IGauge m_gauge;
 
-    public ESEBGaugeConfigurationProviderPort (IGauge gauge) throws IOException, ParticipantException {
+    public ESEBGaugeConfigurationProviderPort (@NotNull IGauge gauge) throws IOException, ParticipantException {
 
         super (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (),
                 gauge.id ());

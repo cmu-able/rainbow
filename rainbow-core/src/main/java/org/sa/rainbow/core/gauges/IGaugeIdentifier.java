@@ -23,6 +23,7 @@
  */
 package org.sa.rainbow.core.gauges;
 
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.util.TypedAttribute;
 
@@ -33,12 +34,14 @@ public interface IGaugeIdentifier extends Identifiable {
      * 
      * @return TypedAttribute the Gauge description as a type-name pair
      */
-    public TypedAttribute gaugeDesc ();
+    @Nullable
+    TypedAttribute gaugeDesc ();
 
     /**
      * Returns the Gauge's model type-name description.
      * 
      * @return TypedAttribute the Model description as a type-name pair
      */
-    public TypedAttribute modelDesc ();
+    @Nullable
+    TypedAttribute modelDesc ();
 }

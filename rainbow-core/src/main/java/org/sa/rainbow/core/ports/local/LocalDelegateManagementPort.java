@@ -23,20 +23,20 @@
  */
 package org.sa.rainbow.core.ports.local;
 
-import java.text.MessageFormat;
-import java.util.Collections;
-import java.util.Properties;
-
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.ports.IDelegateManagementPort;
 
+import java.text.MessageFormat;
+import java.util.Collections;
+import java.util.Properties;
+
 public class LocalDelegateManagementPort implements IDelegateManagementPort {
 
-    static Logger           LOGGER = Logger.getLogger (LocalDelegateManagementPort.class);
+    static final Logger LOGGER = Logger.getLogger (LocalDelegateManagementPort.class);
 
-    private RainbowDelegate m_delegate;
-    private String          m_delegateID;
+    private final RainbowDelegate m_delegate;
+    private final String m_delegateID;
     LocalMasterSideManagementPort m_connectedTo;
 
     public LocalDelegateManagementPort (RainbowDelegate delegate, String delegateID) {

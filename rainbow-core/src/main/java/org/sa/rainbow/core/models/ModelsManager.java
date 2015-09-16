@@ -23,31 +23,9 @@
  */
 package org.sa.rainbow.core.models;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.nio.channels.FileChannel;
-import java.text.MessageFormat;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Stack;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
@@ -61,13 +39,19 @@ import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd;
 import org.sa.rainbow.core.models.commands.AbstractSaveModelCmd;
 import org.sa.rainbow.core.models.commands.IRainbowModelOperation;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
-import org.sa.rainbow.core.ports.DisconnectedRainbowDelegateConnectionPort;
-import org.sa.rainbow.core.ports.IModelChangeBusPort;
-import org.sa.rainbow.core.ports.IModelUSBusPort;
-import org.sa.rainbow.core.ports.IModelsManagerPort;
-import org.sa.rainbow.core.ports.IRainbowReportingPort;
-import org.sa.rainbow.core.ports.RainbowPortFactory;
+import org.sa.rainbow.core.ports.*;
 import org.sa.rainbow.util.Util;
+
+import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.nio.channels.FileChannel;
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * The Models manager is a component that provides access to the models in Rainbow. It should also contain: - a
@@ -79,26 +63,28 @@ import org.sa.rainbow.util.Util;
  * 
  */
 public class ModelsManager extends AbstractRainbowRunnable implements IModelsManager {
-    static Logger                                      LOGGER     = Logger.getLogger (ModelsManager.class);
+    static final Logger LOGGER = Logger.getLogger (ModelsManager.class);
 
     /** The bus on which to announce model change events **/
+    @Nullable
     protected IModelChangeBusPort                    m_changeBusPort;
 
     /** The bus on which requests to change models are made by analyses and gauges **/
+    @Nullable
     protected IModelUSBusPort                   m_upstreamBusPort;
 
     /** Provides remote access to the models **/
     private IModelsManagerPort                         m_remoteModelManagerPort;
 
     /** Contains all the models -- keyed by Type then name **/
-    protected Map<String, Map<String, IModelInstance<?>>> m_modelMap     = new HashMap<> ();
+    protected final Map<String, Map<String, IModelInstance<?>>> m_modelMap = new HashMap<> ();
 
     /** Contains the queue of commands waiting to be executed on the models **/
-    protected BlockingQueue<Object>                       commandQ       = new LinkedBlockingQueue<> ();
+    protected final BlockingQueue<Object> commandQ = new LinkedBlockingQueue<> ();
 
-    protected Map<ModelReference, File>                m_modelsToSave = new HashMap<> ();
+    protected final Map<ModelReference, File> m_modelsToSave = new HashMap<> ();
 
-    protected Map<ModelReference, FileChannel> m_modelLogs = new HashMap<> ();
+    protected final Map<ModelReference, FileChannel> m_modelLogs = new HashMap<> ();
 
     public ModelsManager () {
         super ("Models Manager");
@@ -196,14 +182,12 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                         "Could not load the model file ''{0}''. It was resolved to the path ''{1}''.", path,
                         modelPath.getAbsolutePath ());
                 m_reportingPort.error (getComponentType (), msg, e, LOGGER);
-            }
-            catch (IllegalStateException | RainbowException e) {
+            } catch (@NotNull IllegalStateException | RainbowException e) {
                 String msg = MessageFormat.format (
                         "Could not execute the load command for the model ''{0}''. ''{1}'' not loaded.", modelName,
                         modelPath);
                 m_reportingPort.error (getComponentType (), msg, e, LOGGER);
-            }
-            catch (NoSuchMethodException | SecurityException e) {
+            } catch (@NotNull NoSuchMethodException | SecurityException e) {
                 String msg = MessageFormat.format (
                         "Could not access static method loadCommand in ''{0}''. ''{1}'' not loaded.", factoryClassName,
                         modelPath);
@@ -211,8 +195,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
             }
             catch (UnsupportedOperationException e) {
                 m_reportingPort.error (getComponentType (), e.getMessage (), e, LOGGER);
-            }
-            catch (IllegalArgumentException | InvocationTargetException e) {
+            } catch (@NotNull IllegalArgumentException | InvocationTargetException e) {
                 String msg = MessageFormat.format ("Error calling loadCommand in {0}. {1} not loaded.",
                         factoryClassName, modelPath);
                 m_reportingPort.error (getComponentType (), msg, e, LOGGER);
@@ -245,11 +228,13 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
         }
     }
 
+    @NotNull
     @Override
     public Collection<? extends String> getRegisteredModelTypes () {
         return m_modelMap.keySet ();
     }
 
+    @NotNull
     @Override
     public Collection<? extends IModelInstance<?>> getModelsOfType (String modelType) {
         Map<String, IModelInstance<?>> map = m_modelMap.get (modelType);
@@ -257,16 +242,18 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
         return Collections.<IModelInstance<?>> emptySet ();
     }
 
+    @Nullable
     @SuppressWarnings ("unchecked")
     @Override
-    public synchronized <T> IModelInstance<T> getModelInstance (ModelReference modelRef) {
+    public synchronized <T> IModelInstance<T> getModelInstance (@NotNull ModelReference modelRef) {
         Map<String, IModelInstance<?>> models = m_modelMap.get (modelRef.getModelType ());
         if (models != null) return (IModelInstance<T> )models.get (modelRef.getModelName ());
         return null;
     }
 
+    @Nullable
     @Override
-    public synchronized <T> IModelInstance<T> getModelInstanceByResource (String resource) {
+    public synchronized <T> IModelInstance<T> getModelInstanceByResource (@NotNull String resource) {
         Collection<Map<String, IModelInstance<?>>> values = m_modelMap.values ();
         IModelInstance<T> foundModel = null;
         for (Iterator<Map<String, IModelInstance<?>>> iterator = values.iterator (); iterator.hasNext ()
@@ -284,7 +271,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
     }
 
     @Override
-    public synchronized <T> IModelInstance<T> copyInstance (ModelReference modelRef, String copyName)
+    public synchronized <T> IModelInstance<T> copyInstance (@NotNull ModelReference modelRef, String copyName)
             throws RainbowModelException {
         Map<String, IModelInstance<?>> models = m_modelMap.get (modelRef.getModelType ());
         if (models != null) {
@@ -317,7 +304,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
     }
 
     @Override
-    public synchronized void registerModel (ModelReference modelRef, IModelInstance<?> model)
+    public synchronized void registerModel (@NotNull ModelReference modelRef, IModelInstance<?> model)
             throws RainbowModelException {
         Map<String, IModelInstance<?>> models = m_modelMap.get (modelRef.getModelType ());
         if (models != null) {
@@ -340,7 +327,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
     }
 
     @Override
-    public synchronized void unregisterModel (IModelInstance<?> model) throws RainbowModelException {
+    public synchronized void unregisterModel (@NotNull IModelInstance<?> model) throws RainbowModelException {
         Map<String, IModelInstance<?>> models = m_modelMap.get (model.getModelType ());
         boolean success = false;
         if (models != null) {
@@ -366,7 +353,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
         }
     }
 
-    private synchronized boolean unregisterModel (Map<String, IModelInstance<?>> models, IModelInstance<?> model) {
+    private synchronized boolean unregisterModel (@NotNull Map<String, IModelInstance<?>> models, @NotNull IModelInstance<?> model) {
         Iterator<Entry<String, IModelInstance<?>>> it = models.entrySet ().iterator ();
         boolean deleted = false;
         while (it.hasNext () && !deleted) {
@@ -395,15 +382,16 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
      * @throws RainbowException
      */
     @Override
-    public void requestModelUpdate (IRainbowOperation command) throws IllegalStateException,
+    public void requestModelUpdate (@NotNull IRainbowOperation command) throws IllegalStateException,
     RainbowException {
         commandQ.offer (command);
 
 
     }
 
+    @Nullable
     private IRainbowModelOperation setupCommand (IRainbowOperation command,
-            IModelInstance<?> modelInstance) throws RainbowException {
+                                                 @NotNull IModelInstance<?> modelInstance) throws RainbowException {
         IRainbowModelOperation rcmd = null;
         if (!(command instanceof IRainbowModelOperation)) {
             // Try to use the model instanceo to turn it into an executable command
@@ -425,7 +413,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
     }
 
     @Override
-    public void requestModelUpdate (List<IRainbowOperation> commands, boolean transaction) {
+    public void requestModelUpdate (@NotNull List<IRainbowOperation> commands, boolean transaction) {
         LOGGER.info (MessageFormat.format ("Updating the model with {0} commands, transaction = {1}", commands.size (),
                 transaction));
         // If the command is to be executed transactionally, then add the list to the queue, otherwise add each command individually
@@ -454,8 +442,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                     AbstractSaveModelCmd saveCommand = model.getCommandFactory ().saveCommand (
                             saveTo.getAbsolutePath ());
                     saveCommand.execute (model, null);
-                }
-                catch (IllegalStateException | RainbowException e) {
+                } catch (@NotNull IllegalStateException | RainbowException e) {
                     m_reportingPort.error (getComponentType (), "Failed to save " + ref.toString ());
                 }
             }
@@ -510,8 +497,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                 else {
                     logModelOperation (command, false);
                 }
-            }
-            catch (IllegalStateException | RainbowException e) {
+            } catch (@NotNull IllegalStateException | RainbowException e) {
                 e.printStackTrace ();
             }
         }
@@ -521,7 +507,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
             // Keep track of successfully executed commands in case we need to undo 
             Stack<IRainbowModelOperation> executedCommands = new Stack<> ();
             // Stores the events that will be reported to the change bus
-            List<IRainbowMessage> events = new LinkedList<IRainbowMessage> ();
+            List<IRainbowMessage> events = new LinkedList<> ();
             // Indicates whether all the commands have been executed successfully so far
             boolean complete = true;
             if (!commands.isEmpty ()) {
@@ -566,8 +552,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                             events.addAll (cmdEvents);
                             // Recall what we executed in case we need to rollback
                             executedCommands.push (mcmd);
-                        }
-                        catch (IllegalStateException | RainbowException e) {
+                        } catch (@NotNull IllegalStateException | RainbowException e) {
                             complete = false;
                             break;
                         }
@@ -584,8 +569,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                             try {
                                 cmd = executedCommands.pop ();
                                 cmd.undo ();
-                            }
-                            catch (IllegalStateException | RainbowException e) {
+                            } catch (@NotNull IllegalStateException | RainbowException e) {
                                 LOGGER.error ("Could not undo the commands. Model could be in an inconsistent state", e);
                             }
                         }
@@ -600,13 +584,13 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
         }
     }
 
-    private void logModelOperations (List<IRainbowOperation> commands, boolean b) {
+    private void logModelOperations (@NotNull List<IRainbowOperation> commands, boolean b) {
         for (IRainbowOperation op : commands) {
             logModelOperation (op, b);
         }
     }
 
-    private void logModelOperation (IRainbowOperation command, boolean success) {
+    private void logModelOperation (@NotNull IRainbowOperation command, boolean success) {
         FileChannel file = m_modelLogs.get (command.getModelReference ());
         if (file != null) {
             Date d = new Date ();
@@ -621,6 +605,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
 
     }
 
+    @NotNull
     @Override
     protected RainbowComponentT getComponentType () {
         return RainbowComponentT.MODEL;

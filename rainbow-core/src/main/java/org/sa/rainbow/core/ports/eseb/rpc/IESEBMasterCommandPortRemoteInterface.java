@@ -1,13 +1,12 @@
 package org.sa.rainbow.core.ports.eseb.rpc;
 
-import java.util.List;
-
+import edu.cmu.cs.able.eseb.rpc.ParametersTypeMapping;
+import edu.cmu.cs.able.eseb.rpc.ReturnTypeMapping;
 import org.sa.rainbow.core.Rainbow.ExitState;
 import org.sa.rainbow.core.ports.IMasterCommandPort;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 
-import edu.cmu.cs.able.eseb.rpc.ParametersTypeMapping;
-import edu.cmu.cs.able.eseb.rpc.ReturnTypeMapping;
+import java.util.List;
 
 public interface IESEBMasterCommandPortRemoteInterface extends IMasterCommandPort {
 
@@ -37,7 +36,7 @@ public interface IESEBMasterCommandPortRemoteInterface extends IMasterCommandPor
     void restartDelegates ();
 
     @Override
-    public void sleepDelegates ();
+    void sleepDelegates ();
 
     @Override
     void destroyDelegates ();

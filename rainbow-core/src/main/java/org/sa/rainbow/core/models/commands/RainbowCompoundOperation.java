@@ -23,16 +23,18 @@
  */
 package org.sa.rainbow.core.models.commands;
 
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.error.RainbowDelegationException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
+
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 // NOTE: THIS CLASS SHOULD NOT BE USED YET.
 public class RainbowCompoundOperation<Model> extends AbstractRainbowModelOperation<List<Object>, Model> implements
@@ -40,13 +42,15 @@ IRainbowModelCompoundCommand<Model> {
 
     enum CommandState {
         CAN_EXECUTE, CAN_UNDO, CAN_REDO, ERROR
-    };
+    }
 
-    List<AbstractRainbowModelOperation<?, Model>> m_commands = new ArrayList<> ();
+    final List<AbstractRainbowModelOperation<?, Model>> m_commands = new ArrayList<> ();
+    @NotNull
     CommandState                                m_state    = CommandState.CAN_EXECUTE;
+    @NotNull
     List<Object>                                m_results  = Collections.emptyList ();
 
-    public RainbowCompoundOperation (List<AbstractRainbowModelOperation<?, Model>> commands) {
+    public RainbowCompoundOperation (@Nullable List<AbstractRainbowModelOperation<?, Model>> commands) {
         // TODO: Do we need this?
         super ("compound", null, null);
         if (commands == null || commands.size () == 0)
@@ -93,8 +97,7 @@ IRainbowModelCompoundCommand<Model> {
                 }
             }
             this.m_results = result;
-        }
-        catch (RainbowDelegationException | RuntimeException re) {
+        } catch (@NotNull RainbowDelegationException | RuntimeException re) {
             // unwind this command, undoing commands already done
             position--;
             for (; position >= 0; position--) {
@@ -127,8 +130,7 @@ IRainbowModelCompoundCommand<Model> {
                     result.add (o);
                 }
             }
-        }
-        catch (RainbowDelegationException | RuntimeException re) {
+        } catch (@NotNull RainbowDelegationException | RuntimeException re) {
             // unwind this command, undoing commands already done
             position--;
             for (; position >= 0; position--) {
@@ -148,7 +150,7 @@ IRainbowModelCompoundCommand<Model> {
     protected void subUndo () throws RainbowException {
         if (!canUndo ()) throw new IllegalStateException ("This AcmeCompoundCommand is not in a legal state.");
 
-        List<Object> result = new ArrayList<Object> (m_commands.size ());
+        List<Object> result = new ArrayList<> (m_commands.size ());
         try {
             for (int i = m_commands.size () - 1; i >= 0; i--) {
                 AbstractRainbowModelOperation<?, Model> command = m_commands.get (i);
@@ -158,24 +160,26 @@ IRainbowModelCompoundCommand<Model> {
                     result.add (o);
                 }
             }
-        }
-        catch (RainbowDelegationException | RuntimeException e) {
+        } catch (@NotNull RainbowDelegationException | RuntimeException e) {
             m_state = CommandState.ERROR;
             throw e;
         }
         m_state = CommandState.CAN_REDO;
     }
 
+    @NotNull
     @Override
     public List<Object> getResults () {
         return m_results;
     }
 
+    @NotNull
     @Override
     public List<Object> getResult () {
         return getResults ();
     }
 
+    @Nullable
     @Override
     public List<? extends IRainbowMessage> getGeneratedEvents (IRainbowMessageFactory messageFactory) {
         // TODO Auto-generated method stub
@@ -193,12 +197,14 @@ IRainbowModelCompoundCommand<Model> {
         return ok;
     }
 
+    @Nullable
     @Override
     public String getOrigin () {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Nullable
     @Override
     public ModelReference getModelReference () {
         return null;

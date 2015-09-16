@@ -48,14 +48,14 @@ public interface IModelInstance<T> {
      * 
      * @return the Model instance being managed (e.g., an Acme system, and impact model, ...)
      */
-    public T getModelInstance ();
+    T getModelInstance ();
 
     /**
      * Sets the model to be managed by this instance
      * 
      * @param model
      */
-    public void setModelInstance (T model);
+    void setModelInstance (T model);
 
     /**
      * Creates a copy of this model instance, giving it the new name if appropriate
@@ -64,21 +64,21 @@ public interface IModelInstance<T> {
      * @return
      * @throws RainbowCopyException
      */
-    public IModelInstance<T> copyModelInstance (String newName) throws RainbowCopyException;
+    IModelInstance<T> copyModelInstance (String newName) throws RainbowCopyException;
 
     /**
      * 
      * @return The type of this model (e.g., Acme, computation, ...)
      */
-    public String getModelType ();
+    String getModelType ();
 
-    public String getModelName ();
+    String getModelName ();
 
-    public ModelCommandFactory<T> getCommandFactory ();
+    ModelCommandFactory<T> getCommandFactory ();
 
-    public void setOriginalSource (String source);
+    void setOriginalSource (String source);
 
-    public String getOriginalSource ();
+    String getOriginalSource ();
 
-    public void dispose () throws RainbowException;
+    void dispose () throws RainbowException;
 }

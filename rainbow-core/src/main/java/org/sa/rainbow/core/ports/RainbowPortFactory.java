@@ -23,19 +23,10 @@
  */
 package org.sa.rainbow.core.ports;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.text.MessageFormat;
-import java.util.Collection;
-import java.util.Properties;
-
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
-import org.sa.rainbow.core.Identifiable;
-import org.sa.rainbow.core.Rainbow;
-import org.sa.rainbow.core.RainbowConstants;
-import org.sa.rainbow.core.RainbowDelegate;
-import org.sa.rainbow.core.RainbowMaster;
+import org.jetbrains.annotations.NotNull;
+import org.sa.rainbow.core.*;
 import org.sa.rainbow.core.adaptation.IEvaluable;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.IGauge;
@@ -50,9 +41,15 @@ import org.sa.rainbow.translator.effectors.IEffectorExecutionPort;
 import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
 import org.sa.rainbow.translator.probes.IProbe;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.text.MessageFormat;
+import java.util.Collection;
+import java.util.Properties;
+
 public class RainbowPortFactory {
 
-    static Logger                        LOGGER          = Logger.getLogger (RainbowPortFactory.class);
+    static final Logger LOGGER = Logger.getLogger (RainbowPortFactory.class);
     static final String                  DEFAULT_FACTORY = "org.sa.rainbow.ports.local.LocalRainbowDelegatePortFactory";
 
     static IRainbowConnectionPortFactory m_instance;
@@ -76,16 +73,15 @@ public class RainbowPortFactory {
             }
             try {
                 Class<?> f = Class.forName (factory);
-                Method method = f.getMethod ("getFactory", new Class[0]);
-                m_instance = (IRainbowConnectionPortFactory )method.invoke (null, new Object[0]);
+                Method method = f.getMethod ("getFactory");
+                m_instance = (IRainbowConnectionPortFactory) method.invoke (null);
             }
             catch (ClassNotFoundException e) {
                 String errMsg = MessageFormat.format (
                         "The class ''{0}'' could not be found on the classpath. Bailing!", factory);
                 LOGGER.error (errMsg, e);
                 throw new NotImplementedException (errMsg, e);
-            }
-            catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+            } catch (@NotNull NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
                     | InvocationTargetException e) {
                 String errMsg = MessageFormat.format (
                         "The class ''{0}'' does not implement the method ''{1}''. Bailing!", factory, "getFactory");

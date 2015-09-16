@@ -57,26 +57,26 @@ package org.sa.rainbow.core.gauges;
  */
 public interface IGaugeProtocol {
 
-    public static final String ID = "uid";
-    public static final String UID                = "luid";
-    public static final String GAUGE_TYPE = "gaugeType";
-    public static final String GAUGE_NAME = "gaugeName";
-    public static final String MODEL_TYPE = "modelType";
-    public static final String MODEL_NAME = "modelName";
-    public static final String LOCATION = "location";
-    public static final String SUBSCRIPTION_DUR = "subsDur";
-    public static final String BEACON_PERIOD = "beaconPer";
-    public static final String SETUP_PARAM = "setupParam";  // name[:type][=value]
-    public static final String CONFIG_PARAM = "configParam";  // name[:type][=value]
-    public static final String META_CONFIG_PARAM = "metaConfigParam";  // name:type
-    public static final String META_VALUE = "metaValue";  // name:type
-    public static final String SIZE              = "_size";
-    public static final String GAUGE_HEARTBEAT   = "gauge-heartbeat";
-    public static final String CONFIG_PARAM_VALUE = "configParamValue";
-    public static final String CONFIG_PARAM_TYPE  = "configParamType";
-    public static final String CONFIG_PARAM_NAME  = "configParam";
-    public static final String GAUGE_CONFIGURED = "GAUGE_CONFIGURED";
-    public static final String GAUGE_DELETED = "GAUGE_DELETED";
-    public static final String GAUGE_CREATED = "GAUGE_CREATED";
+    String ID = "uid";
+    String UID = "luid";
+    String GAUGE_TYPE = "gaugeType";
+    String GAUGE_NAME = "gaugeName";
+    String MODEL_TYPE = "modelType";
+    String MODEL_NAME = "modelName";
+    String LOCATION = "location";
+    String SUBSCRIPTION_DUR = "subsDur";
+    String BEACON_PERIOD = "beaconPer";
+    String SETUP_PARAM = "setupParam";  // name[:type][=value]
+    String CONFIG_PARAM = "configParam";  // name[:type][=value]
+    String META_CONFIG_PARAM = "metaConfigParam";  // name:type
+    String META_VALUE = "metaValue";  // name:type
+    String SIZE = "_size";
+    String GAUGE_HEARTBEAT = "gauge-heartbeat";
+    String CONFIG_PARAM_VALUE = "configParamValue";
+    String CONFIG_PARAM_TYPE = "configParamType";
+    String CONFIG_PARAM_NAME = "configParam";
+    String GAUGE_CONFIGURED = "GAUGE_CONFIGURED";
+    String GAUGE_DELETED = "GAUGE_DELETED";
+    String GAUGE_CREATED = "GAUGE_CREATED";
 
 }

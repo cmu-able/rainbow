@@ -26,57 +26,30 @@
  */
 package org.sa.rainbow.gui;
 
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import org.apache.commons.lang.NotImplementedException;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.sa.rainbow.core.*;
+import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.gauges.OperationRepresentation;
+import org.sa.rainbow.core.models.ModelReference;
+import org.sa.rainbow.core.ports.*;
+import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
+import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.OperationResult;
+import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReportingSubscriberCallback;
+import org.sa.rainbow.core.util.Pair;
+import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
+import org.sa.rainbow.util.Util;
+
+import javax.swing.*;
+import javax.swing.border.Border;
+import java.awt.*;
+import java.awt.event.*;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
-
-import javax.swing.BorderFactory;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
-import javax.swing.JTextArea;
-import javax.swing.border.Border;
-
-import org.apache.commons.lang.NotImplementedException;
-import org.sa.rainbow.core.IDisposable;
-import org.sa.rainbow.core.IRainbowRunnable;
-import org.sa.rainbow.core.Identifiable;
-import org.sa.rainbow.core.Rainbow;
-import org.sa.rainbow.core.RainbowComponentT;
-import org.sa.rainbow.core.RainbowConstants;
-import org.sa.rainbow.core.error.RainbowConnectionException;
-import org.sa.rainbow.core.gauges.OperationRepresentation;
-import org.sa.rainbow.core.models.ModelReference;
-import org.sa.rainbow.core.ports.IEffectorLifecycleBusPort;
-import org.sa.rainbow.core.ports.IGaugeLifecycleBusPort;
-import org.sa.rainbow.core.ports.IMasterCommandPort;
-import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
-import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
-import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.OperationResult;
-import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort;
-import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReportingSubscriberCallback;
-import org.sa.rainbow.core.ports.RainbowPortFactory;
-import org.sa.rainbow.core.util.Pair;
-import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
-import org.sa.rainbow.util.Util;
 
 /**
  * The GUI for observing the Rainbow infrastructure.
@@ -109,7 +82,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
     /** Convenience constant: size of text field to set to when Max is exceeded. */
     public static final int TEXT_HALF_LENGTH = 50000;
 
-    public static void main(String[] args) {
+    public static void main (@NotNull String[] args) {
         boolean showHelp = false;
 
         int lastIdx = args.length - 1;
@@ -135,9 +108,13 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         gui.display();
     }
 
+    @Nullable
     private JFrame m_frame = null;
+    @Nullable
     private JTextArea[] m_textAreas = null;
+    @Nullable
     private JComponent[]       m_panes     = null;
+    @NotNull
     private Color[] m_colors = {
             /* purple */ new Color(188, 188, 250),
             /* pink */   new Color(255, 145, 255),
@@ -149,6 +126,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
             Color.WHITE,
             Color.GRAY
     };
+    @NotNull
     private int[] m_order = { 7, 2, 8, 3, 0, 1, 5, 4, 6 };
     private IMasterCommandPort m_master;
     private IModelDSBusPublisherPort m_dsPort;
@@ -329,12 +307,12 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         Throwable error = null;
         for (int i : m_order) {
             if (i == ID_ORACLE_MESSAGE) {
-                List<String> expectedDelegateLocations = Collections.<String> emptyList ();
+                List<String> expectedDelegateLocations = Collections.emptyList ();
                 try {
                     expectedDelegateLocations = m_master.getExpectedDelegateLocations ();
                 }
                 catch (Throwable e) {
-                    expectedDelegateLocations = Arrays.asList (new String[] { "Error" });
+                    expectedDelegateLocations = Arrays.asList ("Error");
                     error = e;
                 }
                 m_panes[i] = new OracleStatusPanel (m_colors[i], expectedDelegateLocations);
@@ -378,7 +356,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
 
     }
 
-    private void createInformationMenu (final JMenu menu) {
+    private void createInformationMenu (@NotNull final JMenu menu) {
 
         JMenu gauges = new JMenu ("Gauges");
         gauges.setMnemonic (KeyEvent.VK_G);
@@ -407,6 +385,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         }
     }
 
+    @Nullable
     private JComponent createTextArea (int area) {
         m_textAreas[area] = new JTextArea(TEXT_ROWS, TEXT_COLUMNS);
         m_textAreas[area].setFont(m_textAreas[area].getFont().deriveFont(TEXT_FONT_SIZE));
@@ -429,7 +408,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
      * Creates a series of Oracle-specific menu items.
      * @param menu  the menu on which to create items.
      */
-    private void createOracleMenu(JMenu menu) {
+    private void createOracleMenu (@NotNull JMenu menu) {
         JMenuItem item = null;
 
         // Management menu item
@@ -532,7 +511,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
      * Creates a series of Delegate-specific menu items.
      * @param menu  the menu on which to create items.
      */
-    private void createDelegateMenu(JMenu menu) {
+    private void createDelegateMenu (@NotNull JMenu menu) {
         JMenuItem item = null;
 
         // Probe start menu item
@@ -716,7 +695,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
      * Creates the help menu items.
      * @param menu  the menu on which to create items.
      */
-    private void createHelpMenu (JMenu menu) {
+    private void createHelpMenu (@NotNull JMenu menu) {
         JMenuItem item = null;
 
         item = new JMenuItem("Software Update...");
@@ -777,13 +756,14 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
 //        writeText(ID_EXECUTOR, "  - outcome: " + outcome);
     }
 
-    private void testOperation (ModelReference modelRef, String opName, String[] args) {
+    private void testOperation (@NotNull ModelReference modelRef, String opName, @NotNull String[] args) {
         OperationRepresentation or = new OperationRepresentation (opName, modelRef,
                 args[0], Arrays.copyOfRange (args, 1, args.length));
         if (m_dsPort == null) {
             try {
                 m_dsPort = RainbowPortFactory.createModelDSPublishPort (new Identifiable () {
 
+                    @NotNull
                     @Override
                     public String id () {
                         return "UI";
@@ -806,7 +786,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
     }
 
     @Override
-    public void report (RainbowComponentT component, ReportType type, String message) {
+    public void report (@NotNull RainbowComponentT component, @NotNull ReportType type, String message) {
 //        public static final int ID_MODEL_MANAGER = 0;
 //        public static final int ID_ARCH_EVALUATOR = 1;
 //        public static final int ID_ADAPTATION_MANAGER = 2;

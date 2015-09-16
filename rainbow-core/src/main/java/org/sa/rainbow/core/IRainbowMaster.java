@@ -32,12 +32,12 @@ public interface IRainbowMaster {
 
 //    public abstract UtilityPreferenceDescription preferenceDesc ();
 
-    public abstract GaugeDescription gaugeDesc ();
+    GaugeDescription gaugeDesc ();
 
-    public abstract EffectorDescription effectorDesc ();
+    EffectorDescription effectorDesc ();
 
-    public abstract ProbeDescription probeDesc ();
+    ProbeDescription probeDesc ();
 
-    public abstract ModelsManager modelsManager ();
+    ModelsManager modelsManager ();
 
 }

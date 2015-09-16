@@ -26,12 +26,14 @@
  */
 package org.sa.rainbow.core;
 
-import java.io.IOException;
-import java.text.MessageFormat;
-
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.ports.DisconnectedRainbowDelegateConnectionPort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
+
+import java.io.IOException;
+import java.text.MessageFormat;
 
 /**
  * Convenience abstract class that handles the usual thread start/stop/terminate
@@ -43,9 +45,12 @@ import org.sa.rainbow.core.ports.IRainbowReportingPort;
 public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Identifiable {
 
 
+    @Nullable
     private Thread m_thread = null;
+    @Nullable
     private String m_name = null;
     private long m_sleepTime = SLEEP_TIME;
+    @NotNull
     private State m_threadState = State.RAW;
     private State m_nextState = State.RAW;
     private boolean m_restarting = false;
@@ -83,6 +88,7 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
     /* (non-Javadoc)
      * @see org.sa.rainbow.core.IRainbowRunnable#name()
      */
+    @Nullable
     @Override
     public String id() {
         return m_name;
@@ -138,6 +144,7 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
     /* (non-Javadoc)
      * @see org.sa.rainbow.core.IRainbowRunnable#state()
      */
+    @NotNull
     @Override
     public State state () {
         return m_threadState;
@@ -155,7 +162,7 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
      * Pauses the execution of the runnable, preserving any states until it is
      * resumed again by call to start.
      */
-    protected void doStop () {
+    private void doStop () {
         if (m_thread == null || m_threadState == State.RAW || m_threadState == State.TERMINATED) return;
 
         m_threadState = State.STOPPED;
@@ -167,14 +174,14 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
      */
     protected void doTerminate () {
         log (m_name + " terminated.");
-        dispose();
+        dispose ();
         finalTerminate();
     }
 
     /**
      * This method is only to be invoked if overriding the doTerminate method().
      */
-    protected void finalTerminate () {
+    private void finalTerminate () {
         m_threadState = State.TERMINATED;
         m_name = null;
         m_thread = null;
@@ -198,7 +205,7 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
      * Override to define special conditions.
      * @return boolean  <code>true</code> if runnable should terminate, <code>false</code> otherwise
      */
-    protected boolean shouldTerminate () {
+    private boolean shouldTerminate () {
         return Rainbow.shouldTerminate();
     }
 
@@ -272,6 +279,7 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
         log ("Terminated " + m_name);
     }
 
+    @Nullable
     protected Thread activeThread () {
         return m_thread;
     }
@@ -283,7 +291,7 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
 
     /**
      * Sets the next State to transition this Runnable to; with appropriate guard.
-     * @param state  new runnable state
+     * @param nextState  new runnable state
      */
     private void transition(State nextState) {
         // rule out prohibited transitions, basically TERMINATED->* and *->RAW

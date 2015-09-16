@@ -23,15 +23,6 @@
  */
 package org.sa.rainbow.core.ports.eseb.converters;
 
-import incubator.pval.Ensure;
-
-import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.sa.rainbow.core.util.TypedAttribute;
-import org.sa.rainbow.core.util.TypedAttributeWithValue;
-
 import edu.cmu.cs.able.typelib.comp.OptionalDataType;
 import edu.cmu.cs.able.typelib.comp.OptionalDataValue;
 import edu.cmu.cs.able.typelib.jconv.TypelibJavaConversionRule;
@@ -45,25 +36,35 @@ import edu.cmu.cs.able.typelib.struct.StructureDataValue;
 import edu.cmu.cs.able.typelib.struct.UnknownFieldException;
 import edu.cmu.cs.able.typelib.type.DataType;
 import edu.cmu.cs.able.typelib.type.DataValue;
+import incubator.pval.Ensure;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.sa.rainbow.core.util.TypedAttribute;
+import org.sa.rainbow.core.util.TypedAttributeWithValue;
+
+import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TypedAttributeConverter implements TypelibJavaConversionRule {
 
-    private PrimitiveScope m_scope;
+    private final PrimitiveScope m_scope;
 
     public TypedAttributeConverter (PrimitiveScope scope) {
         m_scope = scope;
     }
 
+    @NotNull
     @Override
-    public <T> T to_java (DataValue value, Class<T> cls, TypelibJavaConverter converter)
+    public <T> T to_java (DataValue value, @NotNull Class<T> cls, @NotNull TypelibJavaConverter converter)
             throws ValueConversionException {
         if (value instanceof StructureDataValue) {
             try {
                 Object ret;
                 StructureDataValue sdv = (StructureDataValue )value;
                 StructureDataType sdt = (StructureDataType )sdv.type ();
-                String name = converter.<String> to_java (sdv.value (sdt.field ("name")), String.class);
-                String type = converter.<String> to_java (sdv.value (sdt.field ("type")), String.class);
+                String name = converter.to_java (sdv.value (sdt.field ("name")), String.class);
+                String type = converter.to_java (sdv.value (sdt.field ("type")), String.class);
                 DataValue v = sdv.value (sdt.field ("value"));
                 if (v instanceof OptionalDataValue) {
                     OptionalDataValue odv = (OptionalDataValue )v;
@@ -80,8 +81,7 @@ public class TypedAttributeConverter implements TypelibJavaConversionRule {
                 @SuppressWarnings("unchecked")
                 T t = (T )ret;
                 return t;
-            }
-            catch (UnknownFieldException | AmbiguousNameException e) {
+            } catch (@NotNull UnknownFieldException | AmbiguousNameException e) {
                 throw new ValueConversionException (MessageFormat.format ("Could not convert from {0} to {1}",
                         value.toString (), cls.getCanonicalName ()), e);
             }
@@ -91,7 +91,7 @@ public class TypedAttributeConverter implements TypelibJavaConversionRule {
     }
 
     @Override
-    public boolean handles_typelib (DataValue value, Class<?> cls) {
+    public boolean handles_typelib (@NotNull DataValue value, @Nullable Class<?> cls) {
         Ensure.not_null (value);
         if (value.type ().name ().equals ("typed_attribute_with_value")) {
             if (cls == null || TypedAttribute.class.isAssignableFrom (cls)) return true;
@@ -100,14 +100,12 @@ public class TypedAttributeConverter implements TypelibJavaConversionRule {
     }
 
     @Override
-    public boolean handles_java (Object value, DataType dst) {
-        if (value instanceof TypedAttributeWithValue || value instanceof TypedAttribute)
-            return dst == null || dst.name ().equals ("typed_attribute_with_value");
-        return false;
+    public boolean handles_java (Object value, @Nullable DataType dst) {
+        return (value instanceof TypedAttributeWithValue || value instanceof TypedAttribute) && (dst == null || dst.name ().equals ("typed_attribute_with_value"));
     }
 
     @Override
-    public DataValue from_java (Object value, DataType dst, TypelibJavaConverter converter)
+    public DataValue from_java (Object value, @Nullable DataType dst, @NotNull TypelibJavaConverter converter)
             throws ValueConversionException {
         try {
             if ((dst == null || dst instanceof StructureDataType) && value instanceof TypedAttribute) {
@@ -124,8 +122,7 @@ public class TypedAttributeConverter implements TypelibJavaConversionRule {
                 fields.put (name, converter.from_java (ta.getName (), null));
                 fields.put (type, converter.from_java (ta.getType (), null));
                 fields.put (v, ((OptionalDataType )m_scope.find ("opt_any")).make (null));
-                StructureDataValue sdv = sdt.make (fields);
-                return sdv;
+                return sdt.make (fields);
             }
             else if ((dst == null || dst instanceof StructureDataType) && value instanceof TypedAttributeWithValue) {
                 TypedAttributeWithValue ta = (TypedAttributeWithValue )value;
@@ -149,11 +146,9 @@ public class TypedAttributeConverter implements TypelibJavaConversionRule {
                             odt.make (converter.from_java (
                                     ta.getValue (), null)));
                 }
-                StructureDataValue sdv = sdt.make (fields);
-                return sdv;
+                return sdt.make (fields);
             }
-        }
-        catch (UnknownFieldException | AmbiguousNameException e) {
+        } catch (@NotNull UnknownFieldException | AmbiguousNameException e) {
             throw new ValueConversionException (MessageFormat.format ("Could not convert from {0} to {1}", value
                     .getClass ().getCanonicalName (), (dst == null ? "typed_attribute_with_value" : dst
                             .absolute_hname ().toString ())), e);

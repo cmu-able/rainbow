@@ -24,9 +24,9 @@ import org.sa.rainbow.core.util.TypedAttributeWithValue;
  */
 package org.sa.rainbow.core.ports;
 
-import java.util.List;
-
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
+
+import java.util.List;
 
 /**
  * This interface represents the API through which gauges might be configured at runtime
@@ -42,7 +42,7 @@ public interface IGaugeConfigurationPort extends IDisposablePort {
      *            list of type-name-value triples of configuration parameters
      * @return boolean <code>true</code> if configuration succeeds, <code>false</code> otherwise
      */
-    public boolean configureGauge (List<TypedAttributeWithValue> configParams);
+    boolean configureGauge (List<TypedAttributeWithValue> configParams);
 
     /**
      * Causes the IGauge to call configureGauge on itself using its existing config parameters. This method is currently
@@ -50,7 +50,7 @@ public interface IGaugeConfigurationPort extends IDisposablePort {
      * 
      * @return boolean <code>true</code> if configure call succeed, <code>false</code> otherwise
      */
-    public boolean reconfigureGauge ();
+    boolean reconfigureGauge ();
 
 
 }

@@ -23,6 +23,9 @@
  */
 package org.sa.rainbow.core.models;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,38 +38,49 @@ import java.util.Map;
 public class UtilityPreferenceDescription {
 
     public static class UtilityAttributes {
+        @Nullable
         public String              label   = null;
+        @Nullable
         public String              mapping = null;
+        @Nullable
         public String              desc    = null;
+        @Nullable
         public Map<Number, Number> values  = null; // gets assigned during parsing
     }
 
+    @Nullable
     protected Map<String, UtilityAttributes> utilities        = null;
 
+    @Nullable
     public Map<String, UtilityAttributes> getUtilities () {
         return utilities;
     }
 
+    @Nullable
     public Map<String, Map<String, Double>> weights          = null;
+    @Nullable
     public Map<String, Map<String, Object>> attributeVectors = null;
+    @Nullable
     public ModelReference                   associatedModel  = null;
+    @Nullable
     private Map<String, UtilityFunction>    utilityFunctions = null;
 
     /**
      * Default Constructor.
      */
     public UtilityPreferenceDescription () {
-        utilities = new HashMap<String, UtilityAttributes> ();
-        weights = new HashMap<String, Map<String, Double>> ();
-        attributeVectors = new HashMap<String, Map<String, Object>> ();
-        utilityFunctions = new HashMap<String, UtilityFunction> ();
+        utilities = new HashMap<> ();
+        weights = new HashMap<> ();
+        attributeVectors = new HashMap<> ();
+        utilityFunctions = new HashMap<> ();
     }
 
-    public void addAttributes (String label, UtilityAttributes atts) {
+    public void addAttributes (String label, @NotNull UtilityAttributes atts) {
         utilities.put (label, atts);
         utilityFunctions.put (label, new UtilityFunction (label, atts.label, atts.mapping, atts.desc, atts.values));
     }
 
+    @NotNull
     public Map<String, UtilityFunction> getUtilityFunctions () {
         return Collections.unmodifiableMap (utilityFunctions);
     }

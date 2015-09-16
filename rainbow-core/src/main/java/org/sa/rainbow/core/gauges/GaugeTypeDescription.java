@@ -26,15 +26,13 @@
  */
 package org.sa.rainbow.core.gauges;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * This Class captures the information in a Gauge Type description.
@@ -44,26 +42,32 @@ import org.sa.rainbow.core.util.TypedAttributeWithValue;
  */
 public class GaugeTypeDescription {
 
-    protected String m_typeName = null;
-    protected String m_typeComment = null;
+    @Nullable
+    private String m_typeName = null;
+    @Nullable
+    private String m_typeComment = null;
     /** Stores, by type name, a hash of type-name pairs. */
-    protected Map<String, OperationRepresentation>   m_commandSignatures = null;
+    @Nullable
+    Map<String, OperationRepresentation> m_commandSignatures = null;
     /** Stores, by name, a hash of type-name and any default value of the setup parameters. */
-    protected Map<String, TypedAttributeWithValue> m_setupParams    = null;
+    @Nullable
+    private Map<String, TypedAttributeWithValue> m_setupParams = null;
     /** Stores, by name, a hash of the type-name and any default value of the configuration parameters. */
-    protected Map<String, TypedAttributeWithValue> m_configParams   = null;
+    @Nullable
+    private Map<String, TypedAttributeWithValue> m_configParams = null;
 
     /**
      * Main Constructor.
      */
-    public GaugeTypeDescription (String gaugeType, String typeComment) {
+    public GaugeTypeDescription (String gaugeType, @Nullable String typeComment) {
         m_typeName = gaugeType;
         m_typeComment = typeComment == null ? "" : typeComment;
-        m_commandSignatures = new HashMap<String, OperationRepresentation> ();
-        m_setupParams = new HashMap<String, TypedAttributeWithValue> ();
-        m_configParams = new HashMap<String, TypedAttributeWithValue> ();
+        m_commandSignatures = new HashMap<> ();
+        m_setupParams = new HashMap<> ();
+        m_configParams = new HashMap<> ();
     }
 
+    @Nullable
     public GaugeInstanceDescription makeInstance (String gaugeName, String instComment) {
         // create a Gauge Instance description using type, name, and comments
         GaugeInstanceDescription inst = new GaugeInstanceDescription(m_typeName, gaugeName, m_typeComment, instComment);
@@ -84,10 +88,12 @@ public class GaugeTypeDescription {
         return inst;
     }
 
+    @Nullable
     public String gaugeType () {
         return m_typeName;
     }
 
+    @Nullable
     public String typeComment () {
         return m_typeComment;
     }
@@ -99,7 +105,7 @@ public class GaugeTypeDescription {
         }
     }
 
-    public void addCommandSignature (String key, OperationRepresentation commandRep) {
+    void addCommandSignature (String key, OperationRepresentation commandRep) {
         m_commandSignatures.put (key, commandRep);
     }
 
@@ -107,16 +113,17 @@ public class GaugeTypeDescription {
         return m_commandSignatures.get(name);
     }
 
+    @NotNull
     public List<Pair<String, OperationRepresentation>> commandSignatures () {
         List<Pair<String, OperationRepresentation>> valueList = new ArrayList<> ();
         for (Entry<String, OperationRepresentation> pair : m_commandSignatures.entrySet ()) {
-            valueList.add (new Pair<String, OperationRepresentation> (pair.getKey (), pair.getValue ()));
+            valueList.add (new Pair<> (pair.getKey (), pair.getValue ()));
         }
         Collections.sort(valueList);
         return valueList;
     }
 
-    public void addSetupParam (TypedAttributeWithValue triple) {
+    public void addSetupParam (@NotNull TypedAttributeWithValue triple) {
         m_setupParams.put (triple.getName (), triple);
     }
 
@@ -124,13 +131,14 @@ public class GaugeTypeDescription {
         return m_setupParams.get(name);
     }
 
+    @NotNull
     public List<TypedAttributeWithValue> setupParams () {
-        List<TypedAttributeWithValue> paramList = new ArrayList<TypedAttributeWithValue> (m_setupParams.values ());
+        List<TypedAttributeWithValue> paramList = new ArrayList<> (m_setupParams.values ());
         Collections.sort(paramList);
         return paramList;
     }
 
-    public void addConfigParam (TypedAttributeWithValue triple) {
+    public void addConfigParam (@NotNull TypedAttributeWithValue triple) {
         m_configParams.put (triple.getName (), triple);
     }
 
@@ -138,8 +146,9 @@ public class GaugeTypeDescription {
         return m_configParams.get(name);
     }
 
+    @NotNull
     public List<TypedAttributeWithValue> configParams () {
-        List<TypedAttributeWithValue> paramList = new ArrayList<TypedAttributeWithValue> (m_configParams.values ());
+        List<TypedAttributeWithValue> paramList = new ArrayList<> (m_configParams.values ());
         Collections.sort(paramList);
         return paramList;
     }

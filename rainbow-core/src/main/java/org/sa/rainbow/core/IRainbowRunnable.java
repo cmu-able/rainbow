@@ -41,57 +41,57 @@ package org.sa.rainbow.core;
  */
 public interface IRainbowRunnable extends IDisposable, Runnable {
 
-    public static enum State {
+    enum State {
         RAW, STARTED, STOPPED, TERMINATED
     }
 
-    public static final long SLEEP_TIME = 100;  // ms
-    public static final long LONG_SLEEP_TIME = 1000;  // ms
-    public static final long SHORT_SLEEP_TIME = 10;  // ms
+    long SLEEP_TIME = 100;  // ms
+    long LONG_SLEEP_TIME = 1000;  // ms
+    long SHORT_SLEEP_TIME = 10;  // ms
     /** Threshold value useful for preventing a runnable from hogging CPU */
-    public static final int MAX_CYCLES_PER_SLEEP = 100;
+    int MAX_CYCLES_PER_SLEEP = 100;
 
     /**
      * Returns the name of this runnable.
      * @return String  the IRainbowRunnable's name
      */
-    public String id ();
+    String id ();
 
     /**
      * Starts the execution of the runnable, usually via thisThread.start().
      */
-    public void start ();
+    void start ();
 
     /**
      * Pauses the execution of the runnable, preserving any states until it is
      * resumed again by call to start.  This method actually calls an
      * implementation method, transition().
      */
-    public void stop ();
+    void stop ();
 
     /**
      * Stops, then starts, the execution of the runnable.
      * This method actually calls an implementation method, transition().
      */
-    public void restart ();
+    void restart ();
 
     /**
      * Stops the runnable thread and (potentially) causes exit from fun.
      * This method actually calls an implementation method, transition().
      */
-    public void terminate ();
+    void terminate ();
 
     /**
      * Returns the running state of this runnable.
      * @return State  one of the states, <code>RAW</code>, <code>STARTED</code>, <code>STOPPED</code>, <code>TERMINATED</code> 
      */
-    public State state ();
+    State state ();
 
     /**
      * A convenience method for checking whether this IRainbowRunnable is in a
      * TERMINATED state.
      * @return boolean  <code>true</code> if TERMINATED, <code>false</code> otherwise.
      */
-    public boolean isTerminated ();
+    boolean isTerminated ();
 
 }

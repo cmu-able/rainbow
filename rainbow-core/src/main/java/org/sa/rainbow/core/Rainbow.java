@@ -23,29 +23,20 @@
  */
 package org.sa.rainbow.core;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.error.RainbowAbortException;
 import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.util.Util;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.*;
+import java.text.MessageFormat;
+import java.util.*;
 
 /**
  * A singleton class that provides utilities for reading properties, and getting access to important Rainbow Framework
@@ -55,14 +46,14 @@ import org.sa.rainbow.util.Util;
  * 
  */
 public class Rainbow implements RainbowConstants {
-    static Logger LOGGER = Logger.getLogger (Rainbow.class);
+    static final Logger LOGGER = Logger.getLogger (Rainbow.class);
 
     /**
      * States used to track the target deployment environment of Rainbow component.
      * 
      * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
      */
-    public static enum Environment {
+    public enum Environment {
         /** We don't yet know what deployment environment. */
         UNKNOWN,
         /** We're in a Linux environment. */
@@ -73,14 +64,14 @@ public class Rainbow implements RainbowConstants {
         MAC,
         /** We're in a Windows environment without Cygwin. */
         WINDOWS
-    };
+    }
 
     /**
      * States used to help the Rainbow daemon process determine what to do after this Rainbow component exits.
      * 
      * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
      */
-    public static enum ExitState {
+    public enum ExitState {
         /**
          * Completely clear out (daemon dies) after the Rainbow component exits (default).
          */
@@ -94,6 +85,7 @@ public class Rainbow implements RainbowConstants {
         /** Abort of operation. */
         ABORT;
 
+        @NotNull
         public static ExitState parseState (int val) {
             ExitState st = ExitState.DESTRUCT;
             switch (val) {
@@ -148,6 +140,7 @@ public class Rainbow implements RainbowConstants {
     /**
      * Singleton instance of Rainbow
      */
+    @Nullable
     private static Rainbow m_instance = null;
 
     private static Map<String, IGauge> m_id2Gauge;
@@ -156,6 +149,7 @@ public class Rainbow implements RainbowConstants {
 
     private boolean            m_shouldTerminate = false;
 
+    @Nullable
     public synchronized static Rainbow instance () {
         if (m_instance == null) {
             m_instance = new Rainbow ();
@@ -207,11 +201,14 @@ public class Rainbow implements RainbowConstants {
         return instance ().m_isMaster;
     }
 
-    private Properties m_props;
+    @NotNull
+    private final Properties m_props;
     private File       m_basePath;
+    @Nullable
     private File       m_targetPath;
 
-    private ThreadGroup m_threadGroup;
+    @NotNull
+    private final ThreadGroup m_threadGroup;
 
     /** Indicates whether this instance is the master or a delegate **/
     private boolean     m_isMaster = false;
@@ -234,11 +231,11 @@ public class Rainbow implements RainbowConstants {
         return instance ().m_props.getProperty (key, instance ().m_defaultProps.getProperty (key, defaultProperty));
     }
 
-    public static String getProperty (String key) {
+    public static String getProperty (@NotNull String key) {
         return instance ().m_props.getProperty (key, instance ().m_defaultProps.getProperty (key));
     }
 
-    public static boolean getProperty (String key, boolean b) {
+    public static boolean getProperty (@NotNull String key, boolean b) {
         String value = instance ().m_props.getProperty (key);
         if (value != null)
             return Boolean.valueOf (value);
@@ -246,7 +243,7 @@ public class Rainbow implements RainbowConstants {
             return b;
     }
 
-    public static long getProperty (String key, long default_) {
+    public static long getProperty (@NotNull String key, long default_) {
         String value = instance ().m_props.getProperty (key);
         if (value == null) return default_;
         try {
@@ -257,7 +254,7 @@ public class Rainbow implements RainbowConstants {
         }
     }
 
-    public static short getProperty (String key, short default_) {
+    public static short getProperty (@NotNull String key, short default_) {
         String value = instance ().m_props.getProperty (key);
         if (value == null) return default_;
         try {
@@ -268,7 +265,7 @@ public class Rainbow implements RainbowConstants {
         }
     }
 
-    public static int getProperty (String key, int default_) {
+    public static int getProperty (@NotNull String key, int default_) {
         String value = instance ().m_props.getProperty (key);
         if (value == null) return default_;
         try {
@@ -279,7 +276,7 @@ public class Rainbow implements RainbowConstants {
         }
     }
 
-    public static double getProperty (String key, double default_) {
+    public static double getProperty (@NotNull String key, double default_) {
         String value = instance ().m_props.getProperty (key);
         if (value == null) return default_;
         try {
@@ -314,6 +311,7 @@ public class Rainbow implements RainbowConstants {
         instance ().m_props.setProperty (key, Integer.toString (val));
     }
 
+    @NotNull
     public static Properties allProperties () {
         return instance ().m_props;
     }
@@ -388,11 +386,7 @@ public class Rainbow implements RainbowConstants {
         for (String cfg : cfgFiles) {
             try (FileInputStream pfIn = new FileInputStream (Util.getRelativeToPath (m_targetPath, cfg))) {
                 m_props.load (pfIn);
-            }
-            catch (FileNotFoundException e) {
-                LOGGER.error (e);
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 LOGGER.error (e);
             }
         }
@@ -481,7 +475,7 @@ public class Rainbow implements RainbowConstants {
      * @throws SocketException
      */
     private void computeHostSpecificConfig () {
-        List<String> triedHosts = new ArrayList<String> ();
+        List<String> triedHosts = new ArrayList<> ();
 
         try {
             Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces ();
@@ -509,7 +503,7 @@ public class Rainbow implements RainbowConstants {
      *            The combinations that have been tried
      * @return true after the the first properties file that matches is found
      */
-    private boolean checkInetAddressConfigFile (InetAddress ia, List<String> triedHosts) {
+    private boolean checkInetAddressConfigFile (InetAddress ia, @NotNull List<String> triedHosts) {
         if (ia instanceof Inet6Address) return false;
         // check with the remembered hostname (preferred)
         String hostname = ia.getHostName ().toLowerCase ();
@@ -557,7 +551,7 @@ public class Rainbow implements RainbowConstants {
      *            the hostname to check
      * @return true if the file hostname specific properties file exists
      */
-    private boolean checkSetConfig (String hostname) {
+    private boolean checkSetConfig (@NotNull String hostname) {
         boolean good = false;
         String cfgFileName = RainbowConstants.CONFIG_FILE_TEMPLATE.replace (CONFIG_FILE_STUB_NAME, hostname);
         if (Util.getRelativeToPath (m_targetPath, cfgFileName).exists ()) {
@@ -567,10 +561,12 @@ public class Rainbow implements RainbowConstants {
         return good;
     }
 
+    @NotNull
     public ThreadGroup getThreadGroup () {
         return m_threadGroup;
     }
 
+    @Nullable
     public File getTargetPath () {
         return m_targetPath;
     }
@@ -587,7 +583,7 @@ public class Rainbow implements RainbowConstants {
         return m_rainbowMaster;
     }
 
-    public static void registerGauge (IGauge gauge) {
+    public static void registerGauge (@NotNull IGauge gauge) {
         instance ();
         Rainbow.m_id2Gauge.put (gauge.id (), gauge);
     }

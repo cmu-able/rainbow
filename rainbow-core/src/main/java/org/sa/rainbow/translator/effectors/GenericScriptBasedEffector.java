@@ -23,14 +23,16 @@
  */
 package org.sa.rainbow.translator.effectors;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.translator.probes.IBashBasedScript;
+import org.sa.rainbow.util.Util;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-
-import org.sa.rainbow.core.Rainbow;
-import org.sa.rainbow.translator.probes.IBashBasedScript;
-import org.sa.rainbow.util.Util;
 
 /**
  * This class defines an effector that depends on a shell/Perl script for
@@ -41,7 +43,9 @@ import org.sa.rainbow.util.Util;
  */
 public class GenericScriptBasedEffector extends AbstractEffector implements IBashBasedScript {
 
+    @Nullable
     private String m_path = null;
+    @Nullable
     private String m_params = null;
 
     /**
@@ -61,8 +65,9 @@ public class GenericScriptBasedEffector extends AbstractEffector implements IBas
     /* (non-Javadoc)
      * @see org.sa.rainbow.translator.effectors.IEffector#execute(java.lang.String[])
      */
+    @NotNull
     @Override
-    public Outcome execute (List<String> args) {
+    public Outcome execute (@NotNull List<String> args) {
         Outcome r = Outcome.UNKNOWN;
         String[] cmds = new String[3];
 
@@ -70,7 +75,7 @@ public class GenericScriptBasedEffector extends AbstractEffector implements IBas
         String params = m_params;
         for (int i = 0; i < args.size (); ++i) {
             String a = args.get (i);
-            if (a.indexOf ("=") > -1) { // a key=val argument, split
+            if (a.contains ("=")) { // a key=val argument, split
                 String[] kv = a.split ("\\s*=\\s*");
                 params = params.replace("{"+kv[0]+"}", kv[1]);
             } else {  // replace by position

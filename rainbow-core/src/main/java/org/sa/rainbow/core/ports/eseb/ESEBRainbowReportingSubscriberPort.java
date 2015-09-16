@@ -23,21 +23,23 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import java.io.IOException;
-import java.util.EnumSet;
-
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.IESEBListener;
 
+import java.io.IOException;
+import java.util.EnumSet;
+
 public class ESEBRainbowReportingSubscriberPort extends AbstractESEBDisposablePort implements
 IRainbowReportingSubscriberPort {
 
     private IRainbowReportingSubscriberCallback m_reportTo;
-    private EnumSet<RainbowComponentT>          m_components = EnumSet.noneOf (RainbowComponentT.class);
-    private EnumSet<ReportType>                 m_reports    = EnumSet.noneOf (ReportType.class);
+    private final EnumSet<RainbowComponentT> m_components = EnumSet.noneOf (RainbowComponentT.class);
+    private final EnumSet<ReportType> m_reports = EnumSet.noneOf (ReportType.class);
 
     public ESEBRainbowReportingSubscriberPort (IRainbowReportingSubscriberCallback reportTo) throws IOException {
         super (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (), ChannelT.UIREPORT);
@@ -45,7 +47,7 @@ IRainbowReportingSubscriberPort {
         getConnectionRole().addListener (new IESEBListener () {
 
             @Override
-            public void receive (RainbowESEBMessage msg) {
+            public void receive (@NotNull RainbowESEBMessage msg) {
                 if (msg.getProperty (ESEBConstants.MSG_CHANNEL_KEY).equals (ChannelT.UIREPORT.name ())) {
                     String componentStr = (String )msg.getProperty (ESEBConstants.COMPONENT_TYPE_KEY);
                     String reportTypeStr = (String )msg.getProperty (ESEBConstants.REPORT_TYPE_KEY);
@@ -72,7 +74,7 @@ IRainbowReportingSubscriberPort {
     }
 
     @Override
-    public void subscribe (EnumSet<RainbowComponentT> components, EnumSet<ReportType> reports) {
+    public void subscribe (@Nullable EnumSet<RainbowComponentT> components, @Nullable EnumSet<ReportType> reports) {
         if (components != null) {
             m_components.addAll (components);
         }
@@ -82,7 +84,7 @@ IRainbowReportingSubscriberPort {
     }
 
     @Override
-    public void unsubscribe (EnumSet<RainbowComponentT> components, EnumSet<ReportType> reports) {
+    public void unsubscribe (@Nullable EnumSet<RainbowComponentT> components, @Nullable EnumSet<ReportType> reports) {
         if (components != null) {
             m_components.removeAll (components);
         }

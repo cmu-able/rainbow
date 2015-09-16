@@ -38,11 +38,11 @@ import org.sa.rainbow.core.ports.IRainbowReportingPort;
  */
 public interface IAdaptationExecutor<S> extends IRainbowRunnable {
 
-    public abstract void setModelToManage (ModelReference modelRef);
+    void setModelToManage (ModelReference modelRef);
 
-    public abstract void initialize (IRainbowReportingPort reportingPort) throws RainbowConnectionException;
+    void initialize (IRainbowReportingPort reportingPort) throws RainbowConnectionException;
 
-    public abstract IModelDSBusPublisherPort getOperationPublishingPort ();
+    IModelDSBusPublisherPort getOperationPublishingPort ();
 
-    public abstract IRainbowReportingPort getReportingPort ();
+    IRainbowReportingPort getReportingPort ();
 }

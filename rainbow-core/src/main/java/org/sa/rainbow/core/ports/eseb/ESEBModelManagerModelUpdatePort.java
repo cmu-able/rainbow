@@ -23,11 +23,7 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.LinkedList;
-import java.util.List;
-
+import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
@@ -40,10 +36,15 @@ import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.IESEBListener;
 
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.LinkedList;
+import java.util.List;
+
 public class ESEBModelManagerModelUpdatePort extends AbstractESEBDisposablePort implements ESEBConstants,
 IModelUSBusPort {
 
-    private IRainbowReportingPort LOGGER = new ESEBMasterReportingPort ();
+    private final IRainbowReportingPort LOGGER = new ESEBMasterReportingPort ();
 
     private IModelUpdater m_mm;
 
@@ -54,7 +55,7 @@ IModelUSBusPort {
         getConnectionRole().addListener (new IESEBListener() {
 
             @Override
-            public void receive (RainbowESEBMessage msg) {
+            public void receive (@NotNull RainbowESEBMessage msg) {
                 String msgType = (String )msg.getProperty (ESEBConstants.MSG_TYPE_KEY);
                 if (ESEBConstants.MSG_TYPE_UPDATE_MODEL.equals (msgType)) {
                     String modelType = (String )msg.getProperty (MODEL_TYPE_KEY);
@@ -73,7 +74,7 @@ IModelUSBusPort {
                         IModelInstance model = getModelInstance (new ModelReference (modelName, modelType));
                         if (model != null) {
                             IRainbowOperation command = model.getCommandFactory ().generateCommand (
-                                    commandName, params.toArray (new String[0]));
+                                    commandName, params.toArray (new String[params.size ()]));
                             if (msg.hasProperty (COMMAND_ORIGIN)) {
                                 command.setOrigin ((String )msg.getProperty (COMMAND_ORIGIN));
                             }
@@ -133,8 +134,7 @@ IModelUSBusPort {
     public void updateModel (IRainbowOperation command) {
         try {
             m_mm.requestModelUpdate (command);
-        }
-        catch (IllegalStateException | RainbowException e) {
+        } catch (@NotNull IllegalStateException | RainbowException e) {
             // TODO Auto-generated catch block
             e.printStackTrace ();
         }
@@ -144,12 +144,7 @@ IModelUSBusPort {
     public void updateModel (List<IRainbowOperation> commands, boolean transaction) {
         try {
             m_mm.requestModelUpdate (commands, transaction);
-        }
-        catch (IllegalStateException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace ();
-        }
-        catch (RainbowException e) {
+        } catch (@NotNull IllegalStateException | RainbowException e) {
             // TODO Auto-generated catch block
             e.printStackTrace ();
         }

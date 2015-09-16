@@ -3,6 +3,9 @@
  */
 package org.sa.rainbow.core.models;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -39,21 +42,26 @@ import java.util.TreeMap;
  */
 public class UtilityFunction {
 
+    @Nullable
     private String m_id = null;
+    @Nullable
     private String m_label = null;
+    @Nullable
     private String m_mapping = null;
+    @Nullable
     private String m_desc = null;
+    @Nullable
     private SortedMap<Double,Double> m_values = null;
 
     /**
      * Main Constructor
      */
-    public UtilityFunction (String id, String label, String mapping, String desc, Map<?, ?> values) {
+    public UtilityFunction (String id, String label, String mapping, String desc, @NotNull Map<?, ?> values) {
         m_id = id;
         m_label = label;
         m_mapping = mapping;
         m_desc = desc;
-        m_values = new TreeMap<Double,Double>();
+        m_values = new TreeMap<> ();
 
         // store values into value map as doubles
         for (Object k : values.keySet()) {
@@ -67,6 +75,7 @@ public class UtilityFunction {
     /* (non-Javadoc)
      * @see java.lang.Object#clone()
      */
+    @Nullable
     @Override
     public Object clone() throws CloneNotSupportedException {
         return new UtilityFunction (
@@ -80,27 +89,33 @@ public class UtilityFunction {
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
+    @Nullable
     @Override
     public String toString() {
         return "Util: " + m_id + " (" + m_label + " : " + m_mapping + ") " + m_values;
     }
 
+    @Nullable
     public String id () {
         return m_id;
     }
 
+    @Nullable
     public String label () {
         return m_label;
     }
 
+    @Nullable
     public String mapping () {
         return m_mapping;
     }
 
+    @Nullable
     public String description () {
         return m_desc;
     }
 
+    @Nullable
     public Map<Double,Double> values () {
         return m_values;
     }

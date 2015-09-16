@@ -23,9 +23,11 @@
  */
 package org.sa.rainbow.core.models;
 
-import java.util.Collection;
-
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.error.RainbowModelException;
+
+import java.util.Collection;
 
 /**
  * The models manager is a repository for all models. Features should include - registering different kinds of models -
@@ -41,13 +43,14 @@ public interface IModelsManager extends IModelUpdater, IModelInstanceProvider {
      * @param typeName
      *            The name to register the model type under
      */
-    public void registerModelType (String typeName);
+    void registerModelType (String typeName);
 
     /**
      * 
      * @return The collection of model types that the Models Manager knows about
      */
-    public Collection<? extends String> getRegisteredModelTypes ();
+    @NotNull
+    Collection<? extends String> getRegisteredModelTypes ();
 
     /**
      * Gets all the instances of a model of a certain type
@@ -56,7 +59,8 @@ public interface IModelsManager extends IModelUpdater, IModelInstanceProvider {
      *            The model type
      * @return The collection of instances of the model type
      */
-    public Collection<? extends IModelInstance<?>> getModelsOfType (String modelType);
+    @NotNull
+    Collection<? extends IModelInstance<?>> getModelsOfType (String modelType);
 
     /**
      * Registers a new model with the name and type with the model manager
@@ -69,7 +73,7 @@ public interface IModelsManager extends IModelUpdater, IModelInstanceProvider {
      *            The model instance
      * @throws RainbowModelException
      */
-    public void registerModel (ModelReference modelRef, IModelInstance<?> model)
+    void registerModel (ModelReference modelRef, IModelInstance<?> model)
             throws RainbowModelException;
 
 
@@ -83,10 +87,11 @@ public interface IModelsManager extends IModelUpdater, IModelInstanceProvider {
      * @return
      * @throws RainbowModelException
      */
-    public <T> IModelInstance<T> copyInstance (ModelReference modelRef, String copyName)
+    <T> IModelInstance<T> copyInstance (ModelReference modelRef, String copyName)
             throws RainbowModelException;
 
-    public abstract void unregisterModel (IModelInstance<?> model) throws RainbowModelException;
+    void unregisterModel (IModelInstance<?> model) throws RainbowModelException;
 
-    public <T> IModelInstance<T> getModelInstanceByResource (String resource);
+    @Nullable
+    <T> IModelInstance<T> getModelInstanceByResource (String resource);
 }

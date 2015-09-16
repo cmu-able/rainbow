@@ -1,7 +1,6 @@
 package org.sa.rainbow.gui;
 
-import java.util.EnumSet;
-
+import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.Rainbow.ExitState;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowConnectionException;
@@ -10,6 +9,8 @@ import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReportingSubscriberCallback;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
+
+import java.util.EnumSet;
 
 public class CommandLineUI {
 
@@ -44,12 +45,14 @@ public class CommandLineUI {
         //  data input methods for
         //string, int, char, and double
         //********************************
+        @NotNull
         public static String inString (String prompt) {
             inputFlush ();
             printPrompt (prompt);
             return inString ();
         }
 
+        @NotNull
         public static String inString () {
             int aChar;
             String s = "";
@@ -79,7 +82,7 @@ public class CommandLineUI {
                 inputFlush ();
                 printPrompt (prompt);
                 try {
-                    return Integer.valueOf (inString ().trim ()).intValue ();
+                    return Integer.valueOf (inString ().trim ());
                 }
 
                 catch (NumberFormatException e) {
@@ -110,7 +113,7 @@ public class CommandLineUI {
                 inputFlush ();
                 printPrompt (prompt);
                 try {
-                    return Double.valueOf (inString ().trim ()).doubleValue ();
+                    return Double.valueOf (inString ().trim ());
                 }
 
                 catch (NumberFormatException e) {
@@ -126,7 +129,7 @@ public class CommandLineUI {
                 .createReportingSubscriberPort (new IRainbowReportingSubscriberCallback () {
 
                     @Override
-                    public void report (RainbowComponentT component, ReportType type, String message) {
+                    public void report (RainbowComponentT component, @NotNull ReportType type, String message) {
                         if (type == ReportType.ERROR || type == ReportType.FATAL || type == ReportType.WARNING) {
                             System.out.println (type.name () + ": " + message);
                         }

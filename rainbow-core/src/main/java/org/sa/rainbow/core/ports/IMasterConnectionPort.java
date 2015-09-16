@@ -23,10 +23,11 @@
  */
 package org.sa.rainbow.core.ports;
 
-import java.util.Properties;
-
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+
+import java.util.Properties;
 
 /**
  * This interface represents a port through which delegates connect to the master
@@ -37,7 +38,9 @@ import org.sa.rainbow.core.error.RainbowConnectionException;
 public interface IMasterConnectionPort extends IDisposablePort {
 
     /** Message types for sending to the Rainbow Master, which could be displayed on the UI **/
-    public enum ReportType {INFO, WARNING, ERROR, FATAL};
+    enum ReportType {
+        INFO, WARNING, ERROR, FATAL
+    }
 
     /**
      * Connects a delegate to the master through the connection port
@@ -51,7 +54,8 @@ public interface IMasterConnectionPort extends IDisposablePort {
      * @return A deployment port through which the delegate can be managed
      * @throws RainbowConnectionException TODO
      */
-    public IDelegateManagementPort connectDelegate (String delegateID, Properties connectionProperties) throws RainbowConnectionException;
+    @Nullable
+    IDelegateManagementPort connectDelegate (String delegateID, Properties connectionProperties) throws RainbowConnectionException;
 
     /**
      * Disconnects the delegate from the master. The master will delete the delegate from its records. Any processing
@@ -60,9 +64,9 @@ public interface IMasterConnectionPort extends IDisposablePort {
      * @param delegateId
      *            The delegate being disconnected
      */
-    public void disconnectDelegate (String delegateId);
+    void disconnectDelegate (String delegateId);
 
-    public void report (String delegateID, ReportType type, RainbowComponentT compT, String msg);
+    void report (String delegateID, ReportType type, RainbowComponentT compT, String msg);
 
 
 }

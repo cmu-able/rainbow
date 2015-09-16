@@ -24,27 +24,26 @@
 
 package org.sa.rainbow.core.ports.eseb.rpc;
 
-import java.util.Collection;
-
+import edu.cmu.cs.able.eseb.rpc.ParametersTypeMapping;
+import edu.cmu.cs.able.eseb.rpc.ReturnTypeMapping;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IModelsManagerPort;
 
-import edu.cmu.cs.able.eseb.rpc.ParametersTypeMapping;
-import edu.cmu.cs.able.eseb.rpc.ReturnTypeMapping;
+import java.util.Collection;
 
 public interface IESEBModeslManagerRemoteInterface extends IModelsManagerPort {
 
-    static final String DEFAULT_ESEB_RPCNAME  = "rainbow_models_manager";
-    static final String MODEL_CONVERTER_CLASS = "org.sa.rainbow.model.converter.eseb.class";
+    String DEFAULT_ESEB_RPCNAME = "rainbow_models_manager";
+    String MODEL_CONVERTER_CLASS = "org.sa.rainbow.model.converter.eseb.class";
 
     @Override
     @ReturnTypeMapping ("set<string>")
-    public Collection<? extends String> getRegisteredModelTypes ();
+    Collection<? extends String> getRegisteredModelTypes ();
 
     @Override
     @ReturnTypeMapping ("rainbow_model")
     @ParametersTypeMapping ({ "model_reference" })
-    public <T> IModelInstance<T> getModelInstance (ModelReference modelRef);
+    <T> IModelInstance<T> getModelInstance (ModelReference modelRef);
 
 }

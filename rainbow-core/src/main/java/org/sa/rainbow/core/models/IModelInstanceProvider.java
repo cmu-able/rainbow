@@ -23,6 +23,8 @@
  */
 package org.sa.rainbow.core.models;
 
+import org.jetbrains.annotations.Nullable;
+
 public interface IModelInstanceProvider {
 
     /**
@@ -32,5 +34,6 @@ public interface IModelInstanceProvider {
      * @param modelName
      * @return
      */
-    public <T> IModelInstance<T> getModelInstance (ModelReference modelRef);
+    @Nullable
+    <T> IModelInstance<T> getModelInstance (ModelReference modelRef);
 }

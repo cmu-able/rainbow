@@ -44,13 +44,13 @@ public interface IDisposable {
      * Disconnects any I/O connections, disposes of all resources, and
      * null-out members as good measure.
      */
-    public void dispose ();
+    void dispose ();
 
     /**
      * Returns whether this object is considered to have been disposed,
      * usually by checking some key data member, or via an explicit boolean.
      * @return boolean  <code>true</code> if object disposed, <code>false</code> otherwise
      */
-    public boolean isDisposed ();
+    boolean isDisposed ();
 
 }

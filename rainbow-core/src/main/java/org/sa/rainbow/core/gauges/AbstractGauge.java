@@ -23,35 +23,24 @@
  */
 package org.sa.rainbow.core.gauges;
 
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
+import incubator.pval.Ensure;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
-import org.sa.rainbow.core.ports.DisconnectedRainbowDelegateConnectionPort;
-import org.sa.rainbow.core.ports.IGaugeConfigurationPort;
-import org.sa.rainbow.core.ports.IGaugeLifecycleBusPort;
-import org.sa.rainbow.core.ports.IGaugeQueryPort;
-import org.sa.rainbow.core.ports.IModelUSBusPort;
-import org.sa.rainbow.core.ports.IRainbowReportingPort;
-import org.sa.rainbow.core.ports.RainbowPortFactory;
+import org.sa.rainbow.core.ports.*;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.util.Beacon;
 
-import incubator.pval.Ensure;
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * Abstract definition of a gauge that does not use probes to gather system information. This allows for subclasses to
@@ -65,21 +54,32 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
     private final String                                      m_id;
 
     /** The ports through which the gauge interacts with the outside world **/
-    protected IModelUSBusPort                          m_announcePort;
-    protected IGaugeLifecycleBusPort                   m_gaugeManagementPort;
-    protected IGaugeConfigurationPort                    m_configurationPort;
-    protected IGaugeQueryPort                            m_queryPort;
+    @Nullable
+    private IModelUSBusPort m_announcePort;
+    @Nullable
+    private IGaugeLifecycleBusPort m_gaugeManagementPort;
+    @Nullable
+    private IGaugeConfigurationPort m_configurationPort;
+    @Nullable
+    private IGaugeQueryPort m_queryPort;
     /**
      * Used to determine when to fire off beacon to consumers; the period will be set by the Gauge implementation
      * subclass
      */
-    protected Beacon                                          m_gaugeBeacon  = null;
-    protected TypedAttribute                                  m_gaugeDesc    = null;
+    @Nullable
+    private Beacon m_gaugeBeacon = null;
+    @Nullable
+    private TypedAttribute m_gaugeDesc = null;
+    @Nullable
     protected TypedAttribute                                  m_modelDesc    = null;
-    protected Map<String, TypedAttributeWithValue>            m_setupParams  = null;
+    @Nullable
+    private Map<String, TypedAttributeWithValue> m_setupParams = null;
+    @Nullable
     protected Map<String, TypedAttributeWithValue>            m_configParams = null;
+    @Nullable
     protected Map<String, IRainbowOperation>       m_commands     = null;
-    protected Map<String, IRainbowOperation> m_lastCommands = null;
+    @Nullable
+    private Map<String, IRainbowOperation> m_lastCommands = null;
 
     /**
      * Main Constructor for the Gauge.
@@ -103,8 +103,8 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
     @SuppressWarnings ("null")
     // Ensure is used to check this
     public AbstractGauge (String threadName, String id, long beaconPeriod, TypedAttribute gaugeDesc,
-            TypedAttribute modelDesc, List<TypedAttributeWithValue> setupParams,
-            Map<String, IRainbowOperation> mappings)
+                          @Nullable TypedAttribute modelDesc, @Nullable List<TypedAttributeWithValue> setupParams,
+                          @Nullable Map<String, IRainbowOperation> mappings)
                     throws RainbowException {
         super (threadName);
         Ensure.is_false (mappings == null || mappings.isEmpty ());
@@ -112,6 +112,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
         Ensure.is_false (modelDesc.getName () == null);
         Ensure.is_false (modelDesc.getType () == null);
         Ensure.is_false (setupParams == null); // can be empty
+        Ensure.is_false (mappings == null);
 
         this.m_id = id;
 
@@ -119,17 +120,19 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
         m_gaugeDesc = gaugeDesc;
         m_modelDesc = modelDesc;
 
-        m_setupParams = new HashMap<String, TypedAttributeWithValue> ();
-        m_configParams = new HashMap<String, TypedAttributeWithValue> ();
-        m_lastCommands = new HashMap<String, IRainbowOperation> ();
+        m_setupParams = new HashMap<> ();
+        m_configParams = new HashMap<> ();
+        m_lastCommands = new HashMap<> ();
         setCommands (new HashMap<String, IRainbowOperation> ());
 
         // store the setup parameters
+        assert setupParams != null;
         for (TypedAttributeWithValue param : setupParams) {
             m_setupParams.put (param.getName (), param);
         }
 
         // Need to keep the list of commands, and also perhaps the commands by value (if they exist)
+        assert mappings != null;
         for (Entry<String, IRainbowOperation> cmd : mappings.entrySet ()) {
             m_commands.put (cmd.getKey (), cmd.getValue ());
             for (String param : cmd.getValue ().getParameters ()) {
@@ -153,7 +156,8 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
         }
     }
 
-    private String pullOutParam (String param) {
+    @NotNull
+    private String pullOutParam (@NotNull String param) {
         // This is a value parameter, so really should store command by this, too
         // pull out the parameter
         if (param.startsWith ("$<")) {
@@ -210,6 +214,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
     /* (non-Javadoc)
      * @see org.sa.rainbow.translator.gauges.IGauge#gaugeDesc()
      */
+    @Nullable
     @Override
     public TypedAttribute gaugeDesc () {
         return m_gaugeDesc;
@@ -218,13 +223,14 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
     /* (non-Javadoc)
      * @see org.sa.rainbow.translator.gauges.IGauge#modelDesc()
      */
+    @Nullable
     @Override
     public TypedAttribute modelDesc () {
         return m_modelDesc;
     }
 
     @Override
-    public boolean configureGauge (List<TypedAttributeWithValue> configParams) {
+    public boolean configureGauge (@NotNull List<TypedAttributeWithValue> configParams) {
         for (TypedAttributeWithValue triple : configParams) {
             m_configParams.put (triple.getName (), triple);
             handleConfigParam (triple);
@@ -240,7 +246,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
      * @param triple
      *            a triple of name, type, value.
      */
-    protected void handleConfigParam (TypedAttributeWithValue triple) {
+    protected void handleConfigParam (@NotNull TypedAttributeWithValue triple) {
         if (triple.getName ().equals (CONFIG_SAMPLING_FREQUENCY)) {
             // set the runner timer directly
             setSleepTime ((Long )triple.getValue ());
@@ -252,20 +258,21 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
      */
     @Override
     public boolean reconfigureGauge () {
-        return configureGauge (new ArrayList<TypedAttributeWithValue> (m_configParams.values ()));
+        return configureGauge (new ArrayList<> (m_configParams.values ()));
     }
 
     /* (non-Javadoc)
      * @see org.sa.rainbow.translator.gauges.IGauge#queryGaugeState()
      */
+    @NotNull
     @Override
     public IGaugeState queryGaugeState () {
         return new GaugeState (m_setupParams.values (), m_configParams.values (),
-                new HashSet<IRainbowOperation> (
+                new HashSet<> (
                         m_lastCommands.values ()));
     }
 
-    public void issueCommand (IRainbowOperation cmd, Map<String, String> parameters) {
+    public void issueCommand (@NotNull IRainbowOperation cmd, @NotNull Map<String, String> parameters) {
         OperationRepresentation actualCmd = new OperationRepresentation (cmd);
         Map<String, IRainbowOperation> actualsMap = new HashMap<> ();
         actualCmd = formOperation (cmd, parameters, actualCmd, actualsMap);
@@ -276,10 +283,10 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
                 actualCmd.getTarget (), actualCmd.getName (), Arrays.toString (actualCmd.getParameters ())));
     }
 
-    private OperationRepresentation formOperation (IRainbowOperation cmd,
-            Map<String, String> parameters,
+    private OperationRepresentation formOperation (@NotNull IRainbowOperation cmd,
+                                                   @NotNull Map<String, String> parameters,
             OperationRepresentation actualCmd,
-            Map<String, IRainbowOperation> actualsMap) {
+                                                   @NotNull Map<String, IRainbowOperation> actualsMap) {
         String target = cmd.getTarget ();
         String actualTarget = parameters.get (target);
         if (actualTarget != null) {
@@ -301,7 +308,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
         return actualCmd;
     }
 
-    public void issueCommands (List<IRainbowOperation> operations, List<Map<String, String>> parameters) {
+    public void issueCommands (@NotNull List<IRainbowOperation> operations, @NotNull List<Map<String, String>> parameters) {
         Ensure.is_true (operations.size () == parameters.size ());
         List<IRainbowOperation> actualCommands = new ArrayList<> (operations.size ());
         for (int i = 0; i < operations.size (); i++) {
@@ -328,7 +335,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
      * @see org.sa.rainbow.translator.gauges.IGauge#queryCommand()
      */
     @Override
-    public IRainbowOperation queryCommand (String value) {
+    public IRainbowOperation queryCommand (@NotNull String value) {
 
         IRainbowOperation cmd = m_lastCommands.get (pullOutParam (value));
         if (cmd == null) {
@@ -340,6 +347,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
     /* (non-Javadoc)
      * @see org.sa.rainbow.translator.gauges.IGauge#queryAllCommands()
      */
+    @NotNull
     @Override
     public Collection<IRainbowOperation> queryAllCommands () {
         return new HashSet<> (m_lastCommands.values ());
@@ -372,7 +380,8 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
      * 
      * @return String the string indicating the deployment location
      */
-    protected String deploymentLocation () {
+    @Nullable
+    String deploymentLocation () {
         return (String )m_setupParams.get (SETUP_LOCATION).getValue ();
     }
 
@@ -389,11 +398,13 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
         return m_reportingPort;
     }
 
+    @NotNull
     @Override
     protected RainbowComponentT getComponentType () {
         return RainbowComponentT.GAUGE;
     }
 
+    @Nullable
     protected <T> T getSetupValue (String key, Class<T> t) {
         TypedAttributeWithValue setupParam = m_setupParams.get (key);
         if (setupParam == null) return null;
@@ -446,11 +457,12 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
         return null;
     }
 
+    @NotNull
     protected IRainbowOperation getCommand (String cmd) {
         return new OperationRepresentation (m_commands.get (cmd));
     }
 
-    protected void setCommands (Map<String, IRainbowOperation> commands) {
+    private void setCommands (Map<String, IRainbowOperation> commands) {
         m_commands = commands;
     }
 

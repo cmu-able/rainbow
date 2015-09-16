@@ -23,18 +23,20 @@
  */
 package org.sa.rainbow.core.gauges;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.sa.rainbow.core.RainbowComponentT;
+import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.ports.IRainbowReportingPort;
+import org.sa.rainbow.core.util.TypedAttribute;
+import org.sa.rainbow.core.util.TypedAttributeWithValue;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.sa.rainbow.core.RainbowComponentT;
-import org.sa.rainbow.core.error.RainbowConnectionException;
-import org.sa.rainbow.core.ports.IRainbowReportingPort;
-import org.sa.rainbow.core.util.TypedAttribute;
-import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
 /**
  * A class for managing the creation and starting of gauges local to a delegate.
@@ -44,19 +46,20 @@ import org.sa.rainbow.core.util.TypedAttributeWithValue;
  */
 public class LocalGaugeManager {
 
-    IRainbowReportingPort m_reportingPort;
+    final IRainbowReportingPort m_reportingPort;
 
     /** tThe list of gauges started by this gauge manager **/
+    @NotNull
     private Map<String, IGauge> m_id2Gauge = new HashMap<> ();
 
     /** The list of guage descriptions started by this gauge manager **/
-    private GaugeDescription    m_gauges   = new GaugeDescription ();
+    private final GaugeDescription m_gauges = new GaugeDescription ();
 
     public LocalGaugeManager (String id, IRainbowReportingPort masterConnectionPort) {
         m_reportingPort = masterConnectionPort;
     }
 
-    public void initGauges (List<GaugeInstanceDescription> gauges) {
+    public void initGauges (@NotNull List<GaugeInstanceDescription> gauges) {
         for (GaugeInstanceDescription instDesc : gauges) {
             m_gauges.instSpec.put (instDesc.gaugeName (), instDesc);
             m_gauges.typeSpec.put (instDesc.gaugeType (), instDesc);
@@ -89,7 +92,8 @@ public class LocalGaugeManager {
 
     }
 
-    private IGauge doCreateGauge (Class<?> gaugeClass, long beaconPeriod, GaugeInstanceDescription instDesc) {
+    @Nullable
+    private IGauge doCreateGauge (@NotNull Class<?> gaugeClass, long beaconPeriod, @NotNull GaugeInstanceDescription instDesc) {
         AbstractGauge gauge = null;
         String id = GaugeInstanceDescription.genID (instDesc);
         Class<?>[] paramTypes = new Class[6];
@@ -111,8 +115,7 @@ public class LocalGaugeManager {
             gauge = (AbstractGauge )constructor.newInstance (args);
             gauge.initialize (m_reportingPort);
             gauge.start ();
-        }
-        catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
+        } catch (@NotNull NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException | RainbowConnectionException e) {
             m_reportingPort.error (RainbowComponentT.GAUGE_MANAGER,
                     MessageFormat.format ("Gauge construction for {0} failed!", id), e);

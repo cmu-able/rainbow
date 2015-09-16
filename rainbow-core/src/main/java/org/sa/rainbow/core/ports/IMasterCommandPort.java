@@ -22,32 +22,32 @@ ftware and associated documentation files (the "Software"), to deal
  */
 package org.sa.rainbow.core.ports;
 
-import java.util.List;
-
 import org.sa.rainbow.core.Rainbow.ExitState;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 
+import java.util.List;
+
 public interface IMasterCommandPort {
-    public void startProbes ();
+    void startProbes ();
 
-    public void killProbes ();
+    void killProbes ();
 
-    public void enableAdaptation (boolean enabled);
+    void enableAdaptation (boolean enabled);
 
-    public Outcome testEffector (String target, String effName, String[] args);
+    Outcome testEffector (String target, String effName, String[] args);
 
-    public void sleep ();
+    void sleep ();
 
-    public void terminate (ExitState exitState);
+    void terminate (ExitState exitState);
 
-    public void restartDelegates ();
+    void restartDelegates ();
 
-    public void sleepDelegates ();
+    void sleepDelegates ();
 
-    public void destroyDelegates ();
+    void destroyDelegates ();
 
-    public void killDelegate (String ipOfDelegate);
+    void killDelegate (String ipOfDelegate);
 
-    public List<String> getExpectedDelegateLocations ();
+    List<String> getExpectedDelegateLocations ();
 
 }

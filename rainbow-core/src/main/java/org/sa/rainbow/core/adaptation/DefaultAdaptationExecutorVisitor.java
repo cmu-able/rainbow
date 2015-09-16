@@ -1,12 +1,13 @@
 package org.sa.rainbow.core.adaptation;
 
+import org.jetbrains.annotations.NotNull;
+import org.sa.rainbow.core.RainbowComponentT;
+import org.sa.rainbow.core.ports.IRainbowReportingPort;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-
-import org.sa.rainbow.core.RainbowComponentT;
-import org.sa.rainbow.core.ports.IRainbowReportingPort;
 
 /**
  * An abstract class that defines the semantics for executing adaptation trees. Subclasses will define how to evaluate a
@@ -20,14 +21,14 @@ import org.sa.rainbow.core.ports.IRainbowReportingPort;
 public abstract class DefaultAdaptationExecutorVisitor<S extends IEvaluable> extends Thread implements IAdaptationVisitor<S> {
 
     /** The tree to visit **/
-    protected AdaptationTree<S> m_adtToVisit;
+    private final AdaptationTree<S> m_adtToVisit;
     /** The latch used to indicate when this thread is finished (i.e., the tree has been visited) **/
-    protected CountDownLatch    m_done;
+    private final CountDownLatch m_done;
     /** The result of executing this tree **/
-    protected boolean           m_result = true;
-    private IRainbowReportingPort m_reporter;
+    private boolean m_result = true;
+    private final IRainbowReportingPort m_reporter;
 
-    public DefaultAdaptationExecutorVisitor (AdaptationTree<S> adt, ThreadGroup tg, String threadName,
+    public DefaultAdaptationExecutorVisitor (AdaptationTree<S> adt, ThreadGroup tg, @NotNull String threadName,
             CountDownLatch done, IRainbowReportingPort reporter) {
         super (tg, threadName);
         m_adtToVisit = adt;
@@ -47,7 +48,7 @@ public abstract class DefaultAdaptationExecutorVisitor<S extends IEvaluable> ext
     }
 
     @Override
-    public final boolean visitLeaf (AdaptationTree<S> tree) {
+    public final boolean visitLeaf (@NotNull AdaptationTree<S> tree) {
         S s = tree.getHead ();
         m_reporter.info (RainbowComponentT.EXECUTOR, "Visiting execution leaf");
         Object evaluate = this.evaluate (s);
@@ -65,7 +66,7 @@ public abstract class DefaultAdaptationExecutorVisitor<S extends IEvaluable> ext
     protected abstract boolean evaluate (S adaptation);
 
     @Override
-    public final boolean visitSequence (AdaptationTree<S> tree) {
+    public final boolean visitSequence (@NotNull AdaptationTree<S> tree) {
         Collection<AdaptationTree<S>> subTrees = tree.getSubTrees ();
         // Will return true of all branches are successful
         boolean ret = true;
@@ -76,7 +77,7 @@ public abstract class DefaultAdaptationExecutorVisitor<S extends IEvaluable> ext
     }
 
     @Override
-    public final boolean visitParallel (AdaptationTree<S> tree) {
+    public final boolean visitParallel (@NotNull AdaptationTree<S> tree) {
         Collection<AdaptationTree<S>> subTrees = tree.getSubTrees ();
         // Create a new thread group to manage the execution of these branches
         ThreadGroup g = new ThreadGroup (this.getThreadGroup (), "");
@@ -87,6 +88,7 @@ public abstract class DefaultAdaptationExecutorVisitor<S extends IEvaluable> ext
         // Spawn a new executor for each branch
         for (AdaptationTree<S> adt : subTrees) {
             DefaultAdaptationExecutorVisitor<S> aexec = spawnNewExecutorForTree (adt, g, doneSignal);
+            nodes.add (aexec);
             aexec.start ();
         }
         // Wait until all the subthreads have finished
@@ -110,7 +112,7 @@ public abstract class DefaultAdaptationExecutorVisitor<S extends IEvaluable> ext
             CountDownLatch doneSignal);
 
     @Override
-    public final boolean visitSequenceStopSuccess (AdaptationTree<S> tree) {
+    public final boolean visitSequenceStopSuccess (@NotNull AdaptationTree<S> tree) {
         Collection<AdaptationTree<S>> subTrees = tree.getSubTrees ();
         for (AdaptationTree<S> adt : subTrees) {
             boolean ret = adt.visit (this);
@@ -120,7 +122,7 @@ public abstract class DefaultAdaptationExecutorVisitor<S extends IEvaluable> ext
     }
 
     @Override
-    public final boolean visitSequenceStopFailure (AdaptationTree<S> tree) {
+    public final boolean visitSequenceStopFailure (@NotNull AdaptationTree<S> tree) {
         Collection<AdaptationTree<S>> subTrees = tree.getSubTrees ();
         for (AdaptationTree<S> adt : subTrees) {
             boolean ret = adt.visit (this);

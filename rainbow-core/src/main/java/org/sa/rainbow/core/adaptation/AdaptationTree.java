@@ -1,5 +1,8 @@
 package org.sa.rainbow.core.adaptation;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -15,15 +18,17 @@ import java.util.Collection;
 public class AdaptationTree<T extends IEvaluable> {
 
     /** The data associated with this LEAF node. data != null iff operator==LEAF **/
+    @Nullable
     final private T                            data;
 
     /** How to execute the leaves of this treee. !leafs.isEmpty iff operator != LEAF **/
     final private AdaptationExecutionOperatorT operator;
 
     /** The children of the tree **/
-    private ArrayList<AdaptationTree<T>>       branches = new ArrayList<AdaptationTree<T>> ();
+    private final ArrayList<AdaptationTree<T>> branches = new ArrayList<> ();
 
     /** The parent of this tree **/
+    @Nullable
     private AdaptationTree<T>                  parent   = null;
 
     public AdaptationTree (T head) {
@@ -40,28 +45,33 @@ public class AdaptationTree<T extends IEvaluable> {
         addLeaf (root).addLeaf (leaf);
     }
 
+    @NotNull
     public AdaptationTree<T> addLeaf (T leaf) {
-        AdaptationTree<T> t = new AdaptationTree<T> (leaf);
+        AdaptationTree<T> t = new AdaptationTree<> (leaf);
         branches.add (t);
         t.parent = this;
         return t;
     }
 
+    @NotNull
     public AdaptationTree<T> setAsParent (T parentRoot) {
-        AdaptationTree<T> t = new AdaptationTree<T> (parentRoot);
+        AdaptationTree<T> t = new AdaptationTree<> (parentRoot);
         t.branches.add (this);
         this.parent = t;
         return t;
     }
 
+    @Nullable
     public T getHead () {
         return data;
     }
 
+    @Nullable
     public AdaptationTree<T> getParent () {
         return parent;
     }
 
+    @NotNull
     public Collection<AdaptationTree<T>> getSubTrees () {
         return branches;
     }
@@ -70,6 +80,7 @@ public class AdaptationTree<T extends IEvaluable> {
         return operator;
     }
 
+    @Nullable
     @Override
     public String toString () {
         return printTree (0);
@@ -77,6 +88,7 @@ public class AdaptationTree<T extends IEvaluable> {
 
     private static final int indent = 2;
 
+    @Nullable
     private String printTree (int increment) {
         String s = "";
         String inc = "";
@@ -97,7 +109,7 @@ public class AdaptationTree<T extends IEvaluable> {
      *            the visitor to visit the tree
      * @return
      */
-    public boolean visit (IAdaptationVisitor<T> visitor) {
+    public boolean visit (@NotNull IAdaptationVisitor<T> visitor) {
         switch (operator) {
         case LEAF:
             return visitor.visitLeaf (this);

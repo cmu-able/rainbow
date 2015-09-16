@@ -23,12 +23,8 @@
  */
 package org.sa.rainbow.core.models.commands;
 
-import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
-
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.error.RainbowDelegationException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
@@ -38,29 +34,39 @@ import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 import org.sa.rainbow.core.ports.eseb.ESEBConstants;
 
+import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
+
 public abstract class AbstractRainbowModelOperation<Type, Model> implements IRainbowModelOperation<Type, Model> {
 
     public static final String COMPOUND_COMMAND    = "compoundCommand";
 
     public static final String IN_COMPOUND_COMMAND = "inCompoundCommand";
 
-    public static enum ExecutionState {
+    public enum ExecutionState {
         NOT_YET_DONE, DONE, UNDONE, ERROR, DISPOSED
-    };
+    }
 
-    protected ExecutionState              m_executionState  = ExecutionState.NOT_YET_DONE;
+    @NotNull
+    ExecutionState m_executionState = ExecutionState.NOT_YET_DONE;
 
-    protected boolean                     inCompoundCommand = false;
+    boolean inCompoundCommand = false;
 
+    @Nullable
     private RainbowCompoundOperation<Model> m_parentCommand   = null;
 
+    @Nullable
     protected IRainbowMessageFactory      m_messageFactory;
 
+    @Nullable
     protected IModelInstance<Model>       m_modelContext;
 
-    private String                        m_target;
+    private final String m_target;
 
-    private String[]                      m_parameters;
+    private final String[] m_parameters;
 
     private final String                  m_commandName;
 
@@ -85,6 +91,7 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
         return m_parameters;
     }
 
+    @Nullable
     @Override
     public String getOrigin () {
         return m_origin;
@@ -110,9 +117,10 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
         return (m_executionState == ExecutionState.UNDONE);
     }
 
+    @Nullable
     @Override
     public List<? extends IRainbowMessage>
-    execute (IModelInstance<Model> context, IRainbowMessageFactory messageFactory)
+    execute (@Nullable IModelInstance<Model> context, @Nullable IRainbowMessageFactory messageFactory)
             throws IllegalStateException, RainbowException {
         if (inCompoundCommand)
             throw new IllegalStateException (
@@ -139,6 +147,7 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
         return getGeneratedEvents (m_messageFactory);
     }
 
+    @Nullable
     @Override
     public List<? extends IRainbowMessage> redo () throws IllegalStateException, RainbowException {
         if (inCompoundCommand)
@@ -159,8 +168,10 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
         return getGeneratedEvents (m_messageFactory);
     }
 
+    @Nullable
     protected abstract List<? extends IRainbowMessage> getGeneratedEvents (IRainbowMessageFactory messageFactory);
 
+    @Nullable
     @Override
     public List<? extends IRainbowMessage> undo () throws IllegalStateException, RainbowException {
         if (inCompoundCommand)
@@ -193,6 +204,7 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
         m_parentCommand = parent;
     }
 
+    @Nullable
     RainbowCompoundOperation<Model> getParentCompound () {
         return m_parentCommand;
     }
@@ -206,6 +218,7 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
 
     protected abstract boolean checkModelValidForCommand (Model model);
 
+    @NotNull
     @Override
     public String toString () {
         return MessageFormat.format ("O[{0}:{1}/{2}.{3}({4})]{5}", getModelReference ().getModelName (),
@@ -214,12 +227,14 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
                         : ("<" + m_origin));
     }
 
+    @Nullable
     protected IModelInstance<Model> getModelContext () {
         return m_modelContext;
     }
 
 
-    protected List<? extends IRainbowMessage> generateEvents (IRainbowMessageFactory messageFactory, String eventType) {
+    @Nullable
+    protected List<? extends IRainbowMessage> generateEvents (@NotNull IRainbowMessageFactory messageFactory, String eventType) {
         try {
             IRainbowMessage msg = messageFactory.createMessage ();
             msg.setProperty (IModelChangeBusPort.EVENT_TYPE_PROP, eventType);
@@ -232,7 +247,7 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
                 msg.setProperty (IModelChangeBusPort.PARAMETER_PROP + Integer.toString (i), getParameters ()[i]);
             }
             msg.setProperty (ESEBConstants.MSG_TYPE_KEY, "MODEL_CHANGE");
-            List<IRainbowMessage> events = new LinkedList<IRainbowMessage> ();
+            List<IRainbowMessage> events = new LinkedList<> ();
             events.add (msg);
             return events;
         }
@@ -242,6 +257,7 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
     }
 
 
+    @Nullable
     @Override
     public ModelReference getModelReference () {
         return new ModelReference (getModelContext ().getModelName (), getModelContext ().getModelType ());

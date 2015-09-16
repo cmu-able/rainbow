@@ -26,16 +26,13 @@
  */
 package org.sa.rainbow.core.models;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
-
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.translator.effectors.IEffector;
 import org.sa.rainbow.translator.effectors.IEffectorIdentifier.Kind;
+
+import java.util.*;
 
 /**
  * This class holds effector description information parsed from its description
@@ -46,8 +43,9 @@ import org.sa.rainbow.translator.effectors.IEffectorIdentifier.Kind;
 public class EffectorDescription {
 
     public static class EffectorAttributes extends DescriptionAttributes {
-        protected IEffector.Kind          kind = null;
-        protected OperationRepresentation commandPattern;
+        @Nullable
+        IEffector.Kind kind = null;
+        OperationRepresentation commandPattern;
         public EffectorAttributes      effectorType;
 
         @Override
@@ -73,16 +71,18 @@ public class EffectorDescription {
             this.commandPattern = commandPattern;
         }
 
+        @NotNull
         @Override
         public Map<String, String[]> getArrays () {
-            Map<String, String[]> a = new HashMap<String, String[]> ();
+            Map<String, String[]> a = new HashMap<> ();
             if (effectorType != null) {
                 a.putAll (effectorType.getArrays ());
             }
             a.putAll (super.getArrays ());
-            return Collections.<String, String[]> unmodifiableMap (a);
+            return Collections.unmodifiableMap (a);
         }
 
+        @NotNull
         @Override
         public Map<String, String> getInfo () {
             Map<String, String> a = new HashMap<> ();
@@ -90,9 +90,10 @@ public class EffectorDescription {
                 a.putAll (effectorType.getInfo ());
             }
             a.putAll (super.getInfo ());
-            return Collections.<String, String> unmodifiableMap (a);
+            return Collections.unmodifiableMap (a);
         }
 
+        @Nullable
         public IEffector.Kind getKind () {
             if (kind == null && effectorType != null)
                 return effectorType.getKind ();
@@ -105,15 +106,17 @@ public class EffectorDescription {
         }
     }
 
+    @Nullable
     public SortedSet<EffectorAttributes> effectors = null;
-    public TreeMap<String, EffectorAttributes> effectorTypes;
+    @NotNull
+    public final TreeMap<String, EffectorAttributes> effectorTypes;
 
     /**
      * Default Constructor.
      */
     public EffectorDescription() {
-        effectors = new TreeSet<EffectorAttributes>();
-        effectorTypes = new TreeMap<String, EffectorAttributes> ();
+        effectors = new TreeSet<> ();
+        effectorTypes = new TreeMap<> ();
     }
 
 

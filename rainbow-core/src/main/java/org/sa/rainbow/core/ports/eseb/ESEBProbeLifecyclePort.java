@@ -23,14 +23,15 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.Map.Entry;
-
+import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.ports.IProbeLifecyclePort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.translator.probes.IProbe;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class ESEBProbeLifecyclePort extends AbstractESEBDisposablePort implements IProbeLifecyclePort {
 
@@ -50,7 +51,7 @@ public class ESEBProbeLifecyclePort extends AbstractESEBDisposablePort implement
         getConnectionRole().publish (msg);
     }
 
-    private void setCommonGaugeProperties (RainbowESEBMessage msg) {
+    private void setCommonGaugeProperties (@NotNull RainbowESEBMessage msg) {
         msg.setProperty (IProbeLifecyclePort.PROBE_ID, m_probe.id ());
         msg.setProperty (IProbeLifecyclePort.PROBE_LOCATION, m_probe.location ());
         msg.setProperty (IProbeLifecyclePort.PROBE_NAME, m_probe.name ());
@@ -65,7 +66,7 @@ public class ESEBProbeLifecyclePort extends AbstractESEBDisposablePort implement
     }
 
     @Override
-    public void reportConfigured (Map<String, Object> configParams) {
+    public void reportConfigured (@NotNull Map<String, Object> configParams) {
         RainbowESEBMessage msg = getConnectionRole().createMessage ();
         setCommonGaugeProperties (msg);
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, IProbeLifecyclePort.PROBE_CONFIGURED);

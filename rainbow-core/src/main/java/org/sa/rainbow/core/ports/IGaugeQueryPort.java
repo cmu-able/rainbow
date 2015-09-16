@@ -23,10 +23,10 @@
  */
 package org.sa.rainbow.core.ports;
 
-import java.util.Collection;
-
 import org.sa.rainbow.core.gauges.IGaugeState;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
+
+import java.util.Collection;
 
 /**
  * The interface through which a gauge can be queried.
@@ -41,7 +41,7 @@ public interface IGaugeQueryPort extends IDisposablePort {
      * @return A gauge state representing all the setup and config params of the gauge, as well as issued commands
      * 
      */
-    public IGaugeState queryGaugeState ();
+    IGaugeState queryGaugeState ();
 
     /**
      * Queries for a command identified by the command name.
@@ -51,7 +51,7 @@ public interface IGaugeQueryPort extends IDisposablePort {
      * @return A representation of the command, including the model it affects, the target, and the parameters last
      *         issued
      */
-    public IRainbowOperation queryCommand (String commandName);
+    IRainbowOperation queryCommand (String commandName);
 
     /**
      * Queries for all of the commands reported by this Gauge.
@@ -59,7 +59,7 @@ public interface IGaugeQueryPort extends IDisposablePort {
      * @return Collection<IRainbowModelCommandRepresentation> A collection of all the commands last issued, one per
      *         command command mapping, including the target and parameters used.
      */
-    public Collection<IRainbowOperation> queryAllCommands ();
+    Collection<IRainbowOperation> queryAllCommands ();
 
 
 }

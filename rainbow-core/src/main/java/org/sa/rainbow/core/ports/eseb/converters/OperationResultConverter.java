@@ -23,15 +23,6 @@
  */
 package org.sa.rainbow.core.ports.eseb.converters;
 
-import incubator.pval.Ensure;
-
-import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.OperationResult;
-import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.Result;
-
 import edu.cmu.cs.able.typelib.jconv.TypelibJavaConversionRule;
 import edu.cmu.cs.able.typelib.jconv.TypelibJavaConverter;
 import edu.cmu.cs.able.typelib.jconv.ValueConversionException;
@@ -43,32 +34,38 @@ import edu.cmu.cs.able.typelib.struct.StructureDataValue;
 import edu.cmu.cs.able.typelib.struct.UnknownFieldException;
 import edu.cmu.cs.able.typelib.type.DataType;
 import edu.cmu.cs.able.typelib.type.DataValue;
+import incubator.pval.Ensure;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.OperationResult;
+import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.Result;
+
+import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 public class OperationResultConverter implements TypelibJavaConversionRule {
 
-    private PrimitiveScope m_scope;
+    private final PrimitiveScope m_scope;
 
     public OperationResultConverter (PrimitiveScope scope) {
         m_scope = scope;
     }
 
     @Override
-    public boolean handles_java (Object value, DataType dst) {
+    public boolean handles_java (Object value, @Nullable DataType dst) {
         Ensure.not_null (value);
-        if (value instanceof OperationResult) return dst == null || "operation_result".equals (dst.name ());
-        return false;
+        return value instanceof OperationResult && (dst == null || "operation_result".equals (dst.name ()));
     }
 
     @Override
-    public boolean handles_typelib (DataValue value, Class<?> cls) {
+    public boolean handles_typelib (@NotNull DataValue value, @Nullable Class<?> cls) {
         Ensure.not_null (value);
-        if ("operation_result".equals (value.type ().name ()))
-            return cls == null || OperationResult.class.isAssignableFrom (cls);
-        return false;
+        return "operation_result".equals (value.type ().name ()) && (cls == null || OperationResult.class.isAssignableFrom (cls));
     }
 
     @Override
-    public DataValue from_java (Object value, DataType dst, TypelibJavaConverter converter)
+    public DataValue from_java (Object value, @Nullable DataType dst, TypelibJavaConverter converter)
             throws ValueConversionException {
         if ((dst == null || dst instanceof StructureDataType) && value instanceof OperationResult) {
             try {
@@ -82,10 +79,8 @@ public class OperationResultConverter implements TypelibJavaConversionRule {
                 Map<Field, DataValue> fields = new HashMap<> ();
                 fields.put (result, m_scope.string ().make (or.result.name ()));
                 fields.put (reply, m_scope.string ().make (or.reply == null ? "" : or.reply));
-                StructureDataValue sdv = sdt.make (fields);
-                return sdv;
-            }
-            catch (UnknownFieldException | AmbiguousNameException e) {
+                return sdt.make (fields);
+            } catch (@NotNull UnknownFieldException | AmbiguousNameException e) {
                 throw new ValueConversionException (MessageFormat.format ("Could not convert from {0} to {1}", value
                         .getClass ().toString (), (dst == null ? "operation_result" : dst.absolute_hname ())), e);
             }
@@ -95,20 +90,20 @@ public class OperationResultConverter implements TypelibJavaConversionRule {
                 .getClass ().toString (), (dst == null ? "operation_result" : dst.absolute_hname ())));
     }
 
+    @NotNull
     @Override
-    public <T> T to_java (DataValue value, Class<T> cls, TypelibJavaConverter converter)
+    public <T> T to_java (DataValue value, @Nullable Class<T> cls, @NotNull TypelibJavaConverter converter)
             throws ValueConversionException {
         if (value instanceof StructureDataValue) {
             try {
                 StructureDataValue sdv = (StructureDataValue )value;
                 StructureDataType sdt = (StructureDataType )value.type ();
-                String reply = converter.<String> to_java (sdv.value (sdt.field ("reply")), String.class);
-                String result = converter.<String> to_java (sdv.value (sdt.field ("result")), String.class);
+                String reply = converter.to_java (sdv.value (sdt.field ("reply")), String.class);
+                String result = converter.to_java (sdv.value (sdt.field ("result")), String.class);
                 OperationResult r = new OperationResult ();
                 r.reply = reply;
                 r.result = Result.valueOf (result);
-                T o = (T )r;
-                return o;
+                return (T) r;
             }
             catch (Exception e) {
                 throw new ValueConversionException (MessageFormat.format ("Could not convert from {0} to {1}",

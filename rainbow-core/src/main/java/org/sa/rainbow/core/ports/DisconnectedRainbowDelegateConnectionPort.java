@@ -23,14 +23,15 @@
  */
 package org.sa.rainbow.core.ports;
 
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.Properties;
-
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
+
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.Properties;
 
 public class DisconnectedRainbowDelegateConnectionPort extends AbstractDelegateConnectionPort {
 
@@ -38,9 +39,9 @@ public class DisconnectedRainbowDelegateConnectionPort extends AbstractDelegateC
         super (null, null, (short )-1, ChannelT.HEALTH);
     }
 
-    Logger                                   LOGGER     = Logger.getLogger (DisconnectedRainbowDelegateConnectionPort.class);
+    private final Logger LOGGER = Logger.getLogger (DisconnectedRainbowDelegateConnectionPort.class);
 
-    static DisconnectedRainbowDelegateConnectionPort m_instance;
+    private static DisconnectedRainbowDelegateConnectionPort m_instance;
 
     static {
         try {
@@ -54,6 +55,7 @@ public class DisconnectedRainbowDelegateConnectionPort extends AbstractDelegateC
         return m_instance;
     }
 
+    @NotNull
     @Override
     public IDelegateManagementPort connectDelegate (String delegateID, Properties connectionProperties)
             throws RainbowConnectionException {
@@ -69,7 +71,7 @@ public class DisconnectedRainbowDelegateConnectionPort extends AbstractDelegateC
     }
 
     @Override
-    public void report (String delegateID, ReportType type, RainbowComponentT compT, String msg) {
+    public void report (String delegateID, @NotNull ReportType type, @NotNull RainbowComponentT compT, String msg) {
         String log = MessageFormat.format ("Delegate[{3}]: {0}: {1}", delegateID, msg, compT.name ());
         switch (type) {
         case INFO:

@@ -26,15 +26,16 @@
  */
 package org.sa.rainbow.translator.effectors;
 
-import java.util.List;
-
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.ports.IEffectorLifecycleBusPort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
+
+import java.util.List;
 
 /**
  * Abstract definition of the effector with common methods to simplify
@@ -46,13 +47,19 @@ import org.sa.rainbow.core.ports.RainbowPortFactory;
  */
 public abstract class AbstractEffector implements IEffector {
 
-    protected Logger LOGGER = Logger.getLogger (this.getClass ());
+    final Logger LOGGER = Logger.getLogger (this.getClass ());
+    @Nullable
     private String m_id = null;
+    @Nullable
     private String m_name = null;
+    @Nullable
     private Kind m_kind = null;
 
-    protected IRainbowReportingPort m_reportingPort;
-    protected IEffectorLifecycleBusPort m_effectorManagementPort;
+    @Nullable
+    private IRainbowReportingPort m_reportingPort;
+    @Nullable
+    private IEffectorLifecycleBusPort m_effectorManagementPort;
+    @Nullable
     private IEffectorExecutionPort    m_executionPort;
 
 
@@ -62,7 +69,7 @@ public abstract class AbstractEffector implements IEffector {
      * @param name   the name used to label this IEffector
      * @param kind   the implementation type of this IEffector
      */
-    public AbstractEffector (String refID, String name, Kind kind) {
+    AbstractEffector (String refID, String name, Kind kind) {
         m_id = refID;
         m_name = name;
         m_kind = kind;
@@ -88,6 +95,7 @@ public abstract class AbstractEffector implements IEffector {
     /* (non-Javadoc)
      * @see org.sa.rainbow.translator.effectors.IEffector#id()
      */
+    @Nullable
     @Override
     public String id () {
         return m_id;
@@ -96,6 +104,7 @@ public abstract class AbstractEffector implements IEffector {
     /* (non-Javadoc)
      * @see org.sa.rainbow.translator.effectors.IEffector#service()
      */
+    @Nullable
     @Override
     public String service () {
         return m_name;
@@ -104,12 +113,13 @@ public abstract class AbstractEffector implements IEffector {
     /* (non-Javadoc)
      * @see org.sa.rainbow.translator.effectors.IEffector#type()
      */
+    @Nullable
     @Override
     public Kind kind() {
         return m_kind;
     }
 
-    protected void log (String txt) {
+    void log (String txt) {
         String msg = "E[" + service() + "] " + txt;
         if (m_reportingPort != null) {
             m_reportingPort.info (RainbowComponentT.EFFECTOR, msg);
@@ -120,7 +130,7 @@ public abstract class AbstractEffector implements IEffector {
         }
     }
 
-    protected void reportExecuted (Outcome r, List<String> args) {
+    void reportExecuted (Outcome r, List<String> args) {
         m_effectorManagementPort.reportExecuted (this, r, args);
     }
 

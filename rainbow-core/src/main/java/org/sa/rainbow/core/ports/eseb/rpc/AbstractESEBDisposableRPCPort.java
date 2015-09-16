@@ -23,26 +23,28 @@
  */
 package org.sa.rainbow.core.ports.eseb.rpc;
 
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.List;
-
+import edu.cmu.cs.able.eseb.participant.ParticipantException;
+import edu.cmu.cs.able.typelib.jconv.TypelibJavaConversionRule;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.ConfigHelper;
 import org.sa.rainbow.core.ports.IDisposablePort;
 import org.sa.rainbow.core.ports.eseb.ESEBProvider;
 import org.sa.rainbow.core.ports.eseb.ESEBRPCConnector;
 
-import edu.cmu.cs.able.eseb.participant.ParticipantException;
-import edu.cmu.cs.able.typelib.jconv.TypelibJavaConversionRule;
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.List;
 
 public class AbstractESEBDisposableRPCPort implements IDisposablePort {
 
+    @Nullable
     private ESEBRPCConnector m_connectionRole;
-    private String           m_host;
-    private short            m_port;
-    private String           m_id;
+    private final String m_host;
+    private final short m_port;
+    private final String m_id;
 
-    public AbstractESEBDisposableRPCPort (String host, short port, String id) throws IOException, ParticipantException {
+    AbstractESEBDisposableRPCPort (String host, short port, String id) {
         m_host = host;
         m_port = port;
         m_id = id;
@@ -54,13 +56,13 @@ public class AbstractESEBDisposableRPCPort implements IDisposablePort {
         try {
             getConnectionRole().close ();
             m_connectionRole = null;
-        }
-        catch (IOException | ParticipantException e) {
+        } catch (@NotNull IOException | ParticipantException e) {
             ESEBRPCConnector.LOGGER.error (e);
         }
     }
 
-    protected ESEBRPCConnector getConnectionRole () throws IOException, ParticipantException {
+    @Nullable
+    ESEBRPCConnector getConnectionRole () throws IOException, ParticipantException {
         if (m_connectionRole == null) {
             initializeConnectionRole ();
         }
@@ -72,7 +74,7 @@ public class AbstractESEBDisposableRPCPort implements IDisposablePort {
 
     }
 
-    protected void setupModelConverters (String key) {
+    void setupModelConverters (String key) {
         List<String> converters = ConfigHelper.getProperties (key);
         if (converters.isEmpty ()) {
             ESEBRPCConnector.LOGGER

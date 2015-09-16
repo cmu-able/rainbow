@@ -23,17 +23,9 @@
  */
 package org.sa.rainbow.translator.effectors;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
@@ -42,24 +34,26 @@ import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.EffectorDescription;
 import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
-import org.sa.rainbow.core.ports.IEffectorLifecycleBusPort;
-import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
-import org.sa.rainbow.core.ports.IModelDSBusSubscriberPort;
-import org.sa.rainbow.core.ports.IModelsManagerPort;
-import org.sa.rainbow.core.ports.IRainbowReportingPort;
-import org.sa.rainbow.core.ports.RainbowPortFactory;
+import org.sa.rainbow.core.ports.*;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 import org.sa.rainbow.util.Util;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.text.MessageFormat;
+import java.util.*;
 
 public abstract class EffectorManager extends AbstractRainbowRunnable implements IEffectorLifecycleBusPort,
 IModelDSBusPublisherPort {
 
-    Logger                            LOGGER = Logger.getLogger (this.getClass ());
+    private final Logger LOGGER = Logger.getLogger (this.getClass ());
 
+    @Nullable
     private IEffectorLifecycleBusPort m_effectorLifecyclePort;
 
-    private Map<String, IEffectorExecutionPort> m_effectorExecutionPorts = new HashMap<> ();
+    private final Map<String, IEffectorExecutionPort> m_effectorExecutionPorts = new HashMap<> ();
 
+    @Nullable
     private IModelDSBusSubscriberPort           m_modelDSSubscribePort;
     protected IModelsManagerPort                m_modelsManagerPort;
 
@@ -86,7 +80,7 @@ IModelDSBusPublisherPort {
         m_modelsManagerPort = RainbowPortFactory.createModelsManagerRequirerPort ();
     }
 
-    public Outcome executeEffector (String effName, String target, String[] args) {
+    public Outcome executeEffector (String effName, @NotNull String target, String[] args) {
 
         String id = Util.genID (effName, target);
         m_reportingPort.info (RainbowComponentT.EFFECTOR_MANAGER, "Attempting E[" + id + "] (" + Arrays.asList (args)
@@ -129,7 +123,7 @@ IModelDSBusPublisherPort {
     }
 
     @Override
-    public void reportCreated (IEffectorIdentifier effector) {
+    public void reportCreated (@NotNull IEffectorIdentifier effector) {
         LOGGER.info (MessageFormat.format ("EffectorManager: An effector was created {0}", effector.id ()));
         try {
             IEffectorExecutionPort port = RainbowPortFactory.createEffectorExecutionPortClient (effector);
@@ -143,7 +137,7 @@ IModelDSBusPublisherPort {
     }
 
     @Override
-    public void reportDeleted (IEffectorIdentifier effector) {
+    public void reportDeleted (@NotNull IEffectorIdentifier effector) {
         LOGGER.info (MessageFormat.format ("EffectorManager: An effector was deleted {0}", effector.id ()));
     }
 
@@ -163,7 +157,7 @@ IModelDSBusPublisherPort {
         m_effectorExecutionPorts.clear ();
         m_modelDSSubscribePort = null;
         m_effectorLifecyclePort = null;
-        m_effectorExecutionPorts = null;
+
 
     }
 
@@ -179,13 +173,15 @@ IModelDSBusPublisherPort {
 
     }
 
+    @NotNull
     @Override
     protected RainbowComponentT getComponentType () {
         return RainbowComponentT.EFFECTOR_MANAGER;
     }
 
-    protected Set<EffectorAttributes> getEffectorsAtLocation (String location) {
-        Set<EffectorAttributes> effectors = new LinkedHashSet<EffectorAttributes> ();
+    @NotNull
+    protected Set<EffectorAttributes> getEffectorsAtLocation (@NotNull String location) {
+        Set<EffectorAttributes> effectors = new LinkedHashSet<> ();
         for (EffectorAttributes candidate : m_effectors.effectors) {
             if (location.equals (candidate.getLocation())) {
                 effectors.add (candidate);
@@ -194,6 +190,7 @@ IModelDSBusPublisherPort {
         return effectors;
     }
 
+    @Nullable
     @Override
     public IRainbowMessage createMessage () {
         return null;

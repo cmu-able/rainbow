@@ -23,6 +23,15 @@
  */
 package org.sa.rainbow.translator.effectors;
 
+import org.jetbrains.annotations.NotNull;
+import org.sa.rainbow.core.AbstractRainbowRunnable;
+import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowComponentT;
+import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.models.EffectorDescription;
+import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
+import org.sa.rainbow.util.Util;
+
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -32,17 +41,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.sa.rainbow.core.AbstractRainbowRunnable;
-import org.sa.rainbow.core.Rainbow;
-import org.sa.rainbow.core.RainbowComponentT;
-import org.sa.rainbow.core.RainbowConstants;
-import org.sa.rainbow.core.models.EffectorDescription;
-import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
-import org.sa.rainbow.util.Util;
-
 public class LocalEffectorManager extends AbstractRainbowRunnable {
 
-    protected static String        ID = "Local Effector Manager";
+    protected static final String ID = "Local Effector Manager";
+    @SuppressWarnings("FieldCanBeLocal")
     private Map<String, IEffector> m_id2Effectors;
 
     public LocalEffectorManager (String delegateId) {
@@ -67,8 +69,8 @@ public class LocalEffectorManager extends AbstractRainbowRunnable {
 
     }
 
-    public void initEffectors (EffectorDescription effectors) {
-        m_id2Effectors = new HashMap<String, IEffector> ();
+    public void initEffectors (@NotNull EffectorDescription effectors) {
+        m_id2Effectors = new HashMap<> ();
         for (EffectorAttributes effAttr : effectors.effectors) {
             // Ignore any effectors that shouldn't start on this machine
             // This should not happen
@@ -111,7 +113,7 @@ public class LocalEffectorManager extends AbstractRainbowRunnable {
                         argsList.add (vObj);
                     }
                 }
-                params = paramList.toArray (new Class<?>[0]);
+                params = paramList.toArray (new Class<?>[paramList.size ()]);
                 args = argsList.toArray ();
                 if (effectorClass != null) {
                     try {
@@ -119,8 +121,7 @@ public class LocalEffectorManager extends AbstractRainbowRunnable {
                         Constructor<?> cons = effectorClazz.getConstructor (params);
                         effector = (IEffector )cons.newInstance (args);
                         m_reportingPort.info (getComponentType (), "Java-based IEffector " + effAttr.name);
-                    }
-                    catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException
+                    } catch (@NotNull ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException
                             | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                         String msg = MessageFormat.format ("Could not instantiate IEffector ''{0}''", effectorClass);
                         m_reportingPort.error (RainbowComponentT.EFFECTOR_MANAGER, msg);
@@ -137,6 +138,7 @@ public class LocalEffectorManager extends AbstractRainbowRunnable {
         }
     }
 
+    @NotNull
     @Override
     protected RainbowComponentT getComponentType () {
         return RainbowComponentT.EFFECTOR_MANAGER;

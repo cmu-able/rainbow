@@ -23,17 +23,18 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import java.io.IOException;
-import java.text.MessageFormat;
-
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.ports.AbstractDelegateManagementPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.IESEBListener;
 
+import java.io.IOException;
+import java.text.MessageFormat;
+
 public class ESEBDelegateManagementPort extends AbstractDelegateManagementPort implements ESEBManagementPortConstants {
-    static Logger         LOGGER = Logger.getLogger (ESEBDelegateManagementPort.class);
+    private static final Logger LOGGER = Logger.getLogger (ESEBDelegateManagementPort.class);
 
     public ESEBDelegateManagementPort (RainbowDelegate delegate) throws IOException {
         // Runs on delegate
@@ -43,7 +44,7 @@ public class ESEBDelegateManagementPort extends AbstractDelegateManagementPort i
         getConnectionRole().addListener (new IESEBListener () {
 
             @Override
-            public void receive (RainbowESEBMessage msg) {
+            public void receive (@NotNull RainbowESEBMessage msg) {
                 String msgType = (String )msg.getProperty (ESEBConstants.MSG_TYPE_KEY);
                 String did = (String )msg.getProperty (ESEBConstants.MSG_DELEGATE_ID_KEY);
                 if (getDelegateId ().equals (did)) {
@@ -96,13 +97,7 @@ public class ESEBDelegateManagementPort extends AbstractDelegateManagementPort i
 
     @Override
     public void dispose () {
-        try {
-            getConnectionRole().close ();
-        }
-        catch (IOException e) {
-            LOGGER.warn (MessageFormat
-                    .format ("Could not close the deployment port for delegate {0}", getDelegateId ()));
-        }
+        getConnectionRole ().close ();
     }
 
 }

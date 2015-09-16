@@ -26,16 +26,16 @@ package org.sa.rainbow.core.ports;
 import org.sa.rainbow.core.event.IRainbowMessage;
 
 public interface IRainbowMessageFactory {
-    public static final String ID_PROP         = "ID";
-    public static final String COMMAND_PROP    = "COMMAND";
-    public static final String TARGET_PROP     = "TARGET";
-    public static final String MODEL_NAME_PROP = "MODEL_NAME";
-    public static final String MODEL_TYPE_PROP = "MODEL_TYPE";
+    String ID_PROP = "ID";
+    String COMMAND_PROP = "COMMAND";
+    String TARGET_PROP = "TARGET";
+    String MODEL_NAME_PROP = "MODEL_NAME";
+    String MODEL_TYPE_PROP = "MODEL_TYPE";
 
-    public static final String PARAMETER_PROP  = "PARAMETER";
-    public static final String EVENT_TYPE_PROP = "EVENTTYPE";
-    public static final String PARENT_ID_PROP  = "PARENT_ID";
+    String PARAMETER_PROP = "PARAMETER";
+    String EVENT_TYPE_PROP = "EVENTTYPE";
+    String PARENT_ID_PROP = "PARENT_ID";
 
-    public IRainbowMessage createMessage ();
+    IRainbowMessage createMessage ();
 
 }

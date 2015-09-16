@@ -23,12 +23,13 @@
  */
 package org.sa.rainbow.core.ports;
 
-import java.text.MessageFormat;
-import java.util.Properties;
-
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+
+import java.text.MessageFormat;
+import java.util.Properties;
 
 /**
  * Represetns a connection port that is not connected to anything. Any calls will be logged as an error.
@@ -38,8 +39,9 @@ import org.sa.rainbow.core.error.RainbowConnectionException;
  */
 public class DisconnectedRainbowMasterConnectionPort implements IMasterConnectionPort {
 
-    static DisconnectedRainbowMasterConnectionPort m_instance = new DisconnectedRainbowMasterConnectionPort ();
+    private static final DisconnectedRainbowMasterConnectionPort m_instance = new DisconnectedRainbowMasterConnectionPort ();
 
+    @NotNull
     public static IMasterConnectionPort instance () {
         return m_instance;
     }
@@ -47,8 +49,9 @@ public class DisconnectedRainbowMasterConnectionPort implements IMasterConnectio
     private DisconnectedRainbowMasterConnectionPort () {
     }
 
-    Logger LOGGER = Logger.getLogger (DisconnectedRainbowMasterConnectionPort.class);
+    private final Logger LOGGER = Logger.getLogger (DisconnectedRainbowMasterConnectionPort.class);
 
+    @NotNull
     @Override
     public IDelegateManagementPort connectDelegate (String delegateID, Properties connectionProperties)
             throws RainbowConnectionException {
@@ -67,7 +70,7 @@ public class DisconnectedRainbowMasterConnectionPort implements IMasterConnectio
     }
 
     @Override
-    public void report (String delegateID, ReportType type, RainbowComponentT compT, String msg) {
+    public void report (String delegateID, @NotNull ReportType type, @NotNull RainbowComponentT compT, String msg) {
         String log = MessageFormat.format ("Delegate[{3}]: {0}: {1}", delegateID, msg, compT.name ());
         switch (type) {
         case INFO:

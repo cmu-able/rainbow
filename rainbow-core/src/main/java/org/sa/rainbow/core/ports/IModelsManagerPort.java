@@ -23,16 +23,16 @@
  */
 package org.sa.rainbow.core.ports;
 
-import java.util.Collection;
-
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.IModelInstanceProvider;
 import org.sa.rainbow.core.models.ModelReference;
 
+import java.util.Collection;
+
 public interface IModelsManagerPort extends IModelInstanceProvider {
-    public Collection<? extends String> getRegisteredModelTypes ();
+    Collection<? extends String> getRegisteredModelTypes ();
 
     @Override
-    public <T> IModelInstance<T> getModelInstance (ModelReference modelRef);
+    <T> IModelInstance<T> getModelInstance (ModelReference modelRef);
 
 }

@@ -23,11 +23,8 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.Properties;
-
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.RainbowMaster;
@@ -36,11 +33,15 @@ import org.sa.rainbow.core.ports.AbstractMasterManagementPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.IESEBListener;
 
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.Properties;
+
 public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort implements ESEBManagementPortConstants {
-    static Logger         LOGGER = Logger.getLogger (ESEBMasterSideManagementPort.class);
+    private static final Logger LOGGER = Logger.getLogger (ESEBMasterSideManagementPort.class);
 
 
-    public ESEBMasterSideManagementPort (RainbowMaster master, String delegateID, Properties connectionProperties) throws IOException {
+    public ESEBMasterSideManagementPort (RainbowMaster master, String delegateID, @NotNull Properties connectionProperties) throws IOException {
         // Runs on delegate
         super (master, delegateID, connectionProperties.getProperty (
                 ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_HOST,
@@ -50,7 +51,7 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
         getConnectionRole().addListener (new IESEBListener () {
 
             @Override
-            public void receive (RainbowESEBMessage msg) {
+            public void receive (@NotNull RainbowESEBMessage msg) {
                 String msgType = (String )msg.getProperty (ESEBConstants.MSG_TYPE_KEY);
                 switch (msgType) {
                 case REQUEST_CONFIG_INFORMATION: {
@@ -71,7 +72,7 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
     }
 
     @Override
-    public void sendConfigurationInformation (Properties configuration) {
+    public void sendConfigurationInformation (@NotNull Properties configuration) {
         RainbowESEBMessage msg = getConnectionRole().createMessage (/*ChannelT.HEALTH*/);
         msg.fillProperties (configuration);
         // No response is expected from the client, so don't do any waiting, just send
@@ -85,7 +86,7 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
         boolean m_reply = false;
 
         @Override
-        public void receive (RainbowESEBMessage msg) {
+        public void receive (@NotNull RainbowESEBMessage msg) {
             m_reply = (Boolean )msg.getProperty (ESEBConstants.MSG_REPLY_VALUE);
 
         }
@@ -138,13 +139,7 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
 
     @Override
     public void dispose () {
-        try {
-            getConnectionRole().close ();
-        }
-        catch (IOException e) {
-            LOGGER.warn (MessageFormat.format ("Could not close the deployment port on the master for {0}",
-                    getDelegateId ()));
-        }
+        getConnectionRole ().close ();
     }
 
     @Override

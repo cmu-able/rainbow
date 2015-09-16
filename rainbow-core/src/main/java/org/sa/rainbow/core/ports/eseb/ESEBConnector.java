@@ -23,16 +23,6 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import org.apache.log4j.Logger;
-import org.sa.rainbow.core.error.RainbowConnectionException;
-import org.sa.rainbow.core.error.RainbowException;
-
 import edu.cmu.cs.able.eseb.BusData;
 import edu.cmu.cs.able.eseb.BusDataQueue;
 import edu.cmu.cs.able.eseb.BusDataQueueListener;
@@ -40,6 +30,17 @@ import edu.cmu.cs.able.eseb.bus.EventBus;
 import edu.cmu.cs.able.eseb.conn.BusConnection;
 import edu.cmu.cs.able.typelib.comp.MapDataValue;
 import edu.cmu.cs.able.typelib.type.DataValue;
+import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowException;
+
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * The ESEBConnector implements both a publish/subscribe and call-return connection over ESEB.
@@ -56,11 +57,11 @@ import edu.cmu.cs.able.typelib.type.DataValue;
  * 
  */
 public class ESEBConnector {
-    static Logger               LOGGER             = Logger.getLogger (ESEBConnector.class);
+    static final Logger LOGGER = Logger.getLogger (ESEBConnector.class);
 
-    public static enum ChannelT {
+    public enum ChannelT {
         HEALTH, UIREPORT, MODEL_US, MODEL_CHANGE, SYSTEM_US, RPC, MODEL_DS
-    };
+    }
 
 
     /**
@@ -76,17 +77,18 @@ public class ESEBConnector {
          * @param msg
          *            The message that is received
          */
-        public void receive (RainbowESEBMessage msg);
+        void receive (RainbowESEBMessage msg);
     }
 
 
     /** The server corresponding to this connector **/
-    protected EventBus                          m_srvr;
+    private EventBus m_srvr;
     /** The client for this connector to publish and receive information **/
-    protected BusConnection                     m_client;
+    @Nullable
+    private BusConnection m_client;
     /** The set of listeners that are awaiting replies. **/
-    private static Map<String, IESEBListener> m_replyListeners     = new HashMap<> ();
-    private ChannelT m_channel;
+    private static final Map<String, IESEBListener> m_replyListeners = new HashMap<> ();
+    private final ChannelT m_channel;
 
     /**
      * Constructs a new ESEBConnector, connecting to a remote bus
@@ -97,7 +99,7 @@ public class ESEBConnector {
      *            The port to connect to
      * @throws IOException
      */
-    public ESEBConnector (String remoteHost, short remotePort, ChannelT channel) throws IOException {
+    public ESEBConnector (String remoteHost, short remotePort, ChannelT channel) {
         m_channel = channel;
         // No need to create a server, as it can't be created remotely anyway
         // So, just set the client
@@ -126,7 +128,7 @@ public class ESEBConnector {
      * @param remoteHost
      * @param remotePort
      */
-    protected void setClient (String remoteHost, short remotePort) {
+    private void setClient (String remoteHost, short remotePort) {
         // reset the client if one was already set
         if (m_client != null) {
             if (!m_client.host ().equals (remoteHost) || m_client.port () != remotePort) {
@@ -149,7 +151,7 @@ public class ESEBConnector {
      * @param msg
      *            the message to publish, as key/value pairs
      */
-    public void publish (RainbowESEBMessage msg) {
+    public void publish (@NotNull RainbowESEBMessage msg) {
         msg.setProperty (ESEBConstants.MSG_SENT, System.currentTimeMillis ());
         m_client.send (msg.getDataValue ());
     }
@@ -164,7 +166,7 @@ public class ESEBConnector {
      * @param receiveListener
      *            The listener to call when a response returns
      */
-    public void sendAndReceive (RainbowESEBMessage msg, final IESEBListener receiveListener) {
+    public void sendAndReceive (@NotNull RainbowESEBMessage msg, final IESEBListener receiveListener) {
         // Generate a random reply key and put it in the message so that responder knows how to respond
         final String replyKey = UUID.randomUUID ().toString ();
         msg.setProperty (ESEBConstants.MSG_REPLY_KEY, replyKey);
@@ -229,7 +231,7 @@ public class ESEBConnector {
 
     public class BlockingListener implements IESEBListener {
 
-        private IESEBListener m_l;
+        private final IESEBListener m_l;
         boolean               ret = false;
 
         public BlockingListener (IESEBListener l) {
@@ -248,7 +250,7 @@ public class ESEBConnector {
 
     }
 
-    public void blockingSendAndReceive (RainbowESEBMessage msg, final IESEBListener l, long timeout)
+    public void blockingSendAndReceive (@NotNull RainbowESEBMessage msg, final IESEBListener l, long timeout)
             throws RainbowConnectionException {
         BlockingListener bl = new BlockingListener (l);
         synchronized (bl) {
@@ -271,7 +273,7 @@ public class ESEBConnector {
      * @param msg
      *            The message to sanitize
      */
-    protected void sanitizeMessage (RainbowESEBMessage msg) {
+    private void sanitizeMessage (@NotNull RainbowESEBMessage msg) {
         msg.removeProperty (ESEBConstants.MSG_REPLY_KEY);
     }
 
@@ -282,7 +284,7 @@ public class ESEBConnector {
      * @param l
      *            The listener to call if a message is received.
      */
-    public void addListener (final IESEBListener l) {
+    public void addListener (@NotNull final IESEBListener l) {
         // Set up the queues
         final BusDataQueue clientReceiveQ = new BusDataQueue ();
         m_client.queue_group ().add (clientReceiveQ);
@@ -310,7 +312,7 @@ public class ESEBConnector {
         });
     }
 
-    public void close () throws IOException {
+    public void close () {
         if (m_client != null) {
             ESEBProvider.releaseClient (m_client);
         }
@@ -319,13 +321,14 @@ public class ESEBConnector {
         }
     }
 
+    @NotNull
     public RainbowESEBMessage createMessage () {
         RainbowESEBMessage msg = new RainbowESEBMessage ();
         msg.setProperty (ESEBConstants.MSG_CHANNEL_KEY, m_channel.name ());
         return msg;
     }
 
-    public void replyToMessage (RainbowESEBMessage msg, Object result) {
+    public void replyToMessage (@NotNull RainbowESEBMessage msg, Object result) {
         String repKey = (String )msg.getProperty (ESEBConstants.MSG_REPLY_KEY);
         if (repKey != null) {
             RainbowESEBMessage reply = createMessage (/*ChannelT.valueOf ((String )msg

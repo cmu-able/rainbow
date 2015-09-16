@@ -23,11 +23,8 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.Properties;
-
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.RainbowMaster;
@@ -35,8 +32,12 @@ import org.sa.rainbow.core.ports.AbstractMasterConnectionPort;
 import org.sa.rainbow.core.ports.IDelegateManagementPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.Properties;
+
 public class ESEBMasterConnectionPort extends AbstractMasterConnectionPort {
-    static Logger         LOGGER = Logger.getLogger (ESEBMasterConnectionPort.class);
+    private static final Logger LOGGER = Logger.getLogger (ESEBMasterConnectionPort.class);
 
 
     public ESEBMasterConnectionPort (RainbowMaster master) throws IOException {
@@ -45,7 +46,7 @@ public class ESEBMasterConnectionPort extends AbstractMasterConnectionPort {
         getConnectionRole().addListener (new ESEBConnector.IESEBListener () {
 
             @Override
-            public void receive (RainbowESEBMessage msg) {
+            public void receive (@NotNull RainbowESEBMessage msg) {
                 String type = (String )msg.getProperty (ESEBConstants.MSG_TYPE_KEY);
                 switch (type) {
                 case ESEBConstants.MSG_TYPE_CONNECT_DELEGATE: {
@@ -107,12 +108,7 @@ public class ESEBMasterConnectionPort extends AbstractMasterConnectionPort {
 
     @Override
     public void dispose () {
-        try {
-            getConnectionRole().close ();
-        }
-        catch (IOException e) {
-            LOGGER.warn ("Could not close down the connection port on the master");
-        }
+        getConnectionRole ().close ();
     }
 
 }

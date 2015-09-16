@@ -23,10 +23,7 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
+import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.ports.IEffectorLifecycleBusPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
@@ -35,22 +32,28 @@ import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
 import org.sa.rainbow.translator.effectors.IEffectorProtocol;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 public class ESEBSubscriberSideEffectorLifecyclePort extends AbstractESEBDisposablePort implements
 IEffectorLifecycleBusPort {
 
     class MessageEffectorIdentifier implements IEffectorIdentifier {
 
-        private IRainbowMessage m_msg;
+        private final IRainbowMessage m_msg;
 
         public MessageEffectorIdentifier (IRainbowMessage msg) {
             m_msg = msg;
         }
 
+        @NotNull
         @Override
         public String id () {
             return (String )m_msg.getProperty (IEffectorProtocol.ID);
         }
 
+        @NotNull
         @Override
         public String service () {
             return (String )m_msg.getProperty (IEffectorProtocol.SERVICE);
@@ -77,7 +80,7 @@ IEffectorLifecycleBusPort {
         getConnectionRole().addListener (new IESEBListener () {
 
             @Override
-            public void receive (RainbowESEBMessage msg) {
+            public void receive (@NotNull RainbowESEBMessage msg) {
                 String type = (String )msg.getProperty (ESEBConstants.MSG_TYPE_KEY);
                 MessageEffectorIdentifier mei;
                 switch (type) {

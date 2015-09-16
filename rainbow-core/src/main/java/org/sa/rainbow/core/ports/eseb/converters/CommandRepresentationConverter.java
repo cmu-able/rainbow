@@ -23,20 +23,6 @@
  */
 package org.sa.rainbow.core.ports.eseb.converters;
 
-import incubator.pval.Ensure;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.sa.rainbow.core.gauges.OperationRepresentation;
-import org.sa.rainbow.core.models.ModelReference;
-import org.sa.rainbow.core.models.commands.IRainbowOperation;
-
 import edu.cmu.cs.able.typelib.jconv.TypelibJavaConversionRule;
 import edu.cmu.cs.able.typelib.jconv.TypelibJavaConverter;
 import edu.cmu.cs.able.typelib.jconv.ValueConversionException;
@@ -48,32 +34,43 @@ import edu.cmu.cs.able.typelib.struct.StructureDataValue;
 import edu.cmu.cs.able.typelib.struct.UnknownFieldException;
 import edu.cmu.cs.able.typelib.type.DataType;
 import edu.cmu.cs.able.typelib.type.DataValue;
+import incubator.pval.Ensure;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.sa.rainbow.core.gauges.OperationRepresentation;
+import org.sa.rainbow.core.models.ModelReference;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class CommandRepresentationConverter implements TypelibJavaConversionRule {
 
-    private PrimitiveScope m_scope;
+    private final PrimitiveScope m_scope;
 
     public CommandRepresentationConverter (PrimitiveScope scope) {
         m_scope = scope;
     }
 
     @Override
-    public boolean handles_java (Object value, DataType dst) {
+    public boolean handles_java (Object value, @Nullable DataType dst) {
         Ensure.not_null (value);
-        if (value instanceof IRainbowOperation) return dst == null || "operation_representation".equals (dst.name ());
-        return false;
+        return value instanceof IRainbowOperation && (dst == null || "operation_representation".equals (dst.name ()));
     }
 
     @Override
-    public boolean handles_typelib (DataValue value, Class<?> cls) {
+    public boolean handles_typelib (@NotNull DataValue value, @Nullable Class<?> cls) {
         Ensure.not_null (value);
-        if (value.type ().name ().equals ("operation_representation"))
-            return cls == null || IRainbowOperation.class.isAssignableFrom (cls);
-        return false;
+        return value.type ().name ().equals ("operation_representation") && (cls == null || IRainbowOperation.class.isAssignableFrom (cls));
     }
 
     @Override
-    public DataValue from_java (Object value, DataType dst, TypelibJavaConverter converter)
+    public DataValue from_java (Object value, @Nullable DataType dst, @NotNull TypelibJavaConverter converter)
             throws ValueConversionException {
         if ((dst == null || dst instanceof StructureDataType) && value instanceof IRainbowOperation) {
             try {
@@ -98,10 +95,8 @@ public class CommandRepresentationConverter implements TypelibJavaConversionRule
                         params,
                         converter.from_java (Arrays.asList (command.getParameters ()),
                                 m_scope.find ("list<string>")));
-                StructureDataValue sdv = sdt.make (fields);
-                return sdv;
-            }
-            catch (UnknownFieldException | AmbiguousNameException e) {
+                return sdt.make (fields);
+            } catch (@NotNull UnknownFieldException | AmbiguousNameException e) {
                 throw new ValueConversionException (MessageFormat.format ("Could not convert from {0} to {1}", value
                         .getClass ().toString (), (dst == null ? "operation_representation" : dst.absolute_hname ())),
                         e);
@@ -112,22 +107,23 @@ public class CommandRepresentationConverter implements TypelibJavaConversionRule
 
     }
 
+    @NotNull
     @Override
-    public <T> T to_java (DataValue value, Class<T> cls, TypelibJavaConverter converter)
+    public <T> T to_java (DataValue value, @Nullable Class<T> cls, @NotNull TypelibJavaConverter converter)
             throws ValueConversionException {
         if (value instanceof StructureDataValue) {
             try {
                 StructureDataValue sdv = (StructureDataValue )value;
                 StructureDataType sdt = (StructureDataType )sdv.type ();
-                String target = converter.<String> to_java (sdv.value (sdt.field ("target")), String.class);
-                String modelName = converter.<String> to_java (sdv.value (sdt.field ("modelName")), String.class);
-                String modelType = converter.<String> to_java (sdv.value (sdt.field ("modelType")), String.class);
-                String name = converter.<String> to_java (sdv.value (sdt.field ("name")), String.class);
-                List<String> parameters = converter.<List> to_java (sdv.value (sdt.field ("params")), List.class);
+                String target = converter.to_java (sdv.value (sdt.field ("target")), String.class);
+                String modelName = converter.to_java (sdv.value (sdt.field ("modelName")), String.class);
+                String modelType = converter.to_java (sdv.value (sdt.field ("modelType")), String.class);
+                String name = converter.to_java (sdv.value (sdt.field ("name")), String.class);
+                List<String> parameters = converter.to_java (sdv.value (sdt.field ("params")), List.class);
                 if (cls == null) {
                     OperationRepresentation crep = new OperationRepresentation (name, new ModelReference (modelName,
                             modelType), target,
-                            parameters.toArray (new String[0]));
+                            parameters.toArray (new String[parameters.size ()]));
                     @SuppressWarnings ("unchecked")
                     T t = (T )crep;
                     return t;
@@ -141,18 +137,16 @@ public class CommandRepresentationConverter implements TypelibJavaConversionRule
                                 String.class, String.class, String[].class);
                         if (constructor != null)
                             return constructor.newInstance (name, modelName, modelType,
-                                    parameters.toArray (new String[0]));
+                                    parameters.toArray (new String[parameters.size ()]));
                         else
                             throw exception;
-                    }
-                    catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
+                    } catch (@NotNull NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
                             | IllegalArgumentException | InvocationTargetException e) {
                         exception.addSuppressed (e);
                         throw exception;
                     }
                 }
-            }
-            catch (UnknownFieldException | AmbiguousNameException e) {
+            } catch (@NotNull UnknownFieldException | AmbiguousNameException e) {
                 throw new ValueConversionException (MessageFormat.format ("Could not convert from {0} to {1}",
                         value.toString (),
                         (cls == null ? "IRainbowModelOperationRepresentation" : cls.getCanonicalName ())), e);

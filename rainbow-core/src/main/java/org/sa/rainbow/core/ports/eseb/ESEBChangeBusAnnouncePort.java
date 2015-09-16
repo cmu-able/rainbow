@@ -26,12 +26,13 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import java.io.IOException;
-import java.util.List;
-
+import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * @author schmerl
@@ -59,7 +60,7 @@ public class ESEBChangeBusAnnouncePort extends AbstractESEBDisposablePort implem
      * @see org.sa.rainbow.models.ports.IRainbowModelChangeBusPort#announce(java.util.List)
      */
     @Override
-    public void announce (List<? extends IRainbowMessage> event) {
+    public void announce (@NotNull List<? extends IRainbowMessage> event) {
         for (IRainbowMessage msg : event) {
             announce (msg);
         }
@@ -68,6 +69,7 @@ public class ESEBChangeBusAnnouncePort extends AbstractESEBDisposablePort implem
     /* (non-Javadoc)
      * @see org.sa.rainbow.models.ports.IRainbowModelChangeBusPort#createMessage()
      */
+    @NotNull
     @Override
     public IRainbowMessage createMessage () {
         return getConnectionRole().createMessage (/*ChannelT.MODEL_CHANGE*/);

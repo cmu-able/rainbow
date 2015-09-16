@@ -23,8 +23,7 @@
  */
 package org.sa.rainbow.core.ports;
 
-import java.util.Properties;
-
+import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.RainbowMaster;
@@ -40,6 +39,8 @@ import org.sa.rainbow.translator.effectors.IEffectorExecutionPort;
 import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
 import org.sa.rainbow.translator.probes.IProbe;
 
+import java.util.Properties;
+
 public interface IRainbowConnectionPortFactory {
 
     /**
@@ -48,7 +49,7 @@ public interface IRainbowConnectionPortFactory {
      * 
      * @return
      */
-    public abstract AbstractDelegateConnectionPort createDelegateSideConnectionPort (RainbowDelegate delegate)
+    AbstractDelegateConnectionPort createDelegateSideConnectionPort (RainbowDelegate delegate)
             throws RainbowConnectionException;
 
     /**
@@ -58,7 +59,7 @@ public interface IRainbowConnectionPortFactory {
      *            The master that has this port
      * @return
      */
-    public abstract IMasterConnectionPort createMasterSideConnectionPort (final RainbowMaster rainbowMaster)
+    IMasterConnectionPort createMasterSideConnectionPort (final RainbowMaster rainbowMaster)
             throws RainbowConnectionException;
 
     /**
@@ -70,7 +71,7 @@ public interface IRainbowConnectionPortFactory {
      *            The delegate id of the delegate
      * @return the port associated with deployment and lifecycle information to the delegate
      */
-    public abstract IDelegateManagementPort
+    IDelegateManagementPort
     createDelegateSideManagementPort (RainbowDelegate delegate, String delegateID)
             throws RainbowConnectionException;
 
@@ -84,93 +85,117 @@ public interface IRainbowConnectionPortFactory {
      * @return a new port to be used by the master to communicate deployment and configuration information to the
      *         delegate, and manager the lifecycle
      */
-    public abstract IDelegateManagementPort createMasterSideManagementPort (RainbowMaster rainbowMaster,
-            String delegateID,
-            Properties connectionProperties) throws RainbowConnectionException;
+    IDelegateManagementPort createMasterSideManagementPort (RainbowMaster rainbowMaster,
+                                                            String delegateID,
+                                                            Properties connectionProperties) throws RainbowConnectionException;
 
-    public abstract IModelUSBusPort createModelsManagerUSPort (IModelsManager m)
+    IModelUSBusPort createModelsManagerUSPort (IModelsManager m)
             throws RainbowConnectionException;
 
-    public abstract IModelUSBusPort createModelsManagerClientUSPort (Identifiable client)
+    IModelUSBusPort createModelsManagerClientUSPort (Identifiable client)
             throws RainbowConnectionException;
 
-    public abstract IGaugeLifecycleBusPort createGaugeSideLifecyclePort () throws RainbowConnectionException;
+    @NotNull
+    IGaugeLifecycleBusPort createGaugeSideLifecyclePort () throws RainbowConnectionException;
 
-    public abstract IModelChangeBusPort createChangeBusAnnouncePort () throws RainbowConnectionException;
+    @NotNull
+    IModelChangeBusPort createChangeBusAnnouncePort () throws RainbowConnectionException;
 
-    public abstract IGaugeLifecycleBusPort
+    @NotNull
+    IGaugeLifecycleBusPort
     createManagerGaugeLifecyclePort (IGaugeLifecycleBusPort manager) throws RainbowConnectionException;
 
-    public abstract IGaugeConfigurationPort createGaugeConfigurationPortClient (IGaugeIdentifier gauge)
+    @NotNull
+    IGaugeConfigurationPort createGaugeConfigurationPortClient (IGaugeIdentifier gauge)
             throws RainbowConnectionException;
 
-    public abstract IGaugeQueryPort createGaugeQueryPortClient (IGaugeIdentifier gauge)
+    @NotNull
+    IGaugeQueryPort createGaugeQueryPortClient (IGaugeIdentifier gauge)
             throws RainbowConnectionException;
 
-    public abstract IGaugeConfigurationPort createGaugeConfigurationPort (IGauge gauge)
+    @NotNull
+    IGaugeConfigurationPort createGaugeConfigurationPort (IGauge gauge)
             throws RainbowConnectionException;
 
-    public abstract IGaugeQueryPort createGaugeQueryPort (IGauge gauge) throws RainbowConnectionException;
+    @NotNull
+    IGaugeQueryPort createGaugeQueryPort (IGauge gauge) throws RainbowConnectionException;
 
-    public abstract IProbeReportPort createProbeReportingPortSender (IProbe probe) throws RainbowConnectionException;
+    @NotNull
+    IProbeReportPort createProbeReportingPortSender (IProbe probe) throws RainbowConnectionException;
 
-    public abstract IProbeConfigurationPort createProbeConfigurationPort (Identifiable probe,
-            IProbeConfigurationPort callback) throws RainbowConnectionException;
+    @NotNull
+    IProbeConfigurationPort createProbeConfigurationPort (Identifiable probe,
+                                                          IProbeConfigurationPort callback) throws RainbowConnectionException;
 
-    public abstract IDelegateConfigurationPort createDelegateConfigurationPort (RainbowDelegate rainbowDelegate)
+    @NotNull
+    IDelegateConfigurationPort createDelegateConfigurationPort (RainbowDelegate rainbowDelegate)
             throws RainbowConnectionException;
 
-    public abstract IDelegateConfigurationPort createDelegateConfigurationPortClient (String delegateID)
+    @NotNull
+    IDelegateConfigurationPort createDelegateConfigurationPortClient (String delegateID)
             throws RainbowConnectionException;
 
-    public abstract IProbeLifecyclePort createProbeManagementPort (IProbe probe) throws RainbowConnectionException;
+    @NotNull
+    IProbeLifecyclePort createProbeManagementPort (IProbe probe) throws RainbowConnectionException;
 
-    public abstract IProbeReportSubscriberPort createProbeReportingPortSubscriber (IProbeReportPort callback)
+    @NotNull
+    IProbeReportSubscriberPort createProbeReportingPortSubscriber (IProbeReportPort callback)
             throws RainbowConnectionException;
 
-    public abstract IEffectorLifecycleBusPort createEffectorSideLifecyclePort () throws RainbowConnectionException;
+    @NotNull
+    IEffectorLifecycleBusPort createEffectorSideLifecyclePort () throws RainbowConnectionException;
 
 
-    public abstract IEffectorLifecycleBusPort
+    @NotNull
+    IEffectorLifecycleBusPort
     createSubscriberSideEffectorLifecyclePort (IEffectorLifecycleBusPort delegate)
             throws RainbowConnectionException;
 
-    public abstract IEffectorExecutionPort createEffectorExecutionPort (IEffector effector)
+    @NotNull
+    IEffectorExecutionPort createEffectorExecutionPort (IEffector effector)
             throws RainbowConnectionException;
 
-    public abstract IEffectorExecutionPort createEffectorExecutionPort (IEffectorIdentifier effector)
+    @NotNull
+    IEffectorExecutionPort createEffectorExecutionPort (IEffectorIdentifier effector)
             throws RainbowConnectionException;
 
-    public abstract IRainbowReportingPort createMasterReportingPort () throws RainbowConnectionException;
+    @NotNull
+    IRainbowReportingPort createMasterReportingPort () throws RainbowConnectionException;
 
-    public abstract IModelChangeBusSubscriberPort
+    @NotNull
+    IModelChangeBusSubscriberPort
     createModelChangeBusSubscriptionPort ()
             throws RainbowConnectionException;
 
-    public abstract IRainbowReportingSubscriberPort
+    @NotNull
+    IRainbowReportingSubscriberPort
     createReportingSubscriberPort (IRainbowReportingSubscriberCallback reportT)
             throws RainbowConnectionException;
 
-    public abstract IModelDSBusPublisherPort createModelDSPublishPort (Identifiable id)
+    @NotNull
+    IModelDSBusPublisherPort createModelDSPublishPort (Identifiable id)
             throws RainbowConnectionException;
 
-    public abstract IModelDSBusSubscriberPort createModelDSubscribePort (Identifiable component)
+    @NotNull
+    IModelDSBusSubscriberPort createModelDSubscribePort (Identifiable component)
             throws RainbowConnectionException;
 
-    public abstract IModelsManagerPort createModelsManagerProviderPort (IModelsManager modelsManager)
+    @NotNull
+    IModelsManagerPort createModelsManagerProviderPort (IModelsManager modelsManager)
             throws RainbowConnectionException;
 
-    public abstract IModelsManagerPort createModeslManagerRequirerPort () throws RainbowConnectionException;
+    @NotNull
+    IModelsManagerPort createModeslManagerRequirerPort () throws RainbowConnectionException;
 
-    public abstract <S extends IEvaluable> IRainbowAdaptationEnqueuePort<S>
+    <S extends IEvaluable> IRainbowAdaptationEnqueuePort<S>
     createAdaptationEnqueuePort (ModelReference model);
 
-    public abstract <S extends IEvaluable> IRainbowAdaptationDequeuePort<S>
+    <S extends IEvaluable> IRainbowAdaptationDequeuePort<S>
     createAdaptationDequeuePort (ModelReference model);
 
-    public abstract IMasterCommandPort createMasterCommandProviderPort (RainbowMaster rainbowMaster)
+    IMasterCommandPort createMasterCommandProviderPort (RainbowMaster rainbowMaster)
             throws RainbowConnectionException;
 
-    public abstract IMasterCommandPort createMasterCommandRequirerPort () throws RainbowConnectionException;
+    IMasterCommandPort createMasterCommandRequirerPort () throws RainbowConnectionException;
 
 }

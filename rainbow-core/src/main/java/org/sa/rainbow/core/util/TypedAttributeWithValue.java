@@ -23,11 +23,14 @@
  */
 package org.sa.rainbow.core.util;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 public class TypedAttributeWithValue extends Pair<TypedAttribute, Object> {
 
     private static final long serialVersionUID = 7005191042752015697L;
 
-    public TypedAttributeWithValue (String name, String type, Object value) {
+    public TypedAttributeWithValue (@NotNull String name, String type, Object value) {
         super (new TypedAttribute (name, type), value);
     }
 
@@ -35,6 +38,7 @@ public class TypedAttributeWithValue extends Pair<TypedAttribute, Object> {
         super (attr, value);
     }
 
+    @Nullable
     public Object getValue () {
         return secondValue ();
     }
@@ -43,6 +47,7 @@ public class TypedAttributeWithValue extends Pair<TypedAttribute, Object> {
         setSecondValue (value);
     }
 
+    @Nullable
     public String getName () {
         return firstValue ().getName ();
     }
@@ -51,6 +56,7 @@ public class TypedAttributeWithValue extends Pair<TypedAttribute, Object> {
         firstValue ().setName (name);
     }
 
+    @Nullable
     public String getType () {
         return firstValue ().getType ();
     }
@@ -59,6 +65,7 @@ public class TypedAttributeWithValue extends Pair<TypedAttribute, Object> {
         firstValue ().setType (type);
     }
 
+    @Nullable
     @Override
     public Object clone () {
         return super.clone ();

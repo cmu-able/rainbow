@@ -37,14 +37,14 @@ public interface IModelChangeBusSubscriberPort extends IDisposablePort {
      * Represents a subscription
      * 
      */
-    public interface IRainbowChangeBusSubscription {
+    interface IRainbowChangeBusSubscription {
         /**
          * Returns true if the message matches the subscription
          * 
          * @param message
          * @return
          */
-        public boolean matches (IRainbowMessage message);
+        boolean matches (IRainbowMessage message);
     }
 
     /**
@@ -53,7 +53,7 @@ public interface IModelChangeBusSubscriberPort extends IDisposablePort {
      * @param <T>
      *            The type of the model
      */
-    public interface IRainbowModelChangeCallback {
+    interface IRainbowModelChangeCallback {
         /**
          * The method will to be called. The message represents the event. The model is the model in Rainbow that the
          * event is associated with.
@@ -61,7 +61,7 @@ public interface IModelChangeBusSubscriberPort extends IDisposablePort {
          * @param model
          * @param message
          */
-        public void onEvent (ModelReference reference, IRainbowMessage message);
+        void onEvent (ModelReference reference, IRainbowMessage message);
     }
 
     /**
@@ -72,13 +72,13 @@ public interface IModelChangeBusSubscriberPort extends IDisposablePort {
      * @param callback
      *            The callback to call when a message of the subscription matches
      */
-    public void subscribe (IRainbowChangeBusSubscription subscription, IRainbowModelChangeCallback callback);
+    void subscribe (IRainbowChangeBusSubscription subscription, IRainbowModelChangeCallback callback);
 
     /**
      * Unsubscribes the callback from the bus
      * 
      * @param callback
      */
-    public void unsubscribe (IRainbowModelChangeCallback callback);
+    void unsubscribe (IRainbowModelChangeCallback callback);
 
 }

@@ -23,11 +23,8 @@
  */
 package org.sa.rainbow.core.gauges;
 
-import java.text.MessageFormat;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
-
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
@@ -42,15 +39,21 @@ import org.sa.rainbow.translator.probes.IProbeIdentifier;
 import org.sa.rainbow.util.Beacon;
 import org.sa.rainbow.util.Util;
 
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
+
 public abstract class AbstractGaugeWithProbes extends AbstractGauge {
 
-    protected Beacon m_probeBeacon;
-    protected IProbeReportSubscriberPort m_probeReportingPort;
+    private Beacon m_probeBeacon;
+    @Nullable
+    private IProbeReportSubscriberPort m_probeReportingPort;
     private boolean                      m_subscribedToProbePort;
 
-    public AbstractGaugeWithProbes (String threadName, String id, long beaconPeriod, TypedAttribute gaugeDesc,
-            TypedAttribute modelDesc, List<TypedAttributeWithValue> setupParams,
-            Map<String, IRainbowOperation> mappings)
+    AbstractGaugeWithProbes (String threadName, String id, long beaconPeriod, TypedAttribute gaugeDesc,
+                             TypedAttribute modelDesc, List<TypedAttributeWithValue> setupParams,
+                             Map<String, IRainbowOperation> mappings)
                     throws RainbowException {
         super (threadName, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
 
@@ -63,12 +66,12 @@ public abstract class AbstractGaugeWithProbes extends AbstractGauge {
         m_probeBeacon.setPeriod (period);
     }
 
-    public void reportFromProbe (IProbeIdentifier probe, String data) {
+    void reportFromProbe (IProbeIdentifier probe, String data) {
         m_probeBeacon.mark ();
     }
 
     @Override
-    protected void handleConfigParam (TypedAttributeWithValue tav) {
+    protected void handleConfigParam (@NotNull TypedAttributeWithValue tav) {
         super.handleConfigParam (tav);
         if (tav.getName ().equals (CONFIG_PROBE_MAPPING)) {
             pubProbeGaugeMapping ((String )tav.getValue ());

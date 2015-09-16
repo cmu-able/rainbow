@@ -43,7 +43,7 @@ public interface IAdaptationManager<S> extends IRainbowRunnable {
      * @param modelRef
      *            The model to manage
      */
-    public abstract void setModelToManage (ModelReference modelRef);
+    void setModelToManage (ModelReference modelRef);
 
     /**
      * Marks a particular adaptation as executed by an adaptation executor
@@ -51,7 +51,7 @@ public interface IAdaptationManager<S> extends IRainbowRunnable {
      * @param strategy
      *            The strategy (managed by this manager) that was executor
      */
-    public abstract void markStrategyExecuted (S strategy);
+    void markStrategyExecuted (S strategy);
 
     /**
      * The interface for initializing this component
@@ -59,15 +59,15 @@ public interface IAdaptationManager<S> extends IRainbowRunnable {
      * @param port
      * @throws RainbowConnectionException
      */
-    public abstract void initialize (IRainbowReportingPort port) throws RainbowConnectionException;
+    void initialize (IRainbowReportingPort port) throws RainbowConnectionException;
 
     /**
      * Sets whether this manager is enabled. Unenabled managers are not suggesting adaptations.
      * 
      * @param enabled
      */
-    public abstract void setEnabled (boolean enabled);
+    void setEnabled (boolean enabled);
 
-    public abstract boolean isEnabled ();
+    boolean isEnabled ();
 
 }

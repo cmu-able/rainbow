@@ -23,13 +23,6 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.log4j.Logger;
-
 import edu.cmu.cs.able.eseb.bus.EventBus;
 import edu.cmu.cs.able.eseb.conn.BusConnection;
 import edu.cmu.cs.able.eseb.participant.ParticipantException;
@@ -37,28 +30,38 @@ import edu.cmu.cs.able.eseb.rpc.JavaRpcFactory;
 import edu.cmu.cs.able.eseb.rpc.RpcEnvironment;
 import edu.cmu.cs.able.typelib.jconv.TypelibJavaConversionRule;
 import edu.cmu.cs.able.typelib.jconv.TypelibJavaConverter;
+import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ESEBRPCConnector {
-    public static Logger  LOGGER = Logger.getLogger (ESEBRPCConnector.class);
+    public static final Logger LOGGER = Logger.getLogger (ESEBRPCConnector.class);
+    @Nullable
     private BusConnection m_client;
     private EventBus      m_srvr;
 
     private static class RPCInfo {
+        @Nullable
         RpcEnvironment m_env;
         String         participant_id;
     }
 
-    private static Map<String, RPCInfo> m_infoMap = new HashMap<> ();
+    private static final Map<String, RPCInfo> m_infoMap = new HashMap<> ();
 
     private RPCInfo                     m_info;
 
-    public ESEBRPCConnector (String remoteHost, short remotePort, String serverId) throws IOException,
-    ParticipantException {
+    public ESEBRPCConnector (String remoteHost, short remotePort, String serverId) throws
+            ParticipantException {
         setClient (remoteHost, remotePort);
         setUpEnvironment (serverId);
     }
 
-    public ESEBRPCConnector (short port, String serverId) throws IOException, ParticipantException {
+    private ESEBRPCConnector (short port, String serverId) throws IOException, ParticipantException {
         m_srvr = ESEBProvider.getBusServer (port);
         ESEBProvider.useServer (m_srvr);
         setClient ("localhost", port);
@@ -66,7 +69,7 @@ public class ESEBRPCConnector {
 
     }
 
-    private void setUpEnvironment (String serverId) throws ParticipantException {
+    private void setUpEnvironment (String serverId) {
         synchronized (m_infoMap) {
             RPCInfo info = m_infoMap.get (serverId);
 
@@ -81,7 +84,7 @@ public class ESEBRPCConnector {
         }
     }
 
-    private void setupConverters (RPCInfo info) {
+    private void setupConverters (@NotNull RPCInfo info) {
         // Share the participant, environment, and then you can share the connection 
         TypelibJavaConverter converter = info.m_env.converter ();
         List<? extends TypelibJavaConversionRule> rules = ESEBProvider.getConversionRules ();
@@ -91,7 +94,7 @@ public class ESEBRPCConnector {
 
     }
 
-    protected void setClient (String remoteHost, short remotePort) {
+    private void setClient (String remoteHost, short remotePort) {
         LOGGER.info ("Getting RPC connector at " + remoteHost + ":" + remotePort);
         if (m_client != null) {
             if (!m_client.host ().equals (remoteHost) || m_client.port () != remotePort) {
@@ -106,6 +109,7 @@ public class ESEBRPCConnector {
         ESEBProvider.useClient (m_client);
     }
 
+    @Nullable
     public BusConnection getESEBConnection () {
         return m_client;
     }
@@ -114,6 +118,7 @@ public class ESEBRPCConnector {
         return m_info.participant_id;
     }
 
+    @Nullable
     private RpcEnvironment getRPCEnvironment () {
         return m_info.m_env;
     }
@@ -129,7 +134,7 @@ public class ESEBRPCConnector {
         JavaRpcFactory.create_registry_wrapper (cls, wrapped, getRPCEnvironment (), obj_id);
     }
 
-    public void close () throws IOException {
+    public void close () {
         if (m_client != null) {
             ESEBProvider.releaseClient (m_client);
         }

@@ -23,20 +23,18 @@
  */
 package org.sa.rainbow.translator.probes;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.BadLifecycleStepException;
 import org.sa.rainbow.core.error.RainbowConnectionException;
-import org.sa.rainbow.core.ports.IProbeConfigurationPort;
-import org.sa.rainbow.core.ports.IProbeLifecyclePort;
-import org.sa.rainbow.core.ports.IProbeReportPort;
-import org.sa.rainbow.core.ports.IRainbowReportingPort;
-import org.sa.rainbow.core.ports.RainbowPortFactory;
+import org.sa.rainbow.core.ports.*;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The AbstractProbe provides the probe State member and the transition of that state when a lifecycle method is
@@ -47,23 +45,29 @@ import org.sa.rainbow.core.ports.RainbowPortFactory;
 public abstract class AbstractProbe implements IProbe {
 
     protected Logger                       LOGGER                      = Logger.getLogger (AbstractProbe.class);
-    protected Map<String, Object> m_configParams              = null;
+    @Nullable
+    private Map<String, Object> m_configParams = null;
 
+    @Nullable
     private String                m_name                      = null;
+    @Nullable
     private String                m_location                  = null;
+    @Nullable
     private String                m_type                      = null;
+    @Nullable
     private Kind                  m_kind                      = null;
+    @NotNull
     private State                 m_state                     = State.NULL;
 
-    protected IProbeReportPort             m_reportingPort;
-    protected IProbeConfigurationPort      m_configurationPort;
-    protected IProbeLifecyclePort          m_probeManagementPort;
+    private IProbeReportPort m_reportingPort;
+    private IProbeConfigurationPort m_configurationPort;
+    private IProbeLifecyclePort m_probeManagementPort;
 
-    IProbeConfigurationPort       m_configurationPortCallback = new IProbeConfigurationPort () {
+    private final IProbeConfigurationPort m_configurationPortCallback = new IProbeConfigurationPort () {
 
         @Override
         public void
-        configure (Map<String, Object> configParams) {
+        configure (@NotNull Map<String, Object> configParams) {
             AbstractProbe.this.configure (configParams);
         }
 
@@ -85,7 +89,7 @@ public abstract class AbstractProbe implements IProbe {
      *            one of the enumerated {@link IProbe.Kind}s designating how this Probe would be handled by the
      *            ProbeBusRelay
      */
-    public AbstractProbe (String id, String type, Kind kind) {
+    public AbstractProbe (@NotNull String id, String type, Kind kind) {
         m_kind = kind;
         m_configParams = Collections.synchronizedMap (new HashMap<String, Object> ());
         setID (id);
@@ -111,6 +115,7 @@ public abstract class AbstractProbe implements IProbe {
     /* (non-Javadoc)
      * @see org.sa.rainbow.translator.probes.relay.IProbe#id()
      */
+    @Nullable
     @Override
     public String id () {
         return m_name + LOCATION_SEP + m_location;
@@ -121,7 +126,7 @@ public abstract class AbstractProbe implements IProbe {
      * 
      * @param id
      */
-    protected void setID (String id) {
+    private void setID (@NotNull String id) {
         if (m_name == null) {
             // find the "@" index
             int atIdx = id.indexOf (LOCATION_SEP);
@@ -139,6 +144,7 @@ public abstract class AbstractProbe implements IProbe {
     /* (non-Javadoc)
      * @see org.sa.rainbow.translator.probes.relay.IProbe#name()
      */
+    @Nullable
     @Override
     public String name () {
         return m_name;
@@ -147,6 +153,7 @@ public abstract class AbstractProbe implements IProbe {
     /* (non-Javadoc)
      * @see org.sa.rainbow.translator.probes.relay.IProbe#location()
      */
+    @Nullable
     @Override
     public String location () {
         return m_location;
@@ -155,18 +162,20 @@ public abstract class AbstractProbe implements IProbe {
     /* (non-Javadoc)
      * @see org.sa.rainbow.translator.probes.IProbe#type()
      */
+    @Nullable
     @Override
     public String type () {
         return m_type;
     }
 
-    protected void setType (String type) {
+    private void setType (String type) {
         m_type = type;
     }
 
     /* (non-Javadoc)
      * @see org.sa.rainbow.translator.probes.IProbe#kind()
      */
+    @Nullable
     @Override
     public Kind kind () {
         return m_kind;
@@ -262,6 +271,7 @@ public abstract class AbstractProbe implements IProbe {
     /* (non-Javadoc)
      * @see org.sa.rainbow.translator.probes.relay.IProbe#lcState()
      */
+    @NotNull
     @Override
     public State lcState () {
         return m_state;
@@ -287,7 +297,7 @@ public abstract class AbstractProbe implements IProbe {
      * @see org.sa.rainbow.translator.probes.IProbe#configure(java.util.Map)
      */
     @Override
-    public void configure (Map<String, Object> configParams) {
+    public void configure (@NotNull Map<String, Object> configParams) {
         m_configParams.putAll (configParams);
         m_probeManagementPort.reportConfigured (configParams);
     }
@@ -301,7 +311,7 @@ public abstract class AbstractProbe implements IProbe {
         log (data);
     }
 
-    protected void log (String txt) {
+    void log (String txt) {
         String msg = "P[" + id () + "] " + txt;
         if (m_loggingPort != null) {
             m_loggingPort.info (RainbowComponentT.PROBE, msg, LOGGER);

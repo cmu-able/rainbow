@@ -23,14 +23,13 @@
  */
 package org.sa.rainbow.core.ports.eseb.rpc;
 
-import java.io.IOException;
-import java.util.Collection;
-
+import edu.cmu.cs.able.eseb.participant.ParticipantException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.eseb.ESEBProvider;
 
-import edu.cmu.cs.able.eseb.participant.ParticipantException;
+import java.io.IOException;
+import java.util.Collection;
 
 public class ESEBModelsManagerRequirerPort extends AbstractESEBDisposableRPCPort implements
 IESEBModeslManagerRemoteInterface {
@@ -41,7 +40,7 @@ IESEBModeslManagerRemoteInterface {
         this (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort ());
     }
 
-    public ESEBModelsManagerRequirerPort (String host, short port) throws IOException, ParticipantException {
+    private ESEBModelsManagerRequirerPort (String host, short port) throws IOException, ParticipantException {
         super (host, port, DEFAULT_ESEB_RPCNAME);
         setupModelConverters (MODEL_CONVERTER_CLASS);
         m_stub = getConnectionRole ().createRemoteStub (IESEBModeslManagerRemoteInterface.class,

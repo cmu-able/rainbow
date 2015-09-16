@@ -23,23 +23,18 @@
  */
 package org.sa.rainbow.gui;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
+import org.jetbrains.annotations.NotNull;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.border.EmptyBorder;
-
 public class ElementInformationDialog extends JDialog {
 
-    private final JPanel m_contentPanel = new JPanel ();
-    private JTextArea    m_textArea;
+    @NotNull
+    private final JTextArea m_textArea;
 
     /**
      * Launch the application.
@@ -62,15 +57,16 @@ public class ElementInformationDialog extends JDialog {
         setTitle ("Information about:");
         setBounds (100, 100, 450, 300);
         getContentPane ().setLayout (new BorderLayout ());
-        m_contentPanel.setBorder (new EmptyBorder (5, 5, 5, 5));
-        getContentPane ().add (m_contentPanel, BorderLayout.CENTER);
-        m_contentPanel.setLayout (new GridLayout (0, 1, 0, 0));
+        JPanel contentPanel = new JPanel ();
+        contentPanel.setBorder (new EmptyBorder (5, 5, 5, 5));
+        getContentPane ().add (contentPanel, BorderLayout.CENTER);
+        contentPanel.setLayout (new GridLayout (0, 1, 0, 0));
         {
             m_textArea = new JTextArea ();
             m_textArea.setEditable (false);
             JScrollPane scrollPane = new JScrollPane (m_textArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                     JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-            m_contentPanel.add (scrollPane);
+            contentPanel.add (scrollPane);
         }
         {
             JPanel buttonPane = new JPanel ();

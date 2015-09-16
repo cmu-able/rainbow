@@ -23,19 +23,21 @@
  */
 package org.sa.rainbow.core.models.commands;
 
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.models.ModelReference;
 
 public interface IRainbowOperation {
 
-    public abstract String[] getParameters ();
+    String[] getParameters ();
 
-    public abstract String getTarget ();
+    String getTarget ();
 
-    public abstract String getName ();
+    String getName ();
 
-    public ModelReference getModelReference ();
+    @Nullable
+    ModelReference getModelReference ();
 
-    public String getOrigin ();
+    String getOrigin ();
 
-    public void setOrigin (String o);
+    void setOrigin (String o);
 }

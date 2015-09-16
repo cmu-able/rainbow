@@ -23,6 +23,8 @@
  */
 package org.sa.rainbow.core;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * This interface defines one method that provides an identifier string of the
  * implementing class.
@@ -35,7 +37,8 @@ public interface Identifiable {
      * Returns an identifier string, not necessarily unique.
      * @return String  an identifier string. 
      */
-    public String id ();
+    @Nullable
+    String id ();
 
 
 }

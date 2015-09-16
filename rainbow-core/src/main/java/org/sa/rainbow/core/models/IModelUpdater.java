@@ -23,10 +23,10 @@
  */
 package org.sa.rainbow.core.models;
 
-import java.util.List;
-
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
+
+import java.util.List;
 
 public interface IModelUpdater {
 
@@ -56,6 +56,6 @@ public interface IModelUpdater {
     void requestModelUpdate (List<IRainbowOperation> commands, boolean transaction)
             throws IllegalStateException, RainbowException;
 
-    public <T> IModelInstance<T> getModelInstance (ModelReference modelRef);
+    <T> IModelInstance<T> getModelInstance (ModelReference modelRef);
 
 }

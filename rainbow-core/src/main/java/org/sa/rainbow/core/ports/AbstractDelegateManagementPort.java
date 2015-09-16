@@ -23,16 +23,16 @@
  */
 package org.sa.rainbow.core.ports;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Properties;
-
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
 import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
 import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
 import org.sa.rainbow.core.ports.eseb.AbstractESEBDisposablePort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Properties;
 
 /**
  * This class represents the common methods for delegate deployment ports. These methods correspond to those that are
@@ -56,7 +56,7 @@ IDelegateManagementPort {
      * @param host
      * @throws IOException
      */
-    public AbstractDelegateManagementPort (RainbowDelegate delegate, String host, short port, ChannelT channel)
+    protected AbstractDelegateManagementPort (RainbowDelegate delegate, String host, short port, ChannelT channel)
             throws IOException {
         super (host, port, channel);
         m_delegate = delegate;

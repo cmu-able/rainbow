@@ -23,15 +23,6 @@
  */
 package org.sa.rainbow.core.ports.eseb.converters;
 
-import incubator.pval.Ensure;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import edu.cmu.cs.able.typelib.comp.ListDataType;
 import edu.cmu.cs.able.typelib.comp.ListDataValue;
 import edu.cmu.cs.able.typelib.comp.SetDataType;
@@ -41,28 +32,31 @@ import edu.cmu.cs.able.typelib.jconv.TypelibJavaConverter;
 import edu.cmu.cs.able.typelib.jconv.ValueConversionException;
 import edu.cmu.cs.able.typelib.type.DataType;
 import edu.cmu.cs.able.typelib.type.DataValue;
+import incubator.pval.Ensure;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
 public class CollectionConverter implements TypelibJavaConversionRule {
 
     @Override
-    public boolean handles_java (Object value, DataType dst) {
-        if (value == null || dst == null) return false;
+    public boolean handles_java (@Nullable Object value, @Nullable DataType dst) {
+        return !(value == null || dst == null) && (dst instanceof ListDataType || dst instanceof SetDataType) && value instanceof Collection;
 
-        return (dst instanceof ListDataType || dst instanceof SetDataType) && value instanceof Collection;
     }
 
     @Override
     public boolean handles_typelib (DataValue value, Class<?> cls) {
         Ensure.not_null (value);
 
-        if (cls != Collection.class && make_instance_set (cls) == null && make_instance_list (cls) == null)
-            return false;
+        return !(cls != Collection.class && make_instance_set (cls) == null && make_instance_list (cls) == null) && (value instanceof SetDataValue || value instanceof ListDataValue);
 
-        return value instanceof SetDataValue || value instanceof ListDataValue;
     }
 
     @Override
-    public DataValue from_java (Object value, DataType dst, TypelibJavaConverter converter)
+    public DataValue from_java (Object value, DataType dst, @NotNull TypelibJavaConverter converter)
             throws ValueConversionException {
         Ensure.not_null (dst);
         Ensure.is_true (dst instanceof SetDataType || dst instanceof ListDataType);
@@ -87,8 +81,9 @@ public class CollectionConverter implements TypelibJavaConversionRule {
         }
     }
 
+    @Nullable
     @Override
-    public <T> T to_java (DataValue value, Class<T> cls, TypelibJavaConverter converter)
+    public <T> T to_java (DataValue value, Class<T> cls, @NotNull TypelibJavaConverter converter)
             throws ValueConversionException {
         Ensure.not_null (value);
         Ensure.is_true (value instanceof SetDataValue || value instanceof ListDataValue);
@@ -101,13 +96,13 @@ public class CollectionConverter implements TypelibJavaConversionRule {
         if (value instanceof SetDataValue) {
             col = ((SetDataValue )value).all ();
             if (set == null && Collection.class == cls) {
-                set = new HashSet ();
+                set = new HashSet<> ();
             }
         }
         else {
             col = ((ListDataValue )value).all ();
             if (list == null && Collection.class == cls) {
-                list = new ArrayList ();
+                list = new ArrayList<> ();
             }
         }
 
@@ -123,6 +118,7 @@ public class CollectionConverter implements TypelibJavaConversionRule {
         }
         else {
             Ensure.not_null (list);
+            assert list != null;
             for (DataValue v : col) {
                 list.add (converter.to_java (v, null));
             }
@@ -140,7 +136,7 @@ public class CollectionConverter implements TypelibJavaConversionRule {
      *            the class; if <code>null</code> a default set will be created
      * @return the instance
      */
-    private Set<Object> make_instance_set (Class<?> cls) {
+    private Set<Object> make_instance_set (@Nullable Class<?> cls) {
         if (cls == null || cls == Set.class) return new HashSet<> ();
 
         if (!Set.class.isAssignableFrom (cls)) return null;
@@ -150,8 +146,7 @@ public class CollectionConverter implements TypelibJavaConversionRule {
             @SuppressWarnings ("unchecked")
             Set<Object> so = (Set<Object> )s;
             return so;
-        }
-        catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
+        } catch (@NotNull NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException | ClassCastException e) {
             return null;
         }
@@ -164,7 +159,7 @@ public class CollectionConverter implements TypelibJavaConversionRule {
      *            the class; if <code>null</code> a default set will be created
      * @return the instance
      */
-    private List<Object> make_instance_list (Class<?> cls) {
+    private List<Object> make_instance_list (@Nullable Class<?> cls) {
         if (cls == null || cls == List.class) return new ArrayList<> ();
 
         if (!List.class.isAssignableFrom (cls)) return null;
@@ -174,8 +169,7 @@ public class CollectionConverter implements TypelibJavaConversionRule {
             @SuppressWarnings ("unchecked")
             List<Object> lo = (List<Object> )l;
             return lo;
-        }
-        catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
+        } catch (@NotNull NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException | ClassCastException e) {
             return null;
         }

@@ -23,26 +23,18 @@
  */
 package org.sa.rainbow.core.gauges;
 
-import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
+import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.error.RainbowConnectionException;
-import org.sa.rainbow.core.ports.IGaugeConfigurationPort;
-import org.sa.rainbow.core.ports.IGaugeLifecycleBusPort;
-import org.sa.rainbow.core.ports.IGaugeQueryPort;
-import org.sa.rainbow.core.ports.IRainbowReportingPort;
-import org.sa.rainbow.core.ports.RainbowPortFactory;
+import org.sa.rainbow.core.ports.*;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
+
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * The "global" gauge manager that maintains information about the global state of Rainbow gauges.
@@ -52,26 +44,28 @@ import org.sa.rainbow.core.util.TypedAttributeWithValue;
  */
 public class GaugeManager extends AbstractRainbowRunnable implements IGaugeLifecycleBusPort {
 
-    static enum GMState {
+    enum GMState {
         CREATED, INITIALIZED, CONFIGURED, OPERATING
-    };
+    }
 
-    public static final String ID = "Gauge Manager";
+    private static final String ID = "Gauge Manager";
 
 
     @SuppressWarnings ("unused")
     private IGaugeLifecycleBusPort m_gaugeLifecyclePort;
 
-    private Map<String, IGaugeConfigurationPort> configurationPorts = new HashMap<> ();
-    private Map<String, IGaugeQueryPort>         queryPorts         = new HashMap<> ();
-    private Map<String, GaugeInstanceDescription>                     m_gaugeDescription;
-    private Set<String>                           newGaugeIds        = new HashSet<> ();
+    private final Map<String, IGaugeConfigurationPort> configurationPorts = new HashMap<> ();
+    private final Map<String, IGaugeQueryPort> queryPorts = new HashMap<> ();
+    @NotNull
+    private final Map<String, GaugeInstanceDescription> m_gaugeDescription;
+    private final Set<String> newGaugeIds = new HashSet<> ();
+    @NotNull
     private GMState                               m_state            = GMState.CREATED;
     private boolean                               m_waitForGauges;
 
-    private Set<String>                           m_nonCompliantGauges = new HashSet<> ();
+    private final Set<String> m_nonCompliantGauges = new HashSet<> ();
 
-    public GaugeManager (GaugeDescription gd) {
+    public GaugeManager (@NotNull GaugeDescription gd) {
         super (ID);
         m_gaugeDescription = new HashMap<> ();
         for (GaugeInstanceDescription gid : gd.instDescList ()) {
@@ -88,7 +82,7 @@ public class GaugeManager extends AbstractRainbowRunnable implements IGaugeLifec
         m_state = GMState.INITIALIZED;
     }
 
-    protected void initializeConnections () throws RainbowConnectionException {
+    private void initializeConnections () throws RainbowConnectionException {
         m_gaugeLifecyclePort = RainbowPortFactory.createManagerLifecylePort (this);
     }
 
@@ -136,7 +130,7 @@ public class GaugeManager extends AbstractRainbowRunnable implements IGaugeLifec
         }
     }
 
-    public void forgetGauge (GaugeInstanceDescription gaugeDesc) {
+    private void forgetGauge (@NotNull GaugeInstanceDescription gaugeDesc) {
         configurationPorts.remove (gaugeDesc.id ());
         queryPorts.remove (gaugeDesc.id ());
     }
@@ -201,7 +195,7 @@ public class GaugeManager extends AbstractRainbowRunnable implements IGaugeLifec
     }
 
     @Override
-    public void reportCreated (IGaugeIdentifier gauge) {
+    public void reportCreated (@NotNull IGaugeIdentifier gauge) {
         // Log creation
         m_reportingPort.info (RainbowComponentT.GAUGE_MANAGER, MessageFormat.format ("Created {0}", gauge.id ()));
         log (MessageFormat.format ("Gauge Manager: A gauge was created {0}", gauge.id ()));
@@ -226,7 +220,7 @@ public class GaugeManager extends AbstractRainbowRunnable implements IGaugeLifec
     }
 
     @Override
-    public void reportDeleted (IGaugeIdentifier gauge) {
+    public void reportDeleted (@NotNull IGaugeIdentifier gauge) {
         m_reportingPort.info (RainbowComponentT.GAUGE_MANAGER, MessageFormat.format ("Deleted {0}", gauge.id ()));
         synchronized (configurationPorts) {
             configurationPorts.remove (gauge.id ());
@@ -235,12 +229,12 @@ public class GaugeManager extends AbstractRainbowRunnable implements IGaugeLifec
     }
 
     @Override
-    public void reportConfigured (IGaugeIdentifier gauge, List<TypedAttributeWithValue> configParams) {
+    public void reportConfigured (@NotNull IGaugeIdentifier gauge, List<TypedAttributeWithValue> configParams) {
         log (gauge.id () + " was configured.");
     }
 
     @Override
-    public void sendBeacon (IGaugeIdentifier gauge) {
+    public void sendBeacon (@NotNull IGaugeIdentifier gauge) {
         GaugeInstanceDescription gid = m_gaugeDescription.get (gauge.id ());
         if (gid != null) {
             gid.beacon ().mark ();
@@ -248,6 +242,7 @@ public class GaugeManager extends AbstractRainbowRunnable implements IGaugeLifec
 
     }
 
+    @NotNull
     @Override
     protected RainbowComponentT getComponentType () {
         return RainbowComponentT.GAUGE_MANAGER;

@@ -23,11 +23,7 @@
  */
 package org.sa.rainbow.core.ports.local;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
+import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowDelegate;
@@ -38,35 +34,17 @@ import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
 import org.sa.rainbow.core.models.IModelsManager;
 import org.sa.rainbow.core.models.ModelReference;
-import org.sa.rainbow.core.ports.AbstractDelegateConnectionPort;
-import org.sa.rainbow.core.ports.IDelegateConfigurationPort;
-import org.sa.rainbow.core.ports.IDelegateManagementPort;
-import org.sa.rainbow.core.ports.IEffectorLifecycleBusPort;
-import org.sa.rainbow.core.ports.IGaugeConfigurationPort;
-import org.sa.rainbow.core.ports.IGaugeLifecycleBusPort;
-import org.sa.rainbow.core.ports.IGaugeQueryPort;
-import org.sa.rainbow.core.ports.IMasterCommandPort;
-import org.sa.rainbow.core.ports.IMasterConnectionPort;
-import org.sa.rainbow.core.ports.IModelChangeBusPort;
-import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
-import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
-import org.sa.rainbow.core.ports.IModelDSBusSubscriberPort;
-import org.sa.rainbow.core.ports.IModelUSBusPort;
-import org.sa.rainbow.core.ports.IModelsManagerPort;
-import org.sa.rainbow.core.ports.IProbeConfigurationPort;
-import org.sa.rainbow.core.ports.IProbeLifecyclePort;
-import org.sa.rainbow.core.ports.IProbeReportPort;
-import org.sa.rainbow.core.ports.IProbeReportSubscriberPort;
-import org.sa.rainbow.core.ports.IRainbowAdaptationDequeuePort;
-import org.sa.rainbow.core.ports.IRainbowAdaptationEnqueuePort;
-import org.sa.rainbow.core.ports.IRainbowConnectionPortFactory;
-import org.sa.rainbow.core.ports.IRainbowReportingPort;
-import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort;
+import org.sa.rainbow.core.ports.*;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReportingSubscriberCallback;
 import org.sa.rainbow.translator.effectors.IEffector;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort;
 import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
 import org.sa.rainbow.translator.probes.IProbe;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
 
@@ -74,15 +52,19 @@ public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
      * Singleton instance
      */
     private static IRainbowConnectionPortFactory       m_instance;
+    @NotNull
     Map<String, LocalMasterSideManagementPort>         m_masterPorts             = new HashMap<> ();
     LocalMasterConnectionPort                          m_masterConnectionPort;
+    @NotNull
     Map<String, LocalDelegateManagementPort>           m_delegatePorts           = new HashMap<> ();
+    @NotNull
     Map<String, LocalDelegateConnectionPort>           m_delegateConnectionPorts = new HashMap<> ();
     private LocalModelsManagerUSPort                   m_localModelsManagerUSPort;
+    @NotNull
     private Map<String, LocalModelsManagerClientUSPort> m_mmClientUSPorts         = new HashMap<> ();
 
     private LocalRainbowPortFactory () {
-    };
+    }
 
     @Override
     public IDelegateManagementPort createMasterSideManagementPort (RainbowMaster rainbowMaster,
@@ -133,7 +115,7 @@ public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
     }
 
     @Override
-    public AbstractDelegateConnectionPort createDelegateSideConnectionPort (RainbowDelegate delegate) {
+    public AbstractDelegateConnectionPort createDelegateSideConnectionPort (@NotNull RainbowDelegate delegate) {
         LocalDelegateConnectionPort ldcp = m_delegateConnectionPorts.get (delegate.getId ());
         if (ldcp == null) {
             try {
@@ -167,7 +149,7 @@ public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
     }
 
     @Override
-    public IModelUSBusPort createModelsManagerClientUSPort (Identifiable client)
+    public IModelUSBusPort createModelsManagerClientUSPort (@NotNull Identifiable client)
             throws RainbowConnectionException {
         LocalModelsManagerClientUSPort port = m_mmClientUSPorts.get (client.id ());
         if (port == null) {
@@ -178,29 +160,34 @@ public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
         return port;
     }
 
+    @NotNull
     @Override
     public IGaugeLifecycleBusPort createGaugeSideLifecyclePort () throws RainbowConnectionException {
         throw new UnsupportedOperationException ("NYS");
     }
 
+    @NotNull
     @Override
     public IModelChangeBusPort createChangeBusAnnouncePort () throws RainbowConnectionException {
         throw new UnsupportedOperationException ("NYS");
 
     }
 
+    @NotNull
     @Override
     public IGaugeLifecycleBusPort createManagerGaugeLifecyclePort (IGaugeLifecycleBusPort manager) {
         throw new UnsupportedOperationException ("NYS");
 
     }
 
+    @NotNull
     @Override
     public IGaugeConfigurationPort createGaugeConfigurationPortClient (IGaugeIdentifier gauge)
             throws RainbowConnectionException {
         throw new UnsupportedOperationException ("NYS");
     }
 
+    @NotNull
     @Override
     public IGaugeQueryPort createGaugeQueryPortClient (IGaugeIdentifier gauge)
             throws RainbowConnectionException {
@@ -208,23 +195,27 @@ public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
 
     }
 
+    @NotNull
     @Override
     public IGaugeConfigurationPort createGaugeConfigurationPort (IGauge gauge) throws RainbowConnectionException {
         throw new UnsupportedOperationException ("NYS");
     }
 
+    @NotNull
     @Override
     public IGaugeQueryPort createGaugeQueryPort (IGauge gauge) throws RainbowConnectionException {
         throw new UnsupportedOperationException ("NYS");
 
     }
 
+    @NotNull
     @Override
     public IProbeReportPort createProbeReportingPortSender (IProbe probe) throws RainbowConnectionException {
         throw new UnsupportedOperationException ("NYS");
 
     }
 
+    @NotNull
     @Override
     public IProbeConfigurationPort createProbeConfigurationPort (Identifiable probe, IProbeConfigurationPort callback)
             throws RainbowConnectionException {
@@ -232,6 +223,7 @@ public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
 
     }
 
+    @NotNull
     @Override
     public IDelegateConfigurationPort createDelegateConfigurationPort (RainbowDelegate rainbowDelegate)
             throws RainbowConnectionException {
@@ -239,6 +231,7 @@ public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
 
     }
 
+    @NotNull
     @Override
     public IDelegateConfigurationPort createDelegateConfigurationPortClient (String delegateID)
             throws RainbowConnectionException {
@@ -246,12 +239,14 @@ public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
 
     }
 
+    @NotNull
     @Override
     public IProbeLifecyclePort createProbeManagementPort (IProbe probe) throws RainbowConnectionException {
         throw new UnsupportedOperationException ("NYS");
 
     }
 
+    @NotNull
     @Override
     public IProbeReportSubscriberPort createProbeReportingPortSubscriber (IProbeReportPort callback)
             throws RainbowConnectionException {
@@ -259,12 +254,14 @@ public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
 
     }
 
+    @NotNull
     @Override
     public IEffectorLifecycleBusPort createEffectorSideLifecyclePort () throws RainbowConnectionException {
         throw new UnsupportedOperationException ("NYS");
 
     }
 
+    @NotNull
     @Override
     public IEffectorLifecycleBusPort createSubscriberSideEffectorLifecyclePort (IEffectorLifecycleBusPort delegate)
             throws RainbowConnectionException {
@@ -272,24 +269,28 @@ public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
 
     }
 
+    @NotNull
     @Override
     public IEffectorExecutionPort createEffectorExecutionPort (IEffector effector) throws RainbowConnectionException {
         throw new UnsupportedOperationException ("NYS");
 
     }
 
+    @NotNull
     @Override
     public IEffectorExecutionPort createEffectorExecutionPort (IEffectorIdentifier effector)
             throws RainbowConnectionException {
         throw new UnsupportedOperationException ("NYS");
     }
 
+    @NotNull
     @Override
     public IRainbowReportingPort createMasterReportingPort () throws RainbowConnectionException {
         throw new UnsupportedOperationException ("NYS");
 
     }
 
+    @NotNull
     @Override
     public IModelChangeBusSubscriberPort createModelChangeBusSubscriptionPort ()
             throws RainbowConnectionException {
@@ -297,6 +298,7 @@ public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
 
     }
 
+    @NotNull
     @Override
     public IRainbowReportingSubscriberPort createReportingSubscriberPort (IRainbowReportingSubscriberCallback reportT)
             throws RainbowConnectionException {
@@ -305,18 +307,21 @@ public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
     }
 
 
+    @NotNull
     @Override
     public IModelDSBusPublisherPort createModelDSPublishPort (Identifiable id) throws RainbowConnectionException {
         throw new UnsupportedOperationException ("NYS");
 
     }
 
+    @NotNull
     @Override
     public IModelDSBusSubscriberPort createModelDSubscribePort (Identifiable id) {
         throw new UnsupportedOperationException ("NYS");
 
     }
 
+    @NotNull
     @Override
     public IModelsManagerPort createModelsManagerProviderPort (IModelsManager modelsManager)
             throws RainbowConnectionException {
@@ -324,18 +329,21 @@ public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
 
     }
 
+    @NotNull
     @Override
     public IModelsManagerPort createModeslManagerRequirerPort () throws RainbowConnectionException {
         throw new UnsupportedOperationException ("NYS");
 
     }
 
+    @NotNull
     @Override
     public <S extends IEvaluable> IRainbowAdaptationEnqueuePort<S> createAdaptationEnqueuePort (ModelReference model) {
         throw new UnsupportedOperationException ("NYS");
 
     }
 
+    @NotNull
     @Override
     public <S extends IEvaluable> IRainbowAdaptationDequeuePort<S> createAdaptationDequeuePort (ModelReference model) {
         throw new UnsupportedOperationException ("NYS");

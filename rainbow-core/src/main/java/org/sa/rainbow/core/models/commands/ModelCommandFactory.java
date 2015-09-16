@@ -23,6 +23,11 @@
  */
 package org.sa.rainbow.core.models.commands;
 
+import org.jetbrains.annotations.NotNull;
+import org.sa.rainbow.core.error.RainbowModelException;
+import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelsManager;
+
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -31,14 +36,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.sa.rainbow.core.error.RainbowModelException;
-import org.sa.rainbow.core.models.IModelInstance;
-import org.sa.rainbow.core.models.ModelsManager;
-
 public abstract class ModelCommandFactory<T> {
-    private Class<? extends IModelInstance<T>> m_instanceClass;
-    protected IModelInstance<T>                m_modelInstance;
-    protected Map<String, Class<? extends AbstractRainbowModelOperation<?, T>>> m_commandMap = new HashMap<> ();
+    private final Class<? extends IModelInstance<T>> m_instanceClass;
+    protected final IModelInstance<T> m_modelInstance;
+    protected final Map<String, Class<? extends AbstractRainbowModelOperation<?, T>>> m_commandMap = new HashMap<> ();
 
     /**
      * Is used by the ModelsManager to load a model into Rainbow. The ModelsManager looks for this method through
@@ -54,6 +55,7 @@ public abstract class ModelCommandFactory<T> {
      *            The original source of the model (e.g., its filename)
      * @return Returns the command used by the ModelsManager to load the model
      */
+    @NotNull
     public static AbstractLoadModelCmd<?>
     loadCommand (ModelsManager modelsManager,
             String modelName,
@@ -86,7 +88,7 @@ public abstract class ModelCommandFactory<T> {
      * @throws RainbowModelException
      *             When the commandName cannot be found
      */
-    public IRainbowModelOperation<?, T> generateCommand (String commandName, String... args)
+    public IRainbowModelOperation<?, T> generateCommand (@NotNull String commandName, @NotNull String... args)
             throws RainbowModelException {
         try {
             Class<? extends AbstractRainbowModelOperation<?, T>> cmdClass = m_commandMap
@@ -112,14 +114,10 @@ public abstract class ModelCommandFactory<T> {
             Object[] cargs = new Object[2 + args.length];
             cargs[0] = commandName;
             cargs[1] = m_modelInstance;
-            for (int i = 0; i < args.length; i++) {
-                cargs[2 + i] = args[i];
-            }
-            AbstractRainbowModelOperation<?, T> cmd = constructor.newInstance (cargs/*commandName, m_modelInstance.getModelInstance (),
+            System.arraycopy (args, 0, cargs, 2, args.length);
+            return constructor.newInstance (cargs/*commandName, m_modelInstance.getModelInstance (),
                                                                                     args*/);
-            return cmd;
-        }
-        catch (SecurityException | NoSuchMethodException | InstantiationException | IllegalAccessException
+        } catch (@NotNull SecurityException | NoSuchMethodException | InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException e) {
             throw new RainbowModelException ("Cannot create a command for the commandName: " + commandName);
         }

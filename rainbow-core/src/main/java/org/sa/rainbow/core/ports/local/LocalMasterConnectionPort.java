@@ -23,10 +23,10 @@
  */
 package org.sa.rainbow.core.ports.local;
 
-import java.io.IOException;
-
 import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.ports.AbstractMasterConnectionPort;
+
+import java.io.IOException;
 
 final class LocalMasterConnectionPort extends AbstractMasterConnectionPort {
 
@@ -46,7 +46,7 @@ final class LocalMasterConnectionPort extends AbstractMasterConnectionPort {
 
     @Override
     public void disconnectDelegate (String delegateId) {
-//        m_connectedPort.disconnectDelegate (delegateId);
+        m_connectedPort.disconnectDelegate (delegateId);
     }
 
 }

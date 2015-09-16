@@ -23,9 +23,10 @@
  */
 package org.sa.rainbow.core.ports;
 
-import java.util.Properties;
-
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Properties;
 
 /**
  * Represents a deployment port that is not connected to either a master or a delegate. Any calls will log an error.
@@ -35,10 +36,12 @@ import org.apache.log4j.Logger;
  */
 public class DisconnectedRainbowManagementPort implements IDelegateManagementPort {
 
-    Logger                                   LOGGER     = Logger.getLogger (DisconnectedRainbowManagementPort.class);
+    private final Logger
+            LOGGER = Logger.getLogger (DisconnectedRainbowManagementPort.class);
 
-    static DisconnectedRainbowManagementPort m_instance = new DisconnectedRainbowManagementPort ();
+    private static final DisconnectedRainbowManagementPort m_instance = new DisconnectedRainbowManagementPort ();
 
+    @NotNull
     public static IDelegateManagementPort instance () {
         return m_instance;
     }
@@ -46,6 +49,7 @@ public class DisconnectedRainbowManagementPort implements IDelegateManagementPor
     private DisconnectedRainbowManagementPort () {
     }
 
+    @NotNull
     @Override
     public String getDelegateId () {
         LOGGER.error ("Attempt to get the delegate of a disconnected deployment port");

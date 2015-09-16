@@ -23,24 +23,28 @@
  */
 package org.sa.rainbow.core.gauges;
 
-import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.util.HashCodeUtil;
 
+import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class OperationRepresentation implements IRainbowOperation, Cloneable {
 
-    private String[] m_parameters;
-    private String   m_target;
-    private String   m_operationName;
+    private final String[] m_parameters;
+    private final String m_target;
+    private final String m_operationName;
+    @Nullable
     private ModelReference m_modelRef;
     private String   m_origin;
 
+    @NotNull
     @Override
     public String toString () {
         return MessageFormat.format ("O[{0}:{1}/{2}.{3}({4}){5}]", m_modelRef.getModelName (),
@@ -48,12 +52,10 @@ public class OperationRepresentation implements IRainbowOperation, Cloneable {
                 m_parameters == null ? "" : Arrays.toString (m_parameters), m_origin == null ? "" : ("<" + m_origin));
     }
 
-    public OperationRepresentation (IRainbowOperation cmd) {
+    public OperationRepresentation (@NotNull IRainbowOperation cmd) {
         m_parameters = new String[cmd.getParameters ().length];
         String[] parameters = cmd.getParameters ();
-        for (int i = 0; i < parameters.length; i++) {
-            m_parameters[i] = parameters[i];
-        }
+        System.arraycopy (parameters, 0, m_parameters, 0, parameters.length);
         m_target = cmd.getTarget ();
         m_operationName = cmd.getName ();
         m_modelRef = new ModelReference (cmd.getModelReference ());
@@ -61,7 +63,7 @@ public class OperationRepresentation implements IRainbowOperation, Cloneable {
 
     }
 
-    public OperationRepresentation (String name, ModelReference modelRef, String target,
+    public OperationRepresentation (String name, @Nullable ModelReference modelRef, String target,
             String... parameters) {
         m_operationName = name;
         m_modelRef = modelRef == null ? null : new ModelReference (modelRef);
@@ -86,12 +88,14 @@ public class OperationRepresentation implements IRainbowOperation, Cloneable {
         return m_operationName;
     }
 
+    @Nullable
     @Override
     public ModelReference getModelReference () {
         return new ModelReference (m_modelRef);
     }
 
 
+    @NotNull
     @Override
     protected OperationRepresentation clone () throws CloneNotSupportedException {
         return (OperationRepresentation )super.clone ();
@@ -131,7 +135,7 @@ public class OperationRepresentation implements IRainbowOperation, Cloneable {
         m_modelRef = new ModelReference (modelRef);
     }
 
-    void setModel (TypedAttribute modelRef) {
+    void setModel (@NotNull TypedAttribute modelRef) {
         m_modelRef = new ModelReference (modelRef.getName (), modelRef.getType ());
     }
 
@@ -140,10 +144,10 @@ public class OperationRepresentation implements IRainbowOperation, Cloneable {
         m_origin = o;
     }
 
-    static Pattern pattern = Pattern
+    static final Pattern pattern = Pattern
             .compile ("\\\"?(([\\w\\$\\<\\>\\\"\\.]+)\\.)?(\\w+)\\s*\\(([\\w, \\.{}\\$\\<\\>\\\"]*)\\)\\\"?");
 
-    public static OperationRepresentation parseCommandSignature (String commandSignature) {
+    public static OperationRepresentation parseCommandSignature (@NotNull String commandSignature) {
         Matcher matcher = pattern.matcher (commandSignature);
         if (matcher.find ()) {
             String target = matcher.group (2);
@@ -153,9 +157,8 @@ public class OperationRepresentation implements IRainbowOperation, Cloneable {
             if (unprocessedParams != null) {
                 parameters = unprocessedParams.split ("\\s*,\\s*");
             }
-            OperationRepresentation rep = new OperationRepresentation (commandName, null, target,
+            return new OperationRepresentation (commandName, null, target,
                     parameters);
-            return rep;
         }
         return null;
     }

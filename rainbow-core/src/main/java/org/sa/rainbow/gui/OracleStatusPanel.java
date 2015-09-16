@@ -23,31 +23,27 @@
  */
 package org.sa.rainbow.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.FlowLayout;
+import org.jetbrains.annotations.NotNull;
+
+import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
+import java.awt.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.BorderFactory;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.border.Border;
-import javax.swing.border.LineBorder;
-
 public class OracleStatusPanel extends JPanel {
 
-    private JTextArea    m_textArea;
+    @NotNull
+    private final JTextArea m_textArea;
 
     static final Pattern NO_HEARTBEAT = Pattern.compile ("\\[ERROR\\]: No Heartbeat from (.*)@(.*)");
     static final Pattern HEARTBEAT    = Pattern.compile ("\\[INFO\\]: Heartbeat from (.*)@(.*)");
 
+    @NotNull
     Map<String, JLabel>  labels       = new HashMap<> ();
 
     private JPanel       m_statusPane;
@@ -55,7 +51,7 @@ public class OracleStatusPanel extends JPanel {
     /**
      * Create the panel.
      */
-    public OracleStatusPanel (Color color, List<String> delegates) {
+    public OracleStatusPanel (Color color, @NotNull List<String> delegates) {
         setLayout (new BorderLayout (0, 0));
 
         m_statusPane = new JPanel ();
@@ -90,14 +86,14 @@ public class OracleStatusPanel extends JPanel {
         expectedDelegates (delegates);
     }
 
-    public void expectedDelegates (List<String> locations) {
+    public void expectedDelegates (@NotNull List<String> locations) {
         for (String loc : locations) {
             JLabel label = getDelegateLabel (null, loc);
             label.setBorder (new LineBorder (Color.black));
         }
     }
 
-    public void report (String report, boolean nl) {
+    public void report (@NotNull String report, boolean nl) {
         Matcher noHB = NO_HEARTBEAT.matcher (report);
         if (noHB.matches ()) {
             String did = noHB.group (1);

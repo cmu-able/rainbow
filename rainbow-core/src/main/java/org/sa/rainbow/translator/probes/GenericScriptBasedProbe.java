@@ -26,16 +26,14 @@
  */
 package org.sa.rainbow.translator.probes;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.util.RainbowLogger;
 import org.sa.rainbow.util.Util;
+
+import java.io.*;
 
 /**
  * This class defines a probe that's implemented in a shell/Perl script.
@@ -48,7 +46,7 @@ public class GenericScriptBasedProbe extends AbstractProbe implements IBashBased
 
     public class StreamGobbler extends Thread {
 
-        private InputStream m_inputStream;
+        private final InputStream m_inputStream;
 
         public StreamGobbler (InputStream inputStream) {
             m_inputStream = inputStream;
@@ -71,8 +69,11 @@ public class GenericScriptBasedProbe extends AbstractProbe implements IBashBased
 
     }
 
+    @Nullable
     private String m_path = null;
+    @Nullable
     private String m_params = null;
+    @Nullable
     private Process m_process = null;
     private boolean m_continual;
 
@@ -83,7 +84,7 @@ public class GenericScriptBasedProbe extends AbstractProbe implements IBashBased
      * @param path   the path to the script
      * @param paramStr  the parameters to supply as arguments to the script
      */
-    public GenericScriptBasedProbe (String refID, String alias, String path, String paramStr) {
+    public GenericScriptBasedProbe (@NotNull String refID, String alias, String path, String paramStr) {
         super(refID, alias, Kind.SCRIPT);
 
         m_path = path;

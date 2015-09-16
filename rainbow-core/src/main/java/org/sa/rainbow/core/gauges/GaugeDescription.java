@@ -26,6 +26,8 @@
  */
 package org.sa.rainbow.core.gauges;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedMap;
@@ -39,21 +41,24 @@ import java.util.TreeMap;
  */
 public class GaugeDescription {
 
+    @Nullable
     public SortedMap<String,GaugeTypeDescription> typeSpec = null;
+    @Nullable
     public SortedMap<String,GaugeInstanceDescription> instSpec = null;
 
     /**
      * Default Constructor.
      */
     public GaugeDescription() {
-        typeSpec = new TreeMap<String,GaugeTypeDescription>();
-        instSpec = new TreeMap<String,GaugeInstanceDescription>();
+        typeSpec = new TreeMap<> ();
+        instSpec = new TreeMap<> ();
     }
 
+    @Nullable
     public List<GaugeInstanceDescription> instDescList () {
         List<GaugeInstanceDescription> instSpecs = null;
         synchronized (instSpec) {
-            instSpecs = new ArrayList<GaugeInstanceDescription>(instSpec.values());
+            instSpecs = new ArrayList<> (instSpec.values ());
         }
         return instSpecs;
     }
