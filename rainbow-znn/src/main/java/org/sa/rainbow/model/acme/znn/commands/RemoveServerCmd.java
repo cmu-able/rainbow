@@ -23,21 +23,16 @@
  */
 package org.sa.rainbow.model.acme.znn.commands;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.acmestudio.acme.ModelHelper;
-import org.acmestudio.acme.element.IAcmeAttachment;
-import org.acmestudio.acme.element.IAcmeComponent;
-import org.acmestudio.acme.element.IAcmeConnector;
-import org.acmestudio.acme.element.IAcmePort;
-import org.acmestudio.acme.element.IAcmeRole;
-import org.acmestudio.acme.element.IAcmeSystem;
+import org.acmestudio.acme.element.*;
 import org.acmestudio.acme.model.IAcmeCommandFactory;
 import org.acmestudio.acme.model.command.IAcmeCommand;
 import org.acmestudio.acme.model.command.IAcmeComponentDeleteCommand;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Removes the a server from the model, and deletes any binary connectors that are connected to it
@@ -49,8 +44,8 @@ public class RemoveServerCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
 
     private IAcmeComponentDeleteCommand m_deleteServerCmd;
 
-    public RemoveServerCmd (String commandName, AcmeModelInstance model, String server) {
-        super (commandName, model, server, new String[0]);
+    public RemoveServerCmd (AcmeModelInstance model, String server) {
+        super ("removeServer", model, server);
     }
 
     @Override
@@ -85,9 +80,9 @@ public class RemoveServerCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
         IAcmeCommandFactory cf = getModel ().getCommandFactory ();
         if (server == null) throw new RainbowModelException ("Cannot delete unknown server " + getTarget ());
         IAcmeSystem system = ModelHelper.getAcmeSystem (server);
-        List<IAcmeConnector> connectorsToRemove = new LinkedList<IAcmeConnector> ();
-        List<IAcmeRole> rolesToRemove = new LinkedList<IAcmeRole> ();
-        List<IAcmePort> portsToRemove = new LinkedList<IAcmePort> ();
+        List<IAcmeConnector> connectorsToRemove = new LinkedList<> ();
+        List<IAcmeRole> rolesToRemove = new LinkedList<> ();
+        List<IAcmePort> portsToRemove = new LinkedList<> ();
         for (IAcmePort port : server.getPorts ()) {
             for (IAcmeAttachment att : system.getAttachments (port)) {
                 IAcmeConnector conn = (IAcmeConnector )att.getRole ().getParent ();

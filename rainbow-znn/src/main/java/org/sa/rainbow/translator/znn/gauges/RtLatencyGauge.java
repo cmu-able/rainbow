@@ -26,20 +26,16 @@
  */
 package org.sa.rainbow.translator.znn.gauges;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.RegularPatternGauge;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.translator.znn.probes.PingRTTProbe;
+
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Gauge for computing roundtrip latency of N KB data using Ping RTT data (PingRTTProbe).
@@ -73,7 +69,7 @@ public class RtLatencyGauge extends RegularPatternGauge {
                     throws RainbowException {
         super (NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
 
-        m_history = new LinkedList<Double> ();
+        m_history = new LinkedList<> ();
 
         addPattern (DEFAULT, Pattern.compile ("\\[(.+)\\]\\s+(.+?):([0-9.]+)[/]([0-9.]+)[/]([0-9.]+)"));
 

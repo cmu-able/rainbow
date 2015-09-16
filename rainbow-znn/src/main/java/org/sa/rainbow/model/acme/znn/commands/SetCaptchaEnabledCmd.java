@@ -26,10 +26,6 @@ e shall be included in
  */
 package org.sa.rainbow.model.acme.znn.commands;
 
-import java.text.MessageFormat;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.acmestudio.acme.PropertyHelper;
 import org.acmestudio.acme.core.type.IAcmeBooleanValue;
 import org.acmestudio.acme.element.IAcmeComponent;
@@ -38,6 +34,10 @@ import org.acmestudio.acme.model.command.IAcmeCommand;
 import org.acmestudio.acme.model.command.IAcmePropertyCommand;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
+
+import java.text.MessageFormat;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * This commands sets the model property indicating whether captcha is enabled.
@@ -48,16 +48,13 @@ import org.sa.rainbow.model.acme.AcmeModelInstance;
 public class SetCaptchaEnabledCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
 
     /**
-     * 
-     * @param commandName
-     * @param model
+     *  @param model
      * @param target
      *            The load balancer to set the property on
      * @param enabled
-     *            "true" if captcha is enabled, "false" otherwise
      */
-    public SetCaptchaEnabledCmd (String commandName, AcmeModelInstance model, String target, String enabled) {
-        super (commandName, model, target, enabled);
+    public SetCaptchaEnabledCmd (AcmeModelInstance model, String target, String enabled) {
+        super ("setCaptchaEnabled", model, target, enabled);
     }
 
     @Override

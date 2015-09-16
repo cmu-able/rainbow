@@ -26,20 +26,15 @@
  */
 package org.sa.rainbow.translator.znn.gauges;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.RegularPatternGauge;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
+
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Gauge for estimating end-to-end response time of a server request, as
@@ -70,8 +65,8 @@ public class End2EndRespTimeGauge extends RegularPatternGauge {
             Map<String, IRainbowOperation> mappings) throws RainbowException {
         super (NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
 
-        m_historyMap = new HashMap<String, Queue<Double>> ();
-        m_cumulationMap = new HashMap<String, Double> ();
+        m_historyMap = new HashMap<> ();
+        m_cumulationMap = new HashMap<> ();
 
         addPattern (DEFAULT, Pattern.compile ("\\[(.+)\\]<(.+)>\\s+(.+?):([0-9.]+)ms"));
     }

@@ -23,10 +23,6 @@
  */
 package org.sa.rainbow.model.acme.znn.commands;
 
-import java.text.MessageFormat;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.acmestudio.acme.PropertyHelper;
 import org.acmestudio.acme.element.IAcmeComponent;
 import org.acmestudio.acme.element.property.IAcmeProperty;
@@ -36,11 +32,15 @@ import org.acmestudio.acme.model.command.IAcmePropertyCommand;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 
+import java.text.MessageFormat;
+import java.util.LinkedList;
+import java.util.List;
+
 public class SetMaliciousnessCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
 
-    public SetMaliciousnessCmd (String commandName, AcmeModelInstance model, String target,
-            String maliciousness) {
-        super (commandName, model, target, maliciousness);
+    public SetMaliciousnessCmd (AcmeModelInstance model, String target,
+                                String maliciousness) {
+        super ("setMaliciousness", model, target, maliciousness);
     }
 
     @Override

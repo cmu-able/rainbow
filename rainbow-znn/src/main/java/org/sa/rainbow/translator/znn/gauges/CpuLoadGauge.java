@@ -26,19 +26,15 @@
  */
 package org.sa.rainbow.translator.znn.gauges;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.RegularPatternGauge;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
+
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Gauge for consuming CPU load monitoring output.
@@ -71,7 +67,7 @@ public class CpuLoadGauge extends RegularPatternGauge {
 
         super(NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
 
-        m_history = new LinkedList<Double>();
+        m_history = new LinkedList<> ();
 
         addPattern(DEFAULT, Pattern.compile("\\[(.+)\\]\\s+([0-9.]+)\\s+([0-9.]+)\\s+([0-9.]+)\\s+([0-9.]+)(\\s+([0-9.]+))?"));
 
@@ -113,7 +109,7 @@ public class CpuLoadGauge extends RegularPatternGauge {
                 m_reportingPort.trace (getComponentType (), "Updating server prop using load = " + tLoad);
                 // ZNewsSys.s0.load
                 IRainbowOperation cmd = getCommand (valueNames[0]);
-                Map<String, String> pMap = new HashMap<String, String> ();
+                Map<String, String> pMap = new HashMap<> ();
                 pMap.put (cmd.getParameters ()[0], Double.toString (tLoad));
                 issueCommand (cmd, pMap);
             }

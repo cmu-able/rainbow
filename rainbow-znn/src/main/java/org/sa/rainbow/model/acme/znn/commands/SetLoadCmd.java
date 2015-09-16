@@ -23,9 +23,6 @@
  */
 package org.sa.rainbow.model.acme.znn.commands;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.acmestudio.acme.PropertyHelper;
 import org.acmestudio.acme.element.IAcmeComponent;
 import org.acmestudio.acme.element.property.IAcmeProperty;
@@ -34,13 +31,16 @@ import org.acmestudio.acme.model.command.IAcmePropertyCommand;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public class SetLoadCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
 
     private String m_server;
     private float          m_load;
 
-    public SetLoadCmd (String commandName, AcmeModelInstance model, String server, String load) {
-        super (commandName, model, server, load);
+    public SetLoadCmd (AcmeModelInstance model, String server, String load) {
+        super ("setLoad", model, server, load);
         m_server = server;
         m_load = Float.valueOf (load);
     }

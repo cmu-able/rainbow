@@ -1,27 +1,17 @@
 package org.sa.rainbow.model.acme.znn.commands;
 
-import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
 import org.acmestudio.acme.ModelHelper;
 import org.acmestudio.acme.core.type.IAcmeStringValue;
 import org.acmestudio.acme.element.IAcmeComponent;
 import org.acmestudio.acme.element.property.IAcmeProperty;
 import org.acmestudio.acme.model.IAcmeCommandFactory;
-import org.acmestudio.acme.model.command.IAcmeAttachmentCommand;
-import org.acmestudio.acme.model.command.IAcmeCommand;
-import org.acmestudio.acme.model.command.IAcmeComponentCreateCommand;
-import org.acmestudio.acme.model.command.IAcmeConnectorCreateCommand;
-import org.acmestudio.acme.model.command.IAcmePortCreateCommand;
-import org.acmestudio.acme.model.command.IAcmePropertyCreateCommand;
+import org.acmestudio.acme.model.command.*;
 import org.acmestudio.acme.model.util.core.UMStringValue;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
+
+import java.text.MessageFormat;
+import java.util.*;
 
 /**
  * Creates a new client at the IP indicated, if it doesn't already exist
@@ -31,10 +21,10 @@ import org.sa.rainbow.model.acme.AcmeModelInstance;
  */
 public class AddClientCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
 
-    private static final List<String> HTTP_PORT     = Arrays.asList ("HttpPortT");
-    private static final List<String> HTTP_CONN     = Arrays.asList ("HttpConnT");
-    private static final List<String> HTTP_REQ_PORT = Arrays.asList ("HttpReqPortT");
-    private static final List<String> CLIENT_COMP   = Arrays.asList ("ZNewsClientT");
+    private static final List<String> HTTP_PORT = Collections.singletonList ("HttpPortT");
+    private static final List<String> HTTP_CONN = Collections.singletonList ("HttpConnT");
+    private static final List<String> HTTP_REQ_PORT = Collections.singletonList ("HttpReqPortT");
+    private static final List<String> CLIENT_COMP = Collections.singletonList ("ZNewsClientT");
 
     private IAcmeComponent              m_client;
     private String                      m_lb;
@@ -42,18 +32,14 @@ public class AddClientCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
     private IAcmeComponentCreateCommand m_clientCmd;
 
     /**
-     * 
-     * @param commandName
-     *            The name for the command
-     * @param model
+     *  @param model
      *            The model in which the new client may be created
      * @param lb
      *            The load balancer that the client will be attached to
      * @param clientIP
-     *            The IP of the client to create
      */
-    public AddClientCmd (String commandName, AcmeModelInstance model, String sys, String lb, String clientIP) {
-        super (commandName, model, sys, lb, clientIP);
+    public AddClientCmd (AcmeModelInstance model, String sys, String lb, String clientIP) {
+        super ("addClient", model, sys, lb, clientIP);
         m_lb = lb;
         m_clientIP = clientIP;
     }
@@ -132,7 +118,7 @@ public class AddClientCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
 
         }
         else
-            return Collections.<IAcmeCommand<?>> emptyList ();
+            return Collections.emptyList ();
     }
 
 }

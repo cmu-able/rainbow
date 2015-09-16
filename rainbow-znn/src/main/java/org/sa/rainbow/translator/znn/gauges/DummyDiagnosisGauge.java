@@ -23,15 +23,6 @@
  */
 package org.sa.rainbow.translator.znn.gauges;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.acmestudio.acme.PropertyHelper;
 import org.acmestudio.acme.element.IAcmeComponent;
 import org.acmestudio.acme.element.IAcmeSystem;
@@ -52,6 +43,10 @@ import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class DummyDiagnosisGauge extends RegularPatternGauge {
 
     IModelsManagerPort m_modelPort;
@@ -63,7 +58,7 @@ public class DummyDiagnosisGauge extends RegularPatternGauge {
             Object target = message.getProperty (IModelChangeBusPort.TARGET_PROP);
             if (target instanceof String && property instanceof String) {
                 Boolean captchaEnabled = Boolean.valueOf ((String )property);
-                IModelInstance<IAcmeSystem> model = m_modelPort.<IAcmeSystem> getModelInstance (mr);
+                IModelInstance<IAcmeSystem> model = m_modelPort.getModelInstance (mr);
                 IAcmeSystem system = model.getModelInstance ();
                 Set<? extends IAcmeComponent> components = system.getComponents ();
                 Set<IAcmeComponent> maliciousComponents = new HashSet<> ();
@@ -126,9 +121,8 @@ public class DummyDiagnosisGauge extends RegularPatternGauge {
 
             @Override
             public boolean matches (IRainbowMessage message) {
-                boolean b = message.getPropertyNames ().contains (IModelChangeBusPort.COMMAND_PROP)
+                return message.getPropertyNames ().contains (IModelChangeBusPort.COMMAND_PROP)
                         && message.getProperty (IModelChangeBusPort.COMMAND_PROP).equals ("setCaptchaEnabled");
-                return b;
             }
 
         }, new CaptchaWatcher ());

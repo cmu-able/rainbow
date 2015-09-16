@@ -23,17 +23,17 @@
  */
 package org.sa.rainbow.translator.znn.gauges;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.RegularPatternGauge;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ThrottleGauge extends RegularPatternGauge {
 
@@ -60,7 +60,7 @@ public class ThrottleGauge extends RegularPatternGauge {
 
             // Send the list of attackers
             int c = m.groupCount ();
-            StringBuffer ips = new StringBuffer ();
+            StringBuilder ips = new StringBuilder ();
 //          String[] ips = new String[c];
             for (int i = 0; i < c; i++) {
 //              ips[i] = m.group(i + 1);
@@ -72,7 +72,7 @@ public class ThrottleGauge extends RegularPatternGauge {
             if (doReport (ips.toString ())) {
                 recordLastReport (ips.toString ());
                 IRainbowOperation cmd = m_commands.values ().iterator ().next ();
-                Map<String, String> pm = new HashMap<String, String> ();
+                Map<String, String> pm = new HashMap<> ();
                 pm.put (cmd.getParameters ()[0], ips.toString ());
                 issueCommand (cmd, pm);
 
@@ -83,7 +83,7 @@ public class ThrottleGauge extends RegularPatternGauge {
             if (doReport ("")) {
                 recordLastReport ("");
                 IRainbowOperation cmd = m_commands.values ().iterator ().next ();
-                Map<String, String> pm = new HashMap<String, String> ();
+                Map<String, String> pm = new HashMap<> ();
                 pm.put (cmd.getParameters ()[0], "");
                 issueCommand (cmd, pm);
             }
@@ -91,9 +91,7 @@ public class ThrottleGauge extends RegularPatternGauge {
     }
 
     private void recordLastReport (String report) {
-        synchronized (lastReport) {
             lastReport = report;
-        }
     }
 
     private boolean doReport (String report) {

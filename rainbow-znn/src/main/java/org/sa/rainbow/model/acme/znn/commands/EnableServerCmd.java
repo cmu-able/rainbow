@@ -23,10 +23,6 @@
  */
 package org.sa.rainbow.model.acme.znn.commands;
 
-import java.text.MessageFormat;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.acmestudio.acme.PropertyHelper;
 import org.acmestudio.acme.element.IAcmeComponent;
 import org.acmestudio.acme.element.property.IAcmeProperty;
@@ -35,6 +31,10 @@ import org.acmestudio.acme.model.command.IAcmeCommand;
 import org.acmestudio.acme.model.command.IAcmePropertyCommand;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
+
+import java.text.MessageFormat;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * A class representing the Acme command to enable a server in Znn. Currently, this is modeled by setting the property
@@ -46,8 +46,8 @@ import org.sa.rainbow.model.acme.AcmeModelInstance;
 public class EnableServerCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
 
     // Target is the server to enable, enable is whether to set it as enabled or not "true" or "false"
-    public EnableServerCmd (String commandName, AcmeModelInstance model, String target, String enable) {
-        super (commandName, model, target, enable);
+    public EnableServerCmd (AcmeModelInstance model, String target, String enable) {
+        super ("enableServer", model, target, enable);
     }
 
     /**

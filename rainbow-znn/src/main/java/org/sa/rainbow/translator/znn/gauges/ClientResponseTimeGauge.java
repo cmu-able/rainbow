@@ -1,18 +1,5 @@
 package org.sa.rainbow.translator.znn.gauges;
 
-import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Queue;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.acmestudio.acme.model.event.AcmeModelEventType;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
@@ -28,6 +15,12 @@ import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.model.acme.AcmeModelOperation;
 import org.sa.rainbow.model.acme.AcmeRainbowOperationEvent.CommandEventT;
+
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Gauge monitors Apache log information for the %D log entry (response time in microseconds)
@@ -169,7 +162,7 @@ public class ClientResponseTimeGauge extends RegularPatternGauge {
     Map<String, Double>        m_cumulationMap = new HashMap<> ();
     Map<String, Long>          m_lastReport    = new HashMap<> ();
 
-    Queue<IRainbowOperation>   m_ops    = new LinkedList<> ();
+    final Queue<IRainbowOperation> m_ops = new LinkedList<> ();
     Queue<Map<String, String>> m_params = new LinkedList<> ();
 
     public ClientResponseTimeGauge (String id, long beaconPeriod, TypedAttribute gaugeDesc, TypedAttribute modelDesc,

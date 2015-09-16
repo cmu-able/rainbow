@@ -23,12 +23,6 @@
  */
 package org.sa.rainbow.model.acme.znn.commands;
 
-import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.acmestudio.acme.PropertyHelper;
 import org.acmestudio.acme.element.IAcmeComponent;
 import org.acmestudio.acme.element.property.IAcmeProperty;
@@ -37,6 +31,12 @@ import org.acmestudio.acme.model.command.IAcmeCommand;
 import org.acmestudio.acme.model.command.IAcmePropertyCommand;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
+
+import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * This command sets the blackholed property of the load balancer with the ips of the clients that are blackholed (or
@@ -48,16 +48,13 @@ import org.sa.rainbow.model.acme.AcmeModelInstance;
 public class SetBlackholedCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
 
     /**
-     * 
-     * @param commandName
-     * @param model
+     *  @param model
      * @param target
      *            the load balancer
      * @param ipSet
-     *            the comma separated set of IP addresses
      */
-    public SetBlackholedCmd (String commandName, AcmeModelInstance model, String target, String ipSet) {
-        super (commandName, model, target, ipSet);
+    public SetBlackholedCmd (AcmeModelInstance model, String target, String ipSet) {
+        super ("setBlackholed", model, target, ipSet);
     }
 
     @Override

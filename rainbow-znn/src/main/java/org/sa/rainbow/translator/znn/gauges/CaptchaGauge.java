@@ -23,6 +23,12 @@
  */
 package org.sa.rainbow.translator.znn.gauges;
 
+import org.sa.rainbow.core.error.RainbowException;
+import org.sa.rainbow.core.gauges.RegularPatternGauge;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
+import org.sa.rainbow.core.util.TypedAttribute;
+import org.sa.rainbow.core.util.TypedAttributeWithValue;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,12 +36,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.sa.rainbow.core.error.RainbowException;
-import org.sa.rainbow.core.gauges.RegularPatternGauge;
-import org.sa.rainbow.core.models.commands.IRainbowOperation;
-import org.sa.rainbow.core.util.TypedAttribute;
-import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
 public class CaptchaGauge extends RegularPatternGauge {
     public static final String    NAME       = "G - Captcha Enablement";
@@ -58,7 +58,7 @@ public class CaptchaGauge extends RegularPatternGauge {
     protected void doMatch (String matchName, Matcher m) {
         boolean captchaOn = ON.equals (matchName);
         IRainbowOperation cmd = m_commands.values ().iterator ().next ();
-        Map<String, String> pMap = new HashMap<String, String> ();
+        Map<String, String> pMap = new HashMap<> ();
         pMap.put (cmd.getParameters ()[0], Boolean.toString (captchaOn));
         if (captchaOn) {
             issueCommand (cmd, pMap);

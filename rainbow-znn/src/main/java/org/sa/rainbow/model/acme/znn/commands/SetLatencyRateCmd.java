@@ -23,9 +23,6 @@
  */
 package org.sa.rainbow.model.acme.znn.commands;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.acmestudio.acme.PropertyHelper;
 import org.acmestudio.acme.element.IAcmeConnector;
 import org.acmestudio.acme.element.property.IAcmeProperty;
@@ -34,13 +31,16 @@ import org.acmestudio.acme.model.command.IAcmePropertyCommand;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public class SetLatencyRateCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
 
     private String m_httpConn;
     private double m_latencyRate;
 
-    public SetLatencyRateCmd (String commandName, AcmeModelInstance model, String conn, String latencyRate) {
-        super (commandName, model, conn, latencyRate);
+    public SetLatencyRateCmd (AcmeModelInstance model, String conn, String latencyRate) {
+        super ("setLatency", model, conn, latencyRate);
         m_httpConn = conn;
         m_latencyRate = Double.valueOf (latencyRate);
     }

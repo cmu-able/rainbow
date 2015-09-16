@@ -23,12 +23,6 @@
  */
 package org.sa.rainbow.model.acme.znn.commands;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.acmestudio.acme.core.exception.AcmeException;
 import org.acmestudio.acme.core.exception.AcmeVisitorException;
 import org.acmestudio.acme.core.resource.IAcmeResource;
@@ -49,11 +43,17 @@ import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd;
 import org.sa.rainbow.model.acme.znn.ZNNModelUpdateOperatorsImpl;
 import org.sa.rainbow.util.Util;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.LinkedList;
+import java.util.List;
+
 public class ZNNLoadModelCommand extends AbstractLoadModelCmd<IAcmeSystem> {
 
     public class AcmePropertySubstitutionVisitor extends AbstractAcmeElementVisitor {
 
-        protected List<IAcmeCommand<?>> m_commands = new LinkedList<IAcmeCommand<?>> ();
+        protected List<IAcmeCommand<?>> m_commands = new LinkedList<> ();
 
         public IAcmeCommand getCommand () {
             if (m_commands.isEmpty ()) return null;

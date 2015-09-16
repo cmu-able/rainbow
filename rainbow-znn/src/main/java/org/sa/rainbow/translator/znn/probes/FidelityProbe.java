@@ -23,13 +23,13 @@
  */
 package org.sa.rainbow.translator.znn.probes;
 
+import org.sa.rainbow.translator.probes.AbstractRunnableProbe;
+import org.sa.rainbow.util.Util;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-
-import org.sa.rainbow.translator.probes.AbstractRunnableProbe;
-import org.sa.rainbow.util.Util;
 
 public class FidelityProbe extends AbstractRunnableProbe {
 
@@ -65,7 +65,7 @@ public class FidelityProbe extends AbstractRunnableProbe {
             catch (InterruptedException e) {
             }
 
-            StringBuffer rpt = new StringBuffer ();
+            StringBuilder rpt = new StringBuilder ();
             String fidelity = "high";
             try (BufferedReader in = new BufferedReader (new InputStreamReader (new FileInputStream (m_fidelityFile)))) {
                 line = in.readLine ();

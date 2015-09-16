@@ -23,12 +23,6 @@
  */
 package org.sa.rainbow.translator.znn.probes;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
@@ -36,6 +30,12 @@ import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.util.RainbowLogger;
 import org.sa.rainbow.translator.probes.AbstractRunnableProbe;
 import org.sa.rainbow.util.Util;
+
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A Java Probe that uses the available external "ping" program to compute
@@ -87,7 +87,7 @@ public class PingRTTProbe extends AbstractRunnableProbe {
         // compose the ping command
         boolean isWin = false;
         String[] pingCmd = null;
-        if (System.getProperty("os.name").indexOf("Window") > -1) {
+        if (System.getProperty ("os.name").contains ("Window")) {
             pingCmd = PING_WIN32;
             isWin = true;
         } else {
@@ -135,7 +135,7 @@ public class PingRTTProbe extends AbstractRunnableProbe {
                         tallyError();
                         continue;
                     }
-                    StringBuffer buf = new StringBuffer();
+                    StringBuilder buf = new StringBuilder ();
                     byte[] bytes = new byte[Util.MAX_BYTES];
                     BufferedInputStream bis = new BufferedInputStream(p.getInputStream());
                     while (bis.available() > 0) {

@@ -1,24 +1,24 @@
 package org.sa.rainbow.model.acme.znn.commands;
 
-import java.text.MessageFormat;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.acmestudio.acme.element.IAcmeComponent;
 import org.acmestudio.acme.element.property.IAcmeProperty;
 import org.acmestudio.acme.model.command.IAcmeCommand;
 import org.acmestudio.acme.model.command.IAcmePropertyCommand;
-import org.acmestudio.acme.model.util.core.UMFloatValue;
+import org.acmestudio.acme.model.util.core.UMFloatingPointValue;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
+
+import java.text.MessageFormat;
+import java.util.LinkedList;
+import java.util.List;
 
 public class SetClientRequestRateCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
 
     private String m_client;
     private Float  m_reqRate;
 
-    public SetClientRequestRateCmd (String cmdName, AcmeModelInstance model, String client, String reqRate) {
-        super (cmdName, model, client, reqRate);
+    public SetClientRequestRateCmd (AcmeModelInstance model, String client, String reqRate) {
+        super ("setClientRequestRate", model, client, reqRate);
         m_client = client;
         m_reqRate = Float.valueOf (reqRate);
     }
@@ -34,7 +34,7 @@ public class SetClientRequestRateCmd extends ZNNAcmeModelCommand<IAcmeProperty> 
         if (client == null)
             throw new RainbowModelException (MessageFormat.format ("Could not find client ''{0}'' in model", m_client));
         m_command = client.getCommandFactory ().propertyValueSetCommand (client.getProperty ("reqRate"),
-                new UMFloatValue (m_reqRate));
+                new UMFloatingPointValue (m_reqRate));
         List<IAcmeCommand<?>> cmds = new LinkedList<> ();
         cmds.add (m_command);
         return cmds;

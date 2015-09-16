@@ -26,22 +26,17 @@
  */
 package org.sa.rainbow.translator.znn.gauges;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.RegularPatternGauge;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Gauge for aggregating Disk IO probe monitoring output.  This gauge keeps a
@@ -89,7 +84,7 @@ public class DiskIOGauge extends RegularPatternGauge {
 
         super(NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
 
-        m_history = new LinkedList<Double[]>();
+        m_history = new LinkedList<> ();
         m_cumulations = new Double[valueNames.length];
         for (int i=0; i < valueNames.length; ++i) {
             m_cumulations[i] = 0.0;
@@ -183,7 +178,7 @@ public class DiskIOGauge extends RegularPatternGauge {
                     if (m_commands.containsKey (valueNames[i])) {
                         // ZNewsSys.s0.<vName>, if "vName" exists in mapping
                         IRainbowOperation cmd = getCommand (valueNames[i]);
-                        Map<String, String> pMap = new HashMap<String, String> ();
+                        Map<String, String> pMap = new HashMap<> ();
                         pMap.put (cmd.getParameters ()[0], Double.toString (values[i]));
                         issueCommand (cmd, pMap);
                     }

@@ -26,10 +26,6 @@ otice shall be included in
  */
 package org.sa.rainbow.model.acme.znn.commands;
 
-import java.text.MessageFormat;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.acmestudio.acme.PropertyHelper;
 import org.acmestudio.acme.core.type.IAcmeIntValue;
 import org.acmestudio.acme.element.IAcmeComponent;
@@ -39,13 +35,17 @@ import org.acmestudio.acme.model.command.IAcmePropertyCommand;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 
+import java.text.MessageFormat;
+import java.util.LinkedList;
+import java.util.List;
+
 public class SetFidelityCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
 
     private String m_server;
     private int    m_fidelity;
 
-    public SetFidelityCmd (String commandName, AcmeModelInstance model, String server, String fidelity) {
-        super (commandName, model, server, fidelity);
+    public SetFidelityCmd (AcmeModelInstance model, String server, String fidelity) {
+        super ("setFidelity", model, server, fidelity);
         m_server = server;
         m_fidelity = Integer.valueOf (fidelity);
     }

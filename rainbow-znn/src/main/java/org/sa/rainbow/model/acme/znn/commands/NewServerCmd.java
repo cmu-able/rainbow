@@ -23,23 +23,17 @@
  */
 package org.sa.rainbow.model.acme.znn.commands;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.acmestudio.acme.ModelHelper;
 import org.acmestudio.acme.element.IAcmeComponent;
 import org.acmestudio.acme.model.IAcmeCommandFactory;
-import org.acmestudio.acme.model.command.IAcmeAttachmentCommand;
-import org.acmestudio.acme.model.command.IAcmeCommand;
-import org.acmestudio.acme.model.command.IAcmeComponentCreateCommand;
-import org.acmestudio.acme.model.command.IAcmeConnectorCreateCommand;
-import org.acmestudio.acme.model.command.IAcmePortCreateCommand;
-import org.acmestudio.acme.model.command.IAcmePropertyCommand;
-import org.acmestudio.acme.model.command.IAcmePropertyCreateCommand;
+import org.acmestudio.acme.model.command.*;
 import org.acmestudio.acme.model.util.core.UMStringValue;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
+
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Creates a new server in Znn and attaches it to the indicated load balancer
@@ -49,13 +43,13 @@ import org.sa.rainbow.model.acme.AcmeModelInstance;
  */
 public class NewServerCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
 
-    private static final List<String>   SERVER_TYPE        = Arrays.asList ("ServerT");
+    private static final List<String> SERVER_TYPE = Collections.singletonList ("ServerT");
 
-    private static final List<String>   HTTP_CONN_T        = Arrays.asList ("ProxyConnT");
+    private static final List<String> HTTP_CONN_T = Collections.singletonList ("ProxyConnT");
 
-    private static final List<String>   PROXY_FORWARD_PORT = Arrays.asList ("ProxyForwardPortT");
+    private static final List<String> PROXY_FORWARD_PORT = Collections.singletonList ("ProxyForwardPortT");
 
-    private static final List<String>   HTTP_PORT          = Arrays.asList ("HttpPortT");
+    private static final List<String> HTTP_PORT = Collections.singletonList ("HttpPortT");
 
     private String                      m_name;
     public String                       m_lb;

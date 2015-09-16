@@ -23,18 +23,18 @@
  */
 package org.sa.rainbow.translator.znn.probes;
 
+import org.apache.log4j.Logger;
+import org.sa.rainbow.core.RainbowComponentT;
+import org.sa.rainbow.core.util.RainbowLogger;
+import org.sa.rainbow.translator.probes.AbstractRunnableProbe;
+import org.sa.rainbow.util.Util;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.log4j.Logger;
-import org.sa.rainbow.core.RainbowComponentT;
-import org.sa.rainbow.core.util.RainbowLogger;
-import org.sa.rainbow.translator.probes.AbstractRunnableProbe;
-import org.sa.rainbow.util.Util;
 
 public class ThrottleProbe extends AbstractRunnableProbe {
 
@@ -82,12 +82,12 @@ public class ThrottleProbe extends AbstractRunnableProbe {
             catch (InterruptedException e) {
 
             }
-            StringBuffer rpt = new StringBuffer ();
+            StringBuilder rpt = new StringBuilder ();
             boolean reportingThrottle = false;
             if (new File (m_throttleConfFile).exists ()) {
                 try (BufferedReader in = new BufferedReader (new InputStreamReader (new FileInputStream (
                         m_throttleConfFile)))) {
-                    StringBuffer clients = new StringBuffer ();
+                    StringBuilder clients = new StringBuilder ();
                     while ((line = in.readLine ()) != null) {
                         Matcher m = pattern.matcher (line);
                         if (m.find ()) {

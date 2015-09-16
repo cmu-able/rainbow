@@ -23,23 +23,17 @@
  */
 package org.sa.rainbow.translator.znn.probes;
 
+import org.sa.rainbow.translator.probes.AbstractRunnableProbe;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardWatchEventKinds;
-import java.nio.file.WatchEvent;
-import java.nio.file.WatchKey;
-import java.nio.file.WatchService;
+import java.nio.file.*;
 import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-
-import org.sa.rainbow.translator.probes.AbstractRunnableProbe;
 
 public class ServerEnablementProbe extends AbstractRunnableProbe {
     private static final String PROBE_TYPE = "enablementprobe";
@@ -102,7 +96,7 @@ public class ServerEnablementProbe extends AbstractRunnableProbe {
                                 }
                                 // oldIPs now contains IPs that are no longer active
                                 // ipsInFile now contains IPs that are new
-                                StringBuffer report = new StringBuffer ();
+                                StringBuilder report = new StringBuilder ();
                                 if (!oldIPs.isEmpty ()) {
                                     for (String ip : oldIPs) {
                                         report.append ("f ");

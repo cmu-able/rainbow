@@ -26,21 +26,16 @@
  */
 package org.sa.rainbow.translator.znn.gauges;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.RegularPatternGauge;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.translator.znn.probes.PingRTTProbe;
+
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Gauge for computing rate of change of roundtrip latency for N KB data using
@@ -84,11 +79,11 @@ public class RtLatencyRateMultiHostGauge extends RegularPatternGauge {
 
         super(NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
 
-        m_historyMap = new HashMap<String,Queue<Double>>();
-        m_cumulationMap = new HashMap<String,Double>();
-        m_offsetCumulationMap = new HashMap<String,Double>();
-        m_rateHistMap = new HashMap<String,Queue<Double>>();
-        m_rateCumuMap = new HashMap<String,Double>();
+        m_historyMap = new HashMap<> ();
+        m_cumulationMap = new HashMap<> ();
+        m_offsetCumulationMap = new HashMap<> ();
+        m_rateHistMap = new HashMap<> ();
+        m_rateCumuMap = new HashMap<> ();
 
         addPattern(DEFAULT, Pattern.compile("\\[(.+)\\]\\s+(.+?):([0-9.]+)[/]([0-9.]+)[/]([0-9.]+)"));
     }

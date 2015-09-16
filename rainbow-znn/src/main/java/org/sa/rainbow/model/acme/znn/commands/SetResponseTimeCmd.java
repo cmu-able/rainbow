@@ -23,10 +23,6 @@
  */
 package org.sa.rainbow.model.acme.znn.commands;
 
-import java.text.MessageFormat;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.acmestudio.acme.PropertyHelper;
 import org.acmestudio.acme.element.IAcmeComponent;
 import org.acmestudio.acme.element.property.IAcmeProperty;
@@ -35,13 +31,17 @@ import org.acmestudio.acme.model.command.IAcmePropertyCommand;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 
+import java.text.MessageFormat;
+import java.util.LinkedList;
+import java.util.List;
+
 public class SetResponseTimeCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
 
     private String m_client;
     private float          m_responseTime;
 
-    public SetResponseTimeCmd (String commandName, AcmeModelInstance model, String client, String rt) {
-        super (commandName, model, client, rt);
+    public SetResponseTimeCmd (AcmeModelInstance model, String client, String rt) {
+        super ("setResponseTime", model, client, rt);
         m_client = client;
         m_responseTime = Float.valueOf (rt);
     }

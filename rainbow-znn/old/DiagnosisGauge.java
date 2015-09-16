@@ -1,30 +1,26 @@
-package org.sa.rainbow.transaltor.znn.gauges;
+package org.sa.rainbow.translator.znn.gauges;
+
+import edu.cmu.cs.able.typelib.type.DataType;
+import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowComponentT;
+import org.sa.rainbow.core.error.RainbowException;
+import org.sa.rainbow.core.gauges.AbstractGauge;
+import org.sa.rainbow.core.gauges.CommandRepresentation;
+import org.sa.rainbow.core.gauges.OperationRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
+import org.sa.rainbow.core.util.TypedAttribute;
+import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.sa.rainbow.core.Rainbow;
-import org.sa.rainbow.core.error.RainbowException;
-import org.sa.rainbow.core.gauges.AbstractGauge;
-import org.sa.rainbow.core.gauges.CommandRepresentation;
-import org.sa.rainbow.core.models.commands.IRainbowModelCommandRepresentation;
-import org.sa.rainbow.core.util.TypedAttribute;
-import org.sa.rainbow.core.util.TypedAttributeWithValue;
-
-import edu.cmu.cs.able.typelib.type.DataType;
 
 public class DiagnosisGauge extends AbstractGauge {
 
@@ -50,7 +46,7 @@ public class DiagnosisGauge extends AbstractGauge {
     private List<RequestData> m_requests;
 
     public DiagnosisGauge (String id, long beaconPeriod, TypedAttribute gaugeDesc, TypedAttribute modelDesc,
-            List<TypedAttributeWithValue> setupParams, Map<String, IRainbowModelCommandRepresentation> mappings)
+            List<TypedAttributeWithValue> setupParams, Map<String, IRainbowOperation> mappings)
                     throws IOException, RainbowException {
         super(NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams,
                 mappings);
@@ -73,13 +69,6 @@ public class DiagnosisGauge extends AbstractGauge {
                 }
             }
         }).start();
-    }
-
-    @Override
-    protected void initProperty(String name, Object value) {
-        /*
-         * Nothing to do... yet.
-         */
     }
 
     @Override
@@ -108,7 +97,7 @@ public class DiagnosisGauge extends AbstractGauge {
             String msg = MessageFormat
                     .format("{0}: No parameter ''{1}'' found. Diagnosis gauge won''t report anything useful.",
                             this.id(), CLIENTS_CONFIG_PARAM_NAME);
-            getReportingPort ().error (msg);
+            getReportingPort ().error (RainbowComponentT.GAUGE,msg);
             m_configured = false;
         } else {
             String[] client_defs = clients_param.split(",");
@@ -119,7 +108,7 @@ public class DiagnosisGauge extends AbstractGauge {
                     String msg = MessageFormat
                             .format("{0}: Invalid client configuration ignored: ''{1}''.",
                                     this.id(), s);
-                    getReportingPort ().error (msg);
+                    getReportingPort ().error (RainbowComponentT.GAUGE,msg);
                 } else {
                     String name = m.group(1);
                     String value = m.group(2);
@@ -196,9 +185,12 @@ public class DiagnosisGauge extends AbstractGauge {
              */
             List<TypedAttributeWithValue> toSend = new ArrayList<TypedAttributeWithValue> ();
             for (Entry<String, Double> e : r.maliciousness.entrySet()) {
-                IRainbowModelCommandRepresentation cmd = m_commands.get (0);
+                IRainbowOperation cmd = m_commands.get (0);
                 Map<String, String> pMap = new HashMap<> ();
-                CommandRepresentation crep = new CommandRepresentation (cmd.getLabel (), cmd.getCommandName (),
+                OperationRepresentation crep = new OperationRepresentation (cmd.getName (), cmd.getModelReference (), cmd.getTarget ()
+
+
+                        cmd.getName (), cmd.getCommandName (),
                         cmd.getModelName (), cmd.getModelType (), e.getKey (), cmd.getParameters ());
                 pMap.put (cmd.getParameters ()[0], Double.toString (e.getValue ()));
                 issueCommand (crep, pMap);

@@ -26,17 +26,17 @@
  */
 package org.sa.rainbow.translator.znn.gauges;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.RegularPatternGauge;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Gauge for consuming Apache Top's monitoring output.
@@ -126,12 +126,12 @@ public class ApacheTopGauge extends RegularPatternGauge {
                         + "," + numReqs + "," + numBytes + ")");
                 // ZNewsSys.s0.reqServiceRate
                 IRainbowOperation reqServiceRateCmd = getCommand (valueNames[0]);
-                Map<String, String> pMap = new HashMap<String, String> ();
+                Map<String, String> pMap = new HashMap<> ();
                 pMap.put (reqServiceRateCmd.getParameters ()[0], Double.toString ((double )numReqs / numSecs));
                 issueCommand (reqServiceRateCmd, pMap);
                 // ZNewsSys.s0.byteServiceRate
                 IRainbowOperation byteServiceRateCmd = getCommand (valueNames[0]);
-                pMap = new HashMap<String, String> ();
+                pMap = new HashMap<> ();
                 pMap.put (reqServiceRateCmd.getParameters ()[0], Double.toString (numBytes / numSecs));
                 issueCommand (byteServiceRateCmd, pMap);
             }
@@ -147,19 +147,19 @@ public class ApacheTopGauge extends RegularPatternGauge {
                 // ZNewsSys.conn0.numReqsSuccess
 
                 IRainbowOperation numReqsSuccessCmd = getCommand (valueNames[2]);
-                Map<String, String> pMap = new HashMap<String, String> ();
+                Map<String, String> pMap = new HashMap<> ();
                 pMap.put (numReqsSuccessCmd.getParameters ()[0], Integer.toString (num2x));
                 issueCommand (numReqsSuccessCmd, pMap);
                 IRainbowOperation numReqsRedirect = getCommand (valueNames[3]);
-                pMap = new HashMap<String, String> ();
+                pMap = new HashMap<> ();
                 pMap.put (numReqsRedirect.getParameters ()[0], Integer.toString (num3x));
                 issueCommand (numReqsRedirect, pMap);
                 IRainbowOperation numReqsClientError = getCommand (valueNames[4]);
-                pMap = new HashMap<String, String> ();
+                pMap = new HashMap<> ();
                 pMap.put (numReqsClientError.getParameters ()[0], Integer.toString (num4x));
                 issueCommand (numReqsClientError, pMap);
                 IRainbowOperation numReqsServerError = getCommand (valueNames[5]);
-                pMap = new HashMap<String, String> ();
+                pMap = new HashMap<> ();
                 pMap.put (numReqsServerError.getParameters ()[0], Integer.toString (num5x));
                 issueCommand (numReqsServerError, pMap);
 
@@ -176,7 +176,7 @@ public class ApacheTopGauge extends RegularPatternGauge {
                     + "; kbytes:float=" + kB + "; ]";
 
             IRainbowOperation lastPageHit = getCommand (valueNames[6]);
-            Map<String, String> pMap = new HashMap<String, String> ();
+            Map<String, String> pMap = new HashMap<> ();
             pMap.put (lastPageHit.getParameters ()[0], hitStr);
             issueCommand (lastPageHit, pMap);
         }

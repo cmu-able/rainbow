@@ -1,11 +1,5 @@
 package org.sa.rainbow.translator.znn.gauges;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.gauges.AbstractGauge;
@@ -19,6 +13,8 @@ import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.model.acme.AcmeRainbowOperationEvent.CommandEventT;
 import org.sa.rainbow.translator.znn.gauges.ClientResponseTimeGauge.ModelBasedSubscription;
+
+import java.util.*;
 
 public class RequestRateBasedMaliciousnessGauge extends AbstractGauge {
 
@@ -59,7 +55,7 @@ public class RequestRateBasedMaliciousnessGauge extends AbstractGauge {
     static final String[] commandNames = { "setMaliciousness" };
 
     /* Both these queues should be synchronized */
-    Queue<IRainbowOperation>   m_ops        = new LinkedList<> ();
+    final Queue<IRainbowOperation> m_ops = new LinkedList<> ();
     Queue<Map<String, String>> m_parameters = new LinkedList<> ();
 
     public RequestRateBasedMaliciousnessGauge (String id, long beaconPeriod, TypedAttribute gaugeDesc,
@@ -88,15 +84,23 @@ public class RequestRateBasedMaliciousnessGauge extends AbstractGauge {
         super.runAction ();
         IRainbowOperation cmd = null;
         Map<String, String> params = null;
+        List<IRainbowOperation> cmds = new LinkedList<> ();
+        List<Map<String, String>> pms = new LinkedList<> ();
         synchronized (m_ops) {
             cmd = m_ops.poll ();
             if (cmd != null) {
-                params = m_parameters.poll ();
+                cmds.add (cmd);
+                pms.add (m_parameters.poll ());
+                while ((cmd = m_ops.poll ()) != null) {
+                    cmds.add (cmd);
+                    pms.add (m_parameters.poll ());
+                }
             }
         }
-        if (cmd != null) {
-            issueCommand (cmd, params);
+        if (!cmds.isEmpty ()) {
+            issueCommands (cmds, pms);
         }
+
     }
 
     // This gauge listens to changes to the property request rate on clients
@@ -119,15 +123,8 @@ public class RequestRateBasedMaliciousnessGauge extends AbstractGauge {
                 IRainbowOperation cmd = getCommand (commandNames[0]);
                 Map<String, String> pm = new HashMap<> ();
                 pm.put (cmd.getTarget (), client);
+                currentMaliciousness = isMaliciousRate (reqRate) ? 1.0f : 0.0f;
 
-                if (isMaliciousRate (reqRate) && currentMaliciousness != 1) {
-                    // setMaliciousness (1.0)
-                    currentMaliciousness = 1.0f;
-                }
-                else {
-                    // setMaliciousness (0)
-                    currentMaliciousness = 0f;
-                }
                 if (!m_maliciousnessMap.get (client).equals (currentMaliciousness)) {
                     pm.put (cmd.getParameters ()[0], currentMaliciousness.toString ());
                     m_maliciousnessMap.put (client, currentMaliciousness);

@@ -23,9 +23,6 @@
  */
 package org.sa.rainbow.model.acme.znn.commands;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.acmestudio.acme.PropertyHelper;
 import org.acmestudio.acme.core.type.IAcmeIntValue;
 import org.acmestudio.acme.element.IAcmeComponent;
@@ -35,6 +32,9 @@ import org.acmestudio.acme.model.command.IAcmePropertyCommand;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * This command sets whether a client has responded to an authentication request.
  * 
@@ -43,8 +43,8 @@ import org.sa.rainbow.model.acme.AcmeModelInstance;
  */
 public class SetAuthenticationResponseCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
 
-    public SetAuthenticationResponseCmd (String name, AcmeModelInstance modelInstance, String client, String response) {
-        super (name, modelInstance, client, response);
+    public SetAuthenticationResponseCmd (AcmeModelInstance modelInstance, String client, String response) {
+        super ("setAuthenticationResponse", modelInstance, client, response);
     }
 
     @Override
