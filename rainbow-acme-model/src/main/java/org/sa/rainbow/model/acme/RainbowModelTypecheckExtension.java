@@ -31,9 +31,9 @@ import org.acmestudio.acme.core.extension.IAcmeElementExtension;
  * @author Bradley Schmerl: schmerl
  * 
  */
-public class RainbowModelTypecheckExtension implements IAcmeElementExtension {
+class RainbowModelTypecheckExtension implements IAcmeElementExtension {
 
-    protected boolean m_typechecks;
+    private final boolean m_typechecks;
 
     public RainbowModelTypecheckExtension (boolean typechecks) {
         m_typechecks = typechecks;

@@ -23,13 +23,6 @@
  */
 package org.sa.rainbow.effectors.acme;
 
-import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
 import org.acmestudio.acme.ModelHelper;
 import org.acmestudio.acme.element.IAcmeElementInstance;
 import org.acmestudio.acme.element.IAcmeSystem;
@@ -43,6 +36,9 @@ import org.sa.rainbow.translator.effectors.EffectorManager;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 import org.sa.rainbow.util.Util;
 
+import java.text.MessageFormat;
+import java.util.*;
+
 /**
  * An effector manager that deals with operations intended for Acme models. It assumes: 1. That commands are Acme
  * commands 2. That the target of a command refers to an Acme object
@@ -52,7 +48,7 @@ import org.sa.rainbow.util.Util;
  * @author Bradley Schmerl: schmerl
  * 
  */
-public class AcmeEffectorManager extends EffectorManager {
+class AcmeEffectorManager extends EffectorManager {
 
     public AcmeEffectorManager () {
         super ("Acme Global Effector Manager");
@@ -92,7 +88,7 @@ public class AcmeEffectorManager extends EffectorManager {
                         if (!effectors.isEmpty ()) {
                             OperationResult result = new OperationResult ();
                             result.result = Result.SUCCESS;
-                            StringBuffer errMsg = new StringBuffer ();
+                            StringBuilder errMsg = new StringBuilder ();
                             for (EffectorAttributes ea : effectors) {
                                 Outcome outcome = executeEffector (ea.name, ea.getLocation(), cmd.getParameters ());
                                 if (outcome != Outcome.SUCCESS) {
@@ -157,13 +153,12 @@ public class AcmeEffectorManager extends EffectorManager {
                 args[i] = resolveAcmeReference (args[i], ami);
             }
         }
-        OperationRepresentation or = new OperationRepresentation (cmd.getName (), cmd.getModelReference (), target,
+        return new OperationRepresentation (cmd.getName (), cmd.getModelReference (), target,
                 args);
-        return or;
 
     }
 
-    String resolveAcmeReference (String target, AcmeModelInstance ami) {
+    private String resolveAcmeReference (String target, AcmeModelInstance ami) {
         try {
             Object modelObject = ami.resolveInModel (target, Object.class);
             if (modelObject instanceof IAcmeElementInstance) {

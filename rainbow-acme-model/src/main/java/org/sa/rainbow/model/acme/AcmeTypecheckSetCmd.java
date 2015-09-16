@@ -23,21 +23,21 @@
  */
 package org.sa.rainbow.model.acme;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.acmestudio.acme.core.extension.IAcmeElementExtension;
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.acmestudio.acme.model.command.IAcmeCommand;
 import org.acmestudio.acme.model.command.IAcmeUserDataCommand;
 import org.sa.rainbow.core.error.RainbowModelException;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public class AcmeTypecheckSetCmd extends AcmeModelOperation<IAcmeElementExtension> {
 
-    private Boolean m_typechecks;
+    private final Boolean m_typechecks;
 
-    public AcmeTypecheckSetCmd (String commandName, AcmeModelInstance model, String target, String typechecks) {
-        super (commandName, model, target, typechecks);
+    public AcmeTypecheckSetCmd (AcmeModelInstance model, String typechecks) {
+        super ("setTypecheckResult", model, "self", typechecks);
         m_typechecks = Boolean.valueOf (typechecks);
     }
 

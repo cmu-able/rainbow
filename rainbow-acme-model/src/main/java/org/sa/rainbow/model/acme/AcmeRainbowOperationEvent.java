@@ -29,17 +29,17 @@ import org.sa.rainbow.core.models.commands.IRainbowOperation;
 
 public class AcmeRainbowOperationEvent extends AcmeEvent {
 
-    public static enum CommandEventT {
+    public enum CommandEventT {
         START_COMMAND, FINISH_COMMAND, START_UNDO_COMMAND, FINISH_UNDO_COMMAND, LOAD_MODEL;
 
         public boolean isEnd () {
             return this == FINISH_COMMAND || this == FINISH_UNDO_COMMAND;
         }
 
-    };
+    }
 
-    private IRainbowOperation m_rep;
-    private CommandEventT                      m_event;
+    private final IRainbowOperation m_rep;
+    private final CommandEventT m_event;
 
     public CommandEventT getEventType () {
         return m_event;

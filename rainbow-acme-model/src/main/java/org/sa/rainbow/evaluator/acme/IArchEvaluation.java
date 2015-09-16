@@ -23,6 +23,6 @@
  */
 package org.sa.rainbow.evaluator.acme;
 
-public interface IArchEvaluation {
-    public void modelChanged (IArchEvaluator evaluator);
+interface IArchEvaluation {
+    void modelChanged (IArchEvaluator evaluator);
 }

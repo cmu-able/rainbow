@@ -23,26 +23,11 @@
  */
 package org.sa.rainbow.model.acme;
 
-import java.util.ConcurrentModificationException;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
 import org.acmestudio.acme.core.IAcmeNamedObject;
 import org.acmestudio.acme.core.resource.RegionManager;
 import org.acmestudio.acme.element.IAcmeElementInstance;
 import org.acmestudio.acme.element.IAcmeElementTypeRef;
-import org.acmestudio.acme.model.event.AcmeAttachmentEvent;
-import org.acmestudio.acme.model.event.AcmeBindingEvent;
-import org.acmestudio.acme.model.event.AcmeComponentEvent;
-import org.acmestudio.acme.model.event.AcmeConnectorEvent;
-import org.acmestudio.acme.model.event.AcmeEvent;
-import org.acmestudio.acme.model.event.AcmeGroupEvent;
-import org.acmestudio.acme.model.event.AcmePortEvent;
-import org.acmestudio.acme.model.event.AcmePropertyEvent;
-import org.acmestudio.acme.model.event.AcmeRoleEvent;
+import org.acmestudio.acme.model.event.*;
 import org.acmestudio.standalone.resource.StandaloneLanguagePackHelper;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
@@ -50,14 +35,16 @@ import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 import org.sa.rainbow.core.ports.eseb.ESEBConstants;
 
+import java.util.*;
+
 /**
  * Serializes Acme events as Rainbow events.
  * 
  * @author Bradley Schmerl: schmerl
  * 
  */
-public class AcmeEventSerializer {
-    public void serialize (AcmeEvent event, IRainbowMessage msg, IRainbowMessage parent) {
+class AcmeEventSerializer {
+    private void serialize (AcmeEvent event, IRainbowMessage msg, IRainbowMessage parent) {
         if (event instanceof AcmeAttachmentEvent) {
             serialize ((AcmeAttachmentEvent )event, msg, parent);
         }
@@ -88,7 +75,7 @@ public class AcmeEventSerializer {
 
     }
 
-    public void serialize (AcmeRainbowOperationEvent event, IRainbowMessage msg, IRainbowMessage parent) {
+    private void serialize (AcmeRainbowOperationEvent event, IRainbowMessage msg, IRainbowMessage parent) {
 
         try {
             addCommonProperties (event, msg, parent);
@@ -122,7 +109,7 @@ public class AcmeEventSerializer {
         }
     }
 
-    public void serialize (AcmeAttachmentEvent event, IRainbowMessage msg, IRainbowMessage parent) {
+    private void serialize (AcmeAttachmentEvent event, IRainbowMessage msg, IRainbowMessage parent) {
         try {
             addCommonProperties (event, msg, parent);
             msg.setProperty (AcmeModelOperation.PORT_PROP, event.getAttachment ().getReferencedPortName ());
@@ -135,7 +122,7 @@ public class AcmeEventSerializer {
         }
     }
 
-    public void serialize (AcmeBindingEvent event, IRainbowMessage msg, IRainbowMessage parent) {
+    private void serialize (AcmeBindingEvent event, IRainbowMessage msg, IRainbowMessage parent) {
         try {
             addCommonProperties (event, msg, parent);
             msg.setProperty (AcmeModelOperation.OUTER_PROP, event.getBinding ().getOuterReference ().getReferencedName ());
@@ -149,7 +136,7 @@ public class AcmeEventSerializer {
 
     }
 
-    public void serialize (AcmeComponentEvent event, IRainbowMessage msg, IRainbowMessage parent) {
+    private void serialize (AcmeComponentEvent event, IRainbowMessage msg, IRainbowMessage parent) {
         try {
             addCommonProperties (event, msg, parent);
             msg.setProperty (AcmeModelOperation.COMPONENT_PROP, event.getComponent ().getQualifiedName ());
@@ -164,7 +151,7 @@ public class AcmeEventSerializer {
         }
     }
 
-    public void serialize (AcmeConnectorEvent event, IRainbowMessage msg, IRainbowMessage parent) {
+    private void serialize (AcmeConnectorEvent event, IRainbowMessage msg, IRainbowMessage parent) {
         try {
             addCommonProperties (event, msg, parent);
             msg.setProperty (AcmeModelOperation.CONNECTOR_PROP, event.getConnector ().getQualifiedName ());
@@ -179,7 +166,7 @@ public class AcmeEventSerializer {
         }
     }
 
-    public void serialize (AcmeGroupEvent event, IRainbowMessage msg, IRainbowMessage parent) {
+    private void serialize (AcmeGroupEvent event, IRainbowMessage msg, IRainbowMessage parent) {
         try {
             addCommonProperties (event, msg, parent);
             msg.setProperty (AcmeModelOperation.GROUP_PROP, event.getGroup ().getQualifiedName ());
@@ -194,7 +181,7 @@ public class AcmeEventSerializer {
         }
     }
 
-    public void serialize (AcmePortEvent event, IRainbowMessage msg, IRainbowMessage parent) {
+    private void serialize (AcmePortEvent event, IRainbowMessage msg, IRainbowMessage parent) {
         try {
             addCommonProperties (event, msg, parent);
             msg.setProperty (AcmeModelOperation.PORT_PROP, event.getPort ().getQualifiedName ());
@@ -209,7 +196,7 @@ public class AcmeEventSerializer {
         }
     }
 
-    public void serialize (AcmePropertyEvent event, IRainbowMessage msg, IRainbowMessage parent) {
+    private void serialize (AcmePropertyEvent event, IRainbowMessage msg, IRainbowMessage parent) {
         try {
             addCommonProperties (event, msg, parent);
             msg.setProperty (AcmeModelOperation.PROPERTY_PROP, event.getProperty ().getQualifiedName ());
@@ -250,7 +237,7 @@ public class AcmeEventSerializer {
     }
 
 
-    public void serialize (AcmeRoleEvent event, IRainbowMessage msg, IRainbowMessage parent) {
+    private void serialize (AcmeRoleEvent event, IRainbowMessage msg, IRainbowMessage parent) {
 
         try {
             addCommonProperties (event, msg, parent);

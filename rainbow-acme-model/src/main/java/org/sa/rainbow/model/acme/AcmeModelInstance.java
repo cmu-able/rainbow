@@ -23,26 +23,13 @@
  */
 package org.sa.rainbow.model.acme;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.Stack;
-
 import org.acmestudio.acme.ModelHelper;
 import org.acmestudio.acme.PropertyHelper;
 import org.acmestudio.acme.core.exception.AcmeException;
 import org.acmestudio.acme.core.resource.IAcmeLanguageHelper;
 import org.acmestudio.acme.core.resource.RegionManager;
 import org.acmestudio.acme.core.type.IAcmeFloatType;
-import org.acmestudio.acme.core.type.IAcmeFloatValue;
+import org.acmestudio.acme.core.type.IAcmeFloatingPointValue;
 import org.acmestudio.acme.core.type.IAcmeIntType;
 import org.acmestudio.acme.core.type.IAcmeIntValue;
 import org.acmestudio.acme.element.IAcmeComponent;
@@ -75,26 +62,32 @@ import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.util.Util;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.*;
+
 public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
 
-    public Logger                          LOGGER                  = Logger.getLogger (this.getClass ());
-    public static final String             EXP_AVG_KEY             = "[EAvg]";
-    public static final String             PENALTY_KEY             = "[Penalty]";
-    public static final String             EXPR_KEY                = "[EXPR]";
+    private final Logger LOGGER = Logger.getLogger (this.getClass ());
+    private static final String EXP_AVG_KEY = "[EAvg]";
+    private static final String PENALTY_KEY = "[Penalty]";
+    private static final String EXPR_KEY = "[EXPR]";
 
     /** The property identifier for obtaining the deployment location of an element */
-    public static final String             PROPKEY_LOCATION        = "deploymentLocation";
+    private static final String PROPKEY_LOCATION = "deploymentLocation";
     /** The property identifier for determining whether an element is in the architecture or the env't */
-    public static final String             PROPKEY_ARCH_ENABLED    = "isArchEnabled";
-    public static final String             PROPKEY_HTTPPORT        = "httpPort";
+    public static final String PROPKEY_ARCH_ENABLED = "isArchEnabled";
+    private static final String PROPKEY_HTTPPORT = "httpPort";
 
     private IAcmeSystem                    m_system;
     /** Map of qualified name to average values */
-    protected Map<String, Double>          m_propExpAvg            = new HashMap<> ();
+    private final Map<String, Double> m_propExpAvg = new HashMap<> ();
     /** Map of additional, non-model properties */
-    protected Map<String, Double>          m_moreProp              = new HashMap<> ();
-    protected Map<String, IExpressionNode> m_registeredExpressions = new HashMap<> ();
-    private Properties                     m_opMap;
+    private final Map<String, Double> m_moreProp = new HashMap<> ();
+    private final Map<String, IExpressionNode> m_registeredExpressions = new HashMap<> ();
+    private final Properties m_opMap;
     private String                         m_source;
 
     /** Map of paths to IAcmeResources to make sure the same is retrieved */
@@ -111,8 +104,8 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
             fis.close ();
         }
         catch (IOException e) {
-            LOGGER.warn (MessageFormat.format (
-                    "Could not find operator map ''{0}''. Adaptation of this model will fail.", opPath));
+            LOGGER.warn (MessageFormat
+                    .format ("Could not find operator map ''{0}''. Adaptation of this model will fail.", opPath));
         }
 
     }
@@ -150,14 +143,10 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
                     if (parent instanceof IAcmeElementInstance)
                         if (ModelHelper.getAcmeSystem ((IAcmeElementInstance )event.getPropertyBearer ()) == m_system)
                             if (event.getProperty ().getType () instanceof IAcmeFloatType) {
-                                updateExponentialAverage (event.getProperty ().getQualifiedName (),
-                                        Float.valueOf (PropertyHelper.toJavaVal ((IAcmeFloatValue )event.getProperty ()
-                                                .getValue ())));
+                                updateExponentialAverage (event.getProperty ().getQualifiedName (), PropertyHelper.toJavaVal ((IAcmeFloatingPointValue) event.getProperty ().getValue ()));
                             }
                             else if (event.getProperty ().getType () instanceof IAcmeIntType) {
-                                updateExponentialAverage (event.getProperty ().getQualifiedName (),
-                                        Integer.valueOf (PropertyHelper.toJavaVal ((IAcmeIntValue )event.getProperty ()
-                                                .getValue ())));
+                                updateExponentialAverage (event.getProperty ().getQualifiedName (), PropertyHelper.toJavaVal ((IAcmeIntValue) event.getProperty ().getValue ()));
                             }
                 }
                 catch (RainbowAbortException e) {
@@ -177,7 +166,7 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
      * @param id
      * @param val
      */
-    protected void updateExponentialAverage (String id, double val) {
+    private void updateExponentialAverage (String id, double val) {
         double avg = 0.0;
         // retrieve exponential alpha
         double alpha = Rainbow.getProperty (RainbowConstants.PROPKEY_MODEL_ALPHA, .3);
@@ -244,8 +233,8 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
                 }
             }
             catch (IllegalStateException | AcmeException e) {
-                RainbowCopyException exc = new RainbowCopyException (MessageFormat.format (
-                        "Could not copy Acme system {0}", m_system.getName ()));
+                RainbowCopyException exc = new RainbowCopyException (
+                        MessageFormat.format ("Could not copy Acme system {0}", m_system.getName ()));
                 exc.addSuppressed (e);
                 throw exc;
             }
@@ -325,7 +314,7 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
 //                    }
                 }
                 // 3. take the mean over these exp.avg values
-                prop = Double.valueOf (sum / propKeys.size ());
+                prop = sum / propKeys.size ();
             }
             if (LOGGER.isTraceEnabled ()) {
                 LOGGER.trace ("ExpAvg Prop " + id + (dur > 0 ? "(+" + dur + ") " : "") + " requested == " + prop);
@@ -339,8 +328,8 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
             if (expr == null) {
                 int idxStart = EXPR_KEY.length ();
                 String exprStr = id.substring (idxStart);
-                IAcmeLanguageHelper helper = StandaloneResourceProvider.instance ().languageHelperForResource (
-                        getModelInstance ().getContext ());
+                IAcmeLanguageHelper helper = StandaloneResourceProvider.instance ()
+                        .languageHelperForResource (getModelInstance ().getContext ());
                 try {
                     expr = helper.designRuleExpressionFromString (exprStr, new RegionManager ());
                     m_registeredExpressions.put (id, expr);
@@ -379,7 +368,7 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
      * @return the set of qualified property names
      */
     private Set<String> collectInstanceProps (String typeName, String propName) {
-        Set<String> propKeys = new HashSet<String> ();
+        Set<String> propKeys = new HashSet<> ();
         boolean useSatisfies = false;
         if (typeName.startsWith ("!")) {
             typeName = typeName.substring (1);
@@ -392,7 +381,7 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
         // return propKeys;
         // }
         IAcmeSystem sys = getModelInstance ();
-        Set<IAcmeElementInstance<?, ?>> children = new HashSet<IAcmeElementInstance<?, ?>> ();
+        Set<IAcmeElementInstance<?, ?>> children = new HashSet<> ();
         children.addAll (sys.getComponents ());
         children.addAll (sys.getConnectors ());
         children.addAll (sys.getPorts ());
@@ -464,9 +453,8 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
             qname = qname.substring (qname.indexOf ('.') + 1);
         }
         Object resolve = getModelInstance ().lookupName (qname);
-        if (resolve == null || !(clazz.isInstance (resolve)))
-            throw new RainbowModelException (MessageFormat.format ("Cannot find the ''{0}'' in the model as a {1}",
-                    qname, clazz.getName ()));
+        if (resolve == null || !(clazz.isInstance (resolve))) throw new RainbowModelException (
+                MessageFormat.format ("Cannot find the ''{0}'' in the model as a {1}", qname, clazz.getName ()));
 
         @SuppressWarnings ("unchecked")
         T lb = (T )resolve;

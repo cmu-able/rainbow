@@ -23,41 +23,6 @@
  */
 package org.sa.rainbow.model.acme.eseb;
 
-import incubator.pval.Ensure;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
-import org.acmestudio.acme.core.exception.AcmeVisitorException;
-import org.acmestudio.acme.core.resource.IAcmeResource;
-import org.acmestudio.acme.core.resource.ParsingFailureException;
-import org.acmestudio.acme.core.resource.datapersistence.UserDataIOVisitor;
-import org.acmestudio.acme.element.IAcmeSystem;
-import org.acmestudio.acme.model.IAcmeModel;
-import org.acmestudio.armani.ArmaniExportVisitor;
-import org.acmestudio.standalone.resource.StandaloneResourceProvider;
-import org.sa.rainbow.model.acme.AcmeModelInstance;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
-
 import edu.cmu.cs.able.typelib.jconv.TypelibJavaConversionRule;
 import edu.cmu.cs.able.typelib.jconv.TypelibJavaConverter;
 import edu.cmu.cs.able.typelib.jconv.ValueConversionException;
@@ -70,10 +35,38 @@ import edu.cmu.cs.able.typelib.struct.StructureDataValue;
 import edu.cmu.cs.able.typelib.struct.UnknownFieldException;
 import edu.cmu.cs.able.typelib.type.DataType;
 import edu.cmu.cs.able.typelib.type.DataValue;
+import incubator.pval.Ensure;
+import org.acmestudio.acme.core.exception.AcmeVisitorException;
+import org.acmestudio.acme.core.resource.IAcmeResource;
+import org.acmestudio.acme.core.resource.ParsingFailureException;
+import org.acmestudio.acme.core.resource.datapersistence.UserDataIOVisitor;
+import org.acmestudio.acme.element.IAcmeSystem;
+import org.acmestudio.acme.model.IAcmeModel;
+import org.acmestudio.armani.ArmaniExportVisitor;
+import org.acmestudio.standalone.resource.StandaloneResourceProvider;
+import org.sa.rainbow.model.acme.AcmeModelInstance;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AcmeConverter implements TypelibJavaConversionRule {
 
-    private PrimitiveScope m_scope;
+    private final PrimitiveScope m_scope;
 
     public AcmeConverter (PrimitiveScope scope) {
         m_scope = scope;
@@ -159,8 +152,7 @@ public class AcmeConverter implements TypelibJavaConversionRule {
                 }
                 fields.put (additionalInfo, m_scope.string ().make (additionalUserData));
 
-                StructureDataValue sdv = sdt.make (fields);
-                return sdv;
+                return sdt.make (fields);
             }
             catch (AcmeVisitorException | UnknownFieldException | AmbiguousNameException | IOException e) {
                 throw new ValueConversionException (e.getMessage ());
@@ -177,14 +169,14 @@ public class AcmeConverter implements TypelibJavaConversionRule {
             try {
                 StructureDataValue sdv = (StructureDataValue )value;
                 StructureDataType sdt = (StructureDataType )value.type ();
-                String serialization = converter.<String> to_java (sdv.value (sdt.field ("serialization")),
+                String serialization = converter.to_java (sdv.value (sdt.field ("serialization")),
                         String.class);
-                String modelClass = converter.<String> to_java (sdv.value (sdt.field ("cls")), String.class);
+                String modelClass = converter.to_java (sdv.value (sdt.field ("cls")), String.class);
 //                String modelType = converter.<String> to_java (sdv.value (sdt.field ("type")), String.class);
 //                String modelName = converter.<String> to_java (sdv.value (sdt.field ("name")), String.class);
-                String systemName = converter.<String> to_java (sdv.value (sdt.field ("system_name")), String.class);
-                String source = converter.<String> to_java (sdv.value (sdt.field ("source")), String.class);
-                String additionalInfo = converter.<String> to_java (sdv.value (sdt.field ("additional_info")),
+                String systemName = converter.to_java (sdv.value (sdt.field ("system_name")), String.class);
+                String source = converter.to_java (sdv.value (sdt.field ("source")), String.class);
+                String additionalInfo = converter.to_java (sdv.value (sdt.field ("additional_info")),
                         String.class);
                 this.getClass ();
                 // First, check that the class for the model is loaded, otherwise all is for naught

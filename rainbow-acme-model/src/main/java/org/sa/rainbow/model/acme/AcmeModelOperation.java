@@ -23,11 +23,6 @@
  */
 package org.sa.rainbow.model.acme;
 
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.acmestudio.acme.core.exception.AcmeException;
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.acmestudio.acme.element.property.IAcmeProperty;
@@ -47,6 +42,11 @@ import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation;
 import org.sa.rainbow.core.models.commands.IRainbowModelOperation;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 import org.sa.rainbow.model.acme.AcmeRainbowOperationEvent.CommandEventT;
+
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * An implementation of RainbowModelCommands for AcmeModelCommands
@@ -73,11 +73,11 @@ IRainbowModelOperation<T, IAcmeSystem> {
     public static final String  DECLARED_TYPES_PROP   = "ACME_DECLARED_TYPES";
     public static final String  INSTANTIATED_TYPES_PROP = "ACME_INSTANTIATED_TYPES";
     protected IAcmeCommand<?>   m_command;
-    private IUpdate             m_eventUpdater        = new IUpdate () {
+    private final IUpdate m_eventUpdater = new IUpdate () {
 
-        boolean waitingForSentinel = true;
+        final boolean waitingForSentinel = true;
 
-        protected void registerFinalEvent () {
+        void registerFinalEvent () {
             synchronized (this) {
                 this.notifyAll ();
             }
@@ -115,13 +115,13 @@ IRainbowModelOperation<T, IAcmeSystem> {
     };
 
     private EventUpdateAdapter  m_eventListener;
-    List<AcmeEvent>             m_events              = Collections.synchronizedList (new LinkedList<AcmeEvent> ());
+    private final List<AcmeEvent> m_events = Collections.synchronizedList (new LinkedList<AcmeEvent> ());
 
     public AcmeModelOperation (String commandName, AcmeModelInstance model, String target, String... parameters) {
         super (commandName, model, target, parameters);
     }
 
-    protected void setUpEventListeners () {
+    private void setUpEventListeners () {
         m_events.clear ();
         m_eventListener = new EventUpdateAdapter (m_eventUpdater);
         m_eventListener.addListenedTypes (EnumSet.allOf (AcmeModelEventType.class));
@@ -132,7 +132,7 @@ IRainbowModelOperation<T, IAcmeSystem> {
         return m_modelContext.getModelInstance ();
     }
 
-    protected void removeEventListener () {
+    private void removeEventListener () {
         getModel ().getContext ().getModel ().removeEventListener (m_eventListener);
     }
 

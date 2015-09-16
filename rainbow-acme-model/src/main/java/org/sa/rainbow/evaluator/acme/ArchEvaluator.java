@@ -23,39 +23,26 @@
  */
 package org.sa.rainbow.evaluator.acme;
 
-import java.text.MessageFormat;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.LinkedBlockingQueue;
-
 import org.acmestudio.acme.environment.IAcmeEnvironment;
 import org.acmestudio.acme.environment.error.AcmeError;
 import org.acmestudio.acme.type.IAcmeTypeChecker;
 import org.acmestudio.acme.type.verification.SimpleModelTypeChecker;
-import org.sa.rainbow.core.AbstractRainbowRunnable;
-import org.sa.rainbow.core.IRainbowRunnable;
-import org.sa.rainbow.core.Rainbow;
-import org.sa.rainbow.core.RainbowComponentT;
-import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.*;
 import org.sa.rainbow.core.analysis.IRainbowAnalysis;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
-import org.sa.rainbow.core.ports.IModelChangeBusPort;
-import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
+import org.sa.rainbow.core.ports.*;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowChangeBusSubscription;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowModelChangeCallback;
-import org.sa.rainbow.core.ports.IModelUSBusPort;
-import org.sa.rainbow.core.ports.IModelsManagerPort;
-import org.sa.rainbow.core.ports.IRainbowReportingPort;
-import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.model.acme.AcmeRainbowOperationEvent.CommandEventT;
 import org.sa.rainbow.model.acme.AcmeTypecheckSetCmd;
+
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * The Rainbow Architectural Evaluator, which performs change-triggered evaluation of the architectural model. When a
@@ -72,15 +59,15 @@ IRainbowModelChangeCallback {
 
     private static final String                    SET_TYPECHECK_OPERATION_NAME = "setTypecheckResult";
 
-    public static final String                     NAME                         = "Rainbow Acme Architecture Constraint Evaluator";
+    private static final String NAME = "Rainbow Acme Architecture Constraint Evaluator";
 
     private IModelChangeBusSubscriberPort          m_modelChangePort;
     private IModelUSBusPort                        m_modelUSPort;
 
-    Map<String, String>                            properties                   = new HashMap<> ();
+    private final Map<String, String> properties = new HashMap<> ();
 
     /** Matches the end of changes to the model **/
-    private IRainbowChangeBusSubscription          m_modelChangeSubscriber      = new IRainbowChangeBusSubscription () {
+    private final IRainbowChangeBusSubscription m_modelChangeSubscriber = new IRainbowChangeBusSubscription () {
 
         @Override
         public
@@ -111,8 +98,8 @@ IRainbowModelChangeCallback {
     };
 
     /** The models to typecheck **/
-    private LinkedBlockingQueue<AcmeModelInstance> m_modelCheckQ                = new LinkedBlockingQueue<> ();
-    private Map<ModelReference, Boolean>           m_lastResult  = new HashMap<> ();
+    private final LinkedBlockingQueue<AcmeModelInstance> m_modelCheckQ = new LinkedBlockingQueue<> ();
+    private final Map<ModelReference, Boolean> m_lastResult = new HashMap<> ();
 
     private Set<IArchEvaluation>                   m_evaluations;
 
@@ -155,10 +142,10 @@ IRainbowModelChangeCallback {
     private void installEvaluations () {
         String evaluators = Rainbow.getProperty (RainbowConstants.PROPKEY_ARCH_EVALUATOR_EXTENSIONS);
         if (evaluators == null || evaluators.trim ().equals ("")) {
-            m_evaluations = Collections.<IArchEvaluation> emptySet ();
+            m_evaluations = Collections.emptySet ();
         }
         else {
-            m_evaluations = new HashSet<IArchEvaluation> ();
+            m_evaluations = new HashSet<> ();
             String[] evaluationSet = evaluators.split (",");
             for (String evaluation : evaluationSet) {
                 try {
@@ -207,7 +194,7 @@ IRainbowModelChangeCallback {
                 boolean constraintViolated = !synchChecker.typechecks (model.getModelInstance ());
                 ModelReference ref = new ModelReference (model.getModelName (), model.getModelType ());
                 Boolean last = m_lastResult.get (ref);
-                if (last == null || last.booleanValue () != constraintViolated) {
+                if (last == null || last != constraintViolated) {
                     m_lastResult.put (ref, constraintViolated);
                     AcmeTypecheckSetCmd cmd = model.getCommandFactory ().setTypecheckResultCmd (!constraintViolated);
 
@@ -220,10 +207,17 @@ IRainbowModelChangeCallback {
                     }
                 }
                 if (constraintViolated) {
-                    Set<? extends AcmeError> errors = env.getAllRegisteredErrors ();
-                    m_reportingPort.info (RainbowComponentT.ANALYSIS,
-                            "Model " + model.getModelName () + ":" + model.getModelType () + " constraints violated: "
-                                    + errors.toString ());
+                    try {
+                        Set<? extends AcmeError> errors = env.getAllRegisteredErrors ();
+                        m_reportingPort.info (RainbowComponentT.ANALYSIS,
+                                "Model " + model.getModelName () + ":" + model.getModelType () + " constraints violated: "
+                                        + errors.toString ());
+                    } catch (Exception e) {
+                        m_reportingPort.error (RainbowComponentT.ANALYSIS,
+                                "There's an error reporting the constraint violation", e);
+                        m_reportingPort.info (RainbowComponentT.ANALYSIS, "Model " + model.getModelName () + ":"
+                                + model.getModelType () + " constraints violated: <error in reporting>");
+                    }
                 }
                 else {
                     m_reportingPort.info (RainbowComponentT.ANALYSIS,

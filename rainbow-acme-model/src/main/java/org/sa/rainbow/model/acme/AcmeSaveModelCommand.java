@@ -23,9 +23,6 @@
  */
 package org.sa.rainbow.model.acme;
 
-import java.io.BufferedOutputStream;
-import java.io.OutputStream;
-
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.acmestudio.acme.model.IAcmeModel;
 import org.acmestudio.armani.ArmaniExportVisitor;
@@ -34,9 +31,12 @@ import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.AbstractSaveModelCmd;
 
+import java.io.BufferedOutputStream;
+import java.io.OutputStream;
+
 public class AcmeSaveModelCommand extends AbstractSaveModelCmd<IAcmeSystem> {
 
-    private String m_systemName;
+    private final String m_systemName;
 
     public AcmeSaveModelCommand (String systemName, AcmeModelInstance model, OutputStream os) {
         super ("SaveAcmeModel", null, systemName, os, "");

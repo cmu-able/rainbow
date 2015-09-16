@@ -23,12 +23,12 @@
  */
 package org.sa.rainbow.model.acme;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.commands.ModelCommandFactory;
+
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 
 public abstract class AcmeModelCommandFactory extends ModelCommandFactory<IAcmeSystem> {
 
@@ -42,7 +42,7 @@ public abstract class AcmeModelCommandFactory extends ModelCommandFactory<IAcmeS
     }
 
     public AcmeTypecheckSetCmd setTypecheckResultCmd (boolean typechecks) {
-        return new AcmeTypecheckSetCmd ("setTypecheckResult", (AcmeModelInstance )m_modelInstance, "self",
+        return new AcmeTypecheckSetCmd ((AcmeModelInstance) m_modelInstance,
                 Boolean.toString (typechecks));
     }
 
@@ -52,9 +52,8 @@ public abstract class AcmeModelCommandFactory extends ModelCommandFactory<IAcmeS
     public AcmeSaveModelCommand saveCommand (String location) throws RainbowModelException {
         try {
             FileOutputStream stream = new FileOutputStream (location);
-            AcmeSaveModelCommand cmd = new AcmeSaveModelCommand (m_modelInstance.getModelName (),
+            return new AcmeSaveModelCommand (m_modelInstance.getModelName (),
                     (AcmeModelInstance )m_modelInstance, stream);
-            return cmd;
         }
         catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
