@@ -33,7 +33,6 @@ import edu.cmu.cs.able.typelib.jconv.TypelibJavaConversionRule;
 import edu.cmu.cs.able.typelib.parser.DefaultTypelibParser;
 import edu.cmu.cs.able.typelib.parser.TypelibParsingContext;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
-import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.ports.eseb.converters.*;
@@ -103,7 +102,7 @@ public class ESEBProvider {
         return c;
     }
 
-    @NotNull
+
     private static String clientKey (String remoteHost, short remotePort) {
         return remoteHost + ":" + remotePort;
     }
@@ -173,7 +172,7 @@ public class ESEBProvider {
         }
     }
 
-    public static void registerConverter (@NotNull Class<TypelibJavaConversionRule> converterClass) {
+    public static void registerConverter (Class<TypelibJavaConversionRule> converterClass) {
         if (!REGISTERED_CONVERTERS.contains (converterClass.getCanonicalName ())) {
             try {
                 Constructor<?> constructor = converterClass.getConstructor (PrimitiveScope.class);
@@ -181,7 +180,7 @@ public class ESEBProvider {
                 REGISTERED_CONVERTERS.add (converterClass.getCanonicalName ());
                 RULES.add (r);
                 CONVERTER.add (r);
-            } catch (@NotNull NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
+            } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
                     | IllegalArgumentException | InvocationTargetException e) {
                 ESEBConnector.LOGGER.error (MessageFormat.format ("Could not construct model converter ''{0}''.",
                         converterClass.getCanonicalName ()));
@@ -229,7 +228,7 @@ public class ESEBProvider {
      * 
      * @param client
      */
-    public static void releaseClient (@NotNull BusConnection client) {
+    public static void releaseClient (BusConnection client) {
         Integer counts = s_clientReferences.get (client);
         if (counts != null) {
             counts--;
@@ -273,7 +272,7 @@ public class ESEBProvider {
      * 
      * @param srvr
      */
-    public static void releaseServer (@NotNull EventBus srvr) {
+    public static void releaseServer (EventBus srvr) {
         Integer counts = s_serverReferences.get (srvr);
         if (counts != null) {
             counts--;

@@ -23,7 +23,7 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import org.jetbrains.annotations.NotNull;
+
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
 import org.sa.rainbow.core.gauges.IGaugeProtocol;
@@ -46,14 +46,14 @@ public class ESEBGaugeSideLifecyclePort extends AbstractESEBDisposablePort imple
     }
 
     @Override
-    public void reportCreated (@NotNull IGaugeIdentifier gauge) {
+    public void reportCreated (IGaugeIdentifier gauge) {
         RainbowESEBMessage msg = getConnectionRole().createMessage (/*ChannelT.HEALTH*/);
         setCommonGaugeProperties (msg, gauge);
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, IGaugeProtocol.GAUGE_CREATED);
         getConnectionRole().publish (msg);
     }
 
-    private void setCommonGaugeProperties (@NotNull RainbowESEBMessage msg, @NotNull IGaugeIdentifier gauge) {
+    private void setCommonGaugeProperties (RainbowESEBMessage msg, IGaugeIdentifier gauge) {
         msg.setProperty (IGaugeProtocol.ID, gauge.id ());
         msg.setProperty (IGaugeProtocol.GAUGE_NAME, gauge.gaugeDesc ().getName ());
         msg.setProperty (IGaugeProtocol.GAUGE_TYPE, gauge.gaugeDesc ().getType ());
@@ -62,7 +62,7 @@ public class ESEBGaugeSideLifecyclePort extends AbstractESEBDisposablePort imple
     }
 
     @Override
-    public void reportDeleted (@NotNull IGaugeIdentifier gauge) {
+    public void reportDeleted (IGaugeIdentifier gauge) {
         RainbowESEBMessage msg = getConnectionRole().createMessage ();
         setCommonGaugeProperties (msg, gauge);
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, IGaugeProtocol.GAUGE_DELETED);
@@ -70,7 +70,7 @@ public class ESEBGaugeSideLifecyclePort extends AbstractESEBDisposablePort imple
     }
 
     @Override
-    public void reportConfigured (@NotNull IGaugeIdentifier gauge, @NotNull List<TypedAttributeWithValue> configParams) {
+    public void reportConfigured (IGaugeIdentifier gauge, List<TypedAttributeWithValue> configParams) {
         RainbowESEBMessage msg = getConnectionRole().createMessage ();
         setCommonGaugeProperties (msg, gauge);
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, IGaugeProtocol.GAUGE_CONFIGURED);
@@ -90,7 +90,7 @@ public class ESEBGaugeSideLifecyclePort extends AbstractESEBDisposablePort imple
     }
 
     @Override
-    public void sendBeacon (@NotNull IGaugeIdentifier gauge) {
+    public void sendBeacon (IGaugeIdentifier gauge) {
         RainbowESEBMessage msg = getConnectionRole().createMessage (/*ChannelT.HEALTH*/);
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, IGaugeProtocol.GAUGE_HEARTBEAT);
         setCommonGaugeProperties (msg, gauge);

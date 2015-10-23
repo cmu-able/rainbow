@@ -27,7 +27,6 @@
 package org.sa.rainbow.translator.effectors;
 
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowConnectionException;
@@ -48,18 +47,18 @@ import java.util.List;
 public abstract class AbstractEffector implements IEffector {
 
     final Logger LOGGER = Logger.getLogger (this.getClass ());
-    @Nullable
+
     private String m_id = null;
-    @Nullable
+
     private String m_name = null;
-    @Nullable
+
     private Kind m_kind = null;
 
-    @Nullable
+
     private IRainbowReportingPort m_reportingPort;
-    @Nullable
+
     private IEffectorLifecycleBusPort m_effectorManagementPort;
-    @Nullable
+
     private IEffectorExecutionPort    m_executionPort;
 
 
@@ -95,7 +94,7 @@ public abstract class AbstractEffector implements IEffector {
     /* (non-Javadoc)
      * @see org.sa.rainbow.translator.effectors.IEffector#id()
      */
-    @Nullable
+
     @Override
     public String id () {
         return m_id;
@@ -104,7 +103,7 @@ public abstract class AbstractEffector implements IEffector {
     /* (non-Javadoc)
      * @see org.sa.rainbow.translator.effectors.IEffector#service()
      */
-    @Nullable
+
     @Override
     public String service () {
         return m_name;
@@ -113,7 +112,7 @@ public abstract class AbstractEffector implements IEffector {
     /* (non-Javadoc)
      * @see org.sa.rainbow.translator.effectors.IEffector#type()
      */
-    @Nullable
+
     @Override
     public Kind kind() {
         return m_kind;

@@ -23,7 +23,6 @@
  */
 package org.sa.rainbow.translator.effectors;
 
-import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
@@ -69,7 +68,7 @@ public class LocalEffectorManager extends AbstractRainbowRunnable {
 
     }
 
-    public void initEffectors (@NotNull EffectorDescription effectors) {
+    public void initEffectors (EffectorDescription effectors) {
         m_id2Effectors = new HashMap<> ();
         for (EffectorAttributes effAttr : effectors.effectors) {
             // Ignore any effectors that shouldn't start on this machine
@@ -79,9 +78,9 @@ public class LocalEffectorManager extends AbstractRainbowRunnable {
             }
             IEffector effector = null;
             // prepare class info
-            String effectorClass = null;
-            Class<?>[] params = null;
-            Object[] args = null;
+            String effectorClass;
+            Class<?>[] params;
+            Object[] args;
             // collect argument values
             String refId = Util.genID (effAttr.name, effAttr.getLocation());
             switch (effAttr.getKind ()) {
@@ -121,7 +120,7 @@ public class LocalEffectorManager extends AbstractRainbowRunnable {
                         Constructor<?> cons = effectorClazz.getConstructor (params);
                         effector = (IEffector )cons.newInstance (args);
                         m_reportingPort.info (getComponentType (), "Java-based IEffector " + effAttr.name);
-                    } catch (@NotNull ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException
+                    } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException
                             | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                         String msg = MessageFormat.format ("Could not instantiate IEffector ''{0}''", effectorClass);
                         m_reportingPort.error (RainbowComponentT.EFFECTOR_MANAGER, msg);
@@ -138,7 +137,7 @@ public class LocalEffectorManager extends AbstractRainbowRunnable {
         }
     }
 
-    @NotNull
+
     @Override
     protected RainbowComponentT getComponentType () {
         return RainbowComponentT.EFFECTOR_MANAGER;

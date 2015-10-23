@@ -15,13 +15,13 @@ public interface ScbDelta<T extends MergeableScb<T>> {
 	 * Obtains the target.
 	 * @return the target
 	 */
-	public T target();
+	T target ();
 	
 	/**
 	 * Obtains the source.
 	 * @return the source
 	 */
-	public T source();
+	T source ();
 	
 	/**
 	 * Applies the change to the SCB

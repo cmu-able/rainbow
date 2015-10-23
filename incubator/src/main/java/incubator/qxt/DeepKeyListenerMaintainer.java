@@ -1,7 +1,6 @@
 package incubator.qxt;
 
-import java.awt.Component;
-import java.awt.Container;
+import java.awt.*;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
 import java.awt.event.KeyListener;
@@ -85,14 +84,14 @@ public class DeepKeyListenerMaintainer {
 		for (Component c : newComponents) {
 			c.addKeyListener(listener);
 			if (c instanceof Container) {
-				((Container) c).addHierarchyListener(hlistener);
+				c.addHierarchyListener (hlistener);
 			}
 		}
 
 		for (Component c : removedComponents) {
 			c.removeKeyListener(listener);
 			if (c instanceof Container) {
-				((Container) c).removeHierarchyListener(hlistener);
+				c.removeHierarchyListener (hlistener);
 			}
 		}
 

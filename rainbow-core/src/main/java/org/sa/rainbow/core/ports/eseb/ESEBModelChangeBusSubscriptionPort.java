@@ -23,7 +23,6 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
@@ -51,7 +50,7 @@ IModelChangeBusSubscriberPort {
         getConnectionRole ().addListener (new IESEBListener () {
 
             @Override
-            public void receive (@NotNull RainbowESEBMessage msg) {
+            public void receive (RainbowESEBMessage msg) {
                 if (msg.getProperty (ESEBConstants.MSG_CHANNEL_KEY).equals (ChannelT.MODEL_CHANGE.name ())) {
                     synchronized (m_subscribers) {
                         for (Pair<IRainbowChangeBusSubscription, IRainbowModelChangeCallback> pair : m_subscribers) {

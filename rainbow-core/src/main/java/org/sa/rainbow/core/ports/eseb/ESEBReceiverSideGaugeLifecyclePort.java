@@ -23,7 +23,7 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import org.jetbrains.annotations.NotNull;
+
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
@@ -50,20 +50,20 @@ public class ESEBReceiverSideGaugeLifecyclePort extends AbstractESEBDisposablePo
             m_msg = msg;
         }
 
-        @NotNull
+
         @Override
         public String id () {
             return (String )m_msg.getProperty (IGaugeProtocol.ID);
         }
 
-        @NotNull
+
         @Override
         public TypedAttribute gaugeDesc () {
             return new TypedAttribute ((String )m_msg.getProperty (IGaugeProtocol.GAUGE_NAME),
                     (String )m_msg.getProperty (IGaugeProtocol.GAUGE_TYPE));
         }
 
-        @NotNull
+
         @Override
         public TypedAttribute modelDesc () {
             return new TypedAttribute ((String )m_msg.getProperty (IGaugeProtocol.MODEL_NAME),
@@ -78,7 +78,7 @@ public class ESEBReceiverSideGaugeLifecyclePort extends AbstractESEBDisposablePo
         getConnectionRole().addListener (new IESEBListener () {
 
             @Override
-            public void receive (@NotNull RainbowESEBMessage msg) {
+            public void receive (RainbowESEBMessage msg) {
                 String type = (String )msg.getProperty (ESEBConstants.MSG_TYPE_KEY);
                 MessageGaugeIdentifier mgi;
                 switch (type) {

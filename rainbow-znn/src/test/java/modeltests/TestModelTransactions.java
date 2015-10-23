@@ -1,23 +1,17 @@
 package modeltests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
+import edu.cmu.cs.able.eseb.BusData;
+import edu.cmu.cs.able.eseb.BusDataQueue;
+import edu.cmu.cs.able.eseb.BusDataQueueListener;
+import edu.cmu.cs.able.eseb.conn.BusConnection;
+import edu.cmu.cs.able.typelib.comp.MapDataValue;
+import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
+import edu.cmu.cs.able.typelib.type.DataValue;
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.sa.rainbow.core.RainbowMaster;
-import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.ModelReference;
@@ -30,13 +24,14 @@ import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.model.acme.AcmeRainbowOperationEvent.CommandEventT;
 import org.sa.rainbow.model.acme.znn.commands.NewServerCmd;
 
-import edu.cmu.cs.able.eseb.BusData;
-import edu.cmu.cs.able.eseb.BusDataQueue;
-import edu.cmu.cs.able.eseb.BusDataQueueListener;
-import edu.cmu.cs.able.eseb.conn.BusConnection;
-import edu.cmu.cs.able.typelib.comp.MapDataValue;
-import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
-import edu.cmu.cs.able.typelib.type.DataValue;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 public class TestModelTransactions {
 
@@ -45,7 +40,7 @@ public class TestModelTransactions {
     @Test
     public void testEventsPropagatedOk () throws Exception {
         PrimitiveScope scope = new PrimitiveScope ();
-        try (BusConnection connection = new BusConnection ("localhost", (short )1234, scope);) {
+        try (BusConnection connection = new BusConnection ("localhost", (short) 1234, scope)) {
             final BusDataQueue q = new BusDataQueue ();
             connection.queue_group ().add (q);
             final List<DataValue> vals = new ArrayList<> ();
@@ -163,7 +158,7 @@ public class TestModelTransactions {
     }
 
     @Before
-    public void setup () throws IOException, RainbowConnectionException, RainbowException {
+    public void setup () throws IOException, RainbowException {
         File basePath = new File (System.getProperty ("user.dir"));
         File testMasterDir = new File (basePath, "src/test/resources/RainbowTest/eseb");
         System.setProperty ("user.dir", testMasterDir.getCanonicalPath ());

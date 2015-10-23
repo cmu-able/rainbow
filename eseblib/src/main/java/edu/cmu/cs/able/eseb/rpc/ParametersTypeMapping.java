@@ -1,10 +1,6 @@
 package edu.cmu.cs.able.eseb.rpc;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Annotation added to methods of remote interfaces that maps the method
@@ -21,5 +17,5 @@ public @interface ParametersTypeMapping {
 	 * @return the names of the <em>typelib</em> data types; there should be
 	 * exactly one element in the array per argument in the method signature
 	 */
-	public String[] value();
+	String[] value ();
 }

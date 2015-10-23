@@ -23,12 +23,10 @@
  */
 package org.sa.rainbow.core.models.commands;
 
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 public interface IRainbowModelCompoundCommand<Model> extends IRainbowModelOperation<List<Object>, Model> {
-    @NotNull
     List<Object> getResults ();
 
 }

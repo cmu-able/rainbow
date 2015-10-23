@@ -23,14 +23,13 @@
  */
 package org.sa.rainbow.core.ports;
 
-import org.jetbrains.annotations.NotNull;
 
 public interface ITransmittableConverter {
 
-    @NotNull
+
     Object toTransmittable (Object o, Object context);
 
-    @NotNull
+
     Object fromTransmittable (Object o, Object context);
 
 }

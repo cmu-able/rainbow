@@ -23,8 +23,6 @@
  */
 package org.sa.rainbow.core;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
 import org.sa.rainbow.core.gauges.LocalGaugeManager;
@@ -52,41 +50,41 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
 
     protected static final String NAME = "Rainbow Delegate";
 
-    @NotNull
-    private final String m_id;
-    @Nullable
-    private String                            m_name          = null;
 
-    @Nullable
-    private Beacon                            m_beacon;
+    private final String m_id;
+
+    private String m_name = null;
+
+
+    private Beacon m_beacon;
 
     /** The port through which the management information comes (lifecyle, reporting, ...) **/
-    @Nullable
-    private IDelegateManagementPort            m_masterPort;
+
+    private IDelegateManagementPort        m_masterPort;
     /** The connection port to the master **/
-    private AbstractDelegateConnectionPort      m_masterConnectionPort;
+    private AbstractDelegateConnectionPort m_masterConnectionPort;
     /**
      * The configuration port, through which the delegate can be configured. Configuration includes which local probes
      * and effectors to start. It "looks" unused because it calls back
      **/
     @SuppressWarnings({"unused", "FieldCanBeLocal"})
-    private IDelegateConfigurationPort m_configurationPort;
+    private IDelegateConfigurationPort     m_configurationPort;
 
-    private Properties                        m_configurationInformation;
+    private Properties m_configurationInformation;
     /** Manages the connection lifecycle of the delegate. Perhaps this should be moved to the connection port?**/
-    @NotNull
-    private ConnectionState                   m_delegateState = ConnectionState.UNKNOWN;
+
+    private ConnectionState m_delegateState = ConnectionState.UNKNOWN;
 
     /** The local effectors **/
-    private EffectorDescription               m_localEffectorDesc;
+    private EffectorDescription m_localEffectorDesc;
 
-    private LocalProbeManager              m_probeManager;
-    private LocalGaugeManager              m_gaugeManager;
-    private LocalEffectorManager           m_effectorManager;
+    private LocalProbeManager    m_probeManager;
+    private LocalGaugeManager    m_gaugeManager;
+    private LocalEffectorManager m_effectorManager;
 
-    final List<ProbeAttributes> m_probes = new LinkedList<> ();
-    final List<EffectorAttributes> m_effectors = new LinkedList<> ();
-    final List<GaugeInstanceDescription> m_gauges = new LinkedList<> ();
+    final List<ProbeAttributes>          m_probes    = new LinkedList<> ();
+    final List<EffectorAttributes>       m_effectors = new LinkedList<> ();
+    final List<GaugeInstanceDescription> m_gauges    = new LinkedList<> ();
 
     public RainbowDelegate () {
         super (NAME);
@@ -117,23 +115,24 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
 
     }
 
-    @NotNull
+
     private Properties getConnectionProperties () {
         Properties props = new Properties ();
-        props.setProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION, Rainbow.getProperty (PROPKEY_DEPLOYMENT_LOCATION));
+        props.setProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION, Rainbow.getProperty
+                (PROPKEY_DEPLOYMENT_LOCATION));
         return props;
     }
 
     /**
      * Called when configuration information is received from the master.
-     * 
+     *
      * @param props
      *            The configuration information, as a set of properties
      */
-    public synchronized void receiveConfigurationInformation (@NotNull Properties props,
-                                                              @NotNull List<ProbeAttributes> probes,
-                                                              @NotNull List<EffectorAttributes> effectors,
-                                                              @NotNull List<GaugeInstanceDescription> gauges) {
+    public synchronized void receiveConfigurationInformation (Properties props,
+                                                              List<ProbeAttributes> probes,
+                                                              List<EffectorAttributes> effectors,
+                                                              List<GaugeInstanceDescription> gauges) {
         synchronized (m_probes) {
             // This might take some time, so record the information lest the method times out
             m_configurationInformation = props;
@@ -165,8 +164,8 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
     }
 
     void initDelegateComponents (List<ProbeAttributes> probes,
-                                 @NotNull List<EffectorAttributes> effectors,
-                                 @NotNull List<GaugeInstanceDescription> gauges) {
+                                 List<EffectorAttributes> effectors,
+                                 List<GaugeInstanceDescription> gauges) {
         m_probeManager.initProbes (probes);
 
         m_gaugeManager.initGauges (gauges);
@@ -243,7 +242,7 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
         super.stop ();
     }
 
-    @NotNull
+
     public String getId () {
         return m_id;
     }
@@ -277,7 +276,7 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
 
 
     // Methods after this are used for testing
-    @NotNull
+
     synchronized ConnectionState getConnectionState () {
         return m_delegateState;
     }
@@ -286,7 +285,7 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
         return m_probeManager.getProbeConfiguration ();
     }
 
-    @Nullable
+
     synchronized Set<EffectorAttributes> getEffectorConfiguration () {
         return m_localEffectorDesc.effectors;
     }
@@ -299,7 +298,7 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
         m_probeManager.killProbes ();
     }
 
-    @NotNull
+
     @Override
     protected RainbowComponentT getComponentType () {
         return RainbowComponentT.DELEGATE;

@@ -62,7 +62,6 @@
 					<encoding>iso8859-1</encoding>
 				</configuration>
 			</plugin>
-			
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
@@ -70,7 +69,6 @@
 					<outputEncoding>iso8859-1</outputEncoding>
 				</configuration>
 			</plugin>
-			
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>

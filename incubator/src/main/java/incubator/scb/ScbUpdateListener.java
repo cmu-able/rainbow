@@ -10,5 +10,5 @@ public interface ScbUpdateListener<T extends Scb<T>> {
 	 * THe SCB has been updated.
 	 * @param t the SCB
 	 */
-	public void updated(T t);
+	void updated (T t);
 }

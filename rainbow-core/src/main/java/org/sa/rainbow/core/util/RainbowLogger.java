@@ -24,7 +24,6 @@
 package org.sa.rainbow.core.util;
 
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 
@@ -33,8 +32,8 @@ public class RainbowLogger {
     public static void error (RainbowComponentT compT,
             String msg,
             Throwable e,
-                              @Nullable IRainbowReportingPort port,
-                              @Nullable Logger logger) {
+                              IRainbowReportingPort port,
+                              Logger logger) {
         if (logger != null) {
             logger.error (msg, e);
         }
@@ -43,7 +42,7 @@ public class RainbowLogger {
         }
     }
 
-    public static void error (RainbowComponentT compT, String msg, @Nullable IRainbowReportingPort port, @Nullable Logger logger) {
+    public static void error (RainbowComponentT compT, String msg, IRainbowReportingPort port, Logger logger) {
         if (logger != null) {
             logger.error (msg);
         }
@@ -53,7 +52,7 @@ public class RainbowLogger {
     }
 
     public static void
-    warn (RainbowComponentT compT, String msg, Throwable e, @Nullable IRainbowReportingPort port, @Nullable Logger logger) {
+    warn (RainbowComponentT compT, String msg, Throwable e, IRainbowReportingPort port, Logger logger) {
         if (logger != null) {
             logger.warn (msg, e);
         }
@@ -62,7 +61,7 @@ public class RainbowLogger {
         }
     }
 
-    public static void warn (RainbowComponentT compT, String msg, @Nullable IRainbowReportingPort port, @Nullable Logger logger) {
+    public static void warn (RainbowComponentT compT, String msg, IRainbowReportingPort port, Logger logger) {
         if (logger != null) {
             logger.warn (msg);
         }
@@ -74,8 +73,8 @@ public class RainbowLogger {
     public static void fatal (RainbowComponentT compT,
             String msg,
             Throwable e,
-                              @Nullable IRainbowReportingPort port,
-                              @Nullable Logger logger) {
+                              IRainbowReportingPort port,
+                              Logger logger) {
         if (logger != null) {
             logger.fatal (msg, e);
         }
@@ -84,7 +83,7 @@ public class RainbowLogger {
         }
     }
 
-    public static void info (RainbowComponentT compT, String msg, @Nullable IRainbowReportingPort port, @Nullable Logger logger) {
+    public static void info (RainbowComponentT compT, String msg, IRainbowReportingPort port, Logger logger) {
         if (logger != null) {
             logger.info (msg);
         }

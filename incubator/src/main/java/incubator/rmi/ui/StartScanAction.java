@@ -35,13 +35,10 @@ public class StartScanAction extends ContextualAction {
 		if (state == null) {
 			return false;
 		}
-		
-		if (state.intValue() == RmiScanner.STOPPED ||
-				state.intValue() == RmiScanner.FINISHED) {
-			return true;
-		}
-		
-		return false;
+
+		return state.intValue () == RmiScanner.STOPPED ||
+				state.intValue () == RmiScanner.FINISHED;
+
 	}
 
 	@Override

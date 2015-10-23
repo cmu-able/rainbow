@@ -1,10 +1,6 @@
 package edu.cmu.cs.able.eseb.rpc;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Annotation added to methods in a service which return values. This
@@ -20,5 +16,5 @@ public @interface ReturnTypeMapping {
 	 * The name of the <em>typelib</em> type to convert the result to.
 	 * @return the type name
 	 */
-	public String value();
+	String value ();
 }

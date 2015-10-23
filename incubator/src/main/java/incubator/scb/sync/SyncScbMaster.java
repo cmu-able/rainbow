@@ -17,6 +17,6 @@ public interface SyncScbMaster {
 	 * @throws UnknownContainerException the slave refers to a container
 	 * which is unknown in the master
 	 */
-	public Pair<Boolean,List<ScbOperation>> slave_contact(String key,
-			List<ScbOperation> ops) throws UnknownContainerException;
+	Pair<Boolean, List<ScbOperation>> slave_contact (String key,
+													 List<ScbOperation> ops) throws UnknownContainerException;
 }

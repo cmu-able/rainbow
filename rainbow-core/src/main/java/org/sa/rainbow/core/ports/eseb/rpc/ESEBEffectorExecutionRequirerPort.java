@@ -27,7 +27,6 @@ ut limitation the rights
 package org.sa.rainbow.core.ports.eseb.rpc;
 
 import edu.cmu.cs.able.eseb.participant.ParticipantException;
-import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.ports.eseb.ESEBProvider;
 import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
 
@@ -39,7 +38,7 @@ IESEBEffectorExecutionRemoteInterface {
 
     private IESEBEffectorExecutionRemoteInterface m_stub;
 
-    public ESEBEffectorExecutionRequirerPort (@NotNull IEffectorIdentifier effector) throws IOException, ParticipantException {
+    public ESEBEffectorExecutionRequirerPort (IEffectorIdentifier effector) throws IOException, ParticipantException {
         super (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (),
                 effector.id ());
         m_stub = getConnectionRole().createRemoteStub (IESEBEffectorExecutionRemoteInterface.class,

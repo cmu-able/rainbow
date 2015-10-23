@@ -23,7 +23,7 @@
  */
 package org.sa.rainbow.gui;
 
-import org.jetbrains.annotations.NotNull;
+
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
 import org.sa.rainbow.core.gauges.IGaugeState;
@@ -51,7 +51,7 @@ public class GUIGaugeLifecycleListener implements IGaugeLifecycleBusPort {
     }
 
     @Override
-    public void reportCreated (@NotNull final IGaugeIdentifier gauge) {
+    public void reportCreated (final IGaugeIdentifier gauge) {
         if (!itemMap.containsKey (gauge.id ())) {
             JMenuItem item = new JMenuItem (gauge.id ());
             itemMap.put (gauge.id (), item);
@@ -120,7 +120,7 @@ public class GUIGaugeLifecycleListener implements IGaugeLifecycleBusPort {
     }
 
     @Override
-    public void reportDeleted (@NotNull IGaugeIdentifier gauge) {
+    public void reportDeleted (IGaugeIdentifier gauge) {
         if (itemMap.containsKey (gauge.id ())) {
             JMenuItem item = itemMap.get (gauge.id ());
             m_menu.remove (item);

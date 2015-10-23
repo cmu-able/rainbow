@@ -23,8 +23,7 @@
  */
 package org.sa.rainbow.translator.effectors;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.translator.probes.IBashBasedScript;
 import org.sa.rainbow.util.Util;
@@ -43,9 +42,9 @@ import java.util.List;
  */
 public class GenericScriptBasedEffector extends AbstractEffector implements IBashBasedScript {
 
-    @Nullable
+
     private String m_path = null;
-    @Nullable
+
     private String m_params = null;
 
     /**
@@ -65,10 +64,10 @@ public class GenericScriptBasedEffector extends AbstractEffector implements IBas
     /* (non-Javadoc)
      * @see org.sa.rainbow.translator.effectors.IEffector#execute(java.lang.String[])
      */
-    @NotNull
+
     @Override
-    public Outcome execute (@NotNull List<String> args) {
-        Outcome r = Outcome.UNKNOWN;
+    public Outcome execute (List<String> args) {
+        Outcome r;
         String[] cmds = new String[3];
 
         // do param substitution

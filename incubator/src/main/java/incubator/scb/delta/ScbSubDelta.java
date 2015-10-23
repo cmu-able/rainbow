@@ -14,5 +14,5 @@ public interface ScbSubDelta<T extends MergeableScb<T>,
 	 * Obtains the sub delta.
 	 * @return the sub delta
 	 */
-	public ScbDelta<ST> sub_delta();
+	ScbDelta<ST> sub_delta ();
 }

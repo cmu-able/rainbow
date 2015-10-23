@@ -23,8 +23,7 @@
  */
 package org.sa.rainbow.core.gauges;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
@@ -47,7 +46,7 @@ import java.util.StringTokenizer;
 public abstract class AbstractGaugeWithProbes extends AbstractGauge {
 
     private Beacon m_probeBeacon;
-    @Nullable
+
     private IProbeReportSubscriberPort m_probeReportingPort;
     private boolean                      m_subscribedToProbePort;
 
@@ -71,7 +70,7 @@ public abstract class AbstractGaugeWithProbes extends AbstractGauge {
     }
 
     @Override
-    protected void handleConfigParam (@NotNull TypedAttributeWithValue tav) {
+    protected void handleConfigParam (TypedAttributeWithValue tav) {
         super.handleConfigParam (tav);
         if (tav.getName ().equals (CONFIG_PROBE_MAPPING)) {
             pubProbeGaugeMapping ((String )tav.getValue ());

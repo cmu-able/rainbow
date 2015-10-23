@@ -4,24 +4,18 @@ import incubator.ctxaction.RowContextTableModel;
 import incubator.obscol.ObservableList;
 import incubator.obscol.ObservableListListener;
 import incubator.obscol.WrapperObservableList;
+import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
+import javax.swing.event.TableModelEvent;
+import javax.swing.table.AbstractTableModel;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.swing.event.TableModelEvent;
-import javax.swing.table.AbstractTableModel;
-
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import java.util.*;
 
 /**
  * <p>
@@ -807,11 +801,8 @@ class QxtTableModel<T> extends AbstractTableModel implements
 	 * @return is it the empty row?
 	 */
 	boolean isNewLine(int row) {
-		if (extraLine != null && row == getRowCount() - 1) {
-			return true;
-		}
+		return extraLine != null && row == getRowCount () - 1;
 
-		return false;
 	}
 
 	/**

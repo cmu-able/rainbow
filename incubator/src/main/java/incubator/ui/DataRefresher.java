@@ -3,7 +3,7 @@ package incubator.ui;
 import incubator.ctxaction.ActionContext;
 import incubator.ctxaction.ContextualAction;
 
-import javax.swing.JOptionPane;
+import javax.swing.*;
 
 /**
  * Class implementing an abstract data refresh feature. It will regularly
@@ -209,12 +209,9 @@ public abstract class DataRefresher {
 			if (r == null) {
 				return false;
 			}
-			
-			if (r.is_paused() || r.refresh_rate() == 0) {
-				return false;
-			}
-			
-			return true;
+
+			return !(r.is_paused () || r.refresh_rate () == 0);
+
 		}
 
 		@Override
@@ -245,12 +242,9 @@ public abstract class DataRefresher {
 			if (r == null) {
 				return false;
 			}
-			
-			if (!r.is_paused() || r.refresh_rate() == 0) {
-				return false;
-			}
-			
-			return true;
+
+			return !(!r.is_paused () || r.refresh_rate () == 0);
+
 		}
 
 		@Override
@@ -279,11 +273,8 @@ public abstract class DataRefresher {
 		@Override
 		protected boolean isValid(ActionContext context) {
 			DataRefresher r = (DataRefresher) context.get(CONTEXT_KEY);
-			if (r == null) {
-				return false;
-			}
-			
-			return true;
+			return r != null;
+
 		}
 
 		@Override

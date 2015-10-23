@@ -29,8 +29,6 @@ import edu.cmu.cs.able.typelib.jconv.ValueConversionException;
 import edu.cmu.cs.able.typelib.prim.StringValue;
 import edu.cmu.cs.able.typelib.type.DataValue;
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 
@@ -55,7 +53,7 @@ public class RainbowESEBMessage implements IRainbowMessage {
         m_esebMap = mdv;
     }
 
-    @NotNull
+
     @Override
     public List<String> getPropertyNames () {
         LinkedList<String> pns = new LinkedList<> ();
@@ -69,7 +67,7 @@ public class RainbowESEBMessage implements IRainbowMessage {
         return pns;
     }
 
-    @Nullable
+
     @Override
     public Object getProperty (String id) {
         DataValue dv = m_esebMap.get (ESEBProvider.SCOPE.string ().make (id));
@@ -85,7 +83,7 @@ public class RainbowESEBMessage implements IRainbowMessage {
     }
 
     @Override
-    public void setProperty (String id, @NotNull Object prop) throws RainbowException {
+    public void setProperty (String id, Object prop) throws RainbowException {
         try {
             m_esebMap.put (ESEBProvider.CONVERTER.from_java (id, ESEBProvider.SCOPE.string ()), ESEBProvider.CONVERTER.from_java (prop, null));
         }
@@ -146,9 +144,9 @@ public class RainbowESEBMessage implements IRainbowMessage {
         m_esebMap.remove (ESEBProvider.SCOPE.string ().make (key));
     }
 
-    public void fillProperties (@NotNull Properties props) {
+    public void fillProperties (Properties props) {
         for (Entry<Object, Object> entry : props.entrySet ()) {
-            String key = null;
+            String key;
             if (entry.getKey () instanceof String) {
                 key = PROP_PREFIX + entry.getKey ();
             }
@@ -157,7 +155,7 @@ public class RainbowESEBMessage implements IRainbowMessage {
                         "Attempting to encode a property with non-string key is not allowed: {0}", entry.getKey ()));
                 continue;
             }
-            String value = null;
+            String value;
             if (entry.getValue () instanceof String) {
                 value = (String )entry.getValue ();
             }
@@ -172,7 +170,7 @@ public class RainbowESEBMessage implements IRainbowMessage {
 
     }
 
-    @NotNull
+
     public Properties pulloutProperties () {
         Properties p = new Properties ();
         Map<DataValue, DataValue> msg = m_esebMap.all ();
@@ -198,7 +196,7 @@ public class RainbowESEBMessage implements IRainbowMessage {
         return m_esebMap.contains (ESEBProvider.SCOPE.string ().make (key));
     }
 
-    @NotNull
+
     @Override
     public String toString () {
         StringBuilder str = new StringBuilder ();

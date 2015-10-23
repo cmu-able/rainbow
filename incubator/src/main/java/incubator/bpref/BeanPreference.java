@@ -1,16 +1,16 @@
 package incubator.bpref;
 
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.BeanUtilsBean;
+import org.apache.commons.beanutils.PropertyUtilsBean;
+import org.apache.commons.lang.ClassUtils;
+
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.prefs.Preferences;
-
-import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.beanutils.BeanUtilsBean;
-import org.apache.commons.beanutils.PropertyUtilsBean;
-import org.apache.commons.lang.ClassUtils;
 
 /**
  * Class capable of saving beans to preferences and populating beans from
@@ -160,7 +160,7 @@ public class BeanPreference {
 		 * 
 		 * @throws Exception failed to perform the operation
 		 */
-		public void run(Preferences prefs, Object bean, String pkey,
-				String pname, PropertyHandler<?> handler) throws Exception;
+		void run (Preferences prefs, Object bean, String pkey,
+				  String pname, PropertyHandler<?> handler) throws Exception;
 	}
 }

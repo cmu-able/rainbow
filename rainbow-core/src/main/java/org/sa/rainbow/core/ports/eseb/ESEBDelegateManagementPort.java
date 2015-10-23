@@ -24,7 +24,6 @@
 package org.sa.rainbow.core.ports.eseb;
 
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.ports.AbstractDelegateManagementPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
@@ -44,12 +43,12 @@ public class ESEBDelegateManagementPort extends AbstractDelegateManagementPort i
         getConnectionRole().addListener (new IESEBListener () {
 
             @Override
-            public void receive (@NotNull RainbowESEBMessage msg) {
+            public void receive (RainbowESEBMessage msg) {
                 String msgType = (String )msg.getProperty (ESEBConstants.MSG_TYPE_KEY);
                 String did = (String )msg.getProperty (ESEBConstants.MSG_DELEGATE_ID_KEY);
                 if (getDelegateId ().equals (did)) {
                     if (msgType != null) {
-                        boolean result = false;
+                        boolean result;
                         switch (msgType) {
 /*                        case SEND_CONFIGURATION_INFORMATION:
                             sendConfigurationInformation (msg.pulloutProperties ());

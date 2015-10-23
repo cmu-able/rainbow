@@ -14,5 +14,5 @@ public interface TypeTransformation<T, R> {
 	 * 
 	 * @return the transformed type
 	 */
-	public R transform(T t);
+	R transform (T t);
 }

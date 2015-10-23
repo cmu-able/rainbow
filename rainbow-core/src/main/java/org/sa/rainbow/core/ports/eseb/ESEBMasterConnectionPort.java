@@ -24,7 +24,6 @@
 package org.sa.rainbow.core.ports.eseb;
 
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.RainbowMaster;
@@ -46,7 +45,7 @@ public class ESEBMasterConnectionPort extends AbstractMasterConnectionPort {
         getConnectionRole().addListener (new ESEBConnector.IESEBListener () {
 
             @Override
-            public void receive (@NotNull RainbowESEBMessage msg) {
+            public void receive (RainbowESEBMessage msg) {
                 String type = (String )msg.getProperty (ESEBConstants.MSG_TYPE_KEY);
                 switch (type) {
                 case ESEBConstants.MSG_TYPE_CONNECT_DELEGATE: {

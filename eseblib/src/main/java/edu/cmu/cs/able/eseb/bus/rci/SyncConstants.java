@@ -7,7 +7,7 @@ public interface SyncConstants {
 	/**
 	 * Key for the container that keeps connection information synchronized.
 	 */
-	public static final String CONTAINER_KEY =
-			ConnectionInformationScbSynchronizer.class.getName();
+	String CONTAINER_KEY =
+			ConnectionInformationScbSynchronizer.class.getName ();
 
 }

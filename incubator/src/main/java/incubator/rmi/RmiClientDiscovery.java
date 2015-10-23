@@ -1,10 +1,10 @@
 package incubator.rmi;
 
+import net.ladypleaser.rmilite.Client;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-
-import net.ladypleaser.rmilite.Client;
 
 /**
  * Class responsible for discovering where RMI clients are.
@@ -162,7 +162,7 @@ public class RmiClientDiscovery {
 		 * A port was found
 		 * @param port the port
 		 */
-		public void port_found(int port);
+		void port_found (int port);
 	}
 	
 	/**
@@ -177,8 +177,8 @@ public class RmiClientDiscovery {
 		 * @param port the port where the client was found
 		 * @param iface the RMI client class
 		 */
-		public void client_found(Object object, String host, int port,
-				Class<?> iface);
+		void client_found (Object object, String host, int port,
+						   Class<?> iface);
 	}
 	
 	/**
@@ -190,6 +190,6 @@ public class RmiClientDiscovery {
 		 * A port has been scanned.
 		 * @param port the port
 		 */
-		public void port_scanned(int port);
+		void port_scanned (int port);
 	}
 }

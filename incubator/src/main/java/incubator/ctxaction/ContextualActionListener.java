@@ -8,5 +8,5 @@ public interface ContextualActionListener {
 	/**
 	 * The action has been performed.
 	 */
-	public void actionPerformed();
+	void actionPerformed ();
 }

@@ -31,8 +31,6 @@ import edu.cmu.cs.able.eseb.rpc.RpcEnvironment;
 import edu.cmu.cs.able.typelib.jconv.TypelibJavaConversionRule;
 import edu.cmu.cs.able.typelib.jconv.TypelibJavaConverter;
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -41,12 +39,12 @@ import java.util.Map;
 
 public class ESEBRPCConnector {
     public static final Logger LOGGER = Logger.getLogger (ESEBRPCConnector.class);
-    @Nullable
+
     private BusConnection m_client;
     private EventBus      m_srvr;
 
     private static class RPCInfo {
-        @Nullable
+
         RpcEnvironment m_env;
         String         participant_id;
     }
@@ -84,7 +82,7 @@ public class ESEBRPCConnector {
         }
     }
 
-    private void setupConverters (@NotNull RPCInfo info) {
+    private void setupConverters (RPCInfo info) {
         // Share the participant, environment, and then you can share the connection 
         TypelibJavaConverter converter = info.m_env.converter ();
         List<? extends TypelibJavaConversionRule> rules = ESEBProvider.getConversionRules ();
@@ -109,7 +107,7 @@ public class ESEBRPCConnector {
         ESEBProvider.useClient (m_client);
     }
 
-    @Nullable
+
     public BusConnection getESEBConnection () {
         return m_client;
     }
@@ -118,7 +116,7 @@ public class ESEBRPCConnector {
         return m_info.participant_id;
     }
 
-    @Nullable
+
     private RpcEnvironment getRPCEnvironment () {
         return m_info.m_env;
     }

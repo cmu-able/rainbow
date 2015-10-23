@@ -26,8 +26,6 @@
  */
 package org.sa.rainbow.core.models;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.translator.effectors.IEffector;
 import org.sa.rainbow.translator.effectors.IEffectorIdentifier.Kind;
@@ -43,7 +41,7 @@ import java.util.*;
 public class EffectorDescription {
 
     public static class EffectorAttributes extends DescriptionAttributes {
-        @Nullable
+
         IEffector.Kind kind = null;
         OperationRepresentation commandPattern;
         public EffectorAttributes      effectorType;
@@ -71,7 +69,7 @@ public class EffectorDescription {
             this.commandPattern = commandPattern;
         }
 
-        @NotNull
+
         @Override
         public Map<String, String[]> getArrays () {
             Map<String, String[]> a = new HashMap<> ();
@@ -82,7 +80,7 @@ public class EffectorDescription {
             return Collections.unmodifiableMap (a);
         }
 
-        @NotNull
+
         @Override
         public Map<String, String> getInfo () {
             Map<String, String> a = new HashMap<> ();
@@ -93,7 +91,7 @@ public class EffectorDescription {
             return Collections.unmodifiableMap (a);
         }
 
-        @Nullable
+
         public IEffector.Kind getKind () {
             if (kind == null && effectorType != null)
                 return effectorType.getKind ();
@@ -106,9 +104,9 @@ public class EffectorDescription {
         }
     }
 
-    @Nullable
+
     public SortedSet<EffectorAttributes> effectors = null;
-    @NotNull
+
     public final TreeMap<String, EffectorAttributes> effectorTypes;
 
     /**

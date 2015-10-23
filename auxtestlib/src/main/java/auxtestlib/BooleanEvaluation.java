@@ -9,5 +9,5 @@ public interface BooleanEvaluation {
 	 * @return result of the evaluation
 	 * @throws Exception failed to perform the computation
 	 */
-	public boolean evaluate() throws Exception;
+	boolean evaluate () throws Exception;
 }

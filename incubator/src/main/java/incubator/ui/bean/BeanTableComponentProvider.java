@@ -1,8 +1,7 @@
 package incubator.ui.bean;
 
-import java.awt.Component;
-
-import javax.swing.JTable;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * Interface implemented by classes that provide the component to show in the
@@ -19,6 +18,6 @@ public interface BeanTableComponentProvider {
 	 * @param column column number
 	 * @return a component configured for display
 	 */
-	public Component getComponentForBean(JTable table, BeanRendererInfo info,
-			boolean is_selected, boolean has_focus, int row, int column);
+	Component getComponentForBean (JTable table, BeanRendererInfo info,
+								   boolean is_selected, boolean has_focus, int row, int column);
 }

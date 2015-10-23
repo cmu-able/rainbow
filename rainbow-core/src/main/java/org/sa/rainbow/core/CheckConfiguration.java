@@ -23,8 +23,7 @@
  */
 package org.sa.rainbow.core;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
 import org.sa.rainbow.core.gauges.GaugeDescription;
 import org.sa.rainbow.core.models.EffectorDescription;
 import org.sa.rainbow.core.models.ModelsManager;
@@ -84,7 +83,7 @@ public class CheckConfiguration {
                 return loadEffectorDesc;
             }
 
-            @NotNull
+
             @Override
             public ModelsManager modelsManager () {
                 return mm;
@@ -109,7 +108,7 @@ public class CheckConfiguration {
 
     }
 
-    @Nullable
+
     public ModelsManager modelsManager () {
         return null;
     }

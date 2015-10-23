@@ -23,7 +23,7 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import org.jetbrains.annotations.NotNull;
+
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.IModelsManager;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
@@ -50,13 +50,13 @@ public class ESEBModelChangeBusAnnouncePort extends AbstractESEBDisposablePort i
     }
 
     @Override
-    public void announce (@NotNull List<? extends IRainbowMessage> event) {
+    public void announce (List<? extends IRainbowMessage> event) {
         for (IRainbowMessage msg : event) {
             announce (msg);
         }
     }
 
-    @NotNull
+
     @Override
     public IRainbowMessage createMessage () {
         return new RainbowESEBMessage ();

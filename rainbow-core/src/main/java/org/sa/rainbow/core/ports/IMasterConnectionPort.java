@@ -23,7 +23,6 @@
  */
 package org.sa.rainbow.core.ports;
 
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 
@@ -54,7 +53,6 @@ public interface IMasterConnectionPort extends IDisposablePort {
      * @return A deployment port through which the delegate can be managed
      * @throws RainbowConnectionException TODO
      */
-    @Nullable
     IDelegateManagementPort connectDelegate (String delegateID, Properties connectionProperties) throws RainbowConnectionException;
 
     /**

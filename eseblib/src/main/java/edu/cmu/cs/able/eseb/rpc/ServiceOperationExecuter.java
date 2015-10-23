@@ -1,10 +1,9 @@
 package edu.cmu.cs.able.eseb.rpc;
 
+import edu.cmu.cs.able.typelib.type.DataValue;
 import incubator.Pair;
 
 import java.util.Map;
-
-import edu.cmu.cs.able.typelib.type.DataValue;
 
 /**
  * Interface implemented by the objects responsible for executing an operation
@@ -22,7 +21,7 @@ public interface ServiceOperationExecuter {
 	 * {@link FailureInformation} object will be created from the exception
 	 * and will be used as return value
 	 */
-	public Pair<Map<String, DataValue>, FailureInformation> execute(
+	Pair<Map<String, DataValue>, FailureInformation> execute (
 			DataValue operation, Map<String, DataValue> input_arguments)
 			throws Exception;
 }

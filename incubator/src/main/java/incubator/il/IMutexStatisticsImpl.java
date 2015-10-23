@@ -149,12 +149,9 @@ class IMutexStatisticsImpl implements IMutexStatistics, Serializable {
 		if (impl.m_average_usage_time != m_average_usage_time) {
 			return false;
 		}
-		
-		if (impl.m_average_wait_time != m_average_wait_time) {
-			return false;
-		}
-		
-		return true;
+
+		return impl.m_average_wait_time == m_average_wait_time;
+
 	}
 	
 	@Override

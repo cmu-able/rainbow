@@ -35,8 +35,6 @@ import edu.cmu.cs.able.typelib.struct.UnknownFieldException;
 import edu.cmu.cs.able.typelib.type.DataType;
 import edu.cmu.cs.able.typelib.type.DataValue;
 import incubator.pval.Ensure;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.models.DescriptionAttributes;
 import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
 import org.sa.rainbow.core.models.ProbeDescription;
@@ -62,9 +60,9 @@ public class DescriptionAttributesConverter implements TypelibJavaConversionRule
         m_scope = scope;
     }
 
-    @NotNull
+
     @Override
-    public <T> T to_java (DataValue value, @NotNull Class<T> cls, @NotNull TypelibJavaConverter converter)
+    public <T> T to_java (DataValue value, Class<T> cls, TypelibJavaConverter converter)
             throws ValueConversionException {
         if (value instanceof StructureDataValue) {
             try {
@@ -106,7 +104,7 @@ public class DescriptionAttributesConverter implements TypelibJavaConversionRule
                 @SuppressWarnings ("unchecked")
                 T t = (T )atts;
                 return t;
-            } catch (@NotNull UnknownFieldException | AmbiguousNameException e) {
+            } catch (UnknownFieldException | AmbiguousNameException e) {
                 throw new ValueConversionException (MessageFormat.format ("Could not convert from {0} to {1}",
                         value.toString (), cls.getCanonicalName ()), e);
             }
@@ -116,7 +114,7 @@ public class DescriptionAttributesConverter implements TypelibJavaConversionRule
     }
 
     @Override
-    public boolean handles_typelib (@NotNull DataValue value, @Nullable Class<?> cls) {
+    public boolean handles_typelib (DataValue value, Class<?> cls) {
         Ensure.not_null (value);
         if (value.type ().name ().equals ("probe_description") || value.type ().name ().equals ("effector_description")) {
             if (cls == null || DescriptionAttributes.class.isAssignableFrom (cls)) return true;
@@ -125,12 +123,12 @@ public class DescriptionAttributesConverter implements TypelibJavaConversionRule
     }
 
     @Override
-    public boolean handles_java (Object value, @Nullable DataType dst) {
+    public boolean handles_java (Object value, DataType dst) {
         return (value instanceof ProbeAttributes || value instanceof EffectorAttributes) && (dst == null || dst.name ().equals ("probe_description") || dst.name ().equals ("effector_description"));
     }
 
     @Override
-    public DataValue from_java (Object value, @Nullable DataType dst, @NotNull TypelibJavaConverter converter)
+    public DataValue from_java (Object value, DataType dst, TypelibJavaConverter converter)
             throws ValueConversionException {
         try {
             if ((dst == null || dst instanceof StructureDataType) && value instanceof ProbeAttributes) {
@@ -159,7 +157,7 @@ public class DescriptionAttributesConverter implements TypelibJavaConversionRule
                 fields.put (kind, converter.from_java (ea.getKind ().name (), m_scope.string ()));
                 return sdt.make (fields);
             }
-        } catch (@NotNull UnknownFieldException | AmbiguousNameException e) {
+        } catch (UnknownFieldException | AmbiguousNameException e) {
             throw new ValueConversionException (MessageFormat.format ("Could not convert from {0} to {1}", value
                     .getClass ().getCanonicalName (), (dst == null ? "probe_description or effector_description" : dst
                             .absolute_hname ().toString ())), e);
@@ -171,10 +169,11 @@ public class DescriptionAttributesConverter implements TypelibJavaConversionRule
 
     }
 
-    @NotNull
-    private Map<Field, DataValue> from_java (@NotNull DescriptionAttributes da,
-                                             @NotNull StructureDataType sdt,
-                                             @NotNull TypelibJavaConverter converter) throws AmbiguousNameException, ValueConversionException {
+
+    private Map<Field, DataValue> from_java (DescriptionAttributes da,
+                                             StructureDataType sdt,
+                                             TypelibJavaConverter converter) throws AmbiguousNameException,
+                                                                                    ValueConversionException {
         Map<Field, DataValue> fields = new HashMap<> ();
 
         Field name = sdt.field ("name");

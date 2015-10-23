@@ -26,8 +26,6 @@ package org.sa.rainbow.util;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 import org.reflections.scanners.SubTypesScanner;
@@ -86,14 +84,13 @@ public class Util {
             + RB_ESC + "[^\\$]*");
 
 
-    @Nullable
     public static File computeBasePath (final String configPath) {
         // determine path to target config dir
         File basePath = new File (System.getProperty ("user.dir"));
         LOGGER.debug (MessageFormat.format ("CWD: {0}, looking for config \"{1}\"", basePath, configPath));
         FilenameFilter configFilter = new FilenameFilter () {
             @Override
-            public boolean accept (File dir, @NotNull String name) {
+            public boolean accept (File dir, String name) {
                 return name.equals (configPath);
             }
         };
@@ -111,7 +108,7 @@ public class Util {
         return basePath;
     }
 
-    public static File getRelativeToPath (@NotNull File parent, @NotNull String relPath) {
+    public static File getRelativeToPath (File parent, String relPath) {
         try {
             return new File (parent, relPath).getCanonicalFile ();
         }
@@ -122,13 +119,13 @@ public class Util {
         return null;
     }
 
-    public static String unifyPath (@NotNull String path) {
+    public static String unifyPath (String path) {
         if (File.separator != FILESEP) return path.replace (File.separator, FILESEP);
         return path;
     }
 
-    @Nullable
-    public static String evalTokens (@Nullable String str, @Nullable Properties props) {
+
+    public static String evalTokens (String str, Properties props) {
         if (str == null) return str;
         if (props == null) return str;
         String result = str;
@@ -148,14 +145,14 @@ public class Util {
         return result;
     }
 
-    @Nullable
-    public static String evalTokens (@Nullable String str) {
+
+    public static String evalTokens (String str) {
         if (str == null) return str;
         return evalTokens (str, Rainbow.allProperties ());
     }
 
-    @NotNull
-    public static String[] evalCommandParameters (@NotNull String value) {
+
+    public static String[] evalCommandParameters (String value) {
         String regex = ",|\\.|\\(|\\)";
         String[] split = value.split (regex);
 
@@ -166,8 +163,8 @@ public class Util {
         return ret;
     }
 
-    @NotNull
-    public static String[] evalCommand (@NotNull String value) {
+
+    public static String[] evalCommand (String value) {
         String[] split = value.split (",|\\.|\\(|\\|");
         for (int i = 0; i < split.length; i++) {
             split[i] = split[i].trim ();
@@ -180,9 +177,9 @@ public class Util {
     //////////////////////////////////////////////
     //Type manipulation utility
     //
-    @Nullable
+
     private static Map<String, Class<?>>   m_primName2Class  = null;
-    @Nullable
+
     private static Map<Class<?>, Class<?>> m_primClass2Class = null;
 
     private static void lazyInitMaps () {
@@ -209,7 +206,7 @@ public class Util {
         m_primClass2Class.put (char.class, Character.class);
     }
 
-    public static Object parseObject (String val, @NotNull String classStr) {
+    public static Object parseObject (String val, String classStr) {
         Object valObj = val; // by default, return just the String value
         try {
             Class<?> typeClass = Class.forName (classStr);
@@ -223,12 +220,12 @@ public class Util {
             // see if it's one of the primitive types
             lazyInitMaps ();
             valObj = parsePrimitiveValue (val, m_primName2Class.get (classStr.intern ()));
-        } catch (@NotNull InstantiationException | IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException e) {
         }
         return valObj;
     }
 
-    public static Object parsePrimitiveValue (String val, @Nullable Class<?> clazz) {
+    public static Object parsePrimitiveValue (String val, Class<?> clazz) {
         if (clazz == null) return val;
 
         Object primVal = val; // by default, return the String value
@@ -245,7 +242,8 @@ public class Util {
             Object[] args = new Object[1];
             args[0] = val;
             primVal = m.invoke (null, args);
-        } catch (@NotNull SecurityException | InvocationTargetException | IllegalAccessException | IllegalArgumentException | NoSuchMethodException e) {
+        } catch (SecurityException | InvocationTargetException | IllegalAccessException | IllegalArgumentException |
+                NoSuchMethodException e) {
         }
         return primVal;
     }
@@ -263,14 +261,14 @@ public class Util {
      *            the element's location in lowercase
      * @return String the concatenated string forming the unique identifier
      */
-    @NotNull
-    public static String genID (String name, @NotNull String target) {
+
+    public static String genID (String name, String target) {
         return name + AT + target.toLowerCase ();
     }
 
-    @Nullable
-    public static Pair<String, String> decomposeID (@NotNull String id) {
-        String name = null;
+
+    public static Pair<String, String> decomposeID (String id) {
+        String name;
         String loc = null;
         int atIdx = id.indexOf (AT);
         if (atIdx > -1) { // got both name and target location
@@ -283,9 +281,9 @@ public class Util {
         return new Pair<> (name, loc);
     }
 
-    @Nullable
-    public static ModelReference decomposeModelReference (@NotNull String modelRef) {
-        String name = null;
+
+    public static ModelReference decomposeModelReference (String modelRef) {
+        String name;
         String type = null;
         int atIdx = modelRef.indexOf (':');
         if (atIdx > -1) { // got both name and target location
@@ -298,7 +296,7 @@ public class Util {
         return new ModelReference (name, type);
     }
 
-    @NotNull
+
     public static String genModelRef (String modelName, String modelType) {
         return modelName + ":" + modelType;
     }
@@ -310,7 +308,7 @@ public class Util {
      *            the process to read output from
      * @return String the textual output, with any MS-Dos newline replaced
      */
-    public static String getProcessOutput (@NotNull Process p) {
+    public static String getProcessOutput (Process p) {
         String str = "";
         try {
             StringBuilder buf = new StringBuilder ();
@@ -410,7 +408,6 @@ public class Util {
     public static final String   DATA_PATTERN        = "%d{ISO8601} %m%n";
 
 
-    @NotNull
     public static Properties defineLoggerProperties () {
         String filepath = Rainbow.getProperty (RainbowConstants.PROPKEY_LOG_PATH);
         if (!filepath.startsWith ("/")) {
@@ -454,11 +451,10 @@ public class Util {
         return props;
     }
 
-    @Nullable
+
     private static Logger m_dataLogger = null;
 
 
-    @Nullable
     public static Logger dataLogger () {
         if (m_dataLogger == null) {
 //            PropertyConfigurator.configure (defineLoggerProperties ());
@@ -497,8 +493,8 @@ public class Util {
      * @throws ClassNotFoundException
      *             if the package name points to an invalid package
      */
-    @NotNull
-    public static Class[] getClasses (@NotNull String pkgname) throws ClassNotFoundException {
+
+    public static Class[] getClasses (String pkgname) throws ClassNotFoundException {
         List<ClassLoader> classLoaderList = new LinkedList<> ();
         classLoaderList.add (ClasspathHelper.contextClassLoader ());
         classLoaderList.add (ClasspathHelper.staticClassLoader ());
@@ -569,7 +565,7 @@ public class Util {
 //        return classArray;
     }
 
-    public static Level reportTypeToPriority (@NotNull ReportType type) {
+    public static Level reportTypeToPriority (ReportType type) {
         switch (type) {
         case INFO:
             return Level.INFO;
@@ -584,8 +580,7 @@ public class Util {
     }
 
 
-    @NotNull
-    public static Properties propertiesByPrefix (@NotNull String prefix, @NotNull Properties props) {
+    public static Properties propertiesByPrefix (String prefix, Properties props) {
         Properties result = new Properties ();
         for (Object o : props.keySet ()) {
             String key = (String )o;
@@ -597,8 +592,8 @@ public class Util {
         return result;
     }
 
-    @NotNull
-    public static Properties propertiesByRegex (@NotNull String regex, @NotNull Properties props) {
+
+    public static Properties propertiesByRegex (String regex, Properties props) {
         Properties result = new Properties ();
         for (Object o : props.keySet ()) {
             String key = (String )o;
@@ -609,7 +604,7 @@ public class Util {
         return result;
     }
 
-    public static boolean safeEquals (@Nullable Object a, @Nullable Object b) {
+    public static boolean safeEquals (Object a, Object b) {
         return a != null ? a.equals (b) : b == null;
     }
 }

@@ -26,8 +26,6 @@
  */
 package org.sa.rainbow.core.models;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,19 +42,19 @@ public class DescriptionAttributes implements Comparable<DescriptionAttributes> 
     private static final String INFO_SUFFIX = "Info";
 
     /** The name of the element */
-    @Nullable
+    
     public String name = null;
     /** The target location, e.g., hostname, of the element */
-    @Nullable
+    
     private String location = null;
     /** The String name of the "kind" for this element */
-    @Nullable
+    
     private String kindName = null;
     /** Key'd map of info attributes, not sorted. */
-    @Nullable
+    
     private Map<String,String> info = null;
     /** Key'd map of String arrays, sorted by natural order of key. */
-    @Nullable
+    
     private Map<String,String[]> arrays = null;
 
     /**
@@ -71,16 +69,16 @@ public class DescriptionAttributes implements Comparable<DescriptionAttributes> 
      * @see java.lang.Comparable#compareTo(java.lang.Object)
      */
     @Override
-    public int compareTo (@NotNull DescriptionAttributes o) {
+    public int compareTo (DescriptionAttributes o) {
         return name.compareTo(o.name);
     }
 
-    @NotNull
+
     public String infoPropName () {
         return getKindName() + INFO_SUFFIX;
     }
 
-    @Nullable
+
     public String getLocation () {
         return location;
     }
@@ -89,7 +87,7 @@ public class DescriptionAttributes implements Comparable<DescriptionAttributes> 
         this.location = location;
     }
 
-    @Nullable
+
     public String getKindName () {
         return kindName;
     }
@@ -98,7 +96,7 @@ public class DescriptionAttributes implements Comparable<DescriptionAttributes> 
         this.kindName = kindName;
     }
 
-    @Nullable
+
     public Map<String,String> getInfo () {
         return info;
     }
@@ -111,7 +109,7 @@ public class DescriptionAttributes implements Comparable<DescriptionAttributes> 
         this.info = info;
     }
 
-    @Nullable
+
     public Map<String,String[]> getArrays () {
         return arrays;
     }

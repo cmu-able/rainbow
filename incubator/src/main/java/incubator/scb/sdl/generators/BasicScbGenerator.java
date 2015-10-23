@@ -3,30 +3,10 @@ package incubator.scb.sdl.generators;
 import incubator.dispatch.Dispatcher;
 import incubator.dispatch.DispatcherOp;
 import incubator.dispatch.LocalDispatcher;
-import incubator.jcodegen.JavaClass;
-import incubator.jcodegen.JavaCode;
-import incubator.jcodegen.JavaField;
-import incubator.jcodegen.JavaMethod;
-import incubator.jcodegen.JavaPackage;
-import incubator.jcodegen.JavaType;
-import incubator.jcodegen.ProtectionLevel;
+import incubator.jcodegen.*;
 import incubator.pval.Ensure;
-import incubator.scb.Scb;
-import incubator.scb.ScbBooleanField;
-import incubator.scb.ScbDateField;
-import incubator.scb.ScbEnumField;
-import incubator.scb.ScbField;
-import incubator.scb.ScbIntegerField;
-import incubator.scb.ScbLongField;
-import incubator.scb.ScbTextField;
-import incubator.scb.ScbUpdateListener;
-import incubator.scb.sdl.GenerationInfo;
-import incubator.scb.sdl.GenerationResult;
-import incubator.scb.sdl.SdlAttribute;
-import incubator.scb.sdl.SdlBean;
-import incubator.scb.sdl.SdlBeanGenerator;
-import incubator.scb.sdl.SdlEnumerationType;
-import incubator.scb.sdl.SdlGenerationException;
+import incubator.scb.*;
+import incubator.scb.sdl.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -147,11 +127,11 @@ public class BasicScbGenerator implements SdlBeanGenerator {
 		JavaType ud_type = new JavaType(
 				LocalDispatcher.class.getCanonicalName() + "<"
 				+ ScbUpdateListener.class.getCanonicalName() + "<"
-				+ bc.name() + ">>");;
+						+ bc.name () + ">>");
 		JavaType ud_pub_type = new JavaType(
 				Dispatcher.class.getCanonicalName() + "<"
 				+ ScbUpdateListener.class.getCanonicalName() + "<"
-				+ bc.name() + ">>");;
+						+ bc.name () + ">>");
 		String ud_v_name;
 		String ud_m_name;
 		if (b.parent() == null) {

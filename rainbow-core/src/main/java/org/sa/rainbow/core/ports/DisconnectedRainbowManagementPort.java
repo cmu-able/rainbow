@@ -24,7 +24,6 @@
 package org.sa.rainbow.core.ports;
 
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Properties;
 
@@ -41,7 +40,7 @@ public class DisconnectedRainbowManagementPort implements IDelegateManagementPor
 
     private static final DisconnectedRainbowManagementPort m_instance = new DisconnectedRainbowManagementPort ();
 
-    @NotNull
+
     public static IDelegateManagementPort instance () {
         return m_instance;
     }
@@ -49,7 +48,7 @@ public class DisconnectedRainbowManagementPort implements IDelegateManagementPor
     private DisconnectedRainbowManagementPort () {
     }
 
-    @NotNull
+
     @Override
     public String getDelegateId () {
         LOGGER.error ("Attempt to get the delegate of a disconnected deployment port");

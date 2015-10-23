@@ -36,8 +36,8 @@ public class AcmeTypecheckSetCmd extends AcmeModelOperation<IAcmeElementExtensio
 
     private final Boolean m_typechecks;
 
-    public AcmeTypecheckSetCmd (AcmeModelInstance model, String typechecks) {
-        super ("setTypecheckResult", model, "self", typechecks);
+    public AcmeTypecheckSetCmd (AcmeModelInstance model, String system, String typechecks) {
+        super ("setTypecheckResult", model, system, typechecks);
         m_typechecks = Boolean.valueOf (typechecks);
     }
 
@@ -45,6 +45,7 @@ public class AcmeTypecheckSetCmd extends AcmeModelOperation<IAcmeElementExtensio
     public IAcmeElementExtension getResult () throws IllegalStateException {
         return ((IAcmeUserDataCommand )m_command).getValue ();
     }
+
 
     @Override
     protected List<IAcmeCommand<?>> doConstructCommand () throws RainbowModelException {

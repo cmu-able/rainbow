@@ -23,7 +23,6 @@
  */
 package org.sa.rainbow.core.ports.local;
 
-import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.IModelsManager;
@@ -45,7 +44,7 @@ public class LocalModelsManagerUSPort implements IModelUSBusPort {
     public void updateModel (IRainbowOperation command) {
         try {
             m_modelsManager.requestModelUpdate (command);
-        } catch (@NotNull IllegalStateException | RainbowException e) {
+        } catch (IllegalStateException | RainbowException e) {
             // TODO Auto-generated catch block
             e.printStackTrace ();
         }
@@ -55,7 +54,7 @@ public class LocalModelsManagerUSPort implements IModelUSBusPort {
     public void updateModel (List<IRainbowOperation> commands, boolean transaction) {
         try {
             m_modelsManager.requestModelUpdate (commands, transaction);
-        } catch (@NotNull IllegalStateException | RainbowException e) {
+        } catch (IllegalStateException | RainbowException e) {
             // TODO Auto-generated catch block
             e.printStackTrace ();
         }

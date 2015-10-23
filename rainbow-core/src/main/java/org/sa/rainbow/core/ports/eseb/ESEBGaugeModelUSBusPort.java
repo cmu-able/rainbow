@@ -23,7 +23,7 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import org.jetbrains.annotations.NotNull;
+
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowMaster;
@@ -53,7 +53,7 @@ public class ESEBGaugeModelUSBusPort extends AbstractESEBDisposablePort implemen
     }
 
     @Override
-    public void updateModel (@NotNull IRainbowOperation command) {
+    public void updateModel (IRainbowOperation command) {
         RainbowESEBMessage msg = getConnectionRole().createMessage (/*ChannelT.MODEL_US*/);
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, m_client.id ());
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_UPDATE_MODEL);
@@ -63,7 +63,7 @@ public class ESEBGaugeModelUSBusPort extends AbstractESEBDisposablePort implemen
     }
 
     @Override
-    public void updateModel (@NotNull List<IRainbowOperation> commands, boolean transaction) {
+    public void updateModel (List<IRainbowOperation> commands, boolean transaction) {
         RainbowESEBMessage msg = getConnectionRole().createMessage ();
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, m_client.id ());
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_UPDATE_MODEL + "_multi");

@@ -296,13 +296,13 @@ public class ZNNCommandFactory extends AcmeModelCommandFactory {
                 Boolean.toString (enabled));
     }
 
-    public SetFidelityCmd setFidelityCmd (IAcmeComponent server, String fidelity) {
+    public SetFidelityCmd setFidelityCmd (IAcmeComponent server, int fidelity) {
         Ensure.is_true (server.declaresType ("ServerT"));
         if (ModelHelper.getAcmeSystem (server) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
         return new SetFidelityCmd ((AcmeModelInstance) m_modelInstance, server.getQualifiedName (),
-                fidelity);
+                                   Integer.toString (fidelity));
     }
 
     public SetCaptchaResponseCmd setCaptchaResponseCmd (IAcmeComponent client, int response) {

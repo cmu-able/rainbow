@@ -23,7 +23,6 @@
  */
 package org.sa.rainbow.core.models;
 
-import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.util.HashCodeUtil;
 import org.sa.rainbow.util.Util;
 
@@ -36,7 +35,7 @@ public class ModelReference {
         m_modelType = modelType;
     }
 
-    public ModelReference (@NotNull ModelReference modelRef) {
+    public ModelReference (ModelReference modelRef) {
         m_modelName = modelRef.getModelName ();
         m_modelType = modelRef.getModelType ();
     }
@@ -49,14 +48,12 @@ public class ModelReference {
         return m_modelType;
     }
 
-    @NotNull
     @Override
     public String toString () {
         return getModelName () + ":" + getModelType ();
     }
 
-    @NotNull
-    public static ModelReference fromString (@NotNull String ref) {
+    public static ModelReference fromString (String ref) {
         String[] split = ref.split (":");
         return new ModelReference (split[0], split[1]);
     }

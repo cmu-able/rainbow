@@ -27,8 +27,6 @@
 package org.sa.rainbow.util;
 
 import org.ho.yaml.Yaml;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.gauges.GaugeDescription;
@@ -69,8 +67,7 @@ public abstract class YamlUtil {
 //        String utilityPath = Rainbow.getProperty (RainbowConstants.PROPKEY_UTILITY_PATH);
 //        return loadUtilityPrefs (utilityPath);
 //    }
-    @NotNull
-    public static UtilityPreferenceDescription loadUtilityPrefs (@NotNull String utilityPath) {
+    public static UtilityPreferenceDescription loadUtilityPrefs (String utilityPath) {
         UtilityPreferenceDescription prefDesc = new UtilityPreferenceDescription ();
 
         Map<String, Map<String, Map>> utilityDefMap = null;
@@ -149,14 +146,14 @@ public abstract class YamlUtil {
         return prefDesc;
     }
 
-    @NotNull
+
     public static GaugeDescription loadGaugeSpecs () {
         File gaugeSpec = Util.getRelativeToPath (Rainbow.instance ().getTargetPath (),
                 Rainbow.getProperty (RainbowConstants.PROPKEY_GAUGES_PATH));
         return loadGaugeSpecs (gaugeSpec);
     }
 
-    @NotNull
+
     @SuppressWarnings ("unchecked")
     public static GaugeDescription loadGaugeSpecs (File gaugeSpec) {
         GaugeDescription gd = new GaugeDescription ();
@@ -296,7 +293,7 @@ public abstract class YamlUtil {
         return gd;
     }
 
-    @NotNull
+
     @SuppressWarnings ("unchecked")
     public static EffectorDescription loadEffectorDesc () {
         EffectorDescription ed = new EffectorDescription ();
@@ -377,7 +374,7 @@ public abstract class YamlUtil {
         return ed;
     }
 
-    @NotNull
+
     @SuppressWarnings ("unchecked")
     public static ProbeDescription loadProbeDesc () {
         ProbeDescription ed = new ProbeDescription ();
@@ -436,7 +433,7 @@ public abstract class YamlUtil {
      * @param infoMap
      *            the map of key-value info pairs
      */
-    public static void extractArrays (@NotNull DescriptionAttributes attr, @Nullable Map<String, Object> infoMap) {
+    public static void extractArrays (DescriptionAttributes attr, Map<String, Object> infoMap) {
         List<String> arrayKeys = new ArrayList<> ();
         if (infoMap == null) return;
         for (Map.Entry<String, Object> pair : infoMap.entrySet ()) {

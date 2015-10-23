@@ -23,7 +23,7 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import org.jetbrains.annotations.NotNull;
+
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.ports.IEffectorLifecycleBusPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
@@ -47,13 +47,13 @@ IEffectorLifecycleBusPort {
             m_msg = msg;
         }
 
-        @NotNull
+
         @Override
         public String id () {
             return (String )m_msg.getProperty (IEffectorProtocol.ID);
         }
 
-        @NotNull
+
         @Override
         public String service () {
             return (String )m_msg.getProperty (IEffectorProtocol.SERVICE);
@@ -80,7 +80,7 @@ IEffectorLifecycleBusPort {
         getConnectionRole().addListener (new IESEBListener () {
 
             @Override
-            public void receive (@NotNull RainbowESEBMessage msg) {
+            public void receive (RainbowESEBMessage msg) {
                 String type = (String )msg.getProperty (ESEBConstants.MSG_TYPE_KEY);
                 MessageEffectorIdentifier mei;
                 switch (type) {

@@ -1,25 +1,17 @@
 package edu.cmu.cs.able.typelib.txtenc.typelib;
 
-import incubator.pval.Ensure;
-
-import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
-
 import edu.cmu.cs.able.typelib.enc.InvalidEncodingException;
-import edu.cmu.cs.able.typelib.prim.Int16Type;
-import edu.cmu.cs.able.typelib.prim.Int16Value;
-import edu.cmu.cs.able.typelib.prim.Int32Type;
-import edu.cmu.cs.able.typelib.prim.Int32Value;
-import edu.cmu.cs.able.typelib.prim.Int64Type;
-import edu.cmu.cs.able.typelib.prim.Int64Value;
-import edu.cmu.cs.able.typelib.prim.Int8Type;
-import edu.cmu.cs.able.typelib.prim.Int8Value;
+import edu.cmu.cs.able.typelib.prim.*;
 import edu.cmu.cs.able.typelib.txtenc.DelegateTextEncoding;
 import edu.cmu.cs.able.typelib.txtenc.TextEncoding;
 import edu.cmu.cs.able.typelib.type.DataType;
 import edu.cmu.cs.able.typelib.type.DataTypeScope;
 import edu.cmu.cs.able.typelib.type.DataValue;
+import incubator.pval.Ensure;
+
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 
 /**
  * Text encoding that encodes integer values.
@@ -39,13 +31,9 @@ public class IntegerDelegateTextEncoding implements DelegateTextEncoding {
 	@Override
 	public boolean supports(DataType t) {
 		Ensure.not_null(t);
-		
-		if (t instanceof Int8Type || t instanceof Int16Type
-				|| t instanceof Int32Type || t instanceof Int64Type) {
-			return true;
-		} else {
-			return false;
-		}
+
+		return t instanceof Int8Type || t instanceof Int16Type
+				|| t instanceof Int32Type || t instanceof Int64Type;
 	}
 
 	@Override

@@ -7,5 +7,5 @@ public interface Pinged {
 	/**
 	 * A ping has been received.
 	 */
-	public void ping();
+	void ping ();
 }

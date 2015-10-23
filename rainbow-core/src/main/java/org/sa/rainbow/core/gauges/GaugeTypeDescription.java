@@ -26,8 +26,6 @@
  */
 package org.sa.rainbow.core.gauges;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
@@ -42,24 +40,19 @@ import java.util.Map.Entry;
  */
 public class GaugeTypeDescription {
 
-    @Nullable
     private String m_typeName = null;
-    @Nullable
     private String m_typeComment = null;
     /** Stores, by type name, a hash of type-name pairs. */
-    @Nullable
     Map<String, OperationRepresentation> m_commandSignatures = null;
     /** Stores, by name, a hash of type-name and any default value of the setup parameters. */
-    @Nullable
     private Map<String, TypedAttributeWithValue> m_setupParams = null;
     /** Stores, by name, a hash of the type-name and any default value of the configuration parameters. */
-    @Nullable
     private Map<String, TypedAttributeWithValue> m_configParams = null;
 
     /**
      * Main Constructor.
      */
-    public GaugeTypeDescription (String gaugeType, @Nullable String typeComment) {
+    public GaugeTypeDescription (String gaugeType, String typeComment) {
         m_typeName = gaugeType;
         m_typeComment = typeComment == null ? "" : typeComment;
         m_commandSignatures = new HashMap<> ();
@@ -67,7 +60,7 @@ public class GaugeTypeDescription {
         m_configParams = new HashMap<> ();
     }
 
-    @Nullable
+
     public GaugeInstanceDescription makeInstance (String gaugeName, String instComment) {
         // create a Gauge Instance description using type, name, and comments
         GaugeInstanceDescription inst = new GaugeInstanceDescription(m_typeName, gaugeName, m_typeComment, instComment);
@@ -88,12 +81,12 @@ public class GaugeTypeDescription {
         return inst;
     }
 
-    @Nullable
+
     public String gaugeType () {
         return m_typeName;
     }
 
-    @Nullable
+
     public String typeComment () {
         return m_typeComment;
     }
@@ -113,7 +106,7 @@ public class GaugeTypeDescription {
         return m_commandSignatures.get(name);
     }
 
-    @NotNull
+
     public List<Pair<String, OperationRepresentation>> commandSignatures () {
         List<Pair<String, OperationRepresentation>> valueList = new ArrayList<> ();
         for (Entry<String, OperationRepresentation> pair : m_commandSignatures.entrySet ()) {
@@ -123,7 +116,7 @@ public class GaugeTypeDescription {
         return valueList;
     }
 
-    public void addSetupParam (@NotNull TypedAttributeWithValue triple) {
+    public void addSetupParam (TypedAttributeWithValue triple) {
         m_setupParams.put (triple.getName (), triple);
     }
 
@@ -131,14 +124,14 @@ public class GaugeTypeDescription {
         return m_setupParams.get(name);
     }
 
-    @NotNull
+
     public List<TypedAttributeWithValue> setupParams () {
         List<TypedAttributeWithValue> paramList = new ArrayList<> (m_setupParams.values ());
         Collections.sort(paramList);
         return paramList;
     }
 
-    public void addConfigParam (@NotNull TypedAttributeWithValue triple) {
+    public void addConfigParam (TypedAttributeWithValue triple) {
         m_configParams.put (triple.getName (), triple);
     }
 
@@ -146,7 +139,7 @@ public class GaugeTypeDescription {
         return m_configParams.get(name);
     }
 
-    @NotNull
+
     public List<TypedAttributeWithValue> configParams () {
         List<TypedAttributeWithValue> paramList = new ArrayList<> (m_configParams.values ());
         Collections.sort(paramList);

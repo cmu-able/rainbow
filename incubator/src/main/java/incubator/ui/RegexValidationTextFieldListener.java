@@ -8,5 +8,5 @@ public interface RegexValidationTextFieldListener {
 	/**
 	 * Invoked when the text field has changed.
 	 */
-	public void text_field_changed();
+	void text_field_changed ();
 }

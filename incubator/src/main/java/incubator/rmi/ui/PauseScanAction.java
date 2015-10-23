@@ -35,12 +35,9 @@ public class PauseScanAction extends ContextualAction {
 		if (state == null) {
 			return false;
 		}
-		
-		if (state.intValue() == RmiScanner.SCANNING) {
-			return true;
-		}
-		
-		return false;
+
+		return state.intValue () == RmiScanner.SCANNING;
+
 	}
 
 	@Override

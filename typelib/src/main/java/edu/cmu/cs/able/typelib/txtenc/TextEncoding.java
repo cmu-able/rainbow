@@ -1,18 +1,5 @@
 package edu.cmu.cs.able.typelib.txtenc;
 
-import incubator.pval.Ensure;
-
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.Writer;
-import java.util.HashSet;
-import java.util.Set;
-
 import edu.cmu.cs.able.typelib.AsciiEncoding;
 import edu.cmu.cs.able.typelib.enc.DataValueEncoding;
 import edu.cmu.cs.able.typelib.enc.InvalidEncodingException;
@@ -21,6 +8,11 @@ import edu.cmu.cs.able.typelib.scope.HierarchicalName;
 import edu.cmu.cs.able.typelib.type.DataType;
 import edu.cmu.cs.able.typelib.type.DataTypeScope;
 import edu.cmu.cs.able.typelib.type.DataValue;
+import incubator.pval.Ensure;
+
+import java.io.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Encoding that converts all data values into text. The text encoding does
@@ -158,8 +150,8 @@ public class TextEncoding implements DataValueEncoding {
 				 * Nothing to do.
 				 */
 			}
-		};
-		
+		}
+
 		try (Reader r = new InnerReader()) {
 			return decode(r, scope);
 		}

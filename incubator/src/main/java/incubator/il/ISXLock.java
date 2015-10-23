@@ -2,78 +2,78 @@ package incubator.il;
 
 /**
  * Interface de um lock shared/exclusive. Os locks de shared/exclusive permitem
- * que vários threads o obtenham como shared mas apenas um o obtenha como
- * exclusive não podendo ser obtido como shared ou exclusive em simultâneo. O
+ * que vï¿½rios threads o obtenham como shared mas apenas um o obtenha como
+ * exclusive nï¿½o podendo ser obtido como shared ou exclusive em simultï¿½neo. O
  * lock existe num dos seguintes estados:
  * <ul>
- * <li><code>FREE</code>: O lock não está adquirido por nenhum thread;</li>
- * <li><code>SHARED</code>: O lock está adquirido por um ou mais threads em
- * modo partilhado. Não existem threads à espera do modo exclusivo;</li>
- * <li><code>SHARED_BLOCKING</code>: O lock está adqurido por um ou mais
+ * <li><code>FREE</code>: O lock nï¿½o estï¿½ adquirido por nenhum thread;</li>
+ * <li><code>SHARED</code>: O lock estï¿½ adquirido por um ou mais threads em
+ * modo partilhado. Nï¿½o existem threads ï¿½ espera do modo exclusivo;</li>
+ * <li><code>SHARED_BLOCKING</code>: O lock estï¿½ adqurido por um ou mais
  * threads me modo partilhado mas existem pedidos em fila de espera pendentes
- * por modo exclusivo. Novos pedidos em modo partilhado ou exclusivo são
+ * por modo exclusivo. Novos pedidos em modo partilhado ou exclusivo sï¿½o
  * colocados em fila de espera.</li>
- * <li><code>EXCLUSIVE</code>: o lock está adqurido por um thread em modo
+ * <li><code>EXCLUSIVE</code>: o lock estï¿½ adqurido por um thread em modo
  * exclusivo.</li>
  * </ul> 
  */
 public interface ISXLock {
 	/**
-	 * O lock exclusivo deve ser adquirido o mais rapidamente possível. Ver o
-	 * método {@link #acquireExclusive(int, long)} para mais informações.
+	 * O lock exclusivo deve ser adquirido o mais rapidamente possï¿½vel. Ver o
+	 * mï¿½todo {@link #acquireExclusive(int, long)} para mais informaï¿½ï¿½es.
 	 */
-	public static final int ASAP = 11;
-	
+	int ASAP = 11;
+
 	/**
-	 * O lock exclusivo deve ser adquirido quando não estiver adquirido podendo
-	 * esperar o tempo necessário. Ver o método {@link #acquireExclusive(int,
-	 * long)} para mais informações.
+	 * O lock exclusivo deve ser adquirido quando nï¿½o estiver adquirido podendo
+	 * esperar o tempo necessï¿½rio. Ver o mï¿½todo {@link #acquireExclusive(int,
+	 * long)} para mais informaï¿½ï¿½es.
 	 */
-	public static final int WHEN_AVAIlABLE = 12;
-	
+	int WHEN_AVAIlABLE = 12;
+
 	/**
-	 * Pode-se esperar até um determinado período de tempo para adquirir o
-	 * lock exclusivo. Ver o método {@link #acquireExclusive(int, long)} para
-	 * mais informação.es
+	 * Pode-se esperar atï¿½ um determinado perï¿½odo de tempo para adquirir o
+	 * lock exclusivo. Ver o mï¿½todo {@link #acquireExclusive(int, long)} para
+	 * mais informaï¿½ï¿½o.es
 	 */
-	public static final int TIMED = 13;
-	
+	int TIMED = 13;
+
 	/**
-	 * O lock está livre.
+	 * O lock estï¿½ livre.
 	 */
-	public static final int FREE = 21;
-	
+	int FREE = 21;
+
 	/**
-	 * O lock está adquirido em modo partilhado.
+	 * O lock estï¿½ adquirido em modo partilhado.
 	 */
-	public static final int SHARED = 22;
-	
+	int SHARED = 22;
+
 	/**
-	 * O lock está adquirido em modo partilhado mas não são permitidos novos
+	 * O lock estï¿½ adquirido em modo partilhado mas nï¿½o sï¿½o permitidos novos
 	 * pedidos partilhados.
 	 */
-	public static final int SHARED_BLOCKING = 23;
-	
+	int SHARED_BLOCKING = 23;
+
 	/**
-	 * O lock está adquirido em modo exclusivo.
+	 * O lock estï¿½ adquirido em modo exclusivo.
 	 */
-	public static final int EXCLUSIVE = 24;
-	
+	int EXCLUSIVE = 24;
+
 	/**
 	 * Adquire o lock como shared.
 	 */
-	public void acquireShared();
-	
+	void acquireShared ();
+
 	/**
-	 * Tenta adquirir o lock de read sem esperar pela aquisição.
-	 * 
+	 * Tenta adquirir o lock de read sem esperar pela aquisiï¿½ï¿½o.
+	 *
 	 * @return conseguiu adquirir?
 	 */
-	public boolean tryAcquireShared();
-	
+	boolean tryAcquireShared ();
+
 	/**
 	 * Adquire o lock em modo exclusivo. Dependendo do valor de
-	 * <code>priority</code> e do estado actual do lock o resultado é o dado
+	 * <code>priority</code> e do estado actual do lock o resultado ï¿½ o dado
 	 * pela tabela seguinte:
 	 * <br>
 	 * <table border="1">
@@ -85,15 +85,15 @@ public interface ISXLock {
 	 * 	</tr>
 	 * 	<tr>
 	 * 		<th><code>FREE</code></th>
-	 * 		<td colspan="3">O lock é de imediato adquirido em modo
+	 * 		<td colspan="3">O lock ï¿½ de imediato adquirido em modo
 	 * exclusivo.</td>
 	 * 		<td/>
 	 * 		<td/>
 	 * </tr>
 	 * <tr>
 	 * 		<th><code>SHARED</code></th>
-	 * 		<td>O lock é colocado em modo <code>SHARED_BLOCKING</code> e o
-	 * pedido de modo exclusivo é colocado na fila de espera.</td>
+	 * 		<td>O lock ï¿½ colocado em modo <code>SHARED_BLOCKING</code> e o
+	 * pedido de modo exclusivo ï¿½ colocado na fila de espera.</td>
 	 * 		<td rowspan="4">O thread fica a aguardar que o lock mude para
 	 * estado <code>FREE</code>.</td>
 	 * 		<td>O thread fica a aguardar durante o periodo de tempo
@@ -103,7 +103,7 @@ public interface ISXLock {
 	 * </tr>
 	 * <tr>
 	 * 		<th><code>SHARED_BLOCKING</code></th>
-	 * 		<td rowspan="2">O pedido de modo exclusivo é colocado na fila de
+	 * 		<td rowspan="2">O pedido de modo exclusivo ï¿½ colocado na fila de
 	 * espera.</td>
 	 * 		<td/>
 	 * 		<td/>
@@ -117,63 +117,63 @@ public interface ISXLock {
 	 * </table>
 	 * <br>
 	 * 
-	 * @param priority prioridade de aquisição: deverá ser um de
+	 * @param priority prioridade de aquisiï¿½ï¿½o: deverï¿½ ser um de
 	 * {@link #ASAP}, {@link #WHEN_AVAIlABLE} ou {@link #TIMED}
 	 * @param time tempo de espera (em milisegundos) caso a prioridade seja
 	 * {@link #TIMED}. Ignorado nos restantes casos.
 	 */
-	public void acquireExclusive(int priority, long time);
+	void acquireExclusive (int priority, long time);
 	
 	/**
 	 * Tenta adquirir o lock em modo exclusivo sem esperar.
 	 * 
 	 * @return foi adquirido o lock?
 	 */
-	public boolean tryAcquireExclusive();
+	boolean tryAcquireExclusive ();
 	
 	/**
-	 * Este método permite a um thread promover um lock partilhado para
-	 * exclusivo. O método é equivalente ao
-	 * {@link #acquireExclusive(int, long)} com a diferença que este thread
+	 * Este mï¿½todo permite a um thread promover um lock partilhado para
+	 * exclusivo. O mï¿½todo ï¿½ equivalente ao
+	 * {@link #acquireExclusive(int, long)} com a diferenï¿½a que este thread
 	 * nunca perde o lock partilhado: quando restar apenas este thread com o
-	 * lock partilhado, o lock é promovido a exclusivo. 
+	 * lock partilhado, o lock ï¿½ promovido a exclusivo. 
 	 * 
-	 * @param priority a prioridade de promoção: deverá ser {@link #ASAP},
+	 * @param priority a prioridade de promoï¿½ï¿½o: deverï¿½ ser {@link #ASAP},
 	 * {@link #WHEN_AVAIlABLE} ou {@link #TIMED}
 	 * @param time tempo de espera (em milisegundos) caso a prioridade seja
 	 * {@link #TIMED}. Ignorado nos restantes casos.
 	 * 
-	 * @throws IllegalSXOperationException o thread actual não detém o lock
+	 * @throws IllegalSXOperationException o thread actual nï¿½o detï¿½m o lock
 	 * partilhado
 	 */
-	public void promoteToExclusive(int priority, long time);
+	void promoteToExclusive (int priority, long time);
 	
 	/**
-	 * Tenta promover um lock partilhado para exclusivo não esperando por
+	 * Tenta promover um lock partilhado para exclusivo nï¿½o esperando por
 	 * conseguir.
 	 * 
 	 * @return conseguiu-se promover o lock?
 	 */
-	public boolean tryPromoteToExclusive();
+	boolean tryPromoteToExclusive ();
 	
 	/**
 	 * Demove o lock exclusivo para partilhado.
 	 * 
-	 * @throws IllegalSXOperationException o thread actual não detém o lock
+	 * @throws IllegalSXOperationException o thread actual nï¿½o detï¿½m o lock
 	 * exclusivo
 	 */
-	public void demoteToShared();
+	void demoteToShared ();
 	
 	/**
-	 * Obtém o estado do lock.
+	 * Obtï¿½m o estado do lock.
 	 * 
 	 * @return {@link #FREE}, {@link #SHARED}, {@link #SHARED_BLOCKING} ou
 	 * {@link #EXCLUSIVE}
 	 */
-	public int getState();
+	int getState ();
 	
 	/**
 	 * Liberta o lock (partilhado ou exclusivo).
 	 */
-	public void release();
+	void release ();
 }

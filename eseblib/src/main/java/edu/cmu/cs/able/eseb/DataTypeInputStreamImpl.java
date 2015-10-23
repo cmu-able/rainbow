@@ -1,17 +1,12 @@
 package edu.cmu.cs.able.eseb;
 
-import incubator.pval.Ensure;
-
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
-
 import edu.cmu.cs.able.typelib.enc.DataValueEncoding;
 import edu.cmu.cs.able.typelib.enc.InvalidEncodingException;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
 import edu.cmu.cs.able.typelib.type.DataValue;
+import incubator.pval.Ensure;
+
+import java.io.*;
 
 /**
  * Implementation of a data type input stream based on a data value encoding.
@@ -63,7 +58,7 @@ public class DataTypeInputStreamImpl implements DataTypeInputStream {
     }
 
     @Override
-    public BusData read() throws EOFException, IOException,
+    public BusData read () throws IOException,
     InvalidEncodingException {
         if (m_din == null) throw new IllegalStateException("Stream is closed.");
 

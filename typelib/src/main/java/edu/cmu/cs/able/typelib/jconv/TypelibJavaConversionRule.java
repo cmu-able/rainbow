@@ -24,7 +24,7 @@ public interface TypelibJavaConversionRule {
 	 * @param dst optionally, the data type to convert to
 	 * @return can it be converted?
 	 */
-	public boolean handles_java(Object value, DataType dst);
+	boolean handles_java (Object value, DataType dst);
 	
 	/**
 	 * Can the given typelib value be handled by this rule?
@@ -32,7 +32,7 @@ public interface TypelibJavaConversionRule {
 	 * @param cls optionally, the data type to convert to
 	 * @return can it be converted?
 	 */
-	public boolean handles_typelib(DataValue value, Class<?> cls);
+	boolean handles_typelib (DataValue value, Class<?> cls);
 	
 	/**
 	 * Converts a value from Java into typelib.
@@ -43,8 +43,8 @@ public interface TypelibJavaConversionRule {
 	 * @return the typelib value, which cannot be <code>null</code>
 	 * @throws ValueConversionException failed to convert
 	 */
-	public DataValue from_java(Object value, DataType dst,
-			TypelibJavaConverter converter) throws ValueConversionException;
+	DataValue from_java (Object value, DataType dst,
+						 TypelibJavaConverter converter) throws ValueConversionException;
 	
 	/**
 	 * Converts a typelib value to a Java value.
@@ -56,6 +56,6 @@ public interface TypelibJavaConversionRule {
 	 * @param <T> the type of the Java value
 	 * @throws ValueConversionException failed to convert
 	 */
-	public <T> T to_java(DataValue value, Class<T> cls,
-			TypelibJavaConverter converter) throws ValueConversionException;
+	<T> T to_java (DataValue value, Class<T> cls,
+				   TypelibJavaConverter converter) throws ValueConversionException;
 }

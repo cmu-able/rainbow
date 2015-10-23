@@ -23,7 +23,6 @@
  */
 package org.sa.rainbow.gui;
 
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -33,7 +32,7 @@ import java.awt.event.ActionListener;
 
 public class ElementInformationDialog extends JDialog {
 
-    @NotNull
+
     private final JTextArea m_textArea;
 
     /**

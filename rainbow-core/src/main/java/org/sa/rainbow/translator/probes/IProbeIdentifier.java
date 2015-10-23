@@ -23,7 +23,6 @@
  */
 package org.sa.rainbow.translator.probes;
 
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.Identifiable;
 
 public interface IProbeIdentifier extends Identifiable {
@@ -32,7 +31,6 @@ public interface IProbeIdentifier extends Identifiable {
      * The name of this Probe, unique within the deployment location.
      * @return String  the name of this Probe
      */
-    @Nullable
     String name ();
 
     /**
@@ -40,7 +38,6 @@ public interface IProbeIdentifier extends Identifiable {
      * The location is set via the string ID at Probe instantiation time.
      * @return String  the name of the location where the Probe is deployed.
      */
-    @Nullable
     String location ();
 
     /**
@@ -48,7 +45,6 @@ public interface IProbeIdentifier extends Identifiable {
      * Gauges to Probes. 
      * @return String  the type name of the Probe 
      */
-    @Nullable
     String type ();
 
 }

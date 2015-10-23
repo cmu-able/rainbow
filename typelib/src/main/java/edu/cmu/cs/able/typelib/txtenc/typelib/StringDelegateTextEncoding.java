@@ -1,14 +1,5 @@
 package edu.cmu.cs.able.typelib.txtenc.typelib;
 
-import incubator.pval.Ensure;
-
-import java.io.IOException;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-
 import edu.cmu.cs.able.typelib.AsciiEncoding;
 import edu.cmu.cs.able.typelib.enc.InvalidEncodingException;
 import edu.cmu.cs.able.typelib.prim.AsciiType;
@@ -20,6 +11,14 @@ import edu.cmu.cs.able.typelib.txtenc.TextEncoding;
 import edu.cmu.cs.able.typelib.type.DataType;
 import edu.cmu.cs.able.typelib.type.DataTypeScope;
 import edu.cmu.cs.able.typelib.type.DataValue;
+import incubator.pval.Ensure;
+
+import java.io.IOException;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 
 /**
  * Text encoding that encodes and decodes strings (including ASCII strings).
@@ -39,12 +38,8 @@ public class StringDelegateTextEncoding implements DelegateTextEncoding {
 	@Override
 	public boolean supports(DataType t) {
 		Ensure.not_null(t);
-		
-		if (t instanceof AsciiType || t instanceof StringType) {
-			return true;
-		} else {
-			return false;
-		}
+
+		return t instanceof AsciiType || t instanceof StringType;
 	}
 
 	@Override

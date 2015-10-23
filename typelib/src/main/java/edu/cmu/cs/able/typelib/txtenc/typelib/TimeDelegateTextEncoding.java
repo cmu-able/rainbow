@@ -1,11 +1,5 @@
 package edu.cmu.cs.able.typelib.txtenc.typelib;
 
-import incubator.pval.Ensure;
-
-import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
-
 import edu.cmu.cs.able.typelib.enc.InvalidEncodingException;
 import edu.cmu.cs.able.typelib.prim.PeriodType;
 import edu.cmu.cs.able.typelib.prim.PeriodValue;
@@ -16,6 +10,11 @@ import edu.cmu.cs.able.typelib.txtenc.TextEncoding;
 import edu.cmu.cs.able.typelib.type.DataType;
 import edu.cmu.cs.able.typelib.type.DataTypeScope;
 import edu.cmu.cs.able.typelib.type.DataValue;
+import incubator.pval.Ensure;
+
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 
 /**
  * Text encoding that encodes integer values.
@@ -35,12 +34,8 @@ public class TimeDelegateTextEncoding implements DelegateTextEncoding {
 	@Override
 	public boolean supports(DataType t) {
 		Ensure.not_null(t);
-		
-		if (t instanceof TimeType || t instanceof PeriodType) {
-			return true;
-		} else {
-			return false;
-		}
+
+		return t instanceof TimeType || t instanceof PeriodType;
 	}
 
 	@Override

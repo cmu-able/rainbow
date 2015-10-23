@@ -25,8 +25,6 @@ package org.sa.rainbow.core.ports.eseb.rpc;
 
 import edu.cmu.cs.able.eseb.participant.ParticipantException;
 import edu.cmu.cs.able.typelib.jconv.TypelibJavaConversionRule;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.ConfigHelper;
 import org.sa.rainbow.core.ports.IDisposablePort;
 import org.sa.rainbow.core.ports.eseb.ESEBProvider;
@@ -38,7 +36,7 @@ import java.util.List;
 
 public class AbstractESEBDisposableRPCPort implements IDisposablePort {
 
-    @Nullable
+
     private ESEBRPCConnector m_connectionRole;
     private final String m_host;
     private final short m_port;
@@ -56,12 +54,12 @@ public class AbstractESEBDisposableRPCPort implements IDisposablePort {
         try {
             getConnectionRole().close ();
             m_connectionRole = null;
-        } catch (@NotNull IOException | ParticipantException e) {
+        } catch (IOException | ParticipantException e) {
             ESEBRPCConnector.LOGGER.error (e);
         }
     }
 
-    @Nullable
+
     ESEBRPCConnector getConnectionRole () throws IOException, ParticipantException {
         if (m_connectionRole == null) {
             initializeConnectionRole ();

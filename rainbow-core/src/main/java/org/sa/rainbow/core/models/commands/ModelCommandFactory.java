@@ -23,7 +23,6 @@
  */
 package org.sa.rainbow.core.models.commands;
 
-import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelsManager;
@@ -55,7 +54,6 @@ public abstract class ModelCommandFactory<T> {
      *            The original source of the model (e.g., its filename)
      * @return Returns the command used by the ModelsManager to load the model
      */
-    @NotNull
     public static AbstractLoadModelCmd<?>
     loadCommand (ModelsManager modelsManager,
             String modelName,
@@ -88,7 +86,7 @@ public abstract class ModelCommandFactory<T> {
      * @throws RainbowModelException
      *             When the commandName cannot be found
      */
-    public IRainbowModelOperation<?, T> generateCommand (@NotNull String commandName, @NotNull String... args)
+    public IRainbowModelOperation<?, T> generateCommand (String commandName, String... args)
             throws RainbowModelException {
         try {
             Class<? extends AbstractRainbowModelOperation<?, T>> cmdClass = m_commandMap
@@ -103,31 +101,34 @@ public abstract class ModelCommandFactory<T> {
             Constructor<? extends AbstractRainbowModelOperation<?, T>> constructor = null;
             for (Constructor<? extends AbstractRainbowModelOperation<?, T>> c : constructors) {
                 Class<?>[] parameterTypes = c.getParameterTypes ();
-                if (Arrays.equals (new Class<?>[] { String.class, m_instanceClass, String.class },
-                        Arrays.copyOfRange (parameterTypes, 0, 3))
-                        && parameterTypes.length == 2 + args.length) {
-                    constructor = c;
-                    break;
-                }
+                final Class<?>[] a2 = Arrays.copyOfRange (parameterTypes, 0, 2);
+                if (Arrays.equals (new Class<?>[]{m_instanceClass, String.class},
+                                   a2))
+                    if (parameterTypes.length == 1 + args.length) {
+                        constructor = c;
+                        break;
+                    }
             }
-            if (constructor == null) throw new NoSuchMethodException ();
-            Object[] cargs = new Object[2 + args.length];
-            cargs[0] = commandName;
-            cargs[1] = m_modelInstance;
-            System.arraycopy (args, 0, cargs, 2, args.length);
+            if (constructor == null) throw new NoSuchMethodException ("Could not find a constructor for " + cmdClass
+                    .getName () + " (AcmeModelInstance, String ...)");
+            Object[] cargs = new Object[1 + args.length];
+//            cargs[0] = commandName;
+            cargs[0] = m_modelInstance;
+            System.arraycopy (args, 0, cargs, 1, args.length);
             return constructor.newInstance (cargs/*commandName, m_modelInstance.getModelInstance (),
                                                                                     args*/);
-        } catch (@NotNull SecurityException | NoSuchMethodException | InstantiationException | IllegalAccessException
+        } catch (SecurityException | NoSuchMethodException | InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException e) {
-            throw new RainbowModelException ("Cannot create a command for the commandName: " + commandName);
+            throw new RainbowModelException ("Cannot create a command for the commandName: " + commandName, e);
         }
     }
 
     private Class<? extends AbstractRainbowModelOperation<?, T>> tryThroughReflection (String commandName) {
         Method[] methods = this.getClass ().getMethods ();
         for (Method method : methods) {
-            if (method.getName ().equals (commandName + "Cmd"))
-                return (Class<? extends AbstractRainbowModelOperation<?, T>> )method.getReturnType ();
+            if (method.getName ().equals (commandName + "Cmd")) {
+                return (Class<? extends AbstractRainbowModelOperation<?, T>>) method.getReturnType ();
+            }
         }
         return null;
     }

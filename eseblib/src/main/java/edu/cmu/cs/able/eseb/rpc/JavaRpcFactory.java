@@ -1,7 +1,15 @@
 package edu.cmu.cs.able.eseb.rpc;
 
+import edu.cmu.cs.able.typelib.parser.DataTypeNameParser;
+import edu.cmu.cs.able.typelib.parser.ParseException;
+import edu.cmu.cs.able.typelib.parser.TokenMgrError;
+import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
+import edu.cmu.cs.able.typelib.type.DataType;
+import edu.cmu.cs.able.typelib.type.DataValue;
 import incubator.Pair;
 import incubator.pval.Ensure;
+import org.apache.commons.lang.ClassUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.Closeable;
 import java.io.PrintWriter;
@@ -10,24 +18,9 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import org.apache.commons.lang.ClassUtils;
-import org.apache.commons.lang.StringUtils;
-
-import edu.cmu.cs.able.typelib.parser.DataTypeNameParser;
-import edu.cmu.cs.able.typelib.parser.ParseException;
-import edu.cmu.cs.able.typelib.parser.TokenMgrError;
-import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
-import edu.cmu.cs.able.typelib.type.DataType;
-import edu.cmu.cs.able.typelib.type.DataValue;
 
 
 /**
@@ -287,7 +280,7 @@ public class JavaRpcFactory {
 					Throwable t = e;
 					
 					if (e instanceof InvocationTargetException) {
-						t = ((InvocationTargetException) e).getCause();
+						t = e.getCause ();
 					}
 					
 					StringWriter sw = new StringWriter();

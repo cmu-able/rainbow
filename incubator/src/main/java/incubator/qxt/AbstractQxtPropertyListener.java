@@ -9,5 +9,5 @@ public interface AbstractQxtPropertyListener {
 	 * 
 	 * @param property the property
 	 */
-	public void propertyDescriptionChanged(AbstractQxtProperty<?> property);
+	void propertyDescriptionChanged (AbstractQxtProperty<?> property);
 }

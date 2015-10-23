@@ -24,7 +24,6 @@
 package org.sa.rainbow.core.ports.eseb;
 
 import edu.cmu.cs.able.eseb.participant.ParticipantException;
-import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.RainbowMaster;
@@ -107,7 +106,7 @@ public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
         return m_instance;
     }
 
-    @NotNull
+
     @Override
     public IModelUSBusPort createModelsManagerUSPort (IModelsManager m) throws RainbowConnectionException {
         try {
@@ -118,7 +117,7 @@ public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
         }
     }
 
-    @NotNull
+
     @Override
     public IModelUSBusPort createModelsManagerClientUSPort (Identifiable client) throws RainbowConnectionException {
         try {
@@ -129,7 +128,7 @@ public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
         }
     }
 
-    @NotNull
+
     @Override
     public IGaugeLifecycleBusPort createGaugeSideLifecyclePort () throws RainbowConnectionException {
         try {
@@ -140,7 +139,7 @@ public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
         }
     }
 
-    @NotNull
+
     @Override
     public IModelChangeBusPort createChangeBusAnnouncePort () throws RainbowConnectionException {
         try {
@@ -151,7 +150,7 @@ public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
         }
     }
 
-    @NotNull
+
     @Override
     public IGaugeLifecycleBusPort createManagerGaugeLifecyclePort (IGaugeLifecycleBusPort manager)
             throws RainbowConnectionException {
@@ -163,50 +162,50 @@ public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
         }
     }
 
-    @NotNull
+
     @Override
-    public IGaugeConfigurationPort createGaugeConfigurationPortClient (@NotNull IGaugeIdentifier gauge)
+    public IGaugeConfigurationPort createGaugeConfigurationPortClient (IGaugeIdentifier gauge)
             throws RainbowConnectionException {
         try {
             return new ESEBGaugeConfigurationRequirerPort (gauge);
-        } catch (@NotNull IOException | ParticipantException e) {
+        } catch (IOException | ParticipantException e) {
             throw new RainbowConnectionException ("Failed to connect", e);
         }
     }
 
-    @NotNull
+
     @Override
-    public IGaugeQueryPort createGaugeQueryPortClient (@NotNull IGaugeIdentifier gauge) throws RainbowConnectionException {
+    public IGaugeQueryPort createGaugeQueryPortClient (IGaugeIdentifier gauge) throws RainbowConnectionException {
         try {
             return new ESEBGaugeQueryRequirerPort (gauge);
-        } catch (@NotNull IOException | ParticipantException e) {
+        } catch (IOException | ParticipantException e) {
             throw new RainbowConnectionException ("Failed to connect", e);
         }
     }
 
-    @NotNull
+
     @Override
-    public IGaugeConfigurationPort createGaugeConfigurationPort (@NotNull IGauge gauge) throws RainbowConnectionException {
+    public IGaugeConfigurationPort createGaugeConfigurationPort (IGauge gauge) throws RainbowConnectionException {
         try {
             return new ESEBGaugeConfigurationProviderPort (gauge);
-        } catch (@NotNull IOException | ParticipantException e) {
+        } catch (IOException | ParticipantException e) {
             throw new RainbowConnectionException ("Failed to connect", e);
 
         }
     }
 
-    @NotNull
+
     @Override
-    public IGaugeQueryPort createGaugeQueryPort (@NotNull IGauge gauge) throws RainbowConnectionException {
+    public IGaugeQueryPort createGaugeQueryPort (IGauge gauge) throws RainbowConnectionException {
         try {
             return new ESEBGaugeQueryProviderPort (gauge);
-        } catch (@NotNull IOException | ParticipantException e) {
+        } catch (IOException | ParticipantException e) {
             throw new RainbowConnectionException ("Failed to connect", e);
 
         }
     }
 
-    @NotNull
+
     @Override
     public IProbeReportPort createProbeReportingPortSender (IProbe probe) throws RainbowConnectionException {
         try {
@@ -218,40 +217,40 @@ public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
 
     }
 
-    @NotNull
+
     @Override
-    public IProbeConfigurationPort createProbeConfigurationPort (@NotNull Identifiable probe, IProbeConfigurationPort callback)
+    public IProbeConfigurationPort createProbeConfigurationPort (Identifiable probe, IProbeConfigurationPort callback)
             throws RainbowConnectionException {
         try {
             return new ESEBProbeConfigurationProviderPort (probe, callback);
-        } catch (@NotNull IOException | ParticipantException e) {
+        } catch (IOException | ParticipantException e) {
             throw new RainbowConnectionException ("Failed to connect", e);
         }
     }
 
-    @NotNull
+
     @Override
-    public IDelegateConfigurationPort createDelegateConfigurationPort (@NotNull RainbowDelegate rainbowDelegate)
+    public IDelegateConfigurationPort createDelegateConfigurationPort (RainbowDelegate rainbowDelegate)
             throws RainbowConnectionException {
         try {
             return new ESEBDelegateConfigurationProviderPort (rainbowDelegate);
-        } catch (@NotNull IOException | ParticipantException e) {
+        } catch (IOException | ParticipantException e) {
             throw new RainbowConnectionException ("Failed to connect", e);
         }
     }
 
-    @NotNull
+
     @Override
     public IDelegateConfigurationPort createDelegateConfigurationPortClient (String delegateID)
             throws RainbowConnectionException {
         try {
             return new ESEBDelegateConfigurationRequirerPort (delegateID);
-        } catch (@NotNull IOException | ParticipantException e) {
+        } catch (IOException | ParticipantException e) {
             throw new RainbowConnectionException ("Failed to connect", e);
         }
     }
 
-    @NotNull
+
     @Override
     public IProbeLifecyclePort createProbeManagementPort (IProbe probe) throws RainbowConnectionException {
         try {
@@ -262,7 +261,7 @@ public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
         }
     }
 
-    @NotNull
+
     @Override
     public IProbeReportSubscriberPort createProbeReportingPortSubscriber (IProbeReportPort callback)
             throws RainbowConnectionException {
@@ -275,7 +274,7 @@ public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
 
     }
 
-    @NotNull
+
     @Override
     public IEffectorLifecycleBusPort createEffectorSideLifecyclePort () throws RainbowConnectionException {
         try {
@@ -286,7 +285,7 @@ public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
         }
     }
 
-    @NotNull
+
     @Override
     public IEffectorLifecycleBusPort createSubscriberSideEffectorLifecyclePort (IEffectorLifecycleBusPort delegate)
             throws RainbowConnectionException {
@@ -298,30 +297,30 @@ public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
         }
     }
 
-    @NotNull
+
     @Override
-    public IEffectorExecutionPort createEffectorExecutionPort (@NotNull IEffector effector) throws RainbowConnectionException {
+    public IEffectorExecutionPort createEffectorExecutionPort (IEffector effector) throws RainbowConnectionException {
         try {
             return new ESEBEffectorExecutionProviderPort (effector);
-        } catch (@NotNull IOException | ParticipantException e) {
+        } catch (IOException | ParticipantException e) {
             throw new RainbowConnectionException ("Failed to connect", e);
 
         }
     }
 
-    @NotNull
+
     @Override
-    public IEffectorExecutionPort createEffectorExecutionPort (@NotNull IEffectorIdentifier effector)
+    public IEffectorExecutionPort createEffectorExecutionPort (IEffectorIdentifier effector)
             throws RainbowConnectionException {
         try {
             return new ESEBEffectorExecutionRequirerPort (effector);
-        } catch (@NotNull IOException | ParticipantException e) {
+        } catch (IOException | ParticipantException e) {
             throw new RainbowConnectionException ("Failed to connect", e);
 
         }
     }
 
-    @NotNull
+
     @Override
     public IRainbowReportingPort createMasterReportingPort () throws RainbowConnectionException {
         try {
@@ -333,7 +332,7 @@ public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
         }
     }
 
-    @NotNull
+
     @Override
     public IModelChangeBusSubscriberPort createModelChangeBusSubscriptionPort () throws RainbowConnectionException {
         try {
@@ -345,7 +344,7 @@ public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
         }
     }
 
-    @NotNull
+
     @Override
     public IRainbowReportingSubscriberPort createReportingSubscriberPort (IRainbowReportingSubscriberCallback reportTo)
             throws RainbowConnectionException {
@@ -358,7 +357,7 @@ public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
         }
     }
 
-    @NotNull
+
     @Override
     public IModelDSBusPublisherPort createModelDSPublishPort (Identifiable client) throws RainbowConnectionException {
         try {
@@ -369,7 +368,7 @@ public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
         }
     }
 
-    @NotNull
+
     @Override
     public IModelDSBusSubscriberPort createModelDSubscribePort (Identifiable client) throws RainbowConnectionException {
         try {
@@ -381,23 +380,23 @@ public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
         }
     }
 
-    @NotNull
+
     @Override
     public IModelsManagerPort createModelsManagerProviderPort (IModelsManager modelsManager)
             throws RainbowConnectionException {
         try {
             return new ESEBModelsManagerProviderPort (modelsManager);
-        } catch (@NotNull IOException | ParticipantException e) {
+        } catch (IOException | ParticipantException e) {
             throw new RainbowConnectionException ("Failed to connect", e);
         }
     }
 
-    @NotNull
+
     @Override
     public IModelsManagerPort createModeslManagerRequirerPort () throws RainbowConnectionException {
         try {
             return new ESEBModelsManagerRequirerPort ();
-        } catch (@NotNull IOException | ParticipantException e) {
+        } catch (IOException | ParticipantException e) {
             throw new RainbowConnectionException ("Failed to connect", e);
         }
     }
@@ -405,12 +404,12 @@ public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
     private final Map<String, ESEBAdaptationQConnector> m_adaptationConnectors = new HashMap<> ();
 
     @Override
-    public <S extends IEvaluable> IRainbowAdaptationEnqueuePort<S> createAdaptationEnqueuePort (@NotNull ModelReference model) {
+    public <S extends IEvaluable> IRainbowAdaptationEnqueuePort<S> createAdaptationEnqueuePort (ModelReference model) {
         return getAdaptationConnectorForModel (model);
     }
 
     private <S extends IEvaluable> IRainbowAdaptationEnqueuePort<S>
-    getAdaptationConnectorForModel (@NotNull ModelReference model) {
+    getAdaptationConnectorForModel (ModelReference model) {
         synchronized (m_adaptationConnectors) {
             ESEBAdaptationQConnector<S> conn = m_adaptationConnectors.get (model.toString ());
             if (conn == null) {
@@ -422,7 +421,7 @@ public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
     }
 
     @Override
-    public <S extends IEvaluable> IRainbowAdaptationDequeuePort<S> createAdaptationDequeuePort (@NotNull ModelReference model) {
+    public <S extends IEvaluable> IRainbowAdaptationDequeuePort<S> createAdaptationDequeuePort (ModelReference model) {
         synchronized (m_adaptationConnectors) {
 
             ESEBAdaptationQConnector<S> conn = m_adaptationConnectors.get (model.toString ());
@@ -434,23 +433,23 @@ public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
         }
     }
 
-    @NotNull
+
     @Override
     public IMasterCommandPort createMasterCommandProviderPort (RainbowMaster rainbowMaster)
             throws RainbowConnectionException {
         try {
             return new ESEBMasterCommandProviderPort (rainbowMaster);
-        } catch (@NotNull IOException | ParticipantException e) {
+        } catch (IOException | ParticipantException e) {
             throw new RainbowConnectionException ("Failed to connect", e);
         }
     }
 
-    @NotNull
+
     @Override
     public IMasterCommandPort createMasterCommandRequirerPort () throws RainbowConnectionException {
         try {
             return new ESEBMasterCommandRequirerPort ();
-        } catch (@NotNull IOException |
+        } catch (IOException |
 
                 ParticipantException e)
 

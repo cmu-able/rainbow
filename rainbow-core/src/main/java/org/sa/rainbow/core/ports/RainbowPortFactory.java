@@ -25,7 +25,6 @@ package org.sa.rainbow.core.ports;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.*;
 import org.sa.rainbow.core.adaptation.IEvaluable;
 import org.sa.rainbow.core.error.RainbowConnectionException;
@@ -81,7 +80,7 @@ public class RainbowPortFactory {
                         "The class ''{0}'' could not be found on the classpath. Bailing!", factory);
                 LOGGER.error (errMsg, e);
                 throw new NotImplementedException (errMsg, e);
-            } catch (@NotNull NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+            } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
                     | InvocationTargetException e) {
                 String errMsg = MessageFormat.format (
                         "The class ''{0}'' does not implement the method ''{1}''. Bailing!", factory, "getFactory");

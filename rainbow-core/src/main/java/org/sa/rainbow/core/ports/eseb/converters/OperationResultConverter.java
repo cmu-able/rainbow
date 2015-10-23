@@ -35,8 +35,6 @@ import edu.cmu.cs.able.typelib.struct.UnknownFieldException;
 import edu.cmu.cs.able.typelib.type.DataType;
 import edu.cmu.cs.able.typelib.type.DataValue;
 import incubator.pval.Ensure;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.OperationResult;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.Result;
 
@@ -53,19 +51,19 @@ public class OperationResultConverter implements TypelibJavaConversionRule {
     }
 
     @Override
-    public boolean handles_java (Object value, @Nullable DataType dst) {
+    public boolean handles_java (Object value, DataType dst) {
         Ensure.not_null (value);
         return value instanceof OperationResult && (dst == null || "operation_result".equals (dst.name ()));
     }
 
     @Override
-    public boolean handles_typelib (@NotNull DataValue value, @Nullable Class<?> cls) {
+    public boolean handles_typelib (DataValue value, Class<?> cls) {
         Ensure.not_null (value);
         return "operation_result".equals (value.type ().name ()) && (cls == null || OperationResult.class.isAssignableFrom (cls));
     }
 
     @Override
-    public DataValue from_java (Object value, @Nullable DataType dst, TypelibJavaConverter converter)
+    public DataValue from_java (Object value, DataType dst, TypelibJavaConverter converter)
             throws ValueConversionException {
         if ((dst == null || dst instanceof StructureDataType) && value instanceof OperationResult) {
             try {
@@ -80,7 +78,7 @@ public class OperationResultConverter implements TypelibJavaConversionRule {
                 fields.put (result, m_scope.string ().make (or.result.name ()));
                 fields.put (reply, m_scope.string ().make (or.reply == null ? "" : or.reply));
                 return sdt.make (fields);
-            } catch (@NotNull UnknownFieldException | AmbiguousNameException e) {
+            } catch (UnknownFieldException | AmbiguousNameException e) {
                 throw new ValueConversionException (MessageFormat.format ("Could not convert from {0} to {1}", value
                         .getClass ().toString (), (dst == null ? "operation_result" : dst.absolute_hname ())), e);
             }
@@ -90,9 +88,9 @@ public class OperationResultConverter implements TypelibJavaConversionRule {
                 .getClass ().toString (), (dst == null ? "operation_result" : dst.absolute_hname ())));
     }
 
-    @NotNull
+
     @Override
-    public <T> T to_java (DataValue value, @Nullable Class<T> cls, @NotNull TypelibJavaConverter converter)
+    public <T> T to_java (DataValue value, Class<T> cls, TypelibJavaConverter converter)
             throws ValueConversionException {
         if (value instanceof StructureDataValue) {
             try {

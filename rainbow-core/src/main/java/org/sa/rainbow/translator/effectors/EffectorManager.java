@@ -24,8 +24,6 @@
 package org.sa.rainbow.translator.effectors;
 
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
@@ -48,12 +46,12 @@ IModelDSBusPublisherPort {
 
     private final Logger LOGGER = Logger.getLogger (this.getClass ());
 
-    @Nullable
+
     private IEffectorLifecycleBusPort m_effectorLifecyclePort;
 
     private final Map<String, IEffectorExecutionPort> m_effectorExecutionPorts = new HashMap<> ();
 
-    @Nullable
+
     private IModelDSBusSubscriberPort           m_modelDSSubscribePort;
     protected IModelsManagerPort                m_modelsManagerPort;
 
@@ -80,7 +78,7 @@ IModelDSBusPublisherPort {
         m_modelsManagerPort = RainbowPortFactory.createModelsManagerRequirerPort ();
     }
 
-    public Outcome executeEffector (String effName, @NotNull String target, String[] args) {
+    public Outcome executeEffector (String effName, String target, String[] args) {
 
         String id = Util.genID (effName, target);
         m_reportingPort.info (RainbowComponentT.EFFECTOR_MANAGER, "Attempting E[" + id + "] (" + Arrays.asList (args)
@@ -123,7 +121,7 @@ IModelDSBusPublisherPort {
     }
 
     @Override
-    public void reportCreated (@NotNull IEffectorIdentifier effector) {
+    public void reportCreated (IEffectorIdentifier effector) {
         LOGGER.info (MessageFormat.format ("EffectorManager: An effector was created {0}", effector.id ()));
         try {
             IEffectorExecutionPort port = RainbowPortFactory.createEffectorExecutionPortClient (effector);
@@ -137,7 +135,7 @@ IModelDSBusPublisherPort {
     }
 
     @Override
-    public void reportDeleted (@NotNull IEffectorIdentifier effector) {
+    public void reportDeleted (IEffectorIdentifier effector) {
         LOGGER.info (MessageFormat.format ("EffectorManager: An effector was deleted {0}", effector.id ()));
     }
 
@@ -173,14 +171,14 @@ IModelDSBusPublisherPort {
 
     }
 
-    @NotNull
+
     @Override
     protected RainbowComponentT getComponentType () {
         return RainbowComponentT.EFFECTOR_MANAGER;
     }
 
-    @NotNull
-    protected Set<EffectorAttributes> getEffectorsAtLocation (@NotNull String location) {
+
+    protected Set<EffectorAttributes> getEffectorsAtLocation (String location) {
         Set<EffectorAttributes> effectors = new LinkedHashSet<> ();
         for (EffectorAttributes candidate : m_effectors.effectors) {
             if (location.equals (candidate.getLocation())) {
@@ -190,7 +188,7 @@ IModelDSBusPublisherPort {
         return effectors;
     }
 
-    @Nullable
+
     @Override
     public IRainbowMessage createMessage () {
         return null;

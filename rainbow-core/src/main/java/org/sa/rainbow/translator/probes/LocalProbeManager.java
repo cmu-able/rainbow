@@ -24,8 +24,6 @@
 package org.sa.rainbow.translator.probes;
 
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
@@ -42,12 +40,12 @@ import java.util.*;
 
 public class LocalProbeManager extends AbstractRainbowRunnable {
     Logger                      LOGGER          = Logger.getLogger (this.getClass ());
-    @NotNull
+
     static String NAME = "ProbeManager";
     private ProbeDescription               m_localProbeDesc;
-    @NotNull
+
     private Map<String, IProbe>            m_localProbes = new HashMap<> ();
-    @NotNull
+
     private Map<String, IProbe>            m_alias2Probe = new HashMap<> ();
 
     private boolean                        m_probesStarted = false;
@@ -88,7 +86,7 @@ public class LocalProbeManager extends AbstractRainbowRunnable {
     }
 
 
-    public synchronized void initProbes (@NotNull List<ProbeAttributes> probes) {
+    public synchronized void initProbes (List<ProbeAttributes> probes) {
         m_localProbeDesc = new ProbeDescription ();
         m_localProbeDesc.probes = new TreeSet<> (probes);
         // obtain the list of probes to create
@@ -180,7 +178,7 @@ public class LocalProbeManager extends AbstractRainbowRunnable {
         deregisterProbe (probe);
     }
 
-    protected void deregisterProbe (@Nullable IProbe probe) {
+    protected void deregisterProbe (IProbe probe) {
         if (probe != null) {
             if (probe.isActive ()) {
                 probe.deactivate ();
@@ -194,7 +192,7 @@ public class LocalProbeManager extends AbstractRainbowRunnable {
         }
     }
 
-    @Nullable
+
     public Set<ProbeAttributes> getProbeConfiguration () {
         return m_localProbeDesc.probes;
     }
@@ -217,7 +215,7 @@ public class LocalProbeManager extends AbstractRainbowRunnable {
         }
     }
 
-    @NotNull
+
     @Override
     protected RainbowComponentT getComponentType () {
         return RainbowComponentT.PROBE_MANAGER;

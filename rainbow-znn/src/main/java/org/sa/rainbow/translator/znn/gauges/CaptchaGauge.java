@@ -44,7 +44,7 @@ public class CaptchaGauge extends RegularPatternGauge {
     private static final String   ON         = "on";
 
     /** List of values reported by this Gauge */
-    private static final String[] valueNames = { "enabled" };
+    private static final String[] valueNames = { "enablement" };
 
     public CaptchaGauge (String id, long beaconPeriod, TypedAttribute gaugeDesc, TypedAttribute modelDesc,
             List<TypedAttributeWithValue> setupParams, Map<String, IRainbowOperation> mappings)
@@ -57,7 +57,7 @@ public class CaptchaGauge extends RegularPatternGauge {
     @Override
     protected void doMatch (String matchName, Matcher m) {
         boolean captchaOn = ON.equals (matchName);
-        IRainbowOperation cmd = m_commands.values ().iterator ().next ();
+        IRainbowOperation cmd = m_commands.get (valueNames[0]);
         Map<String, String> pMap = new HashMap<> ();
         pMap.put (cmd.getParameters ()[0], Boolean.toString (captchaOn));
         if (captchaOn) {

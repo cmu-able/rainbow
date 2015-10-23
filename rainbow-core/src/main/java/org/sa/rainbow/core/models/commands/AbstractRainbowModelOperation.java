@@ -23,8 +23,6 @@
  */
 package org.sa.rainbow.core.models.commands;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.error.RainbowDelegationException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
@@ -50,18 +48,14 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
         NOT_YET_DONE, DONE, UNDONE, ERROR, DISPOSED
     }
 
-    @NotNull
     ExecutionState m_executionState = ExecutionState.NOT_YET_DONE;
 
     boolean inCompoundCommand = false;
 
-    @Nullable
     private RainbowCompoundOperation<Model> m_parentCommand   = null;
 
-    @Nullable
     protected IRainbowMessageFactory      m_messageFactory;
 
-    @Nullable
     protected IModelInstance<Model>       m_modelContext;
 
     private final String m_target;
@@ -91,7 +85,6 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
         return m_parameters;
     }
 
-    @Nullable
     @Override
     public String getOrigin () {
         return m_origin;
@@ -117,10 +110,9 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
         return (m_executionState == ExecutionState.UNDONE);
     }
 
-    @Nullable
     @Override
     public List<? extends IRainbowMessage>
-    execute (@Nullable IModelInstance<Model> context, @Nullable IRainbowMessageFactory messageFactory)
+    execute (IModelInstance<Model> context, IRainbowMessageFactory messageFactory)
             throws IllegalStateException, RainbowException {
         if (inCompoundCommand)
             throw new IllegalStateException (
@@ -147,7 +139,6 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
         return getGeneratedEvents (m_messageFactory);
     }
 
-    @Nullable
     @Override
     public List<? extends IRainbowMessage> redo () throws IllegalStateException, RainbowException {
         if (inCompoundCommand)
@@ -155,10 +146,8 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
                     "Cannot call redo() on a compounded command -- it must be called on the parent");
         if (!canRedo ()) throw new IllegalStateException ("This command cannot currently be redone");
 
-        Type t = null;
         try {
             subRedo ();
-            t = getResult ();
             m_executionState = ExecutionState.DONE;
         }
         catch (RainbowDelegationException rde) {
@@ -168,10 +157,8 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
         return getGeneratedEvents (m_messageFactory);
     }
 
-    @Nullable
     protected abstract List<? extends IRainbowMessage> getGeneratedEvents (IRainbowMessageFactory messageFactory);
 
-    @Nullable
     @Override
     public List<? extends IRainbowMessage> undo () throws IllegalStateException, RainbowException {
         if (inCompoundCommand)
@@ -204,7 +191,6 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
         m_parentCommand = parent;
     }
 
-    @Nullable
     RainbowCompoundOperation<Model> getParentCompound () {
         return m_parentCommand;
     }
@@ -218,7 +204,6 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
 
     protected abstract boolean checkModelValidForCommand (Model model);
 
-    @NotNull
     @Override
     public String toString () {
         return MessageFormat.format ("O[{0}:{1}/{2}.{3}({4})]{5}", getModelReference ().getModelName (),
@@ -227,14 +212,12 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
                         : ("<" + m_origin));
     }
 
-    @Nullable
     protected IModelInstance<Model> getModelContext () {
         return m_modelContext;
     }
 
 
-    @Nullable
-    protected List<? extends IRainbowMessage> generateEvents (@NotNull IRainbowMessageFactory messageFactory, String eventType) {
+    protected List<? extends IRainbowMessage> generateEvents (IRainbowMessageFactory messageFactory, String eventType) {
         try {
             IRainbowMessage msg = messageFactory.createMessage ();
             msg.setProperty (IModelChangeBusPort.EVENT_TYPE_PROP, eventType);
@@ -257,7 +240,6 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
     }
 
 
-    @Nullable
     @Override
     public ModelReference getModelReference () {
         return new ModelReference (getModelContext ().getModelName (), getModelContext ().getModelType ());

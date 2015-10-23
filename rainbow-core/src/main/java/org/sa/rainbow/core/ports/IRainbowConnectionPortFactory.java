@@ -23,7 +23,6 @@
  */
 package org.sa.rainbow.core.ports;
 
-import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.RainbowMaster;
@@ -95,96 +94,95 @@ public interface IRainbowConnectionPortFactory {
     IModelUSBusPort createModelsManagerClientUSPort (Identifiable client)
             throws RainbowConnectionException;
 
-    @NotNull
+
     IGaugeLifecycleBusPort createGaugeSideLifecyclePort () throws RainbowConnectionException;
 
-    @NotNull
+
     IModelChangeBusPort createChangeBusAnnouncePort () throws RainbowConnectionException;
 
-    @NotNull
+
     IGaugeLifecycleBusPort
     createManagerGaugeLifecyclePort (IGaugeLifecycleBusPort manager) throws RainbowConnectionException;
 
-    @NotNull
+
     IGaugeConfigurationPort createGaugeConfigurationPortClient (IGaugeIdentifier gauge)
             throws RainbowConnectionException;
 
-    @NotNull
+
     IGaugeQueryPort createGaugeQueryPortClient (IGaugeIdentifier gauge)
             throws RainbowConnectionException;
 
-    @NotNull
+
     IGaugeConfigurationPort createGaugeConfigurationPort (IGauge gauge)
             throws RainbowConnectionException;
 
-    @NotNull
+
     IGaugeQueryPort createGaugeQueryPort (IGauge gauge) throws RainbowConnectionException;
 
-    @NotNull
+
     IProbeReportPort createProbeReportingPortSender (IProbe probe) throws RainbowConnectionException;
 
-    @NotNull
+
     IProbeConfigurationPort createProbeConfigurationPort (Identifiable probe,
                                                           IProbeConfigurationPort callback) throws RainbowConnectionException;
 
-    @NotNull
+
     IDelegateConfigurationPort createDelegateConfigurationPort (RainbowDelegate rainbowDelegate)
             throws RainbowConnectionException;
 
-    @NotNull
+
     IDelegateConfigurationPort createDelegateConfigurationPortClient (String delegateID)
             throws RainbowConnectionException;
 
-    @NotNull
+
     IProbeLifecyclePort createProbeManagementPort (IProbe probe) throws RainbowConnectionException;
 
-    @NotNull
+
     IProbeReportSubscriberPort createProbeReportingPortSubscriber (IProbeReportPort callback)
             throws RainbowConnectionException;
 
-    @NotNull
+
     IEffectorLifecycleBusPort createEffectorSideLifecyclePort () throws RainbowConnectionException;
 
 
-    @NotNull
     IEffectorLifecycleBusPort
     createSubscriberSideEffectorLifecyclePort (IEffectorLifecycleBusPort delegate)
             throws RainbowConnectionException;
 
-    @NotNull
+
     IEffectorExecutionPort createEffectorExecutionPort (IEffector effector)
             throws RainbowConnectionException;
 
-    @NotNull
+
     IEffectorExecutionPort createEffectorExecutionPort (IEffectorIdentifier effector)
             throws RainbowConnectionException;
 
-    @NotNull
+
     IRainbowReportingPort createMasterReportingPort () throws RainbowConnectionException;
 
-    @NotNull
+
     IModelChangeBusSubscriberPort
     createModelChangeBusSubscriptionPort ()
             throws RainbowConnectionException;
 
-    @NotNull
+
     IRainbowReportingSubscriberPort
     createReportingSubscriberPort (IRainbowReportingSubscriberCallback reportT)
             throws RainbowConnectionException;
 
-    @NotNull
+
     IModelDSBusPublisherPort createModelDSPublishPort (Identifiable id)
             throws RainbowConnectionException;
 
-    @NotNull
+
     IModelDSBusSubscriberPort createModelDSubscribePort (Identifiable component)
             throws RainbowConnectionException;
 
-    @NotNull
+
     IModelsManagerPort createModelsManagerProviderPort (IModelsManager modelsManager)
             throws RainbowConnectionException;
 
-    @NotNull
+
     IModelsManagerPort createModeslManagerRequirerPort () throws RainbowConnectionException;
 
     <S extends IEvaluable> IRainbowAdaptationEnqueuePort<S>

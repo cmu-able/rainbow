@@ -23,8 +23,6 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort;
@@ -47,7 +45,7 @@ IRainbowReportingSubscriberPort {
         getConnectionRole().addListener (new IESEBListener () {
 
             @Override
-            public void receive (@NotNull RainbowESEBMessage msg) {
+            public void receive (RainbowESEBMessage msg) {
                 if (msg.getProperty (ESEBConstants.MSG_CHANNEL_KEY).equals (ChannelT.UIREPORT.name ())) {
                     String componentStr = (String )msg.getProperty (ESEBConstants.COMPONENT_TYPE_KEY);
                     String reportTypeStr = (String )msg.getProperty (ESEBConstants.REPORT_TYPE_KEY);
@@ -74,7 +72,7 @@ IRainbowReportingSubscriberPort {
     }
 
     @Override
-    public void subscribe (@Nullable EnumSet<RainbowComponentT> components, @Nullable EnumSet<ReportType> reports) {
+    public void subscribe (EnumSet<RainbowComponentT> components, EnumSet<ReportType> reports) {
         if (components != null) {
             m_components.addAll (components);
         }
@@ -84,7 +82,7 @@ IRainbowReportingSubscriberPort {
     }
 
     @Override
-    public void unsubscribe (@Nullable EnumSet<RainbowComponentT> components, @Nullable EnumSet<ReportType> reports) {
+    public void unsubscribe (EnumSet<RainbowComponentT> components, EnumSet<ReportType> reports) {
         if (components != null) {
             m_components.removeAll (components);
         }

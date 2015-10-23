@@ -26,7 +26,6 @@
  */
 package org.sa.rainbow.translator.effectors;
 
-import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 
 import java.util.List;
@@ -41,25 +40,21 @@ public interface IEffector extends IEffectorIdentifier, IEffectorExecutionPort {
 
 
     IEffector NULL_EFFECTOR = new IEffector () {
-        @NotNull
         @Override
         public String id () {
             return "NullEffector@0.0.0.0";
         }
 
-        @NotNull
         @Override
         public String service () {
             return "ANull";
         }
 
-        @NotNull
         @Override
         public Kind kind () {
             return Kind.NULL;
         }
 
-        @NotNull
         @Override
         public Outcome execute (List<String> args) {
             return Outcome.UNKNOWN;

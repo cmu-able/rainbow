@@ -23,7 +23,6 @@
  */
 package org.sa.rainbow.translator.effectors;
 
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.Identifiable;
 
 public interface IEffectorIdentifier extends Identifiable {
@@ -42,7 +41,7 @@ public interface IEffectorIdentifier extends Identifiable {
      * 
      * @return String Service name
      */
-    @Nullable
+
     String service ();
 
     /**
@@ -50,6 +49,6 @@ public interface IEffectorIdentifier extends Identifiable {
      * 
      * @return Type the implementation type
      */
-    @Nullable
+
     Kind kind ();
 }

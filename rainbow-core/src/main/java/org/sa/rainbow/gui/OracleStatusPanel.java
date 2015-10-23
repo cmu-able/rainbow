@@ -23,10 +23,8 @@
  */
 package org.sa.rainbow.gui;
 
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.util.HashMap;
@@ -37,13 +35,13 @@ import java.util.regex.Pattern;
 
 public class OracleStatusPanel extends JPanel {
 
-    @NotNull
+
     private final JTextArea m_textArea;
 
     static final Pattern NO_HEARTBEAT = Pattern.compile ("\\[ERROR\\]: No Heartbeat from (.*)@(.*)");
     static final Pattern HEARTBEAT    = Pattern.compile ("\\[INFO\\]: Heartbeat from (.*)@(.*)");
 
-    @NotNull
+
     Map<String, JLabel>  labels       = new HashMap<> ();
 
     private JPanel       m_statusPane;
@@ -51,7 +49,7 @@ public class OracleStatusPanel extends JPanel {
     /**
      * Create the panel.
      */
-    public OracleStatusPanel (Color color, @NotNull List<String> delegates) {
+    public OracleStatusPanel (Color color, List<String> delegates) {
         setLayout (new BorderLayout (0, 0));
 
         m_statusPane = new JPanel ();
@@ -78,22 +76,22 @@ public class OracleStatusPanel extends JPanel {
         JScrollPane sp = new JScrollPane (m_textArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         sp.setAutoscrolls (true);
-        Border border = BorderFactory.createMatteBorder (RainbowGUI.PANEL_BORDER, RainbowGUI.PANEL_BORDER,
-                RainbowGUI.PANEL_BORDER, RainbowGUI.PANEL_BORDER, color);
+        BorderFactory.createMatteBorder (RainbowGUI.PANEL_BORDER, RainbowGUI.PANEL_BORDER,
+                                         RainbowGUI.PANEL_BORDER, RainbowGUI.PANEL_BORDER, color);
 
         add (sp);
 
         expectedDelegates (delegates);
     }
 
-    public void expectedDelegates (@NotNull List<String> locations) {
+    public void expectedDelegates (List<String> locations) {
         for (String loc : locations) {
             JLabel label = getDelegateLabel (null, loc);
             label.setBorder (new LineBorder (Color.black));
         }
     }
 
-    public void report (@NotNull String report, boolean nl) {
+    public void report (String report, boolean nl) {
         Matcher noHB = NO_HEARTBEAT.matcher (report);
         if (noHB.matches ()) {
             String did = noHB.group (1);

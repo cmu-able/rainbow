@@ -24,7 +24,6 @@
 package org.sa.rainbow.core.ports.eseb;
 
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.ports.IProbeReportPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
@@ -44,7 +43,7 @@ public class ESEBProbeReportingPortSender extends AbstractESEBDisposablePort imp
     }
 
     @Override
-    public void reportData (@NotNull IProbeIdentifier probe, String data) {
+    public void reportData (IProbeIdentifier probe, String data) {
         if (probe.id ().equals (m_sender.id ())) {
             RainbowESEBMessage msg = getConnectionRole().createMessage ();
             msg.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_PROBE_REPORT);

@@ -23,14 +23,13 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 
 class ESEBCommandHelper implements ESEBConstants {
 
-    public static void command2Message (@NotNull IRainbowOperation command, @NotNull RainbowESEBMessage msg) {
+    public static void command2Message (IRainbowOperation command, RainbowESEBMessage msg) {
         msg.setProperty (MODEL_NAME_KEY, command.getModelReference ().getModelName ());
         msg.setProperty (COMMAND_NAME_KEY, command.getName ());
         msg.setProperty (MODEL_TYPE_KEY, command.getModelReference ().getModelType ());
@@ -45,7 +44,7 @@ class ESEBCommandHelper implements ESEBConstants {
 
     }
 
-    public static void command2Message (@NotNull IRainbowOperation command, @NotNull RainbowESEBMessage msg, String suffix) {
+    public static void command2Message (IRainbowOperation command, RainbowESEBMessage msg, String suffix) {
         msg.setProperty (MODEL_NAME_KEY + suffix, command.getModelReference ().getModelName ());
         msg.setProperty (COMMAND_NAME_KEY + suffix, command.getName ());
         msg.setProperty (MODEL_TYPE_KEY + suffix, command.getModelReference ().getModelType ());
@@ -59,8 +58,8 @@ class ESEBCommandHelper implements ESEBConstants {
         }
     }
 
-    @NotNull
-    public static IRainbowOperation msgToCommand (@NotNull RainbowESEBMessage msg) {
+
+    public static IRainbowOperation msgToCommand (RainbowESEBMessage msg) {
         String modelName = (String )msg.getProperty (MODEL_NAME_KEY);
         String modelType = (String )msg.getProperty (MODEL_TYPE_KEY);
         String commandName = (String )msg.getProperty (COMMAND_NAME_KEY);
@@ -78,7 +77,7 @@ class ESEBCommandHelper implements ESEBConstants {
         return or;
     }
 
-    public static IRainbowOperation msgToCommand (@NotNull RainbowESEBMessage msg, String suffix) {
+    public static IRainbowOperation msgToCommand (RainbowESEBMessage msg, String suffix) {
         String modelName = (String )msg.getProperty (MODEL_NAME_KEY + suffix);
         if (modelName == null) return null;
         String modelType = (String )msg.getProperty (MODEL_TYPE_KEY + suffix);

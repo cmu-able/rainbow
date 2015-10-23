@@ -35,8 +35,6 @@ import edu.cmu.cs.able.typelib.struct.UnknownFieldException;
 import edu.cmu.cs.able.typelib.type.DataType;
 import edu.cmu.cs.able.typelib.type.DataValue;
 import incubator.pval.Ensure;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.util.TypedAttribute;
@@ -58,18 +56,18 @@ public class GaugeInstanceDescriptionConverter implements TypelibJavaConversionR
     }
 
     @Override
-    public boolean handles_java (Object value, @Nullable DataType dst) {
+    public boolean handles_java (Object value, DataType dst) {
         return value instanceof GaugeInstanceDescription && (dst == null || dst.name ().equals ("gauge_instance"));
     }
 
     @Override
-    public boolean handles_typelib (@NotNull DataValue value, @Nullable Class<?> cls) {
+    public boolean handles_typelib (DataValue value, Class<?> cls) {
         Ensure.not_null (value);
         return "gauge_instance".equals (value.type ().name ()) && (cls == null || GaugeInstanceDescription.class.isAssignableFrom (cls));
     }
 
     @Override
-    public DataValue from_java (Object value, @Nullable DataType dst, @NotNull TypelibJavaConverter converter)
+    public DataValue from_java (Object value, DataType dst, TypelibJavaConverter converter)
             throws ValueConversionException {
         try {
             System.out.println ();
@@ -102,7 +100,7 @@ public class GaugeInstanceDescriptionConverter implements TypelibJavaConversionR
                 return sdt.make (fields);
 
             }
-        } catch (@NotNull UnknownFieldException | AmbiguousNameException e) {
+        } catch (UnknownFieldException | AmbiguousNameException e) {
             throw new ValueConversionException (MessageFormat.format ("Could not convert from {0} to {1}", value
                     .getClass ().getCanonicalName (), (dst == null ? "typed_attribute_with_value" : dst
                             .absolute_hname ().toString ())), e);
@@ -112,9 +110,9 @@ public class GaugeInstanceDescriptionConverter implements TypelibJavaConversionR
                         .toString ())));
     }
 
-    @NotNull
+
     @Override
-    public <T> T to_java (DataValue value, @Nullable Class<T> cls, @NotNull TypelibJavaConverter converter)
+    public <T> T to_java (DataValue value, Class<T> cls, TypelibJavaConverter converter)
             throws ValueConversionException {
         try {
             if (value instanceof StructureDataValue) {
@@ -142,7 +140,7 @@ public class GaugeInstanceDescriptionConverter implements TypelibJavaConversionR
                 T t = (T )gid;
                 return t;
             }
-        } catch (@NotNull UnknownFieldException | AmbiguousNameException e) {
+        } catch (UnknownFieldException | AmbiguousNameException e) {
             throw new ValueConversionException (MessageFormat.format ("Could not convert from {0} to {1}",
                     value.toString (), (cls == null ? "GaugeInstanceDescription" : cls.getCanonicalName ())), e);
         }

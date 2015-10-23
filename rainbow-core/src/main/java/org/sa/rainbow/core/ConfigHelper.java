@@ -23,8 +23,7 @@
  */
 package org.sa.rainbow.core;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,8 +34,9 @@ public class ConfigHelper {
 
     private static List<Properties> CONFIG_PROPERTIES;
 
-    @NotNull
-    private static List<InputStream> loadResources (final String name, @Nullable final ClassLoader classLoader) throws IOException {
+
+    private static List<InputStream> loadResources (final String name, final ClassLoader classLoader) throws
+                                                                                                      IOException {
         final List<InputStream> list = new ArrayList<> ();
         final Enumeration<URL> systemResources = (classLoader == null) ? ClassLoader.getSystemClassLoader ()
                 .getResources (name) : classLoader.getResources (name);
@@ -66,8 +66,8 @@ public class ConfigHelper {
         return Collections.<Properties> emptyList ();
     }
 
-    @NotNull
-    public static List<String> getProperties (@NotNull String key) {
+
+    public static List<String> getProperties (String key) {
         List<? extends Properties> props = getConfigProperties ();
         List<String> vals = new ArrayList<> ();
         for (Properties p : props) {

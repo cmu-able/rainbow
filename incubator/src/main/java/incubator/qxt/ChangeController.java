@@ -159,7 +159,7 @@ class ChangeController<T> {
 	 * 
 	 * @param <T> bean type
 	 */
-	static interface Listener<T> {
+	interface Listener<T> {
 		/**
 		 * Tries to commit changes in the bean.
 		 * 

@@ -88,9 +88,7 @@ public class EventFilterInfo extends SerializableScb<EventFilterInfo> {
 				return false;
 		} else if (!m_filter_class.equals(other.m_filter_class))
 			return false;
-		if (m_index != other.m_index)
-			return false;
-		return true;
+		return m_index == other.m_index;
 	}
 	
 	@SuppressWarnings("javadoc")

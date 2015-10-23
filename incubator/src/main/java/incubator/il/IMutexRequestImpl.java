@@ -120,12 +120,9 @@ class IMutexRequestImpl implements IMutexRequest, Serializable {
 		if (!m_trace.equals(impl.m_trace)) {
 			return false;
 		}
-		
-		if (m_wait_time != impl.m_wait_time) {
-			return false;
-		}
-		
-		return true;
+
+		return m_wait_time == impl.m_wait_time;
+
 	}
 	
 	@Override

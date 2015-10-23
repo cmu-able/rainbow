@@ -35,12 +35,9 @@ public class ResumeScanAction extends ContextualAction {
 		if (state == null) {
 			return false;
 		}
-		
-		if (state.intValue() == RmiScanner.PAUSED) {
-			return true;
-		}
-		
-		return false;
+
+		return state.intValue () == RmiScanner.PAUSED;
+
 	}
 
 	@Override

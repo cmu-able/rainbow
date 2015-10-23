@@ -1,18 +1,12 @@
 package incubator.ctxaction;
 
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JMenuItem;
-import javax.swing.KeyStroke;
 
 /**
  * <p>
@@ -84,7 +78,7 @@ public abstract class ContextualAction extends AbstractAction {
 	 * qualification).
 	 */
 	public ContextualAction() {
-		this((String) null, null);
+		this (null, null);
 	}
 
 	/**

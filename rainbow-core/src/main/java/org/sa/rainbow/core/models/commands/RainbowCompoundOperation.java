@@ -23,8 +23,6 @@
  */
 package org.sa.rainbow.core.models.commands;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.error.RainbowDelegationException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
@@ -36,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-// NOTE: THIS CLASS SHOULD NOT BE USED YET.
 public class RainbowCompoundOperation<Model> extends AbstractRainbowModelOperation<List<Object>, Model> implements
 IRainbowModelCompoundCommand<Model> {
 
@@ -45,12 +42,10 @@ IRainbowModelCompoundCommand<Model> {
     }
 
     final List<AbstractRainbowModelOperation<?, Model>> m_commands = new ArrayList<> ();
-    @NotNull
     CommandState                                m_state    = CommandState.CAN_EXECUTE;
-    @NotNull
     List<Object>                                m_results  = Collections.emptyList ();
 
-    public RainbowCompoundOperation (@Nullable List<AbstractRainbowModelOperation<?, Model>> commands) {
+    public RainbowCompoundOperation (List<AbstractRainbowModelOperation<?, Model>> commands) {
         // TODO: Do we need this?
         super ("compound", null, null);
         if (commands == null || commands.size () == 0)
@@ -97,7 +92,7 @@ IRainbowModelCompoundCommand<Model> {
                 }
             }
             this.m_results = result;
-        } catch (@NotNull RainbowDelegationException | RuntimeException re) {
+        } catch (RainbowDelegationException | RuntimeException re) {
             // unwind this command, undoing commands already done
             position--;
             for (; position >= 0; position--) {
@@ -130,7 +125,7 @@ IRainbowModelCompoundCommand<Model> {
                     result.add (o);
                 }
             }
-        } catch (@NotNull RainbowDelegationException | RuntimeException re) {
+        } catch (RainbowDelegationException | RuntimeException re) {
             // unwind this command, undoing commands already done
             position--;
             for (; position >= 0; position--) {
@@ -160,26 +155,24 @@ IRainbowModelCompoundCommand<Model> {
                     result.add (o);
                 }
             }
-        } catch (@NotNull RainbowDelegationException | RuntimeException e) {
+            m_results = result;
+        } catch (RainbowDelegationException | RuntimeException e) {
             m_state = CommandState.ERROR;
             throw e;
         }
         m_state = CommandState.CAN_REDO;
     }
 
-    @NotNull
     @Override
     public List<Object> getResults () {
         return m_results;
     }
 
-    @NotNull
     @Override
     public List<Object> getResult () {
         return getResults ();
     }
 
-    @Nullable
     @Override
     public List<? extends IRainbowMessage> getGeneratedEvents (IRainbowMessageFactory messageFactory) {
         // TODO Auto-generated method stub
@@ -197,14 +190,12 @@ IRainbowModelCompoundCommand<Model> {
         return ok;
     }
 
-    @Nullable
     @Override
     public String getOrigin () {
         // TODO Auto-generated method stub
         return null;
     }
 
-    @Nullable
     @Override
     public ModelReference getModelReference () {
         return null;

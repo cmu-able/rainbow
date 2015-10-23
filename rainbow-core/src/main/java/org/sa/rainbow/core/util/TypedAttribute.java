@@ -23,8 +23,6 @@
  */
 package org.sa.rainbow.core.util;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,11 +33,11 @@ public class TypedAttribute extends Pair<String, String> {
     private static final long serialVersionUID = 8134259574614606785L;
     private static Pattern    MAPPING_PAIR_PATTERN;
 
-    public TypedAttribute (@NotNull String name, String type) {
+    public TypedAttribute (String name, String type) {
         super (name.intern (), type);
     }
 
-    @Nullable
+
     public String getName () {
         return firstValue ();
     }
@@ -48,7 +46,7 @@ public class TypedAttribute extends Pair<String, String> {
         setFirstValue (name);
     }
 
-    @Nullable
+
     public String getType () {
         return secondValue ();
     }
@@ -57,14 +55,14 @@ public class TypedAttribute extends Pair<String, String> {
         setSecondValue (type);
     }
 
-    @Nullable
+
     @Override
     public Object clone () {
         return super.clone ();
     }
 
-    @Nullable
-    public static TypedAttribute parsePair (@NotNull String string) {
+
+    public static TypedAttribute parsePair (String string) {
         /**
          * Parses a string of the form "name":"type" into a Pair object.
          * 

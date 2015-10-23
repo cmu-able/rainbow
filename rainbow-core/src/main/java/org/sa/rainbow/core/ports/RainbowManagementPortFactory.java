@@ -25,7 +25,6 @@ package org.sa.rainbow.core.ports;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.*;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.models.IModelsManager;
@@ -70,7 +69,7 @@ public class RainbowManagementPortFactory {
                 LOGGER.error (errMsg);
                 LOGGER.error (e);
                 throw new NotImplementedException (errMsg, e);
-            } catch (@NotNull NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+            } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
                     | InvocationTargetException e) {
                 String errMsg = MessageFormat.format (
                         "The class ''{0}'' does not implement the method ''{1}''. Bailing!", factory, "getFactory");

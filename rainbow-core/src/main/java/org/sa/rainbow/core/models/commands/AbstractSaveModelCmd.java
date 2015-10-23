@@ -23,8 +23,7 @@
  */
 package org.sa.rainbow.core.models.commands;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
 import org.sa.rainbow.core.error.RainbowDelegationException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
@@ -47,11 +46,11 @@ public abstract class AbstractSaveModelCmd<Type> extends AbstractRainbowModelOpe
         m_source = source;
     }
 
-    @NotNull
+
     @Override
     public List<? extends IRainbowMessage>
     execute (IModelInstance<Type> context,
-             @Nullable IRainbowMessageFactory messageFactory) throws IllegalStateException, RainbowException {
+             IRainbowMessageFactory messageFactory) throws IllegalStateException, RainbowException {
         if (inCompoundCommand)
             throw new IllegalStateException (
                     "Cannot call execute() on a compounded command -- it must be called on the parent");
@@ -93,7 +92,7 @@ public abstract class AbstractSaveModelCmd<Type> extends AbstractRainbowModelOpe
         return (m_executionState == ExecutionState.UNDONE);
     }
 
-    @NotNull
+
     @Override
     protected List<? extends IRainbowMessage> getGeneratedEvents (IRainbowMessageFactory messageFactory) {
         return Collections.<IRainbowMessage> emptyList ();

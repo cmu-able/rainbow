@@ -10,11 +10,11 @@ public interface Dispatcher<L> {
 	 * Adds a new listener to the dispatcher.
 	 * @param listener the listener
 	 */
-	public abstract void add(L listener);
+	void add (L listener);
 
 	/**
 	 * Removes a previously registered listener from the dispatcher.
 	 * @param listener the listener to remove
 	 */
-	public abstract void remove(L listener);
+	void remove (L listener);
 }

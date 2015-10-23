@@ -23,7 +23,7 @@
  */
 package org.sa.rainbow.gui;
 
-import org.jetbrains.annotations.NotNull;
+
 import org.sa.rainbow.core.ports.IEffectorLifecycleBusPort;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
@@ -60,7 +60,7 @@ public class GUIEffectorLifecycleListener implements IEffectorLifecycleBusPort {
     }
 
     @Override
-    public void reportCreated (@NotNull final IEffectorIdentifier effector) {
+    public void reportCreated (final IEffectorIdentifier effector) {
         if (!itemMap.containsKey (effector.id ())) {
             JMenuItem item = new JMenuItem (effector.id ());
             item.addActionListener (new ActionListener () {
@@ -93,7 +93,7 @@ public class GUIEffectorLifecycleListener implements IEffectorLifecycleBusPort {
     }
 
     @Override
-    public void reportDeleted (@NotNull IEffectorIdentifier effector) {
+    public void reportDeleted (IEffectorIdentifier effector) {
         JMenuItem item = itemMap.get (effector.id ());
         if (item != null) {
             itemMap.remove (effector.id ());
@@ -102,7 +102,7 @@ public class GUIEffectorLifecycleListener implements IEffectorLifecycleBusPort {
     }
 
     @Override
-    public void reportExecuted (@NotNull IEffectorIdentifier effector, Outcome outcome, List<String> args) {
+    public void reportExecuted (IEffectorIdentifier effector, Outcome outcome, List<String> args) {
         EffectorInformation ei = new EffectorInformation (outcome, args, new Date ());
         List<EffectorInformation> info = informationMap.get (effector.id ());
         if (info == null) {

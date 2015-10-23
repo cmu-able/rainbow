@@ -25,7 +25,6 @@ package org.sa.rainbow.core.ports.eseb.rpc;
 
 import edu.cmu.cs.able.eseb.participant.ParticipantException;
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.core.ports.eseb.ESEBProvider;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
@@ -38,7 +37,7 @@ IESEBGaugeConfigurationRemoteInterface {
     static Logger            LOGGER = Logger.getLogger (ESEBGaugeConfigurationProviderPort.class);
     private IGauge m_gauge;
 
-    public ESEBGaugeConfigurationProviderPort (@NotNull IGauge gauge) throws IOException, ParticipantException {
+    public ESEBGaugeConfigurationProviderPort (IGauge gauge) throws IOException, ParticipantException {
 
         super (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (),
                 gauge.id ());

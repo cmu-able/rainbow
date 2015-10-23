@@ -1,23 +1,15 @@
 package incubator.ui.bean;
 
+import org.apache.commons.lang.ClassUtils;
+import org.apache.commons.lang.ObjectUtils;
+
+import javax.swing.table.AbstractTableModel;
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.swing.table.AbstractTableModel;
-
-import org.apache.commons.lang.ClassUtils;
-import org.apache.commons.lang.ObjectUtils;
 
 /**
  * Table model that uses a set of beans as data.
@@ -849,12 +841,12 @@ public class BeanTableModel extends AbstractTableModel {
 		/**
 		 * Bean key in the execution context.
 		 */
-		public static final String BEAN = "bean";
+		String BEAN = "bean";
 		
 		/**
 		 * Helpers key in the execution context.
 		 */
-		public static final String HELPERS = "helpers";
+		String HELPERS = "helpers";
 		
 		/**
 		 * Obtains the result of the execution.
@@ -862,13 +854,13 @@ public class BeanTableModel extends AbstractTableModel {
 		 * @return the result
 		 * @throws Exception failed to evaluate
 		 */
-		public Object eval(Map<String, Object> context) throws Exception;
+		Object eval (Map<String, Object> context) throws Exception;
 		
 		/**
 		 * Obtains the type returned by the element
 		 * @return the type returned
 		 */
-		public Class<?> get_return_type();
+		Class<?> get_return_type ();
 	}
 	
 	/**

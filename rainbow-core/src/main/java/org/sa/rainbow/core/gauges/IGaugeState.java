@@ -23,7 +23,6 @@
  */
 package org.sa.rainbow.core.gauges;
 
-import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
@@ -41,20 +40,17 @@ public interface IGaugeState {
      * 
      * @return The collection of setup parameters that were used to set up this gauge.
      */
-    @NotNull
     Collection<? extends TypedAttributeWithValue> getSetupParams ();
 
     /**
      * 
      * @return The set of configuration parameters (and their current values) with which the gauge has been configured.
      */
-    @NotNull
     Collection<? extends TypedAttributeWithValue> getConfigParams ();
 
     /**
      * 
      * @return The set of commands that were most recently issued (one entry per command kind).
      */
-    @NotNull
     Collection<? extends IRainbowOperation> getGaugeReports ();
 }

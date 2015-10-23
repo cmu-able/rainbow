@@ -1,13 +1,13 @@
 package incubator.koolform;
 
-import java.awt.Component;
-import java.beans.PropertyDescriptor;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.ClassUtils;
+
+import java.awt.*;
+import java.beans.PropertyDescriptor;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>
@@ -352,11 +352,8 @@ public class KoolBeanForm<T> extends KoolForm {
 		}
 
 		T data = extractData();
-		if (!editing.equals(data)) {
-			return false;
-		}
+		return editing.equals (data);
 
-		return true;
 	}
 
 	/**

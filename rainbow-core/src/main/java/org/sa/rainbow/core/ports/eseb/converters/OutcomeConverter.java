@@ -33,8 +33,6 @@ import edu.cmu.cs.able.typelib.scope.AmbiguousNameException;
 import edu.cmu.cs.able.typelib.type.DataType;
 import edu.cmu.cs.able.typelib.type.DataValue;
 import incubator.pval.Ensure;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 
 import java.text.MessageFormat;
@@ -48,19 +46,19 @@ public class OutcomeConverter implements TypelibJavaConversionRule {
     }
 
     @Override
-    public boolean handles_java (Object value, @Nullable DataType dst) {
+    public boolean handles_java (Object value, DataType dst) {
         Ensure.not_null (value);
         return value instanceof Outcome && (dst == null || "outcome".equals (dst.name ()));
     }
 
     @Override
-    public boolean handles_typelib (@NotNull DataValue value, @Nullable Class<?> cls) {
+    public boolean handles_typelib (DataValue value, Class<?> cls) {
         Ensure.not_null (value);
         return "outcome".equals (value.type ().name ()) && (cls == null || Outcome.class.isAssignableFrom (cls));
     }
 
     @Override
-    public DataValue from_java (Object value, @Nullable DataType dst, TypelibJavaConverter converter)
+    public DataValue from_java (Object value, DataType dst, TypelibJavaConverter converter)
             throws ValueConversionException {
         if ((dst == null || dst instanceof EnumerationType) && value instanceof Outcome) {
             try {
@@ -92,16 +90,12 @@ public class OutcomeConverter implements TypelibJavaConversionRule {
                 .getCanonicalName (), (dst == null ? "outcome" : dst.absolute_hname ().toString ())));
     }
 
-    @NotNull
+
     @Override
-    public <T> T to_java (DataValue value, @Nullable Class<T> cls, TypelibJavaConverter converter)
+    public <T> T to_java (DataValue value, Class<T> cls, TypelibJavaConverter converter)
             throws ValueConversionException {
         if (value instanceof EnumerationValue) {
             EnumerationValue ev = (EnumerationValue )value;
-            EnumerationType et = (EnumerationType )ev.type ();
-            if (cls == null || cls == Outcome.class) {
-                cls = (Class<T> )Outcome.class;
-            }
             switch (ev.name ()) {
             case "confounded":
                 return (T )Outcome.CONFOUNDED;

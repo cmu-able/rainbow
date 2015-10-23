@@ -27,8 +27,6 @@
 package org.sa.rainbow.gui;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.*;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
@@ -47,7 +45,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.text.MessageFormat;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -82,7 +79,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
     /** Convenience constant: size of text field to set to when Max is exceeded. */
     public static final int TEXT_HALF_LENGTH = 50000;
 
-    public static void main (@NotNull String[] args) {
+    public static void main (String[] args) {
         boolean showHelp = false;
 
         int lastIdx = args.length - 1;
@@ -108,13 +105,13 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         gui.display();
     }
 
-    @Nullable
+
     private JFrame m_frame = null;
-    @Nullable
+
     private JTextArea[] m_textAreas = null;
-    @Nullable
+
     private JComponent[]       m_panes     = null;
-    @NotNull
+
     private Color[] m_colors = {
             /* purple */ new Color(188, 188, 250),
             /* pink */   new Color(255, 145, 255),
@@ -126,7 +123,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
             Color.WHITE,
             Color.GRAY
     };
-    @NotNull
+
     private int[] m_order = { 7, 2, 8, 3, 0, 1, 5, 4, 6 };
     private IMasterCommandPort m_master;
     private IModelDSBusPublisherPort m_dsPort;
@@ -307,7 +304,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         Throwable error = null;
         for (int i : m_order) {
             if (i == ID_ORACLE_MESSAGE) {
-                List<String> expectedDelegateLocations = Collections.emptyList ();
+                List<String> expectedDelegateLocations;
                 try {
                     expectedDelegateLocations = m_master.getExpectedDelegateLocations ();
                 }
@@ -356,7 +353,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
 
     }
 
-    private void createInformationMenu (@NotNull final JMenu menu) {
+    private void createInformationMenu (final JMenu menu) {
 
         JMenu gauges = new JMenu ("Gauges");
         gauges.setMnemonic (KeyEvent.VK_G);
@@ -385,7 +382,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         }
     }
 
-    @Nullable
+
     private JComponent createTextArea (int area) {
         m_textAreas[area] = new JTextArea(TEXT_ROWS, TEXT_COLUMNS);
         m_textAreas[area].setFont(m_textAreas[area].getFont().deriveFont(TEXT_FONT_SIZE));
@@ -408,20 +405,21 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
      * Creates a series of Oracle-specific menu items.
      * @param menu  the menu on which to create items.
      */
-    private void createOracleMenu (@NotNull JMenu menu) {
-        JMenuItem item = null;
+    private void createOracleMenu (JMenu menu) {
+        JMenuItem item;
 
         // Management menu item
         item = new JMenuItem("Toggle adaptation switch");
-        item.setMnemonic(KeyEvent.VK_A);
-        item.setToolTipText("Toggles whether self-adaptation is enabled, default is ON");
-        item.addActionListener(new ActionListener() {
+        item.setMnemonic (KeyEvent.VK_A);
+        item.setToolTipText ("Toggles whether self-adaptation is enabled, default is ON");
+        item.addActionListener (new ActionListener () {
             @Override
             public void actionPerformed (ActionEvent e) {
                 boolean b = Rainbow.instance ().getRainbowMaster ().isAdaptationEnabled ();
                 Rainbow.instance ().getRainbowMaster ().enableAdaptation (!b);
 
-                //        		boolean b = !((AdaptationManager )Oracle.instance().adaptationManager()).adaptationEnabled();
+                //        		boolean b = !((AdaptationManager )Oracle.instance().adaptationManager())
+                // .adaptationEnabled();
 //        		((AdaptationManager )Oracle.instance().adaptationManager()).setAdaptationEnabled(b);
                 writeText (ID_ORACLE_MESSAGE, "Adaptation switched " + (b ? "ON" : "OFF"));
             }
@@ -449,13 +447,13 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         menu.add (item);
 
         item = new JMenuItem("Clear consoles");
-        item.setMnemonic(KeyEvent.VK_C);
-        item.setToolTipText("Clears all the GUI consoles");
-        item.addActionListener(new ActionListener() {
+        item.setMnemonic (KeyEvent.VK_C);
+        item.setToolTipText ("Clears all the GUI consoles");
+        item.addActionListener (new ActionListener () {
             @Override
             public void actionPerformed (ActionEvent e) {
                 for (JTextArea textArea : m_textAreas) {
-                    textArea.setText("");
+                    textArea.setText ("");
                 }
             }
         });
@@ -464,23 +462,26 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         // Termination menu item
         item = new JMenuItem("Sleep Master+Delegate");
         item.setMnemonic(KeyEvent.VK_S);
-        item.setToolTipText("Signals Oracle and all Delegates to terminate, then sleep");
-        item.addActionListener(new ActionListener() {
+        item.setToolTipText ("Signals Oracle and all Delegates to terminate, then sleep");
+        item.addActionListener (new ActionListener () {
             @Override
             public void actionPerformed (ActionEvent e) {
-                quit();
+                quit ();
             }
         });
-        menu.add(item);
+        item.setEnabled (false);
+        menu.add (item);
         item = new JMenuItem("Restart Master+Delegate");
         item.setMnemonic(KeyEvent.VK_R);
-        item.setToolTipText("Signals Oracle and all Delegates to terminate, then restart");
-        item.addActionListener(new ActionListener() {
+        item.setToolTipText ("Signals Oracle and all Delegates to terminate, then restart");
+        item.addActionListener (new ActionListener () {
             @Override
             public void actionPerformed (ActionEvent e) {
                 Rainbow.signalTerminate (Rainbow.ExitState.RESTART);
             }
         });
+        item.setEnabled (false);
+
         menu.add(item);
         item = new JMenuItem("Destroy Master+Delegate");
         item.setMnemonic(KeyEvent.VK_D);
@@ -511,8 +512,8 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
      * Creates a series of Delegate-specific menu items.
      * @param menu  the menu on which to create items.
      */
-    private void createDelegateMenu (@NotNull JMenu menu) {
-        JMenuItem item = null;
+    private void createDelegateMenu (JMenu menu) {
+        JMenuItem item;
 
         // Probe start menu item
         item = new JMenuItem("Start Probes");
@@ -531,8 +532,8 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         // Probe kill menu item
         item = new JMenuItem("Kill Probes");
         item.setMnemonic(KeyEvent.VK_K);
-        item.setToolTipText("Signals all Delegates to kill the probes");
-        item.addActionListener(new ActionListener() {
+        item.setToolTipText ("Signals all Delegates to kill the probes");
+        item.addActionListener (new ActionListener () {
             @Override
             public void actionPerformed (ActionEvent e) {
                 m_master.killProbes ();
@@ -541,6 +542,9 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
 //        		}
             }
         });
+        item.setEnabled (false);
+
+
         menu.add(item);
         menu.add(new JSeparator());
 
@@ -572,7 +576,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
                     namePair.setSecondValue("localhost");
                 }
                 String argStr = JOptionPane.showInputDialog(m_frame, "Please provide String arguments, separated by '|'");
-                String[] args = null;
+                String[] args;
                 if (argStr == null || argStr.length() == 0) {
                     args = new String[0];
                 } else {
@@ -598,7 +602,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
 
                 String argStr = JOptionPane.showInputDialog (m_frame,
                         "Please provide string arguments, separated by ','");
-                String[] args = null;
+                String[] args;
                 if (argStr == null || argStr.isEmpty ()) {
                     args = new String[0];
                 }
@@ -623,8 +627,8 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         // Delegate control menu item
         item = new JMenuItem("Restart Delegates");
         item.setMnemonic(KeyEvent.VK_R);
-        item.setToolTipText("Signals all the Delegates to terminate and restart");
-        item.addActionListener(new ActionListener() {
+        item.setToolTipText ("Signals all the Delegates to terminate and restart");
+        item.addActionListener (new ActionListener () {
             @Override
             public void actionPerformed (ActionEvent e) {
                 throw new NotImplementedException ();
@@ -632,11 +636,13 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
 //        		signalDelegates(ServiceConstants.SVC_CMD_RESTART);
             }
         });
-        menu.add(item);
+        item.setEnabled (false);
+
+        menu.add (item);
         item = new JMenuItem("Sleep Delegates");
         item.setMnemonic(KeyEvent.VK_S);
-        item.setToolTipText("Signals all the Delegates to terminate and sleep");
-        item.addActionListener(new ActionListener() {
+        item.setToolTipText ("Signals all the Delegates to terminate and sleep");
+        item.addActionListener (new ActionListener () {
             @Override
             public void actionPerformed (ActionEvent e) {
                 throw new NotImplementedException ();
@@ -644,6 +650,9 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
 //        		signalDelegates(ServiceConstants.SVC_CMD_SLEEP);
             }
         });
+        item.setEnabled (false);
+
+
         menu.add(item);
         item = new JMenuItem("Destroy Delegates");
         item.setMnemonic(KeyEvent.VK_D);
@@ -662,31 +671,37 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         // RainDropD control
         item = new JMenuItem("Awaken RainDropD...");
         item.setMnemonic(KeyEvent.VK_A);
-        item.setToolTipText("Given a hostname, awakens the Delegate RainDrop Daemon on that host");
-        item.addActionListener(new ActionListener() {
+        item.setToolTipText ("Given a hostname, awakens the Delegate RainDrop Daemon on that host");
+        item.addActionListener (new ActionListener () {
             @Override
             public void actionPerformed (ActionEvent e) {
                 throw new NotImplementedException ();
-//        		String hostname = JOptionPane.showInputDialog(m_frame, "Please provide a hostname with a sleeping RainDropD");
+//        		String hostname = JOptionPane.showInputDialog(m_frame, "Please provide a hostname with a sleeping
+// RainDropD");
 //        		if (hostname != null && hostname.length() > 0) {
 //        			RemoteControl.waker(hostname, RemoteControl.WAKER_RESTART);
 //        		}
             }
         });
-        menu.add(item);
+        item.setEnabled (false);
+
+        menu.add (item);
         item = new JMenuItem("Kill RainDropD...");
         item.setMnemonic(KeyEvent.VK_L);
-        item.setToolTipText("Given a hostname, kills the Delegate RainDropD on that host");
-        item.addActionListener(new ActionListener() {
+        item.setToolTipText ("Given a hostname, kills the Delegate RainDropD on that host");
+        item.addActionListener (new ActionListener () {
             @Override
             public void actionPerformed (ActionEvent e) {
                 throw new NotImplementedException ();
-//        		String hostname = JOptionPane.showInputDialog(m_frame, "Please provide a hostname with a sleeping RainDropD");
+//        		String hostname = JOptionPane.showInputDialog(m_frame, "Please provide a hostname with a sleeping
+// RainDropD");
 //        		if (hostname != null && hostname.length() > 0) {
 //        			RemoteControl.waker(hostname, RemoteControl.WAKER_KILL);
 //        		}
             }
         });
+        item.setEnabled (false);
+
         menu.add(item);
 
     }
@@ -695,8 +710,8 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
      * Creates the help menu items.
      * @param menu  the menu on which to create items.
      */
-    private void createHelpMenu (@NotNull JMenu menu) {
-        JMenuItem item = null;
+    private void createHelpMenu (JMenu menu) {
+        JMenuItem item;
 
         item = new JMenuItem("Software Update...");
         item.setMnemonic(KeyEvent.VK_U);
@@ -718,6 +733,8 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
                 throw new NotImplementedException ();
             }
         });
+        item.setEnabled (false);
+
         menu.add(item);
         menu.add(new JSeparator());
         item = new JMenuItem("About");
@@ -756,14 +773,14 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
 //        writeText(ID_EXECUTOR, "  - outcome: " + outcome);
     }
 
-    private void testOperation (@NotNull ModelReference modelRef, String opName, @NotNull String[] args) {
+    private void testOperation (ModelReference modelRef, String opName, String[] args) {
         OperationRepresentation or = new OperationRepresentation (opName, modelRef,
                 args[0], Arrays.copyOfRange (args, 1, args.length));
         if (m_dsPort == null) {
             try {
                 m_dsPort = RainbowPortFactory.createModelDSPublishPort (new Identifiable () {
 
-                    @NotNull
+
                     @Override
                     public String id () {
                         return "UI";
@@ -786,7 +803,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
     }
 
     @Override
-    public void report (@NotNull RainbowComponentT component, @NotNull ReportType type, String message) {
+    public void report (RainbowComponentT component, ReportType type, String message) {
 //        public static final int ID_MODEL_MANAGER = 0;
 //        public static final int ID_ARCH_EVALUATOR = 1;
 //        public static final int ID_ADAPTATION_MANAGER = 2;

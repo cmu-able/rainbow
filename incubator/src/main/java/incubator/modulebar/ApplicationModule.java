@@ -2,7 +2,7 @@ package incubator.modulebar;
 
 import incubator.ctxaction.ContextualAction;
 
-import javax.swing.JPanel;
+import javax.swing.*;
 
 /**
  * Interface implemented by application modules.
@@ -13,7 +13,7 @@ public interface ApplicationModule {
 	 * 
 	 * @return the module's user interface component
 	 */
-	public JPanel getModulePanel();
+	JPanel getModulePanel ();
 	
 	/**
 	 * Obtains the action used to activate the module (the action that will
@@ -21,15 +21,15 @@ public interface ApplicationModule {
 	 * 
 	 * @return the action
 	 */
-	public ContextualAction getActivationAction();
+	ContextualAction getActivationAction ();
 	
 	/**
 	 * Invoked when the module has been activated.
 	 */
-	public void activated();
+	void activated ();
 	
 	/**
 	 * Invoked when the module has been deactivated.
 	 */
-	public void deactivated();
+	void deactivated ();
 }

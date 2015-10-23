@@ -23,17 +23,15 @@
  */
 package org.sa.rainbow.core.models;
 
-import org.jetbrains.annotations.Nullable;
 
 public interface IModelInstanceProvider {
 
     /**
      * Returns a model instance keyed by name and type
-     * 
-     * @param modelType
-     * @param modelName
+     *
+     * @param modelRef
+     *
      * @return
      */
-    @Nullable
     <T> IModelInstance<T> getModelInstance (ModelReference modelRef);
 }

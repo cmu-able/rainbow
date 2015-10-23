@@ -23,7 +23,7 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import org.jetbrains.annotations.NotNull;
+
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
@@ -50,7 +50,7 @@ IModelDSBusSubscriberPort {
         getConnectionRole().addListener (new IESEBListener () {
 
             @Override
-            public void receive (@NotNull RainbowESEBMessage msg) {
+            public void receive (RainbowESEBMessage msg) {
                 if (m_callbacks == null || m_callbacks.isEmpty ()) return; // no one interested
                 String msgType = (String )msg.getProperty (ESEBConstants.MSG_TYPE_KEY);
                 String channel = (String )msg.getProperty (ESEBConstants.MSG_CHANNEL_KEY);
@@ -86,9 +86,9 @@ IModelDSBusSubscriberPort {
         });
     }
 
-    @NotNull
+
     @Override
-    public OperationResult publishOperation (@NotNull IRainbowOperation cmd) {
+    public OperationResult publishOperation (IRainbowOperation cmd) {
         // Doing this the old way because more than one listener may be interested in this message. The first one to reply, wins.
         RainbowESEBMessage msg = getConnectionRole().createMessage ();
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, m_publisher.id ());
@@ -103,7 +103,7 @@ IModelDSBusSubscriberPort {
             getConnectionRole().blockingSendAndReceive (msg, new IESEBListener () {
 
                 @Override
-                public void receive (@NotNull RainbowESEBMessage msg) {
+                public void receive (RainbowESEBMessage msg) {
                     OperationResult reply = (OperationResult )msg.getProperty (ESEBConstants.MSG_UPDATE_MODEL_REPLY);
                     result.result = reply.result;
                     result.reply = reply.reply;
@@ -134,7 +134,7 @@ IModelDSBusSubscriberPort {
 //        }
 //    }
 
-    @NotNull
+
     @Override
     public IRainbowMessage createMessage () {
         return getConnectionRole ().createMessage ();

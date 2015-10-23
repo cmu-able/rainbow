@@ -23,8 +23,6 @@
  */
 package org.sa.rainbow.core.models;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.error.RainbowModelException;
 
 import java.util.Collection;
@@ -49,7 +47,7 @@ public interface IModelsManager extends IModelUpdater, IModelInstanceProvider {
      * 
      * @return The collection of model types that the Models Manager knows about
      */
-    @NotNull
+
     Collection<? extends String> getRegisteredModelTypes ();
 
     /**
@@ -59,16 +57,14 @@ public interface IModelsManager extends IModelUpdater, IModelInstanceProvider {
      *            The model type
      * @return The collection of instances of the model type
      */
-    @NotNull
+
     Collection<? extends IModelInstance<?>> getModelsOfType (String modelType);
 
     /**
      * Registers a new model with the name and type with the model manager
-     * 
-     * @param modelType
-     *            The type of the model
-     * @param modelName
-     *            The name of the model
+     *
+     * @param modelRef
+     *            The model reference
      * @param model
      *            The model instance
      * @throws RainbowModelException
@@ -80,9 +76,8 @@ public interface IModelsManager extends IModelUpdater, IModelInstanceProvider {
 
     /**
      * Copies a model instance, and registers the copy wth the model
-     * 
-     * @param modelType
-     * @param modelName
+     *
+     * @param modelRef
      * @param copyName
      * @return
      * @throws RainbowModelException
@@ -92,6 +87,5 @@ public interface IModelsManager extends IModelUpdater, IModelInstanceProvider {
 
     void unregisterModel (IModelInstance<?> model) throws RainbowModelException;
 
-    @Nullable
     <T> IModelInstance<T> getModelInstanceByResource (String resource);
 }

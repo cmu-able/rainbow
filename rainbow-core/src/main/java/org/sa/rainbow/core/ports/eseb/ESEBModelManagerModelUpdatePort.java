@@ -23,7 +23,7 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import org.jetbrains.annotations.NotNull;
+
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
@@ -55,7 +55,7 @@ IModelUSBusPort {
         getConnectionRole().addListener (new IESEBListener() {
 
             @Override
-            public void receive (@NotNull RainbowESEBMessage msg) {
+            public void receive (RainbowESEBMessage msg) {
                 String msgType = (String )msg.getProperty (ESEBConstants.MSG_TYPE_KEY);
                 if (ESEBConstants.MSG_TYPE_UPDATE_MODEL.equals (msgType)) {
                     String modelType = (String )msg.getProperty (MODEL_TYPE_KEY);
@@ -92,7 +92,7 @@ IModelUSBusPort {
                 }
                 else if ((ESEBConstants.MSG_TYPE_UPDATE_MODEL + "_multi").equals (msgType)) {
                     int i = 0;
-                    IRainbowOperation cmd = null;
+                    IRainbowOperation cmd;
                     List<IRainbowOperation> ops = new LinkedList<> ();
                     do {
                         cmd = ESEBCommandHelper.msgToCommand (msg, "_" + i + "_");
@@ -134,7 +134,7 @@ IModelUSBusPort {
     public void updateModel (IRainbowOperation command) {
         try {
             m_mm.requestModelUpdate (command);
-        } catch (@NotNull IllegalStateException | RainbowException e) {
+        } catch (IllegalStateException | RainbowException e) {
             // TODO Auto-generated catch block
             e.printStackTrace ();
         }
@@ -144,7 +144,7 @@ IModelUSBusPort {
     public void updateModel (List<IRainbowOperation> commands, boolean transaction) {
         try {
             m_mm.requestModelUpdate (commands, transaction);
-        } catch (@NotNull IllegalStateException | RainbowException e) {
+        } catch (IllegalStateException | RainbowException e) {
             // TODO Auto-generated catch block
             e.printStackTrace ();
         }

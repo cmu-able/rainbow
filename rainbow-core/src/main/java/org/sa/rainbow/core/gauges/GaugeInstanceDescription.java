@@ -26,8 +26,6 @@
  */
 package org.sa.rainbow.core.gauges;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
@@ -57,26 +55,26 @@ public class GaugeInstanceDescription extends GaugeTypeDescription {
 
     private static final String LOCATION_PARAM_NAME = "targetIP";
 
-    @Nullable
+
     private String m_instName = null;
-    @Nullable
+
     private String m_instComment = null;
-    @Nullable
+
     private TypedAttribute                        m_modelDesc         = null;
-    @Nullable
+
     private Map<String, OperationRepresentation> m_mappings          = null;
 
-    @Nullable
+
     private String m_id = null;
     private State m_state = State.UNINITIALIZED;
-    @Nullable
+
     private Beacon m_beacon = null;
 
     /**
      * Main Constructor.
      */
     public GaugeInstanceDescription (String gaugeType, String gaugeName,
-                                     String typeComment, @Nullable String instComment) {
+                                     String typeComment, String instComment) {
 
         super(gaugeType, typeComment);
         m_instName = gaugeName;
@@ -94,22 +92,22 @@ public class GaugeInstanceDescription extends GaugeTypeDescription {
         }
     }
 
-    @Nullable
+
     public String gaugeName () {
         return m_instName;
     }
 
-    @Nullable
+
     public String instanceComment () {
         return m_instComment;
     }
 
-    @Nullable
+
     public TypedAttribute modelDesc () {
         return m_modelDesc;
     }
 
-    public void setModelDesc (@NotNull TypedAttribute modelDesc) {
+    public void setModelDesc (TypedAttribute modelDesc) {
         m_modelDesc = modelDesc;
         Collection<OperationRepresentation> commands = m_commandSignatures.values ();
         for (OperationRepresentation command : commands) {
@@ -118,7 +116,7 @@ public class GaugeInstanceDescription extends GaugeTypeDescription {
     }
 
     @Override
-    public void addCommandSignature (String key, @NotNull OperationRepresentation commandRep) {
+    public void addCommandSignature (String key, OperationRepresentation commandRep) {
         if (m_modelDesc != null) {
             commandRep.setModel (m_modelDesc);
         }
@@ -133,12 +131,12 @@ public class GaugeInstanceDescription extends GaugeTypeDescription {
         return m_mappings.get(name);
     }
 
-    @Nullable
+
     public Map<String, OperationRepresentation> mappings () {
         return m_mappings;
     }
 
-    @Nullable
+
     public String id () {
         return m_id;
     }
@@ -151,7 +149,7 @@ public class GaugeInstanceDescription extends GaugeTypeDescription {
      * this method returns the value of that location.
      * @return String  the string indicating the location of the target host
      */
-    @Nullable
+
     private String location () {
         String location = null;
         TypedAttributeWithValue loc = findSetupParam (LOCATION_PARAM_NAME);
@@ -161,7 +159,7 @@ public class GaugeInstanceDescription extends GaugeTypeDescription {
         return location;
     }
 
-    @Nullable
+
     public Beacon beacon () {
         return m_beacon;
     }
@@ -183,8 +181,8 @@ public class GaugeInstanceDescription extends GaugeTypeDescription {
         return m_state == State.ALIVE;
     }
 
-    @Nullable
-    public static String genID (@NotNull GaugeInstanceDescription gd) {
+
+    public static String genID (GaugeInstanceDescription gd) {
         return gd.gaugeName () + ":" + gd.gaugeType () + "@" + gd.location ();
     }
 

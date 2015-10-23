@@ -1,9 +1,9 @@
 package edu.cmu.cs.able.eseb;
 
+import edu.cmu.cs.able.typelib.type.DataValue;
+
 import java.io.Closeable;
 import java.io.IOException;
-
-import edu.cmu.cs.able.typelib.type.DataValue;
 
 /**
  * Output stream that writes data values.
@@ -15,7 +15,7 @@ public interface DataTypeOutputStream extends Closeable {
 	 * @throws IOException failed to write the data type; the stream is
 	 * probably corrupted and should no longer be used
 	 */
-	public void write(DataValue dt) throws IOException;
+	void write (DataValue dt) throws IOException;
 	
 	/**
 	 * Writes the data value to the output stream.
@@ -23,12 +23,12 @@ public interface DataTypeOutputStream extends Closeable {
 	 * @throws IOException failed to write the data type; the stream is
 	 * probably corrupted and should no longer be used
 	 */
-	public void write(BusData bd) throws IOException;
+	void write (BusData bd) throws IOException;
 	
 	/**
 	 * Closes this stream and the underlying stream.
 	 * @throws IOException failed to close the stream
 	 */
 	@Override
-	public void close() throws IOException;
+	void close () throws IOException;
 }

@@ -26,8 +26,7 @@
  */
 package org.sa.rainbow.translator.probes;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.util.RainbowLogger;
@@ -57,7 +56,7 @@ public class GenericScriptBasedProbe extends AbstractProbe implements IBashBased
             try {
                 InputStreamReader isr = new InputStreamReader (m_inputStream);
                 BufferedReader br = new BufferedReader (isr);
-                String line = null;
+                String line;
                 while ((line = br.readLine ()) != null) {
                     reportData (line);
                 }
@@ -69,11 +68,11 @@ public class GenericScriptBasedProbe extends AbstractProbe implements IBashBased
 
     }
 
-    @Nullable
+
     private String m_path = null;
-    @Nullable
+
     private String m_params = null;
-    @Nullable
+
     private Process m_process = null;
     private boolean m_continual;
 
@@ -84,7 +83,7 @@ public class GenericScriptBasedProbe extends AbstractProbe implements IBashBased
      * @param path   the path to the script
      * @param paramStr  the parameters to supply as arguments to the script
      */
-    public GenericScriptBasedProbe (@NotNull String refID, String alias, String path, String paramStr) {
+    public GenericScriptBasedProbe (String refID, String alias, String path, String paramStr) {
         super(refID, alias, Kind.SCRIPT);
 
         m_path = path;

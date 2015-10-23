@@ -70,7 +70,7 @@ public class SetCaptchaResponseCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
             return cmds;
         }
         catch (NumberFormatException e) {
-            throw new RainbowModelException (MessageFormat.format ("Could not parse ''{0]'' as an integer",
+            throw new RainbowModelException (MessageFormat.format ("Could not parse ''{0}'' as an integer",
                     getParameters ()[0]));
         }
     }

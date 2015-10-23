@@ -23,8 +23,7 @@
  */
 package org.sa.rainbow.core.gauges;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
@@ -45,9 +44,8 @@ import java.util.regex.Pattern;
 public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
 
 
-    @Nullable
     protected Queue<String> m_lines = null;
-    @Nullable
+
     private Map<String,Pattern> m_patternMap = null;
 
     /**
@@ -125,7 +123,7 @@ public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
         super.runAction();
     }
 
-    protected void addPattern (@NotNull String matchName, Pattern p) {
+    protected void addPattern (String matchName, Pattern p) {
         m_patternMap.put(matchName.intern(), p);
     }
 

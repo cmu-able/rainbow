@@ -23,8 +23,7 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
 import org.sa.rainbow.core.ports.IProbeReportPort;
 import org.sa.rainbow.core.ports.IProbeReportSubscriberPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
@@ -48,7 +47,7 @@ public class ESEBProbeReportSubscriberPort extends AbstractESEBDisposablePort im
         getConnectionRole().addListener (new IESEBListener () {
 
             @Override
-            public void receive (@NotNull RainbowESEBMessage msg) {
+            public void receive (RainbowESEBMessage msg) {
                 processMessage (msg);
             }
         });
@@ -60,7 +59,7 @@ public class ESEBProbeReportSubscriberPort extends AbstractESEBDisposablePort im
     }
 
     @Override
-    public void subscribeToProbe (String probeType, @Nullable String location) {
+    public void subscribeToProbe (String probeType, String location) {
         synchronized (m_subscriptions) {
             Set<String> locations = m_subscriptions.get (probeType);
             if (locations == null) {
@@ -84,7 +83,7 @@ public class ESEBProbeReportSubscriberPort extends AbstractESEBDisposablePort im
     }
 
     @Override
-    public void unsubscribeToProbe (String probeType, @Nullable String location) {
+    public void unsubscribeToProbe (String probeType, String location) {
         synchronized (m_subscriptions) {
             if (location == null) {
                 m_subscriptions.remove (probeType);
@@ -101,7 +100,7 @@ public class ESEBProbeReportSubscriberPort extends AbstractESEBDisposablePort im
         }
     }
 
-    private void processMessage (@NotNull final RainbowESEBMessage msg) {
+    private void processMessage (final RainbowESEBMessage msg) {
         String type = (String )msg.getProperty (ESEBConstants.MSG_TYPE_KEY);
         if (ESEBConstants.MSG_TYPE_PROBE_REPORT.equals (type)) {
             final String probeType = (String )msg.getProperty (ESEBConstants.MSG_PROBE_TYPE_KEY);
@@ -110,25 +109,25 @@ public class ESEBProbeReportSubscriberPort extends AbstractESEBDisposablePort im
             if (subscribedToMessage) {
                 m_callback.reportData (new IProbeIdentifier () {
 
-                    @Nullable
+
                     @Override
                     public String id () {
                         return (String )msg.getProperty (ESEBConstants.MSG_PROBE_ID_KEY);
                     }
 
-                    @Nullable
+
                     @Override
                     public String type () {
                         return probeType;
                     }
 
-                    @Nullable
+
                     @Override
                     public String name () {
                         return id ();
                     }
 
-                    @Nullable
+
                     @Override
                     public String location () {
                         return probeLocation;

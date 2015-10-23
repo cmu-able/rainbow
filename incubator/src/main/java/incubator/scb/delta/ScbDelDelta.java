@@ -12,5 +12,5 @@ public interface ScbDelDelta<T extends MergeableScb<T>, V> extends ScbDelta<T> {
 	 * Obtains the removed value.
 	 * @return the value
 	 */
-	public V deleted();
+	V deleted ();
 }

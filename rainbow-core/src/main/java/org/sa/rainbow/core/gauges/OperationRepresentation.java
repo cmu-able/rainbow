@@ -23,8 +23,6 @@
  */
 package org.sa.rainbow.core.gauges;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttribute;
@@ -32,6 +30,7 @@ import org.sa.rainbow.util.HashCodeUtil;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,11 +39,11 @@ public class OperationRepresentation implements IRainbowOperation, Cloneable {
     private final String[] m_parameters;
     private final String m_target;
     private final String m_operationName;
-    @Nullable
+
     private ModelReference m_modelRef;
     private String   m_origin;
 
-    @NotNull
+
     @Override
     public String toString () {
         return MessageFormat.format ("O[{0}:{1}/{2}.{3}({4}){5}]", m_modelRef.getModelName (),
@@ -52,7 +51,7 @@ public class OperationRepresentation implements IRainbowOperation, Cloneable {
                 m_parameters == null ? "" : Arrays.toString (m_parameters), m_origin == null ? "" : ("<" + m_origin));
     }
 
-    public OperationRepresentation (@NotNull IRainbowOperation cmd) {
+    public OperationRepresentation (IRainbowOperation cmd) {
         m_parameters = new String[cmd.getParameters ().length];
         String[] parameters = cmd.getParameters ();
         System.arraycopy (parameters, 0, m_parameters, 0, parameters.length);
@@ -63,7 +62,7 @@ public class OperationRepresentation implements IRainbowOperation, Cloneable {
 
     }
 
-    public OperationRepresentation (String name, @Nullable ModelReference modelRef, String target,
+    public OperationRepresentation (String name, ModelReference modelRef, String target,
             String... parameters) {
         m_operationName = name;
         m_modelRef = modelRef == null ? null : new ModelReference (modelRef);
@@ -88,14 +87,13 @@ public class OperationRepresentation implements IRainbowOperation, Cloneable {
         return m_operationName;
     }
 
-    @Nullable
+
     @Override
     public ModelReference getModelReference () {
         return new ModelReference (m_modelRef);
     }
 
 
-    @NotNull
     @Override
     protected OperationRepresentation clone () throws CloneNotSupportedException {
         return (OperationRepresentation )super.clone ();
@@ -106,13 +104,15 @@ public class OperationRepresentation implements IRainbowOperation, Cloneable {
         if (obj != this) {
             if (obj instanceof OperationRepresentation) {
                 OperationRepresentation cr = (OperationRepresentation )obj;
-                return (cr.getModelReference ().getModelType () == getModelReference ().getModelType () || (getModelReference ()
+                return (Objects.equals (cr.getModelReference ().getModelType (), getModelReference ().getModelType ()
+                ) || (getModelReference ()
                         .getModelType () != null && getModelReference ().getModelType ().equals (
                                 cr.getModelReference ().getModelType ())))
-                                && (cr.getName () == getName () || (getName () != null && getName ()
+                        && (Objects.equals (cr.getName (), getName ()) || (getName () != null && getName ()
                                 .equals (cr.getName ())))
 
-                                && (cr.getTarget () == getTarget () || (getTarget () != null && getTarget ().equals (
+                        && (Objects.equals (cr.getTarget (), getTarget ()) || (getTarget () != null && getTarget ()
+                        .equals (
                                         cr.getTarget ()))) && Arrays.equals (getParameters (), cr.getParameters ());
             }
             return false;
@@ -135,7 +135,7 @@ public class OperationRepresentation implements IRainbowOperation, Cloneable {
         m_modelRef = new ModelReference (modelRef);
     }
 
-    void setModel (@NotNull TypedAttribute modelRef) {
+    void setModel (TypedAttribute modelRef) {
         m_modelRef = new ModelReference (modelRef.getName (), modelRef.getType ());
     }
 
@@ -147,7 +147,7 @@ public class OperationRepresentation implements IRainbowOperation, Cloneable {
     static final Pattern pattern = Pattern
             .compile ("\\\"?(([\\w\\$\\<\\>\\\"\\.]+)\\.)?(\\w+)\\s*\\(([\\w, \\.{}\\$\\<\\>\\\"]*)\\)\\\"?");
 
-    public static OperationRepresentation parseCommandSignature (@NotNull String commandSignature) {
+    public static OperationRepresentation parseCommandSignature (String commandSignature) {
         Matcher matcher = pattern.matcher (commandSignature);
         if (matcher.find ()) {
             String target = matcher.group (2);

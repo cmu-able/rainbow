@@ -24,7 +24,6 @@
 package org.sa.rainbow.core.ports.eseb.rpc;
 
 import edu.cmu.cs.able.eseb.participant.ParticipantException;
-import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.core.gauges.IGaugeState;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
@@ -37,7 +36,7 @@ public class ESEBGaugeQueryProviderPort extends AbstractESEBDisposableRPCPort im
 
     private IGauge           m_gauge;
 
-    public ESEBGaugeQueryProviderPort (@NotNull IGauge gauge) throws IOException, ParticipantException {
+    public ESEBGaugeQueryProviderPort (IGauge gauge) throws IOException, ParticipantException {
 
         super (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (), gauge.id ());
         m_gauge = gauge;

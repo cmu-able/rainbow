@@ -1,6 +1,5 @@
 package org.sa.rainbow.gui;
 
-import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.Rainbow.ExitState;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowConnectionException;
@@ -29,7 +28,6 @@ public class CommandLineUI {
         //input stream
         public static void inputFlush () {
             int dummy;
-            int bAvail;
 
             try {
                 while ((System.in.available ()) != 0) {
@@ -45,14 +43,14 @@ public class CommandLineUI {
         //  data input methods for
         //string, int, char, and double
         //********************************
-        @NotNull
+
         public static String inString (String prompt) {
             inputFlush ();
             printPrompt (prompt);
             return inString ();
         }
 
-        @NotNull
+
         public static String inString () {
             int aChar;
             String s = "";
@@ -129,7 +127,7 @@ public class CommandLineUI {
                 .createReportingSubscriberPort (new IRainbowReportingSubscriberCallback () {
 
                     @Override
-                    public void report (RainbowComponentT component, @NotNull ReportType type, String message) {
+                    public void report (RainbowComponentT component, ReportType type, String message) {
                         if (type == ReportType.ERROR || type == ReportType.FATAL || type == ReportType.WARNING) {
                             System.out.println (type.name () + ": " + message);
                         }

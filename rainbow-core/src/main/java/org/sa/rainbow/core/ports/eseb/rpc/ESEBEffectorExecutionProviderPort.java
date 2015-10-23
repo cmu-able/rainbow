@@ -27,7 +27,6 @@ ding without limitation the rights
 package org.sa.rainbow.core.ports.eseb.rpc;
 
 import edu.cmu.cs.able.eseb.participant.ParticipantException;
-import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.ports.eseb.ESEBProvider;
 import org.sa.rainbow.translator.effectors.IEffector;
 
@@ -39,7 +38,7 @@ IESEBEffectorExecutionRemoteInterface {
 
     private IEffector        m_effector;
 
-    public ESEBEffectorExecutionProviderPort (@NotNull IEffector effector) throws IOException, ParticipantException {
+    public ESEBEffectorExecutionProviderPort (IEffector effector) throws IOException, ParticipantException {
         super (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (),
                 effector.id ());
         m_effector = effector;

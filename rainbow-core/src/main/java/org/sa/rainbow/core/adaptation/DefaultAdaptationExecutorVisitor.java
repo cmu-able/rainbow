@@ -1,6 +1,5 @@
 package org.sa.rainbow.core.adaptation;
 
-import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 
@@ -28,7 +27,7 @@ public abstract class DefaultAdaptationExecutorVisitor<S extends IEvaluable> ext
     private boolean m_result = true;
     private final IRainbowReportingPort m_reporter;
 
-    public DefaultAdaptationExecutorVisitor (AdaptationTree<S> adt, ThreadGroup tg, @NotNull String threadName,
+    public DefaultAdaptationExecutorVisitor (AdaptationTree<S> adt, ThreadGroup tg, String threadName,
             CountDownLatch done, IRainbowReportingPort reporter) {
         super (tg, threadName);
         m_adtToVisit = adt;
@@ -48,7 +47,7 @@ public abstract class DefaultAdaptationExecutorVisitor<S extends IEvaluable> ext
     }
 
     @Override
-    public final boolean visitLeaf (@NotNull AdaptationTree<S> tree) {
+    public final boolean visitLeaf (AdaptationTree<S> tree) {
         S s = tree.getHead ();
         m_reporter.info (RainbowComponentT.EXECUTOR, "Visiting execution leaf");
         Object evaluate = this.evaluate (s);
@@ -66,7 +65,7 @@ public abstract class DefaultAdaptationExecutorVisitor<S extends IEvaluable> ext
     protected abstract boolean evaluate (S adaptation);
 
     @Override
-    public final boolean visitSequence (@NotNull AdaptationTree<S> tree) {
+    public final boolean visitSequence (AdaptationTree<S> tree) {
         Collection<AdaptationTree<S>> subTrees = tree.getSubTrees ();
         // Will return true of all branches are successful
         boolean ret = true;
@@ -77,7 +76,7 @@ public abstract class DefaultAdaptationExecutorVisitor<S extends IEvaluable> ext
     }
 
     @Override
-    public final boolean visitParallel (@NotNull AdaptationTree<S> tree) {
+    public final boolean visitParallel (AdaptationTree<S> tree) {
         Collection<AdaptationTree<S>> subTrees = tree.getSubTrees ();
         // Create a new thread group to manage the execution of these branches
         ThreadGroup g = new ThreadGroup (this.getThreadGroup (), "");
@@ -112,7 +111,7 @@ public abstract class DefaultAdaptationExecutorVisitor<S extends IEvaluable> ext
             CountDownLatch doneSignal);
 
     @Override
-    public final boolean visitSequenceStopSuccess (@NotNull AdaptationTree<S> tree) {
+    public final boolean visitSequenceStopSuccess (AdaptationTree<S> tree) {
         Collection<AdaptationTree<S>> subTrees = tree.getSubTrees ();
         for (AdaptationTree<S> adt : subTrees) {
             boolean ret = adt.visit (this);
@@ -122,7 +121,7 @@ public abstract class DefaultAdaptationExecutorVisitor<S extends IEvaluable> ext
     }
 
     @Override
-    public final boolean visitSequenceStopFailure (@NotNull AdaptationTree<S> tree) {
+    public final boolean visitSequenceStopFailure (AdaptationTree<S> tree) {
         Collection<AdaptationTree<S>> subTrees = tree.getSubTrees ();
         for (AdaptationTree<S> adt : subTrees) {
             boolean ret = adt.visit (this);

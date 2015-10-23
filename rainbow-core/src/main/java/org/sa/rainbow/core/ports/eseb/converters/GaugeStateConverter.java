@@ -35,8 +35,6 @@ import edu.cmu.cs.able.typelib.struct.UnknownFieldException;
 import edu.cmu.cs.able.typelib.type.DataType;
 import edu.cmu.cs.able.typelib.type.DataValue;
 import incubator.pval.Ensure;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.gauges.GaugeState;
 import org.sa.rainbow.core.gauges.IGaugeState;
 
@@ -57,19 +55,19 @@ public class GaugeStateConverter implements TypelibJavaConversionRule {
     }
 
     @Override
-    public boolean handles_java (Object value, @Nullable DataType dst) {
+    public boolean handles_java (Object value, DataType dst) {
         Ensure.not_null (value);
         return value instanceof IGaugeState && (dst == null || "gauge_state".equals (dst.name ()));
     }
 
     @Override
-    public boolean handles_typelib (@NotNull DataValue value, @Nullable Class<?> cls) {
+    public boolean handles_typelib (DataValue value, Class<?> cls) {
         Ensure.not_null (value);
         return value.type ().name ().equals ("gauge_state") && (cls == null || IGaugeState.class.isAssignableFrom (cls));
     }
 
     @Override
-    public DataValue from_java (Object value, @Nullable DataType dst, @NotNull TypelibJavaConverter converter)
+    public DataValue from_java (Object value, DataType dst, TypelibJavaConverter converter)
             throws ValueConversionException {
         if ((dst == null || dst instanceof StructureDataType) && value instanceof IGaugeState) {
             try {
@@ -96,7 +94,7 @@ public class GaugeStateConverter implements TypelibJavaConversionRule {
                         converter.from_java (command.getGaugeReports (),
                                 m_scope.find ("list<operation_representation>")));
                 return sdt.make (fields);
-            } catch (@NotNull UnknownFieldException | AmbiguousNameException e) {
+            } catch (UnknownFieldException | AmbiguousNameException e) {
                 throw new ValueConversionException (MessageFormat.format ("Could not convert from {0} to {1}", value
                         .getClass ().toString (), (dst == null ? "gauge_state" : dst.absolute_hname ())), e);
             }
@@ -106,9 +104,9 @@ public class GaugeStateConverter implements TypelibJavaConversionRule {
 
     }
 
-    @NotNull
+
     @Override
-    public <T> T to_java (DataValue value, @Nullable Class<T> cls, @NotNull TypelibJavaConverter converter)
+    public <T> T to_java (DataValue value, Class<T> cls, TypelibJavaConverter converter)
             throws ValueConversionException {
         if (value instanceof StructureDataValue) {
             try {
@@ -130,12 +128,12 @@ public class GaugeStateConverter implements TypelibJavaConversionRule {
                         return constructor.newInstance (setup, config, commands);
                     else
                         throw exception;
-                } catch (@NotNull NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
+                } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
                         | IllegalArgumentException | InvocationTargetException e) {
                     exception.addSuppressed (e);
                     throw exception;
                 }
-            } catch (@NotNull UnknownFieldException | AmbiguousNameException e) {
+            } catch (UnknownFieldException | AmbiguousNameException e) {
                 throw new ValueConversionException (MessageFormat.format ("Could not convert from {0} to {1}",
                         value.toString (),
                         (cls == null ? "IRainbowModelCommandRepresentation" : cls.getCanonicalName ())), e);

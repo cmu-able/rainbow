@@ -12,11 +12,11 @@ public interface IMutexManagerRemoteAccess {
 	 * Obtains the name of the mutex manager name.
 	 * @return the name
 	 */
-	public String manager_name();
+	String manager_name ();
 	
 	/**
 	 * Obtains the mutex manager's status report.
 	 * @return a mapping from mutex name to mutex status
 	 */
-	public Map<String, IMutexStatus> getStatusReport();
+	Map<String, IMutexStatus> getStatusReport ();
 }

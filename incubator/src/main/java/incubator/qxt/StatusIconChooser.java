@@ -1,6 +1,6 @@
 package incubator.qxt;
 
-import javax.swing.Icon;
+import javax.swing.*;
 
 /**
  * Interface implemented by classes that are used to choose an icon
@@ -23,7 +23,7 @@ public interface StatusIconChooser<T> {
 	/**
 	 * Types of row status.
 	 */
-	public enum StatusType {
+	enum StatusType {
 		/**
 		 * The row is empty.
 		 */

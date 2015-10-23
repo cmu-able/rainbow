@@ -23,8 +23,7 @@
  */
 package org.sa.rainbow.core.gauges;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
@@ -49,7 +48,7 @@ public class LocalGaugeManager {
     final IRainbowReportingPort m_reportingPort;
 
     /** tThe list of gauges started by this gauge manager **/
-    @NotNull
+
     private Map<String, IGauge> m_id2Gauge = new HashMap<> ();
 
     /** The list of guage descriptions started by this gauge manager **/
@@ -59,7 +58,7 @@ public class LocalGaugeManager {
         m_reportingPort = masterConnectionPort;
     }
 
-    public void initGauges (@NotNull List<GaugeInstanceDescription> gauges) {
+    public void initGauges (List<GaugeInstanceDescription> gauges) {
         for (GaugeInstanceDescription instDesc : gauges) {
             m_gauges.instSpec.put (instDesc.gaugeName (), instDesc);
             m_gauges.typeSpec.put (instDesc.gaugeType (), instDesc);
@@ -71,7 +70,7 @@ public class LocalGaugeManager {
                         instDesc.gaugeType ()));
                 continue;
             }
-            long gaugeBeaconPeriod = (Long )beaconPeriod.getValue ();
+            long gaugeBeaconPeriod = (Long) beaconPeriod.getValue ();
             TypedAttributeWithValue javaClassAttr = instDesc.findSetupParam (IGauge.SETUP_JAVA_CLASS);
             if (javaClassAttr == null) {
                 m_reportingPort.error (RainbowComponentT.GAUGE_MANAGER, MessageFormat.format (
@@ -79,12 +78,11 @@ public class LocalGaugeManager {
                         gaugeType, IGauge.SETUP_JAVA_CLASS));
                 continue;
             }
-            String gaugeClassName = (String )javaClassAttr.getValue ();
+            String gaugeClassName = (String) javaClassAttr.getValue ();
             try {
                 Class<?> gaugeClass = Class.forName (gaugeClassName);
                 doCreateGauge (gaugeClass, gaugeBeaconPeriod, instDesc);
-            }
-            catch (ClassNotFoundException e) {
+            } catch (ClassNotFoundException e) {
                 m_reportingPort.error (RainbowComponentT.GAUGE_MANAGER, MessageFormat.format (
                         "Could not create gauge of type {0}: Class ''{1}'' not found!", gaugeType, gaugeClassName), e);
             }
@@ -92,8 +90,8 @@ public class LocalGaugeManager {
 
     }
 
-    @Nullable
-    private IGauge doCreateGauge (@NotNull Class<?> gaugeClass, long beaconPeriod, @NotNull GaugeInstanceDescription instDesc) {
+
+    private IGauge doCreateGauge (Class<?> gaugeClass, long beaconPeriod, GaugeInstanceDescription instDesc) {
         AbstractGauge gauge = null;
         String id = GaugeInstanceDescription.genID (instDesc);
         Class<?>[] paramTypes = new Class[6];
@@ -115,7 +113,7 @@ public class LocalGaugeManager {
             gauge = (AbstractGauge )constructor.newInstance (args);
             gauge.initialize (m_reportingPort);
             gauge.start ();
-        } catch (@NotNull NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
+        } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException | RainbowConnectionException e) {
             m_reportingPort.error (RainbowComponentT.GAUGE_MANAGER,
                     MessageFormat.format ("Gauge construction for {0} failed!", id), e);

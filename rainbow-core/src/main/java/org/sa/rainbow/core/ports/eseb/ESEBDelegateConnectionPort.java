@@ -24,8 +24,6 @@
 package org.sa.rainbow.core.ports.eseb;
 
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
@@ -44,7 +42,7 @@ import java.util.Properties;
 
 public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
     private static final Logger LOGGER = Logger.getLogger (ESEBDelegateConnectionPort.class);
-    @Nullable
+
     private IDelegateManagementPort m_deploymentPort;
 
     public ESEBDelegateConnectionPort (RainbowDelegate delegate) throws IOException {
@@ -54,7 +52,7 @@ public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
         getConnectionRole().addListener (new IESEBListener() {
 
             @Override
-            public void receive (@NotNull RainbowESEBMessage msg) {
+            public void receive (RainbowESEBMessage msg) {
                 String type = (String )msg.getProperty (ESEBConstants.MSG_TYPE_KEY);
                 switch (type) {
                 case ESEBConstants.MSG_TYPE_DISCONNECT_DELEGATE: {
@@ -68,9 +66,10 @@ public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
         });
     }
 
-    @Nullable
+
     @Override
-    public IDelegateManagementPort connectDelegate (String delegateID, @NotNull Properties connectionProperties) throws RainbowConnectionException {
+    public IDelegateManagementPort connectDelegate (String delegateID, Properties connectionProperties) throws
+                                                                                                        RainbowConnectionException {
         /*
          * connectionProperties should contain the following information: 
          * PROPKEY_ESEB_DELEGATE_DEPLOYMENT_PORT, PROPKEY_ESEB_DELEGATE_DEPLOYMENT_HOST: 
@@ -95,7 +94,7 @@ public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
 
         getConnectionRole().blockingSendAndReceive (msg, new IESEBListener () {
             @Override
-            public void receive (@NotNull RainbowESEBMessage msgRcvd) {
+            public void receive (RainbowESEBMessage msgRcvd) {
                 String reply = (String )msgRcvd.getProperty (ESEBConstants.MSG_CONNECT_REPLY);
                 if (!ESEBConstants.MSG_REPLY_OK.equals (reply)) {
                     LOGGER.error (MessageFormat.format (
@@ -135,7 +134,7 @@ public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
     }
 
     @Override
-    public void report (String delegateID, @NotNull ReportType type, @NotNull RainbowComponentT compT, String msg) {
+    public void report (String delegateID, ReportType type, RainbowComponentT compT, String msg) {
         RainbowESEBMessage esebMsg = getConnectionRole().createMessage ();
         esebMsg.setProperty (ESEBConstants.MSG_CHANNEL_KEY, ChannelT.UIREPORT.name ());
         esebMsg.setProperty (ESEBConstants.COMPONENT_TYPE_KEY, compT.name ());

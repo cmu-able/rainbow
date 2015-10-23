@@ -94,7 +94,6 @@ public abstract class AbstractCommand implements Command {
 			doExecute();
 		} finally {
 			this.cmdIntf.set(null);
-			;
 			this.commandManager.set(null);
 			this.sid.set(0);
 		}

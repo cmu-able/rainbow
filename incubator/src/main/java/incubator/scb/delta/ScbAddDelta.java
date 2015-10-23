@@ -12,5 +12,5 @@ public interface ScbAddDelta<T extends MergeableScb<T>, V> extends ScbDelta<T> {
 	 * Obtains the added value.
 	 * @return the value
 	 */
-	public V added();
+	V added ();
 }

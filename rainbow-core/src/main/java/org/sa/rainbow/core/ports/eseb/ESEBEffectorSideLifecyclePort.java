@@ -23,7 +23,7 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import org.jetbrains.annotations.NotNull;
+
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.ports.IEffectorLifecycleBusPort;
@@ -44,14 +44,14 @@ public class ESEBEffectorSideLifecyclePort extends AbstractESEBDisposablePort im
     }
 
     @Override
-    public void reportCreated (@NotNull IEffectorIdentifier effector) {
+    public void reportCreated (IEffectorIdentifier effector) {
         RainbowESEBMessage msg = getConnectionRole().createMessage ();
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, IEffectorProtocol.EFFECTOR_CREATED);
         setCommonEffectorProperties (effector, msg);
         getConnectionRole().publish (msg);
     }
 
-    private void setCommonEffectorProperties (@NotNull IEffectorIdentifier effector, @NotNull RainbowESEBMessage msg) {
+    private void setCommonEffectorProperties (IEffectorIdentifier effector, RainbowESEBMessage msg) {
         msg.setProperty (IEffectorProtocol.ID, effector.id ());
         msg.setProperty (IEffectorProtocol.SERVICE, effector.service ());
         msg.setProperty (IEffectorProtocol.KIND, effector.kind ().name ());
@@ -59,7 +59,7 @@ public class ESEBEffectorSideLifecyclePort extends AbstractESEBDisposablePort im
     }
 
     @Override
-    public void reportDeleted (@NotNull IEffectorIdentifier effector) {
+    public void reportDeleted (IEffectorIdentifier effector) {
         RainbowESEBMessage msg = getConnectionRole().createMessage ();
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, IEffectorProtocol.EFFECTOR_DELETED);
         setCommonEffectorProperties (effector, msg);
@@ -67,7 +67,7 @@ public class ESEBEffectorSideLifecyclePort extends AbstractESEBDisposablePort im
     }
 
     @Override
-    public void reportExecuted (@NotNull IEffectorIdentifier effector, @NotNull Outcome outcome, @NotNull List<String> args) {
+    public void reportExecuted (IEffectorIdentifier effector, Outcome outcome, List<String> args) {
         RainbowESEBMessage msg = getConnectionRole().createMessage ();
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, IEffectorProtocol.EFFECTOR_EXECUTED);
         setCommonEffectorProperties (effector, msg);

@@ -1,11 +1,8 @@
 package incubator.ui.bean;
 
-import java.awt.Component;
+import javax.swing.*;
+import java.awt.*;
 import java.lang.reflect.Method;
-
-import javax.swing.JLabel;
-import javax.swing.JProgressBar;
-import javax.swing.JTable;
 
 /**
  * Provider that shows a progress bar. There are 5 hints that can be defined:
@@ -123,12 +120,12 @@ public class ProgressBarComponentProvider
 			Class<?> cls = bean.getClass();
 			String pname = "is" + Character.toUpperCase(prop.charAt(0))
 					+ prop.substring(1);
-			Method m = cls.getMethod(pname, new Class[0]);
+			Method m = cls.getMethod (pname);
 			if (m == null) {
 				return default_value;
 			}
-			
-			Object r = m.invoke(bean, new Object[0]);
+
+			Object r = m.invoke (bean);
 			if (r == null || !(r instanceof Boolean)) {
 				return default_value;
 			}
@@ -161,12 +158,12 @@ public class ProgressBarComponentProvider
 			Class<?> cls = bean.getClass();
 			String pname = "get" + Character.toUpperCase(prop.charAt(0))
 					+ prop.substring(1);
-			Method m = cls.getMethod(pname, new Class[0]);
+			Method m = cls.getMethod (pname);
 			if (m == null) {
 				return default_value;
 			}
-			
-			Object r = m.invoke(bean, new Object[0]);
+
+			Object r = m.invoke (bean);
 			if (r == null || !(r instanceof Integer)) {
 				return default_value;
 			}
@@ -199,12 +196,12 @@ public class ProgressBarComponentProvider
 			Class<?> cls = bean.getClass();
 			String pname = "get" + Character.toUpperCase(prop.charAt(0))
 					+ prop.substring(1);
-			Method m = cls.getMethod(pname, new Class[0]);
+			Method m = cls.getMethod (pname);
 			if (m == null) {
 				return default_value;
 			}
-			
-			Object r = m.invoke(bean, new Object[0]);
+
+			Object r = m.invoke (bean);
 			if (r == null || !(r instanceof String)) {
 				return default_value;
 			}

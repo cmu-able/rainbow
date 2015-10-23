@@ -24,7 +24,6 @@
 package org.sa.rainbow.core.ports.eseb.rpc;
 
 import edu.cmu.cs.able.eseb.participant.ParticipantException;
-import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
 import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
@@ -40,7 +39,7 @@ IESEBDelegateConfigurationPort {
 
     private RainbowDelegate m_delegate;
 
-    public ESEBDelegateConfigurationProviderPort (@NotNull RainbowDelegate delegate) throws IOException, ParticipantException {
+    public ESEBDelegateConfigurationProviderPort (RainbowDelegate delegate) throws IOException, ParticipantException {
         super (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (), delegate.getId ());
         m_delegate = delegate;
 

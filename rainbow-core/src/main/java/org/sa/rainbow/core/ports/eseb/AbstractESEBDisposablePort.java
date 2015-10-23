@@ -23,7 +23,6 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.ports.IDisposablePort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 
@@ -38,10 +37,10 @@ import java.io.IOException;
  */
 public abstract class AbstractESEBDisposablePort implements IDisposablePort {
 
-    @Nullable
+
     private ESEBConnector m_connectionRole;
 
-    protected AbstractESEBDisposablePort (@Nullable String host, short port, ChannelT channel) throws IOException {
+    protected AbstractESEBDisposablePort (String host, short port, ChannelT channel) throws IOException {
         if (host != null) {
             m_connectionRole = new ESEBConnector (host, port, channel);
         }
@@ -61,7 +60,7 @@ public abstract class AbstractESEBDisposablePort implements IDisposablePort {
         m_connectionRole = null;
     }
 
-    @Nullable
+
     public ESEBConnector getConnectionRole () {
         return m_connectionRole;
     }

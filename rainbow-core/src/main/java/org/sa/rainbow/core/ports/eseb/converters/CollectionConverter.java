@@ -33,8 +33,6 @@ import edu.cmu.cs.able.typelib.jconv.ValueConversionException;
 import edu.cmu.cs.able.typelib.type.DataType;
 import edu.cmu.cs.able.typelib.type.DataValue;
 import incubator.pval.Ensure;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -42,7 +40,7 @@ import java.util.*;
 public class CollectionConverter implements TypelibJavaConversionRule {
 
     @Override
-    public boolean handles_java (@Nullable Object value, @Nullable DataType dst) {
+    public boolean handles_java (Object value, DataType dst) {
         return !(value == null || dst == null) && (dst instanceof ListDataType || dst instanceof SetDataType) && value instanceof Collection;
 
     }
@@ -56,7 +54,7 @@ public class CollectionConverter implements TypelibJavaConversionRule {
     }
 
     @Override
-    public DataValue from_java (Object value, DataType dst, @NotNull TypelibJavaConverter converter)
+    public DataValue from_java (Object value, DataType dst, TypelibJavaConverter converter)
             throws ValueConversionException {
         Ensure.not_null (dst);
         Ensure.is_true (dst instanceof SetDataType || dst instanceof ListDataType);
@@ -81,9 +79,9 @@ public class CollectionConverter implements TypelibJavaConversionRule {
         }
     }
 
-    @Nullable
+
     @Override
-    public <T> T to_java (DataValue value, Class<T> cls, @NotNull TypelibJavaConverter converter)
+    public <T> T to_java (DataValue value, Class<T> cls, TypelibJavaConverter converter)
             throws ValueConversionException {
         Ensure.not_null (value);
         Ensure.is_true (value instanceof SetDataValue || value instanceof ListDataValue);
@@ -92,7 +90,7 @@ public class CollectionConverter implements TypelibJavaConversionRule {
         Set<Object> set = make_instance_set (cls);
         List<Object> list = make_instance_list (cls);
 
-        Collection<DataValue> col = null;
+        Collection<DataValue> col;
         if (value instanceof SetDataValue) {
             col = ((SetDataValue )value).all ();
             if (set == null && Collection.class == cls) {
@@ -136,7 +134,7 @@ public class CollectionConverter implements TypelibJavaConversionRule {
      *            the class; if <code>null</code> a default set will be created
      * @return the instance
      */
-    private Set<Object> make_instance_set (@Nullable Class<?> cls) {
+    private Set<Object> make_instance_set (Class<?> cls) {
         if (cls == null || cls == Set.class) return new HashSet<> ();
 
         if (!Set.class.isAssignableFrom (cls)) return null;
@@ -146,7 +144,7 @@ public class CollectionConverter implements TypelibJavaConversionRule {
             @SuppressWarnings ("unchecked")
             Set<Object> so = (Set<Object> )s;
             return so;
-        } catch (@NotNull NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
+        } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException | ClassCastException e) {
             return null;
         }
@@ -159,7 +157,7 @@ public class CollectionConverter implements TypelibJavaConversionRule {
      *            the class; if <code>null</code> a default set will be created
      * @return the instance
      */
-    private List<Object> make_instance_list (@Nullable Class<?> cls) {
+    private List<Object> make_instance_list (Class<?> cls) {
         if (cls == null || cls == List.class) return new ArrayList<> ();
 
         if (!List.class.isAssignableFrom (cls)) return null;
@@ -169,7 +167,7 @@ public class CollectionConverter implements TypelibJavaConversionRule {
             @SuppressWarnings ("unchecked")
             List<Object> lo = (List<Object> )l;
             return lo;
-        } catch (@NotNull NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
+        } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException | ClassCastException e) {
             return null;
         }

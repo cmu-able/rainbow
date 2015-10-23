@@ -1,10 +1,10 @@
 package edu.cmu.cs.able.eseb;
 
+import edu.cmu.cs.able.typelib.enc.InvalidEncodingException;
+
 import java.io.Closeable;
 import java.io.EOFException;
 import java.io.IOException;
-
-import edu.cmu.cs.able.typelib.enc.InvalidEncodingException;
 
 /**
  * Input stream that reads data values.
@@ -20,7 +20,7 @@ public interface DataTypeInputStream extends Closeable {
 	 * @throws InvalidEncodingException invalid data was read from the
 	 * stream
 	 */
-	public BusData read() throws EOFException, IOException,
+	BusData read () throws IOException,
 		InvalidEncodingException;
 	
 	/**
@@ -28,5 +28,5 @@ public interface DataTypeInputStream extends Closeable {
 	 * @throws IOException failed to close the input stream 
 	 */
 	@Override
-	public void close() throws IOException;
+	void close () throws IOException;
 }

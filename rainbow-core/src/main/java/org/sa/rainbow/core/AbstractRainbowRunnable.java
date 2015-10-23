@@ -26,8 +26,6 @@
  */
 package org.sa.rainbow.core;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.ports.DisconnectedRainbowDelegateConnectionPort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
@@ -45,12 +43,10 @@ import java.text.MessageFormat;
 public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Identifiable {
 
 
-    @Nullable
     private Thread m_thread = null;
-    @Nullable
     private String m_name = null;
     private long m_sleepTime = SLEEP_TIME;
-    @NotNull
+
     private State m_threadState = State.RAW;
     private State m_nextState = State.RAW;
     private boolean m_restarting = false;
@@ -88,7 +84,6 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
     /* (non-Javadoc)
      * @see org.sa.rainbow.core.IRainbowRunnable#name()
      */
-    @Nullable
     @Override
     public String id() {
         return m_name;
@@ -144,7 +139,7 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
     /* (non-Javadoc)
      * @see org.sa.rainbow.core.IRainbowRunnable#state()
      */
-    @NotNull
+
     @Override
     public State state () {
         return m_threadState;
@@ -279,7 +274,6 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
         log ("Terminated " + m_name);
     }
 
-    @Nullable
     protected Thread activeThread () {
         return m_thread;
     }

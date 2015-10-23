@@ -23,7 +23,6 @@
  */
 package org.sa.rainbow.core.gauges;
 
-import org.jetbrains.annotations.NotNull;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.util.HashCodeUtil;
@@ -34,15 +33,15 @@ import java.util.Set;
 
 public class GaugeState implements IGaugeState {
 
-    @NotNull
+
     private final Set<TypedAttributeWithValue> m_setupParams;
-    @NotNull
+
     private final Set<IRainbowOperation> m_commands;
-    @NotNull
+
     private final Set<TypedAttributeWithValue> m_configParams;
 
-    public GaugeState (@NotNull Collection<TypedAttributeWithValue> setupPArams,
-                       @NotNull Collection<TypedAttributeWithValue> configParams, @NotNull Collection<IRainbowOperation> commands) {
+    public GaugeState (Collection<TypedAttributeWithValue> setupPArams,
+                       Collection<TypedAttributeWithValue> configParams, Collection<IRainbowOperation> commands) {
         m_setupParams = new HashSet<> (setupPArams);
         m_configParams = new HashSet<> (configParams);
         m_commands = new HashSet<> (commands);
@@ -52,7 +51,7 @@ public class GaugeState implements IGaugeState {
      * (non-Javadoc)
      * @see org.sa.rainbow.gauges.IGaugeState#getSetupParams()
      */
-    @NotNull
+
     @Override
     public Collection<TypedAttributeWithValue> getSetupParams () {
         return m_setupParams;
@@ -62,7 +61,7 @@ public class GaugeState implements IGaugeState {
      * (non-Javadoc)
      * @see org.sa.rainbow.gauges.IGaugeState#getConfigParams()
      */
-    @NotNull
+
     @Override
     public Collection<TypedAttributeWithValue> getConfigParams () {
         return m_configParams;
@@ -72,7 +71,7 @@ public class GaugeState implements IGaugeState {
      * (non-Javadoc)
      * @see org.sa.rainbow.gauges.IGaugeState#getGaugeReports()
      */
-    @NotNull
+
     @Override
     public Collection<IRainbowOperation> getGaugeReports () {
         return m_commands;

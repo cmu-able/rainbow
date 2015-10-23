@@ -13,7 +13,7 @@ public interface Scb<T extends Scb<T>> {
 	 * Obtains the notification dispatcher.
 	 * @return the dispatcher
 	 */
-	public Dispatcher<ScbUpdateListener<T>> dispatcher();
+	Dispatcher<ScbUpdateListener<T>> dispatcher ();
 	
 	/**
 	 * Obtains all fields in the SCB. Normally, this method just delegates
@@ -23,5 +23,5 @@ public interface Scb<T extends Scb<T>> {
 	 * <code>c_</code>.
 	 * @return the list of all SCB fields
 	 */
-	public List<ScbField<T, ?>> fields();
+	List<ScbField<T, ?>> fields ();
 }

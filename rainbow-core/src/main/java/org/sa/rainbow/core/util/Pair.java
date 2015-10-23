@@ -23,8 +23,6 @@
  */
 package org.sa.rainbow.core.util;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 
@@ -38,10 +36,10 @@ public class Pair<T,E> implements Serializable, Comparable<Pair<T,E>>, Cloneable
     private static final long serialVersionUID = -3528940665822993558L;
 
     /** First value of the pair, usually a "type" */
-    @Nullable
+
     private T m_t = null;
     /** Second value of the pair, usually a name or "element" */
-    @Nullable
+
     private E m_e = null;
 
     /**
@@ -63,17 +61,17 @@ public class Pair<T,E> implements Serializable, Comparable<Pair<T,E>>, Cloneable
      */
     @SuppressWarnings("unchecked")
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals (Object obj) {
         boolean rv = true;
         if (obj instanceof Pair) {
-            Pair<T,E> pair = (Pair<T,E> )obj;
+            Pair<T, E> pair = (Pair<T, E>) obj;
             if (m_t != null) {
-                rv &= m_t.equals(pair.m_t);
+                rv = m_t.equals (pair.m_t);
             } else {
-                rv &= m_t == pair.m_t;
+                rv = m_t == pair.m_t;
             }
             if (m_e != null) {
-                rv &= m_e.equals(pair.m_e);
+                rv &= m_e.equals (pair.m_e);
             } else {
                 rv &= m_e == pair.m_e;
             }
@@ -87,7 +85,7 @@ public class Pair<T,E> implements Serializable, Comparable<Pair<T,E>>, Cloneable
      * @see java.lang.Object#hashCode()
      */
     @Override
-    public int hashCode() {
+    public int hashCode () {
         // create hashcode from the strings of the pair element objects
         return (String.valueOf (m_t) + m_e).hashCode ();
     }
@@ -96,10 +94,10 @@ public class Pair<T,E> implements Serializable, Comparable<Pair<T,E>>, Cloneable
      * @see java.lang.Object#finalize()
      */
     @Override
-    protected void finalize() throws Throwable {
+    protected void finalize () throws Throwable {
         m_t = null;
         m_e = null;
-        super.finalize();
+        super.finalize ();
     }
 
     /* (non-Javadoc)
@@ -107,7 +105,7 @@ public class Pair<T,E> implements Serializable, Comparable<Pair<T,E>>, Cloneable
      */
     @Override
     @SuppressWarnings("unchecked")
-    public int compareTo (@NotNull Pair<T, E> p) {
+    public int compareTo (Pair<T, E> p) {
         // now we do comparison
         int rv = ((Comparable<T> )firstValue()).compareTo(p.firstValue());
         if (rv == 0) {
@@ -124,7 +122,6 @@ public class Pair<T,E> implements Serializable, Comparable<Pair<T,E>>, Cloneable
     /* (non-Javadoc)
      * @see java.lang.Object#clone()
      */
-    @Nullable
     @SuppressWarnings("unchecked")
     @Override
     public Object clone () {
@@ -139,7 +136,7 @@ public class Pair<T,E> implements Serializable, Comparable<Pair<T,E>>, Cloneable
         return clonedPair;
     }
 
-    @Nullable
+
     public T firstValue () {
         return m_t;
     }
@@ -148,7 +145,7 @@ public class Pair<T,E> implements Serializable, Comparable<Pair<T,E>>, Cloneable
         m_t = t;
     }
 
-    @Nullable
+
     public E secondValue () {
         return m_e;
     }

@@ -23,7 +23,6 @@
  */
 package org.sa.rainbow.core.models.commands;
 
-import org.jetbrains.annotations.Nullable;
 import org.sa.rainbow.core.models.ModelReference;
 
 public interface IRainbowOperation {
@@ -34,7 +33,6 @@ public interface IRainbowOperation {
 
     String getName ();
 
-    @Nullable
     ModelReference getModelReference ();
 
     String getOrigin ();

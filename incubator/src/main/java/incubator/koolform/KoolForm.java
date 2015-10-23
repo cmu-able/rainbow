@@ -3,52 +3,20 @@ package incubator.koolform;
 import incubator.obscol.ObservableList;
 import incubator.ui.AutoUpdateJComboBox;
 import incubator.ui.RegexValidationDocument;
-
-import java.awt.AWTKeyStroke;
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.KeyboardFocusManager;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.swing.AbstractAction;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JRootPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JToggleButton;
-import javax.swing.KeyStroke;
-import javax.swing.SwingConstants;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.text.JTextComponent;
-
 import org.apache.commons.lang.StringUtils;
 import org.jdesktop.swingx.JXDatePicker;
 import org.jdesktop.swingx.renderer.StringValue;
+
+import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.JTextComponent;
+import java.awt.*;
+import java.awt.event.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.*;
+import java.util.List;
 
 /**
  * <p>
@@ -1024,11 +992,11 @@ public class KoolForm extends JPanel {
 						}
 					});
 		} else if (c instanceof JXDatePicker) {
-			((JXDatePicker) c).addPropertyChangeListener("date",
-					new PropertyChangeListener() {
+			c.addPropertyChangeListener ("date",
+										 new PropertyChangeListener () {
 						@Override
-						public void propertyChange(PropertyChangeEvent evt) {
-							componentDataChanged(c);
+						public void propertyChange (PropertyChangeEvent evt) {
+							componentDataChanged (c);
 						}
 					});
 		} else if (c instanceof JComboBox) {
@@ -1039,11 +1007,11 @@ public class KoolForm extends JPanel {
 				}
 			});
 		} else if (c instanceof JLabel) {
-			((JLabel) c).addPropertyChangeListener("text",
-					new PropertyChangeListener() {
+			c.addPropertyChangeListener ("text",
+										 new PropertyChangeListener () {
 						@Override
-						public void propertyChange(PropertyChangeEvent evt) {
-							componentDataChanged(c);
+						public void propertyChange (PropertyChangeEvent evt) {
+							componentDataChanged (c);
 						}
 					});
 		} else if (c instanceof JToggleButton) {
@@ -1080,7 +1048,7 @@ public class KoolForm extends JPanel {
 		}
 
 		if (value instanceof Integer && clazz == String.class) {
-			return clazz.cast(((Integer) value).toString());
+			return clazz.cast (value.toString ());
 		}
 
 		if (value instanceof String

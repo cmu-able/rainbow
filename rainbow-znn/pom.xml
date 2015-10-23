@@ -37,7 +37,7 @@
 		<!-- One block per developer. -->
 		<developer>
 			<!-- Unique ID for the developer. This ID is referenced in the changelog. -->
-			<id>schemerl</id>
+			<id>schmerl</id>
 			<!-- Developer name. -->
 			<name>Bradley Schmerl</name>
 			<!-- Developer e-mail address. -->
