@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">RaindroidXposed</string>
+    <string name="title_activity_dangerous">DangerousActivity</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="DangerousActivityTitle">Dangerous Activity Detected</string>
+    <string name="RaindroidDangerousExplanation">Raindroid has detected a potentially malicious action. Please select one of the mitigations below.</string>
+</resources>
