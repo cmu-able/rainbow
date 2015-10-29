@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Raindroid</string>
+
+    <string name="title_activity_intent_disposition_choice">IntentDispositionChoiceActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="ok_button">OK</string>
+</resources>
