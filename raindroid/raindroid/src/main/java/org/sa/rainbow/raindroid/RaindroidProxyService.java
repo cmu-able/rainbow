@@ -3,13 +3,17 @@ package org.sa.rainbow.raindroid;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.util.Log;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -38,6 +42,10 @@ public class RaindroidProxyService extends Service {
     private int m_nextState = 0;
     private boolean m_askUser = true;
 
+    // The packages list contains information about installed apps
+    private List<ApplicationInfo> m_packages = null;
+    private final PackageManager m_pkgMgr = getPackageManager();
+
     static RaindroidProxyService m_serviceIntance;
 
     public static RaindroidProxyService instance () {
@@ -51,6 +59,29 @@ public class RaindroidProxyService extends Service {
     class ServiceState {
         public Intent m_intent;
         public Messenger m_replyTo;
+    }
+
+    /**
+     *  Buld a list of package information for Rainbow
+     */
+    private void listPackageInfo() {
+
+        // Load the list of installed packages when the service starts
+        m_packages = m_pkgMgr.getInstalledApplications(PackageManager.GET_META_DATA);
+
+        // Log app information. In the future this information will be sent to Rainbow for analysis
+        for (ApplicationInfo packageInfo : m_packages) {
+            Log.d("RD_LIST", "Installed package :" + packageInfo.packageName);
+            Log.d("RD_LIST", "Source dir : " + packageInfo.sourceDir);
+            Log.d("RD_LIST", "Launch Activity :" + m_pkgMgr.getLaunchIntentForPackage(packageInfo.packageName));
+            Log.d("RD_LIST", "Permission :" + packageInfo.permission);
+
+            if (packageInfo.enabled == false) {
+                Log.d("LIST", packageInfo.packageName + " : disabled");
+            } else {
+                Log.d("LIST", packageInfo.packageName + " : enabled");
+            }
+        }
     }
 
     private Map<Integer, ServiceState> m_states = new HashMap<>();
@@ -95,6 +126,7 @@ public class RaindroidProxyService extends Service {
 
     public RaindroidProxyService() {
         m_serviceIntance = this;
+        listPackageInfo();
     }
 
     @Override
