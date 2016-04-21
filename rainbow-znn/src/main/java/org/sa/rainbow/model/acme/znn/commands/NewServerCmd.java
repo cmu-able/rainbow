@@ -31,7 +31,6 @@ import org.acmestudio.acme.model.util.core.UMStringValue;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -42,14 +41,6 @@ import java.util.List;
  *
  */
 public class NewServerCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
-
-    private static final List<String> SERVER_TYPE = Collections.singletonList ("ServerT");
-
-    private static final List<String> HTTP_CONN_T = Collections.singletonList ("ProxyConnT");
-
-    private static final List<String> PROXY_FORWARD_PORT = Collections.singletonList ("ProxyForwardPortT");
-
-    private static final List<String> HTTP_PORT = Collections.singletonList ("HttpPortT");
 
     private String                      m_name;
     public String                       m_lb;
@@ -75,8 +66,8 @@ public class NewServerCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
      * @param port
      *            The port on which the server will accept HTTP requests
      */
-    public NewServerCmd (String commandName, AcmeModelInstance model, String lb, String name, String host, String port) {
-        super (commandName, model, lb, name, host, port);
+    public NewServerCmd (AcmeModelInstance model, String lb, String name, String host, String port) {
+        super ("connectNewServer", model, lb, name, host, port);
         m_lb = lb;
         m_name = name;
         m_host = host;
@@ -109,21 +100,23 @@ public class NewServerCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
         // Component <m_name> = new ServerT extended with {
         m_name = ModelHelper.getUniqueName (getModel (), m_name);
         m_serverCommand = cf.componentCreateCommand (getModel (), m_name,
-                SERVER_TYPE, SERVER_TYPE);
+                                                     ZNNConstants.SERVER_TYPE, ZNNConstants.SERVER_TYPE);
         //   port http : HttpPortT = new HttpPortT;
         // }
-        final IAcmePortCreateCommand httpCreateCommand = cf.portCreateCommand (m_serverCommand, "http", HTTP_PORT,
-                HTTP_PORT);
+        final IAcmePortCreateCommand httpCreateCommand = cf.portCreateCommand (m_serverCommand, "http", ZNNConstants
+                                                                                       .HTTP_PORT,
+                                                                               ZNNConstants.HTTP_PORT);
         String lbName = ModelHelper.getUniqueName (getModel (), "proxyconn");
         // Connector proxyconn : ProxyConnT = new ProxyConnT;
         final IAcmeConnectorCreateCommand proxyConnCreateCmd = cf.connectorCreateCommand (getModel (), lbName,
-                HTTP_CONN_T, HTTP_CONN_T);
+                                                                                          ZNNConstants.HTTP_CONN_T,
+                                                                                          ZNNConstants.HTTP_CONN_T);
         String fwd = ModelHelper.getUniqueName (lb, "fwd");
         // m_lb = m_lb extended with {
         //   port fwd : ProxyForwardPortT = new ProxyForwardPortT;
         // }
-        final IAcmePortCreateCommand lbPortCmd = cf.portCreateCommand (lb, fwd, PROXY_FORWARD_PORT,
-                PROXY_FORWARD_PORT);
+        final IAcmePortCreateCommand lbPortCmd = cf.portCreateCommand (lb, fwd, ZNNConstants.PROXY_FORWARD_PORT,
+                                                                       ZNNConstants.PROXY_FORWARD_PORT);
         // attachment m_lb.fwd to proxyconn.req;
         final IAcmeAttachmentCommand attachLBEnd = cf.attachmentCreateCommand (getModel (),
                 lb.getName () + "." + fwd,

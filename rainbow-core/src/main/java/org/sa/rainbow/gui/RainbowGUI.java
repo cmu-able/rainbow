@@ -55,29 +55,29 @@ import java.util.List;
  */
 public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallback {
     // Index values
-    public static final int ID_MODEL_MANAGER = 0;
-    public static final int ID_ARCH_EVALUATOR = 1;
+    public static final int ID_MODEL_MANAGER      = 0;
+    public static final int ID_ARCH_EVALUATOR     = 1;
     public static final int ID_ADAPTATION_MANAGER = 2;
-    public static final int ID_EXECUTOR = 3;
-    public static final int ID_TARGET_SYSTEM = 4;
-    public static final int ID_TRANSLATOR = 5;
-    public static final int ID_GAUGES = 6;
-    public static final int ID_ORACLE_MESSAGE = 7;
-    public static final int ID_FILLER1 = 8;
-    public static final int PANEL_COUNT = 9;  // make sure m_colors has same count
+    public static final int ID_EXECUTOR           = 3;
+    public static final int ID_TARGET_SYSTEM      = 4;
+    public static final int ID_TRANSLATOR         = 5;
+    public static final int ID_GAUGES             = 6;
+    public static final int ID_ORACLE_MESSAGE     = 7;
+    public static final int ID_FILLER1            = 8;
+    public static final int PANEL_COUNT           = 9;  // make sure m_colors has same count
 
     // Layout distances and other constants
-    public static final int PANEL_MARGIN = 10;
-    public static final int PANEL_PADDING = 8;
-    public static final int PANEL_BORDER = 4;
-    public static final int PANEL_ROWS = 3;
-    public static final int PANEL_COLUMNS = 3;
-    public static final int TEXT_ROWS = 10;
-    public static final int TEXT_COLUMNS = 40;
-    public static final float TEXT_FONT_SIZE = 9.0f;
-    public static final int MAX_TEXT_LENGTH = 100000;
+    public static final int   PANEL_MARGIN     = 10;
+    public static final int   PANEL_PADDING    = 8;
+    public static final int   PANEL_BORDER     = 4;
+    public static final int   PANEL_ROWS       = 3;
+    public static final int   PANEL_COLUMNS    = 3;
+    public static final int   TEXT_ROWS        = 10;
+    public static final int   TEXT_COLUMNS     = 40;
+    public static final float TEXT_FONT_SIZE   = 9.0f;
+    public static final int   MAX_TEXT_LENGTH  = 100000;
     /** Convenience constant: size of text field to set to when Max is exceeded. */
-    public static final int TEXT_HALF_LENGTH = 50000;
+    public static final int   TEXT_HALF_LENGTH = 50000;
 
     public static void main (String[] args) {
         boolean showHelp = false;
@@ -86,23 +86,24 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         for (int i = 0; i <= lastIdx; i++) {
             if (args[i].equals ("-h")) {
                 showHelp = true;
-            }
-            else {
+            } else {
                 System.err.println ("Unrecognized or incomplete argument " + args[i]);
                 showHelp = true;
             }
         }
         if (showHelp) {
             System.out.println ("Usage:\n" + "  system property options {default}:\n"
-                    + "    rainbow.target    name of target configuration {default}\n"
-                    + "    rainbow.config    top config directory (org.sa.rainbow.config)\n" + "  options: \n"
-                    + "    -h          Show this help message\n" + "    -nogui      Don't show the Rainbow GUI\n" + "\n"
-                    + "Option defaults are defined in <rainbow.target>/rainbow.properties");
+                                        + "    rainbow.target    name of target configuration {default}\n"
+                                        + "    rainbow.config    top config directory (org.sa.rainbow.config)\n" + " " +
+                                        " options: \n"
+                                        + "    -h          Show this help message\n" + "    -nogui      Don't show " +
+                                        "the Rainbow GUI\n" + "\n"
+                                        + "Option defaults are defined in <rainbow.target>/rainbow.properties");
             System.exit (RainbowConstants.EXIT_VALUE_ABORT);
         }
 
         RainbowGUI gui = new RainbowGUI (null);
-        gui.display();
+        gui.display ();
     }
 
 
@@ -110,23 +111,25 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
 
     private JTextArea[] m_textAreas = null;
 
-    private JComponent[]       m_panes     = null;
+    private JComponent[] m_panes = null;
 
     private Color[] m_colors = {
-            /* purple */ new Color(188, 188, 250),
-            /* pink */   new Color(255, 145, 255),
+            /* purple */ new Color (188, 188, 250),
+            /* pink */   new Color (255, 145, 255),
             Color.RED,
-            /* green */  new Color(0, 255, 64),
+            /* green */  new Color (0, 255, 64),
             Color.CYAN,
-            /* orange */ new Color(255, 128, 64),
+            /* orange */ new Color (255, 128, 64),
             Color.BLUE,
             Color.WHITE,
             Color.GRAY
     };
 
-    private int[] m_order = { 7, 2, 8, 3, 0, 1, 5, 4, 6 };
-    private IMasterCommandPort m_master;
+    private int[] m_order = {7, 2, 8, 3, 0, 1, 5, 4, 6};
+    private IMasterCommandPort       m_master;
     private IModelDSBusPublisherPort m_dsPort;
+    private IModelUSBusPort          m_usPort;
+
     private GUIGaugeLifecycleListener m_gaugeListener;
     private IGaugeLifecycleBusPort    m_gaugeLifecyclePort;
     private IEffectorLifecycleBusPort m_effectorListener;
@@ -142,10 +145,9 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
             IRainbowReportingSubscriberPort reportingSubscriberPort = RainbowPortFactory
                     .createReportingSubscriberPort (this);
             reportingSubscriberPort.subscribe (EnumSet.allOf (RainbowComponentT.class),
-                    EnumSet.allOf (ReportType.class));
+                                               EnumSet.allOf (ReportType.class));
 
-        }
-        catch (RainbowConnectionException e) {
+        } catch (RainbowConnectionException e) {
             // TODO Auto-generated catch block
             e.printStackTrace ();
         }
@@ -156,8 +158,8 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
      */
     @Override
     public void dispose () {
-        m_frame.setVisible(false);
-        m_frame.dispose();
+        m_frame.setVisible (false);
+        m_frame.dispose ();
         m_frame = null;
     }
 
@@ -170,7 +172,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
     }
 
     public void quit () {
-        Rainbow.signalTerminate();
+        Rainbow.signalTerminate ();
     }
 
     public void forceQuit () {
@@ -183,8 +185,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
                 while (Rainbow.instance ().getThreadGroup ().activeCount () > 0) {
                     try {
                         Thread.sleep (100);
-                    }
-                    catch (InterruptedException e) {
+                    } catch (InterruptedException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace ();
                     }
@@ -193,7 +194,8 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
             }
         }).start ();
         int ret = JOptionPane.showOptionDialog (m_frame, "Waiting for Rainbow to shutdown. Continue to wait?",
-                "Quitting", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, null, null);
+                                                "Quitting", JOptionPane.YES_NO_OPTION, JOptionPane
+                                                        .INFORMATION_MESSAGE, null, null, null);
 
         if (ret == JOptionPane.NO_OPTION) {
             System.exit (RainbowConstants.EXIT_VALUE_ABORT);
@@ -205,10 +207,10 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
 
         //Schedule a job for the event-dispatching thread:
         //creating and showing this application's GUI.
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+        javax.swing.SwingUtilities.invokeLater (new Runnable () {
             @Override
-            public void run() {
-                show();
+            public void run () {
+                show ();
             }
         });
     }
@@ -220,27 +222,28 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
      */
     public void writeTextSL (int panelID, String text) {
         if (panelID == ID_ORACLE_MESSAGE) {
-            OracleStatusPanel oracleStatusPanel = (OracleStatusPanel )m_panes[panelID];
+            OracleStatusPanel oracleStatusPanel = (OracleStatusPanel) m_panes[panelID];
             if (oracleStatusPanel == null) return;
-            ((OracleStatusPanel )m_panes[panelID]).report (text, false);
+            ((OracleStatusPanel) m_panes[panelID]).report (text, false);
             return;
         }
         if (m_textAreas[panelID] == null) return;
-        m_textAreas[panelID].append(text);
-        m_textAreas[panelID].setCaretPosition(m_textAreas[panelID].getText().length());
+        m_textAreas[panelID].append (text);
+        m_textAreas[panelID].setCaretPosition (m_textAreas[panelID].getText ().length ());
     }
+
     public void writeText (int panelID, String text) {
         if (panelID == ID_ORACLE_MESSAGE) {
-            OracleStatusPanel oracleStatusPanel = (OracleStatusPanel )m_panes[panelID];
+            OracleStatusPanel oracleStatusPanel = (OracleStatusPanel) m_panes[panelID];
             if (oracleStatusPanel == null) return;
             oracleStatusPanel.report (text, true);
             return;
         }
         if (m_textAreas[panelID] == null) return;
-        m_textAreas[panelID].append(text + "\n");
-        m_textAreas[panelID].setCaretPosition(m_textAreas[panelID].getText().length());
-        if (m_textAreas[panelID].getText().length() > MAX_TEXT_LENGTH) {
-            m_textAreas[panelID].setText(m_textAreas[panelID].getText().substring(TEXT_HALF_LENGTH));
+        m_textAreas[panelID].append (text + "\n");
+        m_textAreas[panelID].setCaretPosition (m_textAreas[panelID].getText ().length ());
+        if (m_textAreas[panelID].getText ().length () > MAX_TEXT_LENGTH) {
+            m_textAreas[panelID].setText (m_textAreas[panelID].getText ().substring (TEXT_HALF_LENGTH));
         }
     }
 
@@ -252,16 +255,17 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         if (m_frame != null) return;
 
         // Use Window's default decorations.
-        JFrame.setDefaultLookAndFeelDecorated(false);
-        JDialog.setDefaultLookAndFeelDecorated(false);
+        JFrame.setDefaultLookAndFeelDecorated (false);
+        JDialog.setDefaultLookAndFeelDecorated (false);
 
         m_textAreas = new JTextArea[PANEL_COUNT];
         m_panes = new JComponent[PANEL_COUNT];
 
         //Create and set up the window.
-        m_frame = new JFrame ("Rainbow Framework GUI - Target " + Rainbow.getProperty (RainbowConstants.PROPKEY_TARGET_NAME));
-        m_frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        m_frame.addWindowListener(new WindowAdapter() {
+        m_frame = new JFrame ("Rainbow Framework GUI - Target " + Rainbow.getProperty (RainbowConstants
+                                                                                               .PROPKEY_TARGET_NAME));
+        m_frame.setDefaultCloseOperation (JFrame.DO_NOTHING_ON_CLOSE);
+        m_frame.addWindowListener (new WindowAdapter () {
             @Override
             public void windowClosing(WindowEvent e) {
                 quit();
@@ -386,14 +390,14 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
     private JComponent createTextArea (int area) {
         m_textAreas[area] = new JTextArea(TEXT_ROWS, TEXT_COLUMNS);
         m_textAreas[area].setFont(m_textAreas[area].getFont().deriveFont(TEXT_FONT_SIZE));
-        m_textAreas[area].setEditable(false);
-        m_textAreas[area].setLineWrap(true);
+        m_textAreas[area].setEditable (false);
+        m_textAreas[area].setLineWrap (true);
         m_textAreas[area].setWrapStyleWord(true);
         m_textAreas[area].setAutoscrolls(true);
         m_panes[area] = new JScrollPane(m_textAreas[area],
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        m_panes[area].setAutoscrolls(true);
+        m_panes[area].setAutoscrolls (true);
         Border border = BorderFactory.createMatteBorder(
                 PANEL_BORDER, PANEL_BORDER, PANEL_BORDER, PANEL_BORDER,
                 m_colors[area]);
@@ -517,9 +521,9 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
 
         // Probe start menu item
         item = new JMenuItem("Start Probes");
-        item.setMnemonic(KeyEvent.VK_P);
-        item.setToolTipText("Signals all Delegates to start the probes (key: rainbow.delegate.startProbesOnInit)");
-        item.addActionListener(new ActionListener() {
+        item.setMnemonic (KeyEvent.VK_P);
+        item.setToolTipText ("Signals all Delegates to start the probes (key: rainbow.delegate.startProbesOnInit)");
+        item.addActionListener (new ActionListener () {
             @Override
             public void actionPerformed (ActionEvent e) {
                 m_master.startProbes ();
@@ -531,7 +535,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         menu.add(item);
         // Probe kill menu item
         item = new JMenuItem("Kill Probes");
-        item.setMnemonic(KeyEvent.VK_K);
+        item.setMnemonic (KeyEvent.VK_K);
         item.setToolTipText ("Signals all Delegates to kill the probes");
         item.addActionListener (new ActionListener () {
             @Override
@@ -550,12 +554,12 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
 
         // Test Effector 1 menu item
         item = new JMenuItem("T1 KillDelegate Effector");
-        item.setMnemonic(KeyEvent.VK_1);
-        item.addActionListener(new ActionListener() {
+        item.setMnemonic (KeyEvent.VK_1);
+        item.addActionListener (new ActionListener () {
             @Override
             public void actionPerformed (ActionEvent e) {
-                String hostname = JOptionPane.showInputDialog(m_frame, "Please provide hostname of Delegate to kill");
-                if (hostname != null && hostname.length() > 0) {
+                String hostname = JOptionPane.showInputDialog (m_frame, "Please provide hostname of Delegate to kill");
+                if (hostname != null && hostname.length () > 0) {
                     m_master.killDelegate (hostname);
                 }
             }
@@ -563,27 +567,29 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         menu.add(item);
         // Test Effector 2 menu item
         item = new JMenuItem("T2 Test An Effector");
-        item.setMnemonic(KeyEvent.VK_2);
-        item.addActionListener(new ActionListener() {
+        item.setMnemonic (KeyEvent.VK_2);
+        item.addActionListener (new ActionListener () {
             @Override
             public void actionPerformed (ActionEvent e) {
-                String effID = JOptionPane.showInputDialog(m_frame, "Please identify Effector to test: 'name@location' (or just 'name' for localhost)");
-                if (effID == null || effID.length() == 0) {
-                    writeText(ID_ORACLE_MESSAGE, "Sorry, Oracle needs to know what effector to invoke!");
+                String effID = JOptionPane.showInputDialog (m_frame, "Please identify Effector to test: " +
+                        "'name@location' (or just 'name' for localhost)");
+                if (effID == null || effID.length () == 0) {
+                    writeText (ID_ORACLE_MESSAGE, "Sorry, Oracle needs to know what effector to invoke!");
                 }
-                Pair<String,String> namePair = Util.decomposeID(effID);
-                if (namePair.secondValue() == null) {  // default to localhost
-                    namePair.setSecondValue("localhost");
+                Pair<String, String> namePair = Util.decomposeID (effID);
+                if (namePair.secondValue () == null) {  // default to localhost
+                    namePair.setSecondValue ("localhost");
                 }
-                String argStr = JOptionPane.showInputDialog(m_frame, "Please provide String arguments, separated by '|'");
+                String argStr = JOptionPane.showInputDialog (m_frame, "Please provide String arguments, separated by " +
+                        "'|'");
                 String[] args;
-                if (argStr == null || argStr.length() == 0) {
+                if (argStr == null || argStr.length () == 0) {
                     args = new String[0];
                 } else {
-                    args = argStr.split("\\s*\\|\\s*");
+                    args = argStr.split ("\\s*\\|\\s*");
                 }
                 // run the test
-                testEffector(namePair.secondValue(), namePair.firstValue(), args);
+                testEffector (namePair.secondValue (), namePair.firstValue (), args);
             }
         });
         menu.add(item);
@@ -595,23 +601,23 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
             @Override
             public void actionPerformed (ActionEvent e) {
                 String operationName = JOptionPane.showInputDialog (m_frame,
-                        "Please identify the Operation to test:");
+                                                                    "Please identify the Operation to test:");
                 if (operationName == null || operationName.isEmpty ()) {
                     writeText (ID_ORACLE_MESSAGE, "Sorry, Oracel needs to know what operation to invoke.");
                 }
 
                 String argStr = JOptionPane.showInputDialog (m_frame,
-                        "Please provide string arguments, separated by ','");
+                                                             "Please provide string arguments, separated by ','");
                 String[] args;
                 if (argStr == null || argStr.isEmpty ()) {
                     args = new String[0];
-                }
-                else {
+                } else {
                     args = argStr.split ("\\s*,\\s*");
                 }
                 String modelRef = JOptionPane
                         .showInputDialog (m_frame,
-                                "Please identify the model to run the operation on: modelName:modelType (or just 'modelName' for Acme)");
+                                          "Please identify the model to run the operation on: modelName:modelType (or" +
+                                                  " just 'modelName' for Acme)");
                 ModelReference model = Util.decomposeModelReference (modelRef);
                 if (model.getModelType () == null || model.getModelType ().isEmpty ()) {
                     model = new ModelReference (model.getModelName (), "Acme");
@@ -622,6 +628,43 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
             }
         });
         menu.add (item);
+
+        item = new JMenuItem ("T4 Change the model");
+        item.setMnemonic (KeyEvent.VK_4);
+        item.addActionListener (new ActionListener () {
+            @Override
+            public void actionPerformed (ActionEvent e) {
+                String mr = JOptionPane.showInputDialog (m_frame,
+                                                         "Please identify the model to run the operation on: " +
+                                                                 "modelName:modelType (or" +
+                                                                 " just 'modelName' for Acme)");
+                ModelReference model = Util.decomposeModelReference (mr);
+                if (model.getModelType () == null || model.getModelType ().isEmpty ()) {
+                    model = new ModelReference (model.getModelName (), "Acme");
+                } else {
+                    writeText (ID_ORACLE_MESSAGE, "Sorry, we need to know the model that will be changed");
+                    return;
+                }
+
+
+                String operation = JOptionPane.showInputDialog (m_frame, "Please identify a model operation to test");
+                if (operation == null || operation.isEmpty ()) {
+                    writeText (ID_ORACLE_MESSAGE, "Sorry, we need to know what model operation to conduct");
+                    return;
+                }
+
+                String argStr = JOptionPane.showInputDialog (m_frame,
+                                                             "Please provide string arguments, separated by ','");
+                String[] args;
+                if (argStr == null || argStr.isEmpty ()) {
+                    args = new String[0];
+                } else {
+                    args = argStr.split ("\\s*,\\s*");
+                }
+
+                testModelOperation (model, operation, args);
+            }
+        });
 
         menu.add(new JSeparator());
         // Delegate control menu item
@@ -706,6 +749,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
 
     }
 
+
     /**
      * Creates the help menu items.
      * @param menu  the menu on which to create items.
@@ -761,11 +805,34 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
 //		}
     }
 
+
     // GUI invoked test methods
+    private void testModelOperation (ModelReference model, String operation, String[] args) {
+        OperationRepresentation or = new OperationRepresentation (operation, model, args[0], Arrays.copyOfRange (args,
+                                                                                                                 1,
+                                                                                                                 args
+                                                                                                                         .length));
+        or.setOrigin ("GUI");
+        if (m_usPort == null) {
+            try {
+                m_usPort = RainbowPortFactory.createModelsManagerClientUSPort (new Identifiable () {
+                    @Override
+                    public String id () {
+                        return "GUI";
+                    }
+                });
+                m_usPort.updateModel (or);
+            } catch (RainbowConnectionException e) {
+                writeText (ID_ORACLE_MESSAGE, "Failed to publish the operation to the model");
+            }
+        }
+    }
+
+
     private void testEffector (String target, String effName, String[] args) {
         String message = "Testing Effector " + effName + "@" + target + Arrays.toString (args);
         writeText (ID_EXECUTOR, message);
-        Outcome outcome = m_master.testEffector (target, effName, args);
+        Outcome outcome = m_master.testEffector (target, effName, Arrays.asList (args));
         JOptionPane.showMessageDialog (m_frame, message + " - outcome: " + outcome);
         writeText (ID_EXECUTOR, message + " - outcome: " + outcome);
 //        writeText(ID_EXECUTOR, "Testing Effector " + effName + Arrays.toString(args));

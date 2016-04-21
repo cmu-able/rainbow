@@ -29,7 +29,7 @@ import java.util.List;
 
 public interface IEffectorExecutionPort extends IDisposablePort {
     enum Outcome {
-        UNKNOWN, CONFOUNDED, FAILURE, SUCCESS, TIMEOUT
+        UNKNOWN, CONFOUNDED, FAILURE, SUCCESS, TIMEOUT, result, LONG_RUNNING
     }
 
     /**

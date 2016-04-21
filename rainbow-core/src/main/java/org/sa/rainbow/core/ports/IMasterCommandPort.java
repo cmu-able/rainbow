@@ -34,7 +34,7 @@ public interface IMasterCommandPort {
 
     void enableAdaptation (boolean enabled);
 
-    Outcome testEffector (String target, String effName, String[] args);
+    Outcome testEffector (String target, String effName, List<String> args);
 
     void sleep ();
 

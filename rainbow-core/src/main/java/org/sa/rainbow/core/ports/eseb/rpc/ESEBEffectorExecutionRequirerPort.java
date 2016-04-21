@@ -27,6 +27,7 @@ ut limitation the rights
 package org.sa.rainbow.core.ports.eseb.rpc;
 
 import edu.cmu.cs.able.eseb.participant.ParticipantException;
+import edu.cmu.cs.able.eseb.rpc.OperationTimedOutException;
 import org.sa.rainbow.core.ports.eseb.ESEBProvider;
 import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
 
@@ -47,7 +48,12 @@ IESEBEffectorExecutionRemoteInterface {
 
     @Override
     public Outcome execute (List<String> args) {
-        return m_stub.execute (args);
+        try {
+            return m_stub.execute (args);
+        }
+        catch (OperationTimedOutException e) {
+            return Outcome.TIMEOUT;
+        }
     }
 
 }

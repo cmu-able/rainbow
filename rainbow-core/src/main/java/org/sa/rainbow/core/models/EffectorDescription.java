@@ -53,6 +53,15 @@ public class EffectorDescription {
             return kindName;
         }
 
+        public void setKindName (String kindName) {
+            super.setKindName (kindName);
+            try {
+                kind = Kind.valueOf (kindName.toUpperCase ());
+            } catch (Throwable e) {
+                kind = Kind.NULL;
+            }
+        }
+
         @Override
         public String getLocation () {
             String location = super.getLocation ();
@@ -93,7 +102,7 @@ public class EffectorDescription {
 
 
         public IEffector.Kind getKind () {
-            if (kind == null && effectorType != null)
+            if ((kind == null || kind == Kind.NULL) && effectorType != null)
                 return effectorType.getKind ();
             else if (kind == null) return Kind.NULL;
             return kind;

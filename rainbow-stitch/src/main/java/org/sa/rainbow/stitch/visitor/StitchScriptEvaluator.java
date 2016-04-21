@@ -1331,9 +1331,7 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
             allParamClassOk &= matchPrimitive;
             ++i;
         }
-        if (!allParamClassOk) {
-            checkMethodParams (m, params, args);
-        }
+
         return allParamClassOk;
     }
 

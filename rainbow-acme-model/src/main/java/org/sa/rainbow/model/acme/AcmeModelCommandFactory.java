@@ -41,15 +41,17 @@ public abstract class AcmeModelCommandFactory extends ModelCommandFactory<IAcmeS
         m_commandMap.put ("setTypecheckResult".toLowerCase (), AcmeTypecheckSetCmd.class);
     }
 
-    public AcmeTypecheckSetCmd setTypecheckResultCmd (boolean typechecks) {
-        return new AcmeTypecheckSetCmd ((AcmeModelInstance) m_modelInstance,
+
+    public AcmeTypecheckSetCmd setTypecheckResultCmd (IAcmeSystem system, boolean typechecks) {
+        return new AcmeTypecheckSetCmd ((AcmeModelInstance) m_modelInstance, "self",
                 Boolean.toString (typechecks));
     }
 
 
 
+
     @Override
-    public AcmeSaveModelCommand saveCommand (String location) throws RainbowModelException {
+    public AcmeSaveModelCommand saveCommand ( String location) throws RainbowModelException {
         try {
             FileOutputStream stream = new FileOutputStream (location);
             return new AcmeSaveModelCommand (m_modelInstance.getModelName (),

@@ -293,8 +293,6 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
      * 
      * @param delegateID
      * @param connectionProperties
-     * @param delegateIP
-     *            Drop the ip address
      */
 
     public IDelegateManagementPort connectDelegate (String delegateID, Properties connectionProperties) {
@@ -541,33 +539,40 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
     }
 
     private void checkHeartbeats () {
-        synchronized (m_heartbeats) {
-            Set<Entry<String, Beacon>> entrySet = m_heartbeats.entrySet ();
-            for (Iterator<Entry<String, Beacon>> iterator = entrySet.iterator (); iterator.hasNext (); ) {
-                Entry<String, Beacon> entry = iterator.next ();
-                if (entry.getValue ().periodElapsed ()) {
-                    Properties properties = m_delegateInfo.get (entry.getKey ());
-                    String loc = "???";
-                    if (properties != null) {
-                        loc = properties.getProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION);
-                    }
-                    if (!m_nonCompliantDelegates.contains (entry.getKey ())) {
-                        m_nonCompliantDelegates.add (entry.getKey ());
-                        m_reportingPort.error (RainbowComponentT.MASTER,
-                                MessageFormat.format ("No Heartbeat from {0}@{1}", entry.getKey (), loc));
-                        LOGGER.error (MessageFormat.format (
-                                "Delegate {0} has not given a heartbeat withing the right time", entry.getKey ()));
-                    }
-                    if (entry.getValue ().isExpired ()) {
-                        m_reportingPort.error (RainbowComponentT.MASTER,
-                                MessageFormat.format (
-                                        "Delegate {0}@{1} has not sent a heartbeat in a while. Forgetting about it",
-                                        entry.getKey (), loc));
-                        deregisterDelegate (entry.getKey (), loc);
-                        iterator.remove ();
+        try {
+            synchronized (m_heartbeats) {
+                Set<Entry<String, Beacon>> entrySet = m_heartbeats.entrySet ();
+                for (Iterator<Entry<String, Beacon>> iterator = entrySet.iterator (); iterator.hasNext (); ) {
+                    Entry<String, Beacon> entry = iterator.next ();
+                    if (entry.getValue ().periodElapsed ()) {
+                        Properties properties = m_delegateInfo.get (entry.getKey ());
+                        String loc = "???";
+                        if (properties != null) {
+                            loc = properties.getProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION);
+                        }
+                        if (!m_nonCompliantDelegates.contains (entry.getKey ())) {
+                            m_nonCompliantDelegates.add (entry.getKey ());
+                            m_reportingPort.error (RainbowComponentT.MASTER,
+                                                   MessageFormat.format ("No Heartbeat from {0}@{1}", entry.getKey ()
+                                                           , loc));
+
+                            LOGGER.error (MessageFormat.format (
+                                    "Delegate {0} has not given a heartbeat withing the right time", entry.getKey ()));
+                        }
+                        if (entry.getValue ().isExpired ()) {
+                            m_reportingPort.error (RainbowComponentT.MASTER,
+                                                   MessageFormat.format (
+                                                           "Delegate {0}@{1} has not sent a heartbeat in a while. " +
+                                                                   "Forgetting about it",
+                                                           entry.getKey (), loc));
+                            deregisterDelegate (entry.getKey (), loc);
+                            iterator.remove ();
+                        }
                     }
                 }
             }
+        } catch (Throwable t) {
+            m_reportingPort.error (RainbowComponentT.MASTER, "Failed in checking heartbeats", t);
         }
     }
 
@@ -783,9 +788,9 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
     }
 
     @Override
-    public Outcome testEffector (String target, String effName, String[] args) {
+    public Outcome testEffector (String target, String effName, List<String> args) {
         for (EffectorManager em : m_effectorManagers) {
-            Outcome outcome = em.executeEffector (effName, target, args);
+            Outcome outcome = em.executeEffector (effName, target, args.toArray (new String[0]));
             if (outcome != Outcome.UNKNOWN) return outcome;
         }
         return Outcome.UNKNOWN;

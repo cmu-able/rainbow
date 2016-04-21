@@ -166,123 +166,131 @@ public abstract class YamlUtil {
             gaugeSpecMap = (Map )o;
 
             Map<String, Map> typeMap = gaugeSpecMap.get ("gauge-types");
-            for (Map.Entry<String, Map> typeSpec : typeMap.entrySet ()) {
-                // map type name to Gauge type desc
-                String gaugeType = typeSpec.getKey ();
-                Map<String, Object> attrMap = typeSpec.getValue (); // get attribute map
-                // get comment
-                String typeComment = (String )attrMap.get ("comment");
-                // populate type description
-                GaugeTypeDescription gaugeTypeSpec = new GaugeTypeDescription (gaugeType, typeComment);
-                gd.typeSpec.put (gaugeType, gaugeTypeSpec);
-                // get mappings of reported values
-                Map<String, String> values = (Map<String, String> )attrMap.get ("commands");
-                for (Map.Entry<String, String> value : values.entrySet ()) {
-                    String valName = value.getKey ();
-                    String signature = value.getValue ();
-                    gaugeTypeSpec.addCommandSignature (valName, signature);
+            if (typeMap != null) {
+                for (Map.Entry<String, Map> typeSpec : typeMap.entrySet ()) {
+                    // map type name to Gauge type desc
+                    String gaugeType = typeSpec.getKey ();
+                    Map<String, Object> attrMap = typeSpec.getValue (); // get attribute map
+                    // get comment
+                    String typeComment = (String) attrMap.get ("comment");
+                    // populate type description
+                    GaugeTypeDescription gaugeTypeSpec = new GaugeTypeDescription (gaugeType, typeComment);
+                    gd.typeSpec.put (gaugeType, gaugeTypeSpec);
+                    // get mappings of reported values
+                    Map<String, String> values = (Map<String, String>) attrMap.get ("commands");
+                    for (Map.Entry<String, String> value : values.entrySet ()) {
+                        String valName = value.getKey ();
+                        String signature = value.getValue ();
+                        gaugeTypeSpec.addCommandSignature (valName, signature);
+                    }
+                    // get mappings of setup params
+                    Map<String, Map> params = (Map<String, Map>) attrMap.get ("setupParams");
+                    for (Map.Entry<String, Map> param : params.entrySet ()) {
+                        String pname = param.getKey ();
+                        Map<String, Object> paramAttr = param.getValue ();
+                        String ptype = (String) paramAttr.get ("type");
+                        Object pdefault = paramAttr.get ("default");
+                        if (!ptype.equals ("String")) {
+                            pdefault = Util.parseObject (pdefault.toString (), ptype);
+                        }
+                        if (pdefault != null && pdefault instanceof String) {
+                            pdefault = Util.evalTokens ((String) pdefault);
+                        }
+                        gaugeTypeSpec.addSetupParam (new TypedAttributeWithValue (pname, ptype, pdefault));
+                    }
+                    // get mappings of config params
+                    params = (Map<String, Map>) attrMap.get ("configParams");
+                    for (Map.Entry<String, Map> param : params.entrySet ()) {
+                        String pname = param.getKey ();
+                        Map<String, Object> paramAttr = param.getValue ();
+                        String ptype = (String) paramAttr.get ("type");
+                        Object pdefault = paramAttr.get ("default");
+                        if (!ptype.equals ("String")) {
+                            pdefault = Util.parseObject (pdefault.toString (), ptype);
+                        }
+                        if (pdefault != null && pdefault instanceof String) {
+                            pdefault = Util.evalTokens ((String) pdefault);
+                        }
+                        gaugeTypeSpec.addConfigParam (new TypedAttributeWithValue (pname, ptype, pdefault));
+                    }
                 }
-                // get mappings of setup params
-                Map<String, Map> params = (Map<String, Map> )attrMap.get ("setupParams");
-                for (Map.Entry<String, Map> param : params.entrySet ()) {
-                    String pname = param.getKey ();
-                    Map<String, Object> paramAttr = param.getValue ();
-                    String ptype = (String )paramAttr.get ("type");
-                    Object pdefault = paramAttr.get ("default");
-                    if (!ptype.equals ("String")) {
-                        pdefault = Util.parseObject (pdefault.toString (), ptype);
-                    }
-                    if (pdefault != null && pdefault instanceof String) {
-                        pdefault = Util.evalTokens ((String )pdefault);
-                    }
-                    gaugeTypeSpec.addSetupParam (new TypedAttributeWithValue (pname, ptype, pdefault));
-                }
-                // get mappings of config params
-                params = (Map<String, Map> )attrMap.get ("configParams");
-                for (Map.Entry<String, Map> param : params.entrySet ()) {
-                    String pname = param.getKey ();
-                    Map<String, Object> paramAttr = param.getValue ();
-                    String ptype = (String )paramAttr.get ("type");
-                    Object pdefault = paramAttr.get ("default");
-                    if (!ptype.equals ("String")) {
-                        pdefault = Util.parseObject (pdefault.toString (), ptype);
-                    }
-                    if (pdefault != null && pdefault instanceof String) {
-                        pdefault = Util.evalTokens ((String )pdefault);
-                    }
-                    gaugeTypeSpec.addConfigParam (new TypedAttributeWithValue (pname, ptype, pdefault));
-                }
+                Util.LOGGER.trace (" - Gauge Types collected: " + gd.typeSpec.keySet ());
             }
-            Util.LOGGER.trace (" - Gauge Types collected: " + gd.typeSpec.keySet ());
-
+            else
+                Util.LOGGER.warn (" - No gauge types specified");
             // store gauge instances
             Map<String, Map> instanceMap = gaugeSpecMap.get ("gauge-instances");
-            for (Map.Entry<String, Map> instSpec : instanceMap.entrySet ()) {
-                // map name to Gauge instance
-                String gaugeName = instSpec.getKey ();
-                Map<String, Object> attrMap = instSpec.getValue (); // get attribute map
-                // get type name, model description, comment
-                String gaugeType = (String )attrMap.get ("type");
-                TypedAttribute modelDesc = TypedAttribute.parsePair ((String )attrMap.get ("model"));
-                String instComment = (String )attrMap.get ("comment");
-                // populate instance description
-                GaugeTypeDescription gaugeTypeSpec = gd.typeSpec.get (gaugeType);
-                if (gaugeTypeSpec == null) {
-                    Util.LOGGER.error (MessageFormat.format (
-                            "Cannot find gauge type: {0} referred to in gauge ''{1}''.", gaugeType, gaugeName));
-                    continue;
-                }
-                GaugeInstanceDescription gaugeInstSpec = gaugeTypeSpec.makeInstance (gaugeName, instComment);
-                gaugeInstSpec.setModelDesc (modelDesc);
-                gd.instSpec.put (gaugeName, gaugeInstSpec);
-                // get commands
-                Map<String, String> commandMappings = (Map<String, String> )attrMap.get ("commands");
-                for (Entry<String, String> cmd : commandMappings.entrySet ()) {
-                    String key = cmd.getKey ();
-                    String[] args = Util.evalCommand (cmd.getValue ());
-                    gaugeInstSpec.addCommand (Util.evalTokens (key),
-                            new OperationRepresentation (args[1],
-                                    new ModelReference (modelDesc.getName (), modelDesc.getType ()), args[0],
-                                    Arrays.copyOfRange (args, 2, args.length)));
-
-                }
-
-                // get mappings of setup values and store in setup param info
-                Map<String, Object> values = (Map<String, Object> )attrMap.get ("setupValues");
-                for (Map.Entry<String, Object> param : values.entrySet ()) {
-                    String paramName = param.getKey ();
-                    Object paramValue = param.getValue ();
-                    if (paramValue != null) { // set new value
-                        if (paramValue instanceof String) {
-                            paramValue = Util.evalTokens ((String )paramValue);
-                        }
-                        TypedAttributeWithValue setupParam = gaugeInstSpec.findSetupParam (paramName);
-                        if (setupParam != null) {
-                            setupParam.setValue (paramValue);
-                        }
+            if (instanceMap != null) {
+                for (Map.Entry<String, Map> instSpec : instanceMap.entrySet ()) {
+                    // map name to Gauge instance
+                    String gaugeName = instSpec.getKey ();
+                    Map<String, Object> attrMap = instSpec.getValue (); // get attribute map
+                    // get type name, model description, comment
+                    String gaugeType = (String) attrMap.get ("type");
+                    TypedAttribute modelDesc = TypedAttribute.parsePair ((String) attrMap.get ("model"));
+                    String instComment = (String) attrMap.get ("comment");
+                    // populate instance description
+                    GaugeTypeDescription gaugeTypeSpec = gd.typeSpec.get (gaugeType);
+                    if (gaugeTypeSpec == null) {
+                        Util.LOGGER.error (MessageFormat.format (
+                                "Cannot find gauge type: {0} referred to in gauge ''{1}''.", gaugeType, gaugeName));
+                        continue;
                     }
-                }
-                // get mappings of config values and store in config param info
-                values = (Map<String, Object> )attrMap.get ("configValues");
-                for (Map.Entry<String, Object> param : values.entrySet ()) {
-                    String paramName = param.getKey ();
-                    Object paramValue = param.getValue ();
-                    if (paramValue != null) { // set new value
-                        if (paramValue instanceof String) {
-                            paramValue = Util.evalTokens ((String )paramValue);
-                        }
-                        TypedAttributeWithValue configParam = gaugeInstSpec.findConfigParam (paramName);
-                        if (configParam != null) {
-                            if (!configParam.getType ().equals ("String")) {
-                                paramValue = Util.parseObject (paramValue.toString (), configParam.getType ());
+                    GaugeInstanceDescription gaugeInstSpec = gaugeTypeSpec.makeInstance (gaugeName, instComment);
+                    gaugeInstSpec.setModelDesc (modelDesc);
+                    gd.instSpec.put (gaugeName, gaugeInstSpec);
+                    // get commands
+                    Map<String, String> commandMappings = (Map<String, String>) attrMap.get ("commands");
+                    for (Entry<String, String> cmd : commandMappings.entrySet ()) {
+                        String key = cmd.getKey ();
+                        String[] args = Util.evalCommand (cmd.getValue ());
+                        gaugeInstSpec.addCommand (Util.evalTokens (key),
+                                                  new OperationRepresentation (args[1],
+                                                                               new ModelReference (modelDesc.getName (), modelDesc.getType ()), args[0],
+
+                                                                               Arrays.copyOfRange (args, 2, args.length)));
+
+                    }
+
+                    // get mappings of setup values and store in setup param info
+                    Map<String, Object> values = (Map<String, Object>) attrMap.get ("setupValues");
+                    for (Map.Entry<String, Object> param : values.entrySet ()) {
+                        String paramName = param.getKey ();
+                        Object paramValue = param.getValue ();
+                        if (paramValue != null) { // set new value
+                            if (paramValue instanceof String) {
+                                paramValue = Util.evalTokens ((String) paramValue);
                             }
-                            configParam.setValue (paramValue);
+                            TypedAttributeWithValue setupParam = gaugeInstSpec.findSetupParam (paramName);
+                            if (setupParam != null) {
+                                setupParam.setValue (paramValue);
+                            }
+                        }
+                    }
+                    // get mappings of config values and store in config param info
+                    values = (Map<String, Object>) attrMap.get ("configValues");
+                    for (Map.Entry<String, Object> param : values.entrySet ()) {
+                        String paramName = param.getKey ();
+                        Object paramValue = param.getValue ();
+                        if (paramValue != null) { // set new value
+                            if (paramValue instanceof String) {
+                                paramValue = Util.evalTokens ((String) paramValue);
+                            }
+                            TypedAttributeWithValue configParam = gaugeInstSpec.findConfigParam (paramName);
+                            if (configParam != null) {
+                                if (!configParam.getType ().equals ("String")) {
+                                    paramValue = Util.parseObject (paramValue.toString (), configParam.getType ());
+                                }
+                                configParam.setValue (paramValue);
+                            }
                         }
                     }
                 }
+                Util.LOGGER.trace (" - Gauge Instances collected: " + gd.instSpec.keySet ());
             }
-            Util.LOGGER.trace (" - Gauge Instances collected: " + gd.instSpec.keySet ());
-
+            else {
+                Util.LOGGER.warn ( " - No gauge instances specified");
+            }
         }
         catch (FileNotFoundException e) {
             Util.LOGGER.error ("Loading Gauge Spec Yaml file failed!", e);
@@ -308,14 +316,20 @@ public abstract class YamlUtil {
                 return ed;
             }
             File effectorFile = Util.getRelativeToPath (Rainbow.instance ().getTargetPath (), effectorPath);
+            if (!effectorFile
+                    .exists ()) {
+                Util.logger ().error ("Effectr file does not exist: " + effectorPath);
+                return ed;
+            }
             Object o = Yaml.load (effectorFile);
             Util.logger ().trace ("Effector Desc Yaml file loaded: " + o.toString ());
             effectorMap = (Map )o;
             // acquire "variable" declarations and store as rainbow properties
             Map<String, String> varMap = (Map<String, String> )effectorMap.get ("vars");
-            for (Map.Entry<String, String> varPair : varMap.entrySet ()) {
-                Rainbow.setProperty (varPair.getKey (), Util.evalTokens (varPair.getValue ()));
-            }
+            if (varMap != null)
+                for (Map.Entry<String, String> varPair : varMap.entrySet ()) {
+                    Rainbow.setProperty (varPair.getKey (), Util.evalTokens (varPair.getValue ()));
+                }
 
             // store effector type info
             Map<String, Map> effTypeMap = (Map<String, Map> )effectorMap.get ("effector-types");
@@ -393,28 +407,35 @@ public abstract class YamlUtil {
             Util.logger ().trace ("Probe Desc Yaml file loaded: " + o.toString ());
             probeMap = (Map )o;
             Map<String, String> varMap = (Map<String, String> )probeMap.get ("vars");
-            for (Map.Entry<String, String> varPair : varMap.entrySet ()) {
-                Rainbow.setProperty (varPair.getKey (), Util.evalTokens (varPair.getValue ()));
-            }
+            if (varMap != null)
+                for (Map.Entry<String, String> varPair : varMap.entrySet ()) {
+                    Rainbow.setProperty (varPair.getKey (), Util.evalTokens (varPair.getValue ()));
+                }
 
             // store probe description info
             Map<String, Map> pbMap = (Map<String, Map> )probeMap.get ("probes");
-            for (Map.Entry<String, Map> pbInfo : pbMap.entrySet ()) {
-                ProbeDescription.ProbeAttributes pa = new ProbeDescription.ProbeAttributes ();
+            if (pbMap != null) {
+                for (Map.Entry<String, Map> pbInfo : pbMap.entrySet ()) {
+                    ProbeDescription.ProbeAttributes pa = new ProbeDescription.ProbeAttributes ();
 
-                // get probe name
-                pa.name = pbInfo.getKey ();
-                Map<String, Object> attrMap = pbInfo.getValue (); // get attribute map
-                // get location, alias, and probe type
-                pa.setLocation (Util.evalTokens ((String )attrMap.get ("location")));
-                pa.alias = (String )attrMap.get ("alias");
-                pa.setKindName ((String )attrMap.get ("type"));
-                pa.kind = IProbe.Kind.valueOf (pa.getKindName ().toUpperCase ());
-                Map<String, Object> addlInfoMap = (Map<String, Object> )attrMap.get (pa.infoPropName ());
-                extractArrays (pa, addlInfoMap);
-                ed.probes.add (pa);
+                    // get probe name
+                    pa.name = pbInfo.getKey ();
+                    Map<String, Object> attrMap = pbInfo.getValue (); // get attribute map
+                    // get location, alias, and probe type
+                    pa.setLocation (Util.evalTokens ((String) attrMap.get ("location")));
+                    pa.alias = (String) attrMap.get ("alias");
+                    pa.setKindName ((String) attrMap.get ("type"));
+                    pa.kind = IProbe.Kind.valueOf (pa.getKindName ().toUpperCase ());
+                    Map<String, Object> addlInfoMap = (Map<String, Object>) attrMap.get (pa.infoPropName ());
+                    extractArrays (pa, addlInfoMap);
+                    ed.probes.add (pa);
+                }
+                Util.logger ().trace (" - Probe collected: " + ed.probes);
             }
-            Util.logger ().trace (" - Probe collected: " + ed.probes);
+            else {
+                Util.logger ().warn (" - No probes specified");
+
+            }
         }
         catch (FileNotFoundException e) {
             Util.logger ().error ("Loading Probe Desc Yaml file failed!", e);

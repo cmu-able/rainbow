@@ -24,6 +24,7 @@
 package org.sa.rainbow.translator.znn.probes;
 
 import org.sa.rainbow.translator.probes.AbstractRunnableProbe;
+import org.sa.rainbow.util.Util;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -62,6 +63,19 @@ public class ServerEnablementProbe extends AbstractRunnableProbe {
         }
 
         Set<String> initialIPs = readBalancerFile (filePath);
+
+        // Report initial enablement
+        StringBuilder initReport = new StringBuilder ();
+        for (String ip : initialIPs) {
+            initReport.append ("i ");
+            initReport.append (ip);
+            initReport.append (" ");
+        }
+        if (initReport.length () > 0) {
+            initReport.deleteCharAt (initReport.length () - 1);
+            reportData (initReport.toString ());
+        }
+
 
         try {
             WatchService watcher = FileSystems.getDefault ().newWatchService ();
@@ -114,6 +128,8 @@ public class ServerEnablementProbe extends AbstractRunnableProbe {
                                 if (report.length () > 0) {
                                     report.deleteCharAt (report.length () - 1);
                                     reportData (report.toString ());
+                                    Util.dataLogger ().info (report);
+
                                 }
                             }
                         }

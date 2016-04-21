@@ -47,33 +47,35 @@ import java.util.concurrent.LinkedBlockingQueue;
 /**
  * The Rainbow Architectural Evaluator, which performs change-triggered evaluation of the architectural model. When a
  * constraint fails, this is reported back to the model through the setTypecheckResult operation.
- * 
+ * <p/>
  * This is backward compatible with the old Rainbow: eventually, IArchEvaluations should be migrated as their own
  * Rainbow analysis
- * 
+ *
  * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
  * @history * [2009.03.04] Removed beacon for model evaluation, set sleep period instead.
  */
 public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAnalysis,
-IRainbowModelChangeCallback {
+                                                                      IRainbowModelChangeCallback {
 
-    private static final String                    SET_TYPECHECK_OPERATION_NAME = "setTypecheckResult";
+    private static final String SET_TYPECHECK_OPERATION_NAME = "setTypecheckResult";
 
     private static final String NAME = "Rainbow Acme Architecture Constraint Evaluator";
 
-    private IModelChangeBusSubscriberPort          m_modelChangePort;
-    private IModelUSBusPort                        m_modelUSPort;
+    private IModelChangeBusSubscriberPort m_modelChangePort;
+    private IModelUSBusPort               m_modelUSPort;
 
     private final Map<String, String> properties = new HashMap<> ();
 
-    /** Matches the end of changes to the model **/
+    /**
+     * Matches the end of changes to the model
+     **/
+
     private final IRainbowChangeBusSubscription m_modelChangeSubscriber = new IRainbowChangeBusSubscription () {
 
         @Override
-        public
-        boolean
+        public boolean
         matches (IRainbowMessage message) {
-            String type = (String )message
+            String type = (String) message
                     .getProperty (IModelChangeBusPort.EVENT_TYPE_PROP);
             if (type != null) {
                 try {
@@ -82,28 +84,29 @@ IRainbowModelChangeCallback {
                     if (ct.isEnd ()
                             && !SET_TYPECHECK_OPERATION_NAME
                             .equals (message
-                                    .getProperty (IModelChangeBusPort.COMMAND_PROP))) {
-                        String modelType = (String )message
+                                             .getProperty (IModelChangeBusPort.COMMAND_PROP))) {
+                        String modelType = (String) message
                                 .getProperty (IModelChangeBusPort.MODEL_TYPE_PROP);
                         if ("Acme"
                                 .equals (modelType))
                             return true;
                     }
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                 }
             }
             return false;
         }
     };
 
-    /** The models to typecheck **/
+    /**
+     * The models to typecheck
+     **/
     private final LinkedBlockingQueue<AcmeModelInstance> m_modelCheckQ = new LinkedBlockingQueue<> ();
-    private final Map<ModelReference, Boolean> m_lastResult = new HashMap<> ();
+    private final Map<ModelReference, Boolean>           m_lastResult  = new HashMap<> ();
 
-    private Set<IArchEvaluation>                   m_evaluations;
+    private Set<IArchEvaluation> m_evaluations;
 
-    private IModelsManagerPort                     m_modelsManagerPort;
+    private IModelsManagerPort m_modelsManagerPort;
 
     /**
      * Default Constructor.
@@ -114,8 +117,7 @@ IRainbowModelChangeCallback {
         String per = Rainbow.getProperty (RainbowConstants.PROPKEY_MODEL_EVAL_PERIOD);
         if (per != null) {
             setSleepTime (Long.parseLong (per));
-        }
-        else { // default to using the long sleep value
+        } else { // default to using the long sleep value
             setSleepTime (IRainbowRunnable.LONG_SLEEP_TIME);
         }
 
@@ -143,17 +145,15 @@ IRainbowModelChangeCallback {
         String evaluators = Rainbow.getProperty (RainbowConstants.PROPKEY_ARCH_EVALUATOR_EXTENSIONS);
         if (evaluators == null || evaluators.trim ().equals ("")) {
             m_evaluations = Collections.emptySet ();
-        }
-        else {
+        } else {
             m_evaluations = new HashSet<> ();
             String[] evaluationSet = evaluators.split (",");
             for (String evaluation : evaluationSet) {
                 try {
-                    IArchEvaluation evaluationInstance = (IArchEvaluation )Class.forName (evaluation.trim ())
+                    IArchEvaluation evaluationInstance = (IArchEvaluation) Class.forName (evaluation.trim ())
                             .newInstance ();
                     m_evaluations.add (evaluationInstance);
-                }
-                catch (Throwable e) {
+                } catch (Throwable e) {
                     m_reportingPort.error (RainbowComponentT.ANALYSIS, MessageFormat.format (
                             "Failed to instantiate {0} as an IArchEvaluation", evaluation.trim ()), e);
                 }
@@ -190,38 +190,38 @@ IRainbowModelChangeCallback {
             IAcmeEnvironment env = model.getModelInstance ().getContext ().getEnvironment ();
             IAcmeTypeChecker typeChecker = env.getTypeChecker ();
             if (typeChecker instanceof SimpleModelTypeChecker) {
-                SimpleModelTypeChecker synchChecker = (SimpleModelTypeChecker )typeChecker;
+                SimpleModelTypeChecker synchChecker = (SimpleModelTypeChecker) typeChecker;
                 boolean constraintViolated = !synchChecker.typechecks (model.getModelInstance ());
                 ModelReference ref = new ModelReference (model.getModelName (), model.getModelType ());
                 Boolean last = m_lastResult.get (ref);
                 if (last == null || last != constraintViolated) {
                     m_lastResult.put (ref, constraintViolated);
-                    AcmeTypecheckSetCmd cmd = model.getCommandFactory ().setTypecheckResultCmd (!constraintViolated);
+                    AcmeTypecheckSetCmd cmd = model.getCommandFactory ().setTypecheckResultCmd
+                            (model.getModelInstance (), !constraintViolated);
 
                     try {
                         m_modelUSPort.updateModel (cmd);
-                    }
-                    catch (IllegalStateException e) {
+                    } catch (IllegalStateException e) {
                         m_reportingPort.error (RainbowComponentT.ANALYSIS,
-                                "Could not execute set typecheck command on model", e);
+                                               "Could not execute set typecheck command on model", e);
                     }
                 }
                 if (constraintViolated) {
                     try {
                         Set<? extends AcmeError> errors = env.getAllRegisteredErrors ();
                         m_reportingPort.info (RainbowComponentT.ANALYSIS,
-                                "Model " + model.getModelName () + ":" + model.getModelType () + " constraints violated: "
-                                        + errors.toString ());
+                                              "Model " + model.getModelName () + ":" + model.getModelType () + " " +
+                                                      "constraints violated: "
+                                                      + errors.toString ());
                     } catch (Exception e) {
                         m_reportingPort.error (RainbowComponentT.ANALYSIS,
-                                "There's an error reporting the constraint violation", e);
+                                               "There's an error reporting the constraint violation", e);
                         m_reportingPort.info (RainbowComponentT.ANALYSIS, "Model " + model.getModelName () + ":"
                                 + model.getModelType () + " constraints violated: <error in reporting>");
                     }
-                }
-                else {
+                } else {
                     m_reportingPort.info (RainbowComponentT.ANALYSIS,
-                            "Model " + model.getModelName () + ":" + model.getModelType () + " ok");
+                                          "Model " + model.getModelName () + ":" + model.getModelType () + " ok");
                 }
 
             }
@@ -234,13 +234,15 @@ IRainbowModelChangeCallback {
 
                         @Override
                         public void requestAdaptation () {
-                            AcmeTypecheckSetCmd cmd = model.getCommandFactory ().setTypecheckResultCmd (false);
+                            AcmeTypecheckSetCmd cmd = model.getCommandFactory ().setTypecheckResultCmd (getModel
+                                                                                                                ()
+                                                                                                                .getModelInstance (),
+                                                                                                        false);
                             try {
                                 m_modelUSPort.updateModel (cmd);
-                            }
-                            catch (IllegalStateException e) {
+                            } catch (IllegalStateException e) {
                                 m_reportingPort.error (RainbowComponentT.ANALYSIS,
-                                        "Could not execute set typecheck command on model", e);
+                                                       "Could not execute set typecheck command on model", e);
                             }
                         }
 
@@ -249,8 +251,7 @@ IRainbowModelChangeCallback {
                             return model;
                         }
                     });
-                }
-                catch (Throwable t) {
+                } catch (Throwable t) {
                     m_reportingPort.error (RainbowComponentT.ANALYSIS, "Evaluator " + evaluation.getClass ().getName ()
                             + " threw an exception: " + t.getMessage ());
                 }
@@ -269,10 +270,10 @@ IRainbowModelChangeCallback {
     @Override
     public void onEvent (ModelReference ref, IRainbowMessage message) {
         // Assuming that the model manager is local, otherwise this call will be slow when done this often
-        @SuppressWarnings ("rawtypes")
+        @SuppressWarnings("rawtypes")
         IModelInstance model = m_modelsManagerPort.getModelInstance (ref); //ref.getModelType (), ref.getModelName ());
         if (model instanceof AcmeModelInstance) {
-            m_modelCheckQ.offer ((AcmeModelInstance )model);
+            m_modelCheckQ.offer ((AcmeModelInstance) model);
         }
     }
 
@@ -280,6 +281,7 @@ IRainbowModelChangeCallback {
     public String id () {
         return NAME;
     }
+
 
     @Override
     protected RainbowComponentT getComponentType () {

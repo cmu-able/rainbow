@@ -23,7 +23,7 @@ public interface IESEBMasterCommandPortRemoteInterface extends IMasterCommandPor
     @Override
     @ParametersTypeMapping ({ "string", "string", "list<string>" })
     @ReturnTypeMapping ("outcome")
-    Outcome testEffector (String target, String effName, String[] args);
+    Outcome testEffector (String target, String effName, List<String> args);
 
     @Override
     void sleep ();

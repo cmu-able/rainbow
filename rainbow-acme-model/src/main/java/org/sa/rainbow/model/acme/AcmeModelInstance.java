@@ -87,6 +87,7 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
     /** Map of additional, non-model properties */
     private final Map<String, Double> m_moreProp = new HashMap<> ();
     private final Map<String, IExpressionNode> m_registeredExpressions = new HashMap<> ();
+
     private final Properties m_opMap;
     private String                         m_source;
 
@@ -109,6 +110,7 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
         }
 
     }
+
 
     @Override
     public String getModelType () {
@@ -231,8 +233,7 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
 
                     return generateInstance ((IAcmeSystem )execute.get (execute.size () - 1));
                 }
-            }
-            catch (IllegalStateException | AcmeException e) {
+            } catch (IllegalStateException | AcmeException e) {
                 RainbowCopyException exc = new RainbowCopyException (
                         MessageFormat.format ("Could not copy Acme system {0}", m_system.getName ()));
                 exc.addSuppressed (e);
@@ -254,13 +255,16 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
     /////////////////////////////////////////////////////////////////////////////////////
     // Convenience functions for getting various Acme properties
     ////////////////////////////////////////////////////////////////////////////////////
+
     public Object getProperty (String id) {
         return internalGetProperty (id, 0);
     }
 
+
     public Object predictProperty (String id, long dur) {
         return internalGetProperty (id, dur);
     }
+
 
     public String getStringProperty (String id) {
         String propVal = null;
@@ -367,6 +371,7 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
      *            the specified property name within relevant instance
      * @return the set of qualified property names
      */
+
     private Set<String> collectInstanceProps (String typeName, String propName) {
         Set<String> propKeys = new HashSet<> ();
         boolean useSatisfies = false;
@@ -413,6 +418,7 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
         return m_opMap.getProperty (archOpName);
     }
 
+
     public String getElementLocation (IAcmeElementInstance<?, ?> element) {
         String location = null;
         if (ModelHelper.getAcmeSystem (element) != m_system) return location;
@@ -422,6 +428,7 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
         }
         return location;
     }
+
 
     public IAcmeComponent getElementForLocation (String location, String type) {
         String[] parts = location.split (":");
@@ -445,6 +452,7 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
         }
         return null;
     }
+
 
     public <T> T resolveInModel (String qname, Class<T> clazz) throws RainbowModelException {
         // The model is an Acme System, but the qname could include the Acme system.

@@ -44,6 +44,10 @@ import java.util.*;
 public abstract class EffectorManager extends AbstractRainbowRunnable implements IEffectorLifecycleBusPort,
 IModelDSBusPublisherPort {
 
+    private class OutcomeHolder {
+        Outcome outcome;
+    }
+
     private final Logger LOGGER = Logger.getLogger (this.getClass ());
 
 
@@ -52,10 +56,12 @@ IModelDSBusPublisherPort {
     private final Map<String, IEffectorExecutionPort> m_effectorExecutionPorts = new HashMap<> ();
 
 
-    private IModelDSBusSubscriberPort           m_modelDSSubscribePort;
-    protected IModelsManagerPort                m_modelsManagerPort;
+    private   IModelDSBusSubscriberPort m_modelDSSubscribePort;
+    protected IModelsManagerPort        m_modelsManagerPort;
 
-    protected EffectorDescription               m_effectors;
+    protected EffectorDescription m_effectors;
+
+    protected Map<String, OutcomeHolder> m_holderMap = new HashMap<> ();
 
     public EffectorManager (String id) {
         super (id);
@@ -97,11 +103,9 @@ IModelDSBusPublisherPort {
                         LOGGER.debug ("[EffectorManager]: getEffector retries ID: " + id);
                     }
                     effector = m_effectorExecutionPorts.get (id);
+                } catch (UnknownHostException e) {
                 }
-                catch (UnknownHostException e) {
-                }
-            }
-            else {
+            } else {
                 try {
                     id = Util.genID (effName, InetAddress.getByName (target).getHostAddress ());
                     if (LOGGER.isDebugEnabled ()) {
@@ -117,7 +121,19 @@ IModelDSBusPublisherPort {
             LOGGER.debug ("[EffectorManager]: Effector retrieved " + (effector == null ? "NULL" : id));
         }
         if (effector == null) return Outcome.UNKNOWN;
-        return effector.execute (Arrays.asList (args));
+        Outcome result = effector.execute (Arrays.asList (args));
+        if (result == Outcome.TIMEOUT) {
+            OutcomeHolder h = new OutcomeHolder ();
+            m_holderMap.put (id, h);
+            synchronized (h) {
+                try {
+                    h.wait ();
+                    result = h.outcome;
+                } catch (InterruptedException e) {
+                }
+            }
+        }
+        return result;
     }
 
     @Override
@@ -136,13 +152,22 @@ IModelDSBusPublisherPort {
 
     @Override
     public void reportDeleted (IEffectorIdentifier effector) {
+        synchronized (m_effectorExecutionPorts) {
+            m_effectorExecutionPorts.remove (effector.id ());
+        }
         LOGGER.info (MessageFormat.format ("EffectorManager: An effector was deleted {0}", effector.id ()));
     }
 
     @Override
     public void reportExecuted (IEffectorIdentifier effector, Outcome outcome, List<String> args) {
-        // TODO Auto-generated method stub
-
+        final OutcomeHolder h = m_holderMap.get (effector.id ());
+        if (h != null) {
+            synchronized (h) {
+                h.outcome = outcome;
+                m_holderMap.remove (effector.id ());
+                h.notifyAll ();
+            }
+        }
     }
 
     @Override
@@ -161,8 +186,7 @@ IModelDSBusPublisherPort {
 
     @Override
     protected void log (String txt) {
-        // TODO Auto-generated method stub
-
+        m_reportingPort.info (getComponentType (), txt);
     }
 
     @Override

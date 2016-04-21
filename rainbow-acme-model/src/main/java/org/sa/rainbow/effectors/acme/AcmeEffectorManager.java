@@ -48,7 +48,7 @@ import java.util.*;
  * @author Bradley Schmerl: schmerl
  * 
  */
-class AcmeEffectorManager extends EffectorManager {
+public class AcmeEffectorManager extends EffectorManager {
 
     public AcmeEffectorManager () {
         super ("Acme Global Effector Manager");
@@ -57,8 +57,9 @@ class AcmeEffectorManager extends EffectorManager {
     /**
      * This method is called when an event is published by the by a publisher
      */
+
     @Override
-    public OperationResult publishOperation (IRainbowOperation cmd) {
+    public OperationResult publishOperation ( IRainbowOperation cmd) {
         OperationResult badResult = new OperationResult ();
         badResult.result = Result.UNKNOWN;
         if (cmd.getModelReference ().getModelType ().equals ("Acme")) {
@@ -82,9 +83,19 @@ class AcmeEffectorManager extends EffectorManager {
                         // look for an effector registered at this location that understands the command
                         cmd = resolveElementReferences (cmd, ami);
                         Set<EffectorAttributes> effectors = getEffectorsAtLocation (location);
+                        m_reportingPort.info (getComponentType (), effectors.size () + " effectors are at location "
+                                + location);
                         effectors.addAll (getEffectorsInterestedInLocation (location, m_effectors.effectors));
+                        m_reportingPort.info (getComponentType (), effectors.size () + " increased effectors that are" +
+                                " interested in location " + location);
+                        for (EffectorAttributes e : effectors) {
+                            m_reportingPort.info (getComponentType (), MessageFormat.format ("{0}@{1}", e.name, e
+                                    .getLocation ()));
+                        }
                         filterEffectorsBasedOnCommandName (cmd, effectors);
                         filterEffectorsBasedOnCommandParameters (cmd, effectors, ami);
+                        m_reportingPort.info (getComponentType (), "after filtering, have " + effectors.size () + " " +
+                                "effectors");
                         if (!effectors.isEmpty ()) {
                             OperationResult result = new OperationResult ();
                             result.result = Result.SUCCESS;
@@ -144,13 +155,19 @@ class AcmeEffectorManager extends EffectorManager {
 
 
 
-    private IRainbowOperation resolveElementReferences (IRainbowOperation cmd, AcmeModelInstance ami) {
+
+    private IRainbowOperation resolveElementReferences ( IRainbowOperation cmd,  AcmeModelInstance ami) {
         String target = cmd.getTarget ();
         target = resolveAcmeReference (target, ami);
         String[] args = cmd.getParameters ();
         for (int i = 0; i < args.length; i++) {
             if (!"".equals (args[i])) {
-                args[i] = resolveAcmeReference (args[i], ami);
+                try {
+                    args[i] = resolveAcmeReference (args[i], ami);
+                }
+                catch (Throwable e) {
+                    // Some arguments aren't models
+                }
             }
         }
         return new OperationRepresentation (cmd.getName (), cmd.getModelReference (), target,
@@ -158,7 +175,8 @@ class AcmeEffectorManager extends EffectorManager {
 
     }
 
-    private String resolveAcmeReference (String target, AcmeModelInstance ami) {
+
+    private String resolveAcmeReference ( String target,  AcmeModelInstance ami) {
         try {
             Object modelObject = ami.resolveInModel (target, Object.class);
             if (modelObject instanceof IAcmeElementInstance) {
@@ -175,8 +193,7 @@ class AcmeEffectorManager extends EffectorManager {
             }
         }
         catch (RainbowModelException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace ();
+            log ("Tried to resolve " + target + " as an Acme reference, but it isn't one. Leaving alone.");
         }
         return target;
     }
@@ -188,8 +205,9 @@ class AcmeEffectorManager extends EffectorManager {
      * @param effectors
      * @return
      */
-    private Collection<? extends EffectorAttributes> getEffectorsInterestedInLocation (String location,
-            Set<EffectorAttributes> effectors) {
+
+    private Collection<? extends EffectorAttributes> getEffectorsInterestedInLocation ( String location,
+             Set<EffectorAttributes> effectors) {
         Set<EffectorAttributes> interestedIn = new HashSet<> ();
         for (EffectorAttributes ea : effectors) {
             if (ea.getCommandPattern () != null && location.equals (ea.getCommandPattern ().getTarget ())) {
@@ -199,8 +217,8 @@ class AcmeEffectorManager extends EffectorManager {
         return interestedIn;
     }
 
-    private void filterEffectorsBasedOnCommandName (IRainbowOperation cmd,
-            Set<EffectorAttributes> effectors) {
+    private void filterEffectorsBasedOnCommandName ( IRainbowOperation cmd,
+             Set<EffectorAttributes> effectors) {
         for (Iterator iterator = effectors.iterator (); iterator.hasNext ();) {
             EffectorAttributes ea = (EffectorAttributes )iterator.next ();
             if (ea.getCommandPattern () == null || !ea.getCommandPattern ().getName ().equals (cmd.getName ())) {
@@ -219,7 +237,7 @@ class AcmeEffectorManager extends EffectorManager {
      * @param ami
      *            The model used to resolve any names
      */
-    private void filterEffectorsBasedOnCommandParameters (IRainbowOperation cmd, Set<EffectorAttributes> effectors, AcmeModelInstance ami) {
+    private void filterEffectorsBasedOnCommandParameters ( IRainbowOperation cmd,  Set<EffectorAttributes> effectors,  AcmeModelInstance ami) {
         for (Iterator iterator = effectors.iterator (); iterator.hasNext ();) {
             EffectorAttributes ea = (EffectorAttributes )iterator.next ();
             OperationRepresentation commandPattern = ea.getCommandPattern ();

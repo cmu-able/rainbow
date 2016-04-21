@@ -109,7 +109,7 @@ IRainbowModelOperation<T, IAcmeSystem> {
             }
         }
 
-        private boolean isSentinel (AcmeSystemEvent ase) {
+        private boolean isSentinel ( AcmeSystemEvent ase) {
             return ase.getType () == AcmeModelEventType.REMOVE_DECLARED_TYPE /*&& ase.getData (ase.getType ()).equals (SENTINEL_COMMAND_TYPE)*/;
         }
     };
@@ -163,7 +163,7 @@ IRainbowModelOperation<T, IAcmeSystem> {
             removeEventListener ();
             m_events.add (new AcmeRainbowOperationEvent (CommandEventT.FINISH_COMMAND, this));
         }
-        catch (IllegalStateException | AcmeException e) {
+        catch ( IllegalStateException | AcmeException e) {
             m_events.clear ();
             // Need to work out how to undo partially complete commands, in a transactional way
             // Maybe look at the events that have been done so far, and undo them...?
@@ -188,7 +188,7 @@ IRainbowModelOperation<T, IAcmeSystem> {
             removeEventListener ();
             m_events.add (new AcmeRainbowOperationEvent (CommandEventT.FINISH_COMMAND, this));
         }
-        catch (IllegalStateException | AcmeException e) {
+        catch ( IllegalStateException | AcmeException e) {
             throw new RainbowDelegationException (e);
         }
     }
@@ -211,7 +211,7 @@ IRainbowModelOperation<T, IAcmeSystem> {
             m_events.add (new AcmeRainbowOperationEvent (CommandEventT.FINISH_UNDO_COMMAND, this));
 
         }
-        catch (IllegalStateException | AcmeException e) {
+        catch ( IllegalStateException | AcmeException e) {
 
             throw new RainbowDelegationException (e);
         }
@@ -232,7 +232,7 @@ IRainbowModelOperation<T, IAcmeSystem> {
 
 
 
-    protected boolean propertyValueChanging (IAcmeProperty property, IAcmePropertyValue acmeVal) {
+    protected boolean propertyValueChanging ( IAcmeProperty property,  IAcmePropertyValue acmeVal) {
         return !acmeVal.equals (property.getValue ());
     }
 

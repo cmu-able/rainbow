@@ -44,7 +44,7 @@ import java.util.*;
  * 
  */
 class AcmeEventSerializer {
-    private void serialize (AcmeEvent event, IRainbowMessage msg, IRainbowMessage parent) {
+    private void serialize (AcmeEvent event,  IRainbowMessage msg, IRainbowMessage parent) {
         if (event instanceof AcmeAttachmentEvent) {
             serialize ((AcmeAttachmentEvent )event, msg, parent);
         }
@@ -75,7 +75,7 @@ class AcmeEventSerializer {
 
     }
 
-    private void serialize (AcmeRainbowOperationEvent event, IRainbowMessage msg, IRainbowMessage parent) {
+    private void serialize ( AcmeRainbowOperationEvent event,  IRainbowMessage msg, IRainbowMessage parent) {
 
         try {
             addCommonProperties (event, msg, parent);
@@ -96,7 +96,7 @@ class AcmeEventSerializer {
         }
     }
 
-    private void addCommonProperties (AcmeEvent event, IRainbowMessage msg, IRainbowMessage parent)
+    private void addCommonProperties ( AcmeEvent event,  IRainbowMessage msg,  IRainbowMessage parent)
             throws RainbowException {
         msg.setProperty (IModelChangeBusPort.EVENT_TYPE_PROP, event.getType ().name ());
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, "MODEL_CHANGE");
@@ -109,7 +109,7 @@ class AcmeEventSerializer {
         }
     }
 
-    private void serialize (AcmeAttachmentEvent event, IRainbowMessage msg, IRainbowMessage parent) {
+    private void serialize ( AcmeAttachmentEvent event,  IRainbowMessage msg, IRainbowMessage parent) {
         try {
             addCommonProperties (event, msg, parent);
             msg.setProperty (AcmeModelOperation.PORT_PROP, event.getAttachment ().getReferencedPortName ());
@@ -122,7 +122,7 @@ class AcmeEventSerializer {
         }
     }
 
-    private void serialize (AcmeBindingEvent event, IRainbowMessage msg, IRainbowMessage parent) {
+    private void serialize ( AcmeBindingEvent event,  IRainbowMessage msg, IRainbowMessage parent) {
         try {
             addCommonProperties (event, msg, parent);
             msg.setProperty (AcmeModelOperation.OUTER_PROP, event.getBinding ().getOuterReference ().getReferencedName ());
@@ -136,7 +136,7 @@ class AcmeEventSerializer {
 
     }
 
-    private void serialize (AcmeComponentEvent event, IRainbowMessage msg, IRainbowMessage parent) {
+    private void serialize ( AcmeComponentEvent event,  IRainbowMessage msg, IRainbowMessage parent) {
         try {
             addCommonProperties (event, msg, parent);
             msg.setProperty (AcmeModelOperation.COMPONENT_PROP, event.getComponent ().getQualifiedName ());
@@ -151,7 +151,7 @@ class AcmeEventSerializer {
         }
     }
 
-    private void serialize (AcmeConnectorEvent event, IRainbowMessage msg, IRainbowMessage parent) {
+    private void serialize ( AcmeConnectorEvent event,  IRainbowMessage msg, IRainbowMessage parent) {
         try {
             addCommonProperties (event, msg, parent);
             msg.setProperty (AcmeModelOperation.CONNECTOR_PROP, event.getConnector ().getQualifiedName ());
@@ -166,7 +166,7 @@ class AcmeEventSerializer {
         }
     }
 
-    private void serialize (AcmeGroupEvent event, IRainbowMessage msg, IRainbowMessage parent) {
+    private void serialize ( AcmeGroupEvent event,  IRainbowMessage msg, IRainbowMessage parent) {
         try {
             addCommonProperties (event, msg, parent);
             msg.setProperty (AcmeModelOperation.GROUP_PROP, event.getGroup ().getQualifiedName ());
@@ -181,7 +181,7 @@ class AcmeEventSerializer {
         }
     }
 
-    private void serialize (AcmePortEvent event, IRainbowMessage msg, IRainbowMessage parent) {
+    private void serialize ( AcmePortEvent event,  IRainbowMessage msg, IRainbowMessage parent) {
         try {
             addCommonProperties (event, msg, parent);
             msg.setProperty (AcmeModelOperation.PORT_PROP, event.getPort ().getQualifiedName ());
@@ -196,7 +196,7 @@ class AcmeEventSerializer {
         }
     }
 
-    private void serialize (AcmePropertyEvent event, IRainbowMessage msg, IRainbowMessage parent) {
+    private void serialize ( AcmePropertyEvent event,  IRainbowMessage msg, IRainbowMessage parent) {
         try {
             addCommonProperties (event, msg, parent);
             msg.setProperty (AcmeModelOperation.PROPERTY_PROP, event.getProperty ().getQualifiedName ());
@@ -237,7 +237,7 @@ class AcmeEventSerializer {
     }
 
 
-    private void serialize (AcmeRoleEvent event, IRainbowMessage msg, IRainbowMessage parent) {
+    private void serialize ( AcmeRoleEvent event,  IRainbowMessage msg, IRainbowMessage parent) {
 
         try {
             addCommonProperties (event, msg, parent);
@@ -253,7 +253,7 @@ class AcmeEventSerializer {
         }
     }
 
-    private void addTypeInformation (IAcmeElementInstance<?, ?> instance, IRainbowMessage msg) throws RainbowException {
+    private void addTypeInformation ( IAcmeElementInstance<?, ?> instance,  IRainbowMessage msg) throws RainbowException {
         Set<? extends IAcmeElementTypeRef<?>> dt = instance.getDeclaredTypes ();
         StringBuffer declaredTypes = new StringBuffer ();
         for (IAcmeElementTypeRef<?> ref : dt) {
@@ -277,7 +277,8 @@ class AcmeEventSerializer {
         }
     }
 
-    public List<IRainbowMessage> serialize (List<? extends AcmeEvent> events, IRainbowMessageFactory port) {
+
+    public List<IRainbowMessage> serialize ( List<? extends AcmeEvent> events,  IRainbowMessageFactory port) {
         try {
             List<IRainbowMessage> msgs = new LinkedList<> ();
             IRainbowMessage parent = null;

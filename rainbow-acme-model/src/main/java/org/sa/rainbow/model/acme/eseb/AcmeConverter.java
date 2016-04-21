@@ -73,14 +73,14 @@ public class AcmeConverter implements TypelibJavaConversionRule {
     }
 
     @Override
-    public boolean handles_java (Object value, DataType dst) {
+    public boolean handles_java (Object value,  DataType dst) {
         Ensure.not_null (value);
         if (value instanceof AcmeModelInstance) return dst == null || "rainbow_model".equals (dst.name ());
         return false;
     }
 
     @Override
-    public boolean handles_typelib (DataValue value, Class<?> cls) {
+    public boolean handles_typelib ( DataValue value, Class<?> cls) {
         Ensure.not_null (value);
         if ("rainbow_model".equals (value.type ().name ()) && value instanceof StructureDataValue) {
             try {
@@ -89,7 +89,7 @@ public class AcmeConverter implements TypelibJavaConversionRule {
                 DataValue type = sdv.value (sdt.field ("type"));
                 return type instanceof StringValue && "Acme".equals (((StringValue )type).value ());
             }
-            catch (UnknownFieldException | AmbiguousNameException e) {
+            catch ( UnknownFieldException | AmbiguousNameException e) {
                 return false;
             }
 
@@ -98,7 +98,7 @@ public class AcmeConverter implements TypelibJavaConversionRule {
     }
 
     @Override
-    public DataValue from_java (Object value, DataType dst, TypelibJavaConverter converter)
+    public DataValue from_java (Object value,  DataType dst, TypelibJavaConverter converter)
             throws ValueConversionException {
         if ((dst == null || dst instanceof StructureDataType) && value instanceof AcmeModelInstance) {
             try {
@@ -147,14 +147,14 @@ public class AcmeConverter implements TypelibJavaConversionRule {
                     tfer.transform (new DOMSource (newDocument), new StreamResult (writer));
                     additionalUserData = writer.getBuffer ().toString ().replaceAll ("\n|\r", "");
                 }
-                catch (IllegalArgumentException | ParserConfigurationException | TransformerFactoryConfigurationError
+                catch ( IllegalArgumentException | ParserConfigurationException | TransformerFactoryConfigurationError
                         | TransformerException e) {
                 }
                 fields.put (additionalInfo, m_scope.string ().make (additionalUserData));
 
                 return sdt.make (fields);
             }
-            catch (AcmeVisitorException | UnknownFieldException | AmbiguousNameException | IOException e) {
+            catch ( AcmeVisitorException | UnknownFieldException | AmbiguousNameException | IOException e) {
                 throw new ValueConversionException (e.getMessage ());
             }
         }
@@ -162,8 +162,9 @@ public class AcmeConverter implements TypelibJavaConversionRule {
                 .getClass ().toString (), (dst == null ? "rainbow_model" : dst.absolute_hname ())));
     }
 
+
     @Override
-    public <T> T to_java (DataValue value, Class<T> cls, TypelibJavaConverter converter)
+    public <T> T to_java (DataValue value,  Class<T> cls,  TypelibJavaConverter converter)
             throws ValueConversionException {
         if (value instanceof StructureDataValue) {
             try {
@@ -196,7 +197,7 @@ public class AcmeConverter implements TypelibJavaConversionRule {
                         e.printStackTrace ();
                     }
                 }
-                catch (ParserConfigurationException | SAXException e) {
+                catch ( ParserConfigurationException | SAXException e) {
                 }
                 Constructor<?> constructor = modelClazz.getConstructor (IAcmeSystem.class, String.class);
                 Object r = constructor.newInstance (resource.getModel ().getSystem (systemName), source);
@@ -205,7 +206,7 @@ public class AcmeConverter implements TypelibJavaConversionRule {
                 return o;
 
             }
-            catch (UnknownFieldException | IOException | AmbiguousNameException | ClassNotFoundException
+            catch ( UnknownFieldException | IOException | AmbiguousNameException | ClassNotFoundException
                     | NoSuchMethodException | SecurityException | ParsingFailureException | InstantiationException
                     | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                 throw new ValueConversionException (MessageFormat.format ("Could not convert from {0} to {1}",

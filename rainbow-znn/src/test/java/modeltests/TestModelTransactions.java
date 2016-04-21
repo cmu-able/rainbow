@@ -58,7 +58,7 @@ public class TestModelTransactions {
             connection.start ();
             AcmeModelInstance modelInstance = (AcmeModelInstance )master.modelsManager ()
                     .<IAcmeSystem> getModelInstance (new ModelReference ("ZNewsSys", "Acme"));
-            NewServerCmd cmd = new NewServerCmd ("newServer", modelInstance, "lbproxy", "server", "10.5.6.6", "1080");
+            NewServerCmd cmd = new NewServerCmd (modelInstance, "lbproxy", "server", "10.5.6.6", "1080");
             master.modelsManager ().requestModelUpdate (cmd);
             List<? extends IRainbowMessage> generatedEvents = cmd.getGeneratedEvents (new IRainbowMessageFactory () {
 
@@ -111,8 +111,8 @@ public class TestModelTransactions {
                 new ModelReference ("ZNewsSys", "Acme"));
 
         List<IRainbowOperation> commands = new LinkedList<> ();
-        commands.add (new NewServerCmd ("newServer", modelInstance, "lbproxy", "server", "10.5.6.6", "1080"));
-        commands.add (new NewServerCmd ("newServer", modelInstance, "lbproxy", "server", "10.5.6.6", "1080"));
+        commands.add (new NewServerCmd (modelInstance, "lbproxy", "server", "10.5.6.6", "1080"));
+        commands.add (new NewServerCmd (modelInstance, "lbproxy", "server", "10.5.6.6", "1080"));
         master.modelsManager ().requestModelUpdate (commands, true);
 
         assertNotNull (modelInstance.getModelInstance ().getComponent ("server"));
@@ -129,8 +129,8 @@ public class TestModelTransactions {
                 new ModelReference ("ZNewsSys", "Acme"));
 
         List<IRainbowOperation> commands = new LinkedList<> ();
-        commands.add (new NewServerCmd ("newServer", modelInstance, "lbproxy", "server", "10.5.6.6", "1080"));
-        commands.add (new NewServerCmd ("newServer", modelInstance, "illegalproxy", "server", "10.5.6.6", "1080"));
+        commands.add (new NewServerCmd (modelInstance, "lbproxy", "server", "10.5.6.6", "1080"));
+        commands.add (new NewServerCmd (modelInstance, "illegalproxy", "server", "10.5.6.6", "1080"));
         master.modelsManager ().requestModelUpdate (commands, true);
 
         assertNull (modelInstance.getModelInstance ().getComponent ("server"));
@@ -148,8 +148,8 @@ public class TestModelTransactions {
                 new ModelReference ("ZNewsSys", "Acme"));
 
         List<IRainbowOperation> commands = new LinkedList<> ();
-        commands.add (new NewServerCmd ("newServer", modelInstance, "lbproxy", "server", "10.5.6.6", "1080"));
-        commands.add (new NewServerCmd ("newServer", modelInstance, "illegalproxy", "server", "10.5.6.6", "1080"));
+        commands.add (new NewServerCmd (modelInstance, "lbproxy", "server", "10.5.6.6", "1080"));
+        commands.add (new NewServerCmd (modelInstance, "illegalproxy", "server", "10.5.6.6", "1080"));
         master.modelsManager ().requestModelUpdate (commands, false);
 
         assertNotNull (modelInstance.getModelInstance ().getComponent ("server"));
