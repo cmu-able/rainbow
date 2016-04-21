@@ -83,7 +83,7 @@ public class ConnectServerCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
             try {
                 Object result = RuleTypeChecker.evaluateAsAny (getModel (), null, s_DisconnectedQueryExpr,
                                                                errorStack, new
-                        NodeScopeLookup ());
+                                                                       NodeScopeLookup ());
                 if (errorStack.isEmpty () && result instanceof AcmeSet) {
                     AcmeSet set = ((AcmeSet) result);
                     if (!set.getValues ().isEmpty ()) {
