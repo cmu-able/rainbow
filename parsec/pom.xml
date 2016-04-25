@@ -8,7 +8,7 @@
 	<groupId>edu.cmu.cs.able</groupId>
 	<artifactId>parsec</artifactId>
 	<packaging>jar</packaging>
-	<version>1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>parsec</name>
 
 	<description>
@@ -271,12 +271,12 @@
 		<dependency>
 			<groupId>incubator</groupId>
 			<artifactId>incubator</artifactId>
-			<version>1.4.1-SNAPSHOT</version>
+			<version>1.4.1</version>
 		</dependency>
 		<dependency>
 			<groupId>auxtestlib</groupId>
 			<artifactId>auxtestlib</artifactId>
-			<version>1.3-SNAPSHOT</version>
+			<version>1.3</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -292,6 +292,27 @@
 			<url>dav:http://acme.able.cs.cmu.edu/maven-repository</url>
 		</repository>
 	</repositories>
+
+	<distributionManagement>
+		<!-- Website location. Do not forget it should start with scp: and not
+		http. The user/password used for authentication should also be
+		added. -->
+		<!--
+		<site>
+			<id>website</id>
+			<url>scp://automatik:automatik@localhost:/home/pasc/mse/studio/mvnroot</url>
+		</site>
+		-->
+
+		<!-- Location of the repository where the jars should be added. It
+		should have the following format:
+		dav:http://<user>:<pass>@<host>[:<port>]/<path> -->
+		<repository>
+			<id>able.maven.repository</id>
+			<name>ABLE Maven Repository</name>
+			<url>dav:http://acme.able.cs.cmu.edu/maven-repository</url>
+		</repository>
+	</distributionManagement>
 
 	<profiles>
 		<profile>

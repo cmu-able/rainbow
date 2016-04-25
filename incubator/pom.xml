@@ -21,7 +21,7 @@
 	<packaging>jar</packaging>
 	<!-- Version. This should *always* be a snapshot version by convention. Name
 	should be <version-number>-SNAPSHOT. -->
-	<version>1.4.1-SNAPSHOT</version>
+	<version>1.4.1</version>
 	<!-- User readable name of the pom. -->
 	<name>Incubator</name>
 	<!-- URL for the project site. -->
@@ -340,7 +340,7 @@
 		<dependency>
 			<groupId>auxtestlib</groupId>
 			<artifactId>auxtestlib</artifactId>
-			<version>1.3-SNAPSHOT</version>
+			<version>1.3</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
