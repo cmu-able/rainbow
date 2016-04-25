@@ -23,13 +23,13 @@
  */
 package org.sa.rainbow.model.utility;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.commands.ModelCommandFactory;
+
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 
 public class UtilityHistoryCommandFactory extends ModelCommandFactory<UtilityHistory> {
 

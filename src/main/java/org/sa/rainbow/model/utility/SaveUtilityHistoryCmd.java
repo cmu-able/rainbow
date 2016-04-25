@@ -23,14 +23,14 @@
  */
 package org.sa.rainbow.model.utility;
 
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.util.Map.Entry;
-
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.IModelsManager;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.AbstractSaveModelCmd;
+
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.Map.Entry;
 
 public class SaveUtilityHistoryCmd extends AbstractSaveModelCmd<UtilityHistory> {
 

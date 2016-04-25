@@ -23,12 +23,12 @@
  */
 package org.sa.rainbow.model.utility;
 
-import java.util.List;
-
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
+
+import java.util.List;
 
 public class AddUtilityMeasureCmd extends AbstractRainbowModelOperation<Double, UtilityHistory> {
 
