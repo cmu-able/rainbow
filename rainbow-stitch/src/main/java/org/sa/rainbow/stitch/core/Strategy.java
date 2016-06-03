@@ -753,7 +753,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
                             null, stitch ().stitchProblemHandler);
                 }
                 else {
-                    boolean effect = parentTactic.checkEffect ();
+                    boolean effect = !parentTactic.hasError () && parentTactic.checkEffect ();
                     if (Tool.logger ().isInfoEnabled ()) {
                         Tool.logger ().info (
                                 child.label () + " " + child.getCondFlag ().name () + " condition! " + effect);

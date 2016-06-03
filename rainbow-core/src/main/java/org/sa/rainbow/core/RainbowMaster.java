@@ -27,6 +27,7 @@ import org.apache.log4j.Logger;
 import org.sa.rainbow.core.Rainbow.ExitState;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
+import org.sa.rainbow.core.adaptation.IEvaluable;
 import org.sa.rainbow.core.analysis.IRainbowAnalysis;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
@@ -691,7 +692,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 
 
     @SuppressWarnings ("unchecked")
-    public <S> IAdaptationManager<S> adaptationManagerForModel (String modelRef) {
+    public <S extends IEvaluable> IAdaptationManager<S> adaptationManagerForModel (String modelRef) {
         return (IAdaptationManager<S> )m_adaptationManagers.get (modelRef);
     }
 

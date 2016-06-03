@@ -30,6 +30,7 @@ import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.adaptation.AdaptationTree;
+import org.sa.rainbow.core.adaptation.DefaultAdaptationExecutorVisitor;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.event.IRainbowMessage;
@@ -56,14 +57,16 @@ import java.io.*;
 import java.nio.channels.FileChannel;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The Rainbow Adaptation Engine... Currently implements a learner interface to interact with Nick Lynn's learner.
- * 
+ *
  * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
  */
 public final class AdaptationManager extends AbstractRainbowRunnable
-implements IAdaptationManager<Strategy>/*
+        implements IAdaptationManager<Strategy>/*
  * implements
  * IRainbowLearner
  */, IRainbowModelChangeCallback {
@@ -72,59 +75,58 @@ implements IAdaptationManager<Strategy>/*
         SERIAL, MULTI_PRONE
     }
 
-    public static final String NAME                     = "Rainbow Adaptation Manager";
-    public static final double FAILURE_RATE_THRESHOLD   = 0.95;
-    public static final double MIN_UTILITY_THRESHOLD    = 0.40;
-    private static double      m_minUtilityThreshold    = 0.0;
-    public static final long   FAILURE_EFFECTIVE_WINDOW = 2000 /* ms */;
-    public static final long   FAILURE_WINDOW_CHUNK     = 1000 /* ms */;
-    private static final int   SLEEP_TIME               = 10000;
+    public static final  String NAME                     = "Rainbow Adaptation Manager";
+    public static final  double FAILURE_RATE_THRESHOLD   = 0.95;
+    public static final  double MIN_UTILITY_THRESHOLD    = 0.40;
+    private static       double m_minUtilityThreshold    = 0.0;
+    public static final  long   FAILURE_EFFECTIVE_WINDOW = 2000 /* ms */;
+    public static final  long   FAILURE_WINDOW_CHUNK     = 1000 /* ms */;
+    private static final int    SLEEP_TIME               = 10000;
     /**
      * The prefix to be used by the strategy which takes a "leap" by achieving a similar adaptation that would have
      * taken multiple increments of the non-leap version, but at a potential "cost" in non-dire scenarios.
      */
-    public static final String LEAP_STRATEGY_PREFIX     = "Leap-";
+    public static final  String LEAP_STRATEGY_PREFIX     = "Leap-";
     /**
      * The prefix to represent the corresponding multi-step strategy of the leap-version strategy.
      */
-    public static final String MULTI_STRATEGY_PREFIX    = "Multi-";
+    public static final  String MULTI_STRATEGY_PREFIX    = "Multi-";
 
-    private Mode                               m_mode              = Mode.SERIAL;
-    private AcmeModelInstance                  m_model             = null;
-    private boolean                            m_adaptNeeded       = false;      // treat as synonymous with
+    private Mode                           m_mode              = Mode.SERIAL;
+    private AcmeModelInstance              m_model             = null;
+    private boolean                        m_adaptNeeded       = false;      // treat as synonymous with
     // constraint being violated
-    private boolean                            m_adaptEnabled      = true;       // by default, we adapt
-    private List<Stitch>                       m_repertoire        = null;
-    private List<Strategy>                     m_pendingStrategies = null;
+    private boolean                        m_adaptEnabled      = true;       // by default, we adapt
+    private List<Stitch>                   m_repertoire        = null;
+    private List<AdaptationTree<Strategy>> m_pendingStrategies = null;
 
     // track history
-    private String                                  m_historyTrackUtilName     = null;
-    private Map<String, int[]>                      m_historyCnt               = null;
-    private Map<String, Beacon>                     m_failTimer                = null;
-    private IRainbowAdaptationEnqueuePort<Strategy> m_enqueuePort              = null;
-    private IModelChangeBusSubscriberPort           m_modelChangePort          = null;
-    private IModelsManagerPort                      m_modelsManagerPort        = null;
-    private String                                  m_modelRef;
-    private FileChannel m_strategyLog = null;
-    private IRainbowChangeBusSubscription           m_modelTypecheckingChanged = new IRainbowChangeBusSubscription () {
+    private String                                  m_historyTrackUtilName = null;
+    private Map<String, int[]>                      m_historyCnt           = null;
+    private Map<String, Beacon>                     m_failTimer            = null;
+    private IRainbowAdaptationEnqueuePort<Strategy> m_enqueuePort          = null;
+    private IModelChangeBusSubscriberPort           m_modelChangePort      = null;
+    private IModelsManagerPort                      m_modelsManagerPort    = null;
+    private String m_modelRef;
+    private FileChannel                   m_strategyLog              = null;
+    private IRainbowChangeBusSubscription m_modelTypecheckingChanged = new IRainbowChangeBusSubscription () {
 
         @Override
         public boolean matches (IRainbowMessage message) {
-            String type = (String )message.getProperty (IModelChangeBusPort.EVENT_TYPE_PROP);
-            String modelName = (String )message.getProperty (IModelChangeBusPort.MODEL_NAME_PROP);
-            String modelType = (String )message.getProperty (IModelChangeBusPort.MODEL_TYPE_PROP);
+            String type = (String) message.getProperty (IModelChangeBusPort.EVENT_TYPE_PROP);
+            String modelName = (String) message.getProperty (IModelChangeBusPort.MODEL_NAME_PROP);
+            String modelType = (String) message.getProperty (IModelChangeBusPort.MODEL_TYPE_PROP);
             try {
                 CommandEventT ct = CommandEventT.valueOf (type);
                 return (ct.isEnd ()
                         && "setTypecheckResult".equals (message.getProperty (IModelChangeBusPort.COMMAND_PROP))
                         && m_modelRef.equals (Util.genModelRef (modelName, modelType)));
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 return false;
             }
         }
     };
-    private UtilityPreferenceDescription            m_utilityModel;
+    private UtilityPreferenceDescription m_utilityModel;
 
     /**
      * Default constructor.
@@ -133,7 +135,7 @@ implements IAdaptationManager<Strategy>/*
         super (NAME);
 
         m_repertoire = new ArrayList<Stitch> ();
-        m_pendingStrategies = new ArrayList<Strategy> ();
+        m_pendingStrategies = new ArrayList<AdaptationTree<Strategy>> ();
         m_historyTrackUtilName = Rainbow.getProperty (RainbowConstants.PROPKEY_TRACK_STRATEGY);
         if (m_historyTrackUtilName != null) {
             m_historyCnt = new HashMap<String, int[]> ();
@@ -142,8 +144,7 @@ implements IAdaptationManager<Strategy>/*
         String thresholdStr = Rainbow.getProperty (RainbowConstants.PROPKEY_UTILITY_MINSCORE_THRESHOLD);
         if (thresholdStr == null) {
             m_minUtilityThreshold = MIN_UTILITY_THRESHOLD;
-        }
-        else {
+        } else {
             m_minUtilityThreshold = Double.valueOf (thresholdStr);
         }
         setSleepTime (SLEEP_TIME);
@@ -168,16 +169,15 @@ implements IAdaptationManager<Strategy>/*
         m_modelRef = model.getModelName () + ":" + model.getModelType ();
         try {
             m_strategyLog = new FileOutputStream (new File (new File (Rainbow.instance ().getTargetPath (), "log"),
-                    model.getModelName () + "-adaptation.log")).getChannel ();
-        }
-        catch (FileNotFoundException e) {
+                                                            model.getModelName () + "-adaptation.log")).getChannel ();
+        } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace ();
         }
-        m_model = (AcmeModelInstance )m_modelsManagerPort.<IAcmeSystem> getModelInstance (model);
+        m_model = (AcmeModelInstance) m_modelsManagerPort.<IAcmeSystem>getModelInstance (model);
         if (m_model == null) {
             m_reportingPort.error (RainbowComponentT.ADAPTATION_MANAGER,
-                    MessageFormat.format ("Could not find reference to {0}", model.toString ()));
+                                   MessageFormat.format ("Could not find reference to {0}", model.toString ()));
         }
         m_enqueuePort = RainbowPortFactory.createAdaptationEnqueuePort (model);
         ModelReference utilityModelRef = new ModelReference (model.getModelName (), "UtilityModel");
@@ -185,12 +185,13 @@ implements IAdaptationManager<Strategy>/*
                 .getModelInstance (utilityModelRef);
         if (modelInstance == null) {
             m_reportingPort.error (RainbowComponentT.ADAPTATION_MANAGER,
-                    MessageFormat.format (
-                            "There is no utility model associated with this model. Expecting to find ''{0}''. Perhaps it is not specified in the rainbow.properties file?",
-                            utilityModelRef.toString ()));
+                                   MessageFormat.format (
+                                           "There is no utility model associated with this model. Expecting to find " +
+                                                   "''{0}''. Perhaps it is not specified in the rainbow.properties " +
+                                                   "file?",
+                                           utilityModelRef.toString ()));
 
-        }
-        else {
+        } else {
             m_utilityModel = modelInstance.getModelInstance ();
         }
 //        for (String k : m_utilityModel.utilities.keySet ()) {
@@ -278,18 +279,45 @@ implements IAdaptationManager<Strategy>/*
     /**
      * Removes a Strategy from the list of pending strategies, marking it as being completed (doesn't incorporate
      * outcome).
-     * 
-     * @param strategy
-     *            the strategy to mark as being executed.
+     *
+     * @param strategy the strategy to mark as being executed.
      */
     @Override
-    public void markStrategyExecuted (Strategy strategy) {
+    public void markStrategyExecuted (AdaptationTree<Strategy> strategy) {
         if (m_pendingStrategies.contains (strategy)) {
             m_pendingStrategies.remove (strategy);
-            String s = strategy.getName () + ";" + strategy.outcome ();
-            log ("*S* outcome: " + s);
-            Util.dataLogger ().info (IRainbowHealthProtocol.DATA_ADAPTATION_STRATEGY + s);
-            tallyStrategyOutcome (strategy);
+            final List<Strategy> strategiesExecuted = new LinkedList<> ();
+            final CountDownLatch countdownLatch = new CountDownLatch (1);
+            DefaultAdaptationExecutorVisitor<Strategy> resultCollector = new
+                    DefaultAdaptationExecutorVisitor<Strategy> (strategy, this.activeThread ()
+                            .getThreadGroup (), "", countdownLatch, m_reportingPort) {
+                        @Override
+                        protected boolean evaluate (Strategy adaptation) {
+                            if (adaptation.outcome () != Strategy.Outcome.UNKNOWN) {
+                                strategiesExecuted.add (adaptation);
+                            }
+                            return true;
+                        }
+
+                        @Override
+                        protected DefaultAdaptationExecutorVisitor<Strategy> spawnNewExecutorForTree
+                                (AdaptationTree<Strategy> adt, ThreadGroup g, CountDownLatch doneSignal) {
+                            return null;
+                        }
+                    };
+            resultCollector.start ();
+            try {
+                countdownLatch.await (2, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+            }
+
+            for (Strategy str : strategiesExecuted) {
+                String s = str.getName () + ";" + str.outcome ();
+                log ("*S* outcome: " + s);
+                Util.dataLogger ().info (IRainbowHealthProtocol.DATA_ADAPTATION_STRATEGY + s);
+                tallyStrategyOutcome (str);
+            }
+
         }
         if (m_pendingStrategies.size () == 0) {
             Util.dataLogger ().info (IRainbowHealthProtocol.DATA_ADAPTATION_END);
@@ -301,7 +329,7 @@ implements IAdaptationManager<Strategy>/*
 
     /**
      * Computes instantaneous utility of target system given current conditions.
-     * 
+     *
      * @return double the instantaneous utility of current conditions
      */
     public double computeSystemInstantUtility () {
@@ -321,12 +349,10 @@ implements IAdaptationManager<Strategy>/*
                 double val = 0.0;
                 if (condVal instanceof Double) {
                     val = (Double) condVal;
-                }
-                else if (condVal instanceof Float) {
-                    val = ((Float )condVal).doubleValue ();
-                }
-                else if (condVal instanceof Integer) {
-                    val = ((Integer )condVal).doubleValue ();
+                } else if (condVal instanceof Float) {
+                    val = ((Float) condVal).doubleValue ();
+                } else if (condVal instanceof Integer) {
+                    val = ((Integer) condVal).doubleValue ();
                 }
                 m_reportingPort.trace (getComponentType (), "Avg value of prop: " + u.mapping () + " == " + condVal);
                 conds[i] = val;
@@ -361,8 +387,8 @@ implements IAdaptationManager<Strategy>/*
                 log (">> do strategy: " + selectedStrategy.getName ());
                 // strategy args removed...
                 Object[] args = new Object[0];
-                m_pendingStrategies.add (selectedStrategy);
                 AdaptationTree<Strategy> at = new AdaptationTree<Strategy> (selectedStrategy);
+                m_pendingStrategies.add (at);
                 m_enqueuePort.offerAdaptation (at, null);
                 String logMessage = selectedStrategy.getName ();
                 strategyLog (logMessage);
@@ -384,7 +410,7 @@ implements IAdaptationManager<Strategy>/*
         if (m_strategyLog != null) {
             Date d = new Date ();
             String log = MessageFormat.format ("{0,number,#},queuing,{1}\n", d.getTime (),
-                    logMessage);
+                                               logMessage);
             try {
                 m_strategyLog.write (java.nio.ByteBuffer.wrap (log.getBytes ()));
             } catch (IOException e) {
@@ -400,7 +426,7 @@ implements IAdaptationManager<Strategy>/*
 
     /**
      * For JUnit testing, allows fetching the strategy repertoire. NOT for public use!
-     * 
+     *
      * @return list of Stitch objects loaded at initialization from stitch file.
      */
     List<Stitch> _retrieveRepertoireForTesting () {
@@ -409,7 +435,7 @@ implements IAdaptationManager<Strategy>/*
 
     /**
      * For JUnit testing, allows fetching the utility objects. NOT for public use!
-     * 
+     *
      * @return map of utility identifiers to functions.
      */
     Map<String, UtilityFunction> _retrieveUtilityProfilesForTesting () {
@@ -419,8 +445,6 @@ implements IAdaptationManager<Strategy>/*
     /**
      * For JUnit testing, allows re-invoking defineAttributes to artificially increase the number of quality dimensions
      * in tactic attribute vectors.
-     * 
-
      */
     void _defineAttributesFromTester (Stitch stitch, Map<String, Map<String, Object>> attrVectorMap) {
         defineAttributes (stitch, attrVectorMap);
@@ -492,7 +516,7 @@ implements IAdaptationManager<Strategy>/*
                 double leapArgVal = leap.getFirstTacticArgumentValue ();
                 if (stratArgVal != Double.NaN) {
                     // compute multiple now
-                    factor = (int )(leapArgVal / stratArgVal);
+                    factor = (int) (leapArgVal / stratArgVal);
                 }
                 Strategy multi = strategy.clone ();
                 multi.setName (MULTI_STRATEGY_PREFIX + strategy.getName ());
@@ -502,7 +526,7 @@ implements IAdaptationManager<Strategy>/*
             }
         }
         log (">> repertoire: " + appSubsetByName.size () + " / " + availCnt + " strategy"
-                + (availCnt > 1 ? "ies" : "y"));
+                     + (availCnt > 1 ? "ies" : "y"));
         SortedMap<Double, Strategy> scoredStrategies = scoreStrategies (appSubsetByName);
         if (Util.dataLogger ().isInfoEnabled ()) {
             StringBuffer buf = new StringBuffer ();
@@ -522,8 +546,7 @@ implements IAdaptationManager<Strategy>/*
         if (scoredStrategies.size () > 0) {
             Strategy selectedStrategy = scoredStrategies.get (scoredStrategies.lastKey ());
             return selectedStrategy;
-        }
-        else {
+        } else {
             Util.dataLogger ().info (IRainbowHealthProtocol.DATA_ADAPTATION_END);
             log ("<< NO applicable strategy, adaptation cycle ended.");
             return null;
@@ -534,9 +557,8 @@ implements IAdaptationManager<Strategy>/*
     /**
      * Iterate through the supplied set of strategies, compute aggregate attributes, and use the aggregate values plus
      * stakeholder utility preferences to compute an integer score for each Strategy, between 0 and 100.
-     * 
-     * @param subset
-     *            the subset of condition-applicable Strategies to score, in the form of a name-strategy map
+     *
+     * @param subset the subset of condition-applicable Strategies to score, in the form of a name-strategy map
      * @return a map of score-strategy pairs, sorted in increasing order by score.
      */
     private SortedMap<Double, Strategy> scoreStrategies (Map<String, Strategy> subset) {
@@ -604,16 +626,14 @@ implements IAdaptationManager<Strategy>/*
                     double val = 0.0;
                     if (condVal instanceof Double) {
                         val = (Double) condVal;
-                    }
-                    else if (condVal instanceof Float) {
-                        val = ((Float )condVal).doubleValue ();
-                    }
-                    else if (condVal instanceof Integer) {
-                        val = ((Integer )condVal).doubleValue ();
+                    } else if (condVal instanceof Float) {
+                        val = ((Float) condVal).doubleValue ();
+                    } else if (condVal instanceof Integer) {
+                        val = ((Integer) condVal).doubleValue ();
                     }
 
                     m_reportingPort.trace (getComponentType (),
-                            "Avg value of prop: " + u.mapping () + " == " + condVal);
+                                           "Avg value of prop: " + u.mapping () + " == " + condVal);
                     conds[i] = val;
                     items[i] += conds[i];
                 }
@@ -657,8 +677,7 @@ implements IAdaptationManager<Strategy>/*
             if (score < m_minUtilityThreshold) {
                 // utility score too low, don't consider for adaptation
                 log ("score " + score + " below threshold, discarding: " + s);
-            }
-            else {
+            } else {
                 scored.put (score, strategy);
             }
             log ("current model properties: " + Arrays.toString (conds));
@@ -680,7 +699,7 @@ implements IAdaptationManager<Strategy>/*
      */
     private void initAdaptationRepertoire () {
         File stitchPath = Util.getRelativeToPath (Rainbow.instance ().getTargetPath (),
-                Rainbow.getProperty (RainbowConstants.PROPKEY_SCRIPT_PATH));
+                                                  Rainbow.getProperty (RainbowConstants.PROPKEY_SCRIPT_PATH));
         if (stitchPath == null) {
             m_reportingPort.error (RainbowComponentT.ADAPTATION_MANAGER, "The stitch path is not set!");
         } else if (stitchPath.exists () && stitchPath.isDirectory ()) {
@@ -706,14 +725,12 @@ implements IAdaptationManager<Strategy>/*
                         defineAttributes (stitch, m_utilityModel.attributeVectors);
                         m_repertoire.add (stitch);
                         log ("Parsed script " + stitch.path);
-                    }
-                    else {
+                    } else {
                         log ("Previously known script " + stitch.path);
                     }
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     m_reportingPort.error (RainbowComponentT.ADAPTATION_MANAGER,
-                            "Obtaining file canonical path failed! " + f.getName (), e);
+                                           "Obtaining file canonical path failed! " + f.getName (), e);
                 }
             }
         }
@@ -729,18 +746,18 @@ implements IAdaptationManager<Strategy>/*
         for (StitchProblem p : problem) {
             StringBuilder out = new StringBuilder ();
             switch (p.getSeverity ()) {
-            case StitchProblem.ERROR:
-                out.append ("ERROR: ");
-                break;
-            case StitchProblem.WARNING:
-                out.append ("WARNING: ");
-                break;
-            case StitchProblem.FATAL:
-                out.append ("FATAL ERROR: ");
-                break;
-            case StitchProblem.UNKNOWN:
-                out.append ("UNKNOWN PROBLEM: ");
-                break;
+                case StitchProblem.ERROR:
+                    out.append ("ERROR: ");
+                    break;
+                case StitchProblem.WARNING:
+                    out.append ("WARNING: ");
+                    break;
+                case StitchProblem.FATAL:
+                    out.append ("FATAL ERROR: ");
+                    break;
+                case StitchProblem.UNKNOWN:
+                    out.append ("UNKNOWN PROBLEM: ");
+                    break;
             }
             out.append ("Line: ").append (p.getLine ());
             out.append (", ");
@@ -757,7 +774,7 @@ implements IAdaptationManager<Strategy>/*
             if (attributes != null) {
                 // found attribute def for tactic, save all key-value pairs
                 m_reportingPort.trace (getComponentType (),
-                        "Found attributes for tactic " + t.getName () + ", saving pairs...");
+                                       "Found attributes for tactic " + t.getName () + ", saving pairs...");
                 for (Map.Entry<String, Object> e : attributes.entrySet ()) {
                     t.putAttribute (e.getKey (), e.getValue ());
                     m_reportingPort.trace (getComponentType (), " - (" + e.getKey () + ", " + e.getValue () + ")");
@@ -795,16 +812,16 @@ implements IAdaptationManager<Strategy>/*
         // tally outcome counts
         ++stat[I_RUN];
         switch (s.outcome ()) {
-        case SUCCESS:
-            ++stat[I_SUCCESS];
-            break;
-        case FAILURE:
-            ++stat[I_FAIL];
-            timer.mark ();
-            break;
-        default:
-            ++stat[I_OTHER];
-            break;
+            case SUCCESS:
+                ++stat[I_SUCCESS];
+                break;
+            case FAILURE:
+                ++stat[I_FAIL];
+                timer.mark ();
+                break;
+            default:
+                ++stat[I_OTHER];
+                break;
         }
         String str = name + Arrays.toString (stat);
         log ("History: " + str);
@@ -817,8 +834,7 @@ implements IAdaptationManager<Strategy>/*
         if (m_historyCnt.containsKey (s.getName ())) {
             // consider failure only
             aggAtt.put (m_historyTrackUtilName, getFailureRate (s));
-        }
-        else {
+        } else {
             // consider no failure
             aggAtt.put (m_historyTrackUtilName, 0.0);
         }
@@ -844,7 +860,7 @@ implements IAdaptationManager<Strategy>/*
     @Override
     public void onEvent (ModelReference mr, IRainbowMessage message) {
         // Because of the subscription, the model should be the model ref so no need to check
-        String typecheckSt = (String )message.getProperty (IModelChangeBusPort.PARAMETER_PROP + "0");
+        String typecheckSt = (String) message.getProperty (IModelChangeBusPort.PARAMETER_PROP + "0");
         Boolean typechecks = Boolean.valueOf (typecheckSt);
         // Cause the thread to wake up if it is sleeping
         if (!typechecks) {
@@ -860,7 +876,7 @@ implements IAdaptationManager<Strategy>/*
     @Override
     public void setEnabled (boolean enabled) {
         m_reportingPort.info (getComponentType (),
-                MessageFormat.format ("Turning adaptation {0}.", (enabled ? "on" : "off")));
+                              MessageFormat.format ("Turning adaptation {0}.", (enabled ? "on" : "off")));
         if (!enabled && !m_pendingStrategies.isEmpty ()) {
             m_reportingPort.info (getComponentType (), "There is an adaptation in progress. This will finish.");
         }

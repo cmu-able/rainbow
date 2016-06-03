@@ -35,7 +35,7 @@ import org.sa.rainbow.core.ports.IRainbowReportingPort;
  *
  * @param <S>
  */
-public interface IAdaptationManager<S> extends IRainbowRunnable {
+public interface IAdaptationManager<S extends IEvaluable> extends IRainbowRunnable {
 
     /**
      * Which model in the models manager are the adaptations in this manager for.
@@ -51,7 +51,7 @@ public interface IAdaptationManager<S> extends IRainbowRunnable {
      * @param strategy
      *            The strategy (managed by this manager) that was executor
      */
-    void markStrategyExecuted (S strategy);
+    void markStrategyExecuted (AdaptationTree<S> strategy);
 
     /**
      * The interface for initializing this component

@@ -23,29 +23,26 @@
  */
 package org.sa.rainbow.stitch.adaptation;
 
-import java.util.HashMap;
-import java.util.concurrent.CountDownLatch;
-
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.adaptation.AdaptationTree;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
+import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.ModelsManager;
-import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
-import org.sa.rainbow.core.ports.IModelUSBusPort;
-import org.sa.rainbow.core.ports.IRainbowAdaptationDequeuePort;
-import org.sa.rainbow.core.ports.IRainbowReportingPort;
-import org.sa.rainbow.core.ports.RainbowPortFactory;
+import org.sa.rainbow.core.ports.*;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.tactic.history.ExecutionHistoryModelInstance;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData;
+
+import java.util.HashMap;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * The Strategy Executor serves the role of maintaining the active thread(s) to carry a strategy/ies. This design
@@ -74,7 +71,6 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
     private ExecutionHistoryModelInstance           m_historyModel;
 
     /**
-     * @param name
      */
     public StitchExecutor () {
         super (NAME);
@@ -132,9 +128,27 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
             // use a StitchExecutionVisitor to visit this adaptation
             AdaptationTree<Strategy> at = m_adapationDQPort.dequeue ();
             log ("Dequeued an adaptation");
+            final CountDownLatch done = new CountDownLatch (1);
             StitchExecutionVisitor stitchVisitor = new StitchExecutionVisitor (this, this.m_modelRef,
-                    m_historyModel.getCommandFactory (), at, m_executionThreadGroup, new CountDownLatch (1));
+                                                                               m_historyModel.getCommandFactory (),
+                                                                               at, m_executionThreadGroup,
+                                                                               done);
             stitchVisitor.start ();
+
+            try {
+                done.await ();
+            } catch (InterruptedException e) {
+                e.printStackTrace ();
+            }
+
+            if (!Rainbow.shouldTerminate ()) {
+                final IAdaptationManager<Strategy> adaptationManager = Rainbow.instance ()
+                        .getRainbowMaster ().adaptationManagerForModel (this.m_modelRef.toString ());
+                if (adaptationManager != null) {
+                    adaptationManager
+                            .markStrategyExecuted (at);
+                }
+            }
 //            
 //            
 //            
