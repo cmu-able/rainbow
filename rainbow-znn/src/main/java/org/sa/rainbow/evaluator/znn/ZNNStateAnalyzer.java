@@ -87,7 +87,7 @@ public class ZNNStateAnalyzer extends AbstractRainbowRunnable implements IRainbo
 
     public ZNNStateAnalyzer () {
         super (NAME);
-        String per = Rainbow.getProperty (RainbowConstants.PROPKEY_MODEL_EVAL_PERIOD);
+        String per = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MODEL_EVAL_PERIOD);
         if (per != null) {
             setSleepTime (Long.parseLong (per));
         } else {
@@ -188,7 +188,7 @@ public class ZNNStateAnalyzer extends AbstractRainbowRunnable implements IRainbo
     }
 
     @Override
-    protected RainbowComponentT getComponentType () {
+    public RainbowComponentT getComponentType () {
         return RainbowComponentT.ANALYSIS;
     }
 

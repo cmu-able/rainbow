@@ -56,7 +56,7 @@ public class PingRTTProbe extends AbstractRunnableProbe {
     /** Invoke Ping on Windows with 64 bytes of data, 3 requests */
     public static final String[] PING_WIN32 = { "ping", "-n", "3", "-l", String.valueOf(PING_REQ_SIZE), "" };
 
-    private String[]             m_tgtHosts    = { Rainbow.getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION) };
+    private String[] m_tgtHosts = {Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION)};
 
     /**
      * Default Constructor, setting ID and sleep time
