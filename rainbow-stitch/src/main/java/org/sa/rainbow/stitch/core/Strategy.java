@@ -30,6 +30,7 @@ import org.acmestudio.acme.element.IAcmeElement;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation;
+import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.adaptation.StitchExecutor;
 import org.sa.rainbow.stitch.error.ArgumentMismatchException;
 import org.sa.rainbow.stitch.tactic.history.ExecutionHistoryModelInstance;
@@ -37,6 +38,7 @@ import org.sa.rainbow.stitch.util.ExecutionHistoryData.ExecutionStateT;
 import org.sa.rainbow.stitch.util.Tool;
 import org.sa.rainbow.stitch.visitor.Stitch;
 
+import java.io.FileNotFoundException;
 import java.util.*;
 
 /**
@@ -244,8 +246,8 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
      * Clones a Strategy object, including the set of children StrategyNodes.
      */
     @Override
-    public Strategy clone () {
-        Strategy newObj = new Strategy (m_parent, m_name, m_stitch);
+    public synchronized Strategy clone (IScope parent) {
+        Strategy newObj = new Strategy (parent, m_name, m_stitch.clone ());
         copyState (newObj);
         return newObj;
     }
@@ -257,7 +259,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
         super.copyState (target);
         target.state = state;
         for (Map.Entry<String, StrategyNode> e : nodes.entrySet ()) {
-            target.nodes.put (e.getKey (), e.getValue ().clone ());
+            target.nodes.put (e.getKey (), e.getValue ().clone (parent()));
         }
         target.multiples = multiples;
         target.m_outcome = m_outcome;
@@ -657,7 +659,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
         // track time elapsed if NOT failure, and store exponential avg
         if (m_outcome != Outcome.FAILURE) { // is this a good idea?
             long estTime = System.currentTimeMillis () - startTime;
-            double alpha = Rainbow.getProperty (RainbowConstants.PROPKEY_MODEL_ALPHA, 0.33);
+            double alpha = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MODEL_ALPHA, 0.33);
             m_avgExecutionTime = (long )((1 - alpha) * m_avgExecutionTime + alpha * estTime);
         }
 
@@ -909,42 +911,62 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
         }
         Object[] args = Tool.evaluateArgs (curNode.getTacticArgExprs ());
         Tactic tactic = stitch ().findTactic (curNode.getTactic ());
-        tactic.setHistoryModel (m_executor.getExecutionHistoryModel ());
-        m_executor.getHistoryModelUSPort ().updateModel (
-                m_executor.getExecutionHistoryModel ().getCommandFactory ()
-                .strategyExecutionStateCommand (tactic.getQualifiedName (),
-                        ExecutionHistoryModelInstance.TACTIC, ExecutionStateT.STARTED, null));
-        long start = new Date ().getTime ();
-        tactic.evaluate (args);
-        m_executor.getHistoryModelUSPort ().updateModel (
-                m_executor.getExecutionHistoryModel ().getCommandFactory ()
-                .strategyExecutionStateCommand (tactic.getQualifiedName (),
-                        ExecutionHistoryModelInstance.TACTIC, ExecutionStateT.WAITING,
-                        Long.toString (curNode.getDuration ())));
-        boolean effectGood = awaitSettling (curNode);
-        long end = new Date ().getTime ();
-        m_executor.getHistoryModelUSPort ().updateModel (
-                m_executor
-                .getExecutionHistoryModel ()
-                .getCommandFactory ()
-                .strategyExecutionStateCommand (tactic.getQualifiedName (),
-                        ExecutionHistoryModelInstance.TACTIC, ExecutionStateT.FINISHED, null));
-        AbstractRainbowModelOperation recordTacticDurationCmd = m_executor.getExecutionHistoryModel ()
-                .getCommandFactory ().recordTacticDurationCmd (tactic.getQualifiedName (), end - start, effectGood);
-        m_executor.getHistoryModelUSPort ().updateModel (recordTacticDurationCmd);
-        // proceed with any branching
-        if (curNode.getChildren ().size () == 0) {
-            // Tactic without branching, must be followed by done!
-            // Check effect of tactic, and if not true, then consider strategy failed
-            if (Tool.logger ().isDebugEnabled ()) {
-                Tool.logger ().debug ("Tactic followed by done! effect == " + effectGood);
+        if (tactic.isExecuting () && tactic.stitch() != curNode.stitch ()) {
+            try {
+                Stitch stitch = Ohana.instance ().findFreeStitch (stitch ());
+                tactic = stitch.findTactic (curNode.getTactic ());
+            } catch (FileNotFoundException e) {
+                m_executor.getReportingPort ().error (m_executor.getComponentType (), "Could not execute " + tactic
+                        .getName ());
+                m_outcome = Outcome.STATUSQUO;
             }
-            if (effectGood && !tactic.hasError ()) {
-                m_outcome = Outcome.SUCCESS;
+        }
+//        if (tactic.isExecuting ()) {
+//
+//        }
+        tactic.markExecuting (true);
+        try {
+            tactic.setHistoryModel (m_executor.getExecutionHistoryModel ());
+            m_executor.getHistoryModelUSPort ().updateModel (
+                    m_executor.getExecutionHistoryModel ().getCommandFactory ()
+                            .strategyExecutionStateCommand (tactic.getQualifiedName (),
+                                                            ExecutionHistoryModelInstance.TACTIC, ExecutionStateT.STARTED, null));
+
+            long start = new Date ().getTime ();
+            tactic.evaluate (args);
+            m_executor.getHistoryModelUSPort ().updateModel (
+                    m_executor.getExecutionHistoryModel ().getCommandFactory ()
+                            .strategyExecutionStateCommand (tactic.getQualifiedName (),
+                                                            ExecutionHistoryModelInstance.TACTIC, ExecutionStateT
+                                                                    .WAITING,
+                                                            Long.toString (curNode.getDuration ())));
+            boolean effectGood = awaitSettling (curNode);
+            long end = new Date ().getTime ();
+            m_executor.getHistoryModelUSPort ().updateModel (
+                    m_executor
+                            .getExecutionHistoryModel ()
+                            .getCommandFactory ()
+                            .strategyExecutionStateCommand (tactic.getQualifiedName (),
+                                                            ExecutionHistoryModelInstance.TACTIC, ExecutionStateT.FINISHED, null));
+            AbstractRainbowModelOperation recordTacticDurationCmd = m_executor.getExecutionHistoryModel ()
+                    .getCommandFactory ().recordTacticDurationCmd (tactic.getQualifiedName (), end - start, effectGood);
+            m_executor.getHistoryModelUSPort ().updateModel (recordTacticDurationCmd);
+            // proceed with any branching
+            if (curNode.getChildren ().size () == 0) {
+                // Tactic without branching, must be followed by done!
+                // Check effect of tactic, and if not true, then consider strategy failed
+                if (Tool.logger ().isDebugEnabled ()) {
+                    Tool.logger ().debug ("Tactic followed by done! effect == " + effectGood);
+                }
+                if (effectGood && !tactic.hasError ()) {
+                    m_outcome = Outcome.SUCCESS;
+                } else {
+                    m_outcome = Outcome.FAILURE;
+                }
             }
-            else {
-                m_outcome = Outcome.FAILURE;
-            }
+        }
+        finally {
+          tactic.markExecuting(false);
         }
     }
 
@@ -995,6 +1017,14 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
     public void setExecutor (StitchExecutor executor) {
         m_executor = executor;
 
+    }
+
+    public synchronized void markExecuting (boolean executing) {
+        stitch ().markExecuting (executing);
+    }
+
+    public synchronized boolean isExecuting () {
+        return stitch ().isExecuting ();
     }
 
 }

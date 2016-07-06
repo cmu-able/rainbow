@@ -92,7 +92,7 @@ public class LocalProbeManager extends AbstractRainbowRunnable {
         // obtain the list of probes to create
         for (ProbeDescription.ProbeAttributes pbAttr : m_localProbeDesc.probes) {
             // see if probe is for my location
-            if (!pbAttr.getLocation().equals (Rainbow.getProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION))) {
+            if (!pbAttr.getLocation().equals (Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION))) {
                 continue;
             }
             try {
@@ -217,7 +217,7 @@ public class LocalProbeManager extends AbstractRainbowRunnable {
 
 
     @Override
-    protected RainbowComponentT getComponentType () {
+    public RainbowComponentT getComponentType () {
         return RainbowComponentT.PROBE_MANAGER;
     }
 

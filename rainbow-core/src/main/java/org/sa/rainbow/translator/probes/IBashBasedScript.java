@@ -32,7 +32,7 @@ public interface IBashBasedScript {
 
     /* We're using UNIX path */
     String FILESEP = "/";
-    String CYGWIN_BASH = "c:/server/cygwin/bin/bash.exe";
+    String CYGWIN_BASH = "c:/cygwin/bin/bash.exe"; // This is hardwired and shouldn't be
     String LINUX_BASH = "/bin/bash";
     String BASH_OPT = "-c";
     String LINUX_CHMOD = "/bin/chmod";

@@ -64,7 +64,7 @@ public class RainbowPortFactory {
      */
     protected static IRainbowConnectionPortFactory getFactory () {
         if (m_instance == null) {
-            String factory = Rainbow.getProperty (RainbowConstants.PROPKEY_PORT_FACTORY);
+            String factory = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_PORT_FACTORY);
             if (factory == null) {
                 LOGGER.warn (MessageFormat.format ("No property defined for ''{0}''. Using default ''{1}''.",
                         RainbowConstants.PROPKEY_PORT_FACTORY, DEFAULT_FACTORY));
@@ -233,14 +233,14 @@ public class RainbowPortFactory {
 
     public static IMasterCommandPort createMasterCommandPort () throws RainbowConnectionException {
 
-        if (Rainbow.isMaster ())
+        if (Rainbow.instance ().isMaster ())
             return getFactory ().createMasterCommandProviderPort (Rainbow.instance ().getRainbowMaster ());
 
         return getFactory ().createMasterCommandRequirerPort ();
     }
 
     public static IModelsManagerPort createModelsManagerRequirerPort () throws RainbowConnectionException {
-        if (Rainbow.isMaster ()) {
+        if (Rainbow.instance ().isMaster ()) {
             final ModelsManager mm = Rainbow.instance ().getRainbowMaster ().modelsManager ();
             return new IModelsManagerPort () {
 

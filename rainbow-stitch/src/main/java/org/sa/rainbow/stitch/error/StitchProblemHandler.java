@@ -44,4 +44,5 @@ public interface StitchProblemHandler {
     void setProblem(StitchProblem problem);
     void addAll (Collection<StitchProblem> problems);
     Collection<StitchProblem> unreportedProblems();
+    StitchProblemHandler clone ();
 }

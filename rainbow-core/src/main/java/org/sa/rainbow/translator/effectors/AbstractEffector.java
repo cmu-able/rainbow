@@ -124,7 +124,7 @@ public abstract class AbstractEffector implements IEffector {
             m_reportingPort.info (RainbowComponentT.EFFECTOR, msg);
         }
         // avoid duplicate output in the master's process
-        if (!Rainbow.isMaster () || m_reportingPort == null) {
+        if (!Rainbow.instance ().isMaster () || m_reportingPort == null) {
             LOGGER.info (msg);
         }
     }

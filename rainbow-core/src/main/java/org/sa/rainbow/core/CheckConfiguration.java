@@ -37,7 +37,7 @@ public class CheckConfiguration {
     public static void main (String[] args) {
         System.out.println ("Reading configuration files");
         Rainbow.instance ();
-        System.out.println ("Loading YAMLs for target: " + Rainbow.getProperty (RainbowConstants.PROPKEY_TARGET_NAME));
+        System.out.println ("Loading YAMLs for target: " + Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_TARGET_NAME));
         System.out.print ("Loading probes...");
         System.out.flush ();
         final ProbeDescription loadProbeDesc = YamlUtil.loadProbeDesc ();
@@ -103,7 +103,7 @@ public class CheckConfiguration {
         else {
             System.out.println ("No problems were found with the configuration");
         }
-        Rainbow.signalTerminate ();
+        Rainbow.instance ().signalTerminate ();
         System.exit (0);
 
     }

@@ -85,7 +85,7 @@ public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
 
         msg.setProperty (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_PORT, Short.toString (deploymentPortNum));
         String host = connectionProperties.getProperty (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_HOST, Rainbow
-                .getProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION, "localhost"));
+                .instance ().getProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION, "localhost"));
         msg.setProperty (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_HOST, host);
         msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, delegateID);
         msg.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_CONNECT_DELEGATE);

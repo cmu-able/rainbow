@@ -23,9 +23,10 @@
  */
 package org.sa.rainbow.core;
 
-import org.apache.log4j.Logger;
 import org.sa.rainbow.core.error.RainbowAbortException;
 import org.sa.rainbow.core.gauges.IGauge;
+import org.sa.rainbow.core.globals.Environment;
+import org.sa.rainbow.core.globals.ExitState;
 import org.sa.rainbow.util.Util;
 
 import java.io.File;
@@ -43,88 +44,7 @@ import java.util.*;
  * @author Bradley Schmerl: schmerl
  * 
  */
-public class Rainbow implements RainbowConstants {
-    static final Logger LOGGER = Logger.getLogger (Rainbow.class);
-
-    /**
-     * States used to track the target deployment environment of Rainbow component.
-     * 
-     * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
-     */
-    public enum Environment {
-        /** We don't yet know what deployment environment. */
-        UNKNOWN,
-        /** We're in a Linux environment. */
-        LINUX,
-        /** We're in a Cygwin environment. */
-        CYGWIN,
-        /** We're in a Mac FreeBSD environment. */
-        MAC,
-        /** We're in a Windows environment without Cygwin. */
-        WINDOWS
-    }
-
-    /**
-     * States used to help the Rainbow daemon process determine what to do after this Rainbow component exits.
-     * 
-     * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
-     */
-    public enum ExitState {
-        /**
-         * Completely clear out (daemon dies) after the Rainbow component exits (default).
-         */
-        DESTRUCT,
-        /** Restart the Rainbow component after exits. */
-        RESTART,
-        /**
-         * After the Rainbow component exits, sleep and await awake command to restart Rainbow.
-         */
-        SLEEP,
-        /** Abort of operation. */
-        ABORT;
-
-
-        public static ExitState parseState (int val) {
-            ExitState st = ExitState.DESTRUCT;
-            switch (val) {
-            case EXIT_VALUE_DESTRUCT:
-                st = ExitState.DESTRUCT;
-                break;
-            case EXIT_VALUE_RESTART:
-                st = ExitState.RESTART;
-                break;
-            case EXIT_VALUE_SLEEP:
-                st = ExitState.SLEEP;
-                break;
-            case EXIT_VALUE_ABORT:
-                st = ExitState.ABORT;
-                break;
-            }
-            return st;
-        }
-
-        public int exitValue () {
-            int ev = 0;
-            switch (this) {
-            case DESTRUCT:
-                ev = EXIT_VALUE_DESTRUCT;
-                break;
-            case RESTART:
-                ev = EXIT_VALUE_RESTART;
-                break;
-            case SLEEP:
-                ev = EXIT_VALUE_SLEEP;
-                break;
-            case ABORT:
-                ev = EXIT_VALUE_ABORT;
-                break;
-            }
-            return ev;
-        }
-    }
-
-    /** The thread name */
-    public static final String NAME = "Rainbow Runtime Infrastructure";
+public class Rainbow implements IRainbowEnvironment {
 
 
     private static final String PROPKEY_PROPFILENAME = "rainbow.properties";
@@ -134,49 +54,43 @@ public class Rainbow implements RainbowConstants {
      */
     private static ExitState m_exitState = ExitState.SLEEP;
 
-    /**
-     * Singleton instance of Rainbow
-     */
-
-    private static Rainbow m_instance = null;
-
     private static Map<String, IGauge> m_id2Gauge;
 
     private static Environment m_env = Environment.UNKNOWN;
 
     private boolean m_shouldTerminate = false;
 
+    private static Rainbow _instance = null;
 
-    public synchronized static Rainbow instance () {
-        if (m_instance == null) {
-            m_instance = new Rainbow ();
-        }
-        return m_instance;
+    public static synchronized Rainbow instance () {
+        if (_instance == null)
+            _instance = new Rainbow ();
+        return _instance;
     }
-
+ 
     /**
      * Returns whether the Rainbow runtime infrastructure should terminate.
      *
      * @return <code>true</code> if Rainbow should terminate, <code>false</code> otherwise.
      */
-    public static boolean shouldTerminate () {
-        return instance ().m_shouldTerminate;
+    public boolean shouldTerminate () {
+        return m_shouldTerminate;
     }
 
     /**
      * Sets the shouldTerminate flag so that the Rainbow Runtime Infrastructure parts know to terminate. This method is
-     * intended primarily for {@link org.sa.rainbow.core.Oracle <code>Oracle</code>}, but may be used by the
-     * UpdateService to signal termination.
+     * intended primarily for {@link org.sa.rainbow.core.RainbowMaster <code>RainbowMaster</code>}, but may be used by
+     * the UpdateService to signal termination.
      */
-    public static void signalTerminate () {
-        if (!instance ().m_shouldTerminate) { // log once the signalling to
+    public void signalTerminate () {
+        if (m_shouldTerminate) { // log once the signalling to
             // terminate
             LOGGER.info ("*** Signalling Terminate ***");
         }
-        instance ().m_shouldTerminate = true;
+        m_shouldTerminate = true;
     }
 
-    public static void signalTerminate (ExitState exitState) {
+    public void signalTerminate (ExitState exitState) {
         setExitState (exitState);
         signalTerminate ();
     }
@@ -186,16 +100,16 @@ public class Rainbow implements RainbowConstants {
      *
      * @return int the exit value to return on System exit.
      */
-    public static int exitValue () {
+    public int exitValue () {
         return m_exitState.exitValue ();
     }
 
-    public static void setExitState (ExitState state) {
+    public void setExitState (ExitState state) {
         m_exitState = state;
     }
 
-    public static boolean isMaster () {
-        return instance ().m_isMaster;
+    public boolean isMaster () {
+        return m_rainbowMaster != null;
     }
 
 
@@ -206,9 +120,6 @@ public class Rainbow implements RainbowConstants {
 
 
     private final ThreadGroup m_threadGroup;
-
-    /** Indicates whether this instance is the master or a delegate **/
-    private boolean m_isMaster = false;
 
     private RainbowMaster m_rainbowMaster;
 
@@ -224,24 +135,24 @@ public class Rainbow implements RainbowConstants {
         evalPropertySubstitution ();
     }
 
-    public static String getProperty (String key, String defaultProperty) {
-        return instance ().m_props.getProperty (key, instance ().m_defaultProps.getProperty (key, defaultProperty));
+    public String getProperty (String key, String defaultProperty) {
+        return m_props.getProperty (key, m_defaultProps.getProperty (key, defaultProperty));
     }
 
-    public static String getProperty (String key) {
-        return instance ().m_props.getProperty (key, instance ().m_defaultProps.getProperty (key));
+    public String getProperty (String key) {
+        return m_props.getProperty (key, m_defaultProps.getProperty (key));
     }
 
-    public static boolean getProperty (String key, boolean b) {
-        String value = instance ().m_props.getProperty (key);
+    public boolean getProperty (String key, boolean b) {
+        String value = m_props.getProperty (key);
         if (value != null)
             return Boolean.valueOf (value);
         else
             return b;
     }
 
-    public static long getProperty (String key, long default_) {
-        String value = instance ().m_props.getProperty (key);
+    public long getProperty (String key, long default_) {
+        String value = m_props.getProperty (key);
         if (value == null) return default_;
         try {
             return Long.parseLong (value);
@@ -250,8 +161,8 @@ public class Rainbow implements RainbowConstants {
         }
     }
 
-    public static short getProperty (String key, short default_) {
-        String value = instance ().m_props.getProperty (key);
+    public short getProperty (String key, short default_) {
+        String value = m_props.getProperty (key);
         if (value == null) return default_;
         try {
             return Short.parseShort (value);
@@ -260,8 +171,8 @@ public class Rainbow implements RainbowConstants {
         }
     }
 
-    public static int getProperty (String key, int default_) {
-        String value = instance ().m_props.getProperty (key);
+    public int getProperty (String key, int default_) {
+        String value = m_props.getProperty (key);
         if (value == null) return default_;
         try {
             return Integer.parseInt (value);
@@ -270,8 +181,8 @@ public class Rainbow implements RainbowConstants {
         }
     }
 
-    public static double getProperty (String key, double default_) {
-        String value = instance ().m_props.getProperty (key);
+    public double getProperty (String key, double default_) {
+        String value = m_props.getProperty (key);
         if (value == null) return default_;
         try {
             return Double.parseDouble (value);
@@ -280,33 +191,33 @@ public class Rainbow implements RainbowConstants {
         }
     }
 
-    public static void setProperty (String key, short val) {
-        instance ().m_props.setProperty (key, Short.toString (val));
+    public void setProperty (String key, short val) {
+        m_props.setProperty (key, Short.toString (val));
     }
 
-    public static void setProperty (String key, long val) {
-        instance ().m_props.setProperty (key, Long.toString (val));
+    public void setProperty (String key, long val) {
+        m_props.setProperty (key, Long.toString (val));
     }
 
-    public static void setProperty (String key, boolean val) {
-        instance ().m_props.setProperty (key, Boolean.toString (val));
+    public void setProperty (String key, boolean val) {
+        m_props.setProperty (key, Boolean.toString (val));
     }
 
-    public static void setProperty (String key, String val) {
-        instance ().m_props.setProperty (key, val);
+    public void setProperty (String key, String val) {
+        m_props.setProperty (key, val);
     }
 
-    public static void setProperty (String key, double val) {
-        instance ().m_props.setProperty (key, Double.toString (val));
+    public void setProperty (String key, double val) {
+        m_props.setProperty (key, Double.toString (val));
     }
 
-    public static void setProperty (String key, int val) {
-        instance ().m_props.setProperty (key, Integer.toString (val));
+    public void setProperty (String key, int val) {
+        m_props.setProperty (key, Integer.toString (val));
     }
 
 
-    public static Properties allProperties () {
-        return instance ().m_props;
+    public Properties allProperties () {
+        return m_props;
     }
 
 
@@ -563,10 +474,6 @@ public class Rainbow implements RainbowConstants {
         return m_targetPath;
     }
 
-    void setIsMaster (boolean b) {
-        instance ().m_isMaster = b;
-    }
-
     public void setMaster (RainbowMaster rainbowMaster) {
         m_rainbowMaster = rainbowMaster;
     }
@@ -575,18 +482,18 @@ public class Rainbow implements RainbowConstants {
         return m_rainbowMaster;
     }
 
-    public static void registerGauge (IGauge gauge) {
-        instance ();
+    public void registerGauge (IGauge gauge) {
+        ;
         Rainbow.m_id2Gauge.put (gauge.id (), gauge);
     }
 
-    public static IGauge lookupGauge (String id) {
-        instance ();
+    public IGauge lookupGauge (String id) {
+        ;
         return Rainbow.m_id2Gauge.get (id);
     }
 
-    public static Environment environment () {
-        instance ();
+    public Environment environment () {
+        ;
         if (Rainbow.m_env == Environment.UNKNOWN) {
             Rainbow.m_env = Environment.valueOf (getProperty (PROPKEY_DEPLOYMENT_ENVIRONMENT).toUpperCase ());
         }

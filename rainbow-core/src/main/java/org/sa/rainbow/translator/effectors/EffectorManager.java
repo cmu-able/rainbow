@@ -96,7 +96,7 @@ IModelDSBusPublisherPort {
         if (effector == null) {
             // convert target into IP4 number (current Rainbow standard representation)
             if (target.equalsIgnoreCase ("localhost")) {
-                String localhost = Rainbow.getProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION);
+                String localhost = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION);
                 try {
                     id = Util.genID (effName, InetAddress.getByName (localhost).getHostAddress ());
                     if (LOGGER.isDebugEnabled ()) {
@@ -197,7 +197,7 @@ IModelDSBusPublisherPort {
 
 
     @Override
-    protected RainbowComponentT getComponentType () {
+    public RainbowComponentT getComponentType () {
         return RainbowComponentT.EFFECTOR_MANAGER;
     }
 

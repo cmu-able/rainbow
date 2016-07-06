@@ -30,6 +30,7 @@ import org.apache.commons.lang.NotImplementedException;
 import org.sa.rainbow.core.*;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
+import org.sa.rainbow.core.globals.ExitState;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.*;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
@@ -172,7 +173,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
     }
 
     public void quit () {
-        Rainbow.signalTerminate ();
+        Rainbow.instance ().signalTerminate ();
     }
 
     public void forceQuit () {
@@ -180,7 +181,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
             @Override
             public void run () {
                 m_master.destroyDelegates ();
-                Rainbow.signalTerminate ();
+                Rainbow.instance ().signalTerminate ();
                 Util.pause (IRainbowRunnable.LONG_SLEEP_TIME);
                 while (Rainbow.instance ().getThreadGroup ().activeCount () > 0) {
                     try {
@@ -262,7 +263,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         m_panes = new JComponent[PANEL_COUNT];
 
         //Create and set up the window.
-        m_frame = new JFrame ("Rainbow Framework GUI - Target " + Rainbow.getProperty (RainbowConstants
+        m_frame = new JFrame ("Rainbow Framework GUI - Target " + Rainbow.instance ().getProperty (RainbowConstants
                                                                                                .PROPKEY_TARGET_NAME));
         m_frame.setDefaultCloseOperation (JFrame.DO_NOTHING_ON_CLOSE);
         m_frame.addWindowListener (new WindowAdapter () {
@@ -481,7 +482,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         item.addActionListener (new ActionListener () {
             @Override
             public void actionPerformed (ActionEvent e) {
-                Rainbow.signalTerminate (Rainbow.ExitState.RESTART);
+                Rainbow.instance ().signalTerminate (ExitState.RESTART);
             }
         });
         item.setEnabled (false);
@@ -494,7 +495,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
             @Override
             public void actionPerformed (ActionEvent e) {
                 m_master.destroyDelegates ();
-                Rainbow.signalTerminate (Rainbow.ExitState.DESTRUCT);
+                Rainbow.instance ().signalTerminate (ExitState.DESTRUCT);
             }
         });
         menu.add(item);

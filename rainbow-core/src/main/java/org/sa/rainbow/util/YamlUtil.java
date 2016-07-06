@@ -64,7 +64,7 @@ public abstract class YamlUtil {
      */
 //    @SuppressWarnings ("unchecked")
 //    public static UtilityPreferenceDescription loadUtilityPrefs () {
-//        String utilityPath = Rainbow.getProperty (RainbowConstants.PROPKEY_UTILITY_PATH);
+//        String utilityPath = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_UTILITY_PATH);
 //        return loadUtilityPrefs (utilityPath);
 //    }
     public static UtilityPreferenceDescription loadUtilityPrefs (String utilityPath) {
@@ -149,7 +149,7 @@ public abstract class YamlUtil {
 
     public static GaugeDescription loadGaugeSpecs () {
         File gaugeSpec = Util.getRelativeToPath (Rainbow.instance ().getTargetPath (),
-                Rainbow.getProperty (RainbowConstants.PROPKEY_GAUGES_PATH));
+                Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_GAUGES_PATH));
         return loadGaugeSpecs (gaugeSpec);
     }
 
@@ -308,7 +308,7 @@ public abstract class YamlUtil {
 
         Map effectorMap = null;
         try {
-            String effectorPath = Rainbow.getProperty (RainbowConstants.PROPKEY_EFFECTORS_PATH);
+            String effectorPath = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_EFFECTORS_PATH);
             if (effectorPath == null) {
                 Util.logger ().error (MessageFormat.format ("No property defined for ''{0}''. No effectors loaded.",
                         RainbowConstants.PROPKEY_EFFECTORS_PATH));
@@ -328,7 +328,7 @@ public abstract class YamlUtil {
             Map<String, String> varMap = (Map<String, String> )effectorMap.get ("vars");
             if (varMap != null)
                 for (Map.Entry<String, String> varPair : varMap.entrySet ()) {
-                    Rainbow.setProperty (varPair.getKey (), Util.evalTokens (varPair.getValue ()));
+                    Rainbow.instance ().setProperty (varPair.getKey (), Util.evalTokens (varPair.getValue ()));
                 }
 
             // store effector type info
@@ -395,7 +395,7 @@ public abstract class YamlUtil {
 
         Map probeMap = null;
         try {
-            String probePath = Rainbow.getProperty (RainbowConstants.PROPKEY_PROBES_PATH);
+            String probePath = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_PROBES_PATH);
             if (probePath == null) {
                 Util.logger ().error (MessageFormat.format ("No property defined for ''{0}''. No probes loaded.",
                         RainbowConstants.PROPKEY_PROBES_PATH));
@@ -409,7 +409,7 @@ public abstract class YamlUtil {
             Map<String, String> varMap = (Map<String, String> )probeMap.get ("vars");
             if (varMap != null)
                 for (Map.Entry<String, String> varPair : varMap.entrySet ()) {
-                    Rainbow.setProperty (varPair.getKey (), Util.evalTokens (varPair.getValue ()));
+                    Rainbow.instance ().setProperty (varPair.getKey (), Util.evalTokens (varPair.getValue ()));
                 }
 
             // store probe description info

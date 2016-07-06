@@ -143,7 +143,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
             m_gaugeManagementPort = RainbowPortFactory.createGaugeSideLifecyclePort ();
             m_announcePort = RainbowPortFactory.createModelsManagerClientUSPort (this);
             // register this Gauge with Rainbow, and report created
-            Rainbow.registerGauge (this);
+            Rainbow.instance ().registerGauge (this);
             m_configurationPort = RainbowPortFactory.createGaugeConfigurationPort (this);
             m_queryPort = RainbowPortFactory.createGaugeQueryPort (this);
             m_gaugeManagementPort.reportCreated (this);
@@ -399,7 +399,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
 
 
     @Override
-    protected RainbowComponentT getComponentType () {
+    public RainbowComponentT getComponentType () {
         return RainbowComponentT.GAUGE;
     }
 

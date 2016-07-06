@@ -52,7 +52,7 @@ public class RainbowManagementPortFactory {
      */
     protected static IRainbowConnectionPortFactory getFactory () {
         if (m_instance == null) {
-            String factory = Rainbow.getProperty (RainbowConstants.PROPKEY_PORT_FACTORY);
+            String factory = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_PORT_FACTORY);
             if (factory == null) {
                 LOGGER.warn (MessageFormat.format ("No property defined for ''{0}''. Using default ''{1}''.", RainbowConstants.PROPKEY_PORT_FACTORY,
                         DEFAULT_FACTORY));

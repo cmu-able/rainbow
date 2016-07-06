@@ -193,7 +193,7 @@ public class ESEBProvider {
     }
 
     public static short getESEBClientPort () {
-        String port = Rainbow.getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION_PORT);
+        String port = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION_PORT);
         if (port == null) {
             port = "1234";
         }
@@ -201,9 +201,9 @@ public class ESEBProvider {
     }
 
     public static short getESEBClientPort (String property) {
-        String port = Rainbow.getProperty (property);
+        String port = Rainbow.instance ().getProperty (property);
         if (port == null) {
-            port = Rainbow.getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION_PORT);
+            port = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION_PORT);
             if (port == null) {
                 port = "1234";
             }
@@ -212,15 +212,15 @@ public class ESEBProvider {
     }
 
     public static String getESEBClientHost (String property) {
-        String host = Rainbow.getProperty (property);
+        String host = Rainbow.instance ().getProperty (property);
         if (host == null) {
-            host = Rainbow.getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION);
+            host = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION);
         }
         return host;
     }
 
     public static String getESEBClientHost () {
-        return Rainbow.getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION, "localhost");
+        return Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION, "localhost");
     }
 
     /**

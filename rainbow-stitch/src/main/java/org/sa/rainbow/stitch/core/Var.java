@@ -54,6 +54,18 @@ public class Var {
         return "var(type \"" + m_type + "\", " + name + " == " + getValue() + ")";
     }
 
+    public Var clone () {
+        Var c = new Var ();
+        c.scope = scope;
+        c.name = name;
+        c.typeObj = typeObj;
+        c.valStmt = valStmt;
+        c.m_isBasicType = m_isBasicType;
+        c.m_type = m_type;
+        c.m_value = m_value;
+        return c;
+    }
+
     public Class computeClass () {
         Class clazz = null;
         if (m_type.toLowerCase().equals("int") || m_type.toLowerCase().equals("long")) {

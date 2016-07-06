@@ -32,6 +32,7 @@ import org.sa.rainbow.core.ports.IRainbowReportingPort;
 
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.Date;
 
 /**
  * Convenience abstract class that handles the usual thread start/stop/terminate
@@ -52,6 +53,9 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
     private boolean m_restarting = false;
 
     protected IRainbowReportingPort m_reportingPort;
+    protected static final int DELAY_TOLERANCE = 500;
+
+    protected IRainbowEnvironment m_rainbowEnvironment = Rainbow.instance ();
 
     /**
      * Default Constructor with name for the thread.
@@ -59,7 +63,8 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
      */
     public AbstractRainbowRunnable (String name) {
         m_name = name;
-        m_thread = new Thread(Rainbow.instance().getThreadGroup(), this, m_name);
+
+        m_thread = new Thread(m_rainbowEnvironment.getThreadGroup(), this, m_name);
         try {
             m_reportingPort = new DisconnectedRainbowDelegateConnectionPort ();
         }
@@ -201,7 +206,7 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
      * @return boolean  <code>true</code> if runnable should terminate, <code>false</code> otherwise
      */
     private boolean shouldTerminate () {
-        return Rainbow.shouldTerminate();
+        return m_threadState == State.TERMINATED;
     }
 
     /* (non-Javadoc)
@@ -211,17 +216,22 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
     public void run () {
         Thread currentThread = Thread.currentThread();
         int errorCount = 0;
+        long nextRelease = new Date ().getTime () + m_sleepTime;
         while (m_thread == currentThread) {
-            try {
-                Thread.sleep(m_sleepTime);
-            } catch (InterruptedException e) {
-                // intentional ignore
+            long sleepTime = nextRelease -  new Date ().getTime ();
+            if (sleepTime >= DELAY_TOLERANCE) {
+                try {
+                    Thread.sleep (Math.max (0,sleepTime));
+                } catch (InterruptedException e) {
+                    // intentional ignore
+                }
             }
+            nextRelease += m_sleepTime;
             if (m_threadState == State.STARTED) {  // only process if started
                 if (shouldTerminate()) {
                     // time to stop RainbowRunnable as well
                     doTerminate();
-                } else {
+                } else if (sleepTime >= DELAY_TOLERANCE){
                     try {
                         runAction();
                     } catch (Throwable t) {
@@ -281,7 +291,7 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
     protected abstract void log (String txt);
     protected abstract void runAction (); 
 
-    protected abstract RainbowComponentT getComponentType ();
+    public abstract RainbowComponentT getComponentType ();
 
     /**
      * Sets the next State to transition this Runnable to; with appropriate guard.

@@ -84,7 +84,7 @@ public class ESEBGaugeModelUSBusPort extends AbstractESEBDisposablePort implemen
         // if we're on the same host as the master, just return the model instance. 
         // Issue: don't want commands to be executable by the gauge - they can only be passed
         // to the bus. 
-        if (Rainbow.isMaster ()) {
+        if (Rainbow.instance ().isMaster ()) {
             RainbowMaster master = Rainbow.instance ().getRainbowMaster ();
             return master.modelsManager ().getModelInstance (modelRef);
         }

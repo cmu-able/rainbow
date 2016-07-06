@@ -1,7 +1,7 @@
 package org.sa.rainbow.core.ports.eseb.rpc;
 
 import edu.cmu.cs.able.eseb.participant.ParticipantException;
-import org.sa.rainbow.core.Rainbow.ExitState;
+import org.sa.rainbow.core.globals.ExitState;
 import org.sa.rainbow.core.ports.IMasterCommandPort;
 import org.sa.rainbow.core.ports.eseb.ESEBProvider;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;

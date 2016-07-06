@@ -171,7 +171,7 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
     private void updateExponentialAverage (String id, double val) {
         double avg = 0.0;
         // retrieve exponential alpha
-        double alpha = Rainbow.getProperty (RainbowConstants.PROPKEY_MODEL_ALPHA, .3);
+        double alpha = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MODEL_ALPHA, .3);
         if (m_propExpAvg.containsKey (id)) {
             avg = m_propExpAvg.get (id);
             avg = (1 - alpha) * avg + alpha * val;
@@ -343,6 +343,8 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
                 }
             }
             try {
+
+//                Object any = RuleTypeChecker.evaluateAsAny ()
                 Object any = RuleTypeChecker.evaluateAsFloat (getModelInstance (), null, expr, new Stack<AcmeError> (),
                         new NodeScopeLookup ());
                 if (any instanceof IAcmePropertyValue) return PropertyHelper.toJavaVal ((IAcmePropertyValue )any);

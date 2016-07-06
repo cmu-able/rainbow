@@ -45,9 +45,9 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
         // Runs on delegate
         super (master, delegateID, connectionProperties.getProperty (
                 ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_HOST,
-                Rainbow.getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION)), Short.valueOf (connectionProperties
+                Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION)), Short.valueOf (connectionProperties
                         .getProperty (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_PORT,
-                                Rainbow.getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION_PORT, "1234"))), ChannelT.HEALTH);
+                                Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION_PORT, "1234"))), ChannelT.HEALTH);
         getConnectionRole().addListener (new IESEBListener () {
 
             @Override

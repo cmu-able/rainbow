@@ -138,8 +138,8 @@ public class Expression extends ScopedEntity implements IEvaluableScope {
      * Clones an Expression object, but without deep-copying the AST object.
      */
     @Override
-    public Expression clone () {
-        Expression clonedExpr = new Expression(parent(), getName(), stitch());
+    public Expression clone (IScope parent) {
+        Expression clonedExpr = new Expression(parent, getName(), stitch());
         copyState(clonedExpr);
         return clonedExpr;
     }

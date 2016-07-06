@@ -26,13 +26,10 @@
  */
 package org.sa.rainbow.stitch.core;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.sa.rainbow.stitch.util.Tool;
 import org.sa.rainbow.stitch.visitor.Stitch;
+
+import java.util.*;
 
 /**
  * Implements a namespace scope to contain references.  Construction of a scope
@@ -71,7 +68,7 @@ public class ScopedEntity implements IScope {
         m_name = name;
         m_stitch = stitch;
         m_parent = parent;
-        m_children = new ArrayList<IScope>();
+        m_children = Collections.synchronizedList (new ArrayList<IScope>());
         m_vars = new HashMap<String,Var>();
         m_expressions = new ArrayList<Expression>();
         m_statements = new ArrayList<Statement>();
@@ -88,8 +85,8 @@ public class ScopedEntity implements IScope {
      * Clones a ScopedEntity object, but without deep-copying collections.
      */
     @Override
-    public ScopedEntity clone () {
-        ScopedEntity newObj = new ScopedEntity(m_parent, m_name, m_stitch);
+    public ScopedEntity clone (IScope parent) {
+        ScopedEntity newObj = new ScopedEntity(parent, m_name, m_stitch);
         copyState(newObj);
         return newObj;
     }
@@ -98,7 +95,7 @@ public class ScopedEntity implements IScope {
      * Copy the states of this object into target object.
      * @param target
      */
-    protected void copyState (ScopedEntity target) {
+    protected synchronized void copyState (ScopedEntity target) {
         target.m_name = m_name;
         target.m_stitch = m_stitch;
         target.m_parent = m_parent;
@@ -107,10 +104,23 @@ public class ScopedEntity implements IScope {
         target.m_hasErrorHandler = m_hasErrorHandler;
         target.m_hasError = m_hasError;
         target.curExprIdx = curExprIdx;
-        target.m_children = new ArrayList<IScope> (m_children);
-        target.m_vars = new HashMap<String,Var> (m_vars);
-        target.m_expressions = new ArrayList<Expression> (m_expressions);
-        target.m_statements = new ArrayList<Statement> (m_statements);
+        synchronized (m_children) {
+            for (IScope s : m_children
+                    ) {
+                target.m_children.add (s.clone (target));
+            }
+        }
+        for (Map.Entry<String,Var> e : m_vars.entrySet ()) {
+            target.m_vars.put (e.getKey (), e.getValue ().clone ());
+        }
+        for (Expression e : m_expressions) {
+            target.m_expressions.add (e);
+        }
+        for (Statement s : m_statements) {
+            Statement statement = new Statement (s.m_parent, s.m_name, s.m_stitch);
+            statement.setAST (s.ast ());
+            target.m_statements.add (statement);
+        }
     }
 
     /* (non-Javadoc)
@@ -271,7 +281,7 @@ public class ScopedEntity implements IScope {
      * @see org.sa.rainbow.stitch.core.IScope#addChildScope(org.sa.rainbow.stitch.core.IScope)
      */
     @Override
-    public void addChildScope (IScope child) {
+    public synchronized void addChildScope (IScope child) {
         m_children.add(child);
 
         if (child.parent() != null && child.parent() != this) {

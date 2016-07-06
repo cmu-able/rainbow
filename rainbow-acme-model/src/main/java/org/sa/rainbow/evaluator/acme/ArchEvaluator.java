@@ -114,7 +114,7 @@ public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAn
     public ArchEvaluator () {
         super (NAME);
 
-        String per = Rainbow.getProperty (RainbowConstants.PROPKEY_MODEL_EVAL_PERIOD);
+        String per = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MODEL_EVAL_PERIOD);
         if (per != null) {
             setSleepTime (Long.parseLong (per));
         } else { // default to using the long sleep value
@@ -142,7 +142,7 @@ public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAn
     }
 
     private void installEvaluations () {
-        String evaluators = Rainbow.getProperty (RainbowConstants.PROPKEY_ARCH_EVALUATOR_EXTENSIONS);
+        String evaluators = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_ARCH_EVALUATOR_EXTENSIONS);
         if (evaluators == null || evaluators.trim ().equals ("")) {
             m_evaluations = Collections.emptySet ();
         } else {
@@ -284,7 +284,7 @@ public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAn
 
 
     @Override
-    protected RainbowComponentT getComponentType () {
+    public RainbowComponentT getComponentType () {
         return RainbowComponentT.ANALYSIS;
     }
 

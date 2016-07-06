@@ -118,7 +118,7 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
 
     private Properties getConnectionProperties () {
         Properties props = new Properties ();
-        props.setProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION, Rainbow.getProperty
+        props.setProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION, Rainbow.instance ().getProperty
                 (PROPKEY_DEPLOYMENT_LOCATION));
         return props;
     }
@@ -226,7 +226,7 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
         log ("Terminating.");
         m_beacon = null;
         m_masterConnectionPort.disconnectDelegate (getId ());
-        Rainbow.signalTerminate ();
+        Rainbow.instance ().signalTerminate ();
         super.doTerminate ();
     }
 
@@ -252,6 +252,7 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
     }
 
     public static void main (String[] args) throws RainbowConnectionException {
+
         RainbowDelegate del = new RainbowDelegate ();
         del.initialize ();
         del.start ();
@@ -300,7 +301,7 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
 
 
     @Override
-    protected RainbowComponentT getComponentType () {
+    public RainbowComponentT getComponentType () {
         return RainbowComponentT.DELEGATE;
     }
 

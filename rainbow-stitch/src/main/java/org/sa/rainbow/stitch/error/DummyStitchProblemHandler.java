@@ -46,6 +46,15 @@ public class DummyStitchProblemHandler implements StitchProblemHandler {
         m_problems = new LinkedHashSet<StitchProblem>();
     }
 
+    public DummyStitchProblemHandler clone () {
+        DummyStitchProblemHandler c = new DummyStitchProblemHandler ();
+        for (StitchProblem p : m_problems
+             ) {
+            c.m_problems.add (new StitchProblem (p.getSourceException (), p.getSeverity ()));
+        }
+        return c;
+    }
+
     /* (non-Javadoc)
      * @see org.sa.rainbow.stitch.error.StitchProblemHandler#setProblem(org.sa.rainbow.stitch.error.StitchProblem)
      */

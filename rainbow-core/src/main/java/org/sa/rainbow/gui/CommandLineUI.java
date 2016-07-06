@@ -1,7 +1,7 @@
 package org.sa.rainbow.gui;
 
 import org.sa.rainbow.core.Identifiable;
-import org.sa.rainbow.core.Rainbow.ExitState;
+import org.sa.rainbow.core.globals.ExitState;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.OperationRepresentation;

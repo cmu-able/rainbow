@@ -76,6 +76,7 @@ public class Stitch {
     private Stack<Expression> m_exprStack = null;
 
     private boolean m_keepRunning = true;  // flag used to cancel execution
+    private Stack<Boolean> m_executing;
 
 
     /**
@@ -93,6 +94,18 @@ public class Stitch {
         m_behaviors = new ILiloBehavior[NUM_PASS];
         m_scopeStack = new Stack<IScope>();
         m_exprStack = new Stack<Expression>();
+        m_executing = new Stack<Boolean> ();
+    }
+
+    @Override
+    public Stitch clone ()  {
+        StitchProblemHandler stitchProblemHandlerClone = stitchProblemHandler.clone ();
+
+        Stitch s = new Stitch (path, stitchProblemHandlerClone);
+//        s.script = this.script;
+//        s.scope = this.scope == null? (this.scope.clone (s.scope.parent ()));
+//        s.expr = this.expr;
+        return s;
     }
 
     /**
@@ -108,6 +121,13 @@ public class Stitch {
             Ohana.instance().storeStitch(scriptPath, stitch);
         }
         return stitch;
+    }
+    
+    public static Stitch newInstance (String scriptPath, StitchProblemHandler stitchProblemHandler, boolean force) {
+        if (!force) return newInstance (scriptPath, stitchProblemHandler);
+        Stitch stitch = new Stitch (scriptPath, stitchProblemHandler);
+        Ohana.instance ().storeStitch (scriptPath, stitch);
+        return stitch; 
     }
 
     /**
@@ -262,6 +282,15 @@ public class Stitch {
         if (o instanceof Tactic) return (Tactic )o;
         else
             return null;
+    }
+
+    public synchronized void markExecuting (boolean executing) {
+        if (executing) m_executing.push (executing);
+        else if (!m_executing.isEmpty ()) m_executing.pop ();
+    }
+
+    public synchronized boolean isExecuting () {
+        return !m_executing.empty ();
     }
 
 }

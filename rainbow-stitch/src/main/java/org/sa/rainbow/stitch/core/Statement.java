@@ -281,7 +281,7 @@ public class Statement extends ScopedEntity implements IEvaluableScope {
         }
         // track time elapsed and store exponential avg
         long estTime = System.currentTimeMillis() - startTime;
-        double alpha = Double.parseDouble (Rainbow.getProperty (RainbowConstants.PROPKEY_MODEL_ALPHA));
+        double alpha = Double.parseDouble (Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MODEL_ALPHA));
         m_avgExecutionTime = (long) ((1-alpha) * m_avgExecutionTime + alpha * estTime);
         return null;  // statement doesn't return result
     }

@@ -22,7 +22,7 @@ ftware and associated documentation files (the "Software"), to deal
  */
 package org.sa.rainbow.core.ports;
 
-import org.sa.rainbow.core.Rainbow.ExitState;
+import org.sa.rainbow.core.globals.ExitState;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 
 import java.util.List;

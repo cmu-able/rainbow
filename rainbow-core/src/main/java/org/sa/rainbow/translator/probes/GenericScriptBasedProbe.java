@@ -98,7 +98,7 @@ public class GenericScriptBasedProbe extends AbstractProbe implements IBashBased
         super.activate();
 
         String[] cmds = new String[3];
-        switch (Rainbow.environment()) {
+        switch (Rainbow.instance ().environment()) {
         case CYGWIN:
             cmds[0] = CYGWIN_BASH;
             break;

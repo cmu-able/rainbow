@@ -10,7 +10,7 @@ import edu.cmu.cs.able.typelib.scope.AmbiguousNameException;
 import edu.cmu.cs.able.typelib.type.DataType;
 import edu.cmu.cs.able.typelib.type.DataValue;
 import incubator.pval.Ensure;
-import org.sa.rainbow.core.Rainbow.ExitState;
+import org.sa.rainbow.core.globals.ExitState;
 
 import java.text.MessageFormat;
 

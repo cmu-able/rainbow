@@ -1199,6 +1199,8 @@ ILiloBehavior {
                         stitch = Stitch.newInstance(f.getAbsolutePath(),
                                 stitchProblemHandler());
                         Ohana.instance().parseFile(stitch);
+                        // BRS: Added so that tactics aren't imported twice
+                        Ohana.instance ().storeStitch (f.getAbsolutePath (),stitch);
                     }
                     m_stitch.script.renames.putAll(stitch.script.renames);
                     m_stitch.script.tactics.addAll(stitch.script.tactics);

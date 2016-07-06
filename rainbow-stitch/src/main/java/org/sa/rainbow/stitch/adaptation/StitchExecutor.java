@@ -141,7 +141,7 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
                 e.printStackTrace ();
             }
 
-            if (!Rainbow.shouldTerminate ()) {
+            if (!Rainbow.instance ().shouldTerminate ()) {
                 final IAdaptationManager<Strategy> adaptationManager = Rainbow.instance ()
                         .getRainbowMaster ().adaptationManagerForModel (this.m_modelRef.toString ());
                 if (adaptationManager != null) {
@@ -409,7 +409,7 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
 //    }
 
     @Override
-    protected RainbowComponentT getComponentType () {
+    public RainbowComponentT getComponentType () {
         return RainbowComponentT.EXECUTOR;
     }
 

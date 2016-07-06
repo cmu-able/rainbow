@@ -24,7 +24,7 @@
 package org.sa.rainbow.core;
 
 import org.apache.log4j.Logger;
-import org.sa.rainbow.core.Rainbow.ExitState;
+import org.sa.rainbow.core.globals.ExitState;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.adaptation.IEvaluable;
@@ -58,6 +58,9 @@ import java.util.*;
 import java.util.Map.Entry;
 
 public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCommandPort, IRainbowMaster {
+
+    private IRainbowEnvironment m_rainbowEnvironment = Rainbow.instance ();
+
     static final Logger LOGGER = Logger.getLogger (Rainbow.class.getCanonicalName ());
 
     final Map<String, IDelegateManagementPort> m_delegates = new HashMap<> ();
@@ -95,10 +98,13 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 
     private Boolean m_initialized = Boolean.FALSE;
 
+    public void setRainbowEnvironment (IRainbowEnvironment env) {
+        m_rainbowEnvironment = env;
+    }
+
     public RainbowMaster () {
         super ("Rainbow Master");
-        Rainbow.instance ().setIsMaster (true);
-        Rainbow.instance ().setMaster (this);
+        m_rainbowEnvironment.setMaster (this);
     }
 
     public void initialize () throws RainbowException {
@@ -146,11 +152,12 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
         m_gaugeManager.start ();
 
         // Create effector managers from the Rainbow properties file
-        int effectorManagerSize = Rainbow.getProperty (RainbowConstants.PROPKEY_EFFECTOR_MANAGER_COMPONENT_SIZE, 0);
+        int effectorManagerSize = m_rainbowEnvironment.getProperty (RainbowConstants
+                                                                            .PROPKEY_EFFECTOR_MANAGER_COMPONENT_SIZE, 0);
         m_effectorManagers = new LinkedList<> ();
         for (int i = 0; i < effectorManagerSize; i++) {
             String emProp = RainbowConstants.PROPKEY_EFFECTOR_MANAGER_COMPONENT + "_" + i;
-            String em = Rainbow.getProperty (emProp);
+            String em = m_rainbowEnvironment.getProperty (emProp);
             if (em != null) {
                 em = em.trim ();
                 try {
@@ -170,11 +177,11 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
         }
 
         // Create analyses from the Rainbow properties file
-        int analysisSize = Rainbow.getProperty (RainbowConstants.PROPKEY_ANALYSIS_COMPONENT_SIZE, 0);
+        int analysisSize = m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_ANALYSIS_COMPONENT_SIZE, 0);
         m_analyses = new LinkedList<> ();
         for (int i = 0; i < analysisSize; i++) {
             String analysisProp = RainbowConstants.PROPKEY_ANALYSIS_COMPONENTS + "_" + i;
-            String an = Rainbow.getProperty (analysisProp);
+            String an = m_rainbowEnvironment.getProperty (analysisProp);
             if (an != null) {
                 an = an.trim ();
                 try {
@@ -184,7 +191,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
                     m_analyses.add (analysis);
                     analysis.initialize (m_reportingPort);
                     analysis.start ();
-                    String model = Rainbow.getProperty (RainbowConstants.PROPKEY_ANALYSIS_COMPONENTS + ".model_" + i);
+                    String model = m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_ANALYSIS_COMPONENTS + ".model_" + i);
                     if (model != null) {
                         analysis.setProperty ("model", model);
                     }
@@ -197,12 +204,12 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
         }
 
         // Create adaptation managers from the Rainbow properties file
-        int adaptationManagerSize = Rainbow.getProperty (RainbowConstants.PROPKEY_ADAPTATION_MANAGER_SIZE, 0);
+        int adaptationManagerSize = m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_ADAPTATION_MANAGER_SIZE, 0);
         m_adaptationManagers = new HashMap<> ();
         for (int i = 0; i < adaptationManagerSize; i++) {
 
             String adaptationManagerProp = RainbowConstants.PROPKEY_ADAPTATION_MANAGER_CLASS + "_" + i;
-            String adaptationManagerClass = Rainbow.getProperty (adaptationManagerProp);
+            String adaptationManagerClass = m_rainbowEnvironment.getProperty (adaptationManagerProp);
             if (adaptationManagerClass != null) {
                 try {
                     @SuppressWarnings ("unchecked")
@@ -210,7 +217,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
                     .forName (adaptationManagerClass.trim ());
                     IAdaptationManager<?> adaptationManager = cls.newInstance ();
                     String amModel = RainbowConstants.PROPKEY_ADAPTATION_MANAGER_MODEL + "_" + i;
-                    String modelReference = Rainbow.getProperty (amModel);
+                    String modelReference = m_rainbowEnvironment.getProperty (amModel);
                     if (modelReference != null) {
                         ModelReference model = Util.decomposeModelReference (modelReference);
                         m_adaptationManagers.put (modelReference, adaptationManager);
@@ -238,11 +245,11 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
         }
 
         // Create adaptation executors from the Rainbow properties file
-        int adaptationExecutorSize = Rainbow.getProperty (RainbowConstants.PROPKEY_ADAPTATION_EXECUTOR_SIZE, 0);
+        int adaptationExecutorSize = m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_ADAPTATION_EXECUTOR_SIZE, 0);
 
         for (int i = 0; i < adaptationExecutorSize; i++) {
             String adaptationExecutorProp = RainbowConstants.PROPKEY_ADAPTATION_EXECUTOR_CLASS + "_" + i;
-            String adaptationExecutorClass = Rainbow.getProperty (adaptationExecutorProp);
+            String adaptationExecutorClass = m_rainbowEnvironment.getProperty (adaptationExecutorProp);
             if (adaptationExecutorClass != null) {
                 try {
                     @SuppressWarnings ("unchecked")
@@ -251,7 +258,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
                     IAdaptationExecutor<?> adaptationExecutor = cls.newInstance ();
                     adaptationExecutor.initialize (m_reportingPort);
                     String amModel = RainbowConstants.PROPKEY_ADAPTATION_EXECUTOR_MODEL + "_" + i;
-                    String modelReference = Rainbow.getProperty (amModel);
+                    String modelReference = m_rainbowEnvironment.getProperty (amModel);
                     if (modelReference != null) {
                         ModelReference model = Util.decomposeModelReference (modelReference);
                         adaptationExecutor.setModelToManage (model);
@@ -311,7 +318,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
             // Add a second to the heartbeat to allow for communication time
             // TODO: Must be a better way to do this...
             Beacon beacon = new Beacon (
-                    Long.parseLong (Rainbow.getProperty (RainbowConstants.PROPKEY_DELEGATE_BEACONPERIOD, "1000"))
+                    Long.parseLong (m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_DELEGATE_BEACONPERIOD, "1000"))
                     + 1000);
             synchronized (m_heartbeats) {
                 m_heartbeats.put (delegatePort.getDelegateId (), beacon);
@@ -442,7 +449,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
      */
 
     private Properties filterPropertiesForDelegate (String delegateID) {
-        return Rainbow.allProperties ();
+        return m_rainbowEnvironment.allProperties ();
     }
 
 
@@ -755,7 +762,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 
 
     @Override
-    protected RainbowComponentT getComponentType () {
+    public RainbowComponentT getComponentType () {
         return RainbowComponentT.MASTER;
     }
 
@@ -799,12 +806,12 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 
     @Override
     public void sleep () {
-        Rainbow.signalTerminate ();
+        m_rainbowEnvironment.signalTerminate ();
     }
 
     @Override
     public void terminate (ExitState exitState) {
-        Rainbow.signalTerminate (exitState);
+        m_rainbowEnvironment.signalTerminate (exitState);
     }
 
     @Override
@@ -861,7 +868,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
     @Override
     public List<String> getExpectedDelegateLocations () {
         List<String> ret = new LinkedList<> ();
-        Properties allProperties = Rainbow.allProperties ();
+        Properties allProperties = m_rainbowEnvironment.allProperties ();
         for (Map.Entry<?, ?> o : allProperties.entrySet ()) {
             String k = (String )o.getKey ();
             if (k.startsWith ("customize.system.")) {

@@ -2,7 +2,7 @@ package org.sa.rainbow.core.ports.eseb.rpc;
 
 import edu.cmu.cs.able.eseb.rpc.ParametersTypeMapping;
 import edu.cmu.cs.able.eseb.rpc.ReturnTypeMapping;
-import org.sa.rainbow.core.Rainbow.ExitState;
+import org.sa.rainbow.core.globals.ExitState;
 import org.sa.rainbow.core.ports.IMasterCommandPort;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 

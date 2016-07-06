@@ -77,7 +77,7 @@ public class GaugeManager extends AbstractRainbowRunnable implements IGaugeLifec
         super.initialize (port);
         initializeConnections ();
         // Read all the gauge information, including the deployment stuff  
-        m_waitForGauges = Rainbow.getProperty (RainbowConstants.PROPKEY_WAIT_FOR_GAUGES, false);
+        m_waitForGauges = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_WAIT_FOR_GAUGES, false);
         m_state = GMState.INITIALIZED;
     }
 
@@ -243,7 +243,7 @@ public class GaugeManager extends AbstractRainbowRunnable implements IGaugeLifec
 
 
     @Override
-    protected RainbowComponentT getComponentType () {
+    public RainbowComponentT getComponentType () {
         return RainbowComponentT.GAUGE_MANAGER;
     }
 

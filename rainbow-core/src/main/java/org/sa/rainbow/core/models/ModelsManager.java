@@ -101,14 +101,14 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
     }
 
     public void initializeModels () {
-        String numberOfModelsStr = Rainbow.getProperty (RainbowConstants.PROPKEY_MODEL_NUMBER, "0");
+        String numberOfModelsStr = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MODEL_NUMBER, "0");
         int numberOfModels = Integer.parseInt (numberOfModelsStr);
         for (int modelNum = 0; modelNum < numberOfModels; modelNum++) {
-            String factoryClassName = Rainbow.getProperty (
+            String factoryClassName = Rainbow.instance ().getProperty (
                     RainbowConstants.PROPKEY_MODEL_LOAD_CLASS_PREFIX + modelNum);
-            String modelName = Rainbow.getProperty (RainbowConstants.PROPKEY_MODEL_NAME_PREFIX + modelNum);
-            String path = Rainbow.getProperty (RainbowConstants.PROPKEY_MODEL_PATH_PREFIX + modelNum);
-            String saveOnClose = Rainbow.getProperty (RainbowConstants.PROPKEY_MODEL_SAVE_PREFIX + modelNum);
+            String modelName = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MODEL_NAME_PREFIX + modelNum);
+            String path = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MODEL_PATH_PREFIX + modelNum);
+            String saveOnClose = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MODEL_SAVE_PREFIX + modelNum);
             // It is possible for a model not to be sourced from a file, in which case
             // the load command may just create and register the model in the manager
             File modelPath = null;
@@ -142,7 +142,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                 boolean toSave = saveOnClose == null ? false : Boolean.valueOf (saveOnClose);
                 ModelReference ref = new ModelReference (instance.getModelName (), instance.getModelType ());
                 if (toSave) {
-                    String saveLocation = Rainbow.getProperty (RainbowConstants.RAINBOW_MODEL_SAVE_LOCATION_PREFIX
+                    String saveLocation = Rainbow.instance ().getProperty (RainbowConstants.RAINBOW_MODEL_SAVE_LOCATION_PREFIX
                             + modelNum);
                     if (saveLocation == null) {
                         saveLocation = path;
@@ -600,7 +600,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
 
 
     @Override
-    protected RainbowComponentT getComponentType () {
+    public RainbowComponentT getComponentType () {
         return RainbowComponentT.MODEL;
     }
 

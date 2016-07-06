@@ -101,23 +101,24 @@ public class StrategyNode {
      * Returns a shallow clone of this Strategy Node object.
      * @return StrategyNode the cloned StrategyNode object.
      */
-    @Override
-    public StrategyNode clone () {
+
+    public StrategyNode clone (IScope parent) {
         StrategyNode newNode = new StrategyNode(m_stitch, m_label);
         newNode.m_parent = m_parent;
         newNode.m_hasProb = m_hasProb;
         newNode.m_probExpr = m_probExpr;
         newNode.m_prob = m_prob;
         newNode.m_condFlag = m_condFlag;
-        newNode.m_condExpr = m_condExpr;
+        newNode.m_condExpr = m_condExpr!=null?m_condExpr.clone (parent):null;
         newNode.m_hasDuration = m_hasDuration;
-        newNode.m_durExpr = m_durExpr;
+        newNode.m_durExpr = m_durExpr!=null?m_durExpr.clone (parent):null;
         newNode.m_actionFlag = m_actionFlag;
         // no need to clone tactic as it is not concurrently evaluated
         newNode.m_tacticID = m_tacticID;
         for (Expression e : m_tacticArgExprs) {
             // no need to clone argument expression as it is not concurrently evaluated
-            newNode.m_tacticArgExprs.add(e);
+            // ^^^ is no longer true, so we are cloning
+            newNode.m_tacticArgExprs.add(e.clone (parent));
         }
         newNode.m_numDoTrials = m_numDoTrials;
         newNode.m_doTarget = m_doTarget;
@@ -200,6 +201,9 @@ public class StrategyNode {
         return rv;
     }
 
+    public Stitch stitch () {
+       return m_stitch;
+    }
     /**
      * @return the m_label
      */
@@ -223,7 +227,7 @@ public class StrategyNode {
 
 
     /**
-     * @param key the m_probKey to set
+     * @param expr the m_probKey to set
      */
     public void setProbabilityExpr (Expression expr) {
         m_probExpr = expr;
@@ -317,7 +321,7 @@ public class StrategyNode {
     }
 
     /**
-     * @param dur the m_duration to set
+     * @param durExpr the m_duration to set
      */
     public void setDurationExpr (Expression durExpr) {
         m_durExpr = durExpr;
@@ -347,7 +351,7 @@ public class StrategyNode {
     }
 
     /**
-     * @param m_tacticID the new tactic reference identifier to set to
+     * @param tactic the new tactic reference identifier to set to
      */
     public void setTactic (Tactic tactic) {
         m_tacticID = tactic.getName();
@@ -428,7 +432,7 @@ public class StrategyNode {
     }
 
     /**
-     * @param m_parent the parent StrategyNode to set
+     * @param parent the parent StrategyNode to set
      */
     public void setParent(StrategyNode parent) {
         m_parent = parent;

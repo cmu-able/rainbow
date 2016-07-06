@@ -82,8 +82,8 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
      * deep-copying elements held in the collections.
      */
     @Override
-    public Tactic clone () {
-        Tactic newT = new Tactic(m_parent, m_name, m_stitch);
+    public synchronized Tactic clone (IScope parent) {
+        Tactic newT = new Tactic(parent, m_name, m_stitch/*.clone ()*/);
         copyState(newT);
         return newT;
     }
@@ -94,10 +94,25 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
     protected void copyState(Tactic target) {
         super.copyState(target);
         target.state = state;
-        target.args = new ArrayList<Var>(args);
-        target.conditions = new ArrayList<Expression>(conditions);
-        target.actions = new ArrayList<Statement>(actions);
-        target.effects = new ArrayList<Expression>(effects);
+        target.args = new ArrayList<Var>(args.size ());
+        for (Var v :
+                args) {
+            target.args.add (v.clone ());
+        }
+        target.conditions = new ArrayList<Expression>(conditions.size ());
+        for (Expression c : conditions) {
+            target.conditions.add (c.clone (target.parent ()));
+        }
+        target.actions = new ArrayList<Statement>(actions.size ());
+        for (Statement s : actions) {
+            final Statement statement = new Statement (m_parent, m_name, m_stitch);
+            statement.setAST (s.ast ());
+            target.actions.add (statement);
+        }
+        target.effects = new ArrayList<Expression>(effects.size ());
+        for (Expression e : effects) {
+            target.effects.add (e.clone (target.parent ()));
+        }
         target.m_attributes = new HashMap<String,Object>(m_attributes);
     }
 
@@ -420,4 +435,11 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
         m_executionHistoryModel = executionHistoryModel;
     }
 
+    public void markExecuting (boolean executing) {
+        stitch ().markExecuting (executing);
+    }
+
+    public boolean isExecuting () {
+        return stitch ().isExecuting ();
+    }
 }

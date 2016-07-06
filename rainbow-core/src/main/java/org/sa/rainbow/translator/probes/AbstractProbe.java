@@ -278,7 +278,7 @@ public abstract class AbstractProbe implements IProbe {
      */
     @Override
     public boolean isActive () {
-        return m_state == State.ACTIVE && !Rainbow.shouldTerminate ();
+        return m_state == State.ACTIVE && !Rainbow.instance ().shouldTerminate ();
     }
 
     /* (non-Javadoc)

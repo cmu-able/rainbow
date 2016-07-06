@@ -56,6 +56,9 @@ public class StitchProblem {
         this.severity = severity;
     }
 
+    public RecognitionException getSourceException () {
+        return sourceException;
+    }
     /* (non-Javadoc)
      * @see org.sa.rainbow.stitch.editor.parserhelper.IStitchProblem#getSeverity()
      */

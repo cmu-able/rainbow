@@ -136,12 +136,12 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 
         m_repertoire = new ArrayList<Stitch> ();
         m_pendingStrategies = new ArrayList<AdaptationTree<Strategy>> ();
-        m_historyTrackUtilName = Rainbow.getProperty (RainbowConstants.PROPKEY_TRACK_STRATEGY);
+        m_historyTrackUtilName = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_TRACK_STRATEGY);
         if (m_historyTrackUtilName != null) {
             m_historyCnt = new HashMap<String, int[]> ();
             m_failTimer = new HashMap<String, Beacon> ();
         }
-        String thresholdStr = Rainbow.getProperty (RainbowConstants.PROPKEY_UTILITY_MINSCORE_THRESHOLD);
+        String thresholdStr = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_UTILITY_MINSCORE_THRESHOLD);
         if (thresholdStr == null) {
             m_minUtilityThreshold = MIN_UTILITY_THRESHOLD;
         } else {
@@ -288,23 +288,8 @@ public final class AdaptationManager extends AbstractRainbowRunnable
             m_pendingStrategies.remove (strategy);
             final List<Strategy> strategiesExecuted = new LinkedList<> ();
             final CountDownLatch countdownLatch = new CountDownLatch (1);
-            DefaultAdaptationExecutorVisitor<Strategy> resultCollector = new
-                    DefaultAdaptationExecutorVisitor<Strategy> (strategy, this.activeThread ()
-                            .getThreadGroup (), "", countdownLatch, m_reportingPort) {
-                        @Override
-                        protected boolean evaluate (Strategy adaptation) {
-                            if (adaptation.outcome () != Strategy.Outcome.UNKNOWN) {
-                                strategiesExecuted.add (adaptation);
-                            }
-                            return true;
-                        }
-
-                        @Override
-                        protected DefaultAdaptationExecutorVisitor<Strategy> spawnNewExecutorForTree
-                                (AdaptationTree<Strategy> adt, ThreadGroup g, CountDownLatch doneSignal) {
-                            return null;
-                        }
-                    };
+            DefaultAdaptationExecutorVisitor<Strategy> resultCollector = new StrategyAdaptationResultsVisitor
+                    (strategy, countdownLatch, strategiesExecuted);
             resultCollector.start ();
             try {
                 countdownLatch.await (2, TimeUnit.SECONDS);
@@ -334,7 +319,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable
      */
     public double computeSystemInstantUtility () {
         Map<String, Double> weights = m_utilityModel.weights
-                .get (Rainbow.getProperty (RainbowConstants.PROPKEY_SCENARIO));
+                .get (Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_SCENARIO));
         double[] conds = new double[m_utilityModel.getUtilityFunctions ().size ()];
         int i = 0;
         double score = 0.0;
@@ -518,7 +503,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable
                     // compute multiple now
                     factor = (int) (leapArgVal / stratArgVal);
                 }
-                Strategy multi = strategy.clone ();
+                Strategy multi = strategy.clone (strategy.parent ());
                 multi.setName (MULTI_STRATEGY_PREFIX + strategy.getName ());
                 multi.multiples = factor;
                 appSubsetByName.put (multi.getName (), multi);
@@ -562,7 +547,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable
      * @return a map of score-strategy pairs, sorted in increasing order by score.
      */
     private SortedMap<Double, Strategy> scoreStrategies (Map<String, Strategy> subset) {
-        String scenario = Rainbow.getProperty (RainbowConstants.PROPKEY_SCENARIO);
+        String scenario = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_SCENARIO);
 //        Set<String> scenarios = Rainbow.instance ().getRainbowMaster ().preferenceDesc ().weights.keySet ();
 //        for (String s : scenarios) {
 //            if (scenarios.equals (s)) {
@@ -699,7 +684,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable
      */
     private void initAdaptationRepertoire () {
         File stitchPath = Util.getRelativeToPath (Rainbow.instance ().getTargetPath (),
-                                                  Rainbow.getProperty (RainbowConstants.PROPKEY_SCRIPT_PATH));
+                                                  Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_SCRIPT_PATH));
         if (stitchPath == null) {
             m_reportingPort.error (RainbowComponentT.ADAPTATION_MANAGER, "The stitch path is not set!");
         } else if (stitchPath.exists () && stitchPath.isDirectory ()) {
@@ -869,7 +854,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable
     }
 
     @Override
-    protected RainbowComponentT getComponentType () {
+    public RainbowComponentT getComponentType () {
         return RainbowComponentT.ADAPTATION_MANAGER;
     }
 
@@ -883,4 +868,30 @@ public final class AdaptationManager extends AbstractRainbowRunnable
         m_adaptEnabled = enabled;
     }
 
+    private class StrategyAdaptationResultsVisitor extends DefaultAdaptationExecutorVisitor<Strategy> {
+        private final List<Strategy> m_strategiesExecuted;
+
+        public StrategyAdaptationResultsVisitor (AdaptationTree<Strategy> strategy, CountDownLatch countdownLatch,
+                                                 List<Strategy> strategiesExecuted) {
+            super (strategy, AdaptationManager.this.activeThread ()
+                    .getThreadGroup (), "", countdownLatch, AdaptationManager.this.m_reportingPort);
+            m_strategiesExecuted = strategiesExecuted;
+        }
+
+        @Override
+        protected boolean evaluate (Strategy adaptation) {
+            if (adaptation.outcome () != Strategy.Outcome.UNKNOWN) {
+                synchronized (m_strategiesExecuted) {
+                    m_strategiesExecuted.add (adaptation);
+                }
+            }
+            return true;
+        }
+
+        @Override
+        protected DefaultAdaptationExecutorVisitor<Strategy> spawnNewExecutorForTree
+                (AdaptationTree<Strategy> adt, ThreadGroup g, CountDownLatch doneSignal) {
+            return new StrategyAdaptationResultsVisitor (adt,doneSignal,m_strategiesExecuted);
+        }
+    }
 }

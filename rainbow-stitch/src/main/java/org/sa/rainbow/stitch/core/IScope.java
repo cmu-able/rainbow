@@ -205,4 +205,6 @@ public interface IScope {
      */
     String leadPadding (String padder);
 
+    IScope clone (IScope parent);
+
 }
