@@ -106,6 +106,8 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
         for (int modelNum = 0; modelNum < numberOfModels; modelNum++) {
             String factoryClassName = Rainbow.instance ().getProperty (
                     RainbowConstants.PROPKEY_MODEL_LOAD_CLASS_PREFIX + modelNum);
+            if (factoryClassName == null || "".equals (factoryClassName))
+                continue;
             String modelName = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MODEL_NAME_PREFIX + modelNum);
             String path = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MODEL_PATH_PREFIX + modelNum);
             String saveOnClose = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MODEL_SAVE_PREFIX + modelNum);

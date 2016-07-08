@@ -44,14 +44,15 @@ import java.util.Map.Entry;
  * Abstract definition of a gauge that does not use probes to gather system information. This allows for subclasses to
  * implement gauges that get information from other gauges, gauges that get information from probes, or gauges that get
  * information from elsewhere.
- * 
+ *
  * @author Bradley Schmerl (schmerl@cs.cmu.edu)
- * 
  */
 public abstract class AbstractGauge extends AbstractRainbowRunnable implements IGauge {
     private final String m_id;
 
-    /** The ports through which the gauge interacts with the outside world **/
+    /**
+     * The ports through which the gauge interacts with the outside world
+     **/
 
     private IModelUSBusPort m_announcePort;
 
@@ -82,20 +83,13 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
     /**
      * Main Constructor for the Gauge.
      *
-     * @param threadName
-     *            the name of the Gauge thread
-     * @param id
-     *            the unique ID of the Gauge
-     * @param beaconPeriod
-     *            the liveness beacon period of the Gauge
-     * @param gaugeDesc
-     *            the type-name description of the Gauge
-     * @param modelDesc
-     *            the type-name description of the Model the Gauge updates
-     * @param setupParams
-     *            the list of setup parameters with their values
-     * @param mappings
-     *            the list of Gauge Value to Model Property mappings
+     * @param threadName   the name of the Gauge thread
+     * @param id           the unique ID of the Gauge
+     * @param beaconPeriod the liveness beacon period of the Gauge
+     * @param gaugeDesc    the type-name description of the Gauge
+     * @param modelDesc    the type-name description of the Model the Gauge updates
+     * @param setupParams  the list of setup parameters with their values
+     * @param mappings     the list of Gauge Value to Model Property mappings
      * @throws RainbowException
      */
     @SuppressWarnings("null")
@@ -148,8 +142,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
             m_queryPort = RainbowPortFactory.createGaugeQueryPort (this);
             m_gaugeManagementPort.reportCreated (this);
             m_gaugeBeacon.mark ();
-        }
-        catch (RainbowConnectionException e) {
+        } catch (RainbowConnectionException e) {
             m_reportingPort.error (getComponentType (), "Could not interact with the outside world", e);
             throw new RainbowException ("The gauge could not be started because the ports could not be set up.", e);
         }
@@ -241,14 +234,13 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
     /**
      * Handles a configuration parameter. Subclasses may override this method to handle additional configuration
      * parameters for different kinds of gauges.
-     * 
-     * @param triple
-     *            a triple of name, type, value.
+     *
+     * @param triple a triple of name, type, value.
      */
     protected void handleConfigParam (TypedAttributeWithValue triple) {
         if (triple.getName ().equals (CONFIG_SAMPLING_FREQUENCY)) {
             // set the runner timer directly
-            setSleepTime ((Long )triple.getValue ());
+            setSleepTime ((Long) triple.getValue ());
         }
     }
 
@@ -267,8 +259,8 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
     @Override
     public IGaugeState queryGaugeState () {
         return new GaugeState (m_setupParams.values (), m_configParams.values (),
-                new HashSet<> (
-                        m_lastCommands.values ()));
+                               new HashSet<> (
+                                       m_lastCommands.values ()));
     }
 
     public void issueCommand (IRainbowOperation cmd, Map<String, String> parameters) {
@@ -279,19 +271,21 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
         m_lastCommands.putAll (actualsMap);
         m_announcePort.updateModel (actualCmd);
         m_reportingPort.info (RainbowComponentT.GAUGE, MessageFormat.format ("G[{0}]: {1}.{2}({3})", id (),
-                actualCmd.getTarget (), actualCmd.getName (), Arrays.toString (actualCmd.getParameters ())));
+                                                                             actualCmd.getTarget (), actualCmd
+                                                                                     .getName (), Arrays.toString
+                        (actualCmd.getParameters ())));
     }
 
     private OperationRepresentation formOperation (IRainbowOperation cmd,
                                                    Map<String, String> parameters,
-            OperationRepresentation actualCmd,
+                                                   OperationRepresentation actualCmd,
                                                    Map<String, IRainbowOperation> actualsMap) {
         String target = cmd.getTarget ();
         String actualTarget = parameters.get (target);
         if (actualTarget != null) {
             // Need to set the target
             actualCmd = new OperationRepresentation (cmd.getName (), cmd.getModelReference (), actualTarget,
-                    cmd.getParameters ());
+                                                     cmd.getParameters ());
             actualsMap.put (pullOutParam (target), actualCmd);
         }
 
@@ -325,7 +319,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
             m_reportingPort.info (
                     RainbowComponentT.GAUGE,
                     MessageFormat.format ("G[{0}]: {1}.{2}({3})", id (), op.getTarget (), op.getName (),
-                            Arrays.toString (op.getParameters ())));
+                                          Arrays.toString (op.getParameters ())));
         }
     }
 
@@ -376,20 +370,19 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
     /**
      * Assuming target location is stored as setup parameter IGauge.SETUP_LOCATION, this method returns the value of
      * that location.
-     * 
+     *
      * @return String the string indicating the deployment location
      */
 
     String deploymentLocation () {
-        return (String )m_setupParams.get (SETUP_LOCATION).getValue ();
+        return (String) m_setupParams.get (SETUP_LOCATION).getValue ();
     }
 
     public IRainbowReportingPort getReportingPort () {
         if (m_reportingPort == null) {
             try {
                 m_reportingPort = new DisconnectedRainbowDelegateConnectionPort ();
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 // Should never happen
                 e.printStackTrace ();
             }
@@ -403,6 +396,11 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
         return RainbowComponentT.GAUGE;
     }
 
+    protected <T> T getSetupValue (String key, Class<T> t, T defaultValue) {
+        T val = getSetupValue (key, t);
+        if (val == null) return defaultValue;
+        return val;
+    }
 
     protected <T> T getSetupValue (String key, Class<T> t) {
         TypedAttributeWithValue setupParam = m_setupParams.get (key);
@@ -410,47 +408,51 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
         Object o = setupParam.getValue ();
         if (o == null) return null;
         if (o instanceof String) {
-            String s = (String )o;
-            if (t == String.class) return (T )s;
+            String s = (String) o;
+            if (t == String.class) return (T) s;
             if (t == Double.class) {
                 Double d = Double.parseDouble (s);
-                return (T )d;
+                return (T) d;
             }
             if (t == Float.class) {
                 Float f = Float.parseFloat (s);
-                return (T )f;
+                return (T) f;
             }
             if (t == Integer.class) {
                 Integer i = Integer.parseInt (s);
-                return (T )i;
+                return (T) i;
             }
             if (t == Long.class) {
                 Long l = Long.parseLong (s);
-                return (T )l;
+                return (T) l;
             }
-        }
-        else if (o instanceof Integer) {
-            Integer i = (Integer )o;
-            if (t == Integer.class) return (T )i;
-            if (t == Long.class) return (T )Long.valueOf (i);
-            if (t == String.class) return (T )i.toString ();
-        }
-        else if (o instanceof Long) {
-            Long l = (Long )o;
-            if (t == Long.class) return (T )l;
-            if (t == String.class) return (T )l.toString ();
-        }
-        else if (o instanceof Float) {
-            Float f = (Float )o;
-            if (t == Float.class) return (T )f;
-            if (t == Double.class) return (T )Double.valueOf (f);
-            if (t == String.class) return (T )Double.toString (f);
-        }
-        else if (o instanceof Double) {
-            Double d = (Double )o;
-            if (t == Double.class) return (T )d;
-            if (t == String.class) return (T )Double.toString (d);
+            if (t == Boolean.class) {
+                Boolean b = Boolean.parseBoolean (s);
+                return (T) b;
+            }
+        } else if (o instanceof Integer) {
+            Integer i = (Integer) o;
+            if (t == Integer.class) return (T) i;
+            if (t == Long.class) return (T) Long.valueOf (i);
+            if (t == String.class) return (T) i.toString ();
+        } else if (o instanceof Long) {
+            Long l = (Long) o;
+            if (t == Long.class) return (T) l;
+            if (t == String.class) return (T) l.toString ();
+        } else if (o instanceof Float) {
+            Float f = (Float) o;
+            if (t == Float.class) return (T) f;
+            if (t == Double.class) return (T) Double.valueOf (f);
+            if (t == String.class) return (T) Double.toString (f);
+        } else if (o instanceof Double) {
+            Double d = (Double) o;
+            if (t == Double.class) return (T) d;
+            if (t == String.class) return (T) Double.toString (d);
 
+        } else if (o instanceof Boolean) {
+            Boolean b = (Boolean) o;
+            if (t == Boolean.class) return (T) b;
+            if (t == String.class) return (T) Boolean.toString (b);
         }
 
         return null;

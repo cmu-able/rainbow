@@ -71,8 +71,8 @@ public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
         m_lines = new LinkedList<> ();
         m_patternMap = new HashMap<> ();
 
-        mostRecentFirst = getSetupValue (MOST_RECENT, Boolean.class);
-        updatesPerCycle = getSetupValue (MAX_UPDATES_PER_CYCLE, Integer.class);
+        mostRecentFirst = getSetupValue (MOST_RECENT, Boolean.class, false);
+        updatesPerCycle = getSetupValue (MAX_UPDATES_PER_CYCLE, Integer.class, MAX_UPDATES_PER_SLEEP);
     }
 
 
