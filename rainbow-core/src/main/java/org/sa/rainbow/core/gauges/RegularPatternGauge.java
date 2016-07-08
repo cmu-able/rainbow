@@ -42,11 +42,15 @@ import java.util.regex.Pattern;
  * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
  */
 public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
-
+    public static String MOST_RECENT = "recentProbeValuesFirst";
+    public static String MAX_UPDATES_PER_CYCLE = "maxUpdatesPerCycle";
 
     protected Queue<String> m_lines = null;
 
     private Map<String,Pattern> m_patternMap = null;
+
+    private boolean mostRecentFirst = false;
+    private int updatesPerCycle = MAX_UPDATES_PER_SLEEP;
 
     /**
      * Main Constructor the Gauge that is hardwired to the Probe.
@@ -66,6 +70,9 @@ public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
 
         m_lines = new LinkedList<> ();
         m_patternMap = new HashMap<> ();
+
+        mostRecentFirst = getSetupValue (MOST_RECENT, Boolean.class);
+        updatesPerCycle = getSetupValue (MAX_UPDATES_PER_CYCLE, Integer.class);
     }
 
 
@@ -74,7 +81,9 @@ public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
      */
     @Override
     public void dispose () {
-        m_lines.clear();
+        synchronized (m_lines) {
+            m_lines.clear ();
+        }
         m_patternMap.clear();
 
         // null-out data members
@@ -90,8 +99,17 @@ public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
     @Override
     public void reportFromProbe (IProbeIdentifier probe, String data) {
         if (m_lines == null) return;
-
-        m_lines.offer(data);
+        synchronized (m_lines) {
+            // Only offer if we have a match
+            for (Map.Entry<String,Pattern> e : m_patternMap.entrySet()) {
+                String name = e.getKey();
+                Matcher m = e.getValue ().matcher (data);
+                if (m.matches()) {
+                    m_lines.offer (data);
+                    break;
+                }
+            }
+        }
 
         super.reportFromProbe (probe, data);
     }
@@ -103,9 +121,24 @@ public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
     protected void runAction() {
         Matcher m = null;
         String name = null;
-        int cnt = MAX_UPDATES_PER_SLEEP;
+        int cnt = Math.min (MAX_UPDATES_PER_SLEEP, updatesPerCycle);
+        Queue<String> lines = new LinkedList<String> ();
+        synchronized (m_lines) {
+           for (String rep : m_lines) {
+               lines.offer (rep);
+           }
+            if (mostRecentFirst) m_lines.clear ();
+        }
+
+        if (mostRecentFirst) {
+            // Flush the oldest values so that we're not keeping increasingly old values around
+            while (lines.size () > cnt) {
+                lines.poll ();
+            }
+        }
+
         while (m_lines.size() > 0 && cnt-- > 0) {
-            String line = m_lines.poll();
+            String line = lines.poll();
             // process the line for stats
             //log("Got line: " + line);
             for (Map.Entry<String,Pattern> e : m_patternMap.entrySet()) {
