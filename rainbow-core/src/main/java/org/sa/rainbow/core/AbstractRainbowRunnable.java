@@ -217,21 +217,31 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
         Thread currentThread = Thread.currentThread();
         int errorCount = 0;
         long nextRelease = new Date ().getTime () + m_sleepTime;
+        
         while (m_thread == currentThread) {
             long sleepTime = nextRelease -  new Date ().getTime ();
-            if (sleepTime >= DELAY_TOLERANCE) {
+
+            /*
+             * a release is skipped if the task is behind by more
+             * than DELAY_TOLERANCE
+             */
+            boolean isTaskBehind = sleepTime < -DELAY_TOLERANCE;
+            boolean interrupted = false;
+            if (!isTaskBehind) {
                 try {
                     Thread.sleep (Math.max (0,sleepTime));
                 } catch (InterruptedException e) {
-                    // intentional ignore
+                    interrupted = true;
                 }
             }
-            nextRelease += m_sleepTime;
+            if (!interrupted) {
+            	nextRelease += m_sleepTime;
+            }
             if (m_threadState == State.STARTED) {  // only process if started
                 if (shouldTerminate()) {
                     // time to stop RainbowRunnable as well
                     doTerminate();
-                } else if (sleepTime >= DELAY_TOLERANCE){
+                } else if (!isTaskBehind && !interrupted) {
                     try {
                         runAction();
                     } catch (Throwable t) {
