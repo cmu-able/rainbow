@@ -124,9 +124,7 @@ public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
         int cnt = Math.min (MAX_UPDATES_PER_SLEEP, updatesPerCycle);
         Queue<String> lines = new LinkedList<String> ();
         synchronized (m_lines) {
-           for (String rep : m_lines) {
-               lines.offer (rep);
-           }
+            lines.addAll (m_lines);
             if (mostRecentFirst) m_lines.clear ();
         }
 
@@ -137,7 +135,7 @@ public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
             }
         }
 
-        while (m_lines.size() > 0 && cnt-- > 0) {
+        while (lines.size() > 0 && cnt-- > 0) {
             String line = lines.poll();
             // process the line for stats
             //log("Got line: " + line);
