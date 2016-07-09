@@ -45,12 +45,18 @@ public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
     public static String MOST_RECENT = "recentProbeValuesFirst";
     public static String MAX_UPDATES_PER_CYCLE = "maxUpdatesPerCycle";
 
+    // This field needs to be synchronized because it is accessed by multiple threads
     protected Queue<String> m_lines = null;
 
+    // The map of patterns that this gauge understands
     private Map<String,Pattern> m_patternMap = null;
 
-    private boolean mostRecentFirst = false;
-    private int updatesPerCycle = MAX_UPDATES_PER_SLEEP;
+    // Process the most recent probes
+    private boolean m_mostRecentFirst = false;
+    // The maximum number of probe values to process in one cycle.
+    // If mostRecentFirst is false, then we just process the first N and keep the rest
+    // If mostRecentFirst is true, then we process the last N and discsard the rest
+    private int     m_updatesPerCycle = MAX_UPDATES_PER_SLEEP;
 
     /**
      * Main Constructor the Gauge that is hardwired to the Probe.
@@ -71,8 +77,8 @@ public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
         m_lines = new LinkedList<> ();
         m_patternMap = new HashMap<> ();
 
-        mostRecentFirst = getSetupValue (MOST_RECENT, Boolean.class, false);
-        updatesPerCycle = getSetupValue (MAX_UPDATES_PER_CYCLE, Integer.class, MAX_UPDATES_PER_SLEEP);
+        m_mostRecentFirst = getSetupValue (MOST_RECENT, Boolean.class, false);
+        m_updatesPerCycle = getSetupValue (MAX_UPDATES_PER_CYCLE, Integer.class, MAX_UPDATES_PER_SLEEP);
     }
 
 
@@ -96,13 +102,20 @@ public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
     /* (non-Javadoc)
      * @see org.sa.rainbow.translator.gauges.AbstractGauge#probeReport(java.lang.String)
      */
+
+    /**
+     * This method is called when a probe reports. Takes the data and the probe and
+     * adds the data to a queue for processing by the gauge, but only if the data
+     * matches one of the patterns for this gauge. Otherwise it is discarded.
+     * @param probe
+     * @param data
+     */
     @Override
     public void reportFromProbe (IProbeIdentifier probe, String data) {
         if (m_lines == null) return;
         synchronized (m_lines) {
             // Only offer if we have a match
             for (Map.Entry<String,Pattern> e : m_patternMap.entrySet()) {
-                String name = e.getKey();
                 Matcher m = e.getValue ().matcher (data);
                 if (m.matches()) {
                     m_lines.offer (data);
@@ -119,16 +132,24 @@ public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
      */
     @Override
     protected void runAction() {
+        // Pull probe values off the queue and process them
         Matcher m = null;
         String name = null;
-        int cnt = Math.min (MAX_UPDATES_PER_SLEEP, updatesPerCycle);
+        int cnt = Math.min (MAX_UPDATES_PER_SLEEP, m_updatesPerCycle);
+        // We need to do some processing of the queue, so make a copy
+        // so that the manipulation doesn't affect probe reporting
         Queue<String> lines = new LinkedList<String> ();
         synchronized (m_lines) {
             lines.addAll (m_lines);
-            if (mostRecentFirst) m_lines.clear ();
+            if (m_mostRecentFirst) m_lines.clear ();
+            else {
+                // delete the first cnt elements from the list
+                int c = cnt;
+                while (m_lines.size () > 0 && c-- > 0)  m_lines.poll ();
+            }
         }
 
-        if (mostRecentFirst) {
+        if (m_mostRecentFirst) {
             // Flush the oldest values so that we're not keeping increasingly old values around
             while (lines.size () > cnt) {
                 lines.poll ();
