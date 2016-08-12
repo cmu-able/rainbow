@@ -50,7 +50,7 @@ public class UtilityHistoryCommandFactory extends ModelCommandFactory<UtilityHis
     }
 
     public AddUtilityMeasureCmd addUtilityMeasureCmd (String utilityKey, double utility) {
-        return new AddUtilityMeasureCmd ("addUtilityMeasure", (UtilityHistoryModelInstance )m_modelInstance,
+        return new AddUtilityMeasureCmd ((UtilityHistoryModelInstance )m_modelInstance,
                 utilityKey,
                 Double.toString (utility));
     }
@@ -59,7 +59,7 @@ public class UtilityHistoryCommandFactory extends ModelCommandFactory<UtilityHis
     public SaveUtilityHistoryCmd saveCommand (String location) throws RainbowModelException {
         try {
             FileOutputStream os = new FileOutputStream (location);
-            return new SaveUtilityHistoryCmd ("SaveUtilityHistoryCmd", null, location, os,
+            return new SaveUtilityHistoryCmd (null, location, os,
                     m_modelInstance.getOriginalSource ());
         }
         catch (FileNotFoundException e) {

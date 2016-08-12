@@ -34,8 +34,8 @@ import java.util.Map.Entry;
 
 public class SaveUtilityHistoryCmd extends AbstractSaveModelCmd<UtilityHistory> {
 
-    public SaveUtilityHistoryCmd (String commandName, IModelsManager mm, String resource, OutputStream os, String source) {
-        super (commandName, mm, resource, os, source);
+    public SaveUtilityHistoryCmd (IModelsManager mm, String resource, OutputStream os, String source) {
+        super ("SaveUtilityHistoryCmd", mm, resource, os, source);
 
     }
 
