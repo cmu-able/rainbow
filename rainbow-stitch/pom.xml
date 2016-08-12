@@ -485,7 +485,7 @@
 		<dependency>
 			<groupId>org.acmestudio</groupId>
 			<artifactId>acme-lib</artifactId>
-			<version>3.5.9-SNAPSHOT</version>
+			<version>3.5.10</version>
 		</dependency>
 
 	</dependencies>

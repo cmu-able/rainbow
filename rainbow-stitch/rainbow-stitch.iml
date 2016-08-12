@@ -86,6 +86,6 @@
     <orderEntry type="library" name="Maven: classworlds:classworlds:1.1-alpha-2" level="project" />
     <orderEntry type="library" name="Maven: org.codehaus.plexus:plexus-compiler-api:2.2" level="project" />
     <orderEntry type="library" name="Maven: org.sonatype.plexus:plexus-build-api:0.0.7" level="project" />
-    <orderEntry type="library" name="Maven: org.acmestudio:acme-lib:3.5.9-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.acmestudio:acme-lib:3.5.10" level="project" />
   </component>
 </module>
