@@ -8,6 +8,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
+import org.sa.rainbow.raindroid.org.sa.rainbow.randroid.util.RaindroidMessages;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -21,7 +23,7 @@ import java.lang.reflect.Method;
 public class HuILActivity extends AppCompatActivity {
 
     /** The choice of what to do with an implicit intent **/
-    private String m_intentDisposition = RaindroidProxyService.MSG_RAINDROID_INTENT_PREVENT;
+    private String m_intentDisposition = RaindroidMessages.MSG_RAINDROID_INTENT_PREVENT;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,13 +52,13 @@ public class HuILActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which) {
                             case 0: // Send to known good
-                                m_intentDisposition = RaindroidProxyService.MSG_RAINDROID_INTENT_SEND_TO_GOOD;
+                                m_intentDisposition = RaindroidMessages.MSG_RAINDROID_INTENT_SEND_TO_GOOD;
                                 break;
                             case 1: // Do not send
-                                m_intentDisposition = RaindroidProxyService.MSG_RAINBOW_INTENT_NO_EFFECT;
+                                m_intentDisposition = RaindroidMessages.MSG_RAINBOW_INTENT_NO_EFFECT;
                                 break;
                             case 2: // Send as normal
-                                m_intentDisposition = RaindroidProxyService.MSG_RAINBOW_INTENT_NO_EFFECT;
+                                m_intentDisposition = RaindroidMessages.MSG_RAINBOW_INTENT_NO_EFFECT;
                                 break;
                         }
                     }

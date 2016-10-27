@@ -12,7 +12,9 @@ public class StartRaindroidReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d("RANDROID", "Starting Raindroid");
-        Intent serviceIntent = new Intent (context, RaindroidProxyService.class);
-        context.startService(serviceIntent);
+        if (Intent.ACTION_BOOT_COMPLETED.equals (intent.getAction())) {
+            Intent serviceIntent = new Intent(context, RaindroidProxyService.class);
+            context.startService(serviceIntent);
+        }
     }
 }
