@@ -42,7 +42,7 @@ public class ActivityMethodHook extends XC_MethodHook {
     protected void beforeHookedMethod(final MethodHookParam param) throws Throwable {
         // Make sure we bind to Raindroid. Need to do this here because we need a
         // valid context.
-        RaindroidBridge.bindToRaindroid();
+        RaindroidBridge.bindToRaindroid(NewActivityHook.getCurrentActivity());
         if (bridge.isIntercept () && m_classes != null && m_classes.contains(param.thisObject.getClass().getName())) {
             Intent i = (Intent) param.args[0];
             XposedBridge.log(param.thisObject.getClass().toString() + " is sending an intent");
@@ -56,7 +56,7 @@ public class ActivityMethodHook extends XC_MethodHook {
             Message msg = Message.obtain(null, RaindroidMessages.MSG_RAINDROID_INTENT_SENT);
             msg.replyTo = new Messenger(new IntentDispositioner (bridge, param));
             msg.getData().putParcelable(RaindroidMessages.MSG_RANDROID_INTENT_DATA_KEY, i);
-            RaindroidBridge.m_raindroidService.send(msg);
+            RaindroidBridge.sendToRaindroidService(msg);
             // This prevents the method from being called -- we will wait for Raindroid
             // to tell us what to do, before sending the intent (if we are allowed).
             param.setResult(null);

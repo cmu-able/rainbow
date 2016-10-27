@@ -7,6 +7,9 @@ public class RaindroidMessages {
 
     public static final int MSG_RAINDROID_INTENT_SENT = 1;
     public static final int MSG_RAINDROID_INTENT_RECEIVED = 2;
+    public static final int MSG_RAINDROID_APP_STARTED = 3;
+    public static final int MSG_RAINDROID_APP_STOPPED = 4;
+    
     public static final String MSG_RANDROID_INTENT_DATA_KEY = "SENT_INTENT";
     public static final  String MSG_RAINDROID_INTENT_PREVENT = "__prevent__";
     public static final  String MSG_RAINDROID_INTENT_SEND_TO_GOOD = "__send_to_good__";
@@ -15,6 +18,10 @@ public class RaindroidMessages {
 
     public static final int MSG_RAINDROID_EFFECT = 2;
     public static final String RAINDROID_CALLER = "__RAINDROID_CALLER__";
+    public static final String MSG_RAINDROID_INTENT_RECEIVER_KEY = "INTENT_SENDER";
+    public static final String MSG_RAINDROID_INTENT_SENDER_KEY = "INTENT_RECEIVER";
+    public static final String MSG_APP_PACKAGE = "PACKAGE_NAME";
+
 
     public static String getTag () {
         StringBuilder tag = new StringBuilder ();

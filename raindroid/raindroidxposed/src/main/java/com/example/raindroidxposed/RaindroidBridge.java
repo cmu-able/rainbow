@@ -1,18 +1,24 @@
 package com.example.raindroidxposed;
 
+import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.Messenger;
+import android.os.RemoteException;
 import android.util.Log;
 
 import com.example.raindroidxposed.hooks.OnCreateMethodHook;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,25 +41,29 @@ import org.sa.rainbow.raindroid.util.RaindroidMessages;
  */
 public class RaindroidBridge implements IXposedHookLoadPackage {
 
-    /** The list of packages that should be modified by Xposed
-     *  This should be refactored into the Raindroid service
+    /**
+     * The list of packages that should be modified by Xposed
+     * This should be refactored into the Raindroid service
      */
     private final Map<String, Set<String>> m_interestingPackages;
 
-    /** Whether to intercept. This is used when Raindroid says to execute
+    /**
+     * Whether to intercept. This is used when Raindroid says to execute
      * the methods, so that we don't get into infinite loops.
      */
     private boolean m_intercept = true;
+
     public void setIntercept(boolean intercept) {
         this.m_intercept = intercept;
     }
+
     public boolean isIntercept() {
         return m_intercept;
     }
 
 
-    /** Indicates whether the bridge has connected with the Raindroid service
-     *
+    /**
+     * Indicates whether the bridge has connected with the Raindroid service
      */
     private static boolean m_serviceBound = false;
 
@@ -61,14 +71,28 @@ public class RaindroidBridge implements IXposedHookLoadPackage {
         e.printStackTrace(System.out);
     }
 
-    public static Messenger m_raindroidService = null;
+    private static Messenger m_raindroidService = null;
 
     private static ServiceConnection m_raindroidServiceConnection = new ServiceConnection() {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            m_raindroidService = new Messenger (service);
+            m_raindroidService = new Messenger(service);
             XposedBridge.log("Connected to Raindroid Service");
+            synchronized (m_unsentMessages) {
+                if (!m_unsentMessages.isEmpty()) {
+                    for (Iterator<Message> i = m_unsentMessages.iterator(); i.hasNext(); ) {
+                        Message msg = i.next();
+                        try {
+                            m_raindroidService.send(msg);
+                            i.remove();
+                        }
+                        catch (Throwable e) {
+                            XposedBridge.log("Still could not send message");
+                        }
+                    }
+                }
+            }
         }
 
         @Override
@@ -79,12 +103,19 @@ public class RaindroidBridge implements IXposedHookLoadPackage {
     };
 
 
-    /** This method is used when an application is loaded, for example when the user launches it or
+    /**
+     * This method is used when an application is loaded, for example when the user launches it or
      * when an activity is started
      */
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) throws Throwable {
         // Ensure that we are in an app that we are interested in
+        try {
+            if (!loadPackageParam.packageName.equals("org.sa.rainbow.raindroid"))
+                XposedHelpers.findAndHookMethod("android.app.Application", loadPackageParam.classLoader, "attach", Context.class, new RegisterWithAndroidHook(this));
+        } catch (Throwable t) {
+            Log.e(RaindroidMessages.getTag(), t.getMessage(), t);
+        }
         if (!m_interestingPackages.keySet().contains(loadPackageParam.packageName)) {
             Log.i(RaindroidMessages.getTag(), "Raindroid: package loaded " + loadPackageParam.packageName + " not interested.");
             return;
@@ -112,6 +143,8 @@ public class RaindroidBridge implements IXposedHookLoadPackage {
 
     }
 
+    private static List<Message> m_unsentMessages = new LinkedList<Message>();
+
 
     public RaindroidBridge() {
         // Initialize packages that we are interested in
@@ -125,14 +158,26 @@ public class RaindroidBridge implements IXposedHookLoadPackage {
 
     }
 
-    public static void bindToRaindroid() {
+    public static void sendToRaindroidService(Message msg) throws RemoteException {
+        if (m_raindroidService == null) {
+            XposedBridge.log("No binding to the Raindroid service. Msg will not be sent later.");
+            synchronized (m_unsentMessages) {
+                m_unsentMessages.add(msg);
+            }
+        }
+        else {
+            m_raindroidService.send(msg);
+        }
+    }
+
+    public static void bindToRaindroid(Context m_context) {
         // Establish a connection to the Raindroid service. This will be used for communicating
         // events to Rainbow and communicating decisions/adaptations back to this bridge
-
-        if (!m_serviceBound) {
+        if (m_context == null) return;
+        if (!m_serviceBound || m_raindroidService == null) {
             Intent intent = new Intent();
-            intent.setComponent(new ComponentName ("org.sa.rainbow.raindroid", "org.sa.rainbow.raindroid.RaindroidProxyService"));
-            NewActivityHook.getCurrentActivity().bindService(intent, m_raindroidServiceConnection, Context.BIND_AUTO_CREATE);
+            intent.setComponent(new ComponentName("org.sa.rainbow.raindroid", "org.sa.rainbow.raindroid.RaindroidProxyService"));
+            m_context.bindService(intent, m_raindroidServiceConnection, Context.BIND_AUTO_CREATE);
             m_serviceBound = true;
         }
     }

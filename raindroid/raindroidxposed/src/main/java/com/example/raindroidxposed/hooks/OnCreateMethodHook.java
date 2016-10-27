@@ -26,7 +26,7 @@ public class OnCreateMethodHook extends XC_MethodHook {
 
     @Override
     protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-        RaindroidBridge.bindToRaindroid();
+        RaindroidBridge.bindToRaindroid(NewActivityHook.getCurrentActivity());
 
         if (m_classes != null && m_classes.contains(param.thisObject.getClass().getName())) {
             Activity a = (Activity) param.thisObject;
@@ -39,7 +39,9 @@ public class OnCreateMethodHook extends XC_MethodHook {
             // Send this event to Rainbow
             Message msg = Message.obtain (null, RaindroidMessages.MSG_RAINDROID_INTENT_RECEIVED);
             msg.getData().putParcelable(RaindroidMessages.MSG_RANDROID_INTENT_DATA_KEY, intent);
-            RaindroidBridge.m_raindroidService.send (msg);
+            msg.getData().putString(RaindroidMessages.MSG_RAINDROID_INTENT_RECEIVER_KEY, a.getPackageName());
+            msg.getData().putString (RaindroidMessages.MSG_RAINDROID_INTENT_SENDER_KEY, rcvr);
+            RaindroidBridge.sendToRaindroidService (msg);
         }
     }
 }
