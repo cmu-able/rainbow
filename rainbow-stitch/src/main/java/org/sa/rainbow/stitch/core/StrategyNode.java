@@ -170,7 +170,7 @@ public class StrategyNode {
             // put in the temp vars
             for (Map.Entry<String,Object> pair : moreVars.entrySet()) {
                 Var v = new Var();
-                v.scope = m_condExpr.stitch().scope;
+                v.scope = m_condExpr.stitch().scope ();
                 v.setType(pair.getValue().getClass().getSimpleName());
                 v.name = pair.getKey();
                 v.setValue(pair.getValue());

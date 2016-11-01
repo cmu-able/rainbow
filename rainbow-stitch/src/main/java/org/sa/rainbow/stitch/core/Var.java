@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.acmestudio.acme.element.IAcmeElementType;
-import org.sa.rainbow.stitch.visitor.Stitch;
 
 /**
  * Represents a variable declared in script.
@@ -105,7 +104,7 @@ public class Var {
         return clazz;
     }
 
-    public void computeValue (Stitch stitch) {
+    public void computeValue () {
         if (valStmt != null) {
             valStmt.clearState();
             valStmt.evaluate(null);

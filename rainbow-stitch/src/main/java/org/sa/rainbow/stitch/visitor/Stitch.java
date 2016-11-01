@@ -67,13 +67,13 @@ public class Stitch {
     public StitchTreeWalker walker = null;
     public String path = null;
     public StitchScript script = null;
-    public IScope scope = null;
-    public Expression expr = null;  // expression "currently" in use for evaluation
+    private ThreadLocal<IScope> scope = null;
+    private ThreadLocal<Expression> expr;  // expression "currently" in use for evaluation
     public StitchProblemHandler stitchProblemHandler = null;  //ALI: ADDED; SWC: made public
 
     private ILiloBehavior[] m_behaviors = null;
-    private Stack<IScope> m_scopeStack = null;
-    private Stack<Expression> m_exprStack = null;
+    private ThreadLocal<Stack<IScope>> m_scopeStack;
+    private ThreadLocal<Stack<Expression>> m_exprStack;
 
     private boolean m_keepRunning = true;  // flag used to cancel execution
     private Stack<Boolean> m_executing;
@@ -92,9 +92,15 @@ public class Stitch {
         path = scriptPath;
 
         m_behaviors = new ILiloBehavior[NUM_PASS];
-        m_scopeStack = new Stack<IScope>();
-        m_exprStack = new Stack<Expression>();
+        m_scopeStack = new ThreadLocal<Stack<IScope>>();
+        m_scopeStack.set (new Stack<IScope> ());
+        m_exprStack = new ThreadLocal<Stack<Expression>>();
+        m_exprStack.set (new Stack<Expression>());
         m_executing = new Stack<Boolean> ();
+        expr = new ThreadLocal<Expression> ();
+        expr.set (null);
+        scope = new ThreadLocal<IScope> ();
+        scope.set (null);
     }
 
     @Override
@@ -231,8 +237,10 @@ public class Stitch {
      * @param s  new scope to set as current scope
      */
     public void pushScope (IScope s) {
-        m_scopeStack.push(scope);
-        scope = s;
+        Stack<IScope> ss = m_scopeStack.get ();
+        if (ss == null) m_scopeStack.set (new Stack<IScope> ());
+        m_scopeStack.get().push(scope.get ());
+        setScope (s);
     }
 
     /**
@@ -240,8 +248,8 @@ public class Stitch {
      * @return IScope  what was previously the current scope
      */
     public IScope popScope () {
-        IScope prev = scope;
-        scope = m_scopeStack.pop();
+        IScope prev = scope ();
+        setScope(m_scopeStack.get().pop());
         return prev;
     }
 
@@ -249,15 +257,17 @@ public class Stitch {
      * Stores the current expression and reset it for evaluation.
      */
     public void pushExpression () {
-        m_exprStack.push(expr);
-        expr = null;
+        Stack<Expression> expressionStack = m_exprStack.get ();
+        if (expressionStack == null) m_exprStack.set (new Stack<Expression> ());
+        m_exprStack.get ().push(expr.get ());
+        expr.set (null);
     }
 
     /**
      * Pops the current expression and restore previous expression.
      */
     public void popExpression () {
-        expr = m_exprStack.pop();
+        expr.set(m_exprStack.get().pop());
     }
 
     /**
@@ -293,4 +303,19 @@ public class Stitch {
         return !m_executing.empty ();
     }
 
+    public Expression expr () {
+        return this.expr.get ();
+    }
+
+    public void setExpr (Expression e) {
+        this.expr.set (e);
+    }
+
+    public IScope scope () {
+        return scope.get ();
+    }
+
+    public void setScope (IScope s) {
+        scope.set(s);
+    }
 }

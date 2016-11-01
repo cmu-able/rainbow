@@ -1,0 +1,8 @@
+group ExpressionTemplate;
+
+expression(expr) ::= <<expr.expr1:impliesExpression <if(expr2)> or <expr.expr2:impliesExpression> <endif> >>
+
+impliesExpression(expr) ::= <<expr.expr1:iffExpression <if(expr2)> -> <expr.expr2::ifExpression> <endif> >>
+
+iffExpression(expr) ::= <<
+

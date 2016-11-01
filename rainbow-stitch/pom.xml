@@ -236,9 +236,13 @@
 			 <artifactId>antlr4-maven-plugin</artifactId>
 			 <version>4.3</version>
 			 <configuration>
-			     <grammars>IM.g4</grammars>
-			     <outputDirectory>${project.build.directory}/generated-sources/antlr/org/sa/rainbow/im/parser</outputDirectory>
-	             <sourceDirectory>${basedir}/src/main/antlr/org/sa/rainbow/im/parser</sourceDirectory>
+				 <visitor>true</visitor>
+				 <listener>true</listener>
+				 <!--
+                  <grammars>IM.g4</grammars>
+                  <outputDirectory>${project.build.directory}/generated-sources/antlr/org/sa/rainbow/im/parser</outputDirectory>
+                  <sourceDirectory>src/main/antlr4/org/sa/rainbow/im/parser</sourceDirectory>
+              -->
 			 </configuration>
 			 <executions>
 			     <execution>

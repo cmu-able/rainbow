@@ -293,35 +293,43 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
         if (id.startsWith (EXP_AVG_KEY)) { // Special treatment for exp.avg
             // the property id is expected to be of the form <elem-type>.<prop>
             int idxStart = EXP_AVG_KEY.length ();
-            int idxDot = id.indexOf (".");
-            if (idxDot == -1) { // property ID is not of expected form
-                LOGGER.error ("Unrecognized form of Average Property Name!" + id);
-                return null;
+            String expr = id.substring (idxStart).trim ();
+            if (expr.startsWith("[")) {
+                Object o = internalGetProperty (expr, dur);
             }
-            String typeName = id.substring (idxStart, idxDot);
-            String propName = id.substring (idxDot + 1);
+            else {
+                int idxDot = id.indexOf (".");
+                if (idxDot == -1) { // property ID is not of expected form
+                    LOGGER.error ("Unrecognized form of Average Property Name!" + id);
+                    return null;
+                }
 
-            // algorithm:
-            // 1. find props of all instances of the specified type
-            Set<String> propKeys = collectInstanceProps (typeName, propName);
-            if (propKeys.size () > 0) {
-                // 2. collec the exp.avg values
-                double sum = 0.0;
-                for (String k : propKeys) {
+
+                String typeName = id.substring (idxStart, idxDot);
+                String propName = id.substring (idxDot + 1);
+
+                // algorithm:
+                // 1. find props of all instances of the specified type
+                Set<String> propKeys = collectInstanceProps (typeName, propName);
+                if (propKeys.size () > 0) {
+                    // 2. collec the exp.avg values
+                    double sum = 0.0;
+                    for (String k : propKeys) {
 //                    if (Rainbow.predictionEnabled () && dur > 0L)
 //                        // grab predicted value from "target system"
 //                        throw new NotImplementedException ("Prediction is not implemented");
 //                        sum += (Double) Oracle.instance().targetSystem()
 //                                .predictProperty(k, dur, StatType.SINGLE);
 //                    else {
-                    sum += m_propExpAvg.get (k);
+                        sum += m_propExpAvg.get (k);
 //                    }
+                    }
+                    // 3. take the mean over these exp.avg values
+                    prop = sum / propKeys.size ();
                 }
-                // 3. take the mean over these exp.avg values
-                prop = sum / propKeys.size ();
-            }
-            if (LOGGER.isTraceEnabled ()) {
-                LOGGER.trace ("ExpAvg Prop " + id + (dur > 0 ? "(+" + dur + ") " : "") + " requested == " + prop);
+                if (LOGGER.isTraceEnabled ()) {
+                    LOGGER.trace ("ExpAvg Prop " + id + (dur > 0 ? "(+" + dur + ") " : "") + " requested == " + prop);
+                }
             }
         }
         else if (id.startsWith (PENALTY_KEY)) {

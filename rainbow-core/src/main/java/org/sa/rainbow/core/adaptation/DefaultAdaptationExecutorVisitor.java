@@ -103,6 +103,9 @@ public abstract class DefaultAdaptationExecutorVisitor<S extends IEvaluable> ext
                 m_result = false;
             }
         }
+//        for (int i = 0; i < subTrees.size (); i++) {
+//            m_done.countDown ();
+//        }
         return m_result;
     }
 

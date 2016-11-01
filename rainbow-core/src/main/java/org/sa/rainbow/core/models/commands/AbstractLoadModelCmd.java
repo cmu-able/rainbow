@@ -41,7 +41,7 @@ import java.util.UUID;
 
 public abstract class AbstractLoadModelCmd<Type> extends AbstractRainbowModelOperation<IModelInstance<Type>, Object> {
 
-    private final IModelsManager m_modelsManager;
+    protected final IModelsManager m_modelsManager;
     private final InputStream m_is;
     private final String m_source;
 

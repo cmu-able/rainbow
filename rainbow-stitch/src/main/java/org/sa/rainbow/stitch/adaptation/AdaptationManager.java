@@ -48,6 +48,7 @@ import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.core.Tactic;
 import org.sa.rainbow.stitch.error.DummyStitchProblemHandler;
+import org.sa.rainbow.stitch.error.IStitchProblem;
 import org.sa.rainbow.stitch.error.StitchProblem;
 import org.sa.rainbow.stitch.visitor.Stitch;
 import org.sa.rainbow.util.Beacon;
@@ -723,24 +724,24 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 
     private void reportProblems (File f, DummyStitchProblemHandler sph) {
 
-        Collection<StitchProblem> problem = sph.getProblems ();
+        Collection<IStitchProblem> problem = sph.getProblems ();
         boolean reported = !problem.isEmpty ();
         if (!problem.isEmpty ()) {
             log ("Errors exist in strategy: " + f.getName () + ", or one of its included files");
         }
-        for (StitchProblem p : problem) {
+        for (IStitchProblem p : problem) {
             StringBuilder out = new StringBuilder ();
             switch (p.getSeverity ()) {
-                case StitchProblem.ERROR:
+                case IStitchProblem.ERROR:
                     out.append ("ERROR: ");
                     break;
-                case StitchProblem.WARNING:
+                case IStitchProblem.WARNING:
                     out.append ("WARNING: ");
                     break;
-                case StitchProblem.FATAL:
+                case IStitchProblem.FATAL:
                     out.append ("FATAL ERROR: ");
                     break;
-                case StitchProblem.UNKNOWN:
+                case IStitchProblem.UNKNOWN:
                     out.append ("UNKNOWN PROBLEM: ");
                     break;
             }

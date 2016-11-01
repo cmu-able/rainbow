@@ -177,8 +177,8 @@ tacticEffectBlock
 
 
 strategies
-    :   (strategy)*    {   #strategies = #([STRATEGIES,"STRATEGIES"], #strategies); }
-
+    :   (strategy)*
+    {   #strategies = #([STRATEGIES,"STRATEGIES"], #strategies); }
     ;
 strategy
     :   STRATEGY^ IDENTIFIER

@@ -42,11 +42,7 @@ package org.sa.rainbow.stitch.error;
 
 import antlr.RecognitionException;
 
-public class StitchProblem {
-    public static final int UNKNOWN = 0;
-    public static final int WARNING = 1;
-    public static final int ERROR = 2;
-    public static final int FATAL = 3;
+public class StitchProblem implements IStitchProblem {
 
     private RecognitionException sourceException = null;
     private int severity = UNKNOWN;
@@ -62,29 +58,38 @@ public class StitchProblem {
     /* (non-Javadoc)
      * @see org.sa.rainbow.stitch.editor.parserhelper.IStitchProblem#getSeverity()
      */
-    public int getSeverity() {
+    @Override
+    public int getSeverity () {
         return severity;
     }
 
     /* (non-Javadoc)
      * @see org.sa.rainbow.stitch.editor.parserhelper.IStitchProblem#getMessage()
      */
-    public String getMessage() {
+    @Override
+    public String getMessage () {
         return sourceException.getMessage();
     }
 
     /* (non-Javadoc)
      * @see org.sa.rainbow.stitch.editor.parserhelper.IStitchProblem#getLine()
      */
-    public int getLine() {
+    @Override
+    public int getLine () {
         return sourceException.getLine();
     }
 
     /* (non-Javadoc)
      * @see org.sa.rainbow.stitch.editor.parserhelper.IStitchProblem#getColumn()
      */
-    public int getColumn() {
+    @Override
+    public int getColumn () {
         return sourceException.getColumn();
+    }
+
+    @Override
+    public IStitchProblem clone () {
+        return new StitchProblem (sourceException, severity);
     }
 
     @Override

@@ -95,6 +95,8 @@ public class Statement extends ScopedEntity implements IEvaluableScope {
         return t;
     }
 
+
+
     /**
      * Main Constructor.
      * @param parent  the parent scope of this scoped entity
@@ -111,7 +113,8 @@ public class Statement extends ScopedEntity implements IEvaluableScope {
      */
     @Override
     public String toString () {
-        return "statement: type " + type + ", { " + m_ast.toStringTree() + " }";
+        return "statement: type " + type + ", { " + m_ast!=null?m_ast.toStringTree():""
+                + " }";
     }
 
     public AST ast () {
@@ -122,6 +125,7 @@ public class Statement extends ScopedEntity implements IEvaluableScope {
         m_ast = ast;
         type = Statement.determineType(ast);
     }
+
 
     /* (non-Javadoc)
      * @see org.sa.rainbow.stitch.core.IEvaluable#evaluate(java.lang.Object[])

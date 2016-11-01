@@ -1109,7 +1109,7 @@ ILiloBehavior {
             // in case of any mismatch
             if (vObj instanceof Var) { // check to make sure type is correct
                 Var v = (Var) vObj;
-                v.computeValue(m_stitch);
+                v.computeValue();
                 Object val = v.getValue();
                 if (val instanceof Integer) {
                     curNode.setNumDoTrials((Integer) val);

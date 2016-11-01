@@ -28,6 +28,7 @@ import antlr.collections.AST;
 import org.acmestudio.acme.core.type.IAcmeBooleanValue;
 import org.acmestudio.acme.element.IAcmeElement;
 import org.acmestudio.acme.element.property.IAcmeProperty;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.util.Tool;
 import org.sa.rainbow.stitch.visitor.ILiloBehavior;
@@ -113,7 +114,7 @@ public class Expression extends ScopedEntity implements IEvaluableScope {
     protected AST m_ast = null;
     /** Flag indicating whether to invert this expression, ONLY applicable if boolean! */
     protected boolean m_inverted = false;
-    protected Object m_result = null;
+    protected Object m_result = Strategy.Outcome.UNKNOWN;
     protected List<Var> m_refdVars = null;
 
     /**
@@ -204,7 +205,10 @@ public class Expression extends ScopedEntity implements IEvaluableScope {
             try {
                 // set stitch to evaluate mode
                 ILiloBehavior beh = m_stitch.getBehavior(Stitch.EVALUATOR_PASS);
-                if (beh == null) return Boolean.FALSE;  // probably disposed
+                if (beh == null) {
+                    System.out.println ("Could not find a Stitch.EVALUATOR_PASS behavior");
+                    return Boolean.FALSE;  // probably disposed
+                }
 
                 m_stitch.walker.setBehavior(beh);
                 m_stitch.walker.expr(ast());

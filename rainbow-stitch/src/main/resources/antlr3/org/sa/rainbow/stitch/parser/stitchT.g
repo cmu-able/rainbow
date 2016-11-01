@@ -53,7 +53,8 @@ options {
     private ILiloBehavior beh = null;
 	private StitchProblemHandler stitchProblemHandler = null;
 
-
+	private static final Semaphore __lock = new Semaphore(1);
+    
     public void setBehavior (ILiloBehavior lb) {
     	beh = lb;
     }
@@ -497,6 +498,7 @@ unaryExpr
 	}
 idExpr
     {
+    __lock.acquire();
     }
     :   id:IDENTIFIER  { beh.doIdentifierExpression(#id, Expression.Kind.IDENTIFIER); }
     |   methodCall
@@ -508,10 +510,13 @@ idExpr
     |   f:FALSE        { beh.doIdentifierExpression(#f, Expression.Kind.BOOLEAN); }
     |   n:NULL         { beh.doIdentifierExpression(#n, Expression.Kind.NULL); }
     ;
-	exception catch [RecognitionException ex] {
+	catch [RecognitionException ex] {
 		processError(ex);
 		if (_t!=null) {_t = _t.getNextSibling();}
+		__lock.release ();
 	}
+	finally {}
+
 methodCall
     {   beh.beginMethodCallExpression(); }
     : #(mc:METHOD_CALL

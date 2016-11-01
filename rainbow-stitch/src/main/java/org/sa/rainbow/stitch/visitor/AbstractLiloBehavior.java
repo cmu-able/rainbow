@@ -67,7 +67,7 @@ public abstract class AbstractLiloBehavior implements ILiloBehavior {
     }
 
     protected IScope scope () {
-        return m_stitch.scope;
+        return m_stitch.scope ();
     }
     protected void pushScope (IScope newScope) {
         m_stitch.pushScope(newScope);
@@ -77,10 +77,10 @@ public abstract class AbstractLiloBehavior implements ILiloBehavior {
     }
 
     protected Expression expr() {
-        return m_stitch.expr;
+        return m_stitch.expr ();
     }
     protected void setExpression(Expression expr) {
-        m_stitch.expr = expr;
+        m_stitch.setExpr (expr);
     }
 
     protected StitchProblemHandler stitchProblemHandler() {

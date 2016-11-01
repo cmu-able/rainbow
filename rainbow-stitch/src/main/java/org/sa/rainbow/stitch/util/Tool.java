@@ -43,6 +43,7 @@ import org.sa.rainbow.stitch.core.Expression;
 import org.sa.rainbow.stitch.core.MyDouble;
 import org.sa.rainbow.stitch.core.MyInteger;
 import org.sa.rainbow.stitch.core.Var;
+import org.sa.rainbow.stitch.error.IStitchProblem;
 import org.sa.rainbow.stitch.error.StitchProblem;
 import org.sa.rainbow.stitch.error.StitchProblemHandler;
 
@@ -79,21 +80,21 @@ public abstract class Tool {
     //ALI: ADDED (this sets a problem for the error too)
     public static void warn (String s, AST ast, StitchProblemHandler stitchProblemHandler) {
         m_logger.warn(s);
-        stitchProblemHandler.setProblem(new StitchProblem(new RecognitionException(s,"",ast==null?1:ast.getLine (),ast==null?1:ast.getColumn ()), StitchProblem.WARNING));
+        stitchProblemHandler.setProblem(new StitchProblem(new RecognitionException(s,"",ast==null?1:ast.getLine (),ast==null?1:ast.getColumn ()), IStitchProblem.WARNING));
     }
     public static void warn (String s, Throwable t, AST ast, StitchProblemHandler stitchProblemHandler) {
         m_logger.warn(s, t);
-        stitchProblemHandler.setProblem(new StitchProblem(new RecognitionException(s,"",ast==null?1:ast.getLine (),ast==null?1:ast.getColumn ()), StitchProblem.WARNING));
+        stitchProblemHandler.setProblem(new StitchProblem(new RecognitionException(s,"",ast==null?1:ast.getLine (),ast==null?1:ast.getColumn ()), IStitchProblem.WARNING));
     }
 
     //ALI: ADDED (this sets a problem for the error too)
     public static void error (String s, AST ast, StitchProblemHandler stitchProblemHandler) {
         m_logger.error(s);
-        stitchProblemHandler.setProblem(new StitchProblem(new RecognitionException(s,"",ast==null?1:ast.getLine (),ast==null?1:ast.getColumn ()), StitchProblem.ERROR));	
+        stitchProblemHandler.setProblem(new StitchProblem(new RecognitionException(s,"",ast==null?1:ast.getLine (),ast==null?1:ast.getColumn ()), IStitchProblem.ERROR));
     }
     public static void error (String s, Throwable t, AST ast, StitchProblemHandler stitchProblemHandler) {
         m_logger.error(s, t);
-        stitchProblemHandler.setProblem(new StitchProblem(new RecognitionException(s,"",ast==null?1:ast.getLine (),ast==null?1:ast.getColumn ()), StitchProblem.ERROR));	
+        stitchProblemHandler.setProblem(new StitchProblem(new RecognitionException(s,"",ast==null?1:ast.getLine (),ast==null?1:ast.getColumn ()), IStitchProblem.ERROR));
     }
 
     /**

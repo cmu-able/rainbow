@@ -41,8 +41,8 @@ package org.sa.rainbow.stitch.error;
 import java.util.Collection;
 
 public interface StitchProblemHandler {
-    void setProblem(StitchProblem problem);
-    void addAll (Collection<StitchProblem> problems);
-    Collection<StitchProblem> unreportedProblems();
+    void setProblem(IStitchProblem problem);
+    void addAll (Collection<IStitchProblem> problems);
+    Collection<IStitchProblem> unreportedProblems();
     StitchProblemHandler clone ();
 }

@@ -37,20 +37,20 @@ import java.util.LinkedHashSet;
  */
 public class DummyStitchProblemHandler implements StitchProblemHandler {
 
-    private LinkedHashSet<StitchProblem> m_problems = null;
+    private LinkedHashSet<IStitchProblem> m_problems = null;
 
     /**
      * Default constructor
      */
     public DummyStitchProblemHandler() {
-        m_problems = new LinkedHashSet<StitchProblem>();
+        m_problems = new LinkedHashSet<IStitchProblem>();
     }
 
     public DummyStitchProblemHandler clone () {
         DummyStitchProblemHandler c = new DummyStitchProblemHandler ();
-        for (StitchProblem p : m_problems
+        for (IStitchProblem p : m_problems
              ) {
-            c.m_problems.add (new StitchProblem (p.getSourceException (), p.getSeverity ()));
+            c.m_problems.add (p.clone ());
         }
         return c;
     }
@@ -59,11 +59,11 @@ public class DummyStitchProblemHandler implements StitchProblemHandler {
      * @see org.sa.rainbow.stitch.error.StitchProblemHandler#setProblem(org.sa.rainbow.stitch.error.StitchProblem)
      */
     @Override
-    public void setProblem(StitchProblem problem) {
+    public void setProblem(IStitchProblem problem) {
         m_problems.add(problem);
     }
 
-    public Collection<StitchProblem> getProblems () {
+    public Collection<IStitchProblem> getProblems () {
         return m_problems;
     }
     public void clearProblems () {
@@ -71,12 +71,12 @@ public class DummyStitchProblemHandler implements StitchProblemHandler {
     }
 
     @Override
-    public void addAll(Collection<StitchProblem> problems) {
+    public void addAll(Collection<IStitchProblem> problems) {
         m_problems.addAll (problems);
     }
 
     @Override
-    public Collection<StitchProblem> unreportedProblems() {
+    public Collection<IStitchProblem> unreportedProblems() {
         return m_problems;
     }
 }
