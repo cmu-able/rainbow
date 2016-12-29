@@ -8,30 +8,30 @@ import org.sa.rainbow.core.models.commands.ModelCommandFactory;
 /**
  * Created by schmerl on 12/9/2016.
  */
-public class InstructionGraphModelInstance implements IModelInstance<InstructionGraph>{
+public class InstructionGraphModelInstance implements IModelInstance<InstructionGraphProgress>{
 
 
-    public static final String INSTRUCTION_GRAPH_TYPE = "InstructionGraph";
-    private InstructionGraph m_graph;
+    public static final String INSTRUCTION_GRAPH_TYPE = "InstructionGraphProgress";
+    private InstructionGraphProgress       m_graph;
     private InstructionGraphCommandFactory m_commandFactory;
-    private String m_source;
+    private String                         m_source;
 
-    public InstructionGraphModelInstance (InstructionGraph graph, String source) {
+    public InstructionGraphModelInstance (InstructionGraphProgress graph, String source) {
         setModelInstance (graph);
         setOriginalSource (source);
     }
     @Override
-    public InstructionGraph getModelInstance () {
+    public InstructionGraphProgress getModelInstance () {
         return m_graph;
     }
 
     @Override
-    public void setModelInstance (InstructionGraph model) {
+    public void setModelInstance (InstructionGraphProgress model) {
         m_graph = model;
     }
 
     @Override
-    public IModelInstance<InstructionGraph> copyModelInstance (String newName) throws RainbowCopyException {
+    public IModelInstance<InstructionGraphProgress> copyModelInstance (String newName) throws RainbowCopyException {
         return new InstructionGraphModelInstance (getModelInstance ().copy (), getOriginalSource ());
     }
 
@@ -46,7 +46,7 @@ public class InstructionGraphModelInstance implements IModelInstance<Instruction
     }
 
     @Override
-    public ModelCommandFactory<InstructionGraph> getCommandFactory () {
+    public ModelCommandFactory<InstructionGraphProgress> getCommandFactory () {
         if (m_commandFactory == null) {
             m_commandFactory = new InstructionGraphCommandFactory (this);
         }

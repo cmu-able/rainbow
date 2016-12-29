@@ -11,19 +11,19 @@ import java.util.List;
 /**
  * Created by schmerl on 12/9/2016.
  */
-public class SetInstructionsCmd extends AbstractRainbowModelOperation<List<InstructionGraph.Instruction>, InstructionGraph>{
-    private final String                       m_instructionsStr;
-    private List<InstructionGraph.Instruction> m_result;
-    private List<InstructionGraph.Instruction> m_oldInstructions;
+public class SetInstructionsCmd extends AbstractRainbowModelOperation<List<InstructionGraphProgress.Instruction>, InstructionGraphProgress>{
+    private final String                               m_instructionsStr;
+    private List<InstructionGraphProgress.Instruction> m_result;
+    private List<InstructionGraphProgress.Instruction> m_oldInstructions;
 
-    public SetInstructionsCmd (InstructionGraphModelInstance modelInstance, String instructionGraphCode) {
-        super ("setInstructionsCmd", modelInstance, "", instructionGraphCode);
+    public SetInstructionsCmd (InstructionGraphModelInstance modelInstance, String target, String instructionGraphCode) {
+        super ("setInstructionsCmd", modelInstance, target, instructionGraphCode);
         m_instructionsStr = instructionGraphCode;
 
     }
 
     @Override
-    public List<InstructionGraph.Instruction> getResult () throws IllegalStateException {
+    public List<InstructionGraphProgress.Instruction> getResult () throws IllegalStateException {
         return m_result;
     }
 
@@ -34,8 +34,8 @@ public class SetInstructionsCmd extends AbstractRainbowModelOperation<List<Instr
 
     @Override
     protected void subExecute () throws RainbowException {
-        List<InstructionGraph.Instruction> instructionList = InstructionGraph.parseFromString (m_instructionsStr);
-        m_oldInstructions = new LinkedList<InstructionGraph.Instruction> (getModelContext ().getModelInstance ()
+        List<InstructionGraphProgress.Instruction> instructionList = InstructionGraphProgress.parseFromString (m_instructionsStr);
+        m_oldInstructions = new LinkedList<InstructionGraphProgress.Instruction> (getModelContext ().getModelInstance ()
                 .getInstructions ());
         getModelContext ().getModelInstance ().setInstructions (instructionList);
     }
@@ -51,7 +51,7 @@ public class SetInstructionsCmd extends AbstractRainbowModelOperation<List<Instr
     }
 
     @Override
-    protected boolean checkModelValidForCommand (InstructionGraph instructionGraph) {
+    protected boolean checkModelValidForCommand (InstructionGraphProgress instructionGraph) {
         return true;
     }
 }

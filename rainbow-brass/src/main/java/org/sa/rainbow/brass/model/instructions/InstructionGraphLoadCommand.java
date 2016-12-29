@@ -2,7 +2,6 @@ package org.sa.rainbow.brass.model.instructions;
 
 import org.apache.commons.io.IOUtils;
 import org.sa.rainbow.core.error.RainbowException;
-import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.IModelsManager;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd;
@@ -10,10 +9,12 @@ import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance.INSTRUCTION_GRAPH_TYPE;
+
 /**
  * Created by schmerl on 12/9/2016.
  */
-public class InstructionGraphLoadCommand extends AbstractLoadModelCmd<InstructionGraph> {
+public class InstructionGraphLoadCommand extends AbstractLoadModelCmd<InstructionGraphProgress> {
 
 
     private final String m_modelName;
@@ -33,12 +34,16 @@ public class InstructionGraphLoadCommand extends AbstractLoadModelCmd<Instructio
         return m_result;
     }
 
+    public ModelReference getModelReference () {
+        return new ModelReference (m_modelName, INSTRUCTION_GRAPH_TYPE);
+    }
+
     @Override
     protected void subExecute () throws RainbowException {
         // Parse the instruction graph. This will be done very simply in the first instance through string manipulation
         try {
             String str = IOUtils.toString (m_stream);
-            InstructionGraph g = InstructionGraph.parseFromString (getModelReference (), str);
+            InstructionGraphProgress g = InstructionGraphProgress.parseFromString (getModelReference (), str);
             m_result = new InstructionGraphModelInstance (g, getOriginalSource ());
             doPostExecute ();
         } catch (IOException e) {

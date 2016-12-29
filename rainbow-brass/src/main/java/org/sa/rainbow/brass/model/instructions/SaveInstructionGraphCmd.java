@@ -4,7 +4,6 @@ import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.IModelsManager;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.AbstractSaveModelCmd;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.FileOutputStream;
 import java.io.PrintStream;
@@ -12,7 +11,7 @@ import java.io.PrintStream;
 /**
  * Created by schmerl on 12/9/2016.
  */
-public class SaveInstructionGraphCmd extends AbstractSaveModelCmd<InstructionGraph> {
+public class SaveInstructionGraphCmd extends AbstractSaveModelCmd<InstructionGraphProgress> {
     public SaveInstructionGraphCmd (IModelsManager mm, String location, FileOutputStream os, String source) {
         super ("saveInstructionGraph", mm, location, os, source);
     }
@@ -24,12 +23,12 @@ public class SaveInstructionGraphCmd extends AbstractSaveModelCmd<InstructionGra
 
     @Override
     public ModelReference getModelReference () {
-        return new ModelReference ("", "InstructionGraph");
+        return new ModelReference ("", "InstructionGraphProgress");
     }
 
     @Override
     protected void subExecute () throws RainbowException {
-        InstructionGraph model = getModelContext ().getModelInstance ();
+        InstructionGraphProgress model = getModelContext ().getModelInstance ();
         try (PrintStream ps = new PrintStream (getStream ())) {
             ps.print (model.toString ());
         }
@@ -46,7 +45,7 @@ public class SaveInstructionGraphCmd extends AbstractSaveModelCmd<InstructionGra
     }
 
     @Override
-    protected boolean checkModelValidForCommand (InstructionGraph instructionGraph) {
+    protected boolean checkModelValidForCommand (InstructionGraphProgress instructionGraph) {
         return true;
     }
 }

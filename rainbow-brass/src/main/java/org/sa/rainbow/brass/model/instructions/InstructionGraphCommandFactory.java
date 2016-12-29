@@ -1,12 +1,9 @@
 package org.sa.rainbow.brass.model.instructions;
 
 import org.sa.rainbow.core.error.RainbowModelException;
-import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelsManager;
-import org.sa.rainbow.core.models.commands.AbstractSaveModelCmd;
 import org.sa.rainbow.core.models.commands.ModelCommandFactory;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +11,7 @@ import java.io.InputStream;
 /**
  * Created by schmerl on 12/9/2016.
  */
-public class InstructionGraphCommandFactory extends ModelCommandFactory<InstructionGraph> {
+public class InstructionGraphCommandFactory extends ModelCommandFactory<InstructionGraphProgress> {
 
     public static InstructionGraphLoadCommand loadCommand (ModelsManager mm, String modelName, InputStream stream,
                                                            String source) {
@@ -45,14 +42,14 @@ public class InstructionGraphCommandFactory extends ModelCommandFactory<Instruct
     }
 
     public SetInstructionsCmd setInstructionsCmd (String instructionGraphCode) {
-        return new SetInstructionsCmd ((InstructionGraphModelInstance )m_modelInstance, instructionGraphCode);
+        return new SetInstructionsCmd ((InstructionGraphModelInstance )m_modelInstance, "", instructionGraphCode);
     }
 
     public SetExecutingInstructionCmd setExecutingInstructionCmd (String instructionLabel) {
-        return new SetExecutingInstructionCmd ((InstructionGraphModelInstance )m_modelInstance, instructionLabel);
+        return new SetExecutingInstructionCmd ((InstructionGraphModelInstance )m_modelInstance, "", instructionLabel);
     }
 
     public SetExecutionFailedCmd setExecutionFailedCmd (String instructionLabel) {
-        return new SetExecutionFailedCmd ((InstructionGraphModelInstance )m_modelInstance, instructionLabel);
+        return new SetExecutionFailedCmd ((InstructionGraphModelInstance )m_modelInstance, "", instructionLabel);
     }
 }

@@ -10,11 +10,11 @@ import java.util.List;
 /**
  * Created by schmerl on 12/9/2016.
  */
-public class SetExecutingInstructionCmd extends AbstractRainbowModelOperation<String, InstructionGraph> {
+public class SetExecutingInstructionCmd extends AbstractRainbowModelOperation<String, InstructionGraphProgress> {
     private String m_instructionLabel;
     private String m_oldInstructionLabel;
 
-    public SetExecutingInstructionCmd (InstructionGraphModelInstance modelInstance, String instructionLabel) {
+    public SetExecutingInstructionCmd (InstructionGraphModelInstance modelInstance, String target, String instructionLabel) {
         super ("setExecutingInstruction", modelInstance, "", instructionLabel);
     }
 
@@ -46,7 +46,7 @@ public class SetExecutingInstructionCmd extends AbstractRainbowModelOperation<St
     }
 
     @Override
-    protected boolean checkModelValidForCommand (InstructionGraph instructionGraph) {
+    protected boolean checkModelValidForCommand (InstructionGraphProgress instructionGraph) {
         return true;
     }
 }

@@ -10,13 +10,13 @@ import java.util.List;
 /**
  * Created by schmerl on 12/9/2016.
  */
-public class SetExecutionFailedCmd extends AbstractRainbowModelOperation<Boolean, InstructionGraph> {
+public class SetExecutionFailedCmd extends AbstractRainbowModelOperation<Boolean, InstructionGraphProgress> {
     private Boolean m_result;
     private boolean m_old;
 
 
-    public SetExecutionFailedCmd (InstructionGraphModelInstance modelInstance, String instructionLabel) {
-        super ("setExecutionFailed", modelInstance, "", instructionLabel);
+    public SetExecutionFailedCmd (InstructionGraphModelInstance modelInstance, String target, String instructionLabel) {
+        super ("setExecutionFailed", modelInstance, target, instructionLabel);
     }
 
     @Override
@@ -50,7 +50,7 @@ public class SetExecutionFailedCmd extends AbstractRainbowModelOperation<Boolean
     }
 
     @Override
-    protected boolean checkModelValidForCommand (InstructionGraph instructionGraph) {
+    protected boolean checkModelValidForCommand (InstructionGraphProgress instructionGraph) {
         return true;
     }
 }
