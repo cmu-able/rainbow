@@ -42,7 +42,6 @@ import java.util.List;
  */
 public class GenericScriptBasedEffector extends AbstractEffector implements IBashBasedScript {
 
-
     private String m_path = null;
 
     private String m_params = null;

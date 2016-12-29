@@ -110,7 +110,7 @@ public abstract class ModelCommandFactory<T> {
                     }
             }
             if (constructor == null) throw new NoSuchMethodException ("Could not find a constructor for " + cmdClass
-                    .getName () + " (AcmeModelInstance, String ...)");
+                    .getName () + " (" + m_instanceClass.getName () + ", String, String ...)");
             Object[] cargs = new Object[1 + args.length];
 //            cargs[0] = commandName;
             cargs[0] = m_modelInstance;

@@ -29,6 +29,7 @@ import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.IModelsManager;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 import org.sa.rainbow.core.ports.eseb.ESEBConstants;
@@ -140,5 +141,7 @@ public abstract class AbstractLoadModelCmd<Type> extends AbstractRainbowModelOpe
         }
         return msgs;
     }
+
+    public abstract ModelReference getModelReference ();
 
 }

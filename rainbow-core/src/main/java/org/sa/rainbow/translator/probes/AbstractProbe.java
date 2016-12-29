@@ -307,7 +307,7 @@ public abstract class AbstractProbe implements IProbe {
         log (data);
     }
 
-    void log (String txt) {
+    protected void log (String txt) {
         String msg = "P[" + id () + "] " + txt;
         if (m_loggingPort != null) {
             m_loggingPort.info (RainbowComponentT.PROBE, msg, LOGGER);

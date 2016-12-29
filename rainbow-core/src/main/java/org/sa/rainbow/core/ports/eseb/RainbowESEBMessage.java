@@ -43,14 +43,18 @@ public class RainbowESEBMessage implements IRainbowMessage {
     private static final String PROP_PREFIX = "__PROP_";
     private static final int    PROP_PREFIX_LENGTH = PROP_PREFIX.length ();
 
-    private final MapDataValue            m_esebMap;
+    private MapDataValue            m_esebMap;
 
     public RainbowESEBMessage () {
         m_esebMap = MAP_STRING_TO_ANY.make ();
     }
 
     public RainbowESEBMessage (MapDataValue mdv) {
-        m_esebMap = mdv;
+        try {
+            m_esebMap = mdv.clone ();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace ();
+        }
     }
 
 

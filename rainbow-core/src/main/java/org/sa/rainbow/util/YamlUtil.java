@@ -469,12 +469,12 @@ public abstract class YamlUtil {
          * key.# items, and construct an array out of the list of values
          */
         for (String arrayKey : arrayKeys) {
-            int length = Integer.parseInt (attr.getInfo ().remove (arrayKey + ".length"));
+            int length = Integer.parseInt (attr.getInfo ()./*remove*/get (arrayKey + ".length"));
             String[] valArray = new String[length]; // new array
             for (int i = 0; i < length; ++i) { // store item in array
                 String itemKey = arrayKey + Util.DOT + i;
                 if (attr.getInfo ().containsKey (itemKey)) {
-                    valArray[i] = attr.getInfo ().remove (itemKey);
+                    valArray[i] = attr.getInfo ()./*remove*/get (itemKey);
                 }
             }
             attr.putArray (arrayKey, valArray);

@@ -103,8 +103,10 @@ public class LocalEffectorManager extends AbstractRainbowRunnable {
                 effectorClass = effAttr.getInfo().get ("class");
                 List<Class<?>> paramList = new ArrayList<> ();
                 List<Object> argsList = new ArrayList<> ();
-                paramList.add (String.class);
+                paramList.add (String.class); // id
+                paramList.add (String.class); // name
                 argsList.add (refId);
+                argsList.add (effAttr.name);
                 if (effAttr.getArrays().size () > 0) {
                     // get list of arguments for a pure Java effector
                     for (Object vObj : effAttr.getArrays().values ()) {

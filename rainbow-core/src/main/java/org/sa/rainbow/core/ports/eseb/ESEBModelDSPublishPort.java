@@ -66,7 +66,8 @@ IModelDSBusSubscriberPort {
                                             msg.getProperty (ESEBConstants.MSG_REPLY_KEY));
                                     reply.setProperty (ESEBConstants.MSG_UPDATE_MODEL_REPLY, result);
                                     reply.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_REPLY);
-                                    msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, m_publisher.id ());
+                                    reply.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, m_publisher.id ());
+//                                    System.out.println ("DS Publishing " + reply.toString ());
                                     getConnectionRole ().publish (reply);
                                 }
                                 catch (RainbowException e) {
@@ -89,31 +90,34 @@ IModelDSBusSubscriberPort {
 
     @Override
     public OperationResult publishOperation (IRainbowOperation cmd) {
-        // Doing this the old way because more than one listener may be interested in this message. The first one to reply, wins.
-        RainbowESEBMessage msg = getConnectionRole().createMessage ();
-        msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, m_publisher.id ());
-        msg.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_UPDATE_MODEL);
-        ESEBCommandHelper.command2Message (cmd, msg);
+//        synchronized (this) {
+            // Doing this the old way because more than one listener may be interested in this message. The first one to reply, wins.
 
-        final OperationResult result = new OperationResult ();
-        result.result = Result.FAILURE;
-        result.reply = "Operation timed out";
+            RainbowESEBMessage msg = getConnectionRole ().createMessage ();
+            msg.setProperty (ESEBConstants.MSG_DELEGATE_ID_KEY, m_publisher.id ());
+            msg.setProperty (ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_UPDATE_MODEL);
+            ESEBCommandHelper.command2Message (cmd, msg);
 
-        try {
-            getConnectionRole().blockingSendAndReceive (msg, new IESEBListener () {
+            final OperationResult result = new OperationResult ();
+            result.result = Result.FAILURE;
+            result.reply = "Operation timed out";
+//            System.out.println ("======> publishOperation[SEND]: " + cmd.toString ());
+            try {
+                getConnectionRole ().blockingSendAndReceive (msg, new IESEBListener () {
 
-                @Override
-                public void receive (RainbowESEBMessage msg) {
-                    OperationResult reply = (OperationResult )msg.getProperty (ESEBConstants.MSG_UPDATE_MODEL_REPLY);
-                    result.result = reply.result;
-                    result.reply = reply.reply;
-                }
-            }, 10000);
-        }
-        catch (RainbowConnectionException e) {
-            result.reply = e.getMessage ();
-        }
-        return result;
+                    @Override
+                    public void receive (RainbowESEBMessage msg) {
+                        OperationResult reply = (OperationResult) msg.getProperty (ESEBConstants.MSG_UPDATE_MODEL_REPLY);
+                        result.result = reply.result;
+                        result.reply = reply.reply;
+                    }
+                }, 1000000);
+            } catch (RainbowConnectionException e) {
+                result.reply = e.getMessage ();
+            }
+//            System.out.println ("======> publishOperation[RECEIVE]: " + cmd.toString () + " = " + result.result);
+            return result;
+//        }
     }
 
     @Override

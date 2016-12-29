@@ -70,7 +70,7 @@ public class GaugeInstanceDescriptionConverter implements TypelibJavaConversionR
     public DataValue from_java (Object value, DataType dst, TypelibJavaConverter converter)
             throws ValueConversionException {
         try {
-            System.out.println ();
+//            System.out.println ();
             if ((dst == null || dst instanceof StructureDataType) && value instanceof GaugeInstanceDescription) {
                 GaugeInstanceDescription gid = (GaugeInstanceDescription )value;
                 StructureDataType sdt = (StructureDataType )dst;

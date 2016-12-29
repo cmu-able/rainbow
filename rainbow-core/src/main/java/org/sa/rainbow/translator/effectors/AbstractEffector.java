@@ -68,7 +68,7 @@ public abstract class AbstractEffector implements IEffector {
      * @param name   the name used to label this IEffector
      * @param kind   the implementation type of this IEffector
      */
-    AbstractEffector (String refID, String name, Kind kind) {
+    protected AbstractEffector (String refID, String name, Kind kind) {
         m_id = refID;
         m_name = name;
         m_kind = kind;

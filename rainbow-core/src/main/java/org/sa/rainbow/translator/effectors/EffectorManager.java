@@ -120,7 +120,10 @@ IModelDSBusPublisherPort {
         if (LOGGER.isDebugEnabled ()) {
             LOGGER.debug ("[EffectorManager]: Effector retrieved " + (effector == null ? "NULL" : id));
         }
-        if (effector == null) return Outcome.UNKNOWN;
+        if (effector == null) {
+            m_reportingPort.info (RainbowComponentT.EFFECTOR_MANAGER, "Failed E[" + id + "] UNKNOWN");
+            return Outcome.UNKNOWN;
+        }
         Outcome result = effector.execute (Arrays.asList (args));
         if (result == Outcome.TIMEOUT) {
             OutcomeHolder h = new OutcomeHolder ();
@@ -133,6 +136,8 @@ IModelDSBusPublisherPort {
                 }
             }
         }
+        //m_reportingPort.info (RainbowComponentT.EFFECTOR_MANAGER, "Returning E[" + id + "] " + result.toString ());
+
         return result;
     }
 

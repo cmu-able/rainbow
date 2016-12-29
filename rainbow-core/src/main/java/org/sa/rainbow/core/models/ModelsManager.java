@@ -55,27 +55,35 @@ import java.util.concurrent.LinkedBlockingQueue;
  * The Models manager is a component that provides access to the models in Rainbow. It should also contain: - a
  * reference to the model update US bus, as a subscriber to events to get information - a reference to the model change
  * bus, as a publisher - all executed commands should publish events to this bus
- * 
- * 
+ *
  * @author Bradley Schmerl: schmerl
- * 
  */
 public class ModelsManager extends AbstractRainbowRunnable implements IModelsManager {
     static final Logger LOGGER = Logger.getLogger (ModelsManager.class);
 
-    /** The bus on which to announce model change events **/
-    protected IModelChangeBusPort                    m_changeBusPort;
+    /**
+     * The bus on which to announce model change events
+     **/
+    protected IModelChangeBusPort m_changeBusPort;
 
-    /** The bus on which requests to change models are made by analyses and gauges **/
-    protected IModelUSBusPort                   m_upstreamBusPort;
+    /**
+     * The bus on which requests to change models are made by analyses and gauges
+     **/
+    protected IModelUSBusPort m_upstreamBusPort;
 
-    /** Provides remote access to the models **/
-    private IModelsManagerPort                         m_remoteModelManagerPort;
+    /**
+     * Provides remote access to the models
+     **/
+    private IModelsManagerPort m_remoteModelManagerPort;
 
-    /** Contains all the models -- keyed by Type then name **/
+    /**
+     * Contains all the models -- keyed by Type then name
+     **/
     protected final Map<String, Map<String, IModelInstance<?>>> m_modelMap = new HashMap<> ();
 
-    /** Contains the queue of commands waiting to be executed on the models **/
+    /**
+     * Contains the queue of commands waiting to be executed on the models
+     **/
     protected final BlockingQueue<Object> commandQ = new LinkedBlockingQueue<> ();
 
     protected final Map<ModelReference, File> m_modelsToSave = new HashMap<> ();
@@ -86,8 +94,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
         super ("Models Manager");
         try {
             m_reportingPort = new DisconnectedRainbowDelegateConnectionPort ();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             // Should never happen
         }
     }
@@ -110,12 +117,16 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                 continue;
             String modelName = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MODEL_NAME_PREFIX + modelNum);
             String path = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MODEL_PATH_PREFIX + modelNum);
-            String saveOnClose = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MODEL_SAVE_PREFIX + modelNum);
+            String saveOnClose = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MODEL_SAVE_PREFIX +
+                                                                          modelNum);
             // It is possible for a model not to be sourced from a file, in which case
             // the load command may just create and register the model in the manager
             File modelPath = null;
             if (path != null) {
-                modelPath = Util.getRelativeToPath (Rainbow.instance ().getTargetPath (), path);
+                modelPath = new File (path);
+                if (!modelPath.isAbsolute ())
+                    modelPath = Util.getRelativeToPath (Rainbow.instance ().getTargetPath (), path);
+
             }
             try {
                 // The factory class should provide a static method for generating a load command that can be
@@ -125,27 +136,34 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                 // Q: is this the right place for that?
                 Class loadClass = Class.forName (factoryClassName);
                 Method method = loadClass.getMethod ("loadCommand", ModelsManager.class, String.class,
-                        InputStream.class, String.class);
-                if (!Modifier.isStatic (method.getModifiers ()) || method.getDeclaringClass () != loadClass) 
+                                                     InputStream.class, String.class);
+                if (!Modifier.isStatic (method.getModifiers ()) || method.getDeclaringClass () != loadClass)
                     throw new UnsupportedOperationException (MessageFormat
-                            .format (
-                                    "The class {0} does not implement a static method loadCommand, used to generate modelInstances",
-                                    method.getDeclaringClass ().getCanonicalName ()));
-                AbstractLoadModelCmd load = (AbstractLoadModelCmd )method.invoke (null, this, modelName,
-                        modelPath == null ? null : new FileInputStream (modelPath), modelPath == null ? null
-                                : modelPath.getAbsolutePath ());
+                                                                     .format (
+                                                                             "The class {0} does not implement a " +
+                                                                                     "static method loadCommand, used" +
+                                                                                     " to generate modelInstances",
+                                                                             method.getDeclaringClass ()
+                                                                                     .getCanonicalName ()));
+                AbstractLoadModelCmd load = (AbstractLoadModelCmd) method.invoke (null, this, modelName,
+                                                                                  modelPath == null ? null : new
+                                                                                          FileInputStream (modelPath)
+                        , modelPath == null ? null
+                                                                                          : modelPath.getAbsolutePath
+                                ());
                 List<? extends IRainbowMessage> events = load.execute (null, m_changeBusPort);
                 // Announce the loading on the change bus.
                 // Q: should this be done in clients or in the commands themselves?
                 if (m_changeBusPort != null) {
                     m_changeBusPort.announce (events);
                 }
-                IModelInstance instance = (IModelInstance )load.getResult ();
+                IModelInstance instance = (IModelInstance) load.getResult ();
                 boolean toSave = saveOnClose == null ? false : Boolean.valueOf (saveOnClose);
                 ModelReference ref = new ModelReference (instance.getModelName (), instance.getModelType ());
                 if (toSave) {
-                    String saveLocation = Rainbow.instance ().getProperty (RainbowConstants.RAINBOW_MODEL_SAVE_LOCATION_PREFIX
-                            + modelNum);
+                    String saveLocation = Rainbow.instance ().getProperty (RainbowConstants
+                                                                                   .RAINBOW_MODEL_SAVE_LOCATION_PREFIX
+                                                                                   + modelNum);
                     if (saveLocation == null) {
                         saveLocation = path;
                     }
@@ -164,18 +182,15 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                         getComponentType (),
                         "Successfully loaded and registered " + instance.getModelName () + ":"
                                 + instance.getModelType (), LOGGER);
-            }
-            catch (ClassNotFoundException e) {
+            } catch (ClassNotFoundException e) {
 
                 String msg = MessageFormat.format (
                         "Could not locate the class ''{0}'' to load the model. ''{1}'' not loaded.", factoryClassName,
                         modelPath);
                 m_reportingPort.error (getComponentType (), msg, e, LOGGER);
-            }
-            catch (IllegalAccessException e) {
+            } catch (IllegalAccessException e) {
                 m_reportingPort.error (getComponentType (), "Exception", e, LOGGER);
-            }
-            catch (FileNotFoundException e) {
+            } catch (FileNotFoundException e) {
                 String msg = MessageFormat.format (
                         "Could not load the model file ''{0}''. It was resolved to the path ''{1}''.", path,
                         modelPath != null ? modelPath.getAbsolutePath () : null);
@@ -190,15 +205,13 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                         "Could not access static method loadCommand in ''{0}''. ''{1}'' not loaded.", factoryClassName,
                         modelPath);
                 m_reportingPort.error (getComponentType (), msg, e, LOGGER);
-            }
-            catch (UnsupportedOperationException e) {
+            } catch (UnsupportedOperationException e) {
                 m_reportingPort.error (getComponentType (), e.getMessage (), e, LOGGER);
             } catch (IllegalArgumentException | InvocationTargetException e) {
                 String msg = MessageFormat.format ("Error calling loadCommand in {0}. {1} not loaded.",
-                        factoryClassName, modelPath);
+                                                   factoryClassName, modelPath);
                 m_reportingPort.error (getComponentType (), msg, e, LOGGER);
-            }
-            catch (Throwable e) {
+            } catch (Throwable e) {
                 m_reportingPort.error (getComponentType (), MessageFormat.format (
                         "There was an error creating the model in {0}. Exception: {1}", modelPath, e.getMessage ()), e);
             }
@@ -213,8 +226,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
             m_upstreamBusPort = RainbowPortFactory.createModelsManagerUSPort (this);
             // Create a remote port for model access
             m_remoteModelManagerPort = RainbowPortFactory.createModelsManagerProviderPort (this);
-        }
-        catch (RainbowConnectionException e) {
+        } catch (RainbowConnectionException e) {
             LOGGER.error ("Could not connect the appropriate ports", e);
         }
     }
@@ -237,14 +249,14 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
     public Collection<? extends IModelInstance<?>> getModelsOfType (String modelType) {
         Map<String, IModelInstance<?>> map = m_modelMap.get (modelType);
         if (map != null) return map.values ();
-        return Collections.<IModelInstance<?>> emptySet ();
+        return Collections.<IModelInstance<?>>emptySet ();
     }
 
-    @SuppressWarnings ("unchecked")
+    @SuppressWarnings("unchecked")
     @Override
     public synchronized <T> IModelInstance<T> getModelInstance (ModelReference modelRef) {
         Map<String, IModelInstance<?>> models = m_modelMap.get (modelRef.getModelType ());
-        if (models != null) return (IModelInstance<T> )models.get (modelRef.getModelName ());
+        if (models != null) return (IModelInstance<T>) models.get (modelRef.getModelName ());
         return null;
     }
 
@@ -253,13 +265,13 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
         Collection<Map<String, IModelInstance<?>>> values = m_modelMap.values ();
         IModelInstance<T> foundModel = null;
         for (Iterator<Map<String, IModelInstance<?>>> iterator = values.iterator (); iterator.hasNext ()
-                && foundModel == null;) {
+                && foundModel == null; ) {
             Map<String, IModelInstance<?>> map = iterator.next ();
             Collection<IModelInstance<?>> values2 = map.values ();
-            for (Iterator<IModelInstance<?>> it2 = values2.iterator (); it2.hasNext () && foundModel == null;) {
+            for (Iterator<IModelInstance<?>> it2 = values2.iterator (); it2.hasNext () && foundModel == null; ) {
                 IModelInstance<?> model = it2.next ();
                 if (resource.equals (model.getOriginalSource ())) {
-                    foundModel = (IModelInstance<T> )model;
+                    foundModel = (IModelInstance<T>) model;
                 }
             }
         }
@@ -271,7 +283,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
             throws RainbowModelException {
         Map<String, IModelInstance<?>> models = m_modelMap.get (modelRef.getModelType ());
         if (models != null) {
-            IModelInstance<T> model = (IModelInstance<T> )models.get (modelRef.getModelName ());
+            IModelInstance<T> model = (IModelInstance<T>) models.get (modelRef.getModelName ());
             if (model != null) {
                 if (models.get (copyName) == null) {
                     try {
@@ -280,23 +292,20 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                             registerModel (new ModelReference (copyName, modelRef.getModelType ()), copy);
                             return copy;
                         }
-                    }
-                    catch (RainbowCopyException e) {
+                    } catch (RainbowCopyException e) {
                         throw new RainbowModelException (e);
                     }
-                }
-                else
+                } else
                     throw new RainbowModelException (MessageFormat.format (
                             "A model with the name ''{0}'' of the type ''{1}'' already exists!", copyName,
                             modelRef.getModelType ()));
-            }
-            else
+            } else
                 throw new RainbowModelException (MessageFormat.format (
                         "No model of type ''{0}'' exists with name ''{1}''!", modelRef.getModelType (),
                         modelRef.getModelName ()));
         }
         throw new RainbowModelException (MessageFormat.format ("The type ''{0}'' is not a registered model type.",
-                modelRef.getModelType ()));
+                                                               modelRef.getModelType ()));
     }
 
     @Override
@@ -310,16 +319,14 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                 synchronized (existingModel) {
                     models.put (modelRef.getModelName (), model);
                 }
-            }
-            else {
+            } else {
                 models.put (modelRef.getModelName (), model);
 //            model.setChangePort (m_changeBusPort);
                 // TODO: attach the change bus port to the model
             }
-        }
-        else
+        } else
             throw new RainbowModelException (MessageFormat.format ("The type ''{0}'' is not a registered model type.",
-                    modelRef.getModelType ()));
+                                                                   modelRef.getModelType ()));
     }
 
     @Override
@@ -330,8 +337,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
             synchronized (model.getModelInstance ()) {
                 success = unregisterModel (models, model);
             }
-        }
-        else {
+        } else {
             // do it the slow way
             synchronized (model.getModelInstance ()) {
                 for (Map<String, IModelInstance<?>> m : m_modelMap.values ()) {
@@ -358,10 +364,9 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                 it.remove ();
                 try {
                     model.dispose ();
-                }
-                catch (RainbowException e1) {
+                } catch (RainbowException e1) {
                     LOGGER.warn ("Failed to dispose of the system in model manager registerd as "
-                            + model.getModelName () + ":" + model.getModelType ());
+                                         + model.getModelName () + ":" + model.getModelType ());
                 }
                 deleted = true;
             }
@@ -371,15 +376,14 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
 
     /**
      * Adds commands to the command queue to be processed by the models
-     * 
-     * @param command
-     *            The command to add
+     *
+     * @param command The command to add
      * @throws IllegalStateException
      * @throws RainbowException
      */
     @Override
     public void requestModelUpdate (IRainbowOperation command) throws IllegalStateException,
-    RainbowException {
+                                                                      RainbowException {
         commandQ.offer (command);
 
 
@@ -397,12 +401,12 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
             }
             rcmd = modelInstance.getCommandFactory ().generateCommand (command.getName (), cargs);
             rcmd.setOrigin (command.getOrigin ());
-        }
-        else {
-            rcmd = (IRainbowModelOperation )command;
+        } else {
+            rcmd = (IRainbowModelOperation) command;
         }
 
-//        if (!(command instanceof IRainbowModelCommand)) throw new RainbowException (MessageFormat.format ("The command {0} is not an executable command.",
+//        if (!(command instanceof IRainbowModelCommand)) throw new RainbowException (MessageFormat.format ("The
+// command {0} is not an executable command.",
 //                command.getCommandName ()));
         return rcmd;
     }
@@ -410,12 +414,12 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
     @Override
     public void requestModelUpdate (List<IRainbowOperation> commands, boolean transaction) {
         LOGGER.info (MessageFormat.format ("Updating the model with {0} commands, transaction = {1}", commands.size (),
-                transaction));
-        // If the command is to be executed transactionally, then add the list to the queue, otherwise add each command individually
+                                           transaction));
+        // If the command is to be executed transactionally, then add the list to the queue, otherwise add each
+        // command individually
         if (transaction) {
             commandQ.offer (commands);
-        }
-        else {
+        } else {
             for (IRainbowOperation command : commands) {
                 commandQ.offer (command);
             }
@@ -448,8 +452,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
             for (Entry<String, IModelInstance<?>> entry : mts.getValue ().entrySet ()) {
                 try {
                     entry.getValue ().dispose ();
-                }
-                catch (RainbowException e) {
+                } catch (RainbowException e) {
                     e.printStackTrace ();
                 }
             }
@@ -472,8 +475,16 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
         Object poll = commandQ.poll ();
         if (poll instanceof IRainbowOperation) {
             try {
-                IRainbowOperation command = (IRainbowOperation )poll;
+                IRainbowOperation command = (IRainbowOperation) poll;
                 IModelInstance<?> modelInstance = getModelInstance (command.getModelReference ());
+                if (modelInstance == null) {
+                    reportingPort ().error (RainbowComponentT.MODEL,
+                                            MessageFormat.format ("Could not find model {0} for " +
+                                                                          "command: {1}",
+                                                                  command.getModelReference ().toString (),
+                                                                  command.toString ()));
+                    return;
+                }
                 IRainbowModelOperation cmd = setupCommand (command, modelInstance);
                 List<? extends IRainbowMessage> events;
                 synchronized (modelInstance.getModelInstance ()) {
@@ -488,16 +499,14 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                     // Announce all the changes on the the change bus
                     m_changeBusPort.announce (events);
                     logModelOperation (command, true);
-                }
-                else {
+                } else {
                     logModelOperation (command, false);
                 }
             } catch (IllegalStateException | RainbowException e) {
                 e.printStackTrace ();
             }
-        }
-        else if (poll instanceof List) {
-            List<IRainbowOperation> commands = (List<IRainbowOperation> )poll;
+        } else if (poll instanceof List) {
+            List<IRainbowOperation> commands = (List<IRainbowOperation>) poll;
             boolean transaction = true;
             // Keep track of successfully executed commands in case we need to undo 
             Stack<IRainbowModelOperation> executedCommands = new Stack<> ();
@@ -508,25 +517,27 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
             if (!commands.isEmpty ()) {
                 IRainbowOperation c = commands.iterator ().next ();
                 // The model being updated should be the same for all commands, so just grab the first one
-                IModelInstance<?> modelInstance = getModelInstance (c.getModelReference ()); //c.getModelReference ().getModelType (), c.getModelReference ().getModelName ());
+                IModelInstance<?> modelInstance = getModelInstance (c.getModelReference ()); //c.getModelReference ()
+                // .getModelType (), c.getModelReference ().getModelName ());
                 synchronized (modelInstance.getModelInstance ()) {
 
                     for (IRainbowOperation cmd : commands) {
                         try {
                             // Make sure that the model is the same 
-                            IModelInstance<?> mi = getModelInstance (cmd.getModelReference ()); //cmd.getModelType (), cmd.getModelName ());
+                            IModelInstance<?> mi = getModelInstance (cmd.getModelReference ()); //cmd.getModelType ()
+                            // , cmd.getModelName ());
                             if (mi != modelInstance) {
                                 if (transaction) {
                                     // If not the same, this is an error so log it as such an mark as incomplete
                                     complete = false;
                                     m_reportingPort.error (RainbowComponentT.MODEL,
-                                            "All commands in a transaction must be on the same model.");
+                                                           "All commands in a transaction must be on the same model.");
                                     break;
-                                }
-                                else {
+                                } else {
                                     // Otherwise, just log a warning
                                     m_reportingPort.warn (RainbowComponentT.MODEL,
-                                            "All commands in the transaction should be on the same model.");
+                                                          "All commands in the transaction should be on the same " +
+                                                                  "model.");
                                 }
                             }
                             // Make sure the command is executable, and add the ancilliary execution information
@@ -535,12 +546,12 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                             if (cmd == null)
                                 throw new RainbowException (MessageFormat.format (
                                         "The command {0} is not an executable command.", cmd.getName ()));
-                            IRainbowModelOperation mcmd = (IRainbowModelOperation )cmd;
+                            IRainbowModelOperation mcmd = (IRainbowModelOperation) cmd;
                             // Execute the command
                             List<? extends IRainbowMessage> cmdEvents = mcmd.execute (mi, m_changeBusPort);
                             if (cmdEvents.size () > 0) {
                                 m_reportingPort.info (RainbowComponentT.MODEL,
-                                        MessageFormat.format ("Executing {0}", mcmd.toString ()));
+                                                      MessageFormat.format ("Executing {0}", mcmd.toString ()));
                             }
 
                             // Store all the generated events to announce later
@@ -565,11 +576,11 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
                                 cmd = executedCommands.pop ();
                                 cmd.undo ();
                             } catch (IllegalStateException | RainbowException e) {
-                                LOGGER.error ("Could not undo the commands. Model could be in an inconsistent state", e);
+                                LOGGER.error ("Could not undo the commands. Model could be in an inconsistent state",
+                                              e);
                             }
                         }
-                    }
-                    else {
+                    } else {
                         // Announce the changes
                         m_changeBusPort.announce (events);
                         logModelOperations (commands, true);
@@ -592,8 +603,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
             String log = MessageFormat.format ("{0,number,#},{1},{2}\n", d.getTime (), command.toString (), success);
             try {
                 file.write (java.nio.ByteBuffer.wrap (log.getBytes ()));
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 LOGGER.error ("Failed to write " + log + " to log file");
             }
         }
@@ -611,8 +621,7 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
         for (FileChannel c : m_modelLogs.values ()) {
             try {
                 c.close ();
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
             }
         }
         super.doTerminate ();
