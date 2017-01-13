@@ -1,8 +1,13 @@
 package org.sa.rainbow.brass.analyses;
 
+import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
+import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
+import org.sa.rainbow.brass.model.mission.MissionState;
+import org.sa.rainbow.brass.model.mission.MissionStateModelInstance;
 import org.sa.rainbow.core.*;
 import org.sa.rainbow.core.analysis.IRainbowAnalysis;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.*;
 
 /**
@@ -14,7 +19,7 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
     public static final String NAME = "BRASS Mission Evaluator";
     private IModelsManagerPort m_modelsManagerPort;
     private IModelUSBusPort m_modelUSPort;
-
+    
     public BRASSMissionAnalyzer () {
         super(NAME);
         String per = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MODEL_EVAL_PERIOD);
@@ -67,6 +72,24 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
     @Override
     protected void runAction () {
         // Do the periodic analysis on the models of interest
+    	ModelReference missionStateRef = new ModelReference("RobotAndEnvironmentState", MissionStateModelInstance.MISSION_STATE_TYPE);
+    	ModelReference igRef = new ModelReference("ExecutingInstructionGraph", InstructionGraphModelInstance.INSTRUCTION_GRAPH_TYPE);
+    	MissionStateModelInstance missionStateModel = (MissionStateModelInstance) m_modelsManagerPort
+    			.<MissionState> getModelInstance(missionStateRef);
+        InstructionGraphModelInstance igModel = (InstructionGraphModelInstance) m_modelsManagerPort
+        		.<InstructionGraphProgress> getModelInstance(igRef);
+        
+        if (missionStateModel != null && igModel != null) {
+        	MissionState missionState = missionStateModel.getModelInstance();
+        	InstructionGraphProgress igProgress = igModel.getModelInstance();
+        	boolean currentOK = igProgress.getCurrentOK();
+        	
+        	if (!currentOK) {
+        		// Current IG failed
+        		// Update map
+        		// Trigger planning for adaptation
+        	}
+        }
     }
 
     @Override
