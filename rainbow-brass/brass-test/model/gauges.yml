@@ -21,7 +21,7 @@ gauge-types:
 
   MissionStateGaugeT:
     commands:
-      location: "MS.setCurrentLocation(double,double)"
+      location: "MS.setCurrentLocation(double,double,double)"
     setupParams:
       targetIP:
         type: String
@@ -55,7 +55,7 @@ gauge-instances:
     type: MissionStateGaugeT
     model: RobotAndEnvironmentState:MissionState
     commands:
-      location: "ms.setCurrentLocation($<x>,$<y>)"
+      location: "ms.setCurrentLocation($<x>,$<y>,$<w>)"
     setupValues:
       targetIP: "${customize.system.target.master}"
     configValues:
