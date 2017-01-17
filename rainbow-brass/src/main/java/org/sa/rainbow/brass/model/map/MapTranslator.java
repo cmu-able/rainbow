@@ -290,7 +290,7 @@ public class MapTranslator {
 	public static void main(String[] args) {
 		 
 			// Use example for the class
-		 	EnvMap dummyMap = new EnvMap();
+		 	EnvMap dummyMap = new EnvMap(null);
 		 	
 		 	dummyMap.AddNode("l1", 0f, 0f);
 		 	dummyMap.AddNode("l2", 10f, 10f);

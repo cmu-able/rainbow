@@ -36,6 +36,11 @@ public class EnvMapArc {
 	public void setEnabled(boolean m_enabled) {
 		this.m_enabled = m_enabled;
 	}
-    
+    public boolean includesNode(String node){
+    	return (m_source.equals(node) || m_target.equals(node));
+    }
+    public boolean includesNodes(String nodea, String nodeb){
+    	return (includesNode(nodea) && includesNode(nodeb));
+    }
     
 }
