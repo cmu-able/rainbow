@@ -9,7 +9,7 @@ import java.io.OutputStream;
 
 public class SaveEnvMapCmd extends AbstractSaveModelCmd<EnvMap> {
 	public SaveEnvMapCmd (IModelsManager mm, String resource, OutputStream os, String source) {
-		super ("saveEnvMapState", mm, resource, os, source);
+		super ("saveEnvMap", mm, resource, os, source);
 	}
 	
 	@Override
