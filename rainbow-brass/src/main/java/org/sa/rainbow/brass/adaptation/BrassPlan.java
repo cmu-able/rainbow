@@ -5,13 +5,11 @@ import org.sa.rainbow.core.adaptation.IEvaluable;
 /**
  * Created by schmerl on 12/13/2016.
  */
-public class BrassPlan implements IEvaluable {
+public abstract class BrassPlan implements IEvaluable {
 
     // Evaluates (executes) the plan, returning a result
     @Override
-    public Object evaluate (Object[] argsIn) {
-        return null;
-    }
+    public abstract Object evaluate (Object[] argsIn);
 
     // This is deprecated
     @Override

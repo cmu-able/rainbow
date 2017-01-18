@@ -50,6 +50,14 @@ public class MissionState {
             return m_time;
         }
 
+        public Heading getHeading () {
+            return m_heading;
+        }
+
+        public double getRotation () {
+            return m_w;
+        }
+
         public LocationRecording copy () {
             LocationRecording l = new LocationRecording ();
             l.m_x = m_x;

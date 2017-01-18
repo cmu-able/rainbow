@@ -2,7 +2,10 @@ package org.sa.rainbow.brass.analyses;
 
 import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
+import org.sa.rainbow.brass.model.map.EnvMap;
+import org.sa.rainbow.brass.model.map.EnvMapModelInstance;
 import org.sa.rainbow.brass.model.mission.MissionState;
+import org.sa.rainbow.brass.model.mission.MissionState.LocationRecording;
 import org.sa.rainbow.brass.model.mission.MissionStateModelInstance;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.IRainbowRunnable;
@@ -81,10 +84,12 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
         // Do the periodic analysis on the models of interest
         ModelReference missionStateRef = new ModelReference("RobotAndEnvironmentState", MissionStateModelInstance.MISSION_STATE_TYPE);
         ModelReference igRef = new ModelReference("ExecutingInstructionGraph", InstructionGraphModelInstance.INSTRUCTION_GRAPH_TYPE);
+        ModelReference emRef = new ModelReference ("Map", EnvMapModelInstance.ENV_MAP_TYPE);
         MissionStateModelInstance missionStateModel = (MissionStateModelInstance) m_modelsManagerPort
                 .<MissionState> getModelInstance(missionStateRef);
         InstructionGraphModelInstance igModel = (InstructionGraphModelInstance) m_modelsManagerPort
                 .<InstructionGraphProgress> getModelInstance(igRef);
+        EnvMapModelInstance envModel = (EnvMapModelInstance )m_modelsManagerPort.<EnvMap> getModelInstance (emRef);
 
         if (missionStateModel != null && igModel != null) {
             MissionState missionState = missionStateModel.getModelInstance();
@@ -93,6 +98,11 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
 
             if (!currentOK && igProgress.getExecutingInstruction () != null) {
                 m_reportingPort.warn (getComponentType (), "Instruction graph failed");
+
+                // Get current robot position
+                LocationRecording pose = missionStateModel.getModelInstance ().getCurrentPose ();
+//                envModel.getCommandFactory ().insertNodeCmd (n, na, nb, Double.toString (pose.getX ()), Double.toString (pose.getY ()));
+
                 // Current IG failed
                 // Update map
                 // Trigger planning for adaptation

@@ -1,0 +1,15 @@
+vars:
+  _effectors.path: "/home/turtlebot/rainbow-brass/targets/brass-test/effectors/"
+  
+effector-types:
+  changeInstructionGraphT:
+    command: setInstructions($<ig>)
+    type: script
+    scriptInfo:
+      path: "${_effectors.path}/setInstructions.sh"
+      argument: "{0}"
+      
+effectors:
+  changeInstructionGraph:
+    effector-type: changeInstructionGraphT
+    location:" ${customize.system.target.master}"
