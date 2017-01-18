@@ -1,17 +1,21 @@
 package org.sa.rainbow.brass.model.instructions;
 
-import org.sa.rainbow.core.models.ModelReference;
-
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Collection;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.sa.rainbow.core.models.ModelReference;
 
 /**
  * Created by schmerl on 12/9/2016.
  */
 public class InstructionGraphProgress {
-
-
 
     public static InstructionGraphProgress parseFromString (ModelReference ref, String igStr) {
         // Remove all the returns from string
@@ -23,12 +27,11 @@ public class InstructionGraphProgress {
 
     public static List<Instruction> parseFromString (String igStr) {
         List<Instruction> instructions = new LinkedList<Instruction> ();
-        igStr = igStr.replace("\n","").replace ("\r", "");
+        igStr = igStr.replace ("\n", "").replace ("\r", "");
         igStr = igStr.substring (2); // Remove P(
-        String[] is = igStr.split("V");
+        String[] is = igStr.split ("V");
         Pattern instructionPattern = Pattern.compile ("\\((.*), do (.*) then (.*).*");
-        for (String i :
-                is) {
+        for (String i : is) {
             Matcher m = instructionPattern.matcher (i);
             if (m.matches ()) {
                 Instruction inst = new Instruction ();
@@ -53,7 +56,6 @@ public class InstructionGraphProgress {
         return m_currentOK;
     }
 
-
     public static class Instruction {
         public String m_label;
         public String m_instruction;
@@ -69,17 +71,17 @@ public class InstructionGraphProgress {
     }
 
     public static class ExecutionObservation {
-        String label;
+        String  label;
         boolean successful;
-        long startTime;
-        long endTime;
+        long    startTime;
+        long    endTime;
     }
 
-    private Map<String, Instruction> m_instructions = new HashMap<> ();
-    private LinkedList<Instruction> m_instructionList;
-    private final ModelReference           m_model;
-    private String m_currentNode;
-    private boolean m_currentOK;
+    private Map<String, Instruction>    m_instructions     = new HashMap<> ();
+    private LinkedList<Instruction>     m_instructionList;
+    private final ModelReference        m_model;
+    private String                      m_currentNode;
+    private boolean                     m_currentOK        = true;
     private Deque<ExecutionObservation> m_executionHistory = new ArrayDeque<> ();
 
     public InstructionGraphProgress (ModelReference model) {
@@ -95,8 +97,7 @@ public class InstructionGraphProgress {
         ig.m_instructions = new HashMap<> ();
         ig.m_executionHistory = new ArrayDeque<> (m_executionHistory);
 
-        for (Map.Entry<String,Instruction> i :
-                m_instructions.entrySet ()) {
+        for (Map.Entry<String, Instruction> i : m_instructions.entrySet ()) {
             ig.m_instructions.put (i.getKey (), i.getValue ().copy ());
         }
 
@@ -133,19 +134,20 @@ public class InstructionGraphProgress {
     }
 
     // Note: this assumes sequential instructions
+    @Override
     public String toString () {
         StringBuffer b = new StringBuffer ();
         b.append ("P(");
         if (!m_instructionList.isEmpty ()) {
-            outputInstruction(m_instructionList.get (0), 1, b);
-            b.append("\n");
+            outputInstruction (m_instructionList.get (0), 1, b);
+            b.append ("\n");
             int i = 0;
             for (i = 1; i < m_instructionList.size (); i++) {
-                outputInstruction (m_instructionList.get (i), i+ 1, b);
+                outputInstruction (m_instructionList.get (i), i + 1, b);
                 b.append ("::\n");
             }
             b.append ("V(");
-            b.append (i+1);
+            b.append (i + 1);
             b.append (", end)::\n");
         }
         b.append ("nil)");
@@ -158,7 +160,7 @@ public class InstructionGraphProgress {
         b.append (", do ");
         b.append (instruction.m_instruction);
         b.append (" then ");
-        b.append (i+1);
+        b.append (i + 1);
         b.append (")");
     }
 

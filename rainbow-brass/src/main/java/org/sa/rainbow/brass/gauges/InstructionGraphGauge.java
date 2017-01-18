@@ -1,16 +1,16 @@
 package org.sa.rainbow.brass.gauges;
 
-import org.sa.rainbow.core.error.RainbowException;
-import org.sa.rainbow.core.gauges.RegularPatternGauge;
-import org.sa.rainbow.core.models.commands.IRainbowOperation;
-import org.sa.rainbow.core.util.TypedAttribute;
-import org.sa.rainbow.core.util.TypedAttributeWithValue;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.sa.rainbow.core.error.RainbowException;
+import org.sa.rainbow.core.gauges.RegularPatternGauge;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
+import org.sa.rainbow.core.util.TypedAttribute;
+import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
 /**
  * Created by schmerl on 12/27/2016.
@@ -20,9 +20,7 @@ public class InstructionGraphGauge extends RegularPatternGauge {
     protected static final String IG   = "IGProgress";
     protected static final String NEWIG = "NewIG";
 
-    protected static final String INSTRUCTION_PATTERN = "topic: /ig_action_server/feedback/feedback/sequence.*(\\d+\\" +
-            ".\\d+)" +
-            ":(.*):(.*)";
+    protected static final String INSTRUCTION_PATTERN = "topic: /ig_action_server/feedback/feedback/sequence.*(\\d+)\\.\\d+:([^:]*):(.*)";
     protected static final String NEWIG_PATTERN = "topic: /ig_action_server/feedback/feedback/sequence.*Received new " +
             "valid IG: (.*)";
 
@@ -38,8 +36,8 @@ public class InstructionGraphGauge extends RegularPatternGauge {
      * @param mappings     the list of Gauge Value to Model Property mappings
      */
     public InstructionGraphGauge (String id, long beaconPeriod, TypedAttribute gaugeDesc, TypedAttribute modelDesc,
-                                  List<TypedAttributeWithValue> setupParams, Map<String, IRainbowOperation> mappings)
-            throws RainbowException {
+            List<TypedAttributeWithValue> setupParams, Map<String, IRainbowOperation> mappings)
+                    throws RainbowException {
         super (NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
         addPattern (IG, Pattern.compile (INSTRUCTION_PATTERN, Pattern.DOTALL));
         addPattern (NEWIG, Pattern.compile (NEWIG_PATTERN, Pattern.DOTALL));
@@ -57,7 +55,7 @@ public class InstructionGraphGauge extends RegularPatternGauge {
                 pap.put (operation.getParameters ()[0], node);
                 issueCommand (operation, pap);
             }
-            else if ("FAILED".equals (status)) {
+            else if (status.startsWith ("FAILED")) {
                 IRainbowOperation operation = m_commands.get ("current-failed");
                 Map<String,String> pap = new HashMap<> ();
                 pap.put (operation.getParameters ()[0], node);
