@@ -11,6 +11,8 @@ import org.sa.rainbow.core.ports.IModelsManagerPort;
 import org.sa.rainbow.core.ports.IRainbowAdaptationEnqueuePort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
+import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowModelChangeCallback;
+import org.sa.rainbow.core.event.IRainbowMessage;
 
 /**
  * Created by schmerl on 12/13/2016.
@@ -20,7 +22,8 @@ import org.sa.rainbow.core.ports.RainbowPortFactory;
  * <p>
  * BrassPlan (the type parameter) is the evaluable plan to execute
  */
-public class BRASSAdaptationPlanner extends AbstractRainbowRunnable implements IAdaptationManager<BrassPlan> {
+public class BRASSAdaptationPlanner extends AbstractRainbowRunnable implements IAdaptationManager<BrassPlan>
+																			 , IRainbowModelChangeCallback {
 
     public static final String NAME       = "BRASS Adaptation Planner";
     // The thread "sleep" time. runAction will be called every 10 seconds in this case
@@ -62,6 +65,12 @@ public class BRASSAdaptationPlanner extends AbstractRainbowRunnable implements I
         m_adaptationEnqueuePort = RainbowPortFactory.createAdaptationEnqueuePort (modelRef);
     }
 
+    @Override
+    public void onEvent (ModelReference mr, IRainbowMessage message){
+    	// TODO: Complete code here
+    }
+    
+    
     @Override
     public void markStrategyExecuted (AdaptationTree<BrassPlan> plan) {
         // Insert code here to record when a plan has been executed by the execution manager
