@@ -292,15 +292,15 @@ public class MapTranslator {
 			// Use example for the class
 		 	EnvMap dummyMap = new EnvMap(null);
 		 	
-		 	dummyMap.AddNode("l1", 0f, 0f);
-		 	dummyMap.AddNode("l2", 10f, 10f);
-		 	dummyMap.AddNode("l3", 10f, 10f);
-		 	dummyMap.AddNode("l4", 10f, 10f);
-		 	dummyMap.AddNode("l5", 10f, 10f);
-		 	dummyMap.AddNode("l6", 10f, 10f);
-		 	dummyMap.AddNode("l7", 10f, 10f);
-		 	dummyMap.AddNode("l8", 10f, 10f);
-		 	dummyMap.AddNode("ls", 10f, 10f);
+		 	dummyMap.AddNode("l1", 14.474f, 16f);
+		 	dummyMap.AddNode("l2", 19.82f, 16f);
+		 	dummyMap.AddNode("l3", 42.5f, 16f);
+		 	dummyMap.AddNode("l4", 52.22f, 16f);
+		 	dummyMap.AddNode("l5", 52.22f, 26.26f);
+		 	dummyMap.AddNode("l6", 42.5f, 26.26f);
+		 	dummyMap.AddNode("l7", 19.82f, 26.26f);
+		 	dummyMap.AddNode("l8", 19.82f, 20.05f);
+		 	dummyMap.AddNode("ls", 52.22f, 10.6f);
 		 	
 		 	dummyMap.addArc("l1", "l2", 5.436f, true);
 		 	dummyMap.addArc("l2", "l1", 5.436f, true);
