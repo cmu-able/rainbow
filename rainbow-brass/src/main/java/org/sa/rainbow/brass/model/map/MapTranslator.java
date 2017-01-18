@@ -1,5 +1,8 @@
 package org.sa.rainbow.brass.model.map;
 
+import java.io.*;
+
+
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.map.EnvMapArc;
 import org.sa.rainbow.brass.model.map.EnvMapNode;
@@ -11,6 +14,7 @@ import org.sa.rainbow.brass.model.map.BatteryPredictor;
 
 
 import java.util.*;
+import java.io.BufferedWriter;
 import java.text.*;
 
 /**
@@ -287,43 +291,61 @@ public class MapTranslator {
 		 return buf;
 	}
 	
+	/**
+	 * Generates and exports the PRISM specification for an adaptation scenario to a text file
+	 * @param f String filename to export PRISM specification
+	 */
+	public static void exportMapTranslation(String f){
+		try {
+			BufferedWriter out = new BufferedWriter (new FileWriter(f));
+			out.write(getMapTranslation());
+			out.close();
+		}
+		catch (IOException e){
+			System.out.println("Error exporting PRISM map translation");
+		}
+	}
+	
+	public MapTranslator(){
+		
+	}
+	
 	public static void main(String[] args) {
-		 
-			// Use example for the class
-		 	EnvMap dummyMap = new EnvMap(null);
-		 	
-		 	dummyMap.AddNode("l1", 14.474f, 16f);
-		 	dummyMap.AddNode("l2", 19.82f, 16f);
-		 	dummyMap.AddNode("l3", 42.5f, 16f);
-		 	dummyMap.AddNode("l4", 52.22f, 16f);
-		 	dummyMap.AddNode("l5", 52.22f, 26.26f);
-		 	dummyMap.AddNode("l6", 42.5f, 26.26f);
-		 	dummyMap.AddNode("l7", 19.82f, 26.26f);
-		 	dummyMap.AddNode("l8", 19.82f, 20.05f);
-		 	dummyMap.AddNode("ls", 52.22f, 10.6f);
-		 	
-		 	dummyMap.addArc("l1", "l2", 5.436f, true);
-		 	dummyMap.addArc("l2", "l1", 5.436f, true);
-		 	dummyMap.addArc("l2", "l3", 22.572f, true);
-		 	dummyMap.addArc("l3", "l2", 22.572f, true);
-		 	dummyMap.addArc("l3", "l4", 9.72f, true);
-		 	dummyMap.addArc("l4", "l3", 9.72f, true);
-		 	dummyMap.addArc("l2", "l8", 4.05f, true);
-		 	dummyMap.addArc("l8", "l2", 4.05f, true);
-		 	dummyMap.addArc("l8", "l7", 6.21f, true);
-		 	dummyMap.addArc("l7", "l8", 6.21f, true);
-		 	dummyMap.addArc("l7", "l6", 22.572f, true);
-		 	dummyMap.addArc("l6", "l7", 22.572f, true);
-		 	dummyMap.addArc("l3", "l6", 10.26f, true);
-		 	dummyMap.addArc("l6", "l3", 3f, true);
-		 	dummyMap.addArc("l4", "l5", 10.26f, true);
-		 	dummyMap.addArc("l5", "l4", 10.26f, true);
-		 	dummyMap.addArc("l6", "l5", 9.72f, true);
-		 	dummyMap.addArc("l5", "l6", 9.72f, true);
-		 	dummyMap.addArc("l4", "ls", 5.4f, true);
-		 	dummyMap.addArc("ls", "l4", 5.4f, true);
-
-		 	setMap(dummyMap);
-		 	System.out.println(getMapTranslation());	        
+		// For the time being, this initializes the translator with a hardwired version of the simplemap
+				// for BRASS demonstration
+				EnvMap dummyMap = new EnvMap(null);
+			 	
+			 	dummyMap.AddNode("l1", 14.474f, 16f);
+			 	dummyMap.AddNode("l2", 19.82f, 16f);
+			 	dummyMap.AddNode("l3", 42.5f, 16f);
+			 	dummyMap.AddNode("l4", 52.22f, 16f);
+			 	dummyMap.AddNode("l5", 52.22f, 26.26f);
+			 	dummyMap.AddNode("l6", 42.5f, 26.26f);
+			 	dummyMap.AddNode("l7", 19.82f, 26.26f);
+			 	dummyMap.AddNode("l8", 19.82f, 20.05f);
+			 	dummyMap.AddNode("ls", 52.22f, 10.6f);
+			 	
+			 	dummyMap.addArc("l1", "l2", 5.436f, true);
+			 	dummyMap.addArc("l2", "l1", 5.436f, true);
+			 	dummyMap.addArc("l2", "l3", 22.572f, true);
+			 	dummyMap.addArc("l3", "l2", 22.572f, true);
+			 	dummyMap.addArc("l3", "l4", 9.72f, true);
+			 	dummyMap.addArc("l4", "l3", 9.72f, true);
+			 	dummyMap.addArc("l2", "l8", 4.05f, true);
+			 	dummyMap.addArc("l8", "l2", 4.05f, true);
+			 	dummyMap.addArc("l8", "l7", 6.21f, true);
+			 	dummyMap.addArc("l7", "l8", 6.21f, true);
+			 	dummyMap.addArc("l7", "l6", 22.572f, true);
+			 	dummyMap.addArc("l6", "l7", 22.572f, true);
+			 	dummyMap.addArc("l3", "l6", 10.26f, true);
+			 	dummyMap.addArc("l6", "l3", 3f, true);
+			 	dummyMap.addArc("l4", "l5", 10.26f, true);
+			 	dummyMap.addArc("l5", "l4", 10.26f, true);
+			 	dummyMap.addArc("l6", "l5", 9.72f, true);
+			 	dummyMap.addArc("l5", "l6", 9.72f, true);
+			 	dummyMap.addArc("l4", "ls", 5.4f, true);
+			 	dummyMap.addArc("ls", "l4", 5.4f, true);
+			 	setMap(dummyMap);
+		System.out.println(getMapTranslation()); // Class test
 	}
 }
