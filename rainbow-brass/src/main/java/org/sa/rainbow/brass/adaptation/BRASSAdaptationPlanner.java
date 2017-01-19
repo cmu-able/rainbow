@@ -1,6 +1,14 @@
 package org.sa.rainbow.brass.adaptation;
 
+import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
+import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
+import org.sa.rainbow.brass.model.map.EnvMap;
+import org.sa.rainbow.brass.model.map.EnvMapModelInstance;
+import org.sa.rainbow.brass.model.map.MapTranslator;
+import org.sa.rainbow.brass.adaptation.PrismConnector;
+import org.sa.rainbow.brass.model.mission.MissionState;
 import org.sa.rainbow.brass.model.mission.MissionStateModelInstance;
+import org.sa.rainbow.brass.model.mission.MissionState.LocationRecording;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.adaptation.AdaptationTree;
@@ -16,6 +24,8 @@ import org.sa.rainbow.core.ports.IModelsManagerPort;
 import org.sa.rainbow.core.ports.IRainbowAdaptationEnqueuePort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
+
+
 
 /**
  * Created by schmerl on 12/13/2016. This class implements the BRASS planner. This should either (a) run periodically
@@ -132,8 +142,23 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
             // Generate the plan
             // Enqueue the plan
             // (see AdaptationManager for how to enqueue the plan)
-            // TODO: Javier
-            // Invoke PRISM to get the model
+            // Javier : The code below retrieves the map, translates it, and invokes prism to generate the policy
+        	// TODO: Planning parameters are now hard-wired. We need to retrieve: label of source and target locations
+        	// to invoke PRISM.
+        	 ModelReference emRef = new ModelReference ("Map", EnvMapModelInstance.ENV_MAP_TYPE);
+             EnvMapModelInstance envModel = (EnvMapModelInstance )m_modelsManagerPort.<EnvMap> getModelInstance (emRef);
+
+             if (envModel!=null) {
+                 EnvMap map = envModel.getModelInstance();
+                 MapTranslator mt = new MapTranslator();
+                 PrismConnector pc = new PrismConnector(null); // Does this work with hard-wired props in the constructor?
+                 
+                 mt.setMap(map);
+                 mt.exportMapTranslation(pc.getPrismModelLocation());
+                 
+                 pc.invoke();
+             }
+                         
             // TODO: Ashutosh
             // Translate model to the IG
             // Create a NewInstrcutionGraph object and enqueue it on the adaptation port

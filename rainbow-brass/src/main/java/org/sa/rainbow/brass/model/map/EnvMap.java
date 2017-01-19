@@ -18,6 +18,7 @@ public class EnvMap {
         m_last_insertion = new NodeInsertion();
 		m_nodes = new HashMap<> ();
         m_arcs = new LinkedList<EnvMapArc> ();
+        initWithSimpleMap(); // TODO: Substitute hardwired version of the map by one parsed from file
     }
 
     public ModelReference getModelReference () {
@@ -61,6 +62,13 @@ public class EnvMap {
 		m_arcs.add(new EnvMapArc(source, target, distance, enabled));
 	}
 	
+	public float getNodeX(String n){
+		return m_nodes.get(n).getX();
+	}
+	
+	public float getNodeY(String n){
+		return m_nodes.get(n).getY();
+	}
 	
 	/**
 	 * Eliminates all arcs in map between nodes with labels na and nb
@@ -133,6 +141,40 @@ public class EnvMap {
 		addArc (n, na, distanceBetween(na,n), true);
 		addArc (nb, n, distanceBetween(nb,n), false);
 		addArc (n, nb, distanceBetween(nb,n), false);
+	}
+	
+	
+	public void initWithSimpleMap(){
+	 	AddNode("l1", 14.474f, 16f);
+	 	AddNode("l2", 19.82f, 16f);
+	 	AddNode("l3", 42.5f, 16f);
+	 	AddNode("l4", 52.22f, 16f);
+	 	AddNode("l5", 52.22f, 26.26f);
+	 	AddNode("l6", 42.5f, 26.26f);
+	 	AddNode("l7", 19.82f, 26.26f);
+	 	AddNode("l8", 19.82f, 20.05f);
+	 	AddNode("ls", 52.22f, 10.6f);
+	 	
+	 	addArc("l1", "l2", 5.436f, true);
+	 	addArc("l2", "l1", 5.436f, true);
+	 	addArc("l2", "l3", 22.572f, true);
+	 	addArc("l3", "l2", 22.572f, true);
+	 	addArc("l3", "l4", 9.72f, true);
+	 	addArc("l4", "l3", 9.72f, true);
+	 	addArc("l2", "l8", 4.05f, true);
+	 	addArc("l8", "l2", 4.05f, true);
+	 	addArc("l8", "l7", 6.21f, true);
+	 	addArc("l7", "l8", 6.21f, true);
+	 	addArc("l7", "l6", 22.572f, true);
+	 	addArc("l6", "l7", 22.572f, true);
+	 	addArc("l3", "l6", 10.26f, true);
+	 	addArc("l6", "l3", 3f, true);
+	 	addArc("l4", "l5", 10.26f, true);
+	 	addArc("l5", "l4", 10.26f, true);
+	 	addArc("l6", "l5", 9.72f, true);
+	 	addArc("l5", "l6", 9.72f, true);
+	 	addArc("l4", "ls", 5.4f, true);
+	 	addArc("ls", "l4", 5.4f, true);
 	}
 	
 }

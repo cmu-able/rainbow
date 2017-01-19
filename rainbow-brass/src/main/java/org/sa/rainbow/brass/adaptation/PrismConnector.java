@@ -47,9 +47,14 @@ public class PrismConnector {
         m_prismParameters = props.getProperty (PRISM_PARAMETERS_PROPKEY);
         m_prismAdvExport = props.getProperty (PRISM_ADV_EXPORT_PROPKEY);
     }
-
+    
+    public String getPrismModelLocation(){
+    	return m_prismModel;
+    }
+    
     public void invoke () {
-        String line;
+        String line;       
+        
         try { 
             Process p = Runtime.getRuntime ().exec (m_prismBin + " " + m_prismModel + " " + m_prismProperties
                     + " -prop 1 -ex -const " + m_prismParameters + " -exportadv " + m_prismAdvExport);
