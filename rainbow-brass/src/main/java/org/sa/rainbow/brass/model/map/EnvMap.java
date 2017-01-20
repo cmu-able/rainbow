@@ -145,15 +145,15 @@ public class EnvMap {
 	
 	
 	public void initWithSimpleMap(){
-	 	AddNode("l1", 14.474f, 16f);
-	 	AddNode("l2", 19.82f, 16f);
-	 	AddNode("l3", 42.5f, 16f);
-	 	AddNode("l4", 52.22f, 16f);
-	 	AddNode("l5", 52.22f, 26.26f);
-	 	AddNode("l6", 42.5f, 26.26f);
-	 	AddNode("l7", 19.82f, 26.26f);
-	 	AddNode("l8", 19.82f, 20.05f);
-	 	AddNode("ls", 52.22f, 10.6f);
+	 	AddNode("l1", 14.474f, 69f);
+	 	AddNode("l2", 19.82f, 69f);
+	 	AddNode("l3", 42.5f, 69f);
+	 	AddNode("l4", 52.22f, 69f);
+	 	AddNode("l5", 52.22f, 79.26f);
+	 	AddNode("l6", 42.5f, 79.26f);
+	 	AddNode("l7", 19.82f, 79.26f);
+	 	AddNode("l8", 19.82f, 73.05f);
+	 	AddNode("ls", 52.22f, 63.6f);
 	 	
 	 	addArc("l1", "l2", 5.436f, true);
 	 	addArc("l2", "l1", 5.436f, true);
