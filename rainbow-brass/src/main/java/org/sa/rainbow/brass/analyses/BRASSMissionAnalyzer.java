@@ -7,6 +7,7 @@ import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.map.EnvMapModelInstance;
+import org.sa.rainbow.brass.model.map.InsertNodeCmd;
 import org.sa.rainbow.brass.model.mission.MissionCommandFactory;
 import org.sa.rainbow.brass.model.mission.MissionState;
 import org.sa.rainbow.brass.model.mission.MissionState.LocationRecording;
@@ -135,11 +136,22 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
                 String nb = envMap.getNode(targetX, targetY).getLabel();
                 
                 // Update the environment map
-                envModel.getCommandFactory ().insertNodeCmd (n, na, nb, Double.toString (pose.getX ()), Double.toString (pose.getY ()));
+                InsertNodeCmd insertNodeCmd = envModel.getCommandFactory ()
+                		.insertNodeCmd (n, na, nb, Double.toString (pose.getX ()), Double.toString (pose.getY ()));
                 
-                // Set robot obstructed -- trigger planning for adaptation
-                SetRobotObstructedCmd command = missionStateModel.getCommandFactory().setRobotObstructedCmd("true");
-                m_modelUSPort.updateModel(command);
+                // Set robot obstructed flag -- trigger planning for adaptation
+                SetRobotObstructedCmd robotObstructedCmd = missionStateModel.getCommandFactory().setRobotObstructedCmd("true");
+                
+                // Send the commands
+                List<IRainbowOperation> cmds = new ArrayList<> ();
+                cmds.add(insertNodeCmd);
+                cmds.add(robotObstructedCmd);
+                m_modelUSPort.updateModel(cmds, true);
+            } else if (currentOK && igProgress.getCurrentInstruction () != null && missionState.isRobotObstructed ()) {
+            	// New IG resumed after robot obstructed
+            	// Clear robot obstructed flag
+            	SetRobotObstructedCmd clearRobotObstructedCmd = missionStateModel.getCommandFactory().setRobotObstructedCmd("false");
+            	m_modelUSPort.updateModel(clearRobotObstructedCmd);
             }
         }
     }

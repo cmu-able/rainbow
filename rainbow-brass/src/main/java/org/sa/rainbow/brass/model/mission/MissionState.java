@@ -76,7 +76,7 @@ public class MissionState {
     private Deque<Double>            m_timeScore                = new ArrayDeque<> ();
     private Deque<Double>            m_accuracyScore            = new ArrayDeque<> ();
     private Deque<Double>            m_safetyScore              = new ArrayDeque<> ();
-    private boolean                  m_robotObstructed;
+    private boolean                  m_robotObstructed			= false;
 
     public MissionState (ModelReference model) {
         m_model = model;
