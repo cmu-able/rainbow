@@ -59,8 +59,6 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
 
             return MissionStateModelInstance.MISSION_STATE_TYPE.equals (modelType)
                     && "RobotAndEnvironmentState".equals (modelName)
-                    // TODO: Make sure setRobotObstructed to be the same as the command that
-                    // Roykrong creates
                     && "setRobotObstructed".equals (commandName);
         }
     };

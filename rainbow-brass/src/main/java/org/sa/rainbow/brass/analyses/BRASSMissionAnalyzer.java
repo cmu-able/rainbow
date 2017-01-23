@@ -11,7 +11,7 @@ import org.sa.rainbow.brass.model.mission.MissionCommandFactory;
 import org.sa.rainbow.brass.model.mission.MissionState;
 import org.sa.rainbow.brass.model.mission.MissionState.LocationRecording;
 import org.sa.rainbow.brass.model.mission.MissionStateModelInstance;
-import org.sa.rainbow.brass.model.mission.StallMissionCmd;
+import org.sa.rainbow.brass.model.mission.SetRobotObstructedCmd;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.IRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
@@ -137,8 +137,8 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
                 // Update the environment map
                 envModel.getCommandFactory ().insertNodeCmd (n, na, nb, Double.toString (pose.getX ()), Double.toString (pose.getY ()));
                 
-                // Trigger planning for adaptation
-                StallMissionCmd command = missionStateModel.getCommandFactory().stallMissionCmd();
+                // Set robot obstructed -- trigger planning for adaptation
+                SetRobotObstructedCmd command = missionStateModel.getCommandFactory().setRobotObstructedCmd("true");
                 m_modelUSPort.updateModel(command);
             }
         }

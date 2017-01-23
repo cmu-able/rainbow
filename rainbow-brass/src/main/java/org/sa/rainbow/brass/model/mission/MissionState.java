@@ -76,7 +76,7 @@ public class MissionState {
     private Deque<Double>            m_timeScore                = new ArrayDeque<> ();
     private Deque<Double>            m_accuracyScore            = new ArrayDeque<> ();
     private Deque<Double>            m_safetyScore              = new ArrayDeque<> ();
-    private boolean                  m_errorDetected;
+    private boolean                  m_robotObstructed;
 
     public MissionState (ModelReference model) {
         m_model = model;
@@ -104,12 +104,12 @@ public class MissionState {
     	return m_locationHistory.getFirst();
     }
     
-    public void setErrorDetected (boolean errorDetected) {
-    	m_errorDetected = errorDetected;
+    public void setRobotObstructed (boolean robotObstructed) {
+    	m_robotObstructed = robotObstructed;
     }
     
-    public boolean isErrorDetected () {
-    	return m_errorDetected;
+    public boolean isRobotObstructed () {
+    	return m_robotObstructed;
     }
 
     public MissionState copy () {
