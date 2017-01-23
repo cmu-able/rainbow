@@ -111,7 +111,7 @@ public class EnvMap {
 		}
 		
 	}
-	
+		
 	public NodeInsertion getNodeInsertionResult () {
 		return m_last_insertion.copy();
 	}
@@ -148,6 +148,16 @@ public class EnvMap {
 		addArc (n, na, distanceBetween(na,n), true);
 		addArc (nb, n, distanceBetween(nb,n), false);
 		addArc (n, nb, distanceBetween(nb,n), false);
+	}
+	
+	public EnvMapNode getNode (double x, double y) {
+		for (EnvMapNode node : m_nodes.values()) {
+			if (node.getX() == x && node.getY() == y) {
+				return node;
+			}
+		}
+		
+		return null;
 	}
 	
 	

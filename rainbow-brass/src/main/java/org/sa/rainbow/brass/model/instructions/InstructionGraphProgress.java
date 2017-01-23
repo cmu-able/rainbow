@@ -65,9 +65,13 @@ public class InstructionGraphProgress {
         public String m_instruction;
         public String m_next;
         
-        private double m_x;
-        private double m_y;
-        private double m_w;
+        private double m_targetX;
+        private double m_targetY;
+        private double m_targetW;
+        private double m_sourceX;
+        private double m_sourceY;
+        private double m_sourceW;
+        private boolean m_hasSourcePose = false;
         
         public Instruction copy () {
             Instruction i = new Instruction ();
@@ -77,26 +81,57 @@ public class InstructionGraphProgress {
             return i;
         }
         
+        /**
+         * This method is called every time this instruction is set as the execution instruction in
+         * {@link InstructionGraphProgress}.
+         */
         public void parseMoveAbsTargetPose () {
         	Pattern moveAbsPattern = Pattern.compile ("MoveAbs\\((.+), (.+), (.+)\\)");
         	Matcher m = moveAbsPattern.matcher (m_instruction);
         	if (m.matches ()) {
-        		m_x = Double.parseDouble (m.group (1));
-        		m_y = Double.parseDouble (m.group (2));
-        		m_w = Double.parseDouble (m.group (3));
+        		m_targetX = Double.parseDouble (m.group (1));
+        		m_targetY = Double.parseDouble (m.group (2));
+        		m_targetW = Double.parseDouble (m.group (3));
             }
         }
         
+        /**
+         * This method is called every time this instruction is set as the execution instruction in
+         * {@link InstructionGraphProgress} and there is a previous instruction.
+         */
+        public void setMoveAbsSourcePose (double sourceX, double sourceY, double sourceW) {
+        	m_sourceX = sourceX;
+        	m_sourceY = sourceY;
+        	m_sourceW = sourceW;
+        	m_hasSourcePose = true;
+        }
+        
+        public boolean hasMoveAbsSourcePose () {
+        	return m_hasSourcePose;
+        }
+        
         public double getTargetX () {
-        	return m_x;
+        	return m_targetX;
         }
         
         public double getTargetY () {
-        	return m_y;
+        	return m_targetY;
         }
         
         public double getTargetHeading () {
-        	return m_w;
+        	return m_targetW;
+        }
+        
+        public double getSourceX () {
+        	return m_sourceX;
+        }
+        
+        public double getSourceY () {
+        	return m_sourceY;
+        }
+        
+        public double getSourceHeading () {
+        	return m_sourceW;
         }
     }
 
@@ -148,8 +183,24 @@ public class InstructionGraphProgress {
     }
 
     public void setExecutingInstruction (String instLabel) {
-        if (m_instructions.containsKey (instLabel)) {
+        if (m_instructions.containsKey (instLabel) && m_currentNode != null) {
+        	// Target pose of previous IG node becomes source pose of current IG node
+        	String prevNode = m_currentNode;
+        	Instruction prevInst = m_instructions.get(prevNode);
+        	double prevTargetX = prevInst.getTargetX();
+        	double prevTargetY = prevInst.getTargetY();
+        	double prevTargetW = prevInst.getTargetHeading();
+        	
+        	// Set executing instruction and its source pose
             m_currentNode = instLabel;
+            Instruction currentInst = m_instructions.get(m_currentNode);
+            currentInst.setMoveAbsSourcePose(prevTargetX, prevTargetY, prevTargetW);
+            currentInst.parseMoveAbsTargetPose();
+        } else if (m_instructions.containsKey (instLabel) && m_currentNode == null) {
+        	// Set executing instruction but no source pose because this is the first node
+        	m_currentNode = instLabel;
+        	Instruction currentInst = m_instructions.get(m_currentNode);
+        	currentInst.parseMoveAbsTargetPose();
         }
 //        ExecutionObservation observation = new ExecutionObservation ();
 //        observation.startTime = new Date().getTime ();

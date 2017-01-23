@@ -101,7 +101,6 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
             MissionState missionState = missionStateModel.getModelInstance();
             InstructionGraphProgress igProgress = igModel.getModelInstance();
             EnvMap envMap = envModel.getModelInstance();
-            
             boolean currentOK = igProgress.getCurrentOK();
 
             if (!currentOK && igProgress.getExecutingInstruction () != null) {
@@ -110,12 +109,33 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
 
                 // Get current robot position
                 LocationRecording pose = missionState.getCurrentPose ();
-//                envModel.getCommandFactory ().insertNodeCmd (n, na, nb, Double.toString (pose.getX ()), Double.toString (pose.getY ()));
                 
-                // Update map
-                igProgress.getCurrentInstruction().parseMoveAbsTargetPose();
-                double targetX = igProgress.getCurrentInstruction().getTargetX();
-                double targetY = igProgress.getCurrentInstruction().getTargetY();
+                // Get source and target positions of the failing instruction
+                InstructionGraphProgress.Instruction currentInst = igProgress.getCurrentInstruction();
+                double sourceX;
+                double sourceY;
+                double targetX = currentInst.getTargetX();
+                double targetY = currentInst.getTargetY();
+                
+                if (currentInst.hasMoveAbsSourcePose()) {
+	                sourceX = currentInst.getSourceX();
+	                sourceY = currentInst.getSourceY();
+                } else {
+                	// The current instruction is the first instruction in IG
+                	// Use the initial pose as the source pose
+                	sourceX = missionState.getInitialPose().getX();
+                	sourceY = missionState.getInitialPose().getY();
+                }
+                
+                // Find the corresponding environment map nodes of the source and target positions
+                // Node naming assumption: node's label is lX where X is the order in which the node is added
+                int numNodes = envMap.getNodeCount() + 1;
+                String n = "l" + numNodes;
+                String na = envMap.getNode(sourceX, sourceY).getLabel();
+                String nb = envMap.getNode(targetX, targetY).getLabel();
+                
+                // Update the environment map
+                envModel.getCommandFactory ().insertNodeCmd (n, na, nb, Double.toString (pose.getX ()), Double.toString (pose.getY ()));
                 
                 // Trigger planning for adaptation
                 StallMissionCmd command = missionStateModel.getCommandFactory().stallMissionCmd();
