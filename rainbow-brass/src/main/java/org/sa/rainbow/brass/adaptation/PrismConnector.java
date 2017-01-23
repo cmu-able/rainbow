@@ -9,6 +9,7 @@ import java.util.Properties;
  * @author jcamara
  *
  */
+
 public class PrismConnector {
     private static final String PRISM_ADV_EXPORT_PROPKEY = "prism.adv.export";
 
@@ -28,7 +29,7 @@ public class PrismConnector {
                 "/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp.prism");
         DEFAULT.setProperty (PRISM_PROPERTIES_PROPKEY,
                 "/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/mapbot.props");
-        DEFAULT.setProperty (PRISM_PARAMETERS_PROPKEY, "INITIAL_LOCATION=0,TARGET_LOCATION=5,INITIAL_BATTERY=5000");
+        DEFAULT.setProperty (PRISM_PARAMETERS_PROPKEY, "INITIAL_BATTERY=5000");
         DEFAULT.setProperty (PRISM_ADV_EXPORT_PROPKEY,
                 "/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/botpolicy.adv");
     }
@@ -52,12 +53,14 @@ public class PrismConnector {
     	return m_prismModel;
     }
     
-    public void invoke () {
-        String line;       
+    public void invoke (int currentLocationId, int toLocationId) {
+        String line;   
+        String locationParameterString=",INITIAL_LOCATION="+String.valueOf(currentLocationId)+",TARGET_LOCATION="+String.valueOf(toLocationId);
+        
         
         try { 
             Process p = Runtime.getRuntime ().exec (m_prismBin + " " + m_prismModel + " " + m_prismProperties
-                    + " -prop 1 -ex -const " + m_prismParameters + " -exportadv " + m_prismAdvExport);
+                    + " -prop 1 -ex -const " + m_prismParameters + locationParameterString + " -exportadv " + m_prismAdvExport);
             if (m_print_output) {
                 BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
                 while ((line = input.readLine()) != null) {
@@ -72,7 +75,7 @@ public class PrismConnector {
 
     public static void main (String[] args) throws Exception {
         PrismConnector conn = new PrismConnector (DEFAULT);
-        conn.invoke ();
+        conn.invoke (8,0); // Go from "ls" to "l1" in simplemap
     }  
 }
 

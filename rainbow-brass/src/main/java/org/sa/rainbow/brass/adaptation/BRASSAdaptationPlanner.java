@@ -156,7 +156,7 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
                  mt.setMap(map);
                  mt.exportMapTranslation(pc.getPrismModelLocation());
                  
-                 pc.invoke();
+                 pc.invoke(map.getNodeId("ls"),map.getNodeId("l1")); // Change from hard-wired to values read from model properties
              }
                          
             // TODO: Ashutosh

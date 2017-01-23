@@ -17,6 +17,7 @@ public class EnvMap {
         m_model = model;
         m_last_insertion = new NodeInsertion();
 		m_nodes = new HashMap<> ();
+		m_new_node_id=0;
         m_arcs = new LinkedList<EnvMapArc> ();
         initWithSimpleMap(); // TODO: Substitute hardwired version of the map by one parsed from file
     }
@@ -35,6 +36,7 @@ public class EnvMap {
     private Map<String, EnvMapNode> m_nodes;
     private LinkedList<EnvMapArc> m_arcs;
     private NodeInsertion m_last_insertion;
+    private int m_new_node_id;
     
 	private final ModelReference m_model;
 	
@@ -55,7 +57,8 @@ public class EnvMap {
     }
     
 	public void AddNode (String label, float x, float y){
-		m_nodes.put(label, new EnvMapNode(label, x, y));
+		m_nodes.put(label, new EnvMapNode(label, x, y, m_new_node_id));
+		m_new_node_id++;
 	}
 
 	public void addArc(String source, String target, float distance, boolean enabled ){
@@ -68,6 +71,10 @@ public class EnvMap {
 	
 	public float getNodeY(String n){
 		return m_nodes.get(n).getY();
+	}
+	
+	public int getNodeId(String n){
+		return m_nodes.get(n).getId();
 	}
 	
 	/**

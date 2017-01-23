@@ -117,15 +117,13 @@ public class MapTranslator {
 	 * @return String PRISM encoding for map location constants
 	 */
 	public static String generateLocationConstants(){
-		int c=0;
 	    String buf="// Map location constants\n\n";
 	    buf+="const "+INITIAL_ROBOT_LOCATION_CONST+";\n";
 	    buf+="const "+TARGET_ROBOT_LOCATION_CONST+";\n\n";
 	    buf+="formula "+GOAL_PRED_DEF+"\n\n";
 	    buf+="formula "+STOP_PRED_DEF+"\n\n";
 	    for (Map.Entry<String,EnvMapNode> entry : m_map.getNodes().entrySet() ){
-	    	buf+="const "+entry.getKey()+"="+String.valueOf(c)+";\n";
-	    	c+=1;
+	    	buf+="const "+entry.getKey()+"="+String.valueOf(entry.getValue().getId())+";\n";
 	    }
 	    return buf+"\n";
 	}
@@ -314,5 +312,6 @@ public class MapTranslator {
 		EnvMap dummyMap = new EnvMap(null);		 	
 		setMap(dummyMap);
 		System.out.println(getMapTranslation()); // Class test
+		System.out.println();
 	}
 }
