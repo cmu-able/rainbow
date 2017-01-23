@@ -8,7 +8,6 @@ import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.map.EnvMapModelInstance;
 import org.sa.rainbow.brass.model.map.InsertNodeCmd;
-import org.sa.rainbow.brass.model.mission.MissionCommandFactory;
 import org.sa.rainbow.brass.model.mission.MissionState;
 import org.sa.rainbow.brass.model.mission.MissionState.LocationRecording;
 import org.sa.rainbow.brass.model.mission.MissionStateModelInstance;
@@ -149,6 +148,8 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
                 m_modelUSPort.updateModel(cmds, true);
             } else if (currentOK && igProgress.getCurrentInstruction () != null && missionState.isRobotObstructed ()) {
             	// New IG resumed after robot obstructed
+                m_reportingPort.warn (getComponentType (), "New instruction graph resumed");
+                
             	// Clear robot obstructed flag
             	SetRobotObstructedCmd clearRobotObstructedCmd = missionStateModel.getCommandFactory().setRobotObstructedCmd("false");
             	m_modelUSPort.updateModel(clearRobotObstructedCmd);
