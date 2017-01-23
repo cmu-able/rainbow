@@ -55,18 +55,48 @@ public class InstructionGraphProgress {
     public boolean getCurrentOK () {
         return m_currentOK;
     }
+    
+    public Instruction getCurrentInstruction () {
+    	return m_instructions.get (m_currentNode);
+    }
 
     public static class Instruction {
         public String m_label;
         public String m_instruction;
         public String m_next;
-
+        
+        private double m_x;
+        private double m_y;
+        private double m_w;
+        
         public Instruction copy () {
             Instruction i = new Instruction ();
             i.m_instruction = new String (m_instruction);
             i.m_label = new String (m_label);
             i.m_next = new String (m_next);
             return i;
+        }
+        
+        public void parseMoveAbsTargetPose () {
+        	Pattern moveAbsPattern = Pattern.compile ("MoveAbs\\((.+), (.+), (.+)\\)");
+        	Matcher m = moveAbsPattern.matcher (m_instruction);
+        	if (m.matches ()) {
+        		m_x = Double.parseDouble (m.group (1));
+        		m_y = Double.parseDouble (m.group (2));
+        		m_w = Double.parseDouble (m.group (3));
+            }
+        }
+        
+        public double getTargetX () {
+        	return m_x;
+        }
+        
+        public double getTargetY () {
+        	return m_y;
+        }
+        
+        public double getTargetHeading () {
+        	return m_w;
         }
     }
 

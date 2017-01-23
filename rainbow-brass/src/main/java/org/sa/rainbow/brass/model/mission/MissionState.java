@@ -76,6 +76,7 @@ public class MissionState {
     private Deque<Double>            m_timeScore                = new ArrayDeque<> ();
     private Deque<Double>            m_accuracyScore            = new ArrayDeque<> ();
     private Deque<Double>            m_safetyScore              = new ArrayDeque<> ();
+    private boolean m_errorDetected;
 
     public MissionState (ModelReference model) {
         m_model = model;
@@ -97,6 +98,14 @@ public class MissionState {
 
     public LocationRecording getCurrentPose () {
         return m_locationHistory.peek ().copy ();
+    }
+    
+    public void setErrorDetected (boolean errorDetected) {
+    	m_errorDetected = errorDetected;
+    }
+    
+    public boolean isErrorDetected () {
+    	return m_errorDetected;
     }
 
     public MissionState copy () {

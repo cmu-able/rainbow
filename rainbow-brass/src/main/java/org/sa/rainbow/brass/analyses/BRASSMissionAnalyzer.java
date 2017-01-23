@@ -1,12 +1,17 @@
 package org.sa.rainbow.brass.analyses;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.map.EnvMapModelInstance;
+import org.sa.rainbow.brass.model.mission.MissionCommandFactory;
 import org.sa.rainbow.brass.model.mission.MissionState;
 import org.sa.rainbow.brass.model.mission.MissionState.LocationRecording;
 import org.sa.rainbow.brass.model.mission.MissionStateModelInstance;
+import org.sa.rainbow.brass.model.mission.StallMissionCmd;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.IRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
@@ -15,6 +20,7 @@ import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.analysis.IRainbowAnalysis;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.models.ModelReference;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IModelUSBusPort;
 import org.sa.rainbow.core.ports.IModelsManagerPort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
@@ -89,23 +95,31 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
                 .<MissionState> getModelInstance(missionStateRef);
         InstructionGraphModelInstance igModel = (InstructionGraphModelInstance) m_modelsManagerPort
                 .<InstructionGraphProgress> getModelInstance(igRef);
-        EnvMapModelInstance envModel = (EnvMapModelInstance )m_modelsManagerPort.<EnvMap> getModelInstance (emRef);
+        EnvMapModelInstance envModel = (EnvMapModelInstance) m_modelsManagerPort.<EnvMap> getModelInstance (emRef);
 
-        if (missionStateModel != null && igModel != null) {
+        if (missionStateModel != null && igModel != null && envModel != null) {
             MissionState missionState = missionStateModel.getModelInstance();
             InstructionGraphProgress igProgress = igModel.getModelInstance();
+            EnvMap envMap = envModel.getModelInstance();
+            
             boolean currentOK = igProgress.getCurrentOK();
 
             if (!currentOK && igProgress.getExecutingInstruction () != null) {
+            	// Current IG failed
                 m_reportingPort.warn (getComponentType (), "Instruction graph failed");
 
                 // Get current robot position
-                LocationRecording pose = missionStateModel.getModelInstance ().getCurrentPose ();
+                LocationRecording pose = missionState.getCurrentPose ();
 //                envModel.getCommandFactory ().insertNodeCmd (n, na, nb, Double.toString (pose.getX ()), Double.toString (pose.getY ()));
-
-                // Current IG failed
+                
                 // Update map
+                igProgress.getCurrentInstruction().parseMoveAbsTargetPose();
+                double targetX = igProgress.getCurrentInstruction().getTargetX();
+                double targetY = igProgress.getCurrentInstruction().getTargetY();
+                
                 // Trigger planning for adaptation
+                StallMissionCmd command = missionStateModel.getCommandFactory().stallMissionCmd();
+                m_modelUSPort.updateModel(command);
             }
         }
     }

@@ -27,6 +27,7 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
     @Override
     protected void fillInCommandMap () {
         m_commandMap.put ("setCurrentLocation".toLowerCase (), SetCurrentLocationCmd.class);
+        m_commandMap.put ("stallMission".toLowerCase (), StallMissionCmd.class);
     }
 
     @Override
@@ -40,6 +41,10 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
     }
 
     public SetCurrentLocationCmd setCurrentLocationCmd (String x, String y, String w) {
-        return new SetCurrentLocationCmd ((MissionStateModelInstance )m_modelInstance, "", x, y, w);
+        return new SetCurrentLocationCmd ((MissionStateModelInstance) m_modelInstance, "", x, y, w);
+    }
+    
+    public StallMissionCmd stallMissionCmd () {
+    	return new StallMissionCmd ((MissionStateModelInstance) m_modelInstance, "");
     }
 }
