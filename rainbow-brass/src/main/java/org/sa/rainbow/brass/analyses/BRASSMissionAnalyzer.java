@@ -117,9 +117,12 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
                 double targetX = currentInst.getTargetX();
                 double targetY = currentInst.getTargetY();
                 
-                if (currentInst.hasMoveAbsSourcePose()) {
-	                sourceX = currentInst.getSourceX();
-	                sourceY = currentInst.getSourceY();
+                if (missionState.hasPreviousInstruction()) {
+                	// Target pose of previous instruction is source pose of current instruction
+                	String prevInstLabel = missionState.getPreviousInstruction();
+                	InstructionGraphProgress.Instruction prevInst = igProgress.getInstruction(prevInstLabel);
+                	sourceX = prevInst.getTargetX();
+                	sourceY = prevInst.getTargetY();
                 } else {
                 	// The current instruction is the first instruction in IG
                 	// Use the initial pose as the source pose
@@ -131,8 +134,8 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
                 // Node naming assumption: node's label is lX where X is the order in which the node is added
                 int numNodes = envMap.getNodeCount() + 1;
                 String n = "l" + numNodes;
-                String na = envMap.getNode(sourceX, sourceY).getLabel();
-                String nb = envMap.getNode(targetX, targetY).getLabel();
+                String na = envMap.getNode((float) sourceX, (float) sourceY).getLabel();
+                String nb = envMap.getNode((float) targetX, (float) targetY).getLabel();
                 
                 // Update the environment map
                 InsertNodeCmd insertNodeCmd = envModel.getCommandFactory ()

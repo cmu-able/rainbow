@@ -12,6 +12,7 @@ import java.util.*;
  */
 
 public class EnvMap {
+	private final float SAME_LOCATION_RADIUS = 0.01f;
 	
 	public EnvMap (ModelReference model) {
         m_model = model;
@@ -48,7 +49,18 @@ public class EnvMap {
     	return m_nodes;
     }
     
-    public int getNodeCount(){
+    public EnvMapNode getNode (float x, float y) {
+		for (EnvMapNode node : m_nodes.values()) {
+			if (node.getX() >= x - SAME_LOCATION_RADIUS && node.getX() <= x + SAME_LOCATION_RADIUS &&
+					node.getY() >= y - SAME_LOCATION_RADIUS && node.getY() <= y + SAME_LOCATION_RADIUS) {
+				return node;
+			}
+		}
+		
+		return null;
+	}
+
+	public int getNodeCount(){
     	return m_nodes.size();
     }
     
@@ -149,17 +161,6 @@ public class EnvMap {
 		addArc (nb, n, distanceBetween(nb,n), false);
 		addArc (n, nb, distanceBetween(nb,n), false);
 	}
-	
-	public EnvMapNode getNode (double x, double y) {
-		for (EnvMapNode node : m_nodes.values()) {
-			if (node.getX() == x && node.getY() == y) {
-				return node;
-			}
-		}
-		
-		return null;
-	}
-	
 	
 	public void initWithSimpleMap(){
 	 	AddNode("l1", 14.474f, 69f);
