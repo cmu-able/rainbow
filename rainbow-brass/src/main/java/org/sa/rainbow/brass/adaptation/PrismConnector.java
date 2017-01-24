@@ -42,6 +42,9 @@ public class PrismConnector {
     private String m_prismAdvExport;
 
     public PrismConnector (Properties props) {
+    	if (props==null){
+    		props = DEFAULT;
+    	}
         m_prismBin = props.getProperty (PRISM_BIN_PROPKEY);
         m_prismModel = props.getProperty (PRISM_MODEL_PROPKEY);
         m_prismProperties = props.getProperty (PRISM_PROPERTIES_PROPKEY);
@@ -51,6 +54,10 @@ public class PrismConnector {
     
     public String getPrismModelLocation(){
     	return m_prismModel;
+    }
+    
+    public String getPrismPolicyLocation(){
+    	return m_prismAdvExport;
     }
     
     public void invoke (int currentLocationId, int toLocationId) {

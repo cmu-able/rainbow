@@ -1,15 +1,15 @@
 package org.sa.rainbow.brass.adaptation;
 
 import org.sa.rainbow.brass.adaptation.NewInstructionGraph;
+import org.sa.rainbow.brass.adaptation.PrismPolicy;
+import org.sa.rainbow.brass.adaptation.PolicyToIG;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.map.EnvMapModelInstance;
 import org.sa.rainbow.brass.model.map.MapTranslator;
 import org.sa.rainbow.brass.adaptation.PrismConnector;
-import org.sa.rainbow.brass.model.mission.MissionState;
 import org.sa.rainbow.brass.model.mission.MissionStateModelInstance;
-import org.sa.rainbow.brass.model.mission.MissionState.LocationRecording;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.adaptation.AdaptationTree;
@@ -146,8 +146,12 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
         	// to invoke PRISM.
         	 ModelReference emRef = new ModelReference ("Map", EnvMapModelInstance.ENV_MAP_TYPE);
              EnvMapModelInstance envModel = (EnvMapModelInstance )m_modelsManagerPort.<EnvMap> getModelInstance (emRef);
-
-             if (envModel!=null) {
+             ModelReference igRef = new ModelReference("ExecutingInstructionGraph", InstructionGraphModelInstance.INSTRUCTION_GRAPH_TYPE);
+             InstructionGraphModelInstance igModel = (InstructionGraphModelInstance) m_modelsManagerPort
+                     .<InstructionGraphProgress> getModelInstance(igRef);
+            
+             
+             if (envModel!=null && igModel!=null) {
                  EnvMap map = envModel.getModelInstance();
                  MapTranslator mt = new MapTranslator();
                  PrismConnector pc = new PrismConnector(null); // Does this work with hard-wired props in the constructor?
@@ -156,14 +160,19 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
                  mt.exportMapTranslation(pc.getPrismModelLocation());
                  
                  pc.invoke(map.getNodeId("ls"),map.getNodeId("l1")); // Change from hard-wired to values read from model properties
-             }
                          
-            // TODO: Ashutosh
-            // Translate model to the IG
-            // Create a NewInstrcutionGraph object and enqueue it on the adaptation port
-            NewInstructionGraph nig = null; // Ashutosh: do this
-            AdaptationTree<BrassPlan> at = new AdaptationTree<BrassPlan> (nig);
-            m_adaptationEnqueuePort.offerAdaptation (at, new Object[] {});
+                 // TODO: Ashutosh
+                 // Translate model to the IG
+                 // Create a NewInstrcutionGraph object and enqueue it on the adaptation port
+                 PrismPolicy prismPolicy = new PrismPolicy(pc.getPrismPolicyLocation());
+       		  	 prismPolicy.readPolicy();  
+       		  	 PolicyToIG translator = new PolicyToIG(prismPolicy);
+       		    // NewInstructionGraph nig = NewInstructionGraph(igModel, translator.translate()); // Ashutosh: do this
+       		  	 NewInstructionGraph nig = null;
+                 AdaptationTree<BrassPlan> at = new AdaptationTree<BrassPlan> (nig);
+                 m_adaptationEnqueuePort.offerAdaptation (at, new Object[] {});
+             }
+             
         }
 
     }
