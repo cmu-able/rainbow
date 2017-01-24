@@ -166,7 +166,7 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
                  // Create a NewInstrcutionGraph object and enqueue it on the adaptation port
                  PrismPolicy prismPolicy = new PrismPolicy(pc.getPrismPolicyLocation());
        		  	 prismPolicy.readPolicy();  
-       		  	 PolicyToIG translator = new PolicyToIG(prismPolicy);
+       		  	 PolicyToIG translator = new PolicyToIG(prismPolicy, map);
        		    // NewInstructionGraph nig = NewInstructionGraph(igModel, translator.translate()); // Ashutosh: do this
        		  	 NewInstructionGraph nig = null;
                  AdaptationTree<BrassPlan> at = new AdaptationTree<BrassPlan> (nig);
