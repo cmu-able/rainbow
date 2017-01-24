@@ -1,8 +1,10 @@
 package org.sa.rainbow.brass.model.mission;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Deque;
+import java.util.List;
 
 import org.sa.rainbow.core.models.ModelReference;
 
@@ -71,6 +73,7 @@ public class MissionState {
 
     private final ModelReference     m_model;
     Deque<LocationRecording>         m_locationHistory          = new ArrayDeque<> ();
+    private List<String>             m_instructionHistory		= new ArrayList<> ();
     private Deque<Long>              m_predictedTimeHistory     = new ArrayDeque<> ();
     private Deque<Long>              m_predictedAccuracyHistory = new ArrayDeque<> ();
     private Deque<Double>            m_timeScore                = new ArrayDeque<> ();
@@ -101,7 +104,7 @@ public class MissionState {
     }
     
     public LocationRecording getInitialPose () {
-    	return m_locationHistory.getFirst();
+    	return m_locationHistory.getLast ().copy ();
     }
     
     public void setRobotObstructed (boolean robotObstructed) {
@@ -110,6 +113,22 @@ public class MissionState {
     
     public boolean isRobotObstructed () {
     	return m_robotObstructed;
+    }
+    
+    public void setCurrentInstruction (String instLabel) {
+    	m_instructionHistory.add (instLabel);
+    }
+    
+    public String getCurrentInstruction () {
+    	return m_instructionHistory.get (m_instructionHistory.size () - 1);
+    }
+    
+    public boolean hasPreviousInstruction () {
+    	return m_instructionHistory.size () > 1;
+    }
+    
+    public String getPreviousInstruction () {
+    	return m_instructionHistory.get (m_instructionHistory.size () - 2);
     }
 
     public MissionState copy () {
