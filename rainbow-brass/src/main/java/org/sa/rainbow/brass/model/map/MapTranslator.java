@@ -313,5 +313,6 @@ public class MapTranslator {
 		setMap(dummyMap);
 		System.out.println(getMapTranslation()); // Class test
 		System.out.println();
+		exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp.prism");
 	}
 }

@@ -1,5 +1,6 @@
 package org.sa.rainbow.brass.adaptation;
 
+import org.sa.rainbow.brass.adaptation.NewInstructionGraph;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
 import org.sa.rainbow.brass.model.map.EnvMap;
