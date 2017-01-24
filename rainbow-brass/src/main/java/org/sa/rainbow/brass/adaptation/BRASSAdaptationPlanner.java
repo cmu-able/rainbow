@@ -147,10 +147,9 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
         	 ModelReference emRef = new ModelReference ("Map", EnvMapModelInstance.ENV_MAP_TYPE);
              EnvMapModelInstance envModel = (EnvMapModelInstance )m_modelsManagerPort.<EnvMap> getModelInstance (emRef);
              ModelReference igRef = new ModelReference("ExecutingInstructionGraph", InstructionGraphModelInstance.INSTRUCTION_GRAPH_TYPE);
-             InstructionGraphModelInstance igModel = (InstructionGraphModelInstance) m_modelsManagerPort
-                     .<InstructionGraphProgress> getModelInstance(igRef);
-            
+             InstructionGraphModelInstance igModel = (InstructionGraphModelInstance) m_modelsManagerPort.<InstructionGraphProgress> getModelInstance(igRef);
              
+          
              if (envModel!=null && igModel!=null) {
                  EnvMap map = envModel.getModelInstance();
                  MapTranslator mt = new MapTranslator();
@@ -167,7 +166,7 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
                  PrismPolicy prismPolicy = new PrismPolicy(pc.getPrismPolicyLocation());
        		  	 prismPolicy.readPolicy();  
        		  	 PolicyToIG translator = new PolicyToIG(prismPolicy, map);
-       		    // NewInstructionGraph nig = NewInstructionGraph(igModel, translator.translate()); // Ashutosh: do this
+       		     //NewInstructionGraph nig = NewInstructionGraph(igModel, translator.translate()); // Ashutosh: do this
        		  	 NewInstructionGraph nig = null;
                  AdaptationTree<BrassPlan> at = new AdaptationTree<BrassPlan> (nig);
                  m_adaptationEnqueuePort.offerAdaptation (at, new Object[] {});
