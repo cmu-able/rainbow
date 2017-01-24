@@ -32,14 +32,15 @@ public class PolicyToIG {
 		//		  V(3, end)::
 		//		  nil)
 		String ins_graph = "P(";
-		//System.out.println(cmds.size());
 
 		for (int i = 0; i < cmds.size(); i++) {
 			if (i == cmds.size() - 1) {
 				ins_graph += cmds.get(i) + "::\nV(" + (i + 2) 
-						+ ", end)::nil)";
-			} else {
+						+ ", end)::\nnil)";
+			} else if (i == 0) {
 				ins_graph += cmds.get(i) + ",\n";
+			} else {
+				ins_graph += cmds.get(i) + "::\n";
 			}
 		}
 
@@ -49,33 +50,20 @@ public class PolicyToIG {
 	public String translate() {
 		ArrayList<String> plan = m_prismPolicy.getPlan();
 		ArrayList<String> cmds = new ArrayList<String>();
-		//double src_x = 0.0;
-		//double src_y = 0.0;
-		double dest_x = 1.0;
-		double dest_y = 1.0;
+
 		double speed = 1.0;
 		int cmd_id = 1;
 
 		for (int i = 0; i < plan.size(); i++) {
 			String action = plan.get(i);
-			//String source = "";
-			//String destination = "";
 			
 			// Heuristic for now.
 			String[] elements = action.split("_");
 
-			//source  = elements[0];
 			String destination = elements[2];
 			String cmd = build_cmd(cmd_id, m_map.getNodeX(destination), m_map.getNodeY(destination), speed);
 			cmds.add(cmd);
-			++cmd_id;
-			++dest_x;
-			++dest_y;
-			//System.out.println(action);
-			//System.out.println(source);
-			//System.out.println(destination);
-			
-			//addInfoToIG(action, source, destination);
+			++cmd_id;			
 		}
 		
 		String ins_graph = build_ig(cmds);
