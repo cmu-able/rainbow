@@ -166,11 +166,11 @@ public class EnvMap {
 	 	AddNode("l2", 19.82f, 69f);
 	 	AddNode("l3", 42.5f, 69f);
 	 	AddNode("l4", 52.22f, 69f);
-	 	AddNode("l5", 52.22f, 79.26f);
-	 	AddNode("l6", 42.5f, 79.26f);
-	 	AddNode("l7", 19.82f, 79.26f);
-	 	AddNode("l8", 19.82f, 73.05f);
-	 	AddNode("ls", 52.22f, 63.6f);
+	 	AddNode("l5", 52.22f, 58.74f);
+	 	AddNode("l6", 42.5f, 58.74f);
+	 	AddNode("l7", 19.82f, 58.74f);
+	 	AddNode("l8", 19.82f, 64.95f);
+	 	AddNode("ls", 52.22f, 74.4f);
 	 	
 	 	addArc("l1", "l2", 5.436f, true);
 	 	addArc("l2", "l1", 5.436f, true);
