@@ -40,11 +40,13 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
         }
     }
 
-    public SetCurrentLocationCmd setCurrentLocationCmd (String x, String y, String w) {
-        return new SetCurrentLocationCmd ((MissionStateModelInstance) m_modelInstance, "", x, y, w);
+    public SetCurrentLocationCmd setCurrentLocationCmd (double x, double y, double w) {
+        return new SetCurrentLocationCmd ((MissionStateModelInstance )m_modelInstance, "", Double.toString (x),
+                Double.toString (y), Double.toString (w));
     }
-    
-    public SetRobotObstructedCmd setRobotObstructedCmd (String robotObstructed) {
-    	return new SetRobotObstructedCmd ((MissionStateModelInstance) m_modelInstance, "", robotObstructed);
+
+    public SetRobotObstructedCmd setRobotObstructedCmd (boolean robotObstructed) {
+        return new SetRobotObstructedCmd ((MissionStateModelInstance )m_modelInstance, "",
+                Boolean.toString (robotObstructed));
     }
 }

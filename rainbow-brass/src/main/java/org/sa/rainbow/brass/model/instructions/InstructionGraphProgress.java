@@ -49,62 +49,65 @@ public class InstructionGraphProgress {
     }
 
     public Instruction getInstruction (String instLabel) {
-		return m_instructions.get(instLabel). copy ();
-	}
+        return m_instructions.get(instLabel). copy ();
+    }
 
-	public String getExecutingInstruction () {
+    public String getExecutingInstruction () {
         return m_currentNode;
     }
 
     public boolean getCurrentOK () {
         return m_currentOK;
     }
-    
+
     public Instruction getCurrentInstruction () {
-    	return m_instructions.get (m_currentNode);
+        return m_instructions.get (m_currentNode);
     }
-    
+
     public static class Instruction {
         public String m_label;
         public String m_instruction;
         public String m_next;
-        
+
         private double m_targetX;
         private double m_targetY;
         private double m_targetW;
-        
+
         public Instruction copy () {
             Instruction i = new Instruction ();
             i.m_instruction = new String (m_instruction);
             i.m_label = new String (m_label);
             i.m_next = new String (m_next);
+            i.m_targetX = m_targetX;
+            i.m_targetY = m_targetY;
+            i.m_targetW = m_targetW;
             return i;
         }
-        
+
         /**
          * This method is called every time this instruction is set in setInstructions () in
          * {@link InstructionGraphProgress}.
          */
         public void parseMoveAbsTargetPose () {
-        	Pattern moveAbsPattern = Pattern.compile ("MoveAbs\\((.+), (.+), (.+)\\)");
-        	Matcher m = moveAbsPattern.matcher (m_instruction);
-        	if (m.matches ()) {
-        		m_targetX = Double.parseDouble (m.group (1));
-        		m_targetY = Double.parseDouble (m.group (2));
-        		m_targetW = Double.parseDouble (m.group (3));
+            Pattern moveAbsPattern = Pattern.compile ("MoveAbs\\((.+), (.+), (.+)\\)");
+            Matcher m = moveAbsPattern.matcher (m_instruction);
+            if (m.matches ()) {
+                m_targetX = Double.parseDouble (m.group (1));
+                m_targetY = Double.parseDouble (m.group (2));
+                m_targetW = Double.parseDouble (m.group (3));
             }
         }
-        
+
         public double getTargetX () {
-        	return m_targetX;
+            return m_targetX;
         }
-        
+
         public double getTargetY () {
-        	return m_targetY;
+            return m_targetY;
         }
-        
+
         public double getTargetHeading () {
-        	return m_targetW;
+            return m_targetW;
         }
     }
 
@@ -147,9 +150,9 @@ public class InstructionGraphProgress {
         m_instructionList = new LinkedList<Instruction> (instructions);
         m_instructions.clear ();
         for (Instruction i : instructions) {
-        	// Parse the target pose from MoveAbs(x, y, w)
+            // Parse the target pose from MoveAbs(x, y, w)
             i.parseMoveAbsTargetPose ();
-            
+
             if (prev != null) {
                 prev.m_next = i.m_label;
             }
@@ -159,9 +162,9 @@ public class InstructionGraphProgress {
     }
 
     public void setExecutingInstruction (String instLabel) {
-    	if (m_instructions.containsKey (instLabel)) {
-            m_currentNode = instLabel;
-        }
+//    	if (m_instructions.containsKey (instLabel)) {
+        m_currentNode = instLabel;
+//        }
 //        ExecutionObservation observation = new ExecutionObservation ();
 //        observation.startTime = new Date().getTime ();
 //        observation.label = instLabel;

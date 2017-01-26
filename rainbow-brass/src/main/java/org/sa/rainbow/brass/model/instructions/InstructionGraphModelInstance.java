@@ -3,7 +3,6 @@ package org.sa.rainbow.brass.model.instructions;
 import org.sa.rainbow.core.error.RainbowCopyException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.IModelInstance;
-import org.sa.rainbow.core.models.commands.ModelCommandFactory;
 
 /**
  * Created by schmerl on 12/9/2016.
@@ -46,7 +45,7 @@ public class InstructionGraphModelInstance implements IModelInstance<Instruction
     }
 
     @Override
-    public ModelCommandFactory<InstructionGraphProgress> getCommandFactory () {
+    public InstructionGraphCommandFactory getCommandFactory () {
         if (m_commandFactory == null) {
             m_commandFactory = new InstructionGraphCommandFactory (this);
         }

@@ -1,11 +1,11 @@
 package org.sa.rainbow.brass.model.instructions;
 
+import java.util.List;
+
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
-
-import java.util.List;
 
 /**
  * Created by schmerl on 12/9/2016.
@@ -16,6 +16,7 @@ public class SetExecutingInstructionCmd extends AbstractRainbowModelOperation<St
 
     public SetExecutingInstructionCmd (InstructionGraphModelInstance modelInstance, String target, String instructionLabel) {
         super ("setExecutingInstruction", modelInstance, "", instructionLabel);
+        m_instructionLabel = instructionLabel;
     }
 
     @Override

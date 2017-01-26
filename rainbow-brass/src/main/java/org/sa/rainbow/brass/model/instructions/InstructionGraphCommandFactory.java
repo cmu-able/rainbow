@@ -1,12 +1,12 @@
 package org.sa.rainbow.brass.model.instructions;
 
-import org.sa.rainbow.core.error.RainbowModelException;
-import org.sa.rainbow.core.models.ModelsManager;
-import org.sa.rainbow.core.models.commands.ModelCommandFactory;
-
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
+import org.sa.rainbow.core.error.RainbowModelException;
+import org.sa.rainbow.core.models.ModelsManager;
+import org.sa.rainbow.core.models.commands.ModelCommandFactory;
 
 /**
  * Created by schmerl on 12/9/2016.
@@ -14,7 +14,7 @@ import java.io.InputStream;
 public class InstructionGraphCommandFactory extends ModelCommandFactory<InstructionGraphProgress> {
 
     public static InstructionGraphLoadCommand loadCommand (ModelsManager mm, String modelName, InputStream stream,
-                                                           String source) {
+            String source) {
         return new InstructionGraphLoadCommand (modelName, mm, stream, source);
     }
 

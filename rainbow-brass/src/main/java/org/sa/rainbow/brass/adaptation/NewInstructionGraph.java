@@ -6,6 +6,7 @@ import org.sa.rainbow.brass.model.instructions.SetInstructionsCmd;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.OperationResult;
+import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.Result;
 import org.sa.rainbow.core.ports.IModelsManagerPort;
 
 /**
@@ -34,7 +35,7 @@ public class NewInstructionGraph extends BrassPlan {
         InstructionGraphCommandFactory cf = (InstructionGraphCommandFactory )m_reference.getCommandFactory ();
         SetInstructionsCmd cmd = cf.setInstructionsCmd (m_instructionGraph);
         OperationResult result = executor.getOperationPublishingPort ().publishOperation (cmd);
-        return result;
+        return result.result == Result.SUCCESS;
     }
 
 }

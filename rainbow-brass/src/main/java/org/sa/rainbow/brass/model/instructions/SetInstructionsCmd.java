@@ -1,12 +1,14 @@
 package org.sa.rainbow.brass.model.instructions;
 
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress.Instruction;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
-
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Created by schmerl on 12/9/2016.
@@ -17,7 +19,7 @@ public class SetInstructionsCmd extends AbstractRainbowModelOperation<List<Instr
     private List<InstructionGraphProgress.Instruction> m_oldInstructions;
 
     public SetInstructionsCmd (InstructionGraphModelInstance modelInstance, String target, String instructionGraphCode) {
-        super ("setInstructionsCmd", modelInstance, target, instructionGraphCode);
+        super ("setInstructions", modelInstance, target, instructionGraphCode);
         m_instructionsStr = instructionGraphCode;
 
     }
@@ -35,8 +37,14 @@ public class SetInstructionsCmd extends AbstractRainbowModelOperation<List<Instr
     @Override
     protected void subExecute () throws RainbowException {
         List<InstructionGraphProgress.Instruction> instructionList = InstructionGraphProgress.parseFromString (m_instructionsStr);
-        m_oldInstructions = new LinkedList<InstructionGraphProgress.Instruction> (getModelContext ().getModelInstance ()
-                .getInstructions ());
+        Collection<? extends Instruction> oldInst = getModelContext ().getModelInstance ()
+                .getInstructions ();
+        if (oldInst == null) {
+            m_oldInstructions = new LinkedList<> ();
+        }
+        else {
+            m_oldInstructions = new LinkedList<InstructionGraphProgress.Instruction> (oldInst);
+        }
         getModelContext ().getModelInstance ().setInstructions (instructionList);
     }
 

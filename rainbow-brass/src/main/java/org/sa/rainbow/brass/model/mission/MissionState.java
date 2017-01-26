@@ -100,35 +100,37 @@ public class MissionState {
     }
 
     public LocationRecording getCurrentPose () {
+        if (m_locationHistory.isEmpty ()) return null;
         return m_locationHistory.peek ().copy ();
     }
-    
+
     public LocationRecording getInitialPose () {
-    	return m_locationHistory.getLast ().copy ();
+        if (m_locationHistory.isEmpty ()) return null;
+        return m_locationHistory.getLast ().copy ();
     }
-    
+
     public void setRobotObstructed (boolean robotObstructed) {
-    	m_robotObstructed = robotObstructed;
+        m_robotObstructed = robotObstructed;
     }
-    
+
     public boolean isRobotObstructed () {
-    	return m_robotObstructed;
+        return m_robotObstructed;
     }
-    
+
     public void setCurrentInstruction (String instLabel) {
-    	m_instructionHistory.add (instLabel);
+        m_instructionHistory.add (instLabel);
     }
-    
+
     public String getCurrentInstruction () {
-    	return m_instructionHistory.get (m_instructionHistory.size () - 1);
+        return m_instructionHistory.get (m_instructionHistory.size () - 1);
     }
-    
+
     public boolean hasPreviousInstruction () {
-    	return m_instructionHistory.size () > 1;
+        return m_instructionHistory.size () > 1;
     }
-    
+
     public String getPreviousInstruction () {
-    	return m_instructionHistory.get (m_instructionHistory.size () - 2);
+        return m_instructionHistory.get (m_instructionHistory.size () - 2);
     }
 
     public MissionState copy () {
