@@ -5,9 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import java.io.*;
-
 import org.sa.rainbow.brass.adaptation.PrismConnector;
-import java.util.Properties;
 
 
 /**
@@ -50,17 +48,6 @@ public class PrismPolicy {
 		}
 	}
 	
-	// Searches for "ls_" tag in the action
-	private boolean isFirstAction(String action) {
-		boolean result = false;
-		
-		if (action != "" && action.startsWith("ls_")) {
-			result = true;
-		}
-		
-		return result;
-	}
-
 	// This method parses the policy file.
 	public boolean readPolicy() {
 		Map<String, String> stateActionMap = new HashMap<String, String>();
@@ -81,6 +68,9 @@ public class PrismPolicy {
 
             int line_no = 0;
             boolean firstActionFound = false;
+            String formerEndState = "";
+            String startState="";
+            String endState="";
 
             while((line = bufferedReader.readLine()) != null) {
                 //System.out.println(line);
@@ -92,8 +82,10 @@ public class PrismPolicy {
                 
                 String[] elements = line.split(" ");
 
-                String startState = elements[0];
-                String endState = elements[1];
+                startState=elements[0];
+                formerEndState=endState;
+                endState = elements[1];
+
                 //String probability = elements[2];
                 String action = "";
 
@@ -104,9 +96,9 @@ public class PrismPolicy {
                 stateActionMap.put(startState, action);
                 startEndStateMap.put(startState, endState);
                 
-                if (!firstActionFound && isFirstAction(action)) {
+              if (!firstActionFound && elements.length==4) {
                 	firstActionFound = true;
-                	initial_state = startState;
+                	initial_state = formerEndState;
                 }
             }
 
@@ -134,7 +126,8 @@ public class PrismPolicy {
 	}
 	
 	  public static void main (String[] args) throws Exception { // Class test
-		  PrismConnector pc = new PrismConnector(new Properties());
+		  PrismConnector conn = new PrismConnector (null);
+		  conn.invoke(0, 8);
 		  PrismPolicy prismPolicy = new PrismPolicy("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/botpolicy.adv");
 		  prismPolicy.readPolicy();  
 		  System.out.println(prismPolicy.getPlan().toString());

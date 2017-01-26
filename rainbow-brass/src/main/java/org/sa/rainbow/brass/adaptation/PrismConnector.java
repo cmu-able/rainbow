@@ -33,7 +33,7 @@ public class PrismConnector {
         DEFAULT.setProperty (PRISM_ADV_EXPORT_PROPKEY,
                 "/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/botpolicy.adv");
     }
-    private static final boolean m_print_output = true;
+    private static final boolean m_print_output = false;
 
     private String m_prismBin;
     private String m_prismModel;
@@ -75,9 +75,16 @@ public class PrismConnector {
                 }
                 input.close();
             }
+            try{
+            p.waitFor();
+            } catch (InterruptedException e1){
+            	e1.printStackTrace();
+            }
+
         }catch (IOException e) {  
             e.printStackTrace();  
         }  
+        
     }
 
     public static void main (String[] args) throws Exception {
