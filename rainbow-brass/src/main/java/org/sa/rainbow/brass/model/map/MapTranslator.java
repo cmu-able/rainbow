@@ -71,6 +71,8 @@ public class MapTranslator {
     public static final String	STOP_PRED_DEF = STOP_PRED + " = "+GOAL_PRED+" | "+ROBOT_BATTERY_VAR+"<"+ROBOT_BATTERY_DELTA+";";
     public static final String	STOP_GUARD_STR = "& (!"+STOP_PRED+")";
 
+    public static final double MAX_DISTANCE = 999.0; // Distance assigned to disabled edges (for distance reward computation)
+    
     private static EnvMap m_map;
 
     /**
@@ -189,7 +191,9 @@ public class MapTranslator {
             String buf="";
             for (int i=0;i<m_map.getArcs().size();i++){
                 EnvMapArc a = m_map.getArcs().get(i);
-                buf+="\t ["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] ("+ROBOT_LOCATION_VAR+"="+a.getSource()+") "+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) -> ("+ROBOT_LOCATION_VAR+"'="+a.getTarget()+") "+" & ("+ROBOT_BATTERY_VAR+"'="+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+")"+" & (robot_done'=true);\n";
+                if (a.isEnabled()){
+                    buf+="\t ["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] ("+ROBOT_LOCATION_VAR+"="+a.getSource()+") "+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) -> ("+ROBOT_LOCATION_VAR+"'="+a.getTarget()+") "+" & ("+ROBOT_BATTERY_VAR+"'="+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+")"+" & (robot_done'=true);\n";                	
+                }
             }
             return buf+"\n";		
         }
@@ -204,10 +208,12 @@ public class MapTranslator {
             NumberFormat f = new DecimalFormat("#0.0000");
             for (int i=0;i<m_map.getArcs().size();i++){
                 EnvMapArc a = m_map.getArcs().get(i);
-                double t_distance = a.getDistance (); //  float(self.get_transition_attribute_value(t,"distance"))
-                String t_time_half_speed=f.format(t_distance/ROBOT_HALF_SPEED_VALUE);
-                String t_time_full_speed=f.format(t_distance/ROBOT_FULL_SPEED_VALUE);
-                buf+="\t["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] true :"+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? "+t_time_half_speed+" : "+t_time_full_speed+";\n";
+                if (a.isEnabled()) {
+                	double t_distance = a.getDistance (); //  float(self.get_transition_attribute_value(t,"distance"))
+                	String t_time_half_speed=f.format(t_distance/ROBOT_HALF_SPEED_VALUE);
+                	String t_time_full_speed=f.format(t_distance/ROBOT_FULL_SPEED_VALUE);
+                	buf+="\t["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] true :"+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? "+t_time_half_speed+" : "+t_time_full_speed+";\n";
+                }
             }
             buf+="endrewards\n\n";
             return buf;
@@ -243,11 +249,17 @@ public class MapTranslator {
                 EnvMapArc a = m_map.getArcs().get(i);
                 Vertex source = vertices[(node_indexes.get (a.getSource ()))];
                 Vertex target = vertices[(node_indexes.get (a.getTarget ()))];
-                edges[i] = new Edge(source, target, a.getDistance());
+                if (a.isEnabled()){
+                	edges[i] = new Edge(source, target, a.getDistance());
+                } else {
+                	edges[i] = new Edge(source, target, MAX_DISTANCE); // If edge is disabled, assign max possible distance                   	
+                }
             }
 
             for(Edge e: edges){
-                graph.addEdge(e.getOne(), e.getTwo(), e.getWeight());
+            	if (e.getWeight() < MAX_DISTANCE){
+            		graph.addEdge(e.getOne(), e.getTwo(), e.getWeight());
+            	}
             }
 
             Dijkstra dijkstra = new Dijkstra(graph, node1);
@@ -320,7 +332,8 @@ public class MapTranslator {
     }
 
     public static void main(String[] args) {
-        EnvMap dummyMap = new EnvMap(null);		 	
+        EnvMap dummyMap = new EnvMap(null);		
+        dummyMap.insertNode("newnode", "l1", "l2", 17.0, 69.0);
         setMap(dummyMap);
         System.out.println(getMapTranslation()); // Class test
         System.out.println();

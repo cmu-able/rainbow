@@ -21,6 +21,8 @@ public class Dijkstra {
     private HashMap<String, Double> distances;
     private PriorityQueue<Vertex> availableVertices;
     private HashSet<Vertex> visitedVertices; 
+    
+    public static Double MAX_DISTANCE=9999.0;
 
 
     /**
@@ -62,7 +64,7 @@ public class Dijkstra {
         //assume it has distance infinity denoted by Integer.MAX_VALUE
         for(String key: vertexKeys){
             this.predecessors.put(key, null);
-            this.distances.put (key, Double.POSITIVE_INFINITY);
+            this.distances.put (key, MAX_DISTANCE);
         }
 
 
