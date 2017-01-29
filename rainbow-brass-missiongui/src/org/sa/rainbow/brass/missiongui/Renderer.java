@@ -4,6 +4,7 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.glu.GLU;
+import com.jogamp.opengl.util.gl2.GLUT;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -25,7 +26,7 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener
     private int viewport_h;
     
     private float rot_loc=0.0f;
-    private float robot_x = 40.0f;
+    private float robot_x = 52.22f;
     private float robot_y = 69.0f;
     
     private float prevMouseX = 0.0f;
@@ -55,6 +56,11 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener
     	gl_ref.glColor3f(c[0],c[1],c[2]);
     }
     
+    public void glPrint(float x, float y, String s) {
+    gl_ref.glRasterPos2f(x, y);
+    GLUT glut = new GLUT();
+    glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, s);
+    }
       
     public void drawCircle(float x, float y, float radius) {
        gl_ref.glPushMatrix();
@@ -109,7 +115,8 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener
         gl.glVertex3f(x-SIZE_NODE, y-SIZE_NODE, 0.0f);	
         gl.glEnd();	
         gl.glLineWidth(THICKNESS_NORMAL);
-        drawCircle(x, y, 1.0f);
+        drawCircle(x, y, SIZE_NODE*1.5f);
+        glPrint(x+SIZE_NODE*2, y+SIZE_NODE*2, n.getLabel());
     }
     
     public void drawMapLocations(){
@@ -144,9 +151,12 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener
 //    	ArrayList<String> plan = m_policy.getPlan();
     	// TODO: Update this by a real plan obtained from the model
     	ArrayList<String> plan = new ArrayList<String>() {{
-    	    add("ls_to_l4");
-    	    add("l4_to_l3");
-    	    add("l3_to_l2");
+    	    add("newnode_to_l4");
+    	    add("l4_to_l5");
+    	    add("l5_to_l6");
+    	    add("l6_to_l7");
+    	    add("l7_to_l8");
+    	    add("l8_to_l2");
     	    add("l2_to_l1");
     	}};
     	
@@ -173,15 +183,15 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener
         gl.glLoadIdentity();
         gl.glTranslatef(-35.0f, -65.0f, -40.0f);
         drawMapArcs();
-        drawMapLocations();
         drawPlan();
+         drawMapLocations();
         drawRobot(robot_x, robot_y);
             
         gl.glFlush();
         
         // Animation test code
-        if (robot_x>0){ 
-        	robot_x=(float)robot_x-0.01f;
+        if (robot_y>0){ 
+        	robot_y=(float)robot_y-0.05f;
         }
        
         // TODO: Insert code here to poll the state of the world and update render
@@ -214,7 +224,7 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener
  
     public void reshape(GLAutoDrawable gLDrawable, int x, int y, int width, int height) 
     {
-    	System.out.println("reshape() called: x = "+x+", y = "+y+", width = "+width+", height = "+height);
+    	//System.out.println("reshape() called: x = "+x+", y = "+y+", width = "+width+", height = "+height);
         final GL2 gl = gLDrawable.getGL().getGL2();
  
         if (height <= 0) // avoid a divide by zero error!
