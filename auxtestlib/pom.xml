@@ -43,13 +43,6 @@
 	<contributors>
 	</contributors>
 
-	<scm>
-		<connection>scm:svn://acme.able.cs.cmu.edu/rainbow/v2/trunk
-		</connection>
-		<developerConnection>scm:svn:svn://acme.able.cs.cmu.edu/rainbow/v2/trunk
-		</developerConnection>
-		<url>svn://acme.able.cs.cmu.edu/rainbow/v2/trunk</url>
-	</scm>
 
 	<build>
 		<extensions>
@@ -84,18 +77,18 @@
 					</tagBase>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>buildnumber-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>validate</phase>
-						<goals>
-							<goal>create</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+<!-- 			<plugin> -->
+<!-- 				<groupId>org.codehaus.mojo</groupId> -->
+<!-- 				<artifactId>buildnumber-maven-plugin</artifactId> -->
+<!-- 				<executions> -->
+<!-- 					<execution> -->
+<!-- 						<phase>validate</phase> -->
+<!-- 						<goals> -->
+<!-- 							<goal>create</goal> -->
+<!-- 						</goals> -->
+<!-- 					</execution> -->
+<!-- 				</executions> -->
+<!-- 			</plugin> -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
