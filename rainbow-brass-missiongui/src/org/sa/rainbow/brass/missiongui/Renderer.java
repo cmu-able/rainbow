@@ -7,6 +7,7 @@ import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.util.gl2.GLUT;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Map;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseListener;
@@ -14,6 +15,8 @@ import java.awt.event.MouseEvent;
 
 import org.sa.rainbow.brass.model.map.*;
 import org.sa.rainbow.brass.adaptation.PrismPolicy;
+
+import org.sa.rainbow.brass.missiongui.Notification;
  
 class Renderer implements GLEventListener, MouseListener, MouseMotionListener
 {
@@ -21,6 +24,8 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener
 	private PrismPolicy m_policy=null;
     private GLU glu = new GLU();
     private GL2 gl_ref;
+    
+    private LinkedList<Notification> m_notifications;
     
     private int viewport_w;
     private int viewport_h;
@@ -50,7 +55,13 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener
     private final float THICKNESS_PLAN_ARC = 4.0f;
     private final float THICKNESS_NORMAL = 2.0f;
     
+    public Renderer(){
+    	 m_notifications = new LinkedList<Notification> ();
+    }
     
+    public GL2 getGLRef(){
+    	return gl_ref;
+    }
     
     public void setColor(float[] c){
     	gl_ref.glColor3f(c[0],c[1],c[2]);
@@ -175,6 +186,15 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener
     	}    	
     }
     
+    public void drawNotifications(){
+    	for (int i=0;i<m_notifications.size();i++){
+            Notification n = m_notifications.get(i);
+            n.render();
+            if (n.expired()){
+            	m_notifications.remove(i);
+            }
+    	}
+    }
     
     public void display(GLAutoDrawable gLDrawable) 
     {
@@ -186,7 +206,8 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener
         drawPlan();
          drawMapLocations();
         drawRobot(robot_x, robot_y);
-            
+        drawNotifications();
+        
         gl.glFlush();
         
         // Animation test code
@@ -259,6 +280,8 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener
         mouseRButtonDown = true;
       }
       System.out.println("Mouse pressed @ "+ String.valueOf(prevMouseX)+" "+String.valueOf(prevMouseY));
+      //m_notifications.add(new Notification(this,prevMouseX,prevMouseY,250,"Mouse pressed @ "+ String.valueOf(prevMouseX)+" "+String.valueOf(prevMouseY)));
+      m_notifications.add(new Notification(this,robot_x,robot_y,250,"Mouse pressed @ "+ String.valueOf(prevMouseX)+" "+String.valueOf(prevMouseY)));
       
     }
     public void mouseReleased(MouseEvent e) {
