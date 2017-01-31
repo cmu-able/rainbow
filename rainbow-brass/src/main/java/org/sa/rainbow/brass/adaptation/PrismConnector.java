@@ -42,6 +42,8 @@ public class PrismConnector {
     private String m_prismParameters;
     private String m_prismAdvExport;
 
+    private String m_result; // Result stored after prism invocation;
+
     String convertToAbsolute (String filename) {
         if (filename.startsWith ("\"") && filename.endsWith ("\"") && filename.length () > 2) {
             filename = filename.substring (1, filename.length () - 1);
@@ -86,13 +88,21 @@ public class PrismConnector {
             Process p = Runtime.getRuntime ()
                     .exec (m_prismBin + " " + m_prismModel + " " + m_prismProperties + " -prop 1 -ex -const "
                             + m_prismParameters + locationParameterString + " -exportadv " + m_prismAdvExport);
-            if (m_print_output) {
-                BufferedReader input = new BufferedReader (new InputStreamReader (p.getInputStream ()));
-                while ((line = input.readLine ()) != null) {
-                    System.out.println (line);
+            
+            BufferedReader input = new BufferedReader (new InputStreamReader (p.getInputStream ()));
+            while ((line = input.readLine ()) != null) {
+            	if (m_print_output) {
+            		System.out.println (line);
                 }
-                input.close ();
+            	String[] e = line.split(" ");
+                if (e[0].equals("Result:")){
+                	m_result = e[1];
+                }
             }
+            
+            
+            input.close ();
+            
             try{
             p.waitFor();
             } catch (InterruptedException e1){
@@ -103,6 +113,10 @@ public class PrismConnector {
         catch (IOException e) {
             e.printStackTrace ();
         }
+    }
+    
+    public String getResult(){
+    	return m_result;
     }
 
     public static void main (String[] args) throws Exception {

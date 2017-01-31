@@ -333,7 +333,7 @@ public class MapTranslator {
 
     public static void main(String[] args) {
         EnvMap dummyMap = new EnvMap(null);		
-        dummyMap.insertNode("newnode", "l1", "l2", 17.0, 69.0);
+        //dummyMap.insertNode("newnode", "l1", "l2", 17.0, 69.0);
         setMap(dummyMap);
         System.out.println(getMapTranslation()); // Class test
         System.out.println();

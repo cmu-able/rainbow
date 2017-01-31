@@ -127,7 +127,7 @@ public class PrismPolicy {
 	
 	  public static void main (String[] args) throws Exception { // Class test
 		  PrismConnector conn = new PrismConnector (null);
-		  conn.invoke(0, 8);
+		  conn.invoke(8, 7);
 		  PrismPolicy prismPolicy = new PrismPolicy("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/botpolicy.adv");
 		  prismPolicy.readPolicy();  
 		  System.out.println(prismPolicy.getPlan().toString());

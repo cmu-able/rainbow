@@ -19,7 +19,6 @@ formula goal = l=TARGET_LOCATION;
 formula stop = goal | b<10;
 
 const l1=0;
-const newnode=9;
 const l2=1;
 const l3=2;
 const ls=8;
@@ -46,6 +45,8 @@ const INITIAL_BATTERY;
 const HALF_SPEED=0;
 const FULL_SPEED=1;
 
+formula b_upd_l1_l2= s=HALF_SPEED? max(0,b-377) : max(0,b-647);
+formula b_upd_l2_l1= s=HALF_SPEED? max(0,b-377) : max(0,b-647);
 formula b_upd_l2_l3= s=HALF_SPEED? max(0,b-661) : max(0,b-848);
 formula b_upd_l3_l2= s=HALF_SPEED? max(0,b-661) : max(0,b-848);
 formula b_upd_l3_l4= s=HALF_SPEED? max(0,b-448) : max(0,b-697);
@@ -64,16 +65,16 @@ formula b_upd_l6_l5= s=HALF_SPEED? max(0,b-448) : max(0,b-697);
 formula b_upd_l5_l6= s=HALF_SPEED? max(0,b-448) : max(0,b-697);
 formula b_upd_l4_ls= s=HALF_SPEED? max(0,b-377) : max(0,b-646);
 formula b_upd_ls_l4= s=HALF_SPEED? max(0,b-377) : max(0,b-646);
-formula b_upd_l1_newnode= s=HALF_SPEED? max(0,b-329) : max(0,b-612);
-formula b_upd_newnode_l1= s=HALF_SPEED? max(0,b-329) : max(0,b-612);
 
 module bot_module
 b:[0..32560] init INITIAL_BATTERY;
-l:[0..10] init INITIAL_LOCATION;
+l:[0..9] init INITIAL_LOCATION;
 s:[HALF_SPEED..FULL_SPEED] init HALF_SPEED;
 robot_done:bool init false;
 	[] true & (turn=RT) & (!stop) & (robot_done) -> (robot_done'=false) & (turn'=ET);
 
+	 [l1_to_l2] (l=l1) & (!stop) & (turn=RT) & (!robot_done) -> (l'=l2)  & (b'=b_upd_l1_l2) & (robot_done'=true);
+	 [l2_to_l1] (l=l2) & (!stop) & (turn=RT) & (!robot_done) -> (l'=l1)  & (b'=b_upd_l2_l1) & (robot_done'=true);
 	 [l2_to_l3] (l=l2) & (!stop) & (turn=RT) & (!robot_done) -> (l'=l3)  & (b'=b_upd_l2_l3) & (robot_done'=true);
 	 [l3_to_l2] (l=l3) & (!stop) & (turn=RT) & (!robot_done) -> (l'=l2)  & (b'=b_upd_l3_l2) & (robot_done'=true);
 	 [l3_to_l4] (l=l3) & (!stop) & (turn=RT) & (!robot_done) -> (l'=l4)  & (b'=b_upd_l3_l4) & (robot_done'=true);
@@ -92,13 +93,13 @@ robot_done:bool init false;
 	 [l5_to_l6] (l=l5) & (!stop) & (turn=RT) & (!robot_done) -> (l'=l6)  & (b'=b_upd_l5_l6) & (robot_done'=true);
 	 [l4_to_ls] (l=l4) & (!stop) & (turn=RT) & (!robot_done) -> (l'=ls)  & (b'=b_upd_l4_ls) & (robot_done'=true);
 	 [ls_to_l4] (l=ls) & (!stop) & (turn=RT) & (!robot_done) -> (l'=l4)  & (b'=b_upd_ls_l4) & (robot_done'=true);
-	 [l1_to_newnode] (l=l1) & (!stop) & (turn=RT) & (!robot_done) -> (l'=newnode)  & (b'=b_upd_l1_newnode) & (robot_done'=true);
-	 [newnode_to_l1] (l=newnode) & (!stop) & (turn=RT) & (!robot_done) -> (l'=l1)  & (b'=b_upd_newnode_l1) & (robot_done'=true);
 
 endmodule
 
 
 rewards "time"
+	[l1_to_l2] true :s=HALF_SPEED? 15.5314 : 7.9941;
+	[l2_to_l1] true :s=HALF_SPEED? 15.5314 : 7.9941;
 	[l2_to_l3] true :s=HALF_SPEED? 64.4914 : 33.1941;
 	[l3_to_l2] true :s=HALF_SPEED? 64.4914 : 33.1941;
 	[l3_to_l4] true :s=HALF_SPEED? 27.7714 : 14.2941;
@@ -117,22 +118,19 @@ rewards "time"
 	[l5_to_l6] true :s=HALF_SPEED? 27.7714 : 14.2941;
 	[l4_to_ls] true :s=HALF_SPEED? 15.4286 : 7.9412;
 	[ls_to_l4] true :s=HALF_SPEED? 15.4286 : 7.9412;
-	[l1_to_newnode] true :s=HALF_SPEED? 7.2171 : 3.7147;
-	[newnode_to_l1] true :s=HALF_SPEED? 7.2171 : 3.7147;
 endrewards
 
 
 rewards "distance"
-	stop & TARGET_LOCATION=l1 : l=newnode ? 2.5260 : l=l2 ? 9999.0000 : l=l3 ? 9999.0000 : l=ls ? 9999.0000 : l=l4 ? 9999.0000 : l=l5 ? 9999.0000 : l=l6 ? 9999.0000 : l=l7 ? 9999.0000 : l=l8 ? 9999.0000 :  0;
-	stop & TARGET_LOCATION=newnode : l=l1 ? 2.5260 : l=l2 ? 9999.0000 : l=l3 ? 9999.0000 : l=ls ? 9999.0000 : l=l4 ? 9999.0000 : l=l5 ? 9999.0000 : l=l6 ? 9999.0000 : l=l7 ? 9999.0000 : l=l8 ? 9999.0000 :  0;
-	stop & TARGET_LOCATION=l2 : l=l1 ? 9999.0000 : l=newnode ? 9999.0000 : l=l3 ? 22.5720 : l=ls ? 37.6920 : l=l4 ? 32.2920 : l=l5 ? 42.5520 : l=l6 ? 32.8320 : l=l7 ? 10.2600 : l=l8 ? 4.0500 :  0;
-	stop & TARGET_LOCATION=l3 : l=l1 ? 9999.0000 : l=newnode ? 9999.0000 : l=l2 ? 22.5720 : l=ls ? 15.1200 : l=l4 ? 9.7200 : l=l5 ? 19.9800 : l=l6 ? 10.2600 : l=l7 ? 32.8320 : l=l8 ? 26.6220 :  0;
-	stop & TARGET_LOCATION=ls : l=l1 ? 9999.0000 : l=newnode ? 9999.0000 : l=l2 ? 37.6920 : l=l3 ? 15.1200 : l=l4 ? 5.4000 : l=l5 ? 15.6600 : l=l6 ? 25.3800 : l=l7 ? 47.9520 : l=l8 ? 41.7420 :  0;
-	stop & TARGET_LOCATION=l4 : l=l1 ? 9999.0000 : l=newnode ? 9999.0000 : l=l2 ? 32.2920 : l=l3 ? 9.7200 : l=ls ? 5.4000 : l=l5 ? 10.2600 : l=l6 ? 19.9800 : l=l7 ? 42.5520 : l=l8 ? 36.3420 :  0;
-	stop & TARGET_LOCATION=l5 : l=l1 ? 9999.0000 : l=newnode ? 9999.0000 : l=l2 ? 42.5520 : l=l3 ? 19.9800 : l=ls ? 15.6600 : l=l4 ? 10.2600 : l=l6 ? 9.7200 : l=l7 ? 32.2920 : l=l8 ? 38.5020 :  0;
-	stop & TARGET_LOCATION=l6 : l=l1 ? 9999.0000 : l=newnode ? 9999.0000 : l=l2 ? 32.8320 : l=l3 ? 10.2600 : l=ls ? 25.3800 : l=l4 ? 19.9800 : l=l5 ? 9.7200 : l=l7 ? 22.5720 : l=l8 ? 28.7820 :  0;
-	stop & TARGET_LOCATION=l7 : l=l1 ? 9999.0000 : l=newnode ? 9999.0000 : l=l2 ? 10.2600 : l=l3 ? 32.8320 : l=ls ? 47.9520 : l=l4 ? 42.5520 : l=l5 ? 32.2920 : l=l6 ? 22.5720 : l=l8 ? 6.2100 :  0;
-	stop & TARGET_LOCATION=l8 : l=l1 ? 9999.0000 : l=newnode ? 9999.0000 : l=l2 ? 4.0500 : l=l3 ? 26.6220 : l=ls ? 41.7420 : l=l4 ? 36.3420 : l=l5 ? 38.5020 : l=l6 ? 28.7820 : l=l7 ? 6.2100 :  0;
+	stop & TARGET_LOCATION=l1 : l=l2 ? 5.4360 : l=l3 ? 28.0080 : l=ls ? 43.1280 : l=l4 ? 37.7280 : l=l5 ? 47.9880 : l=l6 ? 38.2680 : l=l7 ? 15.6960 : l=l8 ? 9.4860 :  0;
+	stop & TARGET_LOCATION=l2 : l=l1 ? 5.4360 : l=l3 ? 22.5720 : l=ls ? 37.6920 : l=l4 ? 32.2920 : l=l5 ? 42.5520 : l=l6 ? 32.8320 : l=l7 ? 10.2600 : l=l8 ? 4.0500 :  0;
+	stop & TARGET_LOCATION=l3 : l=l1 ? 28.0080 : l=l2 ? 22.5720 : l=ls ? 15.1200 : l=l4 ? 9.7200 : l=l5 ? 19.9800 : l=l6 ? 10.2600 : l=l7 ? 32.8320 : l=l8 ? 26.6220 :  0;
+	stop & TARGET_LOCATION=ls : l=l1 ? 43.1280 : l=l2 ? 37.6920 : l=l3 ? 15.1200 : l=l4 ? 5.4000 : l=l5 ? 15.6600 : l=l6 ? 25.3800 : l=l7 ? 47.9520 : l=l8 ? 41.7420 :  0;
+	stop & TARGET_LOCATION=l4 : l=l1 ? 37.7280 : l=l2 ? 32.2920 : l=l3 ? 9.7200 : l=ls ? 5.4000 : l=l5 ? 10.2600 : l=l6 ? 19.9800 : l=l7 ? 42.5520 : l=l8 ? 36.3420 :  0;
+	stop & TARGET_LOCATION=l5 : l=l1 ? 47.9880 : l=l2 ? 42.5520 : l=l3 ? 19.9800 : l=ls ? 15.6600 : l=l4 ? 10.2600 : l=l6 ? 9.7200 : l=l7 ? 32.2920 : l=l8 ? 38.5020 :  0;
+	stop & TARGET_LOCATION=l6 : l=l1 ? 38.2680 : l=l2 ? 32.8320 : l=l3 ? 10.2600 : l=ls ? 25.3800 : l=l4 ? 19.9800 : l=l5 ? 9.7200 : l=l7 ? 22.5720 : l=l8 ? 28.7820 :  0;
+	stop & TARGET_LOCATION=l7 : l=l1 ? 15.6960 : l=l2 ? 10.2600 : l=l3 ? 32.8320 : l=ls ? 47.9520 : l=l4 ? 42.5520 : l=l5 ? 32.2920 : l=l6 ? 22.5720 : l=l8 ? 6.2100 :  0;
+	stop & TARGET_LOCATION=l8 : l=l1 ? 9.4860 : l=l2 ? 4.0500 : l=l3 ? 26.6220 : l=ls ? 41.7420 : l=l4 ? 36.3420 : l=l5 ? 38.5020 : l=l6 ? 28.7820 : l=l7 ? 6.2100 :  0;
 endrewards
 
 
