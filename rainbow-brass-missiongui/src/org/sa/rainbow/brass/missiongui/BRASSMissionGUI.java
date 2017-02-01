@@ -15,6 +15,8 @@ import org.sa.rainbow.brass.missiongui.BRASSMissionGUITester;
 
 public class BRASSMissionGUI 
 {
+	
+	private static int FRAME_RATE=25;
 
     public static void main(String[] args) 
     {
@@ -23,7 +25,10 @@ public class BRASSMissionGUI
         GLProfile profile = GLProfile.get(GLProfile.GL2);
         GLCapabilities capabilities = new GLCapabilities(profile);
 
-        Renderer r=new Renderer();
+        
+        
+        
+        Renderer r=new Renderer(FRAME_RATE);
 
         // The canvas is the widget that's drawn in the JFrame
         GLCanvas glcanvas = new GLCanvas(capabilities);
@@ -36,7 +41,7 @@ public class BRASSMissionGUI
         JFrame frame = new JFrame( "BRASS Mission Monitor" );
         frame.getContentPane().add( glcanvas);
 
-        final FPSAnimator animator = new FPSAnimator(glcanvas, 25);		
+        final FPSAnimator animator = new FPSAnimator(glcanvas, FRAME_RATE);		
         animator.start();
 
         final BRASSMissionGUITester t = new BRASSMissionGUITester (r);

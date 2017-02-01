@@ -26,14 +26,17 @@ import com.jogamp.opengl.util.gl2.GLUT;
 
 class Renderer implements GLEventListener, MouseListener, MouseMotionListener, IBRASSOperations
 {
-    private EnvMap m_map=null;
+    public EnvMap m_map=null;
     private PrismPolicy m_policy=null;
     private GLU glu = new GLU();
     private GL2 gl_ref;
 
+    private long m_frame=0;
+    
     private LinkedList<Notification> m_notifications;
     private NotificationWindow m_notification_window;
 
+    private int m_frame_rate;
     private int viewport_w;
     private int viewport_h;
 
@@ -47,6 +50,8 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener, I
     private boolean mouseRButtonDown = false;
 
     private String target_location="l1";
+    ArrayList<String> m_plan = new ArrayList<String>();
+
 
     private final float DEG2RAD = 3.14159f/180.0f;
 
@@ -64,7 +69,8 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener, I
     private final float THICKNESS_PLAN_ARC = 10.0f;
     private final float THICKNESS_NORMAL = 2.0f;
 
-    public Renderer(){
+    public Renderer(int frameRate){
+    	m_frame_rate = frameRate;
         m_notifications = new LinkedList<Notification> ();
         m_notification_window = new NotificationWindow(this, 15, 55, 55, 50);
 //        try {
@@ -171,11 +177,6 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener, I
         }
         drawCircle(x,y,SIZE_NODE/3);
         drawCircle(x,y,SIZE_NODE);
-        // 	gl_ref.glPushMatrix();
-        // 	gl_ref.glTranslatef(-SIZE_NODE*2,0.0f, 0.0f);
-        // 	gl_ref.glRotatef(3.0f, 0.0f, 1.0f, 0.0f);
-        // 	drawTriangle(x,y,SIZE_NODE);
-        // 	gl_ref.glPopMatrix();
     }
 
     public void drawLocation(EnvMapNode n){
@@ -227,21 +228,9 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener, I
         }
     }
 
-    public void drawPlan(){
-//    	ArrayList<String> plan = m_policy.getPlan();
-        // TODO: Update this by a real plan obtained from the model
-        ArrayList<String> plan = new ArrayList<String>() {{
-            add("newnode_to_l4");
-            add("l4_to_l5");
-            add("l5_to_l6");
-            add("l6_to_l7");
-            add("l7_to_l8");
-            add("l8_to_l2");
-            add("l2_to_l1");
-        }};
-
-        for (int i = 0; i < plan.size(); i++) {
-            String action = plan.get(i);
+    public void drawPlan(){       
+        for (int i = 0; i < m_plan.size(); i++) {
+            String action = m_plan.get(i);
             String[] elements = action.split("_");
             String target_label = elements[2];
             String source_label = elements[0];
@@ -273,15 +262,19 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener, I
         gl.glLoadIdentity();
         gl.glTranslatef(-35.0f, -65.0f, -40.0f);
         drawMapArcs();
-        drawPlan();
+        if (m_frame % m_frame_rate == 0){
+        	PrismPolicy prismPolicy = new PrismPolicy("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/botpolicy.adv");
+        	prismPolicy.readPolicy();  
+        	m_plan=prismPolicy.getPlan();
+        	System.out.println(m_plan.toString());
+        }
+    	drawPlan();        
         drawMapLocations();
         drawRobot(robot_x, robot_y);
         drawNotifications();
-        
         m_notification_window.render();
-
         gl.glFlush();
-
+        m_frame++;
     }
 
 
@@ -296,7 +289,6 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener, I
 
         // Map init
         m_map = new EnvMap(null);		
-        m_map.insertNode("newnode", "l4", "l3", 46.0, 67.0);
         m_policy = new PrismPolicy("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/botpolicy.adv");
         m_policy.readPolicy();
 
@@ -312,9 +304,7 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener, I
     @Override
     public void reshape(GLAutoDrawable gLDrawable, int x, int y, int width, int height) 
     {
-        //System.out.println("reshape() called: x = "+x+", y = "+y+", width = "+width+", height = "+height);
         final GL2 gl = gLDrawable.getGL().getGL2();
-
         if (height <= 0) // avoid a divide by zero error!
         {
             height = 1;
@@ -352,9 +342,6 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener, I
             mouseRButtonDown = true;
         }
         System.out.println("Mouse pressed @ "+ String.valueOf(prevMouseX)+" "+String.valueOf(prevMouseY));
-        //m_notifications.add(new Notification(this,prevMouseX,prevMouseY,250,"Mouse pressed @ "+ String.valueOf(prevMouseX)+" "+String.valueOf(prevMouseY)));
-        //m_notifications.add(new Notification(this,robot_x,robot_y,250,"Mouse pressed @ "+ String.valueOf(prevMouseX)+" "+String.valueOf(prevMouseY)));
-
     }
     @Override
     public void mouseReleased(MouseEvent e) {
@@ -383,7 +370,7 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener, I
     
     @Override
     public void setRobotObstructed (Boolean obstructed){
-    	if (obstructed){
+    	if (false){ // Disabled in-place notifications of robot blocked for the time being
     		m_notifications.add(new Notification(this,robot_x+SIZE_NODE,robot_y,100,"Robot blocked."));
     	}
     	robot_obstructed = obstructed;

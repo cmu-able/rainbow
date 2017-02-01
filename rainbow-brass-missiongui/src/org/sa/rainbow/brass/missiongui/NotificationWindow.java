@@ -20,7 +20,7 @@ public class NotificationWindow {
 	private int MAX_NOTIFICATIONS = 6;
 	
 	
-	private final float[] WINDOW_COLOR = {0.3f, 0.5f, 0.3f};
+	private final float[] WINDOW_COLOR = {0.2f, 0.3f, 0.2f};
 	private final float[] TEXT_COLOR = {1.0f, 1.0f, 1.0f};
 
 	private LinkedList<String> m_notifications;

@@ -1,18 +1,25 @@
 package org.sa.rainbow.brass.missiongui;
 
 import org.sa.rainbow.brass.missiongui.IBRASSOperations;
+import org.sa.rainbow.brass.adaptation.PrismConnector;
+import org.sa.rainbow.brass.model.map.MapTranslator;
+import org.sa.rainbow.brass.missiongui.Renderer;
 
 public class BRASSMissionGUITester extends Thread {
 
-	private IBRASSOperations m_bop;
+	private Renderer m_bop; // Use IBRASSOperations instead of renderer in production code
+	private PrismConnector m_conn;
+	private MapTranslator m_trans;
 	
 	private double m_robot_x = 40;
 	private double m_robot_y = 69;
 	private int m_frame=0;
 	
-	public BRASSMissionGUITester(IBRASSOperations bop){
+	public BRASSMissionGUITester(Renderer bop){ // Use IBRASSOperations instead of renderer in production code
 		super();
-		m_bop = bop;		
+		m_bop = bop;
+		m_conn = new PrismConnector (null);
+		m_trans = new MapTranslator();
 		System.out.println("Tester initialized");
 	}
 	
@@ -33,6 +40,9 @@ public class BRASSMissionGUITester extends Thread {
 			if (m_frame==10){
 				m_bop.setRobotObstructed(true);
 				m_bop.reportFromDAS("Robot blocked!");
+				m_trans.setMap(m_bop.m_map); // Using Renderer instead of IBRASSOperation to access m_map for testing purposes
+				m_trans.exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp.prism");
+				m_conn.invoke (8, 0);
 			}
 			
 			if (m_frame==60){
@@ -48,7 +58,9 @@ public class BRASSMissionGUITester extends Thread {
 
 			if (m_frame==70){
 				m_bop.reportFromDAS("Inserted new node in map between l2 and l3");
-				m_bop.insertMapNode("nn2", "l2", "l3", 30.0, 69.0);
+				m_bop.insertMapNode("nn2", "l3", "l2", 30.0, 69.0);
+				m_trans.exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp.prism");
+		        m_conn.invoke (8, 0); 
 			}
 
 			if (m_frame==72){
