@@ -13,6 +13,9 @@ import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.map.EnvMapArc;
 import org.sa.rainbow.brass.model.map.EnvMapNode;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.brass.missiongui.IBRASSOperations;
+import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
+import org.sa.rainbow.brass.missiongui.NotificationWindow;
 
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
@@ -20,7 +23,8 @@ import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.util.gl2.GLUT;
 
-class Renderer implements GLEventListener, MouseListener, MouseMotionListener
+
+class Renderer implements GLEventListener, MouseListener, MouseMotionListener, IBRASSOperations
 {
     private EnvMap m_map=null;
     private PrismPolicy m_policy=null;
@@ -28,6 +32,7 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener
     private GL2 gl_ref;
 
     private LinkedList<Notification> m_notifications;
+    private NotificationWindow m_notification_window;
 
     private int viewport_w;
     private int viewport_h;
@@ -35,6 +40,7 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener
     private float rot_loc=0.0f;
     private float robot_x = 52.22f;
     private float robot_y = 69.0f;
+    private boolean robot_obstructed=false;
 
     private float prevMouseX = 0.0f;
     private float prevMouseY = 0.0f;
@@ -46,74 +52,76 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener
 
     private final float[] COLOR_ARC_ENABLED = {0.0f, 1.0f, 0.0f};
     private final float[] COLOR_ARC_DISABLED = {0.3f, 0.3f, 0.3f};
-    private final float[] COLOR_PLAN_ARC = {1.0f, 0.0f, 0.0f};
+    private final float[] COLOR_PLAN_ARC = {1.0f, 1.0f, 1.0f};
     private final float[] COLOR_LOCATION = {1.0f, 1.0f, 1.0f};
     private final float[] COLOR_TARGET_LOCATION = {1.0f, 0.5f, 0.0f};
     private final float[] COLOR_ROBOT = {0.3f, 0.3f, 1.0f};
+    private final float[] COLOR_ROBOT_OBSTRUCTED ={1.0f, 0.0f, 0.0f};
 
 
     private final float SIZE_NODE = 0.5f;
     private final float THICKNESS_ARC = 12.0f;
-    private final float THICKNESS_PLAN_ARC = 4.0f;
+    private final float THICKNESS_PLAN_ARC = 10.0f;
     private final float THICKNESS_NORMAL = 2.0f;
 
     public Renderer(){
         m_notifications = new LinkedList<Notification> ();
-        try {
-            RainbowAdapter ra = new RainbowAdapter (new IBRASSOperations () {
-
-                private float m_r_x = 0;
-                private float m_r_y = 0;
-
-                @Override
-                public void setRobotObstructed (Boolean obstructed) {
-                    if (obstructed) {
-                        m_notifications.add (new Notification (Renderer.this, m_r_x, m_r_y, 5, "Robot obstructed"));
-                    }
-
-                }
-
-                @Override
-                public void setRobotLocation (Double x, Double y) {
-                    m_r_x = x.floatValue ();
-                    m_r_y = y.floatValue ();
-                    Renderer.this.drawRobot (m_r_x, m_r_y);
-
-                }
-
-                @Override
-                public void setInstructionFailed (Boolean result) {
-                    // TODO Auto-generated method stub
-
-                }
-
-                @Override
-                public void setExecutingInstruction (String label) {
-                    // TODO Auto-generated method stub
-
-                }
-
-                @Override
-                public void reportFromDAS (String string) {
-
-                }
-
-                @Override
-                public void newInstructionGraph (InstructionGraphProgress igModel) {
-                    // TODO Auto-generated method stub
-
-                }
-
-                @Override
-                public void insertMapNode (String n, String na, String nb, Double x, Double y) {
-                    Renderer.this.m_map.insertNode (n, na, nb, x, y);
-                }
-            });
-        }
-        catch (RainbowConnectionException e) {
-            System.err.println ("Could not connect to Rainbow");
-            e.printStackTrace ();
-        }
+        m_notification_window = new NotificationWindow(this, 15, 55, 55, 50);
+//        try {
+//            RainbowAdapter ra = new RainbowAdapter (new IBRASSOperations () {
+//
+//                private float m_r_x = 0;
+//                private float m_r_y = 0;
+//
+//                @Override
+//                public void setRobotObstructed (Boolean obstructed) {
+//                    if (obstructed) {
+//                        m_notifications.add (new Notification (Renderer.this, m_r_x, m_r_y, 5, "Robot obstructed"));
+//                    }
+//
+//                }
+//
+//                @Override
+//                public void setRobotLocation (Double x, Double y) {
+//                    m_r_x = x.floatValue ();
+//                    m_r_y = y.floatValue ();
+//                    Renderer.this.drawRobot (m_r_x, m_r_y);
+//
+//                }
+//
+//                @Override
+//                public void setInstructionFailed (Boolean result) {
+//                    // TODO Auto-generated method stub
+//
+//                }
+//
+//                @Override
+//                public void setExecutingInstruction (String label) {
+//                    // TODO Auto-generated method stub
+//
+//                }
+//
+//                @Override
+//                public void reportFromDAS (String string) {
+//
+//                }
+//
+//                @Override
+//                public void newInstructionGraph (InstructionGraphProgress igModel) {
+//                    // TODO Auto-generated method stub
+//
+//                }
+//
+//                @Override
+//                public void insertMapNode (String n, String na, String nb, Double x, Double y) {
+//                    Renderer.this.m_map.insertNode (n, na, nb, x, y);
+//                }
+//            });
+//        }
+//        catch (RainbowConnectionException e) {
+//            System.err.println ("Could not connect to Rainbow");
+//            e.printStackTrace ();
+//        }
     }
 
     public GL2 getGLRef(){
@@ -156,7 +164,11 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener
 
     public void drawRobot(float x, float y){
         gl_ref.glLineWidth(4.0f);
-        setColor(COLOR_ROBOT);
+        if (robot_obstructed){
+        	setColor(COLOR_ROBOT_OBSTRUCTED);
+        } else {
+            setColor(COLOR_ROBOT);	
+        }
         drawCircle(x,y,SIZE_NODE/3);
         drawCircle(x,y,SIZE_NODE);
         // 	gl_ref.glPushMatrix();
@@ -265,15 +277,10 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener
         drawMapLocations();
         drawRobot(robot_x, robot_y);
         drawNotifications();
+        
+        m_notification_window.render();
 
         gl.glFlush();
-
-        // Animation test code
-        if (robot_y>0){ 
-            robot_y=robot_y-0.05f;
-        }
-
-        // TODO: Insert code here to poll the state of the world and update render
 
     }
 
@@ -346,7 +353,7 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener
         }
         System.out.println("Mouse pressed @ "+ String.valueOf(prevMouseX)+" "+String.valueOf(prevMouseY));
         //m_notifications.add(new Notification(this,prevMouseX,prevMouseY,250,"Mouse pressed @ "+ String.valueOf(prevMouseX)+" "+String.valueOf(prevMouseY)));
-        m_notifications.add(new Notification(this,robot_x,robot_y,250,"Mouse pressed @ "+ String.valueOf(prevMouseX)+" "+String.valueOf(prevMouseY)));
+        //m_notifications.add(new Notification(this,robot_x,robot_y,250,"Mouse pressed @ "+ String.valueOf(prevMouseX)+" "+String.valueOf(prevMouseY)));
 
     }
     @Override
@@ -367,4 +374,44 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener
     {
         System.out.println("dispose() called");
     }
+    
+    @Override
+    public void setRobotLocation (Double x, Double y){
+    	robot_x = x.floatValue();
+    	robot_y = y.floatValue();
+    }
+    
+    @Override
+    public void setRobotObstructed (Boolean obstructed){
+    	if (obstructed){
+    		m_notifications.add(new Notification(this,robot_x+SIZE_NODE,robot_y,100,"Robot blocked."));
+    	}
+    	robot_obstructed = obstructed;
+    }
+    
+    @Override
+    public void insertMapNode (String n, String na, String nb, Double x, Double y){
+    	m_map.insertNode(n, na, nb, x, y);
+    }
+    
+    @Override
+    public void reportFromDAS (String string){
+    	m_notification_window.addNotification(string);
+    }
+    
+    @Override
+    public void setExecutingInstruction (String label){
+    	
+    }
+
+    @Override
+    public void setInstructionFailed (Boolean result){
+    	
+    }
+    
+    @Override
+    public void newInstructionGraph (InstructionGraphProgress igModel){
+    	
+    }
+    
 }

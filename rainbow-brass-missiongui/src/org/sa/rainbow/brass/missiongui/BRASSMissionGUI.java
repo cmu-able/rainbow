@@ -11,6 +11,8 @@ import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.util.FPSAnimator;
 
+import org.sa.rainbow.brass.missiongui.BRASSMissionGUITester;
+
 public class BRASSMissionGUI 
 {
 
@@ -29,7 +31,7 @@ public class BRASSMissionGUI
         glcanvas.addMouseListener(r);
         glcanvas.addMouseMotionListener(r);
 
-        glcanvas.setSize( 640, 480 );
+        glcanvas.setSize( 1024, 768 );
 
         JFrame frame = new JFrame( "BRASS Mission Monitor" );
         frame.getContentPane().add( glcanvas);
@@ -37,7 +39,8 @@ public class BRASSMissionGUI
         final FPSAnimator animator = new FPSAnimator(glcanvas, 25);		
         animator.start();
 
-
+        final BRASSMissionGUITester t = new BRASSMissionGUITester (r);
+        t.start();
 
         // shutdown the program on windows close event
         frame.addWindowListener(new WindowAdapter() {
