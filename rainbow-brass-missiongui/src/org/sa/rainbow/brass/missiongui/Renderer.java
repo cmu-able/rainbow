@@ -6,22 +6,28 @@ import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Iterator;
+import java.util.Collection;
 
 import org.sa.rainbow.brass.adaptation.PrismPolicy;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.map.EnvMapArc;
 import org.sa.rainbow.brass.model.map.EnvMapNode;
+import org.sa.rainbow.brass.model.map.dijkstra.Vertex;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.brass.missiongui.IBRASSOperations;
-import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
 import org.sa.rainbow.brass.missiongui.NotificationWindow;
+import org.sa.rainbow.brass.missiongui.InstructionGraphWindow;
+import org.sa.rainbow.brass.model.*;
+
 
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.util.gl2.GLUT;
+import com.sun.org.apache.bcel.internal.generic.Instruction;
 
 
 class Renderer implements GLEventListener, MouseListener, MouseMotionListener, IBRASSOperations
@@ -35,6 +41,7 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener, I
     
     private LinkedList<Notification> m_notifications;
     private NotificationWindow m_notification_window;
+    private InstructionGraphWindow m_ig_window;
 
     private int m_frame_rate;
     private int viewport_w;
@@ -73,6 +80,7 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener, I
     	m_frame_rate = frameRate;
         m_notifications = new LinkedList<Notification> ();
         m_notification_window = new NotificationWindow(this, 15, 55, 55, 50);
+        m_ig_window = new InstructionGraphWindow(this,22,67,41,60);
 //        try {
 //            RainbowAdapter ra = new RainbowAdapter (new IBRASSOperations () {
 //
@@ -273,6 +281,7 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener, I
         drawRobot(robot_x, robot_y);
         drawNotifications();
         m_notification_window.render();
+        m_ig_window.render();
         gl.glFlush();
         m_frame++;
     }
@@ -388,17 +397,21 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener, I
     
     @Override
     public void setExecutingInstruction (String label){
-    	
+    	m_ig_window.setExecutingInstruction(label);
     }
 
     @Override
     public void setInstructionFailed (Boolean result){
-    	
+    	m_ig_window.instructionFailed(result);
     }
     
     @Override
     public void newInstructionGraph (InstructionGraphProgress igModel){
-    	
+    	m_ig_window.clearInstructions();
+   		m_ig_window.addInstruction("Instruction 1");
+   		m_ig_window.addInstruction("Instruction 2");    
+   		m_ig_window.addInstruction("Instruction 3");    	
+
     }
     
 }

@@ -43,17 +43,21 @@ public class BRASSMissionGUITester extends Thread {
 				m_trans.setMap(m_bop.m_map); // Using Renderer instead of IBRASSOperation to access m_map for testing purposes
 				m_trans.exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp.prism");
 				m_conn.invoke (8, 0);
+				m_bop.newInstructionGraph(null);
 			}
 			
 			if (m_frame==60){
 				m_bop.setRobotObstructed(false);
 				m_bop.reportFromDAS("Robot NOT blocked anymore!");
+				m_bop.setExecutingInstruction("Instruction 1");
 			}
 
 			if (m_frame==65){
 				m_bop.reportFromDAS("Notification 1 received from rainbow");
 				m_bop.reportFromDAS("Notification 2 received from rainbow");
 				m_bop.reportFromDAS("Notification 3 received from rainbow");
+				m_bop.setExecutingInstruction("Instruction 2");
+
 			}
 
 			if (m_frame==70){
@@ -61,13 +65,15 @@ public class BRASSMissionGUITester extends Thread {
 				m_bop.insertMapNode("nn2", "l3", "l2", 30.0, 69.0);
 				m_trans.exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp.prism");
 		        m_conn.invoke (8, 0); 
+		        m_bop.setInstructionFailed(true);
 			}
 
-			if (m_frame==72){
+			if (m_frame==80){
 				m_bop.reportFromDAS("Notification 5");
+				m_bop.setExecutingInstruction("Instruction 3");
 			}
 
-			if (m_frame==74){
+			if (m_frame==90){
 				m_bop.reportFromDAS("Notification 6");
 			}
 
