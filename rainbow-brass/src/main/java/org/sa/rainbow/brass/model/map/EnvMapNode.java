@@ -4,15 +4,26 @@ public class EnvMapNode {
     public String m_label;
     public double m_x, m_y;
     public int m_id;
+    public boolean m_charging; // Is this location a charging station?
 
     public EnvMapNode (String m_label, double m_x, double m_y, int node_id) {
         super();
         this.m_label = m_label;
         this.m_x = m_x;
         this.m_y = m_y;
-        this.m_id= node_id;
+        this.m_id = node_id;
+        this.m_charging = false;
     }
 
+    public EnvMapNode (String m_label, double m_x, double m_y, int node_id, boolean charging) {
+    	super();
+        this.m_label = m_label;
+        this.m_x = m_x;
+        this.m_y = m_y;
+        this.m_id = node_id;
+    	this.m_charging = charging;
+    }
+    
     public String getLabel() {
         return m_label;
     }

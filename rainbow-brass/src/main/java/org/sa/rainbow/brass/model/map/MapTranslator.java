@@ -13,6 +13,7 @@ import org.sa.rainbow.brass.model.map.dijkstra.Dijkstra;
 import org.sa.rainbow.brass.model.map.dijkstra.Edge;
 import org.sa.rainbow.brass.model.map.dijkstra.Graph;
 import org.sa.rainbow.brass.model.map.dijkstra.Vertex;
+import org.sa.rainbow.brass.model.mission.MissionState;
 
 /**
  * @author jcamara
@@ -23,7 +24,9 @@ import org.sa.rainbow.brass.model.map.dijkstra.Vertex;
 
 public class MapTranslator {
 
-    public static final String MODEL_TYPE = "mdp";
+    public static final String VERSION_STR = "V0.2a - Jan 2017";
+	
+	public static final String MODEL_TYPE = "mdp";
     public static final String MODULE_POSTFIX_STR = "_module";	
     public static final String TURN_VARIABLE = "turn";
     public static final String MOVE_CMD_STR = "_to_";
@@ -31,8 +34,11 @@ public class MapTranslator {
     public static final String MAX_POSTFIX = "_max";
     public static final String INIT_POSTFIX = "_init";
     public static final String UPDATE_POSTFIX = "_upd";
+    public static final String HEADING_CONST_PREFIX="H_";
+    public static final String ROTATION_TIME_FORMULA_PREFIX="rot_time_";
     public static final String ENVIRONMENT_TURN_STR = "ET";
     public static final String ROBOT_TURN_STR = "RT";
+    
 
     // Environment Configuration constants
 
@@ -61,6 +67,10 @@ public class MapTranslator {
     public static final String ROBOT_FULL_SPEED_CONST = "FULL_SPEED"; // These are just symbolic constants for PRISM
     public static final String ROBOT_HALF_SPEED_CONST = "HALF_SPEED";
     public static final String ROBOT_SPEED_VAR = "s";
+    
+    public static final float ROBOT_ROTATIONAL_SPEED_VALUE = 0.3f; // rad/s
+    public static final String ROBOT_HEADING_VAR = "r";
+    public static final String INITIAL_ROBOT_HEADING_CONST = "INITIAL_HEADING";
 
     // Goal and stop condition configuration constants
 
@@ -112,7 +122,21 @@ public class MapTranslator {
             return res;
         }
     }
-
+    
+    /**
+     * Generates labels for robot orientation/heading
+     * @return String PRISM encoding for robot orientation constants
+     */
+    public static String generateHeadingConstants(){
+    	String buf="// Robot heading/orientation constants\n\n";
+    	int c=0;
+    	for (MissionState.Heading h : MissionState.Heading.values()) {
+    		 buf+="const "+HEADING_CONST_PREFIX+h.name()+"="+String.valueOf(c)+";\n";
+    		 c++;
+    	}
+    	return buf+"\n";
+    }
+    
     /**
      * Generates labels for map locations
      * @return String PRISM encoding for map location constants
@@ -129,6 +153,9 @@ public class MapTranslator {
         return buf+"\n";
     }
 
+    /**
+     * @return String PRISM encoding for the environment process
+     */
     public static String generateEnvironmentModule(){
         String  buf="// Environment process\n\n";
         buf+="module "+ENVIRONMENT_PLAYER_NAME+MODULE_POSTFIX_STR+"\n";
@@ -145,6 +172,7 @@ public class MapTranslator {
     public static String generateRobotModule(){
         String buf="// Robot process\n\n";
         buf+="const "+INITIAL_ROBOT_BATTERY_CONST+";\n";
+        buf+="const "+INITIAL_ROBOT_HEADING_CONST+";\n";
         buf+="const "+ROBOT_HALF_SPEED_CONST+"=0;\n";
         buf+="const "+ROBOT_FULL_SPEED_CONST+"=1;\n";
         buf+="\n"+generateBatteryUpdates();
@@ -152,6 +180,7 @@ public class MapTranslator {
         buf+=ROBOT_BATTERY_VAR+":["+ROBOT_BATTERY_RANGE_MIN+".."+ROBOT_BATTERY_RANGE_MAX+"] init "+INITIAL_ROBOT_BATTERY_CONST+";\n";
         buf+=ROBOT_LOCATION_VAR+":[0.."+m_map.getNodeCount()+"] init "+INITIAL_ROBOT_LOCATION_CONST+";\n";
         buf+=ROBOT_SPEED_VAR+":["+ROBOT_HALF_SPEED_CONST+".."+ROBOT_FULL_SPEED_CONST+"] init "+ROBOT_HALF_SPEED_CONST+";\n";
+        buf+=ROBOT_HEADING_VAR+":[0.."+String.valueOf(MissionState.Heading.values().length)+"] init "+INITIAL_ROBOT_HEADING_CONST+";\n";
         buf+="robot_done:bool init false;\n";
         buf+="\t[] true "+ROBOT_GUARD_STR+" "+STOP_GUARD_STR+" & (robot_done) -> (robot_done'=false)"+ROBOT_UPDATE_HOUSEKEEPING_STR+";\n";
         buf+="\n"+generateMoveCommands();
@@ -212,7 +241,8 @@ public class MapTranslator {
                 	double t_distance = a.getDistance (); //  float(self.get_transition_attribute_value(t,"distance"))
                 	String t_time_half_speed=f.format(t_distance/ROBOT_HALF_SPEED_VALUE);
                 	String t_time_full_speed=f.format(t_distance/ROBOT_FULL_SPEED_VALUE);
-                	buf+="\t["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] true :"+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? "+t_time_half_speed+" : "+t_time_full_speed+";\n";
+                	String action_name = a.getSource()+MOVE_CMD_STR+a.getTarget();
+                	buf+="\t["+action_name+"] true :"+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? "+t_time_half_speed+" + "+ROTATION_TIME_FORMULA_PREFIX+action_name+" : "+t_time_full_speed+" + "+ROTATION_TIME_FORMULA_PREFIX+action_name+";\n";
                 }
             }
             buf+="endrewards\n\n";
@@ -220,7 +250,72 @@ public class MapTranslator {
         }
     }
 
+    
+    /**
+     * @return PRISM encoding for all rotation formulas (for all arcs in map)
+     */
+    public static String generateRotationTimeFormulas(){
+    	String buf="// Rotation time formulas for map arcs\n";
+    	synchronized (m_map) {
+            for (int i=0;i<m_map.getArcs().size();i++){
+                EnvMapArc a = m_map.getArcs().get(i);
+                if (a.isEnabled()) {
+                	buf = buf+generateRotationTimeFormulaForArc(a);
+                }
+            }
+    	}
+        return buf +"\n";
+    }
+    
+    
+    /**
+     * Generates the PRISM encoding (as a formula) for all possible rotation times 
+     * (for every heading in MissionState.Heading), given a map arc a
+     * @param a Map arc
+     * @return PRISM encoding for rotation times in arc a
+     */
+    public static String generateRotationTimeFormulaForArc(EnvMapArc a){
+    	NumberFormat f = new DecimalFormat ("#0.0000");
+    	String buf="formula "+ROTATION_TIME_FORMULA_PREFIX+a.getSource()+MOVE_CMD_STR+a.getTarget()+" = ";
+    	for (MissionState.Heading h : MissionState.Heading.values()) {
+        	buf += ROBOT_HEADING_VAR + "=" + HEADING_CONST_PREFIX + h.name() + " ? " + f.format (getRotationTime( MissionState.Heading.convertToRadians(h),a)) + " : ";
+    		}
+    	buf+=" 0;\n";
+    	return buf;
+    }
 
+  
+    /**
+     * Returns the rotation time in seconds from a given robot orientation to the right angle before it
+     * starts moving towards a given location (target of arc a)
+     * @param robotOrientation orientation of the robot (angle in Radians)
+     * @param a Map arc 
+     * @return Rotation time in seconds
+     */
+    public static double getRotationTime(double robotOrientation, EnvMapArc a){    	
+    	double theta = Math.abs(robotOrientation-findArcOrientation(a));
+    	double min_theta = (theta > Math.PI) ? 2*Math.PI - theta : theta;
+    	return (min_theta/ROBOT_ROTATIONAL_SPEED_VALUE); 
+    }
+
+        
+    /**
+     * Determines the angle (in Radians) between two endpoints of an arc, taking the source node of the arc
+     * as the reference of coordinates in the plane. Used to determine the part of the time reward structure 
+     * associated with in-node robot rotations.
+     * @param a Map arc
+     * @return angle in radians between a.m_source and a.m_target
+     */
+    public static double findArcOrientation(EnvMapArc a){
+    	synchronized (m_map) {
+    		double src_x = m_map.getNodeX(a.getSource());
+    		double src_y = m_map.getNodeY(a.getSource());
+    		double tgt_x = m_map.getNodeX(a.getTarget());
+    		double tgt_y = m_map.getNodeY(a.getTarget());
+    		return Math.atan2( tgt_y - src_y, tgt_x - src_x);    		
+    	}
+     }
+    
     /**
      * Returns shortest distance between two nodes computed using Dijkstra's Algorithm
      * @param node1 String label of source node (associated with an EnvMapNode in the map to translate)
@@ -301,12 +396,14 @@ public class MapTranslator {
      * @return String PRISM encoding for adaptation scenario
      */
     public static String getMapTranslation(){
-        String buf="// Generated with BRASS Robot Map PRISM Renderer\n\n";
+        String buf="// Generated by BRASS MARS Robot Map PRISM Translator "+VERSION_STR+".\n\n";
         buf+=generateGameStructure()+"\n";
+        buf+=generateHeadingConstants()+"\n";
         buf+=generateLocationConstants()+"\n";
         buf+=generateEnvironmentModule()+"\n";
         buf+=generateRobotModule()+"\n";
         buf+=generateTimeReward()+"\n";
+        buf+=generateRotationTimeFormulas()+"\n";
         buf+=generateDistanceReward()+"\n";
         buf+="// --- End of generated code ---\n";
         return buf;
@@ -327,16 +424,26 @@ public class MapTranslator {
         }
     }
 
-    public MapTranslator(){
 
-    }
-
+    /**
+     * Class test
+     * @param args
+     */
     public static void main(String[] args) {
         EnvMap dummyMap = new EnvMap(null);		
         //dummyMap.insertNode("newnode", "l1", "l2", 17.0, 69.0);
         setMap(dummyMap);
-        System.out.println(getMapTranslation()); // Class test
-        System.out.println();
-        exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp.prism");
+        //System.out.println(getMapTranslation()); // Class test
+        //System.out.println();
+        //exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp_rot.prism");
+        
+        EnvMapArc a = m_map.getArcs().get(0);
+        System.out.println(a.getSource()+"_"+a.getTarget());
+        System.out.println(String.valueOf(findArcOrientation(a)));
+        System.out.println(MissionState.Heading.convertFromRadians(findArcOrientation(a)).name());
+    	for (MissionState.Heading h : MissionState.Heading.values()) {
+    		System.out.println(h.name());
+    		System.out.println(String.valueOf(getRotationTime(MissionState.Heading.convertToRadians(h), a)));
+    	}
     }
 }

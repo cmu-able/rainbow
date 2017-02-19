@@ -31,6 +31,18 @@ public class MissionState {
             return EAST;
 
         }
+        
+        public static double convertToRadians (Heading h) {
+        	if (h == EAST ) return 0;
+        	if (h == NORTHEAST) return Math.PI/4;
+        	if (h == NORTH) return Math.PI/2;
+        	if (h == NORTHWEST) return 3*Math.PI/4;
+        	if (h == WEST) return Math.PI;
+        	if (h == SOUTHWEST) return 5*Math.PI/4;
+        	if (h == SOUTH) return 3*Math.PI/2;
+        	if (h == SOUTHEAST) return 7*Math.PI/4;
+        	return 0;
+        }
     };
 
     public static class LocationRecording {
