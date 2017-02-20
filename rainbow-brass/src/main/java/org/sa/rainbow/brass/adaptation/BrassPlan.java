@@ -16,4 +16,6 @@ public abstract class BrassPlan implements IEvaluable {
     public long estimateAvgTimeCost () {
         return 0;
     }
+
+    public abstract boolean getOutcome ();
 }

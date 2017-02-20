@@ -1,5 +1,7 @@
 package org.sa.rainbow.brass.adaptation;
 
+import org.sa.rainbow.brass.das.BRASSHttpConnector;
+import org.sa.rainbow.brass.das.IBRASSConnector.DASStatusT;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
 import org.sa.rainbow.brass.model.map.EnvMap;
@@ -11,7 +13,9 @@ import org.sa.rainbow.brass.model.mission.MissionStateModelInstance;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
+import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.adaptation.AdaptationTree;
+import org.sa.rainbow.core.adaptation.DefaultAdaptationTreeWalker;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.event.IRainbowMessage;
@@ -51,13 +55,19 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
 
         @Override
         public boolean matches (IRainbowMessage message) {
-            String modelName = (String )message.getProperty (IModelChangeBusPort.MODEL_NAME_PROP);
-            String modelType = (String )message.getProperty (IModelChangeBusPort.MODEL_TYPE_PROP);
-            String commandName = (String )message.getProperty (IModelChangeBusPort.COMMAND_PROP);
+            String modelName = (String )message.getProperty (
+                    IModelChangeBusPort.MODEL_NAME_PROP);
+            String modelType = (String )message.getProperty (
+                    IModelChangeBusPort.MODEL_TYPE_PROP);
+            String commandName = (String )message.getProperty (
+                    IModelChangeBusPort.COMMAND_PROP);
 
-            return MissionStateModelInstance.MISSION_STATE_TYPE.equals (modelType)
-                    && "RobotAndEnvironmentState".equals (modelName)
-                    && "setRobotObstructed".equals (commandName);
+            return MissionStateModelInstance.MISSION_STATE_TYPE
+                    .equals (modelType)
+                    && "RobotAndEnvironmentState"
+                    .equals (modelName)
+                    && "setRobotObstructed"
+                    .equals (commandName);
         }
     };
     private boolean                       m_executingPlan   = false;
@@ -67,7 +77,13 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
      */
     public BRASSAdaptationPlanner () {
         super (NAME);
-        setSleepTime (SLEEP_TIME);
+        String per = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MODEL_EVAL_PERIOD);
+        if (per != null) {
+            setSleepTime (Long.parseLong (per));
+        }
+        else {
+            setSleepTime (SLEEP_TIME);
+        }
     }
 
     @Override
@@ -109,7 +125,19 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
         // Possible things to do:
         // (a) keep a history of plan success
         // (b) start listening to model events to generate new plans again
+
         m_executingPlan = false;
+        AdaptationResultsVisitor v = new AdaptationResultsVisitor (plan);
+        plan.visit (v);
+        if (v.m_allOk) {
+            BRASSHttpConnector.instance ().reportStatus (DASStatusT.ADAPTATION_COMPLETED,
+                    "Finished adapting the system");
+        }
+        else {
+            BRASSHttpConnector.instance ().reportStatus (DASStatusT.ERROR,
+                    "Something in the adaptation plan failed to execute.");
+        }
+
     }
 
     @Override
@@ -135,6 +163,7 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
     @Override
     protected void runAction () {
         if (m_adaptationEnabled && m_errorDetected && !m_executingPlan) {
+            BRASSHttpConnector.instance ().reportStatus (DASStatusT.ADAPTING, "Finding a new plan");
             m_errorDetected = false;
             m_reportingPort.info (getComponentType (), "Determining an appropriate adaptation");
             // Work out if a plan needs to be generated
@@ -146,8 +175,10 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
             // to invoke PRISM.
             ModelReference emRef = new ModelReference ("Map", EnvMapModelInstance.ENV_MAP_TYPE);
             EnvMapModelInstance envModel = (EnvMapModelInstance )m_modelsManagerPort.<EnvMap> getModelInstance (emRef);
-            ModelReference igRef = new ModelReference("ExecutingInstructionGraph", InstructionGraphModelInstance.INSTRUCTION_GRAPH_TYPE);
-            InstructionGraphModelInstance igModel = (InstructionGraphModelInstance) m_modelsManagerPort.<InstructionGraphProgress> getModelInstance(igRef);
+            ModelReference igRef = new ModelReference ("ExecutingInstructionGraph",
+                    InstructionGraphModelInstance.INSTRUCTION_GRAPH_TYPE);
+            InstructionGraphModelInstance igModel = (InstructionGraphModelInstance )m_modelsManagerPort
+                    .<InstructionGraphProgress> getModelInstance (igRef);
             ModelReference missionStateRef = new ModelReference ("RobotAndEnvironmentState",
                     MissionStateModelInstance.MISSION_STATE_TYPE);
             MissionStateModelInstance missionStateModel = (MissionStateModelInstance )m_modelsManagerPort
@@ -170,14 +201,21 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
                 // TODO: Ashutosh
                 // Translate model to the IG
                 // Create a NewInstrcutionGraph object and enqueue it on the adaptation port
-                PrismPolicy prismPolicy = new PrismPolicy(pc.getPrismPolicyLocation());
-                prismPolicy.readPolicy();  
-                PolicyToIG translator = new PolicyToIG(prismPolicy, map);
-                NewInstructionGraph nig = new NewInstructionGraph(igModel, translator.translate()); // Ashutosh: do this
-                AdaptationTree<BrassPlan> at = new AdaptationTree<BrassPlan> (nig);
-                m_reportingPort.info (getComponentType (), "New adaptation found - enqueuing it");
-                m_executingPlan = true;
-                m_adaptationEnqueuePort.offerAdaptation (at, new Object[] {});
+                PrismPolicy prismPolicy = new PrismPolicy (pc.getPrismPolicyLocation ());
+                prismPolicy.readPolicy ();
+                m_reportingPort.info (getComponentType (), "Found new plan: " + prismPolicy.getPlan ().toString ());
+                if (prismPolicy.getPlan () == null || prismPolicy.getPlan ().isEmpty ()) {
+                    BRASSHttpConnector.instance ().reportStatus (DASStatusT.MISSION_ABORTED,
+                            "Could not find a valid adaptation");
+                }
+                else {
+                    PolicyToIG translator = new PolicyToIG (prismPolicy, map);
+                    NewInstructionGraph nig = new NewInstructionGraph (igModel, translator.translate ()); // Ashutosh: do this
+                    AdaptationTree<BrassPlan> at = new AdaptationTree<BrassPlan> (nig);
+                    m_reportingPort.info (getComponentType (), "New adaptation found - enqueuing it");
+                    m_executingPlan = true;
+                    m_adaptationEnqueuePort.offerAdaptation (at, new Object[] {});
+                }
             }
 
         }
@@ -190,5 +228,20 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
     }
 
     public static String DUMMY_ALTERNATE_IG = "P(V(1, do MoveAbs (19.5,69,1) then 2),V(2, do MoveAbs (19.5,59,1) then 3)::V(3, do Move (42.5, 59, 0) then 4)::V(4, end)::nil)";
+
+    private class AdaptationResultsVisitor extends DefaultAdaptationTreeWalker<BrassPlan> {
+
+        public AdaptationResultsVisitor (AdaptationTree<BrassPlan> adt) {
+            super (adt);
+        }
+
+        boolean m_allOk = true;
+
+        @Override
+        protected void evaluate (BrassPlan adaptation) {
+            m_allOk &= adaptation.getOutcome ();
+        }
+
+    }
 
 }

@@ -21,6 +21,7 @@ public class NewInstructionGraph extends BrassPlan {
     private InstructionGraphModelInstance m_reference;
 
     private IModelsManagerPort m_modelsManager;
+    private boolean            m_outcome;
 
     public NewInstructionGraph (InstructionGraphModelInstance m, String instructionGraph) {
         m_instructionGraph = instructionGraph;
@@ -32,10 +33,16 @@ public class NewInstructionGraph extends BrassPlan {
     public Object evaluate (Object[] argsIn) {
         IAdaptationExecutor<BrassPlan> executor = Rainbow.instance ().getRainbowMaster ()
                 .strategyExecutor (m_reference.getModelInstance ().getModelReference ().toString ());
-        InstructionGraphCommandFactory cf = (InstructionGraphCommandFactory )m_reference.getCommandFactory ();
+        InstructionGraphCommandFactory cf = m_reference.getCommandFactory ();
         SetInstructionsCmd cmd = cf.setInstructionsCmd (m_instructionGraph);
         OperationResult result = executor.getOperationPublishingPort ().publishOperation (cmd);
-        return result.result == Result.SUCCESS;
+        m_outcome = result.result == Result.SUCCESS;
+        return m_outcome;
+    }
+
+    @Override
+    public boolean getOutcome () {
+        return m_outcome;
     }
 
 }
