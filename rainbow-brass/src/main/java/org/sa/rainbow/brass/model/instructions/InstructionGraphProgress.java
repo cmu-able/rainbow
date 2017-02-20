@@ -164,12 +164,16 @@ public class InstructionGraphProgress {
     public void setExecutingInstruction (String instLabel) {
 //    	if (m_instructions.containsKey (instLabel)) {
         m_currentNode = instLabel;
+        if (!m_currentOK)
+        {
+            m_currentOK = true;
 //        }
 //        ExecutionObservation observation = new ExecutionObservation ();
 //        observation.startTime = new Date().getTime ();
 //        observation.label = instLabel;
 //        observation.
 //        m_executionHistory.push (observation);
+        }
 
     }
 

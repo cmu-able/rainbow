@@ -1,5 +1,7 @@
 package org.sa.rainbow.brass.analyses;
 
+import org.sa.rainbow.brass.das.BRASSHttpConnector;
+import org.sa.rainbow.brass.das.IBRASSConnector.DASStatusT;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
 import org.sa.rainbow.brass.model.instructions.SetExecutionFailedCmd;
@@ -33,6 +35,7 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
     private IModelsManagerPort m_modelsManagerPort;
     private IModelUSBusPort m_modelUSPort;
     private boolean            m_awaitingNewIG;
+    private boolean            m_awaitingPose;
 
     public BRASSMissionAnalyzer () {
         super(NAME);
@@ -102,16 +105,25 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
             boolean currentOK = igProgress.getCurrentOK();
 
             // If we start off with nothing (i.e., no instruction graph), this is a problem
-            if (emptyInstructions (igProgress)
-                    && !missionState.isRobotObstructed () && missionState.getCurrentPose () != null) {
-                log ("Robot has no instructions - triggering planning to get started");
-                SetRobotObstructedCmd cmd = missionStateModel.getCommandFactory ().setRobotObstructedCmd (true);
-                m_modelUSPort.updateModel (cmd);
+//            if (emptyInstructions (igProgress)
+//                    && !missionState.isRobotObstructed () && missionState.getCurrentPose () != null) {
+//                log ("Robot has no instructions - triggering planning to get started");
+//                SetRobotObstructedCmd cmd = missionStateModel.getCommandFactory ().setRobotObstructedCmd (true);
+//                m_modelUSPort.updateModel (cmd);
+//            }
+            if (missionState.getCurrentPose () == null) {
+                m_awaitingPose = true;
+            }
+            else if (missionState.getCurrentPose () != null && m_awaitingPose) {
+                m_awaitingPose = false;
+                BRASSHttpConnector.instance ().reportReady (true);
+
             }
             else if (!currentOK && igProgress.getExecutingInstruction () != null && !m_awaitingNewIG) {
                 // Current IG failed
                 m_reportingPort.info (getComponentType (), "Instruction graph failed...updating map model");
-
+                BRASSHttpConnector.instance ().reportStatus (DASStatusT.PERTURBATION_DETECTED,
+                        "Obstacle on path detected");
                 // Get current robot position
                 LocationRecording pose = missionState.getCurrentPose ();
 
@@ -166,7 +178,7 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
             else if (currentOK && !emptyInstructions (igProgress) && missionState.isRobotObstructed ()) {
                 // New IG resumed after robot obstructed
                 log ("New instruction model was detected. Reseting models to ok");
-                m_reportingPort.info (getComponentType (), "New instruction graph resumed");
+                m_reportingPort.info (getComponentType (), "New instruction graph detected");
                 m_awaitingNewIG = false;
                 // Clear robot obstructed flag
                 SetRobotObstructedCmd clearRobotObstructedCmd = missionStateModel.getCommandFactory ()

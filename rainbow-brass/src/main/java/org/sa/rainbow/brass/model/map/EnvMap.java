@@ -71,7 +71,7 @@ public class EnvMap {
     public synchronized int getArcCount () {
         return m_arcs.size();
     }
-    
+
     public synchronized LinkedList<String> getNeighbors (String node) {
         LinkedList<String> res = new LinkedList<String>();
     	for (int i=0;i<getArcs().size();i++){
@@ -87,7 +87,7 @@ public class EnvMap {
         m_nodes.put(label, new EnvMapNode(label, x, y, m_new_node_id));
         m_new_node_id++;
     }
-    
+
     public synchronized void AddNode (String label, double x, double y, boolean charging){
     	m_nodes.put(label, new EnvMapNode(label, x, y, m_new_node_id, charging));
         m_new_node_id++;
@@ -106,7 +106,9 @@ public class EnvMap {
     }
 
     public synchronized int getNodeId (String n) {
-        return m_nodes.get(n).getId();
+        EnvMapNode envMapNode = m_nodes.get(n);
+        if (envMapNode == null) return -1;
+        return envMapNode.getId();
     }
 
     /**
@@ -163,10 +165,9 @@ public class EnvMap {
     public double distanceBetweenCoords (double x1, double y1, double x2, double y2){
         double xc = Math.abs (x1 - x2);
         double yc = Math.abs (y1 - y2);
-        return (float)Math.sqrt(xc*xc+yc*yc);		    	
+        return (float)Math.sqrt(xc*xc+yc*yc);		
     }
-    
-    
+
     /**
      * Inserts a new node in the map graph in between two nodes na and nb.
      * The arcs between the original endpoints are split, and the new pair of arcs between
@@ -187,7 +188,7 @@ public class EnvMap {
         //   addArc (nb, n, distanceBetween (nb, n), false);
         // addArc (n, nb, distanceBetween (nb, n), false);
     }
-    
+
     
     /**
      * Reads map information from a JSON file into the EnvMap
@@ -300,7 +301,7 @@ public class EnvMap {
         addArc ("l4", "ls", 5.4, true);
         addArc ("ls", "l4", 5.4, true);
     }
-    
+
 
     /**
      * Class test

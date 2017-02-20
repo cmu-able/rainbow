@@ -1,0 +1,27 @@
+vars:
+  _effectors.path: "${rainbow.path}/system/effectors"
+  
+effector-types:
+  changeInstructionGraphT:
+    command: setInstructions($<ig>)
+    type: script
+    scriptInfo:
+      path: "${_effectors.path}/setInstructions.sh"
+      argument: "{0}"
+  
+  changeDeadlineT:
+    command: setNewDeadline($<time>)
+    type: script
+    scriptInfo:
+      path: "${_effectors.path}/setDeadline.sh"
+      argument: "{0}"
+      
+effectors:
+  
+  changeInstructionGraph:
+    effector-type: changeInstructionGraphT
+    location: "${customize.system.target.master}"
+    
+#  changeDeadline:
+#    effector-type: changeDeadlineT
+#    location: "${customize.system.target.master}"

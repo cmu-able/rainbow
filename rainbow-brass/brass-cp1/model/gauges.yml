@@ -1,0 +1,63 @@
+gauge-types:
+  InstructionGraphProgressGaugeT:
+    commands:
+      current-instruction: "IG.setExecutingInstruction(String)"
+      current-failed: "IG.setExecutionFailed(String)"
+      new-ig: "IG.setInstructions(String)"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.brass.gauges.InstructionGraphGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+
+  MissionStateGaugeT:
+    commands:
+      location: "MS.setCurrentLocation(double,double,double)"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.brass.gauges.MissionStateGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+
+gauge-instances:
+  IGG1:
+    type: InstructionGraphProgressGaugeT
+    model: "ExecutingInstructionGraph:InstructionGraphProgress"
+    commands:
+      current-instruction: "cig.setExecutingInstruction($<node>)"
+      current-failed: "cig.setExecutionFailed($<node>)"
+      new-ig: "igs.setInstructions($<ig>)"
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      reportingPeriod: 1000
+      targetProbeType: rostopicprobe
+
+  MSG1:
+    type: MissionStateGaugeT
+    model: RobotAndEnvironmentState:MissionState
+    commands:
+      location: "ms.setCurrentLocation($<x>,$<y>,$<w>)"
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      reportingPeriod: 1000
+      targetProbeType: rostopicprobe

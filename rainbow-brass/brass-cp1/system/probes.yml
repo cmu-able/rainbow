@@ -1,0 +1,31 @@
+#
+# Probe descriptions for the BRASS test system
+#
+
+vars:
+
+
+probes:
+  ROSTopicProbe:
+    # Probe to report the topic information to gauges. The information is reported
+    # as YAML fragments of the messages published on ROS
+    alias: rostopicprobe
+    location: "${customize.system.target.ros}"
+    type: java
+    javaInfo:
+      class: org.sa.rainbow.brass.probes.BRASSRosTopicProbe
+      period: 2000
+      args.length: 2
+      args.0: "${rainbow.path}/system/probes/rostopicprobe.sh"
+      # /amcl_pose/pose/pose/position:1 will report the following yaml, every second
+      # topic: "/amcl_pose/pose/pose/position"
+      # x : float
+      # y : float
+      #
+      # /ig_action_server/feedback/feedback/sequence will report every message reported to feedback
+      # topic: "/ig_action_server/feedback/feedback/sequence"
+      # feedback: String
+      #   where feedback will either be the pattern: VertexNumber:Instruction:STARTED|SUCCEEDED|FAILED
+      #     from the instruction graph, or "Finished!" when the instruction graph is completed.
+      args.1: "/amcl_pose/pose/pose:1 /ig_action_server/feedback/feedback/sequence"
+
