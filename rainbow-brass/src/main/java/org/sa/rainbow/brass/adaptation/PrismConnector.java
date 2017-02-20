@@ -27,7 +27,7 @@ public class PrismConnector {
     static {
         DEFAULT.setProperty (PRISM_BIN_PROPKEY, "/Applications/prism-4.3.beta-osx64/bin/prism");
         DEFAULT.setProperty (PRISM_MODEL_PROPKEY,
-                "/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp.prism");
+                "/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp_rot.prism");
         DEFAULT.setProperty (PRISM_PROPERTIES_PROPKEY,
                 "/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/mapbot.props");
         DEFAULT.setProperty (PRISM_PARAMETERS_PROPKEY, "INITIAL_BATTERY=5000");

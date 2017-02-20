@@ -7,6 +7,9 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Stack;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.sa.rainbow.brass.model.map.dijkstra.Dijkstra;
@@ -21,6 +24,7 @@ import org.sa.rainbow.brass.model.mission.MissionState;
  * Eventually, the MapTranslator might be moved into a more general
  * translator incorporating elements from the architecture model, etc.
  */
+
 
 public class MapTranslator {
 
@@ -316,6 +320,65 @@ public class MapTranslator {
     	}
      }
     
+
+
+    public static Stack<String> connectionPath = null; // Aux data structures for finding all paths between arbitrary locations
+    public static List<Stack> connectionPaths = null;
+  
+
+    /**
+     * Generates all non-cyclic paths between two locations in map
+     * @param node1
+     * @param node2
+     */
+    public static void goFindAllPaths(String node1, String node2){
+    	connectionPath = new Stack<String>();
+    	connectionPath.push(node1);
+    	connectionPaths = new ArrayList<>();
+    	findAllPaths (node1, node2);
+    	for (int i=0; i<connectionPaths.size();i++)
+    		connectionPaths.get(i).add(node2);
+    	System.out.println(String.valueOf(connectionPaths));
+    }
+  
+	public static synchronized void findAllPaths(String src, String tgt) {
+		  for (String nextNode : m_map.getNeighbors(src)){		  
+			  if (nextNode.equals(tgt)){
+				Stack temp = new Stack<String>();
+				for (String node1 : connectionPath)
+					temp.add(node1);
+				connectionPaths.add(temp);
+			  } else if (!connectionPath.contains(nextNode)) {
+				  connectionPath.push(nextNode);
+				  findAllPaths(nextNode, tgt);
+				  connectionPath.pop();
+			  }
+		  }
+	  	
+	  }
+	  
+	 /**
+	  * Translates a path into a PRISM module constraining the movements of the robot to that path
+	 * @param path List of strings with the locations of the path from source to target (e.g., ["ls", ..., "l1"])
+	 * @return String PRISM encoding of the path constraint module
+	 */
+	public static String generatePathConstraintModule(List path){
+		 String buf="\n"+"module path_constraint\n";
+		 LinkedList<String> allowed = new LinkedList<String>();
+		 for (int i=0; i< path.size()-1; i++){
+		 	allowed.add(path.get(i)+ MOVE_CMD_STR + path.get(i+1));
+		 }
+		 buf+= "// Allowed arcs: "+ String.valueOf(allowed) + "\n";
+		 for (EnvMapArc a : m_map.getArcs()){
+			 String str_arc= a.getSource() + MOVE_CMD_STR + a.getTarget();
+			 if (!allowed.contains(str_arc))
+				 buf += "\t[" + str_arc + "] false -> true; \n";
+		 }
+		 buf += "endmodule\n";
+		 return buf;
+	 }
+	  
+	 
     /**
      * Returns shortest distance between two nodes computed using Dijkstra's Algorithm
      * @param node1 String label of source node (associated with an EnvMapNode in the map to translate)
@@ -437,13 +500,16 @@ public class MapTranslator {
         //System.out.println();
         //exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp_rot.prism");
         
-        EnvMapArc a = m_map.getArcs().get(0);
+        goFindAllPaths("ls","l1");
+        System.out.println(generatePathConstraintModule(connectionPaths.get(0)));
+        
+/*        EnvMapArc a = m_map.getArcs().get(0);
         System.out.println(a.getSource()+"_"+a.getTarget());
         System.out.println(String.valueOf(findArcOrientation(a)));
         System.out.println(MissionState.Heading.convertFromRadians(findArcOrientation(a)).name());
     	for (MissionState.Heading h : MissionState.Heading.values()) {
     		System.out.println(h.name());
     		System.out.println(String.valueOf(getRotationTime(MissionState.Heading.convertToRadians(h), a)));
-    	}
+    	}*/
     }
 }
