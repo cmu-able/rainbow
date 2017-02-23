@@ -27,14 +27,14 @@ public class PrismConnector {
     static {
         DEFAULT.setProperty (PRISM_BIN_PROPKEY, "/Applications/prism-4.3.beta-osx64/bin/prism");
         DEFAULT.setProperty (PRISM_MODEL_PROPKEY,
-                "/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp_rot.prism");
+                "/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp.prism");
         DEFAULT.setProperty (PRISM_PROPERTIES_PROPKEY,
                 "/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/mapbot.props");
-        DEFAULT.setProperty (PRISM_PARAMETERS_PROPKEY, "INITIAL_BATTERY=5000");
+        DEFAULT.setProperty (PRISM_PARAMETERS_PROPKEY, "INITIAL_BATTERY=5000,INITIAL_HEADING=1");
         DEFAULT.setProperty (PRISM_ADV_EXPORT_PROPKEY,
                 "/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/botpolicy.adv");
     }
-    private static final boolean m_print_output = true;
+    private static final boolean m_print_output = false;
 
     private String m_prismBin;
     private String m_prismModel;
@@ -79,6 +79,47 @@ public class PrismConnector {
         return m_prismAdvExport;
     }
 
+    
+    public String invokeGenPolicy (String filename, int currentLocationId, int toLocationId) {
+        String line;
+        String result="";
+        String locationParameterString = ",INITIAL_LOCATION=" + String.valueOf (currentLocationId) + ",TARGET_LOCATION="
+                + String.valueOf (toLocationId);
+
+        try {
+            Process p = Runtime.getRuntime ()
+                    .exec (m_prismBin + " " + filename + " " + m_prismProperties + " -prop 1 -ex -const "
+                            + m_prismParameters + locationParameterString + " -exportadv " + m_prismAdvExport);
+            
+            BufferedReader input = new BufferedReader (new InputStreamReader (p.getInputStream ()));
+            while ((line = input.readLine ()) != null) {
+            	if (m_print_output) {
+            		System.out.println (line);
+                }
+            	String[] e = line.split(" ");
+                if (e[0].equals("Result:")){
+                	m_result = e[1];
+                	result = e[1];
+                }
+            }
+            
+            
+            input.close ();
+            
+            try{
+            p.waitFor();
+            } catch (InterruptedException e1){
+            	e1.printStackTrace();
+            }
+
+        }
+        catch (IOException e) {
+            e.printStackTrace ();
+        }
+        return result;
+    }
+
+    
     public void invoke (int currentLocationId, int toLocationId) {
         String line;
         String locationParameterString = ",INITIAL_LOCATION=" + String.valueOf (currentLocationId) + ",TARGET_LOCATION="

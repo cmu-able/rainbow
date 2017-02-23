@@ -51,7 +51,7 @@ public class PolicyToIG {
             }
         }
         // add the end
-        ins_graph += "V(" + i + ", end)::\nnil";
+        ins_graph += "V(" + (i+1) + ", end)::\nnil)";
 
 //		
 //		for (i = 0; i < cmds.size(); i++) {
@@ -123,7 +123,7 @@ public class PolicyToIG {
         EnvMap map = new EnvMap(null);
         PrismConnector conn = new PrismConnector (null);
 		  String out_dir_ig="/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/igs/";
-		  String out_dir_wp="/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/wps/";
+		  String out_dir_wp="/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/paths/";
         for (EnvMapNode node_src : map.getNodes().values()) {
             for (EnvMapNode node_tgt : map.getNodes().values()) {
                 if (node_src.getId()!=node_tgt.getId()){
@@ -138,7 +138,7 @@ public class PolicyToIG {
 	    			  exportIGTranslation(out_dir_ig+node_src.getLabel()+"_to_"+node_tgt.getLabel()+".ig",translator.translate());
 	    			  String w =generateJSONWayPointList(prismPolicy, prismResult);
 	    			  System.out.println(w);
-	    			  exportIGTranslation(out_dir_wp+node_src.getLabel()+"_to_"+node_tgt.getLabel()+".wp",w);  
+	    			  exportIGTranslation(out_dir_wp+node_src.getLabel()+"_to_"+node_tgt.getLabel()+".json",w);  
 	    			  
                 }
             }

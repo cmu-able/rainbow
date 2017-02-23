@@ -26,7 +26,8 @@ public class EnvMap {
         m_nodes = new HashMap<> ();
         m_new_node_id=0;
         m_arcs = new LinkedList<EnvMapArc> ();
-        initWithSimpleMap(); // TODO: Substitute hardwired version of the map by one parsed from file
+        //initWithSimpleMap(); // TODO: Substitute hardwired version of the map by one parsed from file
+        loadFromFile("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/map.json");
     }
 
     public ModelReference getModelReference () {

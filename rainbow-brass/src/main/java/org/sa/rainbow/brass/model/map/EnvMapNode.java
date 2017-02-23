@@ -24,6 +24,10 @@ public class EnvMapNode {
     	this.m_charging = charging;
     }
     
+    public boolean isChargingStation(){
+    	return m_charging;
+    }
+    
     public String getLabel() {
         return m_label;
     }
