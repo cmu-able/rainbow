@@ -15,16 +15,30 @@ public class BatteryPredictor {
      * @param time amount of seconds during which the robot moves.
      * @return
      */
-    public double batteryConsumption (String speed, double time) {
-        double base_consumption;
-        if (speed.equals("HALF_SPEED")){ 
+	
+	public double batteryConsumption (String speed, double time){
+		return batteryConsumption (speed, false, true, 20, time);
+	}
+	
+    public double batteryConsumption (String speed, boolean rotating, boolean kinectEnabled, double cpuAvgUsage, double time) {
+        double base_consumption=0;
+        double kinect_consumption=0;
+        double nuc_consumption=0;
+        
+        if (speed.equals("HALF_SPEED"))
             base_consumption = 1.674f*time+287.5f;
-        }
-        else{ 
-            base_consumption = 3.89f*time+582.6f;
-        }
-        double kinect_consumption = 1.0386f * time;
-        double nuc_consumption = 3.08f * time;
+        if (speed.equals("FULL_SPEED")) 
+        	base_consumption = 3.89f*time+582.6f;
+        if (rotating)
+        	base_consumption = 4.9f*time + 699f;
+        
+        if (kinectEnabled)
+        	kinect_consumption = 1.426f * time;
+        else 
+        	kinect_consumption = 0.07f * time;
+
+        nuc_consumption = ( 0.032f * cpuAvgUsage + 1.925f) * time;
+        
         return base_consumption + kinect_consumption + nuc_consumption;
     }
     
@@ -34,7 +48,7 @@ public class BatteryPredictor {
      * @return
      */
     public double batteryCharge (double time){
-    	return 0.1389 * time; // Charges 500 mws, or 500/3600 mwh
+    	return 8.35 * time; 
     }
 
 }

@@ -52,7 +52,7 @@ public class DecisionEngine {
 		Map.Entry<List, Double> maxEntry = null;
 		for (Map.Entry<List, Double> entry : m_scoreboard.entrySet())
 		{
-		    if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0)
+		    if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) < 0)
 		    {
 		        maxEntry = entry;
 		    }
@@ -65,7 +65,8 @@ public class DecisionEngine {
 		init();
 		EnvMap dummyMap = new EnvMap(null);
 		setMap(dummyMap);
-		generateCandidates("ls", "l1");
+//		generateCandidates("ls", "l1");
+		generateCandidates("l5", "l1");
 		scoreCandidates(dummyMap);
 		System.out.println(String.valueOf(m_scoreboard));
 		System.out.println(selectPolicy());

@@ -215,7 +215,7 @@ public class MapTranslator {
         synchronized (m_map) {
             String buf="";
             BatteryPredictor bp = new BatteryPredictor();
-            buf+="formula b_upd_1min = min("+ROBOT_BATTERY_VAR+"+"+String.valueOf(Math.round (bp.batteryCharge(ROBOT_CHARGING_TIME)))+", "+ROBOT_BATTERY_RANGE_MAX_CONST+"); // Recharging one minute adds 700 mW/hr to the battery\n\n";
+            buf+="formula b_upd_1min = min("+ROBOT_BATTERY_VAR+"+"+String.valueOf(Math.round (bp.batteryCharge(ROBOT_CHARGING_TIME)))+", "+ROBOT_BATTERY_RANGE_MAX_CONST+");\n\n";
             for (int i=0;i<m_map.getArcs().size();i++){
                 EnvMapArc a = m_map.getArcs().get(i);
                 double t_distance = a.getDistance ();
