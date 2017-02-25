@@ -31,17 +31,17 @@ public class MissionState {
             return EAST;
 
         }
-        
+
         public static double convertToRadians (Heading h) {
-        	if (h == EAST ) return 0;
-        	if (h == NORTHEAST) return Math.PI/4;
-        	if (h == NORTH) return Math.PI/2;
-        	if (h == NORTHWEST) return 3*Math.PI/4;
-        	if (h == WEST) return Math.PI;
-        	if (h == SOUTHWEST) return 5*Math.PI/4;
-        	if (h == SOUTH) return 3*Math.PI/2;
-        	if (h == SOUTHEAST) return 7*Math.PI/4;
-        	return 0;
+            if (h == EAST) return 0;
+            if (h == NORTHEAST) return Math.PI / 4;
+            if (h == NORTH) return Math.PI / 2;
+            if (h == NORTHWEST) return 3 * Math.PI / 4;
+            if (h == WEST) return Math.PI;
+            if (h == SOUTHWEST) return 5 * Math.PI / 4;
+            if (h == SOUTH) return 3 * Math.PI / 2;
+            if (h == SOUTHEAST) return 7 * Math.PI / 4;
+            return 0;
         }
     };
 
@@ -83,15 +83,16 @@ public class MissionState {
         }
     }
 
-    private final ModelReference     m_model;
-    Deque<LocationRecording>         m_locationHistory          = new ArrayDeque<> ();
-    private List<String>             m_instructionHistory		= new ArrayList<> ();
-    private Deque<Long>              m_predictedTimeHistory     = new ArrayDeque<> ();
-    private Deque<Long>              m_predictedAccuracyHistory = new ArrayDeque<> ();
-    private Deque<Double>            m_timeScore                = new ArrayDeque<> ();
-    private Deque<Double>            m_accuracyScore            = new ArrayDeque<> ();
-    private Deque<Double>            m_safetyScore              = new ArrayDeque<> ();
-    private boolean                  m_robotObstructed			= false;
+    private final ModelReference m_model;
+    Deque<LocationRecording>     m_locationHistory          = new ArrayDeque<> ();
+    private List<String>         m_instructionHistory       = new ArrayList<> ();
+    private Deque<Long>          m_predictedTimeHistory     = new ArrayDeque<> ();
+    private Deque<Long>          m_predictedAccuracyHistory = new ArrayDeque<> ();
+    private Deque<Double>        m_timeScore                = new ArrayDeque<> ();
+    private Deque<Double>        m_accuracyScore            = new ArrayDeque<> ();
+    private Deque<Double>        m_safetyScore              = new ArrayDeque<> ();
+    private boolean              m_robotObstructed          = false;
+    Deque<Double>                m_chargeHistory            = new ArrayDeque<> ();
 
     public MissionState (ModelReference model) {
         m_model = model;
@@ -145,9 +146,18 @@ public class MissionState {
         return m_instructionHistory.get (m_instructionHistory.size () - 2);
     }
 
+    public void setBatteryCharge (Double charge) {
+        m_chargeHistory.push (charge);
+    }
+
+    public Double getBatteryCharge () {
+        return m_chargeHistory.peek ();
+    }
+
     public MissionState copy () {
         MissionState s = new MissionState (m_model);
         s.m_locationHistory = new ArrayDeque<> (m_locationHistory);
+        s.m_chargeHistory = new ArrayDeque<> (m_chargeHistory);
         return s;
     }
 

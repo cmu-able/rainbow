@@ -22,6 +22,7 @@ gauge-types:
   MissionStateGaugeT:
     commands:
       location: "MS.setCurrentLocation(double,double,double)"
+      charge: "MS.setBatteryCharge(double)"
     setupParams:
       targetIP:
         type: String
@@ -56,6 +57,7 @@ gauge-instances:
     model: RobotAndEnvironmentState:MissionState
     commands:
       location: "ms.setCurrentLocation($<x>,$<y>,$<w>)"
+      charge: "ms.setBatteryCharge($<c>)"
     setupValues:
       targetIP: "${customize.system.target.master}"
     configValues:

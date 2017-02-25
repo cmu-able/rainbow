@@ -28,6 +28,7 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
     protected void fillInCommandMap () {
         m_commandMap.put ("setCurrentLocation".toLowerCase (), SetCurrentLocationCmd.class);
         m_commandMap.put ("setRobotObstructed".toLowerCase (), SetRobotObstructedCmd.class);
+        m_commandMap.put ("setBatteryCharge".toLowerCase (), SetBatteryChargeCmd.class);
     }
 
     @Override
@@ -48,5 +49,9 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
     public SetRobotObstructedCmd setRobotObstructedCmd (boolean robotObstructed) {
         return new SetRobotObstructedCmd ((MissionStateModelInstance )m_modelInstance, "",
                 Boolean.toString (robotObstructed));
+    }
+
+    public SetBatteryChargeCmd setBatteryChargeCmd (double charge) {
+        return new SetBatteryChargeCmd ((MissionStateModelInstance )m_modelInstance, "", Double.toString (charge));
     }
 }
