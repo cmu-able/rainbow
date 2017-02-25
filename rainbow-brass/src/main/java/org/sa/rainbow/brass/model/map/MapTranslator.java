@@ -5,12 +5,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Stack;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 import org.sa.rainbow.brass.model.map.dijkstra.Dijkstra;
 import org.sa.rainbow.brass.model.map.dijkstra.Edge;
@@ -29,8 +29,8 @@ import org.sa.rainbow.brass.model.mission.MissionState;
 public class MapTranslator {
 
     public static final String VERSION_STR = "V0.3a - Feb 2017";
-	
-	public static final String MODEL_TYPE = "mdp";
+
+    public static final String MODEL_TYPE = "mdp";
     public static final String MODULE_POSTFIX_STR = "_module";	
     public static final String TURN_VARIABLE = "turn";
     public static final String MOVE_CMD_STR = "_to_";
@@ -42,7 +42,7 @@ public class MapTranslator {
     public static final String ROTATION_TIME_FORMULA_PREFIX="rot_time_";
     public static final String ENVIRONMENT_TURN_STR = "ET";
     public static final String ROBOT_TURN_STR = "RT";
-    
+
 
     // Environment Configuration constants
 
@@ -73,7 +73,7 @@ public class MapTranslator {
     public static final String ROBOT_FULL_SPEED_CONST = "FULL_SPEED"; // These are just symbolic constants for PRISM
     public static final String ROBOT_HALF_SPEED_CONST = "HALF_SPEED";
     public static final String ROBOT_SPEED_VAR = "s";
-    
+
     public static final float ROBOT_ROTATIONAL_SPEED_VALUE = 0.3f; // rad/s
     public static final String ROBOT_HEADING_VAR = "r";
     public static final String INITIAL_ROBOT_HEADING_CONST = "INITIAL_HEADING";
@@ -82,7 +82,7 @@ public class MapTranslator {
     public static final String ROBOT_LOC_MODE_LO_CONST = "LOC_LO";
     public static final String ROBOT_LOC_MODE_MED_CONST = "LOC_MED";
     public static final String ROBOT_LOC_MODE_HI_CONST = "LOC_HI";
-    
+
     // Goal and stop condition configuration constants
 
     public static final String GOAL_PRED="goal"; // Goal achieved predicate (currently target location reached)
@@ -94,7 +94,7 @@ public class MapTranslator {
 
     public static final double MAX_DISTANCE = 999.0; // Distance assigned to disabled edges (for distance reward computation)
     public static final double DEFAULT_TIME_TACTIC_TIME=1; // Tactics are not instantaneous;
-    
+
     private static EnvMap m_map;
 
     /**
@@ -134,21 +134,21 @@ public class MapTranslator {
             return res;
         }
     }
-    
+
     /**
      * Generates labels for robot orientation/heading
      * @return String PRISM encoding for robot orientation constants
      */
     public static String generateHeadingConstants(){
-    	String buf="// Robot heading/orientation constants\n\n";
-    	int c=0;
-    	for (MissionState.Heading h : MissionState.Heading.values()) {
-    		 buf+="const "+HEADING_CONST_PREFIX+h.name()+"="+String.valueOf(c)+";\n";
-    		 c++;
-    	}
-    	return buf+"\n";
+        String buf="// Robot heading/orientation constants\n\n";
+        int c=0;
+        for (MissionState.Heading h : MissionState.Heading.values()) {
+            buf+="const "+HEADING_CONST_PREFIX+h.name()+"="+String.valueOf(c)+";\n";
+            c++;
+        }
+        return buf+"\n";
     }
-    
+
     /**
      * Generates labels for map locations
      * @return String PRISM encoding for map location constants
@@ -252,11 +252,11 @@ public class MapTranslator {
      * @return
      */
     public static String generateTacticCommands(){
-    	String buf="";
-    	buf += generateSpeedTacticCommands();
-    	buf += generateSensingTacticCommands();
-    	buf += generateChargingTacticCommands();
-    	return buf;
+        String buf="";
+        buf += generateSpeedTacticCommands();
+        buf += generateSensingTacticCommands();
+        buf += generateChargingTacticCommands();
+        return buf;
     }
 
     /**
@@ -264,11 +264,11 @@ public class MapTranslator {
      * @return
      */
     public static String generateSensingTacticCommands(){
-    	String buf="\t // Sensing tactics (lo=kinect off, med=kinect on+low cpu+low accuracy, hi=kinect on+high cpu+high accuracy\n";
-    	buf+="\t [t_set_loc_lo] ("+ROBOT_LOC_MODE_VAR+"!="+ROBOT_LOC_MODE_LO_CONST+") "+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_LOC_MODE_VAR+"'="+ROBOT_LOC_MODE_LO_CONST+")"+" & (robot_done'=true);\n";                	
-    	buf+="\t [t_set_loc_med] ("+ROBOT_LOC_MODE_VAR+"!="+ROBOT_LOC_MODE_MED_CONST+") "+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_LOC_MODE_VAR+"'="+ROBOT_LOC_MODE_MED_CONST+")"+" & (robot_done'=true);\n";                	
-    	buf+="\t [t_set_loc_hi] ("+ROBOT_LOC_MODE_VAR+"!="+ROBOT_LOC_MODE_HI_CONST+") "+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_LOC_MODE_VAR+"'="+ROBOT_LOC_MODE_HI_CONST+")"+" & (robot_done'=true);\n";                	
-    	return buf+"\n";
+        String buf="\t // Sensing tactics (lo=kinect off, med=kinect on+low cpu+low accuracy, hi=kinect on+high cpu+high accuracy\n";
+        buf+="\t [t_set_loc_lo] ("+ROBOT_LOC_MODE_VAR+"!="+ROBOT_LOC_MODE_LO_CONST+") "+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_LOC_MODE_VAR+"'="+ROBOT_LOC_MODE_LO_CONST+")"+" & (robot_done'=true);\n";                	
+        buf+="\t [t_set_loc_med] ("+ROBOT_LOC_MODE_VAR+"!="+ROBOT_LOC_MODE_MED_CONST+") "+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_LOC_MODE_VAR+"'="+ROBOT_LOC_MODE_MED_CONST+")"+" & (robot_done'=true);\n";                	
+        buf+="\t [t_set_loc_hi] ("+ROBOT_LOC_MODE_VAR+"!="+ROBOT_LOC_MODE_HI_CONST+") "+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_LOC_MODE_VAR+"'="+ROBOT_LOC_MODE_HI_CONST+")"+" & (robot_done'=true);\n";                	
+        return buf+"\n";
     }
 
     /**
@@ -276,10 +276,10 @@ public class MapTranslator {
      * @return
      */
     public static String generateSpeedTacticCommands(){
-    	String buf="\t // Speed setting change tactics\n";
-    	buf+="\t [t_set_half_speed] ("+ROBOT_SPEED_VAR+"!="+ROBOT_HALF_SPEED_CONST+") "+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_SPEED_VAR+"'="+ROBOT_HALF_SPEED_CONST+")"+" & (robot_done'=true);\n";                	
-    	buf+="\t [t_set_full_speed] ("+ROBOT_SPEED_VAR+"!="+ROBOT_FULL_SPEED_CONST+") "+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_SPEED_VAR+"'="+ROBOT_FULL_SPEED_CONST+")"+" & (robot_done'=true);\n";                	
-    	return buf+"\n";
+        String buf="\t // Speed setting change tactics\n";
+        buf+="\t [t_set_half_speed] ("+ROBOT_SPEED_VAR+"!="+ROBOT_HALF_SPEED_CONST+") "+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_SPEED_VAR+"'="+ROBOT_HALF_SPEED_CONST+")"+" & (robot_done'=true);\n";                	
+        buf+="\t [t_set_full_speed] ("+ROBOT_SPEED_VAR+"!="+ROBOT_FULL_SPEED_CONST+") "+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_SPEED_VAR+"'="+ROBOT_FULL_SPEED_CONST+")"+" & (robot_done'=true);\n";                	
+        return buf+"\n";
     }
 
     /**
@@ -287,11 +287,11 @@ public class MapTranslator {
      * @return
      */
     public static String generateChargingTacticCommands(){
-    	String buf="\t // Recharge tactics\n";
-    	buf+="\t [t_recharge_1min] true "+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_SPEED_VAR+"'="+ROBOT_HALF_SPEED_CONST+")"+" & (robot_done'=true);\n";                	
-    	return buf+"\n";
+        String buf="\t // Recharge tactics\n";
+        buf+="\t [t_recharge_1min] true "+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_SPEED_VAR+"'="+ROBOT_HALF_SPEED_CONST+")"+" & (robot_done'=true);\n";                	
+        return buf+"\n";
     }
-    
+
     /**
      * @return String PRISM encoding for time rewards associated with an EnvMap
      */
@@ -299,22 +299,22 @@ public class MapTranslator {
         synchronized (m_map) {
             String buf="rewards \"time\"\n";
             NumberFormat f = new DecimalFormat("#0.0000");
-            
-        	buf+="\t[t_set_half_speed] true : "+String.valueOf(DEFAULT_TIME_TACTIC_TIME)+";\n";
-        	buf+="\t[t_set_full_speed] true : "+String.valueOf(DEFAULT_TIME_TACTIC_TIME)+";\n";
-        	buf+="\t[t_set_loc_lo] true : "+String.valueOf(DEFAULT_TIME_TACTIC_TIME)+";\n";
-        	buf+="\t[t_set_loc_med] true : "+String.valueOf(DEFAULT_TIME_TACTIC_TIME)+";\n";
-        	buf+="\t[t_set_loc_hi] true : "+String.valueOf(DEFAULT_TIME_TACTIC_TIME)+";\n";
-        	buf+="\t[t_recharge_1min] true : "+String.valueOf(ROBOT_CHARGING_TIME)+";\n";
-            
+
+            buf+="\t[t_set_half_speed] true : "+String.valueOf(DEFAULT_TIME_TACTIC_TIME)+";\n";
+            buf+="\t[t_set_full_speed] true : "+String.valueOf(DEFAULT_TIME_TACTIC_TIME)+";\n";
+            buf+="\t[t_set_loc_lo] true : "+String.valueOf(DEFAULT_TIME_TACTIC_TIME)+";\n";
+            buf+="\t[t_set_loc_med] true : "+String.valueOf(DEFAULT_TIME_TACTIC_TIME)+";\n";
+            buf+="\t[t_set_loc_hi] true : "+String.valueOf(DEFAULT_TIME_TACTIC_TIME)+";\n";
+            buf+="\t[t_recharge_1min] true : "+String.valueOf(ROBOT_CHARGING_TIME)+";\n";
+
             for (int i=0;i<m_map.getArcs().size();i++){
                 EnvMapArc a = m_map.getArcs().get(i);
                 if (a.isEnabled()) {
-                	double t_distance = a.getDistance (); //  float(self.get_transition_attribute_value(t,"distance"))
-                	String t_time_half_speed=f.format(t_distance/ROBOT_HALF_SPEED_VALUE);
-                	String t_time_full_speed=f.format(t_distance/ROBOT_FULL_SPEED_VALUE);
-                	String action_name = a.getSource()+MOVE_CMD_STR+a.getTarget();
-                	buf+="\t["+action_name+"] true :"+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? "+t_time_half_speed+" + "+ROTATION_TIME_FORMULA_PREFIX+action_name+" : "+t_time_full_speed+" + "+ROTATION_TIME_FORMULA_PREFIX+action_name+";\n";
+                    double t_distance = a.getDistance (); //  float(self.get_transition_attribute_value(t,"distance"))
+                    String t_time_half_speed=f.format(t_distance/ROBOT_HALF_SPEED_VALUE);
+                    String t_time_full_speed=f.format(t_distance/ROBOT_FULL_SPEED_VALUE);
+                    String action_name = a.getSource()+MOVE_CMD_STR+a.getTarget();
+                    buf+="\t["+action_name+"] true :"+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? "+t_time_half_speed+" + "+ROTATION_TIME_FORMULA_PREFIX+action_name+" : "+t_time_full_speed+" + "+ROTATION_TIME_FORMULA_PREFIX+action_name+";\n";
                 }
             }
             buf+="endrewards\n\n";
@@ -322,24 +322,24 @@ public class MapTranslator {
         }
     }
 
-    
+
     /**
      * @return PRISM encoding for all rotation formulas (for all arcs in map)
      */
     public static String generateRotationTimeFormulas(){
-    	String buf="// Rotation time formulas for map arcs\n";
-    	synchronized (m_map) {
+        String buf="// Rotation time formulas for map arcs\n";
+        synchronized (m_map) {
             for (int i=0;i<m_map.getArcs().size();i++){
                 EnvMapArc a = m_map.getArcs().get(i);
                 if (a.isEnabled()) {
-                	buf = buf+generateRotationTimeFormulaForArc(a);
+                    buf = buf+generateRotationTimeFormulaForArc(a);
                 }
             }
-    	}
+        }
         return buf +"\n";
     }
-    
-    
+
+
     /**
      * Generates the PRISM encoding (as a formula) for all possible rotation times 
      * (for every heading in MissionState.Heading), given a map arc a
@@ -347,16 +347,16 @@ public class MapTranslator {
      * @return PRISM encoding for rotation times in arc a
      */
     public static String generateRotationTimeFormulaForArc(EnvMapArc a){
-    	NumberFormat f = new DecimalFormat ("#0.0000");
-    	String buf="formula "+ROTATION_TIME_FORMULA_PREFIX+a.getSource()+MOVE_CMD_STR+a.getTarget()+" = ";
-    	for (MissionState.Heading h : MissionState.Heading.values()) {
-        	buf += ROBOT_HEADING_VAR + "=" + HEADING_CONST_PREFIX + h.name() + " ? " + f.format (getRotationTime( MissionState.Heading.convertToRadians(h),a)) + " : ";
-    		}
-    	buf+=" 0;\n";
-    	return buf;
+        NumberFormat f = new DecimalFormat ("#0.0000");
+        String buf="formula "+ROTATION_TIME_FORMULA_PREFIX+a.getSource()+MOVE_CMD_STR+a.getTarget()+" = ";
+        for (MissionState.Heading h : MissionState.Heading.values()) {
+            buf += ROBOT_HEADING_VAR + "=" + HEADING_CONST_PREFIX + h.name() + " ? " + f.format (getRotationTime( MissionState.Heading.convertToRadians(h),a)) + " : ";
+        }
+        buf+=" 0;\n";
+        return buf;
     }
 
-  
+
     /**
      * Returns the rotation time in seconds from a given robot orientation to the right angle before it
      * starts moving towards a given location (target of arc a)
@@ -365,12 +365,12 @@ public class MapTranslator {
      * @return Rotation time in seconds
      */
     public static double getRotationTime(double robotOrientation, EnvMapArc a){    	
-    	double theta = Math.abs(robotOrientation-findArcOrientation(a));
-    	double min_theta = (theta > Math.PI) ? 2*Math.PI - theta : theta;
-    	return (min_theta/ROBOT_ROTATIONAL_SPEED_VALUE); 
+        double theta = Math.abs(robotOrientation-findArcOrientation(a));
+        double min_theta = (theta > Math.PI) ? 2*Math.PI - theta : theta;
+        return (min_theta/ROBOT_ROTATIONAL_SPEED_VALUE); 
     }
 
-        
+
     /**
      * Determines the angle (in Radians) between two endpoints of an arc, taking the source node of the arc
      * as the reference of coordinates in the plane. Used to determine the part of the time reward structure 
@@ -379,28 +379,28 @@ public class MapTranslator {
      * @return angle in radians between a.m_source and a.m_target
      */
     public static double findArcOrientation(EnvMapArc a){
-    	synchronized (m_map) {
-    		double src_x = m_map.getNodeX(a.getSource());
-    		double src_y = m_map.getNodeY(a.getSource());
-    		double tgt_x = m_map.getNodeX(a.getTarget());
-    		double tgt_y = m_map.getNodeY(a.getTarget());
-    		return Math.atan2( tgt_y - src_y, tgt_x - src_x);    		
-    	}
-     }
+        synchronized (m_map) {
+            double src_x = m_map.getNodeX(a.getSource());
+            double src_y = m_map.getNodeY(a.getSource());
+            double tgt_x = m_map.getNodeX(a.getTarget());
+            double tgt_y = m_map.getNodeY(a.getTarget());
+            return Math.atan2( tgt_y - src_y, tgt_x - src_x);    		
+        }
+    }
 
-    
+
     /**
      * Determines the heading between two endpoints of an arc (snaps result of findArcOrientation to one of the predetermined headings)
      * @param a Map arc
      * @return heading enum arc heading
      */
     public static MissionState.Heading findArcHeading (EnvMapArc a) {
-    	return MissionState.Heading.convertFromRadians(findArcOrientation(a));
+        return MissionState.Heading.convertFromRadians(findArcOrientation(a));
     }
 
     public static Stack<String> connectionPath = null; // Aux data structures for finding all paths between arbitrary locations
     public static List<Stack> connectionPaths = null;
-  
+
 
     /**
      * Generates all non-cyclic paths between two locations in map
@@ -408,55 +408,58 @@ public class MapTranslator {
      * @param node2
      */
     public static List<Stack> goFindAllPaths(String node1, String node2){
-    	connectionPath = new Stack<String>();
-    	connectionPath.push(node1);
-    	connectionPaths = new ArrayList<>();
-    	findAllPaths (node1, node2);
-    	for (int i=0; i<connectionPaths.size();i++)
-    		connectionPaths.get(i).add(node2);
-    	return connectionPaths;
+        connectionPath = new Stack<String>();
+        connectionPath.push(node1);
+        connectionPaths = new ArrayList<>();
+        findAllPaths (node1, node2);
+        for (int i=0; i<connectionPaths.size();i++) {
+            connectionPaths.get(i).add(node2);
+        }
+        return connectionPaths;
     }
-  
-	public static synchronized void findAllPaths(String src, String tgt) {
-		  for (String nextNode : m_map.getNeighbors(src)){		  
-			  if (nextNode.equals(tgt)){
-				Stack temp = new Stack<String>();
-				for (String node1 : connectionPath)
-					temp.add(node1);
-				connectionPaths.add(temp);
-			  } else if (!connectionPath.contains(nextNode)) {
-				  connectionPath.push(nextNode);
-				  findAllPaths(nextNode, tgt);
-				  connectionPath.pop();
-			  }
-		  }
-	  	
-	  }
-	  
+
+    public static synchronized void findAllPaths(String src, String tgt) {
+        for (String nextNode : m_map.getNeighbors(src)){		  
+            if (nextNode.equals(tgt)){
+                Stack temp = new Stack<String>();
+                for (String node1 : connectionPath) {
+                    temp.add(node1);
+                }
+                connectionPaths.add(temp);
+            } else if (!connectionPath.contains(nextNode)) {
+                connectionPath.push(nextNode);
+                findAllPaths(nextNode, tgt);
+                connectionPath.pop();
+            }
+        }
+
+    }
+
     /**
-	 * Translates a path into a PRISM module constraining the movements of the robot to that path
-	 * @param path List of strings with the locations of the path from source to target (e.g., ["ls", ..., "l1"])
-	 * @return String PRISM encoding of the path constraint module
-	 */
-	public static String generatePathConstraintModule(List path){
-		 String buf="\n"+"module path_constraint\n";
-		 LinkedList<String> allowed = new LinkedList<String>();
-		 for (int i=0; i< path.size()-1; i++){
-		 	allowed.add(path.get(i)+ MOVE_CMD_STR + path.get(i+1));
-		 }
-		 buf+= "// Allowed arcs: "+ String.valueOf(allowed) + "\n";
-		 synchronized(m_map) {
-			 for (EnvMapArc a : m_map.getArcs()){
-				 String str_arc= a.getSource() + MOVE_CMD_STR + a.getTarget();
-				 if (!allowed.contains(str_arc))
-					 buf += "\t[" + str_arc + "] false -> true; \n";
-			 }
-		 }
-		 buf += "endmodule\n";
-		 return buf;
-	 }
-	  
-	 
+     * Translates a path into a PRISM module constraining the movements of the robot to that path
+     * @param path List of strings with the locations of the path from source to target (e.g., ["ls", ..., "l1"])
+     * @return String PRISM encoding of the path constraint module
+     */
+    public static String generatePathConstraintModule(List path){
+        String buf="\n"+"module path_constraint\n";
+        LinkedList<String> allowed = new LinkedList<String>();
+        for (int i=0; i< path.size()-1; i++){
+            allowed.add(path.get(i)+ MOVE_CMD_STR + path.get(i+1));
+        }
+        buf+= "// Allowed arcs: "+ String.valueOf(allowed) + "\n";
+        synchronized(m_map) {
+            for (EnvMapArc a : m_map.getArcs()){
+                String str_arc= a.getSource() + MOVE_CMD_STR + a.getTarget();
+                if (!allowed.contains(str_arc)) {
+                    buf += "\t[" + str_arc + "] false -> true; \n";
+                }
+            }
+        }
+        buf += "endmodule\n";
+        return buf;
+    }
+
+
     /**
      * Returns shortest distance between two nodes computed using Dijkstra's Algorithm
      * @param node1 String label of source node (associated with an EnvMapNode in the map to translate)
@@ -486,16 +489,16 @@ public class MapTranslator {
                 Vertex source = vertices[(node_indexes.get (a.getSource ()))];
                 Vertex target = vertices[(node_indexes.get (a.getTarget ()))];
                 if (a.isEnabled()){
-                	edges[i] = new Edge(source, target, a.getDistance());
+                    edges[i] = new Edge(source, target, a.getDistance());
                 } else {
-                	edges[i] = new Edge(source, target, MAX_DISTANCE); // If edge is disabled, assign max possible distance                   	
+                    edges[i] = new Edge(source, target, MAX_DISTANCE); // If edge is disabled, assign max possible distance                   	
                 }
             }
 
             for(Edge e: edges){
-            	if (e.getWeight() < MAX_DISTANCE){
-            		graph.addEdge(e.getOne(), e.getTwo(), e.getWeight());
-            	}
+                if (e.getWeight() < MAX_DISTANCE){
+                    graph.addEdge(e.getOne(), e.getTwo(), e.getWeight());
+                }
             }
 
             Dijkstra dijkstra = new Dijkstra(graph, node1);
@@ -550,25 +553,25 @@ public class MapTranslator {
         return buf;
     }
 
-    
+
     /**
      * Generates the PRISM specification for an adaptation scenario, constrained to a specific path of robot movements
      * @param path List of strings containing the sequence of locations in the path, e.g., ["l1", ..., "l8"]
      * @return String PRISM encoding for constrained adaptation scenario
      */
     public static String getConstrainedToPathMapTranslation(List path){
-    	return getMapTranslation() +"\n\n"+ generatePathConstraintModule(path);   	
+        return getMapTranslation() +"\n\n"+ generatePathConstraintModule(path);   	
     }
-    
+
     /**
      * Generates and exports the PRISM specification for an adaptation scenario to a text file
      * @param f String filename to export PRISM specification (constrained to a path)
      * @param path List of strings containing the sequence of locations in the path, e.g., ["l1", ..., "l8"]
      */
     public static void exportMapTranslation(String f, List path) {
-    	exportTranslation(f, getConstrainedToPathMapTranslation(path));
+        exportTranslation(f, getConstrainedToPathMapTranslation(path));
     }
-    
+
     /**
      * Generates and exports the PRISM specification for an adaptation scenario to a text file
      * @param f String filename to export PRISM specification
@@ -576,8 +579,8 @@ public class MapTranslator {
     public static void exportMapTranslation(String f){
         exportTranslation(f, getMapTranslation());
     }
-    
-    
+
+
     /**
      * Exports a piece of code to a text file
      * @param f String filename
@@ -594,7 +597,7 @@ public class MapTranslator {
         }
     }
 
-    
+
     /**
      * Generates PRISM encoding variants constrained by all non-cyclic paths between two locations
      * @param f_base String base for PRISM models filenames (e.g., target folder)
@@ -603,34 +606,34 @@ public class MapTranslator {
      * @return
      */
     public static Map<List, String> exportConstrainedTranslationsBetween(String f_base, String source, String target) {
-    	List<Stack> paths = goFindAllPaths(source, target);
-    	Map<List, String> specifications = new HashMap<List, String>();
-    	int c=0;
+        List<Stack> paths = goFindAllPaths(source, target);
+        Map<List, String> specifications = new HashMap<List, String>();
+        int c=0;
         for ( List path : paths )  {
-      	  	String filename = f_base+String.valueOf(c)+".prism";
-        	exportMapTranslation (filename, path);
-      	  	specifications.put(path, filename);
-      	  	c++;
+            String filename = f_base+String.valueOf(c)+".prism";
+            exportMapTranslation (filename, path);
+            specifications.put(path, filename);
+            c++;
         }
         return specifications;
     }
-    
+
 
     /**
      * Class test
      * @param args
      */
     public static void main(String[] args) {
-        EnvMap dummyMap = new EnvMap(null);		
+        EnvMap dummyMap = new EnvMap (null, null);
         //dummyMap.insertNode("newnode", "l1", "l2", 17.0, 69.0);
         setMap(dummyMap);
         System.out.println(getMapTranslation()); // Class test
         //System.out.println();
         exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp-new.prism");
-      String export_path="/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/";
-      
-      Map<List, String> specifications = exportConstrainedTranslationsBetween (export_path, "ls", "l1");
-      System.out.println(String.valueOf(specifications));
-      
+        String export_path="/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/";
+
+        Map<List, String> specifications = exportConstrainedTranslationsBetween (export_path, "ls", "l1");
+        System.out.println(String.valueOf(specifications));
+
     }
 }

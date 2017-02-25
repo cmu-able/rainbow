@@ -1,16 +1,14 @@
 package org.sa.rainbow.brass.adaptation;
 
-import java.util.ArrayList;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.Thread;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.map.EnvMapNode;
-import org.sa.rainbow.brass.adaptation.PrismConnector;
 
 /**
  * @author ashutosh
@@ -93,21 +91,21 @@ public class PolicyToIG {
         return ins_graph;
     }
 
-	
-	public static String generateJSONWayPointList(PrismPolicy p, String r) {
-		String out="{\"path\": [";
-		for (int i=0; i<p.getPlan().size(); i++){
-			String[] e = p.getPlan().get(i).split("_");
-			if (i==0){
-				out = out + "\""+e[0]+"\"";
-			}
-			out = out + ",\""+e[2]+"\"";
-		}
-		out = out +"], \"time\": "+r;
-		out = out +"}";		
-		return out;
-	}
-	
+
+    public static String generateJSONWayPointList(PrismPolicy p, String r) {
+        String out="{\"path\": [";
+        for (int i=0; i<p.getPlan().size(); i++){
+            String[] e = p.getPlan().get(i).split("_");
+            if (i==0){
+                out = out + "\""+e[0]+"\"";
+            }
+            out = out + ",\""+e[2]+"\"";
+        }
+        out = out +"], \"time\": "+r;
+        out = out +"}";		
+        return out;
+    }
+
     public static void exportIGTranslation(String f, String s){
         try {
             BufferedWriter out = new BufferedWriter (new FileWriter(f));
@@ -120,26 +118,26 @@ public class PolicyToIG {
     }
 
     public static void main (String[] args) throws Exception { // Class test
-        EnvMap map = new EnvMap(null);
+        EnvMap map = new EnvMap (null, null);
         PrismConnector conn = new PrismConnector (null);
-		  String out_dir_ig="/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/igs/";
-		  String out_dir_wp="/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/paths/";
+        String out_dir_ig="/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/igs/";
+        String out_dir_wp="/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/paths/";
         for (EnvMapNode node_src : map.getNodes().values()) {
             for (EnvMapNode node_tgt : map.getNodes().values()) {
                 if (node_src.getId()!=node_tgt.getId()){
                     System.out.println("Src:"+String.valueOf(node_src.getId())+" Tgt:"+String.valueOf(node_tgt.getId()));
                     conn.invoke (node_src.getId(),node_tgt.getId()); 
-	    			  String prismResult = conn.getResult();
+                    String prismResult = conn.getResult();
                     PrismPolicy prismPolicy = new PrismPolicy("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/botpolicy.adv");
                     prismPolicy.readPolicy();
                     //System.out.println(prismPolicy.getPlan().toString());
                     PolicyToIG translator = new PolicyToIG(prismPolicy, map);
                     // System.out.println(translator.translate());
-	    			  exportIGTranslation(out_dir_ig+node_src.getLabel()+"_to_"+node_tgt.getLabel()+".ig",translator.translate());
-	    			  String w =generateJSONWayPointList(prismPolicy, prismResult);
-	    			  System.out.println(w);
-	    			  exportIGTranslation(out_dir_wp+node_src.getLabel()+"_to_"+node_tgt.getLabel()+".json",w);  
-	    			  
+                    exportIGTranslation(out_dir_ig+node_src.getLabel()+"_to_"+node_tgt.getLabel()+".ig",translator.translate());
+                    String w =generateJSONWayPointList(prismPolicy, prismResult);
+                    System.out.println(w);
+                    exportIGTranslation(out_dir_wp+node_src.getLabel()+"_to_"+node_tgt.getLabel()+".json",w);  
+
                 }
             }
         }

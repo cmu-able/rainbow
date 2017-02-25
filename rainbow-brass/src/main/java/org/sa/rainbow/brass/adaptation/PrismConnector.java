@@ -6,34 +6,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Properties;
 
+import org.sa.rainbow.brass.PropertiesConnector;
+
 /**
  * @author jcamara
  *
  */
 
 public class PrismConnector {
-    private static final String PRISM_ADV_EXPORT_PROPKEY = "prism.adv.export";
 
-    private static final String PRISM_PARAMETERS_PROPKEY = "prism.parameters";
-
-    private static final String PRISM_PROPERTIES_PROPKEY = "prism.properties";
-
-    private static final String PRISM_MODEL_PROPKEY = "prism.model";
-
-    private static final String PRISM_BIN_PROPKEY = "prism.bin";
-
-    // TODO: Move the hardwired values into some configuration file
-    private static final Properties DEFAULT = new Properties ();
-    static {
-        DEFAULT.setProperty (PRISM_BIN_PROPKEY, "/Applications/prism-4.3.beta-osx64/bin/prism");
-        DEFAULT.setProperty (PRISM_MODEL_PROPKEY,
-                "/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp.prism");
-        DEFAULT.setProperty (PRISM_PROPERTIES_PROPKEY,
-                "/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/mapbot.props");
-        DEFAULT.setProperty (PRISM_PARAMETERS_PROPKEY, "INITIAL_BATTERY=5000,INITIAL_HEADING=1");
-        DEFAULT.setProperty (PRISM_ADV_EXPORT_PROPKEY,
-                "/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/botpolicy.adv");
-    }
     private static final boolean m_print_output = false;
 
     private String m_prismBin;
@@ -56,13 +37,13 @@ public class PrismConnector {
 
     public PrismConnector (Properties props) {
         if (props == null) {
-            props = DEFAULT;
+            props = PropertiesConnector.DEFAULT;
         }
-        m_prismBin = props.getProperty (PRISM_BIN_PROPKEY);
-        m_prismModel = props.getProperty (PRISM_MODEL_PROPKEY);
-        m_prismProperties = props.getProperty (PRISM_PROPERTIES_PROPKEY);
-        m_prismParameters = props.getProperty (PRISM_PARAMETERS_PROPKEY);
-        m_prismAdvExport = props.getProperty (PRISM_ADV_EXPORT_PROPKEY);
+        m_prismBin = props.getProperty (PropertiesConnector.PRISM_BIN_PROPKEY);
+        m_prismModel = props.getProperty (PropertiesConnector.PRISM_MODEL_PROPKEY);
+        m_prismProperties = props.getProperty (PropertiesConnector.PRISM_PROPERTIES_PROPKEY);
+        m_prismParameters = props.getProperty (PropertiesConnector.PRISM_PARAMETERS_PROPKEY);
+        m_prismAdvExport = props.getProperty (PropertiesConnector.PRISM_ADV_EXPORT_PROPKEY);
 
         // Convert to full paths
         m_prismBin = convertToAbsolute (m_prismBin);
@@ -79,7 +60,7 @@ public class PrismConnector {
         return m_prismAdvExport;
     }
 
-    
+
     public String invokeGenPolicy (String filename, int currentLocationId, int toLocationId) {
         String line;
         String result="";
@@ -90,26 +71,26 @@ public class PrismConnector {
             Process p = Runtime.getRuntime ()
                     .exec (m_prismBin + " " + filename + " " + m_prismProperties + " -prop 1 -ex -const "
                             + m_prismParameters + locationParameterString + " -exportadv " + m_prismAdvExport);
-            
+
             BufferedReader input = new BufferedReader (new InputStreamReader (p.getInputStream ()));
             while ((line = input.readLine ()) != null) {
-            	if (m_print_output) {
-            		System.out.println (line);
+                if (m_print_output) {
+                    System.out.println (line);
                 }
-            	String[] e = line.split(" ");
+                String[] e = line.split(" ");
                 if (e[0].equals("Result:")){
-                	m_result = e[1];
-                	result = e[1];
+                    m_result = e[1];
+                    result = e[1];
                 }
             }
-            
-            
+
+
             input.close ();
-            
+
             try{
-            p.waitFor();
+                p.waitFor();
             } catch (InterruptedException e1){
-            	e1.printStackTrace();
+                e1.printStackTrace();
             }
 
         }
@@ -119,7 +100,7 @@ public class PrismConnector {
         return result;
     }
 
-    
+
     public void invoke (int currentLocationId, int toLocationId) {
         String line;
         String locationParameterString = ",INITIAL_LOCATION=" + String.valueOf (currentLocationId) + ",TARGET_LOCATION="
@@ -129,25 +110,25 @@ public class PrismConnector {
             Process p = Runtime.getRuntime ()
                     .exec (m_prismBin + " " + m_prismModel + " " + m_prismProperties + " -prop 1 -ex -const "
                             + m_prismParameters + locationParameterString + " -exportadv " + m_prismAdvExport);
-            
+
             BufferedReader input = new BufferedReader (new InputStreamReader (p.getInputStream ()));
             while ((line = input.readLine ()) != null) {
-            	if (m_print_output) {
-            		System.out.println (line);
+                if (m_print_output) {
+                    System.out.println (line);
                 }
-            	String[] e = line.split(" ");
+                String[] e = line.split(" ");
                 if (e[0].equals("Result:")){
-                	m_result = e[1];
+                    m_result = e[1];
                 }
             }
-            
-            
+
+
             input.close ();
-            
+
             try{
-            p.waitFor();
+                p.waitFor();
             } catch (InterruptedException e1){
-            	e1.printStackTrace();
+                e1.printStackTrace();
             }
 
         }
@@ -155,13 +136,13 @@ public class PrismConnector {
             e.printStackTrace ();
         }
     }
-    
+
     public String getResult(){
-    	return m_result;
+        return m_result;
     }
 
     public static void main (String[] args) throws Exception {
-        PrismConnector conn = new PrismConnector (DEFAULT);
+        PrismConnector conn = new PrismConnector (PropertiesConnector.DEFAULT);
         conn.invoke (8, 0); // Go from "ls" to "l1" in simplemap
     }
 }

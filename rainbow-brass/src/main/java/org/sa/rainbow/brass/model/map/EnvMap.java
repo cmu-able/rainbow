@@ -1,15 +1,17 @@
 package org.sa.rainbow.brass.model.map;
 
+import java.io.FileReader;
+import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Map;
-import java.io.FileReader;
-import java.text.*;
+import java.util.Properties;
 
-import org.json.simple.*;
-import org.json.simple.parser.*;
-import org.sa.rainbow.brass.model.mission.MissionState;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.sa.rainbow.brass.PropertiesConnector;
 import org.sa.rainbow.core.models.ModelReference;
 
 
@@ -20,14 +22,26 @@ import org.sa.rainbow.core.models.ModelReference;
 public class EnvMap {
     private final float SAME_LOCATION_RADIUS = 1.75f;
 
-    public EnvMap (ModelReference model) {
+    public EnvMap (ModelReference model, Properties props) {
+        if (props == null) {
+            props = PropertiesConnector.DEFAULT;
+        }
         m_model = model;
         m_last_insertion = new NodeInsertion();
         m_nodes = new HashMap<> ();
         m_new_node_id=0;
         m_arcs = new LinkedList<EnvMapArc> ();
         //initWithSimpleMap(); // TODO: Substitute hardwired version of the map by one parsed from file
-        loadFromFile("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/map.json");
+//        loadFromFile("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/map.json");
+        loadFromFile (props.getProperty (PropertiesConnector.MAP_PROPKEY));
+    }
+
+    private EnvMap (ModelReference model) {
+        m_model = model;
+        m_last_insertion = new NodeInsertion ();
+        m_nodes = new HashMap<> ();
+        m_new_node_id = 0;
+        m_arcs = new LinkedList<EnvMapArc> ();
     }
 
     public ModelReference getModelReference () {
@@ -75,13 +89,13 @@ public class EnvMap {
 
     public synchronized LinkedList<String> getNeighbors (String node) {
         LinkedList<String> res = new LinkedList<String>();
-    	for (int i=0;i<getArcs().size();i++){
-    		EnvMapArc a = this.getArcs().get(i);
-    		if (a.getSource().equals(node)){
-    			res.add(a.getTarget());
-    		}
+        for (int i=0;i<getArcs().size();i++){
+            EnvMapArc a = this.getArcs().get(i);
+            if (a.getSource().equals(node)){
+                res.add(a.getTarget());
+            }
         }
-    	return res;
+        return res;
     }
 
     public synchronized void AddNode (String label, double x, double y) {
@@ -90,7 +104,7 @@ public class EnvMap {
     }
 
     public synchronized void AddNode (String label, double x, double y, boolean charging){
-    	m_nodes.put(label, new EnvMapNode(label, x, y, m_new_node_id, charging));
+        m_nodes.put(label, new EnvMapNode(label, x, y, m_new_node_id, charging));
         m_new_node_id++;
     }
 
@@ -190,86 +204,86 @@ public class EnvMap {
         // addArc (n, nb, distanceBetween (nb, n), false);
     }
 
-    
+
     /**
      * Reads map information from a JSON file into the EnvMap
      * @param mapFile String filename of the JSON map file
      */
     public synchronized void loadFromFile(String mapFile){
-    	loadNodesFromFile(mapFile);
-    	loadArcsFromFile(mapFile);
+        loadNodesFromFile(mapFile);
+        loadArcsFromFile(mapFile);
     }
-    
+
     public synchronized void loadNodesFromFile(String mapFile){
-    	JSONParser parser = new JSONParser();
-    	NumberFormat format = NumberFormat.getInstance();
-    	
-    	Object obj=null;
-    	try{
-    		obj = parser.parse(new FileReader(mapFile)); 
-    	} catch (Exception e) {
-    		System.out.println("Could not load Map File");
-    	}
-    	
-    	JSONObject jsonObject = (JSONObject) obj;
-    	JSONArray nodes = (JSONArray) jsonObject.get("map");
+        JSONParser parser = new JSONParser();
+        NumberFormat format = NumberFormat.getInstance();
 
-    	for (Object node : nodes) {
-    	    JSONObject jsonNode = (JSONObject) node;
-    	    String id = (String) jsonNode.get("node-id");
-    	    JSONObject src_coords = (JSONObject) jsonNode.get("coord");
-    	    double src_x=0, src_y=0;
-    	    try{
-    	    	src_x = (double) Double.parseDouble(String.valueOf(src_coords.get("x")));
-    	    	src_y = (double) Double.parseDouble(String.valueOf(src_coords.get("y")));
-    	    } catch (Exception e){
-    	    	System.out.println("Error parsing coordinates in location "+id);
-    	    }
-    	    
-    	    AddNode(id, src_x, src_y, id.indexOf("c")==0?true:false); // The last parameter flags that this is a charging station
-    	    														  // if the location's id starts with "c"... maybe to be changed later
-    	    System.out.println("Added node " +id +" - X: " + String.valueOf(src_x) + " Y: " + String.valueOf(src_y)+(id.indexOf("c")==0?" (Charging Station)":""));
-    	}
+        Object obj=null;
+        try{
+            obj = parser.parse(new FileReader(mapFile)); 
+        } catch (Exception e) {
+            System.out.println("Could not load Map File");
+        }
+
+        JSONObject jsonObject = (JSONObject) obj;
+        JSONArray nodes = (JSONArray) jsonObject.get("map");
+
+        for (Object node : nodes) {
+            JSONObject jsonNode = (JSONObject) node;
+            String id = (String) jsonNode.get("node-id");
+            JSONObject src_coords = (JSONObject) jsonNode.get("coord");
+            double src_x=0, src_y=0;
+            try{
+                src_x = Double.parseDouble(String.valueOf(src_coords.get("x")));
+                src_y = Double.parseDouble(String.valueOf(src_coords.get("y")));
+            } catch (Exception e){
+                System.out.println("Error parsing coordinates in location "+id);
+            }
+
+            AddNode(id, src_x, src_y, id.indexOf("c")==0?true:false); // The last parameter flags that this is a charging station
+            // if the location's id starts with "c"... maybe to be changed later
+            System.out.println("Added node " +id +" - X: " + String.valueOf(src_x) + " Y: " + String.valueOf(src_y)+(id.indexOf("c")==0?" (Charging Station)":""));
+        }
     }
-    
+
     public synchronized void loadArcsFromFile(String mapFile){
-    	JSONParser parser = new JSONParser();
-    	NumberFormat format = NumberFormat.getInstance();
-    	
-    	Object obj=null;
-    	try{
-    		obj = parser.parse(new FileReader(mapFile)); 
-    	} catch (Exception e) {
-    		System.out.println("Could not load Map File");
-    	}
-    	
-    	JSONObject jsonObject = (JSONObject) obj;
-    	JSONArray nodes = (JSONArray) jsonObject.get("map");
+        JSONParser parser = new JSONParser();
+        NumberFormat format = NumberFormat.getInstance();
 
-    	for (Object node : nodes) {
-    	    JSONObject jsonNode = (JSONObject) node;
-    	    String id = (String) jsonNode.get("node-id");
-    	    JSONObject src_coords = (JSONObject) jsonNode.get("coord");
-    	    double src_x=0, src_y=0;
-    	    try{
-    	    	src_x = (double) Double.parseDouble(String.valueOf(src_coords.get("x")));
-    	    	src_y = (double) Double.parseDouble(String.valueOf(src_coords.get("y")));
-    	    } catch (Exception e){
-    	    	System.out.println("Error parsing coordinates in location "+id);
-    	    }
-    	        	    
-    	    JSONArray neighbors = (JSONArray) jsonNode.get("connected-to");
-    	    for (Object neighbor : neighbors) {
-    	    	String ns = String.valueOf(neighbor);
-    	    	double distance = distanceBetweenCoords(getNodeX(id),getNodeY(id),getNodeX(ns),getNodeY(ns));
-    	    	addArc(id, ns, distance, true);
-    	    	System.out.println("Added arc ["+id+","+ns+"] (distance="+ distance +")" );
-    	    }
-    	    
-    	}
+        Object obj=null;
+        try{
+            obj = parser.parse(new FileReader(mapFile)); 
+        } catch (Exception e) {
+            System.out.println("Could not load Map File");
+        }
+
+        JSONObject jsonObject = (JSONObject) obj;
+        JSONArray nodes = (JSONArray) jsonObject.get("map");
+
+        for (Object node : nodes) {
+            JSONObject jsonNode = (JSONObject) node;
+            String id = (String) jsonNode.get("node-id");
+            JSONObject src_coords = (JSONObject) jsonNode.get("coord");
+            double src_x=0, src_y=0;
+            try{
+                src_x = Double.parseDouble(String.valueOf(src_coords.get("x")));
+                src_y = Double.parseDouble(String.valueOf(src_coords.get("y")));
+            } catch (Exception e){
+                System.out.println("Error parsing coordinates in location "+id);
+            }
+
+            JSONArray neighbors = (JSONArray) jsonNode.get("connected-to");
+            for (Object neighbor : neighbors) {
+                String ns = String.valueOf(neighbor);
+                double distance = distanceBetweenCoords(getNodeX(id),getNodeY(id),getNodeX(ns),getNodeY(ns));
+                addArc(id, ns, distance, true);
+                System.out.println("Added arc ["+id+","+ns+"] (distance="+ distance +")" );
+            }
+
+        }
     }
 
-    
+
     public synchronized void initWithSimpleMap () {
         AddNode ("l1", 14.474, 69);
         AddNode ("l2", 19.82, 69);
@@ -309,7 +323,7 @@ public class EnvMap {
      * @param args
      */
     public static void main(String[] args) {
-        EnvMap dummyMap = new EnvMap(null);		
+        EnvMap dummyMap = new EnvMap (null, null);
         dummyMap.loadFromFile("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/map.json");
     }
 
