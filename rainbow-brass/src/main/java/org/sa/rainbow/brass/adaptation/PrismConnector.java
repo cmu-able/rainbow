@@ -15,7 +15,7 @@ import org.sa.rainbow.brass.PropertiesConnector;
 
 public class PrismConnector {
 
-    private static final boolean m_print_output = false;
+    private static final boolean m_print_output = true;
 
     private String m_prismBin;
     private String m_prismModel;
@@ -70,7 +70,7 @@ public class PrismConnector {
         try {
             Process p = Runtime.getRuntime ()
                     .exec (m_prismBin + " " + filename + " " + m_prismProperties + " -prop 1 -ex -const "
-                            + m_prismParameters + locationParameterString + " -exportadv " + m_prismAdvExport);
+                            + m_prismParameters + locationParameterString + " -exportstrat " + m_prismAdvExport);
 
             BufferedReader input = new BufferedReader (new InputStreamReader (p.getInputStream ()));
             while ((line = input.readLine ()) != null) {
@@ -143,6 +143,6 @@ public class PrismConnector {
 
     public static void main (String[] args) throws Exception {
         PrismConnector conn = new PrismConnector (PropertiesConnector.DEFAULT);
-        conn.invoke (8, 0); // Go from "ls" to "l1" in simplemap
+        conn.invoke (4, 0); // Go from "ls" to "l1" in simplemap
     }
 }
