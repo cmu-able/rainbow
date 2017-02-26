@@ -8,18 +8,22 @@ import java.util.Properties;
 import org.sa.rainbow.brass.PropertiesConnector;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.map.MapTranslator;
+import org.sa.rainbow.brass.adaptation.PrismPolicy;
+
 
 
 
 public class DecisionEngine {
 
-    public static String            m_export_path;
+    public static String m_export_path;
     public static MapTranslator m_mt;
-    public static PrismConnector m_pc;
+//    public static PrismConnector m_pc;
+    public static PrismConnectorAPI m_pc;
     public static String m_origin;
     public static String m_destination;
     public static Map<List, String> m_candidates;
     public static Map<List, Double > m_scoreboard;
+    public static PrismPolicy m_plan;
 
 
     public static void init (Properties props) {
@@ -28,7 +32,8 @@ public class DecisionEngine {
         }
         m_export_path = props.getProperty (PropertiesConnector.PRISM_OUTPUT_DIR);
         m_mt = new MapTranslator ();
-        m_pc = new PrismConnector (null); // Does this work with hard-wired props in the constructor?
+//        m_pc = new PrismConnector (null); // Old version invokes an installation of prism
+        m_pc = new PrismConnectorAPI (); // PRISM invoked via API
         m_origin="";
         m_destination="";
         m_scoreboard= new HashMap<List, Double>();
@@ -39,16 +44,22 @@ public class DecisionEngine {
     }
 
     public static void generateCandidates(String origin, String destination){
+    	m_origin = origin;
+    	m_destination = destination;
         m_candidates = m_mt.exportConstrainedTranslationsBetween(m_export_path, origin, destination);	
     }
 
-    public static void scoreCandidates(EnvMap map){
+    public static void scoreCandidates(EnvMap map, String batteryLevel, String robotHeading){
         m_scoreboard.clear();
-        String result;
         synchronized (map){
-            for (List candidate_key : m_candidates.keySet() ){
-                result = m_pc.invokeGenPolicy(m_candidates.get(candidate_key), map.getNodeId(String.valueOf(candidate_key.get(0))), map.getNodeId(String.valueOf(candidate_key.get(candidate_key.size()-1))));
-                m_scoreboard.put(candidate_key, Double.valueOf(result));
+        String m_consts = MapTranslator.INITIAL_ROBOT_LOCATION_CONST+"="+String.valueOf(map.getNodeId(m_origin)) +","+ MapTranslator.TARGET_ROBOT_LOCATION_CONST 
+        		+ "="+String.valueOf(map.getNodeId(m_destination))+ "," + MapTranslator.INITIAL_ROBOT_BATTERY_CONST+"="+batteryLevel+","+MapTranslator.INITIAL_ROBOT_HEADING_CONST+"="+robotHeading;
+
+        System.out.println(m_consts);
+        String result;
+            for (List candidate_key : m_candidates.keySet() ){                           	
+            result = m_pc.modelCheckFromFileS(m_candidates.get(candidate_key), m_export_path+"mapbot.props", m_candidates.get(candidate_key), 0, m_consts);
+            m_scoreboard.put(candidate_key, Double.valueOf(result));
             }
         }
     }
@@ -70,11 +81,14 @@ public class DecisionEngine {
         init (null);
         EnvMap dummyMap = new EnvMap (null, null);
         setMap(dummyMap);
-//		generateCandidates("ls", "l1");
         generateCandidates("l5", "l1");
-        scoreCandidates(dummyMap);
+        scoreCandidates(dummyMap, "1000", "1");
         System.out.println(String.valueOf(m_scoreboard));
-        System.out.println(selectPolicy());
+        System.out.println();
+        
+        PrismPolicy pp = new PrismPolicy(selectPolicy()+".adv");
+  	  	pp.readPolicy();  
+  	    System.out.println(pp.getPlan().toString());
 
     }
 

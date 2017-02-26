@@ -60,8 +60,12 @@ public class PrismConnector {
         return m_prismAdvExport;
     }
 
-
+    
     public String invokeGenPolicy (String filename, int currentLocationId, int toLocationId) {
+    	return invokeGenPolicy (filename, currentLocationId, toLocationId, m_prismParameters );
+    }
+    
+    public String invokeGenPolicy (String filename, int currentLocationId, int toLocationId, String auxParameters) {
         String line;
         String result="";
         String locationParameterString = ",INITIAL_LOCATION=" + String.valueOf (currentLocationId) + ",TARGET_LOCATION="
@@ -70,7 +74,7 @@ public class PrismConnector {
         try {
             Process p = Runtime.getRuntime ()
                     .exec (m_prismBin + " " + filename + " " + m_prismProperties + " -prop 1 -ex -const "
-                            + m_prismParameters + locationParameterString + " -exportstrat " + m_prismAdvExport);
+                            + auxParameters + locationParameterString + " -exportstrat " + m_prismAdvExport);
 
             BufferedReader input = new BufferedReader (new InputStreamReader (p.getInputStream ()));
             while ((line = input.readLine ()) != null) {
