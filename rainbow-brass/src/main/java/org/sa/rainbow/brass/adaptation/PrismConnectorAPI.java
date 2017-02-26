@@ -22,6 +22,10 @@ import parser.ast.ModulesFile;
 import parser.ast.PropertiesFile;
 import parser.ast.Property;
 
+/**
+ * @author jcamara
+ *
+ */
 public class PrismConnectorAPI {
 
 	public static PrismFileLog m_log;
@@ -37,6 +41,9 @@ public class PrismConnectorAPI {
 	public static String m_constSwitch;
 		
 	
+	/**
+	 * Initializes PRISM instance and additional structures
+	 */
 	public PrismConnectorAPI() {
 		m_log = new PrismFileLog("stdout");
 		m_prism = new Prism(m_log);
@@ -47,7 +54,7 @@ public class PrismConnectorAPI {
 		} catch (PrismException e){
 			System.out.println("Could not change strategy export mode to MDP");
 		}
-		//setRestrictStratToReach(true);
+		
 		m_constSwitch = "INITIAL_LOCATION=4,TARGET_LOCATION=0,INITIAL_BATTERY=5000,INITIAL_HEADING=1";
 		
 		try{
@@ -62,18 +69,16 @@ public class PrismConnectorAPI {
 		}
 	}
 	
-	
-	public static String modelCheckProperty(String property){
-		String res="";
-		
-		return res;
-	}
+
 	
 	public static String modelCheckFromFileS(String modelFileName, String propertiesFileName, String strategyFileName){
 		return modelCheckFromFileS(modelFileName, propertiesFileName, strategyFileName, -1, m_constSwitch);
 	}
-		
-	
+			
+	/**
+	 * Loads PRISM model from file
+	 * @param modelFileName
+	 */
 	public static void loadModel(String modelFileName){
 		try { // PRISM model parsing		
 			m_modulesFile = m_prism.parseModelFile(new File(modelFileName));
@@ -90,12 +95,13 @@ public class PrismConnectorAPI {
 		}
 	}
 	
+	/**
+	 * Loads PRISM properties from file
+	 * @param propertiesFileName
+	 */
 	public static void loadProperties(String propertiesFileName){
 		try { // PRISM property parsing						
-			//m_propertiesFile = m_prism.parsePropertiesString(m_modulesFile, property);
-			m_propertiesFile = m_prism.parsePropertiesFile(m_modulesFile, new File(propertiesFileName));
-			
-		
+			m_propertiesFile = m_prism.parsePropertiesFile(m_modulesFile, new File(propertiesFileName));				
 		}
 		catch (FileNotFoundException e) {
 			System.out.println("Error FNE: " + e.getMessage());
@@ -107,6 +113,15 @@ public class PrismConnectorAPI {
 		}
 	}
 	
+	/**
+	 * Model checks properties on a PRISM model specification
+	 * @param modelFileName  String filename of PRISM model
+	 * @param propertiesFileName String filename of PRISM properties
+	 * @param strategyFileName String output filename for strategy export (if applicable)
+	 * @param propertyToCheck int index of property to check in the properties file (-1 for all properties)
+	 * @param constSwitch String encoding all undefined constant (parameter)  values (comma-separated, e.g., CONST1=VAL1,..,CONSTN=VALN)
+	 * @return
+	 */
 	public static String modelCheckFromFileS(String modelFileName, String propertiesFileName, String strategyFileName, int propertyToCheck, String constSwitch){
 		int numPropertiesToCheck=0;
 		int i;
@@ -134,8 +149,6 @@ public class PrismConnectorAPI {
 		}
 		
 		// process info about undefined constants
-		
-		
 		// first, see which constants are undefined
 		// (one set of info for model, and one set of info for each property)
 		m_undefinedMFConstants = new UndefinedConstants(m_modulesFile, null);
@@ -143,7 +156,6 @@ public class PrismConnectorAPI {
 		for (i = 0; i < numPropertiesToCheck; i++) {
 			m_undefinedConstants[i] = new UndefinedConstants(m_modulesFile, m_propertiesFile, m_propertiesToCheck.get(i));
 		}
-		
 		
 		try {
 			// then set up value using const switch definitions
@@ -163,14 +175,12 @@ public class PrismConnectorAPI {
 			System.out.println(e.getMessage());
 		}
 		
-		try { // Model check
-			
+		try { // Model check	
 			if (m_propertiesFile != null) {
 				m_definedPFConstants = m_undefinedConstants[0].getPFConstantValues();
 				System.out.println(String.valueOf( m_undefinedConstants[0].getPFConstantValues()));
 				m_propertiesFile.setSomeUndefinedConstants(m_definedPFConstants);	
-			}
-			
+			}		
 			m_result = m_prism.modelCheck(m_propertiesFile, m_propertiesToCheck.get(0));
 			System.out.println(m_result.getResult());
 			res = m_result.getResult().toString();
@@ -182,7 +192,6 @@ public class PrismConnectorAPI {
 		
 		// Export strategy if generated
 		if (m_result.getStrategy() != null) {
-	//		System.out.println("*** Exporting Strategy "+strategyFileName);
 			try {
 				m_prism.exportStrategy(m_result.getStrategy(), Prism.StrategyExportType.ACTIONS, strategyFileName.equals("stdout") ? null : new File(strategyFileName+".act"));
 				m_prism.exportStrategy(m_result.getStrategy(), Prism.StrategyExportType.INDUCED_MODEL, strategyFileName.equals("stdout") ? null : new File(strategyFileName+".ind"));
@@ -190,12 +199,11 @@ public class PrismConnectorAPI {
 			}
 			// in case of error, report it and proceed
 			catch (FileNotFoundException e) {
-				System.out.println("Couldn't open file \"" + strategyFileName + "\" for output");
+				System.out.println("Could not open file \"" + strategyFileName + "\" for output");
 			} catch (PrismException e) {
 				System.out.println(e.getMessage());
 			}
-		} else { System.out.println("*** No Strategy generated.");}
-		
+		} 		
 		//m_prism.closeDown();
 		return res;
 	}	
@@ -216,6 +224,13 @@ public class PrismConnectorAPI {
         }
     }
     
+	/**
+	 * Merges action names and induced model strategy exports from method modelCheckFromFileS into a single 
+	 * adversary file including transitions and action names
+	 * @param actionsFileName
+	 * @param inducedModelFileName
+	 * @param stratFileName String output filename to export strategy
+	 */
 	public static void mergeActionsInducedModelIntoAdversary(String actionsFileName, String inducedModelFileName, String stratFileName){
 		HashMap<String, String> actions = new HashMap<String, String>();
 		Scanner sc=null;
@@ -253,6 +268,10 @@ public class PrismConnectorAPI {
 	}
 	
 	
+	/**
+	 * Class test
+	 * @param args
+	 */
 	public static void main(String[] args){
 		String res="result";
 		String myModel = "/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/0.prism";
