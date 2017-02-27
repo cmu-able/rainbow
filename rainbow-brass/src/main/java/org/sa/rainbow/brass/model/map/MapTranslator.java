@@ -66,7 +66,7 @@ public class MapTranslator {
     public static final String ROBOT_BATTERY_DELTA = "10"; // Constant for the time being, this should be transition+context dependent
     public static final String BATTERY_GUARD_STR="& ("+ROBOT_BATTERY_VAR+">="+ROBOT_BATTERY_DELTA+")"; // Not used for the time being (battery depletion condition covered by STOP_GUARD_STR)
     public static final String BATTERY_UPDATE_STR = ROBOT_BATTERY_VAR+UPDATE_POSTFIX;
-    public static final float ROBOT_CHARGING_TIME = 60f;
+    public static final float ROBOT_CHARGING_TIME = 15.0f;
 
     public static final float ROBOT_FULL_SPEED_VALUE = 0.40f; // m/s
     public static final float ROBOT_HALF_SPEED_VALUE = 0.35f;
@@ -215,7 +215,7 @@ public class MapTranslator {
         synchronized (m_map) {
             String buf="";
             BatteryPredictor bp = new BatteryPredictor();
-            buf+="formula b_upd_1min = min("+ROBOT_BATTERY_VAR+"+"+String.valueOf(Math.round (bp.batteryCharge(ROBOT_CHARGING_TIME)))+", "+ROBOT_BATTERY_RANGE_MAX_CONST+");\n\n";
+            buf+="formula b_upd_charge = min("+ROBOT_BATTERY_VAR+"+"+String.valueOf(Math.round (bp.batteryCharge(ROBOT_CHARGING_TIME)))+", "+ROBOT_BATTERY_RANGE_MAX_CONST+");\n\n";
             for (int i=0;i<m_map.getArcs().size();i++){
                 EnvMapArc a = m_map.getArcs().get(i);
                 double t_distance = a.getDistance ();
@@ -295,10 +295,11 @@ public class MapTranslator {
 
         		}	
         	}
-        guard_can_charge+=") & ("+ROBOT_BATTERY_VAR+"<1500)";	
+        guard_can_charge+=") & ("+ROBOT_BATTERY_VAR+"<1500)";	//TODO: refine this constraint
         }
+    	
     	String buf="\t // Recharge tactics\n";
-        buf+="\t [t_recharge_1min] true "+ guard_can_charge +STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_BATTERY_VAR+"'=b_upd_1min"+")"+" & (robot_done'=true);\n";                	
+        buf+="\t [t_recharge] true "+ guard_can_charge +STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_BATTERY_VAR+"'=b_upd_charge"+")"+" & (robot_done'=true);\n";                	
         return buf+"\n";
     }
 
@@ -315,7 +316,7 @@ public class MapTranslator {
             buf+="\t[t_set_loc_lo] true : "+String.valueOf(DEFAULT_TIME_TACTIC_TIME)+";\n";
             buf+="\t[t_set_loc_med] true : "+String.valueOf(DEFAULT_TIME_TACTIC_TIME)+";\n";
             buf+="\t[t_set_loc_hi] true : "+String.valueOf(DEFAULT_TIME_TACTIC_TIME)+";\n";
-            buf+="\t[t_recharge_1min] true : "+String.valueOf(ROBOT_CHARGING_TIME)+";\n";
+            buf+="\t[t_recharge] true : "+String.valueOf(ROBOT_CHARGING_TIME)+";\n";
 
             for (int i=0;i<m_map.getArcs().size();i++){
                 EnvMapArc a = m_map.getArcs().get(i);

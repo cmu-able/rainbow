@@ -113,7 +113,7 @@ public class DecisionEngine {
         EnvMap dummyMap = new EnvMap (null, null);
         setMap(dummyMap);
         generateCandidates("l5", "l1");
-        scoreCandidates(dummyMap, "1500", "1");
+        scoreCandidates(dummyMap, "3300", "1");
         System.out.println(String.valueOf(m_scoreboard));
         System.out.println();
         
