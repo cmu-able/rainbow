@@ -9,6 +9,8 @@ import org.sa.rainbow.brass.PropertiesConnector;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.map.MapTranslator;
 import org.sa.rainbow.brass.adaptation.PrismPolicy;
+import org.sa.rainbow.brass.adaptation.PolicyToIG;
+
 
 
 
@@ -113,13 +115,17 @@ public class DecisionEngine {
         EnvMap dummyMap = new EnvMap (null, null);
         setMap(dummyMap);
         generateCandidates("l5", "l1");
-        scoreCandidates(dummyMap, "3300", "1");
+        scoreCandidates(dummyMap, "1700", "1");
         System.out.println(String.valueOf(m_scoreboard));
         System.out.println();
         
         PrismPolicy pp = new PrismPolicy(selectPolicy());
   	  	pp.readPolicy();  
-  	    System.out.println(pp.getPlan().toString());
+  	  	String plan = pp.getPlan().toString();
+  	    System.out.println(plan);
+  	    
+  	    PolicyToIG translator = new PolicyToIG(pp, dummyMap);
+        System.out.println(translator.translate());
 
     }
 

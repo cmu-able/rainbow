@@ -6,9 +6,12 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.map.EnvMapNode;
+import org.sa.rainbow.brass.model.map.MapTranslator;
+
 
 /**
  * @author ashutosh
@@ -17,51 +20,61 @@ import org.sa.rainbow.brass.model.map.EnvMapNode;
 public class PolicyToIG {
     public PrismPolicy m_prismPolicy;
     public EnvMap m_map;
+    public float m_current_speed = MapTranslator.ROBOT_HALF_SPEED_VALUE;
 
+    
+    
     public PolicyToIG(PrismPolicy policy, EnvMap map) {
         // TODO Auto-generated constructor stub
         m_prismPolicy = policy;
         m_map = map;
     }
 
-    private String build_cmd(int cmd_id, double dest_x, double dest_y, double speed) {
-        //V(1, do MoveAbs(23.5, 0, 1) then 2)
+    private String build_cmd_move(int cmdId, double dest_x, double dest_y, double speed) {
         NumberFormat f = new DecimalFormat("#0.0");
-        String cmd = "V(" + cmd_id + ", do MoveAbs(" + 
-                f.format(dest_x) + ", " + f.format(dest_y) + 
-                ", " + speed + ") then " + ++cmd_id + ")";
-        return cmd;
+        NumberFormat f2 = new DecimalFormat("#0.00");
+        String cmd = "MoveAbs(" + f.format(dest_x) + ", " + f.format(dest_y) + ", " + f2.format(speed) + ")";
+        return build_cmd(cmdId, cmd);
     }
 
+    private String build_cmd_tactic(int cmdId, String name) {
+        NumberFormat f = new DecimalFormat("#0.00");
+        String cmd = "";
+        if (Objects.equals(name, "t_recharge")){
+        	cmd = name + "("+f.format(MapTranslator.ROBOT_CHARGING_TIME)+")";
+        }
+        if (Objects.equals(name, "t_set_half_speed")){
+        	m_current_speed = MapTranslator.ROBOT_HALF_SPEED_VALUE;
+        	return ""; // Just set speed parameter, not explicit command in IG
+        }
+        if (Objects.equals(name, "t_set_full_speed")){
+        	m_current_speed = MapTranslator.ROBOT_FULL_SPEED_VALUE;
+        	return ""; // Just set speed parameter, not explicit command in IG
+        }
+        return build_cmd(cmdId, cmd);
+    }
+    
+    private String build_cmd (int cmdId, String commandLiteral) {
+        NumberFormat f = new DecimalFormat("#0.0");
+        String cmd = "V(" + cmdId + ", do " + commandLiteral + " then " + ++cmdId + ")";
+        return cmd;
+    }
+    
     private String build_ig(ArrayList<String> cmds) {
-        //P(V(1, do MoveAbs(23.5, 0, 1) then 2),
-        //		  V(2, do MoveAbs(23.5, -10.5, 1) then 3)::
-        //		  V(3, end)::
-        //		  nil)
         String ins_graph = "P(";
         int i = 0;
         for (i = 0; i < cmds.size (); i++) {
-            if (i == 0) {
-                ins_graph += cmds.get (i) + ",\n";
-            }
-            else {
-                ins_graph += cmds.get (i) + "::\n";
-            }
+        	if (!Objects.equals(cmds.get(i),"")){	// Skip command if empty (eg., implicit command like change speed setting)
+	            if (i == 0) {
+	                ins_graph += cmds.get (i) + ",\n";
+	            }
+	            else {
+	                ins_graph += cmds.get (i) + "::\n";
+	            }
+        	}
         }
         // add the end
         ins_graph += "V(" + (i+1) + ", end)::\nnil)";
-
-//		
-//		for (i = 0; i < cmds.size(); i++) {
-//			if (i == cmds.size() - 1) {
-//				ins_graph += cmds.get(i) + "::\nV(" + (i + 2) 
-//						+ ", end)::\nnil)";
-//			} else if (i == 0) {
-//				ins_graph += cmds.get(i) + ",\n";
-//			} else {
-//				ins_graph += cmds.get(i) + "::\n";
-//			}
-//		}
 
         return ins_graph;
     }
@@ -69,25 +82,27 @@ public class PolicyToIG {
     public String translate() {
         ArrayList<String> plan = m_prismPolicy.getPlan();
         ArrayList<String> cmds = new ArrayList<String>();
-
-        double speed = 1.0;
+        String cmd="";
+        
         int cmd_id = 1;
 
         for (int i = 0; i < plan.size(); i++) {
             String action = plan.get(i);
 
-            // Heuristic for now.
-            String[] elements = action.split("_");
-
-            String destination = elements[2];
-            String cmd = build_cmd(cmd_id, m_map.getNodeX(destination), m_map.getNodeY(destination), speed);
+            String[] elements = action.split("_"); // Break action plan name into chunks
+            if (Objects.equals(elements[0], MapTranslator.TACTIC_PREFIX)) { // If action is a tactic
+            	cmd = build_cmd_tactic (cmd_id, action );
+            } else { // Other actions (robot movement for the time being)
+            	synchronized (m_map){	
+            		String destination = elements[2];
+            		cmd = build_cmd_move(cmd_id, m_map.getNodeX(destination), m_map.getNodeY(destination), m_current_speed);
+            	}
+            }
             cmds.add(cmd);
             ++cmd_id;			
         }
-
         String ins_graph = build_ig(cmds);
-        System.out.println(ins_graph);
-
+        //System.out.println(ins_graph);
         return ins_graph;
     }
 

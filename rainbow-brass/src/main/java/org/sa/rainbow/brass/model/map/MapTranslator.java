@@ -68,7 +68,7 @@ public class MapTranslator {
     public static final String BATTERY_UPDATE_STR = ROBOT_BATTERY_VAR+UPDATE_POSTFIX;
     public static final float ROBOT_CHARGING_TIME = 15.0f;
 
-    public static final float ROBOT_FULL_SPEED_VALUE = 0.40f; // m/s
+    public static final float ROBOT_FULL_SPEED_VALUE = 0.68f; // m/s
     public static final float ROBOT_HALF_SPEED_VALUE = 0.35f;
     public static final String ROBOT_FULL_SPEED_CONST = "FULL_SPEED"; // These are just symbolic constants for PRISM
     public static final String ROBOT_HALF_SPEED_CONST = "HALF_SPEED";
@@ -94,6 +94,7 @@ public class MapTranslator {
 
     public static final double MAX_DISTANCE = 999.0; // Distance assigned to disabled edges (for distance reward computation)
     public static final double DEFAULT_TIME_TACTIC_TIME=1; // Tactics are not instantaneous;
+    public static final String TACTIC_PREFIX="t";
 
     private static EnvMap m_map;
 
