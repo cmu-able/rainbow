@@ -64,14 +64,12 @@ public class PolicyToIG {
         String ins_graph = "P(";
         int i = 0;
         for (i = 0; i < cmds.size (); i++) {
-        	if (!Objects.equals(cmds.get(i),"")){	// Skip command if empty (eg., implicit command like change speed setting)
-	            if (i == 0) {
-	                ins_graph += cmds.get (i) + ",\n";
-	            }
-	            else {
-	                ins_graph += cmds.get (i) + "::\n";
-	            }
-        	}
+            if (i == 0) {
+                ins_graph += cmds.get (i) + ",\n";
+            }
+            else {
+                ins_graph += cmds.get (i) + "::\n";
+            }
         }
         // add the end
         ins_graph += "V(" + (i+1) + ", end)::\nnil)";
@@ -98,8 +96,10 @@ public class PolicyToIG {
             		cmd = build_cmd_move(cmd_id, m_map.getNodeX(destination), m_map.getNodeY(destination), m_current_speed);
             	}
             }
-            cmds.add(cmd);
-            ++cmd_id;			
+            if (!Objects.equals(cmd, "")) {
+            	cmds.add(cmd);
+            	++cmd_id;		
+            }
         }
         String ins_graph = build_ig(cmds);
         //System.out.println(ins_graph);
