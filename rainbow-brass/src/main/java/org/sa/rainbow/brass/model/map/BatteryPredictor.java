@@ -1,5 +1,9 @@
 package org.sa.rainbow.brass.model.map;
 
+import java.util.Objects;
+
+import org.sa.rainbow.brass.model.map.MapTranslator;
+
 // To be relocated
 
 /**
@@ -25,9 +29,9 @@ public class BatteryPredictor {
         double kinect_consumption=0;
         double nuc_consumption=0;
         
-        if (speed.equals("HALF_SPEED"))
+        if (Objects.equals(speed, MapTranslator.ROBOT_HALF_SPEED_CONST))
             base_consumption = 1.674f*time+287.5f;
-        if (speed.equals("FULL_SPEED")) 
+        if (Objects.equals(speed, MapTranslator.ROBOT_FULL_SPEED_CONST)) 
         	base_consumption = 3.89f*time+582.6f;
         if (rotating)
         	base_consumption = 4.9f*time + 699f;

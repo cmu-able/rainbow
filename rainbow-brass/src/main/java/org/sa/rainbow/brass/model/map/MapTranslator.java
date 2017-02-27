@@ -17,6 +17,8 @@ import org.sa.rainbow.brass.model.map.dijkstra.Edge;
 import org.sa.rainbow.brass.model.map.dijkstra.Graph;
 import org.sa.rainbow.brass.model.map.dijkstra.Vertex;
 import org.sa.rainbow.brass.model.mission.MissionState;
+import org.sa.rainbow.brass.model.map.BatteryPredictor;
+import org.sa.rainbow.brass.model.map.SpeedPredictor;
 
 /**
  * @author jcamara
@@ -226,9 +228,9 @@ public class MapTranslator {
                 EnvMapArc a = m_map.getArcs().get(i);
                 double t_distance = a.getDistance ();
                 String battery_delta_half_speed = String.valueOf (
-                        Math.round (bp.batteryConsumption (ROBOT_HALF_SPEED_CONST, t_distance / ROBOT_HALF_SPEED_VALUE)));
+                        Math.round (bp.batteryConsumption (ROBOT_HALF_SPEED_CONST, SpeedPredictor.moveForwardTime(t_distance, ROBOT_HALF_SPEED_CONST))));
                 String battery_delta_full_speed = String.valueOf (
-                        Math.round (bp.batteryConsumption (ROBOT_FULL_SPEED_CONST, t_distance / ROBOT_FULL_SPEED_VALUE)));
+                        Math.round (bp.batteryConsumption (ROBOT_FULL_SPEED_CONST, SpeedPredictor.moveForwardTime(t_distance, ROBOT_FULL_SPEED_CONST))));
                 buf+="formula "+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+"= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-"+battery_delta_half_speed+") : max(0,"+ROBOT_BATTERY_VAR+"-"+battery_delta_full_speed+")" +";\n";    	        
             }
             return buf+"\n";
@@ -330,10 +332,10 @@ public class MapTranslator {
                 EnvMapArc a = m_map.getArcs().get(i);
                 if (a.isEnabled()) {
                     double t_distance = a.getDistance (); //  float(self.get_transition_attribute_value(t,"distance"))
-                    String t_time_half_speed=f.format(t_distance/ROBOT_HALF_SPEED_VALUE);
-                    String t_time_full_speed=f.format(t_distance/ROBOT_FULL_SPEED_VALUE);
+                    String t_time_half_speed=f.format(SpeedPredictor.moveForwardTime(t_distance, ROBOT_HALF_SPEED_CONST));
+                    String t_time_full_speed=f.format(SpeedPredictor.moveForwardTime(t_distance, ROBOT_FULL_SPEED_CONST));
                     String action_name = a.getSource()+MOVE_CMD_STR+a.getTarget();
-                    buf+="\t["+action_name+"] true :"+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? "+t_time_half_speed+" + "+ROTATION_TIME_FORMULA_PREFIX+action_name+" : "+t_time_full_speed+" + "+ROTATION_TIME_FORMULA_PREFIX+action_name+";\n";
+                    buf+="\t["+action_name+"] true :"+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? "+t_time_half_speed+" + "+ROTATION_TIME_FORMULA_PREFIX+action_name+" : "+t_time_full_speed+" + "+ROTATION_TIME_FORMULA_PREFIX + action_name+";\n";
                 }
             }
             buf+="endrewards\n\n";
