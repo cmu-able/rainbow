@@ -40,8 +40,21 @@ public class PolicyToIG {
     private String build_cmd_tactic(int cmdId, String name) {
         NumberFormat f = new DecimalFormat("#0.00");
         String cmd = "";
+        
+        if (Objects.equals(name, "t_recalibrate")){
+        	cmd = "Recalibrate()";
+        }
+        if (Objects.equals(name, "t_set_loc_lo")){
+        	cmd = "SetLocalizationFidelity" + "("+MapTranslator.ROBOT_LOC_MODE_LO_VAL+")";
+        }
+        if (Objects.equals(name, "t_set_loc_med")){
+        	cmd = "SetLocalizationFidelity" + "("+MapTranslator.ROBOT_LOC_MODE_MED_VAL+")";
+        }
+        if (Objects.equals(name, "t_set_loc_hi")){
+        	cmd = "SetLocalizationFidelity" + "("+MapTranslator.ROBOT_LOC_MODE_HI_VAL+")";
+        }
         if (Objects.equals(name, "t_recharge")){
-        	cmd = name + "("+f.format(MapTranslator.ROBOT_CHARGING_TIME)+")";
+        	cmd = "Recharge" + "("+f.format(MapTranslator.ROBOT_CHARGING_TIME)+")";
         }
         if (Objects.equals(name, "t_set_half_speed")){
         	m_current_speed = MapTranslator.ROBOT_HALF_SPEED_VALUE;
@@ -55,7 +68,6 @@ public class PolicyToIG {
     }
     
     private String build_cmd (int cmdId, String commandLiteral) {
-        NumberFormat f = new DecimalFormat("#0.0");
         String cmd = "V(" + cmdId + ", do " + commandLiteral + " then " + ++cmdId + ")";
         return cmd;
     }
@@ -83,7 +95,7 @@ public class PolicyToIG {
         String cmd="";
         
         int cmd_id = 1;
-
+        
         for (int i = 0; i < plan.size(); i++) {
             String action = plan.get(i);
 
