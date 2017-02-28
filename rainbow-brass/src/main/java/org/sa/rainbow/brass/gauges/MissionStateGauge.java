@@ -19,9 +19,11 @@ public class MissionStateGauge extends RegularPatternGauge {
     private static final String   NAME        = "Mission State Gauge";
     protected static final String LOC         = "LocationRecording";
     protected static final String CHARGE = "BatteryCharge";
+    protected static final String DEADLINE = "Deadline";
 
     protected static final String LOC_PATTERN = "topic: /amcl_pose/pose/pose.*position.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z.*\\norientation.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z: (.*)\\n.*w: (.*)";
     protected static final String CHARGE_PATTERN = "topic: /energy_monitor/voltage.*\\n.*data: (.*)\\n";
+    protected static final String DEADLINE_PATTERN = "topic: /notify_user.*\\n.*new_deadline: (.*)\\n.*user.*";
     protected String              last_x;
     protected String              last_y;
     private String                last_w;
@@ -49,6 +51,7 @@ public class MissionStateGauge extends RegularPatternGauge {
         super (NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
         addPattern (LOC, Pattern.compile (LOC_PATTERN, Pattern.DOTALL));
         addPattern (CHARGE, Pattern.compile (CHARGE_PATTERN, Pattern.DOTALL));
+        addPattern (DEADLINE, Pattern.compile (DEADLINE_PATTERN, Pattern.DOTALL));
     }
 
     @Override
@@ -83,6 +86,13 @@ public class MissionStateGauge extends RegularPatternGauge {
                 pMap.put (op.getParameters ()[0], Double.toString (charge));
                 issueCommand (op, pMap);
             }
+        }
+        else if (DEADLINE.equals (matchName)) {
+            String date = m.group (1).trim ();
+            IRainbowOperation op = m_commands.get ("deadline");
+            Map<String, String> pMap = new HashMap<> ();
+            pMap.put (op.getParameters ()[0], date);
+            issueCommand (op, pMap);
         }
     }
 

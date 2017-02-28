@@ -12,6 +12,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.sa.rainbow.brass.PropertiesConnector;
+import org.sa.rainbow.brass.adaptation.PrismConnector;
 import org.sa.rainbow.core.models.ModelReference;
 
 
@@ -217,7 +218,7 @@ public class EnvMap {
     public synchronized void loadNodesFromFile(String mapFile){
         JSONParser parser = new JSONParser();
         NumberFormat format = NumberFormat.getInstance();
-
+        mapFile = PrismConnector.convertToAbsolute (mapFile);
         Object obj=null;
         try{
             obj = parser.parse(new FileReader(mapFile)); 
@@ -249,6 +250,7 @@ public class EnvMap {
     public synchronized void loadArcsFromFile(String mapFile){
         JSONParser parser = new JSONParser();
         NumberFormat format = NumberFormat.getInstance();
+        mapFile = PrismConnector.convertToAbsolute (mapFile);
 
         Object obj=null;
         try{

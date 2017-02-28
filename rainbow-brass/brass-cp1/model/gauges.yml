@@ -23,6 +23,7 @@ gauge-types:
     commands:
       location: "MS.setCurrentLocation(double,double,double)"
       charge: "MS.setBatteryCharge(double)"
+      deadline: "MS.setDeadline(string)"
     setupParams:
       targetIP:
         type: String
@@ -58,6 +59,7 @@ gauge-instances:
     commands:
       location: "ms.setCurrentLocation($<x>,$<y>,$<w>)"
       charge: "ms.setBatteryCharge($<c>)"
+      deadline: "ms.setDeadline($<d>)"
     setupValues:
       targetIP: "${customize.system.target.master}"
     configValues:

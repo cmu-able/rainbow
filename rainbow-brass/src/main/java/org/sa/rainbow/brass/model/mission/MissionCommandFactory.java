@@ -3,6 +3,7 @@ package org.sa.rainbow.brass.model.mission;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.IModelInstance;
@@ -29,6 +30,7 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
         m_commandMap.put ("setCurrentLocation".toLowerCase (), SetCurrentLocationCmd.class);
         m_commandMap.put ("setRobotObstructed".toLowerCase (), SetRobotObstructedCmd.class);
         m_commandMap.put ("setBatteryCharge".toLowerCase (), SetBatteryChargeCmd.class);
+        m_commandMap.put ("setDeadlineCmd".toLowerCase (), SetDeadlineCmd.class);
     }
 
     @Override
@@ -53,5 +55,10 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
 
     public SetBatteryChargeCmd setBatteryChargeCmd (double charge) {
         return new SetBatteryChargeCmd ((MissionStateModelInstance )m_modelInstance, "", Double.toString (charge));
+    }
+
+    public SetDeadlineCmd setDeadlineCmd (Date d) {
+        return new SetDeadlineCmd ((MissionStateModelInstance )m_modelInstance, "",
+                MissionState.BRASS_DATE_FORMAT.format (d));
     }
 }

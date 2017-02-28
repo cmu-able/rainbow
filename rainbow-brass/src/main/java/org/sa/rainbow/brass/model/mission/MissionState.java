@@ -1,10 +1,12 @@
 package org.sa.rainbow.brass.model.mission;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Deque;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.sa.rainbow.core.models.ModelReference;
 
@@ -12,6 +14,12 @@ import org.sa.rainbow.core.models.ModelReference;
  * Created by schmerl on 12/27/2016.
  */
 public class MissionState {
+
+    // This should be in UTC
+    public static final SimpleDateFormat BRASS_DATE_FORMAT = new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    static {
+        BRASS_DATE_FORMAT.setTimeZone (TimeZone.getTimeZone ("UTC"));
+    }
 
     public static enum Heading {
         NORTH, NORTHEAST, EAST, SOUTHEAST, SOUTH, SOUTHWEST, WEST, NORTHWEST;
@@ -93,6 +101,7 @@ public class MissionState {
     private Deque<Double>        m_safetyScore              = new ArrayDeque<> ();
     private boolean              m_robotObstructed          = false;
     Deque<Double>                m_chargeHistory            = new ArrayDeque<> ();
+    Deque<Date>                  m_deadlineHistory          = new ArrayDeque<> ();
 
     public MissionState (ModelReference model) {
         m_model = model;
@@ -152,6 +161,14 @@ public class MissionState {
 
     public Double getBatteryCharge () {
         return m_chargeHistory.peek ();
+    }
+
+    public void setDeadline (Date d) {
+        m_deadlineHistory.push (d);
+    }
+
+    public Date getDeadline () {
+        return m_deadlineHistory.peek ();
     }
 
     public MissionState copy () {

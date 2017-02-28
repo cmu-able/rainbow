@@ -25,7 +25,7 @@ public class PrismConnector {
 
     private String m_result; // Result stored after prism invocation;
 
-    String convertToAbsolute (String filename) {
+    public static String convertToAbsolute (String filename) {
         if (filename.startsWith ("\"") && filename.endsWith ("\"") && filename.length () > 2) {
             filename = filename.substring (1, filename.length () - 1);
         }
@@ -60,11 +60,11 @@ public class PrismConnector {
         return m_prismAdvExport;
     }
 
-    
+
     public String invokeGenPolicy (String filename, int currentLocationId, int toLocationId) {
-    	return invokeGenPolicy (filename, currentLocationId, toLocationId, m_prismParameters );
+        return invokeGenPolicy (filename, currentLocationId, toLocationId, m_prismParameters );
     }
-    
+
     public String invokeGenPolicy (String filename, int currentLocationId, int toLocationId, String auxParameters) {
         String line;
         String result="";
