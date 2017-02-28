@@ -12,6 +12,25 @@ import org.sa.rainbow.brass.model.map.MapTranslator;
  */
 public class BatteryPredictor {
 
+
+	
+	public static double batteryConsumption (String speed, String sensing, double time){
+		
+		boolean kinectEnabled = MapTranslator.ROBOT_LOC_MODE_HI_KINECT;
+		double cpuAvgUsage= MapTranslator.ROBOT_LOC_MODE_HI_CPU_VAL;
+		
+		if (Objects.equals(sensing, MapTranslator.ROBOT_LOC_MODE_MED_CONST)){
+			kinectEnabled = MapTranslator.ROBOT_LOC_MODE_MED_KINECT;
+			cpuAvgUsage = MapTranslator.ROBOT_LOC_MODE_MED_CPU_VAL;
+		}
+
+		if (Objects.equals(sensing, MapTranslator.ROBOT_LOC_MODE_LO_CONST)){
+			kinectEnabled = MapTranslator.ROBOT_LOC_MODE_MED_KINECT;
+			cpuAvgUsage = MapTranslator.ROBOT_LOC_MODE_MED_CPU_VAL;
+		}
+		
+		return batteryConsumption (speed, false, kinectEnabled, cpuAvgUsage, time);
+	}
 	
     /**
      * Returns the amount of energy consumed (in mWh) when the robot moves at a given speed
@@ -19,22 +38,17 @@ public class BatteryPredictor {
      * @param time amount of seconds during which the robot moves.
      * @return
      */
-	
-	public double batteryConsumption (String speed, double time){
-		return batteryConsumption (speed, false, true, 20, time);
-	}
-	
-    public double batteryConsumption (String speed, boolean rotating, boolean kinectEnabled, double cpuAvgUsage, double time) {
+	public static double batteryConsumption (String speed, boolean rotating, boolean kinectEnabled, double cpuAvgUsage, double time) {
         double base_consumption=0;
         double kinect_consumption=0;
         double nuc_consumption=0;
         
         if (Objects.equals(speed, MapTranslator.ROBOT_HALF_SPEED_CONST))
-            base_consumption = 1.674f*time+287.5f;
+            base_consumption = 1.674f * time+287.5f;
         if (Objects.equals(speed, MapTranslator.ROBOT_FULL_SPEED_CONST)) 
-        	base_consumption = 3.89f*time+582.6f;
+        	base_consumption = 3.89f * time+582.6f;
         if (rotating)
-        	base_consumption = 4.9f*time + 699f;
+        	base_consumption = 4.9f * time + 699f;
         
         if (kinectEnabled)
         	kinect_consumption = 1.426f * time;

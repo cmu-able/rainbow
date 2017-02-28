@@ -87,7 +87,15 @@ public class MapTranslator {
     public static final String ROBOT_LOC_MODE_MED_VAL = "1";
     public static final String ROBOT_LOC_MODE_HI_CONST = "LOC_HI";
     public static final String ROBOT_LOC_MODE_HI_VAL = "2";
-
+	public static final double ROBOT_LOC_MODE_LO_CPU_VAL = 96.3875;
+	public static final double ROBOT_LOC_MODE_MED_CPU_VAL = 98; // TODO: Change by actual value
+	public static final double ROBOT_LOC_MODE_HI_CPU_VAL = 100; // TODO: Change by actual value
+	public static final boolean ROBOT_LOC_MODE_HI_KINECT = true;
+	public static final boolean ROBOT_LOC_MODE_MED_KINECT = true;
+	public static final boolean ROBOT_LOC_MODE_LO_KINECT = false;
+	
+	
+    
     // Goal and stop condition configuration constants
 
     public static final String GOAL_PRED="goal"; // Goal achieved predicate (currently target location reached)
@@ -219,6 +227,11 @@ public class MapTranslator {
      * Generates battery update formulas employed in updates of movement commands in robot module
      * @return String PRISM encoding for possible battery updates (corresponding to movements between map locations)
      */
+    
+    private static String getDeltaEnergy(String speed, double distance, String sensing){
+    	return String.valueOf (Math.round (BatteryPredictor.batteryConsumption (speed, sensing, SpeedPredictor.moveForwardTime(distance, speed))));
+    }
+    
     public static String generateBatteryUpdates(){
         synchronized (m_map) {
             String buf="";
@@ -227,11 +240,22 @@ public class MapTranslator {
             for (int i=0;i<m_map.getArcs().size();i++){
                 EnvMapArc a = m_map.getArcs().get(i);
                 double t_distance = a.getDistance ();
-                String battery_delta_half_speed = String.valueOf (
-                        Math.round (bp.batteryConsumption (ROBOT_HALF_SPEED_CONST, SpeedPredictor.moveForwardTime(t_distance, ROBOT_HALF_SPEED_CONST))));
-                String battery_delta_full_speed = String.valueOf (
-                        Math.round (bp.batteryConsumption (ROBOT_FULL_SPEED_CONST, SpeedPredictor.moveForwardTime(t_distance, ROBOT_FULL_SPEED_CONST))));
-                buf+="formula "+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+"= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-"+battery_delta_half_speed+") : max(0,"+ROBOT_BATTERY_VAR+"-"+battery_delta_full_speed+")" +";\n";    	        
+                
+                String battery_delta_half_speed_lo = getDeltaEnergy(ROBOT_HALF_SPEED_CONST, t_distance, ROBOT_LOC_MODE_LO_CONST);
+                String battery_delta_half_speed_med = getDeltaEnergy(ROBOT_HALF_SPEED_CONST, t_distance, ROBOT_LOC_MODE_MED_CONST);
+                String battery_delta_half_speed_hi = getDeltaEnergy(ROBOT_HALF_SPEED_CONST, t_distance, ROBOT_LOC_MODE_HI_CONST);
+                
+                String battery_delta_full_speed_lo = getDeltaEnergy(ROBOT_FULL_SPEED_CONST, t_distance, ROBOT_LOC_MODE_LO_CONST);
+                String battery_delta_full_speed_med = getDeltaEnergy(ROBOT_FULL_SPEED_CONST, t_distance, ROBOT_LOC_MODE_MED_CONST);
+                String battery_delta_full_speed_hi = getDeltaEnergy(ROBOT_FULL_SPEED_CONST, t_distance, ROBOT_LOC_MODE_HI_CONST);
+
+                
+                String formulaBaseName = BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget();
+                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_HI_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-"+battery_delta_half_speed_hi+") : max(0,"+ROBOT_BATTERY_VAR+"-"+battery_delta_full_speed_hi+")" +";\n";    	        
+                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_MED_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-"+battery_delta_half_speed_med+") : max(0,"+ROBOT_BATTERY_VAR+"-"+battery_delta_full_speed_med+")" +";\n";    	        
+                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_LO_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-"+battery_delta_half_speed_lo+") : max(0,"+ROBOT_BATTERY_VAR+"-"+battery_delta_full_speed_lo+")" +";\n";    	        
+                buf += "formula " + formulaBaseName + " = " + ROBOT_LOC_MODE_VAR +" = "+ ROBOT_LOC_MODE_LO_CONST + " ? " + formulaBaseName + "_" + ROBOT_LOC_MODE_LO_CONST +" : ( " + ROBOT_LOC_MODE_VAR +" = "+ ROBOT_LOC_MODE_MED_CONST + " ? " + formulaBaseName + "_" + ROBOT_LOC_MODE_MED_CONST  + " : " + formulaBaseName + "_" + ROBOT_LOC_MODE_HI_CONST+" );\n" ;
+            
             }
             return buf+"\n";
         }
