@@ -92,60 +92,6 @@ public class InstructionGraphProgress {
         return m_instructions.get (m_currentNode);
     }
     
-//    public static class Instruction {
-//        public String m_label;
-//        public String m_instruction;
-//        public String m_next;
-//
-//        private double m_targetX;
-//        private double m_targetY;
-//        private double m_targetW;
-//        private double m_speed;
-//
-//        public Instruction copy () {
-//            Instruction i = new Instruction ();
-//            i.m_instruction = new String (m_instruction);
-//            i.m_label = new String (m_label);
-//            i.m_next = new String (m_next);
-//            i.m_targetX = m_targetX;
-//            i.m_targetY = m_targetY;
-//            i.m_targetW = m_targetW;
-//            i.m_speed = m_speed;
-//            return i;
-//        }
-//
-//        /**
-//         * This method is called every time this instruction is set in setInstructions () in
-//         * {@link InstructionGraphProgress}.
-//         */
-//        public void parseMoveAbsTargetPose () {
-//            Pattern moveAbsPattern = Pattern.compile ("MoveAbsH\\(([0-9.]+),.*([0-9.]+),.*([0-9.]+),.*([0-9.]+)\\)");
-//            Matcher m = moveAbsPattern.matcher (m_instruction);
-//            if (m.matches ()) {
-//                m_targetX = Double.parseDouble (m.group (1));
-//                m_targetY = Double.parseDouble (m.group (2));
-//                m_speed = Double.parseDouble (m.group (3));
-//                m_targetW = Double.parseDouble (m.group (4));
-//            }
-//        }
-//
-//        public double getTargetX () {
-//            return m_targetX;
-//        }
-//
-//        public double getTargetY () {
-//            return m_targetY;
-//        }
-//
-//        public double getSpeed () {
-//            return m_speed;
-//        }
-//
-//        public double getTargetW () {
-//            return m_targetW;
-//        }
-//    }
-
     public static class ExecutionObservation {
         String  label;
         boolean successful;

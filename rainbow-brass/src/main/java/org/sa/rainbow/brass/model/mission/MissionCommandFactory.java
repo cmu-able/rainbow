@@ -32,6 +32,7 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
         m_commandMap.put ("setRobotOnTime".toLowerCase (), SetRobotOnTimeCmd.class);
         m_commandMap.put ("setBatteryCharge".toLowerCase (), SetBatteryChargeCmd.class);
         m_commandMap.put ("setDeadlineCmd".toLowerCase (), SetDeadlineCmd.class);
+        m_commandMap.put ("setTargetWaypoint".toLowerCase (), SetTargetWaypointCmd.class);
     }
 
     @Override
@@ -53,7 +54,7 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
         return new SetRobotObstructedCmd ((MissionStateModelInstance) m_modelInstance, "",
                 Boolean.toString (robotObstructed));
     }
-    
+
     public SetRobotOnTimeCmd setRobotOnTimeCmd (boolean robotOnTime) {
         return new SetRobotOnTimeCmd ((MissionStateModelInstance) m_modelInstance, "",
                 Boolean.toString (robotOnTime));
@@ -66,5 +67,9 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
     public SetDeadlineCmd setDeadlineCmd (Date d) {
         return new SetDeadlineCmd ((MissionStateModelInstance) m_modelInstance, "",
                 MissionState.BRASS_DATE_FORMAT.format (d));
+    }
+
+    public SetTargetWaypointCmd setTargetWaypointCmd (String t) {
+        return new SetTargetWaypointCmd ((MissionStateModelInstance )m_modelInstance, "", t);
     }
 }

@@ -90,21 +90,22 @@ public class MissionState {
     }
 
     private final ModelReference m_model;
-    
+
     //private List<String>         m_instructionHistory       = new ArrayList<> ();
     private Deque<Long>          m_predictedTimeHistory     = new ArrayDeque<> ();
     private Deque<Long>          m_predictedAccuracyHistory = new ArrayDeque<> ();
     private Deque<Double>        m_timeScore                = new ArrayDeque<> ();
     private Deque<Double>        m_accuracyScore            = new ArrayDeque<> ();
     private Deque<Double>        m_safetyScore              = new ArrayDeque<> ();
-    
+
     Deque<LocationRecording>     m_locationHistory          = new ArrayDeque<> ();
     Deque<Double>                m_chargeHistory            = new ArrayDeque<> ();
     Deque<Date>                  m_deadlineHistory          = new ArrayDeque<> ();
-    
+
     private boolean              m_robotObstructed          = false;
     private boolean				 m_robotOnTime				= false;
-    
+    private String  m_targetWaypoint  = "";
+
 
     public MissionState (ModelReference model) {
         m_model = model;
@@ -159,21 +160,21 @@ public class MissionState {
 //    }
 
     public void setRobotOnTime (boolean isOnTime) {
-		m_robotOnTime = isOnTime;
-	}
+        m_robotOnTime = isOnTime;
+    }
 
-	public boolean isRobotOnTime () {
-		return m_robotOnTime;
-	}
+    public boolean isRobotOnTime () {
+        return m_robotOnTime;
+    }
 
-	public void setBatteryCharge (Double charge) {
+    public void setBatteryCharge (Double charge) {
         m_chargeHistory.push (charge);
     }
 
     public Double getBatteryCharge () {
         return m_chargeHistory.peek ();
     }
-    
+
     public void setDeadline (Date d) {
         m_deadlineHistory.push (d);
     }
@@ -182,15 +183,23 @@ public class MissionState {
         return m_deadlineHistory.peek ();
     }
 
-    /**
-	 * 
-	 * @return True iff the robot encounters (or expects to encounter) problems
-	 */
-	public boolean isAdaptationNeeded () {
-		return isRobotObstructed() || !isRobotOnTime();
-	}
+    public void setTargetWaypoint (String waypoint) {
+        m_targetWaypoint = waypoint;
+    }
 
-	public MissionState copy () {
+    public String getTargetWaypoint () {
+        return m_targetWaypoint;
+    }
+
+    /**
+     * 
+     * @return True iff the robot encounters (or expects to encounter) problems
+     */
+    public boolean isAdaptationNeeded () {
+        return isRobotObstructed() || !isRobotOnTime();
+    }
+
+    public MissionState copy () {
         MissionState s = new MissionState (m_model);
         s.m_locationHistory = new ArrayDeque<> (m_locationHistory);
         s.m_chargeHistory = new ArrayDeque<> (m_chargeHistory);
