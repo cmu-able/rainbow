@@ -94,8 +94,12 @@ public class MapTranslator {
 	public static final boolean ROBOT_LOC_MODE_HI_KINECT = true;
 	public static final boolean ROBOT_LOC_MODE_MED_KINECT = true;
 	public static final boolean ROBOT_LOC_MODE_LO_KINECT = false;
+	public static final String ROBOT_LOC_MODE_MAX_RECONF_CONST = "LOC_MODE_RECONF_MAX";
+	public static final String ROBOT_LOC_MODE_RECONF_VAR = "kr";
+	public static final String ROBOT_LOC_MODE_MAX_RECONF_VAL = "2";
+	
+	
 	public static final float  MAXIMUM_KINECT_OFF_DISTANCE_VAL = 6.0f; // Maximum driving distance with kinect off in m.
-
     
 	
     
@@ -208,7 +212,9 @@ public class MapTranslator {
         buf+="const "+ROBOT_FULL_SPEED_CONST+"=1;\n";
         buf+="const "+ROBOT_LOC_MODE_LO_CONST+"="+ROBOT_LOC_MODE_LO_VAL+";\n";
         buf+="const "+ROBOT_LOC_MODE_MED_CONST+"="+ROBOT_LOC_MODE_MED_VAL+";\n";
-        buf+="const "+ROBOT_LOC_MODE_HI_CONST+"="+ROBOT_LOC_MODE_HI_VAL+";\n";               
+        buf+="const "+ROBOT_LOC_MODE_HI_CONST+"="+ROBOT_LOC_MODE_HI_VAL+";\n";   
+        buf+="const "+ROBOT_LOC_MODE_MAX_RECONF_CONST+"="+ROBOT_LOC_MODE_MAX_RECONF_VAL+";\n";   
+        
         buf+="\n"+generateBatteryUpdates();
         buf+="module "+ROBOT_PLAYER_NAME+MODULE_POSTFIX_STR+"\n";
         buf+=ROBOT_BATTERY_VAR+":["+ROBOT_BATTERY_RANGE_MIN+".."+ROBOT_BATTERY_RANGE_MAX_CONST+"] init "+INITIAL_ROBOT_BATTERY_CONST+";\n";
@@ -216,6 +222,8 @@ public class MapTranslator {
         buf+=ROBOT_SPEED_VAR+":["+ROBOT_HALF_SPEED_CONST+".."+ROBOT_FULL_SPEED_CONST+"] init "+ROBOT_HALF_SPEED_CONST+";\n";
         buf+=ROBOT_LOC_MODE_VAR+":["+ROBOT_LOC_MODE_LO_CONST+".."+ROBOT_LOC_MODE_HI_CONST+"] init "+ROBOT_LOC_MODE_HI_CONST+";\n";
         buf+=ROBOT_HEADING_VAR+":[0.."+String.valueOf(MissionState.Heading.values().length)+"] init "+INITIAL_ROBOT_HEADING_CONST+";\n";
+        buf+=ROBOT_LOC_MODE_RECONF_VAR+":[0.."+ROBOT_LOC_MODE_MAX_RECONF_VAL+"] init 0;\n";
+        
         buf+="robot_done:bool init false;\n";
         buf+="\t[] true "+ROBOT_GUARD_STR+" "+STOP_GUARD_STR+" & (robot_done) -> (robot_done'=false)"+ROBOT_UPDATE_HOUSEKEEPING_STR+";\n";
         if (!inhibitTactics)
@@ -302,10 +310,12 @@ public class MapTranslator {
      * @return
      */
     public static String generateSensingTacticCommands(){
-        String buf="\t // Sensing tactics (lo=kinect off, med=kinect on+low cpu+low accuracy, hi=kinect on+high cpu+high accuracy\n";
-        buf+="\t [t_set_loc_lo] ("+ROBOT_LOC_MODE_VAR+"!="+ROBOT_LOC_MODE_LO_CONST+") "+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_LOC_MODE_VAR+"'="+ROBOT_LOC_MODE_LO_CONST+")"+" & (robot_done'=true);\n";                	
-        buf+="\t [t_set_loc_med] ("+ROBOT_LOC_MODE_VAR+"!="+ROBOT_LOC_MODE_MED_CONST+") "+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_LOC_MODE_VAR+"'="+ROBOT_LOC_MODE_MED_CONST+")"+" & (robot_done'=true);\n";                	
-        buf+="\t [t_set_loc_hi] ("+ROBOT_LOC_MODE_VAR+"!="+ROBOT_LOC_MODE_HI_CONST+") "+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_LOC_MODE_VAR+"'="+ROBOT_LOC_MODE_HI_CONST+")"+" & (robot_done'=true);\n";                	
+        String reconfGuard = "& ("+ROBOT_LOC_MODE_RECONF_VAR+"<"+ROBOT_LOC_MODE_MAX_RECONF_CONST+") ";
+        String reconfUpdate = "& ("+ROBOT_LOC_MODE_RECONF_VAR+"'="+ROBOT_LOC_MODE_RECONF_VAR+"+1) ";
+    	String buf="\t // Sensing tactics (lo=kinect off, med=kinect on+low cpu+low accuracy, hi=kinect on+high cpu+high accuracy\n";
+        buf+="\t [t_set_loc_lo] ("+ROBOT_LOC_MODE_VAR+"!="+ROBOT_LOC_MODE_LO_CONST+") "+ reconfGuard +STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_LOC_MODE_VAR+"'="+ROBOT_LOC_MODE_LO_CONST+")"+ reconfUpdate +" & (robot_done'=true);\n";                	
+        buf+="\t [t_set_loc_med] ("+ROBOT_LOC_MODE_VAR+"!="+ROBOT_LOC_MODE_MED_CONST+") "+ reconfGuard +STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_LOC_MODE_VAR+"'="+ROBOT_LOC_MODE_MED_CONST+")"+ reconfUpdate + " & (robot_done'=true);\n";                	
+        buf+="\t [t_set_loc_hi] ("+ROBOT_LOC_MODE_VAR+"!="+ROBOT_LOC_MODE_HI_CONST+") "+ reconfGuard + STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_LOC_MODE_VAR+"'="+ROBOT_LOC_MODE_HI_CONST+")"+ reconfUpdate + " & (robot_done'=true);\n";                	
         return buf+"\n";
     }
 
