@@ -4,12 +4,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
 
 import org.sa.rainbow.brass.PropertiesConnector;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.map.MapTranslator;
 import org.sa.rainbow.brass.adaptation.PrismPolicy;
 import org.sa.rainbow.brass.adaptation.PolicyToIG;
+
 
 
 
@@ -28,6 +31,7 @@ public class DecisionEngine {
     public static String m_destination;
     public static Map<List, String> m_candidates;
     public static Map<List, Double > m_scoreboard;
+    public static double m_selected_candidate_time;
     public static PrismPolicy m_plan;
 
 
@@ -44,6 +48,7 @@ public class DecisionEngine {
         m_pc = new PrismConnectorAPI (); // PRISM invoked via API
         m_origin="";
         m_destination="";
+        m_selected_candidate_time=0.0;
         m_scoreboard= new HashMap<List, Double>();
     }
 
@@ -102,9 +107,13 @@ public class DecisionEngine {
                 maxEntry = entry;
             }
         }
+        m_selected_candidate_time = maxEntry.getValue();
         return m_candidates.get(maxEntry.getKey())+".adv";
     }
 
+    public static double getSelectedPolicyTime(){
+    	return m_selected_candidate_time;
+    }
 
     /**
      * Class test
@@ -112,21 +121,28 @@ public class DecisionEngine {
      */
     public static void main(String[] args){
         init (null);
+        
+        List<Point2D> coordinates = new ArrayList<Point2D>();
+        
         EnvMap dummyMap = new EnvMap (null, null);
         setMap(dummyMap);
-        generateCandidates("l5", "l1");
-        scoreCandidates(dummyMap, "2000", "1");
-        System.out.println(String.valueOf(m_scoreboard));
-        System.out.println();
+        for (int i=1000; i< 32000; i+=500){
+	        generateCandidates("l5", "l1");
+	        scoreCandidates(dummyMap, String.valueOf(i), "1");
+	        System.out.println(String.valueOf(m_scoreboard));	        
+	        PrismPolicy pp = new PrismPolicy(selectPolicy());
+	  	  	pp.readPolicy();  
+	  	  	String plan = pp.getPlan().toString();
+	  	    System.out.println(plan);
+	  	    PolicyToIG translator = new PolicyToIG(pp, dummyMap);
+	        System.out.println(translator.translate());
+	        coordinates.add(new Point2D.Double(i, m_selected_candidate_time));
+        }
         
-        PrismPolicy pp = new PrismPolicy(selectPolicy());
-  	  	pp.readPolicy();  
-  	  	String plan = pp.getPlan().toString();
-  	    System.out.println(plan);
-  	    
-  	    PolicyToIG translator = new PolicyToIG(pp, dummyMap);
-        System.out.println(translator.translate());
-
+        for (int j=0; j< coordinates.size(); j++){
+        	System.out.println(" ("+String.valueOf(coordinates.get(j).getX())+", "+String.valueOf(coordinates.get(j).getY())+") ");
+        }
+        
     }
 
 }

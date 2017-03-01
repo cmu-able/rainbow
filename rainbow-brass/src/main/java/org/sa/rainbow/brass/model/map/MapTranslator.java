@@ -87,12 +87,13 @@ public class MapTranslator {
     public static final String ROBOT_LOC_MODE_MED_VAL = "1";
     public static final String ROBOT_LOC_MODE_HI_CONST = "LOC_HI";
     public static final String ROBOT_LOC_MODE_HI_VAL = "2";
-	public static final double ROBOT_LOC_MODE_LO_CPU_VAL = 96.3875;
-	public static final double ROBOT_LOC_MODE_MED_CPU_VAL = 98; // TODO: Change by actual value
-	public static final double ROBOT_LOC_MODE_HI_CPU_VAL = 100; // TODO: Change by actual value
+	public static final double ROBOT_LOC_MODE_LO_CPU_VAL = 20; //96.3875;
+	public static final double ROBOT_LOC_MODE_MED_CPU_VAL = 95; // TODO: Change by actual value
+	public static final double ROBOT_LOC_MODE_HI_CPU_VAL = 95; // TODO: Change by actual value
 	public static final boolean ROBOT_LOC_MODE_HI_KINECT = true;
 	public static final boolean ROBOT_LOC_MODE_MED_KINECT = true;
 	public static final boolean ROBOT_LOC_MODE_LO_KINECT = false;
+	public static final float  MAXIMUM_KINECT_OFF_DISTANCE_VAL = 6.0f; // Maximum driving distance with kinect off in m.
 
     
 	
@@ -273,7 +274,10 @@ public class MapTranslator {
             for (int i=0;i<m_map.getArcs().size();i++){
                 EnvMapArc a = m_map.getArcs().get(i);
                 if (a.isEnabled()){
-                    buf+="\t ["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] ("+ROBOT_LOCATION_VAR+"="+a.getSource()+") "+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) -> ("+ROBOT_LOCATION_VAR+"'="+a.getTarget()+") "+" & ("+ROBOT_BATTERY_VAR+"'="+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+")"+ " & ("+ROBOT_HEADING_VAR+"'="+HEADING_CONST_PREFIX + findArcHeading(a).name() + ") & (robot_done'=true);\n";                	
+                	String kGuard="";
+                	if (a.getDistance() > MAXIMUM_KINECT_OFF_DISTANCE_VAL)
+                		kGuard ="& ("+ROBOT_LOC_MODE_VAR+"!="+ROBOT_LOC_MODE_LO_CONST+") ";
+                    buf+="\t ["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] ("+ROBOT_LOCATION_VAR+"="+a.getSource()+") "+kGuard+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) -> ("+ROBOT_LOCATION_VAR+"'="+a.getTarget()+") "+" & ("+ROBOT_BATTERY_VAR+"'="+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+")"+ " & ("+ROBOT_HEADING_VAR+"'="+HEADING_CONST_PREFIX + findArcHeading(a).name() + ") & (robot_done'=true);\n";                	
                 }
             }
             return buf+"\n";		
@@ -328,7 +332,7 @@ public class MapTranslator {
 
         		}	
         	}
-        guard_can_charge+=") & ("+ROBOT_BATTERY_VAR+"<1500)";	//TODO: refine this constraint
+        guard_can_charge+=") & ("+ROBOT_BATTERY_VAR+"<1500*"+String.valueOf(BatteryPredictor.m_battery_scaling_factor)+")";	//TODO: refine this constraint
         }
     	
     	String buf="\t // Recharge tactics\n";
