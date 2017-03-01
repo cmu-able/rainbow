@@ -16,11 +16,11 @@ public class TargetWaypointGauge extends RegularPatternGauge {
 
     private static final String NAME           = "TargetWaypointGauge";
     private static final String TARGET         = "target";
-    private static final String TARGET_PATTERN = ".*target_loc.*:.*\\\"(..).*";
+    private static final String TARGET_PATTERN = ".*target.*:.*\\\"(..)\\\".*";
 
     public TargetWaypointGauge (String id, long beaconPeriod, TypedAttribute gaugeDesc, TypedAttribute modelDesc,
             List<TypedAttributeWithValue> setupParams, Map<String, IRainbowOperation> mappings)
-            throws RainbowException {
+                    throws RainbowException {
         super (NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
         addPattern (TARGET, Pattern.compile (TARGET_PATTERN, Pattern.DOTALL));
     }
