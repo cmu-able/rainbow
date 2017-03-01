@@ -2,8 +2,10 @@ package org.sa.rainbow.brass.analyses;
 
 import org.sa.rainbow.brass.das.BRASSHttpConnector;
 import org.sa.rainbow.brass.das.IBRASSConnector.DASStatusT;
+import org.sa.rainbow.brass.model.instructions.IInstruction;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
+import org.sa.rainbow.brass.model.instructions.MoveAbsHInstruction;
 import org.sa.rainbow.brass.model.instructions.SetExecutionFailedCmd;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.map.EnvMapModelInstance;
@@ -128,52 +130,54 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
                 LocationRecording pose = missionState.getCurrentPose ();
 
                 // Get source and target positions of the failing instruction
-                InstructionGraphProgress.Instruction currentInst = igProgress.getCurrentInstruction();
-                double sourceX;
-                double sourceY;
-                double targetX = currentInst.getTargetX();
-                double targetY = currentInst.getTargetY();
+                IInstruction currentInst = igProgress.getCurrentInstruction();
+                
+                // The current instruction is of type MoveAbsH
+                if (currentInst instanceof MoveAbsHInstruction) {
+                	MoveAbsHInstruction currentMoveAbsH = (MoveAbsHInstruction) currentInst;
+                	MoveAbsHInstruction prevMoveAbsH = getPreviousMoveAbsH(currentMoveAbsH, igProgress);
+                	
+                	double sourceX;
+                    double sourceY;
+                    double targetX = currentMoveAbsH.getTargetX();
+                    double targetY = currentMoveAbsH.getTargetY();
+                    
+                	if (prevMoveAbsH != null) {
+                		sourceX = prevMoveAbsH.getTargetX();
+                        sourceY = prevMoveAbsH.getTargetY();
+                	} else {
+                        // The current instruction is the first MoveAbsH instruction in IG
+                        // Use the initial pose as the source pose
+                        sourceX = missionState.getInitialPose().getX();
+                        sourceY = missionState.getInitialPose().getY();
+                    }
 
-                if (!currentInst.m_label.equals ("1)")) {
-//                if (missionState.hasPreviousInstruction()) {
-                    // Target pose of previous instruction is source pose of current instruction
-                    String prevInstLabel = String.valueOf (Integer.valueOf (currentInst.m_label) - 1);
-//                    String prevInstLabel = missionState.getPreviousInstruction();
-                    InstructionGraphProgress.Instruction prevInst = igProgress.getInstruction(prevInstLabel);
-                    sourceX = prevInst.getTargetX();
-                    sourceY = prevInst.getTargetY();
-                } else {
-                    // The current instruction is the first instruction in IG
-                    // Use the initial pose as the source pose
-                    sourceX = missionState.getInitialPose().getX();
-                    sourceY = missionState.getInitialPose().getY();
+                    // Find the corresponding environment map nodes of the source and target positions
+                    // Node naming assumption: node's label is lX where X is the order in which the node is added
+                    int numNodes = envMap.getNodeCount() + 1;
+                    String n = "l" + numNodes;
+                    String na = envMap.getNode (sourceX, sourceY).getLabel ();
+                    String nb = envMap.getNode (targetX, targetY).getLabel ();
+
+                    // Update the environment map
+                    String rx = Double.toString (pose.getX ());
+                    String ry = Double.toString (pose.getY ());
+                    InsertNodeCmd insertNodeCmd = envModel.getCommandFactory ()
+                            .insertNodeCmd (n, na, nb, rx, ry);
+                    log ("Inserting node '" + n + "' at (" + rx + ", " + ry + ") between " + na + " and " + nb);
+
+                    // Set robot obstructed flag -- trigger planning for adaptation
+                    SetRobotObstructedCmd robotObstructedCmd = missionStateModel.getCommandFactory ()
+                            .setRobotObstructedCmd (true);
+
+                    SetExecutionFailedCmd resetFailedCmd = igModel.getCommandFactory ().setExecutionFailedCmd ("false");
+
+                    // Send the commands -- different models, so can't bundle them
+                    m_modelUSPort.updateModel (resetFailedCmd);
+                    m_modelUSPort.updateModel (insertNodeCmd);
+                    m_modelUSPort.updateModel (robotObstructedCmd);
+                    m_awaitingNewIG = true;
                 }
-
-                // Find the corresponding environment map nodes of the source and target positions
-                // Node naming assumption: node's label is lX where X is the order in which the node is added
-                int numNodes = envMap.getNodeCount() + 1;
-                String n = "l" + numNodes;
-                String na = envMap.getNode (sourceX, sourceY).getLabel ();
-                String nb = envMap.getNode (targetX, targetY).getLabel ();
-
-                // Update the environment map
-                String rx = Double.toString (pose.getX ());
-                String ry = Double.toString (pose.getY ());
-                InsertNodeCmd insertNodeCmd = envModel.getCommandFactory ()
-                        .insertNodeCmd (n, na, nb, rx, ry);
-                log ("Inserting node '" + n + "' at (" + rx + ", " + ry + ") between " + na + " and " + nb);
-
-                // Set robot obstructed flag -- trigger planning for adaptation
-                SetRobotObstructedCmd robotObstructedCmd = missionStateModel.getCommandFactory ()
-                        .setRobotObstructedCmd (true);
-
-                SetExecutionFailedCmd resetFailedCmd = igModel.getCommandFactory ().setExecutionFailedCmd ("false");
-
-                // Send the commands -- different models, so can't bundle them
-                m_modelUSPort.updateModel (resetFailedCmd);
-                m_modelUSPort.updateModel (insertNodeCmd);
-                m_modelUSPort.updateModel (robotObstructedCmd);
-                m_awaitingNewIG = true;
             }
             else if (currentOK && !emptyInstructions (igProgress) && missionState.isRobotObstructed ()) {
                 // New IG resumed after robot obstructed
@@ -190,6 +194,21 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
 
     boolean emptyInstructions (InstructionGraphProgress igProgress) {
         return igProgress.getInstructions () == null || igProgress.getInstructions ().isEmpty ();
+    }
+    
+    private MoveAbsHInstruction getPreviousMoveAbsH (MoveAbsHInstruction currentMoveAbsH, InstructionGraphProgress igProgress) {
+    	int j = Integer.valueOf (currentMoveAbsH.getInstructionLabel()) - 1;
+    	for (int i = j; i > 0; i--) {
+    		String label = String.valueOf (i);
+    		IInstruction instruction = igProgress.getInstruction(label);
+    		
+    		if (instruction instanceof MoveAbsHInstruction) {
+    			return (MoveAbsHInstruction) instruction;
+    		}
+    	}
+    	
+    	// No previous MoveAbsH instruction
+    	return null;
     }
 
     @Override
