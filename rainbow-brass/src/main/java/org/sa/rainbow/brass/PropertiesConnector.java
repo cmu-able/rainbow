@@ -22,7 +22,7 @@ public class PropertiesConnector {
         PropertiesConnector.DEFAULT.setProperty (PropertiesConnector.PRISM_PROPERTIES_PROPKEY,
                 "/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/mapbot.props");
         PropertiesConnector.DEFAULT.setProperty (PropertiesConnector.PRISM_PARAMETERS_PROPKEY,
-                "INITIAL_BATTERY=5000,INITIAL_HEADING=1");
+                "INITIAL_BATTERY=30000,INITIAL_HEADING=1");
         PropertiesConnector.DEFAULT.setProperty (PropertiesConnector.PRISM_ADV_EXPORT_PROPKEY,
                 "/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/botpolicy.adv");
         DEFAULT.setProperty (MAP_PROPKEY,

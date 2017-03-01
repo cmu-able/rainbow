@@ -659,6 +659,10 @@ public class MapTranslator {
         exportTranslation(f, getMapTranslation());
     }
 
+    public static void exportMapTranslation(String f, boolean inhibitTactics){
+        exportTranslation(f, getMapTranslation(inhibitTactics));
+    }
+
 
     /**
      * Exports a piece of code to a text file
@@ -707,11 +711,11 @@ public class MapTranslator {
         setMap(dummyMap);
         System.out.println(getMapTranslation()); // Class test
         //System.out.println();
-        exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp-new.prism");
-        String export_path="/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/";
+        exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp.prism", true);
+       // String export_path="/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/";
 
-        Map<List, String> specifications = exportConstrainedTranslationsBetween (export_path, "ls", "l1");
-        System.out.println(String.valueOf(specifications));
+       // Map<List, String> specifications = exportConstrainedTranslationsBetween (export_path, "ls", "l1");
+        // System.out.println(String.valueOf(specifications));
 
     }
 }

@@ -99,7 +99,7 @@ public class PolicyToIG {
         	m_current_loc_mode = MapTranslator.ROBOT_LOC_MODE_HI_CONST;
         }
         if (Objects.equals(name, "t_recharge")){
-        	cmd = "Recharge" + "("+f.format(MapTranslator.ROBOT_CHARGING_TIME)+")";
+        	cmd = "Charge" + "("+f.format(MapTranslator.ROBOT_CHARGING_TIME)+")";
         }
         if (Objects.equals(name, "t_set_half_speed")){
         	m_current_speed = MapTranslator.ROBOT_HALF_SPEED_VALUE;
