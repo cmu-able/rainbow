@@ -19,36 +19,64 @@ public class InstructionGraphProgress {
 
     public static InstructionGraphProgress parseFromString (ModelReference ref, String igStr) {
         // Remove all the returns from string
-        List<Instruction> instructions = parseFromString (igStr);
+        List<IInstruction> instructions = parseFromString (igStr);
         InstructionGraphProgress ig = new InstructionGraphProgress (ref);
         ig.setInstructions (instructions);
         return ig;
     }
-
-    public static List<Instruction> parseFromString (String igStr) {
-        List<Instruction> instructions = new LinkedList<Instruction> ();
+    
+    public static List<IInstruction> parseFromString (String igStr) {
+        List<IInstruction> instructions = new LinkedList<IInstruction> ();
         igStr = igStr.replace ("\n", "").replace ("\r", "");
         igStr = igStr.substring (2); // Remove P(
         String[] is = igStr.split ("V");
         Pattern instructionPattern = Pattern.compile ("\\((.*), do (.*) then (.*).*");
+        
         for (String i : is) {
             Matcher m = instructionPattern.matcher (i);
+            
             if (m.matches ()) {
-                Instruction inst = new Instruction ();
-                inst.m_label = m.group (1);
-                inst.m_instruction = m.group (2);
-                inst.m_next = m.group (3);
-                instructions.add (inst);
+                String label = m.group(1);
+                String instruction = m.group(2);
+                String nextLabel = m.group(3);
+                IInstruction inst2;
+                
+                if (instruction.startsWith(MoveAbsHInstruction.COMMAND_NAME)) {
+                	inst2 = new MoveAbsHInstruction(label, instruction, nextLabel);
+                } else {
+                	//TODO
+                	inst2 = new MoveAbsHInstruction(label, instruction, nextLabel);
+                }
+                
+                instructions.add(inst2);
             }
         }
         return instructions;
     }
 
-    public Collection<? extends Instruction> getInstructions () {
+    public Collection<? extends IInstruction> getInstructions () {
         return m_instructionList;
     }
+    
+    /**
+     * 
+     * @return The remaining instructions, excluding the current instruction, to be executed
+     */
+    public Collection<? extends IInstruction> getRemainingInstructions () {
+    	List<IInstruction> remainingInstructions = new LinkedList<>();
+    	IInstruction instPtr = getCurrentInstruction();
+    	
+    	while (instPtr != null && m_instructions.containsKey(instPtr.getNextInstructionLabel())) {
+    		String nextLabel = instPtr.getNextInstructionLabel();
+    		IInstruction nextInstruction = m_instructions.get(nextLabel);
+    		remainingInstructions.add(nextInstruction);
+    		instPtr = m_instructions.get(nextLabel);
+    	}
+    	
+    	return remainingInstructions;
+    }
 
-    public Instruction getInstruction (String instLabel) {
+    public IInstruction getInstruction (String instLabel) {
         return m_instructions.get(instLabel). copy ();
     }
 
@@ -60,63 +88,63 @@ public class InstructionGraphProgress {
         return m_currentOK;
     }
 
-    public Instruction getCurrentInstruction () {
+    public IInstruction getCurrentInstruction () {
         return m_instructions.get (m_currentNode);
     }
-
-    public static class Instruction {
-        public String m_label;
-        public String m_instruction;
-        public String m_next;
-
-        private double m_targetX;
-        private double m_targetY;
-        private double m_targetW;
-        private double m_speed;
-
-        public Instruction copy () {
-            Instruction i = new Instruction ();
-            i.m_instruction = new String (m_instruction);
-            i.m_label = new String (m_label);
-            i.m_next = new String (m_next);
-            i.m_targetX = m_targetX;
-            i.m_targetY = m_targetY;
-            i.m_targetW = m_targetW;
-            i.m_speed = m_speed;
-            return i;
-        }
-
-        /**
-         * This method is called every time this instruction is set in setInstructions () in
-         * {@link InstructionGraphProgress}.
-         */
-        public void parseMoveAbsTargetPose () {
-            Pattern moveAbsPattern = Pattern.compile ("MoveAbsH\\(([0-9.]+),.*([0-9.]+),.*([0-9.]+),.*([0-9.]+)\\)");
-            Matcher m = moveAbsPattern.matcher (m_instruction);
-            if (m.matches ()) {
-                m_targetX = Double.parseDouble (m.group (1));
-                m_targetY = Double.parseDouble (m.group (2));
-                m_speed = Double.parseDouble (m.group (3));
-                m_targetW = Double.parseDouble (m.group (4));
-            }
-        }
-
-        public double getTargetX () {
-            return m_targetX;
-        }
-
-        public double getTargetY () {
-            return m_targetY;
-        }
-
-        public double getSpeed () {
-            return m_speed;
-        }
-
-        public double getTargetW () {
-            return m_targetW;
-        }
-    }
+    
+//    public static class Instruction {
+//        public String m_label;
+//        public String m_instruction;
+//        public String m_next;
+//
+//        private double m_targetX;
+//        private double m_targetY;
+//        private double m_targetW;
+//        private double m_speed;
+//
+//        public Instruction copy () {
+//            Instruction i = new Instruction ();
+//            i.m_instruction = new String (m_instruction);
+//            i.m_label = new String (m_label);
+//            i.m_next = new String (m_next);
+//            i.m_targetX = m_targetX;
+//            i.m_targetY = m_targetY;
+//            i.m_targetW = m_targetW;
+//            i.m_speed = m_speed;
+//            return i;
+//        }
+//
+//        /**
+//         * This method is called every time this instruction is set in setInstructions () in
+//         * {@link InstructionGraphProgress}.
+//         */
+//        public void parseMoveAbsTargetPose () {
+//            Pattern moveAbsPattern = Pattern.compile ("MoveAbsH\\(([0-9.]+),.*([0-9.]+),.*([0-9.]+),.*([0-9.]+)\\)");
+//            Matcher m = moveAbsPattern.matcher (m_instruction);
+//            if (m.matches ()) {
+//                m_targetX = Double.parseDouble (m.group (1));
+//                m_targetY = Double.parseDouble (m.group (2));
+//                m_speed = Double.parseDouble (m.group (3));
+//                m_targetW = Double.parseDouble (m.group (4));
+//            }
+//        }
+//
+//        public double getTargetX () {
+//            return m_targetX;
+//        }
+//
+//        public double getTargetY () {
+//            return m_targetY;
+//        }
+//
+//        public double getSpeed () {
+//            return m_speed;
+//        }
+//
+//        public double getTargetW () {
+//            return m_targetW;
+//        }
+//    }
 
     public static class ExecutionObservation {
         String  label;
@@ -125,13 +153,13 @@ public class InstructionGraphProgress {
         long    endTime;
     }
 
-    private Map<String, Instruction>    m_instructions     = new HashMap<> ();
-    private LinkedList<Instruction>     m_instructionList;
+    private Map<String, IInstruction>    m_instructions     = new HashMap<> ();
+    private LinkedList<IInstruction>     m_instructionList;
     private final ModelReference        m_model;
     private String                      m_currentNode;
     private boolean                     m_currentOK        = true;
     private Deque<ExecutionObservation> m_executionHistory = new ArrayDeque<> ();
-
+    
     public InstructionGraphProgress (ModelReference model) {
         m_model = model;
     }
@@ -145,26 +173,18 @@ public class InstructionGraphProgress {
         ig.m_instructions = new HashMap<> ();
         ig.m_executionHistory = new ArrayDeque<> (m_executionHistory);
 
-        for (Map.Entry<String, Instruction> i : m_instructions.entrySet ()) {
+        for (Map.Entry<String, IInstruction> i : m_instructions.entrySet ()) {
             ig.m_instructions.put (i.getKey (), i.getValue ().copy ());
         }
 
         return ig;
     }
 
-    public void setInstructions (List<Instruction> instructions) {
-        Instruction prev = null;
-        m_instructionList = new LinkedList<Instruction> (instructions);
+    public void setInstructions (List<IInstruction> instructions) {
+        m_instructionList = new LinkedList<IInstruction> (instructions);
         m_instructions.clear ();
-        for (Instruction i : instructions) {
-            // Parse the target pose from MoveAbs(x, y, w)
-            i.parseMoveAbsTargetPose ();
-
-            if (prev != null) {
-                prev.m_next = i.m_label;
-            }
-            prev = i;
-            m_instructions.put (i.m_label, i);
+        for (IInstruction i : instructions) {
+            m_instructions.put (i.getInstructionLabel(), i);
         }
     }
 
@@ -209,11 +229,11 @@ public class InstructionGraphProgress {
         return b.toString ();
     }
 
-    private void outputInstruction (Instruction instruction, int i, StringBuffer b) {
+    private void outputInstruction (IInstruction instruction, int i, StringBuffer b) {
         b.append ("V(");
         b.append (i);
         b.append (", do ");
-        b.append (instruction.m_instruction);
+        b.append (instruction.getInstruction());
         b.append (" then ");
         b.append (i + 1);
         b.append (")");
