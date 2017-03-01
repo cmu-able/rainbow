@@ -1,5 +1,7 @@
 package org.sa.rainbow.brass.adaptation;
 
+import java.util.Date;
+
 import org.sa.rainbow.brass.das.BRASSHttpConnector;
 import org.sa.rainbow.brass.das.IBRASSConnector.DASStatusT;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
@@ -14,6 +16,7 @@ import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.adaptation.AdaptationExecutionOperatorT;
 import org.sa.rainbow.core.adaptation.AdaptationTree;
 import org.sa.rainbow.core.adaptation.DefaultAdaptationTreeWalker;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
@@ -210,8 +213,14 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
                 }
                 else {
                     PolicyToIG translator = new PolicyToIG (prismPolicy, map);
-                    NewInstructionGraph nig = new NewInstructionGraph (igModel, translator.translate ()); // Ashutosh: do this
-                    AdaptationTree<BrassPlan> at = new AdaptationTree<BrassPlan> (nig);
+                    NewInstructionGraph nig = new NewInstructionGraph (igModel, translator.translate ());
+                    Date deadline = new Date (); // Replace with new deadline which is now + estimated seconds
+
+                    AdaptationTree<BrassPlan> at = new AdaptationTree<> (AdaptationExecutionOperatorT.SEQUENCE);
+                    at.addLeaf (nig);
+                    at.addLeaf (new SetDeadline (missionStateModel, deadline));
+
+//                    AdaptationTree<BrassPlan> at = new AdaptationTree<BrassPlan> (nig);
                     m_reportingPort.info (getComponentType (), "New adaptation found - enqueuing it");
                     m_executingPlan = true;
                     m_adaptationEnqueuePort.offerAdaptation (at, new Object[] {});

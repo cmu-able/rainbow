@@ -71,6 +71,7 @@ public class InstructionGraphProgress {
 
         private double m_targetX;
         private double m_targetY;
+        private double m_targetW;
         private double m_speed;
 
         public Instruction copy () {
@@ -80,6 +81,7 @@ public class InstructionGraphProgress {
             i.m_next = new String (m_next);
             i.m_targetX = m_targetX;
             i.m_targetY = m_targetY;
+            i.m_targetW = m_targetW;
             i.m_speed = m_speed;
             return i;
         }
@@ -89,12 +91,13 @@ public class InstructionGraphProgress {
          * {@link InstructionGraphProgress}.
          */
         public void parseMoveAbsTargetPose () {
-            Pattern moveAbsPattern = Pattern.compile ("MoveAbs\\((.+), (.+), (.+)\\)");
+            Pattern moveAbsPattern = Pattern.compile ("MoveAbsH\\(([0-9.]+),.*([0-9.]+),.*([0-9.]+),.*([0-9.]+)\\)");
             Matcher m = moveAbsPattern.matcher (m_instruction);
             if (m.matches ()) {
                 m_targetX = Double.parseDouble (m.group (1));
                 m_targetY = Double.parseDouble (m.group (2));
                 m_speed = Double.parseDouble (m.group (3));
+                m_targetW = Double.parseDouble (m.group (4));
             }
         }
 
@@ -108,6 +111,10 @@ public class InstructionGraphProgress {
 
         public double getSpeed () {
             return m_speed;
+        }
+
+        public double getTargetW () {
+            return m_targetW;
         }
     }
 
