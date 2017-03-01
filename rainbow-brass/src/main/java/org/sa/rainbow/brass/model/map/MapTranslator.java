@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import org.sa.rainbow.brass.adaptation.PrismPolicy;
 import org.sa.rainbow.brass.model.map.dijkstra.Dijkstra;
 import org.sa.rainbow.brass.model.map.dijkstra.Edge;
 import org.sa.rainbow.brass.model.map.dijkstra.Graph;
@@ -633,6 +634,15 @@ public class MapTranslator {
 
     /**
      * Generates and exports the PRISM specification for an adaptation scenario to a text file
+     * @param filename String filename to export PRISM specification (constrained to a policy)
+     * @param policy Prism action sequence
+     */
+    public static void exportMapTranslation2(String filename, List<String> actionSequence) {
+		// TODO
+	}
+
+	/**
+     * Generates and exports the PRISM specification for an adaptation scenario to a text file
      * @param f String filename to export PRISM specification
      */
     public static void exportMapTranslation(String f){
@@ -676,8 +686,7 @@ public class MapTranslator {
         }
         return specifications;
     }
-
-
+    
     /**
      * Class test
      * @param args
