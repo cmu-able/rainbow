@@ -191,7 +191,12 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
                     .<MissionState> getModelInstance (missionStateRef);
 
             if (envModel != null && igModel != null && missionStateModel != null) {
-                EnvMap map = envModel.getModelInstance ();
+            	MissionState ms = missionStateModel.getModelInstance();
+            	
+            	if (!ms.isAdaptationNeeded()) // If there is no need for adaptation, planner does not compute a new plan
+            		return;
+            	
+            	EnvMap map = envModel.getModelInstance ();
                 m_de.setMap(map);
                 
                 //MapTranslator mt = new MapTranslator ();
@@ -201,13 +206,16 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
                 //mt.exportMapTranslation (pc.getPrismModelLocation ());
 
                 
-                // Get the current locatino of the robot
+                // Get the current location of the robot
                 LocationRecording pose = missionStateModel.getModelInstance ().getCurrentPose ();
                 String label = envModel.getModelInstance ().getNode (pose.getX (), pose.getY ()).getLabel();
 //                pc.invoke (map.getNodeId (label), map.getNodeId ("l6"));
 //                pc.invoke (map.getNodeId ("ls"), map.getNodeId ("l1")); // Change from hard-wired to values read from model properties
+                
+              
+                
                 m_de.generateCandidates(label, "l6"); // TODO: substitute parameter 2 by actual destination location
-    	        m_de.scoreCandidates(map, "20000", "1"); // TODO: substitute parameter 2 by actual battery level
+    	        m_de.scoreCandidates(map, String.valueOf(ms.getBatteryCharge()), "1");
 
                 
                 

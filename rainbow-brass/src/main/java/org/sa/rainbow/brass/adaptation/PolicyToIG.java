@@ -52,8 +52,11 @@ public class PolicyToIG {
         NumberFormat f = new DecimalFormat("#0.00");
         String cmd = "";
         
+        if (Objects.equals(name, "t_recalibrate_light")){
+        	cmd = "Recalibrate(0)";
+        }
         if (Objects.equals(name, "t_recalibrate")){
-        	cmd = "Recalibrate()";
+        	cmd = "Recalibrate(1)";
         }
         if (Objects.equals(name, "t_set_loc_lo")){
         	cmd = "SetLocalizationFidelity" + "("+MapTranslator.ROBOT_LOC_MODE_LO_VAL+")";
