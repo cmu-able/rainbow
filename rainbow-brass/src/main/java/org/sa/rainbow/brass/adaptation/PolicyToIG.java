@@ -28,6 +28,7 @@ public class PolicyToIG {
     public String m_command_insert = "";				 // (see build_cmd_tactic)
     public double m_location_x;
     public double m_location_y;
+    public double m_theta; 
     
     
     public PolicyToIG(PrismPolicy policy, EnvMap map) {
@@ -70,6 +71,7 @@ public class PolicyToIG {
      */
     private String build_cmd_tactic(int cmdId, String name) {
         NumberFormat f = new DecimalFormat("#0.00");
+        NumberFormat f2 = new DecimalFormat("#0.0000");
         String cmd = "";
         
         if (Objects.equals(name, "t_recalibrate_light")){
@@ -86,7 +88,7 @@ public class PolicyToIG {
         	cmd = "SetLocalizationFidelity" + "("+MapTranslator.ROBOT_LOC_MODE_MED_VAL+")";
         	if (Objects.equals(m_current_loc_mode, MapTranslator.ROBOT_LOC_MODE_LO_CONST)){
         		m_insert_additional_command = true;
-        		m_command_insert = "Relocate("+f.format(m_location_x)+", "+f.format(m_location_y)+")";
+        		m_command_insert = "Locate("+f.format(m_location_x)+", "+f.format(m_location_y)+", "+f2.format(m_theta)+")";
         	}
         	m_current_loc_mode = MapTranslator.ROBOT_LOC_MODE_MED_CONST;
         }
@@ -94,8 +96,8 @@ public class PolicyToIG {
         	cmd = "SetLocalizationFidelity" + "("+MapTranslator.ROBOT_LOC_MODE_HI_VAL+")";
         	if (Objects.equals(m_current_loc_mode, MapTranslator.ROBOT_LOC_MODE_LO_CONST)){
         		m_insert_additional_command = true;
-        		m_command_insert = "relocate("+f.format(m_location_x)+", "+f.format(m_location_y)+")";
-        	}
+        		m_command_insert = "Locate("+f.format(m_location_x)+", "+f.format(m_location_y)+", "+f2.format(m_theta)+")";
+      	}
         	m_current_loc_mode = MapTranslator.ROBOT_LOC_MODE_HI_CONST;
         }
         if (Objects.equals(name, "t_recharge")){
@@ -214,6 +216,7 @@ public class PolicyToIG {
             		String origin = elements[0];
             		// cmd = build_cmd_move(cmd_id, m_map.getNodeX(destination), m_map.getNodeY(destination), m_current_speed);
             		cmd = build_cmd_move (cmd_id, m_map.getNodeX(destination), m_map.getNodeY(destination), m_current_speed, findNextOrientation(plan,i));
+            		m_theta = MapTranslator.findArcOrientation(m_map.getNodeX(origin), m_map.getNodeY(origin), m_map.getNodeX(destination), m_map.getNodeY(destination));
            			m_location_x =  m_map.getNodeX(destination);
            			m_location_y =  m_map.getNodeY(destination); 
             	}
