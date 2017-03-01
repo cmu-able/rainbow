@@ -2,10 +2,8 @@ package org.sa.rainbow.brass.model.mission;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Deque;
-import java.util.List;
 import java.util.TimeZone;
 
 import org.sa.rainbow.core.models.ModelReference;
@@ -92,16 +90,21 @@ public class MissionState {
     }
 
     private final ModelReference m_model;
-    Deque<LocationRecording>     m_locationHistory          = new ArrayDeque<> ();
-    private List<String>         m_instructionHistory       = new ArrayList<> ();
+    
+    //private List<String>         m_instructionHistory       = new ArrayList<> ();
     private Deque<Long>          m_predictedTimeHistory     = new ArrayDeque<> ();
     private Deque<Long>          m_predictedAccuracyHistory = new ArrayDeque<> ();
     private Deque<Double>        m_timeScore                = new ArrayDeque<> ();
     private Deque<Double>        m_accuracyScore            = new ArrayDeque<> ();
     private Deque<Double>        m_safetyScore              = new ArrayDeque<> ();
-    private boolean              m_robotObstructed          = false;
+    
+    Deque<LocationRecording>     m_locationHistory          = new ArrayDeque<> ();
     Deque<Double>                m_chargeHistory            = new ArrayDeque<> ();
     Deque<Date>                  m_deadlineHistory          = new ArrayDeque<> ();
+    
+    private boolean              m_robotObstructed          = false;
+    private boolean				 m_robotOnTime				= false;
+    
 
     public MissionState (ModelReference model) {
         m_model = model;
@@ -139,30 +142,38 @@ public class MissionState {
         return m_robotObstructed;
     }
 
-    public void setCurrentInstruction (String instLabel) {
-        m_instructionHistory.add (instLabel);
-    }
+//    public void setCurrentInstruction (String instLabel) {
+//        m_instructionHistory.add (instLabel);
+//    }
+//
+//    public String getCurrentInstruction () {
+//        return m_instructionHistory.get (m_instructionHistory.size () - 1);
+//    }
+//
+//    public boolean hasPreviousInstruction () {
+//        return m_instructionHistory.size () > 1;
+//    }
+//
+//    public String getPreviousInstruction () {
+//        return m_instructionHistory.get (m_instructionHistory.size () - 2);
+//    }
 
-    public String getCurrentInstruction () {
-        return m_instructionHistory.get (m_instructionHistory.size () - 1);
-    }
+    public void setRobotOnTime (boolean isOnTime) {
+		m_robotOnTime = isOnTime;
+	}
 
-    public boolean hasPreviousInstruction () {
-        return m_instructionHistory.size () > 1;
-    }
+	public boolean isRobotOnTime () {
+		return m_robotOnTime;
+	}
 
-    public String getPreviousInstruction () {
-        return m_instructionHistory.get (m_instructionHistory.size () - 2);
-    }
-
-    public void setBatteryCharge (Double charge) {
+	public void setBatteryCharge (Double charge) {
         m_chargeHistory.push (charge);
     }
 
     public Double getBatteryCharge () {
         return m_chargeHistory.peek ();
     }
-
+    
     public void setDeadline (Date d) {
         m_deadlineHistory.push (d);
     }
@@ -171,7 +182,15 @@ public class MissionState {
         return m_deadlineHistory.peek ();
     }
 
-    public MissionState copy () {
+    /**
+	 * 
+	 * @return True iff the robot encounters (or expects to encounter) problems
+	 */
+	public boolean isAdaptationNeeded () {
+		return isRobotObstructed() || !isRobotOnTime();
+	}
+
+	public MissionState copy () {
         MissionState s = new MissionState (m_model);
         s.m_locationHistory = new ArrayDeque<> (m_locationHistory);
         s.m_chargeHistory = new ArrayDeque<> (m_chargeHistory);

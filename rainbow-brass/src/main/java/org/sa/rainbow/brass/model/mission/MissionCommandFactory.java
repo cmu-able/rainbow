@@ -29,6 +29,7 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
     protected void fillInCommandMap () {
         m_commandMap.put ("setCurrentLocation".toLowerCase (), SetCurrentLocationCmd.class);
         m_commandMap.put ("setRobotObstructed".toLowerCase (), SetRobotObstructedCmd.class);
+        m_commandMap.put ("setRobotOnTime".toLowerCase (), SetRobotOnTimeCmd.class);
         m_commandMap.put ("setBatteryCharge".toLowerCase (), SetBatteryChargeCmd.class);
         m_commandMap.put ("setDeadlineCmd".toLowerCase (), SetDeadlineCmd.class);
     }
@@ -44,21 +45,26 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
     }
 
     public SetCurrentLocationCmd setCurrentLocationCmd (double x, double y, double w) {
-        return new SetCurrentLocationCmd ((MissionStateModelInstance )m_modelInstance, "", Double.toString (x),
+        return new SetCurrentLocationCmd ((MissionStateModelInstance) m_modelInstance, "", Double.toString (x),
                 Double.toString (y), Double.toString (w));
     }
 
     public SetRobotObstructedCmd setRobotObstructedCmd (boolean robotObstructed) {
-        return new SetRobotObstructedCmd ((MissionStateModelInstance )m_modelInstance, "",
+        return new SetRobotObstructedCmd ((MissionStateModelInstance) m_modelInstance, "",
                 Boolean.toString (robotObstructed));
+    }
+    
+    public SetRobotOnTimeCmd setRobotOnTimeCmd (boolean robotOnTime) {
+        return new SetRobotOnTimeCmd ((MissionStateModelInstance) m_modelInstance, "",
+                Boolean.toString (robotOnTime));
     }
 
     public SetBatteryChargeCmd setBatteryChargeCmd (double charge) {
-        return new SetBatteryChargeCmd ((MissionStateModelInstance )m_modelInstance, "", Double.toString (charge));
+        return new SetBatteryChargeCmd ((MissionStateModelInstance) m_modelInstance, "", Double.toString (charge));
     }
 
     public SetDeadlineCmd setDeadlineCmd (Date d) {
-        return new SetDeadlineCmd ((MissionStateModelInstance )m_modelInstance, "",
+        return new SetDeadlineCmd ((MissionStateModelInstance) m_modelInstance, "",
                 MissionState.BRASS_DATE_FORMAT.format (d));
     }
 }
