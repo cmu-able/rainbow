@@ -13,41 +13,61 @@ import org.sa.rainbow.brass.model.map.EnvMapNode;
 import org.sa.rainbow.brass.model.map.MapTranslator;
 
 
+
 /**
- * @author ashutosh
+ * @author jcamara
  *
  */
+
 public class PolicyToIG {
     public PrismPolicy m_prismPolicy;
     public EnvMap m_map;
     public float m_current_speed = MapTranslator.ROBOT_HALF_SPEED_VALUE;
     public String m_current_loc_mode = MapTranslator.ROBOT_LOC_MODE_HI_CONST;
-
+    public boolean m_insert_additional_command = false;  // When translation of commands is not 1-to-1 from tactics, additional command insertion flag for translation
+    public String m_command_insert = "";				 // (see build_cmd_tactic)
+    public double m_location_x;
+    public double m_location_y;
     
     
     public PolicyToIG(PrismPolicy policy, EnvMap map) {
-        // TODO Auto-generated constructor stub
         m_prismPolicy = policy;
         m_map = map;
     }
 
-//    private String build_cmd_move(int cmdId, double dest_x, double dest_y, double speed) {
-//        NumberFormat f = new DecimalFormat("#0.0");
-//        NumberFormat f2 = new DecimalFormat("#0.00");
-//        
-//        String cmd = "MoveAbs(" + f.format(dest_x) + ", " + f.format(dest_y) + ", " + f2.format(speed) + ")";
-//        return build_cmd(cmdId, cmd);
-//    }
 
+    /**
+     * Generates a movement instruction for the IG
+     * @param cmdId int id for the instruction (IG Vertex)
+     * @param tgt_x double x coordinate for target location
+     * @param tgt_y double y coordinate for target location
+     * @param speed double linear speed
+     * @param theta orientation angle (in radians) that the robot should face after moving
+     * @return
+     */
     private String build_cmd_move(int cmdId, double tgt_x, double tgt_y, double speed, double theta) {
         NumberFormat f = new DecimalFormat("#0.0000");
         NumberFormat f2 = new DecimalFormat("#0.00");
+        String cmd="";
         
-        String cmd = "MoveAbsH(" + f.format(tgt_x) + ", " + f.format(tgt_y) + ", " + f2.format(speed) + ", " + f.format(theta) + ")";
+        if (!Objects.equals(m_current_loc_mode, MapTranslator.ROBOT_LOC_MODE_LO_CONST)){
+        	cmd = "MoveAbsH(" + f2.format(tgt_x) + ", " + f2.format(tgt_y) + ", " + f2.format(speed) + ", " + f.format(theta) + ")";
+        } else { // Dead reckoning
+        	synchronized(m_map){
+        		cmd = "Forward(" + f2.format(m_map.distanceBetweenCoords(m_location_x, m_location_y, tgt_x, tgt_y)) + ", " + f2.format(speed) + ")";
+        	}
+        }
+        
         return build_cmd(cmdId, cmd);
     }
 
     
+    /**
+     * Generates a tactic instruction for the IG
+     * @param cmdId int id for the instruction (IG Vertex)
+     * @param name String literal containing the tactic's identifier
+     * @return
+     */
     private String build_cmd_tactic(int cmdId, String name) {
         NumberFormat f = new DecimalFormat("#0.00");
         String cmd = "";
@@ -60,12 +80,23 @@ public class PolicyToIG {
         }
         if (Objects.equals(name, "t_set_loc_lo")){
         	cmd = "SetLocalizationFidelity" + "("+MapTranslator.ROBOT_LOC_MODE_LO_VAL+")";
+        	m_current_loc_mode = MapTranslator.ROBOT_LOC_MODE_LO_CONST;
         }
         if (Objects.equals(name, "t_set_loc_med")){
         	cmd = "SetLocalizationFidelity" + "("+MapTranslator.ROBOT_LOC_MODE_MED_VAL+")";
+        	if (Objects.equals(m_current_loc_mode, MapTranslator.ROBOT_LOC_MODE_LO_CONST)){
+        		m_insert_additional_command = true;
+        		m_command_insert = "relocate("+f.format(m_location_x)+", "+f.format(m_location_y)+")";
+        	}
+        	m_current_loc_mode = MapTranslator.ROBOT_LOC_MODE_MED_CONST;
         }
         if (Objects.equals(name, "t_set_loc_hi")){
         	cmd = "SetLocalizationFidelity" + "("+MapTranslator.ROBOT_LOC_MODE_HI_VAL+")";
+        	if (Objects.equals(m_current_loc_mode, MapTranslator.ROBOT_LOC_MODE_LO_CONST)){
+        		m_insert_additional_command = true;
+        		m_command_insert = "relocate("+f.format(m_location_x)+", "+f.format(m_location_y)+")";
+        	}
+        	m_current_loc_mode = MapTranslator.ROBOT_LOC_MODE_HI_CONST;
         }
         if (Objects.equals(name, "t_recharge")){
         	cmd = "Recharge" + "("+f.format(MapTranslator.ROBOT_CHARGING_TIME)+")";
@@ -81,11 +112,25 @@ public class PolicyToIG {
         return build_cmd(cmdId, cmd);
     }
     
+    
+    /**
+     * Coats instructions with additional syntactic sugar
+     * @param cmdId
+     * @param commandLiteral
+     * @return
+     */
     private String build_cmd (int cmdId, String commandLiteral) {
         String cmd = "V(" + cmdId + ", do " + commandLiteral + " then " + ++cmdId + ")";
         return cmd;
     }
     
+    
+    
+    /**
+     * Builds the instruction graph
+     * @param cmds ArrayList<String> plan actions
+     * @return
+     */
     private String build_ig(ArrayList<String> cmds) {
         String ins_graph = "P(";
         int i = 0;
@@ -103,6 +148,13 @@ public class PolicyToIG {
         return ins_graph;
     }
 
+    
+    /**
+     * Finds the orientation of the next movement in plan (to indicate orientation of robot at the end of current MoveAbsH movement)
+     * @param plan
+     * @param index
+     * @return
+     */
     public double findNextOrientation(ArrayList<String> plan, int index){
     	double theta = 0;
     	
@@ -129,10 +181,24 @@ public class PolicyToIG {
     	return theta;
     }
     
+    
+    /**
+     * Expands the list of actions in the plan to IG instructions
+     * @return
+     */
     public String translate() {
         ArrayList<String> plan = m_prismPolicy.getPlan();
         ArrayList<String> cmds = new ArrayList<String>();
         String cmd="";
+        
+       
+//  For testing purposes
+//        plan.add("t_set_loc_lo");
+//        plan.add("l1_to_l2");
+//        plan.add("t_set_loc_hi");
+//        plan.add("l2_to_c1");
+//
+//        System.out.println(String.valueOf(plan));
         
         int cmd_id = 1;
         
@@ -145,13 +211,22 @@ public class PolicyToIG {
             } else { // Other actions (robot movement for the time being)
             	synchronized (m_map){	
             		String destination = elements[2];
+            		String origin = elements[0];
             		// cmd = build_cmd_move(cmd_id, m_map.getNodeX(destination), m_map.getNodeY(destination), m_current_speed);
             		cmd = build_cmd_move (cmd_id, m_map.getNodeX(destination), m_map.getNodeY(destination), m_current_speed, findNextOrientation(plan,i));
+           			m_location_x =  m_map.getNodeX(destination);
+           			m_location_y =  m_map.getNodeY(destination); 
             	}
             }
             if (!Objects.equals(cmd, "")) {
             	cmds.add(cmd);
             	++cmd_id;		
+            	if (m_insert_additional_command){
+            		cmds.add(build_cmd(cmd_id, m_command_insert));
+            		++cmd_id;
+            		m_insert_additional_command = false;
+            		m_command_insert = "";
+            	}
             }
         }
         String ins_graph = build_ig(cmds);
@@ -160,6 +235,12 @@ public class PolicyToIG {
     }
 
 
+    /**
+     * Generates a JSON description of a waypoint list
+     * @param p
+     * @param r
+     * @return
+     */
     public static String generateJSONWayPointList(PrismPolicy p, String r) {
         String out="{\"path\": [";
         for (int i=0; i<p.getPlan().size(); i++){
@@ -174,6 +255,12 @@ public class PolicyToIG {
         return out;
     }
 
+    
+    /**
+     * Exports IG translation to a file
+     * @param f String filename
+     * @param s String code for the IG
+     */
     public static void exportIGTranslation(String f, String s){
         try {
             BufferedWriter out = new BufferedWriter (new FileWriter(f));
@@ -184,7 +271,14 @@ public class PolicyToIG {
             System.out.println("Error exporting Instruction Graph translation");
         }
     }
+    
+    
 
+    /**
+     * Class test
+     * @param args
+     * @throws Exception
+     */
     public static void main (String[] args) throws Exception { // Class test
         EnvMap map = new EnvMap (null, null);
         PrismConnector conn = new PrismConnector (null);

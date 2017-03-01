@@ -172,13 +172,9 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
             BRASSHttpConnector.instance ().reportStatus (DASStatusT.ADAPTING, "Finding a new plan");
             m_errorDetected = false;
             m_reportingPort.info (getComponentType (), "Determining an appropriate adaptation");
-            // Work out if a plan needs to be generated
-            // Generate the plan
-            // Enqueue the plan
-            // (see AdaptationManager for how to enqueue the plan)
-            // Javier : The code below retrieves the map, translates it, and invokes prism to generate the policy
-            // TODO: Planning parameters are now hard-wired. We need to retrieve: label of source and target locations
-            // to invoke PRISM.
+            
+            // The code below retrieves the map, translates it, and invokes the decision engine to generate the policy
+            
             ModelReference emRef = new ModelReference ("Map", EnvMapModelInstance.ENV_MAP_TYPE);
             EnvMapModelInstance envModel = (EnvMapModelInstance )m_modelsManagerPort.<EnvMap> getModelInstance (emRef);
             ModelReference igRef = new ModelReference ("ExecutingInstructionGraph",
@@ -198,30 +194,17 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
             	
             	EnvMap map = envModel.getModelInstance ();
                 m_de.setMap(map);
-                
-                //MapTranslator mt = new MapTranslator ();
-                //PrismConnector pc = new PrismConnector (Rainbow.instance ().allProperties ()); // Does this work with hard-wired props in the constructor?
-
-                //mt.setMap (map);
-                //mt.exportMapTranslation (pc.getPrismModelLocation ());
-
-                
+               
                 // Get the current location of the robot
                 LocationRecording pose = missionStateModel.getModelInstance ().getCurrentPose ();
-                String label = envModel.getModelInstance ().getNode (pose.getX (), pose.getY ()).getLabel();
-//                pc.invoke (map.getNodeId (label), map.getNodeId ("l6"));
-//                pc.invoke (map.getNodeId ("ls"), map.getNodeId ("l1")); // Change from hard-wired to values read from model properties
+                String label = envModel.getModelInstance ().getNode (pose.getX (), pose.getY ()).getLabel();          
                 
-              
-                
-                m_de.generateCandidates(label, "l6"); // TODO: substitute parameter 2 by actual destination location
-    	        m_de.scoreCandidates(map, String.valueOf(ms.getBatteryCharge()), "1");
+                m_de.generateCandidates(label, ms.getTargetWaypoint()); // Generate candidate solutions to go from current waypoint to target one
+    	        m_de.scoreCandidates(map, String.valueOf(ms.getBatteryCharge()), "1"); // Property 1 in file deals with time subject to target reachability (R{"time"}min=? [ F goal ])
 
-                
-                
+                      
                 // Translate model to the IG
-                // Create a NewInstrcutionGraph object and enqueue it on the adaptation port
-                //PrismPolicy prismPolicy = new PrismPolicy (pc.getPrismPolicyLocation ());
+                // Create a NewInstrcutionGraph object and enqueue it on the adaptation port, set new deadline
                 PrismPolicy prismPolicy = new PrismPolicy(m_de.selectPolicy());
                 prismPolicy.readPolicy ();
                 m_reportingPort.info (getComponentType (), "Found new plan: " + prismPolicy.getPlan ().toString ());
@@ -236,8 +219,7 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
                     Date now = new Date ();
                     Long offset = new Double(planEstimatedTime*1000).longValue();
                     Date deadline = new Date();
-                    deadline.setTime(now.getTime()+offset); 
-//                  Date deadline = new Date (); // Replace with new deadline which is now + estimated seconds
+                    deadline.setTime(now.getTime()+offset); // Set new deadline based on planner time estimation
 
                     AdaptationTree<BrassPlan> at = new AdaptationTree<> (AdaptationExecutionOperatorT.SEQUENCE);
                     at.addLeaf (nig);
