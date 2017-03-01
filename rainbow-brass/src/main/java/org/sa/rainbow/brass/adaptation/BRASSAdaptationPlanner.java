@@ -46,6 +46,8 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
     // The thread "sleep" time. runAction will be called every 10 seconds in this case
     public static final int SLEEP_TIME = 10000 /*ms*/;
 
+    private static DecisionEngine m_de;
+    
     // Port to query with any models in models manager
     private IModelsManagerPort                       m_modelsManagerPort;
     private IModelChangeBusSubscriberPort            m_modelChangePort;
@@ -87,6 +89,7 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
         else {
             setSleepTime (SLEEP_TIME);
         }
+        m_de = new DecisionEngine();
     }
 
     @Override
@@ -189,22 +192,29 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
 
             if (envModel != null && igModel != null && missionStateModel != null) {
                 EnvMap map = envModel.getModelInstance ();
-                MapTranslator mt = new MapTranslator ();
-                PrismConnector pc = new PrismConnector (Rainbow.instance ().allProperties ()); // Does this work with hard-wired props in the constructor?
+                m_de.setMap(map);
+                
+                //MapTranslator mt = new MapTranslator ();
+                //PrismConnector pc = new PrismConnector (Rainbow.instance ().allProperties ()); // Does this work with hard-wired props in the constructor?
 
-                mt.setMap (map);
-                mt.exportMapTranslation (pc.getPrismModelLocation ());
+                //mt.setMap (map);
+                //mt.exportMapTranslation (pc.getPrismModelLocation ());
 
+                
                 // Get the current locatino of the robot
                 LocationRecording pose = missionStateModel.getModelInstance ().getCurrentPose ();
-                String label = envModel.getModelInstance ().getNode (pose.getX (), pose.getY ()).m_label;
-                pc.invoke (map.getNodeId (label), map.getNodeId ("l6"));
+                String label = envModel.getModelInstance ().getNode (pose.getX (), pose.getY ()).getLabel();
+//                pc.invoke (map.getNodeId (label), map.getNodeId ("l6"));
 //                pc.invoke (map.getNodeId ("ls"), map.getNodeId ("l1")); // Change from hard-wired to values read from model properties
+                m_de.generateCandidates(label, "l6"); // TODO: substitute parameter 2 by actual destination location
+    	        m_de.scoreCandidates(map, "20000", "1"); // TODO: substitute parameter 2 by actual battery level
 
-                // TODO: Ashutosh
+                
+                
                 // Translate model to the IG
                 // Create a NewInstrcutionGraph object and enqueue it on the adaptation port
-                PrismPolicy prismPolicy = new PrismPolicy (pc.getPrismPolicyLocation ());
+                //PrismPolicy prismPolicy = new PrismPolicy (pc.getPrismPolicyLocation ());
+                PrismPolicy prismPolicy = new PrismPolicy(m_de.selectPolicy());
                 prismPolicy.readPolicy ();
                 m_reportingPort.info (getComponentType (), "Found new plan: " + prismPolicy.getPlan ().toString ());
                 if (prismPolicy.getPlan () == null || prismPolicy.getPlan ().isEmpty ()) {
@@ -214,7 +224,12 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
                 else {
                     PolicyToIG translator = new PolicyToIG (prismPolicy, map);
                     NewInstructionGraph nig = new NewInstructionGraph (igModel, translator.translate ());
-                    Date deadline = new Date (); // Replace with new deadline which is now + estimated seconds
+                    double planEstimatedTime = m_de.getSelectedPolicyTime();
+                    Date now = new Date ();
+                    Long offset = new Double(planEstimatedTime*1000).longValue();
+                    Date deadline = new Date();
+                    deadline.setTime(now.getTime()+offset); 
+//                  Date deadline = new Date (); // Replace with new deadline which is now + estimated seconds
 
                     AdaptationTree<BrassPlan> at = new AdaptationTree<> (AdaptationExecutionOperatorT.SEQUENCE);
                     at.addLeaf (nig);
