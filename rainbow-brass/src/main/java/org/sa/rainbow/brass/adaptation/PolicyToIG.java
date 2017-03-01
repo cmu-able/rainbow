@@ -21,6 +21,7 @@ public class PolicyToIG {
     public PrismPolicy m_prismPolicy;
     public EnvMap m_map;
     public float m_current_speed = MapTranslator.ROBOT_HALF_SPEED_VALUE;
+    public String m_current_loc_mode = MapTranslator.ROBOT_LOC_MODE_HI_CONST;
 
     
     
@@ -30,13 +31,23 @@ public class PolicyToIG {
         m_map = map;
     }
 
-    private String build_cmd_move(int cmdId, double dest_x, double dest_y, double speed) {
-        NumberFormat f = new DecimalFormat("#0.0");
+//    private String build_cmd_move(int cmdId, double dest_x, double dest_y, double speed) {
+//        NumberFormat f = new DecimalFormat("#0.0");
+//        NumberFormat f2 = new DecimalFormat("#0.00");
+//        
+//        String cmd = "MoveAbs(" + f.format(dest_x) + ", " + f.format(dest_y) + ", " + f2.format(speed) + ")";
+//        return build_cmd(cmdId, cmd);
+//    }
+
+    private String build_cmd_move(int cmdId, double tgt_x, double tgt_y, double speed, double theta) {
+        NumberFormat f = new DecimalFormat("#0.0000");
         NumberFormat f2 = new DecimalFormat("#0.00");
-        String cmd = "MoveAbs(" + f.format(dest_x) + ", " + f.format(dest_y) + ", " + f2.format(speed) + ")";
+        
+        String cmd = "MoveAbsH(" + f.format(tgt_x) + ", " + f.format(tgt_y) + ", " + f2.format(speed) + ", " + f.format(theta) + ")";
         return build_cmd(cmdId, cmd);
     }
 
+    
     private String build_cmd_tactic(int cmdId, String name) {
         NumberFormat f = new DecimalFormat("#0.00");
         String cmd = "";
@@ -89,6 +100,32 @@ public class PolicyToIG {
         return ins_graph;
     }
 
+    public double findNextOrientation(ArrayList<String> plan, int index){
+    	double theta = 0;
+    	
+    	if (index+1>= plan.size())
+			return theta;
+    	
+    	synchronized(m_map){
+	    	String[] e = plan.get(index).split("_"); // Break current move action plan name into chunks
+	    	Double src_x = m_map.getNodeX(e[2]);
+	    	Double src_y = m_map.getNodeY(e[2]);
+	    	
+        	for (int i = index+1; i < plan.size(); i++) {
+	             String action = plan.get(i);
+	             String[] e2 = action.split("_"); // Break action plan name into chunks
+	             if (!Objects.equals(e2[0], MapTranslator.TACTIC_PREFIX)) { // If action is *not* a tactic (i.e., move command)
+		            Double tgt_x = m_map.getNodeX(e2[2]);
+	     	    	Double tgt_y = m_map.getNodeY(e2[2]);
+	     	    	theta =  MapTranslator.findArcOrientation(src_x, src_y, tgt_x, tgt_y);
+	                return(theta);
+	
+	             }
+	    	}
+    	}
+    	return theta;
+    }
+    
     public String translate() {
         ArrayList<String> plan = m_prismPolicy.getPlan();
         ArrayList<String> cmds = new ArrayList<String>();
@@ -105,7 +142,8 @@ public class PolicyToIG {
             } else { // Other actions (robot movement for the time being)
             	synchronized (m_map){	
             		String destination = elements[2];
-            		cmd = build_cmd_move(cmd_id, m_map.getNodeX(destination), m_map.getNodeY(destination), m_current_speed);
+            		// cmd = build_cmd_move(cmd_id, m_map.getNodeX(destination), m_map.getNodeY(destination), m_current_speed);
+            		cmd = build_cmd_move (cmd_id, m_map.getNodeX(destination), m_map.getNodeY(destination), m_current_speed, findNextOrientation(plan,i));
             	}
             }
             if (!Objects.equals(cmd, "")) {

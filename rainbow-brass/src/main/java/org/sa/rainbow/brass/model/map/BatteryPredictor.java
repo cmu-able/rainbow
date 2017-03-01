@@ -12,7 +12,7 @@ import org.sa.rainbow.brass.model.map.MapTranslator;
  */
 public class BatteryPredictor {
 
-
+	public static final double m_battery_scaling_factor = 1.0;
 	
 	public static double batteryConsumption (String speed, String sensing, double time){
 		
@@ -57,7 +57,7 @@ public class BatteryPredictor {
 
         nuc_consumption = ( 0.032f * cpuAvgUsage + 1.925f) * time;
         
-        return base_consumption + kinect_consumption + nuc_consumption;
+        return m_battery_scaling_factor * (base_consumption + kinect_consumption + nuc_consumption);
     }
     
     /**
@@ -66,7 +66,7 @@ public class BatteryPredictor {
      * @return
      */
     public double batteryCharge (double time){
-    	return 8.35 * time; 
+    	return m_battery_scaling_factor * 8.35 * time; 
     }
 
 }

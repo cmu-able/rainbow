@@ -93,7 +93,8 @@ public class MapTranslator {
 	public static final boolean ROBOT_LOC_MODE_HI_KINECT = true;
 	public static final boolean ROBOT_LOC_MODE_MED_KINECT = true;
 	public static final boolean ROBOT_LOC_MODE_LO_KINECT = false;
-	
+
+    
 	
     
     // Goal and stop condition configuration constants
@@ -425,15 +426,16 @@ public class MapTranslator {
      */
     public static double findArcOrientation(EnvMapArc a){
         synchronized (m_map) {
-            double src_x = m_map.getNodeX(a.getSource());
-            double src_y = m_map.getNodeY(a.getSource());
-            double tgt_x = m_map.getNodeX(a.getTarget());
-            double tgt_y = m_map.getNodeY(a.getTarget());
-            return Math.atan2( tgt_y - src_y, tgt_x - src_x);    		
+            return findArcOrientation( m_map.getNodeX(a.getSource()), m_map.getNodeY(a.getSource()), m_map.getNodeX(a.getTarget()), m_map.getNodeY(a.getTarget()));
         }
     }
 
 
+    public static double findArcOrientation(double src_x, double src_y, double tgt_x, double tgt_y){
+        return Math.atan2( tgt_y - src_y, tgt_x - src_x);
+    }
+    
+    
     /**
      * Determines the heading between two endpoints of an arc (snaps result of findArcOrientation to one of the predetermined headings)
      * @param a Map arc
@@ -442,6 +444,7 @@ public class MapTranslator {
     public static MissionState.Heading findArcHeading (EnvMapArc a) {
         return MissionState.Heading.convertFromRadians(findArcOrientation(a));
     }
+    
 
     public static Stack<String> connectionPath = null; // Aux data structures for finding all paths between arbitrary locations
     public static List<Stack> connectionPaths = null;
