@@ -86,7 +86,7 @@ public class PolicyToIG {
         	cmd = "SetLocalizationFidelity" + "("+MapTranslator.ROBOT_LOC_MODE_MED_VAL+")";
         	if (Objects.equals(m_current_loc_mode, MapTranslator.ROBOT_LOC_MODE_LO_CONST)){
         		m_insert_additional_command = true;
-        		m_command_insert = "relocate("+f.format(m_location_x)+", "+f.format(m_location_y)+")";
+        		m_command_insert = "Relocate("+f.format(m_location_x)+", "+f.format(m_location_y)+")";
         	}
         	m_current_loc_mode = MapTranslator.ROBOT_LOC_MODE_MED_CONST;
         }
