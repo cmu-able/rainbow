@@ -11,13 +11,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.Arrays;
 
-import org.sa.rainbow.brass.adaptation.PrismPolicy;
 import org.sa.rainbow.brass.model.map.dijkstra.Dijkstra;
 import org.sa.rainbow.brass.model.map.dijkstra.Edge;
 import org.sa.rainbow.brass.model.map.dijkstra.Graph;
 import org.sa.rainbow.brass.model.map.dijkstra.Vertex;
 import org.sa.rainbow.brass.model.mission.MissionState;
+
+import com.google.common.base.Objects;
+
 import org.sa.rainbow.brass.model.map.BatteryPredictor;
 import org.sa.rainbow.brass.model.map.SpeedPredictor;
 
@@ -522,6 +525,51 @@ public class MapTranslator {
         return buf;
     }
 
+    /**
+     * Translates a plan into a PRISM module constraining the action of the robots to that plan00
+     * @param plan List of strings (e.g., ["l1_to_l2", ..., "t_recharge", ..., "l4_to_l5"])
+     * @return String PRISM encoding of the plan constraint module
+     */
+    public static String generatePlanConstraintModule(List<String> plan){
+    	LinkedList<String> allTactics = new LinkedList<String>(Arrays.asList("t_set_loc_lo", "t_set_loc_med", "t_set_loc_hi", "t_set_half_speed", "t_set_full_speed", "t_recharge"));
+    	
+        String buf="\n"+"module plan_constraint\n";
+        buf+= "pc_s : [0.."+String.valueOf(plan.size())+"] init 0;\n";
+        for (int i=0; i< plan.size(); i++){
+        	buf += "\t["+plan.get(i)+"] (pc_s="+String.valueOf(i)+") -> (pc_s'="+String.valueOf(i+1)+"); \n";
+        }
+        
+        LinkedList<String> allowed = new LinkedList<String>();
+        for (int i=0; i< plan.size(); i++){
+        	String action = plan.get(i);
+        	String[] e = action.split("_");
+        	if (!Objects.equal(MapTranslator.TACTIC_PREFIX, e[0])) {
+        		allowed.add(plan.get(i));
+        	} 
+        }
+        buf+="\t // Disallowed tactics\n";
+        for (int i=0; i< allTactics.size(); i++){
+        	String action = allTactics.get(i);
+        	if (!plan.contains(action))
+        			buf += "\t[" + action + "] false -> true; \n";
+        }
+        		
+        buf+= "\t // Allowed arcs: "+ String.valueOf(allowed) + "\n";
+        buf+="\t // Disallowed arcs\n";
+        synchronized(m_map) {
+            for (EnvMapArc a : m_map.getArcs()){
+                String str_arc= a.getSource() + MOVE_CMD_STR + a.getTarget();
+                if (!allowed.contains(str_arc)) {
+                    buf += "\t[" + str_arc + "] false -> true; \n";
+                }
+            }
+        }
+        
+        buf += "endmodule\n";
+        return buf;
+    }
+
+    
 
     /**
      * Returns shortest distance between two nodes computed using Dijkstra's Algorithm
@@ -623,32 +671,40 @@ public class MapTranslator {
         return buf;
     }
 
-
     /**
      * Generates the PRISM specification for an adaptation scenario, constrained to a specific path of robot movements
      * @param path List of strings containing the sequence of locations in the path, e.g., ["l1", ..., "l8"]
      * @return String PRISM encoding for constrained adaptation scenario
      */
-    public static String getConstrainedToPathMapTranslation(List path){
+    public static String getConstrainedToPathMapTranslation(List<String> path){
         return getMapTranslation() +"\n\n"+ generatePathConstraintModule(path);
     }
 
+    /**
+     * Generates the PRISM specification for an adaptation scenario, constrained to a specific plan
+     * @param path List of strings containing the sequence of actions for the plan (e.g., ["l1_to_l2", ..., "t_recharge", ..., "l4_to_l5"])
+     * @return String PRISM encoding for constrained adaptation scenario
+     */
+    public static String getConstrainedToPlanMapTranslation(List<String> plan){
+        return getMapTranslation() +"\n\n"+ generatePlanConstraintModule(plan);
+    }
+    
     /**
      * Generates and exports the PRISM specification for an adaptation scenario to a text file
      * @param f String filename to export PRISM specification (constrained to a path)
      * @param path List of strings containing the sequence of locations in the path, e.g., ["l1", ..., "l8"]
      */
-    public static void exportMapTranslation(String f, List path) {
+    public static void exportMapTranslation(String f, List<String> path) {
         exportTranslation(f, getConstrainedToPathMapTranslation(path));
     }
 
     /**
      * Generates and exports the PRISM specification for an adaptation scenario to a text file
-     * @param filename String filename to export PRISM specification (constrained to a policy)
-     * @param policy Prism action sequence
+     * @param f String filename to export PRISM specification (constrained to a plan)
+     * @param plan String list with action sequence (e.g., ["l1_to_l2", ..., "t_recharge", ..., "l4_to_l5"])
      */
-    public static void exportMapTranslation2(String filename, List<String> actionSequence) {
-		// TODO
+    public static void exportConstrainedToPlanMapTranslation(String f, List<String> plan) {
+    	exportTranslation(f, getConstrainedToPlanMapTranslation(plan));
 	}
 
 	/**
@@ -711,7 +767,7 @@ public class MapTranslator {
         setMap(dummyMap);
         System.out.println(getMapTranslation()); // Class test
         //System.out.println();
-        exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp.prism", true);
+       exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp.prism", true);
        // String export_path="/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/";
 
        // Map<List, String> specifications = exportConstrainedTranslationsBetween (export_path, "ls", "l1");

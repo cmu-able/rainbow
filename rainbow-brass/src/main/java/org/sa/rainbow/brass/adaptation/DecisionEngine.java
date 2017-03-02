@@ -123,6 +123,7 @@ public class DecisionEngine {
         init (null);
         
         List<Point2D> coordinates = new ArrayList<Point2D>();
+        PrismPolicy pp=null;
         
         EnvMap dummyMap = new EnvMap (null, null);
         setMap(dummyMap);
@@ -130,7 +131,7 @@ public class DecisionEngine {
 	        generateCandidates("l5", "l1");
 	        scoreCandidates(dummyMap, String.valueOf(i), "1");
 	        System.out.println(String.valueOf(m_scoreboard));	        
-	        PrismPolicy pp = new PrismPolicy(selectPolicy());
+	        pp = new PrismPolicy(selectPolicy());
 	  	  	pp.readPolicy();  
 	  	  	String plan = pp.getPlan().toString();
 	  	    System.out.println(plan);
@@ -142,6 +143,8 @@ public class DecisionEngine {
         for (int j=0; j< coordinates.size(); j++){
         	System.out.println(" ("+String.valueOf(coordinates.get(j).getX())+", "+String.valueOf(coordinates.get(j).getY())+") ");
         }
+        
+        MapTranslator.exportConstrainedToPlanMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp.prism", pp.getPlan());
         
     }
 

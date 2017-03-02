@@ -197,12 +197,12 @@ public class PolicyToIG {
         
        
 //  For testing purposes
-        plan.add("t_set_loc_lo");
-        plan.add("l1_to_l2");
-        plan.add("t_set_loc_hi");
-        plan.add("l2_to_c1");
-
-        System.out.println(String.valueOf(plan));
+//        plan.add("t_set_loc_lo");
+//        plan.add("l1_to_l2");
+//        plan.add("t_set_loc_hi");
+//        plan.add("l2_to_c1");
+//
+//        System.out.println(String.valueOf(plan));
         
         int cmd_id = 1;
         
