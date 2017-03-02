@@ -240,7 +240,7 @@ public class MapTranslator {
      */
     
     private static String getDeltaEnergy(String speed, double distance, String sensing){
-    	return String.valueOf (Math.round (BatteryPredictor.batteryConsumption (speed, sensing, SpeedPredictor.moveForwardTime(distance, speed))));
+    	return String.valueOf (Math.round (BatteryPredictor.batteryConsumption (speed, sensing, SpeedPredictor.moveForwardTimeSimple(distance, speed))));
     }
     
     public static String generateBatteryUpdates(){
@@ -372,8 +372,8 @@ public class MapTranslator {
                 EnvMapArc a = m_map.getArcs().get(i);
                 if (a.isEnabled()) {
                     double t_distance = a.getDistance (); //  float(self.get_transition_attribute_value(t,"distance"))
-                    String t_time_half_speed=f.format(SpeedPredictor.moveForwardTime(t_distance, ROBOT_HALF_SPEED_CONST));
-                    String t_time_full_speed=f.format(SpeedPredictor.moveForwardTime(t_distance, ROBOT_FULL_SPEED_CONST));
+                    String t_time_half_speed=f.format(SpeedPredictor.moveForwardTimeSimple(t_distance, ROBOT_HALF_SPEED_CONST));
+                    String t_time_full_speed=f.format(SpeedPredictor.moveForwardTimeSimple(t_distance, ROBOT_FULL_SPEED_CONST));
                     String action_name = a.getSource()+MOVE_CMD_STR+a.getTarget();
                     buf+="\t["+action_name+"] true :"+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? "+t_time_half_speed+" + "+ROTATION_TIME_FORMULA_PREFIX+action_name+" : "+t_time_full_speed+" + "+ROTATION_TIME_FORMULA_PREFIX + action_name+";\n";
                 }

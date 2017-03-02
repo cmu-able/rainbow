@@ -25,4 +25,18 @@ public class SpeedPredictor {
 		return res;
 	}
 	
+	public static double moveForwardTimeSimple (double distance, String speedSetting){
+		double res=0.0;
+		if (distance<0) {
+			return res;
+		}
+		if (Objects.equals(speedSetting, MapTranslator.ROBOT_HALF_SPEED_CONST)){
+			res = distance / MapTranslator.ROBOT_HALF_SPEED_VALUE;
+		}
+		if (Objects.equals(speedSetting, MapTranslator.ROBOT_FULL_SPEED_CONST)){
+			res = distance / MapTranslator.ROBOT_FULL_SPEED_VALUE;
+		}
+		return res;		
+	}
+	
 }

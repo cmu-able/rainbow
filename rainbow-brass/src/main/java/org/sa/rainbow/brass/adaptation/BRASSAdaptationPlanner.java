@@ -217,7 +217,7 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
                     NewInstructionGraph nig = new NewInstructionGraph (igModel, translator.translate ());
                     double planEstimatedTime = m_de.getSelectedPolicyTime();
                     Date now = new Date ();
-                    Long offset = new Double(planEstimatedTime*1000).longValue();
+                    Long offset = new Double(planEstimatedTime*1000).longValue();  // TODO: Modify this code for the new simulated time to be stored in MissionState
                     Date deadline = new Date();
                     deadline.setTime(now.getTime()+offset); // Set new deadline based on planner time estimation
 
