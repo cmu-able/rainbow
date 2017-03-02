@@ -1,7 +1,5 @@
 package org.sa.rainbow.brass.adaptation;
 
-import java.util.Date;
-
 import org.sa.rainbow.brass.model.mission.MissionCommandFactory;
 import org.sa.rainbow.brass.model.mission.MissionStateModelInstance;
 import org.sa.rainbow.brass.model.mission.SetDeadlineCmd;
@@ -13,10 +11,10 @@ import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.Result;
 public class SetDeadline extends BrassPlan {
 
     private MissionStateModelInstance m_reference;
-    private Date                      m_deadline;
+    private Long                      m_deadline;
     boolean                           m_outcome;
 
-    public SetDeadline (MissionStateModelInstance m, Date d) {
+    public SetDeadline (MissionStateModelInstance m, Long d) {
         m_reference = m;
         m_deadline = d;
     }

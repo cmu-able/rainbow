@@ -1,5 +1,6 @@
 package org.sa.rainbow.brass.model.mission;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.sa.rainbow.core.error.RainbowException;
@@ -7,39 +8,41 @@ import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 
-public class SetDeadlineCmd extends AbstractRainbowModelOperation<Long, MissionState> {
+public class SetCurrentTimeCmd extends AbstractRainbowModelOperation<Double, MissionState> {
 
-    private Long m_date;
+    private double m_time;
 
-    public SetDeadlineCmd (MissionStateModelInstance model, String target, String secondsHence) {
-        super ("setDeadline", model, target, secondsHence);
-        m_date = Long.parseLong (secondsHence);
-
+    public SetCurrentTimeCmd (MissionStateModelInstance model, String target, String wp) {
+        super ("setCurrentTime", model, target, wp);
+        m_time = Double.parseDouble (wp);
     }
 
     @Override
-    public Long getResult () throws IllegalStateException {
-        return m_date;
+    public Double getResult () throws IllegalStateException {
+        return m_time;
     }
 
     @Override
     protected List<? extends IRainbowMessage> getGeneratedEvents (IRainbowMessageFactory messageFactory) {
-        return generateEvents (messageFactory, "setDeadlineCharge");
+        return Collections.<IRainbowMessage> emptyList (); // Let's not send events for this
     }
 
     @Override
     protected void subExecute () throws RainbowException {
-        getModelContext ().getModelInstance ().setDeadline (m_date);
+        getModelContext ().getModelInstance ().setCurrentTime (m_time);
+
     }
 
     @Override
     protected void subRedo () throws RainbowException {
-        subExecute ();
+
+
     }
 
     @Override
     protected void subUndo () throws RainbowException {
-        getModelContext ().getModelInstance ().m_deadlineHistory.pop ();
+        // TODO Auto-generated method stub
+
     }
 
     @Override

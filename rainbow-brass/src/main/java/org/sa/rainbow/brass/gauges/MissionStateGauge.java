@@ -3,6 +3,7 @@ package org.sa.rainbow.brass.gauges;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,10 +21,12 @@ public class MissionStateGauge extends RegularPatternGauge {
     protected static final String LOC         = "LocationRecording";
     protected static final String CHARGE = "BatteryCharge";
     protected static final String DEADLINE = "Deadline";
+    protected static final String CLOCK    = "Clock";
 
     protected static final String LOC_PATTERN = "topic: /amcl_pose/pose/pose.*position.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z.*\\norientation.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z: (.*)\\n.*w: (.*)";
     protected static final String CHARGE_PATTERN = "topic: /energy_monitor/voltage.*\\n.*data: (.*)\\n";
     protected static final String DEADLINE_PATTERN = "topic: /notify_user.*\\n.*new_deadline: (.*)\\n.*user.*";
+    protected static final String CLOCK_PATTERN    = "topic: /clock.*\\n.*secs: ([0-9]*).*nsecs: ([0-9]*).*";
     protected String              last_x;
     protected String              last_y;
     private String                last_w;
@@ -52,6 +55,7 @@ public class MissionStateGauge extends RegularPatternGauge {
         addPattern (LOC, Pattern.compile (LOC_PATTERN, Pattern.DOTALL));
         addPattern (CHARGE, Pattern.compile (CHARGE_PATTERN, Pattern.DOTALL));
         addPattern (DEADLINE, Pattern.compile (DEADLINE_PATTERN, Pattern.DOTALL));
+        addPattern (CLOCK, Pattern.compile (CLOCK_PATTERN, Pattern.DOTALL));
     }
 
     @Override
@@ -92,6 +96,15 @@ public class MissionStateGauge extends RegularPatternGauge {
             IRainbowOperation op = m_commands.get ("deadline");
             Map<String, String> pMap = new HashMap<> ();
             pMap.put (op.getParameters ()[0], date);
+            issueCommand (op, pMap);
+        }
+        else if (CLOCK.equals (matchName)) {
+            long secs = Long.parseLong (m.group (1).trim ());
+            long nsecs = Long.parseLong (m.group (2).trim ());
+            double realSecs = secs + TimeUnit.MILLISECONDS.convert (nsecs, TimeUnit.NANOSECONDS) / 1000.0;
+            IRainbowOperation op = m_commands.get ("clock");
+            Map<String, String> pMap = new HashMap<> ();
+            pMap.put (op.getParameters ()[0], Double.toString (realSecs));
             issueCommand (op, pMap);
         }
     }

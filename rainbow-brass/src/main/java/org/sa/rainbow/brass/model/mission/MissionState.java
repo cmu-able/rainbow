@@ -100,7 +100,7 @@ public class MissionState {
 
     Deque<LocationRecording>     m_locationHistory          = new ArrayDeque<> ();
     Deque<Double>                m_chargeHistory            = new ArrayDeque<> ();
-    Deque<Date>                  m_deadlineHistory          = new ArrayDeque<> ();
+    Deque<Long>              m_deadlineHistory = new ArrayDeque<> ();
 
     private boolean              m_robotObstructed          = false;
     private boolean				 m_robotOnTime				= false;
@@ -176,11 +176,11 @@ public class MissionState {
         return m_chargeHistory.peek ();
     }
 
-    public void setDeadline (Date d) {
+    public void setDeadline (long d) {
         m_deadlineHistory.push (d);
     }
 
-    public Date getDeadline () {
+    public Long getDeadline () {
         return m_deadlineHistory.peek ();
     }
 

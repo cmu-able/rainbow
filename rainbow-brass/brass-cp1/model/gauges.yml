@@ -23,7 +23,8 @@ gauge-types:
     commands:
       location: "MS.setCurrentLocation(double,double,double)"
       charge: "MS.setBatteryCharge(double)"
-      deadline: "MS.setDeadline(string)"
+      deadline: "MS.setDeadline(long)"
+      clock: "MS.setCurrentTime(double)"
     setupParams:
       targetIP:
         type: String
@@ -79,6 +80,7 @@ gauge-instances:
       location: "ms.setCurrentLocation($<x>,$<y>,$<w>)"
       charge: "ms.setBatteryCharge($<c>)"
       deadline: "ms.setDeadline($<d>)"
+      clock: "ms.setCurrentTime($<c>)"
     setupValues:
       targetIP: "${customize.system.target.master}"
     configValues:
@@ -89,7 +91,7 @@ gauge-instances:
     type: BRASSTargetWaypointGaugeT
     model: RobotAndEnvironmentState:MissionState
     commands:
-      target: "ms.setTargetWaypoint($<w>)
+      target: "ms.setTargetWaypoint($<w>)"
     setupValues:
       targetIP: "${customize.system.target.master}"
     configValues:

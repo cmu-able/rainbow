@@ -3,7 +3,6 @@ package org.sa.rainbow.brass.model.mission;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
 
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.IModelInstance;
@@ -33,6 +32,7 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
         m_commandMap.put ("setBatteryCharge".toLowerCase (), SetBatteryChargeCmd.class);
         m_commandMap.put ("setDeadlineCmd".toLowerCase (), SetDeadlineCmd.class);
         m_commandMap.put ("setTargetWaypoint".toLowerCase (), SetTargetWaypointCmd.class);
+        m_commandMap.put ("setCurrentTime".toLowerCase (), SetCurrentTimeCmd.class);
     }
 
     @Override
@@ -64,12 +64,16 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
         return new SetBatteryChargeCmd ((MissionStateModelInstance) m_modelInstance, "", Double.toString (charge));
     }
 
-    public SetDeadlineCmd setDeadlineCmd (Date d) {
+    public SetDeadlineCmd setDeadlineCmd (long d) {
         return new SetDeadlineCmd ((MissionStateModelInstance) m_modelInstance, "",
-                MissionState.BRASS_DATE_FORMAT.format (d));
+                Double.toString (d));
     }
 
     public SetTargetWaypointCmd setTargetWaypointCmd (String t) {
         return new SetTargetWaypointCmd ((MissionStateModelInstance )m_modelInstance, "", t);
+    }
+
+    public SetCurrentTimeCmd setCurrentTime (double t) {
+        return new SetCurrentTimeCmd ((MissionStateModelInstance )m_modelInstance, "", Double.toString (t));
     }
 }
