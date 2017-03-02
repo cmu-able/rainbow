@@ -106,6 +106,7 @@ public class MissionState {
     private boolean				 m_robotOnTime				= false;
     private String  m_targetWaypoint  = "";
 
+    private double m_currentTime = 0;
 
     public MissionState (ModelReference model) {
         m_model = model;
@@ -191,6 +192,13 @@ public class MissionState {
         return m_targetWaypoint;
     }
 
+    public double getCurrentTime () {
+        return m_currentTime;
+    }
+
+    public void setCurrentTime (double time) {
+        m_currentTime = time;
+    }
     /**
      * 
      * @return True iff the robot encounters (or expects to encounter) problems
