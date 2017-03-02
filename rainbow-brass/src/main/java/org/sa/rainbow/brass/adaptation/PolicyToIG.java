@@ -87,16 +87,18 @@ public class PolicyToIG {
         if (Objects.equals(name, "t_set_loc_med")){
         	cmd = "SetLocalizationFidelity" + "("+MapTranslator.ROBOT_LOC_MODE_MED_VAL+")";
         	if (Objects.equals(m_current_loc_mode, MapTranslator.ROBOT_LOC_MODE_LO_CONST)){
+        		cmd = "Locate("+f.format(m_location_x)+", "+f.format(m_location_y)+", "+f2.format(m_theta)+")";
         		m_insert_additional_command = true;
-        		m_command_insert = "Locate("+f.format(m_location_x)+", "+f.format(m_location_y)+", "+f2.format(m_theta)+")";
+        		m_command_insert = "SetLocalizationFidelity" + "("+MapTranslator.ROBOT_LOC_MODE_MED_VAL+")";
         	}
         	m_current_loc_mode = MapTranslator.ROBOT_LOC_MODE_MED_CONST;
         }
         if (Objects.equals(name, "t_set_loc_hi")){
         	cmd = "SetLocalizationFidelity" + "("+MapTranslator.ROBOT_LOC_MODE_HI_VAL+")";
         	if (Objects.equals(m_current_loc_mode, MapTranslator.ROBOT_LOC_MODE_LO_CONST)){
+        		cmd = "Locate("+f.format(m_location_x)+", "+f.format(m_location_y)+", "+f2.format(m_theta)+")";
         		m_insert_additional_command = true;
-        		m_command_insert = "Locate("+f.format(m_location_x)+", "+f.format(m_location_y)+", "+f2.format(m_theta)+")";
+        		m_command_insert = "SetLocalizationFidelity" + "("+MapTranslator.ROBOT_LOC_MODE_HI_VAL+")";
       	}
         	m_current_loc_mode = MapTranslator.ROBOT_LOC_MODE_HI_CONST;
         }
@@ -195,12 +197,12 @@ public class PolicyToIG {
         
        
 //  For testing purposes
-//        plan.add("t_set_loc_lo");
-//        plan.add("l1_to_l2");
-//        plan.add("t_set_loc_hi");
-//        plan.add("l2_to_c1");
-//
-//        System.out.println(String.valueOf(plan));
+        plan.add("t_set_loc_lo");
+        plan.add("l1_to_l2");
+        plan.add("t_set_loc_hi");
+        plan.add("l2_to_c1");
+
+        System.out.println(String.valueOf(plan));
         
         int cmd_id = 1;
         
