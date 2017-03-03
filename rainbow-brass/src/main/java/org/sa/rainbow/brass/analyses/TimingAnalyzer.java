@@ -24,26 +24,57 @@ import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.analysis.IRainbowAnalysis;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.ModelReference;
+import org.sa.rainbow.core.ports.IModelChangeBusPort;
+import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
 import org.sa.rainbow.core.ports.IModelUSBusPort;
 import org.sa.rainbow.core.ports.IModelsManagerPort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
+import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowChangeBusSubscription;
+import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowModelChangeCallback;
 
 /**
  * Analyzes timing property of the current plan, and triggers adaptation if necessary.
  * @author rsukkerd
  *
  */
-public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowAnalysis {
+public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowAnalysis, IRainbowModelChangeCallback {
 
     private static final long DEADLINE_EARLY_BUFFER = 20L; // seconds //TODO
     private static final long DEADLINE_LATE_BUFFER = 10L; // seconds //TODO
     private static final String TMP_MODEL_FILENAME = "timing_analyzer/prismtmp.prism";
 
     public static final String NAME = "BRASS Timing Evaluator";
-    private IModelsManagerPort	m_modelsManagerPort;
-    private IModelUSBusPort		m_modelUSPort;
+    
+    private IModelChangeBusSubscriberPort		m_modelChangePort;
+    private IModelsManagerPort					m_modelsManagerPort;
+    private IModelUSBusPort						m_modelUSPort;
+    
+    private IRainbowChangeBusSubscription m_newIGAvailable = new IRainbowChangeBusSubscription() {
+		
+		@Override
+		public boolean matches(IRainbowMessage message) {
+			String modelName = (String) message.getProperty (
+                    IModelChangeBusPort.MODEL_NAME_PROP);
+            String modelType = (String) message.getProperty (
+                    IModelChangeBusPort.MODEL_TYPE_PROP);
+            String commandName = (String) message.getProperty (
+                    IModelChangeBusPort.COMMAND_PROP);
+
+            //TODO
+            return MissionStateModelInstance.MISSION_STATE_TYPE
+                    .equals (modelType)
+                    && "RobotAndEnvironmentState"
+                    .equals (modelName)
+                    && "setRobotObstructed"
+                    .equals (commandName);
+		}
+	};
+	
+	// If adaptation planning is in progress, this analyzer will wait for it to finish
+	private boolean m_waitForPlanner = false;
 
     private ModelReference m_igRef = new ModelReference("ExecutingInstructionGraph", InstructionGraphModelInstance.INSTRUCTION_GRAPH_TYPE);
     private ModelReference m_msRef = new ModelReference("RobotAndEnvironmentState", MissionStateModelInstance.MISSION_STATE_TYPE);
@@ -74,7 +105,8 @@ public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowA
 
     private void initializeConnections () throws RainbowConnectionException {
         // Create a port to subscribe to model changes (if analyzer is event based)
-        // m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort ();
+        m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort ();
+        m_modelChangePort.subscribe (m_newIGAvailable, this);
 
         // Create a port to query things about a model
         m_modelsManagerPort = RainbowPortFactory.createModelsManagerRequirerPort ();
@@ -105,47 +137,63 @@ public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowA
     }
 
     @Override
+	public void onEvent(ModelReference mr, IRainbowMessage message) {
+    	synchronized (this) {
+    		//TODO
+            Boolean obstructed = Boolean
+                    .parseBoolean ((String) message.getProperty (IModelChangeBusPort.PARAMETER_PROP + "0"));
+            m_waitForPlanner = false;
+        }
+	}
+
+	@Override
     protected void log(String text) {
         m_reportingPort.info (RainbowComponentT.ANALYSIS, text);
     }
 
     @Override
     protected void runAction() {
-        // Do the periodic analysis on the models of interest
-        updateIGProgress();
-        updateMissionState();
-        updateEnvMap();
-
-        if (m_igProgress != null && m_missionState != null && m_envMap != null) {
-            // The current instruction
-            IInstruction currentInstruction = m_igProgress.getCurrentInstruction();
-
-            // Only performing timing analysis once per instruction
-            if (isNewInstruction(currentInstruction)) {
-
-                if (m_missionState != null) {
-                    long deadline = m_missionState.getDeadline();
-                    long deadlineLowerBound = deadline - DEADLINE_EARLY_BUFFER;
-                    long deadlineUpperBound = deadline + DEADLINE_LATE_BUFFER;
-
-                    // The remaining instructions, excluding the current instruction
-                    List<IInstruction> remainingInstructions = (List<IInstruction>) m_igProgress.getRemainingInstructions();
-
-                    boolean isOnTime = isOnTime(deadlineLowerBound, deadlineUpperBound, currentInstruction, remainingInstructions);
-
-                    if (!isOnTime) {
-                        // Update MissionState model to indicate that the robot is NOT expected be on time
-                        MissionStateModelInstance missionStateModel = (MissionStateModelInstance) m_modelsManagerPort
-                                .<MissionState> getModelInstance(m_msRef);
-                        SetRobotOnTimeCmd robotOnTimeCmd = missionStateModel.getCommandFactory().setRobotOnTimeCmd(isOnTime);
-                        m_modelUSPort.updateModel (robotOnTimeCmd);
-                    }
-
-                    // Keep track of the latest instruction that we have analyzed the timing property
-                    m_prevAnalyzedInstruction = currentInstruction;
-                }
-            }
-        }
+    	// If adaptation planning is in progress, wait for it to finish before performing analysis
+    	if (!m_waitForPlanner) {
+	        // Do the periodic analysis on the models of interest
+	        updateIGProgress();
+	        updateMissionState();
+	        updateEnvMap();
+	
+	        if (m_igProgress != null && m_missionState != null && m_envMap != null) {
+	            // The current instruction
+	            IInstruction currentInstruction = m_igProgress.getCurrentInstruction();
+	
+	            // Only performing timing analysis once per instruction
+	            if (isNewInstruction(currentInstruction)) {
+	
+	                if (m_missionState != null) {
+	                    long deadline = m_missionState.getDeadline();
+	                    long deadlineLowerBound = deadline - DEADLINE_EARLY_BUFFER;
+	                    long deadlineUpperBound = deadline + DEADLINE_LATE_BUFFER;
+	
+	                    // The remaining instructions, excluding the current instruction
+	                    List<IInstruction> remainingInstructions = (List<IInstruction>) m_igProgress.getRemainingInstructions();
+	
+	                    boolean isOnTime = isOnTime(deadlineLowerBound, deadlineUpperBound, currentInstruction, remainingInstructions);
+	
+	                    if (!isOnTime) {
+	                        // Update MissionState model to indicate that the robot is NOT expected be on time
+	                        MissionStateModelInstance missionStateModel = (MissionStateModelInstance) m_modelsManagerPort
+	                                .<MissionState> getModelInstance(m_msRef);
+	                        SetRobotOnTimeCmd robotOnTimeCmd = missionStateModel.getCommandFactory().setRobotOnTimeCmd(isOnTime);
+	                        m_modelUSPort.updateModel (robotOnTimeCmd);
+	                        
+	                        // Wait for the planner to come up with an adaptation plan
+	                        m_waitForPlanner = true;
+	                    }
+	
+	                    // Keep track of the latest instruction that we have analyzed the timing property
+	                    m_prevAnalyzedInstruction = currentInstruction;
+	                }
+	            }
+	        }
+    	}
     }
 
     private void updateIGProgress() {
