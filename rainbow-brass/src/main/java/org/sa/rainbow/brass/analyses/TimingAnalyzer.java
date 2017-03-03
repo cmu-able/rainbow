@@ -52,7 +52,7 @@ public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowA
     private IModelsManagerPort					m_modelsManagerPort;
     private IModelUSBusPort						m_modelUSPort;
     
-    private IRainbowChangeBusSubscription m_newIGAvailable = new IRainbowChangeBusSubscription() {
+    private IRainbowChangeBusSubscription m_plannerFinish = new IRainbowChangeBusSubscription() {
 		
 		@Override
 		public boolean matches(IRainbowMessage message) {
@@ -106,7 +106,7 @@ public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowA
     private void initializeConnections () throws RainbowConnectionException {
         // Create a port to subscribe to model changes (if analyzer is event based)
         m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort ();
-        m_modelChangePort.subscribe (m_newIGAvailable, this);
+        m_modelChangePort.subscribe (m_plannerFinish, this);
 
         // Create a port to query things about a model
         m_modelsManagerPort = RainbowPortFactory.createModelsManagerRequirerPort ();
@@ -119,6 +119,7 @@ public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowA
     public void dispose() {
         m_reportingPort.dispose ();
         m_modelUSPort.dispose ();
+        m_modelChangePort.dispose ();
     }
 
     @Override
@@ -305,7 +306,7 @@ public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowA
 			double targetY = moveAbsH.getTargetY();
 			double targetW = moveAbsH.getTargetW();
 			double moveSpeed = moveAbsH.getSpeed();
-			double rotateSpeed = 1; //TODO
+			double rotateSpeed = MapTranslator.ROBOT_ROTATIONAL_SPEED_VALUE;
 			double remainingManhattanDistance = Math.abs(currentX - targetX) + Math.abs(currentY - targetY);
 			double moveTime = remainingManhattanDistance / moveSpeed;
 			double rotateTime = Math.abs(currentW - targetW) / rotateSpeed;
