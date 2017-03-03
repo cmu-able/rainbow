@@ -59,14 +59,13 @@ public class AccuracyAnalyzer extends AbstractRainbowRunnable implements IRainbo
                     IModelChangeBusPort.MODEL_TYPE_PROP);
             String commandName = (String) message.getProperty (
                     IModelChangeBusPort.COMMAND_PROP);
-
-            //TODO
-            return MissionStateModelInstance.MISSION_STATE_TYPE
-                    .equals (modelType)
-                    && "RobotAndEnvironmentState"
-                    .equals (modelName)
-                    && "setRobotObstructed"
-                    .equals (commandName);
+            
+            // New IG event
+            boolean isNewIGEvent = InstructionGraphModelInstance.INSTRUCTION_GRAPH_TYPE.equals(modelType) 
+            		&& "ExecutingInstructionGraph".equals (modelName)
+            		&& "setInstructions".equals (commandName);
+            
+            return isNewIGEvent;
 		}
 	};
 	
@@ -122,9 +121,8 @@ public class AccuracyAnalyzer extends AbstractRainbowRunnable implements IRainbo
 	@Override
 	public void onEvent(ModelReference mr, IRainbowMessage message) {
 		synchronized (this) {
-    		//TODO
-            Boolean obstructed = Boolean
-                    .parseBoolean ((String) message.getProperty (IModelChangeBusPort.PARAMETER_PROP + "0"));
+			// Either a new deadline or a new IG has been set (or both)
+    		// Timing analyzer can resume periodic analysis
             m_waitForPlanner = false;
         }
 	}
