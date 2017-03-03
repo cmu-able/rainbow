@@ -84,8 +84,8 @@ public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowA
     private MissionState m_missionState;
     private EnvMap m_envMap;
 
-    // Keep track of the previously-analyzed instruction
-    private IInstruction m_prevAnalyzedInstruction;
+    // Keep track of the previously-analyzed instruction, which passed
+    private IInstruction m_prevAnalyzedAndPassedInstruction;
 
     public TimingAnalyzer() {
         super(NAME);
@@ -166,7 +166,7 @@ public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowA
 	            IInstruction currentInstruction = m_igProgress.getCurrentInstruction();
 	
 	            // Only performing timing analysis once per instruction
-	            if (isNewInstruction(currentInstruction)) {
+	            if (isNewOrUnpassedInstruction(currentInstruction)) {
 	
 	                if (m_missionState != null) {
 	                    long deadline = m_missionState.getDeadline();
@@ -177,20 +177,30 @@ public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowA
 	                    List<IInstruction> remainingInstructions = (List<IInstruction>) m_igProgress.getRemainingInstructions();
 	
 	                    boolean isOnTime = isOnTime(deadlineLowerBound, deadlineUpperBound, currentInstruction, remainingInstructions);
-	
-	                    if (!isOnTime) {
+	                    
+	                    if (isOnTime) {
+	                    	// Keep track of the latest instruction that we have analyzed the timing property,
+	                    	// and it passed
+		                    m_prevAnalyzedAndPassedInstruction = currentInstruction;
+	                    } 
+	                    
+	                    if (isOnTime && !m_missionState.isRobotOnTime()) {
+	                    	// Previous plan was not on time; new plan is expected to be on time
+	                    	// Update MissionState model to indicate that the robot is now expected be on time
+	                        MissionStateModelInstance missionStateModel = (MissionStateModelInstance) m_modelsManagerPort
+	                                .<MissionState> getModelInstance(m_msRef);
+	                        SetRobotOnTimeCmd robotOnTimeCmd = missionStateModel.getCommandFactory().setRobotOnTimeCmd(true);
+	                        m_modelUSPort.updateModel (robotOnTimeCmd);
+	                    } else if (!isOnTime) {
 	                        // Update MissionState model to indicate that the robot is NOT expected be on time
 	                        MissionStateModelInstance missionStateModel = (MissionStateModelInstance) m_modelsManagerPort
 	                                .<MissionState> getModelInstance(m_msRef);
-	                        SetRobotOnTimeCmd robotOnTimeCmd = missionStateModel.getCommandFactory().setRobotOnTimeCmd(isOnTime);
+	                        SetRobotOnTimeCmd robotOnTimeCmd = missionStateModel.getCommandFactory().setRobotOnTimeCmd(false);
 	                        m_modelUSPort.updateModel (robotOnTimeCmd);
 	                        
 	                        // Wait for the planner to come up with an adaptation plan
 	                        m_waitForPlanner = true;
-	                    }
-	
-	                    // Keep track of the latest instruction that we have analyzed the timing property
-	                    m_prevAnalyzedInstruction = currentInstruction;
+	                    } 
 	                }
 	            }
 	        }
@@ -215,11 +225,12 @@ public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowA
     }
 
     /**
-     * Checks if this instruction is different from the previously-analyzed instruction
+     * Checks if this instruction is different from the previously-analyzed instruction,
+     * or if this instruction has not passed the timing check previously
      */
-    private boolean isNewInstruction(IInstruction instruction) {
-        return (m_prevAnalyzedInstruction == null && instruction != null)
-                || (instruction != null && !instruction.equals (m_prevAnalyzedInstruction));
+    private boolean isNewOrUnpassedInstruction(IInstruction instruction) {
+        return (m_prevAnalyzedAndPassedInstruction == null && instruction != null)
+                || (instruction != null && !instruction.equals (m_prevAnalyzedAndPassedInstruction));
     }
 
     /**

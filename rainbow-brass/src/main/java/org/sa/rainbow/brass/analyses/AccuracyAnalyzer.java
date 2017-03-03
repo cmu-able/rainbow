@@ -16,6 +16,7 @@ import org.sa.rainbow.brass.model.mission.MissionState;
 import org.sa.rainbow.brass.model.mission.MissionState.Heading;
 import org.sa.rainbow.brass.model.mission.MissionStateModelInstance;
 import org.sa.rainbow.brass.model.mission.SetRobotAccurateCmd;
+import org.sa.rainbow.brass.model.mission.SetRobotOnTimeCmd;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.IRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
@@ -73,8 +74,8 @@ public class AccuracyAnalyzer extends AbstractRainbowRunnable implements IRainbo
 	// If adaptation planning is in progress, this analyzer will wait for it to finish
 	private boolean m_waitForPlanner = false;
 	
-	// Keep track of the previously-analyzed instruction
-    private IInstruction m_prevAnalyzedInstruction;
+	// Keep track of the previously-analyzed instruction, which passed
+    private IInstruction m_prevAnalyzedAndPassedInstruction;
 
     private ModelReference m_igRef = new ModelReference("ExecutingInstructionGraph", InstructionGraphModelInstance.INSTRUCTION_GRAPH_TYPE);
     private ModelReference m_msRef = new ModelReference("RobotAndEnvironmentState", MissionStateModelInstance.MISSION_STATE_TYPE);
@@ -163,7 +164,7 @@ public class AccuracyAnalyzer extends AbstractRainbowRunnable implements IRainbo
 	            IInstruction currentInstruction = m_igProgress.getCurrentInstruction();
 	
 	            // Only performing timing analysis once per instruction
-	            if (isNewInstruction(currentInstruction)) {
+	            if (isNewOrUnpassedInstruction(currentInstruction)) {
 	
 	                if (m_missionState != null) {
 	                    // The remaining instructions, excluding the current instruction
@@ -171,19 +172,29 @@ public class AccuracyAnalyzer extends AbstractRainbowRunnable implements IRainbo
 	                    
 	                    boolean hasEnoughEnergy = hasEnoughEnergy(currentInstruction, remainingInstructions);
 	                    
-	                    if (!hasEnoughEnergy) {
+	                    if (hasEnoughEnergy) {
+	                    	// Keep track of the latest instruction that we have analyzed the accuracy property,
+	                    	// and it passed
+		                    m_prevAnalyzedAndPassedInstruction = currentInstruction;
+	                    }
+	                    
+	                    if (hasEnoughEnergy && !m_missionState.isRobotAccurate()) {
+	                    	// Previous plan was not accurate; new plan is expected to be accurate
+	                    	// Update MissionState model to indicate that the robot can now get close enough to the goal
+	                        MissionStateModelInstance missionStateModel = (MissionStateModelInstance) m_modelsManagerPort
+	                                .<MissionState> getModelInstance(m_msRef);
+	                        SetRobotAccurateCmd robotAccurateCmd = missionStateModel.getCommandFactory().setRobotAccurateCmd(true);
+	                        m_modelUSPort.updateModel (robotAccurateCmd);
+	                    } else if (!hasEnoughEnergy) {
 	                    	// Update MissionState model to indicate that the robot cannot get close enough to the goal
 	                        MissionStateModelInstance missionStateModel = (MissionStateModelInstance) m_modelsManagerPort
 	                                .<MissionState> getModelInstance(m_msRef);
-	                        SetRobotAccurateCmd robotAccurateCmd = missionStateModel.getCommandFactory().setRobotAccurateCmd(hasEnoughEnergy);
+	                        SetRobotAccurateCmd robotAccurateCmd = missionStateModel.getCommandFactory().setRobotAccurateCmd(false);
 	                        m_modelUSPort.updateModel (robotAccurateCmd);
 	                        
 	                        // Wait for the planner to come up with an adaptation plan
 	                        m_waitForPlanner = true;
 	                    }
-	                    
-	                    // Keep track of the latest instruction that we have analyzed the timing property
-	                    m_prevAnalyzedInstruction = currentInstruction;
 	                }
 	            }
 	        }
@@ -208,11 +219,12 @@ public class AccuracyAnalyzer extends AbstractRainbowRunnable implements IRainbo
     }
     
     /**
-     * Checks if this instruction is different from the previously-analyzed instruction
+     * Checks if this instruction is different from the previously-analyzed instruction,
+     * or if this instruction has not passed the timing check previously
      */
-    private boolean isNewInstruction(IInstruction instruction) {
-        return (m_prevAnalyzedInstruction == null && instruction != null)
-                || (instruction != null && !instruction.equals (m_prevAnalyzedInstruction));
+    private boolean isNewOrUnpassedInstruction(IInstruction instruction) {
+        return (m_prevAnalyzedAndPassedInstruction == null && instruction != null)
+                || (instruction != null && !instruction.equals (m_prevAnalyzedAndPassedInstruction));
     }
     
     /**
