@@ -34,6 +34,9 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
         m_commandMap.put ("setDeadlineCmd".toLowerCase (), SetDeadlineCmd.class);
         m_commandMap.put ("setTargetWaypoint".toLowerCase (), SetTargetWaypointCmd.class);
         m_commandMap.put ("setCurrentTime".toLowerCase (), SetCurrentTimeCmd.class);
+        m_commandMap.put ("setGroundPlanError".toLowerCase (), SetGroundPlaneErrorCmd.class);
+        m_commandMap.put ("setCalibrationError".toLowerCase (), SetCalibrationErrorCmd.class);
+        m_commandMap.put ("recalibrate", RecalibrateCmd.class);
     }
 
     @Override
@@ -60,7 +63,7 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
         return new SetRobotOnTimeCmd ((MissionStateModelInstance) m_modelInstance, "",
                 Boolean.toString (robotOnTime));
     }
-    
+
     public SetRobotAccurateCmd setRobotAccurateCmd (boolean robotAccurate) {
         return new SetRobotAccurateCmd ((MissionStateModelInstance) m_modelInstance, "",
                 Boolean.toString (robotAccurate));
@@ -79,7 +82,21 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
         return new SetTargetWaypointCmd ((MissionStateModelInstance )m_modelInstance, "", t);
     }
 
-    public SetCurrentTimeCmd setCurrentTime (double t) {
+    public SetCurrentTimeCmd setCurrentTimeCmd (double t) {
         return new SetCurrentTimeCmd ((MissionStateModelInstance )m_modelInstance, "", Double.toString (t));
+    }
+
+    public SetGroundPlaneErrorCmd setGroundPlaneErrorCmd (double t, double r) {
+        return new SetGroundPlaneErrorCmd ((MissionStateModelInstance )m_modelInstance, "", Double.toString (t),
+                Double.toString (r));
+    }
+
+    public SetCalibrationErrorCmd setCalibrationError (double r, double r_scale, double t, double t_scale, double v) {
+        return new SetCalibrationErrorCmd ((MissionStateModelInstance )m_modelInstance, "", Double.toString (r),
+                Double.toString (r_scale), Double.toString (t), Double.toString (t_scale), Double.toString (v));
+    }
+
+    public RecalibrateCmd recalibrate (boolean bad) {
+        return new RecalibrateCmd ((MissionStateModelInstance )m_modelInstance, "", Boolean.toString (bad));
     }
 }

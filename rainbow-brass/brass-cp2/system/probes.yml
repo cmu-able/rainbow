@@ -1,0 +1,21 @@
+#
+# Probe descriptions for the BRASS test system
+#
+
+vars:
+
+
+probes:
+  ROSTopicProbe:
+    # Probe to report the topic information to gauges. The information is reported
+    # as YAML fragments of the messages published on ROS
+    alias: rostopicprobe
+    location: "${customize.system.target.ros}"
+    type: java
+    javaInfo:
+      class: org.sa.rainbow.brass.probes.BRASSRosTopicProbe
+      period: 2000
+      args.length: 2
+      args.0: "${rainbow.path}/system/probes/rostopicprobe.sh"
+      args.1: "/amcl_pose/pose/pose:1 /ig_action_server/feedback/feedback/sequence /calibration_ground_plane_error:1 /calibration/calibration_error"
+

@@ -2,8 +2,11 @@ package org.sa.rainbow.brass.model.mission;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Deque;
+import java.util.List;
 import java.util.TimeZone;
 
 import org.sa.rainbow.core.models.ModelReference;
@@ -89,8 +92,10 @@ public class MissionState {
         }
     }
 
+
     private final ModelReference m_model;
 
+    //private List<String>         m_instructionHistory       = new ArrayList<> ();
     private Deque<Long>          m_predictedTimeHistory     = new ArrayDeque<> ();
     private Deque<Long>          m_predictedAccuracyHistory = new ArrayDeque<> ();
     private Deque<Double>        m_timeScore                = new ArrayDeque<> ();
@@ -99,12 +104,12 @@ public class MissionState {
 
     Deque<LocationRecording>     m_locationHistory          = new ArrayDeque<> ();
     Deque<Double>                m_chargeHistory            = new ArrayDeque<> ();
-    Deque<Long>					 m_deadlineHistory			= new ArrayDeque<> ();
+    Deque<Long>              m_deadlineHistory = new ArrayDeque<> ();
 
     private boolean              m_robotObstructed          = false;
     private boolean				 m_robotOnTime				= false;
     private boolean				 m_robotAccurate			= false;
-    private String				 m_targetWaypoint			= "";
+    private String  m_targetWaypoint  = "";
 
     private double m_currentTime = 0;
 
@@ -123,17 +128,23 @@ public class MissionState {
         l.m_w = w;
         l.m_heading = Heading.convertFromRadians (w);
         l.m_time = new Date ().getTime ();
-        m_locationHistory.push (l);
+        synchronized (m_locationHistory) {
+            m_locationHistory.push (l);
+        }
     }
 
     public LocationRecording getCurrentPose () {
         if (m_locationHistory.isEmpty ()) return null;
-        return m_locationHistory.peek ().copy ();
+        synchronized (m_locationHistory) {
+            return m_locationHistory.peek ().copy ();
+        }
     }
 
     public LocationRecording getInitialPose () {
-        if (m_locationHistory.isEmpty ()) return null;
-        return m_locationHistory.getLast ().copy ();
+        synchronized (m_locationHistory) {
+            if (m_locationHistory.isEmpty ()) return null;
+            return m_locationHistory.getLast ().copy ();
+        }
     }
 
     public void setRobotObstructed (boolean robotObstructed) {
@@ -151,7 +162,7 @@ public class MissionState {
     public boolean isRobotOnTime () {
         return m_robotOnTime;
     }
-    
+
     public void setRobotAccurate (boolean isAccurate) {
     	m_robotAccurate = isAccurate;
     }
@@ -161,19 +172,30 @@ public class MissionState {
     }
 
     public void setBatteryCharge (Double charge) {
-        m_chargeHistory.push (charge);
+        synchronized (m_chargeHistory) {
+            m_chargeHistory.push (charge);
+        }
     }
 
     public Double getBatteryCharge () {
-        return m_chargeHistory.peek ();
+        synchronized (m_chargeHistory) {
+
+            return m_chargeHistory.peek ();
+        }
     }
 
     public void setDeadline (long d) {
-        m_deadlineHistory.push (d);
+        synchronized (m_deadlineHistory) {
+
+            m_deadlineHistory.push (d);
+        }
     }
 
     public Long getDeadline () {
-        return m_deadlineHistory.peek ();
+        synchronized (m_deadlineHistory) {
+
+            return m_deadlineHistory.peek ();
+        }
     }
 
     public void setTargetWaypoint (String waypoint) {
@@ -191,12 +213,27 @@ public class MissionState {
     public void setCurrentTime (double time) {
         m_currentTime = time;
     }
+
+//    public double getSpeed() {
+//        LocationRecording recent, next;
+//        synchronized (m_locationHistory) {
+//            if (m_locationHistory.size () > 2) {
+//                recent = m_locationHistory.pop ();
+//                next = m_locationHistory.pop ();
+//                m_locationHistory.push (next);
+//                m_locationHistory.push (recent);
+//            }
+//            else return 0;
+//        }
+//        double dist = Math.sqrt ()
+//        
+//    }
     /**
      * 
      * @return True iff the robot encounters (or expects to encounter) problems
      */
     public boolean isAdaptationNeeded () {
-        return isRobotObstructed() || !isRobotOnTime() || !isRobotAccurate();
+        return isRobotObstructed () || !isRobotOnTime () || !isRobotAccurate () || isBadlyCalibrated ();
     }
 
     public MissionState copy () {
@@ -205,6 +242,75 @@ public class MissionState {
         s.m_chargeHistory = new ArrayDeque<> (m_chargeHistory);
         s.m_deadlineHistory = new ArrayDeque<> (m_deadlineHistory);
         return s;
+    }
+
+    // Below are for challenge problem 2
+
+    public static class GroundPlaneError {
+        public double translational_error;
+        public double rotational_error;
+    }
+
+    public static class CalibrationError {
+        public double rotational_error;
+        public double rotational_scale;
+        public double translational_error;
+        public double translational_scale;
+        public double velocity_at_time_of_error;
+    }
+
+    Deque<GroundPlaneError> m_groundPlaneErrorHistory  = new ArrayDeque<> ();
+    Deque<CalibrationError> m_calibarationErrorHistory = new ArrayDeque<> ();
+    private boolean         m_isBadlyCalibrated        = false;
+
+    public List<GroundPlaneError> getGroundPlaneSample (int sampleSize) {
+        if (m_groundPlaneErrorHistory.size () < sampleSize) return Collections.<GroundPlaneError> emptyList ();
+        List<GroundPlaneError> ret = new ArrayList<> (sampleSize);
+        synchronized (m_groundPlaneErrorHistory) {
+            for (int i = 0; i < sampleSize; i++) {
+                ret.add (m_groundPlaneErrorHistory.pop ());
+            }
+            // Now put them back
+            for (int i = ret.size (); i > 0; i--) {
+                m_groundPlaneErrorHistory.push (ret.get (i));
+            }
+        }
+        return ret;
+    }
+
+    public boolean isBadlyCalibrated () {
+        return m_isBadlyCalibrated;
+    }
+
+    public void setBadlyCalibrated (boolean bad) {
+        m_isBadlyCalibrated = false;
+    }
+
+    public void addGroundPlaneSample (GroundPlaneError error) {
+        synchronized (m_groundPlaneErrorHistory) {
+            m_groundPlaneErrorHistory.push (error);
+        }
+    }
+
+    public void addCalibrationErrorSample (CalibrationError c) {
+        synchronized (m_calibarationErrorHistory) {
+            m_calibarationErrorHistory.push (c);
+        }
+    }
+
+    public List<CalibrationError> getCallibrationErrorSample (int sampleSize) {
+        if (m_calibarationErrorHistory.size () < sampleSize) return Collections.<CalibrationError> emptyList ();
+        List<CalibrationError> ret = new ArrayList<> ();
+        synchronized (m_calibarationErrorHistory) {
+            for (int i = 0; i < sampleSize; i++) {
+                ret.add (m_calibarationErrorHistory.pop ());
+            }
+            // Now put them back
+            for (int i = ret.size (); i > 0; i--) {
+                m_calibarationErrorHistory.push (ret.get (i));
+            }
+        }
+        return ret;
     }
 
 }

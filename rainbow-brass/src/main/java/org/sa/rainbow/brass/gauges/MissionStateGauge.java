@@ -22,11 +22,15 @@ public class MissionStateGauge extends RegularPatternGauge {
     protected static final String CHARGE = "BatteryCharge";
     protected static final String DEADLINE = "Deadline";
     protected static final String CLOCK    = "Clock";
+    protected static final String GROUNDPLANE       = "GroundPlane";
+    protected static final String CALIBRATION_ERROR = "Calibration";
 
     protected static final String LOC_PATTERN = "topic: /amcl_pose/pose/pose.*position.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z.*\\norientation.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z: (.*)\\n.*w: (.*)";
     protected static final String CHARGE_PATTERN = "topic: /energy_monitor/voltage.*\\n.*data: (.*)\\n";
     protected static final String DEADLINE_PATTERN = "topic: /notify_user.*\\n.*new_deadline: (.*)\\n.*user.*";
     protected static final String CLOCK_PATTERN    = "topic: /clock.*\\n.*secs: ([0-9]*).*nsecs: ([0-9]*).*";
+    private static final String   GROUND_PATTERN      = "topic: /calibration/ground_plane_error.*\\n.*data: \\[(.*)\\].*";
+    private static final String   CALIBRATION_PATTERN = "topic: /calibration/calibration_error.*\n.*data: \\[(.*)\\].*";
     protected String              last_x;
     protected String              last_y;
     private String                last_w;
@@ -56,6 +60,8 @@ public class MissionStateGauge extends RegularPatternGauge {
         addPattern (CHARGE, Pattern.compile (CHARGE_PATTERN, Pattern.DOTALL));
         addPattern (DEADLINE, Pattern.compile (DEADLINE_PATTERN, Pattern.DOTALL));
         addPattern (CLOCK, Pattern.compile (CLOCK_PATTERN, Pattern.DOTALL));
+        addPattern (GROUNDPLANE, Pattern.compile (GROUND_PATTERN, Pattern.DOTALL));
+        addPattern (CALIBRATION_ERROR, Pattern.compile (CALIBRATION_PATTERN, Pattern.DOTALL));
     }
 
     @Override
@@ -105,6 +111,25 @@ public class MissionStateGauge extends RegularPatternGauge {
             IRainbowOperation op = m_commands.get ("clock");
             Map<String, String> pMap = new HashMap<> ();
             pMap.put (op.getParameters ()[0], Double.toString (realSecs));
+            issueCommand (op, pMap);
+        }
+        else if (GROUNDPLANE.equals (matchName)) {
+            String[] vals = m.group (1).split (",");
+            IRainbowOperation op = m_commands.get ("ground-plane");
+            Map<String, String> pMap = new HashMap<> ();
+            pMap.put (op.getParameters ()[0], vals[0]);
+            pMap.put (op.getParameters ()[1], vals[1]);
+            issueCommand (op, pMap);
+        }
+        else if (CALIBRATION_ERROR.equals (matchName)) {
+            String[] vals = m.group (1).split (",");
+            IRainbowOperation op = m_commands.get ("calibration");
+            Map<String, String> pMap = new HashMap<> ();
+            pMap.put (op.getParameters ()[0], vals[0]);
+            pMap.put (op.getParameters ()[1], vals[1]);
+            pMap.put (op.getParameters ()[2], vals[2]);
+            pMap.put (op.getParameters ()[3], vals[3]);
+            pMap.put (op.getParameters ()[4], vals[4]);
             issueCommand (op, pMap);
         }
     }
