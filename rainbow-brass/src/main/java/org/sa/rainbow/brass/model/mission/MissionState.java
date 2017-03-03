@@ -103,6 +103,7 @@ public class MissionState {
 
     private boolean              m_robotObstructed          = false;
     private boolean				 m_robotOnTime				= false;
+    private boolean				 m_robotAccurate			= false;
     private String				 m_targetWaypoint			= "";
 
     private double m_currentTime = 0;
@@ -150,6 +151,14 @@ public class MissionState {
     public boolean isRobotOnTime () {
         return m_robotOnTime;
     }
+    
+    public void setRobotAccurate (boolean isAccurate) {
+    	m_robotAccurate = isAccurate;
+    }
+    
+    public boolean isRobotAccurate () {
+    	return m_robotAccurate;
+    }
 
     public void setBatteryCharge (Double charge) {
         m_chargeHistory.push (charge);
@@ -187,13 +196,14 @@ public class MissionState {
      * @return True iff the robot encounters (or expects to encounter) problems
      */
     public boolean isAdaptationNeeded () {
-        return isRobotObstructed() || !isRobotOnTime();
+        return isRobotObstructed() || !isRobotOnTime() || !isRobotAccurate();
     }
 
     public MissionState copy () {
         MissionState s = new MissionState (m_model);
         s.m_locationHistory = new ArrayDeque<> (m_locationHistory);
         s.m_chargeHistory = new ArrayDeque<> (m_chargeHistory);
+        s.m_deadlineHistory = new ArrayDeque<> (m_deadlineHistory);
         return s;
     }
 

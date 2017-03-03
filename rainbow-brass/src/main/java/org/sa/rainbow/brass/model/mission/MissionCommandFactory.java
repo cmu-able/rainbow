@@ -29,6 +29,7 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
         m_commandMap.put ("setCurrentLocation".toLowerCase (), SetCurrentLocationCmd.class);
         m_commandMap.put ("setRobotObstructed".toLowerCase (), SetRobotObstructedCmd.class);
         m_commandMap.put ("setRobotOnTime".toLowerCase (), SetRobotOnTimeCmd.class);
+        m_commandMap.put ("setRobotAccurate".toLowerCase (), SetRobotAccurateCmd.class);
         m_commandMap.put ("setBatteryCharge".toLowerCase (), SetBatteryChargeCmd.class);
         m_commandMap.put ("setDeadlineCmd".toLowerCase (), SetDeadlineCmd.class);
         m_commandMap.put ("setTargetWaypoint".toLowerCase (), SetTargetWaypointCmd.class);
@@ -58,6 +59,11 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
     public SetRobotOnTimeCmd setRobotOnTimeCmd (boolean robotOnTime) {
         return new SetRobotOnTimeCmd ((MissionStateModelInstance) m_modelInstance, "",
                 Boolean.toString (robotOnTime));
+    }
+    
+    public SetRobotAccurateCmd setRobotAccurateCmd (boolean robotAccurate) {
+        return new SetRobotAccurateCmd ((MissionStateModelInstance) m_modelInstance, "",
+                Boolean.toString (robotAccurate));
     }
 
     public SetBatteryChargeCmd setBatteryChargeCmd (double charge) {
