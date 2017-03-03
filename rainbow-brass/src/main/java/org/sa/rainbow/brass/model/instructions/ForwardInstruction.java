@@ -63,4 +63,30 @@ public class ForwardInstruction implements IInstruction {
             m_speed = Double.parseDouble (m.group (2));
         }
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		
+		if (obj == null || obj.getClass() != this.getClass()) {
+			return false;
+		}
+		
+		ForwardInstruction forward = (ForwardInstruction) obj;
+		return m_label.equals(forward.m_label)
+				&& m_instruction.equals(forward.m_instruction)
+				&& m_nextLabel.equals(forward.m_nextLabel);
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + m_label.hashCode();
+		result = prime * result + m_instruction.hashCode();
+		result = prime * result + m_nextLabel.hashCode();
+		return result;
+	}
 }

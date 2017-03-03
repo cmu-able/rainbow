@@ -76,5 +76,31 @@ public class MoveAbsHInstruction implements IInstruction {
             m_targetW = Double.parseDouble (m.group (4));
         }
     }
+    
+    @Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		
+		if (obj == null || obj.getClass() != this.getClass()) {
+			return false;
+		}
+		
+		MoveAbsHInstruction moveAbsH = (MoveAbsHInstruction) obj;
+		return m_label.equals(moveAbsH.m_label)
+				&& m_instruction.equals(moveAbsH.m_instruction)
+				&& m_nextLabel.equals(moveAbsH.m_nextLabel);
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + m_label.hashCode();
+		result = prime * result + m_instruction.hashCode();
+		result = prime * result + m_nextLabel.hashCode();
+		return result;
+	}
 
 }
