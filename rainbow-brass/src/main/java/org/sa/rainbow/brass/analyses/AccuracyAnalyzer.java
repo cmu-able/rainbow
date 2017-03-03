@@ -16,7 +16,6 @@ import org.sa.rainbow.brass.model.mission.MissionState;
 import org.sa.rainbow.brass.model.mission.MissionState.Heading;
 import org.sa.rainbow.brass.model.mission.MissionStateModelInstance;
 import org.sa.rainbow.brass.model.mission.SetRobotAccurateCmd;
-import org.sa.rainbow.brass.model.mission.SetRobotOnTimeCmd;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.IRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
@@ -270,11 +269,25 @@ public class AccuracyAnalyzer extends AbstractRainbowRunnable implements IRainbo
     			double moveTime = manhattanDistance / moveSpeed;
     			double rotateTime = Math.abs(sourceW - targetW) / rotateSpeed;
     			
-    			String speedStr = moveSpeed == MapTranslator.ROBOT_HALF_SPEED_VALUE ? 
-    					MapTranslator.ROBOT_HALF_SPEED_CONST : MapTranslator.ROBOT_FULL_SPEED_CONST;
+    			String moveSpeedStr;
     			
-    			//TODO
-    			instEnergy = BatteryPredictor.batteryConsumption(speedStr, rotating, kinectEnabled, cpuAvgUsage, moveTime);
+    			if (moveSpeed == MapTranslator.ROBOT_HALF_SPEED_VALUE) {
+    				moveSpeedStr = MapTranslator.ROBOT_HALF_SPEED_CONST;
+    			} else if (moveSpeed == MapTranslator.ROBOT_FULL_SPEED_VALUE) {
+    				moveSpeedStr = MapTranslator.ROBOT_FULL_SPEED_CONST;
+    			} else {
+    				moveSpeedStr = MapTranslator.ROBOT_HALF_SPEED_CONST;
+    			}
+    			
+    			// Energy consumed by straight move
+    			double moveEnergy = BatteryPredictor.batteryConsumption(moveSpeedStr, false, kinectEnabled, cpuAvgUsage, moveTime);
+    			instEnergy += moveEnergy;
+    			
+    			// Energy consumed by rotation, if any
+    			if (rotating) {
+    				double rotateEnergy = BatteryPredictor.batteryConsumption("", true, kinectEnabled, cpuAvgUsage, rotateTime);
+    				instEnergy += rotateEnergy;
+    			}
     			
     			// Update source pose for the next instruction
     			sourceX = targetX;
@@ -297,11 +310,18 @@ public class AccuracyAnalyzer extends AbstractRainbowRunnable implements IRainbo
     			double cpuAvgUsage = 0; //TODO
     			double moveTime = euclideanDistance / speed;
     			
-    			String speedStr = speed == MapTranslator.ROBOT_HALF_SPEED_VALUE ? 
-    					MapTranslator.ROBOT_HALF_SPEED_CONST : MapTranslator.ROBOT_FULL_SPEED_CONST;
+    			String speedStr;
     			
-    			//TODO
-    			instEnergy = BatteryPredictor.batteryConsumption(speedStr, rotating, kinectEnabled, cpuAvgUsage, moveTime);
+    			if (speed == MapTranslator.ROBOT_HALF_SPEED_VALUE) {
+    				speedStr = MapTranslator.ROBOT_HALF_SPEED_CONST;
+    			} else if (speed == MapTranslator.ROBOT_FULL_SPEED_VALUE) {
+    				speedStr = MapTranslator.ROBOT_FULL_SPEED_CONST;
+    			} else {
+    				speedStr = MapTranslator.ROBOT_HALF_SPEED_CONST;
+    			}
+    			
+    			// Energy consumed by straight move
+    			instEnergy += BatteryPredictor.batteryConsumption(speedStr, rotating, kinectEnabled, cpuAvgUsage, moveTime);
     			
     			// Update source pose for the next instruction
     			sourceX = targetX;

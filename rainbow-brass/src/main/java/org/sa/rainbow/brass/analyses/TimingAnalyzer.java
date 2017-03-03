@@ -282,7 +282,7 @@ public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowA
 			String modelFileName = PropertiesConnector.DEFAULT.getProperty(PropertiesConnector.PRISM_OUTPUT_DIR) + TMP_MODEL_FILENAME;
 			String propertiesFileName = PropertiesConnector.DEFAULT.getProperty(PropertiesConnector.PRISM_PROPERTIES_PROPKEY);
 			String strategyFileName = PropertiesConnector.DEFAULT.getProperty(PropertiesConnector.PRISM_ADV_EXPORT_PROPKEY);
-			int propertyToCheck = 0; //TODO
+			int propertyToCheck = MapTranslator.TIME_PROPERTY;
 			
 			EnvMapNode sourceNode = igToActionSequence.getSourceNode();
 			EnvMapNode targetNode = igToActionSequence.getTargetNode();

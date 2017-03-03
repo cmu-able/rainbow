@@ -118,6 +118,10 @@ public class MapTranslator {
     public static final double MAX_DISTANCE = 999.0; // Distance assigned to disabled edges (for distance reward computation)
     public static final double DEFAULT_TIME_TACTIC_TIME=1; // Tactics are not instantaneous;
     public static final String TACTIC_PREFIX="t";
+    
+    // Properties' indices
+    public static final int TIME_PROPERTY = 0;
+    public static final int ACCURACY_PROPERTY = 1;
 
     private static EnvMap m_map;
 
