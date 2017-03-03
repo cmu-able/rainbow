@@ -1,12 +1,11 @@
 package org.sa.rainbow.brass.analyses;
 
-import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang.time.DateUtils;
 import org.sa.rainbow.brass.PropertiesConnector;
 import org.sa.rainbow.brass.adaptation.IGToPrismActionSequence;
 import org.sa.rainbow.brass.adaptation.PrismConnectorAPI;
+import org.sa.rainbow.brass.model.instructions.ForwardInstruction;
 import org.sa.rainbow.brass.model.instructions.IInstruction;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
@@ -38,7 +37,8 @@ import org.sa.rainbow.core.ports.RainbowPortFactory;
  */
 public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowAnalysis {
 
-    private static final long TIME_BUFFER = 10L; // seconds //TODO
+    private static final long DEADLINE_EARLY_BUFFER = 20L; // seconds //TODO
+    private static final long DEADLINE_LATE_BUFFER = 10L; // seconds //TODO
     private static final String TMP_MODEL_FILENAME = "timing_analyzer/prismtmp.prism";
 
     public static final String NAME = "BRASS Timing Evaluator";
@@ -125,8 +125,8 @@ public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowA
 
                 if (m_missionState != null) {
                     long deadline = m_missionState.getDeadline();
-                    long deadlineLowerBound = deadline - TIME_BUFFER; //TODO
-                    long deadlineUpperBound = deadline + TIME_BUFFER; //TODO
+                    long deadlineLowerBound = deadline - DEADLINE_EARLY_BUFFER;
+                    long deadlineUpperBound = deadline + DEADLINE_LATE_BUFFER;
 
                     // The remaining instructions, excluding the current instruction
                     List<IInstruction> remainingInstructions = (List<IInstruction>) m_igProgress.getRemainingInstructions();
@@ -179,8 +179,8 @@ public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowA
     private boolean isOnTime(long deadlineLowerBound, long deadlineUpperBound, 
             IInstruction currentInstruction, List<IInstruction> remainingInstructions) {
         double currentTime = m_missionState.getCurrentTime();
-        long planExecutionTime = getExpectedIGExecutionTime(currentInstruction, remainingInstructions);
-        long expectedPlanCompletionTime = (long) currentTime + planExecutionTime;
+        double planExecutionTime = getExpectedIGExecutionTime(currentInstruction, remainingInstructions);
+        long expectedPlanCompletionTime = (long) (currentTime + planExecutionTime);
 
         return expectedPlanCompletionTime >= deadlineLowerBound && expectedPlanCompletionTime <= deadlineLowerBound;
     }
@@ -188,7 +188,7 @@ public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowA
     /**
      * Calculates the expected execution time of the current and the remaining instructions
      */
-    private long getExpectedIGExecutionTime(IInstruction currentInstruction, List<IInstruction> remainingInstructions) {
+    private double getExpectedIGExecutionTime(IInstruction currentInstruction, List<IInstruction> remainingInstructions) {
         int remainingActionSeqExecTime = 0;
 
         if (!remainingInstructions.isEmpty()) {
@@ -226,8 +226,8 @@ public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowA
 			
 			EnvMapNode sourceNode = igToActionSequence.getSourceNode();
 			EnvMapNode targetNode = igToActionSequence.getTargetNode();
-			String batteryLevel = "1700"; //TODO
-			String robotHeading = "1"; //TODO: MapTranslator to use prism const
+			String batteryLevel = Double.toString(m_missionState.getBatteryCharge());
+			String robotHeading = Integer.toString(m_missionState.getCurrentPose().getHeading().ordinal()); // ref: MapTranslator.generateHeadingConstants()
 			
 			String constSwitch = MapTranslator.INITIAL_ROBOT_LOCATION_CONST + "=" + String.valueOf(m_envMap.getNodeId(sourceNode.getLabel())) + "," 
 					+ MapTranslator.TARGET_ROBOT_LOCATION_CONST + "=" + String.valueOf(m_envMap.getNodeId(targetNode.getLabel())) + "," 
@@ -235,20 +235,48 @@ public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowA
 					+ MapTranslator.INITIAL_ROBOT_HEADING_CONST + "=" + robotHeading;
 			
 			String result = PrismConnectorAPI.modelCheckFromFileS(modelFileName, propertiesFileName, strategyFileName, propertyToCheck, constSwitch);
-			remainingActionSeqExecTime += Long.valueOf(result);
+			remainingActionSeqExecTime += Double.valueOf(result);
 		}
 		
-		long currentInstructionExecTime = getCurrentInstructionExecutionTime();
-		long totalExecTime = currentInstructionExecTime + remainingActionSeqExecTime;
+		double currentInstructionExecTime = getCurrentInstructionExecutionTime(currentInstruction);
+		double totalExecTime = currentInstructionExecTime + remainingActionSeqExecTime;
 		return totalExecTime;
 	}
 	
 	/**
 	 * Calculates the expected execution time of the (remaining of the) current instruction
 	 */
-	private long getCurrentInstructionExecutionTime() {
-		//TODO
-		return 0L;
+	private double getCurrentInstructionExecutionTime(IInstruction currentInstruction) {
+		double currentX = m_missionState.getCurrentPose().getX();
+		double currentY = m_missionState.getCurrentPose().getY();
+		double currentW = m_missionState.getCurrentPose().getRotation();
+		
+		if (currentInstruction instanceof MoveAbsHInstruction) {
+			MoveAbsHInstruction moveAbsH = (MoveAbsHInstruction) currentInstruction;
+			double targetX = moveAbsH.getTargetX();
+			double targetY = moveAbsH.getTargetY();
+			double targetW = moveAbsH.getTargetW();
+			double moveSpeed = moveAbsH.getSpeed();
+			double rotateSpeed = 1; //TODO
+			double remainingManhattanDistance = Math.abs(currentX - targetX) + Math.abs(currentY - targetY);
+			double moveTime = remainingManhattanDistance / moveSpeed;
+			double rotateTime = Math.abs(currentW - targetW) / rotateSpeed;
+			return moveTime + rotateTime;
+		} else if (currentInstruction instanceof ForwardInstruction) {
+			ForwardInstruction forward = (ForwardInstruction) currentInstruction;
+			double distance = forward.getDistance();
+			double speed = forward.getSpeed();
+			// Approximate target location
+			// Assume that the current location is close to the location where this Forward command was issued
+			// TODO: ensure this
+			double targetX = currentX + distance * Math.cos(currentW);
+			double targetY = currentY + distance * Math.sin(currentW);
+			double remainingEuclideanDistance = Math.sqrt(Math.pow(currentX - targetX, 2) + Math.pow(currentY - targetY, 2));
+			return remainingEuclideanDistance / speed;
+		} else {
+			//TODO
+			return 0;
+		}		
 	}
 	
 	private MoveAbsHInstruction getPreviousMoveAbsH (IInstruction instruction) {    	

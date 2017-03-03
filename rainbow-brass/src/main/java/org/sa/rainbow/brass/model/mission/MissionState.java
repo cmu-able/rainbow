@@ -91,7 +91,6 @@ public class MissionState {
 
     private final ModelReference m_model;
 
-    //private List<String>         m_instructionHistory       = new ArrayList<> ();
     private Deque<Long>          m_predictedTimeHistory     = new ArrayDeque<> ();
     private Deque<Long>          m_predictedAccuracyHistory = new ArrayDeque<> ();
     private Deque<Double>        m_timeScore                = new ArrayDeque<> ();
@@ -100,11 +99,11 @@ public class MissionState {
 
     Deque<LocationRecording>     m_locationHistory          = new ArrayDeque<> ();
     Deque<Double>                m_chargeHistory            = new ArrayDeque<> ();
-    Deque<Long>              m_deadlineHistory = new ArrayDeque<> ();
+    Deque<Long>					 m_deadlineHistory			= new ArrayDeque<> ();
 
     private boolean              m_robotObstructed          = false;
     private boolean				 m_robotOnTime				= false;
-    private String  m_targetWaypoint  = "";
+    private String				 m_targetWaypoint			= "";
 
     private double m_currentTime = 0;
 
@@ -143,22 +142,6 @@ public class MissionState {
     public boolean isRobotObstructed () {
         return m_robotObstructed;
     }
-
-//    public void setCurrentInstruction (String instLabel) {
-//        m_instructionHistory.add (instLabel);
-//    }
-//
-//    public String getCurrentInstruction () {
-//        return m_instructionHistory.get (m_instructionHistory.size () - 1);
-//    }
-//
-//    public boolean hasPreviousInstruction () {
-//        return m_instructionHistory.size () > 1;
-//    }
-//
-//    public String getPreviousInstruction () {
-//        return m_instructionHistory.get (m_instructionHistory.size () - 2);
-//    }
 
     public void setRobotOnTime (boolean isOnTime) {
         m_robotOnTime = isOnTime;
