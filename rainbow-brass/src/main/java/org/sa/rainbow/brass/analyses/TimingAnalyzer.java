@@ -38,7 +38,7 @@ import org.sa.rainbow.core.ports.RainbowPortFactory;
  */
 public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowAnalysis {
 
-    private static final int TIME_BUFFER = 10; // seconds //TODO
+    private static final long TIME_BUFFER = 10L; // seconds //TODO
     private static final String TMP_MODEL_FILENAME = "timing_analyzer/prismtmp.prism";
 
     public static final String NAME = "BRASS Timing Evaluator";
@@ -124,9 +124,9 @@ public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowA
             if (isNewInstruction(currentInstruction)) {
 
                 if (m_missionState != null) {
-                    Date deadline = m_missionState.getDeadline();
-                    Date deadlineLowerBound = DateUtils.addSeconds(deadline, -1 * TIME_BUFFER);
-                    Date deadlineUpperBound = DateUtils.addSeconds(deadline, TIME_BUFFER);
+                    long deadline = m_missionState.getDeadline();
+                    long deadlineLowerBound = deadline - TIME_BUFFER; //TODO
+                    long deadlineUpperBound = deadline + TIME_BUFFER; //TODO
 
                     // The remaining instructions, excluding the current instruction
                     List<IInstruction> remainingInstructions = (List<IInstruction>) m_igProgress.getRemainingInstructions();
@@ -176,20 +176,19 @@ public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowA
     /**
      * Checks if the instructions can be completed within the deadline window
      */
-    private boolean isOnTime(Date deadlineLowerBound, Date deadlineUpperBound, 
+    private boolean isOnTime(long deadlineLowerBound, long deadlineUpperBound, 
             IInstruction currentInstruction, List<IInstruction> remainingInstructions) {
-        Date currentTime = new Date();
-        int planExecutionTime = getExpectedIGExecutionTime(currentInstruction, remainingInstructions);
-        Date expectedPlanCompletionTime = DateUtils.addSeconds(currentTime, planExecutionTime);
+        double currentTime = m_missionState.getCurrentTime();
+        long planExecutionTime = getExpectedIGExecutionTime(currentInstruction, remainingInstructions);
+        long expectedPlanCompletionTime = (long) currentTime + planExecutionTime;
 
-        return expectedPlanCompletionTime.after(deadlineLowerBound) && 
-                expectedPlanCompletionTime.before(deadlineUpperBound);
+        return expectedPlanCompletionTime >= deadlineLowerBound && expectedPlanCompletionTime <= deadlineLowerBound;
     }
 
     /**
      * Calculates the expected execution time of the current and the remaining instructions
      */
-    private int getExpectedIGExecutionTime(IInstruction currentInstruction, List<IInstruction> remainingInstructions) {
+    private long getExpectedIGExecutionTime(IInstruction currentInstruction, List<IInstruction> remainingInstructions) {
         int remainingActionSeqExecTime = 0;
 
         if (!remainingInstructions.isEmpty()) {
@@ -213,55 +212,57 @@ public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowA
                 remainingStartX = m_missionState.getInitialPose().getX();
                 remainingStartY = m_missionState.getInitialPose().getY();
             }
-
-            // Action sequence of the remaining instructions
-            IGToPrismActionSequence igToActionSequence = new IGToPrismActionSequence(m_envMap, remainingInstructions, 
-                    remainingStartX, remainingStartY);
-            List<String> remainingActionSequence = igToActionSequence.translate();
-            MapTranslator.exportMapTranslation2(TMP_MODEL_FILENAME, remainingActionSequence);
-
-            String modelFileName = PropertiesConnector.DEFAULT.getProperty(PropertiesConnector.PRISM_OUTPUT_DIR) + TMP_MODEL_FILENAME;
-            String propertiesFileName = PropertiesConnector.DEFAULT.getProperty(PropertiesConnector.PRISM_PROPERTIES_PROPKEY);
-            String strategyFileName = PropertiesConnector.DEFAULT.getProperty(PropertiesConnector.PRISM_ADV_EXPORT_PROPKEY);
-            int propertyToCheck = 0; //TODO
-
-            EnvMapNode sourceNode = igToActionSequence.getSourceNode();
-            EnvMapNode targetNode = igToActionSequence.getTargetNode();
-            String batteryLevel = "1700"; //TODO
-            String robotHeading = "1"; //TODO
-
-            String constSwitch = MapTranslator.INITIAL_ROBOT_LOCATION_CONST + "=" + String.valueOf(m_envMap.getNodeId(sourceNode.getLabel())) + "," 
-                    + MapTranslator.TARGET_ROBOT_LOCATION_CONST + "=" + String.valueOf(m_envMap.getNodeId(targetNode.getLabel())) + "," 
-                    + MapTranslator.INITIAL_ROBOT_BATTERY_CONST + "=" + batteryLevel + "," 
-                    + MapTranslator.INITIAL_ROBOT_HEADING_CONST + "=" + robotHeading;
-
-            String result = PrismConnectorAPI.modelCheckFromFileS(modelFileName, propertiesFileName, strategyFileName, propertyToCheck, constSwitch);
-            remainingActionSeqExecTime += Integer.valueOf(result);
-        }
-
-        int currentInstructionExecTime = getCurrentInstructionExecutionTime();
-        int totalExecTime = currentInstructionExecTime + remainingActionSeqExecTime;
-        return totalExecTime;
-    }
-
-    /**
-     * Calculates the expected execution time of the (remaining of the) current instruction
-     */
-    private int getCurrentInstructionExecutionTime() {
-        //TODO
-        return 0;
-    }
-
-    private MoveAbsHInstruction getPreviousMoveAbsH (IInstruction instruction) {    	
-        int j = Integer.valueOf (instruction.getInstructionLabel()) - 1;
-        for (int i = j; i > 0; i--) {
-            String label = String.valueOf (i);
-            IInstruction inst = m_igProgress.getInstruction(label);
-
-            if (inst instanceof MoveAbsHInstruction) return (MoveAbsHInstruction) inst;
-        }
-
-        // No previous MoveAbsH instruction
-        return null;
+            
+			// Action sequence of the remaining instructions
+			IGToPrismActionSequence igToActionSequence = new IGToPrismActionSequence(m_envMap, remainingInstructions, 
+					remainingStartX, remainingStartY);
+			List<String> remainingActionSequence = igToActionSequence.translate();
+			MapTranslator.exportConstrainedToPlanMapTranslation(TMP_MODEL_FILENAME, remainingActionSequence);
+			
+			String modelFileName = PropertiesConnector.DEFAULT.getProperty(PropertiesConnector.PRISM_OUTPUT_DIR) + TMP_MODEL_FILENAME;
+			String propertiesFileName = PropertiesConnector.DEFAULT.getProperty(PropertiesConnector.PRISM_PROPERTIES_PROPKEY);
+			String strategyFileName = PropertiesConnector.DEFAULT.getProperty(PropertiesConnector.PRISM_ADV_EXPORT_PROPKEY);
+			int propertyToCheck = 0; //TODO
+			
+			EnvMapNode sourceNode = igToActionSequence.getSourceNode();
+			EnvMapNode targetNode = igToActionSequence.getTargetNode();
+			String batteryLevel = "1700"; //TODO
+			String robotHeading = "1"; //TODO: MapTranslator to use prism const
+			
+			String constSwitch = MapTranslator.INITIAL_ROBOT_LOCATION_CONST + "=" + String.valueOf(m_envMap.getNodeId(sourceNode.getLabel())) + "," 
+					+ MapTranslator.TARGET_ROBOT_LOCATION_CONST + "=" + String.valueOf(m_envMap.getNodeId(targetNode.getLabel())) + "," 
+					+ MapTranslator.INITIAL_ROBOT_BATTERY_CONST + "=" + batteryLevel + "," 
+					+ MapTranslator.INITIAL_ROBOT_HEADING_CONST + "=" + robotHeading;
+			
+			String result = PrismConnectorAPI.modelCheckFromFileS(modelFileName, propertiesFileName, strategyFileName, propertyToCheck, constSwitch);
+			remainingActionSeqExecTime += Long.valueOf(result);
+		}
+		
+		long currentInstructionExecTime = getCurrentInstructionExecutionTime();
+		long totalExecTime = currentInstructionExecTime + remainingActionSeqExecTime;
+		return totalExecTime;
+	}
+	
+	/**
+	 * Calculates the expected execution time of the (remaining of the) current instruction
+	 */
+	private long getCurrentInstructionExecutionTime() {
+		//TODO
+		return 0L;
+	}
+	
+	private MoveAbsHInstruction getPreviousMoveAbsH (IInstruction instruction) {    	
+		int j = Integer.valueOf (instruction.getInstructionLabel()) - 1;
+    	for (int i = j; i > 0; i--) {
+    		String label = String.valueOf (i);
+    		IInstruction inst = m_igProgress.getInstruction(label);
+    		
+    		if (inst instanceof MoveAbsHInstruction) {
+    			return (MoveAbsHInstruction) inst;
+    		}
+    	}
+    	
+    	// No previous MoveAbsH instruction
+    	return null;
     }
 }
