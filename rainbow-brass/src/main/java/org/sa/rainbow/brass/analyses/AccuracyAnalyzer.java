@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.sa.rainbow.brass.model.instructions.ChargeInstruction;
 import org.sa.rainbow.brass.model.instructions.ForwardInstruction;
 import org.sa.rainbow.brass.model.instructions.IInstruction;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
 import org.sa.rainbow.brass.model.instructions.MoveAbsHInstruction;
+import org.sa.rainbow.brass.model.instructions.SetLocalizationFidelityInstruction;
+import org.sa.rainbow.brass.model.instructions.SetLocalizationFidelityInstruction.LocalizationFidelity;
 import org.sa.rainbow.brass.model.map.BatteryPredictor;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.map.EnvMapModelInstance;
@@ -17,6 +20,7 @@ import org.sa.rainbow.brass.model.mission.MissionState;
 import org.sa.rainbow.brass.model.mission.MissionState.Heading;
 import org.sa.rainbow.brass.model.mission.MissionStateModelInstance;
 import org.sa.rainbow.brass.model.mission.SetRobotAccurateCmd;
+import org.sa.rainbow.brass.model.mission.SetRobotLocalizationFidelityCmd;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.IRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
@@ -166,6 +170,18 @@ public class AccuracyAnalyzer extends AbstractRainbowRunnable implements IRainbo
 	            if (isNewOrUnpassedInstruction(currentInstruction)) {
 	
 	                if (m_missionState != null) {
+	                	
+	                	// TODO: This may be a hack
+	                	// Update the robot's configuration (Kinect and localization) in MissionState
+	                	if (currentInstruction instanceof SetLocalizationFidelityInstruction) {
+	                		SetLocalizationFidelityInstruction inst = (SetLocalizationFidelityInstruction) currentInstruction;
+		                	MissionStateModelInstance missionStateModel = (MissionStateModelInstance) m_modelsManagerPort
+	                                .<MissionState> getModelInstance(m_msRef);
+		                	SetRobotLocalizationFidelityCmd robotLocFidelityCmd = missionStateModel.getCommandFactory()
+		                			.setRobotLocalizationFidelityCmd(inst.getLocalizationFidelity());
+		                	m_modelUSPort.updateModel(robotLocFidelityCmd);
+	                	}
+	                	
 	                    // The remaining instructions, excluding the current instruction
 	                    List<IInstruction> remainingInstructions = (List<IInstruction>) m_igProgress.getRemainingInstructions();
 	                    
@@ -295,8 +311,14 @@ public class AccuracyAnalyzer extends AbstractRainbowRunnable implements IRainbo
     			// Update source pose for the next instruction
     			sourceX = sourceX + forward.getDistance() * Math.cos(sourceW);;
     			sourceY = sourceY + forward.getDistance() * Math.sin(sourceW);
+    		} else if (instruction instanceof ChargeInstruction) {
+    			ChargeInstruction charge = (ChargeInstruction) instruction;
+    			BatteryPredictor bp = new BatteryPredictor();
+    			double energyGain = bp.batteryCharge(charge.getChargingTime());
+    			instEnergy = -1 * energyGain;
     		} else {
-    			//TODO
+    			// This instruction doesn't consume or produce energy
+    			instEnergy = 0;
     		}
     		
     		totalEnergy += instEnergy;
@@ -352,7 +374,7 @@ public class AccuracyAnalyzer extends AbstractRainbowRunnable implements IRainbo
 		double targetW = moveAbsH.getTargetW();
 		double moveSpeed = moveAbsH.getSpeed();
 		double rotateSpeed = MapTranslator.ROBOT_ROTATIONAL_SPEED_VALUE;
-		double cpuAvgUsage = 0; //TODO
+		double cpuAvgUsage = getCPUAverageUsage(m_missionState.getLocalizationFidelity());
 		
 		double moveAbsHEnergy = getMovementEnergyConsumption(true, sourceX, sourceY, sourceW, targetX, targetY, targetW, 
 				moveSpeed, rotateSpeed, true, cpuAvgUsage);
@@ -370,7 +392,7 @@ public class AccuracyAnalyzer extends AbstractRainbowRunnable implements IRainbo
 		// TODO: ensure this
 		double targetX = sourceX + distance * Math.cos(sourceW);
 		double targetY = sourceY + distance * Math.sin(sourceW);
-		double cpuAvgUsage = 0; //TODO
+		double cpuAvgUsage = getCPUAverageUsage(m_missionState.getLocalizationFidelity());
 		
 		double forwardEnergy = getMovementEnergyConsumption(false, sourceX, sourceY, sourceW, targetX, targetY, sourceW, 
 				speed, 0, false, cpuAvgUsage);
@@ -418,5 +440,17 @@ public class AccuracyAnalyzer extends AbstractRainbowRunnable implements IRainbo
 		}
 		
 		return instEnergy;
+    }
+    
+    private double getCPUAverageUsage(LocalizationFidelity fidelity) {
+    	if (fidelity == LocalizationFidelity.LOW) {
+    		return MapTranslator.ROBOT_LOC_MODE_LO_CPU_VAL;
+    	} else if (fidelity == LocalizationFidelity.MEDIUM) {
+    		return MapTranslator.ROBOT_LOC_MODE_MED_CPU_VAL;
+    	} else if (fidelity == LocalizationFidelity.HIGH) {
+    		return MapTranslator.ROBOT_LOC_MODE_HI_CPU_VAL;
+    	} else {
+    		return MapTranslator.ROBOT_LOC_MODE_LO_CPU_VAL;
+    	}
     }
 }
