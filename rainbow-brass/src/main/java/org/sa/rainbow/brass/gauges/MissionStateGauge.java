@@ -17,24 +17,24 @@ import org.sa.rainbow.core.util.TypedAttributeWithValue;
  * Created by schmerl on 12/28/2016.
  */
 public class MissionStateGauge extends RegularPatternGauge {
-    private static final String   NAME        = "Mission State Gauge";
-    protected static final String LOC         = "LocationRecording";
-    protected static final String CHARGE = "BatteryCharge";
-    protected static final String DEADLINE = "Deadline";
-    protected static final String CLOCK    = "Clock";
+    private static final String   NAME              = "Mission State Gauge";
+    protected static final String LOC               = "LocationRecording";
+    protected static final String CHARGE            = "BatteryCharge";
+    protected static final String DEADLINE          = "Deadline";
+    protected static final String CLOCK             = "Clock";
     protected static final String GROUNDPLANE       = "GroundPlane";
     protected static final String CALIBRATION_ERROR = "Calibration";
 
-    protected static final String LOC_PATTERN = "topic: /amcl_pose/pose/pose.*position.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z.*\\norientation.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z: (.*)\\n.*w: (.*)";
-    protected static final String CHARGE_PATTERN = "topic: /energy_monitor/voltage.*\\n.*data: (.*)\\n";
-    protected static final String DEADLINE_PATTERN = "topic: /notify_user.*\\n.*new_deadline: (.*)\\n.*user.*";
-    protected static final String CLOCK_PATTERN    = "topic: /clock.*\\n.*secs: ([0-9]*).*nsecs: ([0-9]*).*";
-    private static final String   GROUND_PATTERN      = "topic: /calibration/ground_plane_error.*\\n.*data: \\[(.*)\\].*";
-    private static final String   CALIBRATION_PATTERN = "topic: /calibration/calibration_error.*\n.*data: \\[(.*)\\].*";
+    protected static final String LOC_PATTERN         = "topic: /amcl_pose/pose/pose.*position.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z.*\\norientation.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z: (.*)\\n.*w: (.*)(.*)";
+    protected static final String CHARGE_PATTERN      = "topic: /energy_monitor/voltage.*\\n.*data: (.*)\\n(.*)";
+    protected static final String DEADLINE_PATTERN    = "topic: /notify_user.*\\n.*new_deadline: (.*)\\n.*user(.*)";
+    protected static final String CLOCK_PATTERN       = "topic: /clock.*\\n.*secs: ([0-9]*).*nsecs: ([0-9]*)(.*)";
+    private static final String   GROUND_PATTERN      = "topic: /calibration/ground_plane_error.*\\n.*data: \\[(.*)\\](.*)";
+    private static final String   CALIBRATION_PATTERN = "topic: /calibration/calibration_error.*\n.*data: \\[(.*)\\](.*)";
     protected String              last_x;
     protected String              last_y;
     private String                last_w;
-    private int                   last_voltage   = 0;
+    private int                   last_voltage        = 0;
 
     /**
      * Main Constructor the Gauge that is hardwired to the Probe.
@@ -67,6 +67,7 @@ public class MissionStateGauge extends RegularPatternGauge {
     @Override
     protected void doMatch (String matchName, Matcher m) {
         String group = m.group (1);
+        int restGroup = 0;
         if (LOC.equals (matchName)) {
             String x = group.trim ();
             String y = m.group (2).trim ();
@@ -75,6 +76,7 @@ public class MissionStateGauge extends RegularPatternGauge {
             String b = m.group (4).trim ();
             String c = m.group (5).trim ();
             String d = m.group (6).trim ();
+            restGroup = 7;
 
             String w = yawFromQuarternion (a, b, c, d);
 
@@ -96,6 +98,7 @@ public class MissionStateGauge extends RegularPatternGauge {
                 pMap.put (op.getParameters ()[0], Double.toString (charge));
                 issueCommand (op, pMap);
             }
+            restGroup = 2;
         }
         else if (DEADLINE.equals (matchName)) {
             String date = m.group (1).trim ();
@@ -103,6 +106,7 @@ public class MissionStateGauge extends RegularPatternGauge {
             Map<String, String> pMap = new HashMap<> ();
             pMap.put (op.getParameters ()[0], date);
             issueCommand (op, pMap);
+            restGroup = 2;
         }
         else if (CLOCK.equals (matchName)) {
             long secs = Long.parseLong (m.group (1).trim ());
@@ -112,6 +116,7 @@ public class MissionStateGauge extends RegularPatternGauge {
             Map<String, String> pMap = new HashMap<> ();
             pMap.put (op.getParameters ()[0], Double.toString (realSecs));
             issueCommand (op, pMap);
+            restGroup = 3;
         }
         else if (GROUNDPLANE.equals (matchName)) {
             String[] vals = m.group (1).split (",");
@@ -120,6 +125,7 @@ public class MissionStateGauge extends RegularPatternGauge {
             pMap.put (op.getParameters ()[0], vals[0]);
             pMap.put (op.getParameters ()[1], vals[1]);
             issueCommand (op, pMap);
+            restGroup = 2;
         }
         else if (CALIBRATION_ERROR.equals (matchName)) {
             String[] vals = m.group (1).split (",");
@@ -129,11 +135,18 @@ public class MissionStateGauge extends RegularPatternGauge {
             pMap.put (op.getParameters ()[1], vals[1]);
             pMap.put (op.getParameters ()[2], vals[2]);
             pMap.put (op.getParameters ()[3], vals[3]);
-            pMap.put (op.getParameters ()[4], ".35");
+            pMap.put (op.getParameters ()[4], vals[4]);
+            pMap.put (op.getParameters ()[5], vals[5]);
             issueCommand (op, pMap);
+            restGroup = 4;
+        }
+        if (m.groupCount () == restGroup) {
+            String rest = m.group (restGroup);
+            if (!rest.isEmpty () && rest.indexOf ("topic:") != -1) {
+                log ("Gauge had more: " + rest.substring (rest.indexOf ("topic:")));
+            }
         }
     }
-
 
     // Converstino to yaw from http://www.chrobotics.com/library/understanding-quaternions
     private String yawFromQuarternion (String a, String b, String c, String d) {

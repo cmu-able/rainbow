@@ -10,7 +10,9 @@ public interface IBRASSConnector {
         MISSION_ABORTED, // indicates that an adaptive response is deemed to be infeasible
         ADAPTING, //  indicates that the selection/generation of an adaptive version of the target software system has begun or is in progress
         ADAPTATION_COMPLETED, //  indicates that the adaptation response is done, and the adaptive version of the target software system has been deployed
-        ERROR
+        ERROR,
+        // Rainbow specific messages for brasscomms
+        RAINBOW_READY, MISSION_COMPLETED
     }
 
     void reportReady (boolean ready);

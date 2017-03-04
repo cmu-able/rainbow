@@ -266,7 +266,8 @@ public class MissionState {
         public double rotational_scale;
         public double translational_error;
         public double translational_scale;
-        public double velocity_at_time_of_error;
+        public double rotational_velocity_at_time_of_error;
+        public double translational_velocity_at_time_of_error;
     }
 
     Deque<GroundPlaneError> m_groundPlaneErrorHistory  = new ArrayDeque<> ();

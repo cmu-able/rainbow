@@ -304,8 +304,18 @@ public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowA
 					+ MapTranslator.INITIAL_ROBOT_BATTERY_CONST + "=" + batteryLevel + "," 
 					+ MapTranslator.INITIAL_ROBOT_HEADING_CONST + "=" + robotHeading;
 			
-			String result = PrismConnectorAPI.modelCheckFromFileS(modelFileName, propertiesFileName, strategyFileName, propertyToCheck, constSwitch);
-			remainingActionSeqExecTime += Double.valueOf(result);
+			try {
+                String result = PrismConnectorAPI.modelCheckFromFileS(modelFileName, propertiesFileName, strategyFileName, propertyToCheck, constSwitch);
+                remainingActionSeqExecTime += Double.valueOf(result);
+            }
+            catch (NumberFormatException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
 		}
 		
 		double currentInstructionExecTime = getCurrentInstructionExecutionTime(currentInstruction);

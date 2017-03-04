@@ -6,6 +6,7 @@ import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.map.EnvMapModelInstance;
+import org.sa.rainbow.brass.model.map.MapTranslator;
 import org.sa.rainbow.brass.model.mission.MissionState;
 import org.sa.rainbow.brass.model.mission.MissionState.LocationRecording;
 import org.sa.rainbow.brass.model.mission.MissionStateModelInstance;
@@ -43,7 +44,6 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
     // The thread "sleep" time. runAction will be called every 10 seconds in this case
     public static final int SLEEP_TIME = 10000 /*ms*/;
 
-    private static DecisionEngine m_de;
 
     // Port to query with any models in models manager
     private IModelsManagerPort                       m_modelsManagerPort;
@@ -86,13 +86,20 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
         else {
             setSleepTime (SLEEP_TIME);
         }
-        m_de = new DecisionEngine ();
     }
 
     @Override
     public void initialize (IRainbowReportingPort port) throws RainbowConnectionException {
         super.initialize (port);
         initConnectors ();
+        try {
+            DecisionEngine.init (Rainbow.instance ().allProperties ());
+        }
+        catch (Exception e) {
+            e.printStackTrace ();
+            throw new RainbowConnectionException ("Cannot initialize DecisionEngine", e);
+        }
+
     }
 
     private void initConnectors () throws RainbowConnectionException {
@@ -192,69 +199,82 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
                     return;
                 // Challenge problem 2
                 if (missionStateModel.getModelInstance ().isBadlyCalibrated ()) {
-                    BrassPlan recalibrate = new Recalibrate (missionStateModel, igModel);
-                    //AdaptationTree<BrassPlan> rc = new AdaptationTree<> (recalibrate);
-                   
-                    // Generate new plan with inhibited tactics
-                    EnvMap map = envModel.getModelInstance ();
-                    m_de.setMap (map);
-                    
-                  
-                    LocationRecording pose = missionStateModel.getModelInstance ().getCurrentPose ();
-                    String label = envModel.getModelInstance ().getNode (pose.getX (), pose.getY ()).getLabel ();
+                    try {
+                        BrassPlan recalibrate = new Recalibrate (missionStateModel, igModel);
+                        //AdaptationTree<BrassPlan> rc = new AdaptationTree<> (recalibrate);
 
-                    m_de.generateCandidates (label, ms.getTargetWaypoint (), true); // Generate candidate solutions to go from current waypoint to target one (inhibited tactics, just move commands)
-                    m_de.scoreCandidates (map, String.valueOf (ms.getBatteryCharge ()), "1"); // Property 1 in file deals with time subject to target reachability (R{"time"}min=? [ F goal ])
-                    
-                    PrismPolicy prismPolicy = new PrismPolicy (m_de.selectPolicy ());
-                    prismPolicy.readPolicy ();
-                    
-                    PolicyToIG translator = new PolicyToIG (prismPolicy, map);
-                    NewInstructionGraph nig = new NewInstructionGraph (igModel, translator.translate ());
-                    
-                    
-                    AdaptationTree<BrassPlan> at = new AdaptationTree<> (AdaptationExecutionOperatorT.SEQUENCE);
-                    // TODO: Need to add a leaf with stop here
-                    at.addLeaf(recalibrate);
-                    at.addLeaf (nig);
+                        // Generate new plan with inhibited tactics
+                        EnvMap map = envModel.getModelInstance ();
+                        DecisionEngine.setMap (map);
 
-                    m_adaptationEnqueuePort.offerAdaptation (at, new Object[0]);
-                    m_executingPlan = true;
-                }
-                else {
-                    EnvMap map = envModel.getModelInstance ();
-                    m_de.setMap (map);
 
-                    // Get the current location of the robot
-                    LocationRecording pose = missionStateModel.getModelInstance ().getCurrentPose ();
-                    String label = envModel.getModelInstance ().getNode (pose.getX (), pose.getY ()).getLabel ();
+                        LocationRecording pose = missionStateModel.getModelInstance ().getCurrentPose ();
+                        String label = envModel.getModelInstance ().getNode (pose.getX (), pose.getY ()).getLabel ();
 
-                    m_de.generateCandidates (label, ms.getTargetWaypoint ()); // Generate candidate solutions to go from current waypoint to target one
-                    m_de.scoreCandidates (map, String.valueOf (ms.getBatteryCharge ()), "1"); // Property 1 in file deals with time subject to target reachability (R{"time"}min=? [ F goal ])
+                        DecisionEngine.generateCandidates (label, ms.getTargetWaypoint (), true); // Generate candidate solutions to go from current waypoint to target one (inhibited tactics, just move commands)
+                        DecisionEngine.scoreCandidates (map, MapTranslator.ROBOT_BATTERY_RANGE_MAX, "2"); // Property 1 in file deals with time subject to target reachability (R{"time"}min=? [ F goal ])
 
-                    // Translate model to the IG
-                    // Create a NewInstrcutionGraph object and enqueue it on the adaptation port, set new deadline
-                    PrismPolicy prismPolicy = new PrismPolicy (m_de.selectPolicy ());
-                    prismPolicy.readPolicy ();
-                    m_reportingPort.info (getComponentType (), "Found new plan: " + prismPolicy.getPlan ().toString ());
-                    if (prismPolicy.getPlan () == null || prismPolicy.getPlan ().isEmpty ()) {
-                        BRASSHttpConnector.instance ().reportStatus (DASStatusT.MISSION_ABORTED,
-                                "Could not find a valid adaptation");
-                    }
-                    else {
+                        PrismPolicy prismPolicy = new PrismPolicy (DecisionEngine.selectPolicy ());
+                        prismPolicy.readPolicy ();
+
                         PolicyToIG translator = new PolicyToIG (prismPolicy, map);
                         NewInstructionGraph nig = new NewInstructionGraph (igModel, translator.translate ());
-                        double planEstimatedTime = m_de.getSelectedPolicyTime ();
-                        Long deadline = new Double (ms.getCurrentTime () + m_de.getSelectedPolicyTime ()).longValue ();
+
 
                         AdaptationTree<BrassPlan> at = new AdaptationTree<> (AdaptationExecutionOperatorT.SEQUENCE);
+                        // TODO: Need to add a leaf with stop here
+                        at.addLeaf(recalibrate);
                         at.addLeaf (nig);
-                        at.addLeaf (new SetDeadline (missionStateModel, igModel, deadline));
+
+                        m_adaptationEnqueuePort.offerAdaptation (at, new Object[0]);
+                        m_executingPlan = true;
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                else {
+                    try {
+                        EnvMap map = envModel.getModelInstance ();
+                        DecisionEngine.setMap (map);
+
+                        // Get the current location of the robot
+                        LocationRecording pose = missionStateModel.getModelInstance ().getCurrentPose ();
+                        String label = envModel.getModelInstance ().getNode (pose.getX (), pose.getY ()).getLabel ();
+
+                        DecisionEngine.generateCandidates (label, ms.getTargetWaypoint ()); // Generate candidate solutions to go from current waypoint to target one
+                        DecisionEngine.scoreCandidates (map, String.valueOf (ms.getBatteryCharge ()), "1"); // Property 1 in file deals with time subject to target reachability (R{"time"}min=? [ F goal ])
+
+                        // Translate model to the IG
+                        // Create a NewInstrcutionGraph object and enqueue it on the adaptation port, set new deadline
+                        PrismPolicy prismPolicy = new PrismPolicy (DecisionEngine.selectPolicy ());
+                        prismPolicy.readPolicy ();
+                        m_reportingPort.info (getComponentType (),
+                                "Found new plan: " + prismPolicy.getPlan ().toString ());
+                        if (prismPolicy.getPlan () == null || prismPolicy.getPlan ().isEmpty ()) {
+                            BRASSHttpConnector.instance ().reportStatus (DASStatusT.MISSION_ABORTED,
+                                    "Could not find a valid adaptation");
+                        }
+                        else {
+                            PolicyToIG translator = new PolicyToIG (prismPolicy, map);
+                            NewInstructionGraph nig = new NewInstructionGraph (igModel, translator.translate ());
+                            double planEstimatedTime = DecisionEngine.getSelectedPolicyTime ();
+                            Long deadline = new Double (ms.getCurrentTime () + DecisionEngine.getSelectedPolicyTime ())
+                                    .longValue ();
+
+                            AdaptationTree<BrassPlan> at = new AdaptationTree<> (AdaptationExecutionOperatorT.SEQUENCE);
+                            at.addLeaf (nig);
+                            at.addLeaf (new SetDeadline (missionStateModel, igModel, deadline));
 
 //                    AdaptationTree<BrassPlan> at = new AdaptationTree<BrassPlan> (nig);
-                        m_reportingPort.info (getComponentType (), "New adaptation found - enqueuing it");
-                        m_executingPlan = true;
-                        m_adaptationEnqueuePort.offerAdaptation (at, new Object[] {});
+                            m_reportingPort.info (getComponentType (), "New adaptation found - enqueuing it");
+                            m_executingPlan = true;
+                            m_adaptationEnqueuePort.offerAdaptation (at, new Object[] {});
+                        }
+                    }
+                    catch (Exception e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace ();
                     }
                 }
             }

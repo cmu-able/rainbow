@@ -6,12 +6,12 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-import java.util.Arrays;
 
 import org.sa.rainbow.brass.model.map.dijkstra.Dijkstra;
 import org.sa.rainbow.brass.model.map.dijkstra.Edge;
@@ -20,9 +20,6 @@ import org.sa.rainbow.brass.model.map.dijkstra.Vertex;
 import org.sa.rainbow.brass.model.mission.MissionState;
 
 import com.google.common.base.Objects;
-
-import org.sa.rainbow.brass.model.map.BatteryPredictor;
-import org.sa.rainbow.brass.model.map.SpeedPredictor;
 
 /**
  * @author jcamara
@@ -91,21 +88,21 @@ public class MapTranslator {
     public static final String ROBOT_LOC_MODE_MED_VAL = "1";
     public static final String ROBOT_LOC_MODE_HI_CONST = "LOC_HI";
     public static final String ROBOT_LOC_MODE_HI_VAL = "2";
-	public static final double ROBOT_LOC_MODE_LO_CPU_VAL = 20; //96.3875;
-	public static final double ROBOT_LOC_MODE_MED_CPU_VAL = 95; // TODO: Change by actual value
-	public static final double ROBOT_LOC_MODE_HI_CPU_VAL = 95; // TODO: Change by actual value
-	public static final boolean ROBOT_LOC_MODE_HI_KINECT = true;
-	public static final boolean ROBOT_LOC_MODE_MED_KINECT = true;
-	public static final boolean ROBOT_LOC_MODE_LO_KINECT = false;
-	public static final String ROBOT_LOC_MODE_MAX_RECONF_CONST = "LOC_MODE_RECONF_MAX";
-	public static final String ROBOT_LOC_MODE_RECONF_VAR = "kr";
-	public static final String ROBOT_LOC_MODE_MAX_RECONF_VAL = "2";
-	
-	
-	public static final float  MAXIMUM_KINECT_OFF_DISTANCE_VAL = 6.0f; // Maximum driving distance with kinect off in m.
-    
-	
-    
+    public static final double ROBOT_LOC_MODE_LO_CPU_VAL = 20; //96.3875;
+    public static final double ROBOT_LOC_MODE_MED_CPU_VAL = 95; // TODO: Change by actual value
+    public static final double ROBOT_LOC_MODE_HI_CPU_VAL = 95; // TODO: Change by actual value
+    public static final boolean ROBOT_LOC_MODE_HI_KINECT = true;
+    public static final boolean ROBOT_LOC_MODE_MED_KINECT = true;
+    public static final boolean ROBOT_LOC_MODE_LO_KINECT = false;
+    public static final String ROBOT_LOC_MODE_MAX_RECONF_CONST = "LOC_MODE_RECONF_MAX";
+    public static final String ROBOT_LOC_MODE_RECONF_VAR = "kr";
+    public static final String ROBOT_LOC_MODE_MAX_RECONF_VAL = "2";
+
+
+    public static final float  MAXIMUM_KINECT_OFF_DISTANCE_VAL = 6.0f; // Maximum driving distance with kinect off in m.
+
+
+
     // Goal and stop condition configuration constants
 
     public static final String GOAL_PRED="goal"; // Goal achieved predicate (currently target location reached)
@@ -118,7 +115,7 @@ public class MapTranslator {
     public static final double MAX_DISTANCE = 999.0; // Distance assigned to disabled edges (for distance reward computation)
     public static final double DEFAULT_TIME_TACTIC_TIME=1; // Tactics are not instantaneous;
     public static final String TACTIC_PREFIX="t";
-    
+
     // Properties' indices
     public static final int TIME_PROPERTY = 0;
     public static final int ACCURACY_PROPERTY = 1;
@@ -221,7 +218,7 @@ public class MapTranslator {
         buf+="const "+ROBOT_LOC_MODE_MED_CONST+"="+ROBOT_LOC_MODE_MED_VAL+";\n";
         buf+="const "+ROBOT_LOC_MODE_HI_CONST+"="+ROBOT_LOC_MODE_HI_VAL+";\n";   
         buf+="const "+ROBOT_LOC_MODE_MAX_RECONF_CONST+"="+ROBOT_LOC_MODE_MAX_RECONF_VAL+";\n";   
-        
+
         buf+="\n"+generateBatteryUpdates();
         buf+="module "+ROBOT_PLAYER_NAME+MODULE_POSTFIX_STR+"\n";
         buf+=ROBOT_BATTERY_VAR+":["+ROBOT_BATTERY_RANGE_MIN+".."+ROBOT_BATTERY_RANGE_MAX_CONST+"] init "+INITIAL_ROBOT_BATTERY_CONST+";\n";
@@ -230,11 +227,12 @@ public class MapTranslator {
         buf+=ROBOT_LOC_MODE_VAR+":["+ROBOT_LOC_MODE_LO_CONST+".."+ROBOT_LOC_MODE_HI_CONST+"] init "+ROBOT_LOC_MODE_HI_CONST+";\n";
         buf+=ROBOT_HEADING_VAR+":[0.."+String.valueOf(MissionState.Heading.values().length)+"] init "+INITIAL_ROBOT_HEADING_CONST+";\n";
         buf+=ROBOT_LOC_MODE_RECONF_VAR+":[0.."+ROBOT_LOC_MODE_MAX_RECONF_VAL+"] init 0;\n";
-        
+
         buf+="robot_done:bool init false;\n";
         buf+="\t[] true "+ROBOT_GUARD_STR+" "+STOP_GUARD_STR+" & (robot_done) -> (robot_done'=false)"+ROBOT_UPDATE_HOUSEKEEPING_STR+";\n";
-        if (!inhibitTactics)
-        	buf+="\n"+generateTacticCommands();
+        if (!inhibitTactics) {
+            buf+="\n"+generateTacticCommands();
+        }
         buf+="\n"+generateMoveCommands();
         buf+="endmodule\n\n";
         return buf;
@@ -245,11 +243,11 @@ public class MapTranslator {
      * Generates battery update formulas employed in updates of movement commands in robot module
      * @return String PRISM encoding for possible battery updates (corresponding to movements between map locations)
      */
-    
+
     private static String getDeltaEnergy(String speed, double distance, String sensing){
-    	return String.valueOf (Math.round (BatteryPredictor.batteryConsumption (speed, sensing, SpeedPredictor.moveForwardTimeSimple(distance, speed))));
+        return String.valueOf (Math.round (BatteryPredictor.batteryConsumption (speed, sensing, SpeedPredictor.moveForwardTimeSimple(distance, speed))));
     }
-    
+
     public static String generateBatteryUpdates(){
         synchronized (m_map) {
             String buf="";
@@ -258,22 +256,22 @@ public class MapTranslator {
             for (int i=0;i<m_map.getArcs().size();i++){
                 EnvMapArc a = m_map.getArcs().get(i);
                 double t_distance = a.getDistance ();
-                
+
                 String battery_delta_half_speed_lo = getDeltaEnergy(ROBOT_HALF_SPEED_CONST, t_distance, ROBOT_LOC_MODE_LO_CONST);
                 String battery_delta_half_speed_med = getDeltaEnergy(ROBOT_HALF_SPEED_CONST, t_distance, ROBOT_LOC_MODE_MED_CONST);
                 String battery_delta_half_speed_hi = getDeltaEnergy(ROBOT_HALF_SPEED_CONST, t_distance, ROBOT_LOC_MODE_HI_CONST);
-                
+
                 String battery_delta_full_speed_lo = getDeltaEnergy(ROBOT_FULL_SPEED_CONST, t_distance, ROBOT_LOC_MODE_LO_CONST);
                 String battery_delta_full_speed_med = getDeltaEnergy(ROBOT_FULL_SPEED_CONST, t_distance, ROBOT_LOC_MODE_MED_CONST);
                 String battery_delta_full_speed_hi = getDeltaEnergy(ROBOT_FULL_SPEED_CONST, t_distance, ROBOT_LOC_MODE_HI_CONST);
 
-                
+
                 String formulaBaseName = BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget();
                 buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_HI_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-"+battery_delta_half_speed_hi+") : max(0,"+ROBOT_BATTERY_VAR+"-"+battery_delta_full_speed_hi+")" +";\n";    	        
                 buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_MED_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-"+battery_delta_half_speed_med+") : max(0,"+ROBOT_BATTERY_VAR+"-"+battery_delta_full_speed_med+")" +";\n";    	        
                 buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_LO_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-"+battery_delta_half_speed_lo+") : max(0,"+ROBOT_BATTERY_VAR+"-"+battery_delta_full_speed_lo+")" +";\n";    	        
                 buf += "formula " + formulaBaseName + " = " + ROBOT_LOC_MODE_VAR +" = "+ ROBOT_LOC_MODE_LO_CONST + " ? " + formulaBaseName + "_" + ROBOT_LOC_MODE_LO_CONST +" : ( " + ROBOT_LOC_MODE_VAR +" = "+ ROBOT_LOC_MODE_MED_CONST + " ? " + formulaBaseName + "_" + ROBOT_LOC_MODE_MED_CONST  + " : " + formulaBaseName + "_" + ROBOT_LOC_MODE_HI_CONST+" );\n" ;
-            
+
             }
             return buf+"\n";
         }
@@ -290,9 +288,10 @@ public class MapTranslator {
             for (int i=0;i<m_map.getArcs().size();i++){
                 EnvMapArc a = m_map.getArcs().get(i);
                 if (a.isEnabled()){
-                	String kGuard="";
-                	if (a.getDistance() > MAXIMUM_KINECT_OFF_DISTANCE_VAL)
-                		kGuard ="& ("+ROBOT_LOC_MODE_VAR+"!="+ROBOT_LOC_MODE_LO_CONST+") ";
+                    String kGuard="";
+                    if (a.getDistance() > MAXIMUM_KINECT_OFF_DISTANCE_VAL) {
+                        kGuard ="& ("+ROBOT_LOC_MODE_VAR+"!="+ROBOT_LOC_MODE_LO_CONST+") ";
+                    }
                     buf+="\t ["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] ("+ROBOT_LOCATION_VAR+"="+a.getSource()+") "+kGuard+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) -> ("+ROBOT_LOCATION_VAR+"'="+a.getTarget()+") "+" & ("+ROBOT_BATTERY_VAR+"'="+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+")"+ " & ("+ROBOT_HEADING_VAR+"'="+HEADING_CONST_PREFIX + findArcHeading(a).name() + ") & (robot_done'=true);\n";                	
                 }
             }
@@ -319,7 +318,7 @@ public class MapTranslator {
     public static String generateSensingTacticCommands(){
         String reconfGuard = "& ("+ROBOT_LOC_MODE_RECONF_VAR+"<"+ROBOT_LOC_MODE_MAX_RECONF_CONST+") ";
         String reconfUpdate = "& ("+ROBOT_LOC_MODE_RECONF_VAR+"'="+ROBOT_LOC_MODE_RECONF_VAR+"+1) ";
-    	String buf="\t // Sensing tactics (lo=kinect off, med=kinect on+low cpu+low accuracy, hi=kinect on+high cpu+high accuracy\n";
+        String buf="\t // Sensing tactics (lo=kinect off, med=kinect on+low cpu+low accuracy, hi=kinect on+high cpu+high accuracy\n";
         buf+="\t [t_set_loc_lo] ("+ROBOT_LOC_MODE_VAR+"!="+ROBOT_LOC_MODE_LO_CONST+") "+ reconfGuard +STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_LOC_MODE_VAR+"'="+ROBOT_LOC_MODE_LO_CONST+")"+ reconfUpdate +" & (robot_done'=true);\n";                	
         buf+="\t [t_set_loc_med] ("+ROBOT_LOC_MODE_VAR+"!="+ROBOT_LOC_MODE_MED_CONST+") "+ reconfGuard +STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_LOC_MODE_VAR+"'="+ROBOT_LOC_MODE_MED_CONST+")"+ reconfUpdate + " & (robot_done'=true);\n";                	
         buf+="\t [t_set_loc_hi] ("+ROBOT_LOC_MODE_VAR+"!="+ROBOT_LOC_MODE_HI_CONST+") "+ reconfGuard + STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_LOC_MODE_VAR+"'="+ROBOT_LOC_MODE_HI_CONST+")"+ reconfUpdate + " & (robot_done'=true);\n";                	
@@ -342,18 +341,18 @@ public class MapTranslator {
      * @return
      */
     public static String generateChargingTacticCommands(){
-    	String guard_can_charge=" & (false";
-    	synchronized(m_map){
-        	for (Map.Entry<String, EnvMapNode> e: m_map.getNodes().entrySet()){
-        		if (e.getValue().isChargingStation()){
-        			guard_can_charge +="|"+ROBOT_LOCATION_VAR+"="+e.getValue().getId();
+        String guard_can_charge=" & (false";
+        synchronized(m_map){
+            for (Map.Entry<String, EnvMapNode> e: m_map.getNodes().entrySet()){
+                if (e.getValue().isChargingStation()){
+                    guard_can_charge +="|"+ROBOT_LOCATION_VAR+"="+e.getValue().getId();
 
-        		}	
-        	}
-        guard_can_charge+=") & ("+ROBOT_BATTERY_VAR+"<1500*"+String.valueOf(BatteryPredictor.m_battery_scaling_factor)+")";	//TODO: refine this constraint
+                }	
+            }
+            guard_can_charge+=") & ("+ROBOT_BATTERY_VAR+"<1500*"+String.valueOf(BatteryPredictor.m_battery_scaling_factor)+")";	//TODO: refine this constraint
         }
-    	
-    	String buf="\t // Recharge tactics\n";
+
+        String buf="\t // Recharge tactics\n";
         buf+="\t [t_recharge] true "+ guard_can_charge +STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_BATTERY_VAR+"'=b_upd_charge"+")"+" & (robot_done'=true);\n";                	
         return buf+"\n";
     }
@@ -368,12 +367,12 @@ public class MapTranslator {
             NumberFormat f = new DecimalFormat("#0.0000");
 
             if (!inhibitTactics){
-	            buf+="\t[t_set_half_speed] true : "+String.valueOf(DEFAULT_TIME_TACTIC_TIME)+";\n";
-	            buf+="\t[t_set_full_speed] true : "+String.valueOf(DEFAULT_TIME_TACTIC_TIME)+";\n";
-	            buf+="\t[t_set_loc_lo] true : "+String.valueOf(DEFAULT_TIME_TACTIC_TIME)+";\n";
-	            buf+="\t[t_set_loc_med] true : "+String.valueOf(DEFAULT_TIME_TACTIC_TIME)+";\n";
-	            buf+="\t[t_set_loc_hi] true : "+String.valueOf(DEFAULT_TIME_TACTIC_TIME)+";\n";
-	            buf+="\t[t_recharge] true : "+String.valueOf(ROBOT_CHARGING_TIME)+";\n";
+                buf+="\t[t_set_half_speed] true : "+String.valueOf(DEFAULT_TIME_TACTIC_TIME)+";\n";
+                buf+="\t[t_set_full_speed] true : "+String.valueOf(DEFAULT_TIME_TACTIC_TIME)+";\n";
+                buf+="\t[t_set_loc_lo] true : "+String.valueOf(DEFAULT_TIME_TACTIC_TIME)+";\n";
+                buf+="\t[t_set_loc_med] true : "+String.valueOf(DEFAULT_TIME_TACTIC_TIME)+";\n";
+                buf+="\t[t_set_loc_hi] true : "+String.valueOf(DEFAULT_TIME_TACTIC_TIME)+";\n";
+                buf+="\t[t_recharge] true : "+String.valueOf(ROBOT_CHARGING_TIME)+";\n";
             }
             for (int i=0;i<m_map.getArcs().size();i++){
                 EnvMapArc a = m_map.getArcs().get(i);
@@ -456,8 +455,8 @@ public class MapTranslator {
     public static double findArcOrientation(double src_x, double src_y, double tgt_x, double tgt_y){
         return Math.atan2( tgt_y - src_y, tgt_x - src_x);
     }
-    
-    
+
+
     /**
      * Determines the heading between two endpoints of an arc (snaps result of findArcOrientation to one of the predetermined headings)
      * @param a Map arc
@@ -466,7 +465,7 @@ public class MapTranslator {
     public static MissionState.Heading findArcHeading (EnvMapArc a) {
         return MissionState.Heading.convertFromRadians(findArcOrientation(a));
     }
-    
+
 
     public static Stack<String> connectionPath = null; // Aux data structures for finding all paths between arbitrary locations
     public static List<Stack> connectionPaths = null;
@@ -535,29 +534,30 @@ public class MapTranslator {
      * @return String PRISM encoding of the plan constraint module
      */
     public static String generatePlanConstraintModule(List<String> plan){
-    	LinkedList<String> allTactics = new LinkedList<String>(Arrays.asList("t_set_loc_lo", "t_set_loc_med", "t_set_loc_hi", "t_set_half_speed", "t_set_full_speed", "t_recharge"));
-    	
+        LinkedList<String> allTactics = new LinkedList<String>(Arrays.asList("t_set_loc_lo", "t_set_loc_med", "t_set_loc_hi", "t_set_half_speed", "t_set_full_speed", "t_recharge"));
+
         String buf="\n"+"module plan_constraint\n";
         buf+= "pc_s : [0.."+String.valueOf(plan.size())+"] init 0;\n";
         for (int i=0; i< plan.size(); i++){
-        	buf += "\t["+plan.get(i)+"] (pc_s="+String.valueOf(i)+") -> (pc_s'="+String.valueOf(i+1)+"); \n";
+            buf += "\t["+plan.get(i)+"] (pc_s="+String.valueOf(i)+") -> (pc_s'="+String.valueOf(i+1)+"); \n";
         }
-        
+
         LinkedList<String> allowed = new LinkedList<String>();
         for (int i=0; i< plan.size(); i++){
-        	String action = plan.get(i);
-        	String[] e = action.split("_");
-        	if (!Objects.equal(MapTranslator.TACTIC_PREFIX, e[0])) {
-        		allowed.add(plan.get(i));
-        	} 
+            String action = plan.get(i);
+            String[] e = action.split("_");
+            if (!Objects.equal(MapTranslator.TACTIC_PREFIX, e[0])) {
+                allowed.add(plan.get(i));
+            } 
         }
         buf+="\t // Disallowed tactics\n";
         for (int i=0; i< allTactics.size(); i++){
-        	String action = allTactics.get(i);
-        	if (!plan.contains(action))
-        			buf += "\t[" + action + "] false -> true; \n";
+            String action = allTactics.get(i);
+            if (!plan.contains(action)) {
+                buf += "\t[" + action + "] false -> true; \n";
+            }
         }
-        		
+
         buf+= "\t // Allowed arcs: "+ String.valueOf(allowed) + "\n";
         buf+="\t // Disallowed arcs\n";
         synchronized(m_map) {
@@ -568,12 +568,12 @@ public class MapTranslator {
                 }
             }
         }
-        
+
         buf += "endmodule\n";
         return buf;
     }
 
-    
+
 
     /**
      * Returns shortest distance between two nodes computed using Dijkstra's Algorithm
@@ -655,12 +655,12 @@ public class MapTranslator {
      * @param inhibitTactics boolean if true, it generates a specification only with move actions, disabling the rest of actions and tactics
      * @return String PRISM encoding for adaptation scenario
      */
-    
+
     public static String getMapTranslation(){
-    	return getMapTranslation(false);
+        return getMapTranslation(false);
     }
-        
-    	
+
+
     public static String getMapTranslation(boolean inhibitTactics){
         String buf="// Generated by BRASS MARS Robot Map PRISM Translator "+VERSION_STR+".\n\n";
         buf+=generateGameStructure()+"\n";
@@ -680,11 +680,11 @@ public class MapTranslator {
      * @param path List of strings containing the sequence of locations in the path, e.g., ["l1", ..., "l8"]
      * @return String PRISM encoding for constrained adaptation scenario
      */
-    
+
     public static String getConstrainedToPathMapTranslation(List<String> path){
-    	return getConstrainedToPathMapTranslation(path, false);
+        return getConstrainedToPathMapTranslation(path, false);
     }
-    
+
     public static String getConstrainedToPathMapTranslation(List<String> path, boolean inhibitTactics){
         return getMapTranslation(inhibitTactics) +"\n\n"+ generatePathConstraintModule(path);
     }
@@ -697,18 +697,18 @@ public class MapTranslator {
     public static String getConstrainedToPlanMapTranslation(List<String> plan){
         return getMapTranslation() +"\n\n"+ generatePlanConstraintModule(plan);
     }
-    
+
     /**
      * Generates and exports the PRISM specification for an adaptation scenario to a text file
      * @param f String filename to export PRISM specification (constrained to a path)
      * @param path List of strings containing the sequence of locations in the path, e.g., ["l1", ..., "l8"]
      */
-   
-    
+
+
     public static void exportMapTranslation(String f, List<String> path) {
         exportMapTranslation (f, path, false);
     }
-    
+
     public static void exportMapTranslation(String f, List<String> path, boolean inhibitTactics) {
         exportTranslation(f, getConstrainedToPathMapTranslation(path, inhibitTactics));
     }
@@ -719,10 +719,10 @@ public class MapTranslator {
      * @param plan String list with action sequence (e.g., ["l1_to_l2", ..., "t_recharge", ..., "l4_to_l5"])
      */
     public static void exportConstrainedToPlanMapTranslation(String f, List<String> plan) {
-    	exportTranslation(f, getConstrainedToPlanMapTranslation(plan));
-	}
+        exportTranslation(f, getConstrainedToPlanMapTranslation(plan));
+    }
 
-	/**
+    /**
      * Generates and exports the PRISM specification for an adaptation scenario to a text file
      * @param f String filename to export PRISM specification
      */
@@ -760,22 +760,22 @@ public class MapTranslator {
      * @return
      */
     public static Map<List, String> exportConstrainedTranslationsBetween(String f_base, String source, String target) {
-    	return exportConstrainedTranslationsBetween(f_base, source, target, false);   
+        return exportConstrainedTranslationsBetween(f_base, source, target, false);   
     }
-    
+
     public static Map<List, String> exportConstrainedTranslationsBetween(String f_base, String source, String target, boolean inhibitTactics) {
         List<Stack> paths = goFindAllPaths(source, target);
         Map<List, String> specifications = new HashMap<List, String>();
         int c=0;
         for ( List path : paths )  {
-            String filename = f_base+String.valueOf(c);
+            String filename = f_base + "/" + String.valueOf (c);
             exportMapTranslation (filename, path, inhibitTactics);
             specifications.put(path, filename);
             c++;
         }
         return specifications;
     }
-    
+
     /**
      * Class test
      * @param args
@@ -786,10 +786,10 @@ public class MapTranslator {
         setMap(dummyMap);
         System.out.println(getMapTranslation()); // Class test
         //System.out.println();
-       exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp-simple.prism", false);
-       // String export_path="/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/";
+        exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp-simple.prism", false);
+        // String export_path="/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/";
 
-       // Map<List, String> specifications = exportConstrainedTranslationsBetween (export_path, "ls", "l1");
+        // Map<List, String> specifications = exportConstrainedTranslationsBetween (export_path, "ls", "l1");
         // System.out.println(String.valueOf(specifications));
 
     }

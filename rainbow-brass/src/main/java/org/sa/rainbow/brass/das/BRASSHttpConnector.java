@@ -62,8 +62,7 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
     public void reportReady (boolean ready) {
 //        try {
         JsonObject json = getTimeJSON ();
-        json.addProperty ("STATUS", "RAINBOW_READY");
-        json.addProperty ("MESSAGE", "Rainbow is receiving information from Robot");
+        addFieldsToStatus (DASStatusT.RAINBOW_READY, "Rainbow is receiving information from Robot", json);
         String jsonStr = m_gsonPP.toJson (json);
         System.out.println ("Reporting ready: " + jsonStr);
         RequestBody body = RequestBody.create (JSON, jsonStr);
@@ -86,11 +85,7 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
     public void reportStatus (DASStatusT status, String message) {
 //        try {
         JsonObject json = getTimeJSON ();
-        JsonObject msg = new JsonObject ();
-        msg.addProperty ("msg", message);
-        msg.addProperty ("sim_time", "");
-        json.addProperty ("STATUS", status.name ());
-        json.add ("MESSAGE", msg);
+        addFieldsToStatus (status, message, json);
 
 //        json.addProperty ("MESSAGE", message);
         RequestBody body = RequestBody.create (JSON, m_gsonPP.toJson (json));
@@ -104,13 +99,20 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
 
     }
 
+    void addFieldsToStatus (DASStatusT status, String message, JsonObject json) {
+        JsonObject msg = new JsonObject ();
+        msg.addProperty ("msg", message);
+        msg.addProperty ("sim_time", -1);
+        json.addProperty ("STATUS", status.name ());
+        json.add ("MESSAGE", msg);
+    }
+
     @Override
     public void reportDone (boolean failed, String message) {
 //        try {
 
         JsonObject json = getTimeJSON ();
-        json.addProperty ("STATUS", failed ? DASStatusT.MISSION_ABORTED.name () : "MISSION_COMPLETED");
-        json.addProperty ("MESSAGE", message);
+        addFieldsToStatus (failed ? DASStatusT.MISSION_ABORTED : DASStatusT.MISSION_COMPLETED, message, json);
         RequestBody body = RequestBody.create (JSON, m_gsonPP.toJson (json));
         Request request = new Request.Builder ().url (STATUS_SERVER + "/internal/status").post (body).build ();
         CLIENT.newCall (request).enqueue (m_responseCallback);

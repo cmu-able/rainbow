@@ -194,11 +194,17 @@ public class EnvMap {
      * @param x float coordinates of the location of the new node in the map
      * @param y
      */
-    public synchronized void insertNode (String n, String na, String nb, double x, double y) {
+    public synchronized void insertNode (String n, String na, String nb, double x, double y, boolean obstacle) {
         AddNode (n, x, y);
-        removeArcs(na, nb);
         addArc (na, n, distanceBetween(na,n), true);
         addArc (n, na, distanceBetween(na,n), true);
+        if (obstacle) {
+            removeArcs (na, nb);
+        }
+        else {
+            addArc (nb, n, distanceBetween (nb, n), true);
+            addArc (n, nb, distanceBetween (nb, n), true);
+        }
         // Somehow, the planning things that n to nb is still valid
         //   addArc (nb, n, distanceBetween (nb, n), false);
         // addArc (n, nb, distanceBetween (nb, n), false);

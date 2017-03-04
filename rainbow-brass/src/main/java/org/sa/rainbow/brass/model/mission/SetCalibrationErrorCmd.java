@@ -13,14 +13,15 @@ public class SetCalibrationErrorCmd extends AbstractRainbowModelOperation<Calibr
     private CalibrationError m_error;
 
     public SetCalibrationErrorCmd (MissionStateModelInstance model, String target, String r, String r_scale, String t,
-            String t_scale, String v) {
-        super ("setCalibrationError", model, target, t, r);
+            String t_scale, String rv, String tv) {
+        super ("setCalibrationError", model, target, r, r_scale, t, t_scale, rv, tv);
         m_error = new CalibrationError ();
         m_error.translational_error = Double.parseDouble (t);
         m_error.translational_scale = Double.parseDouble (t_scale);
         m_error.rotational_error = Double.parseDouble (r);
         m_error.rotational_scale = Double.parseDouble (r_scale);
-        m_error.velocity_at_time_of_error = Double.parseDouble (v);
+        m_error.rotational_velocity_at_time_of_error = Double.parseDouble (rv);
+        m_error.translational_velocity_at_time_of_error = Double.parseDouble (tv);
     }
 
     @Override

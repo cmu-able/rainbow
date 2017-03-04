@@ -94,16 +94,22 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
                 Double.toString (r));
     }
 
-    public SetCalibrationErrorCmd setCalibrationError (double r, double r_scale, double t, double t_scale, double v) {
+    public SetCalibrationErrorCmd setCalibrationError (double r,
+            double r_scale,
+            double t,
+            double t_scale,
+            double rv,
+            double tv) {
         return new SetCalibrationErrorCmd ((MissionStateModelInstance )m_modelInstance, "", Double.toString (r),
-                Double.toString (r_scale), Double.toString (t), Double.toString (t_scale), Double.toString (v));
+                Double.toString (r_scale), Double.toString (t), Double.toString (t_scale), Double.toString (rv),
+                Double.toString (tv));
     }
 
     public RecalibrateCmd recalibrate (boolean bad) {
         return new RecalibrateCmd ((MissionStateModelInstance )m_modelInstance, "", Boolean.toString (bad));
     }
-    
+
     public SetRobotLocalizationFidelityCmd setRobotLocalizationFidelityCmd (LocalizationFidelity fidelity) {
-    	return new SetRobotLocalizationFidelityCmd((MissionStateModelInstance) m_modelInstance, "", fidelity.toString());
+        return new SetRobotLocalizationFidelityCmd((MissionStateModelInstance) m_modelInstance, "", fidelity.toString());
     }
 }

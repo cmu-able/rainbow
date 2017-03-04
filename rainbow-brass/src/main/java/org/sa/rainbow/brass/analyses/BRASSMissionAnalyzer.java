@@ -163,7 +163,7 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
                     String rx = Double.toString (pose.getX ());
                     String ry = Double.toString (pose.getY ());
                     InsertNodeCmd insertNodeCmd = envModel.getCommandFactory ()
-                            .insertNodeCmd (n, na, nb, rx, ry);
+                            .insertNodeCmd (n, na, nb, rx, ry, "true");
                     log ("Inserting node '" + n + "' at (" + rx + ", " + ry + ") between " + na + " and " + nb);
 
                     // Set robot obstructed flag -- trigger planning for adaptation
