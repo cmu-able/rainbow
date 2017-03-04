@@ -680,8 +680,13 @@ public class MapTranslator {
      * @param path List of strings containing the sequence of locations in the path, e.g., ["l1", ..., "l8"]
      * @return String PRISM encoding for constrained adaptation scenario
      */
+    
     public static String getConstrainedToPathMapTranslation(List<String> path){
-        return getMapTranslation() +"\n\n"+ generatePathConstraintModule(path);
+    	return getConstrainedToPathMapTranslation(path, false);
+    }
+    
+    public static String getConstrainedToPathMapTranslation(List<String> path, boolean inhibitTactics){
+        return getMapTranslation(inhibitTactics) +"\n\n"+ generatePathConstraintModule(path);
     }
 
     /**
@@ -698,8 +703,14 @@ public class MapTranslator {
      * @param f String filename to export PRISM specification (constrained to a path)
      * @param path List of strings containing the sequence of locations in the path, e.g., ["l1", ..., "l8"]
      */
+   
+    
     public static void exportMapTranslation(String f, List<String> path) {
-        exportTranslation(f, getConstrainedToPathMapTranslation(path));
+        exportMapTranslation (f, path, false);
+    }
+    
+    public static void exportMapTranslation(String f, List<String> path, boolean inhibitTactics) {
+        exportTranslation(f, getConstrainedToPathMapTranslation(path, inhibitTactics));
     }
 
     /**
@@ -749,12 +760,16 @@ public class MapTranslator {
      * @return
      */
     public static Map<List, String> exportConstrainedTranslationsBetween(String f_base, String source, String target) {
+    	return exportConstrainedTranslationsBetween(f_base, source, target, false);   
+    }
+    
+    public static Map<List, String> exportConstrainedTranslationsBetween(String f_base, String source, String target, boolean inhibitTactics) {
         List<Stack> paths = goFindAllPaths(source, target);
         Map<List, String> specifications = new HashMap<List, String>();
         int c=0;
         for ( List path : paths )  {
             String filename = f_base+String.valueOf(c);
-            exportMapTranslation (filename, path);
+            exportMapTranslation (filename, path, inhibitTactics);
             specifications.put(path, filename);
             c++;
         }
@@ -771,7 +786,7 @@ public class MapTranslator {
         setMap(dummyMap);
         System.out.println(getMapTranslation()); // Class test
         //System.out.println();
-       exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp.prism", true);
+       exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp-simple.prism", false);
        // String export_path="/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/";
 
        // Map<List, String> specifications = exportConstrainedTranslationsBetween (export_path, "ls", "l1");

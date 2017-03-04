@@ -66,10 +66,15 @@ public class DecisionEngine {
      * @param origin String label of origin map location
      * @param destination String label of destination map location
      */
-    public static void generateCandidates(String origin, String destination){
+    
+    public static void generateCandidates (String origin, String destination){
+    	generateCandidates(origin, destination, false);
+    }
+    
+    public static void generateCandidates(String origin, String destination, boolean inhibitTactics){
     	m_origin = origin;
     	m_destination = destination;
-        m_candidates = m_mt.exportConstrainedTranslationsBetween(m_export_path, origin, destination);	
+        m_candidates = m_mt.exportConstrainedTranslationsBetween(m_export_path, origin, destination, inhibitTactics);	
     }
 
     /**
@@ -144,7 +149,7 @@ public class DecisionEngine {
         	System.out.println(" ("+String.valueOf(coordinates.get(j).getX())+", "+String.valueOf(coordinates.get(j).getY())+") ");
         }
         
-        MapTranslator.exportConstrainedToPlanMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp.prism", pp.getPlan());
+//        MapTranslator.exportConstrainedToPlanMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp.prism", pp.getPlan());
         
     }
 

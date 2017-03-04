@@ -191,7 +191,31 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
                 // Challenge problem 2
                 if (missionStateModel.getModelInstance ().isBadlyCalibrated ()) {
                     BrassPlan recalibrate = new Recalibrate (missionStateModel);
-                    AdaptationTree<BrassPlan> at = new AdaptationTree<> (recalibrate);
+                    //AdaptationTree<BrassPlan> rc = new AdaptationTree<> (recalibrate);
+                   
+                    // Generate new plan with inhibited tactics
+                    EnvMap map = envModel.getModelInstance ();
+                    m_de.setMap (map);
+                    
+                  
+                    LocationRecording pose = missionStateModel.getModelInstance ().getCurrentPose ();
+                    String label = envModel.getModelInstance ().getNode (pose.getX (), pose.getY ()).getLabel ();
+
+                    m_de.generateCandidates (label, ms.getTargetWaypoint (), true); // Generate candidate solutions to go from current waypoint to target one (inhibited tactics, just move commands)
+                    m_de.scoreCandidates (map, String.valueOf (ms.getBatteryCharge ()), "1"); // Property 1 in file deals with time subject to target reachability (R{"time"}min=? [ F goal ])
+                    
+                    PrismPolicy prismPolicy = new PrismPolicy (m_de.selectPolicy ());
+                    prismPolicy.readPolicy ();
+                    
+                    PolicyToIG translator = new PolicyToIG (prismPolicy, map);
+                    NewInstructionGraph nig = new NewInstructionGraph (igModel, translator.translate ());
+                    
+                    
+                    AdaptationTree<BrassPlan> at = new AdaptationTree<> (AdaptationExecutionOperatorT.SEQUENCE);
+                    // TODO: Need to add a leaf with stop here
+                    at.addLeaf(recalibrate);
+                    at.addLeaf (nig);
+
                     m_adaptationEnqueuePort.offerAdaptation (at, new Object[0]);
                     m_executingPlan = true;
                 }

@@ -33,7 +33,6 @@ public class EnvMap {
         m_new_node_id=0;
         m_arcs = new LinkedList<EnvMapArc> ();
         //initWithSimpleMap(); // TODO: Substitute hardwired version of the map by one parsed from file
-//        loadFromFile("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/map.json");
         loadFromFile (props.getProperty (PropertiesConnector.MAP_PROPKEY));
     }
 
@@ -326,7 +325,7 @@ public class EnvMap {
      */
     public static void main(String[] args) {
         EnvMap dummyMap = new EnvMap (null, null);
-        dummyMap.loadFromFile("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/map.json");
+        dummyMap.loadFromFile(PropertiesConnector.MAP_PROPKEY);
     }
 
 }
