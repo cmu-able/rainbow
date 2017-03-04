@@ -1,6 +1,7 @@
 package org.sa.rainbow.brass.analyses;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.sa.rainbow.brass.model.instructions.ForwardInstruction;
@@ -31,6 +32,7 @@ import org.sa.rainbow.core.ports.IModelUSBusPort;
 import org.sa.rainbow.core.ports.IModelsManagerPort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
+import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowChangeBusSubscription;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowModelChangeCallback;
 
@@ -43,7 +45,7 @@ public class AccuracyAnalyzer extends AbstractRainbowRunnable implements IRainbo
 	
 	public static final String NAME = "BRASS Accuracy Evaluator";
 	
-	private static final int DISTANCE_BUFFER = 50; // centimeters //TODO
+	private static final int GOAL_RADIUS = 50; // centimeters //TODO
     
     private IModelChangeBusSubscriberPort		m_modelChangePort;
     private IModelsManagerPort					m_modelsManagerPort;
@@ -239,97 +241,182 @@ public class AccuracyAnalyzer extends AbstractRainbowRunnable implements IRainbo
     private double getExpectedIGEnergyConsumption(IInstruction currentInstruction, List<IInstruction> remainingInstructions) {
     	double totalEnergy = 0;
     	
+    	// Goal location
+    	double goalX = m_envMap.getNodeX(m_missionState.getTargetWaypoint());
+		double goalY = m_envMap.getNodeY(m_missionState.getTargetWaypoint());
+    	
     	double sourceX = m_missionState.getCurrentPose().getX();
 		double sourceY = m_missionState.getCurrentPose().getY();
 		double sourceW = m_missionState.getCurrentPose().getRotation();
-		Heading sourceHeading = m_missionState.getCurrentPose().getHeading();
 		
 		List<IInstruction> allInstructions = new ArrayList<>();
 		allInstructions.add(currentInstruction);
 		allInstructions.addAll(remainingInstructions);
 		
-    	for (IInstruction instruction : allInstructions) {
-    		double instEnergy = 0;
-    		
-    		if (instruction instanceof MoveAbsHInstruction) {
+		int i = 0;
+		for (IInstruction instruction : allInstructions) {
+			double instEnergy = 0;
+			
+			// Special case: for the last instruction, only calculate the energy required to get
+			// within a certain radius from the goal location
+			if (i == allInstructions.size() - 1 && instruction instanceof MoveAbsHInstruction) {
+				// For MoveAbsH, use the target location that is GOAL_RADIUS from the goal, and is nearest the source
+				Pair<Double, Double> targetLocation = getNearestTargetLocation(sourceX, sourceY, goalX, goalY, GOAL_RADIUS);
+				double targetX = targetLocation.firstValue();
+				double targetY = targetLocation.secondValue();
+				
+				MoveAbsHInstruction moveAbsH = (MoveAbsHInstruction) instruction;
+				String newMoveAbsH = 
+						String.format("MoveAbsH(%d, %d, %d, %d)", targetX, targetY, moveAbsH.getSpeed(), moveAbsH.getTargetW());
+				MoveAbsHInstruction moveAbsHCopy = 
+						new MoveAbsHInstruction(moveAbsH.getInstructionLabel(), newMoveAbsH, moveAbsH.getNextInstructionLabel());
+				instEnergy = getMoveAbsHEnergyConsumption(moveAbsHCopy, sourceX, sourceY, sourceW);
+				
+			} else if (i == allInstructions.size() - 1 && instruction instanceof ForwardInstruction) {
+				// For Forward, use the distance that is GOAL_RADIUS shorter than the original distance
+				ForwardInstruction forward = (ForwardInstruction) instruction;
+				String newForward = String.format("Forward(%d, %d)", forward.getDistance() - GOAL_RADIUS, forward.getSpeed());
+				ForwardInstruction forwardCopy = 
+						new ForwardInstruction(forward.getInstructionLabel(), newForward, forward.getNextInstructionLabel());
+				instEnergy = getForwardEnergyConsumption(forwardCopy, sourceX, sourceY, sourceW);
+				
+			} else if (instruction instanceof MoveAbsHInstruction) {
     			MoveAbsHInstruction moveAbsH = (MoveAbsHInstruction) instruction;
-    			double targetX = moveAbsH.getTargetX();
-    			double targetY = moveAbsH.getTargetY();
-    			double targetW = moveAbsH.getTargetW();
-    			Heading targetHeading = Heading.convertFromRadians(targetW);
-    			double moveSpeed = moveAbsH.getSpeed();
-    			double rotateSpeed = MapTranslator.ROBOT_ROTATIONAL_SPEED_VALUE;
-    			
-    			double manhattanDistance = Math.abs(sourceX - targetX) + Math.abs(sourceY - targetY);
-    			boolean rotating = sourceHeading != targetHeading;
-    			boolean kinectEnabled = true;
-    			double cpuAvgUsage = 0; //TODO
-    			double moveTime = manhattanDistance / moveSpeed;
-    			double rotateTime = Math.abs(sourceW - targetW) / rotateSpeed;
-    			
-    			String moveSpeedStr;
-    			
-    			if (moveSpeed == MapTranslator.ROBOT_HALF_SPEED_VALUE) {
-    				moveSpeedStr = MapTranslator.ROBOT_HALF_SPEED_CONST;
-    			} else if (moveSpeed == MapTranslator.ROBOT_FULL_SPEED_VALUE) {
-    				moveSpeedStr = MapTranslator.ROBOT_FULL_SPEED_CONST;
-    			} else {
-    				moveSpeedStr = MapTranslator.ROBOT_HALF_SPEED_CONST;
-    			}
-    			
-    			// Energy consumed by straight move
-    			double moveEnergy = BatteryPredictor.batteryConsumption(moveSpeedStr, false, kinectEnabled, cpuAvgUsage, moveTime);
-    			instEnergy += moveEnergy;
-    			
-    			// Energy consumed by rotation, if any
-    			if (rotating) {
-    				double rotateEnergy = BatteryPredictor.batteryConsumption("", true, kinectEnabled, cpuAvgUsage, rotateTime);
-    				instEnergy += rotateEnergy;
-    			}
+    			instEnergy = getMoveAbsHEnergyConsumption(moveAbsH, sourceX, sourceY, sourceW);
     			
     			// Update source pose for the next instruction
-    			sourceX = targetX;
-    			sourceY = targetY;
-    			sourceW = targetW;
-    			sourceHeading = targetHeading;
+    			sourceX = moveAbsH.getTargetX();;
+    			sourceY = moveAbsH.getTargetY();
+    			sourceW = moveAbsH.getTargetW();
     		} else if (instruction instanceof ForwardInstruction) {
     			ForwardInstruction forward = (ForwardInstruction) instruction;
-    			double distance = forward.getDistance();
-    			double speed = forward.getSpeed();
-    			// Approximate target location
-    			// Assume that the current location is close to the location where this Forward command was issued
-    			// TODO: ensure this
-    			double targetX = sourceX + distance * Math.cos(sourceW);
-    			double targetY = sourceY + distance * Math.sin(sourceW);
-    			
-    			double euclideanDistance = Math.sqrt(Math.pow(sourceX - targetX, 2) + Math.pow(sourceY - targetY, 2));
-    			boolean rotating = false;
-    			boolean kinectEnabled = false;
-    			double cpuAvgUsage = 0; //TODO
-    			double moveTime = euclideanDistance / speed;
-    			
-    			String speedStr;
-    			
-    			if (speed == MapTranslator.ROBOT_HALF_SPEED_VALUE) {
-    				speedStr = MapTranslator.ROBOT_HALF_SPEED_CONST;
-    			} else if (speed == MapTranslator.ROBOT_FULL_SPEED_VALUE) {
-    				speedStr = MapTranslator.ROBOT_FULL_SPEED_CONST;
-    			} else {
-    				speedStr = MapTranslator.ROBOT_HALF_SPEED_CONST;
-    			}
-    			
-    			// Energy consumed by straight move
-    			instEnergy += BatteryPredictor.batteryConsumption(speedStr, rotating, kinectEnabled, cpuAvgUsage, moveTime);
+    			instEnergy = getForwardEnergyConsumption(forward, sourceX, sourceY, sourceW);
     			
     			// Update source pose for the next instruction
-    			sourceX = targetX;
-    			sourceY = targetY;
+    			sourceX = sourceX + forward.getDistance() * Math.cos(sourceW);;
+    			sourceY = sourceY + forward.getDistance() * Math.sin(sourceW);
+    		} else {
+    			//TODO
     		}
     		
     		totalEnergy += instEnergy;
-    	}
+    		i++;
+		}
     	
     	return totalEnergy;
     }
-
+    
+    /**
+     * Finds the nearest (x, y) location to the source location that is a given distance away from the goal.
+     */
+    private Pair<Double, Double> getNearestTargetLocation(double sourceX, double sourceY, 
+    		double goalX, double goalY, double buffer) {
+    	double lowerBoundX = goalX - buffer;
+		double upperBoundX = goalX + buffer;
+		double lowerBoundY = goalY - buffer;
+		double upperBoundY = goalY + buffer;
+		
+    	List<Double> targetXs = new ArrayList<>();
+		List<Double> targetYs = new ArrayList<>();
+		targetXs.add(goalX);
+		targetYs.add(upperBoundY);
+		targetXs.add(upperBoundX);
+		targetYs.add(goalY);
+		targetXs.add(goalX);
+		targetYs.add(lowerBoundY);
+		targetXs.add(lowerBoundX);
+		targetYs.add(goalY);
+		
+		List<Double> manhattanDistances = new ArrayList<>();
+		manhattanDistances.add(getManhattanDistance(sourceX, sourceY, targetXs.get(0), targetXs.get(0)));
+		manhattanDistances.add(getManhattanDistance(sourceX, sourceY, targetXs.get(1), targetXs.get(1)));
+		manhattanDistances.add(getManhattanDistance(sourceX, sourceY, targetXs.get(2), targetXs.get(2)));
+		manhattanDistances.add(getManhattanDistance(sourceX, sourceY, targetXs.get(3), targetXs.get(3)));
+		int minIndex = manhattanDistances.indexOf(Collections.min(manhattanDistances));
+		double targetX = targetXs.get(minIndex);
+		double targetY = targetYs.get(minIndex);
+		Pair<Double, Double> targetLocation = new Pair<Double, Double>(targetX, targetY);
+		return targetLocation;
+    }
+    
+    private double getManhattanDistance(double sourceX, double sourceY, double targetX, double targetY) {
+    	return Math.abs(sourceX - targetX) + Math.abs(sourceY - targetY);
+    }
+    
+    /**
+     * Calculates the energy consumption of MoveAbs(x, y, v, w)
+     */
+    private double getMoveAbsHEnergyConsumption(MoveAbsHInstruction moveAbsH, double sourceX, double sourceY, double sourceW) {
+    	double targetX = moveAbsH.getTargetX();
+		double targetY = moveAbsH.getTargetY();
+		double targetW = moveAbsH.getTargetW();
+		double moveSpeed = moveAbsH.getSpeed();
+		double rotateSpeed = MapTranslator.ROBOT_ROTATIONAL_SPEED_VALUE;
+		double cpuAvgUsage = 0; //TODO
+		
+		double moveAbsHEnergy = getMovementEnergyConsumption(true, sourceX, sourceY, sourceW, targetX, targetY, targetW, 
+				moveSpeed, rotateSpeed, true, cpuAvgUsage);
+		return moveAbsHEnergy;
+    }
+    
+    /**
+     * Calculates the energy consumption of Forward(d, v)
+     */
+    private double getForwardEnergyConsumption(ForwardInstruction forward, double sourceX, double sourceY, double sourceW) {
+    	double distance = forward.getDistance();
+		double speed = forward.getSpeed();
+		// Approximate target location
+		// Assume that the current location is close to the location where this Forward command was issued
+		// TODO: ensure this
+		double targetX = sourceX + distance * Math.cos(sourceW);
+		double targetY = sourceY + distance * Math.sin(sourceW);
+		double cpuAvgUsage = 0; //TODO
+		
+		double forwardEnergy = getMovementEnergyConsumption(false, sourceX, sourceY, sourceW, targetX, targetY, sourceW, 
+				speed, 0, false, cpuAvgUsage);
+		return forwardEnergy;
+    }
+    
+    /**
+     * Calculates the energy consumption of a movement
+     */
+    private double getMovementEnergyConsumption(boolean isManhattanDistance,
+    		double sourceX, double sourceY, double sourceW,
+    		double targetX, double targetY, double targetW,
+    		double moveSpeed, double rotateSpeed, boolean kinectEnabled, double cpuAvgUsage) {
+    	String moveSpeedStr;
+		
+		if (moveSpeed == MapTranslator.ROBOT_HALF_SPEED_VALUE) {
+			moveSpeedStr = MapTranslator.ROBOT_HALF_SPEED_CONST;
+		} else if (moveSpeed == MapTranslator.ROBOT_FULL_SPEED_VALUE) {
+			moveSpeedStr = MapTranslator.ROBOT_FULL_SPEED_CONST;
+		} else {
+			moveSpeedStr = MapTranslator.ROBOT_HALF_SPEED_CONST;
+		}
+		
+		double distance;
+		if (isManhattanDistance) {
+			// Manhattan distance
+			distance = Math.abs(sourceX - targetX) + Math.abs(sourceY - targetY);
+		} else {
+			// Euclidean distance
+			distance = Math.sqrt(Math.pow(sourceX - targetX, 2) + Math.pow(sourceY - targetY, 2));
+		}
+		
+		// Energy consumed by straight move
+		double moveTime = distance / moveSpeed;
+		double moveEnergy = BatteryPredictor.batteryConsumption(moveSpeedStr, false, kinectEnabled, cpuAvgUsage, moveTime);
+		double instEnergy = moveEnergy;
+		
+		boolean rotating = Heading.convertFromRadians(sourceW) != Heading.convertFromRadians(targetW);
+		
+		// Energy consumed by rotation, if any
+		if (rotating) {
+			double rotateTime = Math.abs(sourceW - targetW) / rotateSpeed;
+			double rotateEnergy = BatteryPredictor.batteryConsumption("", true, kinectEnabled, cpuAvgUsage, rotateTime);
+			instEnergy += rotateEnergy;
+		}
+		
+		return instEnergy;
+    }
 }
