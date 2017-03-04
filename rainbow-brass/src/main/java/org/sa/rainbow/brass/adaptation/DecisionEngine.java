@@ -104,7 +104,7 @@ public class DecisionEngine {
      * @return String filename of the selected policy
      */
     public static String selectPolicy(){
-        Map.Entry<List, Double> maxEntry = null;
+        Map.Entry<List, Double> maxEntry = m_scoreboard.entrySet().iterator().next();
         for (Map.Entry<List, Double> entry : m_scoreboard.entrySet())
         {
             if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) < 0)
