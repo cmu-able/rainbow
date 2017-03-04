@@ -26,7 +26,7 @@ effector-types:
     command: recalibrate($<r>)
     type: script
     scriptInfo:
-      path: "${_effectors.path}/recalibrate.sh"
+      path: "${_effectors.path}/setCalibration.sh"
       
 effectors:
   

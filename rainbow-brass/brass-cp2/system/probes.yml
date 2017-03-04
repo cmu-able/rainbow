@@ -18,4 +18,13 @@ probes:
       args.length: 2
       args.0: "${rainbow.path}/system/probes/rostopicprobe.sh"
       args.1: "/amcl_pose/pose/pose:1 /ig_action_server/feedback/feedback/sequence /calibration/calibration_error"
+      
+  BRASSTargetProbe:
+    # Probe to report to Rainbow what the target node is
+    alias: brasstargetprobe
+    location: "${customize.system.target.ros}"
+    type: script
+    scriptInfo: 
+      path: "${rainbow.path}/system/probes/rostargetprobe.sh"
+      argument: "/test/data"
 
