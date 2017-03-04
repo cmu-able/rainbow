@@ -5,6 +5,7 @@ import java.util.List;
 import org.sa.rainbow.brass.PropertiesConnector;
 import org.sa.rainbow.brass.adaptation.IGToPrismActionSequence;
 import org.sa.rainbow.brass.adaptation.PrismConnectorAPI;
+import org.sa.rainbow.brass.model.instructions.ChargeInstruction;
 import org.sa.rainbow.brass.model.instructions.ForwardInstruction;
 import org.sa.rainbow.brass.model.instructions.IInstruction;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
@@ -259,21 +260,27 @@ public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowA
             double remainingStartX;
             double remainingStartY;
 
-            MoveAbsHInstruction prevMoveAbsH;
-
             if (currentInstruction instanceof MoveAbsHInstruction) {
                 // The current instruction is of type MoveAbsH
                 MoveAbsHInstruction currentMoveAbsH = (MoveAbsHInstruction) currentInstruction;
                 remainingStartX = currentMoveAbsH.getTargetX();
                 remainingStartY = currentMoveAbsH.getTargetY();
-            } else if ((prevMoveAbsH = getPreviousMoveAbsH(currentInstruction)) != null) {
-                // There is a previous instruction of type MoveAbsH
-                remainingStartX = prevMoveAbsH.getTargetX();
-                remainingStartY = prevMoveAbsH.getTargetY();
+            } else if (currentInstruction instanceof ForwardInstruction) {
+            	// The current instruction is of type Forward
+            	ForwardInstruction currentForward = (ForwardInstruction) currentInstruction;
+            	double forwardDistance = currentForward.getDistance();
+            	double currentX = m_missionState.getCurrentPose().getX();
+            	double currentY = m_missionState.getCurrentPose().getY();
+            	double currentW = m_missionState.getCurrentPose().getRotation();
+            	// Approximate the target location of this Forward command
+    			// Assume that the current location is close to the location where this Forward command was issued
+    			// TODO: ensure this
+            	remainingStartX = currentX + forwardDistance * Math.cos(currentW);
+            	remainingStartY = currentY + forwardDistance * Math.sin(currentW);
             } else {
-                // There is no previous instruction of type MoveAbsH
-                remainingStartX = m_missionState.getInitialPose().getX();
-                remainingStartY = m_missionState.getInitialPose().getY();
+                // The current instruction is not a translational movement
+                remainingStartX = m_missionState.getCurrentPose().getX();
+                remainingStartY = m_missionState.getCurrentPose().getY();
             }
             
 			// Action sequence of the remaining instructions
@@ -336,24 +343,12 @@ public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowA
 			double targetY = currentY + distance * Math.sin(currentW);
 			double remainingEuclideanDistance = Math.sqrt(Math.pow(currentX - targetX, 2) + Math.pow(currentY - targetY, 2));
 			return remainingEuclideanDistance / speed;
+		} else if (currentInstruction instanceof ChargeInstruction) {
+			ChargeInstruction charge = (ChargeInstruction) currentInstruction;
+			return charge.getChargingTime();
 		} else {
-			//TODO
+			// The current instruction is instantaneous 
 			return 0;
-		}		
+		}
 	}
-	
-	private MoveAbsHInstruction getPreviousMoveAbsH (IInstruction instruction) {    	
-		int j = Integer.valueOf (instruction.getInstructionLabel()) - 1;
-    	for (int i = j; i > 0; i--) {
-    		String label = String.valueOf (i);
-    		IInstruction inst = m_igProgress.getInstruction(label);
-    		
-    		if (inst instanceof MoveAbsHInstruction) {
-    			return (MoveAbsHInstruction) inst;
-    		}
-    	}
-    	
-    	// No previous MoveAbsH instruction
-    	return null;
-    }
 }
