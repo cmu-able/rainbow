@@ -96,6 +96,7 @@ public class MissionState {
 
     private final ModelReference m_model;
 
+    //private List<String>         m_instructionHistory       = new ArrayList<> ();
     private Deque<Long>          m_predictedTimeHistory     = new ArrayDeque<> ();
     private Deque<Long>          m_predictedAccuracyHistory = new ArrayDeque<> ();
     private Deque<Double>        m_timeScore                = new ArrayDeque<> ();
@@ -105,11 +106,11 @@ public class MissionState {
     Deque<LocationRecording>     m_locationHistory          = new ArrayDeque<> ();
     Deque<Double>                m_chargeHistory            = new ArrayDeque<> ();
     Deque<Long>              m_deadlineHistory = new ArrayDeque<> ();
-    Deque<LocalizationFidelity>  m_localizationFidelityHistory = new ArrayDeque<> ();
+    Deque<LocalizationFidelity> m_localizationFidelityHistory = new ArrayDeque<> ();
 
     private boolean              m_robotObstructed          = false;
-    private boolean				 m_robotOnTime				= false;
-    private boolean				 m_robotAccurate			= false;
+    private boolean m_robotOnTime     = true;
+    private boolean m_robotAccurate   = true;
     private String  m_targetWaypoint  = "";
 
     private double m_currentTime = 0;
@@ -165,11 +166,11 @@ public class MissionState {
     }
 
     public void setRobotAccurate (boolean isAccurate) {
-    	m_robotAccurate = isAccurate;
+        m_robotAccurate = isAccurate;
     }
-    
+
     public boolean isRobotAccurate () {
-    	return m_robotAccurate;
+        return m_robotAccurate;
     }
 
     public void setBatteryCharge (Double charge) {
@@ -198,13 +199,13 @@ public class MissionState {
             return m_deadlineHistory.peek ();
         }
     }
-    
+
     public void setLocalizationFidelity (LocalizationFidelity fidelity) {
-    	m_localizationFidelityHistory.push (fidelity);
+        m_localizationFidelityHistory.push (fidelity);
     }
-    
+
     public LocalizationFidelity getLocalizationFidelity () {
-    	return m_localizationFidelityHistory.peek ();
+        return m_localizationFidelityHistory.peek ();
     }
 
     public void setTargetWaypoint (String waypoint) {
@@ -281,7 +282,7 @@ public class MissionState {
             }
             // Now put them back
             for (int i = ret.size (); i > 0; i--) {
-                m_groundPlaneErrorHistory.push (ret.get (i));
+                m_groundPlaneErrorHistory.push (ret.get (i - 1));
             }
         }
         return ret;
@@ -292,7 +293,9 @@ public class MissionState {
     }
 
     public void setBadlyCalibrated (boolean bad) {
-        m_isBadlyCalibrated = false;
+        System.out.println (
+                "Setting calibration state to " + bad + ". isAdapationNeeded() is now " + isAdaptationNeeded ());
+        m_isBadlyCalibrated = bad;
     }
 
     public void addGroundPlaneSample (GroundPlaneError error) {
@@ -301,8 +304,36 @@ public class MissionState {
         }
     }
 
+    protected static final int NUM_SAMPLES = 4;
+    protected double[]         r_sample    = new double[NUM_SAMPLES]; // Rolling window
+    protected int              r_num       = 0;                       // Number of samples
+    protected int              r_idx       = 0;                       // Index of oldest sample
+
+    public double rErrAvg () {
+        double sum = 0.0;
+        for (int i = 0; i < r_num; i++) {
+            sum += r_sample[i];
+        }
+        return sum / r_num;
+    }
+
     public void addCalibrationErrorSample (CalibrationError c) {
         synchronized (m_calibarationErrorHistory) {
+//            if (r_num < 3) { // Need at least 3 samples for an average
+//                // Add this to the winddow
+//                r_sample[r_idx] = c.rotational_error;
+//                r_num++;
+//                r_idx = (r_idx + 1) % NUM_SAMPLES;
+//            }
+//            if (r_num > 3) {
+//                // discount outliers
+//                r_num = Math.min (++r_num, NUM_SAMPLES);
+//                r_idx = (r_idx + 1) % NUM_SAMPLES;
+//                if (Math.abs (c.rotational_error - rErrAvg ()) < ROTATIONAL_ERROR_THRESHOLD) {
+//                    r_sample[r_idx] = c.rotational_error;
+//                }
+//            }
+//            // Record each outlier
             m_calibarationErrorHistory.push (c);
         }
     }
@@ -316,7 +347,7 @@ public class MissionState {
             }
             // Now put them back
             for (int i = ret.size (); i > 0; i--) {
-                m_calibarationErrorHistory.push (ret.get (i));
+                m_calibarationErrorHistory.push (ret.get (i - 1));
             }
         }
         return ret;

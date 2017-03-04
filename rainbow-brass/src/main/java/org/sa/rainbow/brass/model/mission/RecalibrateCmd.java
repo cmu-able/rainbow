@@ -12,7 +12,7 @@ public class RecalibrateCmd extends AbstractRainbowModelOperation<Boolean, Missi
     private boolean m_bad;
 
     public RecalibrateCmd (MissionStateModelInstance modelInstance, String target, String bad) {
-        super ("recalibrate", modelInstance, target);
+        super ("recalibrate", modelInstance, target, bad);
         m_bad = Boolean.parseBoolean (bad);
     }
 

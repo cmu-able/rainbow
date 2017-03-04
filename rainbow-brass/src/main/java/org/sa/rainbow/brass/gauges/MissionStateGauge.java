@@ -129,7 +129,7 @@ public class MissionStateGauge extends RegularPatternGauge {
             pMap.put (op.getParameters ()[1], vals[1]);
             pMap.put (op.getParameters ()[2], vals[2]);
             pMap.put (op.getParameters ()[3], vals[3]);
-            pMap.put (op.getParameters ()[4], vals[4]);
+            pMap.put (op.getParameters ()[4], ".35");
             issueCommand (op, pMap);
         }
     }

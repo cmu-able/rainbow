@@ -165,7 +165,13 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
 
     @Override
     protected void runAction () {
-        if (m_adaptationEnabled && m_errorDetected && !m_executingPlan) {
+        ModelReference missionStateRef = new ModelReference ("RobotAndEnvironmentState",
+                MissionStateModelInstance.MISSION_STATE_TYPE);
+        MissionStateModelInstance missionStateModel = (MissionStateModelInstance )m_modelsManagerPort
+                .<MissionState> getModelInstance (missionStateRef);
+        MissionState ms = missionStateModel.getModelInstance ();
+
+        if (m_adaptationEnabled && ms.isAdaptationNeeded () && !m_executingPlan) {
             BRASSHttpConnector.instance ().reportStatus (DASStatusT.ADAPTING, "Finding a new plan");
             m_errorDetected = false;
             m_reportingPort.info (getComponentType (), "Determining an appropriate adaptation");
@@ -178,19 +184,15 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
                     InstructionGraphModelInstance.INSTRUCTION_GRAPH_TYPE);
             InstructionGraphModelInstance igModel = (InstructionGraphModelInstance )m_modelsManagerPort
                     .<InstructionGraphProgress> getModelInstance (igRef);
-            ModelReference missionStateRef = new ModelReference ("RobotAndEnvironmentState",
-                    MissionStateModelInstance.MISSION_STATE_TYPE);
-            MissionStateModelInstance missionStateModel = (MissionStateModelInstance )m_modelsManagerPort
-                    .<MissionState> getModelInstance (missionStateRef);
+
 
             if (envModel != null && igModel != null && missionStateModel != null) {
-                MissionState ms = missionStateModel.getModelInstance ();
 
                 if (!ms.isAdaptationNeeded ()) // If there is no need for adaptation, planner does not compute a new plan
                     return;
                 // Challenge problem 2
                 if (missionStateModel.getModelInstance ().isBadlyCalibrated ()) {
-                    BrassPlan recalibrate = new Recalibrate (missionStateModel);
+                    BrassPlan recalibrate = new Recalibrate (missionStateModel, igModel);
                     //AdaptationTree<BrassPlan> rc = new AdaptationTree<> (recalibrate);
                    
                     // Generate new plan with inhibited tactics
@@ -247,7 +249,7 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
 
                         AdaptationTree<BrassPlan> at = new AdaptationTree<> (AdaptationExecutionOperatorT.SEQUENCE);
                         at.addLeaf (nig);
-                        at.addLeaf (new SetDeadline (missionStateModel, deadline));
+                        at.addLeaf (new SetDeadline (missionStateModel, igModel, deadline));
 
 //                    AdaptationTree<BrassPlan> at = new AdaptationTree<BrassPlan> (nig);
                         m_reportingPort.info (getComponentType (), "New adaptation found - enqueuing it");

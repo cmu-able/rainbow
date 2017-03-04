@@ -2,6 +2,7 @@ package org.sa.rainbow.brass.model.instructions;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -24,30 +25,30 @@ public class InstructionGraphProgress {
         ig.setInstructions (instructions);
         return ig;
     }
-    
+
     public static List<IInstruction> parseFromString (String igStr) {
         List<IInstruction> instructions = new LinkedList<IInstruction> ();
         igStr = igStr.replace ("\n", "").replace ("\r", "");
         igStr = igStr.substring (2); // Remove P(
         String[] is = igStr.split ("V");
         Pattern instructionPattern = Pattern.compile ("\\((.*), do (.*) then (.*).*");
-        
+
         for (String i : is) {
             Matcher m = instructionPattern.matcher (i);
-            
+
             if (m.matches ()) {
                 String label = m.group(1);
                 String instruction = m.group(2);
                 String nextLabel = m.group(3);
                 IInstruction inst2;
-                
+
                 if (instruction.startsWith(MoveAbsHInstruction.COMMAND_NAME)) {
-                	inst2 = new MoveAbsHInstruction(label, instruction, nextLabel);
+                    inst2 = new MoveAbsHInstruction(label, instruction, nextLabel);
                 } else {
-                	//TODO
-                	inst2 = new MoveAbsHInstruction(label, instruction, nextLabel);
+                    //TODO
+                    inst2 = new MoveAbsHInstruction(label, instruction, nextLabel);
                 }
-                
+
                 instructions.add(inst2);
             }
         }
@@ -57,23 +58,23 @@ public class InstructionGraphProgress {
     public Collection<? extends IInstruction> getInstructions () {
         return m_instructionList;
     }
-    
+
     /**
      * 
      * @return The remaining instructions, excluding the current instruction, to be executed
      */
     public Collection<? extends IInstruction> getRemainingInstructions () {
-    	List<IInstruction> remainingInstructions = new LinkedList<>();
-    	IInstruction instPtr = getCurrentInstruction();
-    	
-    	while (instPtr != null && m_instructions.containsKey(instPtr.getNextInstructionLabel())) {
-    		String nextLabel = instPtr.getNextInstructionLabel();
-    		IInstruction nextInstruction = m_instructions.get(nextLabel);
-    		remainingInstructions.add(nextInstruction);
-    		instPtr = m_instructions.get(nextLabel);
-    	}
-    	
-    	return remainingInstructions;
+        List<IInstruction> remainingInstructions = new LinkedList<>();
+        IInstruction instPtr = getCurrentInstruction();
+
+        while (instPtr != null && m_instructions.containsKey(instPtr.getNextInstructionLabel())) {
+            String nextLabel = instPtr.getNextInstructionLabel();
+            IInstruction nextInstruction = m_instructions.get(nextLabel);
+            remainingInstructions.add(nextInstruction);
+            instPtr = m_instructions.get(nextLabel);
+        }
+
+        return remainingInstructions;
     }
 
     public IInstruction getInstruction (String instLabel) {
@@ -91,7 +92,7 @@ public class InstructionGraphProgress {
     public IInstruction getCurrentInstruction () {
         return m_instructions.get (m_currentNode);
     }
-    
+
     public static class ExecutionObservation {
         String  label;
         boolean successful;
@@ -100,12 +101,12 @@ public class InstructionGraphProgress {
     }
 
     private Map<String, IInstruction>    m_instructions     = new HashMap<> ();
-    private LinkedList<IInstruction>     m_instructionList;
+    private List<IInstruction>          m_instructionList  = Collections.<IInstruction> emptyList ();
     private final ModelReference        m_model;
     private String                      m_currentNode;
     private boolean                     m_currentOK        = true;
     private Deque<ExecutionObservation> m_executionHistory = new ArrayDeque<> ();
-    
+
     public InstructionGraphProgress (ModelReference model) {
         m_model = model;
     }

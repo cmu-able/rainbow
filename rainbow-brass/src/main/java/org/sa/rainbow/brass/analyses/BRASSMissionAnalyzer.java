@@ -93,11 +93,11 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
         // Do the periodic analysis on the models of interest
         ModelReference missionStateRef = new ModelReference("RobotAndEnvironmentState", MissionStateModelInstance.MISSION_STATE_TYPE);
         ModelReference igRef = new ModelReference("ExecutingInstructionGraph", InstructionGraphModelInstance.INSTRUCTION_GRAPH_TYPE);
-        ModelReference emRef = new ModelReference ("Map", EnvMapModelInstance.ENV_MAP_TYPE);
         MissionStateModelInstance missionStateModel = (MissionStateModelInstance) m_modelsManagerPort
                 .<MissionState> getModelInstance(missionStateRef);
         InstructionGraphModelInstance igModel = (InstructionGraphModelInstance) m_modelsManagerPort
                 .<InstructionGraphProgress> getModelInstance(igRef);
+        ModelReference emRef = new ModelReference ("Map", EnvMapModelInstance.ENV_MAP_TYPE);
         EnvMapModelInstance envModel = (EnvMapModelInstance) m_modelsManagerPort.<EnvMap> getModelInstance (emRef);
 
         if (missionStateModel != null && igModel != null && envModel != null) {
@@ -131,21 +131,21 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
 
                 // Get source and target positions of the failing instruction
                 IInstruction currentInst = igProgress.getCurrentInstruction();
-                
+
                 // The current instruction is of type MoveAbsH
                 if (currentInst instanceof MoveAbsHInstruction) {
-                	MoveAbsHInstruction currentMoveAbsH = (MoveAbsHInstruction) currentInst;
-                	MoveAbsHInstruction prevMoveAbsH = getPreviousMoveAbsH(currentMoveAbsH, igProgress);
-                	
-                	double sourceX;
+                    MoveAbsHInstruction currentMoveAbsH = (MoveAbsHInstruction) currentInst;
+                    MoveAbsHInstruction prevMoveAbsH = getPreviousMoveAbsH(currentMoveAbsH, igProgress);
+
+                    double sourceX;
                     double sourceY;
                     double targetX = currentMoveAbsH.getTargetX();
                     double targetY = currentMoveAbsH.getTargetY();
-                    
-                	if (prevMoveAbsH != null) {
-                		sourceX = prevMoveAbsH.getTargetX();
+
+                    if (prevMoveAbsH != null) {
+                        sourceX = prevMoveAbsH.getTargetX();
                         sourceY = prevMoveAbsH.getTargetY();
-                	} else {
+                    } else {
                         // The current instruction is the first MoveAbsH instruction in IG
                         // Use the initial pose as the source pose
                         sourceX = missionState.getInitialPose().getX();
@@ -195,20 +195,18 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
     boolean emptyInstructions (InstructionGraphProgress igProgress) {
         return igProgress.getInstructions () == null || igProgress.getInstructions ().isEmpty ();
     }
-    
+
     private MoveAbsHInstruction getPreviousMoveAbsH (MoveAbsHInstruction currentMoveAbsH, InstructionGraphProgress igProgress) {
-    	int j = Integer.valueOf (currentMoveAbsH.getInstructionLabel()) - 1;
-    	for (int i = j; i > 0; i--) {
-    		String label = String.valueOf (i);
-    		IInstruction instruction = igProgress.getInstruction(label);
-    		
-    		if (instruction instanceof MoveAbsHInstruction) {
-    			return (MoveAbsHInstruction) instruction;
-    		}
-    	}
-    	
-    	// No previous MoveAbsH instruction
-    	return null;
+        int j = Integer.valueOf (currentMoveAbsH.getInstructionLabel()) - 1;
+        for (int i = j; i > 0; i--) {
+            String label = String.valueOf (i);
+            IInstruction instruction = igProgress.getInstruction(label);
+
+            if (instruction instanceof MoveAbsHInstruction) return (MoveAbsHInstruction) instruction;
+        }
+
+        // No previous MoveAbsH instruction
+        return null;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package org.sa.rainbow.brass.adaptation;
 
+import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
 import org.sa.rainbow.brass.model.mission.MissionCommandFactory;
 import org.sa.rainbow.brass.model.mission.MissionStateModelInstance;
 import org.sa.rainbow.brass.model.mission.SetDeadlineCmd;
@@ -13,16 +14,19 @@ public class SetDeadline extends BrassPlan {
     private MissionStateModelInstance m_reference;
     private Long                      m_deadline;
     boolean                           m_outcome;
+    private InstructionGraphModelInstance m_executorModel;
 
-    public SetDeadline (MissionStateModelInstance m, Long d) {
+    public SetDeadline (MissionStateModelInstance m, InstructionGraphModelInstance executorModel, Long d) {
         m_reference = m;
+        m_executorModel = executorModel;
         m_deadline = d;
+
     }
 
     @Override
     public Object evaluate (Object[] argsIn) {
         IAdaptationExecutor<BrassPlan> executor = Rainbow.instance ().getRainbowMaster ()
-                .strategyExecutor (m_reference.getModelInstance ().getModelReference ().toString ());
+                .strategyExecutor (m_executorModel.getModelInstance ().getModelReference ().toString ());
         MissionCommandFactory cf = m_reference.getCommandFactory ();
         SetDeadlineCmd cmd = cf.setDeadlineCmd (m_deadline);
         OperationResult result = executor.getOperationPublishingPort ().publishOperation (cmd);

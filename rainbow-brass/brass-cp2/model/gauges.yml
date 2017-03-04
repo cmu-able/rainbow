@@ -22,8 +22,7 @@ gauge-types:
   MissionStateGaugeT:
     commands:
       location: "MS.setCurrentLocation(double,double,double)"
-      charge: "MS.setBatteryCharge(double)"
-      ground-plane: "MS.setGroundPlanError(double,double)"
+      ground-plane: "MS.setGroundPlaneError(double,double)"
       calibration: "MS.setCalibrationError(double, double, double, double, double)"
     setupParams:
       targetIP:
@@ -59,7 +58,7 @@ gauge-instances:
     model: RobotAndEnvironmentState:MissionState
     commands:
       location: "ms.setCurrentLocation($<x>,$<y>,$<w>)"
-      ground-plane: "ms.setGroundPlanError($<t>,$<r>)"
+      ground-plane: "ms.setGroundPlaneError($<t>,$<r>)"
       calibration: "ms.setCalibrationError($<rot_err>, $<rot_scale>, $<t_err>, $<t_scale>, $<v>)"
     setupValues:
       targetIP: "${customize.system.target.master}"
