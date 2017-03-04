@@ -32,7 +32,7 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
         @Override
         public void onResponse (Call call, Response response)
                 throws IOException {
-                                                                 response.close ();
+            response.close ();
 
         }
 
@@ -86,9 +86,13 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
     public void reportStatus (DASStatusT status, String message) {
 //        try {
         JsonObject json = getTimeJSON ();
-
+        JsonObject msg = new JsonObject ();
+        msg.addProperty ("msg", message);
+        msg.addProperty ("sim_time", "");
         json.addProperty ("STATUS", status.name ());
-        json.addProperty ("MESSAGE", message);
+        json.add ("MESSAGE", msg);
+
+//        json.addProperty ("MESSAGE", message);
         RequestBody body = RequestBody.create (JSON, m_gsonPP.toJson (json));
         Request request = new Request.Builder ().url (STATUS_SERVER + "/internal/status").post (body).build ();
         CLIENT.newCall (request).enqueue (m_responseCallback);
