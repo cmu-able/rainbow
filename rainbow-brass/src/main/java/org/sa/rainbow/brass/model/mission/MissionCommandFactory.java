@@ -4,6 +4,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.sa.rainbow.brass.model.instructions.SetLocalizationFidelityInstruction.LocalizationFidelity;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelsManager;
@@ -37,6 +38,8 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
         m_commandMap.put ("setGroundPlanError".toLowerCase (), SetGroundPlaneErrorCmd.class);
         m_commandMap.put ("setCalibrationError".toLowerCase (), SetCalibrationErrorCmd.class);
         m_commandMap.put ("recalibrate", RecalibrateCmd.class);
+        // TODO: This may be a hack
+        m_commandMap.put ("setRobotLocalizationFidelity".toLowerCase (), SetRobotLocalizationFidelityCmd.class);
     }
 
     @Override
@@ -98,5 +101,9 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
 
     public RecalibrateCmd recalibrate (boolean bad) {
         return new RecalibrateCmd ((MissionStateModelInstance )m_modelInstance, "", Boolean.toString (bad));
+    }
+    
+    public SetRobotLocalizationFidelityCmd setRobotLocalizationFidelityCmd (LocalizationFidelity fidelity) {
+    	return new SetRobotLocalizationFidelityCmd((MissionStateModelInstance) m_modelInstance, "", fidelity.toString());
     }
 }

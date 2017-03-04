@@ -9,6 +9,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.TimeZone;
 
+import org.sa.rainbow.brass.model.instructions.SetLocalizationFidelityInstruction.LocalizationFidelity;
 import org.sa.rainbow.core.models.ModelReference;
 
 /**
@@ -95,7 +96,6 @@ public class MissionState {
 
     private final ModelReference m_model;
 
-    //private List<String>         m_instructionHistory       = new ArrayList<> ();
     private Deque<Long>          m_predictedTimeHistory     = new ArrayDeque<> ();
     private Deque<Long>          m_predictedAccuracyHistory = new ArrayDeque<> ();
     private Deque<Double>        m_timeScore                = new ArrayDeque<> ();
@@ -105,6 +105,7 @@ public class MissionState {
     Deque<LocationRecording>     m_locationHistory          = new ArrayDeque<> ();
     Deque<Double>                m_chargeHistory            = new ArrayDeque<> ();
     Deque<Long>              m_deadlineHistory = new ArrayDeque<> ();
+    Deque<LocalizationFidelity>  m_localizationFidelityHistory = new ArrayDeque<> ();
 
     private boolean              m_robotObstructed          = false;
     private boolean				 m_robotOnTime				= false;
@@ -196,6 +197,14 @@ public class MissionState {
 
             return m_deadlineHistory.peek ();
         }
+    }
+    
+    public void setLocalizationFidelity (LocalizationFidelity fidelity) {
+    	m_localizationFidelityHistory.push (fidelity);
+    }
+    
+    public LocalizationFidelity getLocalizationFidelity () {
+    	return m_localizationFidelityHistory.peek ();
     }
 
     public void setTargetWaypoint (String waypoint) {
