@@ -55,7 +55,7 @@ public class PolicyToIG {
         	cmd = "MoveAbsH(" + f2.format(tgt_x) + ", " + f2.format(tgt_y) + ", " + f2.format(speed) + ", " + f.format(theta) + ")";
         } else { // Dead reckoning
         	synchronized(m_map){
-        		cmd = "Forward(" + f2.format(m_map.distanceBetweenCoords(m_location_x, m_location_y, tgt_x, tgt_y)) + ", " + f2.format(speed) + ")";
+        		cmd = "Forward(" + f2.format(m_map.distanceBetweenCoords(m_location_x, m_location_y, tgt_x, tgt_y)) + ", " + f2.format(MapTranslator.ROBOT_DR_SPEED_VALUE) + ")";
         	}
         }
         
@@ -295,13 +295,15 @@ public class PolicyToIG {
                     System.out.println("Src:"+String.valueOf(node_src.getId())+" Tgt:"+String.valueOf(node_tgt.getId()));
                     conn.invoke (node_src.getId(),node_tgt.getId()); 
                     String prismResult = conn.getResult();
+                    Long ttc = new Double (Double.parseDouble(prismResult))
+                            .longValue();
                     PrismPolicy prismPolicy = new PrismPolicy("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/botpolicy.adv");
                     prismPolicy.readPolicy();
                     //System.out.println(prismPolicy.getPlan().toString());
                     PolicyToIG translator = new PolicyToIG(prismPolicy, map);
                     // System.out.println(translator.translate());
                     exportIGTranslation(out_dir_ig+node_src.getLabel()+"_to_"+node_tgt.getLabel()+".ig",translator.translate());
-                    String w =generateJSONWayPointList(prismPolicy, prismResult);
+                    String w =generateJSONWayPointList(prismPolicy, String.valueOf(ttc));
                     System.out.println(w);
                     exportIGTranslation(out_dir_wp+node_src.getLabel()+"_to_"+node_tgt.getLabel()+".json",w);  
 

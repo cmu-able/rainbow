@@ -11,6 +11,8 @@ import org.sa.rainbow.brass.PropertiesConnector;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.map.MapTranslator;
 
+import com.google.common.base.Objects;
+
 
 
 
@@ -32,6 +34,7 @@ public class DecisionEngine {
     public static double m_selected_candidate_time;
     public static PrismPolicy m_plan;
 
+    public static final double INFINITY = 999999.0;
 
     /**
      * Initializes decision engine
@@ -98,7 +101,10 @@ public class DecisionEngine {
             for (List candidate_key : m_candidates.keySet() ){                           	
                 result = m_pc.modelCheckFromFileS (m_candidates.get (candidate_key), m_export_path + "/mapbot.props",
                         m_candidates.get (candidate_key), 0, m_consts);
-                m_scoreboard.put(candidate_key, Double.valueOf(result));
+                if (!Objects.equal(result, "Infinity"))
+                	m_scoreboard.put(candidate_key, Double.valueOf(result));
+                else
+                	m_scoreboard.put(candidate_key, INFINITY);
             }
         }
     }
@@ -111,13 +117,15 @@ public class DecisionEngine {
         Map.Entry<List, Double> maxEntry = m_scoreboard.entrySet().iterator().next();
         for (Map.Entry<List, Double> entry : m_scoreboard.entrySet())
         {
-            if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) < 0)
+            if (entry.getValue().compareTo(maxEntry.getValue()) < 0)
             {
                 maxEntry = entry;
             }
         }
         m_selected_candidate_time = maxEntry.getValue();
+        System.out.println("Selected candidate policy: "+m_candidates.get(maxEntry.getKey()));
         return m_candidates.get(maxEntry.getKey())+".adv";
+        
     }
 
     public static double getSelectedPolicyTime(){

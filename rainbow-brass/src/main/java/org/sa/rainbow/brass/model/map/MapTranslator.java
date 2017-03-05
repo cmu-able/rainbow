@@ -74,9 +74,11 @@ public class MapTranslator {
 
     public static final float ROBOT_FULL_SPEED_VALUE = 0.68f; // m/s
     public static final float ROBOT_HALF_SPEED_VALUE = 0.35f;
+    public static final float ROBOT_DR_SPEED_VALUE = 0.25f; // Dead reckoning speed value .. this is implicit in ROBOT_LOC_MODE_LO
     public static final String ROBOT_FULL_SPEED_CONST = "FULL_SPEED"; // These are just symbolic constants for PRISM
     public static final String ROBOT_HALF_SPEED_CONST = "HALF_SPEED";
-    public static final String ROBOT_SPEED_VAR = "s";
+    public static final String ROBOT_DR_SPEED_CONST = "DR_SPEED";
+     public static final String ROBOT_SPEED_VAR = "s";
 
     public static final float ROBOT_ROTATIONAL_SPEED_VALUE = 1.5f; // rad/s
     public static final String ROBOT_HEADING_VAR = "r";
@@ -383,8 +385,11 @@ public class MapTranslator {
                     double t_distance = a.getDistance (); //  float(self.get_transition_attribute_value(t,"distance"))
                     String t_time_half_speed=f.format(SpeedPredictor.moveForwardTimeSimple(t_distance, ROBOT_HALF_SPEED_CONST));
                     String t_time_full_speed=f.format(SpeedPredictor.moveForwardTimeSimple(t_distance, ROBOT_FULL_SPEED_CONST));
+                    String t_time_dr_speed=f.format(SpeedPredictor.moveForwardTimeSimple(t_distance, ROBOT_DR_SPEED_CONST));
+                    
                     String action_name = a.getSource()+MOVE_CMD_STR+a.getTarget();
-                    buf+="\t["+action_name+"] true :"+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? "+t_time_half_speed+" + "+ROTATION_TIME_FORMULA_PREFIX+action_name+" : "+t_time_full_speed+" + "+ROTATION_TIME_FORMULA_PREFIX + action_name+";\n";
+                    String drs = ROBOT_LOC_MODE_VAR +" = "+ROBOT_LOC_MODE_LO_CONST+" ? "+ t_time_dr_speed + " + " + ROTATION_TIME_FORMULA_PREFIX+action_name + " : " ;
+                    buf+="\t["+action_name+"] true :" + drs + ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? "+t_time_half_speed+" + "+ROTATION_TIME_FORMULA_PREFIX+action_name+" : "+t_time_full_speed+" + "+ROTATION_TIME_FORMULA_PREFIX + action_name+";\n";
                 }
             }
             buf+="endrewards\n\n";
@@ -812,7 +817,7 @@ public class MapTranslator {
         setMap(dummyMap);
         System.out.println(getMapTranslation()); // Class test
         //System.out.println();
-        exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp-simple.prism", false);
+        exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp.prism", true);
         // String export_path="/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/";
 
         // Map<List, String> specifications = exportConstrainedTranslationsBetween (export_path, "ls", "l1");

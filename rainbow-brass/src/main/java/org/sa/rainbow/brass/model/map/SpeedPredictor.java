@@ -36,6 +36,9 @@ public class SpeedPredictor {
 		if (Objects.equals(speedSetting, MapTranslator.ROBOT_FULL_SPEED_CONST)){
 			res = distance / MapTranslator.ROBOT_FULL_SPEED_VALUE;
 		}
+		if (Objects.equals(speedSetting, MapTranslator.ROBOT_DR_SPEED_CONST)){
+			res = distance / MapTranslator.ROBOT_DR_SPEED_VALUE;
+		}
 		return res;		
 	}
 	
