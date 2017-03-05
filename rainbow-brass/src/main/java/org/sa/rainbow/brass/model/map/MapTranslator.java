@@ -43,6 +43,7 @@ public class MapTranslator {
     public static final String UPDATE_POSTFIX = "_upd";
     public static final String HEADING_CONST_PREFIX="H_";
     public static final String ROTATION_TIME_FORMULA_PREFIX="rot_time_";
+    public static final String ROTATION_ENERGY_FORMULA_PREFIX="rot_energy_";
     public static final String ENVIRONMENT_TURN_STR = "ET";
     public static final String ROBOT_TURN_STR = "RT";
 
@@ -77,7 +78,7 @@ public class MapTranslator {
     public static final String ROBOT_HALF_SPEED_CONST = "HALF_SPEED";
     public static final String ROBOT_SPEED_VAR = "s";
 
-    public static final float ROBOT_ROTATIONAL_SPEED_VALUE = 0.3f; // rad/s
+    public static final float ROBOT_ROTATIONAL_SPEED_VALUE = 1.5f; // rad/s
     public static final String ROBOT_HEADING_VAR = "r";
     public static final String INITIAL_ROBOT_HEADING_CONST = "INITIAL_HEADING";
 
@@ -256,6 +257,7 @@ public class MapTranslator {
             for (int i=0;i<m_map.getArcs().size();i++){
                 EnvMapArc a = m_map.getArcs().get(i);
                 double t_distance = a.getDistance ();
+   
 
                 String battery_delta_half_speed_lo = getDeltaEnergy(ROBOT_HALF_SPEED_CONST, t_distance, ROBOT_LOC_MODE_LO_CONST);
                 String battery_delta_half_speed_med = getDeltaEnergy(ROBOT_HALF_SPEED_CONST, t_distance, ROBOT_LOC_MODE_MED_CONST);
@@ -265,11 +267,12 @@ public class MapTranslator {
                 String battery_delta_full_speed_med = getDeltaEnergy(ROBOT_FULL_SPEED_CONST, t_distance, ROBOT_LOC_MODE_MED_CONST);
                 String battery_delta_full_speed_hi = getDeltaEnergy(ROBOT_FULL_SPEED_CONST, t_distance, ROBOT_LOC_MODE_HI_CONST);
 
+                String rote = ROTATION_ENERGY_FORMULA_PREFIX+a.getSource()+MOVE_CMD_STR+a.getTarget();
 
                 String formulaBaseName = BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget();
-                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_HI_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-"+battery_delta_half_speed_hi+") : max(0,"+ROBOT_BATTERY_VAR+"-"+battery_delta_full_speed_hi+")" +";\n";    	        
-                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_MED_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-"+battery_delta_half_speed_med+") : max(0,"+ROBOT_BATTERY_VAR+"-"+battery_delta_full_speed_med+")" +";\n";    	        
-                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_LO_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-"+battery_delta_half_speed_lo+") : max(0,"+ROBOT_BATTERY_VAR+"-"+battery_delta_full_speed_lo+")" +";\n";    	        
+                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_HI_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_half_speed_hi+"+"+rote+")) : max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_full_speed_hi+"+"+rote+"))" +";\n";    	        
+                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_MED_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_half_speed_med+"+"+rote+")) : max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_full_speed_med+"+"+rote+"))" +";\n";    	        
+                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_LO_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_half_speed_lo+"+"+rote+")) : max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_full_speed_lo+"+"+rote+"))" +";\n";    	        
                 buf += "formula " + formulaBaseName + " = " + ROBOT_LOC_MODE_VAR +" = "+ ROBOT_LOC_MODE_LO_CONST + " ? " + formulaBaseName + "_" + ROBOT_LOC_MODE_LO_CONST +" : ( " + ROBOT_LOC_MODE_VAR +" = "+ ROBOT_LOC_MODE_MED_CONST + " ? " + formulaBaseName + "_" + ROBOT_LOC_MODE_MED_CONST  + " : " + formulaBaseName + "_" + ROBOT_LOC_MODE_HI_CONST+" );\n" ;
 
             }
@@ -406,6 +409,18 @@ public class MapTranslator {
         return buf +"\n";
     }
 
+    public static String generateRotationEnergyFormulas(){
+        String buf="// Rotation time formulas for map arcs\n";
+        synchronized (m_map) {
+            for (int i=0;i<m_map.getArcs().size();i++){
+                EnvMapArc a = m_map.getArcs().get(i);
+                if (a.isEnabled()) {
+                    buf = buf+generateRotationEnergyFormulaForArc(a);
+                }
+            }
+        }
+        return buf +"\n";
+    }
 
     /**
      * Generates the PRISM encoding (as a formula) for all possible rotation times 
@@ -418,6 +433,16 @@ public class MapTranslator {
         String buf="formula "+ROTATION_TIME_FORMULA_PREFIX+a.getSource()+MOVE_CMD_STR+a.getTarget()+" = ";
         for (MissionState.Heading h : MissionState.Heading.values()) {
             buf += ROBOT_HEADING_VAR + "=" + HEADING_CONST_PREFIX + h.name() + " ? " + f.format (getRotationTime( MissionState.Heading.convertToRadians(h),a)) + " : ";
+        }
+        buf+=" 0;\n";
+        return buf;
+    }
+    
+    public static String generateRotationEnergyFormulaForArc(EnvMapArc a){
+        NumberFormat f = new DecimalFormat ("#0");
+        String buf="formula "+ROTATION_ENERGY_FORMULA_PREFIX+a.getSource()+MOVE_CMD_STR+a.getTarget()+" = ";
+        for (MissionState.Heading h : MissionState.Heading.values()) {
+            buf += ROBOT_HEADING_VAR + "=" + HEADING_CONST_PREFIX + h.name() + " ? " + f.format (BatteryPredictor.batteryConsumption(ROBOT_HALF_SPEED_CONST, true, ROBOT_LOC_MODE_MED_KINECT, ROBOT_LOC_MODE_HI_CPU_VAL, getRotationTime( MissionState.Heading.convertToRadians(h),a))) + " : ";
         }
         buf+=" 0;\n";
         return buf;
@@ -670,6 +695,7 @@ public class MapTranslator {
         buf+=generateRobotModule(inhibitTactics)+"\n";
         buf+=generateTimeReward(inhibitTactics)+"\n";
         buf+=generateRotationTimeFormulas()+"\n";
+        buf+=generateRotationEnergyFormulas()+"\n";
         buf+=generateDistanceReward()+"\n";
         buf+="// --- End of generated code ---\n";
         return buf;

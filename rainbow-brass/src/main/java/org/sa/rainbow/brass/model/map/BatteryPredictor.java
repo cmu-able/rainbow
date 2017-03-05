@@ -12,7 +12,7 @@ import org.sa.rainbow.brass.model.map.MapTranslator;
  */
 public class BatteryPredictor {
 
-	public static final double m_battery_scaling_factor = 10.0;
+	public static final double m_battery_scaling_factor = 5.0;
 	
 	public static double batteryConsumption (String speed, String sensing, double time){
 		
