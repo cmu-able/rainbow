@@ -256,11 +256,12 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
                                     "Could not find a valid adaptation");
                         }
                         else {
-                            PolicyToIG translator = new PolicyToIG (prismPolicy, map);
-                            NewInstructionGraph nig = new NewInstructionGraph (igModel, translator.translate ());
-                            double planEstimatedTime = DecisionEngine.getSelectedPolicyTime ();
+                            
+                            //double planEstimatedTime = DecisionEngine.getSelectedPolicyTime ();
                             Long deadline = new Double (ms.getCurrentTime () + DecisionEngine.getSelectedPolicyTime ())
                                     .longValue ();
+                            PolicyToIG translator = new PolicyToIG (prismPolicy, map);
+                            NewInstructionGraph nig = new NewInstructionGraph (igModel, translator.translate(deadline));
 
                             AdaptationTree<BrassPlan> at = new AdaptationTree<> (AdaptationExecutionOperatorT.SEQUENCE);
                             at.addLeaf (nig);

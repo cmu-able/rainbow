@@ -153,7 +153,7 @@ public class DecisionEngine {
             String plan = pp.getPlan().toString();
             System.out.println(plan);
             PolicyToIG translator = new PolicyToIG(pp, dummyMap);
-            System.out.println(translator.translate());
+            System.out.println(translator.translate(20394));
             coordinates.add(new Point2D.Double(i, m_selected_candidate_time));
         }
 

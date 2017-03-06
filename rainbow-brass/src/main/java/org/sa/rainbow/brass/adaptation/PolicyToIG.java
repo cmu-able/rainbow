@@ -28,8 +28,10 @@ public class PolicyToIG {
     public String m_command_insert = "";				 // (see build_cmd_tactic)
     public double m_location_x;
     public double m_location_y;
-    public double m_theta; 
+    public double m_theta;
     
+    public static final long NO_DEADLINE=-1;
+    public static final String SPECIAL_CMD_PREFIX = "scmd"; // Used to distinguish special command set deadline in translate method
     
     public PolicyToIG(PrismPolicy policy, EnvMap map) {
         m_prismPolicy = policy;
@@ -62,6 +64,10 @@ public class PolicyToIG {
         return build_cmd(cmdId, cmd);
     }
 
+    private String build_cmd_deadline (int cmdId, long deadline){
+    	String cmd = "SetDeadline("+String.valueOf(deadline)+")";
+    	return build_cmd(cmdId, cmd);
+    }
     
     /**
      * Generates a tactic instruction for the IG
@@ -134,7 +140,7 @@ public class PolicyToIG {
      * Builds the instruction graph
      * @param cmds ArrayList<String> plan actions
      * @return
-     */
+     */    
     private String build_ig(ArrayList<String> cmds) {
         String ins_graph = "P(";
         int i = 0;
@@ -190,11 +196,18 @@ public class PolicyToIG {
      * Expands the list of actions in the plan to IG instructions
      * @return
      */
-    public String translate() {
+    
+    public String translate(){
+    	return (translate(NO_DEADLINE));
+    }
+    
+    public String translate(long deadline) {
         ArrayList<String> plan = m_prismPolicy.getPlan();
         ArrayList<String> cmds = new ArrayList<String>();
         String cmd="";
         
+        if (deadline!=NO_DEADLINE)  // Insert set deadline instruction
+          plan.add(0,SPECIAL_CMD_PREFIX+"_setdeadline_"+String.valueOf(deadline));
        
 //  For testing purposes
 //        plan.add("t_set_loc_lo");
@@ -210,7 +223,9 @@ public class PolicyToIG {
             String action = plan.get(i);
 
             String[] elements = action.split("_"); // Break action plan name into chunks
-            if (Objects.equals(elements[0], MapTranslator.TACTIC_PREFIX)) { // If action is a tactic
+            if (Objects.equals(elements[0], SPECIAL_CMD_PREFIX)){
+            	cmd = build_cmd_deadline(cmd_id, Long.parseLong(elements[2]));
+            } else if (Objects.equals(elements[0], MapTranslator.TACTIC_PREFIX)) { // If action is a tactic
             	cmd = build_cmd_tactic (cmd_id, action );
             } else { // Other actions (robot movement for the time being)
             	synchronized (m_map){	
