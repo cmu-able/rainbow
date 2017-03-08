@@ -261,6 +261,7 @@ public class BRASSAdaptationPlanner extends AbstractRainbowRunnable
                                         "Could not find a valid adaptation");
                                 
                             }
+                        }
                             
                         if (prismPolicy.getPlan()!=null && !prismPolicy.getPlan().isEmpty()) {
                             
@@ -279,8 +280,7 @@ public class BRASSAdaptationPlanner extends AbstractRainbowRunnable
                             m_executingPlan = true;
                             m_adaptationEnqueuePort.offerAdaptation (at, new Object[] {});
                         }
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace ();
                     }
