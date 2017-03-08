@@ -145,7 +145,7 @@ public class DecisionEngine {
         EnvMap dummyMap = new EnvMap (null, null);
         setMap(dummyMap);
         for (int i=30500; i< 31000; i+=500){
-            generateCandidates("l7", "l1");
+            generateCandidates("l5", "l5");
             scoreCandidates(dummyMap, String.valueOf(i), "1");
             System.out.println(String.valueOf(m_scoreboard));	        
             pp = new PrismPolicy(selectPolicy());
