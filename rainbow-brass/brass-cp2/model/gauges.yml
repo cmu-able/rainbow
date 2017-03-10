@@ -1,7 +1,7 @@
 gauge-types:
   InstructionGraphProgressGaugeT:
     commands:
-      current-instruction: "IG.setExecutingInstruction(String)"
+      current-instruction: "IG.setExecutingInstruction(String,String)"
       current-failed: "IG.setExecutionFailed(String)"
       new-ig: "IG.setInstructions(String)"
     setupParams:
@@ -62,7 +62,7 @@ gauge-instances:
     type: InstructionGraphProgressGaugeT
     model: "ExecutingInstructionGraph:InstructionGraphProgress"
     commands:
-      current-instruction: "cig.setExecutingInstruction($<node>)"
+      current-instruction: "cig.setExecutingInstruction($<node>,$<state>)"
       current-failed: "cig.setExecutionFailed($<node>)"
       new-ig: "igs.setInstructions($<ig>)"
     setupValues:

@@ -17,7 +17,7 @@ probes:
       period: 2000
       args.length: 2
       args.0: "${rainbow.path}/system/probes/rostopicprobe.sh"
-      args.1: "/amcl_pose/pose/pose:1 /ig_action_server/feedback/feedback/sequence /calibration/calibration_error"
+      args.1: "/amcl_pose/pose/pose:1 /ig_action_server/feedback/feedback/sequence /calibration/calibration_error /calibration/ground_plane_error:1"
       
   BRASSTargetProbe:
     # Probe to report to Rainbow what the target node is
