@@ -110,7 +110,10 @@ public class MissionStateGauge extends RegularPatternGauge {
         }
         else if (CLOCK.equals (matchName)) {
             long secs = Long.parseLong (m.group (1).trim ());
-            long nsecs = Long.parseLong (m.group (2).trim ());
+            long nsecs = 0;
+            if (!"".equals (m.group (2).trim ())) {
+                nsecs = Long.parseLong (m.group (2).trim ());
+            }
             double realSecs = secs + TimeUnit.MILLISECONDS.convert (nsecs, TimeUnit.NANOSECONDS) / 1000.0;
             IRainbowOperation op = m_commands.get ("clock");
             Map<String, String> pMap = new HashMap<> ();
@@ -120,6 +123,10 @@ public class MissionStateGauge extends RegularPatternGauge {
         }
         else if (GROUNDPLANE.equals (matchName)) {
             String[] vals = m.group (1).split (",");
+            if (!numberCheck (vals)) {
+                log ("Got things that aren't numbers for ground plane " + vals.toString ());
+                return;
+            }
             IRainbowOperation op = m_commands.get ("ground-plane");
             Map<String, String> pMap = new HashMap<> ();
             pMap.put (op.getParameters ()[0], vals[0]);
@@ -129,6 +136,10 @@ public class MissionStateGauge extends RegularPatternGauge {
         }
         else if (CALIBRATION_ERROR.equals (matchName)) {
             String[] vals = m.group (1).split (",");
+            if (!numberCheck (vals)) {
+                log ("Got things that aren't numbers for calibration " + vals.toString ());
+                return;
+            }
             IRainbowOperation op = m_commands.get ("calibration");
             Map<String, String> pMap = new HashMap<> ();
             pMap.put (op.getParameters ()[0], vals[0]);
@@ -146,6 +157,18 @@ public class MissionStateGauge extends RegularPatternGauge {
                 log ("Gauge had more: " + rest.substring (rest.indexOf ("topic:")));
             }
         }
+    }
+
+    private boolean numberCheck (String[] vals) {
+        for (String s : vals) {
+            try {
+                Double.parseDouble (s);
+            }
+            catch (NumberFormatException e) {
+                return false;
+            }
+        }
+        return true;
     }
 
     // Converstino to yaw from http://www.chrobotics.com/library/understanding-quaternions

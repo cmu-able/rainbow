@@ -13,10 +13,14 @@ import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 public class SetExecutingInstructionCmd extends AbstractRainbowModelOperation<String, InstructionGraphProgress> {
     private String m_instructionLabel;
     private String m_oldInstructionLabel;
+    private String m_state;
+    private String m_oldState;
 
-    public SetExecutingInstructionCmd (InstructionGraphModelInstance modelInstance, String target, String instructionLabel) {
-        super ("setExecutingInstruction", modelInstance, "", instructionLabel);
+    public SetExecutingInstructionCmd (InstructionGraphModelInstance modelInstance, String target,
+            String instructionLabel, String state) {
+        super ("setExecutingInstruction", modelInstance, "", instructionLabel, state);
         m_instructionLabel = instructionLabel;
+        m_state = state;
     }
 
     @Override
@@ -32,17 +36,18 @@ public class SetExecutingInstructionCmd extends AbstractRainbowModelOperation<St
     @Override
     protected void subExecute () throws RainbowException {
         m_oldInstructionLabel = getModelContext ().getModelInstance ().getExecutingInstruction ();
-        getModelContext ().getModelInstance ().setExecutingInstruction (m_instructionLabel);
+        m_oldState = ""; // Hack
+        getModelContext ().getModelInstance ().setExecutingInstruction (m_instructionLabel, m_state);
     }
 
     @Override
     protected void subRedo () throws RainbowException {
-        getModelContext ().getModelInstance ().setExecutingInstruction (m_instructionLabel);
+        getModelContext ().getModelInstance ().setExecutingInstruction (m_instructionLabel, m_state);
     }
 
     @Override
     protected void subUndo () throws RainbowException {
-        getModelContext ().getModelInstance ().setExecutingInstruction (m_oldInstructionLabel);
+        getModelContext ().getModelInstance ().setExecutingInstruction (m_oldInstructionLabel, m_oldState);
 
     }
 

@@ -68,13 +68,17 @@ public class MoveAbsHInstruction implements IInstruction {
     }
 
     private void parseMoveAbsHTargetPose () {
-        Pattern moveAbsHPattern = Pattern.compile ("MoveAbsH\\(([0-9.]+), *([0-9.]+), *([0-9.]+), *([0-9.]+)\\)");
+        Pattern moveAbsHPattern = Pattern
+                .compile ("MoveAbsH\\(([\\-0-9.]+), ?([\\-0-9.]+), ?([\\-0-9.]+), ?([\\-0-9.]+)\\)");
         Matcher m = moveAbsHPattern.matcher (m_instruction);
         if (m.matches ()) {
             m_targetX = Double.parseDouble (m.group (1));
             m_targetY = Double.parseDouble (m.group (2));
             m_speed = Double.parseDouble (m.group (3));
             m_targetW = Double.parseDouble (m.group (4));
+        }
+        else {
+            System.out.println ("Error matching instruction: " + m_instruction);
         }
     }
 

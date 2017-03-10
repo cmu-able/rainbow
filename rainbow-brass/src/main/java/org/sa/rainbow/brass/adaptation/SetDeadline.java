@@ -29,8 +29,10 @@ public class SetDeadline extends BrassPlan {
                 .strategyExecutor (m_executorModel.getModelInstance ().getModelReference ().toString ());
         MissionCommandFactory cf = m_reference.getCommandFactory ();
         SetDeadlineCmd cmd = cf.setDeadlineCmd (m_deadline);
+        System.out.println ("Setting deadline to " + m_deadline);
         OperationResult result = executor.getOperationPublishingPort ().publishOperation (cmd);
         m_outcome = result.result == Result.SUCCESS;
+        System.out.println ("DOne");
         return m_outcome;
     }
 

@@ -17,7 +17,6 @@ import com.google.common.base.Objects;
 
 
 
-
 /**
  * @author jcamara
  *
@@ -26,7 +25,6 @@ public class DecisionEngine {
 
     public static String m_export_path;
     public static MapTranslator m_mt;
-    public static PrismConnectorAPI m_pc;
     public static String m_origin;
     public static String m_destination;
     public static Map<List, String> m_candidates;
@@ -47,7 +45,7 @@ public class DecisionEngine {
         m_export_path = props.getProperty (PropertiesConnector.PRISM_OUTPUT_DIR);
         m_export_path = m_export_path.replaceAll ("\\\"", "");
         m_mt = new MapTranslator ();
-        m_pc = new PrismConnectorAPI (); // PRISM invoked via API
+        new PrismConnectorAPI (); // PRISM invoked via API
         m_origin="";
         m_destination="";
         m_selected_candidate_time=0.0;
@@ -99,12 +97,14 @@ public class DecisionEngine {
             System.out.println(m_consts);
             String result;
             for (List candidate_key : m_candidates.keySet() ){                           	
-                result = m_pc.modelCheckFromFileS (m_candidates.get (candidate_key), m_export_path + "/mapbot.props",
+                result = PrismConnectorAPI.modelCheckFromFileS (m_candidates.get (candidate_key), m_export_path + "/mapbot.props",
                         m_candidates.get (candidate_key), 0, m_consts);
-                if (!Objects.equal(result, "Infinity"))
-                	m_scoreboard.put(candidate_key, Double.valueOf(result));
-                else
-                	m_scoreboard.put(candidate_key, INFINITY);
+                if (!Objects.equal(result, "Infinity")) {
+                    m_scoreboard.put(candidate_key, Double.valueOf(result));
+                }
+                else {
+                    m_scoreboard.put(candidate_key, INFINITY);
+                }
             }
         }
     }
@@ -125,7 +125,6 @@ public class DecisionEngine {
         m_selected_candidate_time = maxEntry.getValue();
         System.out.println("Selected candidate policy: "+m_candidates.get(maxEntry.getKey()));
         return m_candidates.get(maxEntry.getKey())+".adv";
-        
     }
 
     public static double getSelectedPolicyTime(){
@@ -144,8 +143,8 @@ public class DecisionEngine {
 
         EnvMap dummyMap = new EnvMap (null, null);
         setMap(dummyMap);
-        for (int i=30500; i< 31000; i+=500){
-            generateCandidates("l5", "l5");
+        for (int i=15000; i< 15500; i+=500){
+            generateCandidates("l5", "l1");
             scoreCandidates(dummyMap, String.valueOf(i), "1");
             System.out.println(String.valueOf(m_scoreboard));	        
             pp = new PrismPolicy(selectPolicy());
@@ -153,7 +152,7 @@ public class DecisionEngine {
             String plan = pp.getPlan().toString();
             System.out.println(plan);
             PolicyToIG translator = new PolicyToIG(pp, dummyMap);
-            System.out.println(translator.translate(20394));
+            System.out.println (translator.translate (20394, false));
             coordinates.add(new Point2D.Double(i, m_selected_candidate_time));
         }
 

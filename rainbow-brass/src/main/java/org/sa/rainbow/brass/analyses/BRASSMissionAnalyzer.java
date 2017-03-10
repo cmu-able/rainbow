@@ -5,6 +5,7 @@ import org.sa.rainbow.brass.das.IBRASSConnector.DASStatusT;
 import org.sa.rainbow.brass.model.instructions.IInstruction;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
+import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress.IGExecutionStateT;
 import org.sa.rainbow.brass.model.instructions.MoveAbsHInstruction;
 import org.sa.rainbow.brass.model.instructions.SetExecutionFailedCmd;
 import org.sa.rainbow.brass.model.map.EnvMap;
@@ -53,6 +54,7 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
     public void initialize (IRainbowReportingPort port) throws RainbowConnectionException {
         super.initialize (port);
         initializeConnections ();
+        log ("Initialized missions analyzer");
     }
 
     private void initializeConnections () throws RainbowConnectionException {
@@ -105,6 +107,7 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
             InstructionGraphProgress igProgress = igModel.getModelInstance();
             EnvMap envMap = envModel.getModelInstance();
             boolean currentOK = igProgress.getCurrentOK();
+            if (missionState.isAdaptationNeeded ()) return;
 
             // If we start off with nothing (i.e., no instruction graph), this is a problem
 //            if (emptyInstructions (igProgress)
@@ -113,6 +116,23 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
 //                SetRobotObstructedCmd cmd = missionStateModel.getCommandFactory ().setRobotObstructedCmd (true);
 //                m_modelUSPort.updateModel (cmd);
 //            }
+
+            log ("Mission Progress Analyzer");
+            log ("Finished succesfully? "
+                    + (igProgress.getInstructionGraphState () == IGExecutionStateT.FINISHED_SUCCESS));
+            log ("Finished failed? " + (igProgress.getInstructionGraphState () == IGExecutionStateT.FINISHED_FAILED));
+            log ("Awaiting pose? " + (missionState.getCurrentPose () == null) + ", " + m_awaitingPose);
+            log ("CurrentOK? " + currentOK);
+            log ("Executing Instruction?" + (igProgress.getExecutingInstruction () != null));
+            log ("Awaiting new IG?" + m_awaitingNewIG);
+            log ("Empty instructions?" + emptyInstructions (igProgress));
+            log ("Robot obstructed known? " + missionState.isRobotObstructed ());
+            if (igProgress.getInstructionGraphState () == IGExecutionStateT.FINISHED_SUCCESS) {
+                BRASSHttpConnector.instance ().reportDone (false, "Finished all the instructions in the task");
+                Rainbow.instance ().signalTerminate ();
+                return;
+
+            }
             if (missionState.getCurrentPose () == null) {
                 m_awaitingPose = true;
             }
@@ -121,11 +141,12 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
                 BRASSHttpConnector.instance ().reportReady (true);
 
             }
-            else if (!currentOK && igProgress.getExecutingInstruction () != null && !m_awaitingNewIG) {
+            else if (!currentOK && igProgress.getExecutingInstruction () != null && !m_awaitingNewIG
+                    /*&& igProgress.getInstructionGraphState () == IGExecutionStateT.FINISHED_FAILED*/) {
                 // Current IG failed
                 m_reportingPort.info (getComponentType (), "Instruction graph failed...updating map model");
                 BRASSHttpConnector.instance ().reportStatus (DASStatusT.PERTURBATION_DETECTED,
-                        "Obstacle on path detected");
+                        "Obstruction to path detected");
                 // Get current robot position
                 LocationRecording pose = missionState.getCurrentPose ();
 

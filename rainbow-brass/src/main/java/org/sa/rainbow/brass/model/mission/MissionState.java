@@ -354,4 +354,8 @@ public class MissionState {
         return ret;
     }
 
+    public Deque<CalibrationError> getCalibrationErrorObservations () {
+        return m_calibarationErrorHistory;
+    }
+
 }

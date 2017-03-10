@@ -45,8 +45,9 @@ public class InstructionGraphCommandFactory extends ModelCommandFactory<Instruct
         return new SetInstructionsCmd ((InstructionGraphModelInstance )m_modelInstance, "", instructionGraphCode);
     }
 
-    public SetExecutingInstructionCmd setExecutingInstructionCmd (String instructionLabel) {
-        return new SetExecutingInstructionCmd ((InstructionGraphModelInstance )m_modelInstance, "", instructionLabel);
+    public SetExecutingInstructionCmd setExecutingInstructionCmd (String instructionLabel, String state) {
+        return new SetExecutingInstructionCmd ((InstructionGraphModelInstance )m_modelInstance, "", instructionLabel,
+                state);
     }
 
     public SetExecutionFailedCmd setExecutionFailedCmd (String instructionLabel) {

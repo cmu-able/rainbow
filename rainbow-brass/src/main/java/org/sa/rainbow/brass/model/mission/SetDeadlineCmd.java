@@ -13,7 +13,12 @@ public class SetDeadlineCmd extends AbstractRainbowModelOperation<Long, MissionS
 
     public SetDeadlineCmd (MissionStateModelInstance model, String target, String secondsHence) {
         super ("setDeadline", model, target, secondsHence);
-        m_date = Long.parseLong (secondsHence);
+        try {
+            m_date = Long.parseLong (secondsHence);
+        }
+        catch (NumberFormatException e) {
+            m_date = Math.round (Double.parseDouble (secondsHence));
+        }
 
     }
 

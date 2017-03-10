@@ -18,6 +18,10 @@ import org.sa.rainbow.core.models.ModelReference;
  */
 public class InstructionGraphProgress {
 
+    public static enum IGExecutionStateT {
+        NONE, EXECUTING, FINISHED_SUCCESS, FINISHED_FAILED
+    }
+
     public static InstructionGraphProgress parseFromString (ModelReference ref, String igStr) {
         // Remove all the returns from string
         List<IInstruction> instructions = parseFromString (igStr);
@@ -31,7 +35,7 @@ public class InstructionGraphProgress {
         igStr = igStr.replace ("\n", "").replace ("\r", "");
         igStr = igStr.substring (2); // Remove P(
         String[] is = igStr.split ("V");
-        Pattern instructionPattern = Pattern.compile ("\\((.*), do (.*) then (.*).*");
+        Pattern instructionPattern = Pattern.compile ("\\((.*), do (.*) then (.*)\\).*");
 
         for (String i : is) {
             Matcher m = instructionPattern.matcher (i);
@@ -44,12 +48,25 @@ public class InstructionGraphProgress {
 
                 if (instruction.startsWith(MoveAbsHInstruction.COMMAND_NAME)) {
                     inst2 = new MoveAbsHInstruction(label, instruction, nextLabel);
+                }
+                else if (instruction.startsWith (ForwardInstruction.COMMAND_NAME)) {
+                    inst2 = new ForwardInstruction (label, instruction, nextLabel);
+                }
+                else if (instruction.startsWith (ChargeInstruction.COMMAND_NAME)) {
+                    inst2 = new ChargeInstruction (label, instruction, nextLabel);
+                }
+                else if (instruction.startsWith (SetLocalizationFidelityInstruction.COMMAND_NAME)) {
+                    inst2 = new SetLocalizationFidelityInstruction (label, instruction, nextLabel);
                 } else {
                     //TODO
-                    inst2 = new MoveAbsHInstruction(label, instruction, nextLabel);
+                    // Other ignorable instructions
+                    inst2 = null;
+//                    inst2 = new MoveAbsHInstruction(label, instruction, nextLabel);
                 }
 
-                instructions.add(inst2);
+                if (inst2 != null) {
+                    instructions.add(inst2);
+                }
             }
         }
         return instructions;
@@ -78,7 +95,9 @@ public class InstructionGraphProgress {
     }
 
     public IInstruction getInstruction (String instLabel) {
-        return m_instructions.get(instLabel). copy ();
+        IInstruction inst = m_instructions.get (instLabel);
+        if (inst == null) return null;
+        return inst.copy ();
     }
 
     public String getExecutingInstruction () {
@@ -106,6 +125,7 @@ public class InstructionGraphProgress {
     private String                      m_currentNode;
     private boolean                     m_currentOK        = true;
     private Deque<ExecutionObservation> m_executionHistory = new ArrayDeque<> ();
+    private IGExecutionStateT           m_instructionGraphState = IGExecutionStateT.NONE;
 
     public InstructionGraphProgress (ModelReference model) {
         m_model = model;
@@ -133,9 +153,10 @@ public class InstructionGraphProgress {
         for (IInstruction i : instructions) {
             m_instructions.put (i.getInstructionLabel(), i);
         }
+        m_instructionGraphState = IGExecutionStateT.NONE;
     }
 
-    public void setExecutingInstruction (String instLabel) {
+    public void setExecutingInstruction (String instLabel, String state) {
 //    	if (m_instructions.containsKey (instLabel)) {
         m_currentNode = instLabel;
         if (!m_currentOK)
@@ -148,11 +169,29 @@ public class InstructionGraphProgress {
 //        observation.
 //        m_executionHistory.push (observation);
         }
+//        if ("SUCCESS".equals (state)
+//                && m_instructions.get (m_instructions.get (m_currentNode).getNextInstructionLabel ()) == null) {
+//            setInstructionGraphState (IGExecutionStateT.FINISHED_SUCCESS);
+//        }
+//        else {
+//            setInstructionGraphState (IGExecutionStateT.EXECUTING);
+//        }
 
     }
 
     public void setCurrentOK (boolean ok) {
         m_currentOK = ok;
+        if (!m_currentOK) {
+            setInstructionGraphState (IGExecutionStateT.FINISHED_FAILED);
+        }
+    }
+
+    public IGExecutionStateT getInstructionGraphState() {
+        return m_instructionGraphState;
+    }
+
+    public void setInstructionGraphState (IGExecutionStateT instructionGraphState) {
+        m_instructionGraphState = instructionGraphState;
     }
 
     // Note: this assumes sequential instructions
