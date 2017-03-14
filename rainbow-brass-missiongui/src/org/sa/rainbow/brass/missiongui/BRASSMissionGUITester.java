@@ -40,9 +40,9 @@ public class BRASSMissionGUITester extends Thread {
 			if (m_frame==10){
 				m_bop.setRobotObstructed(true);
 				m_bop.reportFromDAS("Robot blocked!");
-				m_trans.setMap(m_bop.m_map); // Using Renderer instead of IBRASSOperation to access m_map for testing purposes
-				m_trans.exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp.prism");
-				m_conn.invoke (8, 0);
+				//m_trans.setMap(m_bop.m_map); // Using Renderer instead of IBRASSOperation to access m_map for testing purposes
+				//m_trans.exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp.prism");
+				//m_conn.invoke (8, 0);
 				m_bop.newInstructionGraph(null);
 			}
 			
@@ -50,6 +50,9 @@ public class BRASSMissionGUITester extends Thread {
 				m_bop.setRobotObstructed(false);
 				m_bop.reportFromDAS("Robot NOT blocked anymore!");
 				m_bop.setExecutingInstruction("Instruction 1");
+				m_bop.setBatteryCharge(17500);
+				m_bop.setBatteryVoltage(130);
+
 			}
 
 			if (m_frame==65){
@@ -62,9 +65,9 @@ public class BRASSMissionGUITester extends Thread {
 
 			if (m_frame==70){
 				m_bop.reportFromDAS("Inserted new node in map between l2 and l3");
-				m_bop.insertMapNode("nn2", "l3", "l2", 30.0, 69.0);
-				m_trans.exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp.prism");
-		        m_conn.invoke (8, 0); 
+				//m_bop.insertMapNode("nn2", "l3", "l2", 30.0, 69.0);
+				//m_trans.exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp.prism");
+		        //m_conn.invoke (8, 0); 
 		        m_bop.setInstructionFailed(true);
 			}
 
@@ -75,6 +78,8 @@ public class BRASSMissionGUITester extends Thread {
 
 			if (m_frame==90){
 				m_bop.reportFromDAS("Notification 6");
+				m_bop.setBatteryCharge(2000);
+				m_bop.setBatteryVoltage(108);
 			}
 
 			

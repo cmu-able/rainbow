@@ -19,6 +19,7 @@ import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.brass.missiongui.IBRASSOperations;
 import org.sa.rainbow.brass.missiongui.NotificationWindow;
 import org.sa.rainbow.brass.missiongui.InstructionGraphWindow;
+import org.sa.rainbow.brass.missiongui.BatteryWidget;
 import org.sa.rainbow.brass.model.*;
 
 
@@ -32,7 +33,7 @@ import com.sun.org.apache.bcel.internal.generic.Instruction;
 
 class Renderer implements GLEventListener, MouseListener, MouseMotionListener, IBRASSOperations
 {
-    public EnvMap m_map=null;
+    public EnvMap m_map=new EnvMap(null,null);
     private PrismPolicy m_policy=null;
     private GLU glu = new GLU();
     private GL2 gl_ref;
@@ -41,6 +42,7 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener, I
     
     private LinkedList<Notification> m_notifications;
     private NotificationWindow m_notification_window;
+    private BatteryWidget m_battery_widget;
     private InstructionGraphWindow m_ig_window;
 
     private int m_frame_rate;
@@ -80,6 +82,7 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener, I
     	m_frame_rate = frameRate;
         m_notifications = new LinkedList<Notification> ();
         m_notification_window = new NotificationWindow(this, 15, 55, 55, 50);
+        m_battery_widget = new BatteryWidget(this, 17, 75, 20, 1);
         m_ig_window = new InstructionGraphWindow(this,22,67,41,60);
 //        try {
 //            RainbowAdapter ra = new RainbowAdapter (new IBRASSOperations () {
@@ -245,8 +248,8 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener, I
             setColor(COLOR_PLAN_ARC);
             gl_ref.glLineWidth(THICKNESS_PLAN_ARC);
             gl_ref.glBegin(GL2.GL_LINES);
-            gl_ref.glVertex3f((float)m_map.getNodeX(source_label), (float)m_map.getNodeY(source_label), 0.0f);
-            gl_ref.glVertex3f((float)m_map.getNodeX(target_label), (float)m_map.getNodeY(target_label), 0.0f);
+//            gl_ref.glVertex3f((float)m_map.getNodeX(source_label), (float)m_map.getNodeY(source_label), 0.0f);
+//            gl_ref.glVertex3f((float)m_map.getNodeX(target_label), (float)m_map.getNodeY(target_label), 0.0f);
             gl_ref.glEnd();
 
         }    	
@@ -274,7 +277,10 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener, I
         	PrismPolicy prismPolicy = new PrismPolicy("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/botpolicy.adv");
         	prismPolicy.readPolicy();  
         	m_plan=prismPolicy.getPlan();
-        	System.out.println(m_plan.toString());
+        	//m_plan.clear();
+        	//m_plan.add("ls_to_l4");
+        	//System.out.println(m_plan.toString());
+        	
         }
     	drawPlan();        
         drawMapLocations();
@@ -282,6 +288,7 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener, I
         drawNotifications();
         m_notification_window.render();
         m_ig_window.render();
+        m_battery_widget.render();
         gl.glFlush();
         m_frame++;
     }
@@ -297,7 +304,7 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener, I
     {
 
         // Map init
-        m_map = new EnvMap(null);		
+        //m_map = new EnvMap(null);		
         m_policy = new PrismPolicy("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/botpolicy.adv");
         m_policy.readPolicy();
 
@@ -387,7 +394,7 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener, I
     
     @Override
     public void insertMapNode (String n, String na, String nb, Double x, Double y){
-    	m_map.insertNode(n, na, nb, x, y);
+    	//m_map.insertNode(n, na, nb, x, y);
     }
     
     @Override
@@ -414,4 +421,11 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener, I
 
     }
     
+    public void setBatteryCharge(double charge){
+    	m_battery_widget.setCharge(charge);
+    }
+    
+    public void setBatteryVoltage(double voltage){
+    	m_battery_widget.setVoltage(voltage);
+    }
 }
