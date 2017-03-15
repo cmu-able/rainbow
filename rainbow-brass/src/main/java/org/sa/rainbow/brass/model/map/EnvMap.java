@@ -36,7 +36,7 @@ public class EnvMap {
         loadFromFile (props.getProperty (PropertiesConnector.MAP_PROPKEY));
     }
 
-    private EnvMap (ModelReference model) {
+    public EnvMap (ModelReference model) {
         m_model = model;
         m_last_insertion = new NodeInsertion ();
         m_nodes = new HashMap<> ();

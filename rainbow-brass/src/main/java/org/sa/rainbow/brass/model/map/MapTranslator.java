@@ -272,9 +272,14 @@ public class MapTranslator {
                 String rote = ROTATION_ENERGY_FORMULA_PREFIX+a.getSource()+MOVE_CMD_STR+a.getTarget();
 
                 String formulaBaseName = BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget();
-                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_HI_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_half_speed_hi+"+"+rote+")) : max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_full_speed_hi+"+"+rote+"))" +";\n";    	        
-                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_MED_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_half_speed_med+"+"+rote+")) : max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_full_speed_med+"+"+rote+"))" +";\n";    	        
-                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_LO_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_half_speed_lo+"+"+rote+")) : max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_full_speed_lo+"+"+rote+"))" +";\n";    	        
+//                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_HI_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_half_speed_hi+"+"+rote+")) : max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_full_speed_hi+"+"+rote+"))" +";\n";    	        
+//                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_MED_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_half_speed_med+"+"+rote+")) : max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_full_speed_med+"+"+rote+"))" +";\n";    	        
+//                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_LO_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_half_speed_lo+"+"+rote+")) : max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_full_speed_lo+"+"+rote+"))" +";\n";    	        
+//                buf += "formula " + formulaBaseName + " = " + ROBOT_LOC_MODE_VAR +" = "+ ROBOT_LOC_MODE_LO_CONST + " ? " + formulaBaseName + "_" + ROBOT_LOC_MODE_LO_CONST +" : ( " + ROBOT_LOC_MODE_VAR +" = "+ ROBOT_LOC_MODE_MED_CONST + " ? " + formulaBaseName + "_" + ROBOT_LOC_MODE_MED_CONST  + " : " + formulaBaseName + "_" + ROBOT_LOC_MODE_HI_CONST+" );\n" ;
+
+                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_HI_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_half_speed_hi+")) : max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_full_speed_hi+"))" +";\n";    	        
+                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_MED_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_half_speed_med+")) : max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_full_speed_med+"))" +";\n";    	        
+                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_LO_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_half_speed_lo+")) : max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_full_speed_lo+"))" +";\n";    	        
                 buf += "formula " + formulaBaseName + " = " + ROBOT_LOC_MODE_VAR +" = "+ ROBOT_LOC_MODE_LO_CONST + " ? " + formulaBaseName + "_" + ROBOT_LOC_MODE_LO_CONST +" : ( " + ROBOT_LOC_MODE_VAR +" = "+ ROBOT_LOC_MODE_MED_CONST + " ? " + formulaBaseName + "_" + ROBOT_LOC_MODE_MED_CONST  + " : " + formulaBaseName + "_" + ROBOT_LOC_MODE_HI_CONST+" );\n" ;
 
             }
@@ -813,7 +818,7 @@ public class MapTranslator {
      */
     public static void main(String[] args) {
         EnvMap dummyMap = new EnvMap (null, null);
-        //dummyMap.insertNode("newnode", "l1", "l2", 17.0, 69.0);
+  //      dummyMap.insertNode("l13", "c1", "l2", 17.0, 69.0);
         setMap(dummyMap);
         System.out.println(getMapTranslation()); // Class test
         //System.out.println();
