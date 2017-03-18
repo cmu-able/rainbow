@@ -78,9 +78,9 @@ public class MapTranslator {
     public static final String ROBOT_FULL_SPEED_CONST = "FULL_SPEED"; // These are just symbolic constants for PRISM
     public static final String ROBOT_HALF_SPEED_CONST = "HALF_SPEED";
     public static final String ROBOT_DR_SPEED_CONST = "DR_SPEED";
-     public static final String ROBOT_SPEED_VAR = "s";
+    public static final String ROBOT_SPEED_VAR = "s";
 
-    public static final float ROBOT_ROTATIONAL_SPEED_VALUE = 1.5f; // rad/s
+    public static final float  ROBOT_ROTATIONAL_SPEED_VALUE = 1.5f;             // rad/s
     public static final String ROBOT_HEADING_VAR = "r";
     public static final String INITIAL_ROBOT_HEADING_CONST = "INITIAL_HEADING";
 
@@ -258,8 +258,10 @@ public class MapTranslator {
             buf+="formula b_upd_charge = min("+ROBOT_BATTERY_VAR+"+"+String.valueOf(Math.round (bp.batteryCharge(ROBOT_CHARGING_TIME)))+", "+ROBOT_BATTERY_RANGE_MAX_CONST+");\n\n";
             for (int i=0;i<m_map.getArcs().size();i++){
                 EnvMapArc a = m_map.getArcs().get(i);
+                if (!a.isEnabled ()) {
+                    continue;
+                }
                 double t_distance = a.getDistance ();
-   
 
                 String battery_delta_half_speed_lo = getDeltaEnergy(ROBOT_HALF_SPEED_CONST, t_distance, ROBOT_LOC_MODE_LO_CONST);
                 String battery_delta_half_speed_med = getDeltaEnergy(ROBOT_HALF_SPEED_CONST, t_distance, ROBOT_LOC_MODE_MED_CONST);
@@ -272,14 +274,9 @@ public class MapTranslator {
                 String rote = ROTATION_ENERGY_FORMULA_PREFIX+a.getSource()+MOVE_CMD_STR+a.getTarget();
 
                 String formulaBaseName = BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget();
-//                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_HI_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_half_speed_hi+"+"+rote+")) : max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_full_speed_hi+"+"+rote+"))" +";\n";    	        
-//                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_MED_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_half_speed_med+"+"+rote+")) : max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_full_speed_med+"+"+rote+"))" +";\n";    	        
-//                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_LO_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_half_speed_lo+"+"+rote+")) : max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_full_speed_lo+"+"+rote+"))" +";\n";    	        
-//                buf += "formula " + formulaBaseName + " = " + ROBOT_LOC_MODE_VAR +" = "+ ROBOT_LOC_MODE_LO_CONST + " ? " + formulaBaseName + "_" + ROBOT_LOC_MODE_LO_CONST +" : ( " + ROBOT_LOC_MODE_VAR +" = "+ ROBOT_LOC_MODE_MED_CONST + " ? " + formulaBaseName + "_" + ROBOT_LOC_MODE_MED_CONST  + " : " + formulaBaseName + "_" + ROBOT_LOC_MODE_HI_CONST+" );\n" ;
-
-                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_HI_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_half_speed_hi+")) : max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_full_speed_hi+"))" +";\n";    	        
-                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_MED_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_half_speed_med+")) : max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_full_speed_med+"))" +";\n";    	        
-                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_LO_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_half_speed_lo+")) : max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_full_speed_lo+"))" +";\n";    	        
+                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_HI_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_half_speed_hi+"+"+rote+")) : max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_full_speed_hi+"+"+rote+"))" +";\n";    	        
+                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_MED_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_half_speed_med+"+"+rote+")) : max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_full_speed_med+"+"+rote+"))" +";\n";    	        
+                buf+="formula " + formulaBaseName + "_" + ROBOT_LOC_MODE_LO_CONST + "= "+ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_half_speed_lo+"+"+rote+")) : max(0,"+ROBOT_BATTERY_VAR+"-("+battery_delta_full_speed_lo+"+"+rote+"))" +";\n";    	        
                 buf += "formula " + formulaBaseName + " = " + ROBOT_LOC_MODE_VAR +" = "+ ROBOT_LOC_MODE_LO_CONST + " ? " + formulaBaseName + "_" + ROBOT_LOC_MODE_LO_CONST +" : ( " + ROBOT_LOC_MODE_VAR +" = "+ ROBOT_LOC_MODE_MED_CONST + " ? " + formulaBaseName + "_" + ROBOT_LOC_MODE_MED_CONST  + " : " + formulaBaseName + "_" + ROBOT_LOC_MODE_HI_CONST+" );\n" ;
 
             }
@@ -391,7 +388,7 @@ public class MapTranslator {
                     String t_time_half_speed=f.format(SpeedPredictor.moveForwardTimeSimple(t_distance, ROBOT_HALF_SPEED_CONST));
                     String t_time_full_speed=f.format(SpeedPredictor.moveForwardTimeSimple(t_distance, ROBOT_FULL_SPEED_CONST));
                     String t_time_dr_speed=f.format(SpeedPredictor.moveForwardTimeSimple(t_distance, ROBOT_DR_SPEED_CONST));
-                    
+
                     String action_name = a.getSource()+MOVE_CMD_STR+a.getTarget();
                     String drs = ROBOT_LOC_MODE_VAR +" = "+ROBOT_LOC_MODE_LO_CONST+" ? "+ t_time_dr_speed + " + " + ROTATION_TIME_FORMULA_PREFIX+action_name + " : " ;
                     buf+="\t["+action_name+"] true :" + drs + ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? "+t_time_half_speed+" + "+ROTATION_TIME_FORMULA_PREFIX+action_name+" : "+t_time_full_speed+" + "+ROTATION_TIME_FORMULA_PREFIX + action_name+";\n";
@@ -447,7 +444,7 @@ public class MapTranslator {
         buf+=" 0;\n";
         return buf;
     }
-    
+
     public static String generateRotationEnergyFormulaForArc(EnvMapArc a){
         NumberFormat f = new DecimalFormat ("#0");
         String buf="formula "+ROTATION_ENERGY_FORMULA_PREFIX+a.getSource()+MOVE_CMD_STR+a.getTarget()+" = ";
@@ -482,7 +479,12 @@ public class MapTranslator {
      */
     public static double findArcOrientation(EnvMapArc a){
         synchronized (m_map) {
-            return findArcOrientation( m_map.getNodeX(a.getSource()), m_map.getNodeY(a.getSource()), m_map.getNodeX(a.getTarget()), m_map.getNodeY(a.getTarget()));
+            double nodeX = m_map.getNodeX(a.getSource());
+            double nodeY = m_map.getNodeY(a.getSource());
+            double nodeX2 = m_map.getNodeX(a.getTarget());
+            double nodeY2 = m_map.getNodeY(a.getTarget());
+            if (nodeX == Double.NEGATIVE_INFINITY || nodeX2 == Double.NEGATIVE_INFINITY) return 0;
+            return findArcOrientation( nodeX, nodeY, nodeX2, nodeY2);
         }
     }
 
@@ -818,11 +820,11 @@ public class MapTranslator {
      */
     public static void main(String[] args) {
         EnvMap dummyMap = new EnvMap (null, null);
-  //      dummyMap.insertNode("l13", "c1", "l2", 17.0, 69.0);
+        //dummyMap.insertNode("newnode", "l1", "l2", 17.0, 69.0);
         setMap(dummyMap);
         System.out.println(getMapTranslation()); // Class test
         //System.out.println();
-        exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp.prism", true);
+        exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp-simple.prism", false);
         // String export_path="/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/";
 
         // Map<List, String> specifications = exportConstrainedTranslationsBetween (export_path, "ls", "l1");

@@ -113,11 +113,15 @@ public class EnvMap {
     }
 
     public synchronized double getNodeX (String n) {
-        return m_nodes.get(n).getX();
+        EnvMapNode envMapNode = m_nodes.get(n);
+        if (envMapNode != null) return envMapNode.getX ();
+        return Double.NEGATIVE_INFINITY;
     }
 
     public synchronized double getNodeY (String n) {
-        return m_nodes.get(n).getY();
+        EnvMapNode envMapNode = m_nodes.get (n);
+        if (envMapNode != null) return envMapNode.getY ();
+        return Double.NEGATIVE_INFINITY;
     }
 
     public synchronized int getNodeId (String n) {
@@ -196,8 +200,8 @@ public class EnvMap {
      */
     public synchronized void insertNode (String n, String na, String nb, double x, double y, boolean obstacle) {
         AddNode (n, x, y);
-        addArc (na, n, distanceBetween(na,n), true);
-        addArc (n, na, distanceBetween(na,n), true);
+        addArc (na, n, distanceBetween (na, n), true);
+        addArc (n, na, distanceBetween (na, n), true);
         if (obstacle) {
             removeArcs (na, nb);
         }
@@ -206,8 +210,14 @@ public class EnvMap {
             addArc (n, nb, distanceBetween (nb, n), true);
         }
         // Somehow, the planning things that n to nb is still valid
-        //   addArc (nb, n, distanceBetween (nb, n), false);
-        // addArc (n, nb, distanceBetween (nb, n), false);
+//        else {
+//            addArc (nb, n, distanceBetween (nb, n), false);
+//            addArc (n, nb, distanceBetween (nb, n), false);
+//        }
+        LinkedList<EnvMapArc> arcs = getArcs ();
+        for (EnvMapArc a : arcs) {
+            System.out.println (a.m_source + " -> " + a.m_target + "(" + a.m_enabled + ")");
+        }
     }
 
 
