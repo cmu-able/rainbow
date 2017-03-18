@@ -11,14 +11,17 @@ import org.sa.rainbow.brass.model.instructions.IInstruction;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
 import org.sa.rainbow.brass.model.instructions.MoveAbsHInstruction;
+import org.sa.rainbow.brass.model.instructions.SetExecutionFailedCmd;
 import org.sa.rainbow.brass.model.instructions.SetLocalizationFidelityInstruction;
 import org.sa.rainbow.brass.model.instructions.SetLocalizationFidelityInstruction.LocalizationFidelity;
 import org.sa.rainbow.brass.model.map.BatteryPredictor;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.map.EnvMapModelInstance;
+import org.sa.rainbow.brass.model.map.InsertNodeCmd;
 import org.sa.rainbow.brass.model.map.MapTranslator;
 import org.sa.rainbow.brass.model.mission.MissionState;
 import org.sa.rainbow.brass.model.mission.MissionState.Heading;
+import org.sa.rainbow.brass.model.mission.MissionState.LocationRecording;
 import org.sa.rainbow.brass.model.mission.MissionStateModelInstance;
 import org.sa.rainbow.brass.model.mission.SetRobotAccurateCmd;
 import org.sa.rainbow.brass.model.mission.SetRobotLocalizationFidelityCmd;
@@ -168,57 +171,136 @@ public class AccuracyAnalyzer extends AbstractRainbowRunnable implements IRainbo
                 IInstruction currentInstruction = m_igProgress.getCurrentInstruction();
 
                 // Only performing timing analysis once per instruction
-                if (isNewOrUnpassedInstruction(currentInstruction)) {
+//                if (isNewOrUnpassedInstruction(currentInstruction)) {
 
-                    if (m_missionState != null) {
+                if (m_missionState != null && !(currentInstruction instanceof ChargeInstruction)) {
 
-                        // TODO: This may be a hack
-                        // Update the robot's configuration (Kinect and localization) in MissionState
-                        if (currentInstruction instanceof SetLocalizationFidelityInstruction) {
-                            SetLocalizationFidelityInstruction inst = (SetLocalizationFidelityInstruction) currentInstruction;
-                            MissionStateModelInstance missionStateModel = (MissionStateModelInstance) m_modelsManagerPort
-                                    .<MissionState> getModelInstance(m_msRef);
-                            SetRobotLocalizationFidelityCmd robotLocFidelityCmd = missionStateModel.getCommandFactory()
-                                    .setRobotLocalizationFidelityCmd(inst.getLocalizationFidelity());
-                            m_modelUSPort.updateModel(robotLocFidelityCmd);
-                        }
-
-                        // The remaining instructions, excluding the current instruction
-                        List<IInstruction> remainingInstructions = (List<IInstruction>) m_igProgress.getRemainingInstructions();
-                        double batteryCharge = m_missionState.getBatteryCharge ();
-
-                        double planEnergyConsumption = hasEnoughEnergy (currentInstruction, remainingInstructions);
-                        boolean hasEnoughEnergy = batteryCharge >= planEnergyConsumption;
-
-                        if (hasEnoughEnergy) {
-                            // Keep track of the latest instruction that we have analyzed the accuracy property,
-                            // and it passed
-                            m_prevAnalyzedAndPassedInstruction = currentInstruction;
-                        }
-
-                        if (hasEnoughEnergy && !m_missionState.isRobotAccurate()) {
-                            // Previous plan was not accurate; new plan is expected to be accurate
-                            // Update MissionState model to indicate that the robot can now get close enough to the goal
-                            MissionStateModelInstance missionStateModel = (MissionStateModelInstance) m_modelsManagerPort
-                                    .<MissionState> getModelInstance(m_msRef);
-                            SetRobotAccurateCmd robotAccurateCmd = missionStateModel.getCommandFactory().setRobotAccurateCmd(true);
-                            m_modelUSPort.updateModel (robotAccurateCmd);
-                        } else if (!hasEnoughEnergy) {
-                            log ("Do not have enough battery. Current charge = " + batteryCharge + ", needed charge = "
-                                    + planEnergyConsumption);
-                            planEnergyConsumption = hasEnoughEnergy (currentInstruction, remainingInstructions);
-                            // Update MissionState model to indicate that the robot cannot get close enough to the goal
-                            MissionStateModelInstance missionStateModel = (MissionStateModelInstance) m_modelsManagerPort
-                                    .<MissionState> getModelInstance(m_msRef);
-                            SetRobotAccurateCmd robotAccurateCmd = missionStateModel.getCommandFactory().setRobotAccurateCmd(false);
-                            m_modelUSPort.updateModel (robotAccurateCmd);
-
-                            // Wait for the planner to come up with an adaptation plan
-                            m_waitForPlanner = true;
-                        }
+                    // TODO: This may be a hack
+                    // Update the robot's configuration (Kinect and localization) in MissionState
+                    if (currentInstruction instanceof SetLocalizationFidelityInstruction) {
+                        SetLocalizationFidelityInstruction inst = (SetLocalizationFidelityInstruction) currentInstruction;
+                        MissionStateModelInstance missionStateModel = (MissionStateModelInstance) m_modelsManagerPort
+                                .<MissionState> getModelInstance(m_msRef);
+                        SetRobotLocalizationFidelityCmd robotLocFidelityCmd = missionStateModel.getCommandFactory()
+                                .setRobotLocalizationFidelityCmd(inst.getLocalizationFidelity());
+                        m_modelUSPort.updateModel(robotLocFidelityCmd);
                     }
+
+                    // The remaining instructions, excluding the current instruction
+                    List<IInstruction> remainingInstructions = (List<IInstruction>) m_igProgress.getRemainingInstructions();
+                    Double batteryCharge = m_missionState.getBatteryCharge ();
+                    if (batteryCharge == null) return; // Don't have charge information yet
+                    double planEnergyConsumption = hasEnoughEnergy (currentInstruction, remainingInstructions);
+                    boolean hasEnoughEnergy = batteryCharge >= planEnergyConsumption;
+                    log ("Current charge = " + batteryCharge + ", needed charge = " + planEnergyConsumption);
+                    if (hasEnoughEnergy) {
+                        // Keep track of the latest instruction that we have analyzed the accuracy property,
+                        // and it passed
+                        m_prevAnalyzedAndPassedInstruction = currentInstruction;
+                    }
+
+                    if (hasEnoughEnergy && !m_missionState.isRobotAccurate()) {
+                        // Previous plan was not accurate; new plan is expected to be accurate
+                        // Update MissionState model to indicate that the robot can now get close enough to the goal
+                        MissionStateModelInstance missionStateModel = (MissionStateModelInstance) m_modelsManagerPort
+                                .<MissionState> getModelInstance(m_msRef);
+                        SetRobotAccurateCmd robotAccurateCmd = missionStateModel.getCommandFactory().setRobotAccurateCmd(true);
+                        m_modelUSPort.updateModel (robotAccurateCmd);
+                    } else if (!hasEnoughEnergy) {
+                        log ("Do not have enough battery. Current charge = " + batteryCharge + ", needed charge = "
+                                + planEnergyConsumption);
+                        planEnergyConsumption = hasEnoughEnergy (currentInstruction, remainingInstructions);
+                        // Update MissionState model to indicate that the robot cannot get close enough to the goal
+                        MissionStateModelInstance missionStateModel = (MissionStateModelInstance) m_modelsManagerPort
+                                .<MissionState> getModelInstance(m_msRef);
+
+                        LocationRecording pose = m_missionState.getCurrentPose ();
+
+                        // Get source and target positions of the failing instruction
+                        IInstruction currentInst = m_igProgress.getCurrentInstruction ();
+
+                        // The current instruction is of type MoveAbsH
+                        insertNode (pose, currentInst, missionStateModel);
+
+                        SetRobotAccurateCmd robotAccurateCmd = missionStateModel.getCommandFactory().setRobotAccurateCmd(false);
+                        m_modelUSPort.updateModel (robotAccurateCmd);
+
+                        // Wait for the planner to come up with an adaptation plan
+                        m_waitForPlanner = true;
+                    }
+//                    }
+                }
+                else if (m_missionState != null && !m_missionState.isRobotAccurate ()) {
+                    MissionStateModelInstance missionStateModel = (MissionStateModelInstance )m_modelsManagerPort
+                            .<MissionState> getModelInstance (m_msRef);
+                    SetRobotAccurateCmd robotAccurateCmd = missionStateModel.getCommandFactory ()
+                            .setRobotAccurateCmd (true);
+                    m_modelUSPort.updateModel (robotAccurateCmd);
                 }
             }
+        }
+    }
+
+    private MoveAbsHInstruction getPreviousMoveAbsH (MoveAbsHInstruction currentMoveAbsH,
+            InstructionGraphProgress igProgress) {
+        int j = Integer.valueOf (currentMoveAbsH.getInstructionLabel ()) - 1;
+        for (int i = j; i > 0; i--) {
+            String label = String.valueOf (i);
+            IInstruction instruction = igProgress.getInstruction (label);
+
+            if (instruction instanceof MoveAbsHInstruction) return (MoveAbsHInstruction )instruction;
+        }
+
+        // No previous MoveAbsH instruction
+        return null;
+    }
+
+    void insertNode (LocationRecording pose, IInstruction currentInst, MissionStateModelInstance missionStateModel) {
+        if (currentInst instanceof MoveAbsHInstruction) {
+            MoveAbsHInstruction currentMoveAbsH = (MoveAbsHInstruction )currentInst;
+            MoveAbsHInstruction prevMoveAbsH = getPreviousMoveAbsH (currentMoveAbsH, m_igProgress);
+
+            double sourceX;
+            double sourceY;
+            double targetX = currentMoveAbsH.getTargetX ();
+            double targetY = currentMoveAbsH.getTargetY ();
+
+            if (prevMoveAbsH != null) {
+                sourceX = prevMoveAbsH.getTargetX ();
+                sourceY = prevMoveAbsH.getTargetY ();
+            }
+            else {
+                // The current instruction is the first MoveAbsH instruction in IG
+                // Use the initial pose as the source pose
+                sourceX = m_missionState.getInitialPose ().getX ();
+                sourceY = m_missionState.getInitialPose ().getY ();
+            }
+
+            // Find the corresponding environment map nodes of the source and target positions
+            // Node naming assumption: node's label is lX where X is the order in which the node is added
+            int numNodes = m_envMap.getNodeCount () + 1;
+            String n = "l" + numNodes;
+            String na = m_envMap.getNode (sourceX, sourceY).getLabel ();
+            String nb = m_envMap.getNode (targetX, targetY).getLabel ();
+
+            // Update the environment map
+            String rx = Double.toString (pose.getX ());
+            String ry = Double.toString (pose.getY ());
+            EnvMapModelInstance envModel = (EnvMapModelInstance )m_modelsManagerPort
+                    .<EnvMap> getModelInstance (m_emRef);
+            InstructionGraphModelInstance igModel = (InstructionGraphModelInstance )m_modelsManagerPort
+                    .<InstructionGraphProgress> getModelInstance (m_igRef);
+            InsertNodeCmd insertNodeCmd = envModel.getCommandFactory ().insertNodeCmd (n, na, nb,
+                    rx, ry, "false");
+            log ("Inserting node '" + n + "' at (" + rx + ", " + ry + ") between " + na + " and "
+                    + nb);
+
+            SetExecutionFailedCmd resetFailedCmd = igModel.getCommandFactory ()
+                    .setExecutionFailedCmd ("false");
+
+            // Send the commands -- different models, so can't bundle them
+            m_modelUSPort.updateModel (resetFailedCmd);
+            m_modelUSPort.updateModel (insertNodeCmd);
         }
     }
 
@@ -266,6 +348,7 @@ public class AccuracyAnalyzer extends AbstractRainbowRunnable implements IRainbo
         // Goal location
         double goalX = m_envMap.getNodeX(m_missionState.getTargetWaypoint());
         double goalY = m_envMap.getNodeY(m_missionState.getTargetWaypoint());
+        if (goalX == Double.NEGATIVE_INFINITY || goalY == Double.NEGATIVE_INFINITY) return 0;
 
         double sourceX = m_missionState.getCurrentPose().getX();
         double sourceY = m_missionState.getCurrentPose().getY();
