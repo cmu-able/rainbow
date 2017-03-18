@@ -182,7 +182,9 @@ public class MissionState {
     public Double getBatteryCharge () {
         synchronized (m_chargeHistory) {
 
-            return m_chargeHistory.peek ();
+            Double charge = m_chargeHistory.peek ();
+            if (charge == null) return null;
+            return charge;
         }
     }
 
