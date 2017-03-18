@@ -74,7 +74,7 @@ public class PrismConnectorAPI {
     public synchronized static String modelCheckFromFileS (String modelFileName,
             String propertiesFileName,
             String strategyFileName)
-            throws Exception {
+                    throws Exception {
         return modelCheckFromFileS(modelFileName, propertiesFileName, strategyFileName, -1, m_constSwitch);
     }
 
@@ -212,6 +212,9 @@ public class PrismConnectorAPI {
                 System.out.println(e.getMessage());
             }
         } 		
+        else {
+            exportTextToFile (strategyFileName + ".adv", "");
+        }
         //m_prism.closeDown();
         return res;
     }	
