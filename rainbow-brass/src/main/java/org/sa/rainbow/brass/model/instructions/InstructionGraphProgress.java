@@ -169,13 +169,18 @@ public class InstructionGraphProgress {
 //        observation.
 //        m_executionHistory.push (observation);
         }
-//        if ("SUCCESS".equals (state)
-//                && m_instructions.get (m_instructions.get (m_currentNode).getNextInstructionLabel ()) == null) {
-//            setInstructionGraphState (IGExecutionStateT.FINISHED_SUCCESS);
-//        }
-//        else {
-//            setInstructionGraphState (IGExecutionStateT.EXECUTING);
-//        }
+        if (m_instructions.get (m_currentNode) != null) {
+            if (m_instructions.get (m_instructions.get (m_currentNode).getNextInstructionLabel ()) == null
+                    && "SUCCESS".equals (state)) {
+                setInstructionGraphState (IGExecutionStateT.FINISHED_SUCCESS);
+            }
+            else {
+                setInstructionGraphState (IGExecutionStateT.EXECUTING);
+            }
+        }
+        else {
+            setInstructionGraphState (IGExecutionStateT.EXECUTING);
+        }
 
     }
 
@@ -223,6 +228,13 @@ public class InstructionGraphProgress {
         b.append (" then ");
         b.append (i + 1);
         b.append (")");
+    }
+
+    public static void main (String[] args) {
+        InstructionGraphProgress ip = parseFromString (new ModelReference ("test", "test"),
+                "[P(V(1, do Deadline(143) then 2),V(2, do MoveAbsH(52.20, 69.00, 0.68, 3.1416) then 3)::V(3, do MoveAbsH(42.50, 69.00, 0.68, -1.5708) then 4)::V(4, do MoveAbsH(42.50, 65.00, 0.68, -1.5708) then 5)::V(5, do MoveAbsH(42.50, 58.80, 0.68, 0.0000) then 6)::V(6, end)::nil)");
+        IInstruction instruction = ip.getInstruction ("5");
+        System.out.println ();
     }
 
 }
