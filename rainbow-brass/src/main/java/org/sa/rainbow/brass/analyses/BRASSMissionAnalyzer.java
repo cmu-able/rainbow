@@ -107,7 +107,7 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
             InstructionGraphProgress igProgress = igModel.getModelInstance();
             EnvMap envMap = envModel.getModelInstance();
             boolean currentOK = igProgress.getCurrentOK();
-            if (missionState.isAdaptationNeeded ()) return;
+//            if (missionState.isAdaptationNeeded ()) return;
 
             // If we start off with nothing (i.e., no instruction graph), this is a problem
 //            if (emptyInstructions (igProgress)
@@ -117,16 +117,16 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
 //                m_modelUSPort.updateModel (cmd);
 //            }
 
-            log ("Mission Progress Analyzer");
-            log ("Finished succesfully? "
-                    + (igProgress.getInstructionGraphState () == IGExecutionStateT.FINISHED_SUCCESS));
-            log ("Finished failed? " + (igProgress.getInstructionGraphState () == IGExecutionStateT.FINISHED_FAILED));
-            log ("Awaiting pose? " + (missionState.getCurrentPose () == null) + ", " + m_awaitingPose);
-            log ("CurrentOK? " + currentOK);
-            log ("Executing Instruction?" + (igProgress.getExecutingInstruction () != null));
-            log ("Awaiting new IG?" + m_awaitingNewIG);
-            log ("Empty instructions?" + emptyInstructions (igProgress));
-            log ("Robot obstructed known? " + missionState.isRobotObstructed ());
+//            log ("Mission Progress Analyzer");
+//            log ("Finished succesfully? "
+//                    + (igProgress.getInstructionGraphState () == IGExecutionStateT.FINISHED_SUCCESS));
+//            log ("Finished failed? " + (igProgress.getInstructionGraphState () == IGExecutionStateT.FINISHED_FAILED));
+//            log ("Awaiting pose? " + (missionState.getCurrentPose () == null) + ", " + m_awaitingPose);
+//            log ("CurrentOK? " + currentOK);
+//            log ("Executing Instruction?" + (igProgress.getExecutingInstruction () != null));
+//            log ("Awaiting new IG?" + m_awaitingNewIG);
+//            log ("Empty instructions?" + emptyInstructions (igProgress));
+//            log ("Robot obstructed known? " + missionState.isRobotObstructed ());
             if (igProgress.getInstructionGraphState () == IGExecutionStateT.FINISHED_SUCCESS) {
                 BRASSHttpConnector.instance ().reportDone (false, "Finished all the instructions in the task");
                 Rainbow.instance ().signalTerminate ();
