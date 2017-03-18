@@ -1,6 +1,7 @@
 package org.sa.rainbow.brass.adaptation;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
@@ -111,7 +112,7 @@ public class PlanExecutor extends AbstractRainbowRunnable implements IAdaptation
             executor.start ();
 
             try {
-                latch.await ();
+                latch.await (20, TimeUnit.SECONDS);
             }
             catch (InterruptedException e) {
                 e.printStackTrace ();
