@@ -7,6 +7,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.sa.rainbow.brass.model.map.BatteryPredictor;
+import org.sa.rainbow.brass.model.map.MapTranslator;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.RegularPatternGauge;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
@@ -35,6 +37,9 @@ public class MissionStateGauge extends RegularPatternGauge {
     protected String              last_y;
     private String                last_w;
     private int                   last_voltage        = 0;
+    private double                m_currentTime;
+    private double                last_voltage_time;
+    private double                last_charge         = 0;
 
     /**
      * Main Constructor the Gauge that is hardwired to the Probe.
@@ -91,8 +96,11 @@ public class MissionStateGauge extends RegularPatternGauge {
         }
         else if (CHARGE.equals (matchName)) {
             int voltage = Integer.parseInt (group);
-            if (voltageDifferent (voltage)) {
-                double charge = PowerConverter.voltage2Charge (voltage);
+
+            double charge = voltageToChargeConsiderTime (voltage);
+
+            if (chargeDifferent (charge)) {
+//                double charge = voltage2Charge (voltage);
                 IRainbowOperation op = m_commands.get ("charge");
                 Map<String, String> pMap = new HashMap<> ();
                 pMap.put (op.getParameters ()[0], Double.toString (charge));
@@ -115,6 +123,7 @@ public class MissionStateGauge extends RegularPatternGauge {
                 nsecs = Long.parseLong (m.group (2).trim ());
             }
             double realSecs = secs + TimeUnit.MILLISECONDS.convert (nsecs, TimeUnit.NANOSECONDS) / 1000.0;
+            m_currentTime = realSecs;
             IRainbowOperation op = m_commands.get ("clock");
             Map<String, String> pMap = new HashMap<> ();
             pMap.put (op.getParameters ()[0], Double.toString (realSecs));
@@ -183,12 +192,32 @@ public class MissionStateGauge extends RegularPatternGauge {
 
     }
 
+    private boolean chargeDifferent (double charge) {
+        if (Math.round (last_charge) != Math.round (charge)) {
+            last_charge = charge;
+            return true;
+        }
+        return false;
+    }
+
     private boolean voltageDifferent (int voltage) {
         if (last_voltage != voltage) {
+            last_voltage_time = m_currentTime;
             last_voltage = voltage;
             return true;
         }
         return false;
+    }
+
+    private double voltageToChargeConsiderTime (int voltage) {
+        voltageDifferent (voltage);
+        double estimatedCharge = PowerConverter.voltage2ChargeOpt (voltage)
+                - BatteryPredictor.batteryConsumption (MapTranslator.ROBOT_HALF_SPEED_CONST,
+                        MapTranslator.ROBOT_LOC_MODE_MED_CONST, m_currentTime - last_voltage_time);
+        if (estimatedCharge < PowerConverter.voltage2ChargePess (voltage))
+            return PowerConverter.voltage2ChargePess (voltage);
+        return estimatedCharge;
+
     }
 
     private boolean locationDifferent (String x, String y, String w) {
