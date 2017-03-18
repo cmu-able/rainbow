@@ -17,6 +17,7 @@ public class BatteryWidget {
 	protected float m_length;
 	protected double m_voltage;
 	protected double m_charge;
+	protected boolean m_charging;
 	
 	protected final double MAX_VOLTAGE = 165.0;
 	protected final double MIN_VOLTAGE = 104.0;
@@ -40,6 +41,7 @@ public class BatteryWidget {
 		m_length=length;		
 		m_voltage = MAX_VOLTAGE;
 		m_charge = MAX_CHARGE;
+		m_charging = false;
 	}
 	
 	public void setColor(float[] c){
@@ -64,6 +66,27 @@ public class BatteryWidget {
 			m_charge = c;
 	}
 	
+	public boolean isCharging(){
+		return m_charging;
+	}
+	
+	public void setCharging(boolean c){
+		m_charging = c;
+	}
+	
+	public void drawLightningBolt(float x, float y, float size){
+		GL2 gl_ref=m_ref.getGLRef();
+	   	gl_ref.glBegin(GL2.GL_LINE_STRIP);
+	    gl_ref.glVertex3f(x+size*(2.0f/3.0f),y, 0.0f);
+	    gl_ref.glVertex3f(x+size*(4.0f/3.0f),y, 0.0f);
+	    gl_ref.glVertex3f(x+size*(2.0f/3.0f),y-size, 0.0f);
+	    gl_ref.glVertex3f(x+size*(4.0f/3.0f),y-size, 0.0f);
+	    gl_ref.glVertex3f(x+size/3.0f,y-size*2, 0.0f);
+	    gl_ref.glVertex3f(x+size*(2.0f/3.0f),y-size*(4.0f/3.0f), 0.0f);
+	    gl_ref.glVertex3f(x,y-size*(4.0f/3.0f), 0.0f);
+	    gl_ref.glVertex3f(x+size*(2.0f/3.0f),y, 0.0f);
+	    gl_ref.glEnd();
+	}
 	
 	public void render(){	
 		GL2 gl_ref=m_ref.getGLRef();
@@ -113,11 +136,20 @@ public class BatteryWidget {
 		gl_ref.glEnd();
 		
 		setColor(TEXT_COLOR);
+		String chargingStr="";
+		
+		if (isCharging()){
+			drawLightningBolt(m_left+m_length+0.4f, m_top+(m_width/1.3f), 0.3f);
+			drawLightningBolt(m_left+m_length+0.4f, v_offset+m_top+(m_width/1.3f), 0.3f);
+			chargingStr =" [Charging]";
+			
+		}
+		
 		glPrint(m_left-3f, m_top+(m_width/2.0f),"Charge");
-		glPrint(m_left+m_length+0.3f, m_top+(m_width/2.0f), String.valueOf(m_charge)+" milliwatt-hour"+" ("+f.format(pc_charge)+"%)");
+		glPrint(m_left+m_length+1.0f, m_top+(m_width/2.0f), String.valueOf(m_charge)+" milliwatt-hour"+" ("+f.format(pc_charge)+"%)"+chargingStr);
 		
 		glPrint(m_left-3f, v_offset+m_top+(m_width/2.0f),"Voltage");
-		glPrint(m_left+m_length+0.3f, v_offset+m_top+(m_width/2.0f), String.valueOf(m_voltage)+" volts");
+		glPrint(m_left+m_length+1.0f, v_offset+m_top+(m_width/2.0f), String.valueOf(m_voltage)+" volts"+chargingStr);
 		
 		
 	}

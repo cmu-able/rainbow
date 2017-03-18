@@ -10,10 +10,12 @@ import java.util.Iterator;
 import java.util.Collection;
 
 import org.sa.rainbow.brass.adaptation.PrismPolicy;
+import org.sa.rainbow.brass.adaptation.PolicyToIG;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.map.EnvMapArc;
 import org.sa.rainbow.brass.model.map.EnvMapNode;
+import org.sa.rainbow.brass.model.map.MapTranslator;
 import org.sa.rainbow.brass.model.map.dijkstra.Vertex;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.brass.missiongui.IBRASSOperations;
@@ -22,7 +24,7 @@ import org.sa.rainbow.brass.missiongui.InstructionGraphWindow;
 import org.sa.rainbow.brass.missiongui.BatteryWidget;
 import org.sa.rainbow.brass.model.*;
 
-
+import com.google.common.base.Objects;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
@@ -71,6 +73,7 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener, I
     private final float[] COLOR_TARGET_LOCATION = {1.0f, 0.5f, 0.0f};
     private final float[] COLOR_ROBOT = {0.3f, 0.3f, 1.0f};
     private final float[] COLOR_ROBOT_OBSTRUCTED ={1.0f, 0.0f, 0.0f};
+    private final float[] COLOR_BLACK ={0.0f, 0.0f, 0.0f};
 
 
     private final float SIZE_NODE = 0.5f;
@@ -209,7 +212,16 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener, I
         gl.glLineWidth(THICKNESS_NORMAL);
         drawCircle(x, y, SIZE_NODE*1.5f);
         glPrint(x+SIZE_NODE*2, y+SIZE_NODE*2, n.getLabel());
+        
+        if (n.isChargingStation()){
+        	setColor(COLOR_BLACK);
+            gl.glLineWidth(3.5f);
+        	m_battery_widget.drawLightningBolt(x-SIZE_NODE*0.5f,y+SIZE_NODE*0.8f,0.4f);
+            gl.glLineWidth(THICKNESS_NORMAL);
+        }
     }
+    
+
 
     public void drawMapLocations(){
         for (Map.Entry<String,EnvMapNode> entry : m_map.getNodes().entrySet() ){
@@ -243,14 +255,17 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener, I
         for (int i = 0; i < m_plan.size(); i++) {
             String action = m_plan.get(i);
             String[] elements = action.split("_");
-            String target_label = elements[2];
-            String source_label = elements[0];
-            setColor(COLOR_PLAN_ARC);
-            gl_ref.glLineWidth(THICKNESS_PLAN_ARC);
-            gl_ref.glBegin(GL2.GL_LINES);
-//            gl_ref.glVertex3f((float)m_map.getNodeX(source_label), (float)m_map.getNodeY(source_label), 0.0f);
-//            gl_ref.glVertex3f((float)m_map.getNodeX(target_label), (float)m_map.getNodeY(target_label), 0.0f);
-            gl_ref.glEnd();
+            if (!Objects.equal(elements[0], MapTranslator.TACTIC_PREFIX) &&
+            		!Objects.equal(elements[0],PolicyToIG.SPECIAL_CMD_PREFIX)){
+	            String target_label = elements[2];
+	            String source_label = elements[0];
+	            setColor(COLOR_PLAN_ARC);
+	            gl_ref.glLineWidth(THICKNESS_PLAN_ARC);
+	            gl_ref.glBegin(GL2.GL_LINES);
+	            gl_ref.glVertex3f((float)m_map.getNodeX(source_label), (float)m_map.getNodeY(source_label), 0.0f);
+	            gl_ref.glVertex3f((float)m_map.getNodeX(target_label), (float)m_map.getNodeY(target_label), 0.0f);
+	            gl_ref.glEnd();
+            }
 
         }    	
     }
@@ -428,4 +443,9 @@ class Renderer implements GLEventListener, MouseListener, MouseMotionListener, I
     public void setBatteryVoltage(double voltage){
     	m_battery_widget.setVoltage(voltage);
     }
+    
+    public void setCharging(boolean c){
+    	m_battery_widget.setCharging(c);
+    }
+    
 }

@@ -52,6 +52,7 @@ public class BRASSMissionGUITester extends Thread {
 				m_bop.setExecutingInstruction("Instruction 1");
 				m_bop.setBatteryCharge(17500);
 				m_bop.setBatteryVoltage(130);
+				m_bop.setCharging(true);
 
 			}
 
@@ -80,6 +81,7 @@ public class BRASSMissionGUITester extends Thread {
 				m_bop.reportFromDAS("Notification 6");
 				m_bop.setBatteryCharge(2000);
 				m_bop.setBatteryVoltage(108);
+				m_bop.setCharging(false);
 			}
 
 			
