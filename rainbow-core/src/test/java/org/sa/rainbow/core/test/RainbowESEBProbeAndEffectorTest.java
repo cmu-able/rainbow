@@ -1,9 +1,9 @@
 package org.sa.rainbow.core.test;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Set;
-
+import auxtestlib.BooleanEvaluation;
+import auxtestlib.DefaultTCase;
+import auxtestlib.TestHelper;
+import auxtestlib.TestPropertiesDefinition;
 import org.apache.log4j.BasicConfigurator;
 import org.junit.After;
 import org.junit.Before;
@@ -14,13 +14,11 @@ import org.sa.rainbow.core.IRainbowRunnable.State;
 import org.sa.rainbow.core.MasterTestHelper;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.RainbowMaster;
-import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
 
-import auxtestlib.BooleanEvaluation;
-import auxtestlib.DefaultTCase;
-import auxtestlib.TestHelper;
-import auxtestlib.TestPropertiesDefinition;
+import java.io.File;
+import java.io.IOException;
+import java.util.Set;
 
 public class RainbowESEBProbeAndEffectorTest extends DefaultTCase {
     @TestHelper
@@ -44,13 +42,8 @@ public class RainbowESEBProbeAndEffectorTest extends DefaultTCase {
     public void setupMasterAndDelegate () throws Exception {
         configureTestProperties ();
 
-        try {
-            m_master = new RainbowMaster ();
-            m_delegate = new RainbowDelegate ();
-        }
-        catch (RainbowConnectionException e) {
-            fail (e.getMessage ());
-        }
+        m_master = new RainbowMaster ();
+        m_delegate = new RainbowDelegate ();
     }
 
     protected void configureTestProperties () throws IOException {

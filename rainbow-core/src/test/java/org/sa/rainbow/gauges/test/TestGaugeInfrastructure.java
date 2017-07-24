@@ -1,11 +1,7 @@
 package org.sa.rainbow.gauges.test;
 
-import java.io.File;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
+import auxtestlib.BooleanEvaluation;
+import auxtestlib.DefaultTCase;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -25,8 +21,11 @@ import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.util.Beacon;
 
-import auxtestlib.BooleanEvaluation;
-import auxtestlib.DefaultTCase;
+import java.io.File;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class TestGaugeInfrastructure extends DefaultTCase {
 
@@ -68,10 +67,6 @@ public class TestGaugeInfrastructure extends DefaultTCase {
             }
         }
 
-        @Override
-        protected void initProperty (String name, Object value) {
-
-        }
     }
 
     private static String s_currentDirectory;
@@ -143,10 +138,6 @@ public class TestGaugeInfrastructure extends DefaultTCase {
                 "Test"), new TypedAttribute ("testModel", "Acme"), Collections.<TypedAttributeWithValue> emptyList (),
                 Collections.<String, IRainbowOperation> emptyMap ()) {
 
-            @Override
-            protected void initProperty (String name, Object value) {
-
-            }
 
             @Override
             public boolean configureGauge (List<TypedAttributeWithValue> configParams) {
@@ -226,10 +217,6 @@ public class TestGaugeInfrastructure extends DefaultTCase {
                 "Test"), new TypedAttribute ("testModel", "Acme"), Collections.<TypedAttributeWithValue> emptyList (),
                 Collections.<String, IRainbowOperation> emptyMap ()) {
 
-            @Override
-            protected void initProperty (String name, Object value) {
-
-            }
 
             @Override
             public boolean reconfigureGauge () {

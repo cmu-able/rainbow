@@ -1,13 +1,12 @@
 package org.sa.rainbow.core;
 
-import java.util.Collections;
-import java.util.Set;
-
+import auxtestlib.AbstractTestHelper;
 import org.sa.rainbow.core.RainbowDelegate.ConnectionState;
 import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
 import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
 
-import auxtestlib.AbstractTestHelper;
+import java.util.Collections;
+import java.util.Set;
 
 public class DelegateTestHelper extends AbstractTestHelper {
 
@@ -56,14 +55,14 @@ public class DelegateTestHelper extends AbstractTestHelper {
 
     public Set<ProbeAttributes> getConfiguredProbes () {
         if (m_delegate == null)
-            return Collections.<ProbeAttributes> emptySet ();
+            return Collections.emptySet ();
         else
             return m_delegate.getProbeConfiguration ();
     }
 
     public Set<EffectorAttributes> getConfiguredEffectors () {
         if (m_delegate == null)
-            return Collections.<EffectorAttributes> emptySet ();
+            return Collections.emptySet ();
         else
             return m_delegate.getEffectorConfiguration ();
     }

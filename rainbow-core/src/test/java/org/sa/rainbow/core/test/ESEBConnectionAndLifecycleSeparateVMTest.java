@@ -1,17 +1,8 @@
 package org.sa.rainbow.core.test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.SimpleLayout;
-import org.apache.log4j.WriterAppender;
+import auxtestlib.CommandRunner.ProcessInterface;
+import auxtestlib.*;
+import org.apache.log4j.*;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -20,12 +11,12 @@ import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.RainbowMaster;
 
-import auxtestlib.CommandRunner.ProcessInterface;
-import auxtestlib.DefaultTCase;
-import auxtestlib.JavaLauncher;
-import auxtestlib.TestHelper;
-import auxtestlib.TestPropertiesDefinition;
-import auxtestlib.ThreadCountTestHelper;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Tests various lifecycle methods for masters and delegates by starting delegates in separate VMs and ensuring that
@@ -46,7 +37,7 @@ public class ESEBConnectionAndLifecycleSeparateVMTest extends DefaultTCase {
     private static String s_currentDirectory;
 
     /** Sets the user path to be the right place for finding the properties file for this test **/
-    protected void configureTestProperties () throws IOException {
+    private void configureTestProperties () throws IOException {
         File basePath = new File (s_currentDirectory);
         File testMasterDir = new File (basePath, "src/test/resources/RainbowTest/eseb");
         System.setProperty ("user.dir", testMasterDir.getCanonicalPath ());
@@ -92,7 +83,7 @@ public class ESEBConnectionAndLifecycleSeparateVMTest extends DefaultTCase {
     private ProcessInterface launchDelegate (String current) throws IOException {
         JavaLauncher launcher = new JavaLauncher ();
         ProcessInterface pi = launcher.launch_java_async (this.getClass ().getCanonicalName (), new File (current),
-                Arrays.asList (""), 10000);
+                Collections.singletonList (""), 10000);
         return pi;
     }
 
@@ -120,7 +111,7 @@ public class ESEBConnectionAndLifecycleSeparateVMTest extends DefaultTCase {
         ProcessInterface pi = launchDelegate (s_currentDirectory);
 
         int extra = TestPropertiesDefinition.getInt ("heartbeat.extra.time");
-        Thread.sleep (Integer.valueOf (Rainbow.getProperty (RainbowConstants.PROPKEY_DELEGATE_BEACONPERIOD))
+        Thread.sleep (Integer.valueOf (Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_DELEGATE_BEACONPERIOD))
                 + extra * 3);
         String logMsg = baos.toString ();
         assertTrue (logMsg.contains ("Received heartbeat from known delegate: "));
@@ -129,7 +120,7 @@ public class ESEBConnectionAndLifecycleSeparateVMTest extends DefaultTCase {
 
     }
 
-    protected void startDelegate () throws Exception {
+    private void startDelegate () throws Exception {
         BasicConfigurator.configure ();
         configureTestProperties ();
         final ByteArrayOutputStream baos = new ByteArrayOutputStream ();

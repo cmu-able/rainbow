@@ -1,27 +1,20 @@
 package org.sa.rainbow.core.test;
 
-import java.io.IOException;
-import java.util.Properties;
-
+import auxtestlib.BooleanEvaluation;
+import auxtestlib.DefaultTCase;
+import auxtestlib.TestHelper;
+import auxtestlib.TestPropertiesDefinition;
 import org.apache.log4j.BasicConfigurator;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.sa.rainbow.core.DelegateTestHelper;
+import org.sa.rainbow.core.*;
 import org.sa.rainbow.core.IRainbowRunnable.State;
-import org.sa.rainbow.core.MasterTestHelper;
-import org.sa.rainbow.core.Rainbow;
-import org.sa.rainbow.core.RainbowConstants;
-import org.sa.rainbow.core.RainbowDelegate;
-import org.sa.rainbow.core.RainbowMaster;
-import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.util.Beacon;
 
-import auxtestlib.BooleanEvaluation;
-import auxtestlib.DefaultTCase;
-import auxtestlib.TestHelper;
-import auxtestlib.TestPropertiesDefinition;
+import java.io.IOException;
+import java.util.Properties;
 
 /**
  * Base test class for testing lifecycle information. For each kind of connector (ESEB, Local, RMI), a test should
@@ -101,7 +94,7 @@ public abstract class RainbowConnectionAndLifecycleTest extends DefaultTCase {
         final int extra = TestPropertiesDefinition.getInt ("heartbeat.extra.time");
 
         // Wait for the heartbeat to arrive
-        Thread.sleep (Integer.valueOf (Rainbow.getProperty (RainbowConstants.PROPKEY_DELEGATE_BEACONPERIOD))
+        Thread.sleep (Integer.valueOf (Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_DELEGATE_BEACONPERIOD))
                 + extra);
         Beacon b = mth.getBeaconFor (m_delegate.getId ());
         assertTrue (b != null);
@@ -116,13 +109,8 @@ public abstract class RainbowConnectionAndLifecycleTest extends DefaultTCase {
     public void setupMasterAndDelegate () throws Exception {
         configureTestProperties ();
 
-        try {
-            m_master = new RainbowMaster ();
-            m_delegate = new RainbowDelegate ();
-        }
-        catch (RainbowConnectionException e) {
-            fail (e.getMessage ());
-        }
+        m_master = new RainbowMaster ();
+        m_delegate = new RainbowDelegate ();
     }
 
     @After
@@ -182,7 +170,7 @@ public abstract class RainbowConnectionAndLifecycleTest extends DefaultTCase {
         }, 5000);
         // Wait for heartbeat period to ensure that a heartbeat isn't received, so the delegate is truly paused
         final int extra = TestPropertiesDefinition.getInt ("heartbeat.extra.time");
-        int heartbeatTime = Integer.valueOf (Rainbow.getProperty (
+        int heartbeatTime = Integer.valueOf (Rainbow.instance ().getProperty (
                 RainbowConstants.PROPKEY_DELEGATE_BEACONPERIOD))
                 + extra;
 
