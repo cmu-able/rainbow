@@ -32,6 +32,7 @@ import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -92,7 +93,7 @@ public class BlackholeGauge extends RegularPatternGauge {
 
     @Override
     protected void doMatch(String matchName, Matcher m) {
-        if (matchName == DEFAULT) {
+        if (Objects.equals (matchName, DEFAULT)) {
 
             // Send the list of attackers
             int c = m.groupCount();
