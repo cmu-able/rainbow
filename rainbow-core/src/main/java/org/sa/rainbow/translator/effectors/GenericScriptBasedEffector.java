@@ -24,14 +24,17 @@
 package org.sa.rainbow.translator.effectors;
 
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.List;
+
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.translator.probes.IBashBasedScript;
 import org.sa.rainbow.util.Util;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * This class defines an effector that depends on a shell/Perl script for
@@ -41,6 +44,30 @@ import java.util.List;
  * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
  */
 public class GenericScriptBasedEffector extends AbstractEffector implements IBashBasedScript {
+    public class StreamGobbler extends Thread {
+
+        private final InputStream m_inputStream;
+
+        public StreamGobbler (InputStream inputStream) {
+            m_inputStream = inputStream;
+        }
+
+        @Override
+        public void run () {
+            try {
+                InputStreamReader isr = new InputStreamReader (m_inputStream);
+                BufferedReader br = new BufferedReader (isr);
+                String line;
+                while ((line = br.readLine ()) != null) {
+                    log (line);
+                }
+            }
+            catch (IOException ioe) {
+                log (ioe.getMessage ());
+            }
+        }
+
+    }
 
     private String m_path = null;
 
@@ -70,14 +97,16 @@ public class GenericScriptBasedEffector extends AbstractEffector implements IBas
         String[] cmds = new String[3];
 
         // do param substitution
-        String params = m_params;
+        String params = m_params != null ? m_params : "";
         for (int i = 0; i < args.size (); ++i) {
             String a = args.get (i);
+            a = a.replaceAll (System.getProperty ("line.separator"), "");
+            a = a.replaceAll ("\n", "");
             if (a.contains ("=")) { // a key=val argument, split
                 String[] kv = a.split ("\\s*=\\s*");
-                params = params.replace("{"+kv[0]+"}", kv[1]);
+                params = params.replace ("{" + kv[0] + "}", "\"" + kv[1] + "\"");
             } else {  // replace by position
-                params = params.replace ("{" + i + "}", a);
+                params = params.replace ("{" + i + "}", "\"" + a + "\"");
             }
         }
         // Replace all remaining parameters with ""
@@ -109,23 +138,31 @@ public class GenericScriptBasedEffector extends AbstractEffector implements IBas
         pb.redirectErrorStream(true);
         try {
             Process p = pb.start();
+//            StreamGobbler outputProcessor = new StreamGobbler (p.getInputStream ());
+//            outputProcessor.start ();
             try {
-                p.waitFor();
+//                p.waitFor (5, TimeUnit.SECONDS);
+                Thread.sleep (5000);
+                p.destroyForcibly ();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } finally {
-                log(" = exit status: " + p.exitValue());
-                if (p.exitValue() == 0) {
-                    r = Outcome.SUCCESS;
-                } else {
-                    r = Outcome.FAILURE;
-                }
+//                log(" = exit status: " + p.exitValue());
+//                if (p.exitValue() == 0) {
+                r = Outcome.SUCCESS;
+//                } else {
+//                    r = Outcome.FAILURE;
+//                }
             }
-            log(" --STDOUT+STDERR-----\n" + Util.getProcessOutput(p));
+//            log(" --STDOUT+STDERR-----\n" + Util.getProcessOutput(p));
             log("Done!");
         } catch (IOException e) {
             LOGGER.error ("Process I/O failed!", e);
             r = Outcome.CONFOUNDED;
+        }
+        catch (IllegalThreadStateException e) {
+            LOGGER.warn ("Process took too long - can be ignored");
+            r = Outcome.TIMEOUT;
         }
         reportExecuted (r, args);
         return r;
