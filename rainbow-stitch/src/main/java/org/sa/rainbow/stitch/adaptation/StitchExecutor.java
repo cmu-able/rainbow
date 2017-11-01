@@ -30,6 +30,7 @@ import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.adaptation.AdaptationTree;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
+import org.sa.rainbow.core.adaptation.IAdaptationVisitor;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.IModelInstance;
@@ -43,6 +44,7 @@ import org.sa.rainbow.stitch.util.ExecutionHistoryData;
 
 import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * The Strategy Executor serves the role of maintaining the active thread(s) to carry a strategy/ies. This design
@@ -128,6 +130,51 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
             // use a StitchExecutionVisitor to visit this adaptation
             AdaptationTree<Strategy> at = m_adapationDQPort.dequeue ();
             log ("Dequeued an adaptation");
+//            final AtomicInteger numLL = new AtomicInteger (0);
+//            // Count the number of parallel threads in the tree so that we can wait until they are finished
+//            at.visit (new IAdaptationVisitor<Strategy> () {
+//                @Override
+//                public boolean visitLeaf (AdaptationTree<Strategy> tree) {
+//                    return false;
+//                }
+//
+//                @Override
+//                public boolean visitSequence (AdaptationTree<Strategy> tree) {
+//                    for (AdaptationTree<Strategy> t :
+//                         tree.getSubTrees ()) {
+//                        t.visit (this);
+//                    }
+//                    return true;
+//                }
+//
+//                @Override
+//                public boolean visitSequenceStopSuccess (AdaptationTree<Strategy> tree) {
+//                    for (AdaptationTree<Strategy> t :
+//                            tree.getSubTrees ()) {
+//                        t.visit (this);
+//                    }
+//                    return true;
+//                }
+//
+//                @Override
+//                public boolean visitSequenceStopFailure (AdaptationTree<Strategy> tree) {
+//                    for (AdaptationTree<Strategy> t :
+//                            tree.getSubTrees ()) {
+//                        t.visit (this);
+//                    }
+//                    return true;
+//                }
+//
+//                @Override
+//                public boolean visitParallel (AdaptationTree<Strategy> tree) {
+//                    numLL.addAndGet (tree.getSubTrees ().size ());
+//                    for (AdaptationTree<Strategy> t :
+//                            tree.getSubTrees ()) {
+//                        t.visit (this);
+//                    }
+//                    return true;
+//                }
+//            });
             final CountDownLatch done = new CountDownLatch (1);
             StitchExecutionVisitor stitchVisitor = new StitchExecutionVisitor (this, this.m_modelRef,
                                                                                m_historyModel.getCommandFactory (),

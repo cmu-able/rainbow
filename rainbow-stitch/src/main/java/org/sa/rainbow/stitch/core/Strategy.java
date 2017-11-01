@@ -43,10 +43,18 @@ import java.util.*;
 
 /**
  * Represents a Strategy scoped object parsed from the script.
- * 
+ *
  * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
  */
 public class Strategy extends ScopedEntity implements IEvaluableScope {
+
+    public Outcome getOutcome () {
+        return m_outcome;
+    }
+
+    public void setOutcome (Outcome outcome) {
+        m_outcome = outcome;
+    }
 
     /**
      * Declares the states that the Strategy object might be in during parsing.
@@ -59,14 +67,17 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
      * Enumerates the kinds of conditions that a StrategyNode can have.
      */
     public enum ConditionKind {
-        UNKNOWN, APPLICABILITY /* a strategy applicability condition */, EXPRESSION /* a full expression */, SUCCESS /* "success", meaning effect of parent tactic true */, FAILURE /* "failure", meaning parent tactic didn't complete execution */, DEFAULT /* "default" match, when no other ones match */
+        UNKNOWN, APPLICABILITY /* a strategy applicability condition */, EXPRESSION /* a full expression */, SUCCESS
+        /* "success", meaning effect of parent tactic true */, FAILURE /* "failure", meaning parent tactic didn't
+        complete execution */, DEFAULT /* "default" match, when no other ones match */
     }
 
     /**
      * Enumerates the kinds of actions that a StrategyNode can have.
      */
     public enum ActionKind {
-        UNKNOWN, TACTIC /* a Tactic */, DOLOOP /* a do loop */, DONE /* "done" action, terminating Strategy with success */, NULL /* no-op, a null tactic */
+        UNKNOWN, TACTIC /* a Tactic */, DOLOOP /* a do loop */, DONE /* "done" action, terminating Strategy with
+        success */, NULL /* no-op, a null tactic */
     }
 
     /**
@@ -75,6 +86,13 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
     public enum Outcome {
         UNKNOWN, SUCCESS, FAILURE, STATUSQUO
     }
+
+    public enum StatementKind {ACTION,VAR_DEF, STMT_LIST, EXPRESSION, EMPTY_STMT, ERROR, IF, WHILE, FOR}
+
+    public enum ExpressionKind {PLUS, MINUS, MULTIPLY, DIVIDE, MOD, IMPLIES, IFF, AND, OR, NE, EQ, LT, GE, LE, GT,
+        INCR, DECR, UNARY_MINUS, UNARY_PLUS, NOT, FORALL, EXISTS, EXISTS_UNIQUE, SELECT, IDENTIFIER, INTEGER, FLOAT,
+        STRING, CHAR, BOOLEAN, NULL,
+        UNKNOWN};
 
     public interface NodeAction {
         void applyTactic (Tactic tactic);
@@ -109,7 +127,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
             String tRef = (curNode.getActionFlag () == ActionKind.TACTIC) ? curNode.getTactic () : null;
             Tactic tactic = (tRef != null ? stitch ().findTactic (tRef) : null);
             String nullCaseSuffix = (curNode.getActionFlag () == ActionKind.NULL) ? "." + ActionKind.NULL.name ()
-            : null;
+                    : null;
             double prob = curNode.getProbability ();
             if (tactic != null) {
                 tactic.setArgs (Tool.evaluateArgs (curNode.getTacticArgExprs ()));
@@ -124,8 +142,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
                 String curlabel = null;
                 if (nullCaseSuffix == null) { // account for tactic and sublevel
                     curlabel = k + "." + level;
-                }
-                else { // use NULL level only, this is the base aggAttr
+                } else { // use NULL level only, this is the base aggAttr
                     curlabel = k + nullCaseSuffix;
                 }
                 String upLabel = k + (level > 1 ? "." + (level - 1) : "");
@@ -143,14 +160,13 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
                 upV += v * prob;
                 if (level == 1) {
                     newAggAtt.put (upLabel, upV);
-                }
-                else {
+                } else {
                     aggAtt.put (upLabel, upV);
                 }
                 if (Tool.logger ().isTraceEnabled ()) {
                     Tool.logger ().trace (
                             " .. putting new value pair (" + upLabel + ", " + upV + ") from (" + curlabel + ", " + v
-                            + "), prob == " + prob);
+                                    + "), prob == " + prob);
                 }
             }
             if (level == 1) { // clear out all the temporary computation results
@@ -162,7 +178,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 
     public class TimeEstimator implements NodeAction {
         private StrategyNode m_lastNode = null;
-        public long          estAvgTime = 0L;
+        public  long         estAvgTime = 0L;
 
         public TimeEstimator (StrategyNode lastNode) {
             m_lastNode = lastNode;
@@ -191,34 +207,40 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
         }
     }
 
-    private static final String        ROOT_NODE_LABEL     = "*0*";
+    private static final String ROOT_NODE_LABEL = "*0*";
 
-    public ParseState                  state               = ParseState.UNKNOWN;
-    public Map<String, StrategyNode>   nodes               = new TreeMap<String, StrategyNode> ();
+    public ParseState                state     = ParseState.UNKNOWN;
+    public Map<String, StrategyNode> nodes     = new TreeMap<String, StrategyNode> ();
     /**
      * This value indicates how many times this Strategy is expected to have to execute consecutively if it is chosen to
      * run; this is affected by the presence of a strategy named like this one with "Leap-" prepended. The value affects
      * only the computation of aggregate attribute vector.
      */
-    public int                         multiples           = 1;
+    public int                       multiples = 1;
 
-    /** Tracks the current strategy node being evaluated */
-    private StrategyNode               m_lastNode          = null;
-    /** Tracks stack of executed nodes */
-    Stack<String>                      m_nodeStack         = new Stack<String> ();
-    /** Tracks current do-loop counter */
-    private Map<StrategyNode, Integer> m_doCntMap          = new HashMap<StrategyNode, Integer> ();
-    private Outcome                    m_outcome           = Outcome.UNKNOWN;
-    private long                       m_avgExecutionTime  = 0L;
+    /**
+     * Tracks the current strategy node being evaluated
+     */
+    private StrategyNode m_lastNode = null;
+    /**
+     * Tracks stack of executed nodes
+     */
+    Stack<String> m_nodeStack = new Stack<String> ();
+    /**
+     * Tracks current do-loop counter
+     */
+    private Map<StrategyNode, Integer> m_doCntMap         = new HashMap<StrategyNode, Integer> ();
+    private Outcome                    m_outcome          = Outcome.UNKNOWN;
+    private long                       m_avgExecutionTime = 0L;
 
-    private Boolean                    m_settlingCondition = null;
-    private Observer                   m_conditionObserver = new Observer () {
+    private Boolean  m_settlingCondition = null;
+    private Observer m_conditionObserver = new Observer () {
         /* (non-Javadoc)
          * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
          */
         @Override
         public void update (Observable o, Object arg) {
-            m_settlingCondition = (Boolean )arg;
+            m_settlingCondition = (Boolean) arg;
             if (Tool.logger ().isDebugEnabled ()) {
                 Tool.logger ().debug (
                         "Settling condition observer updated!");
@@ -226,17 +248,14 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
         }
     };
 
-    private StitchExecutor             m_executor;
+    private StitchExecutor m_executor;
 
     /**
      * Main Constructor for a new Strategy object.
-     * 
-     * @param parent
-     *            the parent scope
-     * @param name
-     *            the name of this scope
-     * @param stitch
-     *            the Stitch evaluation context object
+     *
+     * @param parent the parent scope
+     * @param name   the name of this scope
+     * @param stitch the Stitch evaluation context object
      */
     public Strategy (IScope parent, String name, Stitch stitch) {
         super (parent, name, stitch);
@@ -259,10 +278,10 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
         super.copyState (target);
         target.state = state;
         for (Map.Entry<String, StrategyNode> e : nodes.entrySet ()) {
-            target.nodes.put (e.getKey (), e.getValue ().clone (parent()));
+            target.nodes.put (e.getKey (), e.getValue ().clone (parent ()));
         }
         target.multiples = multiples;
-        target.m_outcome = m_outcome;
+        target.setOutcome (getOutcome ());
         target.m_avgExecutionTime = m_avgExecutionTime;
         target.m_settlingCondition = m_settlingCondition;
     }
@@ -293,22 +312,21 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
     public boolean addVar (String id, Var var) {
         boolean rv = true;
         switch (state) {
-        case IN_VARS:
-            rv = super.addVar (id, var);
-            break;
-        case IN_PARAMS:
-            rv = super.addVar (id, var);
-            // args removed for strategy...
-            break;
+            case IN_VARS:
+                rv = super.addVar (id, var);
+                break;
+            case IN_PARAMS:
+                rv = super.addVar (id, var);
+                // args removed for strategy...
+                break;
         }
         return rv;
     }
 
     /**
      * Add a Strategy Node to this strategy.
-     * 
-     * @param node
-     *            the StrategyNode
+     *
+     * @param node the StrategyNode
      */
     public void addNode (StrategyNode node) {
         nodes.put (node.label (), node);
@@ -317,7 +335,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
     /**
      * Creates the root node of this strategy, which will contain the condition of applicability for the strategy, and
      * also signal final collection point for aggregate attribute vector computation.
-     * 
+     *
      * @return StrategyNode the created root strategy node
      */
     public StrategyNode createRootNode () {
@@ -339,8 +357,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
         StrategyNode curNode = getRootNode ();
         if (curNode.getActionFlag () == ActionKind.TACTIC) { // root!
             foundNode = curNode;
-        }
-        else { // search only one level down
+        } else { // search only one level down
             for (StrategyNode child : gatherChildrenNodes (curNode)) {
                 if (child.getActionFlag () == ActionKind.TACTIC) { // found it!
                     foundNode = child;
@@ -354,10 +371,9 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
                 Expression e = foundNode.getTacticArgExprs ().get (0);
                 e.evaluate (null);
                 if (e.getResult () instanceof MyNumber) {
-                    rv = ((MyNumber )e.getResult ()).toJavaNumber ().doubleValue ();
-                }
-                else if (e.getResult () instanceof Double) {
-                    rv = ((Double )e.getResult ()).doubleValue ();
+                    rv = ((MyNumber) e.getResult ()).toJavaNumber ().doubleValue ();
+                } else if (e.getResult () instanceof Double) {
+                    rv = ((Double) e.getResult ()).doubleValue ();
                 }
             }
         }
@@ -367,9 +383,9 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
     /**
      * Returns whether this Strategy is applicable given current model state. In other words, the applicability
      * conditions of the Strategy (currently stored as the root node of the strategy) is evaluated, and result returned.
-     * 
+     *
      * @return <code>true</code> if the condition of the root StrategyNode evaluates true, indicating that this Strategy
-     *         applies; <code>false</code> otherwise.
+     * applies; <code>false</code> otherwise.
      */
     public boolean isApplicable (Map<String, Object> moreVars) {
         boolean applicable = false;
@@ -399,15 +415,14 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 
     /**
      * Returns the expected execution time from the current strategy node.
-     * 
+     *
      * @return
      */
     public long expectedExecutionTimeRemaining () {
         long rv = 0L;
         if (m_lastNode == null) { // estimate from root
             rv = estimateAvgTimeCost ();
-        }
-        else {
+        } else {
             // traverse children nodes from last node, which TimeEstimator will do
             TimeEstimator estimator = new TimeEstimator (m_lastNode);
             walkTreeNodes (estimator, null);
@@ -434,7 +449,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
     /**
      * Calculates the aggregate attribute vector of this Strategy, using the probability of the branches and the
      * attribute vector of the tactics on the branches.
-     * 
+     *
      * @return a SortedMap of aggregate attribute key-value pairs.
      */
     public SortedMap<String, Double> computeAggregateAttributes () {
@@ -476,14 +491,12 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
                     if (iterStack.peek ().hasNext ()) {
                         nodeStack.push (iterStack.peek ().next ());
                         backtrack = false;
-                    }
-                    else {
+                    } else {
                         // this iter exhausted, pop it and backtrack more
                         action.execute (aggAtt, curNode, nodeStack.size ());
                         iterStack.pop ();
                     }
-                }
-                else {
+                } else {
                     // Tactic: attempt depth-first descent down the branches
                     Tactic tactic = stitch ().findTactic (curNode.getTactic ());
                     if (Tool.logger ().isTraceEnabled ()) {
@@ -509,8 +522,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
                                     Tool.logger ().trace (
                                             "  - prob of " + child.label () + " == " + child.getProbability ());
                                 }
-                            }
-                            else {
+                            } else {
                                 unsetChildren.add (child);
                             }
                         }
@@ -529,14 +541,12 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
                         if (Tool.logger ().isTraceEnabled ()) {
                             Tool.logger ().trace (" - iterate first child " + nodeStack.peek ().label ());
                         }
-                    }
-                    else { // backtrack time
+                    } else { // backtrack time
                         action.execute (aggAtt, curNode, nodeStack.size ());
                         backtrack = true;
                     }
                 }
-            }
-            else if (curNode.getActionFlag () == Strategy.ActionKind.DOLOOP) {
+            } else if (curNode.getActionFlag () == Strategy.ActionKind.DOLOOP) {
                 if (backtrack) {
                     // just pop up one more to let any other branches finish 
                     if (Tool.logger ().isTraceEnabled ()) {
@@ -547,8 +557,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
                     // then pop stack
                     nodeStack.pop ();
                     backtrack = false;
-                }
-                else {
+                } else {
                     // LOOP! treat the target node as child node and proceed
                     if (Tool.logger ().isTraceEnabled ()) {
                         Tool.logger ().trace ("Scanning DO loop " + curNode.label ());
@@ -564,14 +573,12 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
                     if (numDone <= curNode.getNumDoTrials ()) {
                         // treat do target as if child node and proceed
                         nodeStack.push (nodes.get (curNode.getDoTarget ()));
-                    }
-                    else {
+                    } else {
                         // continue no more, backtrack
                         backtrack = true;
                     }
                 }
-            }
-            else {
+            } else {
                 // we've hit a null-effect "leaf", is it a NULL node?
                 if (curNode.getActionFlag () == Strategy.ActionKind.NULL) {
                     // Yes! a NULL node, if there's a null-case aggAtt, collect using that!
@@ -625,10 +632,9 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
      * </ul>
      * </ol>
      *
-     * @param argsIn
-     *            the input arguments; there should be NONE
+     * @param argsIn the input arguments; there should be NONE
      * @return one of the <code>Strategy.Outcome</code> enum values: <code>SUCCESS</code>, <code>FAILURE</code>,
-     *         <code>STATUSQUO</code>.
+     * <code>STATUSQUO</code>.
      */
     @Override
     public Object evaluate (Object[] argsIn) {
@@ -645,7 +651,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
         m_lastNode = getRootNode ();
         m_nodeStack.push (m_lastNode.label ());
 //        m_executor.getOperationPublishingPort ().publishMessage (getStartMessage ());
-        while (m_outcome == Outcome.UNKNOWN && !m_stitch.isCanceled ()) {
+        while (getOutcome () == Outcome.UNKNOWN && !m_stitch.isCanceled ()) {
             StrategyNode curNode = m_lastNode;
             boolean ok = evaluateFromNode (curNode);
             if (!ok) {
@@ -657,18 +663,18 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
         }
 
         // track time elapsed if NOT failure, and store exponential avg
-        if (m_outcome != Outcome.FAILURE) { // is this a good idea?
+        if (getOutcome () != Outcome.FAILURE) { // is this a good idea?
             long estTime = System.currentTimeMillis () - startTime;
             double alpha = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MODEL_ALPHA, 0.33);
-            m_avgExecutionTime = (long )((1 - alpha) * m_avgExecutionTime + alpha * estTime);
+            m_avgExecutionTime = (long) ((1 - alpha) * m_avgExecutionTime + alpha * estTime);
         }
 
         // reset class field lastNode pointer
-        if (m_outcome != Outcome.UNKNOWN) {
+        if (getOutcome () != Outcome.UNKNOWN) {
             m_lastNode = null;
         }
 //        m_executor.getOperationPublishingPort ().publishMessage (getEndMessage ());
-        return m_outcome;
+        return getOutcome ();
     }
 
 //    private IRainbowMessage getEndMessage () {
@@ -699,11 +705,10 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 
     /**
      * Like {@link #evaluate(Object[])}, this method evaluates the Strategy, but from the lastNode.
-     * 
-     * @param argsIn
-     *            the input arguments; there should be NONE
+     *
+     * @param argsIn the input arguments; there should be NONE
      * @return one of the <code>Strategy.Outcome</code> enum values: <code>SUCCESS</code>, <code>FAILURE</code>,
-     *         <code>STATUSQUO</code>.
+     * <code>STATUSQUO</code>.
      */
     public Object resumeEvaluate (Object[] argsIn) {
         if (m_lastNode == null)
@@ -714,105 +719,115 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
                         "Resuming strategy execution from node " + m_lastNode.label () + ", trail thus far: "
                                 + m_nodeStack.toString ());
             }
-            m_outcome = Outcome.UNKNOWN;
-            while (m_outcome == Outcome.UNKNOWN && !m_stitch.isCanceled ()) {
+            setOutcome (Outcome.UNKNOWN);
+            while (getOutcome () == Outcome.UNKNOWN && !m_stitch.isCanceled ()) {
                 StrategyNode curNode = m_lastNode; // no pushing into stack, already done
                 boolean ok = evaluateFromNode (curNode);
                 if (!ok) {
                     break;
                 }
             }
-            if (m_outcome != Outcome.UNKNOWN) {
+            if (getOutcome () != Outcome.UNKNOWN) {
                 m_lastNode = null;
             }
             // not sure what to do with tracking of execution time with resumes...
-            return m_outcome;
+            return getOutcome ();
         }
     }
 
     public Outcome outcome () {
-        return m_outcome;
+        return getOutcome ();
     }
 
     private boolean evaluateFromNode (StrategyNode curNode) {
         StrategyNode defaultNode = null; // to track the DEFAULT cond node
         StrategyNode selected = null; // to track the chosen child node
         List<StrategyNode> matchingNodes = new ArrayList<StrategyNode> ();
-        for (StrategyNode child : gatherChildrenNodes (curNode)) {
+        final List<StrategyNode> childrenNodes = gatherChildrenNodes (curNode);
+        System.out.println (this.getName () + ": has " + childrenNodes.size () + " children");
+        for (StrategyNode child : childrenNodes) {
             // check to see which child node's condition is satisfied
+            System.out.println (this.getName () + ": evaluating node condition for");
             switch (child.getCondFlag ()) {
-            case EXPRESSION:
-                if (testCondition (child)) {
-                    matchingNodes.add (child);
-                }
-                break;
-            case SUCCESS: // intentional fall-thru
-            case FAILURE:
-                // look at the parent node's tactic effect
-                Tactic parentTactic = stitch ().findTactic (child.getParent ().getTactic ());
-                if (parentTactic == null) { // something is wrong
-                    Tool.error ("Parent node " + child.getParent ().label () + " appears not to have a tactic action!",
-                            null, stitch ().stitchProblemHandler);
-                }
-                else {
-                    boolean effect = !parentTactic.hasError () && parentTactic.checkEffect ();
+                case EXPRESSION:
+                    if (testCondition (child)) {
+                        matchingNodes.add (child);
+                    }
+                    break;
+                case SUCCESS: // intentional fall-thru
+                case FAILURE:
+                    // look at the parent node's tactic effect
+                    Tactic parentTactic = stitch ().findTactic (child.getParent ().getTactic ());
+                    if (parentTactic == null) { // something is wrong
+                        Tool.error ("Parent node " + child.getParent ().label () + " appears not to have a tactic " +
+                                            "action!",
+                                    null, stitch ().stitchProblemHandler);
+                        System.out.println ("Parent node " + child.getParent ().label () + " appears not to have a " +
+                                                    "tactic" +
+                                                    " action!");
+                    } else {
+                        boolean effect = !parentTactic.hasError () && parentTactic.checkEffect ();
+                        if (Tool.logger ().isInfoEnabled ()) {
+                            Tool.logger ().info (
+                                    child.label () + " " + child.getCondFlag ().name () + " condition! " + effect);
+                        }
+                        if (effect) {
+                            if (child.getCondFlag () == ConditionKind.SUCCESS) {
+                                // parent node's tactic successfully achieved effect
+                                matchingNodes.add (child);
+                            }
+                        } else {
+                            if (child.getCondFlag () == ConditionKind.FAILURE) {
+                                // parent node's tactic failed to achieve effect
+                                matchingNodes.add (child);
+                            }
+                        }
+                    }
+                    break;
+                case DEFAULT: // don't evaluate this, but store the default node
                     if (Tool.logger ().isInfoEnabled ()) {
-                        Tool.logger ().info (
-                                child.label () + " " + child.getCondFlag ().name () + " condition! " + effect);
+                        Tool.logger ().info (child.label () + " DEFAULT condition!");
                     }
-                    if (effect) {
-                        if (child.getCondFlag () == ConditionKind.SUCCESS) {
-                            // parent node's tactic successfully achieved effect
-                            matchingNodes.add (child);
-                        }
-                    }
-                    else {
-                        if (child.getCondFlag () == ConditionKind.FAILURE) {
-                            // parent node's tactic failed to achieve effect
-                            matchingNodes.add (child);
-                        }
-                    }
-                }
-                break;
-            case DEFAULT: // don't evaluate this, but store the default node
-                if (Tool.logger ().isInfoEnabled ()) {
-                    Tool.logger ().info (child.label () + " DEFAULT condition!");
-                }
-                defaultNode = child;
-                break;
-            default: // should NOT be the case
-                Tool.error (
-                        "Strategy node " + child.label () + "has unexpected condition kind! " + child.getCondFlag (),
-                        null, stitch ().stitchProblemHandler);
-                break;
+                    defaultNode = child;
+                    break;
+                default: // should NOT be the case
+                    Tool.error (
+                            "Strategy node " + child.label () + "has unexpected condition kind! " + child.getCondFlag
+                                    (),
+                            null, stitch ().stitchProblemHandler);
+                    System.out.print ("Strategy node " + child.label () + "has unexpected condition kind! " + child
+                            .getCondFlag ());
+                    break;
             }
         }
         // determine which child node to pick
         switch (matchingNodes.size ()) {
-        case 0: // none matched! check for DEFAULT
-            if (defaultNode != null) { // choose the DEFAULT node
-                selected = defaultNode;
-            }
-            else { // strategy failed
-                m_outcome = Outcome.FAILURE;
-                return false;
-            }
-            break;
-        case 1: // retrieve the only one
-            selected = matchingNodes.get (0);
-            break;
-        default: // more than one satisfied
-            // randomly pick one
-            // BRS in the new stitch semantics, this needs to change to calculate the 
-            // aggAtt for each matching node, assigning the utility, and picking the one
-            // with the greatest utility, rather than being random
-            int rand = new Random ().nextInt (matchingNodes.size ());
-            selected = matchingNodes.get (rand);
-            break;
+            case 0: // none matched! check for DEFAULT
+                if (defaultNode != null) { // choose the DEFAULT node
+                    selected = defaultNode;
+                } else { // strategy failed
+                    setOutcome (Outcome.FAILURE);
+                    System.out.println ("No matching nodes in strategy, and no default node, so returning FAILURE for" +
+                                                " " +
+                                                getName ());
+                    return false;
+                }
+                break;
+            case 1: // retrieve the only one
+                selected = matchingNodes.get (0);
+                break;
+            default: // more than one satisfied
+                // randomly pick one
+                // BRS in the new stitch semantics, this needs to change to calculate the
+                // aggAtt for each matching node, assigning the utility, and picking the one
+                // with the greatest utility, rather than being random
+                int rand = new Random ().nextInt (matchingNodes.size ());
+                selected = matchingNodes.get (rand);
+                break;
         } // at this point, selected MUST be non null
         if (selected == null) {
             Tool.error ("Serious failure? No node has been selected, impossible!!", null,
-                    stitch ().stitchProblemHandler);
+                        stitch ().stitchProblemHandler);
             return false;
         }
         curNode = selected;
@@ -820,57 +835,59 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
         m_lastNode = curNode;
         // do action on the selected node
         switch (selected.getActionFlag ()) {
-        case DONE:
-            if (Tool.logger ().isInfoEnabled ()) {
-                Tool.logger ().info ("DONE action!");
-            }
-            // a success branch, terminate successfully
-            m_outcome = Outcome.SUCCESS;
-            break;
-        case NULL:
-            if (Tool.logger ().isInfoEnabled ()) {
-                Tool.logger ().info ("NULL action!");
-            }
-            // null action, so consider terminated with status quo
-            m_outcome = Outcome.STATUSQUO;
-            break;
-        case TACTIC:
-            doTactic (curNode);
-            break;
-        case DOLOOP:
-            // LOOP! treat the target node as child node and proceed
-            if (Tool.logger ().isInfoEnabled ()) {
-                Tool.logger ().info ("LOOP action! " + curNode.label ());
-            }
-            // update loop counter
-            int numDone = 1;
-            if (m_doCntMap.containsKey (curNode)) {
-                numDone = m_doCntMap.get (curNode) + 1;
-            }
-            m_doCntMap.put (curNode, numDone);
-            if (Tool.logger ().isDebugEnabled ()) {
-                Tool.logger ().debug (" - numDone for " + curNode.getDoTarget () + " at " + numDone);
-            }
-            if (numDone <= curNode.getNumDoTrials ()) {
-                // evaluate do target's condition and action
-                curNode = nodes.get (curNode.getDoTarget ());
-                if (testCondition (curNode)) { // carry out its action
-                    doTactic (curNode);
+            case DONE:
+                if (Tool.logger ().isInfoEnabled ()) {
+                    Tool.logger ().info ("DONE action!");
                 }
-                // treat do target as if child node and proceed
-                m_nodeStack.push (curNode.label ());
-            }
-            else {
-                // still no result after looping exceeds max count,
-                // consider Strategy failed
-                m_outcome = Outcome.FAILURE;
-            }
-            break;
-        default: // serious error?
-            Tool.error ("Selected node " + selected.label () + "has unknown action kind! " + selected.getActionFlag (),
-                    null, stitch ().stitchProblemHandler);
-            m_outcome = Outcome.FAILURE;
-            break;
+                // a success branch, terminate successfully
+                setOutcome (Outcome.SUCCESS);
+                break;
+            case NULL:
+                if (Tool.logger ().isInfoEnabled ()) {
+                    Tool.logger ().info ("NULL action!");
+                }
+                // null action, so consider terminated with status quo
+                setOutcome (Outcome.STATUSQUO);
+                break;
+            case TACTIC:
+                doTactic (curNode);
+                break;
+            case DOLOOP:
+                // LOOP! treat the target node as child node and proceed
+                if (Tool.logger ().isInfoEnabled ()) {
+                    Tool.logger ().info ("LOOP action! " + curNode.label ());
+                }
+                // update loop counter
+                int numDone = 1;
+                if (m_doCntMap.containsKey (curNode)) {
+                    numDone = m_doCntMap.get (curNode) + 1;
+                }
+                m_doCntMap.put (curNode, numDone);
+                if (Tool.logger ().isDebugEnabled ()) {
+                    Tool.logger ().debug (" - numDone for " + curNode.getDoTarget () + " at " + numDone);
+                }
+                if (numDone <= curNode.getNumDoTrials ()) {
+                    // evaluate do target's condition and action
+                    curNode = nodes.get (curNode.getDoTarget ());
+                    if (testCondition (curNode)) { // carry out its action
+                        doTactic (curNode);
+                    }
+                    // treat do target as if child node and proceed
+                    m_nodeStack.push (curNode.label ());
+                } else {
+                    // still no result after looping exceeds max count,
+                    // consider Strategy failed
+                    setOutcome (Outcome.FAILURE);
+                }
+                break;
+            default: // serious error?
+                Tool.error ("Selected node " + selected.label () + "has unknown action kind! " + selected
+                        .getActionFlag (),
+                            null, stitch ().stitchProblemHandler);
+                System.out.println ("Selected node " + selected.label () + "has unknown action kind! " + selected
+                        .getActionFlag ());
+                setOutcome (Outcome.FAILURE);
+                break;
         }
         // at this point, evaluation occurred normally
         return true;
@@ -878,21 +895,21 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 
     /**
      * Given a node, evaluates its condition expression and return result.
-     * 
-     * @param child
-     *            StrategyNode whose condition to evaluate
+     *
+     * @param child StrategyNode whose condition to evaluate
      * @return boolean <code>true</code> if condition evaluates to true; <code>false</code> otherwise.
      */
     private boolean testCondition (StrategyNode child) {
         boolean rv = false;
         Expression expr = child.getCondExpr ();
         expr.clearState (); // make sure we're really re-evaluating, not using cached value
+        System.out.println (this.getName () + ": evaluating condition " + expr.toStringTree ());
         expr.evaluate (null);
         if (Tool.logger ().isInfoEnabled ()) {
             Tool.logger ().info (child.label () + " expression condition! " + expr.getResult ());
         }
         if (expr.getResult () != null && expr.getResult () instanceof Boolean) {
-            if ((Boolean )expr.getResult ()) { // condition satisfied!
+            if ((Boolean) expr.getResult ()) { // condition satisfied!
                 rv = true;
             }
         }
@@ -901,24 +918,24 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 
     /**
      * Evaluates tactic action of the given node.
-     * 
-     * @param curNode
-     *            the strategy node whose tactic action to evaluate.
+     *
+     * @param curNode the strategy node whose tactic action to evaluate.
      */
     private void doTactic (StrategyNode curNode) {
         if (Tool.logger ().isInfoEnabled ()) {
             Tool.logger ().info ("Tactic action! " + curNode.getTactic ());
         }
+        System.out.println ("Tactic action! " + curNode.getTactic ());
         Object[] args = Tool.evaluateArgs (curNode.getTacticArgExprs ());
         Tactic tactic = stitch ().findTactic (curNode.getTactic ());
-        if (tactic.isExecuting () && tactic.stitch() != curNode.stitch ()) {
+        if (tactic.isExecuting () && tactic.stitch () != curNode.stitch ()) {
             try {
                 Stitch stitch = Ohana.instance ().findFreeStitch (stitch ());
                 tactic = stitch.findTactic (curNode.getTactic ());
             } catch (FileNotFoundException e) {
                 m_executor.getReportingPort ().error (m_executor.getComponentType (), "Could not execute " + tactic
                         .getName ());
-                m_outcome = Outcome.STATUSQUO;
+                setOutcome (Outcome.STATUSQUO);
             }
         }
 //        if (tactic.isExecuting ()) {
@@ -930,7 +947,8 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
             m_executor.getHistoryModelUSPort ().updateModel (
                     m_executor.getExecutionHistoryModel ().getCommandFactory ()
                             .strategyExecutionStateCommand (tactic.getQualifiedName (),
-                                                            ExecutionHistoryModelInstance.TACTIC, ExecutionStateT.STARTED, null));
+                                                            ExecutionHistoryModelInstance.TACTIC, ExecutionStateT
+                                                                    .STARTED, null));
 
             long start = new Date ().getTime ();
             tactic.evaluate (args);
@@ -947,7 +965,8 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
                             .getExecutionHistoryModel ()
                             .getCommandFactory ()
                             .strategyExecutionStateCommand (tactic.getQualifiedName (),
-                                                            ExecutionHistoryModelInstance.TACTIC, ExecutionStateT.FINISHED, null));
+                                                            ExecutionHistoryModelInstance.TACTIC, ExecutionStateT
+                                                                    .FINISHED, null));
             AbstractRainbowModelOperation recordTacticDurationCmd = m_executor.getExecutionHistoryModel ()
                     .getCommandFactory ().recordTacticDurationCmd (tactic.getQualifiedName (), end - start, effectGood);
             m_executor.getHistoryModelUSPort ().updateModel (recordTacticDurationCmd);
@@ -959,26 +978,23 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
                     Tool.logger ().debug ("Tactic followed by done! effect == " + effectGood);
                 }
                 if (effectGood && !tactic.hasError ()) {
-                    m_outcome = Outcome.SUCCESS;
+                    setOutcome (Outcome.SUCCESS);
                 } else {
-                    m_outcome = Outcome.FAILURE;
+                    setOutcome (Outcome.FAILURE);
                 }
             }
-        }
-        finally {
-          tactic.markExecuting(false);
+        } finally {
+            tactic.markExecuting (false);
         }
     }
 
 
-
     /**
      * Given a node, awaits the effect of the node's tactic to evaluate to true, or until the node's duration times out.
-     * 
-     * @param node
-     *            StrategyNode whose tactic effect to await
+     *
+     * @param node StrategyNode whose tactic effect to await
      * @return boolean <code>true</code> if tactic effect evaluates to true within duration; <code>false</code>
-     *         otherwise.
+     * otherwise.
      */
     private boolean awaitSettling (StrategyNode node) {
         if (node.getTactic () == null) return false; // function can't be eval'd if no tactic
@@ -991,8 +1007,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
         while (m_settlingCondition == null && !m_stitch.isCanceled ()) {
             try {
                 Thread.sleep (ConditionTimer.SLEEP_TIME_LONG);
-            }
-            catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 // intentional ignore
             }
         }

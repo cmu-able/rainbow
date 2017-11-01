@@ -31,6 +31,7 @@ import antlr.collections.AST;
 import antlr.debug.misc.ASTFrame;
 import org.sa.rainbow.stitch.core.*;
 import org.sa.rainbow.stitch.error.DummyStitchProblemHandler;
+import org.sa.rainbow.stitch.error.IStitchProblem;
 import org.sa.rainbow.stitch.error.StitchProblem;
 import org.sa.rainbow.stitch.model.ModelOperator;
 import org.sa.rainbow.stitch.model.ModelRepository;
@@ -116,23 +117,23 @@ public class Ohana {
 
     protected static boolean reportedProblems (
             DummyStitchProblemHandler stitchProblemHandler) {
-        Collection<StitchProblem> problem = stitchProblemHandler.getProblems ();
+        Collection<IStitchProblem> problem = stitchProblemHandler.getProblems ();
         boolean reported = false;
-        for (StitchProblem p : problem) {
+        for (IStitchProblem p : problem) {
             StringBuffer out = new StringBuffer ();
             switch (p.getSeverity ()) {
-                case StitchProblem.ERROR:
+                case IStitchProblem.ERROR:
                     out.append ("ERROR: ");
                     reported = true;
                     break;
-                case StitchProblem.WARNING:
+                case IStitchProblem.WARNING:
                     out.append ("WARNING: ");
                     break;
-                case StitchProblem.FATAL:
+                case IStitchProblem.FATAL:
                     out.append ("FATAL ERROR: ");
                     reported = true;
                     break;
-                case StitchProblem.UNKNOWN:
+                case IStitchProblem.UNKNOWN:
                     out.append ("UNKNOWN PROBLEM: ");
                     reported = true;
                     break;
@@ -241,25 +242,37 @@ public class Ohana {
         return stitches.iterator ().next ();
     }
 
+    public void releaseStitch (Stitch stitch) {
+        synchronized (Ohana.class) {
+            stitch.markExecuting (false);
+        }
+    }
+
     public Stitch findFreeStitch (Stitch stitch) throws FileNotFoundException {
-        synchronized (stitch) {
-            if (stitch.isExecuting ()) {
-                Set<Stitch> sL = m_stitches.get (stitch.path);
-                Stitch s = null;
-                for (Iterator<Stitch> i = sL.iterator (); i.hasNext () && s == null; ) {
-                    Stitch st = i.next ();
-                    if (!st.isExecuting ()) {
-                        s = st;
-                    }
-                }
-                if (s == null) {
-                    s = Stitch.newInstance (stitch.path, stitch.stitchProblemHandler.clone (), true);
-                    Ohana.instance ().parseFile (s);
-                    sL.add (s);
-                }
-                return s;
-            } else
-                return stitch;
+        synchronized (Ohana.class) {
+            Stitch s = Stitch.newInstance (stitch.path, stitch.stitchProblemHandler.clone (), true);
+            Ohana.instance ().parseFile (s);
+            return s;
+//            if (stitch.isExecuting ()) {
+//                Set<Stitch> sL = m_stitches.get (stitch.path);
+//                Stitch s = null;
+//                for (Iterator<Stitch> i = sL.iterator (); i.hasNext () && s == null; ) {
+//                    Stitch st = i.next ();
+//                    if (!st.isExecuting ()) {
+//                        s = st;
+//                    }
+//                }
+//                if (s == null) {
+//                    s = Stitch.newInstance (stitch.path, stitch.stitchProblemHandler.clone (), true);
+//                    Ohana.instance ().parseFile (s);
+//                    sL.add (s);
+//                }
+//                s.markExecuting (true);
+//                return s;
+//            } else {
+//                stitch.markExecuting (true);
+//                return stitch;
+//            }
         }
     }
 
