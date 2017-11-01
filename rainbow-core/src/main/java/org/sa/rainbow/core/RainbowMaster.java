@@ -23,8 +23,20 @@
  */
 package org.sa.rainbow.core;
 
+import java.text.MessageFormat;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.Set;
+
 import org.apache.log4j.Logger;
-import org.sa.rainbow.core.globals.ExitState;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.adaptation.IEvaluable;
@@ -34,14 +46,19 @@ import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.GaugeDescription;
 import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
 import org.sa.rainbow.core.gauges.GaugeManager;
+import org.sa.rainbow.core.globals.ExitState;
 import org.sa.rainbow.core.models.EffectorDescription;
 import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.ProbeDescription;
 import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
-import org.sa.rainbow.core.ports.*;
+import org.sa.rainbow.core.ports.IDelegateConfigurationPort;
+import org.sa.rainbow.core.ports.IDelegateManagementPort;
+import org.sa.rainbow.core.ports.IMasterCommandPort;
+import org.sa.rainbow.core.ports.IMasterConnectionPort;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
+import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.gui.RainbowGUI;
 import org.sa.rainbow.translator.effectors.EffectorManager;
@@ -52,10 +69,6 @@ import org.sa.rainbow.util.RainbowConfigurationChecker.Problem;
 import org.sa.rainbow.util.RainbowConfigurationChecker.ProblemT;
 import org.sa.rainbow.util.Util;
 import org.sa.rainbow.util.YamlUtil;
-
-import java.text.MessageFormat;
-import java.util.*;
-import java.util.Map.Entry;
 
 public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCommandPort, IRainbowMaster {
 
@@ -93,7 +106,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
     private final Map<String, Beacon> m_terminatedDelegates = Collections
             .synchronizedMap (new HashMap<String, Beacon> ());
 
-    private final Set<String> m_nonCompliantDelegates = new HashSet<> ();
+    private final Set<String> m_nonCompliantDelegates = Collections.<String> synchronizedSet (new HashSet<String> ());
 
 
     private Boolean m_initialized = Boolean.FALSE;
@@ -153,7 +166,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 
         // Create effector managers from the Rainbow properties file
         int effectorManagerSize = m_rainbowEnvironment.getProperty (RainbowConstants
-                                                                            .PROPKEY_EFFECTOR_MANAGER_COMPONENT_SIZE, 0);
+                .PROPKEY_EFFECTOR_MANAGER_COMPONENT_SIZE, 0);
         m_effectorManagers = new LinkedList<> ();
         for (int i = 0; i < effectorManagerSize; i++) {
             String emProp = RainbowConstants.PROPKEY_EFFECTOR_MANAGER_COMPONENT + "_" + i;
@@ -185,6 +198,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
             if (an != null) {
                 an = an.trim ();
                 try {
+                    m_reportingPort.info (RainbowComponentT.MASTER, "Starting " + an);
                     @SuppressWarnings ("unchecked")
                     Class<? extends IRainbowAnalysis> cls = (Class<? extends IRainbowAnalysis> )Class.forName (an);
                     IRainbowAnalysis analysis = cls.newInstance ();
@@ -323,6 +337,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
             synchronized (m_heartbeats) {
                 m_heartbeats.put (delegatePort.getDelegateId (), beacon);
             }
+            m_nonCompliantDelegates.add (delegatePort.getDelegateId ());
             beacon.mark ();
             LOGGER.info (MessageFormat.format ("Master created management connection with delegate {0}", delegateID));
             return delegatePort;
@@ -433,7 +448,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
                 m_reportingPort.info (RainbowComponentT.MASTER,
                         MessageFormat.format ("Heartbeat from {0}@{1}", delegateID, loc));
                 hb.mark ();
-
+                m_nonCompliantDelegates.remove (delegate.getDelegateId ());
             }
         }
         else {
@@ -561,18 +576,18 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
                         if (!m_nonCompliantDelegates.contains (entry.getKey ())) {
                             m_nonCompliantDelegates.add (entry.getKey ());
                             m_reportingPort.error (RainbowComponentT.MASTER,
-                                                   MessageFormat.format ("No Heartbeat from {0}@{1}", entry.getKey ()
-                                                           , loc));
+                                    MessageFormat.format ("No Heartbeat from {0}@{1}", entry.getKey ()
+                                            , loc));
 
                             LOGGER.error (MessageFormat.format (
                                     "Delegate {0} has not given a heartbeat withing the right time", entry.getKey ()));
                         }
                         if (entry.getValue ().isExpired ()) {
                             m_reportingPort.error (RainbowComponentT.MASTER,
-                                                   MessageFormat.format (
-                                                           "Delegate {0}@{1} has not sent a heartbeat in a while. " +
-                                                                   "Forgetting about it",
-                                                           entry.getKey (), loc));
+                                    MessageFormat.format (
+                                            "Delegate {0}@{1} has not sent a heartbeat in a while. " +
+                                                    "Forgetting about it",
+                                                    entry.getKey (), loc));
                             deregisterDelegate (entry.getKey (), loc);
                             iterator.remove ();
                         }
@@ -582,6 +597,11 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
         } catch (Throwable t) {
             m_reportingPort.error (RainbowComponentT.MASTER, "Failed in checking heartbeats", t);
         }
+    }
+
+    @Override
+    public boolean allDelegatesOK () {
+        return m_nonCompliantDelegates.isEmpty ();
     }
 
     private void deregisterDelegate (String did, String loc) {
@@ -720,16 +740,16 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
         int lastIdx = args.length - 1;
         for (int i = 0; i <= lastIdx; i++) {
             switch (args[i]) {
-                case "-h":
-                    showHelp = true;
-                    break;
-                case "-nogui":
-                    showGui = false;
-                    break;
-                default:
-                    System.err.println ("Unrecognized or incomplete argument " + args[i]);
-                    showHelp = true;
-                    break;
+            case "-h":
+                showHelp = true;
+                break;
+            case "-nogui":
+                showGui = false;
+                break;
+            default:
+                System.err.println ("Unrecognized or incomplete argument " + args[i]);
+                showHelp = true;
+                break;
             }
         }
         if (showHelp) {
@@ -768,6 +788,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 
     @Override
     public void startProbes () {
+        log ("Starting probes");
         for (IDelegateManagementPort delegate : m_delegates.values ()) {
             delegate.startProbes ();
         }

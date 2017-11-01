@@ -23,19 +23,29 @@
  */
 package org.sa.rainbow.core;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
 import org.sa.rainbow.core.error.RainbowAbortException;
 import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.core.globals.Environment;
 import org.sa.rainbow.core.globals.ExitState;
 import org.sa.rainbow.util.Util;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.*;
-import java.text.MessageFormat;
-import java.util.*;
 
 /**
  * A singleton class that provides utilities for reading properties, and getting access to important Rainbow Framework
@@ -63,16 +73,18 @@ public class Rainbow implements IRainbowEnvironment {
     private static Rainbow _instance = null;
 
     public static synchronized Rainbow instance () {
-        if (_instance == null)
+        if (_instance == null) {
             _instance = new Rainbow ();
+        }
         return _instance;
     }
- 
+
     /**
      * Returns whether the Rainbow runtime infrastructure should terminate.
      *
      * @return <code>true</code> if Rainbow should terminate, <code>false</code> otherwise.
      */
+    @Override
     public boolean shouldTerminate () {
         return m_shouldTerminate;
     }
@@ -82,6 +94,7 @@ public class Rainbow implements IRainbowEnvironment {
      * intended primarily for {@link org.sa.rainbow.core.RainbowMaster <code>RainbowMaster</code>}, but may be used by
      * the UpdateService to signal termination.
      */
+    @Override
     public void signalTerminate () {
         if (m_shouldTerminate) { // log once the signalling to
             // terminate
@@ -90,6 +103,7 @@ public class Rainbow implements IRainbowEnvironment {
         m_shouldTerminate = true;
     }
 
+    @Override
     public void signalTerminate (ExitState exitState) {
         setExitState (exitState);
         signalTerminate ();
@@ -100,14 +114,17 @@ public class Rainbow implements IRainbowEnvironment {
      *
      * @return int the exit value to return on System exit.
      */
+    @Override
     public int exitValue () {
         return m_exitState.exitValue ();
     }
 
+    @Override
     public void setExitState (ExitState state) {
         m_exitState = state;
     }
 
+    @Override
     public boolean isMaster () {
         return m_rainbowMaster != null;
     }
@@ -135,14 +152,17 @@ public class Rainbow implements IRainbowEnvironment {
         evalPropertySubstitution ();
     }
 
+    @Override
     public String getProperty (String key, String defaultProperty) {
         return m_props.getProperty (key, m_defaultProps.getProperty (key, defaultProperty));
     }
 
+    @Override
     public String getProperty (String key) {
         return m_props.getProperty (key, m_defaultProps.getProperty (key));
     }
 
+    @Override
     public boolean getProperty (String key, boolean b) {
         String value = m_props.getProperty (key);
         if (value != null)
@@ -151,6 +171,7 @@ public class Rainbow implements IRainbowEnvironment {
             return b;
     }
 
+    @Override
     public long getProperty (String key, long default_) {
         String value = m_props.getProperty (key);
         if (value == null) return default_;
@@ -161,6 +182,7 @@ public class Rainbow implements IRainbowEnvironment {
         }
     }
 
+    @Override
     public short getProperty (String key, short default_) {
         String value = m_props.getProperty (key);
         if (value == null) return default_;
@@ -171,6 +193,7 @@ public class Rainbow implements IRainbowEnvironment {
         }
     }
 
+    @Override
     public int getProperty (String key, int default_) {
         String value = m_props.getProperty (key);
         if (value == null) return default_;
@@ -181,6 +204,7 @@ public class Rainbow implements IRainbowEnvironment {
         }
     }
 
+    @Override
     public double getProperty (String key, double default_) {
         String value = m_props.getProperty (key);
         if (value == null) return default_;
@@ -191,31 +215,38 @@ public class Rainbow implements IRainbowEnvironment {
         }
     }
 
+    @Override
     public void setProperty (String key, short val) {
         m_props.setProperty (key, Short.toString (val));
     }
 
+    @Override
     public void setProperty (String key, long val) {
         m_props.setProperty (key, Long.toString (val));
     }
 
+    @Override
     public void setProperty (String key, boolean val) {
         m_props.setProperty (key, Boolean.toString (val));
     }
 
+    @Override
     public void setProperty (String key, String val) {
         m_props.setProperty (key, val);
     }
 
+    @Override
     public void setProperty (String key, double val) {
         m_props.setProperty (key, Double.toString (val));
     }
 
+    @Override
     public void setProperty (String key, int val) {
         m_props.setProperty (key, Integer.toString (val));
     }
 
 
+    @Override
     public Properties allProperties () {
         return m_props;
     }
@@ -393,7 +424,8 @@ public class Rainbow implements IRainbowEnvironment {
         }
         catch (SocketException e) {
         }
-        LOGGER.error (MessageFormat.format ("Unable to find host-specific property file! Tried: {0}",
+        LOGGER.info (MessageFormat.format (
+                "Unable to find host-specific property file! Will use general file insted. Tried: {0}",
                 Arrays.toString (triedHosts.toArray ())));
     }
 
@@ -465,33 +497,40 @@ public class Rainbow implements IRainbowEnvironment {
     }
 
 
+    @Override
     public ThreadGroup getThreadGroup () {
         return m_threadGroup;
     }
 
 
+    @Override
     public File getTargetPath () {
         return m_targetPath;
     }
 
+    @Override
     public void setMaster (RainbowMaster rainbowMaster) {
         m_rainbowMaster = rainbowMaster;
     }
 
+    @Override
     public RainbowMaster getRainbowMaster () {
         return m_rainbowMaster;
     }
 
+    @Override
     public void registerGauge (IGauge gauge) {
         ;
         Rainbow.m_id2Gauge.put (gauge.id (), gauge);
     }
 
+    @Override
     public IGauge lookupGauge (String id) {
         ;
         return Rainbow.m_id2Gauge.get (id);
     }
 
+    @Override
     public Environment environment () {
         ;
         if (Rainbow.m_env == Environment.UNKNOWN) {

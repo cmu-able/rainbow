@@ -23,23 +23,28 @@
  */
 package org.sa.rainbow.core;
 
+import java.text.MessageFormat;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.UUID;
+
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
 import org.sa.rainbow.core.gauges.LocalGaugeManager;
 import org.sa.rainbow.core.models.EffectorDescription;
 import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
 import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
-import org.sa.rainbow.core.ports.AbstractDelegateConnectionPort;
 import org.sa.rainbow.core.ports.IDelegateConfigurationPort;
 import org.sa.rainbow.core.ports.IDelegateManagementPort;
+import org.sa.rainbow.core.ports.IDelegateMasterConnectionPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.translator.effectors.LocalEffectorManager;
 import org.sa.rainbow.translator.probes.LocalProbeManager;
 import org.sa.rainbow.util.Beacon;
 import org.sa.rainbow.util.Util;
-
-import java.text.MessageFormat;
-import java.util.*;
 
 public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowConstants {
 
@@ -62,7 +67,7 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
 
     private IDelegateManagementPort        m_masterPort;
     /** The connection port to the master **/
-    private AbstractDelegateConnectionPort m_masterConnectionPort;
+    private IDelegateMasterConnectionPort m_masterConnectionPort;
     /**
      * The configuration port, through which the delegate can be configured. Configuration includes which local probes
      * and effectors to start. It "looks" unused because it calls back
@@ -130,9 +135,9 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
      *            The configuration information, as a set of properties
      */
     public synchronized void receiveConfigurationInformation (Properties props,
-                                                              List<ProbeAttributes> probes,
-                                                              List<EffectorAttributes> effectors,
-                                                              List<GaugeInstanceDescription> gauges) {
+            List<ProbeAttributes> probes,
+            List<EffectorAttributes> effectors,
+            List<GaugeInstanceDescription> gauges) {
         synchronized (m_probes) {
             // This might take some time, so record the information lest the method times out
             m_configurationInformation = props;
@@ -164,8 +169,8 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
     }
 
     void initDelegateComponents (List<ProbeAttributes> probes,
-                                 List<EffectorAttributes> effectors,
-                                 List<GaugeInstanceDescription> gauges) {
+            List<EffectorAttributes> effectors,
+            List<GaugeInstanceDescription> gauges) {
         m_probeManager.initProbes (probes);
 
         m_gaugeManager.initGauges (gauges);

@@ -110,7 +110,7 @@ public interface RainbowConstants {
     /** RMI port of the location of the Master Rainbow component, only useful if RMI event is used */
     String PROPKEY_MASTER_LOCATION_PORT = "rainbow.master.location.port";
 //    /** Deployment {@link org.sa.rainbow.core.Rainbow.Environment <code>Environment</code>} */
-String PROPKEY_DEPLOYMENT_ENVIRONMENT = "rainbow.deployment.environment";
+    String PROPKEY_DEPLOYMENT_ENVIRONMENT = "rainbow.deployment.environment";
 //    /** Rainbow event service name */
 //    public static final String PROPKEY_EVENT_SERVICE = "rainbow.event.service";
 //    /** JMS contact factory class name */
@@ -140,38 +140,38 @@ String PROPKEY_DEPLOYMENT_ENVIRONMENT = "rainbow.deployment.environment";
      */
     String DEFAULT_ENV_MODEL = "model/TargetEnv.acme";
 //    /** Rainbow customization parameter:  Amount of time to wait between each model evaluation */
-String PROPKEY_MODEL_EVAL_PERIOD = "customize.model.evaluate.period";
+    String PROPKEY_MODEL_EVAL_PERIOD = "customize.model.evaluate.period";
     String PROPKEY_ARCH_EVALUATOR_EXTENSIONS = "rainbow.evaluations";
     String PROPKEY_ANALYSIS_COMPONENTS = "rainbow.analyses";
     String PROPKEY_ANALYSIS_COMPONENT_SIZE = "rainbow.analyses.size";
 //    /** Rainbow customization parameter:  Alpha value of exponential average for
 //     *  model properties, expAvg = (1 - alpha) * expAvg + alpha * newVal */
-String PROPKEY_MODEL_ALPHA = "customize.model.expavg.alpha";
+    String PROPKEY_MODEL_ALPHA = "customize.model.expavg.alpha";
 //    /** Rainbow customization parameter: Gauge Description file path */
-String PROPKEY_GAUGES_PATH = "customize.gauges.path";
+    String PROPKEY_GAUGES_PATH = "customize.gauges.path";
 //    /** Rainbow customization parameter: Probe Description file path */
-String PROPKEY_PROBES_PATH = "customize.probes.path";
+    String PROPKEY_PROBES_PATH = "customize.probes.path";
 //    /** Rainbow customization parameter:  Path to the architectural operator mapping file */
 //    public static final String PROPKEY_OP_MAP_PATH = "customize.archop.map.path";
 //    /** Rainbow customization parameter: Effector Description file path */
-String PROPKEY_EFFECTORS_PATH = "customize.effectors.path";
+    String PROPKEY_EFFECTORS_PATH = "customize.effectors.path";
 //    /** Rainbow customization parameter:  Path to the Stitch scripts */
-String PROPKEY_SCRIPT_PATH = "customize.scripts.path";
+    String PROPKEY_SCRIPT_PATH = "customize.scripts.path";
 //    /** Rainbow customization parameter:  Path to the file for persiting Tactic execution time profile */
 //    public static final String PROPKEY_TACTIC_PROFILE_PATH = "customize.profile.tactic.duration.path";
     /** Rainbow customization parameter: Utility Preference Description file path */
     String PROPKEY_UTILITY_PATH = "customize.utility.path";
 //    /** Rainbow customization parameter:  The utility dimension that represents
 //     *  Strategy failure utility, set this only if tracking failure count */
-String PROPKEY_TRACK_STRATEGY = "customize.utility.trackStrategy";
+    String PROPKEY_TRACK_STRATEGY = "customize.utility.trackStrategy";
 //    /** Rainbow customization parameter:  Identifier of utility scenario to use */
-String PROPKEY_SCENARIO = "customize.utility.scenario";
+    String PROPKEY_SCENARIO = "customize.utility.scenario";
 //    /** Rainbow customization parameter:  The minimum threshold of utility score below which a strategy is not considered */
-String PROPKEY_UTILITY_MINSCORE_THRESHOLD = "customize.utility.score.minimum.threshold";
+    String PROPKEY_UTILITY_MINSCORE_THRESHOLD = "customize.utility.score.minimum.threshold";
 //    /** Rainbow customization parameter:  Duration into the future to predict for utility computation */
-String PROPKEY_UTILITY_PREDICTION_DURATION = "customize.utility.prediction.duration";
+    String PROPKEY_UTILITY_PREDICTION_DURATION = "customize.utility.prediction.duration";
 //    /** Rainbow customization parameter:  Flag to turn on prediction capability */
-String PROPKEY_ENABLE_PREDICTION = "customize.prediction.enable";
+    String PROPKEY_ENABLE_PREDICTION = "customize.prediction.enable";
 
     /** Rainbow customization parameter: System target host location */
     String PROPKEY_TARGET_LOCATION = "customize.system.target";
@@ -195,4 +195,6 @@ String PROPKEY_ENABLE_PREDICTION = "customize.prediction.enable";
     String PROPKEY_ADAPTATION_EXECUTOR_MODEL = "rainbow.adaptation.executor.model";
     String PROPKEY_EFFECTOR_MANAGER_COMPONENT_SIZE = "rainbow.effector.manager.size";
     String PROPKEY_EFFECTOR_MANAGER_COMPONENT = "rainbow.effector.manager.class";
+
+    String PROPKEY_PORT_TIMEOUT = "rainbow.port.timeout";
 }
