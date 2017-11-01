@@ -62,6 +62,9 @@ public class AcmeEffectorManager extends EffectorManager {
     public OperationResult publishOperation ( IRainbowOperation cmd) {
         OperationResult badResult = new OperationResult ();
         badResult.result = Result.UNKNOWN;
+//        System.out.println ("======> AcmeEM.publishOperation[RECEIVE]: " + cmd.toString ());
+        OperationResult actualResult = badResult;
+
         if (cmd.getModelReference ().getModelType ().equals ("Acme")) {
             AcmeModelInstance ami = (AcmeModelInstance )m_modelsManagerPort.<IAcmeSystem> getModelInstance (
                     cmd
@@ -128,28 +131,32 @@ public class AcmeEffectorManager extends EffectorManager {
                             }
                             if (result.result == Result.FAILURE) {
                                 result.reply = errMsg.toString ();
-                            }
-                            return result;
+                            } else
+                                result.reply = cmd.toString ();
+                            actualResult = result;
                         }
                         else {
                             badResult.reply = MessageFormat.format ("No effectors at {0} understand the command {1}",
                                     location, cmd.getName ());
-                            return badResult;
+                            actualResult = badResult;
                         }
                     }
                 }
             }
             catch (Exception e) {
                 badResult.reply = e.getMessage ();
-                return badResult;
+                actualResult = badResult;
             }
 
         }
         else {
             badResult.reply = "Currently, I only know how to effect Acme models";
-            return badResult;
+            actualResult = badResult;
         }
-        return badResult;
+//        System.out.println ("======> AcmeEM.publishOperation[RESPOND]: " + cmd.toString () + " = " + actualResult
+// .result);
+
+        return actualResult;
 
     }
 

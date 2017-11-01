@@ -23,6 +23,19 @@
  */
 package org.sa.rainbow.model.acme;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.Stack;
+
 import org.acmestudio.acme.ModelHelper;
 import org.acmestudio.acme.PropertyHelper;
 import org.acmestudio.acme.core.exception.AcmeException;
@@ -46,6 +59,7 @@ import org.acmestudio.acme.model.command.IAcmeCompoundCommand;
 import org.acmestudio.acme.model.command.IAcmeElementCopyCommand;
 import org.acmestudio.acme.model.event.AcmeEventListenerAdapter;
 import org.acmestudio.acme.model.event.AcmePropertyEvent;
+import org.acmestudio.acme.model.event.AcmeSystemEvent;
 import org.acmestudio.acme.rule.node.IExpressionNode;
 import org.acmestudio.acme.type.AcmeTypeHelper;
 import org.acmestudio.acme.type.verification.NodeScopeLookup;
@@ -61,12 +75,6 @@ import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.util.Util;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.*;
 
 public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
 
@@ -136,6 +144,7 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
     public void setModelInstance (IAcmeSystem model) {
         m_system = model;
         // Add listener to update exponential averages for the properties
+        final IAcmeModel acmeModel = m_system.getContext ().getModel ();
         final AcmeEventListenerAdapter propertyListener = new AcmeEventListenerAdapter () {
             @SuppressWarnings ("rawtypes")
             @Override
@@ -152,12 +161,21 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
                             }
                 }
                 catch (RainbowAbortException e) {
-                    m_system.getContext ().getModel ().removeEventListener (this);
+                    acmeModel.removeEventListener (this);
                 }
 
             }
+
+            @Override
+            public void systemCreated (AcmeSystemEvent event) {
+                if (event.getSystem ().getName ().equals (m_system.getName ())) {
+                    // The system was replaced
+                    acmeModel.removeEventListener (this);
+                    setModelInstance (event.getSystem ());
+                }
+            }
         };
-        m_system.getContext ().getModel ().addEventListener (propertyListener);
+        acmeModel.addEventListener (propertyListener);
 
     }
 
