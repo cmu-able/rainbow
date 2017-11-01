@@ -27,12 +27,16 @@
 package org.sa.rainbow.translator.probes;
 
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.util.RainbowLogger;
 import org.sa.rainbow.util.Util;
-
-import java.io.*;
 
 /**
  * This class defines a probe that's implemented in a shell/Perl script.
@@ -75,6 +79,8 @@ public class GenericScriptBasedProbe extends AbstractProbe implements IBashBased
 
     private Process m_process = null;
     private boolean m_continual;
+
+    private boolean m_cleanup = false;
 
     /**
      * Main Constructor.
@@ -119,14 +125,20 @@ public class GenericScriptBasedProbe extends AbstractProbe implements IBashBased
             pb.directory(workDir);
             pb.redirectErrorStream(true);
             try {
+                m_cleanup = false;
                 m_process = pb.start();
                 if (m_continual) {
                     StreamGobbler outputProcessor = new StreamGobbler (m_process.getInputStream ());
                     outputProcessor.start ();
+                    m_cleanup = true;
                 }
                 else {
+
                     m_process.waitFor ();
-                    dumpOutput();
+//                    int exitValue = m_process.exitValue ();
+                    reportData (Util.getProcessOutput (m_process));
+//                    dumpOutput();
+                    m_cleanup = true;
                 }
             } catch (IOException e) {
                 RainbowLogger.error (RainbowComponentT.PROBE, "Process I/O failed!", e, getLoggingPort (), LOGGER);
@@ -158,7 +170,7 @@ public class GenericScriptBasedProbe extends AbstractProbe implements IBashBased
     @Override
     public boolean isAlive() {
         boolean alive = true;
-        if (m_process != null) {
+        if (m_process != null && m_cleanup) {
             try {
                 if (m_process.exitValue() == 0) {  // done, cleanup
                     m_process = null;
