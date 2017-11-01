@@ -23,15 +23,6 @@
  */
 package org.sa.rainbow.evaluator.utility;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.LinkedBlockingQueue;
-
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
@@ -44,20 +35,19 @@ import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.UtilityFunction;
 import org.sa.rainbow.core.models.UtilityPreferenceDescription;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
-import org.sa.rainbow.core.ports.IModelChangeBusPort;
-import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
+import org.sa.rainbow.core.ports.*;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowChangeBusSubscription;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowModelChangeCallback;
-import org.sa.rainbow.core.ports.IModelUSBusPort;
-import org.sa.rainbow.core.ports.IModelsManagerPort;
-import org.sa.rainbow.core.ports.IRainbowReportingPort;
-import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.model.acme.AcmeRainbowOperationEvent.CommandEventT;
 import org.sa.rainbow.model.utility.AddUtilityMeasureCmd;
 import org.sa.rainbow.model.utility.UtilityHistory;
 import org.sa.rainbow.model.utility.UtilityHistoryModelInstance;
 import org.sa.rainbow.model.utility.UtilityModelInstance;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * This evaluator listens for changes in an Acme model and updates the utility history with new utility values
@@ -183,7 +173,7 @@ public class UtilityEvaluator extends AbstractRainbowRunnable implements IRainbo
             AcmeModelInstance acmeModel,
             IRainbowReportingPort reportingPort) {
         Map<String, Double> weights = utilityModel.weights
-                .get (Rainbow.getProperty (RainbowConstants.PROPKEY_SCENARIO));
+                .get (Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_SCENARIO));
         Map<String, Double> utilities = new HashMap<> ();
         double[] conds = new double[utilityModel.getUtilities ().size ()];
         int i = 0;
@@ -219,7 +209,7 @@ public class UtilityEvaluator extends AbstractRainbowRunnable implements IRainbo
     }
 
     @Override
-    protected RainbowComponentT getComponentType () {
+    public RainbowComponentT getComponentType () {
         return RainbowComponentT.ANALYSIS;
     }
 
