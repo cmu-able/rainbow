@@ -23,6 +23,12 @@
  */
 package org.sa.rainbow.core.models.commands;
 
+import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
+
 import org.sa.rainbow.core.error.RainbowDelegationException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
@@ -31,12 +37,6 @@ import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 import org.sa.rainbow.core.ports.eseb.ESEBConstants;
-
-import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
 
 public abstract class AbstractRainbowModelOperation<Type, Model> implements IRainbowModelOperation<Type, Model> {
 
@@ -134,6 +134,10 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
         catch (RainbowDelegationException rde) {
             m_executionState = ExecutionState.ERROR;
             throw rde;
+        }
+        catch (Throwable e) {
+            m_executionState = ExecutionState.ERROR;
+            throw new RainbowDelegationException (e);
         }
         m_executionState = ExecutionState.DONE;
         return getGeneratedEvents (m_messageFactory);
