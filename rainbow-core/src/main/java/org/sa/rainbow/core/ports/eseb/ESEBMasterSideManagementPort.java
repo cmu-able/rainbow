@@ -23,6 +23,10 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.Properties;
+
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
@@ -31,10 +35,6 @@ import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.ports.AbstractMasterManagementPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.IESEBListener;
-
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.Properties;
 
 public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort implements ESEBManagementPortConstants {
     private static final Logger LOGGER = Logger.getLogger (ESEBMasterSideManagementPort.class);
@@ -100,7 +100,8 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
 
         try {
             BooleanReply reply = new BooleanReply ();
-            getConnectionRole().blockingSendAndReceive (msg, reply, 10000);
+            getConnectionRole ().blockingSendAndReceive (msg, reply,
+                    Rainbow.instance ().getProperty (Rainbow.PROPKEY_PORT_TIMEOUT, 10000));
             return reply.m_reply;
         }
         catch (RainbowConnectionException e) {
@@ -117,7 +118,8 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
 
         try {
             BooleanReply reply = new BooleanReply ();
-            getConnectionRole().blockingSendAndReceive (msg, reply, 10000);
+            getConnectionRole ().blockingSendAndReceive (msg, reply,
+                    Rainbow.instance ().getProperty (Rainbow.PROPKEY_PORT_TIMEOUT, 10000));
             return reply.m_reply;
         }
         catch (RainbowConnectionException e) {

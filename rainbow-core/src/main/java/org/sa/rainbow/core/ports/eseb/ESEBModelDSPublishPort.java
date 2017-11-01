@@ -24,6 +24,10 @@
 package org.sa.rainbow.core.ports.eseb;
 
 
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
@@ -33,10 +37,6 @@ import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
 import org.sa.rainbow.core.ports.IModelDSBusSubscriberPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.IESEBListener;
-
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
 
 public class ESEBModelDSPublishPort extends AbstractESEBDisposablePort implements IModelDSBusPublisherPort,
 IModelDSBusSubscriberPort {
@@ -101,7 +101,6 @@ IModelDSBusSubscriberPort {
             final OperationResult result = new OperationResult ();
             result.result = Result.FAILURE;
             result.reply = "Operation timed out";
-//            System.out.println ("======> publishOperation[SEND]: " + cmd.toString ());
             try {
                 getConnectionRole ().blockingSendAndReceive (msg, new IESEBListener () {
 

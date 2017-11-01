@@ -23,6 +23,8 @@
  */
 package org.sa.rainbow.core.ports;
 
+import java.util.Properties;
+
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.RainbowMaster;
@@ -38,8 +40,6 @@ import org.sa.rainbow.translator.effectors.IEffectorExecutionPort;
 import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
 import org.sa.rainbow.translator.probes.IProbe;
 
-import java.util.Properties;
-
 public interface IRainbowConnectionPortFactory {
 
     /**
@@ -48,7 +48,7 @@ public interface IRainbowConnectionPortFactory {
      * 
      * @return
      */
-    AbstractDelegateConnectionPort createDelegateSideConnectionPort (RainbowDelegate delegate)
+    IDelegateMasterConnectionPort createDelegateSideConnectionPort (RainbowDelegate delegate)
             throws RainbowConnectionException;
 
     /**
@@ -85,8 +85,8 @@ public interface IRainbowConnectionPortFactory {
      *         delegate, and manager the lifecycle
      */
     IDelegateManagementPort createMasterSideManagementPort (RainbowMaster rainbowMaster,
-                                                            String delegateID,
-                                                            Properties connectionProperties) throws RainbowConnectionException;
+            String delegateID,
+            Properties connectionProperties) throws RainbowConnectionException;
 
     IModelUSBusPort createModelsManagerUSPort (IModelsManager m)
             throws RainbowConnectionException;
@@ -124,7 +124,7 @@ public interface IRainbowConnectionPortFactory {
 
 
     IProbeConfigurationPort createProbeConfigurationPort (Identifiable probe,
-                                                          IProbeConfigurationPort callback) throws RainbowConnectionException;
+            IProbeConfigurationPort callback) throws RainbowConnectionException;
 
 
     IDelegateConfigurationPort createDelegateConfigurationPort (RainbowDelegate rainbowDelegate)

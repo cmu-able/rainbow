@@ -23,6 +23,10 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.Properties;
+
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
@@ -35,10 +39,6 @@ import org.sa.rainbow.core.ports.IDelegateManagementPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.IESEBListener;
-
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.Properties;
 
 public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
     private static final Logger LOGGER = Logger.getLogger (ESEBDelegateConnectionPort.class);
@@ -69,7 +69,7 @@ public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
 
     @Override
     public IDelegateManagementPort connectDelegate (String delegateID, Properties connectionProperties) throws
-                                                                                                        RainbowConnectionException {
+    RainbowConnectionException {
         /*
          * connectionProperties should contain the following information: 
          * PROPKEY_ESEB_DELEGATE_DEPLOYMENT_PORT, PROPKEY_ESEB_DELEGATE_DEPLOYMENT_HOST: 
@@ -111,7 +111,7 @@ public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
                     }
                 }
             }
-        }, 10000);
+        }, Rainbow.instance ().getProperty (Rainbow.PROPKEY_PORT_TIMEOUT, 10000));
         if (m_deploymentPort == null) {
             LOGGER.error ("The call to connectDelegate timed out without returning a deployment port...");
             // REVIEW: Throw an exception instead

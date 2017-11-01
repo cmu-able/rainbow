@@ -23,11 +23,12 @@
  */
 package org.sa.rainbow.core.ports;
 
+import java.util.List;
+
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
-
-import java.util.List;
 
 public interface IModelUSBusPort extends IDisposablePort {
 
@@ -38,6 +39,8 @@ public interface IModelUSBusPort extends IDisposablePort {
      * 
      * @param command
      *            The command to use to update the model
+     * @throws RainbowException
+     * @throws IllegalStateException
      */
     void updateModel (IRainbowOperation command);
 
@@ -49,6 +52,8 @@ public interface IModelUSBusPort extends IDisposablePort {
      *            The list of commands to update the model
      * @param transaction
      *            Whether this should be run as a transaction
+     * @throws RainbowException
+     * @throws IllegalStateException
      */
     void updateModel (List<IRainbowOperation> commands, boolean transaction);
 

@@ -23,7 +23,11 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
-import edu.cmu.cs.able.eseb.participant.ParticipantException;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.RainbowMaster;
@@ -33,18 +37,53 @@ import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
 import org.sa.rainbow.core.models.IModelsManager;
 import org.sa.rainbow.core.models.ModelReference;
-import org.sa.rainbow.core.ports.*;
+import org.sa.rainbow.core.ports.DisconnectedRainbowDelegateConnectionPort;
+import org.sa.rainbow.core.ports.DisconnectedRainbowManagementPort;
+import org.sa.rainbow.core.ports.DisconnectedRainbowMasterConnectionPort;
+import org.sa.rainbow.core.ports.IDelegateConfigurationPort;
+import org.sa.rainbow.core.ports.IDelegateManagementPort;
+import org.sa.rainbow.core.ports.IDelegateMasterConnectionPort;
+import org.sa.rainbow.core.ports.IEffectorLifecycleBusPort;
+import org.sa.rainbow.core.ports.IGaugeConfigurationPort;
+import org.sa.rainbow.core.ports.IGaugeLifecycleBusPort;
+import org.sa.rainbow.core.ports.IGaugeQueryPort;
+import org.sa.rainbow.core.ports.IMasterCommandPort;
+import org.sa.rainbow.core.ports.IMasterConnectionPort;
+import org.sa.rainbow.core.ports.IModelChangeBusPort;
+import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
+import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
+import org.sa.rainbow.core.ports.IModelDSBusSubscriberPort;
+import org.sa.rainbow.core.ports.IModelUSBusPort;
+import org.sa.rainbow.core.ports.IModelsManagerPort;
+import org.sa.rainbow.core.ports.IProbeConfigurationPort;
+import org.sa.rainbow.core.ports.IProbeLifecyclePort;
+import org.sa.rainbow.core.ports.IProbeReportPort;
+import org.sa.rainbow.core.ports.IProbeReportSubscriberPort;
+import org.sa.rainbow.core.ports.IRainbowAdaptationDequeuePort;
+import org.sa.rainbow.core.ports.IRainbowAdaptationEnqueuePort;
+import org.sa.rainbow.core.ports.IRainbowConnectionPortFactory;
+import org.sa.rainbow.core.ports.IRainbowReportingPort;
+import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReportingSubscriberCallback;
-import org.sa.rainbow.core.ports.eseb.rpc.*;
+import org.sa.rainbow.core.ports.eseb.rpc.ESEBDelegateConfigurationProviderPort;
+import org.sa.rainbow.core.ports.eseb.rpc.ESEBDelegateConfigurationRequirerPort;
+import org.sa.rainbow.core.ports.eseb.rpc.ESEBEffectorExecutionProviderPort;
+import org.sa.rainbow.core.ports.eseb.rpc.ESEBEffectorExecutionRequirerPort;
+import org.sa.rainbow.core.ports.eseb.rpc.ESEBGaugeConfigurationProviderPort;
+import org.sa.rainbow.core.ports.eseb.rpc.ESEBGaugeConfigurationRequirerPort;
+import org.sa.rainbow.core.ports.eseb.rpc.ESEBGaugeQueryProviderPort;
+import org.sa.rainbow.core.ports.eseb.rpc.ESEBGaugeQueryRequirerPort;
+import org.sa.rainbow.core.ports.eseb.rpc.ESEBMasterCommandProviderPort;
+import org.sa.rainbow.core.ports.eseb.rpc.ESEBMasterCommandRequirerPort;
+import org.sa.rainbow.core.ports.eseb.rpc.ESEBModelsManagerProviderPort;
+import org.sa.rainbow.core.ports.eseb.rpc.ESEBModelsManagerRequirerPort;
+import org.sa.rainbow.core.ports.eseb.rpc.ESEBProbeConfigurationProviderPort;
 import org.sa.rainbow.translator.effectors.IEffector;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort;
 import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
 import org.sa.rainbow.translator.probes.IProbe;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import edu.cmu.cs.able.eseb.participant.ParticipantException;
 
 public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
 
@@ -55,7 +94,7 @@ public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
     }
 
     @Override
-    public AbstractDelegateConnectionPort createDelegateSideConnectionPort (RainbowDelegate delegate) {
+    public IDelegateMasterConnectionPort createDelegateSideConnectionPort (RainbowDelegate delegate) {
         try {
             return new ESEBDelegateConnectionPort (delegate);
         }

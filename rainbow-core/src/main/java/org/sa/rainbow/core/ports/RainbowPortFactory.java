@@ -23,9 +23,19 @@
  */
 package org.sa.rainbow.core.ports;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.text.MessageFormat;
+import java.util.Collection;
+import java.util.Properties;
+
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
-import org.sa.rainbow.core.*;
+import org.sa.rainbow.core.Identifiable;
+import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.RainbowDelegate;
+import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.adaptation.IEvaluable;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.IGauge;
@@ -39,12 +49,6 @@ import org.sa.rainbow.translator.effectors.IEffector;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort;
 import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
 import org.sa.rainbow.translator.probes.IProbe;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.text.MessageFormat;
-import java.util.Collection;
-import java.util.Properties;
 
 public class RainbowPortFactory {
 
@@ -92,7 +96,7 @@ public class RainbowPortFactory {
         return m_instance;
     }
 
-    public static AbstractDelegateConnectionPort createDelegateMasterConnectionPort (RainbowDelegate delegate)
+    public static IDelegateMasterConnectionPort createDelegateMasterConnectionPort (RainbowDelegate delegate)
             throws RainbowConnectionException {
         return getFactory ().createDelegateSideConnectionPort (delegate);
     }

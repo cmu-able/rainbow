@@ -1,12 +1,13 @@
 package org.sa.rainbow.core.ports.eseb.rpc;
 
-import edu.cmu.cs.able.eseb.rpc.ParametersTypeMapping;
-import edu.cmu.cs.able.eseb.rpc.ReturnTypeMapping;
+import java.util.List;
+
 import org.sa.rainbow.core.globals.ExitState;
 import org.sa.rainbow.core.ports.IMasterCommandPort;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 
-import java.util.List;
+import edu.cmu.cs.able.eseb.rpc.ParametersTypeMapping;
+import edu.cmu.cs.able.eseb.rpc.ReturnTypeMapping;
 
 public interface IESEBMasterCommandPortRemoteInterface extends IMasterCommandPort {
 
@@ -48,5 +49,9 @@ public interface IESEBMasterCommandPortRemoteInterface extends IMasterCommandPor
     @Override
     @ReturnTypeMapping ("list<string>")
     List<String> getExpectedDelegateLocations ();
+
+    @Override
+    @ReturnTypeMapping ("bool")
+    boolean allDelegatesOK ();
 
 }

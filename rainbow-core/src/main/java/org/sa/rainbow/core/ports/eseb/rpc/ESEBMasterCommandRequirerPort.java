@@ -1,13 +1,14 @@
 package org.sa.rainbow.core.ports.eseb.rpc;
 
-import edu.cmu.cs.able.eseb.participant.ParticipantException;
+import java.io.IOException;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.globals.ExitState;
 import org.sa.rainbow.core.ports.eseb.ESEBProvider;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 
-import java.io.IOException;
-import java.util.List;
+import edu.cmu.cs.able.eseb.participant.ParticipantException;
 
 public class ESEBMasterCommandRequirerPort extends AbstractESEBDisposableRPCPort
 implements IESEBMasterCommandPortRemoteInterface {
@@ -75,5 +76,10 @@ implements IESEBMasterCommandPortRemoteInterface {
     @Override
     public List<String> getExpectedDelegateLocations () {
         return m_stub.getExpectedDelegateLocations ();
+    }
+
+    @Override
+    public boolean allDelegatesOK () {
+        return m_stub.allDelegatesOK ();
     }
 }

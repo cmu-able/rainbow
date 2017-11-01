@@ -23,6 +23,14 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.log4j.Logger;
+import org.sa.rainbow.core.Rainbow;
+
 import edu.cmu.cs.able.eseb.bus.EventBus;
 import edu.cmu.cs.able.eseb.conn.BusConnection;
 import edu.cmu.cs.able.eseb.participant.ParticipantException;
@@ -30,12 +38,6 @@ import edu.cmu.cs.able.eseb.rpc.JavaRpcFactory;
 import edu.cmu.cs.able.eseb.rpc.RpcEnvironment;
 import edu.cmu.cs.able.typelib.jconv.TypelibJavaConversionRule;
 import edu.cmu.cs.able.typelib.jconv.TypelibJavaConverter;
-import org.apache.log4j.Logger;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class ESEBRPCConnector {
     public static final Logger LOGGER = Logger.getLogger (ESEBRPCConnector.class);
@@ -51,10 +53,9 @@ public class ESEBRPCConnector {
 
     private static final Map<String, RPCInfo> m_infoMap = new HashMap<> ();
 
-    private RPCInfo                     m_info;
+    private RPCInfo m_info;
 
-    public ESEBRPCConnector (String remoteHost, short remotePort, String serverId) throws
-            ParticipantException {
+    public ESEBRPCConnector (String remoteHost, short remotePort, String serverId) throws ParticipantException {
         setClient (remoteHost, remotePort);
         setUpEnvironment (serverId);
     }
@@ -107,7 +108,6 @@ public class ESEBRPCConnector {
         ESEBProvider.useClient (m_client);
     }
 
-
     public BusConnection getESEBConnection () {
         return m_client;
     }
@@ -116,15 +116,14 @@ public class ESEBRPCConnector {
         return m_info.participant_id;
     }
 
-
     private RpcEnvironment getRPCEnvironment () {
         return m_info.m_env;
     }
 
     public <T> T createRemoteStub (Class<T> cls, String obj_id) {
         LOGGER.info ("Creating RPC Requirer end for " + obj_id + " with participant " + getParticipantId ());
-        return JavaRpcFactory.create_remote_stub (cls, this.getRPCEnvironment (), this.getParticipantId (), 5000,
-                obj_id);
+        return JavaRpcFactory.create_remote_stub (cls, this.getRPCEnvironment (), this.getParticipantId (),
+                Rainbow.instance ().getProperty (Rainbow.PROPKEY_PORT_TIMEOUT, 10000), obj_id);
     }
 
     public <T> void createRegistryWrapper (Class<T> cls, T wrapped, String obj_id) {

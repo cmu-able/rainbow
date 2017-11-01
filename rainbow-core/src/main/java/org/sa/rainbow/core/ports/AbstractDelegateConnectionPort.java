@@ -1,15 +1,15 @@
 package org.sa.rainbow.core.ports;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.text.MessageFormat;
+
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.ports.eseb.AbstractESEBDisposablePort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.text.MessageFormat;
 
 /*
  * The MIT License
@@ -35,7 +35,7 @@ import java.text.MessageFormat;
  * THE SOFTWARE.
  */
 public abstract class AbstractDelegateConnectionPort extends AbstractESEBDisposablePort implements
-IMasterConnectionPort, IRainbowReportingPort {
+        IDelegateMasterConnectionPort {
 
     protected RainbowDelegate m_delegate;
 
