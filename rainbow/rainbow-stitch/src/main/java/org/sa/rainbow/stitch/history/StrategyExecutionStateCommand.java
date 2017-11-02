@@ -1,4 +1,4 @@
-package org.sa.rainbow.stitch.tactic.history;
+package org.sa.rainbow.stitch.history;
 
 import java.util.List;
 import java.util.Map;

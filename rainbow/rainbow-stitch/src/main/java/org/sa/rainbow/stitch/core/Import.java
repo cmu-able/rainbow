@@ -24,13 +24,16 @@
 package org.sa.rainbow.stitch.core;
 
 import antlr.collections.AST;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 /**
  * Represents an import statement.
- * 
+ *
  * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
  */
 public class Import {
+    public ParserRuleContext tree;
+
     /**
      * Defines the types of import statements.
      */
@@ -39,19 +42,17 @@ public class Import {
     }
 
     public IScope scope = null;
-    public Kind type = Kind.UNKNOWN; 
-    public String path = null;
-    public AST ast = null;
+    public Kind   type  = Kind.UNKNOWN;
+    public String path  = null;
+    public AST    ast   = null;
 
     public static Kind determineType (String str) {
         Kind t = Kind.UNKNOWN;
-        if (str.equals("lib")) {
+        if (str.equals ("lib")) {
             t = Kind.LIB;
-        }
-        else if (str.equals("model")) {
+        } else if (str.equals ("model")) {
             t = Kind.MODEL;
-        }
-        else if (str.equals("op")) {
+        } else if (str.equals ("op")) {
             t = Kind.OP;
         }
         return t;

@@ -26,31 +26,34 @@
  */
 package org.sa.rainbow.stitch.core;
 
+import org.acmestudio.acme.element.IAcmeElementType;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.acmestudio.acme.element.IAcmeElementType;
-
 /**
  * Represents a variable declared in script.
- * 
+ *
  * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
  */
 public class Var {
-    public IScope scope = null;
-    public String name = null;
+    public IScope           scope   = null;
+    public String           name    = null;
     public IAcmeElementType typeObj = null;  // optionally used to hold AcmeModel type
-    public Statement valStmt = null;
+    public Statement        valStmt = null;
 
-    /** Indicates whether this variable has a basic, internally-supported type.  True by default. */
+    /**
+     * Indicates whether this variable has a basic, internally-supported type.  True by default.
+     */
     protected boolean m_isBasicType = true;
-    protected String m_type = null;
-    protected Object m_value = null;
+    protected String  m_type        = null;
+    protected Object  m_value       = null;
+    private boolean m_isFunction;
 
     @Override
     public String toString () {
-        return "var(type \"" + m_type + "\", " + name + " == " + getValue() + ")";
+        return "var(type \"" + m_type + "\", " + name + " == " + getValue () + ")";
     }
 
     public Var clone () {
@@ -62,43 +65,44 @@ public class Var {
         c.m_isBasicType = m_isBasicType;
         c.m_type = m_type;
         c.m_value = m_value;
+        c.setFunction (isFunction ());
         return c;
     }
 
     public Class computeClass () {
         Class clazz = null;
-        if (m_type.toLowerCase().equals("int") || m_type.toLowerCase().equals("long")) {
+        if (m_type.toLowerCase ().equals ("int") || m_type.toLowerCase ().equals ("long")) {
             clazz = Long.class;
-        } else if (m_type.toLowerCase().equals("float") || m_type.toLowerCase().equals("double")) {
+        } else if (m_type.toLowerCase ().equals ("float") || m_type.toLowerCase ().equals ("double")) {
             clazz = Double.class;
-        } else if (m_type.toLowerCase().equals("boolean")) {
+        } else if (m_type.toLowerCase ().equals ("boolean")) {
             clazz = Boolean.class;
-        } else if (m_type.toLowerCase().equals("char")) {
+        } else if (m_type.toLowerCase ().equals ("char")) {
             clazz = Character.class;
-        } else if (m_type.toLowerCase().equals("string")) {
+        } else if (m_type.toLowerCase ().equals ("string")) {
             clazz = String.class;
-        } else if (m_type.toLowerCase().equals("set")) {
+        } else if (m_type.toLowerCase ().equals ("set")) {
             clazz = Set.class;
-        } else if (m_type.toLowerCase().equals("sequence")) {
+        } else if (m_type.toLowerCase ().equals ("sequence")) {
             clazz = List.class;
-        } else if (m_type.toLowerCase().equals("record")) {
+        } else if (m_type.toLowerCase ().equals ("record")) {
             clazz = Map.class;
-        } else if (m_type.toLowerCase().equals("enum")) {
+        } else if (m_type.toLowerCase ().equals ("enum")) {
             clazz = Enum.class;
         } else {  // assume some object
             // look for type name in model, if scope is non-null
             if (scope != null) {
                 if (typeObj == null) {
-                    Object t = scope.lookup(m_type);
+                    Object t = scope.lookup (m_type);
                     if (t != null && t instanceof IAcmeElementType) {
-                        typeObj = (IAcmeElementType )t;
-                        clazz = typeObj.getClass();
+                        typeObj = (IAcmeElementType) t;
+                        clazz = typeObj.getClass ();
                     }
                 } else {
-                    clazz = typeObj.getClass();
+                    clazz = typeObj.getClass ();
                 }
-            } else if (getValue() != null) {
-                clazz = getValue().getClass();
+            } else if (getValue () != null) {
+                clazz = getValue ().getClass ();
             }
         }
         return clazz;
@@ -106,8 +110,8 @@ public class Var {
 
     public void computeValue () {
         if (valStmt != null) {
-            valStmt.clearState();
-            valStmt.evaluate(null);
+            valStmt.clearState ();
+            valStmt.evaluate (null);
         }
     }
 
@@ -122,29 +126,29 @@ public class Var {
     /**
      * @param type the type to set
      */
-    public void setType(String type) {
+    public void setType (String type) {
         m_type = type;
     }
 
     /**
      * @return the type
      */
-    public String getType() {
+    public String getType () {
         return m_type;
     }
 
     /**
      * @param value the value to set
      */
-    public void setValue(Object value) {
+    public void setValue (Object value) {
         if (value instanceof Integer) {
-            m_value = new MyInteger((Integer )value);
+            m_value = new MyInteger ((Integer) value);
         } else if (value instanceof Long) {
-            m_value = new MyInteger((Long )value);
+            m_value = new MyInteger ((Long) value);
         } else if (value instanceof Float) {
-            m_value = new MyDouble(((Float )value).doubleValue());
+            m_value = new MyDouble (((Float) value).doubleValue ());
         } else if (value instanceof Double) {
-            m_value = new MyDouble((Double )value);
+            m_value = new MyDouble ((Double) value);
         } else {
             m_value = value;
         }
@@ -153,7 +157,7 @@ public class Var {
     /**
      * @return the value
      */
-    public Object getValue() {
+    public Object getValue () {
         return m_value;
     }
 
@@ -172,8 +176,16 @@ public class Var {
     public void clearState () {
         if (valStmt != null) {
             m_value = null;
-            valStmt.clearState();
+            valStmt.clearState ();
         }
     }
 
+
+    public boolean isFunction () {
+        return m_isFunction;
+    }
+
+    public void setFunction (boolean function) {
+        m_isFunction = function;
+    }
 }

@@ -23,80 +23,72 @@
  */
 /**
  * Stitch Editor
+ *
  * @author Ali Almossawi <aalossaw@cs.cmu.edu>
  * @version 0.1
  * @created July 1, 2006
- * 
+ * <p/>
  * Parts of the code in this project adapted from or inspired by
- * XMLAuthor © 2005 Nick Wilson (SvcDelivery) released under the 
- * GNU GPL and the Java Editor example © 2000, 2005 IBM Corporation 
+ * XMLAuthor © 2005 Nick Wilson (SvcDelivery) released under the
+ * GNU GPL and the Java Editor example © 2000, 2005 IBM Corporation
  * and others released under the Eclipse Public License v1.0
- * 
  * @author Shang-Wen Cheng <zensoul@cs.cmu.edu>
- * Modified:  August 10, 2006, moved to org.sa.rainbow.stitch plug-in to prevent
+ * Modified:  August 10, 2006, moved to org.sa.rainbow.stitchState plug-in to prevent
  * cyclic dependency and to eliminate the undesirable dependency of the language
  * plug-in on the Editor plug-in.  Also removed implements of IRegion interface.
  */
 
 package org.sa.rainbow.stitch.error;
 
-import antlr.RecognitionException;
 
 public class StitchProblem implements IStitchProblem {
 
     private RecognitionException sourceException = null;
-    private int severity = UNKNOWN;
+    private int                  severity        = IStitchProblem.UNKNOWN;
 
-    public StitchProblem(RecognitionException exception, int severity) {
+    public StitchProblem (RecognitionException exception, int severity) {
         sourceException = exception;
         this.severity = severity;
     }
 
-    public RecognitionException getSourceException () {
+    public Exception getSourceException () {
         return sourceException;
     }
+
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.editor.parserhelper.IStitchProblem#getSeverity()
+     * @see org.sa.rainbow.stitchState.editor.parserhelper.IStitchProblem#getSeverity()
      */
-    @Override
     public int getSeverity () {
         return severity;
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.editor.parserhelper.IStitchProblem#getMessage()
+     * @see org.sa.rainbow.stitchState.editor.parserhelper.IStitchProblem#getMessage()
      */
-    @Override
     public String getMessage () {
-        return sourceException.getMessage();
+        return sourceException.getMessage ();
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.editor.parserhelper.IStitchProblem#getLine()
+     * @see org.sa.rainbow.stitchState.editor.parserhelper.IStitchProblem#getLine()
      */
-    @Override
     public int getLine () {
-        return sourceException.getLine();
+        return sourceException.getLine ();
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.editor.parserhelper.IStitchProblem#getColumn()
+     * @see org.sa.rainbow.stitchState.editor.parserhelper.IStitchProblem#getColumn()
      */
-    @Override
     public int getColumn () {
-        return sourceException.getColumn();
-    }
-
-    @Override
-    public IStitchProblem clone () {
-        return new StitchProblem (sourceException, severity);
+        return sourceException.getColumn ();
     }
 
     @Override
     public boolean equals (Object o) {
         if (o instanceof StitchProblem) {
             StitchProblem p = (StitchProblem) o;
-            return getMessage ().equals (p.getMessage ()) && getLine () == p.getLine () && getColumn () == p.getColumn () && severity == p.severity;
+            return getMessage ().equals (p.getMessage ()) && getLine () == p.getLine () && getColumn () == p
+                    .getColumn () && severity == p.severity;
         }
         return false;
     }
@@ -111,8 +103,14 @@ public class StitchProblem implements IStitchProblem {
         result = result * prime + getSeverity ();
         return result;
     }
-/*
-	public int getOffset() {
+
+    @Override
+    public IStitchProblem clone () {
+        return new StitchProblem (sourceException, severity);
+    }
+
+    /*
+    public int getOffset() {
 		// TODO Calculate offset location
 		return 1;
 	}
@@ -121,5 +119,5 @@ public class StitchProblem implements IStitchProblem {
 		// TODO Calculate length of problem
 		return 1;
 	}
- */	
+ */
 }

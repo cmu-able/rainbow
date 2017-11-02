@@ -5,7 +5,7 @@ import org.sa.rainbow.core.adaptation.DefaultAdaptationExecutorVisitor;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.stitch.core.Tactic;
-import org.sa.rainbow.stitch.tactic.history.ExecutionHistoryCommandFactory;
+import org.sa.rainbow.stitch.history.ExecutionHistoryCommandFactory;
 
 import java.util.concurrent.CountDownLatch;
 
