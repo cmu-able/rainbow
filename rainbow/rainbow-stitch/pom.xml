@@ -222,13 +222,7 @@
 					<outputDirectory>${project.build.directory}/generated-sources/antlr/org/sa/rainbow/stitch/parser</outputDirectory>
 					<sourceDirectory>${basedir}/src/main/antlr/org/sa/rainbow/stitch/parser</sourceDirectory>
 				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-					</execution>
-				</executions>
+
 			</plugin>
 			
 			<plugin>

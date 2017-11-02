@@ -206,14 +206,7 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>javacc-maven-plugin</artifactId>
 				<version>2.6</version>
-				<executions>
-					<execution>
-						<id>javacc</id>
-						<goals>
-							<goal>javacc</goal>
-						</goals>
-					</execution>
-				</executions>
+
 			</plugin>
 			<plugin> 
 				<groupId>org.apache.felix</groupId>
@@ -284,6 +277,7 @@
 			<artifactId>javacc</artifactId>
 			<version>5.0</version>
 		</dependency>
+
 	</dependencies>
 	
 	<repositories>
