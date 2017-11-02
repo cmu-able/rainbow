@@ -23,6 +23,27 @@
  */
 package org.sa.rainbow.stitch.adaptation;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.apache.commons.lang.time.StopWatch;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
@@ -39,9 +60,14 @@ import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.UtilityFunction;
 import org.sa.rainbow.core.models.UtilityPreferenceDescription;
-import org.sa.rainbow.core.ports.*;
+import org.sa.rainbow.core.ports.IModelChangeBusPort;
+import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowChangeBusSubscription;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowModelChangeCallback;
+import org.sa.rainbow.core.ports.IModelsManagerPort;
+import org.sa.rainbow.core.ports.IRainbowAdaptationEnqueuePort;
+import org.sa.rainbow.core.ports.IRainbowReportingPort;
+import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.model.acme.AcmeRainbowOperationEvent.CommandEventT;
 import org.sa.rainbow.stitch.Ohana;
@@ -49,17 +75,9 @@ import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.core.Tactic;
 import org.sa.rainbow.stitch.error.DummyStitchProblemHandler;
 import org.sa.rainbow.stitch.error.IStitchProblem;
-import org.sa.rainbow.stitch.error.StitchProblem;
 import org.sa.rainbow.stitch.visitor.Stitch;
 import org.sa.rainbow.util.Beacon;
 import org.sa.rainbow.util.Util;
-
-import java.io.*;
-import java.nio.channels.FileChannel;
-import java.text.MessageFormat;
-import java.util.*;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 /**
  * The Rainbow Adaptation Engine... Currently implements a learner interface to interact with Nick Lynn's learner.
@@ -413,7 +431,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable
     /**
      * For JUnit testing, allows fetching the strategy repertoire. NOT for public use!
      *
-     * @return list of Stitch objects loaded at initialization from stitch file.
+     * @return list of Stitch objects loaded at initialization from stitchState file.
      */
     List<Stitch> _retrieveRepertoireForTesting () {
         return m_repertoire;
@@ -685,9 +703,10 @@ public final class AdaptationManager extends AbstractRainbowRunnable
      */
     private void initAdaptationRepertoire () {
         File stitchPath = Util.getRelativeToPath (Rainbow.instance ().getTargetPath (),
-                                                  Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_SCRIPT_PATH));
+                                                  Rainbow.instance ().getProperty (RainbowConstants
+                                                                                           .PROPKEY_SCRIPT_PATH));
         if (stitchPath == null) {
-            m_reportingPort.error (RainbowComponentT.ADAPTATION_MANAGER, "The stitch path is not set!");
+            m_reportingPort.error (RainbowComponentT.ADAPTATION_MANAGER, "The stitchState path is not set!");
         } else if (stitchPath.exists () && stitchPath.isDirectory ()) {
             FilenameFilter ff = new FilenameFilter () { // find only ".s" files
                 @Override
@@ -703,7 +722,8 @@ public final class AdaptationManager extends AbstractRainbowRunnable
                         DummyStitchProblemHandler stitchProblemHandler = new DummyStitchProblemHandler ();
                         stitch = Stitch.newInstance (f.getCanonicalPath (), stitchProblemHandler);
                         Ohana.instance ().parseFile (stitch);
-//                        StitchTypechecker behavior = (StitchTypechecker )stitch.getBehavior (Stitch.TYPECHECKER_PASS);
+//                        StitchTypechecker behavior = (StitchTypechecker )stitchState.getBehavior (Stitch
+// .TYPECHECKER_PASS);
 
                         reportProblems (f, stitchProblemHandler);
 
@@ -892,7 +912,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable
         @Override
         protected DefaultAdaptationExecutorVisitor<Strategy> spawnNewExecutorForTree
                 (AdaptationTree<Strategy> adt, ThreadGroup g, CountDownLatch doneSignal) {
-            return new StrategyAdaptationResultsVisitor (adt,doneSignal,m_strategiesExecuted);
+            return new StrategyAdaptationResultsVisitor (adt, doneSignal, m_strategiesExecuted);
         }
     }
 }

@@ -33,12 +33,12 @@ import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation;
 import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.adaptation.StitchExecutor;
 import org.sa.rainbow.stitch.error.ArgumentMismatchException;
-import org.sa.rainbow.stitch.tactic.history.ExecutionHistoryModelInstance;
-import org.sa.rainbow.stitch.util.ExecutionHistoryData.ExecutionStateT;
+import org.sa.rainbow.stitch.history.ExecutionHistoryModelInstance;
+import org.sa.rainbow.stitch.util.ExecutionHistoryData;
 import org.sa.rainbow.stitch.util.Tool;
 import org.sa.rainbow.stitch.visitor.Stitch;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -87,12 +87,14 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
         UNKNOWN, SUCCESS, FAILURE, STATUSQUO
     }
 
-    public enum StatementKind {ACTION,VAR_DEF, STMT_LIST, EXPRESSION, EMPTY_STMT, ERROR, IF, WHILE, FOR}
+    public enum StatementKind {ACTION, VAR_DEF, STMT_LIST, EXPRESSION, EMPTY_STMT, ERROR, IF, WHILE, FOR}
 
-    public enum ExpressionKind {PLUS, MINUS, MULTIPLY, DIVIDE, MOD, IMPLIES, IFF, AND, OR, NE, EQ, LT, GE, LE, GT,
+    public enum ExpressionKind {
+        PLUS, MINUS, MULTIPLY, DIVIDE, MOD, IMPLIES, IFF, AND, OR, NE, EQ, LT, GE, LE, GT,
         INCR, DECR, UNARY_MINUS, UNARY_PLUS, NOT, FORALL, EXISTS, EXISTS_UNIQUE, SELECT, IDENTIFIER, INTEGER, FLOAT,
         STRING, CHAR, BOOLEAN, NULL,
-        UNKNOWN};
+        UNKNOWN
+    }
 
     public interface NodeAction {
         void applyTactic (Tactic tactic);
@@ -125,7 +127,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 
             // grab the tactic, but only if the action for this node is TACTIC
             String tRef = (curNode.getActionFlag () == ActionKind.TACTIC) ? curNode.getTactic () : null;
-            Tactic tactic = (tRef != null ? stitch ().findTactic (tRef) : null);
+            Tactic tactic = (tRef != null ? stitchState ()./*stitch ().*/findTactic (tRef) : null);
             String nullCaseSuffix = (curNode.getActionFlag () == ActionKind.NULL) ? "." + ActionKind.NULL.name ()
                     : null;
             double prob = curNode.getProbability ();
@@ -196,7 +198,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
             if (estAvgTime == 0L) {
                 long tt = 0L;
                 if (curNode.getTactic () != null) {
-                    Tactic tactic = stitch ().findTactic (curNode.getTactic ());
+                    Tactic tactic = stitchState ()./*stitch ().*/findTactic (curNode.getTactic ());
                     tt = tactic.estimateAvgTimeCost ();
                 }
                 if (curNode.hasDuration ()) {
@@ -257,7 +259,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
      * @param name   the name of this scope
      * @param stitch the Stitch evaluation context object
      */
-    public Strategy (IScope parent, String name, Stitch stitch) {
+    public Strategy (IScope parent, String name, Stitch/*State*/ stitch) {
         super (parent, name, stitch);
     }
 
@@ -266,13 +268,13 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
      */
     @Override
     public synchronized Strategy clone (IScope parent) {
-        Strategy newObj = new Strategy (parent, m_name, m_stitch.clone ());
+        Strategy newObj = new Strategy (parent, m_name, m_stitch);
         copyState (newObj);
         return newObj;
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.ScopedEntity#copyState(org.sa.rainbow.stitch.core.Strategy)
+     * @see org.sa.rainbow.stitchState.core.ScopedEntity#copyState(org.sa.rainbow.stitchState.core.Strategy)
      */
     protected void copyState (Strategy target) {
         super.copyState (target);
@@ -287,7 +289,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.ScopedEntity#toString()
+     * @see org.sa.rainbow.stitchState.core.ScopedEntity#toString()
      */
     @Override
     public String toString () {
@@ -306,7 +308,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.ScopedEntity#addVar(java.lang.String, org.sa.rainbow.stitch.core.Var)
+     * @see org.sa.rainbow.stitchState.core.ScopedEntity#addVar(java.lang.String, org.sa.rainbow.stitchState.core.Var)
      */
     @Override
     public boolean addVar (String id, Var var) {
@@ -397,7 +399,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IEvaluable#estimateMaxTimeCost()
+     * @see org.sa.rainbow.stitchState.core.IEvaluable#estimateMaxTimeCost()
      */
     @Override
     public long estimateAvgTimeCost () {
@@ -432,7 +434,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IEvaluable#modelElementsUsed()
+     * @see org.sa.rainbow.stitchState.core.IEvaluable#modelElementsUsed()
      */
     @Override
     public Set<? extends IAcmeElement> modelElementsUsed () {
@@ -440,7 +442,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
         // accumulate "used" elements only from the tactics in this strategy
         for (StrategyNode node : nodes.values ()) {
             if (node.getActionFlag () == Strategy.ActionKind.TACTIC) {
-                resultSet.addAll (stitch ().findTactic (node.getTactic ()).modelElementsUsed ());
+                resultSet.addAll (stitchState ()./*stitch ().*/findTactic (node.getTactic ()).modelElementsUsed ());
             }
         }
         return resultSet;
@@ -498,7 +500,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
                     }
                 } else {
                     // Tactic: attempt depth-first descent down the branches
-                    Tactic tactic = stitch ().findTactic (curNode.getTactic ());
+                    Tactic tactic = stitchState ()./*stitch ().*/findTactic (curNode.getTactic ());
                     if (Tool.logger ().isTraceEnabled ()) {
                         Tool.logger ().trace (
                                 "Scanning Tactic " + curNode.label () + " -> "
@@ -548,7 +550,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
                 }
             } else if (curNode.getActionFlag () == Strategy.ActionKind.DOLOOP) {
                 if (backtrack) {
-                    // just pop up one more to let any other branches finish 
+                    // just pop up one more to let any other branches finish
                     if (Tool.logger ().isTraceEnabled ()) {
                         Tool.logger ().trace (" . back tracking DO Loop " + curNode.label ());
                     }
@@ -651,7 +653,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
         m_lastNode = getRootNode ();
         m_nodeStack.push (m_lastNode.label ());
 //        m_executor.getOperationPublishingPort ().publishMessage (getStartMessage ());
-        while (getOutcome () == Outcome.UNKNOWN && !m_stitch.isCanceled ()) {
+        while (getOutcome () == Outcome.UNKNOWN && !m_stitch./*stitch ().*/isCanceled ()) {
             StrategyNode curNode = m_lastNode;
             boolean ok = evaluateFromNode (curNode);
             if (!ok) {
@@ -720,7 +722,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
                                 + m_nodeStack.toString ());
             }
             setOutcome (Outcome.UNKNOWN);
-            while (getOutcome () == Outcome.UNKNOWN && !m_stitch.isCanceled ()) {
+            while (getOutcome () == Outcome.UNKNOWN && !m_stitch./*stitch ().*/isCanceled ()) {
                 StrategyNode curNode = m_lastNode; // no pushing into stack, already done
                 boolean ok = evaluateFromNode (curNode);
                 if (!ok) {
@@ -739,15 +741,15 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
         return getOutcome ();
     }
 
-    private boolean evaluateFromNode (StrategyNode curNode) {
+    private StrategyNode chooseNodeWithoutTimes (StrategyNode curNode) {
         StrategyNode defaultNode = null; // to track the DEFAULT cond node
         StrategyNode selected = null; // to track the chosen child node
         List<StrategyNode> matchingNodes = new ArrayList<StrategyNode> ();
         final List<StrategyNode> childrenNodes = gatherChildrenNodes (curNode);
-        System.out.println (this.getName () + ": has " + childrenNodes.size () + " children");
+//        System.out.println (this.getName () + ": has " + childrenNodes.size () + " children");
         for (StrategyNode child : childrenNodes) {
             // check to see which child node's condition is satisfied
-            System.out.println (this.getName () + ": evaluating node condition for");
+//            System.out.println (this.getName () + ": evaluating node condition for");
             switch (child.getCondFlag ()) {
                 case EXPRESSION:
                     if (testCondition (child)) {
@@ -757,14 +759,14 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
                 case SUCCESS: // intentional fall-thru
                 case FAILURE:
                     // look at the parent node's tactic effect
-                    Tactic parentTactic = stitch ().findTactic (child.getParent ().getTactic ());
+                    Tactic parentTactic = stitchState ()./*stitch ().*/findTactic (child.getParent ().getTactic ());
                     if (parentTactic == null) { // something is wrong
                         Tool.error ("Parent node " + child.getParent ().label () + " appears not to have a tactic " +
                                             "action!",
-                                    null, stitch ().stitchProblemHandler);
-                        System.out.println ("Parent node " + child.getParent ().label () + " appears not to have a " +
-                                                    "tactic" +
-                                                    " action!");
+                                    null, stitchState ().stitchProblemHandler);
+//                        System.out.println ("Parent node " + child.getParent ().label () + " appears not to have a " +
+//                                                    "tactic" +
+//                                                    " action!");
                     } else {
                         boolean effect = !parentTactic.hasError () && parentTactic.checkEffect ();
                         if (Tool.logger ().isInfoEnabled ()) {
@@ -794,9 +796,9 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
                     Tool.error (
                             "Strategy node " + child.label () + "has unexpected condition kind! " + child.getCondFlag
                                     (),
-                            null, stitch ().stitchProblemHandler);
-                    System.out.print ("Strategy node " + child.label () + "has unexpected condition kind! " + child
-                            .getCondFlag ());
+                            null, stitchState ().stitchProblemHandler);
+//                    System.out.print ("Strategy node " + child.label () + "has unexpected condition kind! " + child
+//                            .getCondFlag ());
                     break;
             }
         }
@@ -807,10 +809,11 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
                     selected = defaultNode;
                 } else { // strategy failed
                     setOutcome (Outcome.FAILURE);
-                    System.out.println ("No matching nodes in strategy, and no default node, so returning FAILURE for" +
-                                                " " +
-                                                getName ());
-                    return false;
+//                    System.out.println ("No matching nodes in strategy, and no default node, so returning FAILURE
+// for" +
+//                                                " " +
+//                                                getName ());
+                    return null;
                 }
                 break;
             case 1: // retrieve the only one
@@ -818,16 +821,203 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
                 break;
             default: // more than one satisfied
                 // randomly pick one
-                // BRS in the new stitch semantics, this needs to change to calculate the
+                // BRS in the new stitchState semantics, this needs to change to calculate the
                 // aggAtt for each matching node, assigning the utility, and picking the one
                 // with the greatest utility, rather than being random
                 int rand = new Random ().nextInt (matchingNodes.size ());
                 selected = matchingNodes.get (rand);
                 break;
         } // at this point, selected MUST be non null
+        return selected;
+    }
+
+    // Stores whether any condition becomes true
+    Boolean m_nodeTrue = new Boolean (false);
+
+    /**
+     * Selects a node with that should be evaluated next, considering times
+     * Semantics are:
+     * (a) return the success or fail node, because that just depends on the tactic effect, otherwise
+     * (b) wait for node duration or until at least one child branch condition is true, then
+     * (c) if a branch condition as true, return one of those nodes, otherwise
+     * (d) if there is a default node, return that
+     * (e) otherwise set outcome to failure and return no node
+     *
+     * @param parentNode The node that has children we want to execute next
+     * @return the child to execute
+     */
+    private StrategyNode chooseNodeWithTimes (StrategyNode parentNode) {
+        try {
+            long start = System.currentTimeMillis ();
+            StrategyNode defaultNode = null; // to track the default cond node
+            StrategyNode selected = null; // to track the chosen child
+            final List<StrategyNode> childrenNodes = gatherChildrenNodes (parentNode);
+
+            // This is the amount of time to wait for any child conditions to evaluate to true
+            long branchWait = parentNode.getDuration ();
+            // Process success or failure immediately, save default for if all conditions fail
+            for (Iterator<StrategyNode> iterator = childrenNodes.iterator ();
+                 iterator.hasNext () && selected == null; ) {
+
+                StrategyNode child = iterator.next ();
+                switch (child.getCondFlag ()) {
+                    case SUCCESS: // intentional fall-thru
+                    case FAILURE:
+                        // success or failure is condition in tactic effect, which has been calculated
+                        // by now. So just select these nodes.
+                        // look at parent node tactic effect
+                        iterator.remove (); // remove this node. Defensive in case we change the logic
+                        Tactic parentTactic = stitchState ().findTactic (child.getParent ().getTactic ());
+                        if (parentTactic == null) { // something is wrong - there is no tactic
+                            Tool.error ("Parent node " + child.getParent ().label () +
+                                                " appears not to have a tactic" +
+                                                " action!", null, stitchState ().stitchProblemHandler);
+                        } else {
+                            boolean effect = !parentTactic.hasError () && parentTactic.checkEffect ();
+                            if (Tool.logger ().isInfoEnabled ()) {
+                                Tool.logger ().info (
+                                        child.label () + " " + child.getCondFlag ().name () +
+                                                " condition! " + effect);
+                            }
+                            if (effect) {
+                                if (child.getCondFlag () == ConditionKind.SUCCESS) {
+                                    selected = child;
+                                }
+                            } else {
+                                if (child.getCondFlag () == ConditionKind.FAILURE) {
+                                    selected = child;
+                                }
+                            }
+                        }
+                    case DEFAULT:
+                        // don't evaluate this, but store the default node
+                        if (Tool.logger ().isInfoEnabled ()) {
+                            Tool.logger ().info (child.label () + " DEFAULT condition!");
+                        }
+                        defaultNode = child;
+                        // remove this from the list, so that we will be left with only conditions
+                        iterator.remove ();
+                        break;
+                    case EXPRESSION:
+                        // Do nothing - childrenNodes will have all the conditional ones that need to be timed
+                        break;
+                    default:
+                        // should NOT be the case
+                        Tool.error (
+                                "Strategy node " + child.label () + "has unexpected condition kind! " + child
+                                        .getCondFlag
+                                                (),
+                                null, stitchState ().stitchProblemHandler);
+                        break;
+                }
+            }
+
+            if (selected != null) {
+                // Was success or fail
+                return selected;
+            }
+
+            switch (childrenNodes.size ()) {
+                case 0: // there are no conditional children
+                    if (defaultNode != null) return defaultNode;
+                    else {
+                        setOutcome (Outcome.FAILURE);
+                        return null;
+                    }
+                default:
+                    final Map<StrategyNode, Boolean> resultMap = new HashMap<> (); // store expression results
+                    // for every condition, register a timed condition to be evaluated in timing thread
+                    for (final StrategyNode node : childrenNodes) {
+                        final Expression expr = node.getCondExpr ();
+                        expr.clearState (); // make sure we're really reevaluating, not using cached value
+                        // register a condition. Should only process this for the node duration that is
+                        // dates back to when this method is called, otherwise the time will be @[x] +
+                        // the time taken to get to here, not @[x]
+                        ConditionTimer.instance ().
+                                registerCondition (Collections.singletonList (expr),
+                                                   branchWait - (System.currentTimeMillis () - start),
+                                                   new Observer () {
+
+                                                       @Override
+                                                       public void update (Observable o, Object arg) {
+                                                           // register the result
+                                                           resultMap.put (node, (Boolean) arg);
+                                                           synchronized (this) {
+                                                               // indicate if at least one is true
+                                                               m_nodeTrue |= m_nodeTrue;
+                                                           }
+                                                       }
+                                                   });
+                    }
+
+                    // Wait for a condition to succeed, or until timeout
+                    boolean nodeTrue;
+                    long allottedTime = start + branchWait;
+                    do {
+                        // Problem here is that we will always wait at lease SLEEP_TIME_LONG (100ms) for
+                        // a condition to evaluate. Probably ok.
+                        try {
+                            Thread.sleep (ConditionTimer.SLEEP_TIME_LONG);
+                        } catch (InterruptedException e) {
+                        }
+                        // Need to synchronize because the timer thread will also
+                        // write to this
+                        synchronized (this) {
+                            nodeTrue = m_nodeTrue;
+                        }
+                        // while no condition is true, the stitch evaluation hasn't been cancelled,
+                        // and we haven't waited past the time it takes to evaluated,
+                    } while (!nodeTrue && !m_stitch.isCanceled ()
+                            && System.currentTimeMillis () < allottedTime
+                            // (and each condition has been evaluated at least once?)
+                            && resultMap.size () == childrenNodes.size ());
+
+                    if (m_nodeTrue) {
+                        List<StrategyNode> matchingNodes = new ArrayList<> ();
+                        for (Map.Entry<StrategyNode, Boolean> e : resultMap.entrySet ()) {
+                            if (e.getValue ()) matchingNodes.add (e.getKey ());
+                        }
+
+                        switch (matchingNodes.size ()) {
+                            case 0: // none matched, break to default
+                                break;
+                            case 1:
+                                selected = matchingNodes.get (0);
+                                break;
+                            default:
+                                // Should really choose the branch with highest utility,
+                                // but this is consistent with the old version for now
+                                int rand = new Random ().nextInt (matchingNodes.size ());
+                                selected = matchingNodes.get (rand);
+                                break;
+                        }
+                    }
+                    if (selected != null) return selected;
+                    if (defaultNode != null) {
+                        return defaultNode;
+                    } else {
+                        setOutcome (Outcome.FAILURE);
+                        return null;
+                    }
+            }
+        } finally {
+            // make sure to reset the node true flag
+            m_nodeTrue = new Boolean (false);
+        }
+    }
+
+    private boolean evaluateFromNode (StrategyNode curNode) {
+        StrategyNode selected = null;
+        if (!curNode.hasDuration ()) {
+            selected = chooseNodeWithoutTimes (curNode);
+            if (selected == null && getOutcome () == Outcome.FAILURE)
+                return false;
+        } else {
+            selected = chooseNodeWithTimes (curNode);
+        }
         if (selected == null) {
             Tool.error ("Serious failure? No node has been selected, impossible!!", null,
-                        stitch ().stitchProblemHandler);
+                        stitchState ().stitchProblemHandler);
             return false;
         }
         curNode = selected;
@@ -882,10 +1072,10 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
                 break;
             default: // serious error?
                 Tool.error ("Selected node " + selected.label () + "has unknown action kind! " + selected
-                        .getActionFlag (),
-                            null, stitch ().stitchProblemHandler);
-                System.out.println ("Selected node " + selected.label () + "has unknown action kind! " + selected
-                        .getActionFlag ());
+                                    .getActionFlag (),
+                            null, stitchState ().stitchProblemHandler);
+//                System.out.println ("Selected node " + selected.label () + "has unknown action kind! " + selected
+//                        .getActionFlag ());
                 setOutcome (Outcome.FAILURE);
                 break;
         }
@@ -903,7 +1093,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
         boolean rv = false;
         Expression expr = child.getCondExpr ();
         expr.clearState (); // make sure we're really re-evaluating, not using cached value
-        System.out.println (this.getName () + ": evaluating condition " + expr.toStringTree ());
+//        System.out.println (this.getName () + ": evaluating condition " + expr.toStringTree ());
         expr.evaluate (null);
         if (Tool.logger ().isInfoEnabled ()) {
             Tool.logger ().info (child.label () + " expression condition! " + expr.getResult ());
@@ -925,14 +1115,14 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
         if (Tool.logger ().isInfoEnabled ()) {
             Tool.logger ().info ("Tactic action! " + curNode.getTactic ());
         }
-        System.out.println ("Tactic action! " + curNode.getTactic ());
+//        System.out.println ("Tactic action! " + curNode.getTactic ());
         Object[] args = Tool.evaluateArgs (curNode.getTacticArgExprs ());
-        Tactic tactic = stitch ().findTactic (curNode.getTactic ());
-        if (tactic.isExecuting () && tactic.stitch () != curNode.stitch ()) {
+        Tactic tactic = stitchState ()./*stitch ().*/findTactic (curNode.getTactic ());
+        if (tactic.isExecuting () && tactic.stitchState () != curNode.stitch ()) {
             try {
-                Stitch stitch = Ohana.instance ().findFreeStitch (stitch ());
+                Stitch stitch = Ohana.instance ().findFreeStitch (stitchState ()/*stitch ()*/);
                 tactic = stitch.findTactic (curNode.getTactic ());
-            } catch (FileNotFoundException e) {
+            } catch (IOException e) {
                 m_executor.getReportingPort ().error (m_executor.getComponentType (), "Could not execute " + tactic
                         .getName ());
                 setOutcome (Outcome.STATUSQUO);
@@ -947,7 +1137,8 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
             m_executor.getHistoryModelUSPort ().updateModel (
                     m_executor.getExecutionHistoryModel ().getCommandFactory ()
                             .strategyExecutionStateCommand (tactic.getQualifiedName (),
-                                                            ExecutionHistoryModelInstance.TACTIC, ExecutionStateT
+                                                            ExecutionHistoryModelInstance.TACTIC,
+                                                            ExecutionHistoryData.ExecutionStateT
                                                                     .STARTED, null));
 
             long start = new Date ().getTime ();
@@ -955,17 +1146,22 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
             m_executor.getHistoryModelUSPort ().updateModel (
                     m_executor.getExecutionHistoryModel ().getCommandFactory ()
                             .strategyExecutionStateCommand (tactic.getQualifiedName (),
-                                                            ExecutionHistoryModelInstance.TACTIC, ExecutionStateT
+                                                            ExecutionHistoryModelInstance.TACTIC,
+                                                            ExecutionHistoryData.ExecutionStateT
                                                                     .WAITING,
-                                                            Long.toString (curNode.getDuration ())));
-            boolean effectGood = awaitSettling (curNode);
+                                                            Long.toString (tactic.getDuration ())));
+            // TODO: calculated settling based on Tactic effect settling
+            boolean effectGood = tactic.awaitSettling ();
             long end = new Date ().getTime ();
+            // TODO: then await condition stuff
+
             m_executor.getHistoryModelUSPort ().updateModel (
                     m_executor
                             .getExecutionHistoryModel ()
                             .getCommandFactory ()
                             .strategyExecutionStateCommand (tactic.getQualifiedName (),
-                                                            ExecutionHistoryModelInstance.TACTIC, ExecutionStateT
+                                                            ExecutionHistoryModelInstance.TACTIC,
+                                                            ExecutionHistoryData.ExecutionStateT
                                                                     .FINISHED, null));
             AbstractRainbowModelOperation recordTacticDurationCmd = m_executor.getExecutionHistoryModel ()
                     .getCommandFactory ().recordTacticDurationCmd (tactic.getQualifiedName (), end - start, effectGood);
@@ -1001,17 +1197,17 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 
         m_settlingCondition = null; // unset settling condition first
         clearVars ();
-        Tactic tactic = stitch ().findTactic (node.getTactic ());
-        ConditionTimer.instance ().registerCondition (tactic.effects, node.getDuration (), m_conditionObserver);
+        Tactic tactic = stitchState ()./*stitch ().*/findTactic (node.getTactic ());
+        ConditionTimer.instance ().registerCondition (tactic.effects, tactic.getDuration (), m_conditionObserver);
         // wait for condition to be set...
-        while (m_settlingCondition == null && !m_stitch.isCanceled ()) {
+        while (m_settlingCondition == null && !m_stitch./*stitch ().*/isCanceled ()) {
             try {
                 Thread.sleep (ConditionTimer.SLEEP_TIME_LONG);
             } catch (InterruptedException e) {
                 // intentional ignore
             }
         }
-        if (m_stitch.isCanceled ())
+        if (m_stitch./*stitch ().*/isCanceled ())
             return false;
         else {
             if (Tool.logger ().isInfoEnabled ()) {
@@ -1020,6 +1216,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
             return m_settlingCondition.booleanValue ();
         }
     }
+
 
     private List<StrategyNode> gatherChildrenNodes (StrategyNode node) {
         List<StrategyNode> children = new ArrayList<StrategyNode> ();
@@ -1035,11 +1232,11 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
     }
 
     public synchronized void markExecuting (boolean executing) {
-        stitch ().markExecuting (executing);
+        stitchState ()./*stitch ().*/markExecuting (executing);
     }
 
     public synchronized boolean isExecuting () {
-        return stitch ().isExecuting ();
+        return stitchState ()./*stitch ().*/isExecuting ();
     }
 
 }
