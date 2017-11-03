@@ -1,0 +1,112 @@
+################################################################################
+# Purpose:  Common configuration file for the Rainbow infrastructure.
+#           Properties are loaded by class org.sa.rainbow.Rainbow .
+# Target:   ZNews case study system with Probes, Gauges, and Effectors implemented
+#           (rainbow.target = znews1-d)
+# Framework-defined special properties:
+#     rainbow.path - the canonical path to the target configuration location
+#
+# History:  see non-target-specific copy
+################################################################################
+
+###
+# Default values for location specific properties, meaning that, if the
+# rainbow-<host>.properties file does not specify a value, the default value
+# set here is used.
+
+### Utility mechanism configuration
+#- Config for Log4J, with levels:  OFF,FATAL,ERROR,WARN,INFO,DEBUG,TRACE,ALL
+logging.level = DEBUG
+event.log.path = log
+logging.path = ${event.log.path}/rainbow.out
+monitoring.log.path = ${event.log.path}/rainbow-data.log
+# (default)
+#logging.pattern = "%d{ISO8601/yyyy-MM-dd HH:mm:ss.SSS} [%t] %p %c %x - %m%n"
+#logging.max.size = 1024
+#logging.max.backups = 5
+
+### Rainbow component customization
+## Rainbow host info and communication infrastructure
+#- Location information of the master and this deployment
+rainbow.master.location.host = 127.0.0.1
+#- Location information of the deployed delegate
+rainbow.deployment.location = 10.0.2.2
+#- default registry port; change if port-tunneling
+rainbow.master.location.port = 1100
+#- OS platform, supported modes are:  cygwin | linux
+#  Use "cygwin" for Windows, "linux" for MacOSX
+rainbow.deployment.environment = linux
+#- Event infrastructure, type of event middleware: rmi | jms | que | eseb
+rainbow.event.service = eseb
+eBus Relay
+
+rainbow.delegate.beaconperiod = 10000
+rainbow.deployment.factory.class = org.sa.rainbow.core.ports.eseb.ESEBRainbowPortFactory
+
+#Rainbow models
+rainbow.model.number=1
+rainbow.model.path_0 = model/ZNewsSys.acme
+rainbow.model.load.class_0 = org.sa.rainbow.model.acme.znn.commands.ZNNCommandFactory
+rainbow.model.name_0 = ZNewsSys
+
+#Rainbow analyses
+rainbow.analyses.size = 1
+rainbow.analyses_0 = org.sa.rainbow.evaluator.acme.ArchEvaluator
+
+#Rainbow adaptation & stitch components
+rainbow.adaptation.manager.size = 1
+rainbow.adaptation.manager.class_0=org.sa.rainbow.stitch.adaptation.AdaptationManager
+rainbow.adaptation.manager.model_0=ZNewsSys:Acme
+
+rainbow.adaptation.executor.size = 1
+rainbow.adaptation.executor.class_0=org.sa.rainbow.stitch.adaptation.Executor
+rainbow.adaptation.executor.model_0=ZNewsSys:Acme
+
+rainbow.effector.manager.size = 1
+rainbow.effector.manager.class_0=org.sa.rainbow.effectors.acme.AcmeEffectorManager
+
+
+customize.model.evaluate.period = 2000
+## Translator customization
+#- Gauge spec
+customize.gauges.path = model/gauges.yml
+#- Probe spec
+customize.probes.path = system/probes.yml
+#- Operator spec as mapping to effector
+customize.archop.map.path = model/op.map
+#- Effector spec
+customize.effectors.path = system/effectors.yml
+## Adaptation Manager
+#- Directory of Stitch adaptation script
+customize.scripts.path = stitch
+#- Utilities description file, Strategy evaluation config, and minimum score threshold
+customize.utility.path = stitch/utilities.yml
+customize.utility.trackStrategy = uSF
+customize.utility.score.minimum.threshold = 0.33
+customize.utility.scenario = scenario 2
+#- Whether to enable prediction, ONLY enable if system has predictor probes!
+#customize.prediction.enable = false
+
+## System configuration information
+#
+#- if in simulation, specify sim path relative to org.sa.rainbow.model.sim/:
+#customize.system.sim.path = znewspred/znews-transbw.sim
+#- if real target system:
+#customize.system.target.0 = ${rainbow.master.location.host}
+#customize.system.target.1 = 10.0.2.15
+#customize.system.target.1 = waterfall.able.cs.cmu.edu
+#customize.system.target.0 = localhost
+#customize.system.target.2 = oracle
+#customize.system.target.size = 3
+#customize.system.target.size = 2
+customize.system.target.master = ${rainbow.deployment.location}
+customize.system.target.lb = 10.5.6.1
+customize.system.target.lb.httpPort = 1081
+customize.system.target.web0 = 10.5.6.1
+customize.system.target.web0.httpPort = 1080
+customize.system.target.web1 = 10.5.6.1
+customize.system.target.web1.httpPort = 1082
+customize.system.target.db = 10.5.6.1
+#customize.system.target.0 = ${rainbow.deployment.location}
+#customize.system.target.1 = 10.5.6.1
+#customize.system.target.size = 2

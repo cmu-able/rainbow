@@ -1,0 +1,96 @@
+gauge-types:
+  InstructionGraphProgressGaugeT:
+    commands:
+      current-instruction: "IG.setExecutingInstruction(String,String)"
+      current-failed: "IG.setExecutionFailed(String)"
+      new-ig: "IG.setInstructions(String)"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.brass.gauges.InstructionGraphGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+
+  MissionStateGaugeT:
+    commands:
+      location: "MS.setCurrentLocation(double,double,double)"
+      ground-plane: "MS.setGroundPlaneError(double,double)"
+      calibration: "MS.setCalibrationError(double, double, double, double, double, double)"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.brass.gauges.MissionStateGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+        
+  BRASSTargetWaypointGaugeT:
+    commands:
+      target: "MS.setTargetWaypoint(String)"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.brass.gauges.TargetWaypointGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+
+gauge-instances:
+  IGG1:
+    type: InstructionGraphProgressGaugeT
+    model: "ExecutingInstructionGraph:InstructionGraphProgress"
+    commands:
+      current-instruction: "cig.setExecutingInstruction($<node>,$<state>)"
+      current-failed: "cig.setExecutionFailed($<node>)"
+      new-ig: "igs.setInstructions($<ig>)"
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      reportingPeriod: 1000
+      targetProbeType: rostopicprobe
+
+  MSG1:
+    type: MissionStateGaugeT
+    model: RobotAndEnvironmentState:MissionState
+    commands:
+      location: "ms.setCurrentLocation($<x>,$<y>,$<w>)"
+      ground-plane: "ms.setGroundPlaneError($<t>,$<r>)"
+      calibration: "ms.setCalibrationError($<rot_err>, $<rot_scale>, $<t_err>, $<t_scale>, $<rv>, $<tv>)"
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      reportingPeriod: 1000
+      targetProbeType: rostopicprobe
+      
+  TWG1:
+    type: BRASSTargetWaypointGaugeT
+    model: RobotAndEnvironmentState:MissionState
+    commands:
+      target: "ms.setTargetWaypoint($<w>)"
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      reportingPeriod: 2000
+      targetProbeType: brasstargetprobe

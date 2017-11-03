@@ -1,0 +1,33 @@
+TARGET=znews1
+# paths
+basedir=/cygdrive/c/server
+rainbow=$basedir/rainbow
+targetdir=$rainbow/oracle/targets/$TARGET
+#- deployed config
+#confpath=$rainbow/oracle/org.sa.rainbow.config/$TARGET/log/relay.log
+#- test config
+#confpath=/cygdrive/c/eclipse/data/eclipse-3.2/org.sa.rainbow.config/$TARGET/log/relay.log
+###
+# -relay option
+#opts=-o $confpath
+opts=-k
+###
+# check demo mode
+if [ "x$DEMO_MODE" != "x" ] ; then
+  if [ $DEMO_MODE == probe ] ; then
+    cd $targetdir/system/probes
+    export PWD=$DEMO_TITLE
+    if [ $DEMO_TITLE == RunApacheTop ] ; then
+      ./runApachetop.pl
+    fi
+  elif [ $DEMO_MODE == effector ] ; then
+    cd $targetdir/system/effectors
+    export PWD=$DEMO_TITLE
+  elif [ $DEMO_MODE == oracle ] ; then
+    cd $rainbow/oracle
+    export PWD=$DEMO_TITLE
+  elif [ $DEMO_MODE == delegate ] ; then
+    cd $rainbow/delegate
+    export PWD=$DEMO_TITLE
+  fi
+fi
