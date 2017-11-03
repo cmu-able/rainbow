@@ -1,8 +1,8 @@
-Rainbow Orange Specification and Deployment Guide.
+# Rainbow Orange Specification and Deployment Guide.
 
 January 2015
 
-# Introduction
+## Introduction
 
 Rainbow is a self-adaptive framework that can be used to provide self-adaptation capabilities to an existing system. Rainbow adds a closed control loop on top of a system, and then monitors and effects changes on the system based on observations. 
 
@@ -22,37 +22,24 @@ To place Rainbow on top of a system requires customizing it with information abo
 
 This document describes how to define and install these elements.
 
-# Customizing Rainbow to a New System
+## Customizing Rainbow to a New System
 
-## Defining a target
+### Defining a target
 
 To customize Rainbow to work on a particular system, a target needs to be defined and placed in the targets directory of Rainbow. The structure of a target is as follows:
 
-<table>
-  <tr>
-    <td>lib/</td>
-    <td>This contains the additional JAR files that are needed for probes, effectors, and gauges. Any JAR files in here will be automatically added to the classpath.</td>
-  </tr>
-  <tr>
-    <td>model/</td>
-    <td>This contains model-level information about Rainbow, including the Acme model of the system being managed, and mappings between architectural operators and effectors.</td>
-  </tr>
-  <tr>
-    <td>system/</td>
-    <td>This contains the elements of the system that get used by Rainbow. In this directory, the probes and effectors are defined.</td>
-  </tr>
-  <tr>
-    <td>stitch/</td>
-    <td>This contains the strategies, tactics, and utility profiles for repairs</td>
-  </tr>
-  <tr>
-    <td>rainbow.properties</td>
-    <td>This file defines the various configuration properties for Rainbow, including the location and ports of the various Rainbow services, the location of the Rainbow master, where gauges, etc. configuration files are located, and additional host locations. These properties are read into Rainbow on startup and can be accessed through the Rainbow.property method in the code.</td>
-  </tr>
-</table>
+| File/Directory | Description |
+|---------------------------|----------------------------|
+| lib/                      | This contains the additional JAR files that are needed for probes, effectors, and gauges. Any JAR files in here will be automatically added to the classpath. |
+| model/                    | This contains model-level information about Rainbow, including the Acme model of the system being managed, and mappings between architectural operators and effectors. |
+| system/                   | This contains the elements of the system that get used by Rainbow. In this directory, the probes and effectors are defined. | 
+| stitch/                   | This contains the strategies, tactics, and utility profiles for repairs. |
+| rainbow.properties | This file defines the various configuration properties for Rainbow, including the location and ports of the various Rainbow services, the location of the Rainbow master, where gauges, etc. configuration files are located, and additional host locations. These properties are read into Rainbow on startup and can be accessed through the Rainbow.property method in the code. |
 
 
-## Adding a model
+
+
+### Adding a model
 
 Rainbow can manage multiple models, including models of the utilities, models of the system, and models of the environment. Rainbow models are specified in the rainbow.properties file, with the following applicable properties:
 
@@ -86,53 +73,29 @@ These framework classes are related as below.
 
 ![image alt text](imgs/image_0.png)
 
-## Adding a new probe
+### Adding a new probe
 
 Probes are instruments in the running system. There are two types of probes supported by Rainbow: script based probes and Java probes. In both cases, the probes.yml file needs to be updated with the new probe information. The probe information consists of the following fields:
 
-<table>
-  <tr>
-    <td>probes:
-  NewProbe:
-    alias: xxx
-
-    location:
-    type:</td>
-    <td>
-The name of the probe
-  The name that the probe as seen by the gauge. Gauges will put
-      this in the targetProbeType field
-  The location where the probe is deployed
-  Can be java or script</td>
-  </tr>
-  <tr>
-    <td>    javaInfo:
-      class:
-      period:
-      args.length
-
-      args.<n></td>
-    <td>For java probes, this element is used
-  The class of the probe, implementing IProbe
-  The  reporting period for the probe
-  The number of arguments that will be passed to the constructor 
-     of the probe
-  The arguments to be passed, n=0..args.length-1</td>
-  </tr>
-  <tr>
-    <td>  scriptInfo:
-      path
-      argument:</td>
-    <td>For script probes, this element is used
-  The path of the script, which should exist on "location"
-  The argument to pass to the script</td>
-  </tr>
-</table>
-
+|     |    |
+|-----|----|
+| <pre>probes:</pre> |   |
+| <pre> NewProbe:</pre> |  The name of the probe  |
+| <pre>    alias: xxx</pre> | The name that the probe as seen by the gauge. Gauges will put this in the targetProbeType field |
+| <pre>    location:</pre>  | The location where the probe is deployed |
+| <pre>    type:</pre>      |   Can be `java` or `script` |
+| <pre>    javaInfo:</pre> | For java probes, this element is used |
+| <pre>      class:</pre>  |   The class of the probe, implementing IProbe |
+| <pre>      period:</pre> |   The  reporting period for the probe |
+| <pre>      args.length</pre> | The number of arguments that will be passed to the constructor of the probe |
+| <pre>      args.<n></pre> | The arguments to be passed, n=0..args.length-1 |
+| <pre>    scriptInfo:</pre> | For script probes, this element is used |
+| <pre>      path:</pre> |   The path of the script, which should exist on “location” |
+| <pre>      argument:</pre> |   The argument to pass to the script |
 
 For Java-based probes, the java class should be on the classpath. This means creating a JAR and placing it on the classpath.** **The JAR file can be placed in the target’s lib directory. For script-based probes, the path needs to exist on the machine. 
 
-**Adding a new Gauge**
+### Adding a new Gauge
 
 While probes provide information about the system, the intent of gauges is to abstract this system information into architectural information, in the form of commands against the model. There are three kinds of gauges in the Rainbow system: gauges that receive information from probes; gauges that receive information from other gauges; and gauges that generate information without either of these (for example, time-based gauges or diagnostic gauges). 
 
@@ -140,102 +103,45 @@ In all cases, gauges must be specified in the gauges.yml file located in the mod
 
 The format of the gauge-type portion of the gauges.yml spec are:
 
-<table>
-  <tr>
-    <td>gauge-types:
-  NewGaugeT:
-    commands:
-       name: Type.command(...)
-    
-  
-
-
- setupParams:
-      
-      
-      targetIP:
-        type : String
-        default: "localhost"
-      
-      beaconPeriod:
-        type: long
-        default: <value>
-      javaClass:
-        type: String
-        default: <value>
-    configParams:
-      
-
-
-      targetProbeType:
-        type: String
-        default: ~
-      targetProbeList:
-        type: String
-        default: ~
-      samplingPeriod:
-      type: long
-      value: <value></td>
-    <td>
-The name of the gauge type
-  The command names and command signature that will be reported by the gauge. The command signature is of the form <Type>.<command>(<type>...). Valid types are String, long, double, boolean, and sets of these specified by surrounding the type in {..}. Commands should be defined in the model.
-  The parameters used when the gauge is constructed. It is possible to define your own setup parameters, given values in the instance, but the required ones are:
-    Where a gauge instance will be run. Here the default is localhost.
-
-
-    How often the gauge will send a report of its liveness to rainbow, in ms
-
-    The javaClass that implements the gauge. It should extend AbstractProbelessGauge or AbstractGauge (if it listens to probes)
-
- The parameters used to configure the gauge, with values given in the instance. Gauges are configured in Rainbow when all the expected target locations have been created. It is possible to define your own parameters, but Rainbow understands the ones below:
-    The probe that the gauge will listen to. This will need to be the name specified in the “alias” of the probe.
-
-    If the gauge listens to more than one probe, their aliases are specified in the comma separated list of this config param
-
-    How often, in ms, the gauge will report a value.</td>
-  </tr>
-</table>
+| | |
+|-|-|
+| <pre>gauge-types:</pre> | |
+| <pre>  NewGaugeT:</pre> | The name of the gauge type. |
+| <pre>    commands:</pre> | The command names and command signature that will be reported by the gauge. The command signature is of the form <Type>.<command>(<type>...). Valid types are String, long, double, boolean, and sets of these specified by surrounding the type in {..}. Commands should be defined in the model. |
+| <pre>    setupParams:</pre> |  The parameters used when the gauge is constructed. It is possible to define your own setup parameters, given values in the instance, but the required ones are: |
+| <pre>      targetIP:</pre> |     Where a gauge instance will be run. Here the default is localhost. |
+| <pre>        type: String</pre> | |
+| <pre>        default: "localhost"</pre> | |
+| <pre>      beaconPeriod:</pre> | How often the gauge will send a report of its liveness to rainbow, in ms |
+| <pre>        type: long</pre> | |
+| <pre>        default: <value></pre> | |
+| <pre>      javaClass:</pre> |  The javaClass that implements the gauge. It should extend AbstractProbelessGauge or AbstractGauge (if it listens to probes) |
+| <pre>        type: String</pre> | |
+| <pre>        default: <value></pre> | |
+| <pre>    configParams:</pre> | The parameters used to configure the gauge, with values given in the instance. Gauges are configured in Rainbow when all the expected target locations have been created. It is possible to define your own parameters, but Rainbow understands the ones below: |
+| <pre>      targetProbeType:</pre> | The probe that the gauge will listen to. This will need to be the name specified in the “alias” of the probe. |
+| <pre>        type: String:</pre> | |
+| <pre>        default: ~</pre> | |
+| <pre>      targetProbeList:</pre> |  If the gauge listens to more than one probe, their aliases are specified in the comma separated list of this config param |
+| <pre>        type: String</pre> | |
+| <pre>        default: ~</pre> | |
+| <pre>      samplingPeriod</pre> |     How often, in ms, the gauge will report a value. |
+| <pre>        type: long</pre> | |
+| <pre>        value: <value></pre> | |
 
 
 The instance specification for a gauge specifies its type, the model it is attached to, the mappings of values to properties on the model, and the values for any setup and configuration parameters.
 
-<table>
-  <tr>
-    <td>gauge-instances:
-  GaugeName:
-    type: xxx
-    model: "xxx"
-
-    
-    commands:
-      “value”: element.command(params)
-    
-
-
-
-
-
-    
-
-
-
-
-setupValues:
-      setupParam: value
-
-    configValues:
-      configParam: value</td>
-    <td>
-The name that the gauge will have
-  Which gauge type this gauge is an instance of
-  The model to which the gauge will be attached. E.g., “ZNewsSys.acme”. This will be an Acme model specified in the target.
-   For each command that the gauge issues, which instance and parameters should it be issued with? 
-element: the architectural element instance (of the type specified in the gauge type) to issue the command against. This can be either a fully qualified model name, or a pattern understood by the gauge. The parameters are a list of values for each parameter of the operation. Parameters of the form ${...} are replaced by rainbow properties. Parameters of the form $<...> are replaced at runtime by the gauge.
-
-  For each setup value specified in the type, give the value to setup. If a value is not specified, then the default value specified in the type is used. 
-  Like the setup values, a value is specified for each config value in the type, otherwise the default value is used.</td>
-  </tr>
-</table>
+| | |
+|-|-|
+|<pre>gauge-instances:</pre> | |
+|<pre>  GaugeName:</pre> | The name that the gauge will have |
+|<pre>    type: xxx</pre>      |   Which gauge type this gauge is an instance of |
+|<pre>    model: xxx</pre>      | The model to which the gauge will be attached. E.g., “ZNewsSys.acme”. This will be an Acme model specified in the target. |
+|<pre>    commands:</pre><pre>      "value": element.command(params)</pre> | For each command that the gauge issues, which instance and parameters should it be issued with? 
+element: the architectural element instance (of the type specified in the gauge type) to issue the command against. This can be either a fully qualified model name, or a pattern understood by the gauge. The parameters are a list of values for each parameter of the operation. Parameters of the form ${...} are replaced by rainbow properties. Parameters of the form $<...> are replaced at runtime by the gauge. |
+|<pre>    setupValues:</pre><pre>      setupParam: value</pre>|   For each setup value specified in the type, give the value to setup. If a value is not specified, then the default value specified in the type is used. |
+|<pre>    configValues:</pre><pre>      configParam: value</pre> | Like the setup values, a value is specified for each config value in the type, otherwise the default value is used. |        
 
 
 Gauges are only implemented using Java in the current framework. The javaClass specified in the type must be on the classpath for the target system. To implement the gauge, the following class hierarchy is provided by the Rainbow Infrastructure:
@@ -246,13 +152,13 @@ AbstractGaugeWithProbes extends AbstractGauge: A gauge that handles the targetPr
 
 RegularExpressionGauge extends AbstractGaugeWithProbes: A gauge that processes probe reports that match one or more regular expressions. The constructor for the gauge should specify the regular expression patterns that are to be matched, and the gauge provides a default runAction that calls "doMatch" when a one of the expressions is matched. Extenders must implement this doMatch method to report the value.
 
-**Adding a new Effector**
+### Adding a new Effector
 
-**Adding Stitch**
+### Adding Stitch
 
 The little tricks necessary to do so, and the location of the reference documentation to create the stitch queries 
 
-**Adding a new Architecture Evaluation**
+### Adding a new Architecture Evaluation
 
 This is new... 
 
