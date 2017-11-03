@@ -1,0 +1,301 @@
+#
+# Gauge Type and Gauge Instance Specifications
+#  - time periods generally in milliseconds
+#
+# History:
+# - [SWC 2007.01.18] Created file, populated ZNews gauge descriptions.
+# - [SWC 2007.04.09] Changed LatencyGaugeT to use RtLatencyMultiHostGauge.
+# - [SWC 2007.04.10] Modified descriptions for different target locations.
+# - [SWC 2007.04.11] Added ResponseTimeGaugeT
+# - [BRS 2013.11.13] Changed to new format
+#
+gauge-types:
+
+  ClientGaugeT:
+    commands:
+      addClient: "ZNewsFam.addClient(String,String)"
+      deleteClient: "ZNewsFam.deleteClient(String)"
+      setClientRequestRate: "ClientT.setClientRequestRate(float)"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      window:
+        type: long
+        default: 30000
+      discardAfter:
+        type: long
+        default: 1800000
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.translator.znn.gauges.ClientGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+        
+  ClientResponseTimeGaugeT:
+    commands:
+      responseTime: ClientT.setResponseTime (float)
+    setupParams:
+      targetIP:
+        type: string
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.translator.znn.gauges.ClientResponseTimeGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+    comment: "Gets the response time given to the client according to the load balancer"
+    
+  MaliciousnessGaugeT:
+    commands: 
+      setMaliciousness: ClientT.setMaliciousness (float)
+    setupParams:
+      targetIP:
+        type: string
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 300000
+      javaClass: 
+        type: String
+        default: "org.sa.rainbow.translator.znn.gauges.RequestRateBasedMaliciousnessGauge"
+    configParams:
+      maliciousRequestRate:
+        type: float
+        default: 10.0
+      requestRateProperty:
+        type: String
+        default: reqRate
+    comment: "Gets a request rate for a client and sets the malciousness based on that"  
+    
+  BlackHoleGaugeT:
+    commands:
+      blockedIPs: "BlackholerT.setBlackholed({String})"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.translator.znn.gauges.BlackholeGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+  
+  ThrottleGaugeT:
+    commands:
+      throttledIPs: "ThrottlerT.setThrottled({String})"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.translator.znn.gauges.ThrottleGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+
+  CaptchaGaugeT:
+    commands:
+      enablement : ProxyT.setCaptchaEnabled (boolean)
+      clientMgmt : CaptchaHandlerT.setCaptchaResponse (int)
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 5000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.translator.znn.gauges.CaptchaGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+    
+  AuthenticationEnablementGaugeT:
+    commands:
+      clientMgmt: AuthenticationHandlerT.setAuthenticationResponse (int)
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 5000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.translator.znn.gauges.AuthenticationEnablementGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~  
+        
+  ServerEnablementGaugeT:
+    commands:
+      removeServer: ServerT.deleteServer
+      addServer: "ProxyT.connectNewServer (String, String, String)"
+      enableServer: ServerT.enableServer (boolean)
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 10000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.translator.znn.gauges.ServerEnablementGauge"
+    configParams:
+      samplingFrequency:
+        type: long
+        default: 1000
+      targetProbeType:
+        type: String
+        default: ~
+      mode:
+        type: String
+        default: "enable"
+    comment: "ServerEnablementGaugeT reports creation/deletion or enablement/disablement of servers. mode can be either enable|new"    
+      
+  FidelityGaugeT:
+    commands:
+      fidelity : ServerT.setFidelity(int)
+    setupParams:
+      targetIP:
+        type:    String
+        default: "localhost"
+      beaconPeriod:
+        type:    long
+        default: 30000
+      javaClass:
+        type:    String
+        default: "org.sa.rainbow.translator.gauges.FidelityGauge"
+    configParams:
+      samplingFrequency:
+        type:    long
+        default: 2500
+      targetProbeType:
+        type:    String
+        default: ~
+    comment: "FidelityGaugeT measures and reports the fidelity level of served content"
+
+gauge-instances:
+
+  MG1:
+    type: MaliciousnessGaugeT
+    model: "ZNewsSys:Acme"
+    commands:
+      setMaliciousness: "$<client>.setMaliciousness($<m>)"
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      maliciousRequestRate: 3.0
+
+  ClG1:
+    type: ClientGaugeT
+    model: "ZNewsSys:Acme"
+    commands:
+      "addClient": "ZNewsSys.addClient(LB0,$<ip>)"
+      "removeClient": "ZNewsSys.removeClient($<ip>)"
+      "setClientRequestRate": "ClientT.setClientRequestRate($<rr>)"
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+      window: 10000
+      discardAfter: 180001
+    configValues:
+      reportingPeriod: 5000
+      targetProbeType: "client@${customize.system.target.lb}"
+
+  CRTG1:
+    type: ClientResponseTimeGaugeT
+    model: "ZNewsSys:Acme"
+    commands:
+      "responseTime": "ClientT.setResponseTime(rt)"
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      targetProbeType: "client"
+      
+  BHG1:
+    type: BlackHoleGaugeT
+    model: "ZNewsSys:Acme"
+    commands:
+      "blockedIPs": LB0.setBlackholed ($<blockedIPs>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      reportingPeriod: 10000
+      targetProbeType: blackhole
+
+  TG1:
+    type: ThrottleGaugeT
+    model: "ZNewsSys:Acme"
+    commands:
+      "throttledIPs": LB0.setThrottled ($<throttledIPs>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      reportingPeriod: 10000
+      targetProbeType: throttle
+
+  CG1:
+    type: CaptchaGaugeT
+    model: "ZNewsSys:Acme"
+    commands:
+      "enabled": LB0.setCaptchaEnabled($<enabled>)
+      "clientMgmt(${customize.system.target.client1})": Client0.setCaptchaResponse (0) 
+      "clientMgmt(${customize.system.target.client2})": Client1.setCaptchaResponse (0)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      samplingFrequency: 1000
+      targetProbeType: captchaprobe
+      
+  AEG1:
+    type: AuthenticationEnablementGaugeT
+    model: "ZNewsSys:Acme"
+    commands:
+      "clientMgmt(${customize.system.target.client1})": Client0.setAuthenticationResponse (0) 
+      "clientMgmt(${customize.system.target.client2})": Client1.setAuthenticationResponse (0)  
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      samplingFrequency: 1000
+      targetProbeType: authenticationprobe
+
+  SEG1:
+    type: ServerEnablementGaugeT
+    model: "ZNewsSys:Acme"
+    commands:
+      "removeServer(x)": x.deleteServer
+      "connectServer(x)": "LB0.connectNewServer (Server0, $<location>, $<port>)"
+      "enableServer(x)": "LB0.enableServer (x, $<enabled>)"
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      targetProbeType: "enablementprobe@${customize.system.target.lb}"
+      samplingFrequency: 1000
+      mode: new
+    comment: "This needs to be located on the master because it needs access to the model"
+  

@@ -1,0 +1,612 @@
+Family EnvType = {
+
+    Property Type ResourceStatePropT = Record [unit : string; total : float; available : float; used : float; ];
+    Port Type PartPortT = {
+
+    }
+    Port Type NetworkPortT = {
+
+    }
+    Port Type ArchPortT = {
+
+        Property isArchEnabled : boolean <<  default : boolean = true; >> ;
+
+    }
+    Port Type ContainmentPortT = {
+
+    }
+    Component Type ArchElementT = {
+
+        Property isArchEnabled : boolean <<  default : boolean = true; >> ;
+
+    }
+    Component Type NodeT = {
+
+        Property cpuOverall : ResourceStatePropT;
+
+        Property memoryMain : ResourceStatePropT;
+
+        Property storageLocal : ResourceStatePropT;
+
+        Property socketPool : ResourceStatePropT;
+
+        Property batteryOverall : ResourceStatePropT;
+
+    }
+    Role Type ArchRoleT = {
+
+        Property isArchEnabled : boolean <<  default : boolean = true; >> ;
+
+    }
+    Role Type NetworkRoleT = {
+
+    }
+    Role Type PartRoleT = {
+
+    }
+    Role Type ContainerRoleT = {
+
+    }
+    Connector Type MappingT = {
+
+    }
+    Connector Type EdgeT = {
+
+        Property bandwidthAvg : ResourceStatePropT;
+
+        Property capacity : ResourceStatePropT;
+
+    }
+    Connector Type ArchConnT = {
+
+        Property isArchEnabled : boolean <<  default : boolean = true; >> ;
+
+    }
+}
+
+Family ZNewsFam extends EnvType with {
+
+    Port Type HttpPortT extends ArchPortT with {
+
+    }
+    Port Type ProxyForwardPortT extends ArchPortT with {
+
+    }
+    Port Type HttpReqPortT extends ArchPortT with {
+
+    }
+    Port Type SqlReqPort extends ArchPortT with {
+
+    }
+    Port Type SqlRecPort extends ArchPortT with {
+
+    }
+    Component Type ProxyT extends ArchElementT with {
+
+        Property deploymentLocation : string <<  default : string = "localhost"; >> ;
+
+        Property load : float <<  default : float = 0.0; >> ;
+
+    }
+    Component Type ServerT extends ArchElementT with {
+
+        Property deploymentLocation : string <<  default : string = "localhost"; >> ;
+
+        Property load : float <<  default : float = 0.0; >> ;
+
+        Property reqServiceRate : float <<  default : float = 0.0; >> ;
+
+        Property byteServiceRate : float <<  default : float = 0.0; >> ;
+
+        Property fidelity : int <<  HIGH : int = 5; LOW : int = 1; default : int = 5; >> ;
+
+        Property cost : float <<  default : float = 1.0; >> ;
+
+        Property lastPageHit : Record [uri : string; cnt : int; kbytes : float; ];
+        rule anotherConstraint = invariant self.load <= MAX_UTIL;
+
+    }
+    Component Type ClientT extends ArchElementT with {
+
+        Property deploymentLocation : string <<  default : string = "localhost"; >> ;
+
+        Property experRespTime : float <<  default : float = 0.0; >> ;
+
+        Property reqRate : float <<  default : float = 0.0; >> ;
+        rule primaryConstraint = invariant self.experRespTime <= MAX_RESPTIME;
+
+    }
+    Component Type DBT extends ArchElementT with {
+
+        Property deploymentLocation : string <<  default : string = "locahost"; >> ;
+
+        Property load : float <<  default : float = 0.0; >> ;
+
+    }
+    Role Type ReceiverRoleT extends ArchRoleT with {
+
+    }
+    Role Type RequestorRoleT extends ArchRoleT with {
+
+    }
+    Connector Type ProxyConnT extends ArchConnT with {
+        Role req : RequestorRoleT = new RequestorRoleT extended with {
+
+        }
+        Role rec : ReceiverRoleT = new ReceiverRoleT extended with {
+
+        }
+
+    }
+    Connector Type SQLConnT extends ArchConnT with {
+        Role req : RequestorRoleT = new RequestorRoleT extended with {
+
+        }
+        Role rec : ReceiverRoleT = new ReceiverRoleT extended with {
+
+        }
+
+    }
+    Connector Type HttpConnT extends ArchConnT with {
+        Role req : RequestorRoleT = new RequestorRoleT extended with {
+
+        }
+        Role rec : ReceiverRoleT = new ReceiverRoleT extended with {
+
+        }
+
+        Property bandwidth : float <<  default : float = 0.0; >> ;
+
+        Property latency : float <<  default : float = 0.0; >> ;
+
+        Property numReqsSuccess : int <<  default : int = 0; >> ;
+
+        Property numReqsRedirect : int <<  default : int = 0; >> ;
+
+        Property numReqsClientError : int <<  default : int = 0; >> ;
+
+        Property numReqsServerError : int <<  default : int = 0; >> ;
+
+        Property latencyRate : float;
+
+    }
+
+    Property MIN_RESPTIME : float;
+
+    Property MAX_RESPTIME : float <<  default : float = 2; >> ;
+
+    Property TOLERABLE_PERCENT_UNHAPPY : float;
+
+    Property UNHAPPY_GRADIENT_1 : float;
+
+    Property UNHAPPY_GRADIENT_2 : float;
+
+    Property UNHAPPY_GRADIENT_3 : float;
+
+    Property FRACTION_GRADIENT_1 : float;
+
+    Property FRACTION_GRADIENT_2 : float;
+
+    Property FRACTION_GRADIENT_3 : float;
+
+    Property MIN_UTIL : float;
+
+    Property MAX_UTIL : float <<  default : float = 1; >> ;
+
+    Property MAX_FIDELITY_LEVEL : int;
+
+    Property THRESHOLD_FIDELITY : int;
+
+    Property THRESHOLD_COST : float;
+}
+
+Family DoSFam = {
+
+    Element Type PotentiallyMaliciousT = {
+
+        Property deploymentLocation : string;
+
+        Property maliciousness : float <<  default : float = 0.0; >> ;
+
+    }
+    Element Type MaliciousT extends PotentiallyMaliciousT with {
+        rule malicious = invariant maliciousness > MALICIOUS_THRESHOLD;
+
+    }
+    Element Type SuspiciousT extends PotentiallyMaliciousT with {
+        rule suspicious = invariant maliciousness > SUSPICIOUS_THRESHOLD AND maliciousness <= MALICIOUS_THRESHOLD;
+
+    }
+    Element Type NormalT extends PotentiallyMaliciousT with {
+        rule ok = invariant malicious <= SUSPICIOUS_THRESHOLD;
+
+    }
+    Element Type BlackholerT = {
+
+        Property blackholed : Set {string} <<  default : Set {string} = {}; >> ;
+
+    }
+    Element Type CaptchaRedirectT = {
+
+        Property captchaEnabled : boolean <<  default : boolean = false; >> ;
+
+    }
+    Element Type ThrottlerT = {
+
+        Property throttled : Set {string} <<  default : Set {string} = {}; >> ;
+
+    }
+    Element Type CaptchaHandlerT = {
+
+        Property captcha : int <<  default : int = 0; >> ;
+
+    }
+    Element Type AuthenticationHandlerT = {
+
+        Property authenticate : int <<  default : int = 0; >> ;
+
+    }
+    Port Type BlackholedPortT = {
+
+        Property isBlackholed : boolean = true;
+
+    }
+
+    Property MALICIOUS_THRESHOLD : float <<  default : float = 0.8; >> ;
+
+    Property SUSPICIOUS_THRESHOLD : float <<  default : float = 0.5; >> ;
+    rule noActiveMalicious = invariant forall c : PotentiallyMaliciousT in /self/COMPONENTS:PotentiallyMaliciousT[maliciousness >= self.MALICIOUS_THRESHOLD] | 
+        exists bh : BlackholerT in self.COMPONENTS | 
+            contains(c.deploymentLocation, bh.blackholed);
+    rule noneUnfairlyPenalized = invariant forall lb : BlackholerT in self.COMPONENTS | 
+        forall ip : string in lb.blackholed | 
+            forall c : PotentiallyMaliciousT in /self/COMPONENTS:PotentiallyMaliciousT[deploymentLocation == ip] | 
+                c.maliciousness > self.MALICIOUS_THRESHOLD;
+}
+
+Family ZNewsDosFam extends ZNewsFam, DoSFam with {
+
+    Component Type ZNewsClientT extends ClientT, PotentiallyMaliciousT, CaptchaHandlerT, AuthenticationHandlerT with {
+
+    }
+    Component Type ZNewsLBT extends ProxyT, CaptchaRedirectT, BlackholerT, ThrottlerT with {
+
+    }
+}
+
+System ZNewsSys : ZNewsDosFam = new ZNewsDosFam extended with {
+
+    Component Server0 : ArchElementT, ServerT = new ArchElementT, ServerT extended with {
+        Port http0 : ArchPortT, HttpPortT = new HttpPortT, ArchPortT extended with {
+
+            Property isArchEnabled = true;
+
+        }
+        Port sql0 : SqlReqPort = new SqlReqPort extended with {
+
+            Property isArchEnabled = true;
+
+        }
+
+        Property deploymentLocation = "${customize.system.target.web0}";
+        Property httpPort : string = "${customize.system.target.web0.httpPort}";
+
+        Property load = 0.0;
+
+        Property reqServiceRate = 0.0;
+
+        Property byteServiceRate = 0.0;
+
+        Property fidelity = 5;
+
+        Property cost = 1.0;
+
+        Property isArchEnabled = true;
+        rule anotherConstraint = invariant self.load <= MAX_UTIL;
+
+    }
+	
+	 Component Server1 : ServerT = new ServerT extended with {
+        Port p : HttpPortT = new HttpPortT extended with {
+
+        }
+        Port p0 : SqlReqPort = new SqlReqPort extended with {
+
+        }
+		Property deploymentLocation = "${customize.system.target.web1}";
+		Property httpPort : string = "${customize.system.target.web1.httpPort}";
+		
+		   Property load = 0.0;
+
+        Property reqServiceRate = 0.0;
+
+        Property byteServiceRate = 0.0;
+
+        Property fidelity = 5;
+
+        Property cost = 1.0;
+
+        Property isArchEnabled = true;
+        rule anotherConstraint = invariant self.load <= MAX_UTIL;
+
+    }
+	
+    Component ServerB0 : ServerT, ArchElementT = new ServerT, ArchElementT extended with {
+        Port http0 : ArchPortT, HttpPortT = new HttpPortT, ArchPortT extended with {
+
+            Property isArchEnabled = false;
+
+        }
+        Port sql0 : SqlReqPort = new SqlReqPort extended with {
+
+            Property isArchEnabled = true;
+
+        }
+
+        Property deploymentLocation = "${customize.system.target.web2}";
+        Property httpPort : string = "${customize.system.target.web2.httpPort}";
+
+        Property load = 0.0;
+
+        Property reqServiceRate = 0.0;
+
+        Property byteServiceRate = 0.0;
+
+        Property fidelity = 5;
+
+        Property cost = 1.0;
+
+        Property isArchEnabled = false;
+        rule anotherConstraint = invariant self.load <= MAX_UTIL;
+
+    }
+    Component LB0 : ZNewsLBT = new ZNewsLBT extended with {
+        Port http0 : HttpPortT = new HttpPortT extended with {
+
+            Property isArchEnabled = true;
+
+        }
+        Port http1 : HttpPortT = new HttpPortT extended with {
+
+            Property isArchEnabled = true;
+
+            Property captchaEnabled = false;
+
+        }
+        Port fwd0 : ProxyForwardPortT = new ProxyForwardPortT extended with {
+
+            Property isArchEnabled = true;
+
+        }
+        Port fwd1 : ProxyForwardPortT = new ProxyForwardPortT extended with {
+
+            Property isArchEnabled = false;
+
+        }
+        Port p : ProxyForwardPortT = new ProxyForwardPortT extended with {
+
+        }
+
+        Property deploymentLocation = "${customize.system.target.lb}";
+
+        Property load = 0.0;
+
+        Property isArchEnabled = true;
+
+        Property blackholed = {};
+
+        Property captchaEnabled = false;
+
+        Property throttled = {};
+
+    }
+    Component DB0 : DBT = new DBT extended with {
+        Port rec0 : SqlRecPort = new SqlRecPort extended with {
+
+            Property isArchEnabled = true;
+
+        }
+        Port rec1 : SqlRecPort = new SqlRecPort extended with {
+
+            Property isArchEnabled = true;
+
+        }
+        Port p : SqlRecPort = new SqlRecPort extended with {
+
+        }
+
+        Property deploymentLocation = "${customize.system.target.db}";
+
+        Property load = 0.0;
+
+        Property isArchEnabled = true;
+
+    }
+    Component Client0 : ZNewsClientT = new ZNewsClientT extended with {
+        Port p0 : HttpReqPortT = new HttpReqPortT extended with {
+
+            Property isArchEnabled = true;
+
+        }
+
+        Property deploymentLocation = "${customize.system.target.client1}";
+
+        Property experRespTime = 0;
+
+        Property reqRate = 0.0;
+
+        Property isArchEnabled = true;
+
+        Property maliciousness = 0.0;
+        rule primaryConstraint = invariant self.experRespTime <= MAX_RESPTIME;
+
+    }
+    Component Client1 : ZNewsClientT = new ZNewsClientT extended with {
+        Port p0 : HttpReqPortT = new HttpReqPortT extended with {
+
+            Property isArchEnabled = true;
+
+        }
+
+        Property deploymentLocation = "${customize.system.target.client2}";
+
+        Property experRespTime = 0.0;
+
+        Property reqRate = 0.0;
+
+        Property isArchEnabled = true;
+
+        Property maliciousness = 0.0;
+
+        Property captcha = 0;
+        rule primaryConstraint = invariant self.experRespTime <= MAX_RESPTIME;
+
+    }
+   
+    Connector httpConn_0_0 : HttpConnT = new HttpConnT extended with {
+        Role req : RequestorRoleT = new RequestorRoleT extended with {
+
+            Property isArchEnabled = true;
+
+        }
+        Role rec : ReceiverRoleT = new ReceiverRoleT extended with {
+
+            Property isArchEnabled = true;
+
+        }
+
+        Property bandwidth = 0.0;
+
+        Property latency = 0.0;
+
+        Property numReqsSuccess = 0;
+
+        Property numReqsRedirect = 0;
+
+        Property numReqsClientError = 0;
+
+        Property numReqsServerError = 0;
+
+        Property isArchEnabled = true;
+
+    }
+    Connector httpConn_1_0 : HttpConnT = new HttpConnT extended with {
+        Role req : RequestorRoleT = new RequestorRoleT extended with {
+
+            Property isArchEnabled = true;
+
+        }
+        Role rec : ReceiverRoleT = new ReceiverRoleT extended with {
+
+            Property isArchEnabled = true;
+
+        }
+
+        Property bandwidth = 0.0;
+
+        Property latency = 0.0;
+
+        Property numReqsSuccess = 0;
+
+        Property numReqsRedirect = 0;
+
+        Property numReqsClientError = 0;
+
+        Property numReqsServerError = 0;
+
+        Property isArchEnabled = true;
+
+    }
+    Connector proxyConn_0_0 : ProxyConnT = new ProxyConnT extended with {
+        Role req : RequestorRoleT = new RequestorRoleT extended with {
+
+            Property isArchEnabled = true;
+
+        }
+        Role rec : ReceiverRoleT = new ReceiverRoleT extended with {
+
+            Property isArchEnabled = true;
+
+        }
+
+        Property isArchEnabled = true;
+
+    }
+    Connector proxyConn_1_0 : ProxyConnT = new ProxyConnT extended with {
+        Role req : RequestorRoleT = new RequestorRoleT extended with {
+
+            Property isArchEnabled = true;
+
+        }
+        Role rec : ReceiverRoleT = new ReceiverRoleT extended with {
+
+            Property isArchEnabled = true;
+
+        }
+
+        Property isArchEnabled = false;
+
+    }
+    Connector dbConn_0_0 : SQLConnT = new SQLConnT extended with {
+        Role req : RequestorRoleT = new RequestorRoleT extended with {
+
+        }
+        Role rec : ReceiverRoleT = new ReceiverRoleT extended with {
+
+            Property isArchEnabled = true;
+
+        }
+
+        Property isArchEnabled = true;
+
+    }
+    Connector dbConn_1_0 : SQLConnT = new SQLConnT extended with {
+        Role req : RequestorRoleT = new RequestorRoleT extended with {
+
+        }
+        Role rec : ReceiverRoleT = new ReceiverRoleT extended with {
+
+            Property isArchEnabled = true;
+
+        }
+
+        Property isArchEnabled = true;
+
+    }
+    Connector ProxyConnT0 : ProxyConnT = new ProxyConnT extended with {
+
+    }
+    Connector SQLConnT0 : SQLConnT = new SQLConnT extended with {
+
+    }
+    Attachment Client1.p0 to httpConn_0_0.req;
+    Attachment LB0.http0 to httpConn_0_0.rec;
+    Attachment Client0.p0 to httpConn_1_0.req;
+    Attachment LB0.http1 to httpConn_1_0.rec;
+    Attachment Server0.http0 to proxyConn_0_0.rec;
+    Attachment LB0.fwd0 to proxyConn_0_0.req;
+    Attachment ServerB0.http0 to proxyConn_1_0.rec;
+    Attachment LB0.fwd1 to proxyConn_1_0.req;
+    Attachment Server0.sql0 to dbConn_0_0.rec;
+    Attachment DB0.rec0 to dbConn_0_0.req;
+    Attachment ServerB0.sql0 to dbConn_1_0.rec;
+    Attachment DB0.rec1 to dbConn_1_0.req;
+    Attachment LB0.p to ProxyConnT0.req;
+    Attachment Server1.p to ProxyConnT0.rec;
+    Attachment Server1.p0 to SQLConnT0.req;
+    Attachment DB0.p to SQLConnT0.rec;
+
+    Property MAX_RESPTIME = 2000.0;
+
+    Property MAX_UTIL = 1;
+
+    Property MALICIOUS_THRESHOLD = 0.8;
+    rule noActiveMalicious = invariant forall c : PotentiallyMaliciousT in /self/COMPONENTS:PotentiallyMaliciousT[maliciousness >= self.MALICIOUS_THRESHOLD] | 
+        exists bh : BlackholerT in self.COMPONENTS | 
+            contains(c.deploymentLocation, bh.blackholed);
+    rule noneUnfairlyPenalized = invariant forall lb : BlackholerT in self.COMPONENTS | 
+        forall ip : string in lb.blackholed | 
+            forall c : PotentiallyMaliciousT in /self/COMPONENTS:PotentiallyMaliciousT[deploymentLocation == ip] | 
+                c.maliciousness > self.MALICIOUS_THRESHOLD;
+}
+

@@ -1,0 +1,46 @@
+Family DoSFam = {
+
+    Element Type PotentiallyMaliciousT = {
+
+        Property deploymentLocation : string;
+
+        Property maliciousness : float <<  default : float = 0.0; >> ;
+
+    }
+	
+	Element Type MaliciousT extends PotentiallyMaliciousT with {
+	    rule malicious = invariant maliciousness > MALICIOUS_THRESHOLD;
+	}
+	
+	Element Type SuspiciousT extends PotentiallyMaliciousT with {
+	    rule suspicious = invariant maliciousness > SUSPICIOUS_THRESHOLD && maliciousness <= MALICIOUS_THRESHOLD;
+	}
+	
+	Element Type NormalT extends PotentiallyMaliciousT with {
+	    rule ok = invariant malicious <= SUSPICIOUS_THRESHOLD;
+	
+    Element Type BlackholerT = {
+
+        Property blackholed : Set {string} <<  default : Set {string} = {}; >> ;
+
+    }
+    Port Type BlackholedPortT = {
+
+        Property isBlackholed : boolean = true;
+
+    }
+	
+	Port Type CaptchaPortT = {
+		Property captchaEnabled : boolean << default : boolean = false;>>;
+	}
+
+    Property MALICIOUS_THRESHOLD : float <<  default : float = 0.8; >> ;
+	Property SUSPICIOUS_THRESHOLD : float << default : float = 0.5; >> ;
+    rule noActiveMalicious = invariant forall c : PotentiallyMaliciousT in /self/COMPONENTS:PotentiallyMaliciousT[maliciousness >= self.MALICIOUS_THRESHOLD] | 
+        exists bh : BlackholerT in self.COMPONENTS | 
+            contains(c.deploymentLocation, bh.blackholed);
+	rule noneUnfairlyPenalized = invariant forall lb : BlackholerT in self.components | 
+	    forall ip : string in lb.blackholed | 
+		    forall c : PotentiallyMaliciousT in /self/COMPONENTS:PotentiallyMaliciousT[deploymentLocation == ip] | 
+			    c.maliciousness > self.MALICIOUS_THRESHOLD;
+}
