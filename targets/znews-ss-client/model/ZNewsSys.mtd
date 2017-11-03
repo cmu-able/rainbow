@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<AcmeModel>
+  <family name="EnvType">
+    <userdata key="SaveData">
+      <data date="7/16/14 2:45 PM"/>
+    </userdata>
+    <userdata key="connection-patterns">
+      <data>
+        <portConnectionRule connector="Connector" name="">
+          <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+          <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+        </portConnectionRule>
+      </data>
+    </userdata>
+    <system name="prototype">
+      <userdata key="connection-patterns">
+        <data>
+          <portConnectionRule connector="Connector" name="">
+            <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+            <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+          </portConnectionRule>
+        </data>
+      </userdata>
+    </system>
+  </family>
+  <family name="ZNewsFam">
+    <userdata key="SaveData">
+      <data date="7/16/14 2:45 PM"/>
+    </userdata>
+    <userdata key="connection-patterns">
+      <data>
+        <portConnectionRule connector="Connector" name="">
+          <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+          <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+        </portConnectionRule>
+      </data>
+    </userdata>
+    <system name="prototype">
+      <userdata key="connection-patterns">
+        <data>
+          <portConnectionRule connector="Connector" name="">
+            <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+            <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+          </portConnectionRule>
+        </data>
+      </userdata>
+    </system>
+  </family>
+  <family name="GaugeFam">
+    <userdata key="SaveData">
+      <data date="7/16/14 2:45 PM"/>
+    </userdata>
+    <userdata key="connection-patterns">
+      <data>
+        <portConnectionRule connector="Connector" name="">
+          <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+          <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+        </portConnectionRule>
+      </data>
+    </userdata>
+    <system name="prototype">
+      <userdata key="connection-patterns">
+        <data>
+          <portConnectionRule connector="Connector" name="">
+            <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+            <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+          </portConnectionRule>
+        </data>
+      </userdata>
+    </system>
+  </family>
+  <family name="DoSFam">
+    <userdata key="SaveData">
+      <data date="7/16/14 2:45 PM"/>
+    </userdata>
+    <userdata key="connection-patterns">
+      <data>
+        <portConnectionRule connector="Connector" name="">
+          <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+          <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+        </portConnectionRule>
+      </data>
+    </userdata>
+    <system name="prototype">
+      <userdata key="connection-patterns">
+        <data>
+          <portConnectionRule connector="Connector" name="">
+            <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+            <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+          </portConnectionRule>
+        </data>
+      </userdata>
+    </system>
+  </family>
+  <family name="ZNewsDosFam">
+    <userdata key="SaveData">
+      <data date="7/16/14 2:45 PM"/>
+    </userdata>
+    <userdata key="connection-patterns">
+      <data>
+        <portConnectionRule connector="Connector" name="">
+          <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+          <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+        </portConnectionRule>
+      </data>
+    </userdata>
+    <system name="prototype">
+      <userdata key="connection-patterns">
+        <data>
+          <portConnectionRule connector="Connector" name="">
+            <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+            <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+          </portConnectionRule>
+        </data>
+      </userdata>
+    </system>
+  </family>
+  <system name="ZNewsSys">
+    <userdata key="SaveData">
+      <data date="7/16/14 2:45 PM"/>
+    </userdata>
+    <userdata key="connection-patterns">
+      <data>
+        <portConnectionRule connector="Connector" name="">
+          <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+          <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+        </portConnectionRule>
+      </data>
+    </userdata>
+    <component name="Server0">
+      <userdata key="vis-information">
+        <data category="component" rotation="0.0" x="263" y="-2"/>
+      </userdata>
+      <port name="http0">
+        <userdata key="vis-information">
+          <data category="port" componentManaged="true" height="10" relPosX="-50" relPosY="-1" rotation="0.0" width="10" x="213" y="-3"/>
+        </userdata>
+      </port>
+      <port name="sql0">
+        <userdata key="vis-information">
+          <data category="port" componentManaged="true" height="10" relPosX="50" relPosY="-1" rotation="0.0" width="10" x="313" y="-3"/>
+        </userdata>
+      </port>
+    </component>
+    <component name="ServerB0">
+      <userdata key="vis-information">
+        <data category="component" rotation="0.0" x="258" y="163"/>
+      </userdata>
+      <port name="http0">
+        <userdata key="vis-information">
+          <data category="port" componentManaged="true" height="10" relPosX="-50" relPosY="-1" rotation="0.0" width="10" x="208" y="162"/>
+        </userdata>
+      </port>
+      <port name="sql0">
+        <userdata key="vis-information">
+          <data category="port" componentManaged="true" height="10" relPosX="50" relPosY="-1" rotation="0.0" width="10" x="308" y="162"/>
+        </userdata>
+      </port>
+    </component>
+    <component name="LB0">
+      <userdata key="vis-information">
+        <data category="component" rotation="0.0" x="81" y="69"/>
+      </userdata>
+      <port name="http0">
+        <userdata key="vis-information">
+          <data category="port" componentManaged="false" height="10" relPosX="-50" relPosY="4" rotation="0.0" width="10" x="31" y="73"/>
+        </userdata>
+      </port>
+      <port name="http1">
+        <userdata key="vis-information">
+          <data category="port" componentManaged="false" height="10" relPosX="-50" relPosY="-15" rotation="0.0" width="10" x="31" y="54"/>
+        </userdata>
+      </port>
+      <port name="fwd0">
+        <userdata key="vis-information">
+          <data category="port" componentManaged="false" height="10" relPosX="50" relPosY="-13" rotation="0.0" width="10" x="131" y="56"/>
+        </userdata>
+      </port>
+      <port name="fwd1">
+        <userdata key="vis-information">
+          <data category="port" componentManaged="false" height="10" relPosX="50" relPosY="23" rotation="0.0" width="10" x="131" y="92"/>
+        </userdata>
+      </port>
+      <port name="p">
+        <userdata key="vis-information">
+          <data category="port" componentManaged="false" height="10" relPosX="50" relPosY="5" rotation="0.0" width="10" x="131" y="74"/>
+        </userdata>
+      </port>
+      <port name="http2">
+        <userdata key="vis-information">
+          <data category="port" componentManaged="false" height="10" relPosX="-50" relPosY="17" rotation="0.0" width="10" x="31" y="86"/>
+        </userdata>
+      </port>
+    </component>
+    <component name="DB0">
+      <userdata key="vis-information">
+        <data category="component" rotation="0.0" x="479" y="61"/>
+      </userdata>
+      <port name="rec0">
+        <userdata key="vis-information">
+          <data category="port" componentManaged="true" height="10" relPosX="-50" relPosY="-16" rotation="0.0" width="10" x="429" y="45"/>
+        </userdata>
+      </port>
+      <port name="rec1">
+        <userdata key="vis-information">
+          <data category="port" componentManaged="false" height="10" relPosX="-50" relPosY="16" rotation="0.0" width="10" x="429" y="77"/>
+        </userdata>
+      </port>
+      <port name="p">
+        <userdata key="vis-information">
+          <data category="port" componentManaged="false" height="10" relPosX="-50" relPosY="0" rotation="0.0" width="10" x="429" y="61"/>
+        </userdata>
+      </port>
+    </component>
+    <component name="Client0">
+      <userdata key="vis-information">
+        <data category="component" rotation="0.0" x="-92" y="-12"/>
+      </userdata>
+      <port name="p0">
+        <userdata key="vis-information">
+          <data category="port" componentManaged="false" height="10" relPosX="50" relPosY="-1" rotation="0.0" width="10" x="-42" y="-13"/>
+        </userdata>
+      </port>
+    </component>
+    <component name="Client1">
+      <userdata key="vis-information">
+        <data category="component" rotation="0.0" x="-90" y="56"/>
+      </userdata>
+      <port name="p0">
+        <userdata key="vis-information">
+          <data category="port" componentManaged="false" height="10" relPosX="50" relPosY="1" rotation="0.0" width="10" x="-40" y="57"/>
+        </userdata>
+      </port>
+    </component>
+    <component name="Server1">
+      <userdata key="vis-information">
+        <data category="component" rotation="0.0" x="262" y="83"/>
+      </userdata>
+      <port name="p">
+        <userdata key="vis-information">
+          <data category="port" componentManaged="true" height="10" relPosX="-50" relPosY="-1" rotation="0.0" width="10" x="212" y="82"/>
+        </userdata>
+      </port>
+      <port name="p0">
+        <userdata key="vis-information">
+          <data category="port" componentManaged="true" height="10" relPosX="50" relPosY="-1" rotation="0.0" width="10" x="312" y="82"/>
+        </userdata>
+      </port>
+    </component>
+    <component name="Client2">
+      <userdata key="vis-information">
+        <data category="component" rotation="0.0" x="-90" y="128"/>
+      </userdata>
+      <port name="p0">
+        <userdata key="vis-information">
+          <data category="port" componentManaged="false" height="10" relPosX="50" relPosY="0" rotation="0.0" width="10" x="-40" y="128"/>
+        </userdata>
+      </port>
+    </component>
+    <connector name="httpConn_0_0">
+      <userdata key="vis-information">
+        <data rotation="0.0" x="1" y="71"/>
+      </userdata>
+      <role name="req">
+        <userdata key="vis-information">
+          <data category="role" rotation="0.0" x="-40" y="57"/>
+        </userdata>
+      </role>
+      <role name="rec">
+        <userdata key="vis-information">
+          <data category="role" rotation="0.0" x="31" y="73"/>
+        </userdata>
+      </role>
+    </connector>
+    <connector name="httpConn_1_0">
+      <userdata key="vis-information">
+        <data rotation="0.0" x="0" y="26"/>
+      </userdata>
+      <role name="req">
+        <userdata key="vis-information">
+          <data category="role" rotation="0.0" x="-42" y="-13"/>
+        </userdata>
+      </role>
+      <role name="rec">
+        <userdata key="vis-information">
+          <data category="role" rotation="0.0" x="31" y="54"/>
+        </userdata>
+      </role>
+    </connector>
+    <connector name="proxyConn_0_0">
+      <userdata key="vis-information">
+        <data rotation="0.0" x="178" y="32"/>
+      </userdata>
+      <role name="req">
+        <userdata key="vis-information">
+          <data category="role" rotation="0.0" x="131" y="56"/>
+        </userdata>
+      </role>
+      <role name="rec">
+        <userdata key="vis-information">
+          <data category="role" rotation="0.0" x="213" y="-3"/>
+        </userdata>
+      </role>
+    </connector>
+    <connector name="proxyConn_1_0">
+      <userdata key="vis-information">
+        <data rotation="0.0" x="175" y="133"/>
+      </userdata>
+      <role name="req">
+        <userdata key="vis-information">
+          <data category="role" rotation="0.0" x="131" y="92"/>
+        </userdata>
+      </role>
+      <role name="rec">
+        <userdata key="vis-information">
+          <data category="role" rotation="0.0" x="208" y="162"/>
+        </userdata>
+      </role>
+    </connector>
+    <connector name="dbConn_0_0">
+      <userdata key="vis-information">
+        <data rotation="0.0" x="377" y="27"/>
+      </userdata>
+      <role name="req">
+        <userdata key="vis-information">
+          <data category="role" rotation="0.0" x="429" y="45"/>
+        </userdata>
+      </role>
+      <role name="rec">
+        <userdata key="vis-information">
+          <data category="role" rotation="0.0" x="313" y="-3"/>
+        </userdata>
+      </role>
+    </connector>
+    <connector name="dbConn_1_0">
+      <userdata key="vis-information">
+        <data rotation="0.0" x="374" y="125"/>
+      </userdata>
+      <role name="req">
+        <userdata key="vis-information">
+          <data category="role" rotation="0.0" x="429" y="77"/>
+        </userdata>
+      </role>
+      <role name="rec">
+        <userdata key="vis-information">
+          <data category="role" rotation="0.0" x="308" y="162"/>
+        </userdata>
+      </role>
+    </connector>
+    <connector name="ProxyConnT0">
+      <userdata key="vis-information">
+        <data rotation="0.0" x="177" y="84"/>
+      </userdata>
+      <role name="req">
+        <userdata key="vis-information">
+          <data category="role" rotation="0.0" x="131" y="74"/>
+        </userdata>
+      </role>
+      <role name="rec">
+        <userdata key="vis-information">
+          <data category="role" rotation="0.0" x="212" y="82"/>
+        </userdata>
+      </role>
+    </connector>
+    <connector name="SQLConnT0">
+      <userdata key="vis-information">
+        <data rotation="0.0" x="376" y="77"/>
+      </userdata>
+      <role name="req">
+        <userdata key="vis-information">
+          <data category="role" rotation="0.0" x="312" y="82"/>
+        </userdata>
+      </role>
+      <role name="rec">
+        <userdata key="vis-information">
+          <data category="role" rotation="0.0" x="429" y="61"/>
+        </userdata>
+      </role>
+    </connector>
+    <connector name="httpConn_2_0">
+      <userdata key="vis-information">
+        <data rotation="0.0" x="1" y="113"/>
+      </userdata>
+      <role name="req">
+        <userdata key="vis-information">
+          <data category="role" rotation="0.0" x="-40" y="128"/>
+        </userdata>
+      </role>
+      <role name="rec">
+        <userdata key="vis-information">
+          <data category="role" rotation="0.0" x="31" y="86"/>
+        </userdata>
+      </role>
+    </connector>
+  </system>
+</AcmeModel>

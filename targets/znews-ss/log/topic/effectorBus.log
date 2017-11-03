@@ -1,0 +1,1 @@
+{location=10.0.2.15, name=blackhole, msg-created=1347630591011, action=EXECUTE, channel=topic/effectorBus, msg-sent=1347630591011, argument_size=1, argument_0=client=10.0.2.2}

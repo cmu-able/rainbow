@@ -1,0 +1,103 @@
+# Created September 5, 2006 (Shang-Wen Cheng)
+#
+# Utility curves, defined as X:Y pairs, where X is value of the dimension and Y is the utility in the range [0,1]
+#
+utilities:
+  uR:
+    label: Average Response Time
+    mapping: "[EAvg]ClientT.experRespTime"
+    description: "Client experienced response time in milliseconds, R, defined as a float property 'ClientT.experRespTime' in the architecture"
+    utility:
+      0: 1.00
+      100: 1.00
+      200: 0.99
+      500: 0.90
+      1000: 0.75
+      1500: 0.50
+      2000: 0.25
+      4000: 0.00
+  uF:
+    label: Average Fidelity
+    mapping: "[EAvg]ServerT.fidelity"
+    description: "Server content fidelity in level, F, defined as an int property 'ServerT.fidelity' in the architecture, with some artificial range to be determined"
+    utility:
+      0: 0.00
+      5: 1.00
+  uC:
+    label: Average Server Cost
+    mapping: "[EAvg]ServerT.cost"
+    description: "Server cost in unit/hr, C, averaged from a float property 'ServerT.cost' in the architecture, and captures average cost across all servers"
+    utility:
+      0: 1.00
+      1: 0.90
+      5: 0.20
+      10: 0.00
+  uSF:
+    label: "Historical Strategy Failure"
+    mapping: "[EAvg]Strategy.rateFailure"
+    description: "Rate of failure, in fraction, of a strategy; utility has no effect if strategy history is not kept"
+    utility:
+      0: 1.00
+      0.1: 0.80
+      0.5: 0.01
+      1: 0.00
+#
+# Weighted utility preferences, each set should sum to 1.
+# Three scenarios:
+#   a) Nominal request rate -> Sustained, peak request rate -> Nominal request rate
+#   b) Nominal request rate -> Transient, peak request rate -> Nominal request rate
+#   c) Any request rate -> Abnormally high request rate (e.g., Ramsey case) -> Any request rate
+#
+weights:
+  scenario 1:
+    uR: 0.35
+    uF: 0.4
+    uC: 0.25
+  scenario 2:
+    uR: 0.5
+    uF: 0.3
+    uC: 0.2
+  scenario 2b:
+    uR: 0.5
+    uF: 0.2
+    uC: 0.3
+  scenario 3:
+    uR: 0.6
+    uF: 0.3
+    uC: 0.1
+  scenario 4:
+    uR: 0.5
+    uF: 0.1
+    uC: 0.4
+  scenario 5:
+    uR:  0.54
+    uF:  0.27
+    uC:  0.09
+    uSF: 0.10
+
+# Tactic quality attribute vectors
+#
+vectors:
+# Utility: [v] R; [^] C; [<>] F
+# assume each server will drop response time by 1000 ms and increase cost by 1 unit
+  enlistServers:
+    uR: -1000
+    uF: 0
+    uC: +1.00
+# Utility: [^] R; [v] C; [<>] F
+  dischargeServers:
+    uR: +1000
+    uF: 0
+    uC: -1.00
+
+# Utility: [v] R; [v] C; [v] F
+# assume each level of fidelity reduces response time by 500 ms, and reduce cost by 10% of unit
+  lowerFidelity:
+    uR: -500
+    uF: -2
+    uC: -0.10
+# Utility: [^] R; [^] C; [^] F
+  raiseFidelity:
+    uR: +500
+    uF: +2
+    uC: +0.10

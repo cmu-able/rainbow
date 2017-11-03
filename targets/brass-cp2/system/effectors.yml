@@ -1,0 +1,47 @@
+vars:
+  _effectors.path: "${rainbow.path}/system/effectors"
+  
+effector-types:
+  changeInstructionGraphT:
+    command: setInstructions($<ig>)
+    type: script
+    scriptInfo:
+      path: "${_effectors.path}/setInstructions.sh"
+      argument: "{0}"
+  
+  changeDeadlineT:
+    command: setNewDeadline($<time>)
+    type: script
+    scriptInfo:
+      path: "${_effectors.path}/setDeadline.sh"
+      argument: "{0}"
+  
+  stopMovingT:
+    command: cancelInstructions($<c>)
+    type: script
+    scriptInfo:
+      path:"${_effectors.path}/stopMoving.sh"
+      
+  recalibrateT:
+    command: recalibrate($<r>)
+    type: script
+    scriptInfo:
+      path: "${_effectors.path}/setCalibration.sh"
+      
+effectors:
+  
+  changeInstructionGraph:
+    effector-type: changeInstructionGraphT
+    location: "${customize.system.target.master}"
+    
+  stopMoving:
+    effector-type: stopMovingT
+    location: "${customize.system.target.master}"
+    
+  recalibrate:
+    effector-type: recalibrateT
+    location: "${customize.system.target.master}"
+    
+#  changeDeadline:
+#    effector-type: changeDeadlineT
+#    location: "${customize.system.target.master}"
