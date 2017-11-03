@@ -109,25 +109,13 @@ The format of the gauge-type portion of the gauges.yml spec are:
 | <pre>  NewGaugeT:</pre> | The name of the gauge type. |
 | <pre>    commands:</pre> | The command names and command signature that will be reported by the gauge. The command signature is of the form <Type>.<command>(<type>...). Valid types are String, long, double, boolean, and sets of these specified by surrounding the type in {..}. Commands should be defined in the model. |
 | <pre>    setupParams:</pre> |  The parameters used when the gauge is constructed. It is possible to define your own setup parameters, given values in the instance, but the required ones are: |
-| <pre>      targetIP:</pre> |     Where a gauge instance will be run. Here the default is localhost. |
-| <pre>        type: String</pre> | |
-| <pre>        default: "localhost"</pre> | |
-| <pre>      beaconPeriod:</pre> | How often the gauge will send a report of its liveness to rainbow, in ms |
-| <pre>        type: long</pre> | |
-| <pre>        default: <value></pre> | |
-| <pre>      javaClass:</pre> |  The javaClass that implements the gauge. It should extend AbstractProbelessGauge or AbstractGauge (if it listens to probes) |
-| <pre>        type: String</pre> | |
-| <pre>        default: <value></pre> | |
+| <pre>      targetIP:</pre><pre>        type: String</pre><pre>        default: "localhost"</pre> |     Where a gauge instance will be run. Here the default is localhost. |
+| <pre>      beaconPeriod:</pre> <pre>        type: long</pre><pre>        default: <value></pre> | How often the gauge will send a report of its liveness to rainbow, in ms |
+| <pre>      javaClass:</pre><pre>        type: String</pre><pre>        default: <value></pre> |  The javaClass that implements the gauge. It should extend AbstractProbelessGauge or AbstractGauge (if it listens to probes) |
 | <pre>    configParams:</pre> | The parameters used to configure the gauge, with values given in the instance. Gauges are configured in Rainbow when all the expected target locations have been created. It is possible to define your own parameters, but Rainbow understands the ones below: |
-| <pre>      targetProbeType:</pre> | The probe that the gauge will listen to. This will need to be the name specified in the “alias” of the probe. |
-| <pre>        type: String:</pre> | |
-| <pre>        default: ~</pre> | |
-| <pre>      targetProbeList:</pre> |  If the gauge listens to more than one probe, their aliases are specified in the comma separated list of this config param |
-| <pre>        type: String</pre> | |
-| <pre>        default: ~</pre> | |
-| <pre>      samplingPeriod</pre> |     How often, in ms, the gauge will report a value. |
-| <pre>        type: long</pre> | |
-| <pre>        value: <value></pre> | |
+| <pre>      targetProbeType:</pre><pre>        type: String:</pre><pre>        default: ~</pre> | The probe that the gauge will listen to. This will need to be the name specified in the “alias” of the probe. |
+| <pre>      targetProbeList:</pre><pre>        type: String</pre><pre>        default: ~</pre>  |  If the gauge listens to more than one probe, their aliases are specified in the comma separated list of this config param |
+| <pre>      samplingPeriod</pre><pre>        type: long</pre><pre>        value: <value></pre> |     How often, in ms, the gauge will report a value. |
 
 
 The instance specification for a gauge specifies its type, the model it is attached to, the mappings of values to properties on the model, and the values for any setup and configuration parameters.
@@ -138,8 +126,7 @@ The instance specification for a gauge specifies its type, the model it is attac
 |<pre>  GaugeName:</pre> | The name that the gauge will have |
 |<pre>    type: xxx</pre>      |   Which gauge type this gauge is an instance of |
 |<pre>    model: xxx</pre>      | The model to which the gauge will be attached. E.g., “ZNewsSys.acme”. This will be an Acme model specified in the target. |
-|<pre>    commands:</pre><pre>      "value": element.command(params)</pre> | For each command that the gauge issues, which instance and parameters should it be issued with? 
-element: the architectural element instance (of the type specified in the gauge type) to issue the command against. This can be either a fully qualified model name, or a pattern understood by the gauge. The parameters are a list of values for each parameter of the operation. Parameters of the form ${...} are replaced by rainbow properties. Parameters of the form $<...> are replaced at runtime by the gauge. |
+|<pre>    commands:</pre><pre>      "value": element.command(params)</pre> | For each command that the gauge issues, which instance and parameters should it be issued with? element: the architectural element instance (of the type specified in the gauge type) to issue the command against. This can be either a fully qualified model name, or a pattern understood by the gauge. The parameters are a list of values for each parameter of the operation. Parameters of the form ${...} are replaced by rainbow properties. Parameters of the form $<...> are replaced at runtime by the gauge. |
 |<pre>    setupValues:</pre><pre>      setupParam: value</pre>|   For each setup value specified in the type, give the value to setup. If a value is not specified, then the default value specified in the type is used. |
 |<pre>    configValues:</pre><pre>      configParam: value</pre> | Like the setup values, a value is specified for each config value in the type, otherwise the default value is used. |        
 
