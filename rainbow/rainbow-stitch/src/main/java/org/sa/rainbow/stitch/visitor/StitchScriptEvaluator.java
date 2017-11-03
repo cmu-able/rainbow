@@ -1,39 +1,9 @@
-/*
- * The MIT License
- *
- * Copyright 2014 CMU ABLE Group.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
-/**
- * Created April 5, 2006.
- */
 package org.sa.rainbow.stitch.visitor;
 
-import antlr.collections.AST;
 import org.acmestudio.acme.ModelHelper;
 import org.acmestudio.acme.core.IAcmeType;
 import org.acmestudio.acme.core.exception.AcmeException;
-import org.acmestudio.acme.core.type.IAcmeBooleanValue;
-import org.acmestudio.acme.core.type.IAcmeFloatingPointValue;
-import org.acmestudio.acme.core.type.IAcmeIntValue;
-import org.acmestudio.acme.core.type.IAcmeSetValue;
+import org.acmestudio.acme.core.type.*;
 import org.acmestudio.acme.element.IAcmeDesignAnalysisDeclaration;
 import org.acmestudio.acme.element.IAcmeElement;
 import org.acmestudio.acme.element.property.IAcmeProperty;
@@ -50,6 +20,8 @@ import org.acmestudio.acme.rule.node.TypeReferenceNode;
 import org.acmestudio.acme.type.verification.NodeScopeLookup;
 import org.acmestudio.acme.type.verification.RuleTypeChecker;
 import org.acmestudio.standalone.resource.StandaloneLanguagePackHelper;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
@@ -57,14 +29,11 @@ import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
-import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.OperationResult;
-import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.Result;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.core.*;
 import org.sa.rainbow.stitch.model.ModelOperator;
-import org.sa.rainbow.stitch.parser.StitchLexerTokenTypes;
-import org.sa.rainbow.stitch.parser.StitchTreeWalkerTokenTypes;
+import org.sa.rainbow.stitch.parser.StitchParser;
 import org.sa.rainbow.stitch.util.Tool;
 import org.sa.rainbow.util.Util;
 
@@ -74,105 +43,80 @@ import java.text.MessageFormat;
 import java.util.*;
 
 /**
- * Process Pass 3 of Tree walking: evaluation.
- *
- * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
+ * Created by schmerl on 10/3/2016.
  */
-public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILiloBehavior {
-
+public class StitchScriptEvaluator extends BaseStitchBehavior {
     private static final int LOP = Expression.LOP;
     private static final int ROP = Expression.ROP;
 
-    /**
-     * @param stitch the script molding scaffold
-     */
-    protected StitchScriptEvaluator (Stitch stitch) {
-        super (stitch);
+    private StitchBeginEndVisitor m_walker;
+
+    public StitchScriptEvaluator (Stitch/*State*/ stitchState) {
+        super (stitchState);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.sa.rainbow.stitch.visitor.AbstractLiloBehavior#createVar(antlr. collections.AST, antlr.collections.AST)
-     */
+    public void setWalker (StitchBeginEndVisitor walker) {
+        m_walker = walker;
+    }
+
     @Override
-    public void createVar (AST typeAST, AST nameAST) {
+    public void createVar (StitchParser.DataTypeContext type, TerminalNode id, StitchParser.ExpressionContext val,
+                           boolean isFunction) {
         // see if a value was assigned at var creation
         if (scope ().expressions ().size () > 0) {
-            Var v = scope ().vars ().get (nameAST.getText ());
+            Var v = scope ().vars ().get (id.getText ());
             if (v != null && v.valStmt != null) {
                 Expression e = scope ().expressions ().get (0);
                 // make sure expr assocaited with var has AST and no known
                 // result
-                if (e.ast () != null && e.getResult () == null) {
-                    e.evaluate (null);
+                if (e.tree () != null && (e.getResult () == null || v.isFunction ())) {
+                    e.evaluate (null, m_walker);
                 }
                 v.setValue (e.getResult ());
             }
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.sa.rainbow.stitch.visitor.AbstractLiloBehavior#lOp()
-     */
     @Override
     public void lOp () {
         if (checkSkipEval ()) return;
-
         expr ().curOp.push (LOP);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.sa.rainbow.stitch.visitor.AbstractLiloBehavior#rOp()
-     */
     @Override
     public void rOp () {
         if (checkSkipEval ()) return;
-
         expr ().curOp.push (ROP);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.sa.rainbow.stitch.visitor.AbstractLiloBehavior#beginExpression()
-     */
     @Override
     public void beginExpression () {
         if (expr () != null) {
-            // don't subExpr anymore, just keep depth cnt
+            // don't subExpr anymore, just keep depth count
             expr ().subLevel++;
             return;
         }
 
-        if (scope () instanceof Statement && scope ().expressions ().size () > ((Statement) scope ()).curExprIdx) {
-            setExpression (scope ().expressions ().get (((Statement) scope ()).curExprIdx++));
+        final IScope scope = scope ();
+        if (scope instanceof Statement && scope.expressions ().size () > ((Statement) scope).curExprIdx) {
+            setExpression (scope.expressions ().get (((Statement) scope).curExprIdx++));
             expr ().curExprIdx = 0;
-        } else if (scope () instanceof Expression) {
-            Expression expr = (Expression) scope ();
+        } else if (scope instanceof Expression) {
+            Expression expr = (Expression) scope;
             if (expr.isComplex ()) {
                 if (expr.expressions ().size () > expr.curExprIdx) {
                     setExpression (expr.expressions ().get (expr.curExprIdx++));
                     expr.subLevel = 0;
                 }
             } else {
-                setExpression ((Expression) scope ());
+                setExpression ((Expression) scope);
                 expr ().curExprIdx = 0;
             }
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.sa.rainbow.stitch.visitor.AbstractLiloBehavior#endExpression()
-     */
     @Override
-    public void endExpression () {
+    public void endExpression (ParserRuleContext ctx) {
         Expression expr = expr ();
         if (expr.subLevel > 0) { // decr dept count first
             expr.subLevel--;
@@ -193,11 +137,6 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
         setExpression (null); // clear eval expression reference
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.sa.rainbow.stitch.visitor.AbstractLiloBehavior#beginQuantifiedExpression ()
-     */
     @Override
     public void beginQuantifiedExpression () {
         if (checkSkipEval ()) return;
@@ -205,19 +144,13 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
         doBeginComplexExpr ();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.sa.rainbow.stitch.visitor.AbstractLiloBehavior#doQuantifiedExpression ()
-     */
-    @SuppressWarnings("unchecked")
-    // newSet.add statement
     @Override
-    public void doQuantifiedExpression () {
+    public void doQuantifiedExpression (Strategy.ExpressionKind type, StitchParser
+            .QuantifiedExpressionContext ctx) {
         if (checkSkipEval ()) return;
 
         Expression cExpr = (Expression) scope ();
-        if (cExpr.kind != Expression.Kind.QUANTIFIED) {
+        if (cExpr.getKind () != Expression.Kind.QUANTIFIED) {
             Tool.error ("Error! Expected quantified expression not found!!", null, stitchProblemHandler ());
             return;
         }
@@ -266,16 +199,15 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
 
         // now we can evaluate quantified expression by
         // iterating through quantified set elements and collecting results
-        int type = cExpr.ast ().getType ();
         boolean rv = true;
         Set newSet = null;
-        if (type == StitchTreeWalkerTokenTypes.EXISTS_UNIQUE || type == StitchTreeWalkerTokenTypes.EXISTS) {
+        if (type == Strategy.ExpressionKind.EXISTS_UNIQUE || type == Strategy.ExpressionKind.EXISTS) {
             // need to start EXISTS with false
             rv = false;
         }
         for (Object elem : subset) {
             v.setValue (elem);
-            expr.evaluate (null);
+            expr.evaluate (null, m_walker);
             boolean b = false;
             if (expr.getResult () instanceof Boolean) {
                 b = (Boolean) expr.getResult ();
@@ -288,16 +220,16 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
             }
 
             switch (type) {
-                case StitchTreeWalkerTokenTypes.FORALL:
+                case FORALL:
                     rv &= b;
                     break;
-                case StitchTreeWalkerTokenTypes.EXISTS:
+                case EXISTS:
                     rv |= b;
                     break;
-                case StitchTreeWalkerTokenTypes.EXISTS_UNIQUE:
+                case EXISTS_UNIQUE:
                     rv = (rv && !b) || (!rv && b);
                     break;
-                case StitchTreeWalkerTokenTypes.SELECT:
+                case SELECT:
                     if (newSet == null) {
                         newSet = new LinkedHashSet ();
                     }
@@ -313,7 +245,7 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
         // set predicate skip flag on the expression to be evaluated
         expr.skipQuanPredicate = true;
         // store result
-        if (type == StitchTreeWalkerTokenTypes.SELECT) {
+        if (type == Strategy.ExpressionKind.SELECT) {
             if (newSet == null) { // create an empty set
                 newSet = new LinkedHashSet ();
             }
@@ -324,24 +256,15 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.sa.rainbow.stitch.visitor.AbstractLiloBehavior#endQuantifiedExpression (antlr.collections.AST)
-     */
     @Override
-    public void endQuantifiedExpression (AST quanAST) {
+    public void endQuantifiedExpression (Strategy.ExpressionKind quant, StitchParser.QuantifiedExpressionContext
+            quantifiedExpressionContext) {
         if (checkSkipEval ()) return;
 
         Expression cExpr = doEndComplexExpr ();
         expr ().setResult (cExpr.getResult ());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.sa.rainbow.stitch.visitor.AbstractLiloBehavior#beginMethodCallExpression ()
-     */
     @Override
     public void beginMethodCallExpression () {
         if (checkSkipEval ()) return;
@@ -349,26 +272,20 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
         doBeginComplexExpr ();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.sa.rainbow.stitch.visitor.AbstractLiloBehavior#endMethodCallExpression (antlr.collections.AST,
-     * antlr.collections.AST)
-     */
     @Override
-    public void endMethodCallExpression (AST mcAST, AST idAST) {
+    public void endMethodCallExpression (TerminalNode mc, StitchParser.MethodCallContext id) {
         if (checkSkipEval ()) return;
 
         Expression cExpr = doEndComplexExpr ();
         Object[] args = new Object[cExpr.expressions ().size ()];
         int i = 0;
         for (Expression e : cExpr.expressions ()) {
-            if (e.ast () != null && e.getResult () == null) {
-                e.evaluate (null);
+            if (e.tree () != null && e.getResult () == null) {
+                e.evaluate (null, m_walker);
             }
             args[i++] = e.getResult ();
         }
-        Object rv = executeMethod (idAST.getText (), args);
+        Object rv = executeMethod (id.IDENTIFIER ().getText (), args);
         cExpr.setResult (rv);
         if (rv instanceof Integer) {
             expr ().setResult (new MyInteger ((Integer) rv));
@@ -383,11 +300,6 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.sa.rainbow.stitch.visitor.AbstractLiloBehavior#beginSetExpression()
-     */
     @Override
     public void beginSetExpression () {
         if (checkSkipEval ()) return;
@@ -395,14 +307,8 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
         doBeginComplexExpr ();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.sa.rainbow.stitch.visitor.AbstractLiloBehavior#endSetExpression(antlr .collections.AST)
-     */
-    @SuppressWarnings("unchecked")
     @Override
-    public void endSetExpression (AST setAST) {
+    public void endSetExpression (StitchParser.SetExpressionContext setAST) {
         if (checkSkipEval ()) return;
 
         Expression cExpr = doEndComplexExpr ();
@@ -434,13 +340,8 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
         cExpr.setResult (set);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.sa.rainbow.stitch.visitor.AbstractLiloBehavior#doExpression(antlr .collections.AST)
-     */
     @Override
-    public void doExpression (AST exprAST) {
+    public void doExpression (ParserRuleContext exprAST) {
         if (checkSkipEval ()) return;
 
         if (scope () instanceof Expression) {
@@ -453,14 +354,8 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.sa.rainbow.stitch.visitor.AbstractLiloBehavior#doAssignExpression (antlr.collections.AST,
-     * antlr.collections.AST)
-     */
     @Override
-    public void doAssignExpression (AST opAST, AST lValAST) {
+    public void doAssignExpression (ParserRuleContext identifier, ParserRuleContext expression) {
         // Note: Assignment will only be meaningful as its own statement, so
         // should not be evaluated as expression elsewhere!
 
@@ -471,7 +366,7 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
         expr.lrOps[LOP].pop ();
         Object rVal = expr.lrOps[ROP].pop ();
         // the lVal can only be an identifier, otherwise, won't make sense!
-        Object lObj = expr.lookup (lValAST.getText ());
+        Object lObj = expr.lookup (identifier.getText ());
         if (lObj != null && lObj instanceof Var) {
             Var v = (Var) lObj;
             if (Tool.typeMatches (v, rVal)) {
@@ -479,40 +374,37 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
                 expr.setResult (rVal);
             } else {
                 Tool.error ("Assignment expression cannot be evaluated due to mismatched value types! " + v.getType ()
-                                    + " vs. " + rVal.getClass ().getName (), lValAST, stitchProblemHandler ());
+                                    + " vs. " + rVal.getClass ().getName (), expression, stitchProblemHandler ());
                 return;
             }
         } else {
             // can't find lvalue reference
             Tool.error ("Assignment expression cannot be evaluated because lvalue reference cannot be found! "
-                                + lValAST.getText (), lValAST, stitchProblemHandler ());
+                                + expression.getText (), expression, stitchProblemHandler ());
             return;
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.sa.rainbow.stitch.visitor.AbstractLiloBehavior#doLogicalExpression (antlr.collections.AST)
-     */
-    @SuppressWarnings("unchecked")
     @Override
-    public void doLogicalExpression (AST opAST) {
+    public void doLogicalExpression (Strategy.ExpressionKind opAST, ParserRuleContext ctx) {
         if (checkSkipEval ()) return;
         Expression expr = expr ();
 
         Boolean lOp = null;
         Boolean rOp = null;
-        if (expr.lrOps[LOP].peek () == null || expr.lrOps[ROP].peek () == null) {
+        if (expr.lrOps[LOP].isEmpty () || expr.lrOps[LOP].peek () == null || expr.lrOps[ROP].isEmpty () || expr
+                .lrOps[ROP].peek ()
+                ==
+                null) {
             // if either is NULL, result is NULL
             final String msg = "One logical operand is NULL: "
                     + (expr.lrOps[LOP] == null || expr.lrOps[LOP].isEmpty () ? "NULL" : expr.lrOps[LOP]
                     .pop ()) + ", "
                     + (expr.lrOps[ROP] == null || expr.lrOps[ROP].isEmpty () ? "NULL" : expr.lrOps[ROP]
                     .pop ());
-            Tool.warn (msg, opAST,
+            Tool.warn (msg, ctx,
                        stitchProblemHandler ());
-            System.out.println (msg);
+//            System.out.println (msg);
             expr.setResult (null);
             return;
         }
@@ -523,8 +415,8 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
             if (aProp.getValue () instanceof IAcmeBooleanValue) {
                 expr.lrOps[LOP].push (((IAcmeBooleanValue) aProp.getValue ()).getValue ());
             } else {
-                Tool.error ("IAcmeProperty does NOT hold the expected Boolean value! " + aProp + " " + opAST.getText ()
-                                    + " " + expr.lrOps[ROP].peek (), opAST, stitchProblemHandler ());
+                Tool.error ("IAcmeProperty does NOT hold the expected Boolean value! " + aProp + " " + ctx.getText ()
+                                    + " " + expr.lrOps[ROP].peek (), ctx, stitchProblemHandler ());
                 return;
             }
         }
@@ -534,7 +426,7 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
                 expr.lrOps[ROP].push (((IAcmeBooleanValue) aProp.getValue ()).getValue ());
             } else {
                 Tool.error ("IAcmeProperty does NOT hold the expected Boolean value! " + expr.lrOps[LOP].peek () + " "
-                                    + opAST.getText () + " " + aProp, opAST, stitchProblemHandler ());
+                                    + ctx.getText () + " " + aProp, ctx, stitchProblemHandler ());
                 return;
             }
         }
@@ -544,21 +436,21 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
         } else {
             Tool.error (
                     "Type mismatch or NOT booleans in logical expression! " + expr.lrOps[LOP].peek () + " "
-                            + opAST.getText () + " " + expr.lrOps[ROP].peek (), opAST, stitchProblemHandler ());
+                            + ctx.getText () + " " + expr.lrOps[ROP].peek (), ctx, stitchProblemHandler ());
             return;
         }
 
-        switch (opAST.getType ()) {
-            case StitchTreeWalkerTokenTypes.IMPLIES:
+        switch (opAST) {
+            case IMPLIES:
                 expr.setResult (!lOp || rOp);
                 break;
-            case StitchTreeWalkerTokenTypes.IFF:
+            case IFF:
                 expr.setResult (lOp == rOp);
                 break;
-            case StitchTreeWalkerTokenTypes.LOGICAL_OR:
+            case OR:
                 expr.setResult (lOp || rOp);
                 break;
-            case StitchTreeWalkerTokenTypes.LOGICAL_AND:
+            case AND:
                 expr.setResult (lOp && rOp);
                 break;
             default:
@@ -567,14 +459,8 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.sa.rainbow.stitch.visitor.AbstractLiloBehavior#doRelationalExpression (antlr.collections.AST)
-     */
     @Override
-    @SuppressWarnings("unchecked")
-    public void doRelationalExpression (AST opAST) {
+    public void doRelationalExpression (Strategy.ExpressionKind kind, ParserRuleContext opAST) {
         if (checkSkipEval ()) return;
         Expression expr = expr ();
 
@@ -586,10 +472,11 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
         // deal with null operands
         if (expr.lrOps[LOP].peek () == null || expr.lrOps[ROP].peek () == null) {
             // if either is NULL, result is NULL
-            final String msg = "One relational operand is NULL: " + expr.lrOps[LOP].pop () + ", " + expr.lrOps[ROP].pop ()
-                    + " ... " + opAST.toStringList ();
+            final String msg = "One relational operand is NULL: " + expr.lrOps[LOP].pop () + ", " + expr.lrOps[ROP]
+                    .pop ()
+                    + " ... " + opAST.toStringTree ();
             Tool.warn (msg, opAST, stitchProblemHandler ());
-            System.out.println (msg);
+//            System.out.println (msg);
             expr.setResult (null);
             return;
         }
@@ -640,8 +527,8 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
         }
 
         Boolean b = null;
-        switch (opAST.getType ()) {
-            case StitchTreeWalkerTokenTypes.EQ:
+        switch (kind) {
+            case EQ:
                 if (compareAsNum) {
                     b = lOp != null ? lOp.eq (rOp) : rOp == null;
                     expr.setResult (b);
@@ -651,7 +538,7 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
                 }
                 debug ("Compare:  " + lOp + " EQ " + rOp + " -> " + b);
                 break;
-            case StitchTreeWalkerTokenTypes.NE:
+            case NE:
                 if (compareAsNum) {
                     b = lOp != null ? lOp.ne (rOp) : rOp != null;
                     expr.setResult (b);
@@ -661,13 +548,13 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
                 }
                 debug ("Compare:  " + lOp + " NE " + rOp + " -> " + b);
                 break;
-            case StitchTreeWalkerTokenTypes.LE:
+            case LE:
                 if (compareAsNum) {
                     if (lOp != null) {
                         b = lOp.le (rOp);
                         expr.setResult (b);
                     } else {
-                        System.out.println ("StitchScriptEvaluator:doRelationalExpression:670");
+//                        System.out.println ("StitchScriptEvaluator:doRelationalExpression:670");
                         expr.setResult (null);
                     }
                     debug ("Compare:  " + lOp + " LE " + rOp + " -> " + b);
@@ -675,13 +562,13 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
                     Tool.error ("LE is not defined for " + lObj + " & " + rObj, opAST, stitchProblemHandler ());
                 }
                 break;
-            case StitchTreeWalkerTokenTypes.LT:
+            case LT:
                 if (compareAsNum) {
                     if (lOp != null) {
                         b = lOp.lt (rOp);
                         expr.setResult (b);
                     } else {
-                        System.out.println ("StitchScriptEvaluator:doRelationalExpression:684");
+//                        System.out.println ("StitchScriptEvaluator:doRelationalExpression:684");
                         expr.setResult (null);
                     }
                     debug ("Compare:  " + lOp + " LT " + rOp + " -> " + b);
@@ -689,13 +576,13 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
                     Tool.error ("LT is not defined for " + lObj + " & " + rObj, opAST, stitchProblemHandler ());
                 }
                 break;
-            case StitchTreeWalkerTokenTypes.GT:
+            case GT:
                 if (compareAsNum) {
                     if (lOp != null) {
                         b = lOp.gt (rOp);
                         expr.setResult (b);
                     } else {
-                        System.out.println ("StitchScriptEvaluator:doRelationalExpression:698");
+//                        System.out.println ("StitchScriptEvaluator:doRelationalExpression:698");
                         expr.setResult (null);
                     }
                     debug ("Compare:  " + lOp + " GT " + rOp + " -> " + b);
@@ -703,13 +590,13 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
                     Tool.error ("GT is not defined for " + lObj + " & " + rObj, opAST, stitchProblemHandler ());
                 }
                 break;
-            case StitchTreeWalkerTokenTypes.GE:
+            case GE:
                 if (compareAsNum) {
                     if (lOp != null) {
                         b = lOp.ge (rOp);
                         expr.setResult (b);
                     } else {
-                        System.out.println ("StitchScriptEvaluator:doRelationalExpression:712");
+//                        System.out.println ("StitchScriptEvaluator:doRelationalExpression:712");
                         expr.setResult (null);
                     }
                     debug ("Compare:  " + lOp + " GE " + rOp + " -> " + b);
@@ -723,19 +610,13 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.sa.rainbow.stitch.visitor.AbstractLiloBehavior#doArithmeticExpression (antlr.collections.AST)
-     */
-    @SuppressWarnings("unchecked")
     @Override
-    public void doArithmeticExpression (AST opAST) {
+    public void doArithmeticExpression (Strategy.ExpressionKind kind, ParserRuleContext opAST) {
         if (checkSkipEval ()) return;
         Expression expr = expr ();
 
         // support String concatenation
-        if (expr.lrOps[LOP].peek () instanceof String && opAST.getType () == StitchTreeWalkerTokenTypes.PLUS) {
+        if (expr.lrOps[LOP].peek () instanceof String && kind == Strategy.ExpressionKind.PLUS) {
             String s1 = (String) expr.lrOps[LOP].pop ();
             Object s2 = expr.lrOps[ROP].pop ();
             expr.setResult (s1 + s2.toString ());
@@ -746,10 +627,11 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
         MyNumber rOp = null;
         if (expr.lrOps[LOP].peek () == null || expr.lrOps[ROP].peek () == null) {
             // if either is NULL, result is NULL
-            final String msg = "One arithmetic operand is NULL: " + expr.lrOps[LOP].pop () + ", " + expr.lrOps[ROP].pop ()
-                    + " ... " + opAST.toStringList ();
+            final String msg = "One arithmetic operand is NULL: " + expr.lrOps[LOP].pop () + ", " + expr.lrOps[ROP]
+                    .pop ()
+                    + " ... " + opAST.toStringTree ();
             Tool.warn (msg, opAST, stitchProblemHandler ());
-            System.out.println(msg);
+//            System.out.println (msg);
             expr.setResult (null);
             return;
         }
@@ -772,28 +654,28 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
         }
 
         MyNumber mynum = null;
-        switch (opAST.getType ()) {
-            case StitchTreeWalkerTokenTypes.PLUS:
+        switch (kind) {
+            case PLUS:
                 mynum = lOp.plus (rOp);
                 expr.setResult (mynum);
                 debug ("Add:  " + lOp + " + " + rOp + " -> " + mynum.toJavaNumber ());
                 break;
-            case StitchLexerTokenTypes.MINUS:
+            case MINUS:
                 mynum = lOp.minus (rOp);
                 expr.setResult (mynum);
                 debug ("Subtract:  " + lOp + " - " + rOp + " -> " + mynum.toJavaNumber ());
                 break;
-            case StitchLexerTokenTypes.STAR:
+            case MULTIPLY:
                 mynum = lOp.times (rOp);
                 expr.setResult (mynum);
                 debug ("Multiply:  " + lOp + " * " + rOp + " -> " + mynum.toJavaNumber ());
                 break;
-            case StitchLexerTokenTypes.SLASH:
+            case DIVIDE:
                 mynum = lOp.dividedBy (rOp);
                 expr.setResult (mynum);
                 debug ("Divide:  " + lOp + " / " + rOp + " -> " + mynum.toJavaNumber ());
                 break;
-            case StitchLexerTokenTypes.MOD:
+            case MOD:
                 mynum = lOp.modulus (rOp);
                 expr.setResult (mynum);
                 debug ("Mod:  " + lOp + " % " + rOp + " -> " + mynum.toJavaNumber ());
@@ -804,14 +686,8 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.sa.rainbow.stitch.visitor.AbstractLiloBehavior#doUnaryExpression( antlr.collections.AST)
-     */
-    @SuppressWarnings("unchecked")
     @Override
-    public void doUnaryExpression (AST opAST) {
+    public void doUnaryExpression (Strategy.ExpressionKind kind, StitchParser.UnaryExpressionContext opAST) {
         if (checkSkipEval ()) return;
         Expression expr = expr ();
 
@@ -838,7 +714,7 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
         }
         if (expr.lrOps[LOP].peek () instanceof MyNumber) {
             op = (MyNumber) expr.lrOps[LOP].pop ();
-        } else if (opAST.getType () == StitchTreeWalkerTokenTypes.LOGICAL_NOT) {
+        } else if (kind == Strategy.ExpressionKind.NOT) {
             if (expr.lrOps[LOP].peek () instanceof Boolean) {
                 bOp = (Boolean) expr.lrOps[LOP].pop ();
             } else if (expr.lrOps[LOP].peek () instanceof IAcmeProperty
@@ -855,25 +731,21 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
             return;
         }
 
-        switch (opAST.getType ()) {
-            case StitchTreeWalkerTokenTypes.INCR:
+        switch (kind) {
+            case INCR:
                 expr.setResult (op != null ? op.incr () : null);
                 break;
-            case StitchTreeWalkerTokenTypes.DECR:
+            case DECR:
                 expr.setResult (op != null ? op.decr () : null);
                 break;
-            case StitchTreeWalkerTokenTypes.LOGICAL_NOT:
+            case NOT:
                 expr.setResult (bOp != null ? !bOp : null);
                 break;
-            case StitchTreeWalkerTokenTypes.UNARY_MINUS:
+            case UNARY_MINUS:
                 expr.setResult (op != null ? op.negate () : null);
                 break;
-            case StitchTreeWalkerTokenTypes.UNARY_PLUS:
+            case UNARY_PLUS:
                 expr.setResult (op);
-                break;
-            case StitchTreeWalkerTokenTypes.POST_INCR:
-            case StitchTreeWalkerTokenTypes.POST_DECR:
-                Tool.error ("Post increment & decrement not implemented", opAST, stitchProblemHandler ());
                 break;
             default:
                 debug ("Don't know what unary op to do... :'(");
@@ -881,21 +753,65 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.sa.rainbow.stitch.visitor.AbstractLiloBehavior#doIdentifierExpression (antlr.collections.AST,
-     * org.sa.rainbow.stitch.core.Expression.Kind)
-     */
     @Override
-    public void doIdentifierExpression (AST idAST, Expression.Kind kind) {
+    public void doPostIdentifierExpression (StitchParser.PostIdExpressionContext identifier) {
+        if (checkSkipEval ()) return;
+        String iden = "__post__" + identifier.IDENTIFIER ().getText ();
+        Expression expr = expr ();
+        Object o = scope ().lookup (iden);
+        if (o instanceof PostVar) {
+            PostVar v = (PostVar) o;
+//            if (v.getValue () == null) {
+            // Value of the postVar should always be recomputed because
+            // the effect (value) may take time to achieve. So storing it
+            // might store an old value
+            v.computeAndSetValue ();
+//            }
+            expr.setResult (((Var) o).getValue ());
+        } else {
+            expr.setResult (null);
+            stitchProblemHandler ().setProblem (generateErrorFromToken (identifier.IDENTIFIER ().getSymbol (),
+                                                                        "Variable " + identifier.getText () +
+                                                                                " not defined."));
+        }
+    }
+
+    @Override
+    public void doIdentifierExpression (ParserRuleContext idAST, Strategy.ExpressionKind kind) {
         if (checkSkipEval ()) return;
         Expression expr = expr ();
 
-        if (kind == Expression.Kind.IDENTIFIER) {
+        if (kind == Strategy.ExpressionKind.IDENTIFIER) {
             // find identifier, lookup entire string first
             String iden = idAST.getText ();
-            Object o = scope ().lookup (iden);
+            Object o = null;
+            if (scope ().lookup ("__path_variable") != null) {
+                Object pv = scope ().lookup ("__path_variable");
+                if (pv instanceof Var) {
+                    pv = ((Var) pv).getValue ();
+                }
+                if (pv instanceof IAcmeElement) {
+                    o = ((IAcmeElement) pv).lookupName (iden);
+                } else if (pv instanceof IAcmeRecordValue) {
+                    o = ((IAcmeRecordValue) pv).getField (iden);
+                    if (o instanceof IAcmePropertyValue) {
+                        o = ModelHelper.propertyValueToJava ((IAcmePropertyValue) o);
+                    }
+                }
+            } else if (scope ().lookup ("__path_filter_type") != null) {
+                Var pv = (Var) scope ().lookup ("__path_filter_type");
+                if (pv.typeObj != null) {
+                    Object o1 = pv.typeObj.lookupName (iden);
+                    if (o1 == null) {
+                        Tool.error ("Unresolved reference '" + iden + "'! Perhaps model not accessible?", idAST,
+                                    stitchProblemHandler ());
+                    }
+                    return;
+                }
+
+            }
+            if (o == null)
+                o = scope ().lookup (iden);
             if (o == null) { // break up dot notation
                 int dotIdx = iden.indexOf (".");
                 if (dotIdx > -1) { // looking for v.something
@@ -938,30 +854,43 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
             } else {
                 if (o instanceof Var) {
                     Var v = (Var) o;
-                    if (v.getValue () == null) {
+                    if (v.getValue () == null || v.isFunction ()) {
                         v.computeValue ();
                     }
                     expr.setResult (((Var) o).getValue ());
+                } else if (o instanceof IAcmeProperty) {
+                    Object rv = ModelHelper.propertyValueToJava (((IAcmeProperty) o).getValue ());
+                    if (rv instanceof Integer) {
+                        expr.setResult (new MyInteger ((Integer) rv));
+                    } else if (rv instanceof Long) {
+                        expr.setResult (new MyInteger ((Long) rv));
+                    } else if (rv instanceof Float) {
+                        expr.setResult (new MyDouble (((Float) rv).doubleValue ()));
+                    } else if (rv instanceof Double) {
+                        expr.setResult (new MyDouble ((Double) rv));
+                    } else {
+                        expr.setResult (rv);
+                    }
                 } else { // store the object directly
                     expr.setResult (o);
                 }
             }
-        } else if (kind == Expression.Kind.INTEGER) {
+        } else if (kind == Strategy.ExpressionKind.INTEGER) {
             expr.setResult (new MyInteger (Integer.parseInt (idAST.getText ())));
-        } else if (kind == Expression.Kind.FLOAT) {
+        } else if (kind == Strategy.ExpressionKind.FLOAT) {
             expr.setResult (new MyDouble (Double.parseDouble (idAST.getText ())));
-        } else if (kind == Expression.Kind.STRING) {
+        } else if (kind == Strategy.ExpressionKind.STRING) {
             // strip the double quotes of string literal
             String s = idAST.getText ();
             expr.setResult (s.substring (1, s.length () - 1));
-        } else if (kind == Expression.Kind.CHAR) {
+        } else if (kind == Strategy.ExpressionKind.CHAR) {
             // strip the single quotes, so char is at index 1
             expr.setResult (new Character (idAST.getText ().charAt (1)));
-        } else if (kind == Expression.Kind.BOOLEAN) {
-            System.out.println ("Evaluating boolean for " + idAST.getText ());
+        } else if (kind == Strategy.ExpressionKind.BOOLEAN) {
+//            System.out.println ("Evaluating boolean for " + idAST.getText ());
             expr.setResult (new Boolean (Boolean.parseBoolean (idAST.getText ())));
-        } else if (kind == Expression.Kind.NULL) {
-            System.out.println ("StitchScriptEvaluator:doArithmeticExpression setting expr result to null");
+        } else if (kind == Strategy.ExpressionKind.NULL) {
+//            System.out.println ("StitchScriptEvaluator:doArithmeticExpression setting expr result to null");
             expr.setResult (null);
         }
     }
@@ -981,6 +910,8 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
         // if not, check current expr to see if it is complex, in which case,
         // we're within a complex expression already...
         Expression expr = expr ();
+        if (expr == null && scope () instanceof Expression)
+            expr = (Expression) scope ();
         Expression cExpr = null;
         if (expr.expressions ().size () > 0) {
             Expression nextExpr = expr.expressions ().get (expr.curExprIdx++);
@@ -1063,8 +994,9 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
                                 Tool.error ("Method invocation failed! " + method.toString (), e, null,
                                             stitchProblemHandler ());
                                 e.printStackTrace ();
-                                OperationResult or = new OperationResult ();
-                                or.result = Result.FAILURE;
+                                IModelDSBusPublisherPort.OperationResult or = new IModelDSBusPublisherPort
+                                        .OperationResult ();
+                                or.result = IModelDSBusPublisherPort.Result.FAILURE;
                                 or.reply = "Method invocation failed! + " + method.toString () + ". Reason: "
                                         + e.getMessage ();
                                 rv = or;
@@ -1079,7 +1011,7 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
                                                                                             "SSE: Attempting " +
                                                                                                     "operation: "
                                                                                                     + op.toString ());
-                                OperationResult result = port
+                                IModelDSBusPublisherPort.OperationResult result = port
                                         .publishOperation (op);
                                 ((AbstractRainbowRunnable) executor).reportingPort ().info (RainbowComponentT
                                                                                                     .EXECUTOR,
@@ -1110,8 +1042,9 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
                                                         name);
                                         break;
                                 }
-                            } else if (rv instanceof OperationResult) {
-                                OperationResult or = (OperationResult) rv;
+                            } else if (rv instanceof IModelDSBusPublisherPort.OperationResult) {
+                                IModelDSBusPublisherPort.OperationResult or = (IModelDSBusPublisherPort
+                                        .OperationResult) rv;
                                 switch (or.result) {
                                     case UNKNOWN:
                                         ((AbstractRainbowRunnable) executor).reportingPort ().info (
@@ -1121,7 +1054,7 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
                                         scope ().setError (true);
                                         ((AbstractRainbowRunnable) executor).reportingPort ().info (
                                                 RainbowComponentT.EXECUTOR, "Failed to execute operation " + name + "" +
-                                                        ". Reason: " +or.reply);
+                                                        ". Reason: " + or.reply);
                                         break;
                                 }
 
@@ -1158,7 +1091,7 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
             // construct list of classes in which to search for method name,
             // look in imports
             List<Class> classesToSearch = new ArrayList<Class> ();
-            for (Class opClass : m_stitch.script.ops) {
+            for (Class opClass : m_stitch./*stitch ().*/script.ops) {
                 // first, see if method class matches the imported method's
                 // class
                 if (methodClass != null) {
@@ -1205,7 +1138,7 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
                 }
             }
             // check if we should continue to actually invoke method
-            if (!m_stitch.isCanceled ()) {
+            if (!m_stitch./*stitch ().*/isCanceled ()) {
                 if (method == null) { // cannot execute anything
                     // try method in ModelOperator using name and first argument
                     if (args.length > 0) {
@@ -1222,8 +1155,8 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
                         Tool.error ("Method invocation failed! " + method.toString (), e, null, stitchProblemHandler
                                 ());
                         e.printStackTrace ();
-                        OperationResult or = new OperationResult ();
-                        or.result = Result.FAILURE;
+                        IModelDSBusPublisherPort.OperationResult or = new IModelDSBusPublisherPort.OperationResult ();
+                        or.result = IModelDSBusPublisherPort.Result.FAILURE;
                         or.reply = "Method invocation failed! + " + method.toString () + ". Reason: " + e.getMessage ();
                         rv = or;
                     }
@@ -1243,7 +1176,7 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
                             Tool.error ("Method invocation did not succeeed! " + name,
                                         null,
                                         stitchProblemHandler
-                                    ());
+                                                ());
                             break;
                     }
                 }
@@ -1398,6 +1331,8 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
                 lookup.put (formalParamName, inst.getModelInstance ());
                 argList.add (inst.getModelInstance ());
 
+            } else {
+                argList.add (arg);
             }
         }
 
@@ -1443,5 +1378,209 @@ public class StitchScriptEvaluator extends AbstractLiloBehavior implements ILilo
 
         }
         return returnType;
+    }
+
+    @Override
+    public void beginPathExpression () {
+        if (checkSkipEval ()) return;
+        doBeginComplexExpr ();
+    }
+
+    final ThreadLocal<Var>     pathVariable = new ThreadLocal<Var> () {
+        @Override
+        protected Var initialValue () {
+            return null;
+        }
+    };
+    final ThreadLocal<Integer> exprIndex    = new ThreadLocal<Integer> () {
+        @Override
+        protected Integer initialValue () {
+            return null;
+        }
+    };
+
+    @Override
+    public void setupPathFilter (TerminalNode identifier) {
+        if (identifier != null) {
+            Var v = new Var ();
+            v.name = "__path_filter_type";
+            v.setType (identifier.toString ());
+            scope ().addVar (v.name, v);
+            v.scope = scope ();
+            v.computeClass ();
+        }
+    }
+
+    @Override
+    public void pathExpressionFilter (TypeFilterT filter, TerminalNode identifier, StitchParser.ExpressionContext
+            expression) {
+        if (checkSkipEval ()) return;
+
+        Expression cExpr = (Expression) scope ();
+        if (cExpr.getKind () != Expression.Kind.PATH) {
+            Tool.error ("Error! Expected path expression not found!", null, stitchProblemHandler ());
+            return;
+        }
+
+        Object result = cExpr.expressions ().get (0).getResult ();
+        Set set = Collections.EMPTY_SET;
+
+        if (result instanceof Set) {
+            set = new HashSet ((Set) result);
+        } else if (result instanceof IAcmeSetValue) {
+            set = (Set) ModelHelper.propertyValueToJava ((IAcmeSetValue) result);
+        } else if (result instanceof AcmeSet) {
+            set = new HashSet (((AcmeSet) result).getValues ());
+        } else if (result instanceof IAcmeProperty && ((IAcmeProperty) result).getValue () instanceof IAcmeSetValue) {
+            set = (Set) ModelHelper.propertyValueToJava (((IAcmeProperty) result).getValue ());
+        } else {
+            Tool.error ("Error! Path set is NULL!" + cExpr.toStringTree (), null, stitchProblemHandler ());
+            set = Collections.EMPTY_SET;
+        }
+
+
+        pathVariable.set (new Var ());
+        pathVariable.get ().name = "___Path";
+        pathVariable.get ().scope = scope ();
+        if (identifier != null) {
+            pathVariable.get ().setType (identifier.getText ());
+            pathVariable.get ().computeClass ();
+            Set subset = new LinkedHashSet ();
+            if (set.size () > 0) {
+                for (Object o : set) {
+                    if (Tool.typeMatches (pathVariable.get (), o) && Tool.isArchEnabled (o)) {
+                        // type matches AND this object in quantified set is arch
+                        // enabled
+                        subset.add (o);
+                    }
+                }
+            }
+            pathVariable.get ().setValue (subset);
+
+
+        } else {
+            pathVariable.get ().setType ("set");
+            pathVariable.get ().computeClass ();
+            pathVariable.get ().setValue (set);
+        }
+
+        cExpr.setResult (pathVariable.get ().getValue ());
+
+
+        if (expression != null) {
+            exprIndex.set (1);
+            Expression expr = cExpr.expressions ().get (exprIndex.get ());
+            Iterator setIterator = ((Set) pathVariable.get ().getValue ()).iterator ();
+            Var __path_element = new Var ();
+            __path_element.name = "__path_variable";
+            scope ().addVar (__path_element.name, __path_element);
+            while (setIterator.hasNext ()) {
+                Object o = setIterator.next ();
+                __path_element.setValue (o);
+                expr.evaluate (null, m_walker);
+                boolean b = true;
+                if (expr.getResult () instanceof Boolean) {
+                    b = (Boolean) expr.getResult ();
+                } else if (expr.getResult () instanceof IAcmeProperty) {
+                    IAcmeProperty prop = (IAcmeProperty) expr.getResult
+                            ();
+                    if (prop.getValue () instanceof IAcmeBooleanValue) {
+                        b = ((IAcmeBooleanValue) prop.getValue ()).getValue ();
+                    }
+                }
+                if (!b) {
+                    setIterator.remove ();
+                }
+            }
+            scope ().vars ().remove (__path_element.name);
+        }
+    }
+
+    @Override
+    public void continueExpressionFilter (TypeFilterT filter, TerminalNode setIdentifier, TerminalNode
+            typeIdentifier, StitchParser.ExpressionContext
+                                                  expression) {
+        if (pathVariable.get () == null) {
+            Tool.error ("Path is not definde!", null, stitchProblemHandler ());
+            return;
+        }
+        Expression cExpr = (Expression) scope ();
+
+        Set set = (Set) pathVariable.get ().getValue ();
+        Set resultSet = new HashSet ();
+        for (Object s : set) {
+            if (s instanceof IAcmeElement) {
+                final Object result = ((IAcmeElement) s).lookupName (setIdentifier.getText ());
+                Set tSet = null;
+                if (result instanceof Set) {
+                    tSet = new HashSet ((Set) result);
+                } else if (result instanceof IAcmeSetValue) {
+                    tSet = (Set) ModelHelper.propertyValueToJava ((IAcmeSetValue) result);
+                } else if (result instanceof AcmeSet) {
+                    tSet = new HashSet (((AcmeSet) result).getValues ());
+                } else if (result instanceof IAcmeProperty && ((IAcmeProperty) result).getValue () instanceof
+                        IAcmeSetValue) {
+                    tSet = (Set) ModelHelper.propertyValueToJava (((IAcmeProperty) result).getValue ());
+                } else {
+                    Tool.error ("Error! Path set is NULL!" + setIdentifier.getText (), null, stitchProblemHandler ());
+                    tSet = Collections.EMPTY_SET;
+                }
+                resultSet.addAll (tSet);
+            }
+        }
+        if (typeIdentifier != null) {
+            pathVariable.get ().setType (typeIdentifier.toString ());
+            pathVariable.get ().typeObj = null;
+            pathVariable.get ().computeClass ();
+            Iterator i = resultSet.iterator ();
+            while (i.hasNext ()) {
+                Object o = i.next ();
+                if (!Tool.typeMatches (pathVariable.get (), o) || !Tool.isArchEnabled (o)) {
+                    // type matches AND this object in quantified set is arch
+                    // enabled
+                    i.remove ();
+                }
+            }
+        }
+        if (expression != null) {
+            pathVariable.get ().setValue (resultSet);
+            Iterator setIterator = resultSet.iterator ();
+            Var __path_element = new Var ();
+            __path_element.name = "__path_variable";
+            scope ().addVar (__path_element.name, __path_element);
+            exprIndex.set (exprIndex.get () + 1);
+            Expression expr = cExpr.expressions ().get (exprIndex.get ());
+
+            while (setIterator.hasNext ()) {
+                Object o = setIterator.next ();
+                __path_element.setValue (o);
+                expr.evaluate (null, m_walker);
+                boolean b = true;
+                if (expr.getResult () instanceof Boolean) {
+                    b = (Boolean) expr.getResult ();
+                } else if (expr.getResult () instanceof IAcmeProperty) {
+                    IAcmeProperty prop = (IAcmeProperty) expr.getResult
+                            ();
+                    if (prop.getValue () instanceof IAcmeBooleanValue) {
+                        b = ((IAcmeBooleanValue) prop.getValue ()).getValue ();
+                    }
+                }
+                if (!b) {
+                    setIterator.remove ();
+                }
+            }
+            scope ().vars ().remove (__path_element.name);
+        }
+        pathVariable.get ().setValue (resultSet);
+        cExpr.setResult (resultSet);
+    }
+
+    @Override
+    public void endPathExpression (StitchParser.PathExpressionContext ctx) {
+        if (checkSkipEval ()) return;
+        pathVariable.set (null);
+        Expression cExpr = doEndComplexExpr ();
+        expr ().setResult (cExpr.getResult ());
+        scope ().vars ().remove ("__path_filter_type");
     }
 }

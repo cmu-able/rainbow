@@ -27,6 +27,5 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/Users/jcamara/Downloads/org.eclipse.jdt.annotation_1.1.0.v20130513-1648.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

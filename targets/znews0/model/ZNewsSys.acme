@@ -1,0 +1,391 @@
+import TargetEnvType.acme;
+ 
+Family ZNewsFam extends EnvType with {
+
+    Port Type HttpPortT extends ArchPortT with {
+
+    }
+    Role Type RequestorRoleT extends ArchRoleT with {
+
+    }
+    Component Type ProxyT extends ArchElementT with {
+
+        Property deploymentLocation : string <<  default : string = "localhost"; >> ;
+
+        Property load : float <<  default : float = 0.0; >> ;
+
+    }
+    Port Type ProxyForwardPortT extends ArchPortT with {
+
+    }
+    Component Type ServerT extends ArchElementT with {
+
+        Property deploymentLocation : string <<  default : string = "localhost"; >> ;
+
+        Property load : float <<  default : float = 0.0; >> ;
+
+        Property reqServiceRate : float <<  default : float = 0.0; >> ;
+
+        Property byteServiceRate : float <<  default : float = 0.0; >> ;
+
+        Property fidelity : int <<  HIGH : int = 5; LOW : int = 1; default : int = 5; >> ;
+
+        Property cost : float <<  default : float = 1.0; >> ;
+
+        Property lastPageHit : Record [uri : string; cnt : int; kbytes : float; ];
+
+        Property anotherConstraint : string <<  default : string = "heuristic self.load <= MAX_UTIL;"; >> ;
+
+    }
+    Role Type ReceiverRoleT extends ArchRoleT with {
+
+    }
+    Connector Type ProxyConnT extends ArchConnT with {
+        Role req : RequestorRoleT = new RequestorRoleT extended with {
+
+        }
+        Role rec : ReceiverRoleT = new ReceiverRoleT extended with {
+
+        }
+
+    }
+    Component Type ClientT extends ArchElementT with {
+
+        Property deploymentLocation : string <<  default : string = "localhost"; >> ;
+
+        Property experRespTime : float <<  default : float = 100.0; >> ;
+
+        Property reqRate : float <<  default : float = 0.0; >> ;
+        rule primaryConstraint = invariant self.experRespTime <= MAX_RESPTIME;
+        rule reverseConstraint = heuristic self.experRespTime >= MIN_RESPTIME;
+
+    }
+    Port Type HttpReqPortT extends ArchPortT with {
+
+    }
+    Connector Type HttpConnT extends ArchConnT with {
+
+        Property bandwidth : float <<  default : float = 0.0; >> ;
+
+        Property latency : float <<  default : float = 0.0; >> ;
+
+        Property numReqsSuccess : int <<  default : int = 0; >> ;
+
+        Property numReqsRedirect : int <<  default : int = 0; >> ;
+
+        Property numReqsClientError : int <<  default : int = 0; >> ;
+
+        Property numReqsServerError : int <<  default : int = 0; >> ;
+
+        Property latencyRate : float;
+        Role req : RequestorRoleT = new RequestorRoleT extended with {
+
+        }
+        Role rec : ReceiverRoleT = new ReceiverRoleT extended with {
+
+        }
+
+    }
+
+    Property MIN_RESPTIME : float;
+
+    Property MAX_RESPTIME : float;
+
+    Property TOLERABLE_PERCENT_UNHAPPY : float;
+
+    Property UNHAPPY_GRADIENT_1 : float;
+
+    Property UNHAPPY_GRADIENT_2 : float;
+
+    Property UNHAPPY_GRADIENT_3 : float;
+
+    Property FRACTION_GRADIENT_1 : float;
+
+    Property FRACTION_GRADIENT_2 : float;
+
+    Property FRACTION_GRADIENT_3 : float;
+
+    Property MIN_UTIL : float;
+
+    Property MAX_UTIL : float;
+
+    Property MAX_FIDELITY_LEVEL : int;
+
+    Property THRESHOLD_FIDELITY : int;
+
+    Property THRESHOLD_COST : float;
+
+    Property SUPPORT_FRACTION_GRADIENT : boolean;
+}
+
+System ZNewsSys : ZNewsFam = {
+
+
+    Property MIN_RESPTIME : float = 100.0;
+
+    Property MAX_RESPTIME : float = 1000.0;
+
+    Property UNHAPPY_GRADIENT_1 : float = 0.1;
+
+    Property UNHAPPY_GRADIENT_2 : float = 0.2;
+
+    Property UNHAPPY_GRADIENT_3 : float = 0.5;
+
+    Property FRACTION_GRADIENT_1 : float = 0.2;
+
+    Property FRACTION_GRADIENT_2 : float = 0.4;
+
+    Property FRACTION_GRADIENT_3 : float = 1.0;
+
+    Property TOLERABLE_PERCENT_UNHAPPY : float = 0.4;
+
+    Property MIN_UTIL : float = 0.1;
+
+    Property MAX_UTIL : float = 0.75;
+
+    Property MAX_FIDELITY_LEVEL : int = 5;
+
+    Property THRESHOLD_FIDELITY : int = 2;
+
+    Property THRESHOLD_COST : float = 4.0;
+
+    Property SUPPORT_FRACTION_GRADIENT : boolean = false;
+    Component s1 : ServerT, ArchElementT = new ServerT, ArchElementT extended with {
+
+        Property deploymentLocation = "phoenix";
+
+        Property isArchEnabled = true;
+
+        Property cost = 1.0;
+
+        Property fidelity = 5;
+
+        Property load = 1.485;
+        Port http0 : HttpPortT, ArchPortT = new HttpPortT, ArchPortT extended with {
+
+        }
+
+    }
+    Component lbproxy : ProxyT = new ProxyT extended with {
+
+        Property deploymentLocation = "127.0.0.1";
+
+        Property isArchEnabled = true;
+
+        Property load = 0.01;
+        Port fwd0 : ProxyForwardPortT = new ProxyForwardPortT extended with {
+
+            Property isArchEnabled = true;
+
+        }
+        Port fwd1 : ProxyForwardPortT = new ProxyForwardPortT extended with {
+
+        }
+        Port fwd2 : ProxyForwardPortT = new ProxyForwardPortT extended with {
+
+        }
+        Port fwd3 : ProxyForwardPortT = new ProxyForwardPortT extended with {
+
+        }
+        Port http0 : HttpPortT = new HttpPortT extended with {
+
+            Property isArchEnabled = true;
+
+        }
+        Port http1 : HttpPortT = new HttpPortT extended with {
+
+            Property isArchEnabled = true;
+
+        }
+        Port http2 : HttpPortT = new HttpPortT extended with {
+
+            Property isArchEnabled = true;
+
+        }
+
+    }
+    Component s2 : ServerT, ArchElementT = new ServerT, ArchElementT extended with {
+
+        Property deploymentLocation = "127.0.0.3";
+
+        Property isArchEnabled = true;
+
+        Property fidelity = 3;
+
+        Property load = 0.594;
+
+        Property cost = 1.0;
+        Port http0 : HttpPortT, ArchPortT = new HttpPortT, ArchPortT extended with {
+
+            Property isArchEnabled = false;
+
+        }
+
+    }
+    Component s3 : ServerT, ArchElementT = new ServerT, ArchElementT extended with {
+
+        Property deploymentLocation = "127.0.0.4";
+
+        Property isArchEnabled = true;
+
+        Property cost = 1.0;
+
+        Property fidelity = 3;
+
+        Property load = 0.891;
+        Port http0 : HttpPortT, ArchPortT = new HttpPortT, ArchPortT extended with {
+
+        }
+
+    }
+    Component s0 : ServerT, ArchElementT = new ServerT, ArchElementT extended with {
+
+        Property deploymentLocation = "oracle";
+
+        Property cost = 0.9;
+
+        Property fidelity = 3;
+
+        Property load = 0.198;
+
+        Property isArchEnabled = true;
+        Port http0 : HttpPortT = new HttpPortT extended with {
+
+            Property isArchEnabled = true;
+
+        }
+
+    }
+    Component c1 : ClientT = new ClientT extended with {
+
+        Property deploymentLocation = "127.0.0.1";
+
+        Property isArchEnabled = true;
+
+        Property experRespTime = 2609.5415;
+        Port p0 : HttpReqPortT = new HttpReqPortT extended with {
+
+            Property isArchEnabled = true;
+
+        }
+
+    }
+    Component c2 : ClientT = new ClientT extended with {
+
+        Property deploymentLocation = "127.0.0.1";
+
+        Property isArchEnabled = true;
+
+        Property experRespTime = 2520.8613;
+        Port p0 : HttpReqPortT = new HttpReqPortT extended with {
+
+            Property isArchEnabled = true;
+
+        }
+
+    }
+    Component c0 : ClientT = new ClientT extended with {
+
+        Property deploymentLocation = "127.0.0.1";
+
+        Property isArchEnabled = true;
+
+        Property experRespTime = 2590.9473;
+        Port p0 : HttpReqPortT = new HttpReqPortT extended with {
+
+            Property isArchEnabled = true;
+
+        }
+
+    }
+    Connector conn0 : HttpConnT = new HttpConnT extended with {
+
+        Property latencyRate = 0.0;
+
+        Property isArchEnabled = true;
+        Role req  = {
+
+            Property isArchEnabled = true;
+
+        }
+        Role rec  = {
+
+            Property isArchEnabled = true;
+
+        }
+
+    }
+    Connector proxyconn0 : ProxyConnT = new ProxyConnT extended with {
+
+        Property isArchEnabled = true;
+        Role req  = {
+
+            Property isArchEnabled = true;
+
+        }
+        Role rec  = {
+
+            Property isArchEnabled = true;
+
+        }
+
+    }
+    Connector proxyconn1 : ProxyConnT, ArchConnT = new ProxyConnT, ArchConnT extended with {
+
+    }
+    Connector proxyconn3 : ProxyConnT, ArchConnT = new ProxyConnT, ArchConnT extended with {
+
+    }
+    Connector proxyconn2 : ProxyConnT, ArchConnT = new ProxyConnT, ArchConnT extended with {
+
+    }
+    Connector conn : HttpConnT = new HttpConnT extended with {
+
+        Property latencyRate = 0.0;
+
+        Property isArchEnabled = true;
+        Role req  = {
+
+            Property isArchEnabled = true;
+
+        }
+        Role rec  = {
+
+            Property isArchEnabled = true;
+
+        }
+
+    }
+    Connector conn1 : HttpConnT = new HttpConnT extended with {
+
+        Property latencyRate = 0.0;
+
+        Property isArchEnabled = true;
+        Role req  = {
+
+            Property isArchEnabled = true;
+
+        }
+        Role rec  = {
+
+            Property isArchEnabled = true;
+
+        }
+
+    }
+    Attachment lbproxy.fwd0 to proxyconn0.req;
+    Attachment s0.http0 to proxyconn0.rec;
+    Attachment lbproxy.http0 to conn0.rec;
+    Attachment c1.p0 to conn.req;
+    Attachment c2.p0 to conn1.req;
+    Attachment lbproxy.http2 to conn1.rec;
+    Attachment lbproxy.http1 to conn.rec;
+    Attachment c0.p0 to conn0.req;
+    Attachment s2.http0 to proxyconn2.rec;
+    Attachment lbproxy.fwd1 to proxyconn1.req;
+    Attachment s1.http0 to proxyconn1.rec;
+    Attachment s3.http0 to proxyconn3.rec;
+    Attachment lbproxy.fwd3 to proxyconn3.req;
+    Attachment lbproxy.fwd2 to proxyconn2.req;
+}
+

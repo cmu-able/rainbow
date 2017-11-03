@@ -34,50 +34,54 @@ import java.util.*;
 /**
  * Implements a namespace scope to contain references.  Construction of a scope
  * object requires a parent scope, where a null indicates a root scope.
- * 
+ *
  * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
  */
 public class ScopedEntity implements IScope {
 
-    /** Expression access index that reflects the currently active expression index */
+    public Stitch/*State*/ m_stitch;
+
+
+    /**
+     * Expression access index that reflects the currently active expression index
+     */
     public int curExprIdx = 0;
 
-    protected String m_name = null;
-    protected int m_level = 0;
-    protected Stitch m_stitch = null;
-    protected IScope m_parent = null;
-    protected boolean m_distinctScope = true;  // true means this is a distinctive scope
-    protected boolean m_hasError = false;
+    protected String  m_name            = null;
+    protected int     m_level           = 0;
+    protected IScope  m_parent          = null;
+    protected boolean m_distinctScope   = true;  // true means this is a distinctive scope
+    protected boolean m_hasError        = false;
     protected boolean m_hasErrorHandler = false;
 
-    protected List<IScope> m_children = null;
+    protected List<IScope>     m_children    = null;
     // all vars in scope
-    protected Map<String,Var> m_vars = null;
+    protected Map<String, Var> m_vars        = null;
     // all expressions in scope
     protected List<Expression> m_expressions = null;
     // for compound statements, must be stored in sequence
-    protected List<Statement> m_statements = null;
+    protected List<Statement>  m_statements  = null;
 
     /**
      * Constructor of a scope, requiring a parent scope.
-     * 
-     * @param parent  the parent scope, or <code>null</code> if this is to be the root scope
-     * @param name    the name, if any, of this scope
+     *
+     * @param parent the parent scope, or <code>null</code> if this is to be the root scope
+     * @param name   the name, if any, of this scope
      */
-    public ScopedEntity (IScope parent, String name, Stitch stitch) {
+    public ScopedEntity (IScope parent, String name, Stitch/*State*/ stitch) {
         m_name = name;
         m_stitch = stitch;
         m_parent = parent;
-        m_children = Collections.synchronizedList (new ArrayList<IScope>());
-        m_vars = new HashMap<String,Var>();
-        m_expressions = new ArrayList<Expression>();
-        m_statements = new ArrayList<Statement>();
+        m_children = Collections.synchronizedList (new ArrayList<IScope> ());
+        m_vars = new HashMap<String, Var> ();
+        m_expressions = new ArrayList<Expression> ();
+        m_statements = new ArrayList<Statement> ();
 
         if (parent == null) {
             m_level = 1;  // null is the 0-level scope, so this is 1
         } else {
-            parent.addChildScope(this);
-            m_level = parent.getLevel() + 1;
+            parent.addChildScope (this);
+            m_level = parent.getLevel () + 1;
         }
     }
 
@@ -86,13 +90,14 @@ public class ScopedEntity implements IScope {
      */
     @Override
     public ScopedEntity clone (IScope parent) {
-        ScopedEntity newObj = new ScopedEntity(parent, m_name, m_stitch);
-        copyState(newObj);
+        ScopedEntity newObj = new ScopedEntity (parent, m_name, m_stitch);
+        copyState (newObj);
         return newObj;
     }
 
     /**
      * Copy the states of this object into target object.
+     *
      * @param target
      */
     protected synchronized void copyState (ScopedEntity target) {
@@ -110,7 +115,7 @@ public class ScopedEntity implements IScope {
                 target.m_children.add (s.clone (target));
             }
         }
-        for (Map.Entry<String,Var> e : m_vars.entrySet ()) {
+        for (Map.Entry<String, Var> e : m_vars.entrySet ()) {
             target.m_vars.put (e.getKey (), e.getValue ().clone ());
         }
         for (Expression e : m_expressions) {
@@ -118,13 +123,13 @@ public class ScopedEntity implements IScope {
         }
         for (Statement s : m_statements) {
             Statement statement = new Statement (s.m_parent, s.m_name, s.m_stitch);
-            statement.setAST (s.ast ());
+            statement.setTree (s.tree ());
             target.m_statements.add (statement);
         }
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IScope#getName()
+     * @see org.sa.rainbow.stitchState.core.IScope#getName()
      */
     @Override
     public String getName () {
@@ -132,17 +137,20 @@ public class ScopedEntity implements IScope {
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IScope#getQualifiedName()
+     * @see org.sa.rainbow.stitchState.core.IScope#getQualifiedName()
      */
     @Override
     public String getQualifiedName () {
-        if (stitch().script != null && stitch().script != this) return stitch().script.getName() + "." + getName();
+        if (stitchState ()/*.stitch()*/.script != null && stitchState ()./*stitch().*/script != this)
+            return stitchState ()/*.stitch()*/.script
+                    .getName () + "." +
+                    getName ();
         else
-            return getName();
+            return getName ();
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IScope#setName(java.lang.String)
+     * @see org.sa.rainbow.stitchState.core.IScope#setName(java.lang.String)
      */
     @Override
     public void setName (String name) {
@@ -150,7 +158,7 @@ public class ScopedEntity implements IScope {
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IScope#getLevel()
+     * @see org.sa.rainbow.stitchState.core.IScope#getLevel()
      */
     @Override
     public int getLevel () {
@@ -158,7 +166,7 @@ public class ScopedEntity implements IScope {
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IScope#setLevel(int)
+     * @see org.sa.rainbow.stitchState.core.IScope#setLevel(int)
      */
     @Override
     public void setLevel (int l) {
@@ -166,7 +174,7 @@ public class ScopedEntity implements IScope {
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IScope#isRoot()
+     * @see org.sa.rainbow.stitchState.core.IScope#isRoot()
      */
     @Override
     public boolean isRoot () {
@@ -174,7 +182,7 @@ public class ScopedEntity implements IScope {
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IScope#isDistinctScope()
+     * @see org.sa.rainbow.stitchState.core.IScope#isDistinctScope()
      */
     @Override
     public boolean isDistinctScope () {
@@ -182,7 +190,7 @@ public class ScopedEntity implements IScope {
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IScope#setDistinctScope(boolean)
+     * @see org.sa.rainbow.stitchState.core.IScope#setDistinctScope(boolean)
      */
     @Override
     public void setDistinctScope (boolean b) {
@@ -190,7 +198,7 @@ public class ScopedEntity implements IScope {
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IScope#hasError()
+     * @see org.sa.rainbow.stitchState.core.IScope#hasError()
      */
     @Override
     public boolean hasError () {
@@ -198,22 +206,22 @@ public class ScopedEntity implements IScope {
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IScope#setError(boolean)
+     * @see org.sa.rainbow.stitchState.core.IScope#setError(boolean)
      */
     @Override
     public void setError (boolean b) {
         // sets failure flag on all enclosing scopes until one with failure
         // handler is found, or no more parent
         m_hasError = b;
-        if (b && !(hasErrorHandler())) {
-            if (parent() != null) {
-                parent().setError(b);
+        if (b && !(hasErrorHandler ())) {
+            if (parent () != null) {
+                parent ().setError (b);
             }
         }
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IScope#hasErrorHandler()
+     * @see org.sa.rainbow.stitchState.core.IScope#hasErrorHandler()
      */
     @Override
     public boolean hasErrorHandler () {
@@ -221,7 +229,7 @@ public class ScopedEntity implements IScope {
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IScope#setHasErrorHandler(boolean)
+     * @see org.sa.rainbow.stitchState.core.IScope#setHasErrorHandler(boolean)
      */
     @Override
     public void setHasErrorHandler (boolean b) {
@@ -229,23 +237,23 @@ public class ScopedEntity implements IScope {
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IScope#stitch()
+     * @see org.sa.rainbow.stitchState.core.IScope#stitchState()
      */
     @Override
-    public Stitch stitch () {
+    public Stitch/*State*/ stitchState () {
         return m_stitch;
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IScope#setStitch(org.sa.rainbow.stitch.visitor.Stitch)
+     * @see org.sa.rainbow.stitchState.core.IScope#setStitch(org.sa.rainbow.stitchState.visitor.Stitch)
      */
     @Override
-    public void setStitch (Stitch s) {
+    public void setStitch (Stitch/*State*/ s) {
         m_stitch = s;
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IScope#moveUp()
+     * @see org.sa.rainbow.stitchState.core.IScope#moveUp()
      */
     @Override
     public IScope parent () {
@@ -253,15 +261,15 @@ public class ScopedEntity implements IScope {
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IScope#vars()
+     * @see org.sa.rainbow.stitchState.core.IScope#vars()
      */
     @Override
     public Map<String, Var> vars () {
-        return isDistinctScope() ? m_vars : parent().vars();
+        return isDistinctScope () ? m_vars : parent ().vars ();
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IScope#expressions()
+     * @see org.sa.rainbow.stitchState.core.IScope#expressions()
      */
     @Override
     public List<Expression> expressions () {
@@ -270,7 +278,7 @@ public class ScopedEntity implements IScope {
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IScope#statements()
+     * @see org.sa.rainbow.stitchState.core.IScope#statements()
      */
     @Override
     public List<Statement> statements () {
@@ -278,20 +286,21 @@ public class ScopedEntity implements IScope {
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IScope#addChildScope(org.sa.rainbow.stitch.core.IScope)
+     * @see org.sa.rainbow.stitchState.core.IScope#addChildScope(org.sa.rainbow.stitchState.core.IScope)
      */
     @Override
     public synchronized void addChildScope (IScope child) {
-        m_children.add(child);
+        m_children.add (child);
 
-        if (child.parent() != null && child.parent() != this) {
-            Tool.logger().error("addChildScope: Did you confuse the scope or forget to set the proper parent?");
+        if (child.parent () != null && child.parent () != this) {
+            Tool.logger ().error ("addChildScope: Did you confuse the scope or forget to set the proper parent?");
         }
     }
 
     /**
      * Returns the children scope objects.
      * This method is meant to be used internally, thus not exposed via IScope interface.
+     *
      * @return
      */
     public List<IScope> getChildren () {
@@ -299,20 +308,20 @@ public class ScopedEntity implements IScope {
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IScope#addVar(antlr.collections.AST, org.sa.rainbow.stitch.core.Var)
+     * @see org.sa.rainbow.stitchState.core.IScope#addVar(antlr.collections.AST, org.sa.rainbow.stitchState.core.Var)
      */
     @Override
     public boolean addVar (String id, Var var) {
         boolean rv = true;
-        if (isDistinctScope()) {
-            if (m_vars.containsKey(id)) {
+        if (isDistinctScope ()) {
+            if (m_vars.containsKey (id)) {
                 rv = false;  // cannot add variable
             } else {
-                m_vars.put(id, var);
+                m_vars.put (id, var);
             }
         } else {
-            if (parent() != null) {
-                rv = parent().addVar(id, var);
+            if (parent () != null) {
+                rv = parent ().addVar (id, var);
             }
         }
 
@@ -320,35 +329,35 @@ public class ScopedEntity implements IScope {
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IScope#addExpression(org.sa.rainbow.stitch.core.Expression)
+     * @see org.sa.rainbow.stitchState.core.IScope#addExpression(org.sa.rainbow.stitchState.core.Expression)
      */
     @Override
     public void addExpression (Expression expr) {
         // no checking for distinct scope when adding expression
-        m_expressions.add(expr);
+        m_expressions.add (expr);
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IScope#addStatement(org.sa.rainbow.stitch.core.Statement)
+     * @see org.sa.rainbow.stitchState.core.IScope#addStatement(org.sa.rainbow.stitchState.core.Statement)
      */
     @Override
     public void addStatement (Statement stmt) {
         // no checking for distinct scope when adding expression
-        m_statements.add(stmt);
+        m_statements.add (stmt);
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IScope#lookup(java.lang.String)
+     * @see org.sa.rainbow.stitchState.core.IScope#lookup(java.lang.String)
      */
     @Override
     public Object lookup (String name) {
         if (name == null) return null;
 
         // by default, we search for variable declarations of this name
-        Object v = vars().get(name);
-        if (v == null && parent() != null) {
+        Object v = vars ().get (name);
+        if (v == null && parent () != null) {
             // move out the scope
-            v = parent().lookup(name);
+            v = parent ().lookup (name);
         }
         return v;
     }
@@ -360,45 +369,44 @@ public class ScopedEntity implements IScope {
     public String toString () {
         String parentName = null;
         if (m_parent != null) {
-            parentName = m_parent.getName();
+            parentName = m_parent.getName ();
         }
         return "ScopedEntity \"" + m_name + "\", parent " + parentName;
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IScope#toStringTree()
+     * @see org.sa.rainbow.stitchState.core.IScope#toStringTree()
      */
     @Override
     public String toStringTree () {
-        String str = leadPadding("  ");
-        str += (isDistinctScope() ? "*" : "") + getName() + " [e# ";
-        str += m_expressions.size() + ", s# " + m_statements.size() + "] (";
-        str += m_vars.toString() + ") {";
+        String str = leadPadding ("  ");
+        str += (isDistinctScope () ? "*" : "") + getName () + " [e# ";
+        str += m_expressions.size () + ", s# " + m_statements.size () + "] (";
+        str += m_vars.toString () + ") {";
         for (IScope c : m_children) {
-            str += "\n" + c.toStringTree();
+            str += "\n" + c.toStringTree ();
         }
-        str += "\n" + leadPadding("  ") + "}";
+        str += "\n" + leadPadding ("  ") + "}";
         return str;
     }
 
     /* (non-Javadoc)
-     * @see org.sa.rainbow.stitch.core.IScope#leadPadding(java.lang.String)
+     * @see org.sa.rainbow.stitchState.core.IScope#leadPadding(java.lang.String)
      */
     @Override
     public String leadPadding (String padder) {
-        if (padder == null)
-        {
+        if (padder == null) {
             padder = " ";  // just use a single space by default
         }
-        StringBuffer spBuf = new StringBuffer();
-        for (int i=0; i < getLevel()-1; i++) {
-            spBuf.append(padder);
+        StringBuffer spBuf = new StringBuffer ();
+        for (int i = 0; i < getLevel () - 1; i++) {
+            spBuf.append (padder);
         }
         // last seg has a space
-        if (getLevel() > 0) {
-            spBuf.append(padder.substring(0, padder.length()-1) + " ");
+        if (getLevel () > 0) {
+            spBuf.append (padder.substring (0, padder.length () - 1) + " ");
         }
-        return spBuf.toString();
+        return spBuf.toString ();
     }
 
 }

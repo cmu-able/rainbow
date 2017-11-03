@@ -39,7 +39,7 @@ import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.ports.*;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.stitch.core.Strategy;
-import org.sa.rainbow.stitch.tactic.history.ExecutionHistoryModelInstance;
+import org.sa.rainbow.stitch.history.ExecutionHistoryModelInstance;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData;
 
 import java.util.HashMap;
