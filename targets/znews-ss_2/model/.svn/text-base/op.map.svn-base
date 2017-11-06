@@ -1,5 +1,0 @@
-setFidelity: changeState
-blackhole: changeState
-unblackhole: changeState
-activateServer: start
-deactivateServer: stop
