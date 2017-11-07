@@ -373,6 +373,8 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
         }
 
         // process the variables
+        this.state = Tactic.ParseState.IN_VARS;
+        walker.getBehavior().beginTactic(null);
         for (Var v : vars ().values ()) {
 //            if (v.name.startsWith ("__post__"))
 //                continue; // ignore post expression until effect is checked
@@ -381,8 +383,8 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
                 v.valStmt.evaluate (null, walker);
             }
         }
-
         // evaluate the condition statements
+        this.state = Tactic.ParseState.IN_CONDITION;
         if (!checkCondition ()) {  // don't continue execute?
             Tool.warn ("Tactic condition of applicability NOT met!", null, stitchState ().stitchProblemHandler);
             // "unfreeze" model
@@ -393,6 +395,8 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
             }
             return null;
         }
+        
+        this.state = Tactic.ParseState.IN_ACTION;
         // execute the action statements
         for (Statement stmt : actions) {
             stmt.evaluate (null, walker);
@@ -420,7 +424,10 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
 ////                v.valStmt.evaluate(null, walker);
 ////            }
 //        }
-        boolean effectObserved = checkEffect ();
+        this.state = Tactic.ParseState.IN_EFFECT;
+        boolean effectObserved = checkEffect (walker);
+        this.state = Tactic.ParseState.UNKNOWN;
+        
         long end = new Date ().getTime ();
 
         if (Tool.logger ().isInfoEnabled ()) {
@@ -485,6 +492,15 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
             effMet &= (Boolean) expr.evaluate (null);
         }
         return effMet;
+    }
+    
+    protected boolean checkEffect (StitchBeginEndVisitor walker) {
+    	boolean effMet = true;
+    	for (Expression expr : effects) {
+    		expr.clearState();
+    		effMet &= (Boolean )expr.evaluate(null, walker);
+    	}
+    	return effMet;
     }
 
     @Override

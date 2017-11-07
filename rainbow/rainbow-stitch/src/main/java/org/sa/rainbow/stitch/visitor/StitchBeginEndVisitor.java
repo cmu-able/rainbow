@@ -260,7 +260,7 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
 
     @Override
     public Boolean visitTacticRef (@NotNull StitchParser.TacticRefContext ctx) {
-        if (ctx.DONE () != null) beh.doStrategyAction (Strategy.ActionKind.NULL);
+        if (ctx.DONE () != null) beh.doStrategyAction (Strategy.ActionKind.DONE);
         else if (ctx.NULLTACTIC () != null) beh.doStrategyAction (Strategy.ActionKind.NULL);
         else if (ctx.DO () != null) {
             beh.doStrategyLoop (ctx.v, ctx.i, ctx.t2);

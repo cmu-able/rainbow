@@ -29,6 +29,7 @@ package org.sa.rainbow.stitch.visitor;
 import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.core.*;
 import org.sa.rainbow.stitch.error.StitchProblemHandler;
+import org.sa.rainbow.stitch.parser.StitchParser;
 
 import java.util.List;
 import java.util.Stack;
@@ -75,6 +76,7 @@ public class Stitch {
 
     private boolean m_keepRunning = true;  // flag used to cancel execution
     private Stack<Boolean> m_executing;
+	public StitchParser parser;
 
 
     /**

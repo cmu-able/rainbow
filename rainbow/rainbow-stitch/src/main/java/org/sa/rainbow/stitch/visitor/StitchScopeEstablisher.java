@@ -156,16 +156,15 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
                 postV.setIsBasicType (false);
             }
             postV.name = "__post__" + identifier.IDENTIFIER ().getText ();
-//            postV.valStmt = new Statement (s, postV.name + "_scope", stitch ());
-//            postV.valStmt.setTree (preVVar.valStmt.tree ());
-//            postV.scope = postV.valStmt;
-//            StitchBeginEndVisitor v = new StitchBeginEndVisitor (this, postV.valStmt);
-//            v.setBehavior (this);
-//            beginStatement (StatementKind.VAR_DEF, (ParserRuleContext )preVVar.valStmt.tree ());
-//            StitchParser.VarContext vc = (StitchParser.VarContext )preVVar.valStmt.tree ();
-//            v.visitExpression (vc.expression ());
-//            endStatement ();
-
+            
+            Var preVar = new Var();
+            preVar.scope = scope;
+            preVar.setType(preVVar.getType());
+            if (preVar.computeClass() != null) preVar.setIsBasicType(false);
+            preVar.name = "__$pre$__" + identifier.IDENTIFIER().getText();
+            
+            
+            
             if (preState != Tactic.ParseState.IN_EFFECT) {
                 stitchProblemHandler ().setProblem (generateErrorFromToken (identifier.IDENTIFIER ().getSymbol (),
                                                                             "Post condition variable " + postV
@@ -178,6 +177,12 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
                                                                                 "Variable " + postV
                                                                                         .name + "" +
                                                                                         " already defined."));
+                }
+                if (!scope.parent().addVar(preVar.name, preVar)) {
+                	stitchProblemHandler ().setProblem (generateErrorFromToken (identifier.IDENTIFIER ().getSymbol (),
+                            "Variable " + postV
+                                    .name + "" +
+                                    " already defined."));
                 }
             }
         } else

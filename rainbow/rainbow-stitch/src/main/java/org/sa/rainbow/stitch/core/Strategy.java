@@ -26,20 +26,37 @@
  */
 package org.sa.rainbow.stitch.core;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.Random;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.Stack;
+import java.util.TreeMap;
+
 import org.acmestudio.acme.element.IAcmeElement;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation;
 import org.sa.rainbow.stitch.Ohana;
+import org.sa.rainbow.stitch.adaptation.IStitchExecutor;
 import org.sa.rainbow.stitch.adaptation.StitchExecutor;
 import org.sa.rainbow.stitch.error.ArgumentMismatchException;
 import org.sa.rainbow.stitch.history.ExecutionHistoryModelInstance;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData;
 import org.sa.rainbow.stitch.util.Tool;
+import org.sa.rainbow.stitch.visitor.IStitchBehavior;
 import org.sa.rainbow.stitch.visitor.Stitch;
-
-import java.io.IOException;
-import java.util.*;
+import org.sa.rainbow.stitch.visitor.StitchBeginEndVisitor;
 
 /**
  * Represents a Strategy scoped object parsed from the script.
@@ -250,7 +267,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
         }
     };
 
-    private StitchExecutor m_executor;
+    private IStitchExecutor m_executor;
 
     /**
      * Main Constructor for a new Strategy object.
@@ -768,7 +785,16 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 //                                                    "tactic" +
 //                                                    " action!");
                     } else {
-                        boolean effect = !parentTactic.hasError () && parentTactic.checkEffect ();
+                        IStitchBehavior beh = m_stitch./*stitch ().*/getBehavior (Stitch.EVALUATOR_PASS);
+                        
+                        StitchBeginEndVisitor walker = new StitchBeginEndVisitor (beh, parentTactic/* m_stitch.scope ()*/);
+                        walker.setBehavior (beh);
+                        beh.stitch ().setScope (parentTactic);
+                        beh.beginTactic(null);
+                        parentTactic.state = Tactic.ParseState.IN_EFFECT;
+                        boolean effect = !parentTactic.hasError () && parentTactic.checkEffect (walker);
+                        parentTactic.state = Tactic.ParseState.UNKNOWN;
+                        beh.endTactic();
                         if (Tool.logger ().isInfoEnabled ()) {
                             Tool.logger ().info (
                                     child.label () + " " + child.getCondFlag ().name () + " condition! " + effect);
@@ -873,7 +899,16 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
                                                 " appears not to have a tactic" +
                                                 " action!", null, stitchState ().stitchProblemHandler);
                         } else {
-                            boolean effect = !parentTactic.hasError () && parentTactic.checkEffect ();
+                            IStitchBehavior beh = m_stitch./*stitch ().*/getBehavior (Stitch.EVALUATOR_PASS);
+                            
+                            StitchBeginEndVisitor walker = new StitchBeginEndVisitor (beh, parentTactic/* m_stitch.scope ()*/);
+                            walker.setBehavior (beh);
+                            beh.stitch ().setScope (parentTactic);
+                            beh.beginTactic(null);
+                            parentTactic.state = Tactic.ParseState.IN_EFFECT;
+                            boolean effect = !parentTactic.hasError () && parentTactic.checkEffect (walker);
+                            parentTactic.state = Tactic.ParseState.UNKNOWN;
+                            beh.endTactic();
                             if (Tool.logger ().isInfoEnabled ()) {
                                 Tool.logger ().info (
                                         child.label () + " " + child.getCondFlag ().name () +
@@ -889,6 +924,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
                                 }
                             }
                         }
+                        break;
                     case DEFAULT:
                         // don't evaluate this, but store the default node
                         if (Tool.logger ().isInfoEnabled ()) {
@@ -1226,7 +1262,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
         return children;
     }
 
-    public void setExecutor (StitchExecutor executor) {
+    public void setExecutor (IStitchExecutor executor) {
         m_executor = executor;
 
     }

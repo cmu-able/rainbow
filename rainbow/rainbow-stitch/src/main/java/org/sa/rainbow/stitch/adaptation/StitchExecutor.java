@@ -55,7 +55,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 
  * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
  */
-public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptationExecutor<Strategy> {
+public class StitchExecutor extends AbstractRainbowRunnable implements IStitchExecutor  {
 
     public static final String                      NAME = "Rainbow Strategy Executor";
 
@@ -79,7 +79,8 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
 
     }
 
-    public ExecutionHistoryModelInstance getExecutionHistoryModel () {
+    @Override
+	public ExecutionHistoryModelInstance getExecutionHistoryModel () {
         return m_historyModel;
     }
 
@@ -465,7 +466,8 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
         return m_modelDSPort;
     }
 
-    public IModelUSBusPort getHistoryModelUSPort () {
+    @Override
+	public IModelUSBusPort getHistoryModelUSPort () {
         return m_modelUSBusPort;
     }
 
