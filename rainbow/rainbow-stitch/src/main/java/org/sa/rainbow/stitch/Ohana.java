@@ -203,7 +203,7 @@ public class Ohana {
         lexer.setTokenFactory (new CommonTokenFactory ());
         TokenStream tokens = new CommonTokenStream (lexer);
         StitchParser parser = new StitchParser (tokens);
-
+        stitch.parser = parser;
         ANTLRErrorListener errReporter = new BaseErrorListener () {
             @Override
             public void syntaxError (@NotNull Recognizer<?, ?> recognizer, @Nullable Object offendingSymbol, int
@@ -293,6 +293,7 @@ public class Ohana {
         parser.addErrorListener (errReporter);
         final StitchParser.ExpressionContext expression = parser.expression ();
         IStitchBehavior sb = m_emptyExprStitch.getBehavior (Stitch.SCOPER_PASS);
+        m_emptyExprStitch.parser = parser;
         StitchBeginEndVisitor walker = new StitchBeginEndVisitor (sb, stmt);
         walker.visit (expression);
 
