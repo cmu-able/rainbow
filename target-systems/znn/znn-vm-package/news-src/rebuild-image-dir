@@ -1,0 +1,17 @@
+#!/bin/bash
+
+IMAGES_DIR="../znn/images";
+
+if [ ! -d "$IMAGES_DIR" ]; then
+	echo "Directory $IMAGES_DIR not found."
+	exit 1
+fi
+
+if [ "`ls -a $IMAGES_DIR | egrep -v \\\.jpg\$ | wc -l`" != "2" ]; then
+	echo "Directory $IMAGES_DIR has more than just jpeg images."
+	exit 1
+fi
+
+rm -f $IMAGES_DIR/*.jpg
+
+cp *.jpg $IMAGES_DIR/

@@ -1,0 +1,62 @@
+#!/bin/bash
+
+echo "-- Commands to load news data into MySQL database." > load-news.sql
+
+IMG_ID=1
+for i in `ls *.t`; do
+	ID=`echo $i | sed -re 's/(.*)\.t/\1/'`
+	IC=1
+	while [ -e "$ID-i$IC-HD.jpg" ]; do
+		IC=$((IC + 1))
+	done
+
+	IC=$((IC - 1))
+
+	echo "insert into news" >> load-news.sql
+	echo "    (news_id, news_title, news_text, news_img_cnt)" >> load-news.sql
+	echo "    values" >> load-news.sql
+
+	echo "    ($ID," >> load-news.sql
+
+	echo -n "    '" >> load-news.sql
+	if [ ! -e "$ID.t" ]; then
+		echo "File $ID.t not found."
+		exit 1
+	fi
+
+	cat "$ID.t" | tr -d '\n' | sed -re "s/'/''/g" >> load-news.sql
+	echo "'," >> load-news.sql
+
+	echo -n "    '" >> load-news.sql
+	if [ ! -e "$ID.b" ]; then
+		echo "File $ID.b not found."
+		exit 1
+	fi
+
+	cat "$ID.b" | sed -re "s/'/''/g" >> load-news.sql
+	echo "'," >> load-news.sql
+
+	echo "    $IC);" >> load-news.sql
+
+	for ((i = 1; i <= $IC; i++)); do
+		HD="$ID-i$i-HD.jpg"
+		LD="$ID-i$i-LD.jpg"
+
+		if [ ! -e "$HD" ]; then
+			echo "File $HD not found."
+			exit 1
+		fi
+
+		if [ ! -e "$LD" ]; then
+			echo "File $LD not found (maybe need to run build-ld.sh?)"
+			exit 1
+		fi
+
+		echo "insert into img" >> load-news.sql
+		echo "    (img_id, news_id, img_high_res, img_low_res)" >> load-news.sql
+		echo "    values" >> load-news.sql
+		echo "    ($IMG_ID, $ID, '$HD', '$LD');" >> load-news.sql 
+		IMG_ID=$((IMG_ID + 1))
+	done
+done
+
