@@ -178,8 +178,8 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
     @Override
     public Boolean visitCondition (@NotNull StitchParser.ConditionContext ctx) {
         beh.beginConditionBlock (ctx);
-        for (int i = 0; i < ctx.expression ().size (); i++) {
-            visitExpression (ctx.expression (i));
+        for (int i = 0; i < ctx.booleanExpression ().size (); i++) {
+            visitBooleanExpression (ctx.booleanExpression (i));
         }
         beh.endConditionBlock ();
         return true;
@@ -199,12 +199,12 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
         int exprStartIndex = 0;
         if (ctx.AT () != null)
             exprStartIndex = 1;
-        for (int i = exprStartIndex; i < ctx.expression ().size (); i++) {
-            visitExpression (ctx.expression (i));
+        for (int i = exprStartIndex; i < ctx.booleanExpression ().size (); i++) {
+            visitBooleanExpression (ctx.booleanExpression (i));
         }
         if (ctx.AT () != null) {
-            visitExpression (ctx.expression (0));
-            beh.doTacticDuration (ctx.expression (0));
+            visitBooleanExpression (ctx.booleanExpression (0));
+            beh.doTacticDuration (ctx.booleanExpression (0));
         }
 //        super.visitEffect (ctx);
         beh.endEffectBlock ();
@@ -215,7 +215,7 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
     public Boolean visitStrategy (@NotNull StitchParser.StrategyContext ctx) {
 //        IScope preScope = beh.stitch().scope ();
         beh.beginStrategy (ctx.IDENTIFIER ());
-        visitExpression (ctx.expression ());
+        visitBooleanExpression (ctx.booleanExpression ());
         beh.doStrategyCondition (Strategy.ConditionKind.APPLICABILITY, ctx);
         visitFunctions (ctx.functions ());
         for (int i = 0; i < ctx.strategyNode ().size (); i++) {
@@ -244,15 +244,15 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
     public Boolean visitStrategyCond (@NotNull StitchParser.StrategyCondContext ctx) {
         int exprIdx = 0;
         if (ctx.HASH () != null) {
-            visitExpression (ctx.expression (0));
+            visitExpression (ctx.expression());
             exprIdx = 1;
             beh.doStrategyProbability ();
         }
         if (ctx.SUCCESS () != null) beh.doStrategyCondition (Strategy.ConditionKind.SUCCESS, ctx);
         if (ctx.FAILURE () != null) beh.doStrategyCondition (Strategy.ConditionKind.FAILURE, ctx);
         if (ctx.DEFAULT () != null) beh.doStrategyCondition (Strategy.ConditionKind.DEFAULT, ctx);
-        if (ctx.expression () != null && ctx.expression ().size () == exprIdx + 1) {
-            visitExpression (ctx.expression (exprIdx));
+        if (ctx.booleanExpression () != null) {
+            visitBooleanExpression(ctx.booleanExpression());
             beh.doStrategyCondition (Strategy.ConditionKind.EXPRESSION, ctx);
         }
         return true;

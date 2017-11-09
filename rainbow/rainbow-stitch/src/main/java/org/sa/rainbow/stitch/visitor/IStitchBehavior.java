@@ -152,7 +152,7 @@ public interface IStitchBehavior {
 
     void setupPathFilter (TerminalNode identifier);
 
-    void doTacticDuration (StitchParser.ExpressionContext expression);
+    void doTacticDuration (StitchParser.BooleanExpressionContext expression);
 
     /**
      * Created by schmerl on 10/20/2016.

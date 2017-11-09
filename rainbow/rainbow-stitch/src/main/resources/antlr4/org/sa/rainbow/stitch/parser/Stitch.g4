@@ -101,7 +101,7 @@ var
   ;
 
 condition
-  :   CONDITION LBRACE (expression SEMICOLON)* RBRACE
+  :   CONDITION LBRACE (booleanExpression SEMICOLON)* RBRACE
   ;
 
 action
@@ -109,13 +109,13 @@ action
   ;
 
 effect
-  : EFFECT (AT LBRACKET expression RBRACKET)? LBRACE (expression SEMICOLON)* RBRACE
+  : EFFECT (AT LBRACKET booleanExpression RBRACKET)? LBRACE (booleanExpression SEMICOLON)* RBRACE
   ;
 
 
 strategy
   : STRATEGY IDENTIFIER
-    LBRACKET expression RBRACKET
+    LBRACKET booleanExpression RBRACKET
     LBRACE functions strategyNode* RBRACE
   ;
 
@@ -129,7 +129,7 @@ strategyNode
 
 strategyCond
   : LPAREN (HASH expression)?
-    (expression | SUCCESS | FAILURE | DEFAULT)
+    (booleanExpression | SUCCESS | FAILURE | DEFAULT)
     RPAREN
   ;
 
@@ -148,49 +148,6 @@ strategyBranch
   : strategyNode+
   ;
 
-/*strategyOutcome
-  : strategyClosedOutcome SEMICOLON
-  | strategyOpenOutcome
-    (strategyTimingExpr)?
-    (BAR DONE SEMICOLON
-    | strategyBranchOutcome
-    )
-  ;*/
-
-/*
-strategyClosedOutcome
-  : DONE
-  | NULLTACTIC
-  | d = DO LBRACKET
-    (IDENTIFIER | INTEGER_LIT | {((CommonToken )$d).setType(DO_UNSPEC);})
-    RBRACKET IDENTIFIER
-  ;
-
-strategyOpenOutcome
-  : IDENTIFIER LPAREN argList RPAREN
-  ;
-
-strategyBranchOutcome
-  : lb = LBRACE {((CommonToken )$lb).setType(STRATEGY_BRANCH);}
-    strategyExpr+ RBRACE
-  ;
-
-strategyProbExpr
-  : HASH LBRACKET strategyProbValue RBRACKET
-  ;
-
-strategyProbValue
-  : expression
-  ;
-
-strategyTimingExpr
-  : AT LBRACKET strategyTimingValue RBRACKET
-  ;
-
-strategyTimingValue
-  : expression
-  ;
-*/
 
 statement
   : LBRACE statement* RBRACE errorHandler?
@@ -287,50 +244,6 @@ multiplicativeExpression
 
 
 
-//expression
-//  : LPAREN e=expression RPAREN
-//  | idExpression
-//  | postIdExpression
-//  | setExpression
-//  | expression (STAR | SLASH | MOD) expression
-//  //| expression SLASH expression
-//  |// expression MOD expression
-//  | expression (PLUS | MINUS) expression
-//  //| expression MINUS expression
-//  | expression (LT | LE | GE | GT) expression
-////  | expression LE expression
-////  | expression GE expression
-////  | expression GT expression
-//  | expression (EQ | NE) expression
-//  //| expression EQ expression
-//  | expression LOGICAL_AND expression
-//  | expression LOGICAL_OR expression
-//  | expression IFF expression
-//  | expression IMPLIES expression
-//  | unaryExpression
-//  | quantifiedExpression
-//  | assignmentExpression
-//
-//  ;
-//
-//
-//assignmentExpression
-//  : IDENTIFIER
-//    (ASSIGN | PLUS_ASSIGN | MINUS_ASSIGN | STAR_ASSIGN | DIV_ASSIGN | MOD_ASSIGN)
-//    expression
-//  ;
-//
-//logicalExpression
-//  : expression (IMPLIES | IFF | LOGICAL_OR | LOGICAL_AND) expression
-//  ;
-//
-//relationalExpression
-//  : expression (NE | EQ | LT | LE | GE | GT) expression
-//  ;
-//
-//arithmeticExpression
-//  : expression (PLUS | MINUS | STAR | SLASH | MOD) expression
-//  ;
 
 unaryExpression
   : INCR unaryExpression

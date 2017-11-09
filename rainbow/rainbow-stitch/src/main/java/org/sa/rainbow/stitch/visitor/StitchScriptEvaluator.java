@@ -64,6 +64,7 @@ import org.sa.rainbow.stitch.core.Var;
 import org.sa.rainbow.stitch.model.ModelOperator;
 import org.sa.rainbow.stitch.parser.StitchParser;
 import org.sa.rainbow.stitch.parser.StitchParser.ActionContext;
+import org.sa.rainbow.stitch.parser.StitchParser.BooleanExpressionContext;
 import org.sa.rainbow.stitch.util.Tool;
 import org.sa.rainbow.util.Util;
 
@@ -314,6 +315,7 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 		Expression cExpr = doEndComplexExpr();
 		expr().setResult(cExpr.getResult());
 	}
+	
 
 	@Override
 	public void beginMethodCallExpression() {
@@ -1635,4 +1637,6 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 		expr().setResult(cExpr.getResult());
 		scope().vars().remove("__path_filter_type");
 	}
+	
+
 }
