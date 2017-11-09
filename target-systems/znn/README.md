@@ -12,15 +12,16 @@ This documentation assumes that you are running a version of Linux (has only
 been tested on Ubuntu). 
 It is assumed that the following Ubuntu packages are installed on each virtual 
 machine that requires the build:
-	build-essentials
-	cmake
- 	libncurses5-dev
-	imagemagick
-	libxml2-dev
- 	zlib1g-devxml2
-    bc
-	psmisc
-    wget
+
+- build-essentials
+- cmake
+- libncurses5-dev
+- imagemagick
+- libxml2-dev
+- zlib1g-devxml2
+- bc
+- psmisc
+- wget
     
 On Ubuntu use sudo apt-get to install the packages.
 
