@@ -1,0 +1,4 @@
+#!/bin/bash
+
+rm *-LD.jpg
+rm load-news.sql

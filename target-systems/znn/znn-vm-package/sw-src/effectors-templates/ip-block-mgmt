@@ -1,0 +1,48 @@
+#!/bin/bash
+if [[ ! "$1" =~ ^(block|unblock)$ ]]; then
+  echo $0 "{block|unblock} {ip-address}"
+  exit 1
+fi
+if [ -f "~/znn-config" ]; then
+  source ~/znn-config
+  BLOCKED_FILE=$ZNN_HOME/sw-bin/httpd-lb-$ZNN_HTTPD_VERSION/conf/blocked.conf
+else
+  BLOCKED_FILE=/home/znn/sw-bin/httpd-lb-2.4.2/conf/blocked.conf
+fi
+
+if [ ! -f "$BLOCKED_FILE" ]; then
+  echo "$BLOCKED_FILE not found."
+  exit 1
+fi
+
+UPDATED=0
+echo "# Place in this file deny orders for znn" > $BLOCKED_FILE
+if [[ "$1" != "" ]]; then
+for ip in ${2//,/ }; do
+  COUNT=$(cat "$BLOCKED_FILE" | egrep "^deny from $2\$" | wc -l)
+  if [ "$COUNT" -gt 0 ]; then
+    if [ "$1" == "block" ]; then
+      echo "$ip is already blocked in $BLOCKED_FILE"
+    else
+      cat "$BLOCKED_FILE" | egrep -v "^deny from $ip\$" > /tmp/new-blocked
+      mv /tmp/new-blocked "$BLOCKED_FILE"
+      echo "$ip is now unblocked in $BLOCKED_FILE"
+      UPDATED=1
+    fi
+  else
+    if [ "$1" == "block" ]; then
+      echo "deny from $ip" >> $BLOCKED_FILE
+      echo "$ip is now blocked in $BLOCKED_FILE"
+      UPDATED=1
+    else
+      echo "$ip is not blocked in $BLOCKED_FILE"
+    fi
+  fi
+done
+else
+  echo "Nothing to do"
+fi
+
+if [[ "$UPDATED" == 1 ]]; then
+APACHE_INSTALL/bin/httpd -k restart
+fi

@@ -1,0 +1,25 @@
+# Configure mod_security to get security rules from security.conf
+<IfModule security2_module>
+SecRuleEngine On
+SecAuditEngine On
+SecAuditLog logs/audit.log
+Include conf/security.conf
+</IfModule>
+
+# Define the location of the load balancer manager web interface
+<Location /balancer-manager>
+  SetHandler balancer-manager
+</Location>
+
+# Define the load balancer
+<Proxy balancer://mycluster/>
+Include conf/balanced.conf
+Order allow,deny
+Allow from all
+Include conf/blocked.conf
+</Proxy>
+
+# Configure apache to send all requests except those for /balancer-manager
+# to the web server
+ProxyPass /balancer-manager !
+ProxyPass / balancer://mycluster/

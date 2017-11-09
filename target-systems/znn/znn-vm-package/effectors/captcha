@@ -1,0 +1,14 @@
+#!/bin/bash
+if [[ ! "$1" =~ ^(off|on)$ ]]; then
+  echo $0 "{on|off} {file}"
+  exit 1
+fi
+
+if [ "$1" == "on" ]; then
+  echo "captcha" > /tmp/znn-wrapper-1080  
+  echo "Captcha is on"
+else
+  rm -f /tmp/znn-wrapper-1080 
+  echo "Captch is off"
+fi
+
