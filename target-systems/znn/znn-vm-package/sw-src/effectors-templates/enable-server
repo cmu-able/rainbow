@@ -1,0 +1,46 @@
+#!/bin/bash
+# enable-server {off|on} {ip:port}
+# BalanceMember http://ip:port/ retry=5 timeout=30 loadfactor=1
+if [[ "$#" != 2 || ! "$1" =~ ^(on|off)$ ]]; then
+  echo "$0 {off|on} {ip:port}"
+  exit 1
+fi
+
+[ -a ~/znn-config ] && {
+  source ~/znn-config
+  BALANCE_FILE=$ZNN_HOME/sw-bin/httpd-lb-$ZNN_HTTPD_VERSION/conf/balanced.conf
+} || {
+  BALANCE_FILE=/home/znn/sw-bin/httpd-lb-2.4.2/conf/balanced.conf
+  ZNN_HOME=/home/znn
+}
+
+if [ ! -f "$BALANCE_FILE" ]; then
+  echo "$BALANCE_FILE not found."
+  exit 1
+fi
+
+UPDATED=0
+
+COUNT=$(cat "$BALANCE_FILE" | egrep "^BalancerMember http://$2" | wc -l)
+if [ "$COUNT" -gt 0 ]; then
+  if [ "$1" == "on" ]; then
+    echo "http://$2 is already enabled in $BALANCE_FILE"
+  else
+    cat "$BALANCE_FILE" | egrep -v "^BalancerMember http://$2" > /tmp/new-balance
+    mv /tmp/new-balance "$BALANCE_FILE"
+    echo "$2 is now disabled in $BALANCE_FILE"
+    UPDATED=1
+  fi
+else
+  if [ "$1" == "on" ]; then
+    echo "BalancerMember http://$2/ retry=5 timeout=30 loadfactor=1" >> $BALANCE_FILE
+    echo "$2 is now enabled in $BALANCE_FILE"
+    UPDATED=1
+  else
+    echo "$2 is already disabled in $BALANCE_FILE"
+  fi
+fi
+
+if [ "$UPDATED" -eq 1 ]; then
+  APACHE_INSTALL/bin/httpd -k restart
+fi
