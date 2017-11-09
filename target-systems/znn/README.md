@@ -54,6 +54,7 @@ changed for your configuration (e.g., on AWS, the ZNN_USER might be ubuntu,
 ZNN_HOME might be ~ubuntu, ZNN_LIBXML2 might be /usr/lib/x86_64/libxml2.so).
 
 The znn.properties define the following variables:
+
 | Variable | Description |
 |----------|-------------|
 | customize.system.target.lb | The IP of the network that will run the load dispatcher.  |
