@@ -9,9 +9,9 @@ import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.core.Var;
-import org.sa.rainbow.stitch.tactic.history.ExecutionHistoryCommandFactory;
-import org.sa.rainbow.stitch.tactic.history.ExecutionHistoryModelInstance;
-import org.sa.rainbow.stitch.util.ExecutionHistoryData.ExecutionStateT;
+import org.sa.rainbow.stitch.history.ExecutionHistoryCommandFactory;
+import org.sa.rainbow.stitch.history.ExecutionHistoryModelInstance;
+import org.sa.rainbow.stitch.util.ExecutionHistoryData;
 import org.sa.rainbow.stitch.visitor.Stitch;
 
 /**
@@ -37,7 +37,7 @@ public class StitchExecutionVisitor extends DefaultAdaptationExecutorVisitor<Str
     }
 
     /**
-     * Evaluate the stitch strSttategy. This evaluation should store the success or otherwise in a model of the
+     * Evaluate the stitchState strSttategy. This evaluation should store the success or otherwise in a model of the
      * strategy, and should mark it executed on the strategy model.
      */
     @Override
@@ -47,7 +47,8 @@ public class StitchExecutionVisitor extends DefaultAdaptationExecutorVisitor<Str
         try {
             synchronized (adaptation) {
                 if (actualExecutedAdaptation.isExecuting ()) {
-                    Stitch stitch = Ohana.instance ().findFreeStitch (actualExecutedAdaptation.stitch ());
+                    Stitch stitch = Ohana.instance ().findFreeStitch (actualExecutedAdaptation.stitchState ()/*
+                    .stitch ()*/);
                     for (Strategy t : stitch.script.strategies) {
                         if (t.getName ().equals (adaptation.getName ())) {
                             actualExecutedAdaptation = t;
@@ -67,27 +68,30 @@ public class StitchExecutionVisitor extends DefaultAdaptationExecutorVisitor<Str
             Strategy.Outcome o = null;
             // provide var fo _dur_
             Var v = new Var ();
-            v.scope = actualExecutedAdaptation.stitch ().scope ();
+            v.scope = actualExecutedAdaptation.stitchState ().scope ();
             v.setType ("long");
             v.name = "_dur_";
             v.setValue (0L);
-            actualExecutedAdaptation.stitch ().script.addVar (v.name, v);
+            actualExecutedAdaptation.stitchState ()./*stitch().*/script.addVar (v.name, v);
             m_executor.getHistoryModelUSPort ().updateModel (
                     m_historyFactory.strategyExecutionStateCommand (adaptation.getQualifiedName (),
                                                                     ExecutionHistoryModelInstance.STRATEGY,
-                                                                    ExecutionStateT.STARTED, null));
+                                                                    ExecutionHistoryData.ExecutionStateT.STARTED,
+                                                                    null));
             o = (Strategy.Outcome) actualExecutedAdaptation.evaluate (null);
-            actualExecutedAdaptation.stitch ().script.vars ().remove (v.name);
+            actualExecutedAdaptation.stitchState ()/*.stitch()*/.script.vars ().remove (v.name);
 
             m_executor.log (" - Outcome(" + actualExecutedAdaptation.getName () + "): " + o);
             m_executor.getHistoryModelUSPort ().updateModel (
                     m_historyFactory.strategyExecutionStateCommand (adaptation.getQualifiedName (),
                                                                     ExecutionHistoryModelInstance.STRATEGY,
-                                                                    ExecutionStateT.FINISHED, o.toString ()));
+                                                                    ExecutionHistoryData.ExecutionStateT.FINISHED, o
+                                                                            .toString ()));
             adaptation.setOutcome (o);
             return o == Strategy.Outcome.SUCCESS;
         } catch (IOException e) {
-            m_executor.getReportingPort ().error (m_executor.getComponentType (), "Failed to parse the stitch file", e);
+            m_executor.getReportingPort ().error (m_executor.getComponentType (), "Failed to parse the stitchState " +
+                    "file", e);
         } finally {
             actualExecutedAdaptation.markExecuting (false);
         }
