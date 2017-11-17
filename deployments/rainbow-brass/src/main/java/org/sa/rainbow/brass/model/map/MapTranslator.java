@@ -460,12 +460,12 @@ public class MapTranslator {
     /**
      * Returns the rotation time in seconds from a given robot orientation to the right angle before it
      * starts moving towards a given location (target of arc a)
-     * @param robotOrientation orientation of the robot (angle in Radians)
+     * @param robotOrientation orientation of the robot (angle in Radians, from 0 to 2pi)
      * @param a Map arc 
      * @return Rotation time in seconds
      */
     public static double getRotationTime(double robotOrientation, EnvMapArc a){    	
-        double theta = Math.abs(robotOrientation-findArcOrientation(a));
+        double theta = Math.abs(robotOrientation-findArcOrientation(a)); // subtracting [0, 2pi) from [0, 2pi)
         double min_theta = (theta > Math.PI) ? 2*Math.PI - theta : theta;
         return (min_theta/ROBOT_ROTATIONAL_SPEED_VALUE); 
     }
@@ -476,7 +476,7 @@ public class MapTranslator {
      * as the reference of coordinates in the plane. Used to determine the part of the time reward structure 
      * associated with in-node robot rotations.
      * @param a Map arc
-     * @return angle in radians between a.m_source and a.m_target
+     * @return angle in radians between a.m_source and a.m_target, in the [0, 2pi) interval
      */
     public static double findArcOrientation(EnvMapArc a){
         synchronized (m_map) {
@@ -489,9 +489,18 @@ public class MapTranslator {
         }
     }
 
-
+    /**
+     * Determines the angle (in Radians) of a vector (source, target), taking the source
+     * as the reference of coordinates in the plane.
+     * @return angle in radians, ranging from -pi to pi
+     */
     public static double findArcOrientation(double src_x, double src_y, double tgt_x, double tgt_y){
-        return Math.atan2( tgt_y - src_y, tgt_x - src_x);
+    	double angle = Math.atan2( tgt_y - src_y, tgt_x - src_x); // from -pi to pi
+    	
+    	if (angle < 0) // convert to [0, 2pi)
+    		angle += 2*Math.PI;
+    	
+        return angle;
     }
 
 
