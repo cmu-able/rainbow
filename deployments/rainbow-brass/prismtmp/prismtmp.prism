@@ -193,7 +193,7 @@ robot_done:bool init false;
 	 [t_set_loc_hi] (k!=LOC_HI) & (kr<LOC_MODE_RECONF_MAX) & (!stop) & (turn=RT) & (!robot_done) ->  (k'=LOC_HI)& (kr'=kr+1)  & (robot_done'=true);
 
 	 // Recharge tactics
-	 [t_recharge] true  & (false|l=10|l=11|l=8|l=9) & (b<1500*5.0)& (!stop) & (turn=RT) & (!robot_done) ->  (b'=b_upd_charge) & (robot_done'=true);
+	 [t_recharge] true  & (false|l=c3|l=c4|l=c1|l=c2) & (b<1500*5.0)& (!stop) & (turn=RT) & (!robot_done) ->  (b'=b_upd_charge) & (robot_done'=true);
 
 
 	 [l1_to_l2] (l=l1) & (!stop) & (turn=RT) & (!robot_done) -> (l'=l2)  & (b'=b_upd_l1_l2) & (r'=H_EAST) & (robot_done'=true);
