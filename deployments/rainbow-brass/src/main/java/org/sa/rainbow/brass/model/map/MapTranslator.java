@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import org.sa.rainbow.brass.PropertiesConnector;
 import org.sa.rainbow.brass.model.map.dijkstra.Dijkstra;
 import org.sa.rainbow.brass.model.map.dijkstra.Edge;
 import org.sa.rainbow.brass.model.map.dijkstra.Graph;
@@ -785,7 +786,7 @@ public class MapTranslator {
             out.close();
         }
         catch (IOException e){
-            System.out.println("Error exporting PRISM map translation");
+            System.out.println("Error exporting PRISM map translation:\n" + e);
         }
     }
 
@@ -819,12 +820,14 @@ public class MapTranslator {
      * @param args
      */
     public static void main(String[] args) {
+    	// To use standalone Prism generation, See ../PropertiesConnector.java to set necessary environment 
         EnvMap dummyMap = new EnvMap (null, null);
         //dummyMap.insertNode("newnode", "l1", "l2", 17.0, 69.0);
         setMap(dummyMap);
         System.out.println(getMapTranslation()); // Class test
-        //System.out.println();
-        exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp-simple.prism", false);
+        exportMapTranslation(PropertiesConnector.DEFAULT.getProperty(PropertiesConnector.PRISM_OUTPUT_DIR_PROPKEY) + 
+        		"prismtmp.prism", false);
+        
         // String export_path="/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/";
 
         // Map<List, String> specifications = exportConstrainedTranslationsBetween (export_path, "ls", "l1");
