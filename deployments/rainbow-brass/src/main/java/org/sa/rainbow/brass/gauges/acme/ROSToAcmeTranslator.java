@@ -59,6 +59,10 @@ public class ROSToAcmeTranslator implements ROSAcmeStyle {
 		m_commands = new HashMap<>();
 	}
 
+	/**
+	 * Checks to make sure all the operations needed to construct the architecture are commands in m_commands 
+	 * @throws IncompleteCommandsException if there is one missing
+	 */
 	protected void checkCommands() throws IncompleteCommandsException {
 		for (Operations o : Operations.values()) {
 			if (!m_commands.containsKey(o.opname()))
@@ -66,6 +70,13 @@ public class ROSToAcmeTranslator implements ROSAcmeStyle {
 		}
 	}
 
+	/**
+	 * Sets the ROS things that should be ignored when constructing the architecture
+	 * @param nodes The nodes to ignore
+	 * @param topics The topics (represented as regular expressions) to ignore
+	 * @param services The services (represented as regular expressions) to ignore
+	 * @param actions The actions (represented as regular expressions) to ignore
+	 */
 	public void setIgnorance(Collection<String> nodes, Collection<String> topics, Collection<String> services,
 			Collection<String> actions) {
 		m_nodes2ignore.addAll(nodes);
@@ -118,7 +129,7 @@ public class ROSToAcmeTranslator implements ROSAcmeStyle {
 			String subscriptions = match.group(3);
 			String services = match.group(4);
 
-			if (!m_nodes2ignore.contains(nodeName)) {
+			if (!m_nodes2ignore.contains(nodeName)) { // This is an interesting node
 
 				UMComponent node = createNodeComponent(system, nodeName);
 				attachments.addAll(processTopics(node, publications, subscriptions, topicConnectors, actionConnectors));
@@ -184,6 +195,7 @@ public class ROSToAcmeTranslator implements ROSAcmeStyle {
 		}
 	}
 
+	// Checks to see if the item matches any of the patterns in the set.
 	private boolean matchesRegex(Set<Pattern> patterns, String item) {
 		for (Pattern p : patterns) {
 			if (p.matcher(item).matches()) return true;
@@ -205,6 +217,7 @@ public class ROSToAcmeTranslator implements ROSAcmeStyle {
 		Set<String> subscribers = new HashSet<>(Arrays.asList(subscriptions.split("\r?\n")));
 
 		Set<String> actions = new HashSet<>();
+		// filter out the actions and put them into the actions set
 		filterTopicsForActions(actions, advertisers, subscribers);
 
 		Set<UMAttachment> atts = new HashSet<>();
@@ -221,7 +234,7 @@ public class ROSToAcmeTranslator implements ROSAcmeStyle {
 			Map<String, UMConnector> actionConnectors) {
 		Set<UMAttachment> atts = new HashSet<>();
 		for (String a : actions) {
-			if (m_actions2ignore.contains(a)) continue;
+			if (matchesRegex(m_actions2ignore, a)) continue;
 			IAcmePortType portType = ActionServerPortT;
 			IAcmeRoleType roleType = ROSActionResponderRoleT;
 			String actionRoleName = "responder";
@@ -256,6 +269,26 @@ public class ROSToAcmeTranslator implements ROSAcmeStyle {
 		return port;
 	}
 
+	/**
+	 * Actions are implemented as a set of topic subscriptions and advertisements. So go through the 
+	 * advertisers and subscribers to check for these topics and filter them out into one action
+	 * An action is represented by the following topics:
+	 * <ul>
+	 * <li> ACTION/cancel
+	 * <li> ACTION/feedback
+	 * <li> ACTION/goal
+	 * <li> ACTION/status
+	 * <li> ACTION/result
+	 * </ul>
+	 * 
+	 * If we see all 5 of these, then we create an ACTION port. If the ACTION/cancel is a subscription
+	 * then the port will be an action server, otherwise it is a client. This is indicated by appending
+	 * _s or _c to the action name, respectively.
+	 * 
+	 * @param actions The action ports that are in here -- this set will be changed with new actions.
+	 * @param advertisers The list of advertiser topics -- this list will have topics corresponding to actions removed
+	 * @param subscribers The list of subscriber topics -- this list will have topics corresponding to actions removed
+	 */
 	private void filterTopicsForActions(Set<String> actions, Set<String> advertisers, Set<String> subscribers) {
 		Map<String, Set<String>> actionCandidates = new HashMap<>();
 		Set<String> topics = new HashSet<>(advertisers);
@@ -309,6 +342,7 @@ public class ROSToAcmeTranslator implements ROSAcmeStyle {
 						+ (topicType == TopicAdvertisePortT ? "_a" : "_s");
 				UMPort port = node.getPort(portName);
 				accountedForPorts.add(portName);
+				// Continue if we've already created this port  (i.e., it existed in here)
 				if (port != null) {
 					continue;
 				}
