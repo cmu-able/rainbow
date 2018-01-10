@@ -295,9 +295,10 @@ public class PolicyToIG {
      * 
      * @param p
      * @param r
+     * @param w 
      * @return
      */
-    public static String generateJSONWayPointList (PrismPolicy p, String r) {
+    public static String generateJSONWayPointList (PrismPolicy p, String r, double w) {
         String out = "{\"path\": [";
         for (int i = 0; i < p.getPlan ().size (); i++) {
             String[] e = p.getPlan ().get (i).split ("_");
@@ -307,6 +308,7 @@ public class PolicyToIG {
             out = out + ",\"" + e[2] + "\"";
         }
         out = out + "], \"time\": " + r;
+        out = out + ", \"start-dir\": " + w;
         out = out + "}";
         return out;
     }
@@ -329,6 +331,12 @@ public class PolicyToIG {
             System.out.println ("Error exporting Instruction Graph translation");
         }
     }
+    
+    public static double getInitialRotation(EnvMapNode src, PrismPolicy prismPolicy, EnvMap map) {
+    	EnvMapNode next = map.getNodes().get(prismPolicy.m_plan.get(0));
+    	double w = Math.atan2(next.m_x - src.m_x, next.m_y - src.m_y);
+    	return w;
+	}
 
     /**
      * Class test
@@ -354,16 +362,20 @@ public class PolicyToIG {
                     prismPolicy.readPolicy ();
                     //System.out.println(prismPolicy.getPlan().toString());
                     PolicyToIG translator = new PolicyToIG (prismPolicy, map);
+                    double w = getInitialRotation(node_src, prismPolicy, map);
                     // System.out.println(translator.translate());
                     exportIGTranslation (out_dir_ig + node_src.getLabel () + "_to_" + node_tgt.getLabel () + ".ig",
                             translator.translate ());
-                    String w = generateJSONWayPointList (prismPolicy, String.valueOf (ttc));
-                    System.out.println (w);
+                    String wJson = generateJSONWayPointList (prismPolicy, String.valueOf (ttc), w);
+                    System.out.println (wJson);
                     exportIGTranslation (out_dir_wp + node_src.getLabel () + "_to_" + node_tgt.getLabel () + ".json",
-                            w);
+                            wJson);
+                    
 
                 }
             }
         }
     }
+
+	
 }
