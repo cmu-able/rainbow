@@ -69,7 +69,7 @@ public class PrismConnector {
         String line;
         String result="";
         String locationParameterString = ",INITIAL_LOCATION=" + String.valueOf (currentLocationId) + ",TARGET_LOCATION="
-                + String.valueOf (toLocationId);
+                + String.valueOf (toLocationId) + ",INITIAL_HEADING=1";
 
         try {
             Process p = Runtime.getRuntime ()
@@ -108,7 +108,7 @@ public class PrismConnector {
     public void invoke (int currentLocationId, int toLocationId) {
         String line;
         String locationParameterString = ",INITIAL_LOCATION=" + String.valueOf (currentLocationId) + ",TARGET_LOCATION="
-                + String.valueOf (toLocationId);
+                + String.valueOf (toLocationId) + ",INITIAL_HEADING=1";
 
         try {
             Process p = Runtime.getRuntime ()
@@ -138,7 +138,7 @@ public class PrismConnector {
         }
         catch (IOException e) {
             e.printStackTrace ();
-        }
+        } 
     }
 
     public String getResult(){
