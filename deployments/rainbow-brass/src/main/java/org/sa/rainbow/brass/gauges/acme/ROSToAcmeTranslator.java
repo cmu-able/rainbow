@@ -135,6 +135,11 @@ public class ROSToAcmeTranslator implements ROSAcmeStyle {
 				attachments.addAll(processTopics(node, publications, subscriptions, topicConnectors, actionConnectors));
 
 				processServices(node, services, servicePorts);
+				if (node.getPorts().isEmpty()) {
+					// This node contribute nothing, so let's delete it
+					system.removeUnifiedComponent(node.getName());
+					
+				}
 			}
 
 		}
@@ -476,6 +481,19 @@ public class ROSToAcmeTranslator implements ROSAcmeStyle {
 					Map<String, String> p = new HashMap<>();
 					p.put(op.getParameters()[0], port);
 					p.put(op.getTarget(), node.getName());
+					ops.add(op);
+					params.add(p);
+				}
+			}
+			
+			// Get rid of nodes that lost their ports
+			if (node.getPorts().isEmpty()) {
+				currentSystem.removeUnifiedComponent(node.getName());
+				IRainbowOperation op = m_commands.get(Operations.DELETE_COMPONENT.opname());
+				if (op != null) {
+					Map<String,String> p = new HashMap<>();
+					p.put(op.getParameters()[0], node.getName());
+					p.put(op.getTarget(), currentSystem.getName());
 					ops.add(op);
 					params.add(p);
 				}
