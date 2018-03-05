@@ -353,8 +353,9 @@ public class MapTranslator {
         String guard_can_charge=" & (false";
         synchronized(m_map){
             for (Map.Entry<String, EnvMapNode> e: m_map.getNodes().entrySet()){
-                if (e.getValue().isChargingStation()){
-                    guard_can_charge +="|"+ROBOT_LOCATION_VAR+"="+e.getValue().getId();
+                EnvMapNode n = e.getValue();
+				if (n.getProperty(Phase1MapPropertyKeys.CHARGING_STATION) != null && ((Boolean )n.getProperty(Phase1MapPropertyKeys.CHARGING_STATION))){
+                    guard_can_charge +="|"+ROBOT_LOCATION_VAR+"="+n.getId();
 
                 }	
             }

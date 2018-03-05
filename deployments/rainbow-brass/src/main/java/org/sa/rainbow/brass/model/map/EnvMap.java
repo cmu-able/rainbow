@@ -104,7 +104,9 @@ public class EnvMap {
     }
 
     public synchronized void AddNode (String label, double x, double y, boolean charging){
-        m_nodes.put(label, new EnvMapNode(label, x, y, m_new_node_id, charging));
+        EnvMapNode mn = new EnvMapNode(label, x, y, m_new_node_id);
+        mn.setProperty(Phase1MapPropertyKeys.CHARGING_STATION, charging);
+		m_nodes.put(label, mn);
         m_new_node_id++;
     }
 
