@@ -1,0 +1,220 @@
+#
+# Probe descriptions.
+#
+# History:
+# - [SWC 2007.03.18] Created file, populated new probe descriptions.
+# - [SWC 2007.04.09] Added array of host names as arguments to PingRTTProbe.
+# - [SWC 2007.04.10] Modified descriptions for different target locations.
+# - [SWC 2007.04.11] Added ClientProxyProbe
+#
+vars:
+#  _probes.commonPath: "${rainbow.path}/system/probes"
+  _probes.commonPath: /home/znn/rainbow/org.sa.rainbow.sdk.znews/targets/znews-ss/system/probes/
+probes:
+
+  ClientProbe:
+    alias: client
+    location: "${customize.system.target.lb}"
+    type: java
+    javaInfo:
+      class: org.sa.rainbow.translator.znn.probes.ClientProbe
+      period: 2000
+      args.length: 1
+      args.0: /home/znn/sw-bin/httpd-lb-2.4.2/logs/access_log
+
+  EnablementProbe:
+    alias: enablementprobe
+    location: "${customize.system.target.lb}"
+    type: java
+    javaInfo:
+      class: org.sa.rainbow.translator.znn.probes.ServerEnablementProbe
+      period: 2000
+      args.length: 1
+      args.0: /home/znn/sw-bin/znn_httpd_lb-2.4.2/conf/balanced.conf
+
+  DummyMaliciousnessProbe:
+    alias: dummymaliciousness
+    location: "${customize.system.target.lb}"
+    type: java
+    javaInfo:
+      class: org.sa.rainbow.translator.znn.probes.DummyProbe
+      period: 2000
+      args.length: 1
+      args.0: /home/znn/maliciousness
+
+  BlackholeProbe:
+    alias: blackhole
+    location: "${customize.system.target.lb}"
+    type: java
+    javaInfo:
+      class: org.sa.rainbow.translator.znn.probes.BlackholeProbe
+      period: 2000
+      args.length: 1
+      args.0: /home/znn/sw-bin/znn_httpd_lb-2.4.2/conf/blocked.conf
+
+  ThrottleProbe:
+    alias: throttle
+    location: "${customize.system.target.lb}"
+    type: java
+    javaInfo:
+      class: org.sa.rainbow.translator.znn.probes.ThrottleProbe
+      period: 2000
+      args.length: 1
+      args.0: /home/znn/sw-bin/znn_httpd_lb-2.4.2/conf/security.conf
+
+  CaptchaProbe:
+    alias: captchaprobe
+    location: "${customize.system.target.lb}"
+    type: java
+    javaInfo:
+      class: org.sa.rainbow.translator.znn.probes.CaptchaProbe
+      period: 2000
+      args.length: 1
+      args.0: /tmp/znn-wrapper-1080
+#      args.0: /home/znn/lb0/sw/httpd-2.4.2/conf/captcha.on
+ 
+  AuthenticationProbe:
+    alias: authenticationprobe
+    location: "${customize.system.target.web0}"
+    type: java
+    javaInfo:
+      class: org.sa.rainbow.translator.znn.probes.AuthenticationProbe
+      period: 2000
+      args.length: 1
+      args.0: /tmp/znn-wrapper-auth-1080
+ 
+  ClientProxyProbe0:
+    alias: clientproxy
+    location: "${customize.system.target.master}"
+    type: java
+    javaInfo:
+      class: org.sa.rainbow.translator.znn.probes.ClientProxyProbe
+      period: 2000
+      args.length: 1
+      args.0: "http://${customize.system.target.lb}:1081/news.php"
+      
+  ClientProxyProbe1:
+    alias: clientproxy
+    location: "${customize.system.target.bad}"
+    type: java
+    javaInfo:
+      class: org.sa.rainbow.translator.znn.probes.ClientProxyProbe
+      period: 2000
+      args.length: 1
+      args.0: "http://${customize.system.target.lb}:1081/news.php"
+
+  FidelityProbe1:
+    alias: fidelity
+    location: "${customize.system.target.web0}"
+    type: java
+    javaInfo:
+      class: org.sa.rainbow.translator.znn.probes.FidelityProbe
+      period: 2000
+      args.length: 1
+      args.0: "/tmp/znn-fidelity-${customize.system.target.web0.httpPort}"
+     
+  LoadProbe0:
+    alias: load
+    location: "${customize.system.target.lb}"
+    type: script
+    scriptInfo:
+      mode: continual
+      path: "${_probes.commonPath}/loadProbe.pl"
+      argument: "-o load.out"
+      
+  LoadProbe1:
+    alias: load
+    location: "${customize.system.target.web0}"
+    type: script
+    scriptInfo:
+      mode: continual
+      path: "${_probes.commonPath}/loadProbe.pl"
+      argument: "-o load.out"
+      
+  LoadProbe2:
+    alias: load
+    location: "${customize.system.target.web1}"
+    type: script
+    scriptInfo:
+      mode: continual
+      path: "${_probes.commonPath}/loadProbe.pl"
+      argument: "-o load.out"
+      
+  LoadProbe3:
+    alias: load
+    location: "${customize.system.target.web2}"
+    type: script
+    scriptInfo:
+      mode: continual
+      path: "${_probes.commonPath}/loadProbe.pl"
+      argument: "-o load.out"
+
+unused-probes:
+  ApacheTopProbe1:
+    alias: apachetop
+    location: "${customize.system.target.web0}"
+    type: script
+    scriptInfo:
+      path    : "${_probes.commonPath}/apachetopProbe.pl"
+      argument: "-k -s"
+  DiskIOProbe1:
+    alias: diskio
+    location: "${customize.system.target.web0}"
+    type: script
+    scriptInfo:
+      path    : "${_probes.commonPath}/diskIOProbe.pl"
+      argument: "-k -s"
+  PingRTTProbe1:
+    alias: pingrtt
+    location: "${customize.system.target.web0}"
+    type: java
+    javaInfo:
+      class: org.sa.rainbow.translator.znn.probes.PingRTTProbe
+# sample period in milliseconds
+      period: 1500
+      args.length: 1
+      args.0: "${rainbow.master.location.host}"
+#      args.1: "${customize.system.target.2}"
+  LoadProbe1:
+    alias: load
+    location: "${customize.system.target.web0}"
+    type: script
+    scriptInfo:
+      path    : "${_probes.commonPath}/loadProbe.pl"
+      argument: "-k -s"
+  NullProbe0:
+    alias: NIL
+    location: "${customize.system.target.0}"
+    type: java
+    javaInfo:
+      class: org.sa.rainbow.translator.probes.NullProbe
+  ApacheTopProbe0:
+    alias: apachetop
+    location: "${customize.system.target.0}"
+    type: script
+    scriptInfo:
+      path    : "${_probes.commonPath}/apachetopProbe.pl"
+      argument: "-k -s"
+  LoadProbe0:
+    alias: load
+    location: "${customize.system.target.0}"
+    type: script
+    scriptInfo:
+      path    : "${_probes.commonPath}/loadProbe.pl"
+      argument: "-k -s"
+  PingRTTProbe3:
+    alias: pingrtt
+    location: "${customize.system.target.3}"
+    type: java
+    javaInfo:
+      class: org.sa.rainbow.translator.znews.probes.PingRTTProbe
+      period: 1500
+      args.length: 1
+      args.0: "${rainbow.master.location.host}"
+  LoadProbe3:
+    alias: load
+    location: "${customize.system.target.3}"
+    type: script
+    scriptInfo:
+      path    : "${_probes.commonPath}/loadProbe.pl"
+      argument: "-k -s"

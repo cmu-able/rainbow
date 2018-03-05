@@ -1,0 +1,165 @@
+#
+# Gauge Type and Gauge Instance Specifications
+#   - Split gauges by family
+#   - Need to tie to probes (and operators)
+#
+
+family:
+  name : DoSFam
+  defined-in: ZNewsSys.acme
+  command-type: java
+  factory: org.sa.rainbow.model.acme.znn.commands.ZNNCommandFactory
+  
+  gauge-types:
+    
+    BlackHoleGaugeT:
+      commands:
+        # The commands that the gauge will produce, keyed by some name
+        # The rhs needs to be an operator defined according to the factory
+        # for the family. In this case, there must be an operator
+        #   'setBlackholed' associated with the type 'BlackholerT' in the 
+        #   'DoSFam'. (In the above, this is defined in the factory.)
+        blockedIPs: "BlackholerT.setBlackholed({String})"
+      setupParams:
+        targetIP:
+          type: String
+          default: "localhost"
+        beaconPeriod:
+          type: long
+          default: 30000
+        javaClass:
+          type: String
+          default: "org.sa.rainbow.translator.znn.gauges.BlackholeGauge"
+      configParams:
+        targetProbeType:
+          type: String
+          default: ~
+      # Definition of what kind of probe is expected to report to this gauge
+      # and what kind of report it is giving
+      probe-type:
+        type: blackhole
+        value-type: regex
+        regex: (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3},\s*)*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})
+  
+  ThrottleGaugeT:
+    commands:
+      throttledIPs: "ThrottlerT.setThrottled({String})"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.translator.znn.gauges.ThrottleGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+
+  MaliciousnessGaugeT:
+    commands:
+      maliciousness : PotentiallyMaliciousT.setMaliciousness (float)
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.translator.znn.gauges.EchoGauge"
+    configParams:
+      targetGaugeName:
+        type: String
+        default: ~
+      targetGaugeType:
+        type: String
+        default: ~
+      targetGaugeValue:
+        type: String
+        default: ~
+    comment: "EchoGaugeT echos a value reported by another gauge"
+    
+  DummyDiagnosisGaugeT:
+    commands:
+      maliciousness: PotentiallyMaliciousT.setMaliciousness (float)
+      captcha: CaptchaHandlerT.setCaptchaResponse (int)
+      authenticate: CaptchaHandlerT.setAuthenticationResponse (int)
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.translator.znn.gauges.DummyDiagnosisGauge"
+    configParams:
+      targetProbeList:
+        type: String
+        default: ~
+    
+  CaptchaGaugeT:
+    commands:
+      enablement : ProxyT.setCaptchaEnabled (boolean)
+      clientMgmt : CaptchaHandlerT.setCaptchaResponse (int)
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 5000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.translator.znn.gauges.CaptchaGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+    
+  AuthenticationEnablementGaugeT:
+    commands:
+      clientMgmt: AuthenticationHandlerT.setAuthenticationResponse (int)
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 5000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.translator.znn.gauges.AuthenticationEnablementGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~  
+  
+  DiagnosisGaugeT:
+    commands:
+      maliciousness: PotentiallyMaliciousT.setMaliciousness (float)
+    setupParams:
+      targetIP: 
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.translator.znn.gauges.DiagnosisGauge"
+    configParams:
+      clients:
+        type: String
+        default: "c1=10.5.6.254"        
+      reportingPeriod:
+        type: long
+        default: 10000
+    comment: "Diagnosis gauge for DoS analysis" 
+ 

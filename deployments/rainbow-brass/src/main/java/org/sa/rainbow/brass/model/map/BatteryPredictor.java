@@ -65,7 +65,7 @@ public class BatteryPredictor {
      * @param time amount in seconds that the rogot stays in the charging base
      * @return
      */
-    public double batteryCharge (double time){
+    public static double batteryCharge (double time){
     	return m_battery_scaling_factor * 8.35 * time; 
     }
 

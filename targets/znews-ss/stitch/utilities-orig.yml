@@ -1,0 +1,94 @@
+# Created June 30, 2012 (Jeff Gennari)
+#
+# Utility curves, defined as X:Y pairs, where X is value of the
+# dimension and Y is the utility in the range [0,1]
+
+# DoS utilities. There are three quality dimensions to a DoS attack:
+# the response time of clients, the presence of an attacker (currently
+# a true/false value), and the cost of adding an additional server.
+
+ # Response time taken directly from existing ZNN example. 
+utilities:
+  uR:
+    label: "Average Response Time"
+    mapping: "[EAvg]ClientT.experRespTime"
+    description: "Client experienced response time in milliseconds, R, defined as a float property 'ClientT.experRespTime' in the architecture"
+    utility:
+      0: 1.00
+      100: 1.00
+      200: 0.99
+      500: 0.90
+      1000: 0.75
+      1500: 0.50
+      2000: 0.25
+      4000: 0.00
+  
+  # Indication of whether an attacker is present in the system. Zero
+  # attackers makes us happy. One attacker makes us sad.
+  uA:
+    label: "Attacker Known"
+    mapping: "ClientT.maliciousness"
+    description: "Indicates whether an attacker is connected to the system. Currently, this is a binary value. That is, there is either one attacker or there are no attackers."
+    utility:
+      0:  1.00
+      1:  0.00
+      
+  uSF:
+    label: "Historical Strategy Failure"
+    mapping: "[EAvg]Strategy.rateFailure"
+    description: "Rate of failure, in fraction, of a strategy; utility has no effect if strategy history is not kept"
+    utility:
+      0: 1.00
+      0.5: 0.01
+      1: 0.00
+
+# scenario 1: Maintaining acceptable response time most important 
+# scenario 2: Identifying the attacker most important
+
+weights:
+  scenario 1:
+    uR: 0.7
+    uA: 0.3
+    uSF: 0.0
+
+  scenario 2:
+    uR: 0.7
+    uA: 0.3
+    uSF: 0.0
+    
+vectors:
+
+  # Deny attacker service by putting him/her in a blackhole. This
+  # should reduce response time for all but the attacker, reduce
+  # disruption cost to the servers, but increase the cost unit of
+  # taking the wrong client offline
+
+  # Utility: [v]R; [v]A; (reduce R by 1000 ms, reduce the number
+  # of attackers by 1 unit)
+  blackholeAttacker:
+    uR: -1000
+    uA: -1
+  
+  unblackholeAttacker:
+    uR: 0
+    uA: -1
+  
+  # Adding more servers should reduce response time, have no impact on
+  # the number of attackers, and increase the server cost (by adding
+  # additional servers).
+
+  # Utility: [v]R; [<>]A; (reduce R by 1000 ms, no change in the
+  # number of attackers)
+  enlistServers:
+    uR: -1000
+    uA: 0
+
+  # Utility: [v]R; [<>]A; [^]C (reduce R by 1000 ms, no change in the
+  # number of attackers)
+  dischargeServers:
+    uR: +1000
+    uA: 0
+
+
+
+

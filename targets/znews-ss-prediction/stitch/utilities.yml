@@ -1,0 +1,151 @@
+# Created October 22nd, 2013 (Javier Camara)
+#
+# Utility curves, defined as X:Y pairs, where X is value of the dimension and Y
+# is the utility in the range [0,1]
+#
+# History:
+# - [JC 2013.10.22] Created file, defined utilities for Dos Attack Demo.
+# - [JC 2013.11.1] Added user annoyance to the utility profile.
+model:
+  name: ZNewsSys
+  type: Acme
+utilities:
+  uR:
+    label: "Average Response Time"
+    mapping: "[EAvg]ClientT.experRespTime"
+    description: "Client experienced response time in milliseconds, R, defined as a float property 'ClientT.experRespTime' in the architecture"
+    utility:
+      0: 1.00
+      100: 1.00
+      200: 0.99
+      500: 0.90
+      1000: 0.75
+      1500: 0.50
+      2000: 0.25
+      4000: 0.00
+  uC:
+    label: "Average Server Cost"
+    mapping: "[EXPR]size(/self/components:ServerT[isArchEnabled])"
+    description: "Server cost in unit/hr, C, averaged from a float property 'ServerT.cost' in the architecture, and captures average cost across all servers. Adapted to a 3-server configuration."
+    utility:
+      0: 1.00
+      1: 0.90
+      2: 0.30
+      3: 0.10
+  uM:
+    label: "Malicious Clients"
+    mapping: "[EXPR](2*size(/self/components:PotentiallyMaliciousT[maliciousness > self.MALICIOUS_THRESHOLD]))/(size(/self/components:PotentiallyMaliciousT)+1)*100"
+    description: "Percentage of malicious clients."
+    utility:
+      0: 1.00
+      5: 1.00
+      20: 0.80
+      50: 0.40
+      70: 0.00
+  uA:
+    label: "Average User Annoyance"
+    mapping: "[EAvg]ClientT.annoyance"
+    description: "Client experienced annoyance level, should be defined as an int property 'ClientT.annoyance' in the architecture, with a range 0-100"
+    utility:
+      0: 1.00
+      100: 0.00
+
+# Weighted utility preferences, each set should sum to 1.
+# Three scenarios:
+#   1.) Priority is given to eliminating malicious clients.
+#   2.) Priority is given to optimizing good client experience (both serving them in a timely manner, and minimizing annoyance).
+#   3.) Priority is given to keeping cost down.
+#  Note: Original Weight of uR is now split 50/50% among uR and uA in every scenario. 
+weights:
+  scenario 1:
+    uR: 0.15
+    uM: 0.6
+    uC: 0.1
+    uA: 0.15
+  scenario 2:
+    uR: 0.3
+    uM: 0.3
+    uC: 0.1
+    uA: 0.3
+  scenario 3:
+    uR: 0.2
+    uM: 0.2
+    uC: 0.4
+    uA: 0.2
+
+# Tactic quality attribute vectors
+#
+vectors:
+# Utility: [^] R; [<>] M; [v] C; [<>]A
+# assume each server will drop response time by 1000 ms and increase cost by 1 unit
+  enlistServers:
+    uR: -1000
+    uM: 0
+    uC: +1.00
+    uA: 0
+
+# Utility: [^] R; [<>] M; [^] C; [v]A
+# assume each level of fidelity reduces response time by 500 ms, and reduce cost by 10% of unit, increases annoyance of users 5% for low-quality service
+  lowerFidelity:
+    uR: -500
+    uM: 0
+    uC: -0.10
+    uA: +5
+
+# Utility: [^] R; [^] M; [v] C; [v]A
+# assume that adding the captcha reduces response time by 250 ms, reduces level of malicious users by 90%, increases cost 1/2 unit, and increases user annoyance by 50%
+  addCaptcha:
+    uR: -250
+    uM: -90
+    uC: +0.50
+    uA: +50
+
+# Utility: [^] R; [^] M; [<>] C; [v]A
+# assume that forcing users to reauthenticate reduces response time by 250 ms, reduces level of malicious users by 70%, and increases user annoyance by 50%
+  forceReauthentication:
+    uR: -250
+    uM: -70
+    uC: 0.00
+    uA: +50
+
+# Utility: [^] R; [^] M; [<>] C; [v]A
+# assume that blackholing potential attackers reduces response time by 1000 ms, reduces level of malicious users by 100%, and increases user annoyance by 100%
+  blackholeAttacker:
+    uR: -1000
+    uM: -100
+    uC: 0.00
+    uA: +50
+    
+# Utility: [^] R; [<>] M; [<>] C; [v]A
+# assume that throttling suspicious clients reduces response time by 500 ms, and increases user annoyance by 50%
+  throttleSuspicious:
+    uR: -500
+# uM may need to change if we decide to substitute % of malicious clients by % of malicious user throughput
+    uM: 0   
+    uC: 0.00
+    uA: +25
+
+# Utility: [^] R; [<>] M; [^] C; [^]A
+# assume that removing the captcha reduces cost 1/2 unit, and reduces user annoyance by 50%
+  removeCaptcha:
+    uR: -500
+    uM: 0
+    uC: -0.50
+    uA: -50 
+    
+# Utility: [<>] R; [<>] M; [<>] C; [^]A
+# assume that removing the captcha reduces user annoyance by 100%
+  unblackholeAttacker:
+    uR: 0
+    uM: 0
+    uC: 0.00
+    uA: -100
+
+# Utility: [<>] R; [<>] M; [<>] C; [^]A
+# assume that unthrottling suspicious clients reduces user annoyance by 50%
+  unthrottle:
+    uR: 0
+    uM: 0
+    uC: 0.00
+    uA: -50
+    

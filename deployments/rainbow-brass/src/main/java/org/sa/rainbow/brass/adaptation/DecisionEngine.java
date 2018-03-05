@@ -42,7 +42,7 @@ public class DecisionEngine {
         if (props == null) {
             props = PropertiesConnector.DEFAULT;
         }
-        m_export_path = props.getProperty (PropertiesConnector.PRISM_OUTPUT_DIR);
+        m_export_path = props.getProperty (PropertiesConnector.PRISM_OUTPUT_DIR_PROPKEY);
         m_export_path = m_export_path.replaceAll ("\\\"", "");
         m_mt = new MapTranslator ();
         new PrismConnectorAPI (); // PRISM invoked via API

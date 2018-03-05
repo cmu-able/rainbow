@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import org.sa.rainbow.brass.PropertiesConnector;
 import org.sa.rainbow.brass.model.map.dijkstra.Dijkstra;
 import org.sa.rainbow.brass.model.map.dijkstra.Edge;
 import org.sa.rainbow.brass.model.map.dijkstra.Graph;
@@ -301,7 +302,10 @@ public class MapTranslator {
                     if (a.getDistance() > MAXIMUM_KINECT_OFF_DISTANCE_VAL) {
                         kGuard ="& ("+ROBOT_LOC_MODE_VAR+"!="+ROBOT_LOC_MODE_LO_CONST+") ";
                     }
-                    buf+="\t ["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] ("+ROBOT_LOCATION_VAR+"="+a.getSource()+") "+kGuard+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) -> ("+ROBOT_LOCATION_VAR+"'="+a.getTarget()+") "+" & ("+ROBOT_BATTERY_VAR+"'="+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+")"+ " & ("+ROBOT_HEADING_VAR+"'="+HEADING_CONST_PREFIX + findArcHeading(a).name() + ") & (robot_done'=true);\n";                	
+                    buf+="\t ["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] ("+ROBOT_LOCATION_VAR+"="+a.getSource()+") "+
+                    		kGuard+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) -> ("+ROBOT_LOCATION_VAR+"'="+a.getTarget()+") "+
+                    		" & ("+ROBOT_BATTERY_VAR+"'="+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+")"+
+                    		" & ("+ROBOT_HEADING_VAR+"'="+HEADING_CONST_PREFIX + findArcHeading(a).name() + ") & (robot_done'=true);\n";                	
                 }
             }
             return buf+"\n";		
@@ -353,10 +357,9 @@ public class MapTranslator {
         String guard_can_charge=" & (false";
         synchronized(m_map){
             for (Map.Entry<String, EnvMapNode> e: m_map.getNodes().entrySet()){
-                EnvMapNode n = e.getValue();
-				if (n.getProperty(Phase1MapPropertyKeys.CHARGING_STATION) != null && ((Boolean )n.getProperty(Phase1MapPropertyKeys.CHARGING_STATION))){
-                    guard_can_charge +="|"+ROBOT_LOCATION_VAR+"="+n.getId();
-
+               EnvMapNode n = e.getValue();
+				          if (n.getProperty(Phase1MapPropertyKeys.CHARGING_STATION) != null && ((Boolean )n.getProperty(Phase1MapPropertyKeys.CHARGING_STATION))){
+                    guard_can_charge +="|"+ROBOT_LOCATION_VAR+"="+e.getValue().getLabel();
                 }	
             }
             guard_can_charge+=") & ("+ROBOT_BATTERY_VAR+"<1500*"+String.valueOf(BatteryPredictor.m_battery_scaling_factor)+")";	//TODO: refine this constraint
@@ -462,12 +465,12 @@ public class MapTranslator {
     /**
      * Returns the rotation time in seconds from a given robot orientation to the right angle before it
      * starts moving towards a given location (target of arc a)
-     * @param robotOrientation orientation of the robot (angle in Radians)
+     * @param robotOrientation orientation of the robot (angle in Radians, from 0 to 2pi)
      * @param a Map arc 
      * @return Rotation time in seconds
      */
     public static double getRotationTime(double robotOrientation, EnvMapArc a){    	
-        double theta = Math.abs(robotOrientation-findArcOrientation(a));
+        double theta = Math.abs(robotOrientation-findArcOrientation(a)); // subtracting [0, 2pi) from [0, 2pi)
         double min_theta = (theta > Math.PI) ? 2*Math.PI - theta : theta;
         return (min_theta/ROBOT_ROTATIONAL_SPEED_VALUE); 
     }
@@ -478,7 +481,7 @@ public class MapTranslator {
      * as the reference of coordinates in the plane. Used to determine the part of the time reward structure 
      * associated with in-node robot rotations.
      * @param a Map arc
-     * @return angle in radians between a.m_source and a.m_target
+     * @return angle in radians between a.m_source and a.m_target, in the [0, 2pi) interval
      */
     public static double findArcOrientation(EnvMapArc a){
         synchronized (m_map) {
@@ -491,9 +494,18 @@ public class MapTranslator {
         }
     }
 
-
+    /**
+     * Determines the angle (in Radians) of a vector (source, target), taking the source
+     * as the reference of coordinates in the plane.
+     * @return angle in radians, ranging from -pi to pi
+     */
     public static double findArcOrientation(double src_x, double src_y, double tgt_x, double tgt_y){
-        return Math.atan2( tgt_y - src_y, tgt_x - src_x);
+    	double angle = Math.atan2( tgt_y - src_y, tgt_x - src_x); // from -pi to pi
+    	
+    	if (angle < 0) // convert to [0, 2pi)
+    		angle += 2*Math.PI;
+    	
+        return angle;
     }
 
 
@@ -788,7 +800,7 @@ public class MapTranslator {
             out.close();
         }
         catch (IOException e){
-            System.out.println("Error exporting PRISM map translation");
+            System.out.println("Error exporting PRISM map translation:\n" + e);
         }
     }
 
@@ -822,12 +834,15 @@ public class MapTranslator {
      * @param args
      */
     public static void main(String[] args) {
-        EnvMap dummyMap = new EnvMap (null, null); 
+
+    	// To use standalone Prism generation, See ../PropertiesConnector.java to set necessary environment 
+        EnvMap dummyMap = new EnvMap (null, null);
         //dummyMap.insertNode("newnode", "l1", "l2", 17.0, 69.0);
         setMap(dummyMap);
         System.out.println(getMapTranslation()); // Class test
-        //System.out.println();
-        exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp-simple.prism", false);
+        exportMapTranslation(PropertiesConnector.DEFAULT.getProperty(PropertiesConnector.PRISM_OUTPUT_DIR_PROPKEY) + 
+        		"prismtmp.prism", false);
+        
         // String export_path="/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/";
 
         // Map<List, String> specifications = exportConstrainedTranslationsBetween (export_path, "ls", "l1");

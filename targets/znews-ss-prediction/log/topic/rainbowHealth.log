@@ -1,0 +1,102 @@
+{msg-created=1347630325763, action=LOG_EVENT, channel=topic/rainbowHealth, msg-sent=1347630325773, txt=EventServiceManager initialized!}
+{msg-created=1347630325789, action=LOG_EVENT, channel=topic/rainbowHealth, msg-sent=1347630325789, txt=T[topic/rainbowHealth] +listener Oracle@10.0.2.2}
+{msg-created=1347630325794, action=LOG_EVENT, channel=topic/rainbowHealth, msg-sent=1347630325794, txt=T[topic/rainbowHealth] +listener SystemDelegate@10.0.2.2}
+{msg-created=1347630325794, action=LOG_EVENT, channel=topic/rainbowHealth, msg-sent=1347630325794, txt=T[topic/effectorBus] +listener SystemDelegate@10.0.2.2}
+{msg-created=1347630351995, action=LOG_EVENT, channel=topic/rainbowHealth, msg-sent=1347630351995, txt=T[topic/gaugeBus] +listener GaugeCoordinator@10.0.2.2}
+{msg-created=1347630351996, action=LOG_EVENT, channel=topic/rainbowHealth, msg-sent=1347630351996, txt=T[topic/rainbowHealth] +listener ModelManager@10.0.2.2}
+{msg-created=1347630352010, action=LOG_EVENT, channel=topic/rainbowHealth, msg-sent=1347630352010, txt=T[topic/rainbowHealth] +listener del1}
+{msg-created=1347630352010, action=LOG_EVENT, channel=topic/rainbowHealth, msg-sent=1347630352010, txt=T[topic/effectorBus] +listener del1}
+{msg-created=1347630352014, action=LOG_EVENT, channel=topic/rainbowHealth, msg-sent=1347630352014, txt=T[topic/gaugeBus] +listener ApacheTopGaugeT@10.0.2.2}
+{msg-created=1347630352018, action=LOG_EVENT, channel=topic/rainbowHealth, msg-sent=1347630352018, txt=T[topic/gaugeBus] +listener DiagnosisGaugeT@10.0.2.2}
+{msg-created=1347630352020, action=LOG_EVENT, channel=topic/rainbowHealth, msg-sent=1347630352020, txt=T[topic/gaugeBus] +listener DiskIOGaugeT@10.0.2.2}
+{msg-created=1347630352021, action=LOG_EVENT, channel=topic/rainbowHealth, msg-sent=1347630352021, txt=T[topic/gaugeBus] +listener FidelityGaugeT@10.0.2.2}
+{msg-created=1347630352022, action=LOG_EVENT, channel=topic/rainbowHealth, msg-sent=1347630352022, txt=T[topic/gaugeBus] +listener LatencyGaugeT@10.0.2.2}
+{msg-created=1347630352024, action=LOG_EVENT, channel=topic/rainbowHealth, msg-sent=1347630352024, txt=T[topic/gaugeBus] +listener LatencyRateGaugeT@10.0.2.2}
+{msg-created=1347630352025, action=LOG_EVENT, channel=topic/rainbowHealth, msg-sent=1347630352025, txt=T[topic/gaugeBus] +listener LoadGaugeT@10.0.2.2}
+{msg-created=1347630352026, action=LOG_EVENT, channel=topic/rainbowHealth, msg-sent=1347630352026, txt=T[topic/gaugeBus] +listener MaliciousnessGaugeT@10.0.2.2}
+{msg-created=1347630352031, action=LOG_EVENT, channel=topic/rainbowHealth, msg-sent=1347630352031, txt=T[topic/gaugeBus] +listener ResponseTimeGaugeT@10.0.2.2}
+{beaconPer=5000, id=del1, location=10.0.2.2, cloudT=DELEGATE, msg-created=1347630357039, action=REPORT_CREATED, channel=topic/rainbowHealth, msg-sent=1347630357039}
+{id=del1, location=10.0.2.2, msg-created=1347630357099, action=START, channel=topic/rainbowHealth, msg-sent=1347630357099}
+{msg-created=1347630357187, action=LOG_EVENT, channel=topic/rainbowHealth, msg-sent=1347630357187, txt=T[topic/gaugeBus] +listener DiagnosisGaugeT0914094557185@10.0.2.2}
+{msg-created=1347630357188, action=LOG_TRANSLATOR, channel=topic/rainbowHealth, msg-sent=1347630357188, txt=G[DiagnosisGaugeT0914094557185@10.0.2.2] G - Diagnosis started.}
+{msg-created=1347630357189, action=LOG_EVENT, channel=topic/rainbowHealth, msg-sent=1347630357189, txt=T[topic/gaugeBus] +listener ResponseTimeGaugeT0914094557188@10.0.2.2}
+{msg-created=1347630357190, action=LOG_EVENT, channel=topic/rainbowHealth, msg-sent=1347630357190, txt=T[topic/probeBus] +listener ResponseTimeGaugeT0914094557188@10.0.2.2}
+{msg-created=1347630357190, action=LOG_TRANSLATOR, channel=topic/rainbowHealth, msg-sent=1347630357190, txt=G[ResponseTimeGaugeT0914094557188@10.0.2.2] G - End-End Resp Time started.}
+{msg-created=1347630357191, action=LOG_EVENT, channel=topic/rainbowHealth, msg-sent=1347630357191, txt=T[topic/gaugeBus] +listener MaliciousnessGaugeT0914094557191@10.0.2.2}
+{msg-created=1347630357192, action=LOG_EVENT, channel=topic/rainbowHealth, msg-sent=1347630357192, txt=T[topic/gaugeBus] +listener MaliciousnessGaugeT0914094557191@10.0.2.2}
+{msg-created=1347630357192, action=LOG_TRANSLATOR, channel=topic/rainbowHealth, msg-sent=1347630357192, txt=G[MaliciousnessGaugeT0914094557191@10.0.2.2] G - Maliciousness started.}
+{msg-created=1347630357193, action=LOG_EVENT, channel=topic/rainbowHealth, msg-sent=1347630357193, txt=T[topic/gaugeBus] +listener LoadGaugeT0914094557193@10.0.2.2}
+{msg-created=1347630357193, action=LOG_EVENT, channel=topic/rainbowHealth, msg-sent=1347630357193, txt=T[topic/probeBus] +listener LoadGaugeT0914094557193@10.0.2.2}
+{msg-created=1347630357193, action=LOG_TRANSLATOR, channel=topic/rainbowHealth, msg-sent=1347630357194, txt=G[LoadGaugeT0914094557193@10.0.2.2] G - CPU Load started.}
+{id=del1, msg-created=1347630362096, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630362096}
+{id=del1, msg-created=1347630367196, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630367196}
+{id=del1, msg-created=1347630372296, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630372296}
+{id=del1, msg-created=1347630377297, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630377297}
+{id=del1, msg-created=1347630382298, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630382298}
+{id=del1, msg-created=1347630387299, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630387299}
+{id=del1, msg-created=1347630392300, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630392300}
+{id=del1, msg-created=1347630397301, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630397301}
+{id=del1, msg-created=1347630402302, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630402302}
+{id=del1, msg-created=1347630407303, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630407303}
+{id=del1, msg-created=1347630412304, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630412304}
+{id=del1, msg-created=1347630417305, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630417305}
+{id=del1, msg-created=1347630422306, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630422306}
+{id=del1, msg-created=1347630427307, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630427307}
+{id=del1, msg-created=1347630432308, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630432308}
+{id=del1, msg-created=1347630437309, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630437309}
+{id=del1, msg-created=1347630442310, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630442310}
+{id=del1, msg-created=1347630447311, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630447311}
+{id=del1, msg-created=1347630452312, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630452312}
+{location=10.0.2.2, msg-created=1347630454176, action=START_PROBES, channel=topic/rainbowHealth, msg-sent=1347630454176}
+{msg-created=1347630454321, action=LOG_EVENT, channel=topic/rainbowHealth, msg-sent=1347630454321, txt=T[topic/rainbowHealth] +listener ProbeBusRelay@10.0.2.2}
+{msg-created=1347630454321, action=LOG_EVENT, channel=topic/rainbowHealth, msg-sent=1347630454321, txt=T[topic/probeBus] +listener ProbeBusRelay@10.0.2.2}
+{beaconPer=0, id=ProbeBusRelay@10.0.2.2, location=10.0.2.2, cloudT=PB_RELAY, msg-created=1347630454321, action=REPORT_CREATED, channel=topic/rainbowHealth, msg-sent=1347630454321}
+{msg-created=1347630454322, action=LOG_TRANSLATOR, channel=topic/rainbowHealth, msg-sent=1347630454322, txt=[PBR] Rainbow Runtime - Probe Bus Relay started.}
+{msg-created=1347630454370, action=LOG_TRANSLATOR, channel=topic/rainbowHealth, msg-sent=1347630454370, txt=[PBR] IProbe ClientProxyProbe0@10.0.2.2:clientproxy added!}
+{beaconPer=0, id=ClientProxyProbe0@10.0.2.2, probeK=JAVA, alias=clientproxy, location=10.0.2.2, cloudT=PROBE, msg-created=1347630454370, action=REPORT_CREATED, svcName=ClientProxyProbe0, channel=topic/rainbowHealth, msg-sent=1347630454370}
+{id=del1, location=10.0.2.15, msg-created=1347630454667, action=START, channel=topic/rainbowHealth, msg-sent=1347630454667}
+{id=del1, msg-created=1347630457373, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630457373}
+{id=del1, location=10.0.2.15, msg-created=1347630459775, action=START, channel=topic/rainbowHealth, msg-sent=1347630459775}
+{id=del1, msg-created=1347630462374, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630462374}
+{id=del1, msg-created=1347630467375, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630467375}
+{id=del1, msg-created=1347630472376, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630472376}
+{id=del1, msg-created=1347630477377, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630477377}
+{id=del1, msg-created=1347630482378, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630482378}
+{id=del1, msg-created=1347630487379, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630487379}
+{id=del1, msg-created=1347630492380, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630492380}
+{id=del1, msg-created=1347630497381, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630497381}
+{id=del1, msg-created=1347630502382, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630502382}
+{id=del1, msg-created=1347630507383, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630507383}
+{id=del1, msg-created=1347630512384, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630512384}
+{id=del1, msg-created=1347630517385, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630517385}
+{id=del1, msg-created=1347630522386, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630522386}
+{id=del1, msg-created=1347630527387, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630527387}
+{id=del1, msg-created=1347630532388, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630532388}
+{id=del1, msg-created=1347630537389, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630537389}
+{id=del1, msg-created=1347630542390, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630542390}
+{id=del1, msg-created=1347630547391, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630547391}
+{id=del1, msg-created=1347630552392, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630552392}
+{id=del1, msg-created=1347630557393, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630557393}
+{id=del1, msg-created=1347630562394, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630562394}
+{id=del1, msg-created=1347630567395, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630567395}
+{id=del1, msg-created=1347630572396, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630572396}
+{id=del1, msg-created=1347630577397, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630577397}
+{id=del1, msg-created=1347630582398, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630582398}
+{id=del1, msg-created=1347630587399, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630587399}
+{id=del1, msg-created=1347630592400, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630592400}
+{id=del1, msg-created=1347630597401, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630597401}
+{id=del1, msg-created=1347630602402, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630602402}
+{id=del1, msg-created=1347630607403, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630607403}
+{id=del1, msg-created=1347630612404, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630612404}
+{id=del1, msg-created=1347630617405, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630617405}
+{id=del1, msg-created=1347630622406, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630622406}
+{id=del1, msg-created=1347630627407, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630627407}
+{id=del1, msg-created=1347630632408, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630632408}
+{id=del1, msg-created=1347630637409, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630637409}
+{id=del1, msg-created=1347630642410, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630642410}
+{id=del1, msg-created=1347630647411, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630647411}
+{id=del1, msg-created=1347630652412, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630652412}
+{id=del1, msg-created=1347630657413, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630657413}
+{id=del1, msg-created=1347630662414, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630662414}
+{id=del1, msg-created=1347630667415, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630667415}
+{id=del1, msg-created=1347630672416, action=BEACON, channel=topic/rainbowHealth, msg-sent=1347630672416}

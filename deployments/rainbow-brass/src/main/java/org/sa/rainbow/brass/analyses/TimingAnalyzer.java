@@ -387,7 +387,7 @@ public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowA
             List<String> remainingActionSequence = igToActionSequence.translate ();
             MapTranslator.exportConstrainedToPlanMapTranslation (TMP_MODEL_FILENAME, remainingActionSequence);
 
-            String modelFileName = Rainbow.instance ().getProperty (PropertiesConnector.PRISM_OUTPUT_DIR)
+            String modelFileName = Rainbow.instance ().getProperty (PropertiesConnector.PRISM_OUTPUT_DIR_PROPKEY)
                     + TMP_MODEL_FILENAME;
             String propertiesFileName = Rainbow.instance ().getProperty (PropertiesConnector.PRISM_PROPERTIES_PROPKEY);
             String strategyFileName = Rainbow.instance ().getProperty (PropertiesConnector.PRISM_ADV_EXPORT_PROPKEY);

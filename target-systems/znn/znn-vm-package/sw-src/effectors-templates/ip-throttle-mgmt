@@ -1,0 +1,45 @@
+#!/bin/bash
+if [[ "$#" != 2 || ! "$1" =~ ^(throttle)$ ]]; then
+  echo $0 "{throttle} {ip-addressi1,ip-address2,...}"
+  exit 1
+fi
+[ -a ~/znn-config ] && {
+  source ~/znn-config
+  BLOCKED_FILE=$ZNN_HOME/sw-bin/http-lb-$ZNN_HTTPD_VERSION/conf/security.conf
+} || {
+  BLOCKED_FILE=/home/znn/sw-bin/httpd-lb-2.4.2/conf/security.conf
+}
+if [ ! -f "$BLOCKED_FILE" ]; then
+  echo "$BLOCKED_FILE not found."
+  exit 1
+fi
+
+UPDATED=0
+echo "# Place in this file deny orders for znn" > $BLOCKED_FILE
+
+for ip in ${2//,/ }; do
+  COUNT=$(cat "$BLOCKED_FILE" | egrep "^SecRule REMOTE_ADDR \"\^$ip\".*\$" | wc -l)
+  if [ "$COUNT" -gt 0 ]; then
+    if [ "$1" == "throttle" ]; then
+      echo "$ip is already throttled in $BLOCKED_FILE"
+    else
+      cat "$BLOCKED_FILE" | egrep -v "^SecRule REMOTE_ADDR \"\^$ip\".*\$" > /tmp/new-throttled
+      mv /tmp/new-throttled "$BLOCKED_FILE"
+      echo "$ip is now unthrottled in $BLOCKED_FILE"
+      UPDATED=1
+    fi
+  else
+    if [ "$1" == "throttle" ]; then
+      id=${ip//./}
+      echo "SecRule REMOTE_ADDR \"@ipMatch $ip\" \"phase:1,log,pause:3000,allow,id:$id\"" >> $BLOCKED_FILE
+      echo "$ip is now throttled in $BLOCKED_FILE"
+      UPDATED=1
+    else
+      echo "$ip is not throttled in $BLOCKED_FILE"
+    fi
+  fi
+done
+
+if [[ "$UPDATED" == "1" ]]; then
+  APACHE_INSTALL/bin/httpd -k restart
+fi
