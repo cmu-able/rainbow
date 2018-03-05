@@ -112,7 +112,6 @@ public class MapTranslator {
     public static final String GOAL_PRED_DEF=GOAL_PRED+" = "+ROBOT_LOCATION_VAR+"="+TARGET_ROBOT_LOCATION_CONST+";";
 
     public static final String	STOP_PRED = "stop"; // Stop condition predicate (currently target location reached of insufficient battery to move to a nearby location)
-    public static final String	STOP_PRED_DEF = STOP_PRED + " = "+GOAL_PRED+" | "+ROBOT_BATTERY_VAR+"<"+ROBOT_BATTERY_DELTA+";";
     public static final String	STOP_GUARD_STR = "& (!"+STOP_PRED+")";
 
     public static final double MAX_DISTANCE = 999.0; // Distance assigned to disabled edges (for distance reward computation)
@@ -176,6 +175,9 @@ public class MapTranslator {
         }
         return buf+"\n";
     }
+    
+    static public boolean considerBattery = true;
+    
 
     /**
      * Generates labels for map locations
@@ -186,7 +188,7 @@ public class MapTranslator {
         buf+="const "+INITIAL_ROBOT_LOCATION_CONST+";\n";
         buf+="const "+TARGET_ROBOT_LOCATION_CONST+";\n\n";
         buf+="formula "+GOAL_PRED_DEF+"\n\n";
-        buf+="formula "+STOP_PRED_DEF+"\n\n";
+        buf+="formula "+STOP_PRED + " = "+GOAL_PRED+(considerBattery?" | "+ROBOT_BATTERY_VAR+"<"+ROBOT_BATTERY_DELTA:"")+";"+"\n\n";
         for (Map.Entry<String,EnvMapNode> entry : m_map.getNodes().entrySet() ){
             buf+="const "+entry.getKey()+"="+String.valueOf(entry.getValue().getId())+";\n";
         }
@@ -351,8 +353,9 @@ public class MapTranslator {
         String guard_can_charge=" & (false";
         synchronized(m_map){
             for (Map.Entry<String, EnvMapNode> e: m_map.getNodes().entrySet()){
-                if (e.getValue().isChargingStation()){
-                    guard_can_charge +="|"+ROBOT_LOCATION_VAR+"="+e.getValue().getId();
+                EnvMapNode n = e.getValue();
+				if (n.getProperty(Phase1MapPropertyKeys.CHARGING_STATION) != null && ((Boolean )n.getProperty(Phase1MapPropertyKeys.CHARGING_STATION))){
+                    guard_can_charge +="|"+ROBOT_LOCATION_VAR+"="+n.getId();
 
                 }	
             }
@@ -819,7 +822,7 @@ public class MapTranslator {
      * @param args
      */
     public static void main(String[] args) {
-        EnvMap dummyMap = new EnvMap (null, null);
+        EnvMap dummyMap = new EnvMap (null, null); 
         //dummyMap.insertNode("newnode", "l1", "l2", 17.0, 69.0);
         setMap(dummyMap);
         System.out.println(getMapTranslation()); // Class test

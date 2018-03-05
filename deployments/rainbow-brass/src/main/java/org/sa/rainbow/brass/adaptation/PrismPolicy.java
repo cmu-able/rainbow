@@ -46,10 +46,10 @@ public class PrismPolicy {
                 m_plan.add(action);
             }
         }
-
-//		for (int i = 0; i < m_plan.size(); i++) {
-//			System.out.println(m_plan.get(i));
-//		}
+        System.out.println("Here is the plan extracted from the policy:");
+		for (int i = 0; i < m_plan.size(); i++) {
+			System.out.println(m_plan.get(i));
+		}
     }
 
     /**
