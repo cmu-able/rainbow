@@ -193,8 +193,7 @@ public class PolicyToIG {
 	 * @param index
 	 * @return
 	 */
-	public double findNextOrientation(ArrayList<String> plan, int index) {
-		double theta = 0;
+	public double findNextOrientation(ArrayList<String> plan, int index, double theta) {
 
 		if (index + 1 >= plan.size())
 			return theta;
@@ -281,9 +280,9 @@ public class PolicyToIG {
 					double destX = m_map.getNodeX(destination);
 					double destY = m_map.getNodeY(destination);
 					if (destX != Double.NEGATIVE_INFINITY && destY != Double.NEGATIVE_INFINITY) {
-						cmd = build_cmd_move(cmd_id, destX, destY, m_current_speed, findNextOrientation(plan, i));
 						m_theta = MapTranslator.findArcOrientation(m_map.getNodeX(origin), m_map.getNodeY(origin),
 								destX, destY);
+						cmd = build_cmd_move(cmd_id, destX, destY, m_current_speed, findNextOrientation(plan, i, m_theta));
 						m_location_x = destX;
 						m_location_y = destY;
 					} else {
@@ -385,6 +384,8 @@ public class PolicyToIG {
 		public String map;
 	}
 
+	
+
 	/**
 	 * Class test
 	 * 
@@ -435,6 +436,7 @@ public class PolicyToIG {
 							"Src:" + String.valueOf(node_src.getId()) + " Tgt:" + String.valueOf(node_tgt.getId()));
 					conn.invoke(node_src.getId(), node_tgt.getId());
 					String prismResult = conn.getResult();
+					System.out.println ("Got : " + prismResult);
 					Long ttc = new Double(Double.parseDouble(prismResult)).longValue();
 					PrismPolicy prismPolicy = new PrismPolicy(PrismConnector
 							.convertToAbsolute(props.getProperty(PropertiesConnector.PRISM_ADV_EXPORT_PROPKEY)));

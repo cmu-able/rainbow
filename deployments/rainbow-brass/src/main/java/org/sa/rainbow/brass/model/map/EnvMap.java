@@ -34,7 +34,7 @@ public class EnvMap {
         m_arcs = new LinkedList<EnvMapArc> ();
         //initWithSimpleMap(); // TODO: Substitute hardwired version of the map by one parsed from file
         loadFromFile (props.getProperty (PropertiesConnector.MAP_PROPKEY));
-    }
+    } 
 
     public EnvMap (ModelReference model) {
         m_model = model;
@@ -247,7 +247,10 @@ public class EnvMap {
         for (Object node : nodes) {
             JSONObject jsonNode = (JSONObject) node;
             String id = (String) jsonNode.get("node-id");
-            JSONObject src_coords = (JSONObject) jsonNode.get("coord");
+            JSONObject src_coords = (JSONObject) jsonNode.get("coords");
+            if (src_coords == null) { // Try backward compatible "coord"
+            	src_coords = (JSONObject )jsonNode.get("coord");
+            }
             double src_x=0, src_y=0;
             try{
                 src_x = Double.parseDouble(String.valueOf(src_coords.get("x")));
@@ -280,8 +283,9 @@ public class EnvMap {
         for (Object node : nodes) {
             JSONObject jsonNode = (JSONObject) node;
             String id = (String) jsonNode.get("node-id");
-            JSONObject src_coords = (JSONObject) jsonNode.get("coord");
-            double src_x=0, src_y=0;
+            JSONObject src_coords = (JSONObject) jsonNode.get("coords");
+            if (src_coords == null) src_coords = (JSONObject )jsonNode.get("coord"); // try backwards compatible
+            double src_x=0, src_y=0; 
             try{
                 src_x = Double.parseDouble(String.valueOf(src_coords.get("x")));
                 src_y = Double.parseDouble(String.valueOf(src_coords.get("y")));
