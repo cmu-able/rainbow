@@ -4,6 +4,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.sa.rainbow.brass.model.clock.SetCurrentTimeCmd;
 import org.sa.rainbow.brass.model.instructions.SetLocalizationFidelityInstruction.LocalizationFidelity;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.IModelInstance;
@@ -34,7 +35,6 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
         m_commandMap.put ("setBatteryCharge".toLowerCase (), SetBatteryChargeCmd.class);
         m_commandMap.put ("setDeadlineCmd".toLowerCase (), SetDeadlineCmd.class);
         m_commandMap.put ("setTargetWaypoint".toLowerCase (), SetTargetWaypointCmd.class);
-        m_commandMap.put ("setCurrentTime".toLowerCase (), SetCurrentTimeCmd.class);
         m_commandMap.put ("setGroundPlanError".toLowerCase (), SetGroundPlaneErrorCmd.class);
         m_commandMap.put ("setCalibrationError".toLowerCase (), SetCalibrationErrorCmd.class);
         m_commandMap.put ("recalibrate", RecalibrateCmd.class);
@@ -83,10 +83,6 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
 
     public SetTargetWaypointCmd setTargetWaypointCmd (String t) {
         return new SetTargetWaypointCmd ((MissionStateModelInstance )m_modelInstance, "", t);
-    }
-
-    public SetCurrentTimeCmd setCurrentTimeCmd (double t) {
-        return new SetCurrentTimeCmd ((MissionStateModelInstance )m_modelInstance, "", Double.toString (t));
     }
 
     public SetGroundPlaneErrorCmd setGroundPlaneErrorCmd (double t, double r) {
