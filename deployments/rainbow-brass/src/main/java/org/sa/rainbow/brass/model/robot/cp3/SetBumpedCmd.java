@@ -8,7 +8,15 @@ import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
-
+/**
+ * This is a little tricky. Because of the way generics are set up, we can't
+ * use CP3RobotState directly, and so therefore we need to use use RobotState.
+ * This means we need to case to CP3RobotState everywhere. The alternative is to
+ * duplicate the RobotState commands rather than reuse through inheritence. C'est la vie.
+ * 
+ * @author schmerl
+ *
+ */
 public class SetBumpedCmd extends AbstractRainbowModelOperation<Boolean, RobotState> {
 
 	private boolean m_bumped;

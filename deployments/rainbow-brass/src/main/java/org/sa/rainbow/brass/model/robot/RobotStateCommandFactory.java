@@ -22,7 +22,8 @@ public class RobotStateCommandFactory extends ModelCommandFactory<RobotState> {
 	@Override
 	protected void fillInCommandMap() {
 		m_commandMap.put("setClockModelCmd".toLowerCase(), SetClockModelCmd.class);
-		m_commandMap.put("setBatteryCharge".toLowerCase(), SetBatteryChargeCmd.class);
+		m_commandMap.put("setBatteryChargeCmd".toLowerCase(), SetBatteryChargeCmd.class);
+		m_commandMap.put("setSpeedCmd".toLowerCase(), SetSpeedCmd.class);
 
 	}
 
@@ -41,5 +42,9 @@ public class RobotStateCommandFactory extends ModelCommandFactory<RobotState> {
 
 	public SetBatteryChargeCmd setBatteryChargeCmd(double charge) {
         return new SetBatteryChargeCmd ((RobotStateModelInstance) m_modelInstance, "", Double.toString (charge));
+	}
+	
+	public SetSpeedCmd setSpeedCmd(double speed) {
+		return new SetSpeedCmd((RobotStateModelInstance )m_modelInstance, "", Double.toString(speed));
 	}
 }

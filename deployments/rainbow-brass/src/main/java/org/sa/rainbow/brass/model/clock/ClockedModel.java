@@ -1,7 +1,13 @@
 package org.sa.rainbow.brass.model.clock;
 
 import java.util.Date;
-
+/**
+ * A model that stores histories of values (like locations, etc.) shoud be
+ * timestamped with respect to a clock. Therefore, all such models should inherit
+ * this. If a clock is provided, this is used; otherwise we use system time.
+ * @author schmerl
+ *
+ */
 public class ClockedModel {
 
 	private Clock m_clock = null;

@@ -1,7 +1,11 @@
 package org.sa.rainbow.brass.model.clock;
 
 import org.sa.rainbow.core.models.ModelReference;
-
+/**
+ * The system publishes a simulation clock time. This represents the model for the clock.
+ * @author schmerl
+ *
+ */
 public class Clock {
 	private ModelReference m_model;
 	private double m_currentTime = 0.0;
