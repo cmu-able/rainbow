@@ -1,10 +1,10 @@
-package org.sa.rainbow.brass.model.robot.cp3;
+package org.sa.rainbow.brass.model.p2_cp3.robot;
 
 import java.util.EnumSet;
 import java.util.List;
 
+import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotState.Sensors;
 import org.sa.rainbow.brass.model.robot.RobotState;
-import org.sa.rainbow.brass.model.robot.cp3.CP3RobotState.Sensors;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.IModelInstance;

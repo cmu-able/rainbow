@@ -1,4 +1,4 @@
-package org.sa.rainbow.brass.model.robot.cp3;
+package org.sa.rainbow.brass.model.p2_cp3.robot;
 
 import java.util.List;
 

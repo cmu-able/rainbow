@@ -4,8 +4,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.sa.rainbow.brass.model.clock.SetCurrentTimeCmd;
 import org.sa.rainbow.brass.model.instructions.SetLocalizationFidelityInstruction.LocalizationFidelity;
+import org.sa.rainbow.brass.model.p2_cp3.clock.SetCurrentTimeCmd;
 import org.sa.rainbow.brass.model.robot.SetBatteryChargeCmd;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.IModelInstance;

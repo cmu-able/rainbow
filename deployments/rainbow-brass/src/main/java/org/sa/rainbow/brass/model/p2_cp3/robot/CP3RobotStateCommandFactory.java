@@ -1,11 +1,11 @@
-package org.sa.rainbow.brass.model.robot.cp3;
+package org.sa.rainbow.brass.model.p2_cp3.robot;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotState.Sensors;
 import org.sa.rainbow.brass.model.robot.RobotState;
 import org.sa.rainbow.brass.model.robot.RobotStateCommandFactory;
-import org.sa.rainbow.brass.model.robot.cp3.CP3RobotState.Sensors;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.commands.AbstractSaveModelCmd;

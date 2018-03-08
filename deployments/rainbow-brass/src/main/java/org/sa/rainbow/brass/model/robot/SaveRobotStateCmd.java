@@ -5,7 +5,7 @@ import java.io.PrintStream;
 import java.util.Deque;
 import java.util.Iterator;
 
-import org.sa.rainbow.brass.model.clock.ClockedModel.TimeStamped;
+import org.sa.rainbow.brass.model.p2_cp3.clock.ClockedModel.TimeStamped;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.IModelsManager;
 import org.sa.rainbow.core.models.commands.AbstractSaveModelCmd;

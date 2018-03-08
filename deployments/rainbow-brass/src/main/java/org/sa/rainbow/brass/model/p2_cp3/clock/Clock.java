@@ -1,4 +1,4 @@
-package org.sa.rainbow.brass.model.clock;
+package org.sa.rainbow.brass.model.p2_cp3.clock;
 
 import org.sa.rainbow.core.models.ModelReference;
 /**

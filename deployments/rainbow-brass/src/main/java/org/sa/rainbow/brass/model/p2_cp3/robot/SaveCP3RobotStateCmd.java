@@ -1,4 +1,4 @@
-package org.sa.rainbow.brass.model.robot.cp3;
+package org.sa.rainbow.brass.model.p2_cp3.robot;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -7,10 +7,10 @@ import java.util.Deque;
 import java.util.EnumSet;
 import java.util.Iterator;
 
-import org.sa.rainbow.brass.model.clock.ClockedModel.TimeStamped;
+import org.sa.rainbow.brass.model.p2_cp3.clock.ClockedModel.TimeStamped;
+import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotState.Sensors;
 import org.sa.rainbow.brass.model.robot.RobotState;
 import org.sa.rainbow.brass.model.robot.SaveRobotStateCmd;
-import org.sa.rainbow.brass.model.robot.cp3.CP3RobotState.Sensors;
 import org.sa.rainbow.core.models.IModelsManager;
 
 public class SaveCP3RobotStateCmd extends SaveRobotStateCmd {

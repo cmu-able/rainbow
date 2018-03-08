@@ -3,7 +3,7 @@ package org.sa.rainbow.brass.model.robot;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-import org.sa.rainbow.brass.model.clock.ClockedModel;
+import org.sa.rainbow.brass.model.p2_cp3.clock.ClockedModel;
 import org.sa.rainbow.core.models.ModelReference;
 
 public class RobotState extends ClockedModel {
