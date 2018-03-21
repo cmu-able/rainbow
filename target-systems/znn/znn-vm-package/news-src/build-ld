@@ -1,0 +1,23 @@
+#!/bin/bash
+
+function fsize {
+	if [ ! -e "$1" ]; then
+		echo "0"
+	else
+		stat "$1" | grep Size | sed -re 's/.*Size: ([[:digit:]]+).*/\1/'
+	fi
+}
+
+for i in `ls *-HD.jpg`; do
+	LD=`echo $i | sed -re 's/(.*)-HD.jpg/\1-LD.jpg/'`
+	SZ=`fsize $i`
+	SCALE=50
+	LDS=`fsize $LD`
+	while [ "$LDS" -eq "0" -o "$LDS" -ge "5000" ]; do
+		convert $i -resize $SCALE% $LD
+		SCALE=`echo -e "scale=2\n$SCALE/2" | bc`
+		LDS=`fsize $LD`
+	done
+	echo "Converted $i ($SZ bytes) to $LD ($LDS bytes)"
+done
+

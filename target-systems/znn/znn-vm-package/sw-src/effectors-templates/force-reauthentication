@@ -1,0 +1,11 @@
+#!/bin/bash
+
+auth_file=/tmp/znn-wrapper-auth-1080
+if [ -e $auth_file ]; then
+  currToken=`cat $auth_file`
+  ((currToken++))
+  echo $currToken > $auth_file
+else
+  echo 1 > $auth_file
+fi
+APACHE_INSTALL/bin/httpd -k restart

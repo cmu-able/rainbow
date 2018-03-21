@@ -1,0 +1,97 @@
+#
+# Probe descriptions.
+#
+# History:
+# - [SWC 2007.03.18] Created file, populated new probe descriptions.
+# - [SWC 2007.04.09] Added array of host names as arguments to PingRTTProbe.
+# - [SWC 2007.04.10] Modified descriptions for different target locations.
+# - [SWC 2007.04.11] Added ClientProxyProbe
+#
+vars:
+#  _probes.commonPath: "${rainbow.path}/system/probes"
+  _probes.znn_home:"/home/ec2-user"
+  _probes.commonPath: "${_probes.znn_home}/rainbow/org.sa.rainbow.sdk.znews/targets/znews-ss/system/probes/"
+  
+probes:
+
+#  ClientProbe:
+#    alias: client
+#    location: "${customize.system.target.lb}"
+#    type: java
+#    javaInfo:
+#      class: org.sa.rainbow.translator.znn.probes.ClientProbe
+#      period: 2000
+#      args.length: 1
+#      args.0: ${_probes.znn_home}/sw-bin/httpd-lb-2.4.2/logs/access_log
+
+  ClientProbe:
+    alias: client
+    location: "${customize.system.target.lb}"
+    type: script
+    scriptInfo:
+      mode: continual
+      path: "/usr/bin/tail"
+      argument: "-f -s 5 ${_probes.znn_home}/sw-bin/httpd-lb-2.4.2/logs/access_log"
+
+  EnablementProbe:
+    alias: enablementprobe
+    location: "${customize.system.target.lb}"
+    type: java
+    javaInfo:
+      class: org.sa.rainbow.translator.znn.probes.ServerEnablementProbe
+      period: 2000
+      args.length: 1
+      args.0: "${_probes.znn_home}/sw-bin/httpd-lb-2.4.2/conf/balanced.conf"
+
+  BlackholeProbe:
+    alias: blackhole
+    location: "${customize.system.target.lb}"
+    type: java
+    javaInfo:
+      class: org.sa.rainbow.translator.znn.probes.BlackholeProbe
+      period: 2000
+      args.length: 1
+      args.0: "${_probes.znn_home}/sw-bin/httpd-lb-2.4.2/conf/blocked.conf"
+
+  ThrottleProbe:
+    alias: throttle
+    location: "${customize.system.target.lb}"
+    type: java
+    javaInfo:
+      class: org.sa.rainbow.translator.znn.probes.ThrottleProbe
+      period: 2000
+      args.length: 1
+      args.0: "${_probes.znn_home}/sw-bin/httpd-lb-2.4.2/conf/security.conf"
+
+  CaptchaProbe:
+    alias: captchaprobe
+    location: "${customize.system.target.lb}"
+    type: java
+    javaInfo:
+      class: org.sa.rainbow.translator.znn.probes.CaptchaProbe
+      period: 2000
+      args.length: 1
+      args.0: /tmp/znn-wrapper-1080
+#      args.0: ${_probes.znn_home}/lb0/sw/httpd-2.4.2/conf/captcha.on
+ 
+  AuthenticationProbe:
+    alias: authenticationprobe
+    location: "${customize.system.target.web0}"
+    type: java
+    javaInfo:
+      class: org.sa.rainbow.translator.znn.probes.AuthenticationProbe
+      period: 2000
+      args.length: 1
+      args.0: /tmp/znn-wrapper-auth-1080
+
+  FidelityProbe1:
+    alias: fidelity
+    location: "${customize.system.target.web0}"
+    type: java
+    javaInfo:
+      class: org.sa.rainbow.translator.znn.probes.FidelityProbe
+      period: 2000
+      args.length: 1
+      args.0: "/tmp/znn-fidelity-${customize.system.target.web0.httpPort}"
+     
+

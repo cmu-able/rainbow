@@ -1,0 +1,136 @@
+# Created June 30, 2012 (Jeff Gennari)
+#
+# Utility curves, defined as X:Y pairs, where X is value of the
+# dimension and Y is the utility in the range [0,1]
+
+# DoS utilities. There are three quality dimensions to a DoS attack:
+# the response time of clients, the presence of an attacker (currently
+# a true/false value), and the cost of adding an additional server.
+
+ # Response time taken directly from existing ZNN example. 
+utilities:
+  uG:
+    label: "Average Response Time to Good Clients"
+    mapping: "[EAvg]!NormalT.experRespTime"
+    description: "Good Client experienced response time in milliseconds, R, defined as a float property 'ClientT.experRespTime' in the architecture"
+    utility:
+      0: 1.00
+      100: 1.00
+      200: 0.99
+      500: 0.90
+      1000: 0.75
+      1500: 0.50
+      2000: 0.25
+      4000: 0.00
+  
+  uB:
+    label: "Average Response to Malicious Clients"
+    mapping: "[EAvg]!MaliciousT.experRespTime"
+    description: "Malicious Client experienced response time in milliseconds, R, defined as a float property 'ClientT.experRespTime' in the architecture"
+    utility:
+      0: 0.00
+      4000: 0.50
+      30000: 1.00
+      
+  uC:
+    label: "Average Server Cost"
+    mapping: "[EAvg]ServerT.cost"
+    description: "Server cost in unit/hr, C, averaged from a float property 'ServerT.cost' in the architecture, and captures average cost across all servers"
+    utility:
+      0: 1.00
+      1: 0.90
+      5: 0.20
+      10: 0.00
+      
+  uSF:
+    label: "Historical Strategy Failure"
+    mapping: "[EAvg]Strategy.rateFailure"
+    description: "Rate of failure, in fraction, of a strategy; utility has no effect if strategy history is not kept"
+    utility:
+      0: 1.00
+      0.5: 0.01
+      1: 0.00
+
+# scenario 1: Maintaining acceptable response time to good clients most important 
+# scenario 2: Eliminating malicious clients is most important
+# scenario 3: Keeping costs down is most important
+
+weights:
+  scenario 1:
+    uG: 0.7
+    uB: 0.3
+    uC: 0.1
+    uSF: 0.0
+
+  scenario 2:
+    uG: 0.3
+    uB: 0.7
+    uC: 0.1
+    uSF: 0.0
+    
+  scenario 2:
+    uG: 0.4
+    uC: 0.4
+    uB: 0.2
+    uSF: 0.0
+    
+vectors:
+
+  # Deny attacker service by putting him/her in a blackhole. This
+  # should reduce response time for all but the attacker, reduce
+  # disruption cost to the servers, but increase the cost unit of
+  # taking the wrong client offline
+
+  # Utility: [v]R; [v]A; (reduce R by 1000 ms, reduce the number
+  # of attackers by 1 unit)
+  blackholeAttacker:
+    uB: +30000
+    uG: -1000
+    uC: 0
+  
+  unblackholeAttacker:
+    uB: 0
+    uG: 0
+    uC: 0
+  
+  # Adding more servers should reduce response time, have no impact on
+  # the number of attackers, and increase the server cost (by adding
+  # additional servers).
+
+  # Utility: [v]R; [<>]A; (reduce R by 1000 ms, no change in the
+  # number of attackers)
+  enlistServers:
+    uG: -1000
+    uB: -1000
+    uC: +1
+
+  # Utility: [v]R; [<>]A; [^]C (reduce R by 1000 ms, no change in the
+  # number of attackers)
+  dischargeServers:
+    uG: +1000
+    uB: +1000
+    uC: -1
+    
+  addCaptcha:
+    uG: -250
+    uB: +30000
+    uC: +0.5
+    
+  removeCaptcha:
+    uG: +250
+    uB: -30000
+    uC: -0.5
+    
+  lowerFidelity:
+    uG: -500
+    uB: -500
+    uC: -0.10
+# Utility: [^] R; [^] C; [^] F
+  raiseFidelity:
+    uG: +500
+    uB: +500
+    uC: +0.10
+
+
+
+

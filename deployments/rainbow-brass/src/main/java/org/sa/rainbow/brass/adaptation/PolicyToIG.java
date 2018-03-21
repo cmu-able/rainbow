@@ -404,6 +404,7 @@ public class PolicyToIG {
 		parser.addArgument("-p", "--properties").metavar("FILE").type(String.class)
 				.help("The file containing properties/environment variables for PRISM etc");
 		parser.addArgument("-w", "--waypoint").type(String.class).help("The waypoint to generate to and from");
+
 		parser.addArgument("map").type(String.class).help("The map file containing the waypoints");
 
 		Arguments theArgs = new Arguments();
@@ -440,6 +441,7 @@ public class PolicyToIG {
 				if (node_src.getId() != node_tgt.getId()) {
 					if (theArgs.waypoint != null && node_tgt.getLabel() != theArgs.waypoint && node_src.getLabel() != theArgs.waypoint)
 						continue;
+
 					System.out.println(
 							"Src:" + String.valueOf(node_src.getId()) + " Tgt:" + String.valueOf(node_tgt.getId()));
 					conn.invoke(node_src.getId(), node_tgt.getId());

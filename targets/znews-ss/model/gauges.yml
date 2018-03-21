@@ -1,0 +1,639 @@
+#
+# Gauge Type and Gauge Instance Specifications
+#  - time periods generally in milliseconds
+#
+# History:
+# - [SWC 2007.01.18] Created file, populated ZNews gauge descriptions.
+# - [SWC 2007.04.09] Changed LatencyGaugeT to use RtLatencyMultiHostGauge.
+# - [SWC 2007.04.10] Modified descriptions for different target locations.
+# - [SWC 2007.04.11] Added ResponseTimeGaugeT
+# - [BRS 2013.11.13] Changed to new format
+#
+gauge-types:
+
+
+  BlackHoleGaugeT:
+    commands:
+      blockedIPs: "BlackholerT.setBlackholed({String})"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.translator.znn.gauges.BlackholeGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+  
+  ThrottleGaugeT:
+    commands:
+      throttledIPs: "ThrottlerT.setThrottled({String})"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.translator.znn.gauges.ThrottleGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+
+  MaliciousnessGaugeT:
+    commands:
+      maliciousness : PotentiallyMaliciousT.setMaliciousness (float)
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.translator.znn.gauges.EchoGauge"
+    configParams:
+      targetGaugeName:
+        type: String
+        default: ~
+      targetGaugeType:
+        type: String
+        default: ~
+      targetGaugeValue:
+        type: String
+        default: ~
+    comment: "EchoGaugeT echos a value reported by another gauge"
+    
+  DummyDiagnosisGaugeT:
+    commands:
+      maliciousness: PotentiallyMaliciousT.setMaliciousness (float)
+      captcha: CaptchaHandlerT.setCaptchaResponse (int)
+      authenticate: CaptchaHandlerT.setAuthenticationResponse (int)
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.translator.znn.gauges.DummyDiagnosisGauge"
+    configParams:
+      targetProbeList:
+        type: String
+        default: ~
+    
+  CaptchaGaugeT:
+    commands:
+      enablement : ProxyT.setCaptchaEnabled (boolean)
+      clientMgmt : CaptchaHandlerT.setCaptchaResponse (int)
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 5000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.translator.znn.gauges.CaptchaGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+    
+  AuthenticationEnablementGaugeT:
+    commands:
+      clientMgmt: AuthenticationHandlerT.setAuthenticationResponse (int)
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 5000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.translator.znn.gauges.AuthenticationEnablementGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~  
+  
+  DiagnosisGaugeT:
+    commands:
+      maliciousness: PotentiallyMaliciousT.setMaliciousness (float)
+    setupParams:
+      targetIP: 
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.translator.znn.gauges.DiagnosisGauge"
+    configParams:
+      clients:
+        type: String
+        default: "c1=10.5.6.254"		
+      reportingPeriod:
+        type: long
+        default: 10000
+    comment: "Diagnosis gauge for DoS analysis" 
+
+  ResponseTimeGaugeT:
+    commands:
+      end2endRespTime : ClientT.setResponseTime (float)
+    setupParams:
+      targetIP:
+        type:    String
+        default: "localhost"
+      beaconPeriod:
+        type:    long
+        default: 30000
+      javaClass:
+        type:    String
+        default: "org.sa.rainbow.translator.znn.gauges.End2EndRespTimeGauge"
+    configParams:
+      samplingFrequency:
+        type:    long
+        default: 1000
+      targetProbeType:
+        type:    String
+        default: ~
+    comment: "ResponseTimeGaugeT measures and reports the end-to-end response time from a client or its proxy."
+
+    
+  ServerEnablementGaugeT:
+    commands:
+      removeServer: ServerT.deleteServer
+      addServer: "ProxyT.connectNewServer (String, String, String)"
+      enableServer: ServerT.enableServer (boolean)
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 10000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.translator.znn.gauges.ServerEnablementGauge"
+    configParams:
+      samplingFrequency:
+        type: long
+        default: 1000
+      targetProbeType:
+        type: String
+        default: ~
+      mode:
+        type: String
+        default: "enable"
+    comment: "ServerEnablementGaugeT reports creation/deletion or enablement/disablement of servers. mode can be either enable|new"
+
+
+  ApacheTopGaugeT:
+    commands:
+      reqServiceRate     : ServerT.setReqServiceRate(float)
+      byteServiceRate    : ServerT.setByteServiceRate(float)
+      numReqsSuccess     : HttpConnT.setNumSuccessfulRequests(int)
+      numReqsRedirect    : HttpConnT.setNumRedirectedRequests(int)
+      numReqsClientError : HttpConnT.setNumRequestsClientError(int)
+      numReqsServerError : HttpConnT.setNumRequestsServerError(int)
+      pageHit : ServerT.setLastPageHit(String)
+    setupParams:
+      targetIP:
+        type:    String
+        default: "localhost"
+      beaconPeriod:
+        type:    long
+        default: 20000
+      javaClass:
+        type:    String
+        default: "org.sa.rainbow.translator.gauges.ApacheTopGauge"
+    configParams:
+      samplingFrequency:
+        type:    long
+        default: 1000
+      targetProbeType:
+        type:    String
+        default: ~
+    comment: "ApacheTopGaugeT measures and reports properties of an Apache server, via a UNIX top like utility"
+
+  DiskIOGaugeT:
+    commands:
+      transferRate : ServerT.setDiskTransferRate(double)
+      readRate     : ServerT.setDiskReadRate(double)
+      writeRate    : ServerT.setDiskWriteRate(double)
+    setupParams:
+      targetIP:
+        type:    String
+        default: "localhost"
+      beaconPeriod:
+        type:    long
+        default: 20000
+      javaClass:
+        type:    String
+        default: "org.sa.rainbow.translator.gauges.DiskIOGauge"
+    configParams:
+      samplingFrequency:
+        type:    long
+        default: 1000
+      targetProbeType:
+        type:    String
+        default: ~
+    comment: "DiskIOGaugeT measures and reports disk IO stat of the target host, read/write reported in KBps"
+
+  LoadGaugeT:
+    commands:
+      load : ServerT.setLoad(double)
+    setupParams:
+      targetIP:
+        type:    String
+        default: "localhost"
+      beaconPeriod:
+        type:    long
+        default: 20000
+      javaClass:
+        type:    String
+        default: "org.sa.rainbow.translator.znn.gauges.CpuLoadGauge"
+    configParams:
+      samplingFrequency:
+        type:    long
+        default: 1000
+      targetProbeType:
+        type:    String
+        default: ~
+    comment: "LoadGaugeT measures and reports CPU load of the target host"
+
+  FidelityGaugeT:
+    commands:
+      fidelity : ServerT.setFidelity(int)
+    setupParams:
+      targetIP:
+        type:    String
+        default: "localhost"
+      beaconPeriod:
+        type:    long
+        default: 30000
+      javaClass:
+        type:    String
+        default: "org.sa.rainbow.translator.gauges.FidelityGauge"
+    configParams:
+      samplingFrequency:
+        type:    long
+        default: 2500
+      targetProbeType:
+        type:    String
+        default: ~
+    comment: "FidelityGaugeT measures and reports the fidelity level of served content"
+
+  LatencyGaugeT:
+    commands:
+      latency : HttpConnT.setLatency(double)
+    setupParams:
+      targetIP:
+        type:    String
+        default: "localhost"
+      beaconPeriod:
+        type:    long
+        default: 20000
+      javaClass:
+        type:    String
+        default: "org.sa.rainbow.translator.znews.gauges.RtLatencyMultiHostGauge"
+    configParams:
+      samplingFrequency:
+        type:    long
+        default: 1500
+      targetProbeType:
+        type:    String
+        default: ~
+    comment: "LatencyGaugeT measures and reports latency on a connection"
+
+  LatencyRateGaugeT:
+    commands:
+      latencyRate : HttpConnT.setLatencyRate(double)
+    setupParams:
+      targetIP:
+        type:    String
+        default: "localhost"
+      beaconPeriod:
+        type:    long
+        default: 20000
+      javaClass:
+        type:    String
+        default: "org.sa.rainbow.translator.znews.gauges.RtLatencyRateMultiHostGauge"
+    configParams:
+      samplingFrequency:
+        type:    long
+        default: 1500
+      targetProbeType:
+        type:    String
+        default: ~
+    comment: "LatencyRateGaugeT measures and reports the latency rate of change on a connection"
+
+    
+
+gauge-instances:
+
+  BHG1:
+    type: BlackHoleGaugeT
+    model: "ZNewsSys:Acme"
+    commands:
+      "blockedIPs": LB0.setBlackholed ($<blockedIPs>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      reportingPeriod: 10000
+      targetProbeType: blackhole
+
+  TG1:
+    type: ThrottleGaugeT
+    model: "ZNewsSys:Acme"
+    commands:
+      "throttledIPs": LB0.setThrottled ($<throttledIPs>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      reportingPeriod: 10000
+      targetProbeType: throttle
+      
+  MG1:
+    type: DummyDiagnosisGaugeT
+    model: "ZNewsSys:Acme"
+    commands:
+      "maliciousness(x)": x.setMaliciousness ($<maliciousness>)
+      "captcha(x)": x.setCaptchaResponse ($<response>)
+      "authenticate(x)": x.setAuthenticationResponse ($<response>)
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      reportingPeriod: 10000
+      targetProbeList: "dummymaliciousness@*,authenticationprobe"
+      
+      
+  CG1:
+    type: CaptchaGaugeT
+    model: "ZNewsSys:Acme"
+    commands:
+      "enabled": LB0.setCaptchaEnabled($<enabled>)
+      "clientMgmt(${customize.system.target.client1})": Client0.setCaptchaResponse (0) 
+      "clientMgmt(${customize.system.target.client2})": Client1.setCaptchaResponse (0)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      samplingFrequency: 1000
+      targetProbeType: captchaprobe
+      
+  AEG1:
+    type: AuthenticationEnablementGaugeT
+    model: "ZNewsSys:Acme"
+    commands:
+      "clientMgmt(${customize.system.target.client1})": Client0.setAuthenticationResponse (0) 
+      "clientMgmt(${customize.system.target.client2})": Client1.setAuthenticationResponse (0)  
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      samplingFrequency: 1000
+      targetProbeType: authenticationprobe
+        
+  EERTG1:
+    type:  ResponseTimeGaugeT
+    model: "ZNewsSys:Acme"
+    commands:
+      "end2endRespTime(${customize.system.target.master})" : Client0.setResponseTime($<end2endRespTime>)
+      "end2endRespTime(${customize.system.target.bad})" : Client1.setResponseTime($<end2endRespTime>)
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      samplingFrequency: 1000
+      targetProbeType  : clientproxy@*
+    comment: "EERTG1 is associated with the client component of the System, ZNewsSys, defined as an Acme model"
+    
+    
+  SEG1:
+    type: ServerEnablementGaugeT
+    model: "ZNewsSys:Acme"
+    commands:
+      "removeServer(x)": x.deleteServer
+      "connectServer(x)": "LB0.connectNewServer (Server0, $<location>, $<port>)"
+      "enableServer(x)": "LB0.enableServer (x, $<enabled>)"
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      targetProbeType: "enablementprobe@${customize.system.target.lb}"
+      samplingFrequency: 1000
+      mode: new
+    comment: "This needs to be located on the master because it needs access to the model"
+    
+  LoG0:
+    type:  LoadGaugeT
+    model: "ZNewsSys:Acme"
+    commands:
+      load : LB0.setLoad($<load>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      samplingFrequency: 1000
+      targetProbeType  : load
+    comment: "LoG1 is associated with the component LB0 of the System, ZNewsSys, defined as an Acme model"
+
+  LoG1:
+    type:  LoadGaugeT
+    model: "ZNewsSys:Acme"
+    commands:
+      load : Server0.setLoad($<load>)
+    setupValues:
+      targetIP: "${customize.system.target.web0}"
+    configValues:
+      samplingFrequency: 1000
+      targetProbeType  : load
+    comment: "LoG1 is associated with the component LB0 of the System, ZNewsSys, defined as an Acme model"
+
+  LoG2:
+    type:  LoadGaugeT
+    model: "ZNewsSys:Acme"
+    commands:
+      load : Server1.setLoad($<load>)
+    setupValues:
+      targetIP: "${customize.system.target.web1}"
+    configValues:
+      samplingFrequency: 1000
+      targetProbeType  : load
+    comment: "LoG1 is associated with the component LB0 of the System, ZNewsSys, defined as an Acme model"
+
+  LoG3:
+    type:  LoadGaugeT
+    model: "ZNewsSys:Acme"
+    commands:
+      load : ServerB0.setLoad($<load>)
+    setupValues:
+      targetIP: "${customize.system.target.web2}"
+    configValues:
+      samplingFrequency: 1000
+      targetProbeType  : load
+    comment: "LoG1 is associated with the component LB0 of the System, ZNewsSys, defined as an Acme model"
+
+    
+unused-gauge-instances: 
+
+  MG1:
+    type: MaliciousnessGaugeT
+    model: "ZNewsSys:Acme"
+    mappings:
+      "maliciousness(c2)": Client1.maliciousness
+      "maliciousness(c1)": Client0.maliciousness
+    setupValues:
+      targetIP: "${customize.system.target.0}"
+    configValues:
+      targetGaugeName: DG1
+      targetGaugeType: DiagnosisGaugeT
+      targetGaugeValue: maliciousness
+
+  DG1:
+    type: DiagnosisGaugeT
+    model: "ZNewsSys:Acme"
+    mappings:
+      "maliciousness": x
+    setupValues:
+      targetIP: "${customize.system.target.0}"
+    configValues:
+      reportingPeriod: 10000
+      
+  ATG1:
+    type:  ApacheTopGaugeT
+    model: "ZNewsSys:Acme"
+    mappings:
+      reqServiceRate     : s0.reqServiceRate
+      byteServiceRate    : s0.byteServiceRate
+      numReqsSuccess     : conn0.numReqsSuccess
+      numReqsRedirect    : conn0.numReqsRedirect
+      numReqsClientError : conn0.numReqsClientError
+      numReqsServerError : conn0.numReqsServerError
+      pageHit : s0.lastPageHit
+    setupValues:
+      targetIP: "${customize.system.target.1}"
+    configValues:
+      samplingFrequency: ~
+      # Leave details unspecified (null) to use default value defined at the type-level
+      targetProbeType  : apachetop
+    comment: "ATG1 is associated with component s0 and connector conn0 of the System, ZNewsSys, defined as an Acme model"
+
+  DioG1:
+    type:  DiskIOGaugeT
+    model: "ZNewsSys:Acme"
+    mappings:
+      transferRate : s0.diskXferRate
+      readRate : s0.diskReadRate
+      writeRate : s0.diskWriteRate
+    setupValues:
+      targetIP: "${customize.system.target.1}"
+    configValues:
+      samplingFrequency: 1000
+      targetProbeType  : diskio
+    comment: "DioG1 is associated with the component s0 of the System, ZNewsSys, defined as an Acme model"
+
+  LoG0:
+    type:  LoadGaugeT
+    model: "ZNewsSys:Acme"
+    mappings:
+      load : s0.load
+    setupValues:
+      targetIP: "${customize.system.target.0}"
+    configValues:
+      samplingFrequency: 1000
+      targetProbeType  : load
+    comment: "LoG0 is associated with the component s0 of the System, ZNewsSys, defined as an Acme model"
+
+  LoG1:
+    type:  LoadGaugeT
+    model: "ZNewsSys:Acme"
+    mappings:
+      load : s1.load
+    setupValues:
+      targetIP: "${customize.system.target.1}"
+    configValues:
+      samplingFrequency: 1000
+      targetProbeType  : load
+    comment: "LoG1 is associated with the component s1 of the System, ZNewsSys, defined as an Acme model"
+
+  FiG1:
+    type:  FidelityGaugeT
+    model: "ZNewsSys:Acme"
+    mappings:
+      fidelity : s0.fidelity
+    setupValues:
+      targetIP: "${customize.system.target.1}"
+    configValues:
+      samplingFrequency: 2500
+      targetProbeType  : fidelity
+    comment: "FiG1 is associated with the component s0 of the System, ZNewsSys, defined as an Acme model"
+
+  LatG1:
+    type:  LatencyGaugeT
+    model: "ZNewsSys:Acme"
+    mappings:
+      "latency(${rainbow.master.location.host})" : conn0.latency
+      "latency(@{ZNewsSys.s1.deploymentLocation})" : conn1.latency
+    setupValues:
+      targetIP: "${customize.system.target.1}"
+    configValues:
+      samplingFrequency: 1500
+      targetProbeType  : pingrtt
+    comment: "LatG1 is associated with the connectors of the System, ZNewsSys, defined as an Acme model"
+
+  LatRoCG1:
+    type:  LatencyRateGaugeT
+    model: "ZNewsSys:Acme"
+    mappings:
+      "latencyRate(${rainbow.master.location.host})" : conn0.latencyRate
+      "latencyRate(@{ZNewsSys.s1.deploymentLocation})" : conn1.latencyRate
+    setupValues:
+      targetIP: "${customize.system.target.1}"
+    configValues:
+      samplingFrequency: 1500
+      targetProbeType  : pingrtt
+    comment: "LatRoCG1 is associated with the connectors of the System, ZNewsSys, defined as an Acme model"
+    
+  ATG0:
+    type:  ApacheTopGaugeT
+    model: "ZNewsSys:Acme"
+    mappings:
+      reqServiceRate     : s0.reqServiceRate
+      byteServiceRate    : s0.byteServiceRate
+      numReqsSuccess     : conn0.numReqsSuccess
+      numReqsRedirect    : conn0.numReqsRedirect
+      numReqsClientError : conn0.numReqsClientError
+      numReqsServerError : conn0.numReqsServerError
+      pageHit : s0.lastPageHit
+    setupValues:
+      targetIP: "${customize.system.target.0}"
+    configValues:
+      samplingFrequency: ~
+      # Leave details unspecified (null) to use default value defined at the type-level
+      targetProbeType  : apachetop
+    comment: "ATG1 is associated with component s0 and connector conn0 of the System, ZNewsSys, defined as an Acme model"
+
+  LoG3:
+    type:  LoadGaugeT
+    model: "ZNewsSys:Acme"
+    mappings:
+      load : s3.load
+    setupValues:
+      targetIP: "${customize.system.target.3}"
+    configValues:
+      samplingFrequency: 1000
+      targetProbeType  : load
+    comment: "LoG3 is associated with the component s3 of the System, ZNewsSys, defined as an Acme model"
+
