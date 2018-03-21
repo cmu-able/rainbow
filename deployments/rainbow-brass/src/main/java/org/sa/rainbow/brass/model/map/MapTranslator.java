@@ -357,9 +357,10 @@ public class MapTranslator {
         String guard_can_charge=" & (false";
         synchronized(m_map){
             for (Map.Entry<String, EnvMapNode> e: m_map.getNodes().entrySet()){
-               EnvMapNode n = e.getValue();
-				          if (n.getProperty(Phase1MapPropertyKeys.CHARGING_STATION) != null && ((Boolean )n.getProperty(Phase1MapPropertyKeys.CHARGING_STATION))){
+                EnvMapNode n = e.getValue();
+				if (n.getProperty(Phase1MapPropertyKeys.CHARGING_STATION) != null && ((Boolean )n.getProperty(Phase1MapPropertyKeys.CHARGING_STATION))){
                     guard_can_charge +="|"+ROBOT_LOCATION_VAR+"="+e.getValue().getLabel();
+
                 }	
             }
             guard_can_charge+=") & ("+ROBOT_BATTERY_VAR+"<1500*"+String.valueOf(BatteryPredictor.m_battery_scaling_factor)+")";	//TODO: refine this constraint
@@ -834,9 +835,8 @@ public class MapTranslator {
      * @param args
      */
     public static void main(String[] args) {
+        EnvMap dummyMap = new EnvMap (null, null); 
 
-    	// To use standalone Prism generation, See ../PropertiesConnector.java to set necessary environment 
-        EnvMap dummyMap = new EnvMap (null, null);
         //dummyMap.insertNode("newnode", "l1", "l2", 17.0, 69.0);
         setMap(dummyMap);
         System.out.println(getMapTranslation()); // Class test

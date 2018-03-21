@@ -1,24 +1,26 @@
-package org.sa.rainbow.brass.model.mission;
+package org.sa.rainbow.brass.model.robot;
 
 import java.util.List;
 
+import org.sa.rainbow.brass.model.mission.MissionState;
+import org.sa.rainbow.brass.model.mission.MissionStateModelInstance;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 
-public class SetBatteryChargeCmd extends AbstractRainbowModelOperation<Double, MissionState> {
+public class SetBatteryChargeCmd extends AbstractRainbowModelOperation<Double, RobotState> {
 
     private double m_charge;
 
-    public SetBatteryChargeCmd (MissionStateModelInstance model, String target, String charge) {
+    public SetBatteryChargeCmd (RobotStateModelInstance model, String target, String charge) {
         super ("setBatteryCharge", model, target, charge);
         m_charge = Double.parseDouble (charge);
     }
 
     @Override
     public Double getResult () throws IllegalStateException {
-        return getModelContext ().getModelInstance ().getBatteryCharge ();
+        return getModelContext ().getModelInstance ().getCharge ();
     }
 
     @Override
@@ -28,7 +30,7 @@ public class SetBatteryChargeCmd extends AbstractRainbowModelOperation<Double, M
 
     @Override
     protected void subExecute () throws RainbowException {
-        getModelContext ().getModelInstance ().setBatteryCharge (m_charge);
+        getModelContext ().getModelInstance ().setCharge (m_charge);
     }
 
     @Override
@@ -38,11 +40,11 @@ public class SetBatteryChargeCmd extends AbstractRainbowModelOperation<Double, M
 
     @Override
     protected void subUndo () throws RainbowException {
-        getModelContext ().getModelInstance ().m_chargeHistory.pop ();
+        getModelContext ().getModelInstance ().getCharge();
     }
 
     @Override
-    protected boolean checkModelValidForCommand (MissionState model) {
+    protected boolean checkModelValidForCommand (RobotState model) {
         return model == getModelContext ().getModelInstance ();
     }
 

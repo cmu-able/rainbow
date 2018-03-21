@@ -5,18 +5,17 @@ import java.util.Map;
 
 public class EnvMapArc {
 	public String m_source, m_target;
-	public double m_distance;
-	public boolean m_enabled;
 
-	private final Map<String, Object> m_properties;
 
-	public EnvMapArc(String m_source, String m_target, double m_distance, boolean m_enabled) {
+	private final Map<String, Object> m_properties = new HashMap<> ();
+
+	public EnvMapArc(String source, String target, double distance, boolean enabled) {
 		super();
-		this.m_source = m_source;
-		this.m_target = m_target;
-		this.m_distance = m_distance;
-		this.m_enabled = m_enabled;
-		this.m_properties = new HashMap<>();
+		this.m_source = source;
+		this.m_target = target;
+		m_properties.put(Phase1MapPropertyKeys.DISTANCE, distance);
+		m_properties.put(Phase1MapPropertyKeys.ENABLEMENT, enabled);
+
 	}
 
 	public String getSource() {
@@ -36,19 +35,20 @@ public class EnvMapArc {
 	}
 
 	public double getDistance() {
-		return m_distance;
+		return (Double )m_properties.get(Phase1MapPropertyKeys.DISTANCE);
 	}
 
-	public void setDistance(double m_distance) {
-		this.m_distance = m_distance;
+	public void setDistance(double distance) {
+		m_properties.put(Phase1MapPropertyKeys.DISTANCE, distance);
 	}
 
 	public boolean isEnabled() {
-		return m_enabled;
+		return (Boolean )m_properties.get(Phase1MapPropertyKeys.ENABLEMENT);
 	}
 
-	public void setEnabled(boolean m_enabled) {
-		this.m_enabled = m_enabled;
+	public void setEnabled(boolean enabled) {
+		m_properties.put(Phase1MapPropertyKeys.ENABLEMENT, enabled);
+
 	}
 
 	public boolean includesNode(String node) {

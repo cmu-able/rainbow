@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.sa.rainbow.brass.model.instructions.SetLocalizationFidelityInstruction.LocalizationFidelity;
+import org.sa.rainbow.brass.model.p2_cp3.clock.SetCurrentTimeCmd;
+import org.sa.rainbow.brass.model.robot.SetBatteryChargeCmd;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelsManager;
@@ -31,10 +33,8 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
         m_commandMap.put ("setRobotObstructed".toLowerCase (), SetRobotObstructedCmd.class);
         m_commandMap.put ("setRobotOnTime".toLowerCase (), SetRobotOnTimeCmd.class);
         m_commandMap.put ("setRobotAccurate".toLowerCase (), SetRobotAccurateCmd.class);
-        m_commandMap.put ("setBatteryCharge".toLowerCase (), SetBatteryChargeCmd.class);
         m_commandMap.put ("setDeadlineCmd".toLowerCase (), SetDeadlineCmd.class);
         m_commandMap.put ("setTargetWaypoint".toLowerCase (), SetTargetWaypointCmd.class);
-        m_commandMap.put ("setCurrentTime".toLowerCase (), SetCurrentTimeCmd.class);
         m_commandMap.put ("setGroundPlanError".toLowerCase (), SetGroundPlaneErrorCmd.class);
         m_commandMap.put ("setCalibrationError".toLowerCase (), SetCalibrationErrorCmd.class);
         m_commandMap.put ("recalibrate", RecalibrateCmd.class);
@@ -72,10 +72,6 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
                 Boolean.toString (robotAccurate));
     }
 
-    public SetBatteryChargeCmd setBatteryChargeCmd (double charge) {
-        return new SetBatteryChargeCmd ((MissionStateModelInstance) m_modelInstance, "", Double.toString (charge));
-    }
-
     public SetDeadlineCmd setDeadlineCmd (long d) {
         return new SetDeadlineCmd ((MissionStateModelInstance) m_modelInstance, "",
                 Double.toString (d));
@@ -83,10 +79,6 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
 
     public SetTargetWaypointCmd setTargetWaypointCmd (String t) {
         return new SetTargetWaypointCmd ((MissionStateModelInstance )m_modelInstance, "", t);
-    }
-
-    public SetCurrentTimeCmd setCurrentTimeCmd (double t) {
-        return new SetCurrentTimeCmd ((MissionStateModelInstance )m_modelInstance, "", Double.toString (t));
     }
 
     public SetGroundPlaneErrorCmd setGroundPlaneErrorCmd (double t, double r) {

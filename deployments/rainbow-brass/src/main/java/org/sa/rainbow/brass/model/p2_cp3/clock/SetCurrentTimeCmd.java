@@ -1,18 +1,20 @@
-package org.sa.rainbow.brass.model.mission;
+package org.sa.rainbow.brass.model.p2_cp3.clock;
 
 import java.util.Collections;
 import java.util.List;
 
+import org.sa.rainbow.brass.model.mission.MissionState;
+import org.sa.rainbow.brass.model.mission.MissionStateModelInstance;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 
-public class SetCurrentTimeCmd extends AbstractRainbowModelOperation<Double, MissionState> {
+public class SetCurrentTimeCmd extends AbstractRainbowModelOperation<Double, Clock> {
 
     private double m_time;
 
-    public SetCurrentTimeCmd (MissionStateModelInstance model, String target, String wp) {
+    public SetCurrentTimeCmd (ClockModelInstance model, String target, String wp) {
         super ("setCurrentTime", model, target, wp);
         m_time = Double.parseDouble (wp);
     }
@@ -46,7 +48,7 @@ public class SetCurrentTimeCmd extends AbstractRainbowModelOperation<Double, Mis
     }
 
     @Override
-    protected boolean checkModelValidForCommand (MissionState model) {
+    protected boolean checkModelValidForCommand (Clock model) {
         return true;
     }
 
