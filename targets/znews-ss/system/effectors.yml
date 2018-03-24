@@ -1,0 +1,287 @@
+# Created January 30, 2007 (Shang-Wen Cheng)
+#
+# Effector descriptions.
+#
+# History:
+# - [SWC 2007.01.30] Created file, populated ZNews effector descriptions.
+# - [SWC 2007.04.10] Modified descriptions for different target locations.
+#
+vars:
+#  _effectors.commonPath: "${rainbow.path}/system/effectors"
+# @ZNN_HOME will be replaced by the rainbow-install script
+#  _effectors.commonPath: "@ZNN_HOME/effectors"
+  _effectors.commonPath: "/home/znn/effectors" 
+  
+  
+effector-types:
+
+  blackholeT:
+    command: "BlackholerT.setBlackholed ($<clients>)"
+    type: script
+    scriptInfo:
+      path: "${_effectors.commonPath}/ip-block-mgmt"
+      argument: "block {0}"
+      
+  flushAuthenticationT:
+    command: "AuthenticationHandlerT.forceReauthentication"
+    type: script
+    scriptInfo:
+      path: "${_effectors.commonPath}/force-reauthentication"
+      
+
+effectors:
+
+  blackhole:
+    effector-type: blackholeT
+    command: "${customize.system.taret.lb}.setBlackholed ($<clients>)"
+    location: "${customize.system.target.lb}"    
+     
+  throttle:
+    location: "${customize.system.target.lb}"
+    command: setThrottled($<clients>)
+    type: script
+    scriptInfo:
+      path: "/home/znn/effectors/ip-throttle-mgmt"
+      argument: "throttle {0}"
+      
+  flushAuthentication-web0:
+    effector-type: flushAuthenticationT
+    location: "${cusomize.system.target.web0}"
+    command: "${customize.system.target.lb}.forceReauthentication()"
+       
+  flushAuthentication-web1:
+    effector-type: flushAuthenticationT
+    location: "${cusomize.system.target.web1}"
+    command: "${customize.system.target.lb}.forceReauthentication()"
+
+  flushAuthentication-web2:
+    effector-type: flushAuthenticationT
+    location: "${cusomize.system.target.web2}"
+    command: "${customize.system.target.lb}.forceReauthentication()"
+      
+  enableCaptcha-web0: 
+    location: "${customize.system.target.web0}"
+    command: "${customize.system.target.lb}.setCaptchaEnabled (true)"
+    type: script
+    scriptInfo:
+      path: "/home/znn/effectors/captcha"
+      argument: "on /home/znn/captcha.on"
+      
+  enableCaptcha-lb: 
+    location: "${customize.system.target.lb}"
+    command: "${customize.system.target.lb}.setCaptchaEnabled (true)"
+    type: script
+    scriptInfo:
+      path: "/home/znn/effectors/captcha"
+      argument: "on /home/znn/captcha.on"
+      
+  enableCaptcha-web1: 
+    location: "${customize.system.target.web1}"
+    command: "${customize.system.target.lb}.setCaptchaEnabled (true)"
+    type: script
+    scriptInfo:
+      path: "/home/znn/effectors/captcha"
+      argument: "on /home/znn/captcha.on"
+
+  enableCaptcha-web2: 
+    location: "${customize.system.target.web2}"
+    command: "${customize.system.target.lb}.setCaptchaEnabled (true)"
+    type: script
+    scriptInfo:
+      path: "/home/znn/effectors/captcha"
+      argument: "on /home/znn/captcha.on"
+      
+  disableCaptcha-web0:
+    location: "${customize.system.target.web0}"
+    command: "${customize.system.target.lb}.setCaptchaEnabled (false)"
+    type: script
+    scriptInfo:
+      path: "/home/znn/effectors/captcha"
+      argument: "off /home/znn/captcha.on"
+      
+  disableCaptcha-lb:
+    location: "${customize.system.target.lb}"
+    command: "${customize.system.target.lb}.setCaptchaEnabled (false)"
+    type: script
+    scriptInfo:
+      path: "/home/znn/effectors/captcha"
+      argument: "off /home/znn/captcha.on"
+      
+  disableCaptcha-web1:
+    location: "${customize.system.target.web1}"
+    command: "${customize.system.target.lb}.setCaptchaEnabled (false)"
+    type: script
+    scriptInfo:
+      path: "/home/znn/effectors/captcha"
+      argument: "off /home/znn/captcha.on"
+      
+  disableCaptcha-web2:
+    location: "${customize.system.target.web2}"
+    command: "${customize.system.target.lb}.setCaptchaEnabled (false)"
+    type: script
+    scriptInfo:
+      path: "/home/znn/effectors/captcha"
+      argument: "off /home/znn/captcha.on"
+      
+  setFidelity-web0:
+    location: "${customize.system.target.web0}"
+    command: "${customize.system.target.lb}.setFidelity($<fidelity>)"
+    type: script
+    scriptInfo:
+      path    : "${_effectors.commonPath}/changeFidelity.sh"
+      argument: "{0} /tmp/znn-fidelity-${customize.system.target.web0.httpPort}"
+      
+  setFidelity-web1:
+    location: "${customize.system.target.web2}"
+    command: "${customize.system.target.lb}.setFidelity($<fidelity>)"
+    type: script
+    scriptInfo:
+      path    : "${_effectors.commonPath}/changeFidelity.sh"
+      argument: "{0} /tmp/znn-fidelity-${customize.system.target.web1.httpPort}"
+
+  setFidelity-web1:
+    location: "${customize.system.target.web1}"
+    command: "${customize.system.target.lb}.setFidelity($<fidelity>)"
+    type: script
+    scriptInfo:
+      path    : "${_effectors.commonPath}/changeFidelity.sh"
+      argument: "{0} /tmp/znn-fidelity-${customize.system.target.web2.httpPort}"
+     
+  enable-server-web0:
+    location: "${customize.system.target.lb}"
+    command: "enableServer (${customize.system.target.web0}, true)"
+    type: script
+    scriptInfo:
+      path    : /home/znn/effectors/enable-server
+      argument : "on ${customize.system.target.web0}:${customize.system.target.web0.httpPort}"
+       
+  disable-server-web0:
+    location: "${customize.system.target.lb}"
+    command: "LB0.enableServer (${customize.system.target.web0}, false)"
+    type: script
+    scriptInfo:
+      path: /home/znn/effectors/enable-server
+      argument: "off ${customize.system.target.web0}:${customize.system.target.web0.httpPort}"
+      
+  enable-server-web1:
+    location: "${customize.system.target.lb}"
+    command: "enableServer (${customize.system.target.web1}, true)"
+    type: script
+    scriptInfo:
+      path    : /home/znn/effectors/enable-server
+      argument : "on ${customize.system.target.web1}:${customize.system.target.web1.httpPort}"
+       
+  disable-server-web1:
+    location: "${customize.system.target.lb}"
+    command: "enableServer (${customize.system.target.web1}, false)"
+    type: script
+    scriptInfo:
+      path: /home/znn/effectors/enable-server
+      argument: "off ${customize.system.target.web1}:${customize.system.target.web1.httpPort}"
+      
+  enable-server-web2:
+    location: "${customize.system.target.lb}"
+    command: "enableServer (${customize.system.target.web2}, true)"
+    type: script
+    scriptInfo:
+      path    : /home/znn/effectors/enable-server
+      argument : "on ${customize.system.target.web2}:${customize.system.target.web2.httpPort}"
+       
+  disable-server-web2:
+    location: "${customize.system.target.lb}"
+    command: "enableServer (${customize.system.target.web2}, false)"
+    type: script
+    scriptInfo:
+      path: /home/znn/effectors/enable-server
+      argument: "off ${customize.system.target.web2}:${customize.system.target.web2.httpPort}"
+ 
+  delete-server-web0:
+    location: "${customize.system.target.lb}"
+    command: "${customize.system.target.web0}.deleteServer ()"
+    type: script
+    scriptInfo:
+      path: /home/znn/effectors/enable-server
+      argument: "off ${customize.system.target.web0}:${customize.system.target.web0.httpPort}"
+       
+  add-server-web0:
+    location: "${customize.system.target.lb}"
+    command: "LB0.connectServer (${customize.system.target.web0})" 
+    type: script
+    scriptInfo:
+      path: /home/znn/effectors/enable-server
+      argument: "on ${customize.system.target.web0}:${customize.system.target.web0.httpPort}"
+
+  delete-server-web1:
+    location: "${customize.system.target.lb}"
+    command: "${customize.system.target.web1}.deleteServer ()"
+    type: script
+    scriptInfo:
+      path: /home/znn/effectors/enable-server
+      argument: "off ${customize.system.target.web1}:${customize.system.target.web1.httpPort}"
+       
+  add-server-web1:
+    location: "${customize.system.target.lb}"
+    command: "LB0.connectServer (${customize.system.target.web1})" 
+    type: script
+    scriptInfo:
+      path: /home/znn/effectors/enable-server
+      argument: "on ${customize.system.target.web1}:${customize.system.target.web1.httpPort}"
+
+  delete-server-web2:
+    location: "${customize.system.target.lb}"
+    command: "${customize.system.target.web2}.deleteServer ()"
+    type: script
+    scriptInfo:
+      path: /home/znn/effectors/enable-server
+      argument: "off ${customize.system.target.web2}:${customize.system.target.web2.httpPort}"
+       
+  add-server-web2:
+    location: "${customize.system.target.lb}"
+    command: "LB0.connectServer (${customize.system.target.web2})" 
+    type: script
+    scriptInfo:
+      path: /home/znn/effectors/enable-server
+      argument: "on ${customize.system.target.web2}:${customize.system.target.web2.httpPort}"
+
+unused-effectors:
+  unblackhole:
+    location: "${customize.system.target.1}"
+    type: script
+    scriptInfo:
+      path: "/home/znn/effectors/ip-block-mgmt"
+      argument: "unblock {clients}"
+  killDelegate2:
+# Causes the designated RainbowDelegate to exit process
+# Illustrates effector time-out as well as tests executor execution
+    location: "${customize.system.target.3}"
+    type: java
+    javaInfo:
+      class   : org.sa.rainbow.translator.effectors.KillDelegateEffector
+
+      # test from GUI with <host>, SetFidelity, fidelity=<1|3|5>
+      
+
+  activateServer1:
+    location: "${customize.system.target.1}"
+    type: script
+    scriptInfo:
+      path    : "${_effectors.commonPath}/turnServer.pl"
+      argument: "-s on"
+  deactivateServer1:
+    location: "${customize.system.target.1}"
+    type: script
+    scriptInfo:
+      path    : "${_effectors.commonPath}/turnServer.pl"
+      argument: "-s off"
+# test from GUI with <host>, RandomReject, frequency=<0..?>
+  randomReject1:
+    location: "${customize.system.target.2}"
+    type: script
+    scriptInfo:
+      path    : "${_effectors.commonPath}/setRandomReject.pl"
+      argument: "-r {frequency}"
+  killDelegate1:
+    location: "${customize.system.target.2}"
+    type: java
+    javaInfo:
+      class   : org.sa.rainbow.translator.effectors.KillDelegateEffector

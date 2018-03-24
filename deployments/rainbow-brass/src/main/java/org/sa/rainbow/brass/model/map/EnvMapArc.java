@@ -5,8 +5,7 @@ import java.util.Map;
 
 public class EnvMapArc {
 	public String m_source, m_target;
-//	public double m_distance;
-//	public boolean m_enabled;
+
 
 	private final Map<String, Object> m_properties = new HashMap<> ();
 
@@ -16,6 +15,7 @@ public class EnvMapArc {
 		this.m_target = target;
 		m_properties.put(Phase1MapPropertyKeys.DISTANCE, distance);
 		m_properties.put(Phase1MapPropertyKeys.ENABLEMENT, enabled);
+
 	}
 
 	public String getSource() {
@@ -48,6 +48,7 @@ public class EnvMapArc {
 
 	public void setEnabled(boolean enabled) {
 		m_properties.put(Phase1MapPropertyKeys.ENABLEMENT, enabled);
+
 	}
 
 	public boolean includesNode(String node) {
