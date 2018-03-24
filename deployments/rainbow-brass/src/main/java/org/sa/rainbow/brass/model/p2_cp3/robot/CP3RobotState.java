@@ -14,12 +14,16 @@ public class CP3RobotState extends RobotState {
 
 	Deque<TimeStamped<EnumSet<Sensors>>> m_sensorHistory = new ArrayDeque<>();
 	Deque<TimeStamped<Boolean>> m_bumpState = new ArrayDeque<> ();
+	Deque<TimeStamped<Double>>	m_lightingHistory = new ArrayDeque<>();
 	private volatile boolean m_everBumped = false;;
 
 	
 	public CP3RobotState(ModelReference model) {
 		super(model);
+		setBumped(false);
+		
 	}
+
 
 
 	public void setBumped(boolean bump) {
@@ -37,9 +41,10 @@ public class CP3RobotState extends RobotState {
 	}
 
 
-	public boolean bumpState() {
+	public boolean bumpState() throws IllegalStateException {
 		synchronized(m_bumpState) {
-			return m_bumpState.peek().data;
+			TimeStamped<Boolean> peek = m_bumpState.peek();
+			return peek.data;
 		}
 	}
 
@@ -60,30 +65,64 @@ public class CP3RobotState extends RobotState {
 	}
 
 
-	public EnumSet<Sensors> getSensors() {
+	public EnumSet<Sensors> getSensors() throws IllegalStateException  {
 		synchronized(m_sensorHistory) {
-			return EnumSet.<Sensors>copyOf(m_sensorHistory.peek().data);
+			TimeStamped<EnumSet<Sensors>> peek = m_sensorHistory.peek();
+			if (peek == null)
+				throw new IllegalStateException("No value for sensors has been set");
+			return EnumSet.<Sensors>copyOf(peek.data);
 		}
 	}
 
 
-	public boolean isKinectOn() {
+	public boolean isKinectOn() throws IllegalStateException {
 		return getSensors().contains(Sensors.KINECT);
 	}
 
 
-	public boolean isLidarOn() {
+	public boolean isLidarOn() throws IllegalStateException {
 		return getSensors().contains(Sensors.LIDAR);
 	}
 
 
-	public boolean isBackCameraOn() {
+	public boolean isBackCameraOn() throws IllegalStateException {
 		return getSensors().contains(Sensors.BACK_CAMERA);
 	}
 
 
-	public boolean isHeadlampOn() {
+	public boolean isHeadlampOn() throws IllegalStateException {
 		return getSensors().contains(Sensors.HEADLAMP);
+	}
+	
+	public void setIllumination(double ill) {
+		synchronized (m_lightingHistory) {
+			m_lightingHistory.push(new TimeStamped<Double>(ill));
+			
+		}
+	}
+	
+	public double getIllumination() throws IllegalStateException {
+		synchronized (m_lightingHistory) {
+			TimeStamped<Double> peek = m_lightingHistory.peek();
+			if (peek == null) throw new IllegalStateException ("No value for illumination has been set");
+			return peek.data;
+		}
+	}
+	
+	@Override
+	public CP3RobotState copy() {
+		CP3RobotState c = new CP3RobotState(getModelReference());
+		this.copyInto(c);
+		return c;
+	}
+	
+	@Override
+	protected void copyInto(RobotState r) {
+		super.copyInto(r);
+		CP3RobotState c = (CP3RobotState )r;
+		c.m_lightingHistory.addAll (m_lightingHistory);
+		c.m_sensorHistory.addAll(m_sensorHistory);
+		c.m_bumpState.addAll(m_bumpState);
 	}
 
 }

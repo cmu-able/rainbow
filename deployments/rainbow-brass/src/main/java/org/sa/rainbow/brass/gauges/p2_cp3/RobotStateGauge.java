@@ -17,6 +17,27 @@ import org.sa.rainbow.core.util.TypedAttributeWithValue;
 
 public class RobotStateGauge extends RegularPatternGauge{
 	
+	public static class MovingAverage {
+		private double [] window;
+		private int n, insert;
+		private double sum;
+		
+		public MovingAverage(int size) {
+			window = new double[size];
+			insert = 0;
+			sum = 0;
+		}
+		
+		public double next (double val) {
+			if (n < window.length) n++;
+			sum -= window[insert];
+			sum += val;
+			window[insert] = val;
+			insert = (insert + 1) % window.length;
+			return (double )sum/n;
+		}
+	}
+	
 	private static final String NAME = "Robot State Gauge";
 	
 	protected static final String CHARGE = "BatteryCharge";
@@ -25,11 +46,13 @@ public class RobotStateGauge extends RegularPatternGauge{
 	protected static final String HEADLAMP = "HeadlampStatus";
 	protected static final String BUMP = "BumpStatus";
 	protected static final String SPEED = "Speed";
+	protected static final String LIGHTING = "Lighting";
 	
     protected static final String CHARGE_PATTERN      = "topic: /energy_monitor/charge.*\\n.*data: (.*)\\n(.*)";
     protected static final String KINECT_PATTERN = "topic: /mobile_base/kinect/status.*\\n.*data: (.*)";
     protected static final String LIDAR_PATTERN = "topic: /mobile_base/lidar/status.*\\n.*data: (.*)";
     protected static final String HEADLAMP_PATTERN = "topic: /mobile_base/headlamp/status.*\\n.*data: (.*)";
+    protected static final String LIGHTING_PATTERN = "topic: /mobile_base/sensors/light_sensor.*\\n.*illuminance: (.*)v.*";
 
 	private double last_charge = 0;
 
@@ -38,6 +61,9 @@ public class RobotStateGauge extends RegularPatternGauge{
 	private boolean reported_lidar_mode;
 
 	private boolean reported_headlamp_mode;
+
+	private double last_lighting = -1;
+	private MovingAverage lightingTracker = new MovingAverage(10);
     
 	public RobotStateGauge(String id, long beaconPeriod, TypedAttribute gaugeDesc,
 			TypedAttribute modelDesc, List<TypedAttributeWithValue> setupParams,
@@ -47,12 +73,13 @@ public class RobotStateGauge extends RegularPatternGauge{
 		addPattern(KINECT, Pattern.compile(KINECT_PATTERN, Pattern.DOTALL));
 		addPattern(LIDAR, Pattern.compile(LIDAR_PATTERN, Pattern.DOTALL));
 		addPattern(HEADLAMP, Pattern.compile(HEADLAMP_PATTERN, Pattern.DOTALL));
+		addPattern(LIGHTING, Pattern.compile(LIGHTING_PATTERN, Pattern.DOTALL));
 	}
 
 	@Override
 	protected void doMatch(String matchName, Matcher m) {
 		if (CHARGE.equals (matchName)) {
-            double charge = Double.parseDouble(m.group(1));
+            double charge = Double.parseDouble(m.group(1).trim());
 
             if (chargeDifferent (charge)) {
                 IRainbowOperation op = m_commands.get ("charge");
@@ -61,8 +88,17 @@ public class RobotStateGauge extends RegularPatternGauge{
                 issueCommand (op, pMap);
             }
 		}
-		if (KINECT.equals(matchName)) {
-			int mode = Integer.parseInt(m.group(1));
+		else if (LIGHTING.equals(matchName)) {
+			double lighting = lightingTracker.next(Double.parseDouble(m.group(1).trim()));
+			if (lightingDifferent(lighting)) {
+				IRainbowOperation op = m_commands.get("lighting");
+				Map<String,String> pMap = new HashMap<> ();
+				pMap.put(op.getParameters()[0], Double.toString(lighting));
+				issueCommand(op, pMap);
+			}
+		}
+		else if (KINECT.equals(matchName)) {
+			int mode = Integer.parseInt(m.group(1).trim());
 			
 			if (reported_kinect_mode != mode) {
 				reported_kinect_mode = mode;
@@ -112,8 +148,8 @@ public class RobotStateGauge extends RegularPatternGauge{
 					issueCommands(ops, params);
 				}
 			}
-			if (LIDAR.equals(matchName)) {
-				boolean lMode = Boolean.parseBoolean(m.group(1));
+			else if (LIDAR.equals(matchName)) {
+				boolean lMode = Boolean.parseBoolean(m.group(1).trim().toLowerCase());
 				if (lMode != reported_lidar_mode) {
 					reported_lidar_mode = lMode;
 					IRainbowOperation lidarOp = m_commands.get("sensor");
@@ -123,8 +159,8 @@ public class RobotStateGauge extends RegularPatternGauge{
 					issueCommand(lidarOp, lidarParams);
 				}
 			}
-			if (HEADLAMP.equals(matchName)) {
-				boolean hMode = Boolean.parseBoolean(m.group(1));
+			else if (HEADLAMP.equals(matchName)) {
+				boolean hMode = Boolean.parseBoolean(m.group(1).trim().toLowerCase());
 				if (hMode != reported_headlamp_mode) {
 					reported_headlamp_mode = hMode;
 					IRainbowOperation lidarOp = m_commands.get("sensor");
@@ -137,7 +173,15 @@ public class RobotStateGauge extends RegularPatternGauge{
 		}
 	}
 	
-    private boolean chargeDifferent (double charge) {
+    private boolean lightingDifferent(double lighting2) {
+		if (Math.round(last_lighting) != Math.round(lighting2)) {
+			last_lighting  = lighting2;
+			return true;
+		}
+		return false;
+	}
+
+	private boolean chargeDifferent (double charge) {
         if (Math.round (last_charge) != Math.round (charge)) {
             last_charge = charge;
             return true;

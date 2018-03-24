@@ -17,28 +17,28 @@ import org.sa.rainbow.core.ports.IRainbowMessageFactory;
  * @author schmerl
  *
  */
-public class SetBumpedCmd extends AbstractRainbowModelOperation<Boolean, RobotState> {
+public class SetLightingCmd extends AbstractRainbowModelOperation<Double, RobotState> {
 
-	private boolean m_bumped;
+	private double m_lighting;
 
-	public SetBumpedCmd(CP3RobotStateModelInstance model, String target, String bumped) {
-		super("SetBumpedCmd", model, target, bumped);
-		m_bumped = Boolean.getBoolean(bumped);
+	public SetLightingCmd(CP3RobotStateModelInstance model, String target, String lighting) {
+		super("SetLightingCmd", model, target, lighting);
+		m_lighting = Double.valueOf(lighting);
 	}
 
 	@Override
-	public Boolean getResult() throws IllegalStateException {
-		return ((CP3RobotState )getModelContext().getModelInstance()).bumpState();
+	public Double getResult() throws IllegalStateException {
+		return ((CP3RobotState )getModelContext().getModelInstance()).getIllumination();
 	}
 
 	@Override
 	protected List<? extends IRainbowMessage> getGeneratedEvents(IRainbowMessageFactory messageFactory) {
-		return generateEvents(messageFactory, "setBumped");
+		return generateEvents(messageFactory, "setLighting");
 	}
 
 	@Override
 	protected void subExecute() throws RainbowException {
-		((CP3RobotState )getModelContext().getModelInstance()).setBumped(m_bumped);
+		((CP3RobotState )getModelContext().getModelInstance()).setIllumination(m_lighting);
 	}
 
 	@Override

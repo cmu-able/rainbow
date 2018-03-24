@@ -25,9 +25,11 @@ public class RobotState extends ClockedModel {
 		}
 	}
 	
-	public double getCharge() {
+	public double getCharge() throws IllegalStateException {
 		synchronized (m_chargeHistory) {
-			return m_chargeHistory.peek().data;
+			TimeStamped<Double> peek = m_chargeHistory.peek();
+			if (peek == null) throw new IllegalStateException("No value for charge has been set yet");
+			return peek.data;
 		}
 	}
 	
@@ -37,9 +39,12 @@ public class RobotState extends ClockedModel {
 		}
 	}
 	
-	public double getSpeed() {
+	public double getSpeed() throws IllegalStateException {
 		synchronized (m_speedHistory) {
-			return m_speedHistory.peek().data;
+			TimeStamped<Double> peek = m_speedHistory.peek();
+			if (peek == null) 
+				throw new IllegalStateException("No value for speed has been set yet");
+			return peek.data;
 		}
 	}
 
