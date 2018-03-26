@@ -4,6 +4,7 @@ import java.util.EnumSet;
 
 import org.sa.rainbow.brass.model.AbstractSimpleRainbowModelOperation;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowState.CP3ModelState;
+import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotStateModelInstance;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.IModelInstance;
 
@@ -11,9 +12,9 @@ public class SetModelProblemCmd extends AbstractSimpleRainbowModelOperation<Enum
 
 	private CP3ModelState m_problem;
 
-	public SetModelProblemCmd(IModelInstance<RainbowState> model, String target,
+	public SetModelProblemCmd(RainbowStateModelInstance model, String target,
 			String problem) {
-		super("SetModelProblemCmd", "setModelProblem", model, target, problem);
+		super("setModelProblem", "setModelProblem", model, target, problem);
 		m_problem = CP3ModelState.valueOf(problem);
 	}
 

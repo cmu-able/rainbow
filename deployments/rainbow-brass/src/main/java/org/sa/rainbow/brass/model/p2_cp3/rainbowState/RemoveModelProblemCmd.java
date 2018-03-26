@@ -12,9 +12,9 @@ public class RemoveModelProblemCmd
 
 	private CP3ModelState m_problem;
 
-	public RemoveModelProblemCmd(IModelInstance<RainbowState> model,
+	public RemoveModelProblemCmd(RainbowStateModelInstance model,
 			String target, String problem) {
-		super("RemoveModelProblemCmd", "removeModelProblem", model, target, problem);
+		super("removeModelProblem", "removeModelProblem", model, target, problem);
 		m_problem = CP3ModelState.valueOf(problem);
 	}
 

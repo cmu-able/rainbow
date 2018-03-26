@@ -1,5 +1,7 @@
 package org.sa.rainbow.brass.adaptation.p2_cp3;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.EnumSet;
 
 import org.sa.rainbow.brass.adaptation.BrassPlan;
@@ -30,9 +32,10 @@ public class ReactiveDarknessPlanner extends AbstractRainbowRunnable implements 
 	private boolean m_adaptationEnabled;
 	private ModelReference m_modelRef;
 	private IRainbowAdaptationEnqueuePort<BrassPlan> m_adaptationNQPort;
-	private boolean m_executingPlan;
+	private long m_waitForEffect = 0;
 	private RainbowStateModelInstance m_rainbowStateModel;
 	private CP3RobotStateModelInstance m_robotStateModel;
+	private boolean m_executingPlan;
 
 	public ReactiveDarknessPlanner() {
 		super("Hello Darkness my old friend");
@@ -73,14 +76,22 @@ public class ReactiveDarknessPlanner extends AbstractRainbowRunnable implements 
 	
 	protected CP3RobotStateModelInstance getRobotStateModel() {
 		if (m_robotStateModel == null) 
-			m_robotStateModel = (CP3RobotStateModelInstance )m_modelsManagerPort.<RobotState>getModelInstance(new ModelReference("RobotState", RobotStateModelInstance.ROBOT_STATE_TYPE));
+			m_robotStateModel = (CP3RobotStateModelInstance )m_modelsManagerPort.<RobotState>getModelInstance(new ModelReference("Robot", RobotStateModelInstance.ROBOT_STATE_TYPE));
 		return m_robotStateModel;
 	}
 
 	@Override
 	protected void runAction() {
+
+		if (m_waitForEffect > 0) {
+			if (new Date().before(new Date(m_waitForEffect)))
+				// Still waiting for effect.
+				return;
+			else m_waitForEffect = 0;
+		}
+	
 		EnumSet<CP3ModelState> problems = getRainbowStateModel ().getModelInstance().getProblems();
-		if (!problems.isEmpty()) {
+		if (!problems.isEmpty() && !m_executingPlan) {
 			if (problems.contains(CP3ModelState.TOO_DARK)) {
 				log("Let there be light!");
 				TurnOnHeadlamp toh = new TurnOnHeadlamp(getRobotStateModel(), true);
@@ -106,6 +117,10 @@ public class ReactiveDarknessPlanner extends AbstractRainbowRunnable implements 
 	@Override
 	public void markStrategyExecuted(AdaptationTree<BrassPlan> plan) {
 		m_executingPlan = false;
+		Calendar cal = Calendar.getInstance();
+		Date d = cal.getTime();
+		cal.add (Calendar.SECOND, 10);
+		m_waitForEffect = cal.getTimeInMillis();
 	}
 
 	@Override

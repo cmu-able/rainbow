@@ -36,9 +36,9 @@ public class CP3RobotStateCommandFactory extends RobotStateCommandFactory {
 	@Override
 	protected void fillInCommandMap() {
 		super.fillInCommandMap();
-		m_commandMap.put("setBumped".toLowerCase(), SetBumpedCmd.class);
-		m_commandMap.put("setSensor".toLowerCase(), SetSensorCmd.class);
-		m_commandMap.put("setLighting".toLowerCase(), SetLightingCmd.class);
+		m_commandMap.put("setBumpedCmd".toLowerCase(), SetBumpedCmd.class);
+		m_commandMap.put("setSensorCmd".toLowerCase(), SetSensorCmd.class);
+		m_commandMap.put("setLightingCmd".toLowerCase(), SetLightingCmd.class);
 
 	}
 

@@ -14,7 +14,7 @@ public abstract class AbstractSimpleRainbowModelOperation<R, M> extends Abstract
 	private String m_event;
 	private R m_result;
 
-	public AbstractSimpleRainbowModelOperation(String commandName, String eventName, IModelInstance<M> model, String target,
+	public AbstractSimpleRainbowModelOperation(String commandName, String eventName, IModelInstance<? extends M> model, String target,
 			String... parameters) {
 		super(commandName, model, target, parameters);
 		m_event = eventName;

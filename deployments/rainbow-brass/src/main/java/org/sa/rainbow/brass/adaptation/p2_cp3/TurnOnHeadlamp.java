@@ -23,7 +23,9 @@ public class TurnOnHeadlamp extends BrassPlan {
 
 	@Override
 	public Object evaluate(Object[] argsIn) {
-		IAdaptationExecutor<BrassPlan> executor = Rainbow.instance().getRainbowMaster().strategyExecutor(m_robotStateModel.getModelInstance().getModelReference().toString());
+		IAdaptationExecutor<BrassPlan> executor = Rainbow.instance().
+				getRainbowMaster().
+				strategyExecutor(m_robotStateModel.getModelInstance().getModelReference().toString());
 		CP3RobotStateCommandFactory cf = (CP3RobotStateCommandFactory )m_robotStateModel.getCommandFactory();
 		SetSensorCmd tohl = cf.setSensorCmd(Sensors.HEADLAMP, m_on);
 		OperationResult result = executor.getOperationPublishingPort().publishOperation(tohl);
