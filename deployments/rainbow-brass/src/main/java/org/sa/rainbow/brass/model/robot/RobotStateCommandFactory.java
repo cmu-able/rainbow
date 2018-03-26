@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.sa.rainbow.core.error.RainbowModelException;
+import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.commands.AbstractSaveModelCmd;
 import org.sa.rainbow.core.models.commands.ModelCommandFactory;
@@ -14,6 +15,10 @@ public class RobotStateCommandFactory extends ModelCommandFactory<RobotState> {
 			RobotStateModelInstance model) {
 		super(RobotStateModelInstance.class, model);
 	}
+	
+	protected RobotStateCommandFactory (Class<? extends IModelInstance<RobotState>> c, RobotStateModelInstance model) {
+		super (c, model);
+	}
 
 	public static RobotStateLoadCmd loadCommand(ModelsManager mm, String modelName, InputStream stream, String source) {
 		return new RobotStateLoadCmd(mm, modelName, stream, source);
@@ -21,9 +26,9 @@ public class RobotStateCommandFactory extends ModelCommandFactory<RobotState> {
 
 	@Override
 	protected void fillInCommandMap() {
-		m_commandMap.put("setClockModelCmd".toLowerCase(), SetClockModelCmd.class);
-		m_commandMap.put("setBatteryChargeCmd".toLowerCase(), SetBatteryChargeCmd.class);
-		m_commandMap.put("setSpeedCmd".toLowerCase(), SetSpeedCmd.class);
+		m_commandMap.put("setClockModel".toLowerCase(), SetClockModelCmd.class);
+		m_commandMap.put("setBatteryCharge".toLowerCase(), SetBatteryChargeCmd.class);
+		m_commandMap.put("setSpeed".toLowerCase(), SetSpeedCmd.class);
 
 	}
 

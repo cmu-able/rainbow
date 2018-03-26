@@ -27,7 +27,7 @@ probes:
       # feedback: String
       #   where feedback will either be the pattern: VertexNumber:Instruction:STARTED|SUCCEEDED|FAILED
       #     from the instruction graph, or "Finished!" when the instruction graph is completed.
-      args.1: "/amcl_pose/pose/pose:1 /ig_action_server/feedback/feedback/sequence /energy_monitor/charge:1 /notify_user /clock:1 /mobile_base/lidar/status /mobile_base/kinect/status /mobil_base/headlamp/status"
+      args.1: "/amcl_pose/pose/pose:1 /ig_action_server/feedback/feedback/sequence /energy_monitor/charge:1 /notify_user /clock:1 /mobile_base/lidar/status /mobile_base/kinect/status /mobile_base/headlamp/status /mobile_base/sensors/light_sensor:1"
       
   BRASSTargetProbe:
     # Probe to report to Rainbow what the target node is
