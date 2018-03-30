@@ -1,0 +1,598 @@
+Family CallReturnFam = {
+
+    Port Type RequestPortT = {
+        rule atLeast1Attachment = heuristic size(self.ATTACHEDROLES) >= 1;
+        rule attachedOnlyToCallerRoleT = invariant forall r in self.ATTACHEDROLES | 
+            declaresType(r, CallerRoleT);
+
+    }
+    Port Type ResponsePortT = {
+        rule atLeast1Attachment = heuristic size(self.ATTACHEDROLES) >= 1;
+        rule attachedOnlyToReponderRoleT = invariant forall r in self.ATTACHEDROLES | 
+            declaresType(r, ResponderRoleT);
+
+    }
+    Component Type CallerCompT = {
+        rule atLast1portOfTypeRequestPortT = heuristic exists p in self.PORTS | 
+            declaresType(p, RequestPortT);
+
+    }
+    Component Type ResponderCompT = {
+        rule atLast1portOfTypeResponsePortT = heuristic exists p in self.PORTS | 
+            declaresType(p, ResponsePortT);
+
+    }
+    Role Type CallerRoleT = {
+        rule exactly1Attachment = heuristic size(self.ATTACHEDPORTS) == 1;
+        rule attachedOnlyToRequestPort = invariant forall p : Port in self.ATTACHEDPORTS | 
+            declaresType(p, RequestPortT);
+
+    }
+    Role Type ResponderRoleT = {
+        rule exactly1Attachment = heuristic size(self.ATTACHEDPORTS) == 1;
+        rule attachedOnlyToResponsePort = invariant forall p : Port in self.ATTACHEDPORTS | 
+            declaresType(p, ResponsePortT);
+
+    }
+    Connector Type CallReturnConnT = {
+        rule exactly2Roles = invariant size(self.ROLES) == 2;
+        rule exactly1RoleOfTypeCallerRoleT = invariant exists r in self.ROLES | 
+            declaresType(r, CallerRoleT);
+        rule exactly1RoleOfTypeResponderRoleT = invariant exists r in self.ROLES | 
+            declaresType(r, ResponderRoleT);
+
+    }
+}
+
+Family EventBasedFam = {
+
+    Port Type AnnouncePortT = {
+        rule attachedOnlyToAnnouncerRoleT = invariant forall a in self.ATTACHEDROLES | 
+            declaresType(a, AnnouncerRoleT);
+
+    }
+    Port Type ReceivePortT = {
+        rule attachedOnlyToReceiverRoleT = invariant forall a in self.ATTACHEDROLES | 
+            declaresType(a, ReceiverRoleT);
+
+    }
+    Component Type ParticipantCompT = {
+        rule atLeastTheseTypesAnnouncePortT_ReceivePortT = heuristic exists t in {AnnouncePortT, ReceivePortT} | 
+            exists e in self.PORTS | 
+                declaresType(e, t);
+
+    }
+    Role Type AnnouncerRoleT = {
+        rule attachedOnlyToAnnouncePortT = invariant forall a in self.ATTACHEDPORTS | 
+            declaresType(a, AnnouncePortT);
+
+    }
+    Role Type ReceiverRoleT = {
+        rule attachedOnlyToReceivePortT = invariant forall a in self.ATTACHEDPORTS | 
+            declaresType(a, ReceivePortT);
+
+    }
+    abstract Connector Type EventConnT = {
+        rule hasOneAnnoucerRole = invariant exists r in self.ROLES | 
+            declaresType(r, AnnouncerRoleT);
+        rule hasOneReceiverRole = invariant exists r in self.ROLES | 
+            declaresType(r, ReceiverRoleT);
+
+    }
+}
+
+
+Family LocalCallReturnFam extends CallReturnFam with {
+
+    Port Type LocalRequestPortT extends RequestPortT with {
+        rule exactly1Attachment = invariant size(self.ATTACHEDROLES) == 1;
+        rule attachedOnlyToLocalCallerRoleT = invariant forall p in self.ATTACHEDROLES | 
+            declaresType(p, LocalCallerRoleT);
+        rule atLeast1Attachment = heuristic size(self.ATTACHEDROLES) >= 1;
+        rule attachedOnlyToCallerRoleT = invariant forall r in self.ATTACHEDROLES | 
+            declaresType(r, CallerRoleT);
+
+    }
+    Port Type LocalResponsePortT extends ResponsePortT with {
+        rule exactly1Attachment = invariant size(self.ATTACHEDROLES) == 1;
+        rule attachedOnlyToLocalResponderRoleT = invariant forall p in self.ATTACHEDROLES | 
+            declaresType(p, LocalResponderRoleT);
+        rule atLeast1Attachment = heuristic size(self.ATTACHEDROLES) >= 1;
+        rule attachedOnlyToReponderRoleT = invariant forall r in self.ATTACHEDROLES | 
+            declaresType(r, ResponderRoleT);
+
+    }
+    Role Type LocalCallerRoleT extends CallerRoleT with {
+        rule attachedOnlyToLocalRequestPortT = invariant forall p in self.ATTACHEDPORTS | 
+            declaresType(p, LocalRequestPortT);
+        rule exactly1Attachment = heuristic size(self.ATTACHEDPORTS) == 1;
+        rule attachedOnlyToRequestPort = invariant forall p : Port in self.ATTACHEDPORTS | 
+            declaresType(p, RequestPortT);
+
+    }
+    Role Type LocalResponderRoleT extends ResponderRoleT with {
+        rule attachedOnlyToLocalResponsePortT = invariant forall p in self.ATTACHEDPORTS | 
+            declaresType(p, LocalResponsePortT);
+        rule exactly1Attachment = heuristic size(self.ATTACHEDPORTS) == 1;
+        rule attachedOnlyToResponsePort = invariant forall p : Port in self.ATTACHEDPORTS | 
+            declaresType(p, ResponsePortT);
+
+    }
+    Connector Type LocalCallReturnConnT extends CallReturnConnT with {
+        rule exactly1RoleOfTypeLocalCallerRoleT = invariant exists r in self.ROLES | 
+            declaresType(r, LocalCallerRoleT);
+        rule exactly1RoleOfTypeLocalResponderRoleT = invariant exists r in self.ROLES | 
+            declaresType(r, LocalResponderRoleT);
+        rule exactly2Roles = invariant size(self.ROLES) == 2;
+        rule exactly1RoleOfTypeCallerRoleT = invariant exists r in self.ROLES | 
+            declaresType(r, CallerRoleT);
+        rule exactly1RoleOfTypeResponderRoleT = invariant exists r in self.ROLES | 
+            declaresType(r, ResponderRoleT);
+
+    }
+}
+
+family PubSubFam extends EventBasedFam with {
+   port type PublishPortT extends AnnouncePortT with {
+      rule exactly1Attachment = heuristic size(self.ATTACHEDROLES) == 1;
+      rule attachedToPublisherRoleT = invariant forall r in self.ATTACHEDROLES | declaresType(r, PublisherRoleT);
+      rule attachedOnlyToAnnouncerRoleT = invariant forall a in self.ATTACHEDROLES | declaresType(a, AnnouncerRoleT);
+   };
+   port type SubscribePortT extends ReceivePortT with {
+      rule exactly1Attachment = heuristic size(self.ATTACHEDROLES) == 1;
+      rule attachedToSubscriberRoleT = invariant forall r in self.ATTACHEDROLES | declaresType(r, SubscriberRoleT);
+      rule attachedOnlyToReceiverRoleT = invariant forall a in self.ATTACHEDROLES | declaresType(a, ReceiverRoleT);
+   };
+   component type PublisherCompT extends ParticipantCompT with {
+      rule atLeast1portOfTypePublishPortT = heuristic exists p in self.PORTS | declaresType(p, PublishPortT);
+      rule atLeastTheseTypesAnnouncePortT_ReceivePortT = heuristic exists t in {AnnouncePortT, ReceivePortT} | exists e in self.PORTS | declaresType(e, t);
+   };
+   component type SubscriberCompT extends ParticipantCompT with {
+      rule atLeast1portOfTypeSubscribePortT = heuristic exists p in self.PORTS | declaresType(p, SubscribePortT);
+      rule atLeastTheseTypesAnnouncePortT_ReceivePortT = heuristic exists t in {AnnouncePortT, ReceivePortT} | exists e in self.PORTS | declaresType(e, t);
+   };
+   role type PublisherRoleT extends AnnouncerRoleT with {
+      rule attachedToPublisherPortT = invariant forall p in self.ATTACHEDPORTS | declaresType(p, PublishPortT);
+      rule attachedOnlyToAnnouncePortT = invariant forall a in self.ATTACHEDPORTS | declaresType(a, AnnouncePortT);
+   };
+   role type SubscriberRoleT extends ReceiverRoleT with {
+      rule attachedToSubscribePortT = invariant forall p in self.ATTACHEDPORTS | declaresType(p, SubscribePortT);
+      rule attachedOnlyToReceivePortT = invariant forall a in self.ATTACHEDPORTS | declaresType(a, ReceivePortT);
+   };
+   connector type EventBusConnT extends EventConnT with {
+      rule atLeast1RoleOfTypePublisherRoleT = heuristic exists r in self.ROLES | declaresType(r, PublisherRoleT);
+      rule atLeast1RoleOfTypeSubscriberRoleT = heuristic exists r in self.ROLES | declaresType(r, SubscriberRoleT);
+      rule hasOneAnnoucerRole = invariant exists r in self.ROLES | declaresType(r, AnnouncerRoleT);
+      rule hasOneReceiverRole = invariant exists r in self.ROLES | declaresType(r, ReceiverRoleT);
+   };
+}
+
+family ROSFam extends LocalCallReturnFam, PubSubFam with {
+
+   property type ServicePersistencyT = enum {persistent, non-persistent};
+
+   port type ServiceClientPortT extends RequestPortT with {
+      property svc_type : string;
+      property persistency : ServicePersistencyT << default = non-persistent; >>;
+  };
+  port type ServiceProviderPortT extends ResponsePortT with {
+     property svc_type : string;
+  };
+
+  port type ActionClientPortT extends RequestPortT with {
+    property action_type : string;
+  };
+
+  port type ActionServerPortT extends ResponsePortT with {
+    property action_type : string;
+  };
+
+
+  port type TopicSubscribePortT extends SubscribePortT with {
+     property topic : string;
+     property msg_type : string;
+     property queueSize : int << default : int = 10;>>;
+  };
+  port type TopicAdvertisePortT extends PublishPortT with {
+     property topic : string;
+     property msg_type : string;
+     property queueSize : int << default : int = 10;>>;
+  };
+
+  component type ROSNodeCompT = {
+    // Should the default logger ports be included here?
+     property name : string;
+
+     rule noServiceCallToSelf = invariant forall req :! ServiceClientPortT in self.PORTS |
+       ! exists resp :! ServiceProviderPortT in self.PORTS |
+         connected (req, resp);
+     rule noActionCalLToSelf = invariant forall req :! ActionClientPortT in self.PORTS |
+       ! exists resp :! ActionServerPortT in self.PORTS |
+         connected (req, resp);
+  };
+
+
+  component type ROSNodeletCompT extends ROSNodeCompT;
+
+  component type ROSNodeManagerCompT extends ROSNodeCompT with {
+        port list : ServiceProviderPortT = new ServiceProviderPortT extended with {
+      property svc_type = "list";
+        };
+
+        port load : ServiceProviderPortT = new ServiceProviderPortT extended with {
+          property svc_type = "load";
+        };
+
+        port unload : ServiceProviderPortT = new ServiceProviderPortT extended with {
+          property svc_type = "unload";
+        };
+  };
+
+  role type ROSServiceCallerRoleT extends CallerRoleT;
+  role type ROSServiceResponderRoleT extends ResponderRoleT;
+  role type ROSActionCallerRoleT extends CallerRoleT;
+  role type ROSActionResponderRoleT extends ResponderRoleT;
+  role type ROSTopicAdvertiserRoleT extends PublisherRoleT;
+  role type ROSTopicSubscriberRoleT extends SubscriberRoleT;
+
+  connector type TopicConnectorT extends EventBusConnT with {
+        property topic : string;
+        property msg_type : string;
+
+        rule topicsMatchAdvertiser = invariant
+          forall r :! ROSTopicAdvertiserRoleT in self.ROLES |
+            forall p :! TopicAdvertisePortT in r.ATTACHEDPORTS |
+              (p.topic == topic and p.msg_type == msg_type);
+
+        rule topicsMatchSubscriber = invariant
+          forall r :! ROSTopicSubscriberRoleT in self.ROLES |
+            forall p :! TopicSubscribePortT in r.ATTACHEDPORTS |
+              (p.topic == topic and p.msg_type == msg_type);
+  };
+
+  // Service calls (on the client side) can be non-persistent (normal) and persistent.
+  // Non-persistent service calls consist of three steps: looking up a server that provides
+  // a given service, requesting that service from the looked-up server, and waiting for the result.
+  //Persistent calls/clients establish and maintain the connection with the looked-up server,
+  // repeating only the last two steps in each call after the first one.
+  connector type ServiceConnT extends CallReturnConnT;
+  connector type ActionServerConnT extends CallReturnConnT;
+
+  group type ROSLauncherGroupT = {
+        rule onlyROSNodes = invariant forall m in self.MEMBERS | (declaresType (m, ROSNodeCompT) and !declaresType(m, ROSNodeletCompT));
+  };
+
+  group type ROSNodeManagerGroupT = {
+    property name : string;
+        rule onlyNodelets = invariant forall m in self.MEMBERS | (declaresType (m, ROSNodeletCompT) or declaresType(m,ROSNodeManagerCompT));
+        rule oneNodeManager = invariant exists unique m in self.MEMBERS | declaresType (m, ROSNodeManagerCompT);
+  };
+
+  rule allNodeletsInGroup = invariant forall n :! ROSNodeletCompT in self.COMPONENTS |
+    // Nodelets can only exist as members of a group, and it can only be one
+    // group
+    exists unique m :! ROSNodeManagerGroupT in self.GROUPS | contains (n, m.MEMBERS);
+
+  rule topicsMatch = invariant
+    forall s :! TopicSubscribePortT in /self/COMPONENTS/PORTS:!TopicSubscribePortT |
+      exists p :! TopicAdvertisePortT in /self/COMPONENTS/PORTS:!TopicAdvertisePortT |
+        (s.topic == p.topic and s.msg_type == p.msg_type);
+
+
+  // Only one bus with the same topic and msg_type, otherwise error
+  rule onlyOneBusForTopicAndMsg = invariant forall t1, t2 :! TopicConnectorT in self.CONNECTORS |
+    ((t1.msg_type == t2.msg_type and t1.topic == t2.topic) <-> t1==t2);
+
+
+  // There should only be one bus with the same topic - warning if different msg_types
+  rule onlyOneBusForTopic = heuristic forall t1, t2 :! TopicConnectorT in self.CONNECTORS |
+    (t1.topic == t2.topic) <-> t1 == t2;
+
+  // No nodes should have the same name
+  rule noDuplicateNodes = invariant forall n2 :! ROSNodeCompT in self.COMPONENTS |
+    forall n1 :! ROSNodeCompT in self.COMPONENTS |
+        (n1.name == n2.name) <-> n1 == n2;
+
+
+
+}
+family TurtleBotFam = {
+  property type NodeCategory = enum {Localization, Navigation, InstructionGraph, Camera, MapServer, None};
+
+  component type TurtleBotNodeCompT = {
+        property category : NodeCategory <<default : NodeCategory = None;>>;
+  };
+
+  rule atLeastOneLocalization = invariant exists n :! TurtleBotNodeCompT in self.COMPONENTS | n.category == Localization;
+  rule atLeastOneNavigation = invariant exists n :! TurtleBotNodeCompT in self.COMPONENTS | n.category == Navigation;
+  rule atLeastOneIG = invariant exists n:! TurtleBotNodeCompT in self.COMPONENTS | n.category == InstructionGraph;
+  rule atLeastOneMapServer = invariant exists n:! TurtleBotNodeCompT in self.COMPONENTS | n.category == MapServer;
+
+}
+family Enablement = {
+  property type ActiveT = enum {
+     ACTIVE, INACTIVE, FAILED };
+  element type EnablementT = {
+     property enablement : Enablement.ActiveT << default : Enablement.ActiveT = ACTIVE; >>;
+  };
+}
+
+
+system P2CP3Turtlebot : TurtleBotFam, ROSFam, Enablement = new TurtleBotFam, ROSFam, Enablement extended with {
+   component acml : ROSNodeCompT, TurtleBotNodeCompT, EnablementT = new ROSNodeCompT, TurtleBotNodeCompT, EnablementT extended with {
+      port TopicAdvertisePortT0 : TopicAdvertisePortT = new TopicAdvertisePortT extended with {
+         property topic = "/tf";
+         property msg_type = "TF";
+      };
+      port TopicSubscribePortT0 : TopicSubscribePortT = new TopicSubscribePortT extended with {
+         property msg_type = "LaserScan";
+         property topic = "/scan";
+      };
+      property name = "amcl";
+      property category = Localization;
+      property enablement = INACTIVE;
+   };
+   component ig_interpreter : ROSNodeCompT, TurtleBotNodeCompT, EnablementT = new ROSNodeCompT, TurtleBotNodeCompT, EnablementT extended with {
+      port ActionServerPortT0 : ActionServerPortT = new ActionServerPortT;
+      port ActionClientPortT0 : ActionClientPortT = new ActionClientPortT;
+      property name = "ig_interpreter";
+      property category = InstructionGraph;
+   };
+   component map_server : ROSNodeCompT, TurtleBotNodeCompT, EnablementT = new ROSNodeCompT, TurtleBotNodeCompT, EnablementT extended with {
+      port TopicAdvertisePortT0 : TopicAdvertisePortT = new TopicAdvertisePortT extended with {
+         property msg_type = " nav_msgs/OccupancyGrid";
+         property topic = "/map";
+      };
+      property name = "map_server";
+      property category = MapServer;
+   };
+   component move_base : ROSNodeCompT, TurtleBotNodeCompT, EnablementT = new ROSNodeCompT, TurtleBotNodeCompT, EnablementT extended with {
+      port ActionServerPortT0 : ActionServerPortT = new ActionServerPortT extended with {
+         property action_type = "goal";
+      };
+      port TopicSubscribePortT0 : TopicSubscribePortT = new TopicSubscribePortT extended with {
+         property topic = "/tf";
+         property msg_type = "TF";
+      };
+      port TopicSubscribePortT1 : TopicSubscribePortT = new TopicSubscribePortT extended with {
+         property msg_type = " nav_msgs/OccupancyGrid";
+         property topic = "/map";
+      };
+      property name = "move_base";
+      property category = Navigation;
+   };
+   component mrpt : ROSNodeCompT, TurtleBotNodeCompT, EnablementT = new ROSNodeCompT, TurtleBotNodeCompT, EnablementT extended with {
+      port TopicAdvertisePortT0 : TopicAdvertisePortT = new TopicAdvertisePortT extended with {
+         property msg_type = "TF";
+         property topic = "/tf";
+      };
+      port TopicSubscribePortT0 : TopicSubscribePortT = new TopicSubscribePortT extended with {
+         property msg_type = "LaserScan";
+         property topic = "/scan";
+      };
+      property name = "mrpt";
+      property category = Localization;
+      property enablement = INACTIVE;
+   };
+   component marker_pose_publisher : ROSNodeCompT, TurtleBotNodeCompT, EnablementT = new ROSNodeCompT, TurtleBotNodeCompT, EnablementT extended with {
+      port TopicAdvertisePortT0 : TopicAdvertisePortT = new TopicAdvertisePortT extended with {
+         property msg_type = "TF";
+         property topic = "/tf";
+      };
+      port TopicSubscribePortT0 : TopicSubscribePortT = new TopicSubscribePortT extended with {
+         property msg_type = "UInt32MultiArray";
+         property topic = "aruco_marker_publisher_front/markers_list";
+      };
+      port TopicSubscribePortT1 : TopicSubscribePortT = new TopicSubscribePortT extended with {
+         property topic = "aruco_marker_publisher_back/markers_list";
+         property msg_type = "UInt32MultiArray";
+         property queueSize = 10;
+         rule attachedOnlyToReceiverRoleT = invariant forall a in self.ATTACHEDROLES | declaresType(a, ReceiverRoleT);
+         rule exactly1Attachment = heuristic size(self.ATTACHEDROLES) == 1;
+         rule attachedToSubscriberRoleT = invariant forall r in self.ATTACHEDROLES | declaresType(r, SubscriberRoleT);
+      };
+      property name = "marker_pose_publisher";
+      property category = Localization;
+      property enablement = INACTIVE;
+   };
+   component laserScanNodelet : ROSNodeCompT, EnablementT = new ROSNodeCompT, EnablementT extended with {
+      port TopicAdvertisePortT0 : TopicAdvertisePortT = new TopicAdvertisePortT extended with {
+         property msg_type = "LaserScan";
+         property topic = "/scan";
+      };
+      port TopicSubscribePortT0 : TopicSubscribePortT = new TopicSubscribePortT extended with {
+         property topic = "/mobile_base/camera/depth_image";
+         property msg_type = "DepthImageRGB";
+      };
+      property name = "laserScan_nodelet";
+      property enablement = INACTIVE;
+   };
+   component TurtleBot : ROSNodeCompT = new ROSNodeCompT extended with {
+      port TopicAdvertisePortT0 : TopicAdvertisePortT, EnablementT = new TopicAdvertisePortT, EnablementT extended with {
+         property msg_type = "DepthImageRGB";
+         property topic = "/mobile_base/camera/depth_image";
+         property enablement = INACTIVE;
+      };
+      port TopicAdvertisePortT1 : TopicAdvertisePortT, EnablementT = new TopicAdvertisePortT, EnablementT extended with {
+         property msg_type = "LaserScan";
+         property topic = "/scan";
+         property enablement = INACTIVE;
+      };
+      port TopicAdvertisePortT2 : TopicAdvertisePortT, EnablementT = new TopicAdvertisePortT, EnablementT extended with {
+         property msg_type = "ImageRGB";
+         property topic = "/mobile_base/camera/image/raw";
+         property enablement = INACTIVE;
+      };
+      port TopicAdvertisePortT3 : TopicAdvertisePortT, EnablementT = new TopicAdvertisePortT, EnablementT extended with {
+         property topic = "/mobile_base/camera360/image/raw";
+         property msg_type = "ImageRGB";
+         property enablement = INACTIVE;
+      };
+      property name = "Gazebo";
+   };
+   component aruco_marker_publisher_front : ROSNodeCompT, EnablementT = new ROSNodeCompT, EnablementT extended with {
+      port TopicAdvertisePortT0 : TopicAdvertisePortT = new TopicAdvertisePortT extended with {
+         property msg_type = "UInt32MultiArray";
+         property topic = "aruco_marker_publisher_front/markers_list";
+      };
+      port TopicSubscribePortT0 : TopicSubscribePortT = new TopicSubscribePortT extended with {
+         property topic = "/mobile_base/camera/image/raw";
+         property msg_type = "ImageRGB";
+      };
+      property name = "aruco_marker_publisher_front";
+      property enablement = INACTIVE;
+      };
+      component aruco_marker_publisher_back : ROSNodeCompT, EnablementT = new ROSNodeCompT, EnablementT extended with {
+         port TopicAdvertisePortT0 : TopicAdvertisePortT = new TopicAdvertisePortT extended with {
+            property topic = "aruco_marker_publisher_back/markers_list";
+            property msg_type = "UInt32MultiArray";
+            property queueSize = 10;
+            rule attachedOnlyToAnnouncerRoleT = invariant forall a in self.ATTACHEDROLES | declaresType(a, AnnouncerRoleT);
+            rule exactly1Attachment = heuristic size(self.ATTACHEDROLES) == 1;
+            rule attachedToPublisherRoleT = invariant forall r in self.ATTACHEDROLES | declaresType(r, PublisherRoleT);
+         };
+         port TopicSubscribePortT0 : TopicSubscribePortT = new TopicSubscribePortT extended with {
+            property topic = "/mobile_base/camera360/image/raw";
+            property msg_type = "ImageRGB";
+            property queueSize = 10;
+            rule attachedOnlyToReceiverRoleT = invariant forall a in self.ATTACHEDROLES | declaresType(a, ReceiverRoleT);
+            rule exactly1Attachment = heuristic size(self.ATTACHEDROLES) == 1;
+            rule attachedToSubscriberRoleT = invariant forall r in self.ATTACHEDROLES | declaresType(r, SubscriberRoleT);
+         };
+         property name = "aruco_marker_publisher_back";
+         property enablement = INACTIVE;
+         rule noServiceCallToSelf = invariant forall req :! ServiceClientPortT in self.PORTS | !exists resp :! ServiceProviderPortT in self.PORTS | connected(req, resp);
+         rule noActionCalLToSelf = invariant forall req :! ActionClientPortT in self.PORTS | !exists resp :! ActionServerPortT in self.PORTS | connected(req, resp);
+   };
+   connector ActionServerConnT0 : ActionServerConnT = new ActionServerConnT extended with {
+      role ROSActionCallerRoleT0 : ROSActionCallerRoleT = new ROSActionCallerRoleT;
+      role ROSActionResponderRoleT0 : ROSActionResponderRoleT = new ROSActionResponderRoleT;
+   };
+   connector tf : TopicConnectorT = new TopicConnectorT extended with {
+      role subscriber : ROSTopicSubscriberRoleT = new ROSTopicSubscriberRoleT;
+      role advertiser : ROSTopicAdvertiserRoleT = new ROSTopicAdvertiserRoleT;
+      role advertiser0 : ROSTopicAdvertiserRoleT = new ROSTopicAdvertiserRoleT;
+      role advertiser1 : ROSTopicAdvertiserRoleT = new ROSTopicAdvertiserRoleT;
+      property topic = "/tf";
+      property msg_type = "TF";
+   };
+   connector scan : TopicConnectorT, EnablementT = new TopicConnectorT, EnablementT extended with {
+      role subscriber : ROSTopicSubscriberRoleT = new ROSTopicSubscriberRoleT;
+      role subscriber0 : ROSTopicSubscriberRoleT = new ROSTopicSubscriberRoleT;
+      role advertiser : ROSTopicAdvertiserRoleT = new ROSTopicAdvertiserRoleT;
+      role advertiser0 : ROSTopicAdvertiserRoleT = new ROSTopicAdvertiserRoleT;
+      property msg_type = "LaserScan";
+      property topic = "/scan";
+   };
+   connector depth_image : TopicConnectorT, EnablementT = new TopicConnectorT, EnablementT extended with {
+      role advertiser : ROSTopicAdvertiserRoleT = new ROSTopicAdvertiserRoleT;
+      role subsriber : ROSTopicSubscriberRoleT = new ROSTopicSubscriberRoleT;
+      property topic = "/mobile_base/camera/depth_image";
+      property msg_type = "DepthImageRGB";
+      property enablement = INACTIVE;
+   };
+   connector depth_image0 : TopicConnectorT, EnablementT = new TopicConnectorT, EnablementT extended with {
+      role advertiser : ROSTopicAdvertiserRoleT = new ROSTopicAdvertiserRoleT extended with {
+         rule attachedOnlyToAnnouncePortT = invariant forall a in self.ATTACHEDPORTS | declaresType(a, AnnouncePortT);
+         rule attachedToPublisherPortT = invariant forall p in self.ATTACHEDPORTS | declaresType(p, PublishPortT);
+      };
+      role subsriber : ROSTopicSubscriberRoleT = new ROSTopicSubscriberRoleT extended with {
+         rule attachedOnlyToReceivePortT = invariant forall a in self.ATTACHEDPORTS | declaresType(a, ReceivePortT);
+         rule attachedToSubscribePortT = invariant forall p in self.ATTACHEDPORTS | declaresType(p, SubscribePortT);
+      };
+      property topic = "aruco_marker_publisher_front/markers_list";
+      property msg_type = "UInt32MultiArray";
+      property enablement = INACTIVE;
+      rule topicsMatchAdvertiser = invariant forall r :! ROSTopicAdvertiserRoleT in self.ROLES | forall p :! TopicAdvertisePortT in r.ATTACHEDPORTS | (p.topic == topic and p.msg_type == msg_type);
+      rule topicsMatchSubscriber = invariant forall r :! ROSTopicSubscriberRoleT in self.ROLES | forall p :! TopicSubscribePortT in r.ATTACHEDPORTS | (p.topic == topic and p.msg_type == msg_type);
+      rule hasOneAnnoucerRole = invariant exists r in self.ROLES | declaresType(r, AnnouncerRoleT);
+      rule hasOneReceiverRole = invariant exists r in self.ROLES | declaresType(r, ReceiverRoleT);
+      rule atLeast1RoleOfTypePublisherRoleT = heuristic exists r in self.ROLES | declaresType(r, PublisherRoleT);
+      rule atLeast1RoleOfTypeSubscriberRoleT = heuristic exists r in self.ROLES | declaresType(r, SubscriberRoleT);
+   };
+   connector camera_image : TopicConnectorT, EnablementT = new TopicConnectorT, EnablementT extended with {
+      role advertiser : ROSTopicAdvertiserRoleT = new ROSTopicAdvertiserRoleT extended with {
+         rule attachedOnlyToAnnouncePortT = invariant forall a in self.ATTACHEDPORTS | declaresType(a, AnnouncePortT);
+         rule attachedToPublisherPortT = invariant forall p in self.ATTACHEDPORTS | declaresType(p, PublishPortT);
+      };
+      role subsriber : ROSTopicSubscriberRoleT = new ROSTopicSubscriberRoleT extended with {
+         rule attachedOnlyToReceivePortT = invariant forall a in self.ATTACHEDPORTS | declaresType(a, ReceivePortT);
+         rule attachedToSubscribePortT = invariant forall p in self.ATTACHEDPORTS | declaresType(p, SubscribePortT);
+      };
+      property topic = "/mobile_base/camera/image/raw";
+      property msg_type = "ImageRGB";
+      property enablement = INACTIVE;
+      rule topicsMatchAdvertiser = invariant forall r :! ROSTopicAdvertiserRoleT in self.ROLES | forall p :! TopicAdvertisePortT in r.ATTACHEDPORTS | (p.topic == topic and p.msg_type == msg_type);
+      rule topicsMatchSubscriber = invariant forall r :! ROSTopicSubscriberRoleT in self.ROLES | forall p :! TopicSubscribePortT in r.ATTACHEDPORTS | (p.topic == topic and p.msg_type == msg_type);
+      rule hasOneAnnoucerRole = invariant exists r in self.ROLES | declaresType(r, AnnouncerRoleT);
+      rule hasOneReceiverRole = invariant exists r in self.ROLES | declaresType(r, ReceiverRoleT);
+      rule atLeast1RoleOfTypePublisherRoleT = heuristic exists r in self.ROLES | declaresType(r, PublisherRoleT);
+      rule atLeast1RoleOfTypeSubscriberRoleT = heuristic exists r in self.ROLES | declaresType(r, SubscriberRoleT);
+   };
+   connector camera_image0 : TopicConnectorT, EnablementT = new TopicConnectorT, EnablementT extended with {
+      role advertiser : ROSTopicAdvertiserRoleT = new ROSTopicAdvertiserRoleT extended with {
+         rule attachedOnlyToAnnouncePortT = invariant forall a in self.ATTACHEDPORTS | declaresType(a, AnnouncePortT);
+         rule attachedToPublisherPortT = invariant forall p in self.ATTACHEDPORTS | declaresType(p, PublishPortT);
+      };
+      role subsriber : ROSTopicSubscriberRoleT = new ROSTopicSubscriberRoleT extended with {
+         rule attachedOnlyToReceivePortT = invariant forall a in self.ATTACHEDPORTS | declaresType(a, ReceivePortT);
+         rule attachedToSubscribePortT = invariant forall p in self.ATTACHEDPORTS | declaresType(p, SubscribePortT);
+      };
+      property topic = "/mobile_base/camera360/image/raw";
+      property msg_type = "ImageRGB";
+      property enablement = INACTIVE;
+      rule topicsMatchAdvertiser = invariant forall r :! ROSTopicAdvertiserRoleT in self.ROLES | forall p :! TopicAdvertisePortT in r.ATTACHEDPORTS | (p.topic == topic and p.msg_type == msg_type);
+      rule topicsMatchSubscriber = invariant forall r :! ROSTopicSubscriberRoleT in self.ROLES | forall p :! TopicSubscribePortT in r.ATTACHEDPORTS | (p.topic == topic and p.msg_type == msg_type);
+      rule hasOneAnnoucerRole = invariant exists r in self.ROLES | declaresType(r, AnnouncerRoleT);
+      rule hasOneReceiverRole = invariant exists r in self.ROLES | declaresType(r, ReceiverRoleT);
+      rule atLeast1RoleOfTypePublisherRoleT = heuristic exists r in self.ROLES | declaresType(r, PublisherRoleT);
+      rule atLeast1RoleOfTypeSubscriberRoleT = heuristic exists r in self.ROLES | declaresType(r, SubscriberRoleT);
+   };
+   connector depth_image1 : TopicConnectorT, EnablementT = new TopicConnectorT, EnablementT extended with {
+      role advertiser : ROSTopicAdvertiserRoleT = new ROSTopicAdvertiserRoleT extended with {
+         rule attachedOnlyToAnnouncePortT = invariant forall a in self.ATTACHEDPORTS | declaresType(a, AnnouncePortT);
+         rule attachedToPublisherPortT = invariant forall p in self.ATTACHEDPORTS | declaresType(p, PublishPortT);
+      };
+      role subsriber : ROSTopicSubscriberRoleT = new ROSTopicSubscriberRoleT extended with {
+         rule attachedOnlyToReceivePortT = invariant forall a in self.ATTACHEDPORTS | declaresType(a, ReceivePortT);
+         rule attachedToSubscribePortT = invariant forall p in self.ATTACHEDPORTS | declaresType(p, SubscribePortT);
+      };
+      property topic = "aruco_marker_publisher_back/markers_list";
+      property msg_type = "UInt32MultiArray";
+      property enablement = INACTIVE;
+      rule topicsMatchAdvertiser = invariant forall r :! ROSTopicAdvertiserRoleT in self.ROLES | forall p :! TopicAdvertisePortT in r.ATTACHEDPORTS | (p.topic == topic and p.msg_type == msg_type);
+      rule topicsMatchSubscriber = invariant forall r :! ROSTopicSubscriberRoleT in self.ROLES | forall p :! TopicSubscribePortT in r.ATTACHEDPORTS | (p.topic == topic and p.msg_type == msg_type);
+      rule hasOneAnnoucerRole = invariant exists r in self.ROLES | declaresType(r, AnnouncerRoleT);
+      rule hasOneReceiverRole = invariant exists r in self.ROLES | declaresType(r, ReceiverRoleT);
+      rule atLeast1RoleOfTypePublisherRoleT = heuristic exists r in self.ROLES | declaresType(r, PublisherRoleT);
+      rule atLeast1RoleOfTypeSubscriberRoleT = heuristic exists r in self.ROLES | declaresType(r, SubscriberRoleT);
+   };
+   connector TopicConnectorT0 : TopicConnectorT = new TopicConnectorT extended with {
+      role advertiser : ROSTopicAdvertiserRoleT = new ROSTopicAdvertiserRoleT;
+      role subscriber : ROSTopicSubscriberRoleT = new ROSTopicSubscriberRoleT;
+      property msg_type = " nav_msgs/OccupancyGrid";
+      property topic = "/map";
+   };
+   attachment ig_interpreter.ActionClientPortT0 to ActionServerConnT0.ROSActionCallerRoleT0;
+   attachment move_base.ActionServerPortT0 to ActionServerConnT0.ROSActionResponderRoleT0;
+   attachment move_base.TopicSubscribePortT0 to tf.subscriber;
+   attachment acml.TopicAdvertisePortT0 to tf.advertiser;
+   attachment mrpt.TopicAdvertisePortT0 to tf.advertiser0;
+   attachment marker_pose_publisher.TopicAdvertisePortT0 to tf.advertiser1;
+   attachment acml.TopicSubscribePortT0 to scan.subscriber;
+   attachment mrpt.TopicSubscribePortT0 to scan.subscriber0;
+   attachment laserScanNodelet.TopicAdvertisePortT0 to scan.advertiser;
+   attachment TurtleBot.TopicAdvertisePortT0 to depth_image.advertiser;
+   attachment laserScanNodelet.TopicSubscribePortT0 to depth_image.subsriber;
+   attachment TurtleBot.TopicAdvertisePortT1 to scan.advertiser0;
+   attachment marker_pose_publisher.TopicSubscribePortT0 to depth_image0.subsriber;
+   attachment aruco_marker_publisher_front.TopicAdvertisePortT0 to depth_image0.advertiser;
+   attachment TurtleBot.TopicAdvertisePortT2 to camera_image.advertiser;
+   attachment aruco_marker_publisher_front.TopicSubscribePortT0 to camera_image.subsriber;
+   attachment TurtleBot.TopicAdvertisePortT3 to camera_image0.advertiser;
+   attachment aruco_marker_publisher_back.TopicSubscribePortT0 to camera_image0.subsriber;
+   attachment aruco_marker_publisher_back.TopicAdvertisePortT0 to depth_image1.advertiser;
+   attachment marker_pose_publisher.TopicSubscribePortT1 to depth_image1.subsriber;
+   attachment map_server.TopicAdvertisePortT0 to TopicConnectorT0.advertiser;
+   attachment move_base.TopicSubscribePortT1 to TopicConnectorT0.subscriber;
+}
