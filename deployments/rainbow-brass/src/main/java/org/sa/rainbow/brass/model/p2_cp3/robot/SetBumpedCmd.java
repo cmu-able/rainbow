@@ -5,7 +5,6 @@ import java.util.List;
 import org.sa.rainbow.brass.model.robot.RobotState;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
-import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 /**
@@ -22,7 +21,7 @@ public class SetBumpedCmd extends AbstractRainbowModelOperation<Boolean, RobotSt
 	private boolean m_bumped;
 
 	public SetBumpedCmd(CP3RobotStateModelInstance model, String target, String bumped) {
-		super("SetBumpedCmd", model, target, bumped);
+		super("setBumped", model, target, bumped);
 		m_bumped = Boolean.getBoolean(bumped);
 	}
 

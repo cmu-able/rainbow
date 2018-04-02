@@ -37,3 +37,15 @@ probes:
     scriptInfo: 
       path: "${rainbow.path}/system/probes/rostargetprobe.sh"
       argument: "/test/data"
+      
+  ROSNodeProbe:
+    # Probe to report the node information to guages, to determine which nodes are active
+    alias: rosnodeprobe
+    location: "${customize.system.target.ros}"
+    type: script
+    scriptInfo:
+      path: "${rainbow.path}/system/probles/rosnodeprobe.sh"
+      argument: "1" # Number of seconds between reporting
+      mode: continual
+      
+      

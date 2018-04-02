@@ -22,7 +22,7 @@ public class SetLightingCmd extends AbstractRainbowModelOperation<Double, RobotS
 	private double m_lighting;
 
 	public SetLightingCmd(CP3RobotStateModelInstance model, String target, String lighting) {
-		super("SetLightingCmd", model, target, lighting);
+		super("setLighting", model, target, lighting);
 		m_lighting = Double.valueOf(lighting);
 	}
 

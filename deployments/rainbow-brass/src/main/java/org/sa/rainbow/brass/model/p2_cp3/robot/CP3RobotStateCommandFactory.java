@@ -36,9 +36,10 @@ public class CP3RobotStateCommandFactory extends RobotStateCommandFactory {
 	@Override
 	protected void fillInCommandMap() {
 		super.fillInCommandMap();
-		m_commandMap.put("setBumpedCmd".toLowerCase(), SetBumpedCmd.class);
-		m_commandMap.put("setSensorCmd".toLowerCase(), SetSensorCmd.class);
-		m_commandMap.put("setLightingCmd".toLowerCase(), SetLightingCmd.class);
+		m_commandMap.put("setBumped".toLowerCase(), SetBumpedCmd.class);
+		m_commandMap.put("setSensor".toLowerCase(), SetSensorCmd.class);
+		m_commandMap.put("setSensorFailed".toLowerCase(), SetSensorFailedCmd.class);
+		m_commandMap.put("setLighting".toLowerCase(), SetLightingCmd.class);
 
 	}
 
@@ -52,5 +53,9 @@ public class CP3RobotStateCommandFactory extends RobotStateCommandFactory {
 	
 	public SetLightingCmd setLightingCmd(double lighting) {
 		return new SetLightingCmd((CP3RobotStateModelInstance )m_modelInstance, "",  Double.toString(lighting));
+	}
+	
+	public SetSensorFailedCmd sesnSensorFailedCmd(Sensors sensor) {
+		return new SetSensorFailedCmd((CP3RobotStateModelInstance )m_modelInstance, sensor.name(), "");
 	}
 }
