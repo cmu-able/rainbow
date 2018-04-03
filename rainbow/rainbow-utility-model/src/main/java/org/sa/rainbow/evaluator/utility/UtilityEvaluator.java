@@ -180,7 +180,7 @@ public class UtilityEvaluator extends AbstractRainbowRunnable implements IRainbo
             AcmeModelInstance acmeModel,
             IRainbowReportingPort reportingPort) {
         Map<String, Double> weights = utilityModel.weights
-                .get (Rainbow.getProperty (RainbowConstants.PROPKEY_SCENARIO));
+                .get (Rainbow.instance().getProperty (RainbowConstants.PROPKEY_SCENARIO));
         Map<String, Double> utilities = new HashMap<> ();
         double[] conds = new double[utilityModel.getUtilities ().size ()];
         int i = 0;
@@ -216,7 +216,7 @@ public class UtilityEvaluator extends AbstractRainbowRunnable implements IRainbo
     }
 
     @Override
-    protected RainbowComponentT getComponentType () {
+    public RainbowComponentT getComponentType () {
         return RainbowComponentT.ANALYSIS;
     }
 
