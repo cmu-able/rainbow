@@ -13,6 +13,7 @@ public class CP3RobotState extends RobotState {
 
 
 	Deque<TimeStamped<EnumSet<Sensors>>> m_sensorHistory = new ArrayDeque<>();
+	Deque<TimeStamped<EnumSet<Sensors>>> m_sensorFailedHistory = new ArrayDeque<>();
 	Deque<TimeStamped<Boolean>> m_bumpState = new ArrayDeque<> ();
 	Deque<TimeStamped<Double>>	m_lightingHistory = new ArrayDeque<>();
 	private volatile boolean m_everBumped = false;;
@@ -51,7 +52,9 @@ public class CP3RobotState extends RobotState {
 
 	public void setSensor(Sensors sensor, boolean on) {
 		synchronized (m_sensorHistory) {
-			EnumSet<Sensors> currentState = m_sensorHistory.peek().data;
+			TimeStamped<EnumSet<Sensors>> peek = m_sensorHistory.peek();
+			
+			EnumSet<Sensors> currentState = peek!=null?peek.data:EnumSet.noneOf(Sensors.class);
 			EnumSet<Sensors> nextState = EnumSet.<Sensors>copyOf(currentState);
 			if (on &&  !currentState.contains(sensor)) {
 				nextState.add(sensor);
@@ -64,13 +67,33 @@ public class CP3RobotState extends RobotState {
 		}
 	}
 
+	public void setSensorFailed(Sensors sensor) {
+		synchronized (m_sensorFailedHistory) {
+			TimeStamped<EnumSet<Sensors>> peek = m_sensorFailedHistory.peek();
+			EnumSet<Sensors> currentState = peek!=null?peek.data:EnumSet.noneOf(Sensors.class);
+			EnumSet<Sensors> nextState = EnumSet.<Sensors>copyOf(currentState);
+			if (!currentState.contains(sensor)) {
+				nextState.add(sensor);
+				m_sensorFailedHistory.push(new TimeStamped<EnumSet<Sensors>>(nextState));
+			}
+		}
+	}
 
+	public EnumSet<Sensors> getAvailableSensors() throws IllegalStateException {
+		synchronized (m_sensorFailedHistory) {
+			TimeStamped<EnumSet<Sensors>> peek = m_sensorFailedHistory.peek();
+			EnumSet<Sensors> currentState = peek!=null?peek.data:EnumSet.noneOf(Sensors.class);
+			EnumSet<Sensors> available = EnumSet.allOf(Sensors.class);
+			available.remove(Sensors.HEADLAMP);
+			available.removeAll(currentState);
+			return available;
+		}
+	}
+	
 	public EnumSet<Sensors> getSensors() throws IllegalStateException  {
 		synchronized(m_sensorHistory) {
 			TimeStamped<EnumSet<Sensors>> peek = m_sensorHistory.peek();
-			if (peek == null)
-				throw new IllegalStateException("No value for sensors has been set");
-			return EnumSet.<Sensors>copyOf(peek.data);
+			return peek != null?EnumSet.<Sensors>copyOf(peek.data):EnumSet.<Sensors>noneOf(Sensors.class);
 		}
 	}
 

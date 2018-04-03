@@ -60,8 +60,10 @@ gauge-types:
     configParams:
       targetProbeType:
         type: String
-        default: ~
-        
+        default: ~    
+      rainbowAdapting:
+        type: boolean
+        default: false 
         
   ClockGaugeT:
     commands:
@@ -80,7 +82,34 @@ gauge-types:
       targetProbeType:
         type: String
         default: ~
+      rainbowAdapting:
+        type: boolean
+        default: false
       
+  ArchEnablementGaugeT:
+    commands: 
+      set-active: "C.setAcive(String)"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.brass.gauges.p2_cp3.ArchitectureGauge"
+      mapping:
+        type: String
+        default: ~
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+      rainbowAdapting:
+        type: boolean
+        default: false
+    
         
 #  BRASSTargetWaypointGaugeT:
 #    commands:
@@ -140,6 +169,18 @@ gauge-instances:
     configValues:
       reportingPeriod: 1000
       targetProbeType: rostopicprobe
+
+  TurtlebotArchitectureGauge:
+    type: ArchEnablementGaugeT
+    model: Turtlebot:Acme
+    commands:
+      set-active: "c.setActive($<a>)"
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+      mapping: "/amcl=amcl,/laserscan_nodelet_manager=laserScanNodelet,/map_server=map_server,/ig_interpreter=ig_interpreter,/move_base=move_base,/mrpt_localization_node=mrpt,/aruco_marker_publisher_front=aruco_marker_publisher_front,/aruco_marker_publisher_back=aruco_marker_publisher_back,/marker_pose_publisher=marker_pose_publisher"
+    configValues:
+      reportinPeriod: 1000
+      targetProbeType: rosnodeprobe
 
 #  MSG1:
 #    type: MissionStateGaugeT
