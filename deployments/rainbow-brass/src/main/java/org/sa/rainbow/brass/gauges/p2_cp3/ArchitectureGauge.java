@@ -25,6 +25,8 @@ public class ArchitectureGauge extends AbstractGaugeWithProbes {
 	boolean m_reconfiguring = false;
 
 	private Map<String, String> m_nodeToArch;
+
+	private Boolean m_adapting = false;
 	
 	protected ArchitectureGauge(String id, long beaconPeriod, TypedAttribute gaugeDesc,
 			TypedAttribute modelDesc, List<TypedAttributeWithValue> setupParams,
@@ -35,6 +37,7 @@ public class ArchitectureGauge extends AbstractGaugeWithProbes {
 	@Override
 	public void reportFromProbe(IProbeIdentifier probe, String data) {
 		super.reportFromProbe(probe, data);
+		if (isRainbowAdapting()) return;
 		synchronized (m_nodesFromProbes) {
 			m_nodesFromProbes.clear();
 			String[] nodes = data.split("\n");
@@ -56,6 +59,7 @@ public class ArchitectureGauge extends AbstractGaugeWithProbes {
 	
 	@Override
 	protected void runAction() {
+		if (isRainbowAdapting()) return;
 		HashSet<String> newNodes = new HashSet<String> ();
 		HashSet<String> goneNodes = new HashSet<String> ();
 		synchronized (m_nodesFromProbes) {
