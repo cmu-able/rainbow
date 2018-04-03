@@ -25,6 +25,7 @@ package org.sa.rainbow.core;
 
 
 import org.sa.rainbow.core.gauges.GaugeDescription;
+import org.sa.rainbow.core.gauges.GaugeManager;
 import org.sa.rainbow.core.models.EffectorDescription;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.ProbeDescription;
@@ -60,6 +61,7 @@ public class CheckConfiguration {
         System.out.print ("Loading models...");
         System.out.flush ();
         final ModelsManager mm = new ModelsManager ();
+        final GaugeManager gm = new GaugeManager(loadGaugeSpecs);
 
         RainbowConfigurationChecker checker = new RainbowConfigurationChecker (new IRainbowMaster () {
 
@@ -88,6 +90,11 @@ public class CheckConfiguration {
             public ModelsManager modelsManager () {
                 return mm;
             }
+
+			@Override
+			public GaugeManager gaugeManager() {
+				return gm;
+			}
         });
         mm.m_reportingPort = checker;
         mm.initializeModels ();

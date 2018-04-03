@@ -1,40 +1,36 @@
 package org.sa.rainbow.brass.model.p2_cp3.robot;
 
-import java.util.EnumSet;
 import java.util.List;
 
 import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotState.Sensors;
 import org.sa.rainbow.brass.model.robot.RobotState;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
-import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 
-public class SetSensorCmd extends AbstractRainbowModelOperation<EnumSet<Sensors>, RobotState> {
+public class SetSensorFailedCmd extends AbstractRainbowModelOperation<Boolean, RobotState> {
 
-	private Boolean m_on;
 	private Sensors m_sensor;
 
-	public SetSensorCmd(CP3RobotStateModelInstance model, String target, String sensor, String on) {
-		super("setSensor", model, target, sensor, on);
-		m_sensor = Sensors.valueOf(sensor);
-		m_on = Boolean.valueOf(on);
+	public SetSensorFailedCmd(CP3RobotStateModelInstance model, String target, String param) {
+		super("setSensorFailed", model, target, param);
+		m_sensor = Sensors.valueOf(target);
 	}
 
 	@Override
-	public EnumSet<Sensors> getResult() throws IllegalStateException {
-		return ((CP3RobotState) getModelContext().getModelInstance()).getSensors();
+	public Boolean getResult() throws IllegalStateException {
+		return true;
 	}
 
 	@Override
 	protected List<? extends IRainbowMessage> getGeneratedEvents(IRainbowMessageFactory messageFactory) {
-		return generateEvents(messageFactory, "setSensor");
+		return generateEvents(messageFactory, "setSensorFailed");
 	}
 
 	@Override
 	protected void subExecute() throws RainbowException {
-		((CP3RobotState) getModelContext().getModelInstance()).setSensor(m_sensor, m_on);
+		((CP3RobotState) getModelContext().getModelInstance()).setSensorFailed(m_sensor);
 	}
 
 	@Override
@@ -49,7 +45,7 @@ public class SetSensorCmd extends AbstractRainbowModelOperation<EnumSet<Sensors>
 
 	@Override
 	protected boolean checkModelValidForCommand(RobotState model) {
-		return model == getModelContext().getModelInstance();
+		return true;
 	}
 
 }

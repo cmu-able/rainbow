@@ -188,4 +188,9 @@ public class RobotStateGauge extends RegularPatternGauge{
         }
         return false;
     }
+	
+	@Override
+	protected boolean shouldProcess() {
+		return !isRainbowAdapting();
+	}
 }
