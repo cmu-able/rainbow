@@ -309,6 +309,11 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
     public ModelsManager modelsManager () {
         return m_modelsManager;
     }
+    
+    public GaugeManager gaugeManager () {
+    	return m_gaugeManager;
+    }
+    
 
     /**
      * Connects a new delegate and sends the appropriate configuration information to the delegate

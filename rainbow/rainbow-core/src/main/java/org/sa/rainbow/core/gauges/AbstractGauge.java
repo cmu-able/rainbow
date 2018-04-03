@@ -48,7 +48,8 @@ import java.util.Map.Entry;
  * @author Bradley Schmerl (schmerl@cs.cmu.edu)
  */
 public abstract class AbstractGauge extends AbstractRainbowRunnable implements IGauge {
-    private final String m_id;
+
+	private final String m_id;
 
     /**
      * The ports through which the gauge interacts with the outside world
@@ -79,6 +80,8 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
     protected Map<String, IRainbowOperation> m_commands = null;
 
     private Map<String, IRainbowOperation> m_lastCommands = null;
+    
+    private Boolean m_adapting = false;
 
     /**
      * Main Constructor for the Gauge.
@@ -242,7 +245,17 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
             // set the runner timer directly
             setSleepTime ((Long) triple.getValue ());
         }
+        else if (triple.getName().equals(RAINBOW_ADAPTING)) {
+        	synchronized (this) {
+        		m_adapting = (Boolean )triple.getValue();
+        	}
+        }
     }
+    
+    protected synchronized boolean isRainbowAdapting() {
+    	return m_adapting;
+    }
+    
 
     /* (non-Javadoc)
      * @see org.sa.rainbow.translator.gauges.IGauge#reconfigureGauge()

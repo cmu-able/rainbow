@@ -24,6 +24,7 @@
 package org.sa.rainbow.core;
 
 import org.sa.rainbow.core.gauges.GaugeDescription;
+import org.sa.rainbow.core.gauges.GaugeManager;
 import org.sa.rainbow.core.models.EffectorDescription;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.ProbeDescription;
@@ -39,5 +40,8 @@ public interface IRainbowMaster {
     ProbeDescription probeDesc ();
 
     ModelsManager modelsManager ();
+    
+    GaugeManager gaugeManager ();
+    
 
 }
