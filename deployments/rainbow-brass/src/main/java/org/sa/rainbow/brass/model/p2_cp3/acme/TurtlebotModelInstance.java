@@ -1,13 +1,14 @@
 package org.sa.rainbow.brass.model.p2_cp3.acme;
 
-import org.acmestudio.acme.core.type.IAcmeEnumType;
-import org.acmestudio.acme.element.IAcmeElementInstance;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.acmestudio.acme.core.type.IAcmeEnumValue;
+import org.acmestudio.acme.element.IAcmeComponent;
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.acmestudio.acme.element.property.IAcmeProperty;
-import org.acmestudio.acme.model.command.IAcmePropertyCommand;
-import org.acmestudio.acme.model.util.core.UMEnumValue;
-import org.acmestudio.basicmodel.core.AcmeEnumType;
-import org.sa.rainbow.core.error.RainbowException;
+import org.acmestudio.acme.element.property.IAcmePropertyValue;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 
 public class TurtlebotModelInstance extends AcmeModelInstance {
@@ -33,6 +34,31 @@ public class TurtlebotModelInstance extends AcmeModelInstance {
 		return m_commandFactory;
 	}
 	
+	public Collection<String> getActiveComponents() {
+		return getComponentEnablement("ACTIVE");
+	}
+
+	private Collection<String> getComponentEnablement(String compare) {
+		Set<? extends IAcmeComponent> components = getModelInstance().getComponents();
+		Set<String> active = new HashSet<String> ();
+		for (IAcmeComponent c : components) {
+			IAcmeProperty property = c.getProperty("enablement");
+			if (property != null) {
+				IAcmePropertyValue value = property.getValue();
+				if (value instanceof IAcmeEnumValue) {
+					IAcmeEnumValue en = (IAcmeEnumValue) value;
+					if (en.getValue().equals(compare)) {
+						active.add(c.getName());
+					}
+					
+				}
+			}
+		}
+		return active;
+	}
 	
+	public Collection<String> getFailedComponents() {
+		return getComponentEnablement("FAILED");
+	}
 
 }

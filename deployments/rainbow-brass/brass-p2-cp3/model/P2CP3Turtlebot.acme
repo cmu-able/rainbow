@@ -318,8 +318,8 @@ family Enablement = {
 }
 
 
-system P2CP3Turtlebot : TurtleBotFam, ROSFam, Enablement = new TurtleBotFam, ROSFam, Enablement extended with {
-   component acml : ROSNodeCompT, TurtleBotNodeCompT, EnablementT = new ROSNodeCompT, TurtleBotNodeCompT, EnablementT extended with {
+system Turtlebot : TurtleBotFam, ROSFam, Enablement = new TurtleBotFam, ROSFam, Enablement extended with {
+   component amcl : ROSNodeCompT, TurtleBotNodeCompT, EnablementT = new ROSNodeCompT, TurtleBotNodeCompT, EnablementT extended with {
       port TopicAdvertisePortT0 : TopicAdvertisePortT = new TopicAdvertisePortT extended with {
          property topic = "/tf";
          property msg_type = "TF";

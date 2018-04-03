@@ -93,9 +93,7 @@ public class CP3RobotState extends RobotState {
 	public EnumSet<Sensors> getSensors() throws IllegalStateException  {
 		synchronized(m_sensorHistory) {
 			TimeStamped<EnumSet<Sensors>> peek = m_sensorHistory.peek();
-			if (peek == null)
-				throw new IllegalStateException("No value for sensors has been set");
-			return EnumSet.<Sensors>copyOf(peek.data);
+			return peek != null?EnumSet.<Sensors>copyOf(peek.data):EnumSet.<Sensors>noneOf(Sensors.class);
 		}
 	}
 

@@ -44,8 +44,8 @@ probes:
     location: "${customize.system.target.ros}"
     type: script
     scriptInfo:
-      path: "${rainbow.path}/system/probles/rosnodeprobe.sh"
-      argument: "1" # Number of seconds between reporting
+      path: "${rainbow.path}/system/probes/rosnodeprobe.sh"
+      argument: "1" 
       mode: continual
       
       

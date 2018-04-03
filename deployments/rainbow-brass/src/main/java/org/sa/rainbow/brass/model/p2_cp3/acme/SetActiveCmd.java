@@ -3,15 +3,15 @@ package org.sa.rainbow.brass.model.p2_cp3.acme;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.acmestudio.acme.core.IAcmeType;
 import org.acmestudio.acme.core.type.IAcmeEnumType;
 import org.acmestudio.acme.element.IAcmeComponent;
-import org.acmestudio.acme.element.IAcmeElementInstance;
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.acmestudio.acme.element.property.IAcmeProperty;
 import org.acmestudio.acme.model.command.IAcmeCommand;
 import org.acmestudio.acme.model.command.IAcmePropertyCommand;
-import org.acmestudio.acme.model.command.IAcmePropertyCreateCommand;
 import org.acmestudio.acme.model.util.core.UMEnumValue;
+import org.acmestudio.acme.type.AcmeTypeHelper;
 import org.sa.rainbow.brass.model.p2_cp3.acme.TurtlebotModelInstance.ActiveT;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
@@ -37,7 +37,7 @@ public class SetActiveCmd extends AcmeModelOperation<IAcmeProperty> {
 		IAcmeComponent cr = getModelContext().resolveInModel(getTarget(), IAcmeComponent.class);
 		if (cr == null)
 			throw new RainbowModelException("Cannot find component " + getTarget() + " in the system");
-		IAcmeEnumType et = (IAcmeEnumType) cr.lookupName("EnablementT", true);
+		IAcmeEnumType et = (IAcmeEnumType) AcmeTypeHelper.extractTypeStructure((IAcmeType )cr.lookupName("ActiveT", true));
 
 		if (!et.getValues().contains(m_enablement.name())) {
 			throw new RainbowModelException("Cannot assign value to EnablementT: " + m_enablement.name());

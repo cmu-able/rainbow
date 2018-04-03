@@ -25,10 +25,11 @@ public class ArchitectureGauge extends AbstractGaugeWithProbes {
 	boolean m_reconfiguring = false;
 
 	private Map<String, String> m_nodeToArch;
+	private boolean m_newReport = false;
 
 	private Boolean m_adapting = false;
 	
-	protected ArchitectureGauge(String id, long beaconPeriod, TypedAttribute gaugeDesc,
+	public ArchitectureGauge(String id, long beaconPeriod, TypedAttribute gaugeDesc,
 			TypedAttribute modelDesc, List<TypedAttributeWithValue> setupParams,
 			Map<String, IRainbowOperation> mappings) throws RainbowException {
 		super("Architecture Gauge", id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
@@ -40,26 +41,32 @@ public class ArchitectureGauge extends AbstractGaugeWithProbes {
 		if (isRainbowAdapting()) return;
 		synchronized (m_nodesFromProbes) {
 			m_nodesFromProbes.clear();
-			String[] nodes = data.split("\n");
+			String[] nodes = data.split("\\s+");
 			m_nodesFromProbes.addAll(Arrays.asList(nodes));
+			m_newReport = true;
 		}
 	}
 	
 	@Override
 	protected void handleConfigParam(TypedAttributeWithValue tav) {
 		super.handleConfigParam(tav);
-		if (tav.getName().equals("mapping")) {
-			String[] mappings = ((String )tav.getValue()).split(",");
+		
+	}
+	
+	@Override
+	protected void runAction() {
+		super.runAction();
+
+		if (isRainbowAdapting() || !m_newReport) return;
+		if (m_nodeToArch == null) {
+			m_nodeToArch = new HashMap<> ();
+			String mapping = getSetupValue("mapping", String.class);
+			String[] mappings = mapping.split(",");
 			for (String m : mappings) {
 				String[] map = m.split("=");
 				m_nodeToArch.put(map[0].trim(), map[1].trim());
 			}
 		}
-	}
-	
-	@Override
-	protected void runAction() {
-		if (isRainbowAdapting()) return;
 		HashSet<String> newNodes = new HashSet<String> ();
 		HashSet<String> goneNodes = new HashSet<String> ();
 		synchronized (m_nodesFromProbes) {
@@ -68,6 +75,10 @@ public class ArchitectureGauge extends AbstractGaugeWithProbes {
 			
 			goneNodes.addAll(m_currentlyActiveNodes);
 			goneNodes.removeAll(m_nodesFromProbes);
+			
+			m_currentlyActiveNodes.clear();
+			m_currentlyActiveNodes.addAll(m_nodesFromProbes);
+			m_newReport = false;
 		}
 		
 		List<IRainbowOperation> ops = new LinkedList<> ();
@@ -97,9 +108,8 @@ public class ArchitectureGauge extends AbstractGaugeWithProbes {
 				params.add(p);
 			}
 		}
-			
-		issueCommands(ops, params);
-		super.runAction();
+		if (!ops.isEmpty())
+			issueCommands(ops, params);
 	}
 
 }
