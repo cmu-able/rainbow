@@ -60,7 +60,10 @@ gauge-types:
     configParams:
       targetProbeType:
         type: String
-        default: ~     
+        default: ~    
+      rainbowAdapting:
+        type: boolean
+        default: false 
         
   ClockGaugeT:
     commands:
@@ -79,6 +82,9 @@ gauge-types:
       targetProbeType:
         type: String
         default: ~
+      rainbowAdapting:
+        type: boolean
+        default: false
       
   ArchEnablementGaugeT:
     commands: 
@@ -100,6 +106,9 @@ gauge-types:
       targetProbeType:
         type: String
         default: ~
+      rainbowAdapting:
+        type: boolean
+        default: false
     
         
 #  BRASSTargetWaypointGaugeT:
