@@ -2,82 +2,47 @@ package org.sa.rainbow.brass.analyses.p2_cp3;
 
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.Stack;
 
+import org.acmestudio.acme.core.exception.AcmeException;
+import org.acmestudio.acme.element.IAcmeDesignRule;
 import org.acmestudio.acme.element.IAcmeSystem;
+import org.acmestudio.acme.environment.error.AcmeError;
+import org.acmestudio.acme.rule.node.feedback.ExpressionEvaluationError;
+import org.acmestudio.acme.type.verification.NodeScopeLookup;
+import org.acmestudio.acme.type.verification.RuleTypeChecker;
 import org.sa.rainbow.brass.model.p2_cp3.acme.TurtlebotModelInstance;
+import org.sa.rainbow.brass.model.p2_cp3.mission.MissionState;
+import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowState.CP3ModelState;
+import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RemoveModelProblemCmd;
+import org.sa.rainbow.brass.model.p2_cp3.rainbowState.SetModelProblemCmd;
 import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotState;
 import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotState.Sensors;
-import org.sa.rainbow.brass.model.robot.RobotStateModelInstance;
-import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.IRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
-import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
-import org.sa.rainbow.core.analysis.IRainbowAnalysis;
-import org.sa.rainbow.core.error.RainbowConnectionException;
-import org.sa.rainbow.core.models.ModelReference;
-import org.sa.rainbow.core.ports.IModelUSBusPort;
-import org.sa.rainbow.core.ports.IModelsManagerPort;
-import org.sa.rainbow.core.ports.IRainbowReportingPort;
-import org.sa.rainbow.core.ports.RainbowPortFactory;
 
-public class ConfigurationAnalyzer extends AbstractRainbowRunnable implements IRainbowAnalysis {
+public class ConfigurationAnalyzer extends P2CP3Analyzer {
 
-	private IModelsManagerPort m_modelsManagerPort;
-	private IModelUSBusPort m_modelUSPort;
-	private CP3RobotState m_robotStateModel;
-	private TurtlebotModelInstance m_turtlebotArchModel;
+	private String m_lastPrintedLog;
+	private boolean m_wasOK;
 
 	public ConfigurationAnalyzer() {
 		super("TurtlebotConfigurationAnalyzer");
 		String period = Rainbow.instance().getProperty(RainbowConstants.PROPKEY_MODEL_EVAL_PERIOD);
 		if (period != null) {
 			setSleepTime(Long.parseLong(period));
-		}
-		else {
+		} else {
 			setSleepTime(IRainbowRunnable.LONG_SLEEP_TIME);
 		}
 	}
-	
-	@Override
-	public void initialize(IRainbowReportingPort port) throws RainbowConnectionException {
-		super.initialize(port);
-		initializeConnections();
-	}
-	
-	private void initializeConnections() throws RainbowConnectionException {
-		m_modelUSPort = RainbowPortFactory.createModelsManagerClientUSPort(this);
-		m_modelsManagerPort = RainbowPortFactory.createModelsManagerRequirerPort();
-	}
 
-	@Override
-	public void dispose() {
-	}
-
-	@Override
-	public void setProperty(String key, String value) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public String getProperty(String key) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	protected void log(String txt) {
-		m_reportingPort.info(RainbowComponentT.ANALYSIS, txt);
-	}
-
-	
-	
 	@Override
 	protected void runAction() {
-		CP3RobotState rs = getRobotState();
-		TurtlebotModelInstance tb = getTurtlebotModel();	
-		
+		CP3RobotState rs = getModels().getRobotStateModel().getModelInstance();
+		TurtlebotModelInstance tb = getModels().getTurtlebotModel();
+		MissionState ms = getModels().getMissionStateModel().getModelInstance();
+
 		EnumSet<Sensors> sensors = rs.getSensors();
 		Collection<String> components = tb.getActiveComponents();
 		StringBuffer log = new StringBuffer("Components: ");
@@ -89,29 +54,41 @@ public class ConfigurationAnalyzer extends AbstractRainbowRunnable implements IR
 		for (Sensors s : sensors) {
 			log.append(s.name());
 		}
-		log(log.toString());
-	}
-
-	private TurtlebotModelInstance getTurtlebotModel() {
-		if (m_turtlebotArchModel == null) {
-			m_turtlebotArchModel = (TurtlebotModelInstance )m_modelsManagerPort.<IAcmeSystem>getModelInstance(
-					new ModelReference("Turtlebot", "Acme"));
+		if (m_lastPrintedLog == null || !m_lastPrintedLog.equals(log.toString())) {
+			m_lastPrintedLog = log.toString();
+			log(m_lastPrintedLog);
 		}
-		return m_turtlebotArchModel;
-	}
 
-	private CP3RobotState getRobotState() {
-		if (m_robotStateModel == null) 
-			m_robotStateModel = (CP3RobotState) m_modelsManagerPort.<CP3RobotState>getModelInstance(
-					new ModelReference("Robot", RobotStateModelInstance.ROBOT_STATE_TYPE)).getModelInstance();
-		return m_robotStateModel;
-	}
-	
+		if (ms.isMissionStarted()) {
+			IAcmeSystem tbs = tb.getModelInstance();
+			IAcmeDesignRule localization = tbs.getDesignRule("atLeastOneActiveLocalization");
+			IAcmeDesignRule navigation = tbs.getDesignRule("atLeastOneActiveNavigation");
+			IAcmeDesignRule instructionGraph = tbs.getDesignRule("atLeastOneActiveIG");
+			IAcmeDesignRule mapServer = tbs.getDesignRule("atLeastOneActiveMapServer");
 
-	@Override
-	public RainbowComponentT getComponentType() {
-		return RainbowComponentT.ANALYSIS;
-		
+			IAcmeDesignRule[] rules = new IAcmeDesignRule[] { localization, navigation, instructionGraph, mapServer };
+
+			Stack<AcmeError> errors = new Stack<>();
+			boolean ok = true;
+			for (IAcmeDesignRule r : rules) {
+				try {
+					ok &= RuleTypeChecker.evaluateAsBoolean(tbs, r, r.getDesignRuleExpression(), errors,
+							new NodeScopeLookup());
+				} catch (AcmeException e) {
+					errors.push(new ExpressionEvaluationError(tbs, r, r.getDesignRuleExpression(), e.getMessage()));
+				}
+			}
+			if (!ok && m_wasOK) {
+				m_wasOK = false;
+				SetModelProblemCmd cmd = getModels().getRainbowStateModel ().getCommandFactory ().setModelProblem(CP3ModelState.ARCHITECTURE_ERROR);
+				m_modelUSPort.updateModel(cmd);
+			}
+			else if (ok && !m_wasOK) {
+				m_wasOK = true;
+				RemoveModelProblemCmd cmd = getModels().getRainbowStateModel().getCommandFactory ().removeModelProblem(CP3ModelState.ARCHITECTURE_ERROR);
+				m_modelUSPort.updateModel(cmd);
+			}
+		}
 	}
 
 }

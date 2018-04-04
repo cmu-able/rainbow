@@ -25,7 +25,7 @@ import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowModelChan
 import org.sa.rainbow.core.ports.IModelUSBusPort;
 import org.sa.rainbow.core.ports.IModelsManagerPort;
 
-public class DarknessAnalyzer extends AbstractRainbowRunnable implements IRainbowAnalysis, IRainbowModelChangeCallback {
+public class DarknessAnalyzer extends P2CP3Analyzer implements IRainbowModelChangeCallback {
 
 	private static final double ILLUMINATION_THRESHOLD = 10;
 	private IModelChangeBusSubscriberPort m_modelChangePort;
@@ -37,74 +37,24 @@ public class DarknessAnalyzer extends AbstractRainbowRunnable implements IRainbo
 
 	public DarknessAnalyzer() {
 		super("Darkness");
-		String period = Rainbow.instance().getProperty(RainbowConstants.PROPKEY_MODEL_EVAL_PERIOD);
-		if (period != null) {
-			setSleepTime(Long.parseLong(period));
-		} else {
-			setSleepTime(IRainbowRunnable.LONG_SLEEP_TIME);
-		}
-	}
-
-	@Override
-	public void initialize(IRainbowReportingPort port) throws RainbowConnectionException {
-		super.initialize(port);
-		initializeConnections();
-	}
-
-	private void initializeConnections() throws RainbowConnectionException {
-		m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort();
-		// m_modelChangePort.subscribe(m_, callback);
-		m_modelUSPort = RainbowPortFactory.createModelsManagerClientUSPort(this);
-		m_modelsManagerPort = RainbowPortFactory.createModelsManagerRequirerPort();
-	}
-
-	@Override
-	public void dispose() {
-		m_reportingPort.dispose();
-		m_modelUSPort.dispose();
-	}
-
-	@Override
-	public void setProperty(String key, String value) {
-	}
-
-	@Override
-	public String getProperty(String key) {
-		return null;
-	}
-
-	@Override
-	protected void log(String txt) {
-		m_reportingPort.info(RainbowComponentT.ANALYSIS, txt);
 
 	}
 
-	protected CP3RobotState getRobotState() {
-		if (m_robotStateModel == null) {
-			m_robotStateModel = (CP3RobotState) m_modelsManagerPort.<CP3RobotState>getModelInstance(
-					new ModelReference("Robot", RobotStateModelInstance.ROBOT_STATE_TYPE)).getModelInstance();
-		}
-		return m_robotStateModel;
-	}
 
-	protected RainbowStateModelInstance getRainbowStateModel() {
-		if (m_rainbowStateModel == null)
-			m_rainbowStateModel = (RainbowStateModelInstance) m_modelsManagerPort
-					.<RainbowState>getModelInstance(new ModelReference("RainbowState", RainbowStateModelInstance.TYPE));
-		return m_rainbowStateModel;
-	}
+
+
 
 	@Override
 	protected void runAction() {
-		CP3RobotState rs = getRobotState();
+		CP3RobotState rs = getModels().getRobotStateModel().getModelInstance();
 		try {
 			if (rs.getIllumination() < ILLUMINATION_THRESHOLD && !m_darkBefore) {
-				SetModelProblemCmd cmd = getRainbowStateModel().getCommandFactory()
+				SetModelProblemCmd cmd = getModels().getRainbowStateModel().getCommandFactory()
 						.setModelProblem(CP3ModelState.TOO_DARK);
 				m_darkBefore = true;
 				m_modelUSPort.updateModel(cmd);
 			} else if (m_darkBefore && rs.getIllumination() >= ILLUMINATION_THRESHOLD) {
-				RemoveModelProblemCmd cmd = getRainbowStateModel().getCommandFactory()
+				RemoveModelProblemCmd cmd = getModels().getRainbowStateModel().getCommandFactory()
 						.removeModelProblem(CP3ModelState.TOO_DARK);
 				m_darkBefore = false;
 				m_modelUSPort.updateModel(cmd);

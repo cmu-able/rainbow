@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.EnumSet;
 
 import org.sa.rainbow.brass.adaptation.BrassPlan;
+import org.sa.rainbow.brass.model.p2_cp3.ModelAccessor;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowState;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowState.CP3ModelState;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowStateModelInstance;
@@ -36,6 +37,7 @@ public class ReactiveDarknessPlanner extends AbstractRainbowRunnable implements 
 	private RainbowStateModelInstance m_rainbowStateModel;
 	private CP3RobotStateModelInstance m_robotStateModel;
 	private boolean m_executingPlan;
+	private ModelAccessor m_models;
 
 	public ReactiveDarknessPlanner() {
 		super("Hello Darkness my old friend");
@@ -56,6 +58,7 @@ public class ReactiveDarknessPlanner extends AbstractRainbowRunnable implements 
 
 	private void initConnectors() throws RainbowConnectionException {
 		m_modelsManagerPort = RainbowPortFactory.createModelsManagerRequirerPort();
+		m_models = new ModelAccessor(m_modelsManagerPort);
 	}
 
 	@Override
@@ -68,17 +71,7 @@ public class ReactiveDarknessPlanner extends AbstractRainbowRunnable implements 
         m_reportingPort.info (RainbowComponentT.ADAPTATION_MANAGER, txt);
 	}
 	
-	protected RainbowStateModelInstance getRainbowStateModel() {
-		if (m_rainbowStateModel == null) 
-			m_rainbowStateModel = (RainbowStateModelInstance )m_modelsManagerPort.<RainbowState>getModelInstance(new ModelReference("RainbowState", RainbowStateModelInstance.TYPE));
-		return m_rainbowStateModel;
-	}
-	
-	protected CP3RobotStateModelInstance getRobotStateModel() {
-		if (m_robotStateModel == null) 
-			m_robotStateModel = (CP3RobotStateModelInstance )m_modelsManagerPort.<RobotState>getModelInstance(new ModelReference("Robot", RobotStateModelInstance.ROBOT_STATE_TYPE));
-		return m_robotStateModel;
-	}
+
 
 	@Override
 	protected void runAction() {
@@ -90,11 +83,17 @@ public class ReactiveDarknessPlanner extends AbstractRainbowRunnable implements 
 			else m_waitForEffect = 0;
 		}
 	
-		EnumSet<CP3ModelState> problems = getRainbowStateModel ().getModelInstance().getProblems();
+		EnumSet<CP3ModelState> problems = m_models.getRainbowStateModel ().getModelInstance().getProblems();
 		if (!problems.isEmpty() && !m_executingPlan) {
+			StringBuffer ps = new StringBuffer ("Problems: ");
+			for (CP3ModelState p : problems) {
+				ps.append(p.name());
+				ps.append(" ");
+			}
+			log(ps.toString());
 			if (problems.contains(CP3ModelState.TOO_DARK)) {
 				log("Let there be light!");
-				TurnOnHeadlamp toh = new TurnOnHeadlamp(getRobotStateModel(), true);
+				TurnOnHeadlamp toh = new TurnOnHeadlamp(m_models.getRobotStateModel(), true);
 				m_executingPlan = true;
 				AdaptationTree<BrassPlan> at = new AdaptationTree<>(toh);
 				m_adaptationNQPort.offerAdaptation(at, new Object[0]);
