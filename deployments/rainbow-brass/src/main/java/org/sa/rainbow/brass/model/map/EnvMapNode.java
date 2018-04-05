@@ -9,6 +9,17 @@ public class EnvMapNode {
     public int m_id;
     private final Map<String,Object> m_properties;
 
+    public EnvMapNode (String m_label, double x, double y, int node_id, boolean charging) {
+    	super();
+        this.m_label = m_label;
+        this.m_x = x;
+        this.m_y = y;
+        this.m_id = node_id;
+        
+        m_properties = new HashMap<> ();
+        m_properties.put("CHARGING", (boolean)charging);	
+    }
+    
     public EnvMapNode (String m_label, double x, double y, int node_id) {
         super();
         this.m_label = m_label;
@@ -17,6 +28,8 @@ public class EnvMapNode {
         this.m_id = node_id;
         
         m_properties = new HashMap<> ();
+        m_properties.put("CHARGING", false);	
+
     }
    
     public void setProperty(String key, Object value) {
@@ -54,4 +67,9 @@ public class EnvMapNode {
     public int getId() {
         return m_id;
     }
+    
+    public boolean isChargingStation(){
+    	return (boolean) m_properties.get("CHARGING");
+    }
+    
 }
