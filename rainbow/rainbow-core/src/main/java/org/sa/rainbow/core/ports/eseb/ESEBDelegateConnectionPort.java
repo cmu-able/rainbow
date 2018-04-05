@@ -28,6 +28,7 @@ import java.text.MessageFormat;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
@@ -111,7 +112,7 @@ public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
                     }
                 }
             }
-        }, Rainbow.instance ().getProperty (Rainbow.PROPKEY_PORT_TIMEOUT, 10000));
+        }, Rainbow.instance ().getProperty (IRainbowEnvironment.PROPKEY_PORT_TIMEOUT, 10000));
         if (m_deploymentPort == null) {
             LOGGER.error ("The call to connectDelegate timed out without returning a deployment port...");
             // REVIEW: Throw an exception instead

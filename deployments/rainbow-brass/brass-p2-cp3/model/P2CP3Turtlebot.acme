@@ -1,135 +1,129 @@
-Family CallReturnFam = {
-
-    Port Type RequestPortT = {
+family CallReturnFam = {
+  port type RequestPortT = {
         rule atLeast1Attachment = heuristic size(self.ATTACHEDROLES) >= 1;
-        rule attachedOnlyToCallerRoleT = invariant forall r in self.ATTACHEDROLES | 
+        rule attachedOnlyToCallerRoleT = invariant forall r in self.ATTACHEDROLES |
             declaresType(r, CallerRoleT);
 
-    }
-    Port Type ResponsePortT = {
+    };
+    port type ResponsePortT = {
         rule atLeast1Attachment = heuristic size(self.ATTACHEDROLES) >= 1;
-        rule attachedOnlyToReponderRoleT = invariant forall r in self.ATTACHEDROLES | 
+        rule attachedOnlyToReponderRoleT = invariant forall r in self.ATTACHEDROLES |
             declaresType(r, ResponderRoleT);
 
-    }
-    Component Type CallerCompT = {
-        rule atLast1portOfTypeRequestPortT = heuristic exists p in self.PORTS | 
+    };
+    component type CallerCompT = {
+        rule atLast1portOfTypeRequestPortT = heuristic exists p in self.PORTS |
             declaresType(p, RequestPortT);
 
-    }
-    Component Type ResponderCompT = {
-        rule atLast1portOfTypeResponsePortT = heuristic exists p in self.PORTS | 
+    };
+    component type ResponderCompT = {
+        rule atLast1portOfTypeResponsePortT = heuristic exists p in self.PORTS |
             declaresType(p, ResponsePortT);
 
-    }
-    Role Type CallerRoleT = {
+    };
+    role type CallerRoleT = {
         rule exactly1Attachment = heuristic size(self.ATTACHEDPORTS) == 1;
-        rule attachedOnlyToRequestPort = invariant forall p : Port in self.ATTACHEDPORTS | 
+        rule attachedOnlyToRequestPort = invariant forall p : Port in self.ATTACHEDPORTS |
             declaresType(p, RequestPortT);
 
-    }
-    Role Type ResponderRoleT = {
+    };
+    role type ResponderRoleT = {
         rule exactly1Attachment = heuristic size(self.ATTACHEDPORTS) == 1;
-        rule attachedOnlyToResponsePort = invariant forall p : Port in self.ATTACHEDPORTS | 
+        rule attachedOnlyToResponsePort = invariant forall p : Port in self.ATTACHEDPORTS |
             declaresType(p, ResponsePortT);
 
-    }
-    Connector Type CallReturnConnT = {
+    };
+    connector type CallReturnConnT = {
         rule exactly2Roles = invariant size(self.ROLES) == 2;
-        rule exactly1RoleOfTypeCallerRoleT = invariant exists r in self.ROLES | 
+        rule exactly1RoleOfTypeCallerRoleT = invariant exists r in self.ROLES |
             declaresType(r, CallerRoleT);
-        rule exactly1RoleOfTypeResponderRoleT = invariant exists r in self.ROLES | 
+        rule exactly1RoleOfTypeResponderRoleT = invariant exists r in self.ROLES |
             declaresType(r, ResponderRoleT);
 
-    }
+    };
 }
-
-Family EventBasedFam = {
-
-    Port Type AnnouncePortT = {
-        rule attachedOnlyToAnnouncerRoleT = invariant forall a in self.ATTACHEDROLES | 
+family EventBasedFam = {
+   port type AnnouncePortT = {
+        rule attachedOnlyToAnnouncerRoleT = invariant forall a in self.ATTACHEDROLES |
             declaresType(a, AnnouncerRoleT);
 
-    }
-    Port Type ReceivePortT = {
-        rule attachedOnlyToReceiverRoleT = invariant forall a in self.ATTACHEDROLES | 
+    };
+    port type ReceivePortT = {
+        rule attachedOnlyToReceiverRoleT = invariant forall a in self.ATTACHEDROLES |
             declaresType(a, ReceiverRoleT);
 
-    }
-    Component Type ParticipantCompT = {
-        rule atLeastTheseTypesAnnouncePortT_ReceivePortT = heuristic exists t in {AnnouncePortT, ReceivePortT} | 
-            exists e in self.PORTS | 
+    };
+    component type ParticipantCompT = {
+        rule atLeastTheseTypesAnnouncePortT_ReceivePortT = heuristic exists t in {AnnouncePortT, ReceivePortT} |
+            exists e in self.PORTS |
                 declaresType(e, t);
 
-    }
-    Role Type AnnouncerRoleT = {
-        rule attachedOnlyToAnnouncePortT = invariant forall a in self.ATTACHEDPORTS | 
+    };
+    role type AnnouncerRoleT = {
+        rule attachedOnlyToAnnouncePortT = invariant forall a in self.ATTACHEDPORTS |
             declaresType(a, AnnouncePortT);
 
-    }
-    Role Type ReceiverRoleT = {
-        rule attachedOnlyToReceivePortT = invariant forall a in self.ATTACHEDPORTS | 
+    };
+    role type ReceiverRoleT = {
+        rule attachedOnlyToReceivePortT = invariant forall a in self.ATTACHEDPORTS |
             declaresType(a, ReceivePortT);
 
-    }
-    abstract Connector Type EventConnT = {
-        rule hasOneAnnoucerRole = invariant exists r in self.ROLES | 
+    };
+    abstract connector type EventConnT = {
+        rule hasOneAnnoucerRole = invariant exists r in self.ROLES |
             declaresType(r, AnnouncerRoleT);
-        rule hasOneReceiverRole = invariant exists r in self.ROLES | 
+        rule hasOneReceiverRole = invariant exists r in self.ROLES |
             declaresType(r, ReceiverRoleT);
 
-    }
+    };
 }
-
-
-Family LocalCallReturnFam extends CallReturnFam with {
-
-    Port Type LocalRequestPortT extends RequestPortT with {
+family LocalCallReturnFam extends CallReturnFam with {
+   port type LocalRequestPortT extends RequestPortT with {
         rule exactly1Attachment = invariant size(self.ATTACHEDROLES) == 1;
-        rule attachedOnlyToLocalCallerRoleT = invariant forall p in self.ATTACHEDROLES | 
+        rule attachedOnlyToLocalCallerRoleT = invariant forall p in self.ATTACHEDROLES |
             declaresType(p, LocalCallerRoleT);
         rule atLeast1Attachment = heuristic size(self.ATTACHEDROLES) >= 1;
-        rule attachedOnlyToCallerRoleT = invariant forall r in self.ATTACHEDROLES | 
+        rule attachedOnlyToCallerRoleT = invariant forall r in self.ATTACHEDROLES |
             declaresType(r, CallerRoleT);
 
-    }
-    Port Type LocalResponsePortT extends ResponsePortT with {
+    };
+    port type LocalResponsePortT extends ResponsePortT with {
         rule exactly1Attachment = invariant size(self.ATTACHEDROLES) == 1;
-        rule attachedOnlyToLocalResponderRoleT = invariant forall p in self.ATTACHEDROLES | 
+        rule attachedOnlyToLocalResponderRoleT = invariant forall p in self.ATTACHEDROLES |
             declaresType(p, LocalResponderRoleT);
         rule atLeast1Attachment = heuristic size(self.ATTACHEDROLES) >= 1;
-        rule attachedOnlyToReponderRoleT = invariant forall r in self.ATTACHEDROLES | 
+        rule attachedOnlyToReponderRoleT = invariant forall r in self.ATTACHEDROLES |
             declaresType(r, ResponderRoleT);
 
-    }
-    Role Type LocalCallerRoleT extends CallerRoleT with {
-        rule attachedOnlyToLocalRequestPortT = invariant forall p in self.ATTACHEDPORTS | 
+    };
+    role type LocalCallerRoleT extends CallerRoleT with {
+        rule attachedOnlyToLocalRequestPortT = invariant forall p in self.ATTACHEDPORTS |
             declaresType(p, LocalRequestPortT);
         rule exactly1Attachment = heuristic size(self.ATTACHEDPORTS) == 1;
-        rule attachedOnlyToRequestPort = invariant forall p : Port in self.ATTACHEDPORTS | 
+        rule attachedOnlyToRequestPort = invariant forall p : Port in self.ATTACHEDPORTS |
             declaresType(p, RequestPortT);
 
-    }
-    Role Type LocalResponderRoleT extends ResponderRoleT with {
-        rule attachedOnlyToLocalResponsePortT = invariant forall p in self.ATTACHEDPORTS | 
+    };
+    role type LocalResponderRoleT extends ResponderRoleT with {
+        rule attachedOnlyToLocalResponsePortT = invariant forall p in self.ATTACHEDPORTS |
             declaresType(p, LocalResponsePortT);
         rule exactly1Attachment = heuristic size(self.ATTACHEDPORTS) == 1;
-        rule attachedOnlyToResponsePort = invariant forall p : Port in self.ATTACHEDPORTS | 
+        rule attachedOnlyToResponsePort = invariant forall p : Port in self.ATTACHEDPORTS |
             declaresType(p, ResponsePortT);
 
-    }
-    Connector Type LocalCallReturnConnT extends CallReturnConnT with {
-        rule exactly1RoleOfTypeLocalCallerRoleT = invariant exists r in self.ROLES | 
+    };
+    connector type LocalCallReturnConnT extends CallReturnConnT with {
+        rule exactly1RoleOfTypeLocalCallerRoleT = invariant exists r in self.ROLES |
             declaresType(r, LocalCallerRoleT);
-        rule exactly1RoleOfTypeLocalResponderRoleT = invariant exists r in self.ROLES | 
+        rule exactly1RoleOfTypeLocalResponderRoleT = invariant exists r in self.ROLES |
             declaresType(r, LocalResponderRoleT);
         rule exactly2Roles = invariant size(self.ROLES) == 2;
-        rule exactly1RoleOfTypeCallerRoleT = invariant exists r in self.ROLES | 
+        rule exactly1RoleOfTypeCallerRoleT = invariant exists r in self.ROLES |
             declaresType(r, CallerRoleT);
-        rule exactly1RoleOfTypeResponderRoleT = invariant exists r in self.ROLES | 
+        rule exactly1RoleOfTypeResponderRoleT = invariant exists r in self.ROLES |
             declaresType(r, ResponderRoleT);
 
-    }
+    };
 }
 
 family PubSubFam extends EventBasedFam with {
@@ -317,28 +311,17 @@ family Enablement = {
   };
 }
 
-
-system Turtlebot : TurtleBotFam, ROSFam, Enablement = new TurtleBotFam, ROSFam, Enablement extended with {
-   component amcl : ROSNodeCompT, TurtleBotNodeCompT, EnablementT = new ROSNodeCompT, TurtleBotNodeCompT, EnablementT extended with {
-      port TopicAdvertisePortT0 : TopicAdvertisePortT = new TopicAdvertisePortT extended with {
-         property topic = "/tf";
-         property msg_type = "TF";
-      };
-      port TopicSubscribePortT0 : TopicSubscribePortT = new TopicSubscribePortT extended with {
-         property msg_type = "LaserScan";
-         property topic = "/scan";
-      };
-      property name = "amcl";
-      property category = Localization;
-      property enablement = INACTIVE;
-   };
-   component ig_interpreter : ROSNodeCompT, TurtleBotNodeCompT, EnablementT = new ROSNodeCompT, TurtleBotNodeCompT, EnablementT extended with {
+family BrassTurtlebotFam extends Enablement, TurtleBotFam,ROSFam with {
+        component type EnableableTurtlebotNodeCompT extends RosNodeCompT, TurtleBotNodeCompT, EnablementT;
+}
+system Turtlebot : BrassTurtlebotFam = new BrassTurtlebotFam extended with {
+   component ig_interpreter : EnableableTurtlebotNodeCompT = new EnableableTurtlebotNodeCompT extended with {
       port ActionServerPortT0 : ActionServerPortT = new ActionServerPortT;
       port ActionClientPortT0 : ActionClientPortT = new ActionClientPortT;
       property name = "ig_interpreter";
       property category = InstructionGraph;
    };
-   component map_server : ROSNodeCompT, TurtleBotNodeCompT, EnablementT = new ROSNodeCompT, TurtleBotNodeCompT, EnablementT extended with {
+   component map_server : EnableableTurtlebotNodeCompT = new EnableableTurtlebotNodeCompT extended with {
       port TopicAdvertisePortT0 : TopicAdvertisePortT = new TopicAdvertisePortT extended with {
          property msg_type = " nav_msgs/OccupancyGrid";
          property topic = "/map";
@@ -346,7 +329,7 @@ system Turtlebot : TurtleBotFam, ROSFam, Enablement = new TurtleBotFam, ROSFam, 
       property name = "map_server";
       property category = MapServer;
    };
-   component move_base : ROSNodeCompT, TurtleBotNodeCompT, EnablementT = new ROSNodeCompT, TurtleBotNodeCompT, EnablementT extended with {
+   component move_base : EnableableTurtlebotNodeCompT = new EnableableTurtlebotNodeCompT extended with {
       port ActionServerPortT0 : ActionServerPortT = new ActionServerPortT extended with {
          property action_type = "goal";
       };
@@ -361,7 +344,7 @@ system Turtlebot : TurtleBotFam, ROSFam, Enablement = new TurtleBotFam, ROSFam, 
       property name = "move_base";
       property category = Navigation;
    };
-   component mrpt : ROSNodeCompT, TurtleBotNodeCompT, EnablementT = new ROSNodeCompT, TurtleBotNodeCompT, EnablementT extended with {
+   component mrpt : EnableableTurtlebotNodeCompT = new EnableableTurtlebotNodeCompT extended with {
       port TopicAdvertisePortT0 : TopicAdvertisePortT = new TopicAdvertisePortT extended with {
          property msg_type = "TF";
          property topic = "/tf";
@@ -374,7 +357,7 @@ system Turtlebot : TurtleBotFam, ROSFam, Enablement = new TurtleBotFam, ROSFam, 
       property category = Localization;
       property enablement = INACTIVE;
    };
-   component marker_pose_publisher : ROSNodeCompT, TurtleBotNodeCompT, EnablementT = new ROSNodeCompT, TurtleBotNodeCompT, EnablementT extended with {
+   component marker_pose_publisher : EnableableTurtlebotNodeCompT = new EnableableTurtlebotNodeCompT extended with {
       port TopicAdvertisePortT0 : TopicAdvertisePortT = new TopicAdvertisePortT extended with {
          property msg_type = "TF";
          property topic = "/tf";
@@ -463,6 +446,19 @@ system Turtlebot : TurtleBotFam, ROSFam, Enablement = new TurtleBotFam, ROSFam, 
          property enablement = INACTIVE;
          rule noServiceCallToSelf = invariant forall req :! ServiceClientPortT in self.PORTS | !exists resp :! ServiceProviderPortT in self.PORTS | connected(req, resp);
          rule noActionCalLToSelf = invariant forall req :! ActionClientPortT in self.PORTS | !exists resp :! ActionServerPortT in self.PORTS | connected(req, resp);
+   };
+   component amcl : EnableableTurtlebotNodeCompT = new EnableableTurtlebotNodeCompT extended with {
+      port TopicAdvertisePortT0 : TopicAdvertisePortT = new TopicAdvertisePortT extended with {
+         property topic = "/tf";
+         property msg_type = "TF";
+      };
+      port TopicSubscribePortT0 : TopicSubscribePortT = new TopicSubscribePortT extended with {
+         property msg_type = "LaserScan";
+         property topic = "/scan";
+      };
+      property name = "amcl";
+      property category = Localization;
+      property enablement = INACTIVE;
    };
    connector ActionServerConnT0 : ActionServerConnT = new ActionServerConnT extended with {
       role ROSActionCallerRoleT0 : ROSActionCallerRoleT = new ROSActionCallerRoleT;
@@ -576,10 +572,10 @@ system Turtlebot : TurtleBotFam, ROSFam, Enablement = new TurtleBotFam, ROSFam, 
    attachment ig_interpreter.ActionClientPortT0 to ActionServerConnT0.ROSActionCallerRoleT0;
    attachment move_base.ActionServerPortT0 to ActionServerConnT0.ROSActionResponderRoleT0;
    attachment move_base.TopicSubscribePortT0 to tf.subscriber;
-   attachment acml.TopicAdvertisePortT0 to tf.advertiser;
+   attachment amcl.TopicAdvertisePortT0 to tf.advertiser;
    attachment mrpt.TopicAdvertisePortT0 to tf.advertiser0;
    attachment marker_pose_publisher.TopicAdvertisePortT0 to tf.advertiser1;
-   attachment acml.TopicSubscribePortT0 to scan.subscriber;
+   attachment amcl.TopicSubscribePortT0 to scan.subscriber;
    attachment mrpt.TopicSubscribePortT0 to scan.subscriber0;
    attachment laserScanNodelet.TopicAdvertisePortT0 to scan.advertiser;
    attachment TurtleBot.TopicAdvertisePortT0 to depth_image.advertiser;
@@ -595,4 +591,10 @@ system Turtlebot : TurtleBotFam, ROSFam, Enablement = new TurtleBotFam, ROSFam, 
    attachment marker_pose_publisher.TopicSubscribePortT1 to depth_image1.subsriber;
    attachment map_server.TopicAdvertisePortT0 to TopicConnectorT0.advertiser;
    attachment move_base.TopicSubscribePortT1 to TopicConnectorT0.subscriber;
+
+    rule atLeastOneActiveLocalization = invariant exists n :! EnableableTurtlebotNodeCompT in self.COMPONENTS | (n.category == Localization and n.enablement == ACTIVE);
+    rule atLeastOneActiveNavigation = invariant exists n :! EnableableTurtlebotNodeCompT in self.COMPONENTS | (n.category == Navigation and n.enablement == ACTIVE);
+    rule atLeastOneActiveIG = invariant exists n:! EnableableTurtlebotNodeCompT in self.COMPONENTS | (n.category == InstructionGraph and n.enablement == ACTIVE);
+    rule atLeastOneActiveMapServer = invariant exists n:! EnableableTurtlebotNodeCompT in self.COMPONENTS | (n.category == MapServer and n.enablement == ACTIVE);
+
 }

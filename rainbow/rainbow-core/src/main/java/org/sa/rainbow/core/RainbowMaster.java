@@ -23,6 +23,8 @@
  */
 package org.sa.rainbow.core;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
@@ -60,6 +62,7 @@ import org.sa.rainbow.core.ports.IMasterConnectionPort;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
+import org.sa.rainbow.gui.IRainbowGUI;
 import org.sa.rainbow.gui.RainbowGUI;
 import org.sa.rainbow.translator.effectors.EffectorManager;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
@@ -768,8 +771,21 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 
         RainbowMaster master = new RainbowMaster ();
         if (showGui) {
-            RainbowGUI gui = new RainbowGUI (master);
-            gui.display ();
+        	String guiProp = Rainbow.instance().getProperty(IRainbowEnvironment.PROPKEY_RAINBOW_GUI, null);
+        	IRainbowGUI gui = null;
+        	if (guiProp != null) {
+        		try {
+					Class<IRainbowGUI> fc = (Class<IRainbowGUI>) Class.forName(guiProp);
+					gui = fc.newInstance();
+				} catch (ClassNotFoundException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException e) {
+				}
+        		
+        	}
+        	if (gui == null) {
+        		gui = new RainbowGUI();
+        		gui.setMaster(master);
+                gui.display ();
+        	}
         }
         master.initialize ();
 
