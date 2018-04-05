@@ -28,6 +28,7 @@ import java.text.MessageFormat;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.RainbowMaster;
@@ -101,7 +102,7 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
         try {
             BooleanReply reply = new BooleanReply ();
             getConnectionRole ().blockingSendAndReceive (msg, reply,
-                    Rainbow.instance ().getProperty (Rainbow.PROPKEY_PORT_TIMEOUT, 10000));
+                    Rainbow.instance ().getProperty (IRainbowEnvironment.PROPKEY_PORT_TIMEOUT, 10000));
             return reply.m_reply;
         }
         catch (RainbowConnectionException e) {
@@ -119,7 +120,7 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
         try {
             BooleanReply reply = new BooleanReply ();
             getConnectionRole ().blockingSendAndReceive (msg, reply,
-                    Rainbow.instance ().getProperty (Rainbow.PROPKEY_PORT_TIMEOUT, 10000));
+                    Rainbow.instance ().getProperty (IRainbowEnvironment.PROPKEY_PORT_TIMEOUT, 10000));
             return reply.m_reply;
         }
         catch (RainbowConnectionException e) {

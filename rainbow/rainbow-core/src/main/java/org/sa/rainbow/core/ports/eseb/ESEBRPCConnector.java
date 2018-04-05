@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
 
 import edu.cmu.cs.able.eseb.bus.EventBus;
@@ -123,7 +124,7 @@ public class ESEBRPCConnector {
     public <T> T createRemoteStub (Class<T> cls, String obj_id) {
         LOGGER.info ("Creating RPC Requirer end for " + obj_id + " with participant " + getParticipantId ());
         return JavaRpcFactory.create_remote_stub (cls, this.getRPCEnvironment (), this.getParticipantId (),
-                Rainbow.instance ().getProperty (Rainbow.PROPKEY_PORT_TIMEOUT, 10000), obj_id);
+                Rainbow.instance ().getProperty (IRainbowEnvironment.PROPKEY_PORT_TIMEOUT, 10000), obj_id);
     }
 
     public <T> void createRegistryWrapper (Class<T> cls, T wrapped, String obj_id) {

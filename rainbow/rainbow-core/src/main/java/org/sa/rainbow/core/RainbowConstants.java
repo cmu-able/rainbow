@@ -85,6 +85,8 @@ public interface RainbowConstants {
     String PROPKEY_TARGET_NAME = "rainbow.target";
     /** Property key for the Rainbow target configuration path */
     String PROPKEY_TARGET_PATH = "rainbow.path";
+	String PROPKEY_RAINBOW_GUI = "rainbow.gui";
+
 
     /** The logger level of details */
     String PROPKEY_LOG_LEVEL = "logging.level";
