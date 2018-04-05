@@ -59,7 +59,7 @@ public class Rainbow implements IRainbowEnvironment {
 
     private static final String PROPKEY_PROPFILENAME = "rainbow.properties";
 
-    /**
+	/**
      * Exit status that Rainbow would report when it exits, default to sleeping.
      */
     private static ExitState m_exitState = ExitState.SLEEP;
@@ -70,9 +70,9 @@ public class Rainbow implements IRainbowEnvironment {
 
     private boolean m_shouldTerminate = false;
 
-    private static Rainbow _instance = null;
+    private static IRainbowEnvironment _instance = null;
 
-    public static synchronized Rainbow instance () {
+    public static synchronized IRainbowEnvironment instance () {
         if (_instance == null) {
             _instance = new Rainbow ();
         }
