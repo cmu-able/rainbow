@@ -21,10 +21,10 @@ public class InstructionGraphGauge extends RegularPatternGauge {
     protected static final String NEWIG = "NewIG";
     private static final String   FINISHEDIG = "IGFinished";
 
-    protected static final String INSTRUCTION_PATTERN = "topic: /ig_action_server/feedback/feedback/sequence.*(\\d+)\\.\\d+:([^:]*):(.*)";
+    protected static final String INSTRUCTION_PATTERN = "topic: /ig_action_server/feedback/feedback/sequence.*(\\d+)\\.\\d+:([^:]*):(.*)\\\".*";
     protected static final String NEWIG_PATTERN = "topic: /ig_action_server/feedback/feedback/sequence.*Received new " +
             "valid IG: (.*)";
-    protected static final String FINISHIG_PATTERN    = "topic: /ig_action_server/feedback/feedback/sequence.*completed successfully.*";
+    protected static final String FINISHIG_PATTERN    = "topic: /ig_action_server/feedback/feedback/sequence.*Finished!.*";
 
 
     /**
@@ -43,7 +43,7 @@ public class InstructionGraphGauge extends RegularPatternGauge {
         super (NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
         addPattern (IG, Pattern.compile (INSTRUCTION_PATTERN, Pattern.DOTALL));
         addPattern (NEWIG, Pattern.compile (NEWIG_PATTERN, Pattern.DOTALL));
-        addPattern (FINISHEDIG, Pattern.compile (FINISHIG_PATTERN, Pattern.DOTALL));
+//        addPattern (FINISHEDIG, Pattern.compile (FINISHIG_PATTERN, Pattern.DOTALL));
     }
 
     @Override
