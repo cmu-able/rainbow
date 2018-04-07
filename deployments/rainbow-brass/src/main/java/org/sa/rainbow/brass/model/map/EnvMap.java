@@ -38,6 +38,7 @@ public class EnvMap {
 		m_nodes = new HashMap<>();
 		m_new_node_id = 0;
 		m_arcs = new HashMap<>();
+		m_arcs_lookup =new LinkedList<EnvMapArc>();
 		// initWithSimpleMap(); // TODO: Substitute hardwired version of the map by one
 		// parsed from file
 		//loadFromFile(props.getProperty(PropertiesConnector.MAP_PROPKEY));
@@ -59,19 +60,25 @@ public class EnvMap {
 		EnvMap m = new EnvMap(m_model);
 		m.m_nodes = new HashMap<String, EnvMapNode>(m_nodes);
 		m.m_arcs = new HashMap<>(m_arcs);
+		m.m_arcs_lookup = new LinkedList<EnvMapArc>();
 		return m;
 	}
 
 	private Map<String, EnvMapNode> m_nodes;
 	private Map<String, EnvMapArc> m_arcs = new HashMap<>();
+	private LinkedList<EnvMapArc> m_arcs_lookup = new LinkedList<EnvMapArc>();
 	// private LinkedList<EnvMapArc> m_arcs;
 	private NodeInsertion m_last_insertion;
 	private int m_new_node_id;
 
 	private final ModelReference m_model;
 
+	public synchronized void updateArcsLookup() {
+		m_arcs_lookup = new LinkedList<EnvMapArc>(new LinkedHashSet<EnvMapArc>(m_arcs.values()));
+	}
+
 	public synchronized LinkedList<EnvMapArc> getArcs() {
-		return new LinkedList<EnvMapArc>(new LinkedHashSet<EnvMapArc>(m_arcs.values()));
+		return m_arcs_lookup;
 	}
 
 	public synchronized Map<String, EnvMapNode> getNodes() {
@@ -94,6 +101,10 @@ public class EnvMap {
 
 	public synchronized int getArcCount() {
 		return m_arcs.size() / 2;
+	}
+
+	public synchronized int getUniqueArcCount() {
+		return m_arcs.size();
 	}
 
 	public synchronized LinkedList<String> getNeighbors(String node) {
@@ -123,11 +134,14 @@ public class EnvMap {
 		EnvMapArc arc = new EnvMapArc(source, target, distance, enabled);
 		m_arcs.put(source + target, arc);
 		m_arcs.put(target + source, arc);
+		updateArcsLookup();
 	}
 	
     public synchronized void addArc (EnvMapArc a) {
-        if (!doesArcExist(a.getSource(), a.getTarget()))
+        if (!doesArcExist(a.getSource(), a.getTarget())){
      	   m_arcs.put(a.getSource()+a.getTarget(),a);
+     	   updateArcsLookup();
+        }
      }
 
     public boolean doesArcExist (String na, String nb) {

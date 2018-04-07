@@ -189,9 +189,14 @@ public class PrismConnectorAPI {
                 System.out.println(String.valueOf( m_undefinedConstants[0].getPFConstantValues()));
                 m_propertiesFile.setSomeUndefinedConstants(m_definedPFConstants);	
             }		
-            m_result = m_prism.modelCheck(m_propertiesFile, m_propertiesToCheck.get(0));
-            System.out.println(m_result.getResult());
-            res = m_result.getResult().toString();
+            
+            for (i=0;i<numPropertiesToCheck;i++){
+            	m_result = m_prism.modelCheck(m_propertiesFile, m_propertiesToCheck.get(i));
+            	//System.out.println(m_result.getResult());
+                if (i>0)
+                	res += ",";
+            	res += m_result.getResult().toString();
+            }
         } 
         catch (PrismException e) {
             System.out.println("Error PE2: " + e.getMessage());
@@ -217,7 +222,7 @@ public class PrismConnectorAPI {
         }
         //m_prism.closeDown();
         return res;
-    }	
+    }
 
     /**
      * Exports a String to a text file

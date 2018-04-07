@@ -713,12 +713,13 @@ public class MapTranslator {
                 i++;
             }
 
-            Edge[] edges = new Edge[m_map.getArcCount()];
+            Edge[] edges = new Edge[m_map.getUniqueArcCount()];
 
             for (i=0;i<m_map.getArcs().size();i++){
                 EnvMapArc a = m_map.getArcs().get(i);
                 Vertex source = vertices[(node_indexes.get (a.getSource ()))];
                 Vertex target = vertices[(node_indexes.get (a.getTarget ()))];
+//                System.out.println("ARC: "+a.getSource()+" "+a.getTarget());
                 if (a.isEnabled()){
                     edges[i] = new Edge(source, target, a.getDistance());
                 } else {
