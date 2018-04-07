@@ -25,6 +25,7 @@ package org.sa.rainbow.core.ports.local;
 
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.IModelUpdater;
 import org.sa.rainbow.core.models.IModelsManager;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
@@ -34,9 +35,9 @@ import java.util.List;
 
 public class LocalModelsManagerUSPort implements IModelUSBusPort {
 
-    private IModelsManager m_modelsManager;
+    private IModelUpdater m_modelsManager;
 
-    public LocalModelsManagerUSPort (IModelsManager m) {
+    public LocalModelsManagerUSPort (IModelUpdater m) {
         m_modelsManager = m;
     }
 
