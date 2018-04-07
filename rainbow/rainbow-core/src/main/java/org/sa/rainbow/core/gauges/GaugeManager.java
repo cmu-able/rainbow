@@ -263,4 +263,8 @@ public class GaugeManager extends AbstractRainbowRunnable implements IGaugeLifec
 		return RainbowComponentT.GAUGE_MANAGER;
 	}
 
+	
+	public Collection<String> getCreatedGauges() {
+		return configurationPorts.keySet();
+	}
 }

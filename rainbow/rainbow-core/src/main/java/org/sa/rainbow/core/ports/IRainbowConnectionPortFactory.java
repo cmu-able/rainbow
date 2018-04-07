@@ -32,6 +32,7 @@ import org.sa.rainbow.core.adaptation.IEvaluable;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
+import org.sa.rainbow.core.models.IModelUpdater;
 import org.sa.rainbow.core.models.IModelsManager;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReportingSubscriberCallback;
@@ -88,7 +89,7 @@ public interface IRainbowConnectionPortFactory {
             String delegateID,
             Properties connectionProperties) throws RainbowConnectionException;
 
-    IModelUSBusPort createModelsManagerUSPort (IModelsManager m)
+    IModelUSBusPort createModelsManagerUSPort (IModelUpdater m)
             throws RainbowConnectionException;
 
     IModelUSBusPort createModelsManagerClientUSPort (Identifiable client)
