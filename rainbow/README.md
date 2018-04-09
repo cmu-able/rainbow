@@ -12,3 +12,4 @@ being managed to capture, reason, and plan adaptations against. Deployments (e.g
 3. **rainbow-utility-model**: A model that represents the utilities used by Rainbow and Stitch to decide which adaptation would be best in a given
 situation
 4. **rainbow-stitch**: An implementation of the [Stitch](http://acme.able.cs.cmu.edu/pubs/show.php?id=341) language.
+5. **rainbow-gui**: A new implementation of the Rainbow console that splits out each window into different tabs.

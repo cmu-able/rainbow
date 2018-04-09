@@ -778,14 +778,17 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 					Class<IRainbowGUI> fc = (Class<IRainbowGUI>) Class.forName(guiProp);
 					gui = fc.newInstance();
 				} catch (ClassNotFoundException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException e) {
+					System.err.println("Could not create class " + guiProp);
 				}
+        		
         		
         	}
         	if (gui == null) {
         		gui = new RainbowGUI();
-        		gui.setMaster(master);
-                gui.display ();
+
         	}
+    		gui.setMaster(master);
+            gui.display ();
         }
         master.initialize ();
 

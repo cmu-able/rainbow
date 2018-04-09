@@ -35,6 +35,7 @@ import org.sa.rainbow.core.adaptation.IEvaluable;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
+import org.sa.rainbow.core.models.IModelUpdater;
 import org.sa.rainbow.core.models.IModelsManager;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.DisconnectedRainbowDelegateConnectionPort;
@@ -147,7 +148,7 @@ public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
 
 
     @Override
-    public IModelUSBusPort createModelsManagerUSPort (IModelsManager m) throws RainbowConnectionException {
+    public IModelUSBusPort createModelsManagerUSPort (IModelUpdater m) throws RainbowConnectionException {
         try {
             return new ESEBModelManagerModelUpdatePort (m);
         }
