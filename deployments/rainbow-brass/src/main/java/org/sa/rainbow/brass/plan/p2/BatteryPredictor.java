@@ -1,4 +1,4 @@
-package org.sa.rainbow.brass.plan.p2_cp3;
+package org.sa.rainbow.brass.plan.p2;
 
 import java.util.Objects;
 
