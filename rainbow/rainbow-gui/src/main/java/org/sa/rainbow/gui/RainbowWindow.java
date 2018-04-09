@@ -415,8 +415,8 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	private void createRainbowMenu(JMenu menu) {
 		JMenuItem item;
 
-		item = new JMenuItem("Connect to Master");
-		item.setMnemonic(KeyEvent.VK_C);
+		item = new JMenuItem("Populate panels");
+		item.setMnemonic(KeyEvent.VK_P);
 		item.addActionListener(new ActionListener() {
 
 			@Override

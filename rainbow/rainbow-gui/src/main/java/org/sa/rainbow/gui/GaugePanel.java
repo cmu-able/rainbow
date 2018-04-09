@@ -53,7 +53,7 @@ public class GaugePanel extends JPanel implements IModelUpdater{
 
 	@Override
 	public void requestModelUpdate(IRainbowOperation command) throws IllegalStateException, RainbowException {
-		if (!command.getOrigin().equals(m_gaugeId)) return;
+		if (!m_gaugeId.equals(command.getOrigin())) return;
 		addOperation(command);
 	}
 	
