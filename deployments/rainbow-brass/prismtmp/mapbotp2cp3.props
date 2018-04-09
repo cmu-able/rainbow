@@ -1,0 +1,4 @@
+R{"time"}min=? [ F goal ]
+
+Pmax=? [ F (goal & !collided) ]
+

@@ -22,7 +22,6 @@ import com.google.common.base.Objects;
  *
  */
 public class DecisionEngine {
-
     public static String m_export_path;
     public static MapTranslator m_mt;
     public static String m_origin;
@@ -31,7 +30,7 @@ public class DecisionEngine {
     public static Map<List, Double > m_scoreboard;
     public static double m_selected_candidate_time;
     public static PrismPolicy m_plan;
-
+  
     public static final double INFINITY = 999999.0;
 
     /**
@@ -89,7 +88,7 @@ public class DecisionEngine {
      * @throws Exception
      */
     public static void scoreCandidates (EnvMap map, String batteryLevel, String robotHeading) throws Exception {
-        m_scoreboard.clear();
+        m_scoreboard.clear(); 
         synchronized (map){
             String m_consts = MapTranslator.INITIAL_ROBOT_LOCATION_CONST+"="+String.valueOf(map.getNodeId(m_origin)) +","+ MapTranslator.TARGET_ROBOT_LOCATION_CONST 
                     + "="+String.valueOf(map.getNodeId(m_destination))+ "," + MapTranslator.INITIAL_ROBOT_BATTERY_CONST+"="+batteryLevel+","+MapTranslator.INITIAL_ROBOT_HEADING_CONST+"="+robotHeading;

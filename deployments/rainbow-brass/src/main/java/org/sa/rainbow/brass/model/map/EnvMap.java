@@ -5,10 +5,14 @@ import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.function.Consumer;
+
+import com.google.common.base.Objects;
+
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -34,9 +38,10 @@ public class EnvMap {
 		m_nodes = new HashMap<>();
 		m_new_node_id = 0;
 		m_arcs = new HashMap<>();
+		m_arcs_lookup =new LinkedList<EnvMapArc>();
 		// initWithSimpleMap(); // TODO: Substitute hardwired version of the map by one
 		// parsed from file
-		loadFromFile(props.getProperty(PropertiesConnector.MAP_PROPKEY));
+		//loadFromFile(props.getProperty(PropertiesConnector.MAP_PROPKEY));
 	}
 
 	public EnvMap(ModelReference model) {
@@ -55,19 +60,25 @@ public class EnvMap {
 		EnvMap m = new EnvMap(m_model);
 		m.m_nodes = new HashMap<String, EnvMapNode>(m_nodes);
 		m.m_arcs = new HashMap<>(m_arcs);
+		m.m_arcs_lookup = new LinkedList<EnvMapArc>();
 		return m;
 	}
 
 	private Map<String, EnvMapNode> m_nodes;
 	private Map<String, EnvMapArc> m_arcs = new HashMap<>();
+	private LinkedList<EnvMapArc> m_arcs_lookup = new LinkedList<EnvMapArc>();
 	// private LinkedList<EnvMapArc> m_arcs;
 	private NodeInsertion m_last_insertion;
 	private int m_new_node_id;
 
 	private final ModelReference m_model;
 
+	public synchronized void updateArcsLookup() {
+		m_arcs_lookup = new LinkedList<EnvMapArc>(new LinkedHashSet<EnvMapArc>(m_arcs.values()));
+	}
+
 	public synchronized LinkedList<EnvMapArc> getArcs() {
-		return new LinkedList<EnvMapArc>(new LinkedHashSet<EnvMapArc>(m_arcs.values()));
+		return m_arcs_lookup;
 	}
 
 	public synchronized Map<String, EnvMapNode> getNodes() {
@@ -92,6 +103,10 @@ public class EnvMap {
 		return m_arcs.size() / 2;
 	}
 
+	public synchronized int getUniqueArcCount() {
+		return m_arcs.size();
+	}
+
 	public synchronized LinkedList<String> getNeighbors(String node) {
 		LinkedList<String> res = new LinkedList<String>();
 		for (int i = 0; i < getArcs().size(); i++) {
@@ -102,7 +117,7 @@ public class EnvMap {
 		}
 		return res;
 	}
-
+	
 	public synchronized void AddNode(String label, double x, double y) {
 		m_nodes.put(label, new EnvMapNode(label, x, y, m_new_node_id));
 		m_new_node_id++;
@@ -119,8 +134,35 @@ public class EnvMap {
 		EnvMapArc arc = new EnvMapArc(source, target, distance, enabled);
 		m_arcs.put(source + target, arc);
 		m_arcs.put(target + source, arc);
+		updateArcsLookup();
 	}
+	
+    public synchronized void addArc (EnvMapArc a) {
+        if (!doesArcExist(a.getSource(), a.getTarget())){
+     	   m_arcs.put(a.getSource()+a.getTarget(),a);
+     	   updateArcsLookup();
+        }
+     }
 
+    public boolean doesArcExist (String na, String nb) {
+        ListIterator<EnvMapArc> iter = getArcs().listIterator();
+        while(iter.hasNext()){
+            if(iter.next().isArcBetween(na, nb)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public Double pathDistance (List<String> path){
+    	Double d=0.0;
+    	for (int i=0; i<path.size()-1;i++){
+    		d += distanceBetween(path.get(i), path.get(i+1));
+    	}
+    	return d;
+    }
+    
+    
 	public synchronized double getNodeX(String n) {
 		EnvMapNode envMapNode = m_nodes.get(n);
 		if (envMapNode != null)
@@ -380,17 +422,94 @@ public class EnvMap {
 				System.out.println("Error parsing coordinates in location " + id);
 			}
 
+			JSONArray hitrates = (JSONArray) jsonObject.get("hitrate");
+            JSONArray ttimes = (JSONArray) jsonObject.get("time");
+			
 			JSONArray neighbors = (JSONArray) jsonNode.get("connected-to");
 			for (Object neighbor : neighbors) {
 				String ns = String.valueOf(neighbor);
 				double distance = distanceBetweenCoords(getNodeX(id), getNodeY(id), getNodeX(ns), getNodeY(ns));
-				addArc(id, ns, distance, true);
-				System.out.println("Added arc [" + id + "," + ns + "] (distance=" + distance + ")");
+				//addArc(id, ns, distance, true);
+				//System.out.println("Added arc [" + id + "," + ns + "] (distance=" + distance + ")");
+                EnvMapArc newarc = new EnvMapArc (id, ns, distance, true);
+                // Add hitrates here
+                
+                if (!Objects.equal(null, hitrates)){
+                	HashMap <String, Double> hitrateDictionary = retrieveHitrates(hitrates, newarc);
+                
+                	for (Map.Entry<String, Double> e: hitrateDictionary.entrySet()){
+                		newarc.addHitRate(e.getKey(), e.getValue());
+                		//System.out.println("Added HitRate: "+e.getKey()+" "+e.getValue());
+                	}
+                }
+                
+                if (!Objects.equal(null, ttimes)){
+                	HashMap <String, Double> timeDictionary = retrieveTimes(ttimes, newarc);
+                	for (Map.Entry<String, Double> e: timeDictionary.entrySet()){
+                		newarc.addTime(e.getKey(), e.getValue());
+                		//System.out.println("Added Time: "+e.getKey()+" "+e.getValue());
+                	}
+                }
+                
+                addArc (newarc);
+                //addArc(id, ns, distance, true);
+                System.out.println("Added arc ["+id+","+ns+"] (distance="+ distance +")" );
+					
 			}
 
 		}
 	}
 
+    public HashMap<String, Double> retrieveHitrates(JSONArray hitrates, EnvMapArc a){
+    	HashMap<String, Double> res = new HashMap<String, Double>();
+    	for (Object hitrate: hitrates){
+    		JSONObject jsonHitrate = (JSONObject) hitrate;
+         	
+         	String srcnode = (String) jsonHitrate.get("from");
+     		String tgtnode = (String) jsonHitrate.get("to");
+     		
+     		if (Objects.equal(srcnode, a.getSource()) && Objects.equal(tgtnode, a.getTarget())){
+     			
+     			for (Object k: jsonHitrate.keySet()){
+             		if (!Objects.equal(k.toString(), "from") && !Objects.equal(k.toString(), "to") && !Objects.equal(k.toString(), "prob")){
+                 		//System.out.println(k.toString());
+             			Double hr = ((Number)((JSONObject)jsonHitrate.get(k.toString())).get("hitrate")).doubleValue();
+             			//System.out.println(hr.toString());
+             			res.put(k.toString(), hr);
+     				}
+             	}    	
+   	    	 return res;
+     		}
+    	 }
+    	return res;
+    }
+    
+    
+    public HashMap<String, Double> retrieveTimes(JSONArray times, EnvMapArc a){
+    	HashMap<String, Double> res = new HashMap<String, Double>();
+    	for (Object ttime: times){
+    		JSONObject jsonTime = (JSONObject) ttime;
+         	
+         	String srcnode = (String) jsonTime.get("from");
+     		String tgtnode = (String) jsonTime.get("to");
+     		
+     		if (Objects.equal(srcnode, a.getSource()) && Objects.equal(tgtnode, a.getTarget())){
+     			
+     			for (Object k: jsonTime.keySet()){
+             		if (!Objects.equal(k.toString(), "from") && !Objects.equal(k.toString(), "to") && !Objects.equal(k.toString(), "stdev") && !Objects.equal(k.toString(), "mean")){
+                 		//System.out.println(k.toString());
+             			Double hr = ((Number)((JSONObject)jsonTime.get(k.toString())).get("mean")).doubleValue();
+             			//System.out.println(hr.toString());
+             			res.put(k.toString(), hr);
+     				}
+             	}    	
+   	    	 return res;
+     		}
+    	 }
+    	return res;
+    }
+    
+	
 	public synchronized void initWithSimpleMap() {
 		AddNode("l1", 14.474, 69);
 		AddNode("l2", 19.82, 69);
