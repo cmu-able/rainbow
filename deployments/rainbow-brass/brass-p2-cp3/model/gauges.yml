@@ -147,7 +147,7 @@ gauge-instances:
     model: Robot:RobotState
     commands:
       speed: "rs.setSpeed($<s>)"
-      charge: "rs.setCharge($<c>)"
+      charge: "rs.setBatteryCharge($<c>)"
       sensor: "rs.setSensor($<s>,$<v>)"
       bump: "rs.setBumped($<b>)"
       lighting: "rs.setLighting($<l>)"

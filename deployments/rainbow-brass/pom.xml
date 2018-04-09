@@ -105,6 +105,13 @@
 			<systemPath>${project.basedir}/lib/jhoafparser.jar</systemPath>
 		</dependency>
 		<dependency>
+			<groupId>rainbow</groupId>
+			<artifactId>alloy</artifactId>
+			<version>4.2</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/alloy4.2.jar</systemPath>
+		</dependency>
+		<dependency>
 			<groupId>colt</groupId>
 			<artifactId>colt</artifactId>
 			<version>1.2.0</version>
