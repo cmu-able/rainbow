@@ -439,7 +439,7 @@ public class EnvMap {
                 
                 	for (Map.Entry<String, Double> e: hitrateDictionary.entrySet()){
                 		newarc.addHitRate(e.getKey(), e.getValue());
-                		System.out.println("Added HitRate: "+e.getKey()+" "+e.getValue());
+                		//System.out.println("Added HitRate: "+e.getKey()+" "+e.getValue());
                 	}
                 }
                 
@@ -447,7 +447,7 @@ public class EnvMap {
                 	HashMap <String, Double> timeDictionary = retrieveTimes(ttimes, newarc);
                 	for (Map.Entry<String, Double> e: timeDictionary.entrySet()){
                 		newarc.addTime(e.getKey(), e.getValue());
-                		System.out.println("Added Time: "+e.getKey()+" "+e.getValue());
+                		//System.out.println("Added Time: "+e.getKey()+" "+e.getValue());
                 	}
                 }
                 

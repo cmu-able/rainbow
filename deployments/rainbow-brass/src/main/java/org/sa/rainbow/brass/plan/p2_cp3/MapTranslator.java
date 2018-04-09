@@ -43,7 +43,7 @@ import com.google.common.base.Objects;
 
 public class MapTranslator {
 
-    public static final String VERSION_STR = "V0.4a - Feb 2018";
+    public static final String VERSION_STR = "V0.5a - April 2018";
 
     public static final String MODEL_TYPE = "mdp";
     public static final String MODULE_POSTFIX_STR = "_module";	
@@ -325,7 +325,8 @@ public class MapTranslator {
                 if (a.isEnabled()){
                 	if (!a.includesHitRates(m_cp)){ // If no risk of collision exists, generate only a simple deterministic command for the transition
                 		buf+="\t ["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] ("+ROBOT_LOCATION_VAR+"="+a.getSource()+") "+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) -> ("+ROBOT_LOCATION_VAR+"'="+a.getTarget()+") "+" & ("+ROBOT_BATTERY_VAR+"'="+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+")"+ " & ("+ROBOT_HEADING_VAR+"'="+HEADING_CONST_PREFIX + findArcHeading(a).name() + ") & (robot_done'=true);\n";                	
-                   	} else { // If collision risk exist, generate alternative probabilistic branches
+                		//System.out.println("\t ["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] does not include hitrates");
+                	} else { // If collision risk exist, generate alternative probabilistic branches
                 	    
                    		for (Map.Entry<String, Configuration> c: m_cp.getConfigurations().entrySet()){
                    			confStr=m_cp.translateId(c.getKey());
@@ -768,6 +769,19 @@ public class MapTranslator {
 
 
     /**
+     * @return String PRISM encoding for energy rewards at the end of the execution
+     */
+    public static String generateEnergyReward(){
+        synchronized (m_map) {
+            String buf="rewards \"energy\"\n";
+            buf+="\t"+STOP_PRED+" : "+ROBOT_BATTERY_VAR+";\n";
+            buf+="endrewards\n\n";
+            return buf;		
+        }
+    }
+    
+    
+    /**
      * Generates the PRISM specification for an adaptation scenario, based on a given EnvMap
      * @param inhibitTactics boolean if true, it generates a specification only with move actions, disabling the rest of actions and tactics
      * @return String PRISM encoding for adaptation scenario
@@ -789,7 +803,8 @@ public class MapTranslator {
         buf+=generateTimeReward(inhibitTactics)+"\n";
         buf+=generateRotationTimeFormulas()+"\n";
         buf+=generateRotationEnergyFormulas()+"\n";
-        buf+=generateDistanceReward()+"\n";
+//        buf+=generateDistanceReward()+"\n";    // Used in Phase 1 only
+        buf+=generateEnergyReward()+"\n";
         buf+="// --- End of generated code ---\n";
         return buf;
     }

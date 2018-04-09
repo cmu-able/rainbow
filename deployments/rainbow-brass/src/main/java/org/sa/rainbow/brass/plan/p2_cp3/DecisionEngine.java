@@ -30,7 +30,9 @@ import com.google.common.base.Objects;
  *
  */
 public class DecisionEngine {
-
+	public enum ChallengeProblemMode {
+	    CP1, CP3;
+	}
     public static String m_export_path;
     public static MapTranslator m_mt;
     public static String m_origin;
@@ -39,8 +41,10 @@ public class DecisionEngine {
     public static Map<List, ArrayList<Double>> m_scoreboard;
     public static double m_selected_candidate_time;
     public static double m_selected_candidate_safety;
+    public static double m_selected_candidate_energy;
     public static double m_selected_candidate_score;
     public static PrismPolicy m_plan;
+    public static ChallengeProblemMode m_mode = ChallengeProblemMode.CP3;
 
     public static final double INFINITY = 999999.0;
 
@@ -80,6 +84,9 @@ public class DecisionEngine {
         m_mt.setConfigurationProvider(cp);
     }
     
+    public static void setChallengeProblemMode (ChallengeProblemMode m){
+    	m_mode = m;
+    }
 
     /**
      * Generates all PRISM specifications corresponding to the different non-cyclic paths between
@@ -113,6 +120,11 @@ public class DecisionEngine {
      */
     public static void scoreCandidates (EnvMap map, String batteryLevel, String robotHeading) throws Exception {
         m_scoreboard.clear();
+        String propFileString = "/mapbotp2cp3.props";
+        if (m_mode==ChallengeProblemMode.CP1){
+        	propFileString = "/mapbotp2cp1.props";
+        }
+        
         synchronized (map){
             String m_consts = MapTranslator.INITIAL_ROBOT_CONF_CONST+"=-1,"+MapTranslator.INITIAL_ROBOT_LOCATION_CONST+"="+String.valueOf(map.getNodeId(m_origin)) +","+ MapTranslator.TARGET_ROBOT_LOCATION_CONST 
                     + "="+String.valueOf(map.getNodeId(m_destination))+ "," + MapTranslator.INITIAL_ROBOT_BATTERY_CONST+"="+batteryLevel+","+MapTranslator.INITIAL_ROBOT_HEADING_CONST+"="+robotHeading;
@@ -120,8 +132,8 @@ public class DecisionEngine {
             System.out.println(m_consts);
             String result;
             for (List candidate_key : m_candidates.keySet() ){                           	
-                result = PrismConnectorAPI.modelCheckFromFileS (m_candidates.get (candidate_key), m_export_path + "/mapbot.props",
-                        m_candidates.get (candidate_key), -1, m_consts);
+                result = PrismConnectorAPI.modelCheckFromFileS (m_candidates.get (candidate_key), m_export_path + propFileString, 
+                		m_candidates.get (candidate_key), -1, m_consts);
                 
                 String[] results = result.split(",");
                 ArrayList<Double> resultItems = new ArrayList<Double>();
@@ -139,26 +151,39 @@ public class DecisionEngine {
     }
 
     
-    public static Double getMaxTime(){
+    public static Double getMaxItem(int index){
     	Double res = 0.0;
     	for (Map.Entry<List, ArrayList<Double>> entry : m_scoreboard.entrySet()){
-    		if (entry.getValue().get(0)>res){
-    			res = entry.getValue().get(0);
+    		if (entry.getValue().get(index)>res){
+    			res = entry.getValue().get(index);
     		}
     	}
     	return res;
     }
     
+    public static Double getMaxTimeCP3(){
+    	return getMaxItem(0);
+    }    
+    
+    
+    public static String selectPolicy(){
+    	if (m_mode==ChallengeProblemMode.CP1){
+    		return selectPolicyCP1();
+    	}
+    		return selectPolicyCP3();
+    }
+    
+    
     /**
-     * Selects the policy with the best score
+     * Selects the policy with the best score (CP3)
      * @return String filename of the selected policy
      */
-    public static String selectPolicy(){
+    public static String selectPolicyCP3(){
     	
     	Double m_safetyWeight=0.5;
     	Double m_timelinessWeight=0.5;
     	
-    	Double maxTime = getMaxTime();
+    	Double maxTime = getMaxTimeCP3();
     	Double maxScore=0.0;
     	
         Map.Entry<List, ArrayList<Double>> maxEntry = m_scoreboard.entrySet().iterator().next();
@@ -194,6 +219,60 @@ public class DecisionEngine {
         return m_selected_candidate_time;
     }
 
+    
+    public static Double getMaxTimeCP1(){
+    	return getMaxItem(0);
+    }
+
+    public static Double getMaxEnergyCP1(){
+    	return getMaxItem(1);
+    }
+    
+    /**
+     * Selects the policy with the best score (CP1)
+     * @return String filename of the selected policy
+     */
+    public static String selectPolicyCP1(){
+    	
+    	Double m_energyWeight=0.5;
+    	Double m_timelinessWeight=0.5;
+    	
+    	Double maxTime = getMaxTimeCP1();
+    	Double maxEnergy = getMaxEnergyCP1();
+    	Double maxScore=0.0;
+    	
+        Map.Entry<List, ArrayList<Double>> maxEntry = m_scoreboard.entrySet().iterator().next();
+        for (Map.Entry<List, ArrayList<Double>> entry : m_scoreboard.entrySet())
+        {
+            Double entryTime = entry.getValue().get(0);
+            Double entryTimeliness = 0.0;
+            if (maxTime>0.0){
+            	entryTimeliness = 1.0-(entryTime / maxTime);
+            }
+            
+            Double entryEnergy = entry.getValue().get(1)/maxEnergy;
+            
+            
+            Double entryScore = m_energyWeight * entryEnergy + m_timelinessWeight * entryTimeliness;
+            
+        	if ( entryScore > maxScore)
+            {
+                maxEntry = entry;
+                maxScore = entryScore;
+            }
+        }
+        m_selected_candidate_time = maxEntry.getValue().get(0);
+        m_selected_candidate_energy = maxEntry.getValue().get(1);
+        m_selected_candidate_score = maxScore;
+        
+        System.out.println("Selected candidate policy: "+m_candidates.get(maxEntry.getKey()));
+        System.out.println("Score: "+String.valueOf(m_selected_candidate_score)+" Energy: "+String.valueOf(m_selected_candidate_energy)+" Time: "+String.valueOf(m_selected_candidate_time));
+        
+        return m_candidates.get(maxEntry.getKey())+".adv";
+    }
+
+    
+    
     /**
      * Class test
      * @param args
@@ -204,19 +283,21 @@ public class DecisionEngine {
         List<Point2D> coordinates = new ArrayList<Point2D>();
         PrismPolicy pp=null;
 
+        setChallengeProblemMode(ChallengeProblemMode.CP3);
+
         EnvMap dummyMap = new EnvMap (null, null);
         System.out.println("Loading Map: "+PropertiesConnector.DEFAULT.getProperty(PropertiesConnector.MAP_PROPKEY));
         dummyMap.loadFromFile(PropertiesConnector.DEFAULT.getProperty(PropertiesConnector.MAP_PROPKEY));
-
-//        dummyMap.loadFromFile("/Users/jcamara/Dropbox/Documents/Work/projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/p2cp3/cp3.json");
+        System.out.println("Setting map...");
+        setMap(dummyMap);
+        
         ConfigurationSynthesizer cs = new ConfigurationSynthesizer();
 //        SimpleConfigurationStore cs = new SimpleConfigurationStore();
         System.out.println("Populating configuration list..");
         cs.populate();
         System.out.println("Setting configuration provider...");
         setConfigurationProvider(cs);
-        System.out.println("Setting map...");
-        setMap(dummyMap);
+        
         
         for (int i=32000; i< 32500; i+=500){
         	System.out.println("Generating candidates for l1-l4...");
@@ -236,8 +317,6 @@ public class DecisionEngine {
         for (int j=0; j< coordinates.size(); j++){
             System.out.println(" ("+String.valueOf(coordinates.get(j).getX())+", "+String.valueOf(coordinates.get(j).getY())+") ");
         }
-
-//        MapTranslator.exportConstrainedToPlanMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp.prism", pp.getPlan());
 
     }
 

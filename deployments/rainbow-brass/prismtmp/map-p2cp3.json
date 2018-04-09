@@ -21,23 +21,6 @@
             "aruco": {
                 "hitrate": 0.0
             },
-            "to": "l4",
-            "prob": 0.0,
-            "mrpt-kinect": {
-                "hitrate": 0.4
-            },
-            "amcl-kinect": {
-                "hitrate": 0.4
-            },
-            "from": "l3",
-            "amcl-lidar": {
-                "hitrate": 0.0
-            }
-        },
-        {
-            "aruco": {
-                "hitrate": 0.0
-            },
             "to": "l2",
             "prob": 0.0,
             "mrpt-kinect": {

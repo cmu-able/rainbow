@@ -60,7 +60,7 @@ public class DetailedConfiguration implements Configuration {
 		}
 //		System.out.println(String.valueOf(m_cdrs));
 		computeEnergyDischargeRate();
-		System.out.println("Speed: " + String.valueOf(m_speed));
+//		System.out.println("Speed: " + String.valueOf(m_speed));
 	}
 
 	public String getId(){
@@ -70,11 +70,11 @@ public class DetailedConfiguration implements Configuration {
 	public void computeEnergyDischargeRate(){
 		Double res=0.0;
 		for (Map.Entry<String, Double> e: m_cdrs.entrySet()){
-			System.out.println(e.getKey());
+			//System.out.println(e.getKey());
 			res += e.getValue();
 		}
 		m_cdr=res;
-		System.out.println(m_id+" Energy discharge rate: " + String.valueOf(m_cdr));
+		//System.out.println(m_id+" Energy discharge rate: " + String.valueOf(m_cdr));
 	}
 	
 	public Double getEnergyDischargeRate(){
