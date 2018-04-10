@@ -59,10 +59,10 @@ public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelC
 		m_ref = ref;
 		setLayout(new BorderLayout(0, 0));
 		Object[][] data = {};
-		Object[] colNames = {"Operation", "Target", "Parameters", "Origin"};
+		Object[] colNames = {"Operation", "Target", "Parameters", "Origin","State"};
 		m_table = new JTable(new DefaultTableModel(data, colNames));
-		m_table.removeColumn(m_table.getColumnModel().getColumn(4));
-		m_table.setDefaultRenderer(String.class, new ModelErrorRenderer());
+//		m_table.removeColumn(m_table.getColumnModel().getColumn(4));
+//		m_table.setDefaultRenderer(String.class, new ModelErrorRenderer());
 		JScrollPane p = new JScrollPane(m_table);
 		p.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		p.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
