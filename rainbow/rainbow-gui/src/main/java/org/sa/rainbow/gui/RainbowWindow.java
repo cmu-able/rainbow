@@ -93,7 +93,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 					OperationRepresentation op = new OperationRepresentation("test",
 							new ModelReference("TestModel", "TestModel"), "operation", "1", "2", "3");
 					op.setOrigin("TestGauge");
-					window.m_modelSections.get("TestModel").addOperation(op);
+					window.m_modelSections.get("TestModel").addOperation(op, false);
 					window.addGaugePanel("TestGauge");
 					window.m_gaugeSections.get("TestGauge").addOperation(op);
 					window.m_frame.setVisible(true);
@@ -415,8 +415,8 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	private void createRainbowMenu(JMenu menu) {
 		JMenuItem item;
 
-		item = new JMenuItem("Connect to Master");
-		item.setMnemonic(KeyEvent.VK_C);
+		item = new JMenuItem("Populate panels");
+		item.setMnemonic(KeyEvent.VK_P);
 		item.addActionListener(new ActionListener() {
 
 			@Override
@@ -989,6 +989,19 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 			component = RainbowComponentT.MASTER;
 		if (component == RainbowComponentT.GAUGE_MANAGER)
 			component = RainbowComponentT.GAUGE;
+		
+		if (component == RainbowComponentT.GAUGE) {
+			for (GaugePanel gp : m_gaugeSections.values()) {
+				gp.processReport(type, message);
+			}
+			
+		}
+		else if (component == RainbowComponentT.MODEL) {
+			for (ModelPanel mp : m_modelSections.values()) {
+				mp.processReport(type, message);
+			}
+		}
+		
 		writeText(component, msg);
 	}
 
