@@ -1,6 +1,8 @@
 package org.sa.rainbow.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,7 +11,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableModel;
 
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
@@ -20,6 +25,7 @@ import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.IModelsManager;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
+import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowChangeBusSubscription;
@@ -27,6 +33,20 @@ import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowModelChan
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 
 public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelChangeCallback{
+	public class ModelErrorRenderer extends DefaultTableCellRenderer implements TableCellRenderer {
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+				int row, int column) {
+			Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			TableModel tm = table.getModel();
+			if ("false".equals(tm.getValueAt(row, 4))) {
+				c.setBackground(Color.RED);
+			}
+			table.repaint();
+			return c;
+		}
+	}
+
 	private JTable m_table;
 	private IModelChangeBusSubscriberPort m_modelChangePort;
 	private ModelReference m_ref;
@@ -41,7 +61,8 @@ public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelC
 		Object[][] data = {};
 		Object[] colNames = {"Operation", "Target", "Parameters", "Origin"};
 		m_table = new JTable(new DefaultTableModel(data, colNames));
-		
+		m_table.removeColumn(m_table.getColumnModel().getColumn(4));
+		m_table.setDefaultRenderer(String.class, new ModelErrorRenderer());
 		JScrollPane p = new JScrollPane(m_table);
 		p.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		p.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -71,10 +92,10 @@ public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelC
 	@Override
 	public void requestModelUpdate(IRainbowOperation command) throws IllegalStateException, RainbowException {
 		if (!command.getModelReference().equals(m_ref)) return;
-		addOperation(command);
+		addOperation(command, false);
 	}
 
-	private String[] getTableData(IRainbowOperation command) {
+	private String[] getTableData(IRainbowOperation command, boolean inerror) {
 		String[] data = new String[4];
 		data[0] = command.getName();
 		data[1] = command.getTarget();
@@ -85,6 +106,7 @@ public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelC
 		}
 		data[2] = params.toString();
 		data[3] = command.getOrigin();
+		data[4] = Boolean.toString(inerror);
 		return data;
 	}
 
@@ -95,7 +117,7 @@ public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelC
 		for (IRainbowOperation command : commands) {
 			
 		if (!command.getModelReference().equals(m_ref)) return;
-			String[] data = getTableData(command);
+			String[] data = getTableData(command, false);
 			tableModel.addRow(data);
 		}
 		m_table.setModel(tableModel);
@@ -170,15 +192,25 @@ public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelC
 		if (message.getProperty(IModelChangeBusPort.PARENT_ID_PROP) != null)
 			return;
 		IRainbowOperation op = msgToOperation(message);
-		addOperation(op);
+		addOperation(op, false);
 	}
 
-	void addOperation(IRainbowOperation op) {
+	void addOperation(IRainbowOperation op, boolean error) {
 		DefaultTableModel tableModel = (DefaultTableModel )m_table.getModel();
-		String[] data = getTableData(op);
+		String[] data = getTableData(op, false);
 		tableModel.addRow(data);
 		m_table.setModel(tableModel);
 		tableModel.fireTableDataChanged();
+	}
+
+	public void processReport(ReportType type, String message) {
+		if (message.startsWith("Error executing command")) {
+			try {
+				OperationRepresentation op = OperationRepresentation.fromString(message.split("=")[1]);
+				addOperation(op, type!=ReportType.ERROR && type!=ReportType.FATAL);
+			}
+			catch (Throwable t) {}
+		}
 	}
 
 }

@@ -9,6 +9,7 @@ import org.sa.rainbow.core.models.IModelUpdater;
 import org.sa.rainbow.core.models.IModelsManager;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
+import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.ports.IModelUSBusPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 
@@ -96,6 +97,11 @@ public class GaugePanel extends JPanel implements IModelUpdater{
 		tableModel.addRow(data);
 		m_table.setModel(tableModel);
 		tableModel.fireTableDataChanged();
+	}
+
+	public void processReport(ReportType type, String message) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

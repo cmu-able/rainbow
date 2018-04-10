@@ -48,6 +48,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.log4j.Logger;
+import org.hibernate.id.CompositeNestedGeneratedValueGenerator.GenerationContextLocator;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
@@ -516,7 +517,12 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
 				} else {
 					logModelOperation(command, false);
 				}
-			} catch (IllegalStateException | RainbowException e) {
+			} 
+			catch (RainbowModelException me) {
+				IRainbowOperation cmd = (IRainbowOperation) poll;
+				m_reportingPort.error(RainbowComponentT.MODEL, MessageFormat.format("Error executing command ''{0}''= {1}", cmd.getName(), cmd.toString()), me);
+			}
+			catch (IllegalStateException | RainbowException e) {
 				e.printStackTrace();
 			}
 		} else if (poll instanceof List) {
@@ -574,6 +580,9 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
 							events.addAll(cmdEvents);
 							// Recall what we executed in case we need to rollback
 							executedCommands.push(mcmd);
+						}
+						catch (RainbowModelException me) {
+							m_reportingPort.error(RainbowComponentT.MODEL, MessageFormat.format("Error executing command ''{0}''={1}", cmd.getName(), cmd.toString()), me);
 						} catch (IllegalStateException | RainbowException e) {
 							complete = false;
 							break;
