@@ -127,7 +127,7 @@ gauge-instances:
       targetIP: "${customize.system.target.master}"
     configValues:
       reportingPeriod: 1000
-      targetProbeType: rostopicprobe
+      targetProbeList: "rostopicprobe,cp1configprobe"
 
   Clock1:
     type: ClockGaugeT

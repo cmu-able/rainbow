@@ -28,6 +28,14 @@ probes:
       #   where feedback will either be the pattern: VertexNumber:Instruction:STARTED|SUCCEEDED|FAILED
       #     from the instruction graph, or "Finished!" when the instruction graph is completed.
       args.1: "/amcl_pose/pose/pose:1 /ig_action_server/feedback/feedback/sequence /mobile_base/commands/charge_level:1 /clock:1"
+  
+  CP1ConfigurationProbe:
+    alias: cp1configprobe
+    location: "${customize.system.target.ros}"
+    type: script
+    scriptInfo:
+      path: "${rainbow.path}/system/probes/get_robot_configuration.sh"
+      mode: continual
       
   BRASSTargetProbe:
     # Probe to report to Rainbow what the target node is
