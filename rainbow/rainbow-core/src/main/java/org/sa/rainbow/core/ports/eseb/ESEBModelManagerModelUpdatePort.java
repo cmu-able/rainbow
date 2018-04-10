@@ -69,8 +69,9 @@ public class ESEBModelManagerModelUpdatePort extends AbstractESEBDisposablePort
 					}
 
 					String commandName = (String) msg.getProperty(COMMAND_NAME_KEY);
+					ModelReference mref = new ModelReference(modelName, modelType);
+
 					try {
-						ModelReference mref = new ModelReference(modelName, modelType);
 						IModelInstance model = getModelInstance(mref);
 						if (model != null) {
 							IRainbowOperation command = model.getCommandFactory().generateCommand(commandName,
@@ -91,8 +92,15 @@ public class ESEBModelManagerModelUpdatePort extends AbstractESEBDisposablePort
 						}
 
 					} catch (Throwable e) {
+						params.remove(0);
+						IRainbowOperation command = new OperationRepresentation(commandName, mref,
+								(String) msg.getProperty(COMMAND_TARGET_KEY),
+								params.toArray(new String[params.size()]));
+						if (msg.hasProperty(COMMAND_ORIGIN)) {
+							command.setOrigin((String) msg.getProperty(COMMAND_ORIGIN));
+						}
 						LOGGER.error(RainbowComponentT.MODEL, MessageFormat
-								.format("Could not form the command ''{0}'' from the ESEB message", commandName), e);
+								.format("Could not form the command ''{0}'' from the ESEB message = {1}", commandName, command.toString()), e);
 					}
 				} else if ((ESEBConstants.MSG_TYPE_UPDATE_MODEL + "_multi").equals(msgType)) {
 					int i = 0;
@@ -115,7 +123,8 @@ public class ESEBModelManagerModelUpdatePort extends AbstractESEBDisposablePort
 										command.setOrigin((String) msg.getProperty(COMMAND_ORIGIN));
 									}
 									ops.add(command);
-
+									
+									
 								} else {
 									IRainbowOperation command = new OperationRepresentation(cmd);
 									if (msg.hasProperty(COMMAND_ORIGIN)) {
@@ -125,7 +134,8 @@ public class ESEBModelManagerModelUpdatePort extends AbstractESEBDisposablePort
 								}
 							} catch (Throwable e) {
 								LOGGER.error(RainbowComponentT.MODEL, MessageFormat.format(
-										"Could not form the command ''{0}'' from the ESEB message", cmd.getName()), e);
+										"Could not form the command ''{0}'' from the ESEB message= {1}", cmd.getName(), cmd.toString()), e);
+								
 							}
 						}
 						i++;

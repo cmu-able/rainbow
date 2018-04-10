@@ -6,6 +6,8 @@ import java.awt.Component;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -32,17 +34,16 @@ import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowChangeBus
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowModelChangeCallback;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 
-public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelChangeCallback{
+public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelChangeCallback {
 	public class ModelErrorRenderer extends DefaultTableCellRenderer implements TableCellRenderer {
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int column) {
 			Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 			TableModel tm = table.getModel();
-			if ("false".equals(tm.getValueAt(row, 4))) {
+			if (!"false".equals(tm.getValueAt(row, 4))) {
 				c.setBackground(Color.RED);
 			}
-			table.repaint();
 			return c;
 		}
 	}
@@ -53,50 +54,51 @@ public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelC
 
 	/**
 	 * Create the panel.
-	 * @throws RainbowConnectionException 
+	 * 
+	 * @throws RainbowConnectionException
 	 */
 	public ModelPanel(ModelReference ref) throws RainbowConnectionException {
 		m_ref = ref;
 		setLayout(new BorderLayout(0, 0));
 		Object[][] data = {};
-		Object[] colNames = {"Operation", "Target", "Parameters", "Origin","State"};
+		Object[] colNames = { "Operation", "Target", "Parameters", "Origin", "State" };
 		m_table = new JTable(new DefaultTableModel(data, colNames));
-//		m_table.removeColumn(m_table.getColumnModel().getColumn(4));
-//		m_table.setDefaultRenderer(String.class, new ModelErrorRenderer());
+		m_table.removeColumn(m_table.getColumnModel().getColumn(4));
+		m_table.setDefaultRenderer(Object.class, new ModelErrorRenderer());
 		JScrollPane p = new JScrollPane(m_table);
 		p.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		p.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		
-		
+
 		add(p, BorderLayout.CENTER);
 		m_table.setAutoscrolls(true);
 		m_table.addComponentListener(new JTableCellDisplayer(m_table));
 		try {
 			m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort();
-			
+
 			m_modelChangePort.subscribe(new IRainbowChangeBusSubscription() {
-				
+
 				@Override
 				public boolean matches(IRainbowMessage message) {
-					return ref.getModelName().equals(message.getProperty(IModelChangeBusPort.MODEL_NAME_PROP)) &&
-							ref.getModelType().equals(message.getProperty(IModelChangeBusPort.MODEL_TYPE_PROP));
+					return ref.getModelName().equals(message.getProperty(IModelChangeBusPort.MODEL_NAME_PROP))
+							&& ref.getModelType().equals(message.getProperty(IModelChangeBusPort.MODEL_TYPE_PROP));
 				}
 			}, this);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	@Override
 	public void requestModelUpdate(IRainbowOperation command) throws IllegalStateException, RainbowException {
-		if (!command.getModelReference().equals(m_ref)) return;
+		if (!command.getModelReference().equals(m_ref))
+			return;
 		addOperation(command, false);
 	}
 
 	private String[] getTableData(IRainbowOperation command, boolean inerror) {
-		String[] data = new String[4];
+		String[] data = new String[5];
 		data[0] = command.getName();
 		data[1] = command.getTarget();
 		StringBuffer params = new StringBuffer();
@@ -113,10 +115,11 @@ public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelC
 	@Override
 	public void requestModelUpdate(List<IRainbowOperation> commands, boolean transaction)
 			throws IllegalStateException, RainbowException {
-		DefaultTableModel tableModel = (DefaultTableModel )m_table.getModel();
+		DefaultTableModel tableModel = (DefaultTableModel) m_table.getModel();
 		for (IRainbowOperation command : commands) {
-			
-		if (!command.getModelReference().equals(m_ref)) return;
+
+			if (!command.getModelReference().equals(m_ref))
+				return;
 			String[] data = getTableData(command, false);
 			tableModel.addRow(data);
 		}
@@ -132,7 +135,7 @@ public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelC
 	@Override
 	public void registerModelType(String typeName) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -150,7 +153,7 @@ public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelC
 	@Override
 	public void registerModel(ModelReference modelRef, IModelInstance<?> model) throws RainbowModelException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -162,7 +165,7 @@ public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelC
 	@Override
 	public void unregisterModel(IModelInstance<?> model) throws RainbowModelException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -173,20 +176,22 @@ public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelC
 
 	public IRainbowOperation msgToOperation(IRainbowMessage message) {
 		String modelName = (String) message.getProperty(IModelChangeBusPort.MODEL_NAME_PROP);
-		if (modelName == null) throw new IllegalArgumentException ("The message does not represent an operation");
-		String commandName = (String )message.getProperty(IModelChangeBusPort.COMMAND_PROP);
-		String target = (String )message.getProperty(IModelChangeBusPort.TARGET_PROP);
-		List<String> params = new LinkedList<> ();
+		if (modelName == null)
+			throw new IllegalArgumentException("The message does not represent an operation");
+		String commandName = (String) message.getProperty(IModelChangeBusPort.COMMAND_PROP);
+		String target = (String) message.getProperty(IModelChangeBusPort.TARGET_PROP);
+		List<String> params = new LinkedList<>();
 		int i = 0;
-		String numParams = (String )message.getProperty(IModelChangeBusPort.PARAMETER_PROP + i);
+		String numParams = (String) message.getProperty(IModelChangeBusPort.PARAMETER_PROP + i);
 		while (numParams != null) {
 			params.add(numParams);
-			numParams = (String )message.getProperty(IModelChangeBusPort.PARAMETER_PROP + (++i));
+			numParams = (String) message.getProperty(IModelChangeBusPort.PARAMETER_PROP + (++i));
 		}
-		OperationRepresentation rep = new OperationRepresentation(commandName, this.m_ref, target, params.toArray(new String[0]));
+		OperationRepresentation rep = new OperationRepresentation(commandName, this.m_ref, target,
+				params.toArray(new String[0]));
 		return rep;
 	}
-	
+
 	@Override
 	public void onEvent(ModelReference reference, IRainbowMessage message) {
 		if (message.getProperty(IModelChangeBusPort.PARENT_ID_PROP) != null)
@@ -196,21 +201,38 @@ public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelC
 	}
 
 	void addOperation(IRainbowOperation op, boolean error) {
-		DefaultTableModel tableModel = (DefaultTableModel )m_table.getModel();
-		String[] data = getTableData(op, false);
+		DefaultTableModel tableModel = (DefaultTableModel) m_table.getModel();
+		String[] data = getTableData(op, error);
 		tableModel.addRow(data);
 		m_table.setModel(tableModel);
 		tableModel.fireTableDataChanged();
 	}
 
-	public void processReport(ReportType type, String message) {
-		if (message.startsWith("Error executing command")) {
-			try {
-				OperationRepresentation op = OperationRepresentation.fromString(message.split("=")[1]);
-				addOperation(op, type!=ReportType.ERROR && type!=ReportType.FATAL);
-			}
-			catch (Throwable t) {}
+	private static final Pattern strPattern = Pattern.compile("O\\[(.*):(.*)/(.*)\\.(.*)\\((.*)\\)<?(.*)\\]");
+
+	public static OperationRepresentation pullOutOfString(String msg) {
+		Matcher m = strPattern.matcher(msg);
+		if (m.find()) {
+			OperationRepresentation rep = new OperationRepresentation(m.group(4),
+					new ModelReference(m.group(1), m.group(2)), m.group(3),
+					m.group(5).replaceAll("\\[", "").replaceAll("\\]", "").split(","));
+			rep.setOrigin(m.group(6));
+			return rep;
 		}
+		return null;
+	}
+
+	public void processReport(ReportType type, String message) {
+		if (type == ReportType.ERROR || type == ReportType.FATAL) {
+			// if (message.startsWith("Error executing command") ||
+			// message.startsWith("Could not form the command")) {
+			try {
+				OperationRepresentation op = pullOutOfString(message);
+				if (op != null && op.getModelReference().equals(m_ref))
+					addOperation(op, type == ReportType.ERROR || type == ReportType.FATAL);
+			} catch (Throwable t) {
+			}
+		 }
 	}
 
 }
