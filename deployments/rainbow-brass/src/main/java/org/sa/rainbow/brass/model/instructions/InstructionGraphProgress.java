@@ -57,7 +57,20 @@ public class InstructionGraphProgress {
                 }
                 else if (instruction.startsWith (SetLocalizationFidelityInstruction.COMMAND_NAME)) {
                     inst2 = new SetLocalizationFidelityInstruction (label, instruction, nextLabel);
-                } else {
+                }
+                else if (instruction.startsWith(SetSensorInstruction.COMMAND_NAME)) {
+                	inst2 = new SetSensorInstruction(label, instruction, nextLabel);
+                }
+                else if (instruction.startsWith(StartNodesInstruction.COMMAND_NAME)) {
+                	inst2 = new StartNodesInstruction(label, instruction, nextLabel);
+                }
+                else if (instruction.startsWith(KillNodesInstruction.COMMAND_NAME)) {
+                	inst2 = new KillNodesInstruction(label, instruction, nextLabel);
+                } 
+                else if (instruction.startsWith(SetConfigInstruction.COMMAND_NAME)) {
+                	inst2 = new SetConfigInstruction(label, instruction, nextLabel);
+                }
+                else {
                     //TODO
                     // Other ignorable instructions
                     inst2 = null;
