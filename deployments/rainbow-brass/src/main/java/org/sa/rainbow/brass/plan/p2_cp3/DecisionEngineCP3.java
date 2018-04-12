@@ -22,13 +22,18 @@ public class DecisionEngineCP3 extends DecisionEngine {
    public static Double getMaxTime(){
 	    	return getMaxItem(0);
 	    }    
-    
+
+   public static Double getMaxSafety(){
+   	return getMaxItem(1);
+   }    
+
     /**
      * Selects the policy with the best score (CP3)
      * @return String filename of the selected policy
      */
     public static String selectPolicy(){     	
     	Double maxTime = getMaxTime();
+    	Double maxSafety = getMaxSafety();
     	Double maxScore=0.0;
     	
         Map.Entry<List, ArrayList<Double>> maxEntry = m_scoreboard.entrySet().iterator().next();
@@ -39,8 +44,11 @@ public class DecisionEngineCP3 extends DecisionEngine {
             if (maxTime>0.0){
             	entryTimeliness = 1.0-(entryTime / maxTime);
             }
-            Double entrySafety = entry.getValue().get(1);
-            
+            Double entryProbSafety = entry.getValue().get(1);
+            Double entrySafety=0.0;
+            if (maxSafety>0.0){
+            	entrySafety = (entryProbSafety/maxSafety);
+            }
             
             Double entryScore = m_safetyWeight * entrySafety + m_timelinessWeight * entryTimeliness;
             

@@ -1,0 +1,54 @@
+{
+  "configurations": [
+    {
+      "config_id": "12", 
+      "power_load": 60, 
+      "speed": 0.4
+    }, 
+    {
+      "config_id": "888", 
+      "power_load": 76, 
+      "speed": 0.7
+    }, 
+    {
+      "config_id": "32", 
+      "power_load": 55, 
+      "speed": 0.5
+    }, 
+    {
+      "config_id": "125", 
+      "power_load": 76, 
+      "speed": 0.7
+    }, 
+    {
+      "config_id": "345", 
+      "power_load": 76, 
+      "speed": 0.7
+    }, 
+    {
+      "config_id": "432", 
+      "power_load": 76, 
+      "speed": 0.7
+    }, 
+    {
+      "config_id": "555", 
+      "power_load": 76, 
+      "speed": 0.7
+    }, 
+    {
+      "config_id": "666", 
+      "power_load": 76, 
+      "speed": 0.7
+    }, 
+    {
+      "config_id": "777", 
+      "power_load": 76, 
+      "speed": 0.7
+    }, 
+    {
+      "config_id": "999", 
+      "power_load": 76, 
+      "speed": 0.7
+    }
+  ]
+}

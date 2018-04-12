@@ -26,10 +26,10 @@ public class PropertiesConnector {
     	DEFAULT.setProperty (PRISM_BIN_PROPKEY, prismBin);
     	DEFAULT.setProperty (PRISM_OUTPUT_DIR_PROPKEY, prismOutDir);
         DEFAULT.setProperty (PRISM_MODEL_PROPKEY, prismOutDir + "prismtmp.prism");
-        DEFAULT.setProperty (PRISM_PROPERTIES_PROPKEY, prismOutDir + "mapbotp2cp3.props");
+        DEFAULT.setProperty (PRISM_PROPERTIES_PROPKEY, prismOutDir + "mapbotp2cp1.props");
         DEFAULT.setProperty (PRISM_PARAMETERS_PROPKEY, "INITIAL_BATTERY=30000,INITIAL_HEADING=1");
         DEFAULT.setProperty (PRISM_ADV_EXPORT_PROPKEY, prismOutDir + "botpolicy.adv");
-        DEFAULT.setProperty (MAP_PROPKEY, prismOutDir + "map-p2cp3.json");
+        DEFAULT.setProperty (MAP_PROPKEY, prismOutDir + "map-p2cp1.json");
     }
 
 

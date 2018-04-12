@@ -17,6 +17,9 @@ import org.sa.rainbow.brass.confsynthesis.PropertiesConfigurationSynthesizer;
 import org.sa.rainbow.brass.confsynthesis.SpaceIterator;
 import org.sa.rainbow.brass.confsynthesis.AlloySolution.AlloySolutionNode;
 
+import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotState;
+import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotState.Sensors;
+
 public class ConfigurationSynthesizer implements ConfigurationProvider {
 
 
@@ -24,8 +27,8 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 	public HashMap<String, String> m_configurations = new HashMap<String, String>();
 	public HashMap<String, DetailedConfiguration> m_configuration_objects = new HashMap<String, DetailedConfiguration>();
 	public LinkedList<String> m_allinstances = new LinkedList<String>();
-	public HashMap<String, ArrayList<String>> m_reconfigurations = new HashMap<String,ArrayList<String>>();
-	private static final HashMap<String, String> m_component_modes;
+	public HashMap<String, List<String>> m_reconfigurations = new HashMap<String,List<String>>();
+	public static final HashMap<String, String> m_component_modes;
 	static{
 		m_component_modes = new HashMap<String, String>();
 		m_component_modes.put("DISABLED", "0");
@@ -227,10 +230,10 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 		res +=")";
 		return res;
 	}
-	
+			
 	
 	public void generateReconfigurations(){
-		
+		m_reconfigurations.clear();
 		String constantdefs = new String("");
 		for (int i=0; i<m_allinstances.size();i++){
 			if (i>0) constantdefs +=",";
@@ -300,12 +303,83 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 	}
 	
 	
+	public ArrayList<String> generateReconfiguration(String from, String to){
+		// Gets base model template, appends encoding of configuration formulas, target configuration predicate, and writes it to a temp model file
+				TextFileHandler fBaseModel = new TextFileHandler(m_myBaseModel);
+				ArrayList<String> baseCode = fBaseModel.readFileLines();
+				
+				// For a given configuration
+				for (int i=0; i<m_configurationPredicates.size();i++){	
+					String configKey = AlloyConnector.SOLUTION_STRING+String.valueOf(i);	
+					baseCode.add(m_configurationPredicates.get(configKey));
+					//System.out.println(cs.m_configurationPredicates.get(configKey));
+				}
+				//baseCode.add(cs.generateTargetConfPredicate());
+				
+				TextFileHandler fTempModel = new TextFileHandler(m_myModel);
+				fTempModel.exportFile(baseCode);
+
+				// Exports PCTL formula to compute reconfiguration plan to a temp property file
+				TextFileHandler fTempProps = new TextFileHandler(m_myProps);
+				fTempProps.exportFile("R{\"steps\"}min=? [ F "+to+" ]");
+				
+			    PrismPolicy pp=null;
+			    
+
+			    try{
+			    m_res = m_pc.modelCheckFromFileS(m_myModel, m_myProps, m_myPolicy, 0, from);
+			    
+			    } catch (Exception e){
+			    	System.out.println("Configuration synthesizer: Error model checking reconfiguration from" + from);
+			    }
+			    pp = new PrismPolicy(m_myPolicy+".adv");
+			    pp.readPolicy();  
+			    String plan = pp.getPlan().toString();
+			    System.out.println(plan);
+			    System.out.println("Result is:" + m_res);
+			    return pp.getPlan();
+	}
+	
+	
+	public void generateReconfigurationsFrom(String from){
+		m_reconfigurations.clear();
+		for (String toConf : m_configuration_dictionary.keySet()){
+			m_reconfigurations.put(toConf, generateReconfiguration(from, toConf));
+		}
+	}
+	
+	
+	public HashMap<String,List<String>> getLegalReconfigurationsFrom(String fromConfiguration){
+		generateReconfigurationsFrom(fromConfiguration);
+		HashMap<String, List<String>> res = new HashMap<String, List<String>> ();
+		for (Map.Entry<String,List<String>> e: m_reconfigurations.entrySet()){
+			if (e.getValue().size()>0)
+				res.put(e.getKey(), e.getValue());
+		}
+		return res;
+	}
+	
+	public HashMap<String,Configuration> getLegalTargetConfigurations(){
+		HashMap<String, Configuration> res = new HashMap<String, Configuration>();
+		for (Map.Entry<String, List<String>> e : m_reconfigurations.entrySet()){
+			if (m_configuration_objects.containsKey(e.getKey())){
+				res.put(e.getKey(), m_configuration_objects.get(e.getKey()));
+			}
+		}
+		return res;
+	}
+
+	public HashMap<String,Configuration> getLegalTargetConfigurationsFrom(String fromConfiguration){
+		return getLegalTargetConfigurations();
+	}
+	
 	public void populate(){
+		String currentConfStr="markerLocalization0_INIT=0,markerRecognizer0_INIT=0,amcl0_INIT=1,laserscanNodelet0_INIT=1,mrpt0_INIT=2,camera0_INIT=1,lidar0_INIT=1,headlamp0_INIT=0,kinect0_INIT=2,fullSpeedSetting0_INIT=0,halfSpeedSetting0_INIT=1";
 		generateConfigurations();
-//		addConfigurationInstances();
-//		generateBaseModel();
-//		generateConfigurationPreds();
-//		generateReconfigurations();
+		addConfigurationInstances();
+		generateBaseModel();
+		generateConfigurationPreds();
+		generateReconfigurationsFrom(currentConfStr);
 	}
 	
     public Double getReconfigurationTime(String sourceConfiguration, String targetConfiguration){
