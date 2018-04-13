@@ -36,7 +36,13 @@ probes:
     type: script
     scriptInfo: 
       path: "${rainbow.path}/system/probes/rostargetprobe.sh"
-      argument: "/test/data"
+      argument: "~/ready"
+      # { "start-configuration" : "amcl-kinect",
+      #   "start-loc" : "l1",
+      #   "target-loc" : "l8",
+      #   "use-adaptation" : true,
+      #   "utility-function" : "favor-timeliness"
+      # }
       
   ROSNodeProbe:
     # Probe to report the node information to guages, to determine which nodes are active

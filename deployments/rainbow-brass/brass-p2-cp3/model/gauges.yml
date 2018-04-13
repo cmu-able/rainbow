@@ -109,23 +109,23 @@ gauge-types:
         default: false
     
         
-#  BRASSTargetWaypointGaugeT:
-#    commands:
-#      target: "MS.setTargetWaypoint(String)"
-#    setupParams:
-#      targetIP:
-#        type: String
-#        default: "localhost"
-#      beaconPeriod:
-#        type: long
-#        default: 30000
-#      javaClass:
-#        type: String
-#        default: "org.sa.rainbow.brass.gauges.TargetWaypointGauge"
-#    configParams:
-#      targetProbeType:
-#        type: String
-#        default: ~
+  BRASSTargetWaypointGaugeT:
+    commands:
+      target: "MS.setTargetWaypoint(String)"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.brass.gauges.TargetWaypointGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
         
 
 gauge-instances:
@@ -192,13 +192,13 @@ gauge-instances:
       reportingPeriod: 1000
       targetProbeType: rostopicprobe
       
-#  TWG1:
-#    type: BRASSTargetWaypointGaugeT
-#    model: RobotAndEnvironmentState:MissionState
-#    commands:
-#      target: "ms.setTargetWaypoint($<w>)"
-#    setupValues:
-#      targetIP: "${customize.system.target.master}"
-#    configValues:
-#      reportingPeriod: 2000
-#      targetProbeType: brasstargetprobe
+  TWG1:
+    type: BRASSTargetWaypointGaugeT
+    model: RobotAndEnvironmentState:MissionState
+    commands:
+      target: "ms.setTargetWaypoint($<w>)"
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      reportingPeriod: 2000
+      targetProbeType: brasstargetprobe

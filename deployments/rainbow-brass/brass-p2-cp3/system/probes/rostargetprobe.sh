@@ -1,2 +1,2 @@
 #!/bin/bash
-grep "target_loc" /test/data
+grep "target-loc" $1
