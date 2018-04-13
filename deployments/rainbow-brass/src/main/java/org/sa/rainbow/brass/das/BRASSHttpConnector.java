@@ -42,27 +42,33 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
         }
     };
     private Gson                      m_gsonPP;
+	private Phases m_phase;
 
-    protected BRASSHttpConnector () {
-        // TODO Auto-generated constructor stub
+    protected BRASSHttpConnector (Phases phase) {
+        m_phase = phase;
+		// TODO Auto-generated constructor stub
 //        super ("BRASSConnector");
 //        setSleepTime (1000);
         m_gsonPP = new GsonBuilder ().setPrettyPrinting ().create ();
     }
 
-    public static BRASSHttpConnector instance () {
+    public static BRASSHttpConnector instance (Phases phase) {
         if (s_instance == null) {
-            s_instance = new BRASSHttpConnector ();
+            s_instance = new BRASSHttpConnector (phase);
 //            s_instance.start ();
         }
         return s_instance;
+    }
+    
+    String getRainbowReady() {
+    	return m_phase == Phases.Phase1?DASPhase1StatusT.RAINBOW_READY.name():DASPhase2StatusT.RAINBOW_READY.name();
     }
 
     @Override
     public void reportReady (boolean ready) {
 //        try {
         JsonObject json = getTimeJSON ();
-        addFieldsToStatus (DASStatusT.RAINBOW_READY, "Rainbow is receiving information from Robot", json);
+        addFieldsToStatus (getRainbowReady(), "Rainbow is receiving information from Robot", json);
         String jsonStr = m_gsonPP.toJson (json);
         System.out.println ("Reporting ready: " + jsonStr);
         RequestBody body = RequestBody.create (JSON, jsonStr);
@@ -82,7 +88,7 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
     }
 
     @Override
-    public void reportStatus (DASStatusT status, String message) {
+    public void reportStatus (String status, String message) {
 //        try {
         JsonObject json = getTimeJSON ();
         addFieldsToStatus (status, message, json);
@@ -99,11 +105,11 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
 
     }
 
-    void addFieldsToStatus (DASStatusT status, String message, JsonObject json) {
+    void addFieldsToStatus (String status, String message, JsonObject json) {
         JsonObject msg = new JsonObject ();
         msg.addProperty ("msg", message);
         msg.addProperty ("sim_time", -1);
-        json.addProperty ("STATUS", status.name ());
+        json.addProperty ("STATUS", status);
         json.add ("MESSAGE", msg);
     }
 
@@ -112,7 +118,7 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
 //        try {
 
         JsonObject json = getTimeJSON ();
-        addFieldsToStatus (failed ? DASStatusT.MISSION_ABORTED : DASStatusT.MISSION_COMPLETED, message, json);
+        addFieldsToStatus (failed ? missionFailed() : missionSucceeded(), message, json);
         RequestBody body = RequestBody.create (JSON, m_gsonPP.toJson (json));
         Request request = new Request.Builder ().url (STATUS_SERVER + "/internal/status").post (body).build ();
         CLIENT.newCall (request).enqueue (m_responseCallback);
@@ -121,6 +127,14 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
 //        catch (IOException e) {
 //        }
     }
+
+	private String missionSucceeded() {
+		return m_phase==Phases.Phase1?DASPhase1StatusT.MISSION_COMPLETED.name():DASPhase2StatusT.MISSION_SUCCEEDED.name();
+	}
+
+	private String missionFailed() {
+		return m_phase==Phases.Phase1?DASPhase1StatusT.MISSION_ABORTED.name():DASPhase2StatusT.MISSION_FAILED.name();
+	}
 
 //    @Override
 //    protected void runAction () {
@@ -152,7 +166,7 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
 //    };
 
     public static void main (String[] args) {
-        BRASSHttpConnector conn = new BRASSHttpConnector ();
+        BRASSHttpConnector conn = new BRASSHttpConnector (Phases.Phase2);
         JsonObject j = conn.getTimeJSON ();
         System.out.println (conn.m_gsonPP.toJson (j));
     }

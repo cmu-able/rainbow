@@ -6,7 +6,8 @@ import java.util.List;
 
 import org.sa.rainbow.brass.PropertiesConnector;
 import org.sa.rainbow.brass.das.BRASSHttpConnector;
-import org.sa.rainbow.brass.das.IBRASSConnector.DASStatusT;
+import org.sa.rainbow.brass.das.IBRASSConnector.DASPhase1StatusT;
+import org.sa.rainbow.brass.das.IBRASSConnector.Phases;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
 import org.sa.rainbow.brass.model.map.EnvMap;
@@ -144,11 +145,11 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
         AdaptationResultsVisitor v = new AdaptationResultsVisitor (plan);
         plan.visit (v);
         if (v.m_allOk) {
-            BRASSHttpConnector.instance ().reportStatus (DASStatusT.ADAPTATION_COMPLETED,
+            BRASSHttpConnector.instance (Phases.Phase1).reportStatus (DASPhase1StatusT.ADAPTATION_COMPLETED.name(),
                     "Finished adapting the system");
         }
         else {
-            BRASSHttpConnector.instance ().reportStatus (DASStatusT.TEST_ERROR,
+            BRASSHttpConnector.instance (Phases.Phase1).reportStatus (DASPhase1StatusT.TEST_ERROR.name(),
                     "Something in the adaptation plan failed to execute.");
         }
         try {
@@ -244,7 +245,7 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
                                     m_currentPlan = new ArrayList<> (prismPolicy.getPlan ());
                                     AdaptationTree<BrassPlan> at = new AdaptationTree<> (nig);
 //                            at.addLeaf (nig);
-                                    BRASSHttpConnector.instance ().reportStatus (DASStatusT.ADAPTATION_INITIATED,
+                                    BRASSHttpConnector.instance (Phases.Phase1).reportStatus (DASPhase1StatusT.ADAPTATION_INITIATED.name(),
                                             "Enqueuing a new plan");
                                     m_adaptationEnqueuePort.offerAdaptation (at, new Object[0]);
 
@@ -341,7 +342,7 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
 //                    AdaptationTree<BrassPlan> at = new AdaptationTree<BrassPlan> (nig);
                                 m_reportingPort.info (getComponentType (), "New adaptation found - enqueuing it");
                                 m_executingPlan = true;
-                                BRASSHttpConnector.instance ().reportStatus (DASStatusT.ADAPTATION_INITIATED,
+                                BRASSHttpConnector.instance (Phases.Phase1).reportStatus (DASPhase1StatusT.ADAPTATION_INITIATED.name(),
                                         "Enqueuing a new plan");
 
                                 m_adaptationEnqueuePort.offerAdaptation (at, new Object[] {});
