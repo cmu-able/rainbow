@@ -15,4 +15,4 @@ def get_current_configuration(current_or_historical):
 
 
 if __name__ == '__main__':
-    print(get_current_configuration(1))
+    print("cp1 configuration: %s" %get_current_configuration(1))

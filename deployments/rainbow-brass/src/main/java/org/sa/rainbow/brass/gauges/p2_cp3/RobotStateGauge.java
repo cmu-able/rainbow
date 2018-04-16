@@ -46,7 +46,7 @@ public class RobotStateGauge extends RegularPatternGauge{
 	protected static final String HEADLAMP = "HeadlampStatus";
 	protected static final String BUMP = "BumpStatus";
 	protected static final String SPEED = "Speed";
-	protected static final String LIGHTING = "Lighting";
+	protected static final String LIGHTING = "Lighting"; 
 	
     protected static final String CHARGE_PATTERN      = "topic: /energy_monitor/energy_level.*\\n.*data: (.*)";
     protected static final String KINECT_PATTERN = "topic: /mobile_base/kinect/status.*\\n.*data: (.*)";
