@@ -53,6 +53,8 @@ public class RobotStateGauge extends RegularPatternGauge{
     protected static final String LIDAR_PATTERN = "topic: /mobile_base/lidar/status.*\\n.*data: (.*)";
     protected static final String HEADLAMP_PATTERN = "topic: /mobile_base/headlamp/status.*\\n.*data: (.*)";
     protected static final String LIGHTING_PATTERN = "topic: /mobile_base/sensors/light_sensor.*\\n.*illuminance: (.*)v.*";
+    protected static final String SPEED_PATTERN = "topic: /odom/twist/twist/linear.*\\nx: (.*)\\ny: (.*)\\n";
+    protected static final String BUMP_PATTERN = "topic: /mobile_base/events/bumper.*\\nstate: (.*)\\n";
 
 	private double last_charge = 0;
 
@@ -64,6 +66,10 @@ public class RobotStateGauge extends RegularPatternGauge{
 
 	private double last_lighting = -1;
 	private MovingAverage lightingTracker = new MovingAverage(10);
+
+	private double reported_speed;
+
+	private boolean reported_bump;
     
 	public RobotStateGauge(String id, long beaconPeriod, TypedAttribute gaugeDesc,
 			TypedAttribute modelDesc, List<TypedAttributeWithValue> setupParams,
@@ -74,6 +80,8 @@ public class RobotStateGauge extends RegularPatternGauge{
 		addPattern(LIDAR, Pattern.compile(LIDAR_PATTERN, Pattern.DOTALL));
 		addPattern(HEADLAMP, Pattern.compile(HEADLAMP_PATTERN, Pattern.DOTALL));
 		addPattern(LIGHTING, Pattern.compile(LIGHTING_PATTERN, Pattern.DOTALL));
+		addPattern(SPEED, Pattern.compile(SPEED_PATTERN, Pattern.DOTALL));
+		addPattern(BUMP, Pattern.compile(BUMP_PATTERN, Pattern.DOTALL));
 	}
 
 	@Override
@@ -168,6 +176,30 @@ public class RobotStateGauge extends RegularPatternGauge{
 					lidarParams.put(lidarOp.getParameters()[0], Sensors.HEADLAMP.name());
 					lidarParams.put(lidarOp.getParameters()[1], Boolean.toString(hMode));
 					issueCommand(lidarOp, lidarParams);
+				}
+			}
+			else if (SPEED.equals(matchName)) {
+				double x = Double.parseDouble(m.group(1).trim ());
+				double y = Double.parseDouble(m.group(2).trim());
+				
+				double speed = Math.round(Math.sqrt(x*x + y*y) * 100)/100d;
+				if (speed != reported_speed) {
+					reported_speed = speed;
+					IRainbowOperation speedOp = m_commands.get("speed");
+					Map<String,String> params = new HashMap<> ();
+					params.put(speedOp.getParameters()[0], Double.toString(speed));
+					issueCommand(speedOp, params);
+				}		
+			}
+			else if (BUMP.equals(matchName)) {
+				int status = Integer.parseInt(m.group(1).trim());
+				boolean bump = status == 1;
+				if (bump != reported_bump) {
+					reported_bump = bump;
+					IRainbowOperation bumpOp = m_commands.get("bump");
+					Map<String,String> params = new HashMap<> ();
+					params.put(bumpOp.getParameters()[0], Boolean.toString(bump));
+					issueCommand(bumpOp, params);
 				}
 			}
 		}
