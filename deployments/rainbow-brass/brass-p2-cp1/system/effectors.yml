@@ -9,20 +9,20 @@ effector-types:
       path: "${_effectors.path}/setInstructions.sh"
       argument: "{0}"
   
-  changeDeadlineT:
-    command: setNewDeadline($<time>)
+  completedTaskFailedT:
+    command: setModelProblem(INSTRUCTION_GRAPH_FAILED)
     type: script
     scriptInfo:
-      path: "${_effectors.path}/setDeadline.sh"
-      argument: "{0}"
+      path: "${_effectors.path}/current-task-finished.sh"
+      argument: 1
       
-  activateHeadlampT:
-    command: "setSensor(HEADLAMP, $<b>)"
+  completedTaskSuccessT:
+    command: removeModelProblem(INSTRUCTION_GRAPH_FAILED)
     type: script
     scriptInfo:
-      path: "${_effectors.path}/setSensor.sh"
-      argument: "{0} {1}"
-      
+      path: "${_effectors.path}/current-task-finished.sh"
+      argument: 0
+
 effectors:
   
   changeInstructionGraph:
@@ -31,6 +31,14 @@ effectors:
     
   activateHeadlamp:
     effector-type: activateHeadlampT
+    location: "${customize.system.target.master}"
+    
+  taskFailed:
+    effector-type: completedTaskFailedT
+    location: "${customize.system.target.master}"
+    
+  taskSucceeded:
+    effector-type: completedTaskSuccessT
     location: "${customize.system.target.master}"
     
 #  changeDeadline:

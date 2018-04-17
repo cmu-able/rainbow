@@ -93,7 +93,7 @@ public class ReactiveDarknessPlanner extends AbstractRainbowRunnable implements 
 			log(ps.toString());
 			if (problems.contains(CP3ModelState.TOO_DARK)) {
 				log("Let there be light!");
-				TurnOnHeadlamp toh = new TurnOnHeadlamp(m_models.getRobotStateModel(), true);
+				TurnOnHeadlamp toh = new TurnOnHeadlamp(m_models, true);
 				m_executingPlan = true;
 				AdaptationTree<BrassPlan> at = new AdaptationTree<>(toh);
 				m_adaptationNQPort.offerAdaptation(at, new Object[0]);

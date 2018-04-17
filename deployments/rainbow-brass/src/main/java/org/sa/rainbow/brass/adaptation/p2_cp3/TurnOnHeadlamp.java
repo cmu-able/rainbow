@@ -1,6 +1,7 @@
 package org.sa.rainbow.brass.adaptation.p2_cp3;
 
 import org.sa.rainbow.brass.adaptation.BrassPlan;
+import org.sa.rainbow.brass.model.p2_cp3.ModelAccessor;
 import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotState.Sensors;
 import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotStateCommandFactory;
 import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotStateModelInstance;
@@ -12,12 +13,12 @@ import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.Result;
 
 public class TurnOnHeadlamp extends BrassPlan {
 
-	private CP3RobotStateModelInstance m_robotStateModel;
 	private boolean m_on;
 	private boolean m_outcome;
+	private ModelAccessor m_models;
 
-	public TurnOnHeadlamp(CP3RobotStateModelInstance robotStateModel, boolean b) {
-		m_robotStateModel = robotStateModel;
+	public TurnOnHeadlamp(ModelAccessor models, boolean b) {
+		m_models = models;
 		m_on = b;
 	}
 
@@ -25,8 +26,8 @@ public class TurnOnHeadlamp extends BrassPlan {
 	public Object evaluate(Object[] argsIn) {
 		IAdaptationExecutor<BrassPlan> executor = Rainbow.instance().
 				getRainbowMaster().
-				strategyExecutor(m_robotStateModel.getModelInstance().getModelReference().toString());
-		CP3RobotStateCommandFactory cf = (CP3RobotStateCommandFactory )m_robotStateModel.getCommandFactory();
+				strategyExecutor(m_models.getRainbowStateModel().getModelInstance().getModelReference().toString());
+		CP3RobotStateCommandFactory cf = (CP3RobotStateCommandFactory) m_models.getRobotStateModel().getCommandFactory();
 		SetSensorCmd tohl = cf.setSensorCmd(Sensors.HEADLAMP, m_on);
 		OperationResult result = executor.getOperationPublishingPort().publishOperation(tohl);
 		m_outcome = result.result == Result.SUCCESS;
