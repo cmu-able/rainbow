@@ -10,7 +10,7 @@ public class RainbowState {
 		INSTRUCTION_GRAPH_FAILED,
 		OUT_OF_BATTERY,
 		LOW_ON_BATTERY,
-		ARCHITECTURE_ERROR
+		ARCHITECTURE_ERROR, IS_OBSTRUCTED
 	}
 	
 	private ModelReference m_model;
