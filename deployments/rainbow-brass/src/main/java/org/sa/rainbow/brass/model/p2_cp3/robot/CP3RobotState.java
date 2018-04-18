@@ -90,6 +90,13 @@ public class CP3RobotState extends RobotState {
 		}
 	}
 	
+	public EnumSet<Sensors> getFailedSensors() {
+		synchronized (m_sensorFailedHistory) {
+			TimeStamped<EnumSet<Sensors>> peek = m_sensorFailedHistory.peek();
+			return peek != null?peek.data:EnumSet.noneOf(Sensors.class);
+		}
+	}
+	
 	public EnumSet<Sensors> getSensors() throws IllegalStateException  {
 		synchronized(m_sensorHistory) {
 			TimeStamped<EnumSet<Sensors>> peek = m_sensorHistory.peek();

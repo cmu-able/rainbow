@@ -61,4 +61,8 @@ public class TurtlebotModelInstance extends AcmeModelInstance {
 		return getComponentEnablement("FAILED");
 	}
 
+	public Collection<String> getInactiveComponents() {
+		return getComponentEnablement("INACTIVE");
+	}
+
 }
