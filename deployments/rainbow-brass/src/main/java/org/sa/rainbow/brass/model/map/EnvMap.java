@@ -60,7 +60,7 @@ public class EnvMap {
 		EnvMap m = new EnvMap(m_model);
 		m.m_nodes = new HashMap<String, EnvMapNode>(m_nodes);
 		m.m_arcs = new HashMap<>(m_arcs);
-		m.m_arcs_lookup = new LinkedList<EnvMapArc>();
+		m.m_arcs_lookup = new LinkedList<EnvMapArc>(m_arcs_lookup);
 		return m;
 	}
 

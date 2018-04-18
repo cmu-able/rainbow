@@ -31,7 +31,7 @@ public class EnvMapModelInstance implements IModelInstance<EnvMap> {
     }
 
     @Override 
-    public IModelInstance<EnvMap> copyModelInstance (String newName) throws RainbowCopyException {
+    public EnvMapModelInstance copyModelInstance (String newName) throws RainbowCopyException {
         return new EnvMapModelInstance (getModelInstance ().copy (), getOriginalSource());
     }
 
