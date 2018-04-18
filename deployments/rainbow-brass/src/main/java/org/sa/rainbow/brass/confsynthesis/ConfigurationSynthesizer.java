@@ -350,7 +350,6 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 	
 	
 	public HashMap<String,List<String>> getLegalReconfigurationsFrom(String fromConfiguration){
-		generateReconfigurationsFrom(fromConfiguration);
 		HashMap<String, List<String>> res = new HashMap<String, List<String>> ();
 		for (Map.Entry<String,List<String>> e: m_reconfigurations.entrySet()){
 			if (e.getValue().size()>0)
@@ -379,7 +378,6 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 		addConfigurationInstances();
 		generateBaseModel();
 		generateConfigurationPreds();
-		generateReconfigurationsFrom(currentConfStr);
 	}
 	
     public Double getReconfigurationTime(String sourceConfiguration, String targetConfiguration){
@@ -397,9 +395,7 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 		
 		ConfigurationSynthesizer cs = new ConfigurationSynthesizer();
 		cs.generateConfigurations();
-//		cs.addConfigurationInstances();
-//		cs.generateBaseModel();
-//		cs.generateConfigurationPreds();
+		cs.populate();
 //		System.out.println("Global instance space: "+cs.m_allinstances.toString());
 //		cs.generateReconfigurations();
 		System.out.println(cs.getConfigurations().toString());
