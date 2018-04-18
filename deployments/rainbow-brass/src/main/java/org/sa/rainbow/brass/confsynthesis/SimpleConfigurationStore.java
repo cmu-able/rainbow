@@ -4,6 +4,7 @@ import java.io.FileReader;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.LinkedList;
 
 import org.json.simple.JSONArray;
@@ -74,13 +75,33 @@ public class SimpleConfigurationStore implements ConfigurationProvider {
 	public HashMap<String, Configuration> getConfigurations(){
 		return (HashMap<String, Configuration>)(HashMap<String, ?>)m_configuration_objects;
 	}
+	
+	public HashMap<String,List<String>> getLegalReconfigurationsFrom(String fromConfiguration){
+		HashMap<String, List<String>> res = new HashMap<String, List<String>> ();
+		for (String cid: m_configuration_objects.keySet()){
+			LinkedList<String> reconfPath = new LinkedList<String>();
+			reconfPath.add("t_set_"+cid);
+			res.put(cid, reconfPath);			
+		}
+		return res;
+	}
+    
+	public HashMap<String,Configuration> getLegalTargetConfigurations(){
+		HashMap<String, Configuration> res = new HashMap<String, Configuration>();
+		for (Map.Entry<String, SimpleConfiguration> e : m_configuration_objects.entrySet()){
+			if (m_configuration_objects.containsKey(e.getKey())){
+				res.put(e.getKey(), e.getValue());
+			}
+		}
+		return res;
+	}
+
     
 	public static void main(String[] args) throws Exception{
 		
 		SimpleConfigurationStore cs = new SimpleConfigurationStore();
 		cs.populate();
+		System.out.println(cs.getLegalReconfigurationsFrom("sol_432"));
 	}
-	
-    
 	
 }

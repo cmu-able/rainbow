@@ -1,6 +1,8 @@
 package org.sa.rainbow.brass.confsynthesis;
 
 import java.util.HashMap;
+
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
@@ -83,6 +85,12 @@ public class DetailedConfiguration implements Configuration {
 	
 	public Double getSpeed(){
 		return m_speed;
+	}
+	
+	public ArrayList<String> getComponents(){
+		ArrayList<String> res = new ArrayList<String>();
+		res.addAll(m_cdrs.keySet());
+		return res;
 	}
 	
 }

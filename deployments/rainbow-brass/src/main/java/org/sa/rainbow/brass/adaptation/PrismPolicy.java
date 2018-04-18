@@ -7,9 +7,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import org.sa.rainbow.brass.confsynthesis.ConfigurationProvider;
+
+import com.google.common.base.Objects;
 
 /**
  * @author ashutosh
@@ -18,7 +22,6 @@ import java.util.Scanner;
 public class PrismPolicy {
     private static String m_policyFile;
     public ArrayList<String> m_plan = new ArrayList<String>();
-
 
 
     public PrismPolicy(String policyFile) {
@@ -46,10 +49,10 @@ public class PrismPolicy {
                 m_plan.add(action);
             }
         }
-        System.out.println("Here is the plan extracted from the policy:");
-		for (int i = 0; i < m_plan.size(); i++) {
-			System.out.println(m_plan.get(i));
-		}
+//        System.out.println("Here is the plan extracted from the policy:");
+//		for (int i = 0; i < m_plan.size(); i++) {
+//			System.out.println(m_plan.get(i));
+//		}
     }
 
     /**
@@ -157,6 +160,20 @@ public class PrismPolicy {
     }
 
 
+    public ArrayList<String> getPlan(ConfigurationProvider cp, String fromConfiguration){
+    	String confSetPrefix = "t_set_";
+    	ArrayList<String> res = new ArrayList<String>();
+    	
+    	HashMap<String,List<String>> reconfs = cp.getLegalReconfigurationsFrom(fromConfiguration);
+    	
+    	for (int i=0; i<m_plan.size(); i++){
+    		if (m_plan.get(i).startsWith(confSetPrefix)){
+    			res.addAll(reconfs.get(m_plan.get(i).replace(confSetPrefix, "")));
+    		} else
+    			res.add(m_plan.get(i));
+    	}
+    	return res;
+    }
 
     /**
      * Class test

@@ -100,7 +100,7 @@ public class MapTranslator {
     public static final String INITIAL_ROBOT_CONF_CONST = "INITIAL_CONFIGURATION";
     public static final String ROBOT_MAX_RECONF_CONST = "RECONF_MAX";
     public static final String ROBOT_RECONF_VAR = "cr";
-    public static final String ROBOT_MAX_RECONF_VAL = "2";
+    public static final String ROBOT_MAX_RECONF_VAL = "1"; // Only reconfiguring at start of plan, for the time being...
 //    public static final String ROBOT_CONF_PREFIX = "sol_";
 
 
@@ -373,7 +373,7 @@ public class MapTranslator {
           String reconfGuard = "& ("+ROBOT_RECONF_VAR+"<"+ROBOT_MAX_RECONF_CONST+") ";
           String reconfUpdate = "& ("+ROBOT_RECONF_VAR+"'="+ROBOT_RECONF_VAR+"+1) ";
     	  String buf="";
-    	  for (Map.Entry<String, Configuration> c: m_cp.getConfigurations().entrySet()){
+    	  for (Map.Entry<String, Configuration> c: m_cp.getLegalTargetConfigurations().entrySet()){
 //    		  buf+= "\t [t_set_"+c.getValue().getId()+"] ("+ROBOT_CONF_VAR+"!="+ROBOT_CONF_PREFIX+c.getValue().getId()+") "+reconfGuard +STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_CONF_VAR+"'="+ROBOT_CONF_PREFIX+c.getValue().getId()+")"+ reconfUpdate +" & (robot_done'=true);\n";                	
     		  buf+= "\t [t_set_"+c.getValue().getId()+"] ("+ROBOT_CONF_VAR+"!="+c.getValue().getId()+") "+reconfGuard +STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_CONF_VAR+"'="+c.getValue().getId()+")"+ reconfUpdate +" & (robot_done'=true);\n";                	
 
@@ -460,10 +460,10 @@ public class MapTranslator {
             }
             
             // Robot reconfiguration tactics
-            for (Map.Entry<String, Configuration> c: m_cp.getConfigurations().entrySet()){
+            for (Map.Entry<String, Configuration> c: m_cp.getLegalTargetConfigurations().entrySet()){
       		  buf+= "\t [t_set_"+c.getValue().getId()+"]  true :";
       		  int counter=0;
-      		  for (Map.Entry<String, Configuration> cs: m_cp.getConfigurations().entrySet()){
+      		  for (Map.Entry<String, Configuration> cs: m_cp.getLegalTargetConfigurations().entrySet()){
       			  if (counter>0) buf += " : ";
       			  buf+= ROBOT_CONF_VAR + "=" + cs.getKey() + " ? "+  m_cp.getReconfigurationTime(cs.getValue().getId(),c.getValue().getId());  
       			  counter++;

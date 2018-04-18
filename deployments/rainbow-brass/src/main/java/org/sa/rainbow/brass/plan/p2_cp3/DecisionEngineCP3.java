@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.sa.rainbow.brass.PropertiesConnector;
-import org.sa.rainbow.brass.adaptation.PolicyToIG;
 import org.sa.rainbow.brass.adaptation.PrismPolicy;
+import org.sa.rainbow.brass.plan.p2_cp3.PolicyToIGCP3;
 import org.sa.rainbow.brass.confsynthesis.ConfigurationSynthesizer;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.plan.p2.DecisionEngine;
@@ -22,13 +22,18 @@ public class DecisionEngineCP3 extends DecisionEngine {
    public static Double getMaxTime(){
 	    	return getMaxItem(0);
 	    }    
-    
+
+   public static Double getMaxSafety(){
+   	return getMaxItem(1);
+   }    
+
     /**
      * Selects the policy with the best score (CP3)
      * @return String filename of the selected policy
      */
     public static String selectPolicy(){     	
     	Double maxTime = getMaxTime();
+    	Double maxSafety = getMaxSafety();
     	Double maxScore=0.0;
     	
         Map.Entry<List, ArrayList<Double>> maxEntry = m_scoreboard.entrySet().iterator().next();
@@ -39,8 +44,11 @@ public class DecisionEngineCP3 extends DecisionEngine {
             if (maxTime>0.0){
             	entryTimeliness = 1.0-(entryTime / maxTime);
             }
-            Double entrySafety = entry.getValue().get(1);
-            
+            Double entryProbSafety = entry.getValue().get(1);
+            Double entrySafety=0.0;
+            if (maxSafety>0.0){
+            	entrySafety = (entryProbSafety/maxSafety);
+            }
             
             Double entryScore = m_safetyWeight * entrySafety + m_timelinessWeight * entryTimeliness;
             
@@ -87,24 +95,22 @@ public class DecisionEngineCP3 extends DecisionEngine {
         System.out.println("Setting configuration provider...");
         setConfigurationProvider(cs);
         
-        
+		String currentConfStr="markerLocalization0_INIT=0,markerRecognizer0_INIT=0,amcl0_INIT=1,laserscanNodelet0_INIT=1,mrpt0_INIT=2,camera0_INIT=1,lidar0_INIT=1,headlamp0_INIT=0,kinect0_INIT=2,fullSpeedSetting0_INIT=0,halfSpeedSetting0_INIT=1";
+		
+        cs.generateReconfigurationsFrom(currentConfStr);
+
         for (int i=32000; i< 32500; i+=500){
         	System.out.println("Generating candidates for l1-l4...");
             generateCandidates("l1", "l4");
         	System.out.println("Scoring candidates...");
             scoreCandidates(dummyMap, String.valueOf(i), "1");
-            System.out.println(String.valueOf(m_scoreboard));	        
+            System.out.println(String.valueOf(m_scoreboard));	
             pp = new PrismPolicy(selectPolicy());
             pp.readPolicy();  
-            String plan = pp.getPlan().toString();
-            System.out.println(plan);
-            PolicyToIG translator = new PolicyToIG(pp, dummyMap);
-            System.out.println (translator.translate (20394, false));
-            coordinates.add(new Point2D.Double(i, getSelectedPolicyTime()));
-        }
-
-        for (int j=0; j< coordinates.size(); j++){
-            System.out.println(" ("+String.valueOf(coordinates.get(j).getX())+", "+String.valueOf(coordinates.get(j).getY())+") ");
+            String plan = pp.getPlan(cs, currentConfStr).toString();
+            System.out.println("Selected Plan: "+plan);
+            PolicyToIGCP3 translator = new PolicyToIGCP3(pp, dummyMap);
+            System.out.println (translator.translate (cs, currentConfStr));
         }
 
     }

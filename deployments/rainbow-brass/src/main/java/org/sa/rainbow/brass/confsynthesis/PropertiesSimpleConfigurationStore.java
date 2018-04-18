@@ -7,7 +7,7 @@ public class PropertiesSimpleConfigurationStore {
 
 	public static final String CONFIGURATIONS_SOURCE_PROPKEY = "configsource";
 	public static final String CONFIGURATIONS_SOURCE_FILENAME = "config_list.json";
-    public static final String CONFIGURATIONS_SOURCE_PATH = "/Users/jcamara/Dropbox/Documents/Work/projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/p2cp1/";
+    public static final String CONFIGURATIONS_SOURCE_PATH = "/Users/jcamara/Dropbox/Documents/Work/projects/rainbow/deployments/rainbow-brass/prismtmp/p2cp1/";
     
     public static final Properties DEFAULT = new Properties ();
     static {
