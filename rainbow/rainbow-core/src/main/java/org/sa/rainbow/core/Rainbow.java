@@ -365,7 +365,14 @@ public class Rainbow implements IRainbowEnvironment {
             String val = m_props.getProperty (key);
             while (val.contains (Util.TOKEN_BEGIN)) {
                 m_props.setProperty (key, Util.evalTokens (val, m_props));
-                val = m_props.getProperty (key);
+                String val2 = m_props.getProperty (key);
+                if (val.equals(val2)) {
+                	System.err.print("The property '" + val + "' seems to have an undefined variable");
+                	break;
+                }
+                else {
+                	val = val2;
+                }
             }
         }
     }
