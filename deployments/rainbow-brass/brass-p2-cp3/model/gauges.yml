@@ -194,7 +194,7 @@ gauge-instances:
       
   TWG1:
     type: BRASSTargetWaypointGaugeT
-    model: RobotAndEnvironmentState:MissionState
+    model: MissionState:MissionState
     commands:
       target: "ms.setTargetWaypoint($<w>)"
     setupValues:
