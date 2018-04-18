@@ -63,7 +63,7 @@ public class ModelAccessor {
 	
 	public InstructionGraphModelInstance getInstructionGraphModel () {
 		if (m_instructionGraphModel == null) {
-			m_instructionGraphModel = (InstructionGraphModelInstance )m_modelsManagerPort.<InstructionGraphProgress>getModelInstance(new ModelReference("ExecutionInstructionGraph", InstructionGraphModelInstance.INSTRUCTION_GRAPH_TYPE));
+			m_instructionGraphModel = (InstructionGraphModelInstance )m_modelsManagerPort.<InstructionGraphProgress>getModelInstance(new ModelReference("ExecutingInstructionGraph", InstructionGraphModelInstance.INSTRUCTION_GRAPH_TYPE));
 		}
 		return m_instructionGraphModel;
 	}
