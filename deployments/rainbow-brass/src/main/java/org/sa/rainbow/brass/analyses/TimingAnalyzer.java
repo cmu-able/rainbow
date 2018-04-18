@@ -406,9 +406,10 @@ public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowA
                     + MapTranslator.INITIAL_ROBOT_HEADING_CONST + "=" + robotHeading;
 
             try {
-                String result = PrismConnectorAPI.modelCheckFromFileS (modelFileName, propertiesFileName,
-                        strategyFileName, propertyToCheck, constSwitch);
-                remainingActionSeqExecTime += Double.valueOf (result);
+            	throw new IllegalStateException("The timing analyzer prism should be progected from running concurrently with the planner");
+//                String result = PrismConnectorAPI.instance().modelCheckFromFileS (modelFileName, propertiesFileName,
+//                        strategyFileName, propertyToCheck, constSwitch);
+//                remainingActionSeqExecTime += Double.valueOf (result);
             }
             catch (NumberFormatException e) {
                 // TODO Auto-generated catch block
