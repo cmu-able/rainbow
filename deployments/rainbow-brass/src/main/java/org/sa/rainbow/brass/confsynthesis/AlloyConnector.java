@@ -18,7 +18,7 @@ public class AlloyConnector {
 	public static final int MAX_SOLUTIONS_DEFAULT = 500;
 	public static int m_max_solutions = MAX_SOLUTIONS_DEFAULT;
 		
-	public void generateSolutions(String modelFile){
+	public void generateSolutions(String modelFile) throws Err{
 		int count=0;
 		Module model=null;
 		A4Solution ans=null;
@@ -27,7 +27,7 @@ public class AlloyConnector {
 			model = CompUtil.parseEverything_fromFile(A4Reporter.NOP, null, modelFile);
 		} catch (Err e){
 			System.out.println("Error on static part of specification");//: "+modelFile);
-			System.exit(-1);
+			throw e;
 		}
 		
 		Command command = model.getAllCommands().get(0);

@@ -93,7 +93,7 @@ public class InstructionGraphProgress {
      * 
      * @return The remaining instructions, excluding the current instruction, to be executed
      */
-    public Collection<? extends IInstruction> getRemainingInstructions () {
+    public List<? extends IInstruction> getRemainingInstructions () {
         List<IInstruction> remainingInstructions = new LinkedList<>();
         IInstruction instPtr = getCurrentInstruction();
 

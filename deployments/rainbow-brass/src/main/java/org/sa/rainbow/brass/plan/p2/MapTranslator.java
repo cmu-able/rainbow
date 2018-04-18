@@ -20,7 +20,7 @@ import org.sa.rainbow.brass.model.map.dijkstra.Edge;
 import org.sa.rainbow.brass.model.map.dijkstra.Graph;
 import org.sa.rainbow.brass.model.map.dijkstra.Vertex;
 import org.sa.rainbow.brass.model.mission.MissionState;
-
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.map.EnvMapArc;
 import org.sa.rainbow.brass.model.map.EnvMapNode;
@@ -955,8 +955,9 @@ public class MapTranslator {
     /**
      * Class test
      * @param args
+     * @throws Exception 
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         
     	
     	ConfigurationSynthesizer cs = new ConfigurationSynthesizer();

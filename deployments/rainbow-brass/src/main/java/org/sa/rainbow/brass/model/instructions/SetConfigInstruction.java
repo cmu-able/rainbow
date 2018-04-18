@@ -26,6 +26,11 @@ public class SetConfigInstruction implements IInstruction {
 			m_config = m.group(1);
 		}
 	}
+	
+	public String getConfig() {
+		return m_config;
+	}
+	
 	@Override
 	public String getInstructionLabel() {
 		return m_label;

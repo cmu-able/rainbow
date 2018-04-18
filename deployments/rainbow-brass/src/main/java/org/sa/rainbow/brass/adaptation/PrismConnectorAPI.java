@@ -26,25 +26,34 @@ import prism.UndefinedConstants;
  */
 public class PrismConnectorAPI {
 
-    public static PrismFileLog m_log;
-    public static Prism m_prism;
-    public static ModulesFile m_modulesFile;
-    public static PropertiesFile m_propertiesFile;
-    public static Result m_result;
-    public static UndefinedConstants m_undefinedMFConstants;
-    public static Values m_definedMFConstants;
-    public static Values m_definedPFConstants;
-    public static UndefinedConstants m_undefinedConstants[];
-    public static ArrayList<Property> m_propertiesToCheck;
-    public static String m_constSwitch;
+    public PrismFileLog m_log;
+    public  Prism m_prism;
+    public  ModulesFile m_modulesFile;
+    public  PropertiesFile m_propertiesFile;
+    public  Result m_result;
+    public  UndefinedConstants m_undefinedMFConstants;
+    public  Values m_definedMFConstants;
+    public  Values m_definedPFConstants;
+    public  UndefinedConstants m_undefinedConstants[];
+    public  ArrayList<Property> m_propertiesToCheck;
+    public  String m_constSwitch;
 
-
+    protected static PrismConnectorAPI s_instance;
+    
+    public static PrismConnectorAPI instance () throws PrismException {
+    	if (s_instance == null) {
+    		s_instance = new PrismConnectorAPI();
+    	}
+    	return s_instance;
+    }
+    
+    
     /**
      * Initializes PRISM instance and additional structures
      * 
      * @throws PrismException
      */
-    public PrismConnectorAPI () throws PrismException {
+    protected PrismConnectorAPI () throws PrismException {
         m_log = new PrismFileLog("stdout");
         m_prism = new Prism(m_log);
         m_propertiesToCheck = new ArrayList<Property>();
@@ -71,7 +80,7 @@ public class PrismConnectorAPI {
 
 
 
-    public synchronized static String modelCheckFromFileS (String modelFileName,
+    public synchronized String modelCheckFromFileS (String modelFileName,
             String propertiesFileName,
             String strategyFileName)
                     throws Exception {
@@ -82,7 +91,7 @@ public class PrismConnectorAPI {
      * Loads PRISM model from file
      * @param modelFileName
      */
-    public static void loadModel (String modelFileName) throws Exception {
+    public void loadModel (String modelFileName) throws Exception {
         try { // PRISM model parsing	
             modelFileName =    modelFileName.replaceAll ("\\\"", "");
             m_modulesFile = m_prism.parseModelFile(new File(modelFileName));
@@ -103,7 +112,7 @@ public class PrismConnectorAPI {
      * Loads PRISM properties from file
      * @param propertiesFileName
      */
-    public static void loadProperties (String propertiesFileName) throws Exception {
+    public void loadProperties (String propertiesFileName) throws Exception {
         try { // PRISM property parsing						
             m_propertiesFile = m_prism.parsePropertiesFile(m_modulesFile, new File(propertiesFileName));				
         }
@@ -126,7 +135,7 @@ public class PrismConnectorAPI {
      * @param constSwitch String encoding all undefined constant (parameter)  values (comma-separated, e.g., CONST1=VAL1,..,CONSTN=VALN)
      * @return
      */
-    public synchronized static String modelCheckFromFileS (String modelFileName,
+    public synchronized String modelCheckFromFileS (String modelFileName,
             String propertiesFileName,
             String strategyFileName,
             int propertyToCheck,

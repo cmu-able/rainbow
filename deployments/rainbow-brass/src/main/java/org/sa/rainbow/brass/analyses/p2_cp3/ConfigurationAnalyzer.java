@@ -53,6 +53,8 @@ public class ConfigurationAnalyzer extends P2CP3Analyzer {
 		TurtlebotModelInstance tb = getModels().getTurtlebotModel();
 		InstructionGraphModelInstance ig = getModels().getInstructionGraphModel();
 		
+		if (ig == null) return;
+		
 		EnumSet<Sensors> sensors = rs.getSensors();
 		Collection<String> components = tb.getActiveComponents();
 		StringBuffer log = new StringBuffer("Components: ");

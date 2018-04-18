@@ -10,7 +10,7 @@ public class PropertiesConfigurationSynthesizer {
     public static final String PROPS_PROPKEY = "prism.props";
     public static final String POLICY_PROPKEY = "prism.policy";
     
-    public static final String MODELS_PATH = "/Users/jcamara/Dropbox/Documents/Work/projects/rainbow/deployments/rainbow-brass/confsynthtmp/";
+    public static final String MODELS_PATH = "/Users/jcamara/Dropbox/Documents/Work/projects/rainbow/deployments/rainbow-brass/brass-p2-cp3/alloy";
     
     public static final Properties DEFAULT = new Properties ();
     static {

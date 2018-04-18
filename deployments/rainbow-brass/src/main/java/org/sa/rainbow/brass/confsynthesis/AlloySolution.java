@@ -5,6 +5,9 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
 import org.json.simple.JSONObject;
+
+import edu.mit.csail.sdg.alloy4.Err;
+
 import org.json.simple.JSONArray;
 
 /**
@@ -231,7 +234,7 @@ public class AlloySolution {
 	
 	
 	
-	public static void main(String[] args){
+	public static void main(String[] args) throws Exception{
 		
 		AlloyConnector ac = new AlloyConnector();
 		

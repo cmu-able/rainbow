@@ -109,8 +109,8 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
         JsonObject msg = new JsonObject ();
         msg.addProperty ("msg", message);
         msg.addProperty ("sim_time", -1);
-        json.addProperty ("STATUS", status);
-        json.add ("MESSAGE", msg);
+        json.addProperty ("status", status);
+        json.add ("message", msg);
     }
 
     @Override

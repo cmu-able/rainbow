@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.LinkedList;
 
 import org.json.simple.JSONArray;
@@ -15,9 +16,18 @@ import org.sa.rainbow.brass.confsynthesis.PropertiesSimpleConfigurationStore;
 public class SimpleConfigurationStore implements ConfigurationProvider {
 
 	public HashMap<String, SimpleConfiguration> m_configuration_objects = new HashMap<String, SimpleConfiguration>();
-	private String m_source = PropertiesSimpleConfigurationStore.DEFAULT.getProperty(PropertiesSimpleConfigurationStore.CONFIGURATIONS_SOURCE_PROPKEY);
+	private String m_source;
 	private String m_conf_prefix = "sol_";
 	
+	
+	public SimpleConfigurationStore() {
+		this(PropertiesSimpleConfigurationStore.DEFAULT);
+	}
+	
+	public SimpleConfigurationStore(Properties props) {
+		m_source = props.getProperty(PropertiesSimpleConfigurationStore.CONFIGURATIONS_SOURCE_PROPKEY);
+	}
+
 	public void populate(){
 		System.out.println("Reading from"+m_source);
 		loadFromFile(m_source);

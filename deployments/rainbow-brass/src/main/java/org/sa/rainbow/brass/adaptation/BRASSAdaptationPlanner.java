@@ -293,7 +293,7 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
 
                                 MapTranslator.exportMapTranslation (
                                         Rainbow.instance ().getProperty (PropertiesConnector.PRISM_MODEL_PROPKEY));
-                                PrismConnectorAPI.loadModel (
+                                PrismConnectorAPI.instance().loadModel (
                                         Rainbow.instance ().getProperty (PropertiesConnector.PRISM_MODEL_PROPKEY));
                                 String m_consts = MapTranslator.INITIAL_ROBOT_LOCATION_CONST + "="
                                         + String.valueOf (map.getNodeId (label)) + ","
@@ -305,7 +305,7 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
 
                                 System.out.println ("Generating last resort plan for " + m_consts);
                                 String result;
-                                result = PrismConnectorAPI.modelCheckFromFileS (
+                                result = PrismConnectorAPI.instance().modelCheckFromFileS (
                                         Rainbow.instance ().getProperty (PropertiesConnector.PRISM_MODEL_PROPKEY),
                                         Rainbow.instance ().getProperty (PropertiesConnector.PRISM_PROPERTIES_PROPKEY),
                                         /*Rainbow.instance ().getProperty (PropertiesConnector.PRISM_ADV_EXPORT_PROPKEY)*/"lastResortPolicy",

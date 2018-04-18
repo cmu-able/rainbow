@@ -52,7 +52,7 @@ public class DecisionEngine {
         m_export_path = m_export_path.replaceAll ("\\\"", "");
         m_properties_file = props.getProperty(PropertiesConnector.PRISM_PROPERTIES_PROPKEY);
         m_mt = new MapTranslator ();
-        new PrismConnectorAPI (); // PRISM invoked via API
+        PrismConnectorAPI.instance(); // PRISM invoked via API
         m_origin="";
         m_destination="";
         m_selected_candidate_score=0.0;
@@ -115,7 +115,7 @@ public class DecisionEngine {
             System.out.println(m_consts);
             String result;
             for (List candidate_key : m_candidates.keySet() ){                           	
-                result = PrismConnectorAPI.modelCheckFromFileS (m_candidates.get(candidate_key), m_properties_file, m_candidates.get (candidate_key), -1, m_consts);
+                result = PrismConnectorAPI.instance().modelCheckFromFileS (m_candidates.get(candidate_key), m_properties_file, m_candidates.get (candidate_key), -1, m_consts);
                 
                 String[] results = result.split(",");
                 ArrayList<Double> resultItems = new ArrayList<Double>();

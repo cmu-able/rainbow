@@ -82,56 +82,13 @@ public class BRASSMissionAnalyzer extends P2CP1Analyzer {
 			IInstruction currentInst = igModel.getCurrentInstruction();
 
 			// The current instruction is of type MoveAbsH
-			if (currentInst instanceof MoveAbsHInstruction) {
-				MoveAbsHInstruction currentMoveAbsH = (MoveAbsHInstruction) currentInst;
-				MoveAbsHInstruction prevMoveAbsH = getPreviousMoveAbsH(currentMoveAbsH, igModel);
-
-				double sourceX;
-				double sourceY;
-				double targetX = currentMoveAbsH.getTargetX();
-				double targetY = currentMoveAbsH.getTargetY();
-
-				if (prevMoveAbsH != null) {
-					sourceX = prevMoveAbsH.getTargetX();
-					sourceY = prevMoveAbsH.getTargetY();
-				} else {
-					// The current instruction is the first MoveAbsH instruction in IG
-					// Use the initial pose as the source pose
-					sourceX = missionState.getInitialPose().getX();
-					sourceY = missionState.getInitialPose().getY();
-				}
-
-				// Find the corresponding environment map nodes of the source and target
-				// positions
-				// Node naming assumption: node's label is lX where X is the order in which the
-				// node is added
-				int numNodes = envMap.getNodeCount() + 1;
-				String n = "l" + numNodes;
-				String na = envMap.getNode(sourceX, sourceY).getLabel();
-				String nb = envMap.getNode(targetX, targetY).getLabel();
-
-				// Update the environment map
-				String rx = Double.toString(pose.getX());
-				String ry = Double.toString(pose.getY());
-				InsertNodeCmd insertNodeCmd = getModels().getEnvMapModel().getCommandFactory().insertNodeCmd(n, na, nb,
-						rx, ry, "true");
-				log("Inserting node '" + n + "' at (" + rx + ", " + ry + ") between " + na + " and " + nb);
-
-				// Set robot obstructed flag -- trigger planning for adaptation
-				SetModelProblemCmd cmd1 = getModels().getRainbowStateModel().getCommandFactory()
-						.setModelProblem(CP3ModelState.INSTRUCTION_GRAPH_FAILED);
-				SetModelProblemCmd cmd2 = getModels().getRainbowStateModel().getCommandFactory()
-						.setModelProblem(CP3ModelState.IS_OBSTRUCTED);
-
-				SetExecutionFailedCmd resetFailedCmd = getModels().getInstructionGraphModel().getCommandFactory()
-						.setExecutionFailedCmd("false");
-
-				// Send the commands -- different models, so can't bundle them
-				m_modelUSPort.updateModel(resetFailedCmd);
-				m_modelUSPort.updateModel(insertNodeCmd);
-				m_modelUSPort.updateModel(Arrays.asList(new IRainbowOperation[] { cmd1, cmd2 }), true);
-				m_awaitingNewIG = true;
-			}
+			insertNodeIntoMap(pose, currentInst);
+			SetModelProblemCmd cmd1 = getModels().getRainbowStateModel().getCommandFactory()
+					.setModelProblem(CP3ModelState.INSTRUCTION_GRAPH_FAILED);
+			SetModelProblemCmd cmd2 = getModels().getRainbowStateModel().getCommandFactory()
+					.setModelProblem(CP3ModelState.IS_OBSTRUCTED);
+			m_modelUSPort.updateModel(Arrays.asList(new IRainbowOperation[] { cmd1, cmd2 }), true);
+			m_awaitingNewIG = true;
 		} else if (currentOK && !emptyInstructions(igModel) && getModels().getRainbowStateModel().getModelInstance()
 				.getProblems().contains(RainbowState.CP3ModelState.IS_OBSTRUCTED)) {
 			// New IG resumed after robot obstructed
@@ -154,19 +111,6 @@ public class BRASSMissionAnalyzer extends P2CP1Analyzer {
 		return igProgress.getInstructions() == null || igProgress.getInstructions().isEmpty();
 	}
 
-	private MoveAbsHInstruction getPreviousMoveAbsH(MoveAbsHInstruction currentMoveAbsH,
-			InstructionGraphProgress igProgress) {
-		int j = Integer.valueOf(currentMoveAbsH.getInstructionLabel()) - 1;
-		for (int i = j; i > 0; i--) {
-			String label = String.valueOf(i);
-			IInstruction instruction = igProgress.getInstruction(label);
 
-			if (instruction instanceof MoveAbsHInstruction)
-				return (MoveAbsHInstruction) instruction;
-		}
-
-		// No previous MoveAbsH instruction
-		return null;
-	}
 
 }

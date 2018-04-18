@@ -1,24 +1,20 @@
 package org.sa.rainbow.brass.confsynthesis;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Properties;
 
 import org.sa.rainbow.brass.adaptation.PrismConnectorAPI;
 import org.sa.rainbow.brass.adaptation.PrismPolicy;
-import org.sa.rainbow.brass.confsynthesis.AlloyConnector;
-import org.sa.rainbow.brass.confsynthesis.AlloySolution;
-import org.sa.rainbow.brass.confsynthesis.ConstantDefinition;
-import org.sa.rainbow.brass.confsynthesis.PropertiesConfigurationSynthesizer;
-import org.sa.rainbow.brass.confsynthesis.SpaceIterator;
 import org.sa.rainbow.brass.confsynthesis.AlloySolution.AlloySolutionNode;
+import org.sa.rainbow.core.error.RainbowException;
 
-import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotState;
-import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotState.Sensors;
+import edu.mit.csail.sdg.alloy4.Err;
 
 public class ConfigurationSynthesizer implements ConfigurationProvider {
 
@@ -65,17 +61,27 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 	private HashMap<String, ConstantDefinition> m_constant_definitions = new HashMap<String, ConstantDefinition>();
 
 	public String m_res="result";
-	public String m_myConstraintModel = PropertiesConfigurationSynthesizer.DEFAULT.getProperty(PropertiesConfigurationSynthesizer.CONSTRAINTMODEL_PROPKEY);
-	public String m_myBaseModel = PropertiesConfigurationSynthesizer.DEFAULT.getProperty(PropertiesConfigurationSynthesizer.BASEMODEL_PROPKEY);
-	public String m_myModel = PropertiesConfigurationSynthesizer.DEFAULT.getProperty(PropertiesConfigurationSynthesizer.TEMPMODEL_PROPKEY);
-	public String m_myPolicy = PropertiesConfigurationSynthesizer.DEFAULT.getProperty(PropertiesConfigurationSynthesizer.POLICY_PROPKEY);
-	public String m_myProps = PropertiesConfigurationSynthesizer.DEFAULT.getProperty(PropertiesConfigurationSynthesizer.PROPS_PROPKEY);;
+	public String m_myConstraintModel;
+	public String m_myBaseModel;
+	public String m_myModel;
+	public String m_myPolicy;
+	public String m_myProps;
 	
 	public static PrismConnectorAPI m_pc;
 	
 	public ConfigurationSynthesizer(){
+		this(PropertiesConfigurationSynthesizer.DEFAULT);
+	}
+	
+	public ConfigurationSynthesizer(Properties props) {
+		m_myConstraintModel = props.getProperty(PropertiesConfigurationSynthesizer.CONSTRAINTMODEL_PROPKEY);
+		m_myBaseModel = props.getProperty(PropertiesConfigurationSynthesizer.BASEMODEL_PROPKEY);
+		m_myModel = props.getProperty(PropertiesConfigurationSynthesizer.TEMPMODEL_PROPKEY);
+		m_myPolicy = props.getProperty(PropertiesConfigurationSynthesizer.POLICY_PROPKEY);
+		m_myProps = props.getProperty(PropertiesConfigurationSynthesizer.PROPS_PROPKEY);;
+
 		try{
-			m_pc = new PrismConnectorAPI();
+			m_pc = PrismConnectorAPI.instance();
 		} catch (Exception e){
 			System.out.println("Configuration Synthesizer: Error initializing PRISM connector API.");
 		}
@@ -128,10 +134,15 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 	 * Generates set of configurations and their corresponding translations into prism predicates
 	 * @param modelFile Alloy model file
 	 * @return number of solutions generated
+	 * @throws RainbowException 
 	 */
-	public int generateConfigurations(){
+	public int generateConfigurations() throws RainbowException{
 		AlloyConnector ac = new AlloyConnector();
-		ac.generateSolutions(m_myConstraintModel);
+		try {
+			ac.generateSolutions(m_myConstraintModel);
+		} catch (Err e) {
+			throw new RainbowException(e);
+		}
 		for (int i=0; i<ac.getSolutions().size();i++){
 			String strSolId = AlloyConnector.SOLUTION_STRING+String.valueOf(i);
 			String strSol = ac.getSolution(strSolId);
@@ -232,7 +243,7 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 	}
 			
 	
-	public void generateReconfigurations(){
+	public void generateReconfigurations() throws RainbowException{
 		m_reconfigurations.clear();
 		String constantdefs = new String("");
 		for (int i=0; i<m_allinstances.size();i++){
@@ -245,7 +256,11 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 
 		for (String s: si.getCombinations()){
 			System.out.println("Init config: "+s);
-			m_reconfigurations.put(s, generateReconfiguration(s));
+			try {
+				m_reconfigurations.put(s, generateReconfiguration(s));
+			} catch (IOException e) {
+				throw new RainbowException(e);
+			}
 		}
 
 		int empty=0;
@@ -265,7 +280,7 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 		
 	}
 	
-	public ArrayList<String> generateReconfiguration(String from){
+	public ArrayList<String> generateReconfiguration(String from) throws IOException{
 		// Gets base model template, appends encoding of configuration formulas, target configuration predicate, and writes it to a temp model file
 				TextFileHandler fBaseModel = new TextFileHandler(m_myBaseModel);
 				ArrayList<String> baseCode = fBaseModel.readFileLines();
@@ -303,10 +318,15 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 	}
 	
 	
-	public ArrayList<String> generateReconfiguration(String from, String to){
+	public ArrayList<String> generateReconfiguration(String from, String to) throws RainbowException{
 		// Gets base model template, appends encoding of configuration formulas, target configuration predicate, and writes it to a temp model file
 				TextFileHandler fBaseModel = new TextFileHandler(m_myBaseModel);
-				ArrayList<String> baseCode = fBaseModel.readFileLines();
+				ArrayList<String> baseCode;
+				try {
+					baseCode = fBaseModel.readFileLines();
+				} catch (IOException e1) {
+					throw new RainbowException(e1);
+				}
 				
 				// For a given configuration
 				for (int i=0; i<m_configurationPredicates.size();i++){	
@@ -341,7 +361,7 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 	}
 	
 	
-	public void generateReconfigurationsFrom(String from){
+	public void generateReconfigurationsFrom(String from) throws RainbowException{
 		m_reconfigurations.clear();
 		for (String toConf : m_configuration_dictionary.keySet()){
 			m_reconfigurations.put(toConf, generateReconfiguration(from, toConf));
@@ -372,7 +392,7 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 		return getLegalTargetConfigurations();
 	}
 	
-	public void populate(){
+	public void populate() throws RainbowException{
 		String currentConfStr="markerLocalization0_INIT=0,markerRecognizer0_INIT=0,amcl0_INIT=1,laserscanNodelet0_INIT=1,mrpt0_INIT=2,camera0_INIT=1,lidar0_INIT=1,headlamp0_INIT=0,kinect0_INIT=2,fullSpeedSetting0_INIT=0,halfSpeedSetting0_INIT=1";
 		generateConfigurations();
 		addConfigurationInstances();

@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.sa.rainbow.brass.PropertiesConnector;
 import org.sa.rainbow.brass.adaptation.PrismPolicy;
-import org.sa.rainbow.brass.plan.p2_cp3.PolicyToIGCP3;
 import org.sa.rainbow.brass.confsynthesis.ConfigurationSynthesizer;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.plan.p2.DecisionEngine;

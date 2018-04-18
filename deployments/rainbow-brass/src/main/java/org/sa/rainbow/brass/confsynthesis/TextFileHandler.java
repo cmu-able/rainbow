@@ -18,7 +18,7 @@ public class TextFileHandler{
 		m_fileName = fileName;
 	}
 	
-	public ArrayList<String> readFileLines(){		
+	public ArrayList<String> readFileLines() throws IOException{		
 		 ArrayList<String> list = new ArrayList<String>();
 	     try (BufferedReader br = new BufferedReader(new FileReader(m_fileName)))
 	     {
@@ -28,7 +28,7 @@ public class TextFileHandler{
 	         }	
 	     } catch (IOException e) {
 	         System.out.println("There was a problem reading from file "+m_fileName);
-	         System.exit(-1);
+	         throw e;
 	     } 
 	     return list;
 	}

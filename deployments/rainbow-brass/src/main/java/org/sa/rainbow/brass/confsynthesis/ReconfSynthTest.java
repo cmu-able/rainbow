@@ -6,29 +6,13 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotState.Sensors;
+
 import com.google.common.base.Objects;
 
-public class ReconfSynthTest {
-	public static enum Sensors {KINECT, BACK_CAMERA, LIDAR, HEADLAMP}
+public class ReconfSynthTest extends ReconfSynth {
+
 	
-	public static final HashMap<Sensors, String> m_sensor_names;
-	static{
-		m_sensor_names = new HashMap<Sensors, String>();
-		m_sensor_names.put(Sensors.KINECT, "kinect0");
-		m_sensor_names.put(Sensors.BACK_CAMERA, "camera0");
-		m_sensor_names.put(Sensors.LIDAR, "lidar0");
-		m_sensor_names.put(Sensors.HEADLAMP, "headlamp0");
-	}
-	
-	public static final HashMap<String, String> m_component_names;
-	static{
-		m_component_names = new HashMap<String, String>();
-		m_component_names.put("amcl", "amcl0");
-		m_component_names.put("mrpt", "mrpt0");
-		m_component_names.put("laserScan_nodelet", "laserscanNodelet0");
-		m_component_names.put("marker_pose_publisher", "markerLocalization0");
-		m_component_names.put("aruco_marker_publisher_front", "markerRecognizer0");
-	}
 	
 	
 	/**
@@ -106,30 +90,30 @@ public class ReconfSynthTest {
 		
 		int i=0;
 		for(String c : getInactiveComponents()){
-			if (!Objects.equal(null, m_component_names.get(c))){
+			if (!Objects.equal(null, COMPONENT_NAMES.get(c))){
 				if (i>0)
 					res+=",";
-				res+=m_component_names.get(c)+"_INIT="+ConfigurationSynthesizer.m_component_modes.get("DISABLED");
+				res+=COMPONENT_NAMES.get(c)+"_INIT="+ConfigurationSynthesizer.m_component_modes.get("DISABLED");
 				i++;
 			}
 		}
 		
 		for(String c : getActiveComponents()){
-			if (!Objects.equal(null, m_component_names.get(c))){
+			if (!Objects.equal(null, COMPONENT_NAMES.get(c))){
 				res+=",";
-				res+=m_component_names.get(c)+"_INIT="+ConfigurationSynthesizer.m_component_modes.get("ENABLED");
+				res+=COMPONENT_NAMES.get(c)+"_INIT="+ConfigurationSynthesizer.m_component_modes.get("ENABLED");
 			}
 		}
 		
 		for(String c : getFailedComponents()){
-			if (!Objects.equal(null, m_component_names.get(c))){
+			if (!Objects.equal(null, COMPONENT_NAMES.get(c))){
 				res+=",";
-				res+=m_component_names.get(c)+"_INIT="+ConfigurationSynthesizer.m_component_modes.get("OFFLINE");
+				res+=COMPONENT_NAMES.get(c)+"_INIT="+ConfigurationSynthesizer.m_component_modes.get("OFFLINE");
 			}
 		}
 
 		for (Sensors s: getAvailableSensors()){
-			if (!Objects.equal(null, m_sensor_names.get(s))){
+			if (!Objects.equal(null, SENSOR_NAMES.get(s))){
 				boolean sensorOn = false;
 				switch (s){
 				case KINECT:
@@ -166,13 +150,13 @@ public class ReconfSynthTest {
 				if (sensorOn)
 					compModeStr = ConfigurationSynthesizer.m_component_modes.get("ENABLED");
 				res+=",";
-				res+=m_sensor_names.get(s)+"_INIT="+compModeStr;
+				res+=SENSOR_NAMES.get(s)+"_INIT="+compModeStr;
 			}
 		}
 		
 		for (Sensors s: getFailedSensors()){
 			res+=",";
-			res+=m_sensor_names.get(s)+"_INIT="+ConfigurationSynthesizer.m_component_modes.get("OFFLINE");
+			res+=SENSOR_NAMES.get(s)+"_INIT="+ConfigurationSynthesizer.m_component_modes.get("OFFLINE");
 		}
 		
 		res+=",fullSpeedSetting0_INIT="+ConfigurationSynthesizer.m_component_modes.get("DISABLED"); // This has to be changed!! Hardwired for the time being.

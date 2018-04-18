@@ -96,7 +96,7 @@ public class DecisionEngine {
             System.out.println(m_consts);
             String result;
             for (List candidate_key : m_candidates.keySet() ){                           	
-                result = PrismConnectorAPI.modelCheckFromFileS (m_candidates.get (candidate_key), m_export_path + "/mapbot.props",
+                result = PrismConnectorAPI.instance().modelCheckFromFileS (m_candidates.get (candidate_key), m_export_path + "/mapbot.props",
                         m_candidates.get (candidate_key), 0, m_consts);
                 if (!Objects.equal(result, "Infinity")) {
                     m_scoreboard.put(candidate_key, Double.valueOf(result));
