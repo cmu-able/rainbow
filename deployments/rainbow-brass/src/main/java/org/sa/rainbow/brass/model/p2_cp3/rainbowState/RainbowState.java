@@ -17,6 +17,7 @@ public class RainbowState {
 	private ModelReference m_model;
 	private EnumSet<CP3ModelState> m_problems;
 	private boolean m_planIssued;
+	public boolean m_waitForIG;
 	
 	public RainbowState(ModelReference model) {
 		m_model = model;
@@ -45,6 +46,10 @@ public class RainbowState {
 
 	public ModelReference getModelReference() {
 		return m_model;
+	}
+	
+	public synchronized boolean waitForIG() {
+		return m_waitForIG;
 	}
 
 	synchronized public RainbowState copy() {

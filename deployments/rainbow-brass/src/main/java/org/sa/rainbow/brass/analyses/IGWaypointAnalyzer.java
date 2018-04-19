@@ -74,6 +74,7 @@ public class IGWaypointAnalyzer extends P2Analyzer implements IRainbowModelChang
 				currentSrc = tgtWp;
 			}
 		}		
+		getModels().getRainbowStateModel().getModelInstance().m_waitForIG = false;
 	}
 
 }
