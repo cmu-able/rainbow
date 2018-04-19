@@ -105,7 +105,7 @@ public class DecisionEngine {
      *            String robot Heading (needs to be converted to an String encoding an int from MissionState.Heading)
      * @throws Exception
      */
-    public static void scoreCandidates (EnvMap map, String batteryLevel, String robotHeading) throws Exception {
+    public static void scoreCandidates (EnvMap map, long batteryLevel, int robotHeading) throws Exception {
         m_scoreboard.clear();
         
         synchronized (map){

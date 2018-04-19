@@ -87,11 +87,11 @@ public class DecisionEngine {
      *            String robot Heading (needs to be converted to an String encoding an int from MissionState.Heading)
      * @throws Exception
      */
-    public static void scoreCandidates (EnvMap map, String batteryLevel, String robotHeading) throws Exception {
+    public static void scoreCandidates (EnvMap map, long batteryLevel, int robotHeading) throws Exception {
         m_scoreboard.clear(); 
         synchronized (map){
             String m_consts = MapTranslator.INITIAL_ROBOT_LOCATION_CONST+"="+String.valueOf(map.getNodeId(m_origin)) +","+ MapTranslator.TARGET_ROBOT_LOCATION_CONST 
-                    + "="+String.valueOf(map.getNodeId(m_destination))+ "," + MapTranslator.INITIAL_ROBOT_BATTERY_CONST+"="+batteryLevel+","+MapTranslator.INITIAL_ROBOT_HEADING_CONST+"="+robotHeading;
+                    + "="+String.valueOf(map.getNodeId(m_destination))+ "," + MapTranslator.INITIAL_ROBOT_BATTERY_CONST+"="+Long.toString(batteryLevel)+","+MapTranslator.INITIAL_ROBOT_HEADING_CONST+"="+Integer.toString(robotHeading);
 
             System.out.println(m_consts);
             String result;
@@ -144,7 +144,7 @@ public class DecisionEngine {
         setMap(dummyMap);
         for (int i=15000; i< 15500; i+=500){
             generateCandidates("l5", "l1");
-            scoreCandidates(dummyMap, String.valueOf(i), "1");
+            scoreCandidates(dummyMap, i, 1);
             System.out.println(String.valueOf(m_scoreboard));	        
             pp = new PrismPolicy(selectPolicy());
             pp.readPolicy();  

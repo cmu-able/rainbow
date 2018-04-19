@@ -76,7 +76,7 @@ public class MapTranslator {
     public static final String TARGET_ROBOT_LOCATION_CONST = "TARGET_LOCATION";
     public static final String ROBOT_BATTERY_VAR = "b";
     public static final String ROBOT_BATTERY_RANGE_MIN = "0";
-    public static final String ROBOT_BATTERY_RANGE_MAX = "32560";
+    public static long ROBOT_BATTERY_RANGE_MAX = 180000;
     public static final String ROBOT_BATTERY_RANGE_MAX_CONST = "MAX_BATTERY";
     public static final String INITIAL_ROBOT_BATTERY_CONST = "INITIAL_BATTERY";
     public static final String ROBOT_BATTERY_DELTA = "10"; // Constant for the time being, this should be transition+context dependent

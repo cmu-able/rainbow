@@ -231,7 +231,7 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
                                     .getLabel ();
 
                             DecisionEngine.generateCandidates (label, ms.getTargetWaypoint (), true); // Generate candidate solutions to go from current waypoint to target one (inhibited tactics, just move commands)
-                            DecisionEngine.scoreCandidates (map, MapTranslator.ROBOT_BATTERY_RANGE_MAX, "2"); // Property 1 in file deals with time subject to target reachability (R{"time"}min=? [ F goal ])
+                            DecisionEngine.scoreCandidates (map, MapTranslator.ROBOT_BATTERY_RANGE_MAX, 2); // Property 1 in file deals with time subject to target reachability (R{"time"}min=? [ F goal ])
 
                             PrismPolicy prismPolicy = new PrismPolicy (DecisionEngine.selectPolicy ());
                             prismPolicy.readPolicy ();
@@ -277,8 +277,8 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
                             String label = node.getLabel ();
 
                             DecisionEngine.generateCandidates (label, ms.getTargetWaypoint ()); // Generate candidate solutions to go from current waypoint to target one
-                            DecisionEngine.scoreCandidates (map, String.valueOf (Math.round (ms.getBatteryCharge ())),
-                                    "1"); // Property 1 in file deals with time subject to target reachability (R{"time"}min=? [ F goal ])
+                            DecisionEngine.scoreCandidates (map, Math.round (ms.getBatteryCharge ()),
+                                    1); // Property 1 in file deals with time subject to target reachability (R{"time"}min=? [ F goal ])
 
                             // Translate model to the IG
                             // Create a NewInstrcutionGraph object and enqueue it on the adaptation port, set new deadline

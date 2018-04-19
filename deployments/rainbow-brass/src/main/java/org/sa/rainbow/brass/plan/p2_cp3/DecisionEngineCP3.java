@@ -4,12 +4,14 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.sa.rainbow.brass.PropertiesConnector;
 import org.sa.rainbow.brass.adaptation.PrismPolicy;
 import org.sa.rainbow.brass.confsynthesis.ConfigurationSynthesizer;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.plan.p2.DecisionEngine;
+import org.sa.rainbow.brass.plan.p2.MapTranslator;
 
 public class DecisionEngineCP3 extends DecisionEngine {
 	
@@ -18,6 +20,12 @@ public class DecisionEngineCP3 extends DecisionEngine {
     public static double m_safetyWeight=0.5;
 	public static double m_timelinessWeight=0.5;
    
+	public static void init (Properties props) throws Exception {
+		DecisionEngine.init(props);
+        MapTranslator.ROBOT_BATTERY_RANGE_MAX = 180000;
+
+	}
+	
    public static Double getMaxTime(){
 	    	return getMaxItem(0);
 	    }    
@@ -102,7 +110,7 @@ public class DecisionEngineCP3 extends DecisionEngine {
         	System.out.println("Generating candidates for l1-l4...");
             generateCandidates("l1", "l4");
         	System.out.println("Scoring candidates...");
-            scoreCandidates(dummyMap, String.valueOf(i), "1");
+            scoreCandidates(dummyMap, i, 1);
             System.out.println(String.valueOf(m_scoreboard));	
             pp = new PrismPolicy(selectPolicy());
             pp.readPolicy();  

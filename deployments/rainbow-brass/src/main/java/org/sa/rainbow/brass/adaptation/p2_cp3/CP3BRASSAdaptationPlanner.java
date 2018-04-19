@@ -10,9 +10,13 @@ import org.sa.rainbow.brass.confsynthesis.ReconfSynthReal;
 import org.sa.rainbow.brass.das.BRASSHttpConnector;
 import org.sa.rainbow.brass.das.IBRASSConnector.DASPhase2StatusT;
 import org.sa.rainbow.brass.das.IBRASSConnector.Phases;
+import org.sa.rainbow.brass.model.instructions.IInstruction;
+import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
+import org.sa.rainbow.brass.model.instructions.MoveAbsHInstruction;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.p2_cp3.CP3ModelAccessor;
 import org.sa.rainbow.brass.model.p2_cp3.mission.MissionState.Heading;
+import org.sa.rainbow.brass.model.p2_cp3.mission.MissionState.LocationRecording;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowState.CP3ModelState;
 import org.sa.rainbow.brass.plan.p2_cp3.DecisionEngineCP3;
 import org.sa.rainbow.brass.plan.p2_cp3.PolicyToIGCP3;
@@ -151,10 +155,11 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 
 	@Override
 	protected void runAction() {
-		if (m_models.getInstructionGraphModel().getModelInstance().getInstructions().isEmpty()) 
+		InstructionGraphProgress igModel = m_models.getInstructionGraphModel().getModelInstance();
+		if (igModel.getInstructions().isEmpty()) 
 			return;
 		if (m_adaptationEnabled && reallyHasError() && !m_executingPlan ) {
-			 BRASSHttpConnector.instance (Phases.Phase2).reportStatus (DASPhase2StatusT.ADAPTING.name(), "Detected an error");
+//			 BRASSHttpConnector.instance (Phases.Phase2).reportStatus (DASPhase2StatusT.ADAPTING.name(), "Detected an error");
 
 			m_errorDetected = false;
 			m_reportingPort.info(getComponentType(), "Determining an appropriate adaptation");
@@ -173,15 +178,28 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 			EnvMap copy = m_models.getEnvMapModel().getModelInstance().copy();
 			DecisionEngineCP3.setMap(copy);
 			// Insert a node where the robot is
-//			copy.insertNode(n, na, nb, x, y, false);
 
-			DecisionEngineCP3.generateCandidates("l1", "l2");
+//			IInstruction ci = igModel.getCurrentInstruction();
+//			LocationRecording cp = m_models.getMissionStateModel().getModelInstance().getCurrentPose();
+//			String srcLabel = null;
+//			String tgtLabel = null;
+//			if (ci instanceof MoveAbsHInstruction) {
+//				MoveAbsHInstruction mi = (MoveAbsHInstruction) ci;
+//				srcLabel = copy.getNextNodeId();
+//				srcLabel = copy.insertNode(srcLabel, mi.getSourceWaypoint(), mi.getTargetWaypoint(), cp.getX(), cp.getY(), false);	
+//				tgtLabel = mi.getTargetWaypoint();
+//			}
+//			else {
+//				
+//			}
+
+			DecisionEngineCP3.generateCandidates("l1", "l8");
 			try {
 				DecisionEngineCP3
-						.scoreCandidates(copy, String.valueOf(m_models.getRobotStateModel().getModelInstance().getCharge()),
-								Integer.toString(Heading.convertFromRadians(
+						.scoreCandidates(copy, Math.round(m_models.getRobotStateModel().getModelInstance().getCharge()),
+								Heading.convertFromRadians(
 										m_models.getMissionStateModel().getModelInstance().getCurrentPose().getRotation())
-										.ordinal()));
+										.ordinal());
 				PrismPolicy pp = new PrismPolicy(DecisionEngineCP3.selectPolicy());
 				pp.readPolicy();
 				String plan = pp.getPlan(m_configurationSynthesizer, confInitString).toString();
