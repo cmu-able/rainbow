@@ -1,6 +1,8 @@
 package org.sa.rainbow.brass.adaptation.p2_cp3;
 
 import java.util.EnumSet;
+import java.util.Iterator;
+import java.util.List;
 
 import org.sa.rainbow.brass.adaptation.BrassPlan;
 import org.sa.rainbow.brass.adaptation.NewInstructionGraph;
@@ -179,21 +181,32 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 			DecisionEngineCP3.setMap(copy);
 			// Insert a node where the robot is
 
-//			IInstruction ci = igModel.getCurrentInstruction();
-//			LocationRecording cp = m_models.getMissionStateModel().getModelInstance().getCurrentPose();
-//			String srcLabel = null;
-//			String tgtLabel = null;
-//			if (ci instanceof MoveAbsHInstruction) {
-//				MoveAbsHInstruction mi = (MoveAbsHInstruction) ci;
-//				srcLabel = copy.getNextNodeId();
-//				srcLabel = copy.insertNode(srcLabel, mi.getSourceWaypoint(), mi.getTargetWaypoint(), cp.getX(), cp.getY(), false);	
-//				tgtLabel = mi.getTargetWaypoint();
-//			}
-//			else {
-//				
-//			}
-
-			DecisionEngineCP3.generateCandidates("l1", "l8");
+			IInstruction ci = igModel.getCurrentInstruction();
+			LocationRecording cp = m_models.getMissionStateModel().getModelInstance().getCurrentPose();
+			String srcLabel = null;
+			String tgtLabel = null;
+			if (ci instanceof MoveAbsHInstruction) {
+				MoveAbsHInstruction mi = (MoveAbsHInstruction) ci;
+				srcLabel = copy.getNextNodeId();
+				srcLabel = copy.insertNode(srcLabel, mi.getSourceWaypoint(), mi.getTargetWaypoint(), cp.getX(), cp.getY(), false);	
+				tgtLabel = mi.getTargetWaypoint();
+			}
+			else {
+				List<? extends IInstruction> remainingInstructions = igModel.getRemainingInstructions();
+				for (Iterator iterator = remainingInstructions.iterator(); iterator.hasNext() && !(ci instanceof MoveAbsHInstruction);) {
+					ci = (IInstruction) iterator.next();
+				}
+				if (ci != null) {
+					MoveAbsHInstruction mi = (MoveAbsHInstruction) ci;
+					srcLabel = mi.getSourceWaypoint();
+					tgtLabel = mi.getTargetWaypoint();
+				}
+				else {
+					m_reportingPort.error(getComponentType(), "There are no move instructions left -- the last instruction in an instruction graph for BRASS should always be a move");
+				}
+			}
+			DecisionEngineCP3.generateCandidates(srcLabel, m_models.getMissionStateModel().getModelInstance().getTargetWaypoint());
+//			DecisionEngineCP3.generateCandidates("l1", "l8");
 			try {
 				DecisionEngineCP3
 						.scoreCandidates(copy, Math.round(m_models.getRobotStateModel().getModelInstance().getCharge()),
@@ -203,12 +216,15 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 				PrismPolicy pp = new PrismPolicy(DecisionEngineCP3.selectPolicy());
 				pp.readPolicy();
 				String plan = pp.getPlan(m_configurationSynthesizer, confInitString).toString();
+				m_reportingPort.info(getComponentType(), "Planner chooses the plan " + plan);
 				PolicyToIGCP3 translator = new PolicyToIGCP3(pp, copy);
 				String translate = translator.translate(m_configurationSynthesizer, confInitString);
 				
 				BrassPlan nig = new NewInstructionGraph(m_models.getInstructionGraphModel(), translate);
 				AdaptationTree<BrassPlan> at = new AdaptationTree<> (nig);
 				m_executingPlan = true;
+				m_models.getRainbowStateModel().getModelInstance().m_waitForIG = true;
+
 				m_adaptationEnqueuePort.offerAdaptation (at, new Object[] {});
 			} catch (Exception e) {
 				e.printStackTrace();

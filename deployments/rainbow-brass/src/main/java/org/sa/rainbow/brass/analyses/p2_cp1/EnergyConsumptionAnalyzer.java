@@ -3,6 +3,7 @@ package org.sa.rainbow.brass.analyses.p2_cp1;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.sa.rainbow.brass.confsynthesis.Configuration;
@@ -52,14 +53,23 @@ public class EnergyConsumptionAnalyzer extends P2CP1Analyzer {
 		if (getModels().getInstructionGraphModel() == null)
 			return;
 		// Need to work out how to wait for planner in CP1 -- is it
-
+		if (getModels().getRainbowStateModel().getModelInstance().waitForIG())
+			return;
 		InstructionGraphProgress igModel = getModels().getInstructionGraphModel().getModelInstance();
 		IInstruction currentInstruction = igModel.getCurrentInstruction();
+		if (currentInstruction == m_prevAnalyzedAndPassedInstruction)
+			return;
+		
 		if (!(currentInstruction instanceof ChargeInstruction)) {
 			List<? extends IInstruction> remainingInstructions = igModel.getRemainingInstructions();
 			double batteryCharge = -1;
 			try {
 				batteryCharge = getModels().getRobotStateModel().getModelInstance().getCharge();
+				if (batteryCharge <= 0) {
+					IRainbowOperation op = getModels().getRainbowStateModel().getCommandFactory().setModelProblem(CP3ModelState.OUT_OF_BATTERY);
+					m_modelUSPort.updateModel(op);
+					return;
+				}
 			} catch (IllegalStateException e) {
 				// Don't have battery information yet
 				return;
@@ -67,11 +77,24 @@ public class EnergyConsumptionAnalyzer extends P2CP1Analyzer {
 			
 			// We need to break the instructions into chunks that are segmented by charge and then ask
 			// is there enough energy to get to each charge instruction or the target?
+			String tgtWP = getModels().getMissionStateModel().getModelInstance().getTargetWaypoint();
+			List<List<? extends IInstruction>> segments = InstructionGraphProgress.segmentByInstructionType(remainingInstructions, ChargeInstruction.class);
+			Iterator<List<? extends IInstruction>> it = segments.iterator();
+			boolean first = true;
+			boolean hasEnoughEnergy = true;
+			while (it.hasNext ()) {
+				if (first) {
+					first = false;
+					hasEnoughEnergy &= hasEnoughEnergy(currentInstruction, it.next(), tgtWP) < batteryCharge;
+				}
+				else {
+					hasEnoughEnergy &= hasEnoughEnergy(null, it.next(), tgtWP) < MapTranslator.ROBOT_BATTERY_RANGE_MAX;
+				}
+			}
 			
-			
-			double planEnergyConsumption = hasEnoughEnergy(currentInstruction, remainingInstructions);
-			boolean hasEnoughEnergy = batteryCharge >= planEnergyConsumption;
-			log("Current charge = " + batteryCharge + ", needed charge = " + planEnergyConsumption);
+//			double planEnergyConsumption = hasEnoughEnergy(currentInstruction, remainingInstructions);
+//			boolean hasEnoughEnergy = batteryCharge >= planEnergyConsumption;
+//			log("Current charge = " + batteryCharge + ", needed charge = " + planEnergyConsumption);
 			if (hasEnoughEnergy) {
 				// Keep track of the latest instruction that we have analyzed the accuracy
 				// property,
@@ -85,8 +108,7 @@ public class EnergyConsumptionAnalyzer extends P2CP1Analyzer {
 						.removeModelProblem(CP3ModelState.LOW_ON_BATTERY);
 				m_modelUSPort.updateModel(op);
 			} else if (!hasEnoughEnergy && !knowAboutLowBattery) {
-				log("Do not have enough battery. Current charge = " + batteryCharge + ", needed charge = "
-						+ planEnergyConsumption);
+				log("Do not have enough battery.");
 				LocationRecording pose = getModels().getMissionStateModel().getModelInstance().getCurrentPose();
 				insertNodeIntoMap(pose, currentInstruction);
 				IRainbowOperation op = getModels().getRainbowStateModel().getCommandFactory()
@@ -105,12 +127,12 @@ public class EnergyConsumptionAnalyzer extends P2CP1Analyzer {
 	   /**
      * Checks if the instructions can be completed with the remaining energy
      */
-    private double hasEnoughEnergy (IInstruction currentInstruction, List<? extends IInstruction> remainingInstructions) {
-        double planEnergyConsumption = getExpectedIGEnergyConsumption(currentInstruction, remainingInstructions);
+    private double hasEnoughEnergy (IInstruction currentInstruction, List<? extends IInstruction> remainingInstructions, String tgtWP) {
+        double planEnergyConsumption = getExpectedIGEnergyConsumption(currentInstruction, remainingInstructions, tgtWP);
         return planEnergyConsumption;
     }
     
-    private double getExpectedIGEnergyConsumption(IInstruction currentInstruction, List<? extends IInstruction> remainingInstructions) {
+    private double getExpectedIGEnergyConsumption(IInstruction currentInstruction, List<? extends IInstruction> remainingInstructions, String tgtWP) {
         double totalEnergy = 0;
 
         // Goal location
@@ -125,7 +147,7 @@ public class EnergyConsumptionAnalyzer extends P2CP1Analyzer {
         double sourceW = missionState.getCurrentPose().getRotation();
 
         List<IInstruction> allInstructions = new ArrayList<>();
-        allInstructions.add(currentInstruction);
+        if (currentInstruction != null) allInstructions.add(currentInstruction);
         allInstructions.addAll(remainingInstructions);
         String config = getModels().getRobotStateModel().getModelInstance().getConfigId();
         int i = 0;
@@ -134,7 +156,7 @@ public class EnergyConsumptionAnalyzer extends P2CP1Analyzer {
 
             // Special case: for the last instruction, only calculate the energy required to get
             // within a certain radius from the goal location
-            if (i == allInstructions.size() - 1 && instruction instanceof MoveAbsHInstruction) {
+            if (i == allInstructions.size() - 1 && instruction instanceof MoveAbsHInstruction && (((MoveAbsHInstruction )instruction).getTargetWaypoint().equals(tgtWP))) {
                 // For MoveAbsH, use the target location that is GOAL_RADIUS from the goal, and is nearest the source
                 Pair<Double, Double> targetLocation = getNearestTargetLocation(sourceX, sourceY, goalX, goalY, GOAL_RADIUS);
                 double targetX = targetLocation.firstValue();
@@ -176,14 +198,11 @@ public class EnergyConsumptionAnalyzer extends P2CP1Analyzer {
                 sourceX = sourceX + forward.getDistance() * Math.cos(sourceW);;
                 sourceY = sourceY + forward.getDistance() * Math.sin(sourceW);
             } else if (instruction instanceof ChargeInstruction) {
-                ChargeInstruction charge = (ChargeInstruction) instruction;
-                EnergyConsumptionPredictor bp = new EnergyConsumptionPredictor();
-//                double energyGain = bp.batteryCharge(charge.getChargingTime());
-                double energyGain = 1;
+            	// This should not happen because we should segment on Charges
+            	//                double energyGain = bp.batteryCharge(charge.getChargingTime());
                 // Charge should be refilling the battery, and so totalEnergy consumed
                 // should be reset to 0 (i.e., after this instruction we have 
-                
-                instEnergy = -1 * energyGain;
+               
             }
             else if (instruction instanceof SetConfigInstruction) {
 				SetConfigInstruction configI = (SetConfigInstruction) instruction;

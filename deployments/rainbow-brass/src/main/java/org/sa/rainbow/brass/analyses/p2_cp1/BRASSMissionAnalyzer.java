@@ -74,15 +74,15 @@ public class BRASSMissionAnalyzer extends P2CP1Analyzer {
 			m_reportingPort.info(getComponentType(), "Instruction graph failed...updating map model");
 //			BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.PERTURBATION_DETECTED,
 //					"Obstruction to path detected");
-			// Get current robot position
-			org.sa.rainbow.brass.model.p2_cp3.mission.MissionState.LocationRecording pose = missionState
-					.getCurrentPose();
-
-			// Get source and target positions of the failing instruction
-			IInstruction currentInst = igModel.getCurrentInstruction();
-
-			// The current instruction is of type MoveAbsH
-			insertNodeIntoMap(pose, currentInst);
+//			// Get current robot position
+//			org.sa.rainbow.brass.model.p2_cp3.mission.MissionState.LocationRecording pose = missionState
+//					.getCurrentPose();
+//
+//			// Get source and target positions of the failing instruction
+//			IInstruction currentInst = igModel.getCurrentInstruction();
+//
+//			// The current instruction is of type MoveAbsH
+//			insertNodeIntoMap(pose, currentInst);
 			SetModelProblemCmd cmd1 = getModels().getRainbowStateModel().getCommandFactory()
 					.setModelProblem(CP3ModelState.INSTRUCTION_GRAPH_FAILED);
 			SetModelProblemCmd cmd2 = getModels().getRainbowStateModel().getCommandFactory()
@@ -95,6 +95,7 @@ public class BRASSMissionAnalyzer extends P2CP1Analyzer {
 			log("New instruction model was detected. Reseting models to ok");
 			m_reportingPort.info(getComponentType(), "New instruction graph detected");
 			m_awaitingNewIG = false;
+			getModels().getRainbowStateModel().getModelInstance().m_waitForIG = false;
 			// Clear robot obstructed flag
 			
 			RemoveModelProblemCmd cmd1 = getModels().getRainbowStateModel().getCommandFactory()

@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -210,6 +211,25 @@ public class InstructionGraphProgress {
 
     public void setInstructionGraphState (IGExecutionStateT instructionGraphState) {
         m_instructionGraphState = instructionGraphState;
+    }
+    
+    public static List<List<? extends IInstruction>> segmentByInstructionType(List<? extends IInstruction> instructions, Class clz) {
+    	List<List<? extends IInstruction>> segments = new LinkedList<> ();
+    	List<IInstruction> currentSegment = new LinkedList<>();
+    	Iterator<? extends IInstruction> it = instructions.iterator();
+    	while (it.hasNext()) {
+    		IInstruction next = it.next();
+    		if (clz.isInstance(next)) {
+    			if (!currentSegment.isEmpty()) {
+    				segments.add(currentSegment);
+    				currentSegment = new LinkedList<> ();
+    			}
+    		}
+    		else {
+    			currentSegment.add(next);
+    		}
+    	}
+    	return segments;
     }
 
     // Note: this assumes sequential instructions
