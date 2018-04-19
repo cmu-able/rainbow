@@ -1,7 +1,7 @@
 package org.sa.rainbow.brass.adaptation.p2_cp1;
 
 import org.sa.rainbow.brass.adaptation.BrassPlan;
-import org.sa.rainbow.brass.model.p2_cp1.ModelAccessor;
+import org.sa.rainbow.brass.model.p2_cp1.CP1ModelAccessor;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowState.CP3ModelState;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
@@ -11,11 +11,11 @@ import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.Result;
 
 public class CompletedTask extends BrassPlan {
 
-	private ModelAccessor m_models;
+	private CP1ModelAccessor m_models;
 	private Boolean m_successOrOtherwise;
 	private boolean m_outcome;
 
-	public CompletedTask(ModelAccessor models, boolean success) {
+	public CompletedTask(CP1ModelAccessor models, boolean success) {
 		m_models = models;
 		m_successOrOtherwise = success;
 		

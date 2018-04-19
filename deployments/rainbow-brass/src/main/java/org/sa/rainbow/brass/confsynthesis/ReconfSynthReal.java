@@ -1,6 +1,6 @@
 package org.sa.rainbow.brass.confsynthesis;
 
-import org.sa.rainbow.brass.model.p2_cp3.ModelAccessor;
+import org.sa.rainbow.brass.model.p2_cp3.CP3ModelAccessor;
 import org.sa.rainbow.brass.model.p2_cp3.acme.TurtlebotModelInstance;
 import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotState;
 import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotState.Sensors;
@@ -12,7 +12,7 @@ public class ReconfSynthReal extends ReconfSynth {
 	private TurtlebotModelInstance m_tb;
 	private CP3RobotState m_rb;
 
-	public ReconfSynthReal(ModelAccessor models) {
+	public ReconfSynthReal(CP3ModelAccessor models) {
 		m_tb = models.getTurtlebotModel();
 		m_rb = models.getRobotStateModel().getModelInstance();
 	}

@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.EnumSet;
 
 import org.sa.rainbow.brass.adaptation.BrassPlan;
-import org.sa.rainbow.brass.model.p2_cp3.ModelAccessor;
+import org.sa.rainbow.brass.model.p2_cp3.CP3ModelAccessor;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowState;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowState.CP3ModelState;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowStateModelInstance;
@@ -37,7 +37,7 @@ public class ReactiveDarknessPlanner extends AbstractRainbowRunnable implements 
 	private RainbowStateModelInstance m_rainbowStateModel;
 	private CP3RobotStateModelInstance m_robotStateModel;
 	private boolean m_executingPlan;
-	private ModelAccessor m_models;
+	private CP3ModelAccessor m_models;
 
 	public ReactiveDarknessPlanner() {
 		super("Hello Darkness my old friend");
@@ -58,7 +58,7 @@ public class ReactiveDarknessPlanner extends AbstractRainbowRunnable implements 
 
 	private void initConnectors() throws RainbowConnectionException {
 		m_modelsManagerPort = RainbowPortFactory.createModelsManagerRequirerPort();
-		m_models = new ModelAccessor(m_modelsManagerPort);
+		m_models = new CP3ModelAccessor(m_modelsManagerPort);
 	}
 
 	@Override

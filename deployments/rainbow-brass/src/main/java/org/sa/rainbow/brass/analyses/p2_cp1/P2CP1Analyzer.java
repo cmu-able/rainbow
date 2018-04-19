@@ -6,7 +6,7 @@ import org.sa.rainbow.brass.model.instructions.MoveAbsHInstruction;
 import org.sa.rainbow.brass.model.instructions.SetExecutionFailedCmd;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.map.InsertNodeCmd;
-import org.sa.rainbow.brass.model.p2_cp1.ModelAccessor;
+import org.sa.rainbow.brass.model.p2_cp1.CP1ModelAccessor;
 import org.sa.rainbow.brass.model.p2_cp3.mission.MissionState.LocationRecording;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 
@@ -15,15 +15,15 @@ public abstract class P2CP1Analyzer extends P2Analyzer {
 		super(name);
 	}
 
-	private ModelAccessor m_modelAccessor;
+	private CP1ModelAccessor m_modelAccessor;
 	
 	@Override
 	public void initializeConnections() throws RainbowConnectionException {
 		super.initializeConnections();
-		m_modelAccessor = new ModelAccessor(m_modelsManagerPort);
+		m_modelAccessor = new CP1ModelAccessor(m_modelsManagerPort);
 	}
 
-	protected ModelAccessor getModels () {
+	protected CP1ModelAccessor getModels () {
 		return m_modelAccessor;
 	}
 

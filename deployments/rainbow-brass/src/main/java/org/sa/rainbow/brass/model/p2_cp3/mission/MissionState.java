@@ -153,7 +153,6 @@ public class MissionState extends ClockedModel {
     }
 
 
-
     public MissionState copy () {
         MissionState s = new MissionState (m_model);
         s.m_locationHistory = new ArrayDeque<> (m_locationHistory);

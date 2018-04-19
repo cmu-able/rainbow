@@ -1,7 +1,7 @@
 package org.sa.rainbow.brass.adaptation.p2_cp3;
 
 import org.sa.rainbow.brass.adaptation.BrassPlan;
-import org.sa.rainbow.brass.model.p2_cp3.ModelAccessor;
+import org.sa.rainbow.brass.model.p2_cp3.CP3ModelAccessor;
 import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotState.Sensors;
 import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotStateCommandFactory;
 import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotStateModelInstance;
@@ -15,9 +15,9 @@ public class TurnOnHeadlamp extends BrassPlan {
 
 	private boolean m_on;
 	private boolean m_outcome;
-	private ModelAccessor m_models;
+	private CP3ModelAccessor m_models;
 
-	public TurnOnHeadlamp(ModelAccessor models, boolean b) {
+	public TurnOnHeadlamp(CP3ModelAccessor models, boolean b) {
 		m_models = models;
 		m_on = b;
 	}
