@@ -84,7 +84,7 @@ public class CP3RobotState extends RobotState {
 			TimeStamped<EnumSet<Sensors>> peek = m_sensorFailedHistory.peek();
 			EnumSet<Sensors> currentState = peek!=null?peek.data:EnumSet.noneOf(Sensors.class);
 			EnumSet<Sensors> available = EnumSet.allOf(Sensors.class);
-			available.remove(Sensors.HEADLAMP);
+//			available.remove(Sensors.HEADLAMP);
 			available.removeAll(currentState);
 			return available;
 		}

@@ -41,7 +41,7 @@ public class EnvMap {
 		m_arcs_lookup =new LinkedList<EnvMapArc>();
 		// initWithSimpleMap(); // TODO: Substitute hardwired version of the map by one
 		// parsed from file
-		//loadFromFile(props.getProperty(PropertiesConnector.MAP_PROPKEY));
+		loadFromFile(props.getProperty(PropertiesConnector.MAP_PROPKEY));
 	}
 
 	public EnvMap(ModelReference model) {
@@ -61,6 +61,8 @@ public class EnvMap {
 		m.m_nodes = new HashMap<String, EnvMapNode>(m_nodes);
 		m.m_arcs = new HashMap<>(m_arcs);
 		m.m_arcs_lookup = new LinkedList<EnvMapArc>(m_arcs_lookup);
+		m.m_new_node_id = m_new_node_id;
+		m.m_last_insertion = m_last_insertion.copy();
 		return m;
 	}
 
@@ -119,11 +121,12 @@ public class EnvMap {
 	}
 	
 	public synchronized String AddNode(String label, double x, double y) {
-		return AddNode(label, x, y, false);
+		return AddNode(label, x, y, false, false);
 	}
 
-	public synchronized String AddNode(String label, double x, double y, boolean charging) {
+	public synchronized String AddNode(String label, double x, double y, boolean charging, boolean force) {
 		EnvMapNode existing = getNode(x,y);
+		if (force) existing = null;
 		if (existing == null) {
 			EnvMapNode mn = new EnvMapNode(label, x, y, m_new_node_id);
 			mn.setProperty(Phase1MapPropertyKeys.CHARGING_STATION, charging);
@@ -280,13 +283,15 @@ public class EnvMap {
 	 *            float coordinates of the location of the new node in the map
 	 * @param y
 	 */
-	public synchronized void insertNode(String n, String na, String nb, double x, double y, boolean obstacle) {
-		AddNode(n, x, y);
-		addArc(na, n, distanceBetween(na, n), true);
-		addArc(n, na, distanceBetween(na, n), true);
+	public synchronized String insertNode(String n, String na, String nb, double x, double y, boolean obstacle) {
+		n = AddNode(n, x, y);
+		if (!n.equals(na)) {
+			addArc(na, n, distanceBetween(na, n), true);
+			addArc(n, na, distanceBetween(na, n), true);
+		}
 		if (obstacle) {
 			removeArcs(na, nb);
-		} else {
+		} else if (!n.equals(nb)) {
 			addArc(nb, n, distanceBetween(nb, n), true);
 			addArc(n, nb, distanceBetween(nb, n), true);
 		}
@@ -299,6 +304,7 @@ public class EnvMap {
 		for (EnvMapArc a : arcs) {
 			System.out.println(a.m_source + " -> " + a.m_target + "(" + a.isEnabled() + ")");
 		}
+		return n;
 	}
 
 	/**
@@ -395,7 +401,7 @@ public class EnvMap {
 				System.out.println("Error parsing coordinates in location " + id);
 			}
 
-			AddNode(id, src_x, src_y, id.indexOf("c") == 0 ? true : false); // The last parameter flags that this is a
+			AddNode(id, src_x, src_y, id.indexOf("c") == 0 ? true : false, true); // The last parameter flags that this is a
 																			// charging station
 			// if the location's id starts with "c"... maybe to be changed later
 			System.out.println("Added node " + id + " - X: " + String.valueOf(src_x) + " Y: " + String.valueOf(src_y)
