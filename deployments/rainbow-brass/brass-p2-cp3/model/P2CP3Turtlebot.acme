@@ -378,7 +378,7 @@ system Turtlebot : BrassTurtlebotFam = new BrassTurtlebotFam extended with {
       property category = Localization;
       property enablement = INACTIVE;
    };
-   component laserScanNodelet : ROSNodeCompT, EnablementT = new ROSNodeCompT, EnablementT extended with {
+   component laserScan_nodelet : ROSNodeCompT, EnablementT = new ROSNodeCompT, EnablementT extended with {
       port TopicAdvertisePortT0 : TopicAdvertisePortT = new TopicAdvertisePortT extended with {
          property msg_type = "LaserScan";
          property topic = "/scan";
@@ -577,9 +577,9 @@ system Turtlebot : BrassTurtlebotFam = new BrassTurtlebotFam extended with {
    attachment marker_pose_publisher.TopicAdvertisePortT0 to tf.advertiser1;
    attachment amcl.TopicSubscribePortT0 to scan.subscriber;
    attachment mrpt.TopicSubscribePortT0 to scan.subscriber0;
-   attachment laserScanNodelet.TopicAdvertisePortT0 to scan.advertiser;
+   attachment laserScan_nodelet.TopicAdvertisePortT0 to scan.advertiser;
    attachment TurtleBot.TopicAdvertisePortT0 to depth_image.advertiser;
-   attachment laserScanNodelet.TopicSubscribePortT0 to depth_image.subsriber;
+   attachment laserScan_nodelet.TopicSubscribePortT0 to depth_image.subsriber;
    attachment TurtleBot.TopicAdvertisePortT1 to scan.advertiser0;
    attachment marker_pose_publisher.TopicSubscribePortT0 to depth_image0.subsriber;
    attachment aruco_marker_publisher_front.TopicAdvertisePortT0 to depth_image0.advertiser;
