@@ -118,16 +118,34 @@ public class EnvMap {
 		return res;
 	}
 	
-	public synchronized void AddNode(String label, double x, double y) {
-		m_nodes.put(label, new EnvMapNode(label, x, y, m_new_node_id));
-		m_new_node_id++;
+	public synchronized String AddNode(String label, double x, double y) {
+		return AddNode(label, x, y, false);
 	}
 
-	public synchronized void AddNode(String label, double x, double y, boolean charging) {
-		EnvMapNode mn = new EnvMapNode(label, x, y, m_new_node_id);
-		mn.setProperty(Phase1MapPropertyKeys.CHARGING_STATION, charging);
-		m_nodes.put(label, mn);
-		m_new_node_id++;
+	public synchronized String AddNode(String label, double x, double y, boolean charging) {
+		EnvMapNode existing = getNode(x,y);
+		if (existing == null) {
+			EnvMapNode mn = new EnvMapNode(label, x, y, m_new_node_id);
+			mn.setProperty(Phase1MapPropertyKeys.CHARGING_STATION, charging);
+			m_nodes.put(label, mn);
+			m_new_node_id++;
+		}
+		else {
+			if (charging || existing.getProperty(Phase1MapPropertyKeys.CHARGING_STATION) != null) {
+				existing.setProperty(Phase1MapPropertyKeys.CHARGING_STATION, charging);
+			}
+			label = existing.getLabel();
+		}
+		return label;
+	}
+	
+	public String getNextNodeId() {
+		int id = m_new_node_id;
+		String candidate = "l" + id;
+		while (m_nodes.containsKey(candidate)) {
+			candidate = "l" + (++id);
+		}
+		return candidate;
 	}
 
 	public synchronized void addArc(String source, String target, double distance, boolean enabled) {
