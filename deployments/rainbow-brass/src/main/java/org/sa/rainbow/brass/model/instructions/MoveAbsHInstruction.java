@@ -14,7 +14,9 @@ public class MoveAbsHInstruction implements IInstruction {
     private double m_targetY;
     private double m_targetW;
     private double m_speed;
-
+    private String m_srcWaypoint;
+    private String m_tgtWaypoint;
+    
     public MoveAbsHInstruction (String label, String instruction, String nextLabel) {
         m_label = label;
         m_instruction = instruction;
@@ -43,6 +45,22 @@ public class MoveAbsHInstruction implements IInstruction {
 
     public double getTargetY () {
         return m_targetY;
+    }
+    
+    public String getTargetWaypoint() {
+    	return m_tgtWaypoint;
+    }
+    
+    public String getSourceWaypoitn() {
+    	return m_srcWaypoint;
+    }
+    
+    public void setTargetWaypoint(String wp) {
+    	m_tgtWaypoint = wp;
+    }
+    
+    public void setSourceWaypoint(String wp) {
+    	m_srcWaypoint = wp;
     }
 
     public double getSpeed () {
