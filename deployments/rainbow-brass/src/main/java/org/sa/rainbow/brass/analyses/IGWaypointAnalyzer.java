@@ -38,7 +38,6 @@ public class IGWaypointAnalyzer extends P2Analyzer implements IRainbowModelChang
 
             // New IG event
             boolean isNewIGEvent = InstructionGraphModelInstance.INSTRUCTION_GRAPH_TYPE.equals(modelType) 
-                    && "ExecutingInstructionGraph".equals (modelName)
                     && "setInstructions".equals (commandName);
 
             return isNewIGEvent;

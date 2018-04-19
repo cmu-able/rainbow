@@ -51,7 +51,7 @@ public class MoveAbsHInstruction implements IInstruction {
     	return m_tgtWaypoint;
     }
     
-    public String getSourceWaypoitn() {
+    public String getSourceWaypoint() {
     	return m_srcWaypoint;
     }
     
