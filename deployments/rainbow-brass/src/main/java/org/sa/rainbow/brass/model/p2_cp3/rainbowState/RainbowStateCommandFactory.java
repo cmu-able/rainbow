@@ -23,7 +23,7 @@ public class RainbowStateCommandFactory extends ModelCommandFactory<RainbowState
 		m_commandMap.put("setPlanIssued".toLowerCase(), SetPlanIssuedCmd.class);
 		m_commandMap.put("setModelProblem".toLowerCase(), SetModelProblemCmd.class);
 		m_commandMap.put("removeModelProblem".toLowerCase(), RemoveModelProblemCmd.class);
-		m_commandMap.put("clearModelsProblem".toLowerCase(), ClearModelProblemsCmd.class);
+		m_commandMap.put("clearModelProblems".toLowerCase(), ClearModelProblemsCmd.class);
 	}
 
 	@Override

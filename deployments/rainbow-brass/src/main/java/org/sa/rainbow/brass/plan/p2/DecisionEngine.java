@@ -109,8 +109,12 @@ public class DecisionEngine {
         m_scoreboard.clear();
         
         synchronized (map){
-            String m_consts = MapTranslator.INITIAL_ROBOT_CONF_CONST+"=-1,"+MapTranslator.INITIAL_ROBOT_LOCATION_CONST+"="+String.valueOf(map.getNodeId(m_origin)) +","+ MapTranslator.TARGET_ROBOT_LOCATION_CONST 
-                    + "="+String.valueOf(map.getNodeId(m_destination))+ "," + MapTranslator.INITIAL_ROBOT_BATTERY_CONST+"="+batteryLevel+","+MapTranslator.INITIAL_ROBOT_HEADING_CONST+"="+robotHeading;
+            int originID = map.getNodeId(m_origin);
+			int destinationID = map.getNodeId(m_destination);
+			if (originID == -1) throw new IllegalArgumentException(m_origin + " does not appear to be in the map");
+			if (destinationID == -1) throw new IllegalArgumentException(m_destination + " does not appear in the map");
+			String m_consts = MapTranslator.INITIAL_ROBOT_CONF_CONST+"=-1,"+MapTranslator.INITIAL_ROBOT_LOCATION_CONST+"="+String.valueOf(originID) +","+ MapTranslator.TARGET_ROBOT_LOCATION_CONST 
+                    + "="+String.valueOf(destinationID)+ "," + MapTranslator.INITIAL_ROBOT_BATTERY_CONST+"="+batteryLevel+","+MapTranslator.INITIAL_ROBOT_HEADING_CONST+"="+robotHeading;
 
             System.out.println(m_consts);
             String result;
