@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -56,7 +57,7 @@ public class PolicyToIGCP3 {
 	 *            moving
 	 * @return
 	 */
-	private String build_cmd_move(int cmdId, double tgt_x, double tgt_y, double speed, double theta) {
+	private String build_cmd_move(double tgt_x, double tgt_y, double speed, double theta) {
 		NumberFormat f = new DecimalFormat("#0.0000");
 		NumberFormat f2 = new DecimalFormat("#0.00");
 		String cmd = "";
@@ -64,7 +65,7 @@ public class PolicyToIGCP3 {
 			cmd = "MoveAbsH(" + f2.format(tgt_x) + ", " + f2.format(tgt_y) + ", " + f2.format(speed) + ", "
 					+ f.format(theta) + ")";
 
-		return build_cmd(cmdId, cmd);
+		return cmd;
 	}
 
 
@@ -77,7 +78,7 @@ public class PolicyToIGCP3 {
 	 *            String literal containing the tactic's identifier
 	 * @return
 	 */
-	private String build_cmd_tactic(int cmdId, String name) {
+	private String build_cmd_tactic(String name) {
 		String cmd = "";
 
 //		System.out.println("Building command: " + String.valueOf(cmdId)+" - "+name);
@@ -93,12 +94,38 @@ public class PolicyToIGCP3 {
 		} else if (name.endsWith("SpeedSetting0_disable")){
 			return ""; // Ignore disable speed setting
 		} else if (name.endsWith("0_enable")){
-			cmd = "Enable ("+name.replace("0_enable","")+")";
+			String toBeEnabled = name.replace("0_enable","");
+			if ("kinect".equals(toBeEnabled) || "camera".equals(toBeEnabled) || "lidar".equals(toBeEnabled) || "headlamp".equals(toBeEnabled)) {
+				cmd = "SetSensor (%" + toBeEnabled.toUpperCase() + "%, %on%)";
+			}
+			else if ("amcl".equals(toBeEnabled) || "mrpt".equals(toBeEnabled)) {
+				cmd = "StartNodes(%" + toBeEnabled + "%)";
+			}
+			else if ("markerLocalization".equals(toBeEnabled) || ("markerRecognizer".equals(toBeEnabled))) {
+				cmd = "StartNodes(%aruco%)";
+			}
+			else if ("laserscanNodelet".equals(toBeEnabled)) {
+				cmd = "StartNodes(%laserscanNodelet%)";
+			}
+			else cmd = "Enable ("+toBeEnabled+")";
 		} else if (name.endsWith("0_disable")){
-			cmd = "Disable ("+name.replace("0_disable","")+")";
+			String toBeEnabled = name.replace("0_disable","");
+			if ("kinect".equals(toBeEnabled) || "camera".equals(toBeEnabled) || "lidar".equals(toBeEnabled) || "headlamp".equals(toBeEnabled)) {
+				cmd = "SetSensor (%" + toBeEnabled.toUpperCase() + "%, %off%)";
+			}
+			else if ("amcl".equals(toBeEnabled) || "mrpt".equals(toBeEnabled)) {
+				cmd = "KillNodes(%" + toBeEnabled + "%)";
+			}
+			else if ("markerLocalization".equals(toBeEnabled) || ("markerRecognizer".equals(toBeEnabled))) {
+				cmd = "KillNodes(%aruco%)";
+			}
+			else if ("laserscanNodelet".equals(toBeEnabled)) {
+				cmd = "KillNodes(%laserscanNodelet%)";
+			}
+			else cmd = "Disable ("+name.replace("0_disable","")+")";
 		}
 		
-		return build_cmd(cmdId, cmd);
+		return cmd;
 	}
 
 	/**
@@ -125,13 +152,28 @@ public class PolicyToIGCP3 {
 	 * @return
 	 */
 	private String build_ig(ArrayList<String> cmds) {
+		
+//		Pattern p = Pattern.compile(".*do ([^)]*).*");
+		// remove duplicates
+		String prev = "";
+		for (Iterator iterator = cmds.iterator(); iterator.hasNext();) {
+			String string = (String) iterator.next();
+//			Matcher m = p.matcher(string);
+//			if (m.matches()) {
+				if (/*m.group(1)*/string.equals(prev)) {
+					iterator.remove();
+				}
+				prev = /*m.group(1)*/string;
+//			}
+			
+		}
 		String ins_graph = "P(";
 		int i = 0;
 		for (i = 0; i < cmds.size(); i++) {
 			if (i == 0) {
-				ins_graph += cmds.get(i) + ",\n";
+				ins_graph += build_cmd(i+1,cmds.get(i)) + ",\n";
 			} else {
-				ins_graph += cmds.get(i) + "::\n";
+				ins_graph += build_cmd(i+1, cmds.get(i)) + "::\n";
 			}
 		}
 		// add the end
@@ -182,6 +224,10 @@ public class PolicyToIGCP3 {
 
 	public String translate(ConfigurationProvider cp, String currentConfStr) {
 		ArrayList<String> plan = m_prismPolicy.getPlan(cp, currentConfStr);
+		return tranlsatePlan(plan);
+	}
+
+	private String tranlsatePlan(ArrayList<String> plan) {
 		ArrayList<String> cmds = new ArrayList<String>();
 		String cmd = "";
 
@@ -192,7 +238,7 @@ public class PolicyToIGCP3 {
 
 			String[] elements = action.split("_"); // Break action plan name into chunks
 			if (action.endsWith("0_enable") || action.endsWith("0_disable")) { // If action is a tactic
-				cmd = build_cmd_tactic(cmd_id, action);
+				cmd = build_cmd_tactic(action);
 			} else { // Other actions (robot movement for the time being)
 				synchronized (m_map) {
 					String destination = elements[2];
@@ -204,7 +250,7 @@ public class PolicyToIGCP3 {
 					if (destX != Double.NEGATIVE_INFINITY && destY != Double.NEGATIVE_INFINITY) {
 						m_theta = MapTranslator.findArcOrientation(m_map.getNodeX(origin), m_map.getNodeY(origin),
 								destX, destY);
-						cmd = build_cmd_move(cmd_id, destX, destY, m_current_speed, findNextOrientation(plan, i, m_theta));
+						cmd = build_cmd_move(destX, destY, m_current_speed, findNextOrientation(plan, i, m_theta));
 						m_location_x = destX;
 						m_location_y = destY;
 					} else {
@@ -308,7 +354,5 @@ public class PolicyToIGCP3 {
 		@Arg(dest = "map")
 		public String map;
 	}
-
-	
 
 }
