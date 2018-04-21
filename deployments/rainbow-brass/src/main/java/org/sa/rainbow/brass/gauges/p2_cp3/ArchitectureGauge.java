@@ -38,7 +38,7 @@ public class ArchitectureGauge extends AbstractGaugeWithProbes {
 	@Override
 	public void reportFromProbe(IProbeIdentifier probe, String data) {
 		super.reportFromProbe(probe, data);
-		if (isRainbowAdapting()) return;
+//		if (isRainbowAdapting()) return;
 		synchronized (m_nodesFromProbes) {
 			m_nodesFromProbes.clear();
 			String[] nodes = data.split("\\s+");
@@ -57,7 +57,7 @@ public class ArchitectureGauge extends AbstractGaugeWithProbes {
 	protected void runAction() {
 		super.runAction();
 
-		if (isRainbowAdapting() || !m_newReport) return;
+		if (/*isRainbowAdapting() || */!m_newReport) return;
 		if (m_nodeToArch == null) {
 			m_nodeToArch = new HashMap<> ();
 			String mapping = getSetupValue("mapping", String.class);
