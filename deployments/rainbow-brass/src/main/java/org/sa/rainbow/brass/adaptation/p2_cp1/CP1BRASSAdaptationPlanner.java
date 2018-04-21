@@ -251,7 +251,7 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 					PolicyToIGCP1 translator = new PolicyToIGCP1(pp, envMap);
 					String translate = translator.translate(m_configurationStore);
 
-					BrassPlan nig = new NewInstructionGraph(m_models.getInstructionGraphModel(), translate);
+					BrassPlan nig = new NewInstructionGraph(m_models, translate);
 					AdaptationTree<BrassPlan> at = new AdaptationTree<>(nig);
 					m_executingPlan = true;
 					m_models.getRainbowStateModel().getModelInstance().m_waitForIG = true;
