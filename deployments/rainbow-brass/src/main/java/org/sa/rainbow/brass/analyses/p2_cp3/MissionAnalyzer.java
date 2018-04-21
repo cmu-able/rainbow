@@ -13,7 +13,7 @@ public class MissionAnalyzer extends P2CP3Analyzer {
 	private boolean m_reportedReady = false;
 	private boolean m_wasOK;
 
-	public MissionAnalyzer(String name) {
+	public MissionAnalyzer() {
 		super("Mission evaluator");
 	}
 

@@ -37,7 +37,7 @@ public abstract class P2Analyzer extends AbstractRainbowRunnable implements IRai
 
 	@Override
 	public void log(String txt) {
-		m_reportingPort.info(RainbowComponentT.ANALYSIS, txt);
+		m_reportingPort.info(RainbowComponentT.ANALYSIS, id() + ": " + txt);
 	}
 
 	protected void initializeConnections() throws RainbowConnectionException {
