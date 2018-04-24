@@ -39,9 +39,9 @@ probes:
       
   BRASSTargetProbe:
     # Probe to report to Rainbow what the target node is
-    alias: brasstargetprobe
+    alias: targetwaypointprobe
     location: "${customize.system.target.ros}"
-    type: script
+    type: java
     javaInfo:
       class:  org.sa.rainbow.brass.probes.TargetWaypointProbe
       period: 20000
