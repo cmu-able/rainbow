@@ -18,7 +18,7 @@ public class RobotStateGauge extends RegularPatternGauge {
 	protected static final String SPEED = "Speed";
 	protected static final String CONFIG = "Config";
 
-	protected static final String CHARGE_PATTERN = "topic: /energy_monitor/energy_level.*\\n.*data: (.*)";
+	protected static final String CHARGE_PATTERN = "topic: /mobile_base/commands/charge_level.*\\n.*data: (.*)";
 	protected static final String CONFIG_PATTERN = "cp1 configuration: (.*)";
 	private double last_charge = 0;
 	private String last_config = "";
@@ -57,7 +57,7 @@ public class RobotStateGauge extends RegularPatternGauge {
 	}
 
 	private boolean chargeDifferent (double charge) {
-        if (Math.round (last_charge/10) != Math.round (charge/10)) {
+        if (Math.round (last_charge) != Math.round (charge)) {
             last_charge = charge;
             return true;
         }

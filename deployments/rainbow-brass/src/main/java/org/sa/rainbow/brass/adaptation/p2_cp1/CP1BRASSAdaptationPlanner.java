@@ -209,14 +209,14 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 					
                     if (pp.getPlan () == null || pp.getPlan ().isEmpty ()) {
                         //  BRASSHttpConnector.instance ().reportStatus (DASStatusT.MISSION_ABORTED, "Could not find a valid adaptation... trying again.");                        
-                        m_reportingPort.info (getComponentType (),
-                                "Could not find a valid adaptation... trying again.");
+                        log(
+                                "Could not find a valid adaptation...");
 
                         MapTranslator.exportMapTranslation (
                                 Rainbow.instance ().getProperty (PropertiesConnector.PRISM_MODEL_PROPKEY));
                         PrismConnectorAPI.instance().loadModel (
                                 Rainbow.instance ().getProperty (PropertiesConnector.PRISM_MODEL_PROPKEY));
-                        String m_consts = MapTranslator.INITIAL_ROBOT_LOCATION_CONST + "="
+                        String m_consts = MapTranslator.INITIAL_ROBOT_CONF_CONST + "=-1," + MapTranslator.INITIAL_ROBOT_LOCATION_CONST + "="
                                 + String.valueOf (envMap.getNodeId (srcLabel)) + ","
                                 + MapTranslator.TARGET_ROBOT_LOCATION_CONST + "="
                                 + String.valueOf (envMap.getNodeId (m_models.getMissionStateModel().getModelInstance().getTargetWaypoint ())) + ","
@@ -224,7 +224,7 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
                                 + String.valueOf (Math.round (m_models.getRobotStateModel().getModelInstance().getCharge())) + ","
                                 + MapTranslator.INITIAL_ROBOT_HEADING_CONST + "=2";
 
-                        System.out.println ("Generating last resort plan for " + m_consts);
+                        log ("Generating last resort plan for " + m_consts);
                         String result;
                         result = PrismConnectorAPI.instance().modelCheckFromFileS (
                                 Rainbow.instance ().getProperty (PropertiesConnector.PRISM_MODEL_PROPKEY),
@@ -235,6 +235,7 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
                                 "lastResortPolicy.adv");
                         pp.readPolicy ();
                         if (pp.getPlan () == null || pp.getPlan ().isEmpty ()) {
+                        	log ("Could not find last resort plan -- marking task as FAILED");
                         	BrassPlan ct = new CompletedTask(m_models, false);
                         	AdaptationTree<BrassPlan> at = new AdaptationTree<>(ct);
         					m_executingPlan = true;
@@ -242,7 +243,7 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
         					return;
                         }
                         m_inLastResort  = true;
-                        m_reportingPort.info (getComponentType (),
+                        log(
                                 "Found last resort plan: " + pp.getPlan ().toString ());
                     }
 					
