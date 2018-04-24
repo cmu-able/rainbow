@@ -276,6 +276,9 @@ public abstract class YamlUtil {
                             if (paramValue instanceof String) {
                                 paramValue = Util.evalTokens ((String) paramValue);
                             }
+                            else if (paramValue instanceof ArrayList){
+                            	paramValue = String.join(",", (String[] )((ArrayList )paramValue).toArray(new String[0]));
+                            }
                             TypedAttributeWithValue configParam = gaugeInstSpec.findConfigParam (paramName);
                             if (configParam != null) {
                                 if (!configParam.getType ().equals ("String")) {

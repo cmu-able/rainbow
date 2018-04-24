@@ -364,9 +364,24 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
 
         // Check if probe exists in probe desc
         TypedAttributeWithValue probe;
-        if ((probe = gid.findConfigParam ("targetProbeType")) != null
-                || (probe = gid.findConfigParam ("targetProbeList")) != null) {
-            String[] probes = ((String )probe.getValue ()).split (",");
+        probe = gid.findConfigParam("targetProbeType");
+//        if (probe == null) probe = gid.findConfigParam("targetProbeList");
+        if (probe != null) {
+        	String[] probes = null;
+        	if (probe.getValue() instanceof String) {
+        		probes = ((String )probe.getValue ()).split (",");
+        	}
+        	else if (probe.getValue() instanceof String[]) {
+        		probes = (String[]) probe.getValue();
+        	}
+        	else if (probe.getValue() instanceof ArrayList) {
+        		ArrayList value = (ArrayList )probe.getValue();
+				probes = (String[]) value.toArray(new String[0]);
+				String csv = String.join(",", value);
+				probe.setValue(csv);
+        		
+        	}
+//            String[] probes = ((String )probe.getValue ()).split (",");
             for (String probe2 : probes) {
                 probe2 = Util.decomposeID (probe2).firstValue ();
                 m_referredToProbes.add (probe2);
