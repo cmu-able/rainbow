@@ -25,6 +25,7 @@ package org.sa.rainbow.core;
 
 
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -78,4 +79,15 @@ public class ConfigHelper {
         }
         return vals;
     }
+    
+    public static String convertToAbsolute (String filename) {
+        if (filename.startsWith ("\"") && filename.endsWith ("\"") && filename.length () > 2) {
+            filename = filename.substring (1, filename.length () - 1);
+        }
+        if (filename.startsWith ("~" + File.separator)) {
+            filename = System.getProperty ("user.home") + filename.substring (1);
+        }
+        return new File (filename).getAbsolutePath ();
+    }
+
 }
