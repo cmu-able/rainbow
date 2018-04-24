@@ -18,11 +18,11 @@ import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress.IGExecutionStateT;
 import org.sa.rainbow.brass.model.instructions.MoveAbsHInstruction;
 import org.sa.rainbow.brass.model.map.EnvMap;
-import org.sa.rainbow.brass.model.map.MapTranslator;
 import org.sa.rainbow.brass.model.p2_cp1.CP1ModelAccessor;
 import org.sa.rainbow.brass.model.p2_cp3.mission.MissionState.Heading;
 import org.sa.rainbow.brass.model.p2_cp3.mission.MissionState.LocationRecording;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowState.CP3ModelState;
+import org.sa.rainbow.brass.plan.p2.MapTranslator;
 import org.sa.rainbow.brass.plan.p2_cp1.DecisionEngineCP1;
 import org.sa.rainbow.brass.plan.p2_cp1.PolicyToIGCP1;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
@@ -265,10 +265,13 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 				m_reportingPort.error(getComponentType(), "Cannot find a plan that magically gives us more power -- we are out of battery");
 				BRASSHttpConnector.instance(Phases.Phase2).reportDone(true, "Ran out of power");
 			}
-			else if (m_models.getInstructionGraphModel().getModelInstance().getInstructionGraphState() == IGExecutionStateT.FINISHED_SUCCESS) {
+			else if (!m_models.getRainbowStateModel().getModelInstance().waitForIG() && m_models.getInstructionGraphModel().getModelInstance().getInstructionGraphState() == IGExecutionStateT.FINISHED_SUCCESS) {
+				log("Planner detected successful completion of instruction graph");
+				log("Reporting that we completed successfully");
 				CompletedTask ct = new CompletedTask(m_models, true);
 				AdaptationTree<BrassPlan> at = new AdaptationTree<>(ct);
 				m_executingPlan = true;
+				m_models.getRainbowStateModel().getModelInstance().m_waitForIG = true;
 				m_adaptationEnqueuePort.offerAdaptation(at, new Object[] {});
 			}
 			else if (m_inLastResort && m_models.getInstructionGraphModel().getModelInstance().getInstructionGraphState() == IGExecutionStateT.FINISHED_FAILED) {
