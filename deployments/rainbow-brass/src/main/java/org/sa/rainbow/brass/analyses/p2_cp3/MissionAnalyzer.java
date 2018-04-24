@@ -25,7 +25,7 @@ public class MissionAnalyzer extends P2CP3Analyzer {
 
 	
 		
-		if (ms.isMissionStarted()) {
+		if (ms.isMissionStarted() && ms.getInitialPose() != null) {
 			if (!m_reportedReady) {
 				m_reportedReady = true;
 				BRASSHttpConnector.instance(Phases.Phase2).reportReady(true);

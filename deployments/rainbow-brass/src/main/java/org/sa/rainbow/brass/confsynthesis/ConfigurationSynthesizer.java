@@ -424,7 +424,8 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 	public HashMap<String, Configuration> getLegalTargetConfigurations() {
 		HashMap<String, Configuration> res = new HashMap<String, Configuration>();
 		for (Map.Entry<String, List<String>> e : m_reconfigurations.entrySet()) {
-			if (m_configuration_objects.containsKey(e.getKey())) {
+			if (m_configuration_objects.containsKey(e.getKey()) && m_reconfigurations.containsKey(e.getKey())
+					&& m_reconfigurations.get(e.getKey()).size() > 0) {
 				res.put(e.getKey(), m_configuration_objects.get(e.getKey()));
 			}
 		}
@@ -452,8 +453,6 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 		res.add(targetConfiguration);
 		return res;
 	}
-
-
 
 	public static void main(String[] args) throws Exception {
 

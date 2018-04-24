@@ -17,7 +17,7 @@ public class RainbowState {
 	private ModelReference m_model;
 	private EnumSet<CP3ModelState> m_problems;
 	private boolean m_planIssued;
-	public boolean m_waitForIG;
+	public boolean m_waitForIG = true;
 	
 	public RainbowState(ModelReference model) {
 		m_model = model;

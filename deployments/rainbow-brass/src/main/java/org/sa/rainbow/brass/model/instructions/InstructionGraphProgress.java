@@ -87,7 +87,7 @@ public class InstructionGraphProgress {
         return instructions;
     }
 
-    public Collection<? extends IInstruction> getInstructions () {
+    public List<? extends IInstruction> getInstructions () {
         return m_instructionList;
     }
 
@@ -222,7 +222,7 @@ public class InstructionGraphProgress {
     		IInstruction next = it.next();
     		if (clz.isInstance(next)) {
     			if (!currentSegment.isEmpty()) {
-    				segments.add(currentSegment);
+    				if (!currentSegment.isEmpty()) segments.add(currentSegment);
     				currentSegment = new LinkedList<> ();
     			}
     		}
@@ -230,6 +230,7 @@ public class InstructionGraphProgress {
     			currentSegment.add(next);
     		}
     	}
+    	if (!currentSegment.isEmpty()) segments.add(currentSegment);
     	return segments;
     }
 

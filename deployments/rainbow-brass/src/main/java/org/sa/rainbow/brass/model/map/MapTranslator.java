@@ -73,9 +73,9 @@ public class MapTranslator {
     public static final String BATTERY_UPDATE_STR = ROBOT_BATTERY_VAR+UPDATE_POSTFIX;
     public static final float ROBOT_CHARGING_TIME = 15.0f;
 
-    public static final float ROBOT_FULL_SPEED_VALUE = 0.68f; // m/s
-    public static final float ROBOT_HALF_SPEED_VALUE = 0.35f;
-    public static final float ROBOT_DR_SPEED_VALUE = 0.25f; // Dead reckoning speed value .. this is implicit in ROBOT_LOC_MODE_LO
+    public static final double ROBOT_FULL_SPEED_VALUE = 0.68; // m/s
+    public static final double ROBOT_HALF_SPEED_VALUE = 0.35;
+    public static final double ROBOT_DR_SPEED_VALUE = 0.25; // Dead reckoning speed value .. this is implicit in ROBOT_LOC_MODE_LO
     public static final String ROBOT_FULL_SPEED_CONST = "FULL_SPEED"; // These are just symbolic constants for PRISM
     public static final String ROBOT_HALF_SPEED_CONST = "HALF_SPEED";
     public static final String ROBOT_DR_SPEED_CONST = "DR_SPEED";
