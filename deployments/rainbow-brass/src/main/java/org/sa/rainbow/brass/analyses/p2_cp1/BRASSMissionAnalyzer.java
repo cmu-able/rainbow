@@ -57,6 +57,12 @@ public class BRASSMissionAnalyzer extends P2CP1Analyzer {
 
 	@Override
 	protected void runAction() {
+		MissionState ms = getModels().getMissionStateModel().getModelInstance();
+		if (!m_reportedReady && ms.getInitialPose() != null) {
+			m_reportedReady = true;
+			BRASSHttpConnector.instance(Phases.Phase2).reportReady(true);
+			m_wasOK = true;
+		}
 		if (getModels().getRainbowStateModel().getModelInstance().waitForIG() || m_awaitingNewIG) {
 			m_wasOK = true;
 			return;
@@ -64,14 +70,9 @@ public class BRASSMissionAnalyzer extends P2CP1Analyzer {
 		// Do the periodic analysis on the models of interest
 		InstructionGraphModelInstance ig = getModels().getInstructionGraphModel();
 
-		MissionState ms = getModels().getMissionStateModel().getModelInstance();
 
 		if (ms.isMissionStarted() && ms.getInitialPose() != null) {
-			if (!m_reportedReady) {
-				m_reportedReady = true;
-				BRASSHttpConnector.instance(Phases.Phase2).reportReady(true);
-				m_wasOK = true;
-			}
+			
 			boolean currentOK = ig.getModelInstance().getCurrentOK();
 //			if (ig.getModelInstance().getInstructionGraphState() == IGExecutionStateT.FINISHED_SUCCESS && !m_reportedCompleted)  {
 //				m_reportedCompleted = true;
