@@ -366,9 +366,14 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
         IDelegateConfigurationPort delegate = m_delegateConfigurtationPorts.get (delegateID);
         if (delegate != null) {
             LOGGER.info (MessageFormat.format ("Sending configuration information to {0}.", delegateID));
-            delegate.sendConfigurationInformation (filterPropertiesForDelegate (delegateID),
-                    filterProbesForDelegate (delegateID), filterEffectorsForDelegate (delegateID),
-                    filterGaugesForDelegate (delegateID));
+            try {
+				delegate.sendConfigurationInformation (filterPropertiesForDelegate (delegateID),
+				        filterProbesForDelegate (delegateID), filterEffectorsForDelegate (delegateID),
+				        filterGaugesForDelegate (delegateID));
+			} catch (Throwable e) {
+				e.printStackTrace();
+				LOGGER.error("Failed to send config information", e);
+			}
         }
         else {
             LOGGER.error (

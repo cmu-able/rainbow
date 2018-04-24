@@ -5,12 +5,14 @@ import java.util.Arrays;
 import org.sa.rainbow.brass.das.BRASSHttpConnector;
 import org.sa.rainbow.brass.das.IBRASSConnector.Phases;
 import org.sa.rainbow.brass.model.instructions.IInstruction;
+import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress.IGExecutionStateT;
 import org.sa.rainbow.brass.model.instructions.MoveAbsHInstruction;
 import org.sa.rainbow.brass.model.instructions.SetExecutionFailedCmd;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.map.InsertNodeCmd;
+import org.sa.rainbow.brass.model.p2_cp3.mission.MissionState;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowState;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowState.CP3ModelState;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RemoveModelProblemCmd;
@@ -30,8 +32,12 @@ public class BRASSMissionAnalyzer extends P2CP1Analyzer {
 
 	public static final String NAME = "BRASS Mission Evaluator";
 
+	private boolean m_reportedReady = false;
+	private boolean m_wasOK;
+
 	private boolean m_awaitingNewIG;
-	private boolean m_awaitingPose;
+
+	private boolean m_reportedCompleted;
 
 	public BRASSMissionAnalyzer() {
 		super(NAME);
@@ -51,67 +57,112 @@ public class BRASSMissionAnalyzer extends P2CP1Analyzer {
 
 	@Override
 	protected void runAction() {
-		// Do the periodic analysis on the models of interest
-		if (getModels().getInstructionGraphModel() == null) return;
-		InstructionGraphProgress igModel = getModels().getInstructionGraphModel().getModelInstance();
-		boolean currentOK = igModel.getCurrentOK();
-		if (igModel.getInstructionGraphState() == IGExecutionStateT.FINISHED_SUCCESS) {
-			// Report done to the Rainbow State -- planner should execute the effector to
-			// call Pooyan's stuff
+		if (getModels().getRainbowStateModel().getModelInstance().waitForIG() || m_awaitingNewIG) {
+			m_wasOK = true;
 			return;
 		}
-		org.sa.rainbow.brass.model.p2_cp3.mission.MissionState missionState = getModels().getMissionStateModel()
-				.getModelInstance();
-		EnvMap envMap = getModels().getEnvMapModel().getModelInstance();
-		if (missionState.getCurrentPose() == null) {
-			m_awaitingPose = true;
-		} else if (missionState.getCurrentPose() != null && m_awaitingPose) {
-			m_awaitingPose = false;
-			BRASSHttpConnector.instance(Phases.Phase2).reportReady(true);
+		// Do the periodic analysis on the models of interest
+		InstructionGraphModelInstance ig = getModels().getInstructionGraphModel();
 
-		} else if (!currentOK && igModel.getExecutingInstruction() != null && !m_awaitingNewIG) {
-			// Current IG failed
-			m_reportingPort.info(getComponentType(), "Instruction graph failed...updating map model");
-//			BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.PERTURBATION_DETECTED,
-//					"Obstruction to path detected");
-//			// Get current robot position
-//			org.sa.rainbow.brass.model.p2_cp3.mission.MissionState.LocationRecording pose = missionState
-//					.getCurrentPose();
-//
-//			// Get source and target positions of the failing instruction
-//			IInstruction currentInst = igModel.getCurrentInstruction();
-//
-//			// The current instruction is of type MoveAbsH
-//			insertNodeIntoMap(pose, currentInst);
-			SetModelProblemCmd cmd1 = getModels().getRainbowStateModel().getCommandFactory()
-					.setModelProblem(CP3ModelState.INSTRUCTION_GRAPH_FAILED);
-			SetModelProblemCmd cmd2 = getModels().getRainbowStateModel().getCommandFactory()
-					.setModelProblem(CP3ModelState.IS_OBSTRUCTED);
-			m_modelUSPort.updateModel(Arrays.asList(new IRainbowOperation[] { cmd1, cmd2 }), true);
-			m_awaitingNewIG = true;
-		} else if (currentOK && !emptyInstructions(igModel) && getModels().getRainbowStateModel().getModelInstance()
-				.getProblems().contains(RainbowState.CP3ModelState.IS_OBSTRUCTED)) {
-			// New IG resumed after robot obstructed
-			log("New instruction model was detected. Reseting models to ok");
-			m_reportingPort.info(getComponentType(), "New instruction graph detected");
-			m_awaitingNewIG = false;
-			getModels().getRainbowStateModel().getModelInstance().m_waitForIG = false;
-			// Clear robot obstructed flag
-			
-			RemoveModelProblemCmd cmd1 = getModels().getRainbowStateModel().getCommandFactory()
-					.removeModelProblem(CP3ModelState.INSTRUCTION_GRAPH_FAILED);
-			RemoveModelProblemCmd cmd2 = getModels().getRainbowStateModel().getCommandFactory()
-					.removeModelProblem(CP3ModelState.IS_OBSTRUCTED);
-			m_modelUSPort.updateModel(Arrays.asList(new IRainbowOperation[] { cmd1, cmd2 }), true);
+		MissionState ms = getModels().getMissionStateModel().getModelInstance();
 
+		if (ms.isMissionStarted() && ms.getInitialPose() != null) {
+			if (!m_reportedReady) {
+				m_reportedReady = true;
+				BRASSHttpConnector.instance(Phases.Phase2).reportReady(true);
+				m_wasOK = true;
+			}
+			boolean currentOK = ig.getModelInstance().getCurrentOK();
+//			if (ig.getModelInstance().getInstructionGraphState() == IGExecutionStateT.FINISHED_SUCCESS && !m_reportedCompleted)  {
+//				m_reportedCompleted = true;
+//				m_awaitingNewIG = true;
+//				SetModelProblemCmd cmd1 = getModels().getRainbowStateModel().getCommandFactory().setModelProblem(CP3ModelState.MISSION_COMPLETED);
+//				return;
+//			}
+			if (!currentOK && m_wasOK && !m_awaitingNewIG) {
+				m_wasOK = false;
+				m_reportingPort.info(getComponentType(), "Instruction graph failed...updating map model");
+				SetModelProblemCmd cmd1 = getModels().getRainbowStateModel().getCommandFactory()
+						.setModelProblem(CP3ModelState.INSTRUCTION_GRAPH_FAILED);
+				SetModelProblemCmd cmd2 = getModels().getRainbowStateModel().getCommandFactory()
+						.setModelProblem(CP3ModelState.IS_OBSTRUCTED);
+				m_modelUSPort.updateModel(Arrays.asList(new IRainbowOperation[] { cmd1, cmd2 }), true);
+				m_awaitingNewIG = true;
+			}
+			else if (currentOK && !emptyInstructions(ig.getModelInstance()) && getModels().getRainbowStateModel().getModelInstance()
+					.getProblems().contains(RainbowState.CP3ModelState.IS_OBSTRUCTED)) {
+				// New IG resumed after robot obstructed
+				log("New instruction model was detected. Reseting models to ok");
+				m_reportingPort.info(getComponentType(), "New instruction graph detected");
+				m_awaitingNewIG = false;
+				getModels().getRainbowStateModel().getModelInstance().m_waitForIG = false;
+				// Clear robot obstructed flag
+				RemoveModelProblemCmd cmd1 = getModels().getRainbowStateModel().getCommandFactory()
+						.removeModelProblem(CP3ModelState.INSTRUCTION_GRAPH_FAILED);
+				RemoveModelProblemCmd cmd2 = getModels().getRainbowStateModel().getCommandFactory()
+						.removeModelProblem(CP3ModelState.IS_OBSTRUCTED);
+				m_modelUSPort.updateModel(Arrays.asList(new IRainbowOperation[] { cmd1, cmd2 }), true);
+
+			}
 		}
+		
+		
+//		if (getModels().getInstructionGraphModel() == null)
+//			return;
+//		InstructionGraphProgress igModel = getModels().getInstructionGraphModel().getModelInstance();
+//		boolean currentOK = igModel.getCurrentOK();
+
+//		org.sa.rainbow.brass.model.p2_cp3.mission.MissionState missionState = getModels().getMissionStateModel()
+//				.getModelInstance();
+//		EnvMap envMap = getModels().getEnvMapModel().getModelInstance();
+//		if (missionState.getCurrentPose() == null) {
+//			m_awaitingPose = true;
+//		} else if (missionState.getCurrentPose() != null && m_awaitingPose) {
+//			m_awaitingPose = false;
+//			BRASSHttpConnector.instance(Phases.Phase2).reportReady(true);
+//
+//		} else if (!currentOK && igModel.getExecutingInstruction() != null && !m_awaitingNewIG) {
+//			// Current IG failed
+//			m_reportingPort.info(getComponentType(), "Instruction graph failed...updating map model");
+//			// BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.PERTURBATION_DETECTED,
+//			// "Obstruction to path detected");
+//			// // Get current robot position
+//			// org.sa.rainbow.brass.model.p2_cp3.mission.MissionState.LocationRecording pose
+//			// = missionState
+//			// .getCurrentPose();
+//			//
+//			// // Get source and target positions of the failing instruction
+//			// IInstruction currentInst = igModel.getCurrentInstruction();
+//			//
+//			// // The current instruction is of type MoveAbsH
+//			// insertNodeIntoMap(pose, currentInst);
+//			SetModelProblemCmd cmd1 = getModels().getRainbowStateModel().getCommandFactory()
+//					.setModelProblem(CP3ModelState.INSTRUCTION_GRAPH_FAILED);
+//			SetModelProblemCmd cmd2 = getModels().getRainbowStateModel().getCommandFactory()
+//					.setModelProblem(CP3ModelState.IS_OBSTRUCTED);
+//			m_modelUSPort.updateModel(Arrays.asList(new IRainbowOperation[] { cmd1, cmd2 }), true);
+//			m_awaitingNewIG = true;
+//		} else if (currentOK && !emptyInstructions(igModel) && getModels().getRainbowStateModel().getModelInstance()
+//				.getProblems().contains(RainbowState.CP3ModelState.IS_OBSTRUCTED)) {
+//			// New IG resumed after robot obstructed
+//			log("New instruction model was detected. Reseting models to ok");
+//			m_reportingPort.info(getComponentType(), "New instruction graph detected");
+//			m_awaitingNewIG = false;
+//			getModels().getRainbowStateModel().getModelInstance().m_waitForIG = false;
+//			// Clear robot obstructed flag
+//
+//			RemoveModelProblemCmd cmd1 = getModels().getRainbowStateModel().getCommandFactory()
+//					.removeModelProblem(CP3ModelState.INSTRUCTION_GRAPH_FAILED);
+//			RemoveModelProblemCmd cmd2 = getModels().getRainbowStateModel().getCommandFactory()
+//					.removeModelProblem(CP3ModelState.IS_OBSTRUCTED);
+//			m_modelUSPort.updateModel(Arrays.asList(new IRainbowOperation[] { cmd1, cmd2 }), true);
+//
+//		}
 
 	}
 
 	boolean emptyInstructions(InstructionGraphProgress igProgress) {
 		return igProgress.getInstructions() == null || igProgress.getInstructions().isEmpty();
 	}
-
-
 
 }

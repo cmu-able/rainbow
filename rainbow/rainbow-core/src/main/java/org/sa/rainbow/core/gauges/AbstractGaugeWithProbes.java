@@ -73,7 +73,15 @@ public abstract class AbstractGaugeWithProbes extends AbstractGauge {
     protected void handleConfigParam (TypedAttributeWithValue tav) {
         super.handleConfigParam (tav);
         if (tav.getName ().equals (CONFIG_PROBE_MAPPING)) {
-            pubProbeGaugeMapping ((String )tav.getValue ());
+        	if (((String )tav.getValue()).contains(",")) {
+        		 StringTokenizer tokens = new StringTokenizer ((String )tav.getValue (), ",");
+                 while (tokens.hasMoreTokens ()) {
+                     pubProbeGaugeMapping (tokens.nextToken ().trim ());
+                 }
+        	}
+        	else {
+        		pubProbeGaugeMapping ((String )tav.getValue ());
+        	}
         }
         if (tav.getName ().equals (CONFIG_PROBE_MAPPING_LIST)) {
             StringTokenizer tokens = new StringTokenizer ((String )tav.getValue (), ",");

@@ -214,7 +214,7 @@ public class RobotStateGauge extends RegularPatternGauge{
 	}
 
 	private boolean chargeDifferent (double charge) {
-        if (Math.round (last_charge) != Math.round (charge)) {
+        if (Math.round (last_charge/10) != Math.round (charge/10)) {
             last_charge = charge;
             return true;
         }

@@ -155,27 +155,30 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 
 	}
 
+	String reportErrors() {
+		StringBuffer sb = new StringBuffer();
+		for (CP3ModelState s : m_models.getRainbowStateModel().getModelInstance().getProblems()) {
+			sb.append(s);
+			sb.append(" ");
+		}
+		return sb.toString();
+	}
+
 	@Override
 	protected void runAction() {
 		InstructionGraphProgress igModel = m_models.getInstructionGraphModel().getModelInstance();
-		if (igModel.getInstructions().isEmpty()) 
+		if (igModel.getInstructions().isEmpty() || m_models.getRainbowStateModel().getModelInstance().waitForIG())
 			return;
-		if (m_adaptationEnabled && reallyHasError() && !m_executingPlan ) {
-//			 BRASSHttpConnector.instance (Phases.Phase2).reportStatus (DASPhase2StatusT.ADAPTING.name(), "Detected an error");
-
+		if (m_adaptationEnabled && reallyHasError() && !m_executingPlan) {
+			String message = "Detected errors: " + reportErrors();
+			BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(), message);
+			log(message);
 			m_errorDetected = false;
 			m_reportingPort.info(getComponentType(), "Determining an appropriate adaptation");
 			// DecisionEngineCP3.setMap(m_models.getEnvMapModel().getModelInstance());
 
 			// 1. Determine string for intialization of the planner
-			String confInitString = m_reconfSynth.getCurrentConfigurationInitConstants();
-			try {
-				m_configurationSynthesizer.generateReconfigurationsFrom(confInitString);
-			} catch (RainbowException e1) {
-				e1.printStackTrace();
-				m_reportingPort.error(getComponentType(), "Could not synthesize configurations " + e1.getMessage());
-
-			}
+			String confInitString = determineValidReconfigurations();
 
 			EnvMap copy = m_models.getEnvMapModel().getModelInstance().copy();
 			DecisionEngineCP3.setMap(copy);
@@ -188,51 +191,79 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 			if (ci instanceof MoveAbsHInstruction) {
 				MoveAbsHInstruction mi = (MoveAbsHInstruction) ci;
 				srcLabel = copy.getNextNodeId();
-				srcLabel = copy.insertNode(srcLabel, mi.getSourceWaypoint(), mi.getTargetWaypoint(), cp.getX(), cp.getY(), false);	
+				srcLabel = copy.insertNode(srcLabel, mi.getSourceWaypoint(), mi.getTargetWaypoint(), cp.getX(),
+						cp.getY(), false);
 				tgtLabel = mi.getTargetWaypoint();
-			}
-			else {
+			} else {
 				List<? extends IInstruction> remainingInstructions = igModel.getRemainingInstructions();
-				for (Iterator iterator = remainingInstructions.iterator(); iterator.hasNext() && !(ci instanceof MoveAbsHInstruction);) {
+				for (Iterator iterator = remainingInstructions.iterator(); iterator.hasNext()
+						&& !(ci instanceof MoveAbsHInstruction);) {
 					ci = (IInstruction) iterator.next();
 				}
 				if (ci != null) {
 					MoveAbsHInstruction mi = (MoveAbsHInstruction) ci;
 					srcLabel = mi.getSourceWaypoint();
 					tgtLabel = mi.getTargetWaypoint();
-				}
-				else {
-					m_reportingPort.error(getComponentType(), "There are no move instructions left -- the last instruction in an instruction graph for BRASS should always be a move");
+				} else {
+					m_reportingPort.error(getComponentType(),
+							"There are no move instructions left -- the last instruction in an instruction graph for BRASS should always be a move");
 				}
 			}
-			DecisionEngineCP3.generateCandidates(srcLabel, m_models.getMissionStateModel().getModelInstance().getTargetWaypoint());
-//			DecisionEngineCP3.generateCandidates("l1", "l8");
+			String tgt = m_models.getMissionStateModel().getModelInstance().getTargetWaypoint();
+			log("Generating candidate paths from " + srcLabel + " to " + tgt);
+			DecisionEngineCP3.generateCandidates(srcLabel, tgt);
+			log("---> found " + DecisionEngineCP3.m_candidates.size());
+			// DecisionEngineCP3.generateCandidates("l1", "l8");
 			try {
-				DecisionEngineCP3
-						.scoreCandidates(copy, Math.round(m_models.getRobotStateModel().getModelInstance().getCharge()),
-								Heading.convertFromRadians(
-										m_models.getMissionStateModel().getModelInstance().getCurrentPose().getRotation())
-										.ordinal());
-				PrismPolicy pp = new PrismPolicy(DecisionEngineCP3.selectPolicy());
-				pp.readPolicy();
-				String plan = pp.getPlan(m_configurationSynthesizer, confInitString).toString();
-				m_reportingPort.info(getComponentType(), "Planner chooses the plan " + plan);
-				PolicyToIGCP3 translator = new PolicyToIGCP3(pp, copy);
-				String translate = translator.translate(m_configurationSynthesizer, confInitString);
-				
-				BrassPlan nig = new NewInstructionGraph(m_models.getInstructionGraphModel(), translate);
-				AdaptationTree<BrassPlan> at = new AdaptationTree<> (nig);
+				AdaptationTree<BrassPlan> at = scoreAndGeneratePlan(confInitString, copy);
 				m_executingPlan = true;
 				m_models.getRainbowStateModel().getModelInstance().m_waitForIG = true;
 
-				m_adaptationEnqueuePort.offerAdaptation (at, new Object[] {});
-			} catch (Exception e) {
+				m_adaptationEnqueuePort.offerAdaptation(at, new Object[] {});
+			} catch (Throwable e) {
 				e.printStackTrace();
 				m_reportingPort.error(getComponentType(), "Failed to find a plan " + e.getMessage());
 			}
 
 		}
 
+	}
+
+	private AdaptationTree<BrassPlan> scoreAndGeneratePlan(String confInitString, EnvMap copy) throws Exception {
+		try {
+			DecisionEngineCP3.scoreCandidates(copy,
+					Math.round(m_models.getRobotStateModel().getModelInstance().getCharge()),
+					Heading.convertFromRadians(
+							m_models.getMissionStateModel().getModelInstance().getCurrentPose().getRotation())
+							.ordinal());
+			PrismPolicy pp = new PrismPolicy(DecisionEngineCP3.selectPolicy());
+			pp.readPolicy();
+			String plan = pp.getPlan(m_configurationSynthesizer, confInitString).toString();
+			m_reportingPort.info(getComponentType(), "Planner chooses the plan " + plan);
+			PolicyToIGCP3 translator = new PolicyToIGCP3(pp, copy);
+			String translate = translator.translate(m_configurationSynthesizer, confInitString);
+
+			BrassPlan nig = new NewInstructionGraph(m_models, translate);
+			AdaptationTree<BrassPlan> at = new AdaptationTree<>(nig);
+			return at;
+		} catch (Throwable t) {
+			throw t;
+		}
+	}
+
+	private String determineValidReconfigurations() {
+		String confInitString = m_reconfSynth.getCurrentConfigurationInitConstants();
+		try {
+			log("Looking for reconfigurations from: " + confInitString);
+			m_configurationSynthesizer.generateReconfigurationsFrom(confInitString);
+			log("----> found " + m_configurationSynthesizer.m_reconfigurations.size());
+		} catch (RainbowException e1) {
+			e1.printStackTrace();
+			m_reportingPort.error(getComponentType(), "Could not synthesize configurations " + e1.getMessage());
+			return confInitString;
+
+		}
+		return confInitString;
 	}
 
 	private boolean reallyHasError() {

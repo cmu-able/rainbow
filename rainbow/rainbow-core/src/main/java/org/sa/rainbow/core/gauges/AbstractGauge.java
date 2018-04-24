@@ -241,13 +241,19 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
      * @param triple a triple of name, type, value.
      */
     protected void handleConfigParam (TypedAttributeWithValue triple) {
-        if (triple.getName ().equals (CONFIG_SAMPLING_FREQUENCY)) {
+        Object value = triple.getValue();
+		if (triple.getName ().equals (CONFIG_SAMPLING_FREQUENCY)) {
             // set the runner timer directly
-            setSleepTime ((Long) triple.getValue ());
+            setSleepTime ((Long) value);
         }
         else if (triple.getName().equals(RAINBOW_ADAPTING)) {
         	synchronized (this) {
-        		m_adapting = (Boolean )triple.getValue();
+        		if (value instanceof Boolean) {
+        			m_adapting = (Boolean )value;
+        		}
+        		else if (value instanceof String) {
+        			m_adapting = Boolean.valueOf((String )value);
+        		}
         	}
         }
     }

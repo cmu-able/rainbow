@@ -30,7 +30,7 @@ import net.sourceforge.argparse4j.inf.ArgumentParser;
 public class PolicyToIG {
 	public PrismPolicy m_prismPolicy;
 	public EnvMap m_map;
-	public float m_current_speed = MapTranslator.ROBOT_HALF_SPEED_VALUE;
+	public double m_current_speed = MapTranslator.ROBOT_HALF_SPEED_VALUE;
 	public String m_current_loc_mode = MapTranslator.ROBOT_LOC_MODE_HI_CONST;
 	public boolean m_insert_additional_command = false; // When translation of commands is not 1-to-1 from tactics,
 														// additional command insertion flag for translation

@@ -22,7 +22,6 @@ gauge-types:
   MissionStateGaugeT:
     commands:
       location: "MS.setCurrentLocation(double,double,double)"
-      deadline: "MS.setDeadline(long)"
     setupParams:
       targetIP:
         type: String
@@ -83,23 +82,23 @@ gauge-types:
         default: false
     
         
-#  BRASSTargetWaypointGaugeT:
-#    commands:
-#      target: "MS.setTargetWaypoint(String)"
-#    setupParams:
-#      targetIP:
-#        type: String
-#        default: "localhost"
-#      beaconPeriod:
-#        type: long
-#        default: 30000
-#      javaClass:
-#        type: String
-#        default: "org.sa.rainbow.brass.gauges.TargetWaypointGauge"
-#    configParams:
-#      targetProbeType:
-#        type: String
-#        default: ~
+  BRASSTargetWaypointGaugeT:
+    commands:
+      target: "MS.setTargetWaypoint(String)"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.brass.gauges.TargetWaypointGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
         
 
 gauge-instances:
@@ -127,7 +126,9 @@ gauge-instances:
       targetIP: "${customize.system.target.master}"
     configValues:
       reportingPeriod: 1000
-      targetProbeList: "rostopicprobe,cp1configprobe"
+      targetProbeType: 
+        - rostopicprobe
+        - cp1configprobe
 
   Clock1:
     type: ClockGaugeT
@@ -145,20 +146,19 @@ gauge-instances:
     model: MissionState:MissionState
     commands:
       location: "ms.setCurrentLocation($<x>,$<y>,$<w>)"
-      deadline: "ms.setDeadline($<d>)"
     setupValues:
       targetIP: "${customize.system.target.master}"
     configValues:
       reportingPeriod: 1000
       targetProbeType: rostopicprobe
       
-#  TWG1:
-#    type: BRASSTargetWaypointGaugeT
-#    model: RobotAndEnvironmentState:MissionState
-#    commands:
-#      target: "ms.setTargetWaypoint($<w>)"
-#    setupValues:
-#      targetIP: "${customize.system.target.master}"
-#    configValues:
-#      reportingPeriod: 2000
-#      targetProbeType: brasstargetprobe
+  TWG1:
+    type: BRASSTargetWaypointGaugeT
+    model: MissionState:MissionState
+    commands:
+      target: "ms.setTargetWaypoint($<w>)"
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      reportingPeriod: 2000
+      targetProbeType: targetwaypointprobe

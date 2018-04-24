@@ -106,11 +106,11 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
     }
 
     void addFieldsToStatus (String status, String message, JsonObject json) {
-        JsonObject msg = new JsonObject ();
-        msg.addProperty ("msg", message);
-        msg.addProperty ("sim_time", -1);
+//        JsonObject msg = new JsonObject ();
+        json.addProperty ("msg", message);
+        json.addProperty ("sim_time", -1);
         json.addProperty ("status", status);
-        json.add ("message", msg);
+//        json.add ("message", msg);
     }
 
     @Override

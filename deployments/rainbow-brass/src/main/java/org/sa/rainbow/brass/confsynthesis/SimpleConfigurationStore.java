@@ -12,6 +12,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.sa.rainbow.brass.confsynthesis.PropertiesSimpleConfigurationStore;
+import org.sa.rainbow.core.ConfigHelper;
 
 public class SimpleConfigurationStore implements ConfigurationProvider {
 
@@ -25,7 +26,7 @@ public class SimpleConfigurationStore implements ConfigurationProvider {
 	}
 	
 	public SimpleConfigurationStore(Properties props) {
-		m_source = props.getProperty(PropertiesSimpleConfigurationStore.CONFIGURATIONS_SOURCE_PROPKEY);
+		m_source = ConfigHelper.convertToAbsolute(props.getProperty(PropertiesSimpleConfigurationStore.CONFIGURATIONS_SOURCE_PROPKEY));
 	}
 
 	public void populate(){
@@ -50,6 +51,7 @@ public class SimpleConfigurationStore implements ConfigurationProvider {
         } catch (Exception e) {
         	System.out.println(e.getMessage());
             System.out.println("Could not load Configuration File: "+confFile);
+            e.printStackTrace();
         }
 
         JSONObject jsonObject = (JSONObject) obj;
@@ -57,7 +59,7 @@ public class SimpleConfigurationStore implements ConfigurationProvider {
 
         for (Object node : nodes) {
             JSONObject jsonNode = (JSONObject) node;
-            String c_id = (String) jsonNode.get("config_id");
+            String c_id = Long.toString((Long) jsonNode.get("config_id"));
             Double c_cdr=0.0, c_speed=0.0;
             try{
             c_cdr = Double.parseDouble(String.valueOf(jsonNode.get("power_load")));

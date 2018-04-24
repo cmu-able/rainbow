@@ -128,7 +128,7 @@ public class PlanExecutor extends AbstractRainbowRunnable implements IAdaptation
                     adaptationManager.markStrategyExecuted (at);
                 }
             }
-            Rainbow.instance().getRainbowMaster().gaugeManager().configureAllGaugews(IGauge.RAINBOW_ADAPTING, "boolean", "true");
+            Rainbow.instance().getRainbowMaster().gaugeManager().configureAllGaugews(IGauge.RAINBOW_ADAPTING, "boolean", "false");
         }
 
     }

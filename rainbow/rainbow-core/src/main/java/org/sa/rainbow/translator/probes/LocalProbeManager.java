@@ -135,6 +135,10 @@ public class LocalProbeManager extends AbstractRainbowRunnable {
                         paramList.add (long.class);
                         argsList.add (Long.parseLong (periodStr));
                     }
+                    if (pbAttr.getInfo().get("argument") != null) {
+                    	paramList.add(String.class);
+                    	argsList.add(pbAttr.getInfo().get("argument"));
+                    }
                     if (pbAttr.getArrays().size () > 0) {
                         // get list of arguments for a pure Java probe
                         for (Object vObj : pbAttr.getArrays().values ()) {

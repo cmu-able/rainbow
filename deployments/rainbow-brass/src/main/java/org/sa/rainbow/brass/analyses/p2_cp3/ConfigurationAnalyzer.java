@@ -52,7 +52,11 @@ public class ConfigurationAnalyzer extends P2CP3Analyzer {
 		MissionState ms = getModels().getMissionStateModel().getModelInstance();
 		TurtlebotModelInstance tb = getModels().getTurtlebotModel();
 		InstructionGraphModelInstance ig = getModels().getInstructionGraphModel();
-		
+		if (getModels().getRainbowStateModel().getModelInstance().waitForIG()) {
+			m_wasArchitectureOK = true;
+			m_wasConfigurationOK = true;
+			return;
+		}
 		if (ig == null) return;
 		
 		EnumSet<Sensors> sensors = rs.getSensors();

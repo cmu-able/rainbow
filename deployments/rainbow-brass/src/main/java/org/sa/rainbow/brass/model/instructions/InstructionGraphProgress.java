@@ -34,9 +34,10 @@ public class InstructionGraphProgress {
     public static List<IInstruction> parseFromString (String igStr) {
         List<IInstruction> instructions = new LinkedList<IInstruction> ();
         igStr = igStr.replace ("\n", "").replace ("\r", "");
+        igStr = igStr.replace("\\", "");
         igStr = igStr.substring (2); // Remove P(
         String[] is = igStr.split ("V");
-        Pattern instructionPattern = Pattern.compile ("\\((.*), do (.*) then (.*)\\).*");
+        Pattern instructionPattern = Pattern.compile ("\\((.*),.*do\\s+(.*) then (.*)\\).*");
 
         for (String i : is) {
             Matcher m = instructionPattern.matcher (i);
@@ -86,7 +87,7 @@ public class InstructionGraphProgress {
         return instructions;
     }
 
-    public Collection<? extends IInstruction> getInstructions () {
+    public List<? extends IInstruction> getInstructions () {
         return m_instructionList;
     }
 
@@ -221,7 +222,7 @@ public class InstructionGraphProgress {
     		IInstruction next = it.next();
     		if (clz.isInstance(next)) {
     			if (!currentSegment.isEmpty()) {
-    				segments.add(currentSegment);
+    				if (!currentSegment.isEmpty()) segments.add(currentSegment);
     				currentSegment = new LinkedList<> ();
     			}
     		}
@@ -229,6 +230,7 @@ public class InstructionGraphProgress {
     			currentSegment.add(next);
     		}
     	}
+    	if (!currentSegment.isEmpty()) segments.add(currentSegment);
     	return segments;
     }
 
@@ -265,7 +267,7 @@ public class InstructionGraphProgress {
 
     public static void main (String[] args) {
         InstructionGraphProgress ip = parseFromString (new ModelReference ("test", "test"),
-                "[P(V(1, do Deadline(143) then 2),V(2, do MoveAbsH(52.20, 69.00, 0.68, 3.1416) then 3)::V(3, do MoveAbsH(42.50, 69.00, 0.68, -1.5708) then 4)::V(4, do MoveAbsH(42.50, 65.00, 0.68, -1.5708) then 5)::V(5, do MoveAbsH(42.50, 58.80, 0.68, 0.0000) then 6)::V(6, end)::nil)");
+                " P(V(1, do KillNodes(%laserscanNodelet%) then 2), V(2, do SetSensor (%KINECT%, %off%) then 3):: V(3, do SetSensor (%CAMERA%, %on%) then 4):: V(4, do SetSensor (%HEADLAMP%, %on%) then 5):: V(5, do StartNodes(%aruco%) then 6):: V(6, do MoveAbsH(-6.22, 0.00, 0.68, 1.5708) then 7):: V(7, do MoveAbsH(-6.22, 10.27, 0.68, 1.5708) then 8):: V(8, end):: nil)");
         IInstruction instruction = ip.getInstruction ("5");
         System.out.println ();
     }
