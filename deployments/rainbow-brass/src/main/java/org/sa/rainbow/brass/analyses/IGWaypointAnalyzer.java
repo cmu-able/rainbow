@@ -58,6 +58,7 @@ public class IGWaypointAnalyzer extends P2Analyzer implements IRainbowModelChang
 
 	@Override
 	public void onEvent(ModelReference reference, IRainbowMessage message) {
+		try {
 		log("Notified of a new IG");
 		LocationRecording currentPose = getModels().getMissionStateModel().getModelInstance().getCurrentPose();
 		EnvMap envMap = getModels().getEnvMapModel().getModelInstance();
@@ -76,6 +77,11 @@ public class IGWaypointAnalyzer extends P2Analyzer implements IRainbowModelChang
 		m_modelUSPort.updateModel(getModels().getRainbowStateModel().getCommandFactory().clearModelProblems());
 		getModels().getRainbowStateModel().getModelInstance().m_waitForIG = false;
 		log("Received and processed a new IG");
+		}
+		catch (Throwable e) {
+			e.printStackTrace();
+			log("IG processor encountered an error");
+		}
 	}
 
 }

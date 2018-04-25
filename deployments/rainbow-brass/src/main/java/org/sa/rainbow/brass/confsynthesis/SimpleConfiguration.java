@@ -31,6 +31,10 @@ public class SimpleConfiguration implements Configuration {
 	public String getId(){
 		return conf_prefix+m_id;
 	}
+	
+	public String getBareId() {
+		return m_id;
+	}
 			
 	public Double getEnergyDischargeRate(){
 		return m_cdr;

@@ -158,18 +158,18 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 	@Override
 	protected void runAction() {
 		InstructionGraphProgress igModel = m_models.getInstructionGraphModel().getModelInstance();
-		if (igModel.getInstructions().isEmpty())
+		if (igModel.getInstructions().isEmpty() || m_models.getRainbowStateModel().getModelInstance().waitForIG())
 			return;
 		if (m_adaptationEnabled && !m_executingPlan) {
 			if (reallyHasError()) {
-				// BRASSHttpConnector.instance (Phases.Phase2).reportStatus
-				// (DASPhase2StatusT.ADAPTING.name(), "Detected an error");
+				 BRASSHttpConnector.instance (Phases.Phase2).reportStatus
+				 (DASPhase2StatusT.ADAPTING.name(), "Detected a problem");
 
 				m_errorDetected = false;
-				m_reportingPort.info(getComponentType(), "Determining an appropriate adaptation");
+ 				m_reportingPort.info(getComponentType(), "Determining an appropriate adaptation");
 				// DecisionEngineCP3.setMap(m_models.getEnvMapModel().getModelInstance());
 
-				EnvMap envMap = m_models.getEnvMapModel().getModelInstance().copy(); // This means that the obstruction will only persist for this plan
+				EnvMap envMap = m_models.getEnvMapModel().getModelInstance(); // This means that the obstruction will only persist for this plan
 				IInstruction ci = igModel.getCurrentInstruction();
 				LocationRecording cp = m_models.getMissionStateModel().getModelInstance().getCurrentPose();
 				String srcLabel = null;
@@ -177,7 +177,8 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 				if (ci instanceof MoveAbsHInstruction) {
 					MoveAbsHInstruction mi = (MoveAbsHInstruction) ci;
 					srcLabel = envMap.getNextNodeId();
-					srcLabel = envMap.insertNode(srcLabel, mi.getSourceWaypoint(), mi.getTargetWaypoint(), cp.getX(), cp.getY(), m_models.getRainbowStateModel().getModelInstance().getProblems().contains(CP3ModelState.IS_OBSTRUCTED));	
+					boolean obstructed = m_models.getRainbowStateModel().getModelInstance().getProblems().contains(CP3ModelState.IS_OBSTRUCTED);
+					srcLabel = envMap.insertNode(srcLabel, mi.getSourceWaypoint(), mi.getTargetWaypoint(), cp.getX(), cp.getY(), obstructed);	
 					tgtLabel = mi.getTargetWaypoint();
 				}
 				else {
@@ -196,7 +197,11 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 				}
 				
 				DecisionEngineCP1.setMap(envMap);
-				DecisionEngineCP1.generateCandidates(srcLabel, m_models.getMissionStateModel().getModelInstance().getTargetWaypoint());
+				String tgt = m_models.getMissionStateModel().getModelInstance().getTargetWaypoint();
+				log("Generating candidate paths from " + srcLabel + " to " + tgt);
+
+				DecisionEngineCP1.generateCandidates(srcLabel, tgt);
+				log("---> found " + DecisionEngineCP1.m_candidates.size());
 
 				try {
 					DecisionEngineCP1.scoreCandidates(envMap,
@@ -219,7 +224,7 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
                         String m_consts = MapTranslator.INITIAL_ROBOT_CONF_CONST + "=-1," + MapTranslator.INITIAL_ROBOT_LOCATION_CONST + "="
                                 + String.valueOf (envMap.getNodeId (srcLabel)) + ","
                                 + MapTranslator.TARGET_ROBOT_LOCATION_CONST + "="
-                                + String.valueOf (envMap.getNodeId (m_models.getMissionStateModel().getModelInstance().getTargetWaypoint ())) + ","
+                                + String.valueOf (envMap.getNodeId (tgt)) + ","
                                 + MapTranslator.INITIAL_ROBOT_BATTERY_CONST + "="
                                 + String.valueOf (Math.round (m_models.getRobotStateModel().getModelInstance().getCharge())) + ","
                                 + MapTranslator.INITIAL_ROBOT_HEADING_CONST + "=2";
@@ -239,6 +244,7 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
                         	BrassPlan ct = new CompletedTask(m_models, false);
                         	AdaptationTree<BrassPlan> at = new AdaptationTree<>(ct);
         					m_executingPlan = true;
+        					BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTED_FAILED.name(), "Could not find an alternate (even last resort) plan to complete task: " + tgt);
         					m_adaptationEnqueuePort.offerAdaptation(at, new Object[] {});
         					return;
                         }
@@ -249,6 +255,7 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 					
 					
 					String plan = pp.getPlan().toString();
+					m_reportingPort.info(getComponentType(), "Planner chooses the plan " + plan);
 					PolicyToIGCP1 translator = new PolicyToIGCP1(pp, envMap);
 					String translate = translator.translate(m_configurationStore);
 

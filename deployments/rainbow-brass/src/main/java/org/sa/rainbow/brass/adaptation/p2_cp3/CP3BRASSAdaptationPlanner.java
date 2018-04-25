@@ -170,7 +170,7 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 		if (igModel.getInstructions().isEmpty() || m_models.getRainbowStateModel().getModelInstance().waitForIG())
 			return;
 		if (m_adaptationEnabled && reallyHasError() && !m_executingPlan) {
-			String message = "Detected errors: " + reportErrors();
+			String message = "Detected problems: " + reportErrors();
 			BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(), message);
 			log(message);
 			m_errorDetected = false;
@@ -180,7 +180,7 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 			// 1. Determine string for intialization of the planner
 			String confInitString = determineValidReconfigurations();
 
-			EnvMap copy = m_models.getEnvMapModel().getModelInstance().copy();
+			EnvMap copy = m_models.getEnvMapModel().getModelInstance()/*.copy() causes potential failure in IGWaypointAnaluzyzer which needs to know about waypoints*/;
 			DecisionEngineCP3.setMap(copy);
 			// Insert a node where the robot is
 
@@ -223,6 +223,7 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 			} catch (Throwable e) {
 				e.printStackTrace();
 				m_reportingPort.error(getComponentType(), "Failed to find a plan " + e.getMessage());
+				BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTED_FAILED.name(), "Did not find a plan");
 			}
 
 		}
