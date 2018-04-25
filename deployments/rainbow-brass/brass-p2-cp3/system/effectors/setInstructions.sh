@@ -1,5 +1,5 @@
 #!/bin/bash
-echo '$1' > /tmp/ig
+echo "$1" > /tmp/ig
 . /opt/ros/kinetic/setup.bash
 . ~/catkin_ws/devel/setup.bash
 python ~/catkin_ws/src/ig-interpreter/ig_action_client/src/ig_client.py CANCEL
