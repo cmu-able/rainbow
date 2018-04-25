@@ -10,11 +10,12 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.sa.rainbow.brass.adaptation.PrismPolicy;
+import org.sa.rainbow.brass.confsynthesis.ConfigurationProvider;
+import org.sa.rainbow.brass.confsynthesis.SimpleConfiguration;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.map.EnvMapNode;
 import org.sa.rainbow.brass.plan.p2.MapTranslator;
-import org.sa.rainbow.brass.adaptation.PrismPolicy;
-import org.sa.rainbow.brass.confsynthesis.ConfigurationProvider;
 
 import net.sourceforge.argparse4j.annotation.Arg;
 
@@ -88,7 +89,7 @@ public class PolicyToIGCP1 {
 		if (name.startsWith("t_set_")) {
 			String confNameStr = name.replace("t_set_", "");
 			m_current_speed = cp.getConfigurations().get(confNameStr).getSpeed();
-			cmd = "SetCP1Config" + "(" + confNameStr + ")";
+			cmd = "SetCP1Config" + "(" + ((SimpleConfiguration )cp.getConfigurations().get(confNameStr)).getBareId() + ")";
 		}	
 		return build_cmd(cmdId, cmd);
 	}
@@ -106,7 +107,11 @@ public class PolicyToIGCP1 {
 	}
 	
 	private boolean isReconfigurationTactic (String a){
-		return (a.endsWith("0_enable") || a.endsWith("0_disable"));
+		return (a.startsWith("t_set"));
+	}
+	
+	private boolean isRechargeTactic(String a) {
+		return a.startsWith("t_recharge");
 	}
 
 	/**
@@ -154,7 +159,7 @@ public class PolicyToIGCP1 {
 			for (int i = index + 1; i < plan.size(); i++) {
 				String action = plan.get(i);
 				String[] e2 = action.split("_"); // Break action plan name into chunks
-				if (!isReconfigurationTactic(action)) { // If action is not a reconfiguration tactic (i.e., it is a move command)																														
+				if (!isReconfigurationTactic(action) && !isRechargeTactic(action)) { // If action is not a reconfiguration tactic (i.e., it is a move command)																														
 					Double tgt_x = m_map.getNodeX(e2[2]);
 					Double tgt_y = m_map.getNodeY(e2[2]);
 					theta = MapTranslator.findArcOrientation(src_x, src_y, tgt_x, tgt_y);
