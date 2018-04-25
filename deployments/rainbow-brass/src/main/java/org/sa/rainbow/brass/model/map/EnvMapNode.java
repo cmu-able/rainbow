@@ -17,7 +17,7 @@ public class EnvMapNode {
         this.m_id = node_id;
         
         m_properties = new HashMap<> ();
-        m_properties.put("CHARGING", (boolean)charging);	
+        m_properties.put(Phase1MapPropertyKeys.CHARGING_STATION, (boolean)charging);	
     }
     
     public EnvMapNode (String m_label, double x, double y, int node_id) {
@@ -28,7 +28,7 @@ public class EnvMapNode {
         this.m_id = node_id;
         
         m_properties = new HashMap<> ();
-        m_properties.put("CHARGING", false);	
+        m_properties.put(Phase1MapPropertyKeys.CHARGING_STATION, false);	
 
     }
    
@@ -69,7 +69,7 @@ public class EnvMapNode {
     }
     
     public boolean isChargingStation(){
-    	return (boolean) m_properties.get("CHARGING");
+    	return (boolean) m_properties.get(Phase1MapPropertyKeys.CHARGING_STATION);
     }
     
 }

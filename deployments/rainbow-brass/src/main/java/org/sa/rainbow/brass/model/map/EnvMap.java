@@ -323,7 +323,7 @@ public class EnvMap {
 	private void loadPropertiesFromFile(JSONObject json) {
 		// Do charging based on property
 
-		JSONArray charge_stations = (JSONArray) json.get("charge_stations");
+		JSONArray charge_stations = (JSONArray) json.get("stations");
 		if (charge_stations != null)
 			charge_stations.forEach(new Consumer<Object>() {
 
