@@ -4,17 +4,19 @@ target=install
 jcctarget="javacc:javacc install"
 TIMESTAMP=`date +'%Y%m%d%H%M'`
 VERSION=$TIMESTAMP
+SKIPTESTS=""
 
 
 function usage () {
-  echo "Usage $PROG [-d deployment-dir] [-t target] [-v version] [command]"
+  echo "Usage $PROG [-s] [-d deployment-dir] [-t target] [-v version] [command]"
   echo "    -d -the deployment that you want included in the build, either relative or in the dir deployments"
   echo "    -t -the comma separated list of targets to include in the build, either relative or in the targets dir"
   echo "    -v -the version label to give the release"
+  echo "    -s skip tests in the build"
   echo "command -the build command to give"
 }
 
-while getopts :d:t:v: opt; do
+while getopts :d:t:v:s opt; do
   case $opt in
     d)
       if [ -d "$OPTARG" ]; then
@@ -48,6 +50,9 @@ while getopts :d:t:v: opt; do
     v)
       VERSION=$OPTARG"-$TIMESTAMP"
       ;;
+    s)
+      SKIPTESTS="-DskipTests"
+      ;;
     \?)
       usage
       exit 1
@@ -78,22 +83,22 @@ mkdir -p bin/lib
 cd libs/
 
 cd auxtestlib
-mvn $target
+mvn $SKIPTESTS $target
 cd ../incubator
-mvn $target
+mvn $SKIPTESTS $target
 cd ../parsec
-mvn $jcctarget -DskipTests
+mvn -DskipTests $jcctarget
 cd ../typelib
-mvn $jcctarget
+mvn $SKIPTESTS $jcctarget
 cd ../eseblib
-mvn $target -DskipTests
+mvn -DskipTests $target
 
 cd ../../rainbow
 
 cd rainbow-core
-mvn $target -DskipTests
+mvn -DskipTests $target 
 cd ../rainbow-acme-model
-mvn $target -DskipTests
+mvn -DskipTests $target
 cd ../rainbow-utility-model
 mvn $target 
 cd ../rainbow-stitch
