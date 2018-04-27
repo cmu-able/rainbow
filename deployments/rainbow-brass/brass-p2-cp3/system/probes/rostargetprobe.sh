@@ -7,4 +7,4 @@ elif [ ! -f $1 ]; then
 	exit 1
 fi
 
-grep "target-loc" $1
+grep "target[-_]loc" $1
