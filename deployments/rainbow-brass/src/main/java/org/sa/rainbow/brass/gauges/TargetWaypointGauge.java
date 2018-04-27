@@ -16,7 +16,7 @@ public class TargetWaypointGauge extends RegularPatternGauge {
 
     private static final String NAME           = "TargetWaypointGauge";
     private static final String TARGET         = "target";
-    private static final String TARGET_PATTERN = ".*target.*:.*\\\"([^\"]*)\\\".*";
+    private static final String TARGET_PATTERN = ".*target.*:.*[\\\"']([^\\\"']*)[\\\"'].*";
 
     public TargetWaypointGauge (String id, long beaconPeriod, TypedAttribute gaugeDesc, TypedAttribute modelDesc,
             List<TypedAttributeWithValue> setupParams, Map<String, IRainbowOperation> mappings)

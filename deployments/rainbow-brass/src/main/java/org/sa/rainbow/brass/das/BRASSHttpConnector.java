@@ -23,7 +23,6 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
 
     public static final MediaType     JSON               = MediaType.parse ("application/json");
     public static final OkHttpClient  CLIENT             = new OkHttpClient ();
-    public static final DateFormat    DF                 = new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ss.S'Z'");
     public static final String        STATUS_SERVER      = "http://localhost:5000";
     private static BRASSHttpConnector s_instance;
     public Queue<Request>             m_requestQ         = new SynchronousQueue<> ();
@@ -83,7 +82,6 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
 
     JsonObject getTimeJSON () {
         JsonObject t = new JsonObject ();
-        t.addProperty ("TIME", DF.format (new Date ()));
         return t;
     }
 

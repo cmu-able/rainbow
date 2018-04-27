@@ -3,6 +3,7 @@ package org.sa.rainbow.brass.analyses.p2_cp3;
 import org.sa.rainbow.brass.das.BRASSHttpConnector;
 import org.sa.rainbow.brass.das.IBRASSConnector.Phases;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
+import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress.IGExecutionStateT;
 import org.sa.rainbow.brass.model.p2_cp3.mission.MissionState;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RemoveModelProblemCmd;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.SetModelProblemCmd;
@@ -42,6 +43,9 @@ public class MissionAnalyzer extends P2CP3Analyzer {
 				m_wasOK = true;
 				RemoveModelProblemCmd cmd = getModels().getRainbowStateModel().getCommandFactory ().removeModelProblem(CP3ModelState.INSTRUCTION_GRAPH_FAILED);
 				m_modelUSPort.updateModel(cmd);
+			}
+			else if (ig.getModelInstance().getInstructionGraphState() == IGExecutionStateT.FINISHED_SUCCESS) {
+				BRASSHttpConnector.instance(Phases.Phase2).reportDone(false, "Finished the IG");
 			}
 		}
 	}
