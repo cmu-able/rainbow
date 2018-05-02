@@ -11,6 +11,7 @@ public class PropertiesConnector {
     public static final String PRISM_BIN_PROPKEY = "prism.bin";
     public static final String MAP_PROPKEY              = "customize.map.json";
     public static final String PRISM_OUTPUT_DIR_PROPKEY         = "prism.tmpdir";
+    public static final String CP1_CONFIG_FILE_PROPKEY = "cp1.config";
 
     public static final Properties DEFAULT = new Properties ();
 
@@ -30,6 +31,7 @@ public class PropertiesConnector {
         DEFAULT.setProperty (PRISM_PARAMETERS_PROPKEY, "INITIAL_BATTERY=30000,INITIAL_HEADING=1");
         DEFAULT.setProperty (PRISM_ADV_EXPORT_PROPKEY, prismOutDir + "botpolicy.adv");
         DEFAULT.setProperty (MAP_PROPKEY, prismOutDir + "map-p2cp3.json");
+        DEFAULT.setProperty(CP1_CONFIG_FILE_PROPKEY, "~/cp1/plugins_config.json");
     }
 
 
