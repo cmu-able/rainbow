@@ -328,7 +328,21 @@ system Turtlebot : BrassTurtlebotFam = new BrassTurtlebotFam extended with {
       };
       property name = "map_server";
       property category = MapServer;
+      property enablement = INACTIVE;
    };
+   
+   component map_server_obs : EnableableTurtlebotNodeCompT = new EnableableTurtlebotNodeCompT extended with {
+      port TopicAdvertisePortT0 : TopicAdvertisePortT = new TopicAdvertisePortT extended with {
+         property msg_type = " nav_msgs/OccupancyGrid";
+         property topic = "/map";
+      };
+      property name = "map_server_obs";
+      property category = MapServer;
+      property enablement = INACTIVE;
+      
+   };
+   
+   
    component move_base : EnableableTurtlebotNodeCompT = new EnableableTurtlebotNodeCompT extended with {
       port ActionServerPortT0 : ActionServerPortT = new ActionServerPortT extended with {
          property action_type = "goal";
@@ -565,6 +579,7 @@ system Turtlebot : BrassTurtlebotFam = new BrassTurtlebotFam extended with {
    };
    connector TopicConnectorT0 : TopicConnectorT = new TopicConnectorT extended with {
       role advertiser : ROSTopicAdvertiserRoleT = new ROSTopicAdvertiserRoleT;
+      role advertiser0 : ROSTopicAdvertiserRoleT = new ROSTopicAdvertiserRoleT;
       role subscriber : ROSTopicSubscriberRoleT = new ROSTopicSubscriberRoleT;
       property msg_type = " nav_msgs/OccupancyGrid";
       property topic = "/map";
@@ -591,6 +606,7 @@ system Turtlebot : BrassTurtlebotFam = new BrassTurtlebotFam extended with {
    attachment marker_pose_publisher.TopicSubscribePortT1 to depth_image1.subsriber;
    attachment map_server.TopicAdvertisePortT0 to TopicConnectorT0.advertiser;
    attachment move_base.TopicSubscribePortT1 to TopicConnectorT0.subscriber;
+   attachment map_server_obs.TopicAdvertisePortT0 to TopicConnectorT0.advertiser0;
 
     rule atLeastOneActiveLocalization = invariant exists n :! EnableableTurtlebotNodeCompT in self.COMPONENTS | (n.category == Localization and n.enablement == ACTIVE);
     rule atLeastOneActiveNavigation = invariant exists n :! EnableableTurtlebotNodeCompT in self.COMPONENTS | (n.category == Navigation and n.enablement == ACTIVE);

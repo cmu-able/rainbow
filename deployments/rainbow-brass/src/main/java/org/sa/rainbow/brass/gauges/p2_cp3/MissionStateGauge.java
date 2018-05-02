@@ -23,7 +23,7 @@ public class MissionStateGauge extends RegularPatternGauge {
     protected static final String LOC               = "LocationRecording";
     protected static final String DEADLINE          = "Deadline";
 
-    protected static final String LOC_PATTERN         = "topic: /amcl_pose/pose/pose.*position.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z.*\\norientation.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z: (.*)\\n.*w: (.*)(.*)";
+    protected static final String LOC_PATTERN         = "topic: /tf/transforms\\[0\\]/transform.*\\ntranslation.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z.*\\nrotation.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z: (.*)\\n.*w: (.*)(.*)";
     protected static final String DEADLINE_PATTERN    = "topic: /notify_user.*\\n.*new_deadline: (.*)\\n.*user(.*)";
     protected String              last_x;
     protected String              last_y;

@@ -102,11 +102,12 @@ class CallbackEcho(object):
     formats. Used for all variants of rostopic echo
     """
 
-    def __init__(self, topic, msg_eval, count=None, period=None):
+    def __init__(self, topic, msg_eval, count=None, period=None, filter_fn=None):
         if topic and topic[-1] == '/':
             topic = topic[:-1]
         self.topic = topic
         self.msg_eval = msg_eval
+        self.filter_fn = filter_fn
         self.prefix = ''
         self.suffix = '\n---'
 
@@ -150,7 +151,6 @@ class CallbackEcho(object):
             datetime = rospy.get_rostime().to_sec()
             #sys.stdout.write (str(self.last_report) + "\n")
             #sys.stdout.write (str(datetime - self.last_report) + " < " + str(self.period))
-            #sys.stdout.flush()
             if self.last_report != 0.0:
                 if (datetime - self.last_report) < self.period:
                     #sys.stdout.write("not reporttttttttttttttttttttttttttttin")
@@ -161,6 +161,8 @@ class CallbackEcho(object):
             sys.stdout.flush()
         topic = callback_args['topic']
         type_information = callback_args.get('type_information', None)
+        if self.filter_fn is not None and not self.filter_fn(data):
+            return
         if self.max_count is not None and self.count >= self.max_count:
             self.done = True
             return
@@ -461,7 +463,7 @@ def _rostopic_cmd_echo(argv):
 
     args = argv # not passing in 'echo' as command because this is the default
     from optparse import OptionParser
-    parser = OptionParser(usage="usage: %prog [options] /topic[:period (secs)]", prog=NAME)
+    parser = OptionParser(usage="usage: %prog [options] /topic[:period (secs)[:filter]]", prog=NAME)
     parser.add_option("-n",
                     dest="msg_count", default=None, metavar="COUNT",
                     help="number of messages to echo")
@@ -477,14 +479,21 @@ def _rostopic_cmd_echo(argv):
     for t in args:
         t_p = t.split(':')
         topic = rosgraph.names.script_resolve_name('rostopic', t_p[0])
+        filter = None
         if len(t_p) > 1:
             try:
                 period = int(t_p[1])
             except ValueError:
                 parser.error("period must be an integer")
+        elif len(t_p) > 2:
+            filter = t_p[2]
         else:
             period = None
-        callbacks.append(CallbackEcho(topic, None, count=msg_count, period=period))
+            filter = None
+        filter_fn = None
+        if filter is not None:
+            filter_fn = expr_eval(filter)
+        callbacks.append(CallbackEcho(topic, None, count=msg_count, period=period, filter_fn=filter_fn))
         topics.append(topic)
         #callback_echo = CallbackEcho(topic, None, count=msg_count)
     try:
