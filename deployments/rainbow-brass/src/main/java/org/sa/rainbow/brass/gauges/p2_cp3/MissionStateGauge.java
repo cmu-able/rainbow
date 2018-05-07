@@ -22,9 +22,11 @@ public class MissionStateGauge extends RegularPatternGauge {
     private static final String   NAME              = "Mission State Gauge";
     protected static final String LOC               = "LocationRecording";
     protected static final String DEADLINE          = "Deadline";
+    protected static final String RECONFIGURING = "Reconfig";
 
     protected static final String LOC_PATTERN         = "topic: /tf/transforms\\[0\\]/transform.*\\ntranslation.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z.*\\nrotation.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z: (.*)\\n.*w: (.*)(.*)";
     protected static final String DEADLINE_PATTERN    = "topic: /notify_user.*\\n.*new_deadline: (.*)\\n.*user(.*)";
+    protected static final String RECONFIG_PATTERN    = "topic: /ig_interpreter/reconfiguring.*\n.*data:(.*)";
     protected String              last_x;
     protected String              last_y;
     private String                last_w;
@@ -51,6 +53,7 @@ public class MissionStateGauge extends RegularPatternGauge {
         super (NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
         addPattern (LOC, Pattern.compile (LOC_PATTERN, Pattern.DOTALL));
         addPattern (DEADLINE, Pattern.compile (DEADLINE_PATTERN, Pattern.DOTALL));
+        addPattern (RECONFIGURING, Pattern.compile(RECONFIG_PATTERN, Pattern.DOTALL));
     }
 
     @Override
@@ -85,6 +88,15 @@ public class MissionStateGauge extends RegularPatternGauge {
             pMap.put (op.getParameters ()[0], date);
             issueCommand (op, pMap);
             restGroup = 2;
+        }
+        else if (RECONFIGURING.equals(matchName)) {
+        	String mode = m.group(1).trim().toLowerCase();
+        	  IRainbowOperation op = m_commands.get ("reconfiguring");
+              Map<String, String> pMap = new HashMap<> ();
+              pMap.put (op.getParameters ()[0], mode);
+              issueCommand (op, pMap);
+              restGroup = 2;
+        	
         }
         if (m.groupCount () == restGroup) {
             String rest = m.group (restGroup);

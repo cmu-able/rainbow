@@ -23,6 +23,7 @@ gauge-types:
     commands:
       location: "MS.setCurrentLocation(double,double,double)"
       deadline: "MS.setDeadline(long)"
+      reconfiguring: "MS.setReconfiguring(boolean)" 
     setupParams:
       targetIP:
         type: String
@@ -44,6 +45,7 @@ gauge-types:
       charge: "RS.setBatteryCharge(double)"
       bump: "RS.setBumped(boolean)"
       sensor: "RS.setSensor(String, boolean)"
+      sensor-failed: "RS.setSensorFailed(String)"
       lighting: "RS.setLighting(double)"
     setupParams:
       targetIP:
@@ -151,6 +153,7 @@ gauge-instances:
       sensor: "rs.setSensor($<s>,$<v>)"
       bump: "rs.setBumped($<b>)"
       lighting: "rs.setLighting($<l>)"
+      sensor-failed: "rs.setSensorFailed($<s>)"
     setupValues:
       targetIP: "${customize.system.target.master}"
     configValues:
@@ -186,6 +189,7 @@ gauge-instances:
     commands:
       location: "ms.setCurrentLocation($<x>,$<y>,$<w>)"
       deadline: "ms.setDeadline($<d>)"
+      reconfiguring: "ms.setReconfiguring($<r>)"
     setupValues:
       targetIP: "${customize.system.target.master}"
     configValues:

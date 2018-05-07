@@ -68,6 +68,9 @@ public class PolicyToIGCP3 {
 		return cmd;
 	}
 
+	private String build_reconfig_cmd(boolean mode) {
+		return "SetReconfiguration(" + (mode?"1":"0") + ")";
+	}
 
 	/**
 	 * Generates a tactic instruction for the IG
@@ -143,6 +146,10 @@ public class PolicyToIGCP3 {
 	private boolean isReconfigurationTactic (String a){
 		return (a.endsWith("0_enable") || a.endsWith("0_disable"));
 	}
+	
+	private boolean isReconfig(String c) {
+		return c.contains("KillNodes") || c.contains("SetSensor") || c.contains("StartNodes");
+	}
 
 	/**
 	 * Builds the instruction graph
@@ -152,21 +159,41 @@ public class PolicyToIGCP3 {
 	 * @return
 	 */
 	private String build_ig(ArrayList<String> cmds) {
-		
-//		Pattern p = Pattern.compile(".*do ([^)]*).*");
-		// remove duplicates
+		ArrayList<String> newCmds = new ArrayList<>(cmds.size());
 		String prev = "";
-		for (Iterator iterator = cmds.iterator(); iterator.hasNext();) {
-			String string = (String) iterator.next();
-//			Matcher m = p.matcher(string);
-//			if (m.matches()) {
-				if (/*m.group(1)*/string.equals(prev)) {
-					iterator.remove();
-				}
-				prev = /*m.group(1)*/string;
-//			}
-			
+		boolean reconfig = false;
+		for (String c : cmds) {
+			if (c.equals(prev)) continue;
+			if (!reconfig && isReconfig(c)) {
+				String r = build_reconfig_cmd(true);
+				reconfig = true;
+				newCmds.add(r);
+			}
+			newCmds.add(c);
+			prev = c;
+			if (reconfig && !isReconfig(c)) {
+				String r = build_reconfig_cmd(false);
+				reconfig = false;
+				newCmds.add(r);
+			}
 		}
+		
+		
+		
+////		Pattern p = Pattern.compile(".*do ([^)]*).*");
+//		// remove duplicates
+//		String prev = "";
+//		for (Iterator iterator = cmds.iterator(); iterator.hasNext();) {
+//			String string = (String) iterator.next();
+////			Matcher m = p.matcher(string);
+////			if (m.matches()) {
+//				if (/*m.group(1)*/string.equals(prev)) {
+//					iterator.remove();
+//				}
+//				prev = /*m.group(1)*/string;
+////			}
+//			
+//		}
 		String ins_graph = "P(";
 		int i = 0;
 		for (i = 0; i < cmds.size(); i++) {

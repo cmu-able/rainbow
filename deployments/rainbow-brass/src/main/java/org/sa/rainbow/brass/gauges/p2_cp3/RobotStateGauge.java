@@ -7,11 +7,15 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.sa.rainbow.brass.model.p2_cp3.CP3ModelAccessor;
 import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotState.Sensors;
+import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.gauges.RegularPatternGauge;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
+import org.sa.rainbow.core.ports.IModelsManagerPort;
+import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.translator.probes.IProbeIdentifier;
@@ -72,6 +76,10 @@ public class RobotStateGauge extends RegularPatternGauge {
 	private double reported_speed;
 
 	private boolean reported_bump;
+	
+	private CP3ModelAccessor m_models;
+
+	private IModelsManagerPort m_modelsPort;
 
 	public RobotStateGauge(String id, long beaconPeriod, TypedAttribute gaugeDesc, TypedAttribute modelDesc,
 			List<TypedAttributeWithValue> setupParams, Map<String, IRainbowOperation> mappings)
@@ -88,6 +96,14 @@ public class RobotStateGauge extends RegularPatternGauge {
 
 	@Override
 	protected void doMatch(String matchName, Matcher m) {
+		if (m_models == null) {
+			try {
+				m_modelsPort = RainbowPortFactory.createModelsManagerRequirerPort();
+				m_models = new CP3ModelAccessor(m_modelsPort);
+			} catch (RainbowConnectionException e) {
+				e.printStackTrace();
+			}
+		}
 		if (CHARGE.equals(matchName)) {
 			double charge = Double.parseDouble(m.group(1).trim());
 
@@ -139,30 +155,50 @@ public class RobotStateGauge extends RegularPatternGauge {
 					List<Map<String, String>> params = Arrays.asList(new Map[] { cameraMap, kinectMap });
 					issueCommands(ops, params);
 				} else if (mode == 0) {
-					IRainbowOperation cameraOp = m_commands.get("sensor");
-					Map<String, String> cameraMap = new HashMap<>();
-					cameraMap.put(cameraOp.getParameters()[0], Sensors.BACK_CAMERA.name());
-					cameraMap.put(cameraOp.getParameters()[1], Boolean.toString(false));
+					if (!m_models.getMissionStateModel().getModelInstance().isReconfiguring()) {
+						IRainbowOperation fop = m_commands.get("sensor-failed");
+						Map<String, String> fom = new HashMap<>();
+						if (m_models.getRobotStateModel().getModelInstance().getSensors().contains(Sensors.KINECT)) {
+							fom.put(fop.getParameters()[0], Sensors.KINECT.name());
+						} else {
+							fom.put(fop.getParameters()[0], Sensors.BACK_CAMERA.name());
+						}
+						issueCommand(fop, fom);
+					} else {
+						IRainbowOperation cameraOp = m_commands.get("sensor");
+						Map<String, String> cameraMap = new HashMap<>();
+						cameraMap.put(cameraOp.getParameters()[0], Sensors.BACK_CAMERA.name());
+						cameraMap.put(cameraOp.getParameters()[1], Boolean.toString(false));
 
-					OperationRepresentation kinectOp = new OperationRepresentation(cameraOp);
-					Map<String, String> kinectMap = new HashMap<>();
-					kinectMap.put(kinectOp.getParameters()[0], Sensors.KINECT.name());
-					kinectMap.put(kinectOp.getParameters()[1], Boolean.toString(false));
+						OperationRepresentation kinectOp = new OperationRepresentation(cameraOp);
+						Map<String, String> kinectMap = new HashMap<>();
+						kinectMap.put(kinectOp.getParameters()[0], Sensors.KINECT.name());
+						kinectMap.put(kinectOp.getParameters()[1], Boolean.toString(false));
 
-					List<IRainbowOperation> ops = Arrays.asList(new IRainbowOperation[] { cameraOp, kinectOp });
-					List<Map<String, String>> params = Arrays.asList(new Map[] { cameraMap, kinectMap });
-					issueCommands(ops, params);
+						List<IRainbowOperation> ops = Arrays.asList(new IRainbowOperation[] { cameraOp, kinectOp });
+						List<Map<String, String>> params = Arrays.asList(new Map[] { cameraMap, kinectMap });
+						issueCommands(ops, params);
+					}
 				}
 			}
 		} else if (LIDAR.equals(matchName)) {
 			boolean lMode = Boolean.parseBoolean(m.group(1).trim().toLowerCase());
 			if (lMode != reported_lidar_mode) {
-				reported_lidar_mode = lMode;
-				IRainbowOperation lidarOp = m_commands.get("sensor");
-				Map<String, String> lidarParams = new HashMap<>();
-				lidarParams.put(lidarOp.getParameters()[0], Sensors.LIDAR.name());
-				lidarParams.put(lidarOp.getParameters()[1], Boolean.toString(lMode));
-				issueCommand(lidarOp, lidarParams);
+				if (!lMode && !m_models.getMissionStateModel().getModelInstance().isReconfiguring()) {
+					reported_lidar_mode = lMode;
+					IRainbowOperation lidarOp = m_commands.get("sensor-failed");
+					Map<String, String> lidarParams = new HashMap<>();
+					lidarParams.put(lidarOp.getParameters()[0], Sensors.LIDAR.name());
+					lidarParams.put(lidarOp.getParameters()[1], Boolean.toString(lMode));
+					issueCommand(lidarOp, lidarParams);
+				} else {
+					reported_lidar_mode = lMode;
+					IRainbowOperation lidarOp = m_commands.get("sensor");
+					Map<String, String> lidarParams = new HashMap<>();
+					lidarParams.put(lidarOp.getParameters()[0], Sensors.LIDAR.name());
+					lidarParams.put(lidarOp.getParameters()[1], Boolean.toString(lMode));
+					issueCommand(lidarOp, lidarParams);
+				}
 			}
 		} else if (HEADLAMP.equals(matchName)) {
 			boolean hMode = Boolean.parseBoolean(m.group(1).trim().toLowerCase());

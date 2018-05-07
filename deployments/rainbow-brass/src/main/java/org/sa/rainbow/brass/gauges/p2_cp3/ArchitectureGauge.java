@@ -8,10 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.sa.rainbow.brass.model.p2_cp3.CP3ModelAccessor;
 import org.sa.rainbow.brass.model.p2_cp3.acme.TurtlebotModelInstance.ActiveT;
+import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.AbstractGaugeWithProbes;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
+import org.sa.rainbow.core.ports.IModelsManagerPort;
+import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.translator.probes.IProbeIdentifier;
@@ -28,6 +32,10 @@ public class ArchitectureGauge extends AbstractGaugeWithProbes {
 	private boolean m_newReport = false;
 
 	private Boolean m_adapting = false;
+
+	private IModelsManagerPort m_modelsPort;
+
+	private CP3ModelAccessor m_models;
 	
 	public ArchitectureGauge(String id, long beaconPeriod, TypedAttribute gaugeDesc,
 			TypedAttribute modelDesc, List<TypedAttributeWithValue> setupParams,
@@ -55,6 +63,14 @@ public class ArchitectureGauge extends AbstractGaugeWithProbes {
 	
 	@Override
 	protected void runAction() {
+		if (m_models == null) {
+			try {
+				m_modelsPort = RainbowPortFactory.createModelsManagerRequirerPort();
+				m_models = new CP3ModelAccessor(m_modelsPort);
+			} catch (RainbowConnectionException e) {
+				e.printStackTrace();
+			}
+		}
 		super.runAction();
 
 		if (/*isRainbowAdapting() || */!m_newReport) return;
@@ -95,7 +111,7 @@ public class ArchitectureGauge extends AbstractGaugeWithProbes {
 				params.add(p);
 			}
 		}
-		String active = m_reconfiguring?ActiveT.INACTIVE.name():ActiveT.FAILED.name();
+		String active = m_models.getMissionStateModel().getModelInstance().isReconfiguring()?ActiveT.INACTIVE.name():ActiveT.FAILED.name();
 
 		for (String n : goneNodes) {
 			IRainbowOperation op = getCommand("set-active");

@@ -97,6 +97,9 @@ public class MissionState extends ClockedModel {
 
     private String  m_targetWaypoint  = "";
 
+
+	private boolean m_reconfiguring;
+
     public MissionState (ModelReference model) {
         m_model = model;
     }
@@ -157,12 +160,21 @@ public class MissionState extends ClockedModel {
         MissionState s = new MissionState (m_model);
         s.m_locationHistory = new ArrayDeque<> (m_locationHistory);
         s.m_deadlineHistory = new ArrayDeque<> (m_deadlineHistory);
+        s.m_reconfiguring = m_reconfiguring;
         return s;
     }
 
     public boolean isMissionStarted () {
     	// TODO: CHange this when mission start detection is implemented
     	return true || !"".equals(getTargetWaypoint ());
+    }
+    
+    public boolean isReconfiguring() {
+    	return m_reconfiguring;
+    }
+    
+    public void setReconfiguring(boolean r) {
+    	m_reconfiguring = r;
     }
 
 }

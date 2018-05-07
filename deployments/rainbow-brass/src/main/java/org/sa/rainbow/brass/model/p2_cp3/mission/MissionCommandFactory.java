@@ -29,6 +29,7 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
         m_commandMap.put ("setCurrentLocation".toLowerCase (), SetCurrentLocationCmd.class);
         m_commandMap.put ("setDeadlineCmd".toLowerCase (), SetDeadlineCmd.class);
         m_commandMap.put ("setTargetWaypoint".toLowerCase (), SetTargetWaypointCmd.class);
+        m_commandMap.put("setReconfiguring".toLowerCase(), SetReconfiguringCmd.class);
     }
 
     @Override
@@ -53,6 +54,10 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
 
     public SetTargetWaypointCmd setTargetWaypointCmd (String t) {
         return new SetTargetWaypointCmd ((MissionStateModelInstance )m_modelInstance, "", t);
+    }
+    
+    public SetReconfiguringCmd setReconfiguringCmd(boolean r) {
+    	return new SetReconfiguringCmd((MissionStateModelInstance )m_modelInstance, "", Boolean.toString(r));
     }
 
  

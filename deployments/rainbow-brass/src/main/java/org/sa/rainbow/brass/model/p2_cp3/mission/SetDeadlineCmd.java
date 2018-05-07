@@ -29,7 +29,7 @@ public class SetDeadlineCmd extends AbstractRainbowModelOperation<Long, MissionS
 
     @Override
     protected List<? extends IRainbowMessage> getGeneratedEvents (IRainbowMessageFactory messageFactory) {
-        return generateEvents (messageFactory, "setDeadlineCharge");
+        return generateEvents (messageFactory, "setDeadline");
     }
 
     @Override
