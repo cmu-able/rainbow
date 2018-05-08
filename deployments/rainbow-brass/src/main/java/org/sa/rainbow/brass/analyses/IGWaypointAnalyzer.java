@@ -7,6 +7,7 @@ import org.sa.rainbow.brass.model.instructions.IInstruction;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
 import org.sa.rainbow.brass.model.instructions.MoveAbsHInstruction;
 import org.sa.rainbow.brass.model.map.EnvMap;
+import org.sa.rainbow.brass.model.map.EnvMapNode;
 import org.sa.rainbow.brass.model.p2_cp3.mission.MissionState.LocationRecording;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.event.IRainbowMessage;
@@ -59,28 +60,35 @@ public class IGWaypointAnalyzer extends P2Analyzer implements IRainbowModelChang
 	@Override
 	public void onEvent(ModelReference reference, IRainbowMessage message) {
 		try {
-		log("Notified of a new IG");
-		LocationRecording currentPose = getModels().getMissionStateModel().getModelInstance().getCurrentPose();
-		EnvMap envMap = getModels().getEnvMapModel().getModelInstance();
-		String currentSrc = envMap.getNode(currentPose.getX(), currentPose.getY()).getLabel();
-		Collection<? extends IInstruction> instructions = getModels().getInstructionGraphModel().getModelInstance()
-				.getInstructions();
-		for (IInstruction i : instructions) {
-			if (i instanceof MoveAbsHInstruction) {
-				MoveAbsHInstruction mai = (MoveAbsHInstruction) i;
-				mai.setSourceWaypoint(currentSrc);
-				String tgtWp = envMap.getNode(mai.getTargetX(), mai.getTargetY()).getLabel();
-				mai.setTargetWaypoint(tgtWp);
-				currentSrc = tgtWp;
+			log("Notified of a new IG");
+			LocationRecording currentPose = getModels().getMissionStateModel().getModelInstance().getCurrentPose();
+			EnvMap envMap = getModels().getEnvMapModel().getModelInstance();
+			String currentSrc = envMap.getNode(currentPose.getX(), currentPose.getY()).getLabel();
+			Collection<? extends IInstruction> instructions = getModels().getInstructionGraphModel().getModelInstance()
+					.getInstructions();
+			for (IInstruction i : instructions) {
+				if (i instanceof MoveAbsHInstruction) {
+					MoveAbsHInstruction mai = (MoveAbsHInstruction) i;
+					mai.setSourceWaypoint(currentSrc);
+					EnvMapNode node = envMap.getNode(mai.getTargetX(), mai.getTargetY());
+					if (node != null) {
+						String tgtWp = node.getLabel();
+						mai.setTargetWaypoint(tgtWp);
+						currentSrc = tgtWp;
+					} else {
+						throw new NullPointerException("Node from " + mai.getTargetX() + ", " + mai.getTargetY()
+								+ " does not exist in envmap");
+					}
+				}
 			}
-		}
-		m_modelUSPort.updateModel(getModels().getRainbowStateModel().getCommandFactory().clearModelProblems());
-		getModels().getRainbowStateModel().getModelInstance().m_waitForIG = false;
-		log("Received and processed a new IG");
-		}
-		catch (Throwable e) {
+
+			log("Received and processed a new IG");
+		} catch (Throwable e) {
 			e.printStackTrace();
 			log("IG processor encountered an error");
+		} finally {
+			m_modelUSPort.updateModel(getModels().getRainbowStateModel().getCommandFactory().clearModelProblems());
+			getModels().getRainbowStateModel().getModelInstance().m_waitForIG = false;
 		}
 	}
 

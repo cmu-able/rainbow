@@ -25,7 +25,7 @@ public class SetSensorInstruction implements IInstruction {
 	}
 	
 	private void parseSensorInformation() {
-		Pattern sensorPattern = Pattern.compile("SetSensor\\((.+),(.+)\\)");
+		Pattern sensorPattern = Pattern.compile("SetSensor\\s*\\(\\s*(.+),\\s*(.+)\\)");
 		Matcher m = sensorPattern.matcher(m_instruction);
 		if (m.matches()) {
 			m_sensor = Sensors.valueOf(m.group(1));

@@ -88,6 +88,13 @@ public class SimpleConfigurationStore implements ConfigurationProvider {
 		return (HashMap<String, Configuration>)(HashMap<String, ?>)m_configuration_objects;
 	}
 	
+	public Configuration getConfiguration(String config) {
+		if (!config.startsWith(m_conf_prefix)) {
+			config = m_conf_prefix + config;
+		}
+		return m_configuration_objects.get(config);
+	}
+	
 	public HashMap<String,List<String>> getLegalReconfigurationsFrom(String fromConfiguration){
 		HashMap<String, List<String>> res = new HashMap<String, List<String>> ();
 		for (String cid: m_configuration_objects.keySet()){

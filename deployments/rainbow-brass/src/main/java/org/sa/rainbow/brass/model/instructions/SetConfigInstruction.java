@@ -20,7 +20,7 @@ public class SetConfigInstruction implements IInstruction {
 		parseInformation();
 	}
 	private void parseInformation() {
-		Pattern startPattern = Pattern.compile(COMMAND_NAME+"\\((.+)\\)");
+		Pattern startPattern = Pattern.compile(COMMAND_NAME+"\\s*\\((.+)\\)");
 		Matcher m = startPattern.matcher(m_instruction);
 		if (m.matches()) {
 			m_config = m.group(1);

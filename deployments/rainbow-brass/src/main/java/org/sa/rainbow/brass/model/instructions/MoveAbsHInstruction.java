@@ -87,7 +87,7 @@ public class MoveAbsHInstruction implements IInstruction {
 
     private void parseMoveAbsHTargetPose () {
         Pattern moveAbsHPattern = Pattern
-                .compile ("MoveAbsH\\(([\\-0-9.]+), ?([\\-0-9.]+), ?([\\-0-9.]+), ?([\\-0-9.]+)\\)");
+                .compile ("MoveAbsH\\(([\\-0-9.]+),\\s*([\\-0-9.]+),\\s*([\\-0-9.]+),\\s*([\\-0-9.]+)\\)");
         Matcher m = moveAbsHPattern.matcher (m_instruction);
         if (m.matches ()) {
             m_targetX = Double.parseDouble (m.group (1));

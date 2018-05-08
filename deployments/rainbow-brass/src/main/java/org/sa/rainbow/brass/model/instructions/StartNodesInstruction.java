@@ -19,7 +19,7 @@ public class StartNodesInstruction implements IInstruction {
 	}
 
 	private void parseInformation() {
-		Pattern startPattern = Pattern.compile(COMMAND_NAME+"\\((.+)\\)");
+		Pattern startPattern = Pattern.compile(COMMAND_NAME+"\\s*\\((.+)\\)");
 		Matcher m = startPattern.matcher(m_instruction);
 		if (m.matches()) {
 			m_node = m.group(1);

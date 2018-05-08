@@ -296,7 +296,7 @@ public class EnergyConsumptionPredictor {
      }
 
      // Energy consumed by straight move
-		Configuration configuration = m_powerModel.getConfigurations().get(config);
+		Configuration configuration = m_powerModel.getConfiguration(config);
 		double moveEnergy =  
 				getEnergyConsumption(configuration, distance/configuration.getSpeed()); 
      		
