@@ -1,51 +1,51 @@
 package org.sa.rainbow.brass.confsynthesis;
 
 import java.util.HashMap;
-
+import java.awt.geom.Point2D;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.sa.rainbow.brass.PropertiesConnector;
+import org.sa.rainbow.brass.adaptation.PrismPolicy;
 import org.sa.rainbow.brass.confsynthesis.AlloySolution;
+import org.sa.rainbow.brass.model.map.EnvMap;
+import org.sa.rainbow.brass.plan.p2_cp3.PolicyToIGCP3;
+import org.sa.rainbow.brass.confsynthesis.DetailedConfigurationBatteryModel;
 
 
 public class DetailedConfiguration implements Configuration {
 
 	private String m_id;
-	private HashMap<String, Double> m_cdrs = new HashMap<String, Double>();
-
+	private LinkedList m_items = new LinkedList<String>();
+	private DetailedConfigurationBatteryModel m_bm;
+	
 	private Double m_cdr;
 	private Double m_speed;
 	
-	private static final HashMap<String, Double> m_drs;
-	static{
-		m_drs = new HashMap<String, Double>();
-		m_drs.put("lidar0", 100.0);
-		m_drs.put("kinect0", 70.0);
-		m_drs.put("laserscanNodelet0", 60.0);
-		m_drs.put("headlamp0", 0.0);
-		m_drs.put("amcl0", 50.0);
-		m_drs.put("mrpt0", 50.0);
-		m_drs.put("halfSpeedSetting0", 50.0);		
-		m_drs.put("fullSpeedSetting0", 100.0);	
-		m_drs.put("camera0", 100.0);	
-		m_drs.put("markerRecognizer0", 100.0);		
-		m_drs.put("markerLocalization0", 100.0);
-	}
+
 
 	private static final HashMap<String, Double> m_speedsettings;
 	static{
 		m_speedsettings = new HashMap<String, Double>();
 		m_speedsettings.put("halfSpeedSetting0", 0.35);
 		m_speedsettings.put("fullSpeedSetting0", 0.7);
+		m_speedsettings.put("safeSpeedSetting0", 0.25);		
 	}
 	
 	public boolean isSpeedSetting(String id){
 		return m_speedsettings.containsKey(id);
 	}
+		
 	
-	public DetailedConfiguration (String id, String solStr){
+	public DetailedConfiguration (String id, String solStr, DetailedConfigurationBatteryModel bm){
+		m_bm = bm;
 		m_id = id;
 		AlloySolution sol = new AlloySolution();
 		sol.loadFromString(solStr);
@@ -54,8 +54,8 @@ public class DetailedConfiguration implements Configuration {
 //			System.out.println(String.valueOf(e.getValue()));
 			for (int i=0; i<e.getValue().size(); i++){
 				String cid = e.getValue().get(i).replace("$", "");
-				if (!Objects.equals(cid,"") && !m_cdrs.containsKey(cid))
-					m_cdrs.put(cid, m_drs.get(cid));
+				if (!Objects.equals(cid,"") && !m_items.contains(cid))
+					m_items.add(cid);
 				if (isSpeedSetting(cid))
 					m_speed = m_speedsettings.get(cid);
 			}
@@ -70,11 +70,7 @@ public class DetailedConfiguration implements Configuration {
 	}
 		
 	public void computeEnergyDischargeRate(){
-		Double res=0.0;
-		for (Map.Entry<String, Double> e: m_cdrs.entrySet()){
-			//System.out.println(e.getKey());
-			res += e.getValue();
-		}
+		Double res = m_bm.computeEnergyDischargeRate(m_items);
 		m_cdr=res;
 		//System.out.println(m_id+" Energy discharge rate: " + String.valueOf(m_cdr));
 	}
@@ -89,8 +85,9 @@ public class DetailedConfiguration implements Configuration {
 	
 	public ArrayList<String> getComponents(){
 		ArrayList<String> res = new ArrayList<String>();
-		res.addAll(m_cdrs.keySet());
+		res.addAll(m_items);
 		return res;
 	}
 	
+
 }

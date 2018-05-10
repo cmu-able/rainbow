@@ -17,21 +17,58 @@ public class DecisionEngineCP3 extends DecisionEngine {
 	
     public static double m_selected_candidate_time=0.0;
     public static double m_selected_candidate_safety=0.0;
-    public static double m_safetyWeight=0.5;
-	public static double m_timelinessWeight=0.5;
+    public static double m_selected_candidate_energy=0.0;
+    public static double m_safetyWeight;
+	public static double m_energyWeight;
+	public static double m_timelinessWeight;
    
 	public static void init (Properties props) throws Exception {
 		DecisionEngine.init(props);
         MapTranslator.ROBOT_BATTERY_RANGE_MAX = 180000;
-
+        setSafetyPreference();
 	}
 	
-   public static Double getMaxTime(){
-	    	return getMaxItem(0);
+	public static void setSafetyPreference(){
+		m_safetyWeight = 0.6;
+		m_energyWeight = 0.2;
+		m_timelinessWeight = 0.2;
+	}
+
+	public static void setEnergyPreference(){
+		m_safetyWeight = 0.2;
+		m_energyWeight = 0.6;
+		m_timelinessWeight = 0.2;
+	}
+	
+	public static void setTimelinessPreference(){
+		m_safetyWeight = 0.2;
+		m_energyWeight = 0.2;
+		m_timelinessWeight = 0.6;
+	}
+
+
+   /**
+    * Returns the maximum estimated remaining energy for a candidate policy in the scoreboard
+    * @return
+    */
+    public static Double getMaxEnergy(){
+    	return getMaxItem(0);
+    }
+	
+    /**
+     * Returns the maximum estimated time for a candidate policy in the scoreboard
+     * @return
+     */
+    public static Double getMaxTime(){
+	    	return getMaxItem(1);
 	    }    
 
+   /**
+    * Returns the maximum estimated safety index for a candidate policy in the scoreboard
+    * @return
+    */
    public static Double getMaxSafety(){
-   	return getMaxItem(1);
+   	return getMaxItem(2);
    }    
 
     /**
@@ -41,23 +78,26 @@ public class DecisionEngineCP3 extends DecisionEngine {
     public static String selectPolicy(){     	
     	Double maxTime = getMaxTime();
     	Double maxSafety = getMaxSafety();
+    	Double maxEnergy = getMaxEnergy();
     	Double maxScore=0.0;
     	
         Map.Entry<List, ArrayList<Double>> maxEntry = m_scoreboard.entrySet().iterator().next();
         for (Map.Entry<List, ArrayList<Double>> entry : m_scoreboard.entrySet())
         {
-            Double entryTime = entry.getValue().get(0);
+            Double entryTime = entry.getValue().get(1);
             Double entryTimeliness = 0.0;
             if (maxTime>0.0){
             	entryTimeliness = 1.0-(entryTime / maxTime);
             }
-            Double entryProbSafety = entry.getValue().get(1);
+            Double entryProbSafety = entry.getValue().get(2);
             Double entrySafety=0.0;
             if (maxSafety>0.0){
             	entrySafety = (entryProbSafety/maxSafety);
             }
             
-            Double entryScore = m_safetyWeight * entrySafety + m_timelinessWeight * entryTimeliness;
+            Double entryEnergy = entry.getValue().get(0)/maxEnergy;
+            
+            Double entryScore = m_safetyWeight * entrySafety + m_timelinessWeight * entryTimeliness + m_energyWeight * entryEnergy;
             
         	if ( entryScore > maxScore)
             {
@@ -65,12 +105,13 @@ public class DecisionEngineCP3 extends DecisionEngine {
                 maxScore = entryScore;
             }
         }
-        m_selected_candidate_time = maxEntry.getValue().get(0);
-        m_selected_candidate_safety = maxEntry.getValue().get(1);
+        m_selected_candidate_time = maxEntry.getValue().get(1);
+        m_selected_candidate_safety = maxEntry.getValue().get(2);
+        m_selected_candidate_energy = maxEntry.getValue().get(0);
         m_selected_candidate_score = maxScore;
         
         System.out.println("Selected candidate policy: "+m_candidates.get(maxEntry.getKey()));
-        System.out.println("Score: "+String.valueOf(m_selected_candidate_score)+" Safety: "+String.valueOf(m_selected_candidate_safety)+" Time: "+String.valueOf(m_selected_candidate_time));
+        System.out.println("Score: "+String.valueOf(m_selected_candidate_score)+" Safety: "+String.valueOf(m_selected_candidate_safety)+" Time: "+String.valueOf(m_selected_candidate_time)+" Energy: "+String.valueOf(m_selected_candidate_energy));
         
         return m_candidates.get(maxEntry.getKey())+".adv";
     }

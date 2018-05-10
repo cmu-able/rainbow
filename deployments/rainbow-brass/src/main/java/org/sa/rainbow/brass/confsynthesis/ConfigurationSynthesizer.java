@@ -24,6 +24,8 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 	public LinkedList<String> m_allinstances = new LinkedList<String>();
 	public HashMap<String, List<String>> m_reconfigurations = new HashMap<String, List<String>>();
 	public static final HashMap<String, String> m_component_modes;
+	public static DetailedConfigurationBatteryModel m_battery_model = new DetailedConfigurationBatteryModel(PropertiesConfigurationSynthesizer.DEFAULT);
+	
 	static {
 		m_component_modes = new HashMap<String, String>();
 		m_component_modes.put("DISABLED", "0");
@@ -42,19 +44,24 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 	private static final HashMap<String, String> m_configuration_dictionary;
 	static {
 		m_configuration_dictionary = new HashMap<String, String>();
-		m_configuration_dictionary.put("sol_0", "amcl-lidar");
+		m_configuration_dictionary.put("sol_0", "amcl-kinect");
 		m_configuration_dictionary.put("sol_1", "aruco");
-		m_configuration_dictionary.put("sol_2", "mrpt-lidar");
-		m_configuration_dictionary.put("sol_3", "amcl-lidar");
-		m_configuration_dictionary.put("sol_4", "mrpt-kinect");
-		m_configuration_dictionary.put("sol_5", "amcl-kinect");
-		m_configuration_dictionary.put("sol_6", "aruco");
-		m_configuration_dictionary.put("sol_7", "aruco");
+		m_configuration_dictionary.put("sol_2", "amcl-kinect");
+		m_configuration_dictionary.put("sol_3", "mrpt-lidar");
+		m_configuration_dictionary.put("sol_4", "aruco");
+		m_configuration_dictionary.put("sol_5", "aruco");
+		m_configuration_dictionary.put("sol_6", "amcl-lidar");
+		m_configuration_dictionary.put("sol_7", "mrpt-kinect");
 		m_configuration_dictionary.put("sol_8", "aruco");
-		m_configuration_dictionary.put("sol_9", "mrpt-lidar");
-		m_configuration_dictionary.put("sol_10", "mrpt-kinect");
-		m_configuration_dictionary.put("sol_11", "amcl-kinect");
-
+		m_configuration_dictionary.put("sol_9", "aruco");
+		m_configuration_dictionary.put("sol_10", "mrpt-lidar");
+		m_configuration_dictionary.put("sol_11", "amcl-lidar");
+		m_configuration_dictionary.put("sol_12", "aruco");
+		m_configuration_dictionary.put("sol_13", "mrpt-kinect");
+		m_configuration_dictionary.put("sol_14", "mrpt-kinect");
+		m_configuration_dictionary.put("sol_15", "mrpt-lidar");
+		m_configuration_dictionary.put("sol_16", "amcl-lidar");
+		m_configuration_dictionary.put("sol_17", "amcl-kinect");
 	}
 
 	private HashMap<String, ConstantDefinition> m_constant_definitions = new HashMap<String, ConstantDefinition>();
@@ -152,7 +159,7 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 			String strSolId = AlloyConnector.SOLUTION_STRING + String.valueOf(i);
 			String strSol = ac.getSolution(strSolId);
 			m_configurations.put(strSolId, strSol);
-			m_configuration_objects.put(strSolId, new DetailedConfiguration(strSolId, strSol));
+			m_configuration_objects.put(strSolId, new DetailedConfiguration(strSolId, strSol, m_battery_model));
 		}
 		return ac.getSolutions().size();
 	}

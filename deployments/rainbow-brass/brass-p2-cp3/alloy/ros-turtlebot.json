@@ -1,0 +1,74 @@
+{
+	"consumption": [
+		{
+			"id" : "lidar0",
+			"enabled" : 7132.0,
+			"disabled" : 250.0
+		},
+		{
+			"id" : "kinect0",
+			"enabled" : 5132.0,
+			"disabled" : 250.0
+		},
+		{
+			"id" : "laserscanNodelet0",
+			"enabled" : 0.0,
+			"disabled" : 0.0
+		},
+		{
+			"id" : "headlamp0",
+			"enabled" : 10000.0,
+			"disabled" : 0.0
+		}
+		{
+			"id" : "amcl0",
+			"enabled" : 12658.0,
+			"disabled" : 0.0
+		},
+		{
+			"id" : "mrpt0",
+			"enabled" : 13810.0,
+			"disabled" : 0.0
+		},
+		{
+			"id" : "halfSpeedSetting0",
+			"enabled" : 14004.0,
+			"disabled" : 0.0
+		},
+		{
+			"id" : "fullSpeedSetting0",
+			"enabled" : 6026.0,
+			"disabled" : 0.0
+		},
+		{
+			"id" : "safeSpeedSetting0",
+			"enabled" : 4000.0,
+			"disabled" : 0.0,
+		},
+		{
+			"id" : "camera0",
+			"enabled" : 2000.0,
+			"disabled" : 250.0
+		},
+		{
+			"id" : "markerRecognizer0",
+			"enabled" : 0.0,
+			"disabled" : 0.0
+		},
+		{
+			"id" : "markerLocalization0",
+			"enabled" : 14963.0,
+			"disabled" : 0.0,
+		},
+		{
+			"id" : "mapServerObs0",
+			"enabled" : 0.0,
+			"disabled" : 0.0
+		},
+		{
+			"id" : "mapServerStd0"
+			"enabled" : 0.0,
+			"disabled" : 0.0
+		}
+	]
+}

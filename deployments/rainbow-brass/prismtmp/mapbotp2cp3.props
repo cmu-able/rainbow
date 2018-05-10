@@ -1,3 +1,5 @@
+R{"energy"}max=? [ F end ]
+
 R{"time"}min=? [ F goal ]
 
 Pmax=? [ F (goal & !collided) ]
