@@ -44,6 +44,14 @@ probes:
       #   "utility-function" : "favor-timeliness"
       # }
       
+  BRASSPreferenceProbe:
+    alias: brasspreferenceprobe
+    location: "${customize.system.target.ros}"
+    type: script
+    scriptInfo:
+      path: "${rainbow.path}/system/probes/rospreferenceprobe.sh"
+      argument: "~/ready"
+      
   ROSNodeProbe:
     # Probe to report the node information to guages, to determine which nodes are active
     alias: rosnodeprobe

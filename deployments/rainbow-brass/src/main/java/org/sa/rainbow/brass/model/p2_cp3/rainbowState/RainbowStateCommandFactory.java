@@ -2,6 +2,7 @@ package org.sa.rainbow.brass.model.p2_cp3.rainbowState;
 
 import java.io.InputStream;
 
+import org.sa.rainbow.brass.model.p2_cp3.mission.SetUtilityPreferenceCmd;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.commands.AbstractSaveModelCmd;
@@ -46,5 +47,7 @@ public class RainbowStateCommandFactory extends ModelCommandFactory<RainbowState
 	public ClearModelProblemsCmd clearModelProblems() {
 		return new ClearModelProblemsCmd((RainbowStateModelInstance )m_modelInstance, "", "");
 	}
+	
+
 	
 }
