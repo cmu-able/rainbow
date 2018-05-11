@@ -19,6 +19,7 @@ import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.p2_cp3.CP3ModelAccessor;
 import org.sa.rainbow.brass.model.p2_cp3.mission.MissionState.Heading;
 import org.sa.rainbow.brass.model.p2_cp3.mission.MissionState.LocationRecording;
+import org.sa.rainbow.brass.model.p2_cp3.mission.MissionState.UtilityPreference;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowState.CP3ModelState;
 import org.sa.rainbow.brass.plan.p2_cp3.DecisionEngineCP3;
 import org.sa.rainbow.brass.plan.p2_cp3.PolicyToIGCP3;
@@ -182,6 +183,14 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 
 			EnvMap copy = m_models.getEnvMapModel().getModelInstance()/*.copy() causes potential failure in IGWaypointAnaluzyzer which needs to know about waypoints*/;
 			DecisionEngineCP3.setMap(copy);
+			UtilityPreference preference = m_models.getMissionStateModel().getModelInstance().getUtilityPreference();
+			if (preference != null) {
+				switch (preference) {
+				case FAVOR_EFFICIENCY: DecisionEngineCP3.setEnergyPreference(); break;
+				case FAVOR_TIMELINESS: DecisionEngineCP3.setTimelinessPreference(); break;
+				case FAVOR_SAFETY: DecisionEngineCP3.setSafetyPreference(); break;
+				}
+			}
 			// Insert a node where the robot is
 
 			IInstruction ci = igModel.getCurrentInstruction();
