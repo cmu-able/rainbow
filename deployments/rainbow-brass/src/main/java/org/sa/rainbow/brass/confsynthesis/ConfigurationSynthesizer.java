@@ -184,7 +184,9 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 		String mode_varname = "status";
 		ArrayList<String> rewards = new ArrayList<String>();
 
-		String code = "mdp\n";
+		String code = "mdp\n\n";
+		code += "global turn:[0.."+String.valueOf(m_allinstances.size()+1)+"] init 0;\n";
+		
 		for (Map.Entry<String, String> e : m_component_modes.entrySet()) {
 			code += "const " + e.getKey() + "=" + e.getValue() + ";\n";
 		}
@@ -193,16 +195,18 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 			String cid = m_allinstances.get(i); // Component id
 			code += "const " + cid + "_INIT;\n";
 			code += "module " + cid + "\n";
+			code += "\t" + cid + "_done : bool init false;\n"; 
 			code += "\t" + cid + "_" + mode_varname + ":[0.." + String.valueOf(m_component_modes.size()) + "] init "
 					+ cid + "_INIT;\n";
 			for (Map.Entry<String, String[]> e : m_component_actions.entrySet()) {
-				code += "\t[" + cid + "_" + e.getKey() + "] (" + cid + "_" + mode_varname + "=" + e.getValue()[0]
-						+ ") -> (" + cid + "_" + mode_varname + "'=" + e.getValue()[1] + ");\n";
+				code += "\t[" + cid + "_" + e.getKey() + "] (turn="+String.valueOf(i)+") & ("+cid+"_done=false) & (" + cid + "_" + mode_varname + "=" + e.getValue()[0]
+						+ ") -> (" + cid + "_" + mode_varname + "'=" + e.getValue()[1] + ") & ("+cid+"_done'=true);\n";
 				int reward_quantity = 1;
 				if (Objects.equals(e.getKey(), "crash"))
 					reward_quantity = 9999;
 				rewards.add("\t[" + cid + "_" + e.getKey() + "]  true : " + String.valueOf(reward_quantity) + ";\n");
 			}
+			code += "\t[] (turn="+String.valueOf(i)+") & ("+cid+"_done=true) -> (turn'="+String.valueOf(i+1)+");\n";
 			code += "endmodule\n\n";
 		}
 
