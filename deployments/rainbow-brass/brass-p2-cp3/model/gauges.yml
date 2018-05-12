@@ -195,14 +195,15 @@ gauge-instances:
       targetIP: "${customize.system.target.master}"
     configValues:
       reportingPeriod: 1000
-      targetProbeType: rostopicprobe
-      
+      targetProbeType: 
+        - rostopicprobe
+        - roslocationprobe
   TWG1:
     type: BRASSTargetWaypointGaugeT
     model: MissionState:MissionState
     commands:
       target: "ms.setTargetWaypoint($<w>)"
-      preference: "ms.setUtilityPrefernce($<p>)"
+      preference: "ms.setUtilityPreference($<p>)"
     setupValues:
       targetIP: "${customize.system.target.master}"
     configValues:
