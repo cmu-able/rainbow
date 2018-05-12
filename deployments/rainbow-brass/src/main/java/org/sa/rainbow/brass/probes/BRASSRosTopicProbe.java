@@ -38,7 +38,7 @@ public class BRASSRosTopicProbe extends AbstractProbe implements IBashBasedScrip
                 String line = br.readLine ();
                 while (line != null) {
                     StringBuffer yaml = new StringBuffer (line + "\n");
-                    while ((line = br.readLine ()) != null && !"---".equals (line)) {
+                    while ((line = br.readLine ()) != null && !"---".equals (line) && !line.startsWith("Frame") && !line.contains("RPY (degree)")) {
                         yaml.append (line);
                         yaml.append ("\n");
                     }

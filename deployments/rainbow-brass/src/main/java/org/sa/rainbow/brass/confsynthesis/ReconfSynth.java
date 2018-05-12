@@ -22,6 +22,8 @@ public abstract class ReconfSynth {
 		COMPONENT_NAMES.put("laserScan_nodelet", "laserscanNodelet0");
 		COMPONENT_NAMES.put("marker_pose_publisher", "markerLocalization0");
 		COMPONENT_NAMES.put("aruco_marker_publisher_front", "markerRecognizer0");
+		COMPONENT_NAMES.put("map_server", "mapServerStd0");
+		COMPONENT_NAMES.put("map_server_obs", "mapServerObs0");
 	}
 	
 	abstract public String getCurrentConfigurationInitConstants();

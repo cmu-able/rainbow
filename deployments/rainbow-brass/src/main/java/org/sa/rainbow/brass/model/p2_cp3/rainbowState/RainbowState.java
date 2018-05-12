@@ -14,6 +14,8 @@ public class RainbowState {
 		 IS_OBSTRUCTED
 	}
 	
+
+	
 	private ModelReference m_model;
 	private EnumSet<CP3ModelState> m_problems;
 	private boolean m_planIssued;
@@ -62,5 +64,10 @@ public class RainbowState {
 	public EnumSet<CP3ModelState> getProblems() {
 		return m_problems;
 	}
+
+
+	
+	
+	
 	
 }

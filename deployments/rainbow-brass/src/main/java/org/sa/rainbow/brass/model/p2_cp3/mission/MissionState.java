@@ -24,6 +24,31 @@ public class MissionState extends ClockedModel {
         BRASS_DATE_FORMAT.setTimeZone (TimeZone.getTimeZone ("UTC"));
     }
 
+	public static enum UtilityPreference {
+		FAVOR_SAFETY("favor-safety"),
+		FAVOR_TIMELINESS("favor-timeliness"),
+		FAVOR_EFFICIENCY("favor-efficiency");
+		
+		private String mnemonic;
+		
+		private UtilityPreference(String mn) {
+			mnemonic = mn;
+		}
+		
+		@Override
+		public String toString() {
+			return mnemonic;
+		}
+		
+		public static UtilityPreference getValue(String mn) {
+			for (UtilityPreference p : UtilityPreference.values()) {
+				if (p.toString().equals(mn))
+					return p;
+			}
+			return null;
+		}
+	}
+	
     public static enum Heading {
         NORTH, NORTHEAST, EAST, SOUTHEAST, SOUTH, SOUTHWEST, WEST, NORTHWEST;
 
@@ -97,6 +122,7 @@ public class MissionState extends ClockedModel {
 
     private String  m_targetWaypoint  = "";
 
+	private UtilityPreference m_utilityPreference = UtilityPreference.FAVOR_SAFETY;
 
 	private boolean m_reconfiguring;
 
@@ -176,5 +202,13 @@ public class MissionState extends ClockedModel {
     public void setReconfiguring(boolean r) {
     	m_reconfiguring = r;
     }
+    
+	public UtilityPreference getUtilityPreference() {
+		return m_utilityPreference;
+	}
+
+	public void setUtilityPreference(UtilityPreference utilityPreference) {
+		m_utilityPreference = utilityPreference;
+	}
 
 }

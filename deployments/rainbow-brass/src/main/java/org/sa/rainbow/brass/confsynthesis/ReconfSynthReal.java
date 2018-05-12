@@ -93,6 +93,7 @@ public class ReconfSynthReal extends ReconfSynth {
 		
 		res+=",fullSpeedSetting0_INIT="+ConfigurationSynthesizer.m_component_modes.get("DISABLED"); // This has to be changed!! Hardwired for the time being.
 		res+=",halfSpeedSetting0_INIT="+ConfigurationSynthesizer.m_component_modes.get("ENABLED");
+		res+=",safeSpeedSetting0_INIT="+ConfigurationSynthesizer.m_component_modes.get("DISABLED");
 		
 		// Rework to this:
 		// STOPPED = speed < 0.05ms, SAFE = 0.05 <= speed <= 0.25ms, SLOW = 0.25 < speed < 0.35, FULL otherwise.
