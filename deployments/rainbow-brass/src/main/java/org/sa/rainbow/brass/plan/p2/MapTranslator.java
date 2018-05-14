@@ -117,7 +117,8 @@ public class MapTranslator {
     public static final String GOAL_PRED_DEF=GOAL_PRED+" = "+ROBOT_LOCATION_VAR+"="+TARGET_ROBOT_LOCATION_CONST+";";
 
     public static final String	STOP_PRED = "stop"; // Stop condition predicate (currently target location reached of insufficient battery to move to a nearby location)
-    public static final String	STOP_PRED_DEF = STOP_PRED + " = "+GOAL_PRED+" | "+ROBOT_BATTERY_VAR+"<"+ROBOT_BATTERY_DELTA+";";
+//    public static final String	STOP_PRED_DEF = STOP_PRED + " = "+GOAL_PRED+" | "+ROBOT_BATTERY_VAR+"<"+ROBOT_BATTERY_DELTA+";";
+    public static final String	STOP_PRED_DEF = STOP_PRED + " = "+GOAL_PRED+";";
     public static final String	STOP_GUARD_STR = "& (!"+STOP_PRED+")";
 
     public static final double MAX_DISTANCE = 999.0; // Distance assigned to disabled edges (for distance reward computation)
@@ -202,9 +203,13 @@ public class MapTranslator {
         buf+="const "+TARGET_ROBOT_LOCATION_CONST+";\n\n";
         buf+="formula "+GOAL_PRED_DEF+"\n\n";
         buf+="formula "+STOP_PRED_DEF+"\n\n";
+        int c=0;
         for (Map.Entry<String,EnvMapNode> entry : m_map.getNodes().entrySet() ){
             buf+="const "+entry.getKey()+"="+String.valueOf(entry.getValue().getId())+";\n";
+//            buf+="const "+entry.getKey()+"="+String.valueOf(c)+";\n";
+            c++;
         }
+        
         return buf+"\n";
     }
     
@@ -250,7 +255,8 @@ public class MapTranslator {
         buf+="\n"+generateBatteryUpdates();
         buf+="module "+ROBOT_PLAYER_NAME+MODULE_POSTFIX_STR+"\n";
         buf+=ROBOT_BATTERY_VAR+":["+ROBOT_BATTERY_RANGE_MIN+".."+ROBOT_BATTERY_RANGE_MAX_CONST+"] init "+INITIAL_ROBOT_BATTERY_CONST+";\n";
-        buf+=ROBOT_LOCATION_VAR+":[0.."+m_map.getNodeCount()+"] init "+INITIAL_ROBOT_LOCATION_CONST+";\n";
+        buf+=ROBOT_LOCATION_VAR+":[0..100] init "+INITIAL_ROBOT_LOCATION_CONST+";\n";
+//        buf+=ROBOT_LOCATION_VAR+":[0.."+m_map.getNodeCount()+"] init "+INITIAL_ROBOT_LOCATION_CONST+";\n";
         buf+=ROBOT_CONF_VAR+":[-1.."+m_cp.getConfigurations().size()+"] init "+INITIAL_ROBOT_CONF_CONST+";\n";
         buf+=ROBOT_HEADING_VAR+":[0.."+String.valueOf(MissionState.Heading.values().length)+"] init "+INITIAL_ROBOT_HEADING_CONST+";\n";
         buf+=ROBOT_RECONF_VAR+":[0.."+ROBOT_MAX_RECONF_VAL+"] init 0;\n";
@@ -332,7 +338,7 @@ public class MapTranslator {
                    			confStr=m_cp.translateId(c.getKey());
                    			if (a.getHitRate(confStr)>0.0){
                    				String confGuard = "("+ROBOT_CONF_VAR+"="+c.getValue().getId()+")";
-			                    buf+="\t ["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] ("+ROBOT_LOCATION_VAR+"="+a.getSource()+") "+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & "+confGuard+" & (!robot_done) -> ";                	
+			                    buf+="\t ["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] ("+ROBOT_LOCATION_VAR+"="+a.getSource()+") "+" & ("+ROBOT_BATTERY_VAR+">="+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+")"+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & "+confGuard+" & (!robot_done) -> ";                	
 			                    
 			                    String mainUpdateStr = "("+ROBOT_LOCATION_VAR+"'="+a.getTarget()+") "+" & ("+ROBOT_BATTERY_VAR+"'="+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+")"+ " & ("+ROBOT_HEADING_VAR+"'="+HEADING_CONST_PREFIX + findArcHeading(a).name() + ") & (robot_done'=true)";
 			                    

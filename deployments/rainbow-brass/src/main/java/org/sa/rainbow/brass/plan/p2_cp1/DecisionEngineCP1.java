@@ -108,9 +108,9 @@ public class DecisionEngineCP1 extends DecisionEngine{
         setConfigurationProvider(cs);
         
         
-        for (int i=32000; i< 32500; i+=500){
+        for (int i=3200; i< 3250; i+=500){
         	System.out.println("Generating candidates for l1-l4...");
-            generateCandidates("l1", "l4");
+            generateCandidates("l4", "l2");
         	System.out.println("Scoring candidates...");
             scoreCandidates(dummyMap, i, 1);
             System.out.println(String.valueOf(m_scoreboard));	        
