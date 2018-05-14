@@ -21,7 +21,6 @@ public class DecisionEngineCP3 extends DecisionEngine {
     public static double m_safetyWeight;
 	public static double m_energyWeight;
 	public static double m_timelinessWeight;
-   
 	public static void init (Properties props) throws Exception {
 		DecisionEngine.init(props);
         MapTranslator.ROBOT_BATTERY_RANGE_MAX = 180000;
@@ -46,8 +45,7 @@ public class DecisionEngineCP3 extends DecisionEngine {
 		m_timelinessWeight = 0.6;
 	}
 
-
-   /**
+	/**
     * Returns the maximum estimated remaining energy for a candidate policy in the scoreboard
     * @return
     */
@@ -110,8 +108,8 @@ public class DecisionEngineCP3 extends DecisionEngine {
         m_selected_candidate_energy = maxEntry.getValue().get(0);
         m_selected_candidate_score = maxScore;
         
-        System.out.println("Selected candidate policy: "+m_candidates.get(maxEntry.getKey()));
-        System.out.println("Score: "+String.valueOf(m_selected_candidate_score)+" Safety: "+String.valueOf(m_selected_candidate_safety)+" Time: "+String.valueOf(m_selected_candidate_time)+" Energy: "+String.valueOf(m_selected_candidate_energy));
+        log("Selected candidate policy: "+m_candidates.get(maxEntry.getKey()));
+        log("Score: "+String.valueOf(m_selected_candidate_score)+" Safety: "+String.valueOf(m_selected_candidate_safety)+" Time: "+String.valueOf(m_selected_candidate_time)+" Energy: "+String.valueOf(m_selected_candidate_energy));
         
         return m_candidates.get(maxEntry.getKey())+".adv";
     }

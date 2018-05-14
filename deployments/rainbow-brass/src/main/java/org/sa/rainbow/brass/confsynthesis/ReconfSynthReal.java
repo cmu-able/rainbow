@@ -52,21 +52,21 @@ public class ReconfSynthReal extends ReconfSynth {
 					try{
 						sensorOn = m_rb.isKinectOn();
 					} catch(Exception e){
-						System.out.println("Illegal state exception determining if Sensor is On.");
+						logError("Illegal state exception determining if Sensor is On.");
 					}
 					break;
 				case BACK_CAMERA:
 					try{
 						sensorOn = m_rb.isBackCameraOn();
 					} catch(Exception e){
-						System.out.println("Illegal state exception determining if Sensor is On.");
+						logError("Illegal state exception determining if Sensor is On.");
 					}
 					break;
 				case LIDAR:
 					try{
 						sensorOn = m_rb.isLidarOn();
 					} catch(Exception e){
-						System.out.println("Illegal state exception determining if Sensor is On.");
+						logError("Illegal state exception determining if Sensor is On.");
 					}
 					break;
 				case HEADLAMP:

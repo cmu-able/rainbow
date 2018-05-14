@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
 import org.sa.rainbow.brass.PropertiesConnector;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.plan.p2.MapTranslator;
@@ -20,6 +21,8 @@ import org.sa.rainbow.brass.confsynthesis.SimpleConfigurationStore;
 
 
 import com.google.common.base.Objects;
+
+import prism.PrismException;
 
 
 /**
@@ -116,7 +119,7 @@ public class DecisionEngine {
 			String m_consts = MapTranslator.INITIAL_ROBOT_CONF_CONST+"=-1,"+MapTranslator.INITIAL_ROBOT_LOCATION_CONST+"="+String.valueOf(originID) +","+ MapTranslator.TARGET_ROBOT_LOCATION_CONST 
                     + "="+String.valueOf(destinationID)+ "," + MapTranslator.INITIAL_ROBOT_BATTERY_CONST+"="+batteryLevel+","+MapTranslator.INITIAL_ROBOT_HEADING_CONST+"="+robotHeading;
 
-            System.out.println(m_consts);
+            log(m_consts);
             String result;
             for (List candidate_key : m_candidates.keySet() ){                           	
                 result = PrismConnectorAPI.instance().modelCheckFromFileS (m_candidates.get(candidate_key), m_properties_file, m_candidates.get (candidate_key), -1, m_consts);
@@ -161,5 +164,30 @@ public class DecisionEngine {
     public static String selectPolicy(){
     	return "None";
     }
+
+	public static Logger LOGGER = null;
+
+	public static Logger getLOGGER() {
+		return LOGGER;
+	}
+
+	public static void setLOGGER(Logger lOGGER) {
+		LOGGER = lOGGER;
+		m_mt.setLogger(LOGGER);
+		try {
+			PrismConnectorAPI.instance().setLogger(lOGGER);
+		} catch (PrismException e) {
+			LOGGER.fatal(e);
+		}
+	}
+
+	public static void log(String msg) {
+		if (LOGGER != null) {
+			LOGGER.info(msg);
+		}
+		else {
+			System.out.println(msg);
+		}
+	}
 
 }

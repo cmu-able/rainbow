@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.Scanner;
 
+import org.apache.log4j.Logger;
+
 import parser.Values;
 import parser.ast.ModulesFile;
 import parser.ast.PropertiesFile;
@@ -37,8 +39,29 @@ public class PrismConnectorAPI {
     public  UndefinedConstants m_undefinedConstants[];
     public  ArrayList<Property> m_propertiesToCheck;
     public  String m_constSwitch;
+    private Logger m_logger;
 
-    protected static PrismConnectorAPI s_instance;
+    public Logger getLogger() {
+		return m_logger;
+	}
+
+
+	public void setLogger(Logger logger) {
+		m_logger = logger;
+	}
+
+	public void logInfo(String msg) {
+		if (m_logger == null) System.out.println(msg);
+		else m_logger.info(msg);
+	}
+	
+	public void logError(String msg) {
+		if (m_logger == null) System.out.println(msg);
+		else m_logger.error(msg);
+	}
+	
+	
+	protected static PrismConnectorAPI s_instance;
     
     public static PrismConnectorAPI instance () throws PrismException {
     	if (s_instance == null) {
@@ -61,19 +84,20 @@ public class PrismConnectorAPI {
         try{
             m_prism.setExportAdv(Prism.EXPORT_ADV_MDP);
         } catch (PrismException e){
-            System.out.println("Could not change strategy export mode to MDP");
+            logError("Could not change strategy export mode to MDP");
+            if (m_logger != null) m_logger.error(e);
         }
 
         m_constSwitch = "INITIAL_LOCATION=4,TARGET_LOCATION=0,INITIAL_BATTERY=5000,INITIAL_HEADING=1";
 
         try{
-            System.out.println("Initializing PRISM");
+            logInfo("Initializing PRISM");
             m_prism.initialise();
-            System.out.println("Initialized");
-            System.out.println("ENGINE: "+ String.valueOf(m_prism.getEngine()));
+            logInfo("Initialized");
+            logInfo("ENGINE: "+ String.valueOf(m_prism.getEngine()));
             m_prism.setEngine(Prism.EXPLICIT); 
         }catch (PrismException e) {
-            System.out.println("Error: " + e.getMessage());
+        	logError("Error: " + e.getMessage());
             throw e;
         }
     }
@@ -99,11 +123,11 @@ public class PrismConnectorAPI {
 
         }
         catch (FileNotFoundException e) {
-            System.out.println ("Error FNE: " + e.getMessage () + ", " + modelFileName);
+            logError ("Error FNE: " + e.getMessage () + ", " + modelFileName);
             throw e;
         }
         catch (PrismException e) {
-            System.out.println("Error PE1: " + e.getMessage());
+            logError("Error PE1: " + e.getMessage());
             throw e;
         }
     }
@@ -117,11 +141,11 @@ public class PrismConnectorAPI {
             m_propertiesFile = m_prism.parsePropertiesFile(m_modulesFile, new File(propertiesFileName));				
         }
         catch (FileNotFoundException e) {
-            System.out.println ("Error FNE: " + e.getMessage () + ", " + propertiesFileName);
+            logError ("Error FNE: " + e.getMessage () + ", " + propertiesFileName);
             throw e;
         }
         catch (PrismException e) {
-            System.out.println("Error PE1: " + e.getMessage());
+            logError("Error PE1: " + e.getMessage());
             throw e;
         }
     }
@@ -182,20 +206,21 @@ public class PrismConnectorAPI {
             }	
         }
         catch (PrismException e) {
-            System.out.println(e.getMessage());
+            logError(e.getMessage());
+            if (m_logger != null) m_logger.error(e);
         }
 
         try {
             m_definedMFConstants = m_undefinedMFConstants.getMFConstantValues();
             m_prism.setPRISMModelConstants(m_definedMFConstants);
         } catch (PrismException e) {
-            System.out.println(e.getMessage());
+            logError(e.getMessage());
         }
 
         try { // Model check	
             if (m_propertiesFile != null) {
                 m_definedPFConstants = m_undefinedConstants[0].getPFConstantValues();
-                System.out.println(String.valueOf( m_undefinedConstants[0].getPFConstantValues()));
+                logInfo(String.valueOf( m_undefinedConstants[0].getPFConstantValues()));
                 m_propertiesFile.setSomeUndefinedConstants(m_definedPFConstants);	
             }		
             
@@ -208,7 +233,7 @@ public class PrismConnectorAPI {
             }
         } 
         catch (PrismException e) {
-            System.out.println("Error PE2: " + e.getMessage());
+            logError("Error PE2: " + e.getMessage());
             throw e;
         }
 
@@ -221,9 +246,9 @@ public class PrismConnectorAPI {
             }
             // in case of error, report it and proceed
             catch (FileNotFoundException e) {
-                System.out.println("Could not open file \"" + strategyFileName + "\" for output");
+                logError("Could not open file \"" + strategyFileName + "\" for output");
             } catch (PrismException e) {
-                System.out.println(e.getMessage());
+                logError(e.getMessage());
             }
         } 		
         else {
@@ -238,14 +263,14 @@ public class PrismConnectorAPI {
      * @param f String filename
      * @param text String text to be exported
      */
-    public static void exportTextToFile(String f, String text){
+    public void exportTextToFile(String f, String text){
         try {
             BufferedWriter out = new BufferedWriter (new FileWriter(f));
             out.write(text);
             out.close();
         }
         catch (IOException e){
-            System.out.println("Error exporting text");
+            logError("Error exporting text");
         }
     }
 
@@ -256,14 +281,14 @@ public class PrismConnectorAPI {
      * @param inducedModelFileName
      * @param stratFileName String output filename to export strategy
      */
-    public static void mergeActionsInducedModelIntoAdversary(String actionsFileName, String inducedModelFileName, String stratFileName){
+    public void mergeActionsInducedModelIntoAdversary(String actionsFileName, String inducedModelFileName, String stratFileName){
         HashMap<String, String> actions = new HashMap<String, String>();
         Scanner sc=null;
         try { 
             sc = new Scanner(new File(actionsFileName));
         }
         catch (FileNotFoundException e){
-            System.out.println("Error merging actions and induced model into policy. File not found "+actionsFileName);
+            logError("Error merging actions and induced model into policy. File not found "+actionsFileName);
         }
 
         while (sc.hasNextLine()) {
@@ -276,7 +301,7 @@ public class PrismConnectorAPI {
             sc = new Scanner(new File(inducedModelFileName));
         }
         catch (FileNotFoundException e){
-            System.out.println("Error merging actions and induced model into policy. File not found "+inducedModelFileName);
+            logError("Error merging actions and induced model into policy. File not found "+inducedModelFileName);
         }
 
         String mergedStrat = "";

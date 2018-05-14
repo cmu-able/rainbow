@@ -4,6 +4,7 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.sa.rainbow.brass.adaptation.BrassPlan;
 import org.sa.rainbow.brass.adaptation.NewInstructionGraph;
 import org.sa.rainbow.brass.adaptation.PrismPolicy;
@@ -42,6 +43,7 @@ import org.sa.rainbow.core.ports.RainbowPortFactory;
 public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implements IAdaptationManager<BrassPlan> {
 
 	public static final String NAME = "BRASS Adaptation Planner";
+	Logger LOGGER = Logger.getLogger("AdaptationManager");
 	// The thread "sleep" time. runAction will be called every 10 seconds in this
 	// case
 	public static final int SLEEP_TIME = 10000 /* ms */;
@@ -80,7 +82,9 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 			m_configurationSynthesizer = new ConfigurationSynthesizer(Rainbow.instance().allProperties());
 			m_configurationSynthesizer.populate();
 			DecisionEngineCP3.setConfigurationProvider(m_configurationSynthesizer);
+			DecisionEngineCP3.LOGGER = LOGGER;
 			m_reconfSynth = new ReconfSynthReal(m_models);
+			m_reconfSynth.LOGGER = LOGGER;
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RainbowConnectionException("Cannot initialize DecisionEngine", e);
@@ -124,9 +128,11 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 		AdaptationResultsVisitor v = new AdaptationResultsVisitor(plan);
 		plan.visit(v);
 		if (v.m_allOk) {
+			log("Adaptation was successfully deployed");
 			BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTED.name(),
 					"Finished adapting the system");
 		} else {
+			log("Adaptation was unsuccessfully deployed");
 			BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTED_FAILED.name(),
 					"Something in the adaptation plan failed to execute.");
 		}
@@ -152,7 +158,7 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 
 	@Override
 	protected void log(String txt) {
-		m_reportingPort.info(RainbowComponentT.ADAPTATION_MANAGER, txt);
+		m_reportingPort.info(RainbowComponentT.ADAPTATION_MANAGER, txt, LOGGER);
 
 	}
 
@@ -170,6 +176,7 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 		InstructionGraphProgress igModel = m_models.getInstructionGraphModel().getModelInstance();
 		if (igModel.getInstructions().isEmpty() || m_models.getRainbowStateModel().getModelInstance().waitForIG())
 			return;
+		DecisionEngineCP3.LOGGER = LOGGER;
 		if (m_adaptationEnabled && reallyHasError() && !m_executingPlan) {
 			String message = "Detected problems: " + reportErrors();
 			BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(), message);
@@ -196,13 +203,11 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 			IInstruction ci = igModel.getCurrentInstruction();
 			LocationRecording cp = m_models.getMissionStateModel().getModelInstance().getCurrentPose();
 			String srcLabel = null;
-			String tgtLabel = null;
 			if (ci instanceof MoveAbsHInstruction) {
 				MoveAbsHInstruction mi = (MoveAbsHInstruction) ci;
 				srcLabel = copy.getNextNodeId();
 				srcLabel = copy.insertNode(srcLabel, mi.getSourceWaypoint(), mi.getTargetWaypoint(), cp.getX(),
 						cp.getY(), false);
-				tgtLabel = mi.getTargetWaypoint();
 			} else {
 				List<? extends IInstruction> remainingInstructions = igModel.getRemainingInstructions();
 				for (Iterator iterator = remainingInstructions.iterator(); iterator.hasNext()
@@ -212,10 +217,9 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 				if (ci != null) {
 					MoveAbsHInstruction mi = (MoveAbsHInstruction) ci;
 					srcLabel = mi.getSourceWaypoint();
-					tgtLabel = mi.getTargetWaypoint();
 				} else {
 					m_reportingPort.error(getComponentType(),
-							"There are no move instructions left -- the last instruction in an instruction graph for BRASS should always be a move");
+							"There are no move instructions left -- the last instruction in an instruction graph for BRASS should always be a move", LOGGER);
 				}
 			}
 			String tgt = m_models.getMissionStateModel().getModelInstance().getTargetWaypoint();
@@ -225,13 +229,14 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 			// DecisionEngineCP3.generateCandidates("l1", "l8");
 			try {
 				AdaptationTree<BrassPlan> at = scoreAndGeneratePlan(confInitString, copy);
+				log("Found a plan");
 				m_executingPlan = true;
 				m_models.getRainbowStateModel().getModelInstance().m_waitForIG = true;
 
 				m_adaptationEnqueuePort.offerAdaptation(at, new Object[] {});
 			} catch (Throwable e) {
 				e.printStackTrace();
-				m_reportingPort.error(getComponentType(), "Failed to find a plan " + e.getMessage());
+				m_reportingPort.error(getComponentType(), "Failed to find a plan " + e.getMessage(), LOGGER);
 				BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTED_FAILED.name(), "Did not find a plan");
 				BRASSHttpConnector.instance(Phases.Phase2).reportDone(true, "No plan was found");
 			}
@@ -250,7 +255,7 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 			PrismPolicy pp = new PrismPolicy(DecisionEngineCP3.selectPolicy());
 			pp.readPolicy();
 			String plan = pp.getPlan(m_configurationSynthesizer, confInitString).toString();
-			m_reportingPort.info(getComponentType(), "Planner chooses the plan " + plan);
+			m_reportingPort.info(getComponentType(), "Planner chooses the plan " + plan, LOGGER);
 			PolicyToIGCP3 translator = new PolicyToIGCP3(pp, copy);
 			String translate = translator.translate(m_configurationSynthesizer, confInitString);
 
@@ -270,7 +275,7 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 			log("----> found " + m_configurationSynthesizer.m_reconfigurations.size());
 		} catch (RainbowException e1) {
 			e1.printStackTrace();
-			m_reportingPort.error(getComponentType(), "Could not synthesize configurations " + e1.getMessage());
+			m_reportingPort.error(getComponentType(), "Could not synthesize configurations " + e1.getMessage(), LOGGER);
 			return confInitString;
 
 		}
