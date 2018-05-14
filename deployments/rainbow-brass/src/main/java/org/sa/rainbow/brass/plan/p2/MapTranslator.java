@@ -8,28 +8,26 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-import java.util.Collections;
 
+import org.apache.log4j.Logger;
+import org.sa.rainbow.brass.confsynthesis.Configuration;
+import org.sa.rainbow.brass.confsynthesis.ConfigurationProvider;
+import org.sa.rainbow.brass.confsynthesis.ConfigurationSynthesizer;
+import org.sa.rainbow.brass.model.map.EnvMap;
+import org.sa.rainbow.brass.model.map.EnvMapArc;
+import org.sa.rainbow.brass.model.map.EnvMapNode;
+import org.sa.rainbow.brass.model.map.EnvMapPath;
 import org.sa.rainbow.brass.model.map.dijkstra.Dijkstra;
 import org.sa.rainbow.brass.model.map.dijkstra.Edge;
 import org.sa.rainbow.brass.model.map.dijkstra.Graph;
 import org.sa.rainbow.brass.model.map.dijkstra.Vertex;
 import org.sa.rainbow.brass.model.mission.MissionState;
-import org.sa.rainbow.core.error.RainbowException;
-import org.sa.rainbow.brass.model.map.EnvMap;
-import org.sa.rainbow.brass.model.map.EnvMapArc;
-import org.sa.rainbow.brass.model.map.EnvMapNode;
-import org.sa.rainbow.brass.model.map.EnvMapPath;
-
-
-import org.sa.rainbow.brass.confsynthesis.ConfigurationProvider;
-import org.sa.rainbow.brass.confsynthesis.Configuration;
-import org.sa.rainbow.brass.confsynthesis.ConfigurationSynthesizer;
 
 import com.google.common.base.Objects;
 
@@ -86,6 +84,7 @@ public class MapTranslator {
 
     public static final float ROBOT_FULL_SPEED_VALUE = 0.68f; // m/s
     public static final float ROBOT_HALF_SPEED_VALUE = 0.35f;
+    public static final float ROBOT_SAFE_SPEED_VALUE = 0.25f;
     public static final float ROBOT_DR_SPEED_VALUE = 0.25f; // Dead reckoning speed value .. this is implicit in ROBOT_LOC_MODE_LO
     public static final String ROBOT_FULL_SPEED_CONST = "FULL_SPEED"; // These are just symbolic constants for PRISM
     public static final String ROBOT_HALF_SPEED_CONST = "HALF_SPEED";
@@ -132,9 +131,31 @@ public class MapTranslator {
     private static EnvMap m_map;
     private static ConfigurationProvider m_cp;
 
-    
+    private static Logger LOGGER;
 
-    /**
+    public static Logger getLogger() {
+		return LOGGER;
+	}
+
+	public static void setLogger(Logger lOGGER) {
+		LOGGER = lOGGER;
+	}
+	
+	public static void logInfo(String msg) {
+		if (LOGGER==null) {
+			System.out.println(msg);
+		}
+		else LOGGER.info(msg);
+	}
+	
+	public static void logError(String msg) {
+		if (LOGGER==null) {
+			System.out.println(msg);
+		}
+		else LOGGER.error(msg);
+	}
+
+	/**
      * Sets the Configuration provider
      */
     public static void setConfigurationProvider(ConfigurationProvider cp){
@@ -887,7 +908,7 @@ public class MapTranslator {
             out.close();
         }
         catch (IOException e){
-            System.out.println("Error exporting PRISM map translation");
+            logError("Error exporting PRISM map translation");
         }
     }
 
@@ -909,7 +930,7 @@ public class MapTranslator {
          int c=0;
          String filename = f_base + "/" + String.valueOf (c);
          exportMapTranslation (filename, inhibitTactics);
-         System.out.println("Exported map translation "+String.valueOf(c));
+         logInfo("Exported map translation "+String.valueOf(c));
          specifications.put(paths.get(0), filename);
          return specifications;
     }
@@ -923,7 +944,7 @@ public class MapTranslator {
         for ( List path : paths )  {
             String filename = f_base + "/" + String.valueOf (c);
             exportMapTranslation (filename, path, inhibitTactics);
-            System.out.println("Exported map translation "+String.valueOf(c));
+            logInfo("Exported map translation "+String.valueOf(c));
             specifications.put(path, filename);
             c++;
         }
@@ -946,9 +967,9 @@ public class MapTranslator {
         for ( EnvMapPath path : map_paths )  {
             String filename = f_base + "/" + String.valueOf (c);
             exportMapTranslation (filename, path.getPath(), inhibitTactics);
-            System.out.println("Exported map translation "+String.valueOf(c));
+            logInfo("Exported map translation "+String.valueOf(c));
             specifications.put(path.getPath(), filename);
-            System.out.println("Candidate Path distance : "+String.valueOf(path.getDistance())+ " "+String.valueOf(path.getPath()));
+            logInfo("Candidate Path distance : "+String.valueOf(path.getDistance())+ " "+String.valueOf(path.getPath()));
             c++;
             if (c==cutoff){
             	break;

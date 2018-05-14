@@ -52,21 +52,21 @@ public class ReconfSynthReal extends ReconfSynth {
 					try{
 						sensorOn = m_rb.isKinectOn();
 					} catch(Exception e){
-						System.out.println("Illegal state exception determining if Sensor is On.");
+						logError("Illegal state exception determining if Sensor is On.");
 					}
 					break;
 				case BACK_CAMERA:
 					try{
 						sensorOn = m_rb.isBackCameraOn();
 					} catch(Exception e){
-						System.out.println("Illegal state exception determining if Sensor is On.");
+						logError("Illegal state exception determining if Sensor is On.");
 					}
 					break;
 				case LIDAR:
 					try{
 						sensorOn = m_rb.isLidarOn();
 					} catch(Exception e){
-						System.out.println("Illegal state exception determining if Sensor is On.");
+						logError("Illegal state exception determining if Sensor is On.");
 					}
 					break;
 				case HEADLAMP:
@@ -93,6 +93,7 @@ public class ReconfSynthReal extends ReconfSynth {
 		
 		res+=",fullSpeedSetting0_INIT="+ConfigurationSynthesizer.m_component_modes.get("DISABLED"); // This has to be changed!! Hardwired for the time being.
 		res+=",halfSpeedSetting0_INIT="+ConfigurationSynthesizer.m_component_modes.get("ENABLED");
+		res+=",safeSpeedSetting0_INIT="+ConfigurationSynthesizer.m_component_modes.get("DISABLED");
 		
 		// Rework to this:
 		// STOPPED = speed < 0.05ms, SAFE = 0.05 <= speed <= 0.25ms, SLOW = 0.25 < speed < 0.35, FULL otherwise.

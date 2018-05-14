@@ -94,6 +94,10 @@ public class PolicyToIGCP3 {
 				m_current_speed = MapTranslator.ROBOT_HALF_SPEED_VALUE;
 				return ""; // Just set speed parameter, not explicit command in IG
 			}
+			if (name.startsWith("safe")) {
+				m_current_speed = MapTranslator.ROBOT_SAFE_SPEED_VALUE;
+				return "";
+			}
 		} else if (name.endsWith("SpeedSetting0_disable")){
 			return ""; // Ignore disable speed setting
 		} else if (name.endsWith("0_enable")){
@@ -110,6 +114,12 @@ public class PolicyToIGCP3 {
 			else if ("laserscanNodelet".equals(toBeEnabled)) {
 				cmd = "StartNodes(%laserscanNodelet%)";
 			}
+			else if ("mapServerStd".equals(toBeEnabled)) {
+				cmd = "StartNodes(%mapServer%)";
+			}
+			else if ("mapServerObs".equals(toBeEnabled)) {
+				cmd = "StartNodes(%mapServerObs%)";
+			}
 			else cmd = "Enable ("+toBeEnabled+")";
 		} else if (name.endsWith("0_disable")){
 			String toBeEnabled = name.replace("0_disable","");
@@ -124,6 +134,12 @@ public class PolicyToIGCP3 {
 			}
 			else if ("laserscanNodelet".equals(toBeEnabled)) {
 				cmd = "KillNodes(%laserscanNodelet%)";
+			}
+			else if ("mapServerStd".equals(toBeEnabled)) {
+				cmd = "KillNodes(%mapServer%)";
+			}
+			else if ("mapServerObs".equals(toBeEnabled)) {
+				cmd = "KillNodes(%mapServerObs%)";
 			}
 			else cmd = "Disable ("+name.replace("0_disable","")+")";
 		}

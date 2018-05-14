@@ -1,5 +1,6 @@
 package org.sa.rainbow.brass.gauges.p2_cp3;
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,15 +22,18 @@ import org.sa.rainbow.core.util.TypedAttributeWithValue;
 public class MissionStateGauge extends RegularPatternGauge {
     private static final String   NAME              = "Mission State Gauge";
     protected static final String LOC               = "LocationRecording";
+    protected static final String LOC_TF = "LocationFromTF";
     protected static final String DEADLINE          = "Deadline";
     protected static final String RECONFIGURING = "Reconfig";
 
     protected static final String LOC_PATTERN         = "topic: /tf/transforms\\[0\\]/transform.*\\ntranslation.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z.*\\nrotation.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z: (.*)\\n.*w: (.*)(.*)";
     protected static final String DEADLINE_PATTERN    = "topic: /notify_user.*\\n.*new_deadline: (.*)\\n.*user(.*)";
     protected static final String RECONFIG_PATTERN    = "topic: /ig_interpreter/reconfiguring.*\n.*data:(.*)";
+    protected static final String TF_LOCATION_PATTERN = ".*At time.*- Translation: \\[(.*), (.*), .*\\].*Quater.*\\(radian\\) \\[.*,.*, (.*)\\].*";
     protected String              last_x;
     protected String              last_y;
     private String                last_w;
+    protected static final DecimalFormat DF = new DecimalFormat("#.##");
 
     /**
      * Main Constructor the Gauge that is hardwired to the Probe.
@@ -54,6 +58,7 @@ public class MissionStateGauge extends RegularPatternGauge {
         addPattern (LOC, Pattern.compile (LOC_PATTERN, Pattern.DOTALL));
         addPattern (DEADLINE, Pattern.compile (DEADLINE_PATTERN, Pattern.DOTALL));
         addPattern (RECONFIGURING, Pattern.compile(RECONFIG_PATTERN, Pattern.DOTALL));
+        addPattern (LOC_TF, Pattern.compile(TF_LOCATION_PATTERN, Pattern.DOTALL));
     }
 
     @Override
@@ -61,8 +66,8 @@ public class MissionStateGauge extends RegularPatternGauge {
         String group = m.group (1);
         int restGroup = 0;
         if (LOC.equals (matchName)) {
-            String x = group.trim ();
-            String y = m.group (2).trim ();
+            String x = DF.format(Double.parseDouble(group.trim ()));
+            String y =DF.format(Double.parseDouble( m.group (2).trim ()));
 
             String a = m.group (3).trim ();
             String b = m.group (4).trim ();
@@ -70,7 +75,7 @@ public class MissionStateGauge extends RegularPatternGauge {
             String d = m.group (6).trim ();
             restGroup = 7;
 
-            String w = yawFromQuarternion (a, b, c, d);
+            String w = DF.format(yawFromQuarternion (a, b, c, d));
 
             if (locationDifferent (x, y, w)) {
                 IRainbowOperation op = m_commands.get ("location");
@@ -80,6 +85,20 @@ public class MissionStateGauge extends RegularPatternGauge {
                 pMap.put (op.getParameters ()[2], w);
                 issueCommand (op, pMap);
             }
+        }
+        else if (LOC_TF.equals(matchName)) {
+        	String x = DF.format(Double.parseDouble(m.group(1).trim()));
+        	String y = DF.format(Double.parseDouble(m.group(2).trim()));
+        	String w = DF.format(Double.parseDouble(m.group(3).trim()));
+        	
+        	if (locationDifferent(x,y,w)) {
+        		IRainbowOperation op = m_commands.get ("location");
+                Map<String, String> pMap = new HashMap<> ();
+                pMap.put (op.getParameters ()[0], x);
+                pMap.put (op.getParameters ()[1], y);
+                pMap.put (op.getParameters ()[2], w);
+                issueCommand (op, pMap); 
+        	}
         }
         else if (DEADLINE.equals (matchName)) {
             String date = m.group (1).trim ();
@@ -119,15 +138,14 @@ public class MissionStateGauge extends RegularPatternGauge {
     }
 
     // Converstino to yaw from http://www.chrobotics.com/library/understanding-quaternions
-    private String yawFromQuarternion (String a, String b, String c, String d) {
+    private double yawFromQuarternion (String a, String b, String c, String d) {
         double A = Double.parseDouble (a);
         double B = Double.parseDouble (b);
         double C = Double.parseDouble (c);
         double D = Double.parseDouble (d);
 
         double w = Math.atan ((2 * (A * B + C * D)) / (A * A - B * B - C * C + D * D));
-        return Double.toString (w);
-
+        return w;
     }
 
     private boolean locationDifferent (String x, String y, String w) {

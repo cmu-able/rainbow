@@ -4,6 +4,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.sa.rainbow.brass.model.p2_cp3.mission.MissionState.UtilityPreference;
+import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowStateModelInstance;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelsManager;
@@ -30,6 +32,8 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
         m_commandMap.put ("setDeadlineCmd".toLowerCase (), SetDeadlineCmd.class);
         m_commandMap.put ("setTargetWaypoint".toLowerCase (), SetTargetWaypointCmd.class);
         m_commandMap.put("setReconfiguring".toLowerCase(), SetReconfiguringCmd.class);
+		m_commandMap.put("setUtilityPreference".toLowerCase(), SetUtilityPreferenceCmd.class);
+
     }
 
     @Override
@@ -60,5 +64,7 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
     	return new SetReconfiguringCmd((MissionStateModelInstance )m_modelInstance, "", Boolean.toString(r));
     }
 
- 
+	public SetUtilityPreferenceCmd setUtilityPreference(UtilityPreference preference) {
+		return new SetUtilityPreferenceCmd((MissionStateModelInstance )m_modelInstance, "", preference.toString());
+	}
 }

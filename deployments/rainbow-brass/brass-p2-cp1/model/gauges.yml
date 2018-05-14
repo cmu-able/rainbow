@@ -31,7 +31,7 @@ gauge-types:
         default: 30000
       javaClass:
         type: String
-        default: "org.sa.rainbow.brass.gauges.p2_cp1.MissionStateGauge"
+        default: "org.sa.rainbow.brass.gauges.p2_cp3.MissionStateGauge"
     configParams:
       targetProbeType:
         type: String
