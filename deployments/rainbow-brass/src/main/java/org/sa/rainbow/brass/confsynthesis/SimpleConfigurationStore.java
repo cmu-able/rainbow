@@ -26,8 +26,8 @@ public class SimpleConfigurationStore implements ConfigurationProvider {
 	}
 	
 	public SimpleConfigurationStore(Properties props) {
-	//	m_source = ConfigHelper.convertToAbsolute(props.getProperty(PropertiesSimpleConfigurationStore.CONFIGURATIONS_SOURCE_PROPKEY));
-		m_source = "/Users/jcamara/Dropbox/Documents/Work/projects/rainbow-alt/deployments/rainbow-brass/prismtmp/p2cp1/config_list.json";
+		m_source = ConfigHelper.convertToAbsolute(props.getProperty(PropertiesSimpleConfigurationStore.CONFIGURATIONS_SOURCE_PROPKEY));
+	//	m_source = "/Users/jcamara/Dropbox/Documents/Work/projects/rainbow-alt/deployments/rainbow-brass/prismtmp/p2cp1/config_list.json";
 	}
 
 	public void populate(){
