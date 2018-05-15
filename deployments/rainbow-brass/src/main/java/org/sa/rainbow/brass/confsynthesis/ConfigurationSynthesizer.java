@@ -24,7 +24,7 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 	public LinkedList<String> m_allinstances = new LinkedList<String>();
 	public HashMap<String, List<String>> m_reconfigurations = new HashMap<String, List<String>>();
 	public static final HashMap<String, String> m_component_modes;
-	public static DetailedConfigurationBatteryModel m_battery_model = new DetailedConfigurationBatteryModel(PropertiesConfigurationSynthesizer.DEFAULT);
+	public static DetailedConfigurationBatteryModel m_battery_model;
 	
 	static {
 		m_component_modes = new HashMap<String, String>();
@@ -85,7 +85,7 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 		m_myModel = props.getProperty(PropertiesConfigurationSynthesizer.TEMPMODEL_PROPKEY);
 		m_myPolicy = props.getProperty(PropertiesConfigurationSynthesizer.POLICY_PROPKEY);
 		m_myProps = props.getProperty(PropertiesConfigurationSynthesizer.PROPS_PROPKEY);
-		;
+		m_battery_model = new DetailedConfigurationBatteryModel(props);
 
 		try {
 			m_pc = PrismConnectorAPI.instance();
@@ -468,6 +468,7 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 	public static void main(String[] args) throws Exception {
 
 		ConfigurationSynthesizer cs = new ConfigurationSynthesizer();
+		m_battery_model = new DetailedConfigurationBatteryModel(PropertiesConfigurationSynthesizer.DEFAULT);
 		cs.generateConfigurations();
 		cs.populate();
 		// System.out.println("Global instance space: "+cs.m_allinstances.toString());
