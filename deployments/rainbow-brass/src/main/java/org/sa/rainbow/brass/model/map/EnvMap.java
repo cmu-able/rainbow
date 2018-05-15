@@ -577,5 +577,16 @@ public class EnvMap {
 		dummyMap.loadFromFile(PropertiesConnector.MAP_PROPKEY);
 	}
 
+//	public EnvMapNode geSourceNode(double x, double y, double targetX, double targetY) {
+//		EnvMapNode node = getNode(targetX, targetY);
+//		EnvMapNode srcNode = null;
+//		LinkedList<String> neighbors = getNeighbors(node.getLabel());
+//		for (String l : neighbors) {
+//			EnvMapNode nbr = m_nodes.get(l);
+//			
+//			
+//		}
+//	}
+
 
 }

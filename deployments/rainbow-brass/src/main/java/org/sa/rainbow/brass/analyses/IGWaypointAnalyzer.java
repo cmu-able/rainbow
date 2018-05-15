@@ -1,6 +1,7 @@
 package org.sa.rainbow.brass.analyses;
 
 import java.util.Collection;
+import java.util.Date;
 
 import org.sa.rainbow.brass.model.P2ModelAccessor;
 import org.sa.rainbow.brass.model.instructions.IInstruction;
@@ -24,6 +25,7 @@ public class IGWaypointAnalyzer extends P2Analyzer implements IRainbowModelChang
 	}
 
 	private P2ModelAccessor m_modelAccessor;
+	private boolean m_newIG = false;
 	private IRainbowChangeBusSubscription m_newIGSubscription = new IRainbowChangeBusSubscription() {
 
 		@Override
@@ -51,45 +53,86 @@ public class IGWaypointAnalyzer extends P2Analyzer implements IRainbowModelChang
 	protected P2ModelAccessor getModels() {
 		return m_modelAccessor;
 	}
+	
+	private Long m_time;
+	
+	private void handleProblem() {
+		if (m_time == null) m_time = new Date().getTime() / 1000;
+		if (new Date().getTime()/1000 - 15 > m_time)
+			throw new NullPointerException("IGWaypointAnalyzer waited too long for the current pose or finding the corresponding map position");
+	}
 
 	@Override
 	protected void runAction() {
+		boolean go = false;
+		synchronized (this) {
+			if (m_newIG)
+				go = true;
+		}
+		if (go) {
+			try {
+				LocationRecording currentPose = getModels().getMissionStateModel().getModelInstance().getCurrentPose();
+				EnvMap envMap = getModels().getEnvMapModel().getModelInstance();
+				if (currentPose == null || envMap == null) {
+					log("Still waiting for pose information");
+					handleProblem();
+					return;
+				}				
+				EnvMapNode srcNode = envMap.getNode(currentPose.getX(), currentPose.getY());
+				if (srcNode == null) {
+					log("Robot is not at a location in the map: (" + currentPose.getX() + ", " + currentPose.getY() + ")");
+//					try {
+						handleProblem();
+						return;
+//					} catch (Exception e) {
+//						log("Robot is not a a location in the map");
+//					}
+				}
+				String currentSrc = srcNode==null?null:srcNode.getLabel();
+				Collection<? extends IInstruction> instructions = getModels().getInstructionGraphModel()
+						.getModelInstance().getInstructions();
+				for (IInstruction i : instructions) {
+					if (i instanceof MoveAbsHInstruction) {
+						MoveAbsHInstruction mai = (MoveAbsHInstruction) i;
+//						if (currentSrc == null) {
+//							srcNode = envMap.geSourceNode(currentPose.getX(), currentPose.getY(), mai.getTargetX(), mai.getTargetY());
+//							currentSrc = srcNode.getLabel();
+//						}
+						mai.setSourceWaypoint(currentSrc);
+						EnvMapNode node = envMap.getNode(mai.getTargetX(), mai.getTargetY());
+						if (node != null) {
+							String tgtWp = node.getLabel();
+							mai.setTargetWaypoint(tgtWp);
+							currentSrc = tgtWp;
+						} else {
+							throw new NullPointerException("Node from " + mai.getTargetX() + ", " + mai.getTargetY()
+									+ " does not exist in envmap");
+						}
+					}
+				}
 
+				log("Received and processed a new IG");
+				synchronized(this) {
+					m_newIG = false;
+				}
+			} catch (Throwable e) {
+				e.printStackTrace();
+				log("IG processor encountered an error");
+			} finally {
+				m_modelUSPort.updateModel(getModels().getRainbowStateModel().getCommandFactory().clearModelProblems());
+				getModels().getRainbowStateModel().getModelInstance().m_waitForIG = false;
+			}
+
+		}
 	}
 
 	@Override
 	public void onEvent(ModelReference reference, IRainbowMessage message) {
-		try {
-			log("Notified of a new IG");
-			LocationRecording currentPose = getModels().getMissionStateModel().getModelInstance().getCurrentPose();
-			EnvMap envMap = getModels().getEnvMapModel().getModelInstance();
-			String currentSrc = envMap.getNode(currentPose.getX(), currentPose.getY()).getLabel();
-			Collection<? extends IInstruction> instructions = getModels().getInstructionGraphModel().getModelInstance()
-					.getInstructions();
-			for (IInstruction i : instructions) {
-				if (i instanceof MoveAbsHInstruction) {
-					MoveAbsHInstruction mai = (MoveAbsHInstruction) i;
-					mai.setSourceWaypoint(currentSrc);
-					EnvMapNode node = envMap.getNode(mai.getTargetX(), mai.getTargetY());
-					if (node != null) {
-						String tgtWp = node.getLabel();
-						mai.setTargetWaypoint(tgtWp);
-						currentSrc = tgtWp;
-					} else {
-						throw new NullPointerException("Node from " + mai.getTargetX() + ", " + mai.getTargetY()
-								+ " does not exist in envmap");
-					}
-				}
-			}
-
-			log("Received and processed a new IG");
-		} catch (Throwable e) {
-			e.printStackTrace();
-			log("IG processor encountered an error");
-		} finally {
-			m_modelUSPort.updateModel(getModels().getRainbowStateModel().getCommandFactory().clearModelProblems());
-			getModels().getRainbowStateModel().getModelInstance().m_waitForIG = false;
+		log("Notified of a new IG");
+		synchronized (this) {
+			m_newIG = true;
 		}
+
 	}
 
 }

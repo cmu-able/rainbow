@@ -105,7 +105,7 @@ public class PlanExecutor extends AbstractRainbowRunnable implements IAdaptation
     @Override
     protected void runAction () {
         if (m_adaptationDQPort != null && !m_adaptationDQPort.isEmpty ()) {
-        	Rainbow.instance().getRainbowMaster().gaugeManager().configureAllGaugews(IGauge.RAINBOW_ADAPTING, "boolean", "true");
+//        	Rainbow.instance().getRainbowMaster().gaugeManager().configureAllGaugews(IGauge.RAINBOW_ADAPTING, "boolean", "true");
             AdaptationTree<BrassPlan> at = m_adaptationDQPort.dequeue ();
             log ("Got a new plan -- executing");
             CountDownLatch latch = new CountDownLatch (1);
@@ -128,7 +128,7 @@ public class PlanExecutor extends AbstractRainbowRunnable implements IAdaptation
                     adaptationManager.markStrategyExecuted (at);
                 }
             }
-            Rainbow.instance().getRainbowMaster().gaugeManager().configureAllGaugews(IGauge.RAINBOW_ADAPTING, "boolean", "false");
+//            Rainbow.instance().getRainbowMaster().gaugeManager().configureAllGaugews(IGauge.RAINBOW_ADAPTING, "boolean", "false");
         }
 
     }
