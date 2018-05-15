@@ -1,8 +1,11 @@
 package org.sa.rainbow.brass.adaptation.p2_cp3;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.sa.rainbow.brass.adaptation.BrassPlan;
@@ -254,8 +257,18 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 							.ordinal());
 			PrismPolicy pp = new PrismPolicy(DecisionEngineCP3.selectPolicy());
 			pp.readPolicy();
-			String plan = pp.getPlan(m_configurationSynthesizer, confInitString).toString();
+			ArrayList<String> planArray = pp.getPlan(m_configurationSynthesizer, confInitString);
+			String plan = planArray.toString();
 			m_reportingPort.info(getComponentType(), "Planner chooses the plan " + plan, LOGGER);
+			ArrayList<String> planToTA = new ArrayList<String>(planArray.size());
+			for (String cmd : planArray) {
+				if (cmd.contains("_to_")) {
+					Pattern p = Pattern.compile("(.*)_to_(.*)");
+					Matcher m = p.matcher(cmd);
+					planToTA.add(m.group(2));
+				}
+			}
+			BRASSHttpConnector.instance(Phases.Phase2).reportNewPlan(planToTA);
 			PolicyToIGCP3 translator = new PolicyToIGCP3(pp, copy);
 			String translate = translator.translate(m_configurationSynthesizer, confInitString);
 

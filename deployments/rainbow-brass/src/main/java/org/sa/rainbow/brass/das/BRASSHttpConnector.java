@@ -3,12 +3,14 @@ package org.sa.rainbow.brass.das;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Queue;
 import java.util.concurrent.SynchronousQueue;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import okhttp3.Call;
@@ -110,6 +112,26 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
         json.addProperty ("status", status);
 //        json.add ("message", msg);
     }
+    
+	public void reportNewPlan(ArrayList<String> planToTA) {
+		JsonObject json = getTimeJSON();
+		StringBuffer planJson = new StringBuffer();
+		planJson.append("[");
+		boolean first = true;
+		for (String l : planToTA) {
+			if (!first) 
+				planJson.append(", ");
+			first = false;
+			planJson.append("'");
+			planJson.append(l);
+			planJson.append("'");
+		}
+		planJson.append("]");
+		addFieldsToStatus("PLAN", planJson.toString(), null);
+	    RequestBody body = RequestBody.create (JSON, m_gsonPP.toJson (json));
+        Request request = new Request.Builder ().url (STATUS_SERVER + "/internal/status").post (body).build ();
+        CLIENT.newCall (request).enqueue (m_responseCallback);
+	}
 
     @Override
     public void reportDone (boolean failed, String message) {
@@ -168,4 +190,6 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
         JsonObject j = conn.getTimeJSON ();
         System.out.println (conn.m_gsonPP.toJson (j));
     }
+
+
 }
