@@ -6,7 +6,7 @@ effector-types:
     command: setInstructions($<ig>)
     type: script
     scriptInfo:
-      path: "${_effectors.path}/setInstructions.sh"
+      path: "${_effectors.path}/setInstructionFile.sh"
       argument: "{0}"
   
   changeDeadlineT:
