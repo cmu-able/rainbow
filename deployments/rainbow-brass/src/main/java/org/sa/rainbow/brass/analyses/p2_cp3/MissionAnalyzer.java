@@ -45,6 +45,7 @@ public class MissionAnalyzer extends P2CP3Analyzer {
 				m_modelUSPort.updateModel(cmd);
 			}
 			else if (ig.getModelInstance().getInstructionGraphState() == IGExecutionStateT.FINISHED_SUCCESS) {
+				log("Reporting that we are done");
 				BRASSHttpConnector.instance(Phases.Phase2).reportDone(false, "Finished the IG");
 			}
 		}

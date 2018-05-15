@@ -1,5 +1,6 @@
 package org.sa.rainbow.brass.analyses;
 
+import org.apache.log4j.Logger;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.IRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
@@ -14,6 +15,7 @@ import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 
 public abstract class P2Analyzer extends AbstractRainbowRunnable implements IRainbowAnalysis {
+	static protected final Logger LOGGER = Logger.getLogger("Analyzer");
 
 	protected IModelUSBusPort m_modelUSPort;
 	protected IModelsManagerPort m_modelsManagerPort;
@@ -37,7 +39,7 @@ public abstract class P2Analyzer extends AbstractRainbowRunnable implements IRai
 
 	@Override
 	public void log(String txt) {
-		m_reportingPort.info(RainbowComponentT.ANALYSIS, id() + ": " + txt);
+		m_reportingPort.info(RainbowComponentT.ANALYSIS, id() + ": " + txt, LOGGER);
 	}
 
 	protected void initializeConnections() throws RainbowConnectionException {

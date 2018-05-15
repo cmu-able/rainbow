@@ -14,6 +14,7 @@ import org.acmestudio.acme.environment.error.AcmeError;
 import org.acmestudio.acme.rule.node.feedback.ExpressionEvaluationError;
 import org.acmestudio.acme.type.verification.NodeScopeLookup;
 import org.acmestudio.acme.type.verification.RuleTypeChecker;
+import org.apache.log4j.Logger;
 import org.sa.rainbow.brass.model.instructions.IInstruction;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
 import org.sa.rainbow.brass.model.instructions.KillNodesInstruction;
@@ -162,8 +163,10 @@ public class ConfigurationAnalyzer extends P2CP3Analyzer {
 		boolean ok = true;
 		for (IAcmeDesignRule r : rules) {
 			try {
-				ok &= RuleTypeChecker.evaluateAsBoolean(tbs, r, r.getDesignRuleExpression(), errors,
+				boolean b = RuleTypeChecker.evaluateAsBoolean(tbs, r, r.getDesignRuleExpression(), errors,
 						new NodeScopeLookup());
+				if (!b) log(r.getName() + " evaluated to false");
+				ok &= b;
 			} catch (AcmeException e) {
 				errors.push(new ExpressionEvaluationError(tbs, r, r.getDesignRuleExpression(), e.getMessage()));
 			}
