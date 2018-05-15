@@ -38,7 +38,7 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 		m_component_actions = new HashMap<String, String[]>();
 		m_component_actions.put("enable", new String[] { "DISABLED", "ENABLED" });
 		m_component_actions.put("disable", new String[] { "ENABLED", "DISABLED" });
-		m_component_actions.put("crash", new String[] { "ENABLED", "OFFLINE" });
+//		m_component_actions.put("crash", new String[] { "ENABLED", "OFFLINE" });
 	}
 
 	private static final HashMap<String, String> m_configuration_dictionary;
@@ -206,7 +206,7 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 					reward_quantity = 9999;
 				rewards.add("\t[" + cid + "_" + e.getKey() + "]  true : " + String.valueOf(reward_quantity) + ";\n");
 			}
-			code += "\t[] (turn="+String.valueOf(i)+") & ("+cid+"_done=true) -> (turn'="+String.valueOf(i+1)+");\n";
+			code += "\t[] (turn="+String.valueOf(i)+") -> (turn'="+String.valueOf(i+1)+");\n";
 			code += "endmodule\n\n";
 		}
 
