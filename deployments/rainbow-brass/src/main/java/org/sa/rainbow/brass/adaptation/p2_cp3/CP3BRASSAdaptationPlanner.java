@@ -263,9 +263,11 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 			ArrayList<String> planToTA = new ArrayList<String>(planArray.size());
 			for (String cmd : planArray) {
 				if (cmd.contains("_to_")) {
-					Pattern p = Pattern.compile("(.*)_to_(.*)");
+					Pattern p = Pattern.compile("([^_]*)_to_(.*)");
 					Matcher m = p.matcher(cmd);
+					if (m.matches()) {
 					planToTA.add(m.group(2));
+					}
 				}
 			}
 			BRASSHttpConnector.instance(Phases.Phase2).reportNewPlan(planToTA);
