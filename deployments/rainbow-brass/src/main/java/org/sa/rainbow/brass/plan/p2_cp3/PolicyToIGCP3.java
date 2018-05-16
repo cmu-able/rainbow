@@ -69,7 +69,7 @@ public class PolicyToIGCP3 {
 	}
 
 	private String build_reconfig_cmd(boolean mode) {
-		return "SetReconfiguration(" + (mode?"1":"0") + ")";
+		return "SetReconfiguring(" + (mode?"1":"0") + ")";
 	}
 
 	/**
@@ -185,16 +185,17 @@ public class PolicyToIGCP3 {
 				reconfig = true;
 				newCmds.add(r);
 			}
-			newCmds.add(c);
-			prev = c;
 			if (reconfig && !isReconfig(c)) {
 				String r = build_reconfig_cmd(false);
 				reconfig = false;
 				newCmds.add(r);
 			}
+			newCmds.add(c);
+			prev = c;
+
 		}
 		
-		
+		cmds = newCmds;
 		
 ////		Pattern p = Pattern.compile(".*do ([^)]*).*");
 //		// remove duplicates
