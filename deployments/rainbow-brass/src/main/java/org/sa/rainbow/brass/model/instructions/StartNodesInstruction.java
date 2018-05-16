@@ -20,10 +20,18 @@ public class StartNodesInstruction implements IInstruction {
 
 	private void parseInformation() {
 		Pattern startPattern = Pattern.compile(COMMAND_NAME+"\\s*\\((.+)\\)");
-		Matcher m = startPattern.matcher(m_instruction);
+		Matcher m = startPattern.matcher(m_instruction.trim());
 		if (m.matches()) {
-			m_node = m.group(1);
+			m_node = extractContents(m.group(1));
 		}
+	}
+	
+	private String extractContents(String s) {
+		if (s.startsWith("%") || s.startsWith("\""))
+			s = s.substring(1);
+		if (s.endsWith("%") || s.endsWith("\""))
+			s = s.substring(0, s.length()-1);
+		return s;
 	}
 
 	@Override

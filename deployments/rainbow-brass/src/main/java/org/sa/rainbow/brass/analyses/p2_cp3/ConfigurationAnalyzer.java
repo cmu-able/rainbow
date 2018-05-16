@@ -143,7 +143,7 @@ public class ConfigurationAnalyzer extends P2CP3Analyzer {
 		}
 		else if (configurationOK && !m_wasConfigurationOK) {
 			m_wasConfigurationOK = true;
-			RemoveModelProblemCmd cmd = getModels().getRainbowStateModel().getCommandFactory ().removeModelProblem(CP3ModelState.ARCHITECTURE_ERROR);
+			RemoveModelProblemCmd cmd = getModels().getRainbowStateModel().getCommandFactory ().removeModelProblem(CP3ModelState.CONFIGURATION_ERROR);
 			m_modelUSPort.updateModel(cmd);
 		}
 				

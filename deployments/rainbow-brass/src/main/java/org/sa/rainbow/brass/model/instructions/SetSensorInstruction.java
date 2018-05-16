@@ -28,9 +28,23 @@ public class SetSensorInstruction implements IInstruction {
 		Pattern sensorPattern = Pattern.compile("SetSensor\\s*\\(\\s*(.+),\\s*(.+)\\)");
 		Matcher m = sensorPattern.matcher(m_instruction);
 		if (m.matches()) {
+			String s = m.group(1);
+			String e = m.group(2);
+			s= extractContents(s);
+			e= extractContents(e);
 			m_sensor = Sensors.valueOf(m.group(1));
-			m_enablement = Boolean.getBoolean(m.group(2));
+			if ("on".equalsIgnoreCase(e)) m_enablement=true;
+			else if ("off".equalsIgnoreCase(e)) m_enablement=false;
+			else m_enablement = Boolean.getBoolean(m.group(2));
 		}
+	}
+
+	private String extractContents(String s) {
+		if (s.startsWith("%") || s.startsWith("\""))
+			s = s.substring(1);
+		if (s.endsWith("%") || s.endsWith("\""))
+			s = s.substring(0, s.length()-1);
+		return s;
 	}
 
 	@Override
