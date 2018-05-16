@@ -351,7 +351,7 @@ public class MapTranslator {
                 String hitRateComplementGuard = "";
                 if (a.isEnabled()){
                 	if (!a.includesHitRates(m_cp)){ // If no risk of collision exists, generate only a simple deterministic command for the transition
-                		buf+="\t ["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] ("+ROBOT_LOCATION_VAR+"="+a.getSource()+") "+" & ("+ROBOT_BATTERY_VAR+">="+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+")"+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) -> ("+ROBOT_LOCATION_VAR+"'="+a.getTarget()+") "+" & ("+ROBOT_BATTERY_VAR+"'="+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+")"+ " & ("+ROBOT_HEADING_VAR+"'="+HEADING_CONST_PREFIX + findArcHeading(a).name() + ") & (robot_done'=true);\n";                	
+                		buf+="\t ["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] ("+ ROBOT_RECONF_VAR +">0) & ("+ROBOT_LOCATION_VAR+"="+a.getSource()+") "+" & ("+ROBOT_BATTERY_VAR+">="+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+")"+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) -> ("+ROBOT_LOCATION_VAR+"'="+a.getTarget()+") "+" & ("+ROBOT_BATTERY_VAR+"'="+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+")"+ " & ("+ROBOT_HEADING_VAR+"'="+HEADING_CONST_PREFIX + findArcHeading(a).name() + ") & (robot_done'=true);\n";                	
                 		//System.out.println("\t ["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] does not include hitrates");
                 	} else { // If collision risk exist, generate alternative probabilistic branches
                 	    
