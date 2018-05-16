@@ -53,13 +53,15 @@ public class IGWaypointAnalyzer extends P2Analyzer implements IRainbowModelChang
 	protected P2ModelAccessor getModels() {
 		return m_modelAccessor;
 	}
-	
+
 	private Long m_time;
-	
+
 	private void handleProblem() {
-		if (m_time == null) m_time = new Date().getTime() / 1000;
-		if (new Date().getTime()/1000 - 15 > m_time)
-			throw new NullPointerException("IGWaypointAnalyzer waited too long for the current pose or finding the corresponding map position");
+		if (m_time == null)
+			m_time = new Date().getTime() / 1000;
+		if (new Date().getTime() / 1000 - 15 > m_time)
+			throw new NullPointerException(
+					"IGWaypointAnalyzer waited too long for the current pose or finding the corresponding map position");
 	}
 
 	@Override
@@ -77,27 +79,37 @@ public class IGWaypointAnalyzer extends P2Analyzer implements IRainbowModelChang
 					log("Still waiting for pose information");
 					handleProblem();
 					return;
-				}				
+				}
 				EnvMapNode srcNode = envMap.getNode(currentPose.getX(), currentPose.getY());
 				if (srcNode == null) {
-					log("Robot is not at a location in the map: (" + currentPose.getX() + ", " + currentPose.getY() + ")");
-//					try {
-						handleProblem();
-						return;
-//					} catch (Exception e) {
-//						log("Robot is not a a location in the map");
-//					}
+					log("Robot is not at a location in the map: (" + currentPose.getX() + ", " + currentPose.getY()
+							+ ")");
+					log("Robot is not a a location in the map");
+					log("The source node is not set, using current pose to guess where robot is coming from");
+					String closestNode = "none";
+					double distance = Double.MAX_VALUE;
+					for (EnvMapNode node : envMap.getNodes().values()) {
+						double d = envMap.distanceBetweenCoords(currentPose.getX(), currentPose.getY(), node.getX(),
+								node.getY());
+						if (d < distance) {
+							distance = d;
+							closestNode = node.getLabel();
+							srcNode = node;
+						}
+					}
+					log("Guessing that current source is " + closestNode);
+
 				}
-				String currentSrc = srcNode==null?null:srcNode.getLabel();
+
+				String currentSrc = srcNode == null ? null : srcNode.getLabel();
 				Collection<? extends IInstruction> instructions = getModels().getInstructionGraphModel()
 						.getModelInstance().getInstructions();
 				for (IInstruction i : instructions) {
 					if (i instanceof MoveAbsHInstruction) {
 						MoveAbsHInstruction mai = (MoveAbsHInstruction) i;
-//						if (currentSrc == null) {
-//							srcNode = envMap.geSourceNode(currentPose.getX(), currentPose.getY(), mai.getTargetX(), mai.getTargetY());
-//							currentSrc = srcNode.getLabel();
-//						}
+						if (currentSrc == null) {
+							log("Current source is null");
+						}
 						mai.setSourceWaypoint(currentSrc);
 						EnvMapNode node = envMap.getNode(mai.getTargetX(), mai.getTargetY());
 						if (node != null) {
@@ -106,13 +118,13 @@ public class IGWaypointAnalyzer extends P2Analyzer implements IRainbowModelChang
 							currentSrc = tgtWp;
 						} else {
 							throw new NullPointerException("Node from " + mai.getTargetX() + ", " + mai.getTargetY()
-									+ " does not exist in envmap");
+									+ " does not exist in envmap in instruction " + mai.getInstruction());
 						}
 					}
 				}
 
 				log("Received and processed a new IG");
-				synchronized(this) {
+				synchronized (this) {
 					m_newIG = false;
 				}
 			} catch (Throwable e) {
