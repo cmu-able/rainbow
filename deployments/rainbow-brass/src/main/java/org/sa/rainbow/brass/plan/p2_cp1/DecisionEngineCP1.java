@@ -18,8 +18,8 @@ public class DecisionEngineCP1 extends DecisionEngine{
 
     public static double m_selected_candidate_time=0.0;
     public static double m_selected_candidate_energy=0.0;
-	public static double m_energyWeight=0.5;
-	public static double m_timelinessWeight=0.5;
+	public static double m_energyWeight=0.9;
+	public static double m_timelinessWeight=0.1;
 
     public static void init(Properties props) throws Exception {
     	DecisionEngine.init(props);
