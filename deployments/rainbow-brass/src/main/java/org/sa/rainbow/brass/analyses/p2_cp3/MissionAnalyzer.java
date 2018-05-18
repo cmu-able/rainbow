@@ -24,14 +24,15 @@ public class MissionAnalyzer extends P2CP3Analyzer {
 		
 		MissionState ms = getModels().getMissionStateModel().getModelInstance();
 
-	
+		if (!m_reportedReady && ms.getInitialPose() != null) {
+			m_reportedReady = true;
+            BRASSHttpConnector.instance(Phases.Phase2).setClock(getModels().getMissionStateModel().getModelInstance());
+			BRASSHttpConnector.instance(Phases.Phase2).reportReady(true);
+			m_wasOK = true;
+		}
 		
 		if (ms.isMissionStarted() && ms.getInitialPose() != null) {
-			if (!m_reportedReady) {
-				m_reportedReady = true;
-				BRASSHttpConnector.instance(Phases.Phase2).reportReady(true);
-				m_wasOK = true;
-			}
+			
 			boolean currentOK = ig.getModelInstance().getCurrentOK();
 			
 			if (!currentOK && m_wasOK) {

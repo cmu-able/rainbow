@@ -60,10 +60,11 @@ public class BRASSMissionAnalyzer extends P2CP1Analyzer {
 		MissionState ms = getModels().getMissionStateModel().getModelInstance();
 		if (!m_reportedReady && ms.getInitialPose() != null) {
 			m_reportedReady = true;
+            BRASSHttpConnector.instance(Phases.Phase2).setClock(getModels().getMissionStateModel().getModelInstance());
 			BRASSHttpConnector.instance(Phases.Phase2).reportReady(true);
 			m_wasOK = true;
 		}
-		if (getModels().getRainbowStateModel().getModelInstance().waitForIG() || m_awaitingNewIG) {
+		if (getModels().getRainbowStateModel().getModelInstance().waitForIG()) {
 			m_wasOK = true;
 			return;
 		}
@@ -80,7 +81,7 @@ public class BRASSMissionAnalyzer extends P2CP1Analyzer {
 //				SetModelProblemCmd cmd1 = getModels().getRainbowStateModel().getCommandFactory().setModelProblem(CP3ModelState.MISSION_COMPLETED);
 //				return;
 //			}
-			if (!currentOK && m_wasOK && !m_awaitingNewIG) {
+			if (!currentOK && m_wasOK && !getModels().getRainbowStateModel().getModelInstance().waitForIG()) {
 				m_wasOK = false;
 				m_reportingPort.info(getComponentType(), "Instruction graph failed...updating map model");
 				SetModelProblemCmd cmd1 = getModels().getRainbowStateModel().getCommandFactory()

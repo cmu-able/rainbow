@@ -8,6 +8,8 @@ import java.util.Date;
 import java.util.Queue;
 import java.util.concurrent.SynchronousQueue;
 
+import org.sa.rainbow.brass.model.p2_cp3.clock.ClockedModel;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -44,6 +46,7 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
     };
     private Gson                      m_gsonPP;
 	private Phases m_phase;
+	private ClockedModel m_clock;
 
     protected BRASSHttpConnector (Phases phase) {
         m_phase = phase;
@@ -59,6 +62,11 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
 //            s_instance.start ();
         }
         return s_instance;
+    }
+    
+    
+    public void setClock(ClockedModel clock) {
+		m_clock = clock;
     }
     
     String getRainbowReady() {
@@ -108,7 +116,7 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
     void addFieldsToStatus (String status, String message, JsonObject json) {
 //        JsonObject msg = new JsonObject ();
         json.addProperty ("msg", message);
-        json.addProperty ("sim_time", -1);
+        json.addProperty ("sim_time", m_clock==null?-1:Math.round(m_clock.clockTime()));
         json.addProperty ("status", status);
 //        json.add ("message", msg);
     }
