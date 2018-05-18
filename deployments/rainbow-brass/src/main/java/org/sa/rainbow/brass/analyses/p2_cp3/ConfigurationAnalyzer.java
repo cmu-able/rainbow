@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 import org.sa.rainbow.brass.model.instructions.IInstruction;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
 import org.sa.rainbow.brass.model.instructions.KillNodesInstruction;
+import org.sa.rainbow.brass.model.instructions.SetReconfiguringInstruction;
 import org.sa.rainbow.brass.model.instructions.SetSensorInstruction;
 import org.sa.rainbow.brass.model.instructions.StartNodesInstruction;
 import org.sa.rainbow.brass.model.p2_cp3.acme.TurtlebotModelInstance;
@@ -78,7 +79,7 @@ public class ConfigurationAnalyzer extends P2CP3Analyzer {
 
 		if (ms.isMissionStarted()) {
 			IInstruction currentInst = ig.getModelInstance().getCurrentInstruction();
-			if (currentInst == null || currentInst instanceof SetSensorInstruction || currentInst instanceof StartNodesInstruction || currentInst instanceof KillNodesInstruction) {
+			if (currentInst == null || currentInst instanceof SetSensorInstruction || currentInst instanceof StartNodesInstruction || currentInst instanceof KillNodesInstruction || currentInst instanceof SetReconfiguringInstruction) {
 				// Currrently executing a command to change the configuration, so let's abort this
 				return;
 			}

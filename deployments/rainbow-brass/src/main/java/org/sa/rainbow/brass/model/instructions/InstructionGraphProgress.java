@@ -72,10 +72,14 @@ public class InstructionGraphProgress {
                 else if (instruction.startsWith(SetConfigInstruction.COMMAND_NAME)) {
                 	inst2 = new SetConfigInstruction(label, instruction, nextLabel);
                 }
+                else if (instruction.startsWith(SetReconfiguringInstruction.COMMAND_NAME)) {
+                	inst2 = new SetReconfiguringInstruction(label, instruction, nextLabel);
+                }
                 else {
                     //TODO
                     // Other ignorable instructions
                     inst2 = null;
+                    
 //                    inst2 = new MoveAbsHInstruction(label, instruction, nextLabel);
                 }
 
@@ -120,7 +124,7 @@ public class InstructionGraphProgress {
     }
 
     public boolean getCurrentOK () {
-        return m_currentOK;
+        return isCurrentOK();
     }
 
     public IInstruction getCurrentInstruction () {
@@ -168,15 +172,16 @@ public class InstructionGraphProgress {
         for (IInstruction i : instructions) {
             m_instructions.put (i.getInstructionLabel(), i);
         }
-        m_instructionGraphState = IGExecutionStateT.NONE;
+        setInstructionGraphState(IGExecutionStateT.NONE);
+        setCurrentOK(true);
     }
 
     public void setExecutingInstruction (String instLabel, String state) {
 //    	if (m_instructions.containsKey (instLabel)) {
         m_currentNode = instLabel;
-        if (!m_currentOK)
+        if (!isCurrentOK())
         {
-            m_currentOK = true;
+            setCurrentOK(true);
 //        }
 //        ExecutionObservation observation = new ExecutionObservation ();
 //        observation.startTime = new Date().getTime ();
@@ -271,5 +276,9 @@ public class InstructionGraphProgress {
         IInstruction instruction = ip.getInstruction ("5");
         System.out.println ();
     }
+
+	private boolean isCurrentOK() {
+		return m_currentOK;
+	}
 
 }
