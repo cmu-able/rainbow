@@ -25,7 +25,8 @@ import okhttp3.Response;
 
 public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements IBRASSConnector {
 
-    public static final MediaType     JSON               = MediaType.parse ("application/json");
+    private static final String STATUS_ENDPOINT = "/internal-status";
+	public static final MediaType     JSON               = MediaType.parse ("application/json");
     public static final OkHttpClient  CLIENT             = new OkHttpClient ();
     public static final String        STATUS_SERVER      = "http://localhost:5000";
     private static BRASSHttpConnector s_instance;
@@ -35,6 +36,7 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
         @Override
         public void onResponse (Call call, Response response)
                 throws IOException {
+        	System.out.println("Received response from shim: " + response.body().string());
             response.close ();
 
         }
@@ -81,7 +83,7 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
         String jsonStr = m_gsonPP.toJson (json);
         System.out.println ("Reporting ready: " + jsonStr);
         RequestBody body = RequestBody.create (JSON, jsonStr);
-        Request request = new Request.Builder ().url (STATUS_SERVER + "/internal/status").post (body).build ();
+        Request request = new Request.Builder ().url (STATUS_SERVER + STATUS_ENDPOINT).post (body).build ();
         CLIENT.newCall (request).enqueue (m_responseCallback);
 
 //            m_requestQ.offer (request);
@@ -103,7 +105,7 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
 
 //        json.addProperty ("MESSAGE", message);
         RequestBody body = RequestBody.create (JSON, m_gsonPP.toJson (json));
-        Request request = new Request.Builder ().url (STATUS_SERVER + "/internal/status").post (body).build ();
+        Request request = new Request.Builder ().url (STATUS_SERVER + STATUS_ENDPOINT).post (body).build ();
         CLIENT.newCall (request).enqueue (m_responseCallback);
 
 //            m_requestQ.offer (request);
@@ -115,8 +117,8 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
 
     void addFieldsToStatus (String status, String message, JsonObject json) {
 //        JsonObject msg = new JsonObject ();
-        json.addProperty ("msg", message);
-        json.addProperty ("sim_time", m_clock==null?-1:Math.round(m_clock.clockTime()));
+        json.addProperty ("message", message);
+        json.addProperty ("sim-time", m_clock==null?-1:Math.round(m_clock.clockTime()));
         json.addProperty ("status", status);
 //        json.add ("message", msg);
     }
@@ -137,7 +139,7 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
 		planJson.append("]");
 		addFieldsToStatus("PLAN", planJson.toString(), json);
 	    RequestBody body = RequestBody.create (JSON, m_gsonPP.toJson (json));
-        Request request = new Request.Builder ().url (STATUS_SERVER + "/internal/status").post (body).build ();
+        Request request = new Request.Builder ().url (STATUS_SERVER + STATUS_ENDPOINT).post (body).build ();
         CLIENT.newCall (request).enqueue (m_responseCallback);
 	}
 
@@ -148,7 +150,7 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
         JsonObject json = getTimeJSON ();
         addFieldsToStatus (failed ? missionFailed() : missionSucceeded(), message, json);
         RequestBody body = RequestBody.create (JSON, m_gsonPP.toJson (json));
-        Request request = new Request.Builder ().url (STATUS_SERVER + "/internal/status").post (body).build ();
+        Request request = new Request.Builder ().url (STATUS_SERVER + STATUS_ENDPOINT).post (body).build ();
         CLIENT.newCall (request).enqueue (m_responseCallback);
 //            m_requestQ.offer (request);
 //        }
