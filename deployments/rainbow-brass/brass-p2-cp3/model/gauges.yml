@@ -195,9 +195,8 @@ gauge-instances:
       targetIP: "${customize.system.target.master}"
     configValues:
       reportingPeriod: 1000
-      targetProbeType: 
-        - rostopicprobe
-        - roslocationprobe
+      targetProbeType: rostopicprobe
+        #- roslocationprobe
   TWG1:
     type: BRASSTargetWaypointGaugeT
     model: MissionState:MissionState
