@@ -151,11 +151,12 @@ public class EnvMap {
 		return candidate;
 	}
 
-	public synchronized void addArc(String source, String target, double distance, boolean enabled) {
+	public synchronized EnvMapArc addArc(String source, String target, double distance, boolean enabled) {
 		EnvMapArc arc = new EnvMapArc(source, target, distance, enabled);
 		m_arcs.put(source + target, arc);
 		m_arcs.put(target + source, arc);
 		updateArcsLookup();
+		return arc;
 	}
 	
     public synchronized void addArc (EnvMapArc a) {
@@ -285,15 +286,21 @@ public class EnvMap {
 	 */
 	public synchronized String insertNode(String n, String na, String nb, double x, double y, boolean obstacle) {
 		n = AddNode(n, x, y);
+		EnvMapArc arc = m_arcs.get(na + nb);
+		Map<String, Object> allProperties = arc.getAllProperties();
 		if (!n.equals(na)) {
-			addArc(na, n, distanceBetween(na, n), true);
-			addArc(n, na, distanceBetween(na, n), true);
+			EnvMapArc arc1 = addArc(na, n, distanceBetween(na, n), true);
+			EnvMapArc arc2 = addArc(n, na, distanceBetween(na, n), true);
+			arc1.loadProperties(allProperties);
+			arc2.loadProperties(allProperties);
 		}
 		if (obstacle) {
 			removeArcs(na, nb);
 		} else if (!n.equals(nb)) {
-			addArc(nb, n, distanceBetween(nb, n), true);
-			addArc(n, nb, distanceBetween(nb, n), true);
+			EnvMapArc arc1 = addArc(nb, n, distanceBetween(nb, n), true);
+			EnvMapArc arc2 = addArc(n, nb, distanceBetween(nb, n), true);
+			arc1.loadProperties(allProperties);
+			arc2.loadProperties(allProperties);
 		}
 		// Somehow, the planning things that n to nb is still valid
 		// else {
@@ -452,6 +459,10 @@ public class EnvMap {
 			JSONArray neighbors = (JSONArray) jsonNode.get("connected-to");
 			for (Object neighbor : neighbors) {
 				String ns = String.valueOf(neighbor);
+				if (ns.equals(id)) {
+					System.out.println("Error: Nodes cannot have arcs to themselves");
+					continue;
+				}
 				double distance = distanceBetweenCoords(getNodeX(id), getNodeY(id), getNodeX(ns), getNodeY(ns));
 				//addArc(id, ns, distance, true);
 				//System.out.println("Added arc [" + id + "," + ns + "] (distance=" + distance + ")");

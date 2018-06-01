@@ -1,5 +1,6 @@
 package org.sa.rainbow.brass.model.map;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import com.google.common.base.Objects;
@@ -22,6 +23,14 @@ public class EnvMapArc {
 		this.m_target = target;
 		m_properties.put(Phase1MapPropertyKeys.DISTANCE, distance);
 		m_properties.put(Phase1MapPropertyKeys.ENABLEMENT, enabled);
+	}
+	
+	public Map<String, Object> getAllProperties() {
+		return Collections.unmodifiableMap(m_properties);
+	}
+	
+	public void loadProperties(Map<String,Object> props) {
+		m_properties.putAll(props);
 	}
 
 	public String getSource() {
