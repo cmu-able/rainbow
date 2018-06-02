@@ -386,7 +386,7 @@ public class PolicyToIGCP3 {
 				src = map.getNodes().get(matcher.group(1));
 				EnvMapNode tgt = map.getNodes().get(matcher.group(2));
 				// System.out.println(src.m_label + " to " + tgt.getLabel());
-				double w = Math.atan2(tgt.m_x - src.m_x, tgt.m_y - src.m_y);
+				double w = Math.atan2(tgt.m_y - src.m_y, tgt.m_x - src.m_x);
 				return w;
 			}
 		}
