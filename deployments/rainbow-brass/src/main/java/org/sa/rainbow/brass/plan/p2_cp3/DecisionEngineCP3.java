@@ -145,9 +145,9 @@ public class DecisionEngineCP3 extends DecisionEngine {
 		
         cs.generateReconfigurationsFrom(currentConfStr);
 
-        for (int i=32000; i< 32500; i+=500){
+        for (int i=180000; i< 180500; i+=500){
         	System.out.println("Generating candidates for l1-l4...");
-            generateCandidates("l1", "l4");
+            generateCandidates("l50", "l1");
         	System.out.println("Scoring candidates...");
             scoreCandidates(dummyMap, i, 1);
             System.out.println(String.valueOf(m_scoreboard));	

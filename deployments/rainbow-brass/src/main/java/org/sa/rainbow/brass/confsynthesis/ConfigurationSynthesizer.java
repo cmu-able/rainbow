@@ -241,6 +241,28 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 		return res;
 	}
 
+	public String configurationToPrismConstants(String label) { // Exports to a prism init constant strings for reconfiguration
+		ArrayList<String> inst = new ArrayList<String>();
+		AlloySolution sol = new AlloySolution();
+		System.out.println(label);
+		sol.loadFromString(m_configurations.get(label));
+		String res = "";
+		boolean first=true;
+		for (AlloySolutionNode node : sol.getNodes().values()) {
+			if (!first) res +=",";
+			first=false;
+			res += node.getId().replace("$", "") + "_INIT=1";
+			inst.add(node.getId().replace("$", ""));
+		}
+
+		for (int i = 0; i < m_allinstances.size(); i++) {
+			if (!inst.contains(m_allinstances.get(i))) {
+				res += "," + m_allinstances.get(i) + "_INIT=0";
+			}
+		}
+		return res;
+	}
+	
 	public void generateConfigurationPreds() {
 		for (Map.Entry<String, String> e : m_configurations.entrySet()) {
 			String prismConfString = configurationToPrismPred(e.getKey());

@@ -276,7 +276,7 @@ public class MapTranslator {
         buf+="\n"+generateBatteryUpdates();
         buf+="module "+ROBOT_PLAYER_NAME+MODULE_POSTFIX_STR+"\n";
         buf+=ROBOT_BATTERY_VAR+":["+ROBOT_BATTERY_RANGE_MIN+".."+ROBOT_BATTERY_RANGE_MAX_CONST+"] init "+INITIAL_ROBOT_BATTERY_CONST+";\n";
-        buf+=ROBOT_LOCATION_VAR+":[0..100] init "+INITIAL_ROBOT_LOCATION_CONST+";\n";
+        buf+=ROBOT_LOCATION_VAR+":[0..1000] init "+INITIAL_ROBOT_LOCATION_CONST+";\n";
 //        buf+=ROBOT_LOCATION_VAR+":[0.."+m_map.getNodeCount()+"] init "+INITIAL_ROBOT_LOCATION_CONST+";\n";
         buf+=ROBOT_CONF_VAR+":[-1.."+m_cp.getConfigurations().size()+"] init "+INITIAL_ROBOT_CONF_CONST+";\n";
         buf+=ROBOT_HEADING_VAR+":[0.."+String.valueOf(MissionState.Heading.values().length)+"] init "+INITIAL_ROBOT_HEADING_CONST+";\n";

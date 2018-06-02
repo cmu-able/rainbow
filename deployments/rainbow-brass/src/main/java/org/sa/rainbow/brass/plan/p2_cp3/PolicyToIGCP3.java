@@ -1,6 +1,8 @@
 package org.sa.rainbow.brass.plan.p2_cp3;
 
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -8,16 +10,25 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.map.EnvMapNode;
 import org.sa.rainbow.brass.plan.p2.MapTranslator;
+import org.sa.rainbow.brass.PropertiesConnector;
+import org.sa.rainbow.brass.adaptation.PolicyToIG;
+import org.sa.rainbow.brass.adaptation.PrismConnector;
 import org.sa.rainbow.brass.adaptation.PrismPolicy;
+//import org.sa.rainbow.brass.adaptation.PolicyToIG.Arguments;
 import org.sa.rainbow.brass.confsynthesis.ConfigurationProvider;
+import org.sa.rainbow.brass.confsynthesis.ConfigurationSynthesizer;
+import org.sa.rainbow.brass.plan.p2_cp3.DecisionEngineCP3;
 
+import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.annotation.Arg;
+import net.sourceforge.argparse4j.inf.ArgumentParser;
 
 
 /**
@@ -395,8 +406,120 @@ public class PolicyToIGCP3 {
 		@Arg(dest="waypoint")
 		public String waypoint;
 
+		@Arg(dest="configuration")
+		public String configuration;
+
+		@Arg(dest="priority")
+		public String priority;
+
 		@Arg(dest = "map")
 		public String map;
 	}
 
+	
+	/**
+	 * Class test
+	 * Generates paths/IGs for an arbitrary pair of locations, initial configuration, and QA preference
+	 * (QA preference keys: "safety", "energy", "timeliness")
+	 * @param args
+	 * @throws Exception
+	 */
+	public static void main(String[] args) throws Exception { // Class test
+
+		ArgumentParser parser = ArgumentParsers.newFor("prog").build()
+				.description("Generate instruction graphs and paths for a map");
+		parser.addArgument("-o", "--output").metavar("DIR").type(String.class)
+				.help("The directory to output paths and instruction graphs");
+		parser.addArgument("-p", "--properties").metavar("FILE").type(String.class)
+				.help("The file containing properties/environment variables for PRISM etc");
+		parser.addArgument("-w", "--waypoint").type(String.class).help("The waypoint to generate to and from");
+		parser.addArgument("-c", "--configuration").type(String.class).help("The configuration to generate from");
+		parser.addArgument("-pr", "--priority").type(String.class).help("The main priority QA");
+		parser.addArgument("map").type(String.class).help("The map file containing the waypoints");
+
+		Arguments theArgs = new Arguments();
+		parser.parseArgs(args, theArgs);
+		Properties props = new Properties(PropertiesConnector.DEFAULT);
+		if (theArgs.properties != null) {
+			try {
+				props.load(new FileInputStream(new File(theArgs.properties)));
+			} catch (Exception e) {
+				System.err.println("Error loading properties file: " + theArgs.properties);
+				System.exit(1);
+			}
+		}
+		props.setProperty(PropertiesConnector.MAP_PROPKEY, theArgs.map);
+
+		// Set preference QA
+		if (Objects.equals(theArgs.priority, "safety")){
+			DecisionEngineCP3.setSafetyPreference();
+		}
+
+		if (Objects.equals(theArgs.priority, "energy")){
+			DecisionEngineCP3.setEnergyPreference();
+		}
+		
+		if (Objects.equals(theArgs.priority, "timeliness")){
+			DecisionEngineCP3.setTimelinessPreference();
+		}
+		
+		// Output dirs
+		String out_dir_ig = PrismConnector.convertToAbsolute(theArgs.output == null ? "." : theArgs.output);
+		String out_dir_wp = out_dir_ig;
+
+		// Set up decision engine
+		DecisionEngineCP3.init(theArgs.properties != null ? props : PropertiesConnector.DEFAULT);
+		props.setProperty(PropertiesConnector.MAP_PROPKEY, theArgs.map);
+		EnvMap map = new EnvMap(null, props);
+		DecisionEngineCP3.setMap(map);
+		
+		ConfigurationSynthesizer cs = new ConfigurationSynthesizer();
+        System.out.println("Populating configuration list..");
+        cs.populate();
+        System.out.println("Setting configuration provider...");
+        DecisionEngineCP3.setConfigurationProvider(cs);
+        
+		String currentConfStr=cs.configurationToPrismConstants(theArgs.configuration);	
+		System.out.println("Configuration: "+currentConfStr);
+     	cs.generateReconfigurationsFrom(currentConfStr);
+		
+		PrismPolicy pp;
+		
+		// Compute IGs/Paths
+		for (EnvMapNode node_src : map.getNodes().values()) {
+			for (EnvMapNode node_tgt : map.getNodes().values()) {
+				if (node_src.getId() != node_tgt.getId()) {
+					if (theArgs.waypoint != null && !Objects.equals(node_tgt.getLabel(),theArgs.waypoint) && !Objects.equals(node_src.getLabel(),theArgs.waypoint))
+						continue;
+
+					System.out.println(
+							"Src:" + String.valueOf(node_src.getId()) + " Tgt:" + String.valueOf(node_tgt.getId()));
+										
+		            DecisionEngineCP3.generateCandidates(node_src.getLabel(), node_tgt.getLabel());
+		        	System.out.println("Scoring candidates...");
+		            DecisionEngineCP3.scoreCandidates(map, MapTranslator.ROBOT_BATTERY_RANGE_MAX, 1);
+		            System.out.println(String.valueOf(DecisionEngineCP3.m_scoreboard));	
+		            pp = new PrismPolicy(DecisionEngineCP3.selectPolicy());
+		            pp.readPolicy();  
+		            String plan = pp.getPlan(cs, currentConfStr).toString();
+		            System.out.println("Selected Plan: "+plan);
+		            PolicyToIGCP3 translator = new PolicyToIGCP3(pp, map);
+		            System.out.println (translator.translate (cs, currentConfStr));
+		            
+		            Long ttc = new Double(DecisionEngineCP3.getSelectedPolicyTime()).longValue(); 
+					double w = getInitialRotation(node_src, pp, map);
+					
+					exportIGTranslation(out_dir_ig + "/" + node_src.getLabel() + "_to_" + node_tgt.getLabel() + ".ig",
+							translator.translate(cs, currentConfStr));
+					String wJson = generateJSONWayPointList(pp, String.valueOf(ttc), w);
+					System.out.println(wJson);
+					exportIGTranslation(out_dir_wp + "/" + node_src.getLabel() + "_to_" + node_tgt.getLabel() + ".json",
+							wJson);
+
+				}
+			}
+		}
+	}
+	
+	
 }

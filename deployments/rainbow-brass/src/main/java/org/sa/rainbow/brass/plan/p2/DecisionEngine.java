@@ -109,8 +109,12 @@ public class DecisionEngine {
      * @throws Exception
      */
     public static void scoreCandidates (EnvMap map, long batteryLevel, int robotHeading) throws Exception {
-        m_scoreboard.clear();
-        
+    	try{
+            m_scoreboard.clear();
+    	}
+    	catch(NullPointerException e){
+    	    m_scoreboard = new HashMap<List, ArrayList<Double>>();
+    	}
         synchronized (map){
             int originID = map.getNodeId(m_origin);
 			int destinationID = map.getNodeId(m_destination);
