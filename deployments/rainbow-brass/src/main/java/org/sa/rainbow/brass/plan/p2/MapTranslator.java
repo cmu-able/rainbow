@@ -108,6 +108,7 @@ public class MapTranslator {
     
     public static final float  MAXIMUM_KINECT_OFF_DISTANCE_VAL = 6.0f; // Maximum driving distance with kinect off in m.
 
+    public static final Double TRAVERSAL_SUCCESS_THRESHOLD=1.0; // Tolerance for map arc traversal success rate (if lower, segment not considered as a valid map trajectory in a given configuration)
 
 
     // Goal and stop condition configuration constants
@@ -130,7 +131,9 @@ public class MapTranslator {
 
     private static EnvMap m_map;
     private static ConfigurationProvider m_cp;
-
+    private static LinkedList<String> m_generated_movecommands = new LinkedList<String>();
+    
+    
     private static Logger LOGGER;
 
     public static Logger getLogger() {
@@ -280,7 +283,10 @@ public class MapTranslator {
 //        buf+=ROBOT_LOCATION_VAR+":[0.."+m_map.getNodeCount()+"] init "+INITIAL_ROBOT_LOCATION_CONST+";\n";
         buf+=ROBOT_CONF_VAR+":[-1.."+m_cp.getConfigurations().size()+"] init "+INITIAL_ROBOT_CONF_CONST+";\n";
         buf+=ROBOT_HEADING_VAR+":[0.."+String.valueOf(MissionState.Heading.values().length)+"] init "+INITIAL_ROBOT_HEADING_CONST+";\n";
-        buf+=ROBOT_RECONF_VAR+":[0.."+ROBOT_MAX_RECONF_VAL+"] init 0;\n";
+        String initRCVal="0";
+        if (inhibitTactics)
+        	initRCVal="1";
+        buf+=ROBOT_RECONF_VAR+":[0.."+ROBOT_MAX_RECONF_VAL+"] init "+initRCVal+";\n";
         buf+=ROBOT_COLLISION_VAR+": bool init false;\n";
 
         buf+="robot_done:bool init false;\n";
@@ -353,24 +359,30 @@ public class MapTranslator {
                 	if (!a.includesHitRates(m_cp)){ // If no risk of collision exists, generate only a simple deterministic command for the transition
                 		buf+="\t ["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] ("+ ROBOT_RECONF_VAR +">0) & ("+ROBOT_LOCATION_VAR+"="+a.getSource()+") "+" & ("+ROBOT_BATTERY_VAR+">="+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+")"+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) -> ("+ROBOT_LOCATION_VAR+"'="+a.getTarget()+") "+" & ("+ROBOT_BATTERY_VAR+"'="+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+")"+ " & ("+ROBOT_HEADING_VAR+"'="+HEADING_CONST_PREFIX + findArcHeading(a).name() + ") & (robot_done'=true);\n";                	
                 		//System.out.println("\t ["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] does not include hitrates");
+                		m_generated_movecommands.add(a.getSource()+MOVE_CMD_STR+a.getTarget());
                 	} else { // If collision risk exist, generate alternative probabilistic branches
                 	    
                    		for (Map.Entry<String, Configuration> c: m_cp.getConfigurations().entrySet()){
                    			confStr=m_cp.translateId(c.getKey());
-                   			if (a.getHitRate(confStr)>0.0){
-                   				String confGuard = "("+ROBOT_CONF_VAR+"="+c.getValue().getId()+")";
-			                    buf+="\t ["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] ("+ ROBOT_RECONF_VAR +">0) & ("+ROBOT_LOCATION_VAR+"="+a.getSource()+") "+" & ("+ROBOT_BATTERY_VAR+">="+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+")"+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & "+confGuard+" & (!robot_done) -> ";                	
-			                    
-			                    String mainUpdateStr = "("+ROBOT_LOCATION_VAR+"'="+a.getTarget()+") "+" & ("+ROBOT_BATTERY_VAR+"'="+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+")"+ " & ("+ROBOT_HEADING_VAR+"'="+HEADING_CONST_PREFIX + findArcHeading(a).name() + ") & (robot_done'=true)";
-			                    
-			                    if (a.getHitRate(confStr)>0.0){
-			                    	hitRateComplementGuard = String.valueOf(1.0-a.getHitRate(confStr)) + ": ";
-			                    	hitRateGuard = String.valueOf(a.getHitRate(confStr)) + ": ";
-			                    	buf+= " "+ hitRateGuard + mainUpdateStr + " & ("+ROBOT_COLLISION_VAR+"'=true)";                	
-			                        buf+= " + "+ hitRateComplementGuard + mainUpdateStr + " & ("+ROBOT_COLLISION_VAR+"'=false);\n";                	
-			                    } else {
-			                    	buf+= " "+ mainUpdateStr+";\n";        
-			                    }
+                   			if ((a.getSuccessRate(confStr)>=TRAVERSAL_SUCCESS_THRESHOLD)||
+                   					(!a.existsSuccessRateAboveThreshold(TRAVERSAL_SUCCESS_THRESHOLD) && 
+                   							(a.getSuccessRate(confStr)==(a.getMaxSuccessRate())))){
+	                   			if (a.getHitRate(confStr)>0.0){
+	                        		m_generated_movecommands.add(a.getSource()+MOVE_CMD_STR+a.getTarget());
+	                   				String confGuard = "("+ROBOT_CONF_VAR+"="+c.getValue().getId()+")";
+				                    buf+="\t ["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] ("+ ROBOT_RECONF_VAR +">0) & ("+ROBOT_LOCATION_VAR+"="+a.getSource()+") "+" & ("+ROBOT_BATTERY_VAR+">="+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+")"+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & "+confGuard+" & (!robot_done) -> ";                	
+				                    
+				                    String mainUpdateStr = "("+ROBOT_LOCATION_VAR+"'="+a.getTarget()+") "+" & ("+ROBOT_BATTERY_VAR+"'="+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+")"+ " & ("+ROBOT_HEADING_VAR+"'="+HEADING_CONST_PREFIX + findArcHeading(a).name() + ") & (robot_done'=true)";
+				                    
+				                    if (a.getHitRate(confStr)>0.0){
+				                    	hitRateComplementGuard = String.valueOf(1.0-a.getHitRate(confStr)) + ": ";
+				                    	hitRateGuard = String.valueOf(a.getHitRate(confStr)) + ": ";
+				                    	buf+= " "+ hitRateGuard + mainUpdateStr + " & ("+ROBOT_COLLISION_VAR+"'=true)";                	
+				                        buf+= " + "+ hitRateComplementGuard + mainUpdateStr + " & ("+ROBOT_COLLISION_VAR+"'=false);\n";                	
+				                    } else {
+				                    	buf+= " "+ mainUpdateStr+";\n";        
+				                    }
+	                   			}
                    			}
                    		}
                     	
@@ -393,7 +405,7 @@ public class MapTranslator {
     }
 
     /**
-     * Returns PRISM encoding for robot module tactics (Sensing)
+     * Returns PRISM encoding for robot module tactics
      * @return
      */
     public static String generateReconfTacticCommands(){
@@ -454,7 +466,9 @@ public class MapTranslator {
             // Robot movement tactics
             for (int i=0;i<m_map.getArcs().size();i++){
                 EnvMapArc a = m_map.getArcs().get(i);
-                if (a.isEnabled()) {
+                String action_name = a.getSource()+MOVE_CMD_STR+a.getTarget();
+
+                if (a.isEnabled() && m_generated_movecommands.contains(action_name)) {
                     double t_distance = a.getDistance (); //  float(self.get_transition_attribute_value(t,"distance"))
                     HashMap<String,String> time_deltas = new HashMap<String, String>();
                     for (Map.Entry<String, Configuration> c: m_cp.getConfigurations().entrySet()){
@@ -465,15 +479,6 @@ public class MapTranslator {
                     		time_deltas.put(c.getKey(),getDeltaTime(c.getValue(), t_distance));
                     }
                     
-                    //String t_time_half_speed=f.format(SpeedPredictor.moveForwardTimeSimple(t_distance, ROBOT_HALF_SPEED_CONST));
-                    //String t_time_full_speed=f.format(SpeedPredictor.moveForwardTimeSimple(t_distance, ROBOT_FULL_SPEED_CONST));
-                    //String t_time_dr_speed=f.format(SpeedPredictor.moveForwardTimeSimple(t_distance, ROBOT_DR_SPEED_CONST));
-
-                    
-              // 
-                     String action_name = a.getSource()+MOVE_CMD_STR+a.getTarget();
-                //    String drs = ROBOT_VAR +" = "+ROBOT_LO_CONST+" ? "+ t_time_dr_speed + " + " + ROTATION_TIME_FORMULA_PREFIX+action_name + " : " ;
-                //    buf+="\t["+action_name+"] true :" + drs + ROBOT_SPEED_VAR+"="+ROBOT_HALF_SPEED_CONST+"? "+t_time_half_speed+" + "+ROTATION_TIME_FORMULA_PREFIX+action_name+" : "+t_time_full_speed+" + "+ROTATION_TIME_FORMULA_PREFIX + action_name+";\n";
                      buf+="\t["+action_name+"] true :";
                      int counter=0;
                      for (Map.Entry<String, String> d: time_deltas.entrySet()){
@@ -487,17 +492,18 @@ public class MapTranslator {
             }
             
             // Robot reconfiguration tactics
-            for (Map.Entry<String, Configuration> c: m_cp.getLegalTargetConfigurations().entrySet()){
-      		  buf+= "\t [t_set_"+c.getValue().getId()+"]  true :";
-      		  int counter=0;
-      		  for (Map.Entry<String, Configuration> cs: m_cp.getLegalTargetConfigurations().entrySet()){
-      			  if (counter>0) buf += " : ";
-      			  buf+= ROBOT_CONF_VAR + "=" + cs.getKey() + " ? "+  m_cp.getReconfigurationTime(cs.getValue().getId(),c.getValue().getId());  
-      			  counter++;
-      		  }
-      		  buf += ": 0;\n";  
-      	  }
-            
+            if (!inhibitTactics){
+	            for (Map.Entry<String, Configuration> c: m_cp.getLegalTargetConfigurations().entrySet()){
+	      		  buf+= "\t [t_set_"+c.getValue().getId()+"]  true :";
+	      		  int counter=0;
+	      		  for (Map.Entry<String, Configuration> cs: m_cp.getLegalTargetConfigurations().entrySet()){
+	      			  if (counter>0) buf += " : ";
+	      			  buf+= ROBOT_CONF_VAR + "=" + cs.getKey() + " ? "+  m_cp.getReconfigurationTime(cs.getValue().getId(),c.getValue().getId());  
+	      			  counter++;
+	      		  }
+	      		  buf += ": 0;\n";  
+	      	  }
+            }
             buf+="endrewards\n\n";
             return buf;
         }
@@ -833,6 +839,7 @@ public class MapTranslator {
 //        buf+=generateDistanceReward()+"\n";    // Used in Phase 1 only
         buf+=generateEnergyReward()+"\n";
         buf+="// --- End of generated code ---\n";
+        m_generated_movecommands.clear(); // Housekeeping
         return buf;
     }
 

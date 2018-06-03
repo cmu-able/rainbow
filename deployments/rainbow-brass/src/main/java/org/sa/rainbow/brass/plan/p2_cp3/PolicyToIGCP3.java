@@ -279,10 +279,19 @@ public class PolicyToIGCP3 {
 
 	public String translate(ConfigurationProvider cp, String currentConfStr) {
 		ArrayList<String> plan = m_prismPolicy.getPlan(cp, currentConfStr);
-		return tranlsatePlan(plan);
+		return translatePlan(plan);
 	}
 
-	private String tranlsatePlan(ArrayList<String> plan) {
+	public String translate(ConfigurationProvider cp, String currentConfStr, boolean includeTactics) {
+		ArrayList<String> plan = m_prismPolicy.getPlan(cp, currentConfStr);
+		return translatePlan(plan, includeTactics);
+	}
+	
+	private String translatePlan(ArrayList<String> plan){
+		return translatePlan(plan, true);
+	}
+	
+	protected String translatePlan(ArrayList<String> plan, boolean includeTactics) {
 		ArrayList<String> cmds = new ArrayList<String>();
 		String cmd = "";
 
@@ -293,7 +302,10 @@ public class PolicyToIGCP3 {
 
 			String[] elements = action.split("_"); // Break action plan name into chunks
 			if (action.endsWith("0_enable") || action.endsWith("0_disable")) { // If action is a tactic
-				cmd = build_cmd_tactic(action);
+				if (includeTactics)
+					cmd = build_cmd_tactic(action);
+				else 
+					cmd = "";
 			} else { // Other actions (robot movement for the time being)
 				synchronized (m_map) {
 					String destination = elements[2];
@@ -495,22 +507,22 @@ public class PolicyToIGCP3 {
 					System.out.println(
 							"Src:" + String.valueOf(node_src.getId()) + " Tgt:" + String.valueOf(node_tgt.getId()));
 										
-		            DecisionEngineCP3.generateCandidates(node_src.getLabel(), node_tgt.getLabel());
-		        	System.out.println("Scoring candidates...");
-		            DecisionEngineCP3.scoreCandidates(map, MapTranslator.ROBOT_BATTERY_RANGE_MAX, 1);
+		            DecisionEngineCP3.generateCandidates(node_src.getLabel(), node_tgt.getLabel(), true); // The last param inhibits reconfiguration tactics
+		        	System.out.println("Scoring candidates (from configuration: "+theArgs.configuration+", index: "+cs.getConfigurationIndex(theArgs.configuration)+")...");
+		            DecisionEngineCP3.scoreCandidates(map, MapTranslator.ROBOT_BATTERY_RANGE_MAX, 1, cs.getConfigurationIndex(theArgs.configuration));
 		            System.out.println(String.valueOf(DecisionEngineCP3.m_scoreboard));	
 		            pp = new PrismPolicy(DecisionEngineCP3.selectPolicy());
 		            pp.readPolicy();  
 		            String plan = pp.getPlan(cs, currentConfStr).toString();
 		            System.out.println("Selected Plan: "+plan);
 		            PolicyToIGCP3 translator = new PolicyToIGCP3(pp, map);
-		            System.out.println (translator.translate (cs, currentConfStr));
+		            System.out.println (translator.translate (cs, currentConfStr, false));
 		            
 		            Long ttc = new Double(DecisionEngineCP3.getSelectedPolicyTime()).longValue(); 
 					double w = getInitialRotation(node_src, pp, map);
 					
 					exportIGTranslation(out_dir_ig + "/" + node_src.getLabel() + "_to_" + node_tgt.getLabel() + ".ig",
-							translator.translate(cs, currentConfStr));
+							translator.translate(cs, currentConfStr, false));
 					String wJson = generateJSONWayPointList(pp, String.valueOf(ttc), w);
 					System.out.println(wJson);
 					exportIGTranslation(out_dir_wp + "/" + node_src.getLabel() + "_to_" + node_tgt.getLabel() + ".json",

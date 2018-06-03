@@ -455,6 +455,8 @@ public class EnvMap {
 
 			JSONArray hitrates = (JSONArray) jsonObject.get("hitrate");
             JSONArray ttimes = (JSONArray) jsonObject.get("time");
+            JSONArray successrates = (JSONArray) jsonObject.get("successrates");
+
 			
 			JSONArray neighbors = (JSONArray) jsonNode.get("connected-to");
 			for (Object neighbor : neighbors) {
@@ -486,12 +488,19 @@ public class EnvMap {
                 	}
                 }
                 
+                if (!Objects.equal(null, successrates)){
+                	HashMap <String, Double> srDictionary = retrieveSuccessRates(successrates, newarc);
+                	for (Map.Entry<String, Double> e: srDictionary.entrySet()){
+                		newarc.addSuccessRate(e.getKey(), e.getValue());
+                		//System.out.println("Added Time: "+e.getKey()+" "+e.getValue());
+                	}
+                }
+                
                 addArc (newarc);
                 //addArc(id, ns, distance, true);
                 System.out.println("Added arc ["+id+","+ns+"] (distance="+ distance +")" );
 					
 			}
-
 		}
 	}
 
@@ -518,6 +527,31 @@ public class EnvMap {
     	 }
     	return res;
     }
+    
+    public HashMap<String, Double> retrieveSuccessRates(JSONArray successrates, EnvMapArc a){
+    	HashMap<String, Double> res = new HashMap<String, Double>();
+    	for (Object successrate: successrates){
+    		JSONObject jsonSuccessRate = (JSONObject) successrate;
+         	
+         	String srcnode = (String) jsonSuccessRate.get("from");
+     		String tgtnode = (String) jsonSuccessRate.get("to");
+     		
+     		if (Objects.equal(srcnode, a.getSource()) && Objects.equal(tgtnode, a.getTarget())){
+     			
+     			for (Object k: jsonSuccessRate.keySet()){
+             		if (!Objects.equal(k.toString(), "from") && !Objects.equal(k.toString(), "to") && !Objects.equal(k.toString(), "prob")){
+                 		//System.out.println(k.toString());
+             			Double sr = ((Number)((JSONObject)jsonSuccessRate.get(k.toString())).get("successrate")).doubleValue();
+             			//System.out.println(hr.toString());
+             			res.put(k.toString(), sr);
+     				}
+             	}    	
+   	    	 return res;
+     		}
+    	 }
+    	return res;
+    }
+
     
     
     public HashMap<String, Double> retrieveTimes(JSONArray times, EnvMapArc a){

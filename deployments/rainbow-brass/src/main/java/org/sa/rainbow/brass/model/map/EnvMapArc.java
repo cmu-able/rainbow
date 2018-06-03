@@ -15,7 +15,7 @@ public class EnvMapArc {
 
 	public HashMap <String, Double> m_times = new HashMap<String, Double>();
     public HashMap <String, Double> m_hitrates = new HashMap<String, Double>(); // Times and hitrates. Keys are configuration identifiers
-    
+    public HashMap <String, Double> m_successrates = new HashMap<String, Double>(); // Probability of successfully traversing the edge, per configuration
 
 	public EnvMapArc(String source, String target, double distance, boolean enabled) {
 		super();
@@ -109,5 +109,27 @@ public class EnvMapArc {
     		}
     	return false;
     }
-	
+
+    public void addSuccessRate(String cid, Double value){
+    	m_successrates.put(cid, value);
+    }    
+
+    public Double getSuccessRate(String cid){
+    	if (Objects.equal(m_successrates.get(cid.toString()), null))
+    		return 0.0; // What should be the default value for this?
+    	return (m_successrates.get(cid.toString()));
+    }
+ 
+    public Double getMaxSuccessRate(){
+    	Double res=0.0;
+    	for (Map.Entry<String, Double> e: m_successrates.entrySet()){
+			if (e.getValue()>res)
+				res = e.getValue();
+		}
+	return res;
+    }
+    
+    public boolean existsSuccessRateAboveThreshold(Double t){
+    	return (getMaxSuccessRate()>t);
+    }
 }

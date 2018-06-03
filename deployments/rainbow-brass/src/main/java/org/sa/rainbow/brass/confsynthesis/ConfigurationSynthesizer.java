@@ -79,6 +79,17 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 		this(PropertiesConfigurationSynthesizer.DEFAULT);
 	}
 
+	public String getConfigurationIndex(String confId){
+		int c = 0;
+		for (String k: m_configurations.keySet()){
+			if (Objects.equals(k, confId)){
+				return String.valueOf(c);
+			}
+			c++;
+		}
+		return "-1"; // Not found
+	}
+	
 	public ConfigurationSynthesizer(Properties props) {
 		m_myConstraintModel = props.getProperty(PropertiesConfigurationSynthesizer.CONSTRAINTMODEL_PROPKEY);
 		m_myBaseModel = props.getProperty(PropertiesConfigurationSynthesizer.BASEMODEL_PROPKEY);

@@ -149,7 +149,7 @@ public class DecisionEngineCP3 extends DecisionEngine {
         	System.out.println("Generating candidates for l1-l4...");
             generateCandidates("l50", "l1");
         	System.out.println("Scoring candidates...");
-            scoreCandidates(dummyMap, i, 1);
+            scoreCandidates(dummyMap, i, 1, "-1");
             System.out.println(String.valueOf(m_scoreboard));	
             pp = new PrismPolicy(selectPolicy());
             pp.readPolicy();  

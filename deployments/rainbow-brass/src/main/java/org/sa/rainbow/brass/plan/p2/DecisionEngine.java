@@ -108,7 +108,12 @@ public class DecisionEngine {
      *            String robot Heading (needs to be converted to an String encoding an int from MissionState.Heading)
      * @throws Exception
      */
+    
     public static void scoreCandidates (EnvMap map, long batteryLevel, int robotHeading) throws Exception {
+    	scoreCandidates (map, batteryLevel, robotHeading, "-1");    
+    }
+    
+    public static void scoreCandidates (EnvMap map, long batteryLevel, int robotHeading, String fromConfig) throws Exception {
     	try{
             m_scoreboard.clear();
     	}
@@ -120,7 +125,7 @@ public class DecisionEngine {
 			int destinationID = map.getNodeId(m_destination);
 			if (originID == -1) throw new IllegalArgumentException(m_origin + " does not appear to be in the map");
 			if (destinationID == -1) throw new IllegalArgumentException(m_destination + " does not appear in the map");
-			String m_consts = MapTranslator.INITIAL_ROBOT_CONF_CONST+"=-1,"+MapTranslator.INITIAL_ROBOT_LOCATION_CONST+"="+String.valueOf(originID) +","+ MapTranslator.TARGET_ROBOT_LOCATION_CONST 
+			String m_consts = MapTranslator.INITIAL_ROBOT_CONF_CONST+"="+fromConfig+","+MapTranslator.INITIAL_ROBOT_LOCATION_CONST+"="+String.valueOf(originID) +","+ MapTranslator.TARGET_ROBOT_LOCATION_CONST 
                     + "="+String.valueOf(destinationID)+ "," + MapTranslator.INITIAL_ROBOT_BATTERY_CONST+"="+batteryLevel+","+MapTranslator.INITIAL_ROBOT_HEADING_CONST+"="+robotHeading;
 
             log(m_consts);
