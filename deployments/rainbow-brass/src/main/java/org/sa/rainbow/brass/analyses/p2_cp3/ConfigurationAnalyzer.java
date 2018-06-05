@@ -1,6 +1,7 @@
 package org.sa.rainbow.brass.analyses.p2_cp3;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -14,7 +15,6 @@ import org.acmestudio.acme.environment.error.AcmeError;
 import org.acmestudio.acme.rule.node.feedback.ExpressionEvaluationError;
 import org.acmestudio.acme.type.verification.NodeScopeLookup;
 import org.acmestudio.acme.type.verification.RuleTypeChecker;
-import org.apache.log4j.Logger;
 import org.sa.rainbow.brass.model.instructions.IInstruction;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
 import org.sa.rainbow.brass.model.instructions.KillNodesInstruction;
@@ -126,7 +126,7 @@ public class ConfigurationAnalyzer extends P2CP3Analyzer {
 		EnumSet<Sensors> detectedSensors = rs.getSensors();
 		Collection<String> activeComponents = tb.getActiveComponents();
 		
-		configurationOK = detectedSensors.containsAll(sensorsTurnedOn) &&
+		configurationOK = !Collections.disjoint(detectedSensors, EnumSet.of(Sensors.KINECT, Sensors.LIDAR, Sensors.CAMERA)) && detectedSensors.containsAll(sensorsTurnedOn) &&
 				activeComponents.containsAll(nodesTurnedOn);
 		if (configurationOK) {
 			EnumSet<Sensors> clone = detectedSensors.clone();

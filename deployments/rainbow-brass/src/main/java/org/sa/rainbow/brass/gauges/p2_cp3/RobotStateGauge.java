@@ -129,7 +129,7 @@ public class RobotStateGauge extends RegularPatternGauge {
 				if (mode == 2) {
 					IRainbowOperation cameraOp = m_commands.get("sensor");
 					Map<String, String> cameraMap = new HashMap<>();
-					cameraMap.put(cameraOp.getParameters()[0], Sensors.BACK_CAMERA.name());
+					cameraMap.put(cameraOp.getParameters()[0], Sensors.CAMERA.name());
 					cameraMap.put(cameraOp.getParameters()[1], Boolean.toString(true));
 
 					OperationRepresentation kinectOp = new OperationRepresentation(cameraOp);
@@ -143,7 +143,7 @@ public class RobotStateGauge extends RegularPatternGauge {
 				} else if (mode == 1) {
 					IRainbowOperation cameraOp = m_commands.get("sensor");
 					Map<String, String> cameraMap = new HashMap<>();
-					cameraMap.put(cameraOp.getParameters()[0], Sensors.BACK_CAMERA.name());
+					cameraMap.put(cameraOp.getParameters()[0], Sensors.CAMERA.name());
 					cameraMap.put(cameraOp.getParameters()[1], Boolean.toString(false));
 
 					OperationRepresentation kinectOp = new OperationRepresentation(cameraOp);
@@ -161,13 +161,13 @@ public class RobotStateGauge extends RegularPatternGauge {
 						if (m_models.getRobotStateModel().getModelInstance().getSensors().contains(Sensors.KINECT)) {
 							fom.put(fop.getParameters()[0], Sensors.KINECT.name());
 						} else {
-							fom.put(fop.getParameters()[0], Sensors.BACK_CAMERA.name());
+							fom.put(fop.getParameters()[0], Sensors.CAMERA.name());
 						}
 						issueCommand(fop, fom);
 					} else {
 						IRainbowOperation cameraOp = m_commands.get("sensor");
 						Map<String, String> cameraMap = new HashMap<>();
-						cameraMap.put(cameraOp.getParameters()[0], Sensors.BACK_CAMERA.name());
+						cameraMap.put(cameraOp.getParameters()[0], Sensors.CAMERA.name());
 						cameraMap.put(cameraOp.getParameters()[1], Boolean.toString(false));
 
 						OperationRepresentation kinectOp = new OperationRepresentation(cameraOp);
