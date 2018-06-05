@@ -325,7 +325,7 @@ public class PolicyToIGCP3 {
 					}
 				}
 			}
-			if (!Objects.equals(cmd, "")) {
+			if (!Objects.equals(cmd, "") && !cmds.contains(cmd)) {
 				cmds.add(cmd);
 				++cmd_id;
 				if (m_insert_additional_command) {
