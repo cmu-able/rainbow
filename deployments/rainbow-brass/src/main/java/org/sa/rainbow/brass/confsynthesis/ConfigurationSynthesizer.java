@@ -44,24 +44,24 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 	private static final HashMap<String, String> m_configuration_dictionary;
 	static {
 		m_configuration_dictionary = new HashMap<String, String>();
-		m_configuration_dictionary.put("sol_0", "amcl-kinect");
-		m_configuration_dictionary.put("sol_1", "aruco");
-		m_configuration_dictionary.put("sol_2", "amcl-kinect");
-		m_configuration_dictionary.put("sol_3", "mrpt-lidar");
-		m_configuration_dictionary.put("sol_4", "aruco");
-		m_configuration_dictionary.put("sol_5", "aruco");
-		m_configuration_dictionary.put("sol_6", "amcl-lidar");
-		m_configuration_dictionary.put("sol_7", "mrpt-kinect");
-		m_configuration_dictionary.put("sol_8", "aruco");
-		m_configuration_dictionary.put("sol_9", "aruco");
-		m_configuration_dictionary.put("sol_10", "mrpt-lidar");
-		m_configuration_dictionary.put("sol_11", "amcl-lidar");
-		m_configuration_dictionary.put("sol_12", "aruco");
-		m_configuration_dictionary.put("sol_13", "mrpt-kinect");
-		m_configuration_dictionary.put("sol_14", "mrpt-kinect");
-		m_configuration_dictionary.put("sol_15", "mrpt-lidar");
-		m_configuration_dictionary.put("sol_16", "amcl-lidar");
-		m_configuration_dictionary.put("sol_17", "amcl-kinect");
+		m_configuration_dictionary.put("sol_0", "amcl-kinect-35");
+		m_configuration_dictionary.put("sol_1", "aruco-headlamp-25");
+		m_configuration_dictionary.put("sol_2", "amcl-kinect-68");
+		m_configuration_dictionary.put("sol_3", "mrpt-lidar-35");
+		m_configuration_dictionary.put("sol_4", "aruco-35");
+		m_configuration_dictionary.put("sol_5", "aruco-headlamp-35");
+		m_configuration_dictionary.put("sol_6", "amcl-lidar-35");
+		m_configuration_dictionary.put("sol_7", "mrpt-kinect-35");
+		m_configuration_dictionary.put("sol_8", "aruco-25");
+		m_configuration_dictionary.put("sol_9", "aruco-headlamp-68");
+		m_configuration_dictionary.put("sol_10", "mrpt-lidar-68");
+		m_configuration_dictionary.put("sol_11", "amcl-lidar-68");
+		m_configuration_dictionary.put("sol_12", "aruco-68");
+		m_configuration_dictionary.put("sol_13", "mrpt-kinect-68");
+		m_configuration_dictionary.put("sol_14", "mrpt-kinect-25");
+		m_configuration_dictionary.put("sol_15", "mrpt-lidar-25");
+		m_configuration_dictionary.put("sol_16", "amcl-lidar-25");
+		m_configuration_dictionary.put("sol_17", "amcl-kinect-25");
 	}
 
 	private HashMap<String, ConstantDefinition> m_constant_definitions = new HashMap<String, ConstantDefinition>();

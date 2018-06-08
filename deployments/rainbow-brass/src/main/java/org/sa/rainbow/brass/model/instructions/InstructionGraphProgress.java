@@ -79,6 +79,7 @@ public class InstructionGraphProgress {
                     //TODO
                     // Other ignorable instructions
                     inst2 = null;
+                    System.out.print("IGERROR: " + label + ":" + instruction + ":" + nextLabel);
                     
 //                    inst2 = new MoveAbsHInstruction(label, instruction, nextLabel);
                 }
@@ -86,6 +87,9 @@ public class InstructionGraphProgress {
                 if (inst2 != null) {
                     instructions.add(inst2);
                 }
+            }
+            else {
+            	System.out.println("IGERROR: " + i);
             }
         }
         return instructions;
@@ -272,7 +276,12 @@ public class InstructionGraphProgress {
 
     public static void main (String[] args) {
         InstructionGraphProgress ip = parseFromString (new ModelReference ("test", "test"),
-                " P(V(1, do KillNodes(%laserscanNodelet%) then 2), V(2, do SetSensor (%KINECT%, %off%) then 3):: V(3, do SetSensor (%CAMERA%, %on%) then 4):: V(4, do SetSensor (%HEADLAMP%, %on%) then 5):: V(5, do StartNodes(%aruco%) then 6):: V(6, do MoveAbsH(-6.22, 0.00, 0.68, 1.5708) then 7):: V(7, do MoveAbsH(-6.22, 10.27, 0.68, 1.5708) then 8):: V(8, end):: nil)");
+                "[P(V(1, do SetReconfiguring(1) then 2),V(2, do KillNodes(%mapServer%)\\\r\n" + 
+                "  \\ then 3)::V(3, do KillNodes(%laserscanNodelet%) then 4)::V(4, do KillNodes(%amcl%)\\\r\n" + 
+                "  \\ then 5)::V(5, do SetSensor (%CAMERA%, %on%) then 6)::V(6, do StartNodes(%aruco%)\\\r\n" + 
+                "  \\ then 7)::V(7, do StartNodes(%mapServerObs%) then 8)::V(8, do SetReconfiguring(0)\\\r\n" + 
+                "  \\ then 9)::V(9, do MoveAbsH(-6.22, 0.00, 0.25, 1.5708) then 10)::V(10, do MoveAbsH(-6.22,\\\r\n" + 
+                "  \\ 10.27, 0.25, 1.5708) then 11)::V(11, end)::nil)");
         IInstruction instruction = ip.getInstruction ("5");
         System.out.println ();
     }
