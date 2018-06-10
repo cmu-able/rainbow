@@ -15,7 +15,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.sa.rainbow.brass.model.map.EnvMap;
+import org.sa.rainbow.brass.model.map.EnvMapArc;
 import org.sa.rainbow.brass.model.map.EnvMapNode;
+import org.sa.rainbow.brass.model.map.Phase2MapPropertyKeys;
 import org.sa.rainbow.brass.plan.p2.MapTranslator;
 import org.sa.rainbow.brass.PropertiesConnector;
 import org.sa.rainbow.brass.adaptation.PolicyToIG;
@@ -451,7 +453,7 @@ public class PolicyToIGCP3 {
 
 		Arguments theArgs = new Arguments();
 		parser.parseArgs(args, theArgs);
-		Properties props = new Properties(PropertiesConnector.DEFAULT);
+		Properties props = new Properties();
 		if (theArgs.properties != null) {
 			try {
 				props.load(new FileInputStream(new File(theArgs.properties)));
@@ -459,6 +461,9 @@ public class PolicyToIGCP3 {
 				System.err.println("Error loading properties file: " + theArgs.properties);
 				System.exit(1);
 			}
+		}
+		else {
+			props =PropertiesConnector.DEFAULT;
 		}
 		props.setProperty(PropertiesConnector.MAP_PROPKEY, theArgs.map);
 
@@ -485,7 +490,7 @@ public class PolicyToIGCP3 {
 		EnvMap map = new EnvMap(null, props);
 		DecisionEngineCP3.setMap(map);
 		
-		ConfigurationSynthesizer cs = new ConfigurationSynthesizer();
+		ConfigurationSynthesizer cs = new ConfigurationSynthesizer(props);
         System.out.println("Populating configuration list..");
         cs.populate();
         System.out.println("Setting configuration provider...");
@@ -503,7 +508,7 @@ public class PolicyToIGCP3 {
 				if (node_src.getId() != node_tgt.getId()) {
 					if (theArgs.waypoint != null && !Objects.equals(node_tgt.getLabel(),theArgs.waypoint) && !Objects.equals(node_src.getLabel(),theArgs.waypoint))
 						continue;
-
+					try {
 					System.out.println(
 							"Src:" + String.valueOf(node_src.getId()) + " Tgt:" + String.valueOf(node_tgt.getId()));
 										
@@ -513,11 +518,12 @@ public class PolicyToIGCP3 {
 		            System.out.println(String.valueOf(DecisionEngineCP3.m_scoreboard));	
 		            pp = new PrismPolicy(DecisionEngineCP3.selectPolicy());
 		            pp.readPolicy();  
-		            String plan = pp.getPlan(cs, currentConfStr).toString();
+		            ArrayList<String> planArray = pp.getPlan(cs, currentConfStr);
+					String plan = planArray.toString();
 		            System.out.println("Selected Plan: "+plan);
 		            PolicyToIGCP3 translator = new PolicyToIGCP3(pp, map);
 		            System.out.println (translator.translate (cs, currentConfStr, false));
-		            
+//		            long ttc = esitmateTime(map, planArray, cs.translateId(theArgs.configuration));
 		            Long ttc = new Double(DecisionEngineCP3.getSelectedPolicyTime()).longValue(); 
 					double w = getInitialRotation(node_src, pp, map);
 					
@@ -527,10 +533,30 @@ public class PolicyToIGCP3 {
 					System.out.println(wJson);
 					exportIGTranslation(out_dir_wp + "/" + node_src.getLabel() + "_to_" + node_tgt.getLabel() + ".json",
 							wJson);
+					}
+					catch (Throwable t) {
+						System.out.println("Failed to generate path from " + node_src.getId() + "->" + node_tgt.getId());
+					}
 
 				}
 			}
 		}
+	}
+
+	private static long esitmateTime(EnvMap map, ArrayList<String> planArray, String translateId) {
+		Pattern pattern = Pattern.compile("(l.*)_to_(l.*)");
+		Double time = 0.0;
+		for (String step : planArray) {
+			Matcher matcher = pattern.matcher(step);
+			if (matcher.matches()) {
+				EnvMapArc arc = map.getArc(matcher.group(1), matcher.group(2));
+				if (arc == null) {
+					throw new NullPointerException("Null arc shouldn't happen");
+				}
+				time += arc.getTime(translateId);
+			}
+		}
+		return Math.round(time);
 	}
 	
 	
