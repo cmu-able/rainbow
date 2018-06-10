@@ -115,7 +115,7 @@ public class EnvMapArc {
     }    
 
     public Double getSuccessRate(String cid){
-    	if (Objects.equal(m_successrates.get(cid.toString()), null))
+    	if (Objects.equal(m_successrates.get(cid.toString()), null))		
     		return 0.0; // What should be the default value for this?
     	return (m_successrates.get(cid.toString()));
     }

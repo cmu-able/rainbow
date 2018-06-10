@@ -96,6 +96,10 @@ public class EnvMap {
 
 		return null;
 	}
+	
+	public synchronized EnvMapArc getArc (String wp1, String wp2) {
+		return m_arcs.get(wp1+wp2);
+	}
 
 	public synchronized int getNodeCount() {
 		return m_nodes.size();
@@ -455,7 +459,7 @@ public class EnvMap {
 
 			JSONArray hitrates = (JSONArray) jsonObject.get("hitrate");
             JSONArray ttimes = (JSONArray) jsonObject.get("time");
-            JSONArray successrates = (JSONArray) jsonObject.get("successrates");
+            JSONArray successrates = (JSONArray) jsonObject.get("successrate");
 
 			
 			JSONArray neighbors = (JSONArray) jsonNode.get("connected-to");
@@ -511,8 +515,8 @@ public class EnvMap {
          	
          	String srcnode = (String) jsonHitrate.get("from");
      		String tgtnode = (String) jsonHitrate.get("to");
-     		
-     		if (Objects.equal(srcnode, a.getSource()) && Objects.equal(tgtnode, a.getTarget())){
+     		// Arc data is bidirection, so look for data in both directions
+     		if ((Objects.equal(srcnode, a.getSource()) && Objects.equal(tgtnode, a.getTarget())) || (Objects.equal(srcnode,  a.getTarget()) && Objects.equal(tgtnode,  a.getSource()))){
      			
      			for (Object k: jsonHitrate.keySet()){
              		if (!Objects.equal(k.toString(), "from") && !Objects.equal(k.toString(), "to") && !Objects.equal(k.toString(), "prob")){
@@ -525,6 +529,7 @@ public class EnvMap {
    	    	 return res;
      		}
     	 }
+    	System.out.print("Warning: Do not have hitrate data for arc: " + a.getSource() + "->" + a.getTarget());
     	return res;
     }
     
@@ -536,7 +541,7 @@ public class EnvMap {
          	String srcnode = (String) jsonSuccessRate.get("from");
      		String tgtnode = (String) jsonSuccessRate.get("to");
      		
-     		if (Objects.equal(srcnode, a.getSource()) && Objects.equal(tgtnode, a.getTarget())){
+     		if ((Objects.equal(srcnode, a.getSource()) && Objects.equal(tgtnode, a.getTarget()))|| (Objects.equal(srcnode,  a.getTarget()) && Objects.equal(tgtnode,  a.getSource()))){
      			
      			for (Object k: jsonSuccessRate.keySet()){
              		if (!Objects.equal(k.toString(), "from") && !Objects.equal(k.toString(), "to") && !Objects.equal(k.toString(), "prob")){
@@ -549,6 +554,8 @@ public class EnvMap {
    	    	 return res;
      		}
     	 }
+    	System.out.print("Warning: Do not have successrate data for arc: " + a.getSource() + "->" + a.getTarget());
+
     	return res;
     }
 
@@ -562,7 +569,7 @@ public class EnvMap {
          	String srcnode = (String) jsonTime.get("from");
      		String tgtnode = (String) jsonTime.get("to");
      		
-     		if (Objects.equal(srcnode, a.getSource()) && Objects.equal(tgtnode, a.getTarget())){
+     		if ((Objects.equal(srcnode, a.getSource()) && Objects.equal(tgtnode, a.getTarget()))|| (Objects.equal(srcnode,  a.getTarget()) && Objects.equal(tgtnode,  a.getSource()))){
      			
      			for (Object k: jsonTime.keySet()){
              		if (!Objects.equal(k.toString(), "from") && !Objects.equal(k.toString(), "to") && !Objects.equal(k.toString(), "stdev") && !Objects.equal(k.toString(), "mean")){
@@ -575,6 +582,8 @@ public class EnvMap {
    	    	 return res;
      		}
     	 }
+    	System.out.print("Warning: Do not have timing date for arc: " + a.getSource() + "->" + a.getTarget());
+
     	return res;
     }
     
