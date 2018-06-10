@@ -26,7 +26,7 @@ public class MissionStateGauge extends RegularPatternGauge {
     protected static final String DEADLINE          = "Deadline";
     protected static final String RECONFIGURING = "Reconfig";
 
-    protected static final String LOC_PATTERN         = "topic: /odom/pose/pose.*position.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z.*\\norientation.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z: (.*)\\n.*w: (.*)(.*)"; //"topic: /o/pose/pose.*position.*\\\\n.*x: (.*)\\\\n.*y: (.*)\\\\n.*z.*\\\\norientation.*\\\\n.*x: (.*)\\\\n.*y: (.*)\\\\n.*z: (.*)\\\\n.*w: (.*)(.*)"; //"topic: /tf/transforms\\[0\\]/transform.*\\ntranslation.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z.*\\nrotation.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z: (.*)\\n.*w: (.*)(.*)";
+    protected static final String LOC_PATTERN         = "topic: /gazebo/model_states/pose.*position.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z.*\\norientation.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z: (.*)\\n.*w: (.*)(.*)"; //"topic: /o/pose/pose.*position.*\\\\n.*x: (.*)\\\\n.*y: (.*)\\\\n.*z.*\\\\norientation.*\\\\n.*x: (.*)\\\\n.*y: (.*)\\\\n.*z: (.*)\\\\n.*w: (.*)(.*)"; //"topic: /tf/transforms\\[0\\]/transform.*\\ntranslation.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z.*\\nrotation.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z: (.*)\\n.*w: (.*)(.*)";
     protected static final String DEADLINE_PATTERN    = "topic: /notify_user.*\\n.*new_deadline: (.*)\\n.*user(.*)";
     protected static final String RECONFIG_PATTERN    = "topic: /ig_interpreter/reconfiguring.*\n.*data:(.*)";
     protected static final String TF_LOCATION_PATTERN = ".*At time.*- Translation: \\[(.*), (.*), .*\\].*Quater.*\\(radian\\) \\[.*,.*, (.*)\\].*";
