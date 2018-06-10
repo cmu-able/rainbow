@@ -49,11 +49,13 @@ public class DarknessAnalyzer extends P2CP3Analyzer implements IRainbowModelChan
 		CP3RobotState rs = getModels().getRobotStateModel().getModelInstance();
 		try {
 			if (rs.getIllumination() < ILLUMINATION_THRESHOLD && getModels().getTurtlebotModel().getActiveComponents().contains("marker_pose_publisher") && !m_darkBefore) {
+				log("DarknessAnalyzer reporting TOO_DARK");
 				SetModelProblemCmd cmd = getModels().getRainbowStateModel().getCommandFactory()
 						.setModelProblem(CP3ModelState.TOO_DARK);
 				m_darkBefore = true;
 				m_modelUSPort.updateModel(cmd);
 			} else if (m_darkBefore && (rs.getIllumination() >= ILLUMINATION_THRESHOLD || !getModels().getTurtlebotModel().getActiveComponents().contains("marker_pose_publisher"))) {
+				log("DarknessAnalyzer removing TOO_DARK");
 				RemoveModelProblemCmd cmd = getModels().getRainbowStateModel().getCommandFactory()
 						.removeModelProblem(CP3ModelState.TOO_DARK);
 				m_darkBefore = false;
