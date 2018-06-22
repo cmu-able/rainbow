@@ -53,7 +53,7 @@ public class ReconfSynthTest extends ReconfSynth {
 	
 	public EnumSet<Sensors> getFailedSensors(){
 		EnumSet<Sensors> failed = EnumSet.allOf(Sensors.class);
-		failed.remove(Sensors.BACK_CAMERA);
+		failed.remove(Sensors.CAMERA);
 		failed.remove(Sensors.LIDAR);
 		failed.remove(Sensors.HEADLAMP);
 		return failed;
@@ -123,7 +123,7 @@ public class ReconfSynthTest extends ReconfSynth {
 						System.out.println("Illegal state exception determining if Sensor is On.");
 					}
 					break;
-				case BACK_CAMERA:
+				case CAMERA:
 					try{
 						sensorOn = isBackCameraOn();
 					} catch(Exception e){

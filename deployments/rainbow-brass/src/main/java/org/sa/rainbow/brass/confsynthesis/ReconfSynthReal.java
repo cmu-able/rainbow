@@ -55,9 +55,9 @@ public class ReconfSynthReal extends ReconfSynth {
 						logError("Illegal state exception determining if Sensor is On.");
 					}
 					break;
-				case BACK_CAMERA:
+				case CAMERA:
 					try{
-						sensorOn = m_rb.isBackCameraOn();
+						sensorOn = m_rb.isCameraOn();
 					} catch(Exception e){
 						logError("Illegal state exception determining if Sensor is On.");
 					}

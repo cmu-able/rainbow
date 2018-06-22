@@ -32,10 +32,10 @@ public class SetSensorInstruction implements IInstruction {
 			String e = m.group(2);
 			s= extractContents(s);
 			e= extractContents(e);
-			m_sensor = Sensors.valueOf(m.group(1));
+			m_sensor = Sensors.valueOf(s);
 			if ("on".equalsIgnoreCase(e)) m_enablement=true;
 			else if ("off".equalsIgnoreCase(e)) m_enablement=false;
-			else m_enablement = Boolean.getBoolean(m.group(2));
+			else m_enablement = Boolean.getBoolean(e);
 		}
 	}
 

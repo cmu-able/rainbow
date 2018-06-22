@@ -258,6 +258,9 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 			PrismPolicy pp = new PrismPolicy(DecisionEngineCP3.selectPolicy());
 			pp.readPolicy();
 			ArrayList<String> planArray = pp.getPlan(m_configurationSynthesizer, confInitString);
+			if (planArray.isEmpty()) {
+				throw new RainbowException("Failed to find a plan for " + confInitString);
+			}
 			String plan = planArray.toString();
 			m_reportingPort.info(getComponentType(), "Planner chooses the plan " + plan, LOGGER);
 			ArrayList<String> planToTA = new ArrayList<String>(planArray.size());

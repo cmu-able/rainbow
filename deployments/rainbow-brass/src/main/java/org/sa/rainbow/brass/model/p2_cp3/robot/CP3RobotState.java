@@ -9,7 +9,7 @@ import org.sa.rainbow.core.models.ModelReference;
 
 public class CP3RobotState extends RobotState {
 
-	public static enum Sensors {KINECT, BACK_CAMERA, LIDAR, HEADLAMP}
+	public static enum Sensors {KINECT, CAMERA, LIDAR, HEADLAMP}
 
 
 	Deque<TimeStamped<EnumSet<Sensors>>> m_sensorHistory = new ArrayDeque<>();
@@ -77,6 +77,7 @@ public class CP3RobotState extends RobotState {
 				m_sensorFailedHistory.push(new TimeStamped<EnumSet<Sensors>>(nextState));
 			}
 		}
+		setSensor(sensor, false);
 	}
 
 	public EnumSet<Sensors> getAvailableSensors() throws IllegalStateException {
@@ -115,8 +116,8 @@ public class CP3RobotState extends RobotState {
 	}
 
 
-	public boolean isBackCameraOn() throws IllegalStateException {
-		return getSensors().contains(Sensors.BACK_CAMERA);
+	public boolean isCameraOn() throws IllegalStateException {
+		return getSensors().contains(Sensors.CAMERA);
 	}
 
 

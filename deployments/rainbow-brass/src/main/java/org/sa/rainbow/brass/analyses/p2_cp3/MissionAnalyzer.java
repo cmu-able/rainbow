@@ -37,11 +37,13 @@ public class MissionAnalyzer extends P2CP3Analyzer {
 			
 			if (!currentOK && m_wasOK) {
 				m_wasOK = false;
+				log("MissionAnalyser reporting INSTRUCTION_GRAPH_FAILED");
 				SetModelProblemCmd cmd = getModels().getRainbowStateModel ().getCommandFactory ().setModelProblem(CP3ModelState.INSTRUCTION_GRAPH_FAILED);
 				m_modelUSPort.updateModel(cmd);
 			}
 			else if (currentOK && !m_wasOK) {
 				m_wasOK = true;
+				log("MissionAnalyzer removing INSTRUCTION_GRAPH_FAILED");
 				RemoveModelProblemCmd cmd = getModels().getRainbowStateModel().getCommandFactory ().removeModelProblem(CP3ModelState.INSTRUCTION_GRAPH_FAILED);
 				m_modelUSPort.updateModel(cmd);
 			}

@@ -15,7 +15,7 @@ public class SetSensorFailedCmd extends AbstractRainbowModelOperation<Boolean, R
 
 	public SetSensorFailedCmd(CP3RobotStateModelInstance model, String target, String param) {
 		super("setSensorFailed", model, target, param);
-		m_sensor = Sensors.valueOf(target);
+		m_sensor = Sensors.valueOf(param);
 	}
 
 	@Override
