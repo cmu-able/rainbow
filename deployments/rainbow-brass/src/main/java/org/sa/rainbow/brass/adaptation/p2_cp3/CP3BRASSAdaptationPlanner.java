@@ -206,8 +206,7 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 				else if (m_models.getRainbowStateModel().getModelInstance().getProblems().contains(CP3ModelState.TOO_DARK)
 						&& m_models.getTurtlebotModel().getActiveComponents().contains("marker_pose_publisher")) {
 					// Javier this is not write because it would preclude the headlamp configuration, so not sure what to do
-					unusableLocalization.add("marker_pose_publisher");
-					unusableSensors.add(Sensors.CAMERA);
+					ConfigurationSynthesizer.enableOnlyDarkConfigs();
 					confInitString = determineValidReconfigurations(unusableLocalization, unusableSensors);
 				} else if (m_models.getRainbowStateModel().getModelInstance().getProblems().contains(CP3ModelState.INSTRUCTION_GRAPH_FAILED)) {
 					// The instruction graph failed for some unknown reason, try another configuration
@@ -300,6 +299,8 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 			BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTED_FAILED.name(),
 					"Did not find a plan due to exception: " + e.getMessage());
 			BRASSHttpConnector.instance(Phases.Phase2).reportDone(true, "No plan was found");
+		} finally {
+			ConfigurationSynthesizer.restoreAllConfigs();
 		}
 
 	}
