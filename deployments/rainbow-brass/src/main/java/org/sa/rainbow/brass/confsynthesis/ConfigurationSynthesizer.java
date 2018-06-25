@@ -44,6 +44,25 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 	private static final HashMap<String, String> m_configuration_dictionary;
 	static {
 		m_configuration_dictionary = new HashMap<String, String>();
+		restoreAllConfigs();
+	}
+
+	private HashMap<String, ConstantDefinition> m_constant_definitions = new HashMap<String, ConstantDefinition>();
+
+	public String m_res = "result";
+	public String m_myConstraintModel;
+	public String m_myBaseModel;
+	public String m_myModel;
+	public String m_myPolicy;
+	public String m_myProps;
+
+	public static PrismConnectorAPI m_pc;
+
+	public ConfigurationSynthesizer() {
+		this(PropertiesConfigurationSynthesizer.DEFAULT);
+	}
+
+	public static void restoreAllConfigs() {
 		m_configuration_dictionary.put("sol_0", "amcl-kinect-35");
 		m_configuration_dictionary.put("sol_1", "aruco-headlamp-25");
 		m_configuration_dictionary.put("sol_2", "amcl-kinect-68");
@@ -62,23 +81,13 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 		m_configuration_dictionary.put("sol_15", "mrpt-lidar-25");
 		m_configuration_dictionary.put("sol_16", "amcl-lidar-25");
 		m_configuration_dictionary.put("sol_17", "amcl-kinect-25");
+		
 	}
-
-	private HashMap<String, ConstantDefinition> m_constant_definitions = new HashMap<String, ConstantDefinition>();
-
-	public String m_res = "result";
-	public String m_myConstraintModel;
-	public String m_myBaseModel;
-	public String m_myModel;
-	public String m_myPolicy;
-	public String m_myProps;
-
-	public static PrismConnectorAPI m_pc;
-
-	public ConfigurationSynthesizer() {
-		this(PropertiesConfigurationSynthesizer.DEFAULT);
+	public static void enableOnlyDarkConfigs() {
+		m_configuration_dictionary.remove("sol_4");
+		m_configuration_dictionary.remove("sol_12");
+		m_configuration_dictionary.remove("sol_8");
 	}
-
 	public String getConfigurationIndex(String confId){
 		int c = 0;
 		for (String k: m_configurations.keySet()){
@@ -508,5 +517,9 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 		// cs.generateReconfigurations();
 		System.out.println(cs.getConfigurations().toString());
 	}
+
+
+
+	
 
 }
