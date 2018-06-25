@@ -189,7 +189,7 @@ public class RobotStateGauge extends RegularPatternGauge {
 					IRainbowOperation lidarOp = m_commands.get("sensor-failed");
 					Map<String, String> lidarParams = new HashMap<>();
 					lidarParams.put(lidarOp.getParameters()[0], Sensors.LIDAR.name());
-					lidarParams.put(lidarOp.getParameters()[1], Boolean.toString(lMode));
+//					lidarParams.put(lidarOp.getParameters()[1], Boolean.toString(lMode));
 					issueCommand(lidarOp, lidarParams);
 				} else {
 					reported_lidar_mode = lMode;
