@@ -1,9 +1,11 @@
 package org.sa.rainbow.brass.plan.p2_cp3;
 
 import java.awt.geom.Point2D;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 
 import org.sa.rainbow.brass.PropertiesConnector;
@@ -79,7 +81,13 @@ public class DecisionEngineCP3 extends DecisionEngine {
     	Double maxEnergy = getMaxEnergy();
     	Double maxScore=0.0;
     	
+    	log(String.format("|%3s|%5s|%5s|%5s|%5s|", "", "Time", "Safty", "NRG", "Score", "AllOrNothingScore"));    	
+    	log("---+-----+-----+-----+----+");
+    	log(String.format("|%3s|%5.2f|%5.2f|%5.2f|%5s|", "Max", maxTime, maxSafety, maxEnergy, "1"));
+    	
         Map.Entry<List, ArrayList<Double>> maxEntry = m_scoreboard.entrySet().iterator().next();
+        double maxSingeScore = 0.0;
+        Map.Entry<List, ArrayList<Double>> maxSingleEntry = m_scoreboard.entrySet().iterator().next();
         for (Map.Entry<List, ArrayList<Double>> entry : m_scoreboard.entrySet())
         {
             Double entryTime = entry.getValue().get(1);
@@ -96,12 +104,21 @@ public class DecisionEngineCP3 extends DecisionEngine {
             Double entryEnergy = entry.getValue().get(0)/maxEnergy;
             
             Double entryScore = m_safetyWeight * entrySafety + m_timelinessWeight * entryTimeliness + m_energyWeight * entryEnergy;
-            
+        	log(String.format("|%3s|%5.2f|%5.2f|%5.2f|%5.2f|", "", entryTimeliness, entrySafety, entryEnergy, entryScore));
+        	log(String.format("|%40s|", String.valueOf(entry.getKey())));
+        	double singleScore = 0.0;
+        	if (m_safetyWeight == 0.6) singleScore = entrySafety;
+        	if (m_timelinessWeight == 0.6) singleScore = entryTimeliness;
+        	if (m_energyWeight == 0.6) singleScore = entryEnergy;
         	if ( entryScore > maxScore)
             {
                 maxEntry = entry;
                 maxScore = entryScore;
             }
+        	if (singleScore > maxSingeScore) {
+        		maxSingeScore =singleScore;
+        		maxSingleEntry = entry;
+        	}
         }
         m_selected_candidate_time = maxEntry.getValue().get(1);
         m_selected_candidate_safety = maxEntry.getValue().get(2);
@@ -110,7 +127,10 @@ public class DecisionEngineCP3 extends DecisionEngine {
         
         log("Selected candidate policy: "+m_candidates.get(maxEntry.getKey()));
         log("Score: "+String.valueOf(m_selected_candidate_score)+" Safety: "+String.valueOf(m_selected_candidate_safety)+" Time: "+String.valueOf(m_selected_candidate_time)+" Energy: "+String.valueOf(m_selected_candidate_energy));
-        
+        log("Alternate selected, based on really preferring one quality: " +m_candidates.get(maxSingleEntry.getKey()));
+        if (!Objects.equals(maxSingleEntry.getKey(), maxEntry.getKey())) {
+        	log("THESE PLANS ARE DIFFERENT");
+        }
         return m_candidates.get(maxEntry.getKey())+".adv";
     }
 
