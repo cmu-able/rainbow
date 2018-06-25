@@ -367,7 +367,7 @@ public class MapTranslator {
                    			if ((a.getSuccessRate(confStr)>=TRAVERSAL_SUCCESS_THRESHOLD)||
                    					(!a.existsSuccessRateAboveThreshold(TRAVERSAL_SUCCESS_THRESHOLD) && 
                    							(a.getSuccessRate(confStr)==(a.getMaxSuccessRate())))){
-	                   			if (a.getHitRate(confStr)<TRAVERSAL_HIT_THRESHOLD){
+	                   			if (a.getHitRate(confStr)>=0){
 	                        		m_generated_movecommands.add(a.getSource()+MOVE_CMD_STR+a.getTarget());
 	                   				String confGuard = "("+ROBOT_CONF_VAR+"="+c.getValue().getId()+")";
 				                    buf+="\t ["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] ("+ ROBOT_RECONF_VAR +">0) & ("+ROBOT_LOCATION_VAR+"="+a.getSource()+") "+" & ("+ROBOT_BATTERY_VAR+">="+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+")"+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & "+confGuard+" & (!robot_done) -> ";                	
