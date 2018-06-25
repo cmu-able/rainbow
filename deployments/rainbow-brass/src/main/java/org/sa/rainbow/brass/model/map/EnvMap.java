@@ -291,7 +291,10 @@ public class EnvMap {
 	public synchronized String insertNode(String n, String na, String nb, double x, double y, boolean obstacle) {
 		n = AddNode(n, x, y);
 		EnvMapArc arc = m_arcs.get(na + nb);
-		Map<String, Object> allProperties = arc.getAllProperties();
+		if (arc == null) {
+			System.out.println("There is no connection between " + na + " and " + nb);
+		}
+		Map<String, Object> allProperties = arc==null?new HashMap<>():arc.getAllProperties();
 		if (!n.equals(na)) {
 			EnvMapArc arc1 = addArc(na, n, distanceBetween(na, n), true);
 			EnvMapArc arc2 = addArc(n, na, distanceBetween(na, n), true);
