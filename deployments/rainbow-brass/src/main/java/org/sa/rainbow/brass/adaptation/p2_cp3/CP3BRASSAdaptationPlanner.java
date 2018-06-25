@@ -312,6 +312,9 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 					Heading.convertFromRadians(
 							m_models.getMissionStateModel().getModelInstance().getCurrentPose().getRotation())
 							.ordinal());
+			if (DecisionEngineCP3.m_scoreboard.isEmpty()) {
+				throw new RainbowException("Failed to find a plan for " + confInitString);
+			}
 			PrismPolicy pp = new PrismPolicy(DecisionEngineCP3.selectPolicy());
 			pp.readPolicy();
 			ArrayList<String> planArray = pp.getPlan(m_configurationSynthesizer, confInitString);

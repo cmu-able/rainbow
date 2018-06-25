@@ -216,10 +216,13 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 							Heading.convertFromRadians(
 									m_models.getMissionStateModel().getModelInstance().getCurrentPose().getRotation())
 									.ordinal());
-					PrismPolicy pp = new PrismPolicy(DecisionEngineCP1.selectPolicy());
-					pp.readPolicy();
+					PrismPolicy pp = null;
+					if (!DecisionEngineCP1.m_scoreboard.isEmpty()) {
+						pp = new PrismPolicy(DecisionEngineCP1.selectPolicy());
+						pp.readPolicy();
+					}
 
-					if (pp.getPlan() == null || pp.getPlan().isEmpty()) {
+					if (DecisionEngineCP1.m_scoreboard.isEmpty() || pp.getPlan() == null || pp.getPlan().isEmpty()) {
 						// BRASSHttpConnector.instance ().reportStatus (DASStatusT.MISSION_ABORTED,
 						// "Could not find a valid adaptation... trying again.");
 						log("Could not find a valid adaptation...");
