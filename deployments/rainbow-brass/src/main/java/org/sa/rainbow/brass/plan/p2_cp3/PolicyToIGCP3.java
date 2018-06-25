@@ -204,6 +204,7 @@ public class PolicyToIGCP3 {
 				newCmds.add(r);
 			}
 			newCmds.add(c);
+//			if ("StartNodes(%amcl%)".equals(c)
 			prev = c;
 
 		}
@@ -425,6 +426,9 @@ public class PolicyToIGCP3 {
 
 		@Arg(dest="priority")
 		public String priority;
+		
+		@Arg(dest="target")
+		public String target;
 
 		@Arg(dest = "map")
 		public String map;
@@ -449,6 +453,7 @@ public class PolicyToIGCP3 {
 		parser.addArgument("-w", "--waypoint").type(String.class).help("The waypoint to generate to and from");
 		parser.addArgument("-c", "--configuration").type(String.class).help("The configuration to generate from");
 		parser.addArgument("-pr", "--priority").type(String.class).help("The main priority QA");
+		parser.addArgument("-t", "--target").type(String.class).help("The target waypoint, coupled with -w");
 		parser.addArgument("map").type(String.class).help("The map file containing the waypoints");
 
 		Arguments theArgs = new Arguments();
@@ -502,44 +507,56 @@ public class PolicyToIGCP3 {
 		
 		PrismPolicy pp;
 		
-		// Compute IGs/Paths
-		for (EnvMapNode node_src : map.getNodes().values()) {
-			for (EnvMapNode node_tgt : map.getNodes().values()) {
-				if (node_src.getId() != node_tgt.getId()) {
-					if (theArgs.waypoint != null && !Objects.equals(node_tgt.getLabel(),theArgs.waypoint) && !Objects.equals(node_src.getLabel(),theArgs.waypoint))
-						continue;
-					try {
-					System.out.println(
-							"Src:" + String.valueOf(node_src.getId()) + " Tgt:" + String.valueOf(node_tgt.getId()));
-										
-		            DecisionEngineCP3.generateCandidates(node_src.getLabel(), node_tgt.getLabel(), true); // The last param inhibits reconfiguration tactics
-		        	System.out.println("Scoring candidates (from configuration: "+theArgs.configuration+", index: "+cs.getConfigurationIndex(theArgs.configuration)+")...");
-		            DecisionEngineCP3.scoreCandidates(map, MapTranslator.ROBOT_BATTERY_RANGE_MAX, 1, cs.getConfigurationIndex(theArgs.configuration));
-		            System.out.println(String.valueOf(DecisionEngineCP3.m_scoreboard));	
-		            pp = new PrismPolicy(DecisionEngineCP3.selectPolicy());
-		            pp.readPolicy();  
-		            ArrayList<String> planArray = pp.getPlan(cs, currentConfStr);
-					String plan = planArray.toString();
-		            System.out.println("Selected Plan: "+plan);
-		            PolicyToIGCP3 translator = new PolicyToIGCP3(pp, map);
-		            System.out.println (translator.translate (cs, currentConfStr, false));
-//		            long ttc = esitmateTime(map, planArray, cs.translateId(theArgs.configuration));
-		            Long ttc = new Double(DecisionEngineCP3.getSelectedPolicyTime()).longValue(); 
-					double w = getInitialRotation(node_src, pp, map);
-					
-					exportIGTranslation(out_dir_ig + "/" + node_src.getLabel() + "_to_" + node_tgt.getLabel() + ".ig",
-							translator.translate(cs, currentConfStr, false));
-					String wJson = generateJSONWayPointList(pp, String.valueOf(ttc), w);
-					System.out.println(wJson);
-					exportIGTranslation(out_dir_wp + "/" + node_src.getLabel() + "_to_" + node_tgt.getLabel() + ".json",
-							wJson);
+		if (theArgs.target != null && theArgs.waypoint != null) {
+			EnvMapNode nodeSrc = map.getNodes().get(theArgs.waypoint);
+			EnvMapNode nodeTgt = map.getNodes().get(theArgs.target);
+			generatePath(theArgs, out_dir_ig, out_dir_wp, map, cs, currentConfStr, nodeSrc, nodeTgt);
+		}
+		else {			
+			// Compute IGs/Paths
+			for (EnvMapNode node_src : map.getNodes().values()) {
+				for (EnvMapNode node_tgt : map.getNodes().values()) {
+					if (node_src.getId() != node_tgt.getId()) {
+						if (theArgs.waypoint != null && !Objects.equals(node_tgt.getLabel(),theArgs.waypoint) && !Objects.equals(node_src.getLabel(),theArgs.waypoint))
+							continue;
+						generatePath(theArgs, out_dir_ig, out_dir_wp, map, cs, currentConfStr, node_src, node_tgt);
 					}
-					catch (Throwable t) {
-						System.out.println("Failed to generate path from " + node_src.getId() + "->" + node_tgt.getId());
-					}
-
 				}
 			}
+		}
+	}
+
+	private static void generatePath(Arguments theArgs, String out_dir_ig, String out_dir_wp, EnvMap map,
+			ConfigurationSynthesizer cs, String currentConfStr, EnvMapNode node_src, EnvMapNode node_tgt) {
+		PrismPolicy pp;
+		try {
+		System.out.println(
+				"Src:" + String.valueOf(node_src.getId()) + " Tgt:" + String.valueOf(node_tgt.getId()));
+							
+		DecisionEngineCP3.generateCandidates(node_src.getLabel(), node_tgt.getLabel(), true); // The last param inhibits reconfiguration tactics
+		System.out.println("Scoring candidates (from configuration: "+theArgs.configuration+", index: "+cs.getConfigurationIndex(theArgs.configuration)+")...");
+		DecisionEngineCP3.scoreCandidates(map, MapTranslator.ROBOT_BATTERY_RANGE_MAX, 1, cs.getConfigurationIndex(theArgs.configuration));
+		System.out.println(String.valueOf(DecisionEngineCP3.m_scoreboard));	
+		pp = new PrismPolicy(DecisionEngineCP3.selectPolicy());
+		pp.readPolicy();  
+		ArrayList<String> planArray = pp.getPlan(cs, currentConfStr);
+		String plan = planArray.toString();
+		System.out.println("Selected Plan: "+plan);
+		PolicyToIGCP3 translator = new PolicyToIGCP3(pp, map);
+		System.out.println (translator.translate (cs, currentConfStr, false));
+//		            long ttc = esitmateTime(map, planArray, cs.translateId(theArgs.configuration));
+		Long ttc = new Double(DecisionEngineCP3.getSelectedPolicyTime()).longValue(); 
+		double w = getInitialRotation(node_src, pp, map);
+		
+		exportIGTranslation(out_dir_ig + "/" + node_src.getLabel() + "_to_" + node_tgt.getLabel() + ".ig",
+				translator.translate(cs, currentConfStr, false));
+		String wJson = generateJSONWayPointList(pp, String.valueOf(ttc), w);
+		System.out.println(wJson);
+		exportIGTranslation(out_dir_wp + "/" + node_src.getLabel() + "_to_" + node_tgt.getLabel() + ".json",
+				wJson);
+		}
+		catch (Throwable t) {
+			System.out.println("Failed to generate path from " + node_src.getId() + "->" + node_tgt.getId());
 		}
 	}
 
