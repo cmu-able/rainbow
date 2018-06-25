@@ -27,12 +27,7 @@ import org.sa.rainbow.core.ports.IModelsManagerPort;
 
 public class DarknessAnalyzer extends P2CP3Analyzer implements IRainbowModelChangeCallback {
 
-	private static final double ILLUMINATION_THRESHOLD = 10;
-	private IModelChangeBusSubscriberPort m_modelChangePort;
-	private IModelUSBusPort m_modelUSPort;
-	private IModelsManagerPort m_modelsManagerPort;
-	private CP3RobotState m_robotStateModel;
-	private RainbowStateModelInstance m_rainbowStateModel;
+	private static final double ILLUMINATION_THRESHOLD = 80;
 	private boolean m_darkBefore = false;
 
 	public DarknessAnalyzer() {
