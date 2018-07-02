@@ -75,6 +75,7 @@ public class MapTranslator {
     public static final String ROBOT_BATTERY_VAR = "b";
     public static final String ROBOT_BATTERY_RANGE_MIN = "0";
     public static long ROBOT_BATTERY_RANGE_MAX = 180000;
+    public static Double ROBOT_BATTERY_CHARGING_RATIO = BatteryPredictor.getChargingTimeRatio();
     public static final String ROBOT_BATTERY_RANGE_MAX_CONST = "MAX_BATTERY";
     public static final String INITIAL_ROBOT_BATTERY_CONST = "INITIAL_BATTERY";
     public static final String ROBOT_BATTERY_DELTA = "10"; // Constant for the time being, this should be transition+context dependent
@@ -460,7 +461,7 @@ public class MapTranslator {
             // Robot recharging tactics
             if (!inhibitTactics){
  //               buf+="\t[t_set_half_speed] true : "+String.valueOf(DEFAULT_TIME_TACTIC_TIME)+";\n";
-                buf+="\t[t_recharge] true : ("+ROBOT_BATTERY_RANGE_MAX+" - "+ROBOT_BATTERY_VAR+")/"+String.valueOf(BatteryPredictor.getChargingTimeRatio())+";\n";
+                buf+="\t[t_recharge] true : ("+ROBOT_BATTERY_RANGE_MAX+" - "+ROBOT_BATTERY_VAR+")/"+String.valueOf(ROBOT_BATTERY_CHARGING_RATIO)+";\n";
             }
             
             // Robot movement tactics

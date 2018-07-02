@@ -13,6 +13,8 @@ import org.sa.rainbow.brass.confsynthesis.SimpleConfigurationStore;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.plan.p2.DecisionEngine;
 import org.sa.rainbow.brass.plan.p2.MapTranslator;
+import org.sa.rainbow.brass.confsynthesis.PropertiesSimpleConfigurationStore;
+import org.sa.rainbow.brass.confsynthesis.SimpleConfigurationBatteryModel;
 
 public class DecisionEngineCP1 extends DecisionEngine{
 
@@ -20,11 +22,16 @@ public class DecisionEngineCP1 extends DecisionEngine{
     public static double m_selected_candidate_energy=0.0;
 	public static double m_energyWeight=0.9;
 	public static double m_timelinessWeight=0.1;
+	public static SimpleConfigurationBatteryModel m_battery_model;
+	public static double m_real_observed_battery_ratio = 0.9; // We assume that we have less battery than observed
 
     public static void init(Properties props) throws Exception {
+    	m_battery_model = new SimpleConfigurationBatteryModel(PropertiesSimpleConfigurationStore.DEFAULT);
     	DecisionEngine.init(props);
-        MapTranslator.ROBOT_BATTERY_RANGE_MAX = 32600;
-
+        MapTranslator.ROBOT_BATTERY_RANGE_MAX = ((Double)(SimpleConfigurationBatteryModel.getBatteryCapacity()*m_real_observed_battery_ratio)).intValue();
+        MapTranslator.ROBOT_BATTERY_CHARGING_RATIO = SimpleConfigurationBatteryModel.getChargingRate();
+        m_energyWeight = SimpleConfigurationBatteryModel.getEnergyWeight();
+        m_timelinessWeight = SimpleConfigurationBatteryModel.getTimelinessWeight();
     }
    /**
     * Returns the maximum estimated time for a candidate policy in the scoreboard
