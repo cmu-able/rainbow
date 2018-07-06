@@ -23,12 +23,11 @@ public class DecisionEngineCP1 extends DecisionEngine{
 	public static double m_energyWeight=0.9;
 	public static double m_timelinessWeight=0.1;
 	public static SimpleConfigurationBatteryModel m_battery_model;
-	public static double m_real_observed_battery_ratio = 0.9; // We assume that we have less battery than observed
-
+	
     public static void init(Properties props) throws Exception {
     	m_battery_model = new SimpleConfigurationBatteryModel(PropertiesSimpleConfigurationStore.DEFAULT);
     	DecisionEngine.init(props);
-        MapTranslator.ROBOT_BATTERY_RANGE_MAX = ((Double)(SimpleConfigurationBatteryModel.getBatteryCapacity()*m_real_observed_battery_ratio)).intValue();
+        MapTranslator.ROBOT_BATTERY_RANGE_MAX = ((Double)(SimpleConfigurationBatteryModel.getBatteryCapacity())).intValue();
         MapTranslator.ROBOT_BATTERY_CHARGING_RATIO = SimpleConfigurationBatteryModel.getChargingRate();
         m_energyWeight = SimpleConfigurationBatteryModel.getEnergyWeight();
         m_timelinessWeight = SimpleConfigurationBatteryModel.getTimelinessWeight();
@@ -119,6 +118,7 @@ public class DecisionEngineCP1 extends DecisionEngine{
         	System.out.println("Generating candidates for l1-l4...");
             generateCandidates("l4", "l2");
         	System.out.println("Scoring candidates...");
+        	DecisionEngineCP1.m_real_observed_battery_ratio=0.9;
             scoreCandidates(dummyMap, i, 1);
             System.out.println(String.valueOf(m_scoreboard));	        
             pp = new PrismPolicy(selectPolicy());

@@ -40,6 +40,8 @@ public class DecisionEngine {
     public static Map<List, ArrayList<Double>> m_scoreboard;
     public static double m_selected_candidate_score;
     public static PrismPolicy m_plan;
+	public static double m_real_observed_battery_ratio = 1.0; // We assume that we have less battery than observed if <1
+
 
     public static final double INFINITY = 999999.0;
 
@@ -110,8 +112,9 @@ public class DecisionEngine {
      */
     
     public static void scoreCandidates (EnvMap map, long batteryLevel, int robotHeading) throws Exception {
-    	scoreCandidates (map, batteryLevel, robotHeading, "-1");    
+    	scoreCandidates (map, ((Double)(batteryLevel*m_real_observed_battery_ratio)).intValue(), robotHeading, "-1");    
     }
+
     
     public static void scoreCandidates (EnvMap map, long batteryLevel, int robotHeading, String fromConfig) throws Exception {
     	try{
