@@ -40,6 +40,8 @@ public class DecisionEngine {
     public static Map<List, ArrayList<Double>> m_scoreboard;
     public static double m_selected_candidate_score;
     public static PrismPolicy m_plan;
+	public static double m_real_observed_battery_ratio = 1.0; // We assume that we have less battery than observed if <1
+
 
     public static final double INFINITY = 999999.0;
 
@@ -110,8 +112,9 @@ public class DecisionEngine {
      */
     
     public static void scoreCandidates (EnvMap map, long batteryLevel, int robotHeading) throws Exception {
-    	scoreCandidates (map, batteryLevel, robotHeading, "-1");    
+    	scoreCandidates (map, ((Double)(batteryLevel*m_real_observed_battery_ratio)).intValue(), robotHeading, "-1");    
     }
+
     
     public static void scoreCandidates (EnvMap map, long batteryLevel, int robotHeading, String fromConfig) throws Exception {
     	try{
@@ -127,7 +130,7 @@ public class DecisionEngine {
 			if (destinationID == -1) throw new IllegalArgumentException(m_destination + " does not appear in the map");
 			String m_consts = MapTranslator.INITIAL_ROBOT_CONF_CONST+"="+fromConfig+","+MapTranslator.INITIAL_ROBOT_LOCATION_CONST+"="+String.valueOf(originID) +","+ MapTranslator.TARGET_ROBOT_LOCATION_CONST 
                     + "="+String.valueOf(destinationID)+ "," + MapTranslator.INITIAL_ROBOT_BATTERY_CONST+"="+batteryLevel+","+MapTranslator.INITIAL_ROBOT_HEADING_CONST+"="+robotHeading;
-
+			System.out.println("Prism initialized with constants: " + m_consts );
             log(m_consts);
             String result;
             for (List candidate_key : m_candidates.keySet() ){                           	
