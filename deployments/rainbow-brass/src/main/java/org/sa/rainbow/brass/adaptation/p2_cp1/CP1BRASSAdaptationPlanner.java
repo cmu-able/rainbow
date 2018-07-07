@@ -77,6 +77,7 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 		initConnectors();
 		try {
 			DecisionEngineCP1.init(Rainbow.instance().allProperties());
+			DecisionEngineCP1.m_real_observed_battery_ratio=0.9;
 			DecisionEngineCP1.setMap(m_models.getEnvMapModel().getModelInstance());
 			m_configurationStore = new SimpleConfigurationStore(Rainbow.instance().allProperties());
 			m_configurationStore.populate();
