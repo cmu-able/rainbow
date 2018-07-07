@@ -53,6 +53,10 @@ public class PrismPolicy {
         		action = stateActionMap.get(state).get(0);
         		state = startEndStateMap.get(state).get(0);
         	}
+        	else if ((startEndStateMap.get(state).size() > 1 && !startEndStateMap.containsKey(startEndStateMap.get(state).get(0)) && !startEndStateMap.containsKey(startEndStateMap.get(state).get(1)) )) {
+        		action = stateActionMap.get(state).get(0);
+        		state = startEndStateMap.get(state).get(0);
+        	}
         	
             if (action != "") {
                 m_plan.add(action);
@@ -208,10 +212,10 @@ public class PrismPolicy {
      * Class test
      */
     public static void main (String[] args) throws Exception { // Class test
-        PrismConnector conn = new PrismConnector (null);
-        conn.invoke(8, 7);
+//        PrismConnector conn = new PrismConnector (null);
+//        conn.invoke(8, 7);
 //        PrismPolicy prismPolicy = new PrismPolicy("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/botpolicy.adv");
-        PrismPolicy prismPolicy = new PrismPolicy("/Users/jcamara/Dropbox/Documents/Work/projects/rainbow-alt/deployments/rainbow-brass/prismtmp/probtest.adv");
+        PrismPolicy prismPolicy = new PrismPolicy("src/test/resources/1.adv");
         prismPolicy.readPolicy();  
         System.out.println(prismPolicy.getPlan().toString());
 
