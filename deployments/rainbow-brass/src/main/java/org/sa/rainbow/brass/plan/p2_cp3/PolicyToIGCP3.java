@@ -30,6 +30,8 @@ import org.sa.rainbow.brass.plan.p2_cp3.DecisionEngineCP3;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.annotation.Arg;
+import net.sourceforge.argparse4j.impl.action.StoreTrueArgumentAction;
+import net.sourceforge.argparse4j.inf.ArgumentAction;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 
 
@@ -432,6 +434,9 @@ public class PolicyToIGCP3 {
 
 		@Arg(dest = "map")
 		public String map;
+		
+		@Arg(dest = "append")
+		public boolean append;
 	}
 
 	
@@ -455,6 +460,7 @@ public class PolicyToIGCP3 {
 		parser.addArgument("-pr", "--priority").type(String.class).help("The main priority QA");
 		parser.addArgument("-t", "--target").type(String.class).help("The target waypoint, coupled with -w");
 		parser.addArgument("map").type(String.class).help("The map file containing the waypoints");
+		parser.addArgument("--append").action(new StoreTrueArgumentAction()).help("DO not overwrite exsiting instructions");
 
 		Arguments theArgs = new Arguments();
 		parser.parseArgs(args, theArgs);
@@ -519,6 +525,10 @@ public class PolicyToIGCP3 {
 					if (node_src.getId() != node_tgt.getId()) {
 						if (theArgs.waypoint != null && !Objects.equals(node_tgt.getLabel(),theArgs.waypoint) && !Objects.equals(node_src.getLabel(),theArgs.waypoint))
 							continue;
+						if (theArgs.append && new File(out_dir_ig, node_src.getLabel() + "_to_" + node_tgt.getLabel() + ".ig").exists()) { 
+							System.out.print("Ignoring " + node_src.getLabel() + "->" + node_tgt.getLabel());
+							continue;
+						}
 						generatePath(theArgs, out_dir_ig, out_dir_wp, map, cs, currentConfStr, node_src, node_tgt);
 					}
 				}
