@@ -4,8 +4,9 @@ TARGET=znews-ss
 DEBUG=""
 GUI=""
 WD="."
+PROP=""
 
-while getopts :dhr:w: opt; do
+while getopts :dhr:w:p: opt; do
   case $opt in
     d)
 	  DEBUG="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=1044"
@@ -19,6 +20,9 @@ while getopts :dhr:w: opt; do
   w)
     WD=$OPTARG
     ;;
+      p)
+	  PROP="-Drainbow.propfile=$OPTARG"
+	  ;;
    esac
 done
 shift $((OPTIND-1))
@@ -55,8 +59,13 @@ elif [ "$(expr substr $(uname -o) 1 6)" == "Cygwin" ]; then
   delim=";"
 fi
 
-echo "java -classpath .${delim}lib/*  -Drainbow.target=$TARGET -Djava.rmi.server.hostname=$ADDR $DEBUG $* org.sa.rainbow.core.RainbowMaster"
+trap 'kill $(jobs -p)' EXIT
 
-java -classpath ".${delim}lib/*"  -Drainbow.target=$TARGET -Djava.rmi.server.hostname=$ADDR $DEBUG $* org.sa.rainbow.core.RainbowMaster $GUI
+# this is for libraries that depend on native libraries, like PLA
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:lib
+
+echo "java -classpath .${delim}lib/*  -Drainbow.target=$TARGET -Djava.rmi.server.hostname=$ADDR $PROP $DEBUG $* org.sa.rainbow.core.RainbowMaster"
+
+java -classpath ".${delim}lib/*"  -Drainbow.target=$TARGET -Djava.rmi.server.hostname=$ADDR $PROP $DEBUG $* org.sa.rainbow.core.RainbowMaster $GUI
 
  
