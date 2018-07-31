@@ -66,7 +66,7 @@ done
 shift $((OPTIND-1))
 
 if [ ! -d "rainbow" -o ! -d "libs" ]; then
-  echo "FATAL: Could not find the rainbow directory containing sourc for the core Rainbow components and libraries!"
+  echo "FATAL: Could not find the rainbow directory containing source for the core Rainbow components and libraries!"
   exit 1
 fi
 
@@ -82,31 +82,48 @@ mkdir -p bin/lib
 
 cd libs/
 
+echo "Doing $target for auxtestlib"
 cd auxtestlib
 mvn $SKIPTESTS $target
+
+echo "Doing $target for incubator"
 cd ../incubator
 mvn $SKIPTESTS $target
+
+echo "Doing $target for parsec"
 cd ../parsec
 mvn -DskipTests $jcctarget
+
+echo "Doing $target for typelib"
 cd ../typelib
 mvn $SKIPTESTS $jcctarget
+
+echo "Doing $target for eselib"
 cd ../eseblib
 mvn -DskipTests $target
 
 cd ../../rainbow
 
+echo "Doing $target for rainbow-core"
 cd rainbow-core
-mvn -DskipTests $target 
+mvn -DskipTests $target
+
+echo "Doing $target for rainbow-acme-model"
 cd ../rainbow-acme-model
 mvn -DskipTests $target
+
+echo "Doing $target for rainbow-utility-model"
 cd ../rainbow-utility-model
-mvn $target 
+mvn $target
+
+echo "Doing $target for rainbow-stitch"
 cd ../rainbow-stitch
 mvn $target
 
 cd ../..
 BUILDDIR=`pwd`
 cd $DEPLOYMENT
+echo "Doing $target in $(pwd)"
 mvn $target
 
 if [[ "$target" == "install" ]]; then
