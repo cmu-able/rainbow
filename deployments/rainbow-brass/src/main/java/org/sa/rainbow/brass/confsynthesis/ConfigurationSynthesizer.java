@@ -23,9 +23,10 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 	public HashMap<String, DetailedConfiguration> m_configuration_objects = new HashMap<String, DetailedConfiguration>();
 	public LinkedList<String> m_allinstances = new LinkedList<String>();
 	public HashMap<String, List<String>> m_reconfigurations = new HashMap<String, List<String>>();
+	public HashMap<String, Double> m_reconfiguration_costs = new HashMap<String, Double>();
 	public static final HashMap<String, String> m_component_modes;
 	public static DetailedConfigurationBatteryModel m_battery_model;
-	
+	public static final Double RECONF_STEP_TIME_COST = 5.0;
 	static {
 		m_component_modes = new HashMap<String, String>();
 		m_component_modes.put("DISABLED", "0");
@@ -410,6 +411,12 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 		} catch (Exception e) {
 			System.out.println("Configuration synthesizer: Error model checking reconfiguration from" + from);
 		}
+		try{
+			Double reconf_steps = Double.parseDouble(m_res);
+			m_reconfiguration_costs.put(to, reconf_steps*RECONF_STEP_TIME_COST);
+		} catch(Exception e){
+			System.out.println("Error parsing cost of reconfiguration.");
+		}
 		pp = new PrismPolicy(m_myPolicy + ".adv");
 		pp.readPolicy();
 		String plan = pp.getPlan().toString();
@@ -498,7 +505,7 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 	}
 
 	public Double getReconfigurationTime(String sourceConfiguration, String targetConfiguration) {
-		return 1.0;
+		return getReconfigurationCost(targetConfiguration);
 	}
 
 	public List<String> getReconfigurationPath(String sourceConfiguration, String targetConfiguration) {
@@ -518,7 +525,9 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 		System.out.println(cs.getConfigurations().toString());
 	}
 
-
+	public Double getReconfigurationCost(String config){
+		return m_reconfiguration_costs.get(config);
+	}
 
 	
 

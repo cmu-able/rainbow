@@ -126,6 +126,8 @@ public class MapTranslator {
     public static final double DEFAULT_TIME_TACTIC_TIME=1; // Tactics are not instantaneous;
     public static final String TACTIC_PREFIX="t";
 
+    public static boolean CONSIDER_RECONFIGURATION_COST=true;
+    
     // Properties' indices
     public static final int TIME_PROPERTY = 0;
     public static final int ACCURACY_PROPERTY = 1;
@@ -415,7 +417,17 @@ public class MapTranslator {
     	  String buf="";
     	  for (Map.Entry<String, Configuration> c: m_cp.getLegalTargetConfigurations().entrySet()){
 //    		  buf+= "\t [t_set_"+c.getValue().getId()+"] ("+ROBOT_CONF_VAR+"!="+ROBOT_CONF_PREFIX+c.getValue().getId()+") "+reconfGuard +STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_CONF_VAR+"'="+ROBOT_CONF_PREFIX+c.getValue().getId()+")"+ reconfUpdate +" & (robot_done'=true);\n";                	
-    		  buf+= "\t [t_set_"+c.getValue().getId()+"] ("+ROBOT_CONF_VAR+"!="+c.getValue().getId()+") "+reconfGuard +STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_CONF_VAR+"'="+c.getValue().getId()+")"+ reconfUpdate +" & (robot_done'=true);\n";                	
+    		 
+			  String reconfCostGuard = "";
+			  String reconfCostUpdate = "";
+			  if (CONSIDER_RECONFIGURATION_COST){
+				  Double rc = c.getValue().getEnergyDischargeRate() * m_cp.getReconfigurationTime("",c.getValue().getId());
+				  String reconfCost = String.valueOf(rc.intValue());
+//				  System.out.println("COST OF Reconfiguring to "+c.getValue().getId()+": " +reconfCost);
+				  reconfCostGuard = " & ("+ROBOT_BATTERY_VAR+">"+reconfCost+") ";
+				  reconfCostUpdate = "& ("+ROBOT_BATTERY_VAR+"'="+ROBOT_BATTERY_VAR+"-"+reconfCost+") ";
+			  }
+    		  buf+= "\t [t_set_"+c.getValue().getId()+"] ("+ROBOT_CONF_VAR+"!="+c.getValue().getId()+") "+ reconfCostGuard + reconfGuard +STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) ->  ("+ROBOT_CONF_VAR+"'="+c.getValue().getId()+")"+ reconfUpdate + reconfCostUpdate +" & (robot_done'=true);\n";                	
 
     	  }
           return buf+"\n";
@@ -498,8 +510,12 @@ public class MapTranslator {
 	      		  buf+= "\t [t_set_"+c.getValue().getId()+"]  true :";
 	      		  int counter=0;
 	      		  for (Map.Entry<String, Configuration> cs: m_cp.getLegalTargetConfigurations().entrySet()){
+	      			  String reconfCost = "0";
+	      			  if (CONSIDER_RECONFIGURATION_COST){
+	      				  reconfCost = String.valueOf(m_cp.getReconfigurationTime(cs.getValue().getId(),c.getValue().getId()));
+	      			  }
 	      			  if (counter>0) buf += " : ";
-	      			  buf+= ROBOT_CONF_VAR + "=" + cs.getKey() + " ? "+  m_cp.getReconfigurationTime(cs.getValue().getId(),c.getValue().getId());  
+	      			  buf+= ROBOT_CONF_VAR + "=" + cs.getKey() + " ? "+  reconfCost;  
 	      			  counter++;
 	      		  }
 	      		  buf += ": 0;\n";  

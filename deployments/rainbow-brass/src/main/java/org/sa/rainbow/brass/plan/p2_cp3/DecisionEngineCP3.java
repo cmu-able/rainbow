@@ -161,7 +161,7 @@ public class DecisionEngineCP3 extends DecisionEngine {
         System.out.println("Setting configuration provider...");
         setConfigurationProvider(cs);
         
-		String currentConfStr="markerLocalization0_INIT=0,markerRecognizer0_INIT=0,amcl0_INIT=1,laserscanNodelet0_INIT=1,mrpt0_INIT=2,camera0_INIT=1,lidar0_INIT=1,headlamp0_INIT=0,kinect0_INIT=2,fullSpeedSetting0_INIT=0,halfSpeedSetting0_INIT=1";
+		String currentConfStr="mapServerStd0_INIT=0,mapServerObs0_INIT=0,safeSpeedSetting0_INIT=0,markerLocalization0_INIT=0,markerRecognizer0_INIT=0,amcl0_INIT=1,laserscanNodelet0_INIT=1,mrpt0_INIT=2,camera0_INIT=1,lidar0_INIT=1,headlamp0_INIT=0,kinect0_INIT=2,fullSpeedSetting0_INIT=0,halfSpeedSetting0_INIT=1";
 		
         cs.generateReconfigurationsFrom(currentConfStr);
 
