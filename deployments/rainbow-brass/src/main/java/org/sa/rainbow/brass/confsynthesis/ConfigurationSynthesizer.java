@@ -546,7 +546,6 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 		return m_reconfiguration_costs.get(config);
 	}
 
-
 	
 
 }
