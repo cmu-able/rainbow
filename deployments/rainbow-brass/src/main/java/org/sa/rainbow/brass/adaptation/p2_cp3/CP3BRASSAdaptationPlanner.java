@@ -299,6 +299,7 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 			BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTED_FAILED.name(),
 					"Did not find a plan due to exception: " + e.getMessage());
 			BRASSHttpConnector.instance(Phases.Phase2).reportDone(true, "No plan was found");
+			m_adaptationEnabled = false;
 		} finally {
 			ConfigurationSynthesizer.restoreAllConfigs();
 		}

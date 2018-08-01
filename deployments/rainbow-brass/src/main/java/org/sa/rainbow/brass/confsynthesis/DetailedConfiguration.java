@@ -35,8 +35,8 @@ public class DetailedConfiguration implements Configuration {
 	static{
 		m_speedsettings = new HashMap<String, Double>();
 		m_speedsettings.put("halfSpeedSetting0", 0.35);
-		m_speedsettings.put("fullSpeedSetting0", 0.7);
-		m_speedsettings.put("safeSpeedSetting0", 0.25);		
+		m_speedsettings.put("fullSpeedSetting0", 0.68);
+		m_speedsettings.put("safeSpeedSetting0", 0.24);		
 	}
 	
 	public boolean isSpeedSetting(String id){

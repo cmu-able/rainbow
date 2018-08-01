@@ -9,11 +9,12 @@ import java.util.Map;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.sa.rainbow.core.ConfigHelper;
 
 public class SimpleConfigurationBatteryModel {
 	
 
-	public static Double m_battery_capacity=32560.0;
+	public static Double m_battery_capacity=32823.0;
 	public static Double m_charging_rate=69.9555;
 	public static Double m_energy_weight=0.5;
 	public static Double m_timeliness_weight=0.5;
@@ -66,6 +67,7 @@ public class SimpleConfigurationBatteryModel {
 	        JSONObject jsonObject = (JSONObject) obj;
 
 	        m_battery_capacity = Double.parseDouble(String.valueOf(((JSONObject)obj).get("battery_capacity")));
+	        System.out.println("Battery capacity in prism is not set to: " + m_battery_capacity);
 	        m_charging_rate = Double.parseDouble(String.valueOf(((JSONObject)obj).get("charging_rate")));
 	        
 	        JSONObject uobj = (JSONObject) ((JSONObject)obj).get("utility");
@@ -81,7 +83,8 @@ public class SimpleConfigurationBatteryModel {
 	public SimpleConfigurationBatteryModel(Properties props) {
 		System.out.println(PropertiesSimpleConfigurationStore.BATTERY_CONFIGURATION_PROPKEY);
 		System.out.println(props.getProperty(PropertiesSimpleConfigurationStore.BATTERY_CONFIGURATION_PROPKEY));
-		loadConfig(props.getProperty(PropertiesSimpleConfigurationStore.BATTERY_CONFIGURATION_PROPKEY));
+		loadConfig(ConfigHelper
+				.convertToAbsolute(props.getProperty(PropertiesSimpleConfigurationStore.BATTERY_CONFIGURATION_PROPKEY)));
 	}
 	 
 }

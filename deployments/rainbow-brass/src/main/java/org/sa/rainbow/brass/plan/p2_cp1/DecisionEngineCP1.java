@@ -25,7 +25,7 @@ public class DecisionEngineCP1 extends DecisionEngine{
 	public static SimpleConfigurationBatteryModel m_battery_model;
 	
     public static void init(Properties props) throws Exception {
-    	m_battery_model = new SimpleConfigurationBatteryModel(PropertiesSimpleConfigurationStore.DEFAULT);
+    	m_battery_model = new SimpleConfigurationBatteryModel(props);
     	DecisionEngine.init(props);
         MapTranslator.ROBOT_BATTERY_RANGE_MAX = ((Double)(SimpleConfigurationBatteryModel.getBatteryCapacity())).intValue();
         MapTranslator.ROBOT_BATTERY_CHARGING_RATIO = SimpleConfigurationBatteryModel.getChargingRate();

@@ -130,7 +130,7 @@ public class DecisionEngine {
 			if (destinationID == -1) throw new IllegalArgumentException(m_destination + " does not appear in the map");
 			String m_consts = MapTranslator.INITIAL_ROBOT_CONF_CONST+"="+fromConfig+","+MapTranslator.INITIAL_ROBOT_LOCATION_CONST+"="+String.valueOf(originID) +","+ MapTranslator.TARGET_ROBOT_LOCATION_CONST 
                     + "="+String.valueOf(destinationID)+ "," + MapTranslator.INITIAL_ROBOT_BATTERY_CONST+"="+batteryLevel+","+MapTranslator.INITIAL_ROBOT_HEADING_CONST+"="+robotHeading;
-
+			System.out.println("Prism initialized with constants: " + m_consts );
             log(m_consts);
             String result;
             for (List candidate_key : m_candidates.keySet() ){                           	
