@@ -195,7 +195,21 @@ public class PrismPolicy {
     public ArrayList<String> getPlan() {
         return m_plan;
     }
-
+    
+    /** 
+     * Returns the list of allowed reconfiguration actions in a plan
+     * @return
+     */
+    public ArrayList<String> getAllowedReconfigurations(){
+    	ArrayList<String> allowed = new ArrayList<String>();
+    	for (int i=0; i< m_plan.size(); i++){
+    		if (m_plan.get(i).startsWith("t_set")){
+    			allowed.add(m_plan.get(i));
+    		}
+    	}
+    	return allowed;
+    }
+    
 
     public ArrayList<String> getPlan(ConfigurationProvider cp, String fromConfiguration){
     	String confSetPrefix = "t_set_";

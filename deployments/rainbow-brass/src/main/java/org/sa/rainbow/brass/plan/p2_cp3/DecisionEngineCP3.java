@@ -23,28 +23,41 @@ public class DecisionEngineCP3 extends DecisionEngine {
     public static double m_safetyWeight;
 	public static double m_energyWeight;
 	public static double m_timelinessWeight;
+	private static boolean choose_balanced_utilty;
 	public static void init (Properties props) throws Exception {
 		DecisionEngine.init(props);
         MapTranslator.ROBOT_BATTERY_RANGE_MAX = 180000;
+        MapTranslator.CONSIDER_RECONFIGURATION_COST = Boolean.parseBoolean(props.getProperty("rainbow.consider_cost", "false"));
+        MapTranslator.ROBOT_MAX_RECONF_VAL = props.getProperty("rainbow.max_reconfs", "1");
+        DecisionEngineCP3.choose_balanced_utilty = Boolean.parseBoolean(props.getProperty("rainbow.balanced_utility", "true"));
         setSafetyPreference();
 	}
+	
+	public static final int ENERGY_INDEX = 0;
+	public static final int TIME_INDEX = 1;
+	public static final int SAFETY_INDEX = 2;
+	
 	
 	public static void setSafetyPreference(){
 		m_safetyWeight = 0.6;
 		m_energyWeight = 0.2;
 		m_timelinessWeight = 0.2;
+		m_priority_index = SAFETY_INDEX;
 	}
 
 	public static void setEnergyPreference(){
 		m_safetyWeight = 0.2;
 		m_energyWeight = 0.6;
 		m_timelinessWeight = 0.2;
+		m_priority_index = ENERGY_INDEX;
 	}
+
 	
 	public static void setTimelinessPreference(){
 		m_safetyWeight = 0.2;
 		m_energyWeight = 0.2;
 		m_timelinessWeight = 0.6;
+		m_priority_index = TIME_INDEX;
 	}
 
 	/**
@@ -52,7 +65,7 @@ public class DecisionEngineCP3 extends DecisionEngine {
     * @return
     */
     public static Double getMaxEnergy(){
-    	return getMaxItem(0);
+    	return getMaxItem(ENERGY_INDEX);
     }
 	
     /**
@@ -60,7 +73,7 @@ public class DecisionEngineCP3 extends DecisionEngine {
      * @return
      */
     public static Double getMaxTime(){
-	    	return getMaxItem(1);
+	    	return getMaxItem(TIME_INDEX);
 	    }    
 
    /**
@@ -68,7 +81,7 @@ public class DecisionEngineCP3 extends DecisionEngine {
     * @return
     */
    public static Double getMaxSafety(){
-   	return getMaxItem(2);
+   	return getMaxItem(SAFETY_INDEX);
    }    
 
     /**
@@ -80,7 +93,8 @@ public class DecisionEngineCP3 extends DecisionEngine {
     	Double maxSafety = getMaxSafety();
     	Double maxEnergy = getMaxEnergy();
     	Double maxScore=0.0;
-    	
+    	log("Considering cost: " + MapTranslator.CONSIDER_RECONFIGURATION_COST);
+    	log("Max reconfgs: " + MapTranslator.ROBOT_MAX_RECONF_VAL);
     	log(String.format("|%3s|%5s|%5s|%5s|%5s|", "", "Time", "Safty", "NRG", "Score", "AllOrNothingScore"));    	
     	log("---+-----+-----+-----+----+");
     	log(String.format("|%3s|%5.2f|%5.2f|%5.2f|%5s|", "Max", maxTime, maxSafety, maxEnergy, "1"));
@@ -90,18 +104,18 @@ public class DecisionEngineCP3 extends DecisionEngine {
         Map.Entry<List, ArrayList<Double>> maxSingleEntry = m_scoreboard.entrySet().iterator().next();
         for (Map.Entry<List, ArrayList<Double>> entry : m_scoreboard.entrySet())
         {
-            Double entryTime = entry.getValue().get(1);
+            Double entryTime = entry.getValue().get(TIME_INDEX);
             Double entryTimeliness = 0.0;
             if (maxTime>0.0){
             	entryTimeliness = 1.0-(entryTime / maxTime);
             }
-            Double entryProbSafety = entry.getValue().get(2);
+            Double entryProbSafety = entry.getValue().get(SAFETY_INDEX);
             Double entrySafety=0.0;
             if (maxSafety>0.0){
             	entrySafety = (entryProbSafety/maxSafety);
             }
             
-            Double entryEnergy = entry.getValue().get(0)/maxEnergy;
+            Double entryEnergy = entry.getValue().get(ENERGY_INDEX)/maxEnergy;
             
             Double entryScore = m_safetyWeight * entrySafety + m_timelinessWeight * entryTimeliness + m_energyWeight * entryEnergy;
         	log(String.format("|%3s|%5.2f|%5.2f|%5.2f|%5.2f|", "", entryTimeliness, entrySafety, entryEnergy, entryScore));
@@ -120,9 +134,9 @@ public class DecisionEngineCP3 extends DecisionEngine {
         		maxSingleEntry = entry;
         	}
         }
-        m_selected_candidate_time = maxEntry.getValue().get(1);
-        m_selected_candidate_safety = maxEntry.getValue().get(2);
-        m_selected_candidate_energy = maxEntry.getValue().get(0);
+        m_selected_candidate_time = maxEntry.getValue().get(TIME_INDEX);
+        m_selected_candidate_safety = maxEntry.getValue().get(SAFETY_INDEX);
+        m_selected_candidate_energy = maxEntry.getValue().get(ENERGY_INDEX);
         m_selected_candidate_score = maxScore;
         
         log("Selected candidate policy: "+m_candidates.get(maxEntry.getKey()));
@@ -131,11 +145,82 @@ public class DecisionEngineCP3 extends DecisionEngine {
         if (!Objects.equals(maxSingleEntry.getKey(), maxEntry.getKey())) {
         	log("THESE PLANS ARE DIFFERENT");
         }
-        return m_candidates.get(maxEntry.getKey())+".adv";
+        printTable();
+        return DecisionEngineCP3.choose_balanced_utilty?(m_candidates.get(maxEntry.getKey())+".adv"):(m_candidates.get(maxSingleEntry.getKey())+".adv");
     }
 
     public static double getSelectedPolicyTime(){
         return m_selected_candidate_time;
+    }
+    
+    public static void printTable(){
+    	String code="";
+    	code +="\n {\\footnotesize \n \\begin{tabular}{|l||l|l|l||l|l|l||l|} \n \\hline \n"
+    			+ "Candidate & {\\bf Time} & {\\bf Safety} & {\\bf Energy} & {\\bf \\sf $U_{Time}$}  & {\\bf \\sf $U_{Safety}$}  & {\\bf \\sf $U_{Energy}$}  & {\\bf Score} \\\\ \n"
+    			+ "\\hline \n";
+    	
+    	Double maxTime = getMaxTime();
+    	Double maxSafety = getMaxSafety();
+    	Double maxEnergy = getMaxEnergy();
+    	Double maxScore=0.0;
+    	
+    
+        Map.Entry<List, ArrayList<Double>> maxEntry = m_scoreboard.entrySet().iterator().next();
+        double maxSingeScore = 0.0;
+        Map.Entry<List, ArrayList<Double>> maxSingleEntry = m_scoreboard.entrySet().iterator().next();
+        for (Map.Entry<List, ArrayList<Double>> entry : m_scoreboard.entrySet())
+        {
+            Double entryTime = entry.getValue().get(TIME_INDEX);
+            Double entryTimeliness = 0.0;
+            if (maxTime>0.0){
+            	entryTimeliness = 1.0-(entryTime / maxTime);
+            }
+            Double entryProbSafety = entry.getValue().get(SAFETY_INDEX);
+            Double entrySafety=0.0;
+            if (maxSafety>0.0){
+            	entrySafety = (entryProbSafety/maxSafety);
+            }
+            
+            Double entryEnergy = entry.getValue().get(ENERGY_INDEX)/maxEnergy;
+            
+            Double entryScore = m_safetyWeight * entrySafety + m_timelinessWeight * entryTimeliness + m_energyWeight * entryEnergy;
+        	
+            code += String.format("\n %40s & ", String.valueOf(entry.getKey()).replace("[", "").replace("]", ""));
+            code += String.format("%5.2f & %5.2f & %5.2f ", entryTime, entrySafety, entry.getValue().get(0));
+            code += String.format("%3s & %5.2f & %5.2f & %5.2f & %5.2f \\\\", "", entryTimeliness, entrySafety, entryEnergy, entryScore);
+            
+        	double singleScore = 0.0;
+        	if (m_safetyWeight == 0.6) singleScore = entrySafety;
+        	if (m_timelinessWeight == 0.6) singleScore = entryTimeliness;
+        	if (m_energyWeight == 0.6) singleScore = entryEnergy;
+        	if ( entryScore > maxScore)
+            {
+                maxEntry = entry;
+                maxScore = entryScore;
+            }
+        	if (singleScore > maxSingeScore) {
+        		maxSingeScore =singleScore;
+        		maxSingleEntry = entry;
+        	}
+        }
+        m_selected_candidate_time = maxEntry.getValue().get(TIME_INDEX);
+        m_selected_candidate_safety = maxEntry.getValue().get(SAFETY_INDEX);
+        m_selected_candidate_energy = maxEntry.getValue().get(ENERGY_INDEX);
+        m_selected_candidate_score = maxScore;
+        
+//        log("Selected candidate policy: "+m_candidates.get(maxEntry.getKey()));
+//        log("Score: "+String.valueOf(m_selected_candidate_score)+" Safety: "+String.valueOf(m_selected_candidate_safety)+" Time: "+String.valueOf(m_selected_candidate_time)+" Energy: "+String.valueOf(m_selected_candidate_energy));
+//        log("Alternate selected, based on really preferring one quality: " +m_candidates.get(maxSingleEntry.getKey()));
+//        if (!Objects.equals(maxSingleEntry.getKey(), maxEntry.getKey())) {
+ //       	log("THESE PLANS ARE DIFFERENT");
+ //       }
+ //       return m_candidates.get(maxEntry.getKey())+".adv";
+    	
+    	code +="\n \\hline \n"
+    			+ "\\end{tabular} } \n";
+
+    	
+    	System.out.println(code);
     }
     
     
@@ -161,13 +246,14 @@ public class DecisionEngineCP3 extends DecisionEngine {
         System.out.println("Setting configuration provider...");
         setConfigurationProvider(cs);
         
-		String currentConfStr="mapServerStd0_INIT=0,mapServerObs0_INIT=0,safeSpeedSetting0_INIT=0,markerLocalization0_INIT=0,markerRecognizer0_INIT=0,amcl0_INIT=1,laserscanNodelet0_INIT=1,mrpt0_INIT=2,camera0_INIT=1,lidar0_INIT=1,headlamp0_INIT=0,kinect0_INIT=2,fullSpeedSetting0_INIT=0,halfSpeedSetting0_INIT=1";
-		
+//		String currentConfStr="mapServerStd0_INIT=0,mapServerObs0_INIT=0,safeSpeedSetting0_INIT=0,markerLocalization0_INIT=0,markerRecognizer0_INIT=0,amcl0_INIT=1,laserscanNodelet0_INIT=1,mrpt0_INIT=2,camera0_INIT=1,lidar0_INIT=1,headlamp0_INIT=0,kinect0_INIT=2,fullSpeedSetting0_INIT=0,halfSpeedSetting0_INIT=1";
+		String currentConfStr="laserscanNodelet0_INIT=0,amcl0_INIT=0,markerLocalization0_INIT=0,mapServerObs0_INIT=0,markerRecognizer0_INIT=0,mapServerStd0_INIT=1,mrpt0_INIT=2,kinect0_INIT=0,camera0_INIT=0,headlamp0_INIT=0,lidar0_INIT=2,fullSpeedSetting0_INIT=0,halfSpeedSetting0_INIT=1,safeSpeedSetting0_INIT=0";
         cs.generateReconfigurationsFrom(currentConfStr);
-
+		
+        setTimelinessPreference();
         for (int i=180000; i< 180500; i+=500){
         	System.out.println("Generating candidates for l1-l4...");
-            generateCandidates("l50", "l1");
+            generateCandidates("l32", "l36");
         	System.out.println("Scoring candidates...");
             scoreCandidates(dummyMap, i, 1, "-1");
             System.out.println(String.valueOf(m_scoreboard));	
@@ -178,6 +264,7 @@ public class DecisionEngineCP3 extends DecisionEngine {
             PolicyToIGCP3 translator = new PolicyToIGCP3(pp, dummyMap);
             System.out.println (translator.translate (cs, currentConfStr));
         }
+        printTable();
 
     }
     

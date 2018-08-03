@@ -100,7 +100,7 @@ public class MapTranslator {
     public static final String INITIAL_ROBOT_CONF_CONST = "INITIAL_CONFIGURATION";
     public static final String ROBOT_MAX_RECONF_CONST = "RECONF_MAX";
     public static final String ROBOT_RECONF_VAR = "cr";
-    public static final String ROBOT_MAX_RECONF_VAL = "1"; // Only reconfiguring at start of plan, for the time being...
+    public static  String ROBOT_MAX_RECONF_VAL = "1"; // Only reconfiguring at start of plan, for the time being...
 //    public static final String ROBOT_CONF_PREFIX = "sol_";
 
 
@@ -126,7 +126,7 @@ public class MapTranslator {
     public static final double DEFAULT_TIME_TACTIC_TIME=1; // Tactics are not instantaneous;
     public static final String TACTIC_PREFIX="t";
 
-    public static boolean CONSIDER_RECONFIGURATION_COST=true;
+    public static boolean CONSIDER_RECONFIGURATION_COST=false;
     
     // Properties' indices
     public static final int TIME_PROPERTY = 0;
@@ -509,8 +509,8 @@ public class MapTranslator {
 	            for (Map.Entry<String, Configuration> c: m_cp.getLegalTargetConfigurations().entrySet()){
 	      		  buf+= "\t [t_set_"+c.getValue().getId()+"]  true :";
 	      		  int counter=0;
+    	      	  String reconfCost = "0";
 	      		  for (Map.Entry<String, Configuration> cs: m_cp.getLegalTargetConfigurations().entrySet()){
-	      			  String reconfCost = "0";
 	      			  if (CONSIDER_RECONFIGURATION_COST){
 	      				  reconfCost = String.valueOf(m_cp.getReconfigurationTime(cs.getValue().getId(),c.getValue().getId()));
 	      			  }
@@ -518,7 +518,7 @@ public class MapTranslator {
 	      			  buf+= ROBOT_CONF_VAR + "=" + cs.getKey() + " ? "+  reconfCost;  
 	      			  counter++;
 	      		  }
-	      		  buf += ": 0;\n";  
+	      		  buf += ": "+reconfCost+";\n";  
 	      	  }
             }
             buf+="endrewards\n\n";
@@ -697,6 +697,29 @@ public class MapTranslator {
         return buf;
     }
 
+    
+    /**
+     * Translates a set of reconfiguration actions into a PRISM module constraining the reconfigurations of the robot to those
+     * If the allowed reconfiguration list is empty, no constraint module is generated.
+     */
+    public static String generateReconfigurationConstraintModule(List allowed){
+    	if (allowed.isEmpty()) return "";
+        String buf="\n"+"module reconf_constraint\n";
+        buf+= "// Allowed reconfigurations: "+ String.valueOf(allowed) + "\n";
+        synchronized(m_map) {
+        	buf += "\t[dummy_action] false -> true; \n";
+            for (Map.Entry<String, Configuration> c: m_cp.getLegalTargetConfigurations().entrySet()){
+                String str_reconf= "t_set_"+c.getValue().getId();
+                if (!allowed.contains(str_reconf)) {
+                    buf += "\t[" + str_reconf + "] false -> true; \n";
+                }
+            }
+        }
+        buf += "endmodule\n";
+        return buf;
+    }
+    
+
     /**
      * Translates a plan into a PRISM module constraining the action of the robots to that plan00
      * @param plan List of strings (e.g., ["l1_to_l2", ..., "t_recharge", ..., "l4_to_l5"])
@@ -866,12 +889,12 @@ public class MapTranslator {
      * @return String PRISM encoding for constrained adaptation scenario
      */
 
-    public static String getConstrainedToPathMapTranslation(List<String> path){
-        return getConstrainedToPathMapTranslation(path, false);
+    public static String getConstrainedToPathMapTranslation(List<String> path, List<String> reconfs){
+        return getConstrainedToPathMapTranslation(path, reconfs, false);
     }
 
-    public static String getConstrainedToPathMapTranslation(List<String> path, boolean inhibitTactics){
-        return getMapTranslation(inhibitTactics) +"\n\n"+ generatePathConstraintModule(path);
+    public static String getConstrainedToPathMapTranslation(List<String> path, List<String> reconfs, boolean inhibitTactics){
+        return getMapTranslation(inhibitTactics) +"\n\n"+ generatePathConstraintModule(path) +"\n\n"+ generateReconfigurationConstraintModule(reconfs);
     }
 
     /**
@@ -890,12 +913,12 @@ public class MapTranslator {
      */
 
 
-    public static void exportMapTranslation(String f, List<String> path) {
-        exportMapTranslation (f, path, false);
+    public static void exportMapTranslation(String f, List<String> path, List<String> reconfs) {
+        exportMapTranslation (f, path, reconfs, false);
     }
 
-    public static void exportMapTranslation(String f, List<String> path, boolean inhibitTactics) {
-        exportTranslation(f, getConstrainedToPathMapTranslation(path, inhibitTactics));
+    public static void exportMapTranslation(String f, List<String> path, List<String> reconfs, boolean inhibitTactics) {
+        exportTranslation(f, getConstrainedToPathMapTranslation(path, reconfs, inhibitTactics));
     }
 
     /**
@@ -944,8 +967,8 @@ public class MapTranslator {
      * @param target String label of target location
      * @return
      */
-    public static Map<List, String> exportConstrainedTranslationsBetween(String f_base, String source, String target) {
-        return exportConstrainedTranslationsBetween(f_base, source, target, false);   
+    public static Map<List, String> exportConstrainedTranslationsBetween(String f_base, String source, List<String> reconfs, String target) {
+        return exportConstrainedTranslationsBetween(f_base, source, target, reconfs, false);   
     }
 
     public static Map<List, String> exportSingleTranslationBetween(String f_base, String source, String target, boolean inhibitTactics) {
@@ -961,13 +984,13 @@ public class MapTranslator {
 
     
     
-    public static Map<List, String> exportConstrainedTranslationsBetween(String f_base, String source, String target, boolean inhibitTactics) {
+    public static Map<List, String> exportConstrainedTranslationsBetween(String f_base, String source, String target, List<String> reconfs, boolean inhibitTactics) {
         List<Stack> paths = goFindAllPaths(source, target);
         Map<List, String> specifications = new HashMap<List, String>();
         int c=0;
         for ( List path : paths )  {
             String filename = f_base + "/" + String.valueOf (c);
-            exportMapTranslation (filename, path, inhibitTactics);
+            exportMapTranslation (filename, path, reconfs, inhibitTactics);
             logInfo("Exported map translation "+String.valueOf(c));
             specifications.put(path, filename);
             c++;
@@ -976,7 +999,7 @@ public class MapTranslator {
     }
 
     
-    public static Map<List, String> exportConstrainedTranslationsBetweenCutOff(String f_base, String source, String target, boolean inhibitTactics) {
+    public static Map<List, String> exportConstrainedTranslationsBetweenCutOff(String f_base, String source, String target, List<String> reconfs, boolean inhibitTactics) {
         List<Stack> paths = goFindAllPaths(source, target);
         int cutoff=5;
         ArrayList<EnvMapPath> map_paths = new ArrayList<EnvMapPath>();
@@ -990,7 +1013,7 @@ public class MapTranslator {
         int c=0;
         for ( EnvMapPath path : map_paths )  {
             String filename = f_base + "/" + String.valueOf (c);
-            exportMapTranslation (filename, path.getPath(), inhibitTactics);
+            exportMapTranslation (filename, path.getPath(), reconfs, inhibitTactics);
             logInfo("Exported map translation "+String.valueOf(c));
             specifications.put(path.getPath(), filename);
             logInfo("Candidate Path distance : "+String.valueOf(path.getDistance())+ " "+String.valueOf(path.getPath()));

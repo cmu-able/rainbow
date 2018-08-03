@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
+import java.io.PrintWriter;
 
 import org.apache.log4j.Logger;
 import org.sa.rainbow.brass.PropertiesConnector;
@@ -13,11 +16,8 @@ import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.plan.p2.MapTranslator;
 import org.sa.rainbow.brass.adaptation.PrismPolicy;
 import org.sa.rainbow.brass.adaptation.PrismConnectorAPI;
-import org.sa.rainbow.brass.adaptation.PolicyToIG;
 
 import org.sa.rainbow.brass.confsynthesis.ConfigurationProvider;
-import org.sa.rainbow.brass.confsynthesis.ConfigurationSynthesizer;
-import org.sa.rainbow.brass.confsynthesis.SimpleConfigurationStore;
 
 
 import com.google.common.base.Objects;
@@ -41,7 +41,7 @@ public class DecisionEngine {
     public static double m_selected_candidate_score;
     public static PrismPolicy m_plan;
 	public static double m_real_observed_battery_ratio = 1.0; // We assume that we have less battery than observed if <1
-
+	public static int m_priority_index = 2;
 
     public static final double INFINITY = 999999.0;
 
@@ -94,7 +94,7 @@ public class DecisionEngine {
     public static void generateCandidates(String origin, String destination, boolean inhibitTactics){
         m_origin = origin;
         m_destination = destination;
-        m_candidates = m_mt.exportConstrainedTranslationsBetweenCutOff(m_export_path, origin, destination, inhibitTactics);	
+        m_candidates = m_mt.exportConstrainedTranslationsBetweenCutOff(m_export_path, origin, destination, new ArrayList<String>() , inhibitTactics);	
 //        m_candidates = m_mt.exportConstrainedTranslationsBetween(m_export_path, origin, destination, inhibitTactics);	
 //        m_candidates = m_mt.exportSingleTranslationBetween(m_export_path, origin, destination, inhibitTactics);	
     }
@@ -116,6 +116,17 @@ public class DecisionEngine {
     }
 
     
+    public static void appendToModel (String modelFile, String text){
+    	try(FileWriter fw = new FileWriter(modelFile, true);
+    			BufferedWriter bw = new BufferedWriter(fw);
+    			PrintWriter out = new PrintWriter(bw))
+    		{
+    			out.println(text);
+    		} catch (Exception e) {
+                System.out.println("Error appending reconfiguration constraint module to PRISM model: "+modelFile);
+    		}
+    }
+    
     public static void scoreCandidates (EnvMap map, long batteryLevel, int robotHeading, String fromConfig) throws Exception {
     	try{
             m_scoreboard.clear();
@@ -134,8 +145,22 @@ public class DecisionEngine {
             log(m_consts);
             String result;
             for (List candidate_key : m_candidates.keySet() ){                           	
-                result = PrismConnectorAPI.instance().modelCheckFromFileS (m_candidates.get(candidate_key), m_properties_file, m_candidates.get (candidate_key), -1, m_consts);
+                // We generate the policy for the priority QA
+            	result = PrismConnectorAPI.instance().modelCheckFromFileS (m_candidates.get(candidate_key), m_properties_file, m_candidates.get (candidate_key), m_priority_index, m_consts);
+                PrismPolicy pp= new PrismPolicy(m_candidates.get (candidate_key)+".adv");
+                pp.readPolicy();  
+                String plan = pp.getPlan().toString();
+                System.out.println("\n\n\t** Priority Plan:"+plan+"\n");
+                ArrayList<String> reconfs = pp.getAllowedReconfigurations();
+                System.out.println("\t ** Allowed reconfigurations: "+ reconfs.toString()+"\n\n");
+
+                try {
+                    appendToModel(m_candidates.get(candidate_key), "\n\n"+MapTranslator.generateReconfigurationConstraintModule(reconfs));
+                }catch (Exception e) {
+                }
+
                 
+                result = PrismConnectorAPI.instance().modelCheckFromFileS (m_candidates.get(candidate_key), m_properties_file, m_candidates.get (candidate_key), -1, m_consts);                
                 String[] results = result.split(",");
                 ArrayList<Double> resultItems = new ArrayList<Double>();
                 for (int i=0; i<results.length; i++){
