@@ -1,15 +1,18 @@
 package org.sa.rainbow.brass.adaptation.p2_cp3;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -278,11 +281,29 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 					}
 				}
 				String tgt = m_models.getMissionStateModel().getModelInstance().getTargetWaypoint();
-				log("Generating candidate paths from " + srcLabel + " to " + tgt);
-				DecisionEngineCP3.generateCandidates(srcLabel, tgt);
-				log("---> found " + DecisionEngineCP3.m_candidates.size());
-				BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(),
-						"Found " + DecisionEngineCP3.m_candidates.size() + " valid paths");
+				if (DecisionEngineCP3.do_not_change_paths) {
+					Stack<String> currentPath = new Stack<>();
+					currentPath.push(srcLabel);
+					List<? extends IInstruction> remainingInstructions = igModel.getRemainingInstructions();
+					for (IInstruction inst : remainingInstructions) {
+						if (inst instanceof MoveAbsHInstruction) {
+							MoveAbsHInstruction i = (MoveAbsHInstruction) inst;
+							currentPath.push(i.getSourceWaypoint());
+						}
+					}
+					currentPath.push(tgt);
+					log("---> using path " + currentPath.toString());
+					DecisionEngineCP3.generateCandidates(currentPath);
+					BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(), "Using path " + DecisionEngineCP3.m_candidates.keySet().iterator().next().toString());
+
+				} else {
+					log("Generating candidate paths from " + srcLabel + " to " + tgt);
+
+					DecisionEngineCP3.generateCandidates(srcLabel, tgt);
+					log("---> found " + DecisionEngineCP3.m_candidates.size());
+					BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(),
+							"Found " + DecisionEngineCP3.m_candidates.size() + " valid paths");
+				}
 				// DecisionEngineCP3.generateCandidates("l1", "l8");
 				try {
 					AdaptationTree<BrassPlan> at = scoreAndGeneratePlan(confInitString, copy);
@@ -323,6 +344,12 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 							.ordinal());
 			if (DecisionEngineCP3.m_scoreboard.isEmpty()) {
 				throw new RainbowException("Failed to find a plan for " + confInitString);
+			}
+			String table = DecisionEngineCP3.export(m_models.getEnvMapModel().getModelInstance());
+			try (BufferedWriter writer = new BufferedWriter(new FileWriter(
+					System.getProperty("user.home") + "/logs/selected_policy" + new Date().getTime() + ".tex"))) {
+				writer.write(table);
+			} catch (Exception e) {
 			}
 			PrismPolicy pp = new PrismPolicy(DecisionEngineCP3.selectPolicy());
 			pp.readPolicy();

@@ -624,6 +624,22 @@ public class EnvMap {
 		addArc("ls", "l4", 5.4, true);
 	}
 
+	
+	public String exportToTikz(){
+		String code="";
+		for (Map.Entry<String,EnvMapNode> entry : this.getNodes().entrySet() ){
+			code+="\\node [mynode] ("+entry.getValue().m_label+") at ("+String.valueOf(entry.getValue().getX())+","+ String.valueOf(entry.getValue().getY())+") {};\n";
+			code+="\\node[draw=none,fill=none] at ("+String.valueOf(entry.getValue().getX()+2)+","+String.valueOf(entry.getValue().getY()-2)+") { \\scriptsize "+entry.getValue().m_label+"};\n";
+		}
+		code+="\n\\begin{scope}[> = stealth,  -,gray, every node/.style = {black,right,align=center}]\n\n";
+		LinkedList<EnvMapArc> arcs = this.getArcs();
+        for (int i=0; i<arcs.size(); i++){
+        	code +="\\draw ("+arcs.get(i).getSource()+") edge [left]   node     {}     ("+arcs.get(i).getTarget()+");\n"; 
+        }
+        code +="\\end{scope}\n";
+        return code;
+	}
+	
 	/**
 	 * Class test
 	 * 
