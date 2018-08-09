@@ -14,11 +14,14 @@ import org.apache.log4j.Logger;
 import org.sa.rainbow.brass.PropertiesConnector;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.plan.p2.MapTranslator;
+import org.sa.rainbow.brass.plan.p2_cp3.DecisionEngineCP3;
 import org.sa.rainbow.brass.adaptation.PrismPolicy;
 import org.sa.rainbow.brass.adaptation.PrismConnectorAPI;
 
 import org.sa.rainbow.brass.confsynthesis.ConfigurationProvider;
-
+import org.sa.rainbow.brass.das.BRASSHttpConnector;
+import org.sa.rainbow.brass.das.IBRASSConnector.DASPhase2StatusT;
+import org.sa.rainbow.brass.das.IBRASSConnector.Phases;
 
 import com.google.common.base.Objects;
 
@@ -146,7 +149,11 @@ public class DecisionEngine {
             String result;
             for (List candidate_key : m_candidates.keySet() ){                           	
                 // We generate the policy for the priority QA
+				BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(), "Model checking path " + candidate_key.toString());
+
             	result = PrismConnectorAPI.instance().modelCheckFromFileS (m_candidates.get(candidate_key), m_properties_file, m_candidates.get (candidate_key), m_priority_index, m_consts);
+				BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(), "  Finished first model check");
+
                 PrismPolicy pp= new PrismPolicy(m_candidates.get (candidate_key)+".adv");
                 pp.readPolicy();  
                 String plan = pp.getPlan().toString();
@@ -159,8 +166,10 @@ public class DecisionEngine {
                 }catch (Exception e) {
                 }
 
-                
-                result = PrismConnectorAPI.instance().modelCheckFromFileS (m_candidates.get(candidate_key), m_properties_file, m_candidates.get (candidate_key), -1, m_consts);                
+				BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(), "  Starting second model check. PP=" + plan + ", AR=" + reconfs);
+
+                result = PrismConnectorAPI.instance().modelCheckFromFileS (m_candidates.get(candidate_key), m_properties_file, m_candidates.get (candidate_key), -1, m_consts);
+				BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(), "  Result is " + result);
                 String[] results = result.split(",");
                 ArrayList<Double> resultItems = new ArrayList<Double>();
                 for (int i=0; i<results.length; i++){

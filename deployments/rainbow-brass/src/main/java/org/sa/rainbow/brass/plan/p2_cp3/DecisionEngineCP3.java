@@ -28,7 +28,7 @@ public class DecisionEngineCP3 extends DecisionEngine {
 	public static double m_safetyWeight;
 	public static double m_energyWeight;
 	public static double m_timelinessWeight;
-	private static boolean choose_balanced_utilty;
+	public static boolean choose_balanced_utilty;
 	public static boolean do_not_change_paths;
 	public static String m_selected_candidate;
 
