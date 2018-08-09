@@ -294,20 +294,30 @@ public class EnvMap {
 		if (arc == null) {
 			System.out.println("There is no connection between " + na + " and " + nb);
 		}
-		Map<String, Object> allProperties = arc==null?new HashMap<>():arc.getAllProperties();
-		if (!n.equals(na)) {
+		Map<String,Object> allProperties = new HashMap<>();
+		Map<String,Double> allTimes = new HashMap<>();
+		Map<String,Double> allHitrates = new HashMap<>();
+		Map<String,Double> allSuccessrates = new HashMap<>();
+		if (arc != null) {
+			arc.retrieveAllProperties(allProperties, allTimes, allHitrates, allSuccessrates);
+			allTimes.clear(); // Remove the times because they shouldn't be inherited
+		}
+//		Map<String, Object> allProperties = arc==null?new HashMap<>():arc.getAllProperties();
+		if (!n.equals(na)) { 
 			EnvMapArc arc1 = addArc(na, n, distanceBetween(na, n), true);
 			EnvMapArc arc2 = addArc(n, na, distanceBetween(na, n), true);
-			arc1.loadProperties(allProperties);
-			arc2.loadProperties(allProperties);
+			arc1.loadProperties(allProperties, allTimes, allHitrates, allSuccessrates);
+			arc2.loadProperties(allProperties, allTimes, allHitrates, allSuccessrates);
+			removeArcs(na,nb);
 		}
 		if (obstacle) {
 			removeArcs(na, nb);
 		} else if (!n.equals(nb)) {
 			EnvMapArc arc1 = addArc(nb, n, distanceBetween(nb, n), true);
 			EnvMapArc arc2 = addArc(n, nb, distanceBetween(nb, n), true);
-			arc1.loadProperties(allProperties);
-			arc2.loadProperties(allProperties);
+			arc1.loadProperties(allProperties, allTimes, allHitrates, allSuccessrates);
+			arc2.loadProperties(allProperties, allTimes, allHitrates, allSuccessrates);
+			removeArcs(na,nb);
 		}
 		// Somehow, the planning things that n to nb is still valid
 		// else {
