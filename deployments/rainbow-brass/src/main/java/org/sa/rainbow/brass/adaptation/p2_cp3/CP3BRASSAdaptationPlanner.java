@@ -35,6 +35,7 @@ import org.sa.rainbow.brass.model.p2_cp3.mission.MissionState.LocationRecording;
 import org.sa.rainbow.brass.model.p2_cp3.mission.MissionState.UtilityPreference;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowState.CP3ModelState;
 import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotState.Sensors;
+import org.sa.rainbow.brass.plan.p2.MapTranslator;
 import org.sa.rainbow.brass.plan.p2_cp3.DecisionEngineCP3;
 import org.sa.rainbow.brass.plan.p2_cp3.PolicyToIGCP3;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
@@ -198,6 +199,11 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 				log(message);
 				m_errorDetected = false;
 				m_reportingPort.info(getComponentType(), "Determining an appropriate adaptation");
+				BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(), "params: fix_paths =" 
+				+ DecisionEngineCP3.do_not_change_paths 
+				+ ", consider_cost=" + MapTranslator.CONSIDER_RECONFIGURATION_COST 
+				+ ", rc/plan=" + MapTranslator.ROBOT_MAX_RECONF_VAL 
+				+ ", balanced_utility=" + DecisionEngineCP3.choose_balanced_utilty);
 				// DecisionEngineCP3.setMap(m_models.getEnvMapModel().getModelInstance());
 
 				// 1. Determine string for intialization of the planner
@@ -346,8 +352,9 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 				throw new RainbowException("Failed to find a plan for " + confInitString);
 			}
 			String table = DecisionEngineCP3.export(m_models.getEnvMapModel().getModelInstance());
+			long curTime = new Date().getTime();
 			try (BufferedWriter writer = new BufferedWriter(new FileWriter(
-					System.getProperty("user.home") + "/logs/selected_policy" + new Date().getTime() + ".tex"))) {
+					System.getProperty("user.home") + "/logs/selected_policy" + curTime + ".tex"))) {
 				writer.write(table);
 			} catch (Exception e) {
 			}
@@ -359,6 +366,11 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 			}
 			String plan = planArray.toString();
 			m_reportingPort.info(getComponentType(), "Planner chooses the plan " + plan, LOGGER);
+			try (BufferedWriter writer = new BufferedWriter(new FileWriter(
+					System.getProperty("user.home") + "/logs/selected_plan_" + curTime + ""))) {
+				writer.write(plan.toString());
+			} catch (Exception e) {
+			} 
 			ArrayList<String> planToTA = new ArrayList<String>(planArray.size());
 			ArrayList<String> planToReport = new ArrayList<>(planArray.size());
 			for (String cmd : planArray) {
