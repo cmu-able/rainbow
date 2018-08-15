@@ -110,6 +110,7 @@ cd $DEPLOYMENT
 mvn $target
 
 if [[ "$target" == "install" ]]; then
+  mkdir -p $BUILDDIR/bin/lib
   cp target/*.jar $BUILDDIR/bin/lib
   cp target/lib/* $BUILDDIR/bin/lib
 
@@ -124,11 +125,13 @@ if [[ "$target" == "install" ]]; then
   cp license.html bin/
 
   mv bin Rainbow-$VERSION
-  zip Rainbow-$VERSION
+  zip -r Rainbow-$VERSION Rainbow-$VERSION
 elif [[ "$target" == "clean" ]]; then
   cd $BUILDDIR
+  rm -rf bin
   rm -rf Rainbow-$VERSION
   rm Rainbow-$VERSION.zip
+  echo "Build is in Rainbow-$VERSION and Rainbow-$VERSION.zip"
 fi
 
 
