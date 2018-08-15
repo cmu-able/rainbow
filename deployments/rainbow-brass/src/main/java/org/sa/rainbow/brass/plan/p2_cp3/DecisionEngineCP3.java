@@ -47,26 +47,24 @@ public class DecisionEngineCP3 extends DecisionEngine {
 	public static final int ENERGY_INDEX = 0;
 	public static final int TIME_INDEX = 1;
 	public static final int SAFETY_INDEX = 2;
+	public static final int SUCCESS_INDEX = 3; 
 
 	public static void setSafetyPreference() {
 		m_safetyWeight = 0.6;
 		m_energyWeight = 0.2;
 		m_timelinessWeight = 0.2;
-		m_priority_index = SAFETY_INDEX;
 	}
 
 	public static void setEnergyPreference() {
 		m_safetyWeight = 0.2;
 		m_energyWeight = 0.6;
 		m_timelinessWeight = 0.2;
-		m_priority_index = ENERGY_INDEX;
 	}
 
 	public static void setTimelinessPreference() {
 		m_safetyWeight = 0.2;
 		m_energyWeight = 0.2;
 		m_timelinessWeight = 0.6;
-		m_priority_index = TIME_INDEX;
 	}
 
 	/**
@@ -178,87 +176,77 @@ public class DecisionEngineCP3 extends DecisionEngine {
 		return m_selected_candidate_time;
 	}
 
-	public static String generateLaTeXCandidateTable() {
-		String code = "";
-		code += "\n {\\scriptsize \n \\setlength\\tabcolsep{1pt} \n \\centering \n \\begin{tabular}{| l | l || l | l | l | || l | l | l || l | } \n \\hline \n"
-				+ "Candidate & Config & {\\bf Time} & {\\bf Safety} & {\\bf Energy} & {\\bf \\sf $U_{Time}$}  & {\\bf \\sf $U_{Safety}$}  & {\\bf \\sf $U_{Energy}$}  & {\\bf Score} \\\\ \n"
-				+ "\\hline \n";
+	public static String generateLaTeXCandidateTable(){
 
-		Double maxTime = getMaxTime();
-		Double maxSafety = getMaxSafety();
-		Double maxEnergy = getMaxEnergy();
-		Double maxScore = 0.0;
+    	String code="";
+    	code +="\n {\\scriptsize \n \\setlength\\tabcolsep{1pt} \n \\centering \n \\begin{tabular}{| p{2.5cm} | l || l | l | l | l | || l | l | l || l | } \n \\hline \n"
+    			+ "{\\bf Candidate} & {\\bf Config} & {\\bf PSuccess} & {\\bf Time} & {\\bf Safety} & {\\bf Energy} & {\\bf \\sf $U_{Time}$}  & {\\bf \\sf $U_{Safety}$}  & {\\bf \\sf $U_{Energy}$}  & {\\bf Score} \\\\ \n"
+    			+ "\\hline \n";
+    	
+    	Double maxTime = getMaxTime();
+    	Double maxSafety = getMaxSafety();
+    	Double maxEnergy = getMaxEnergy();
+    	Double maxScore=0.0;
 
-		Map.Entry<List, ArrayList<Double>> maxEntry = m_scoreboard.entrySet().iterator().next();
-		double maxSingeScore = 0.0;
-		Map.Entry<List, ArrayList<Double>> maxSingleEntry = m_scoreboard.entrySet().iterator().next();
-		for (Map.Entry<List, ArrayList<Double>> entry : m_scoreboard.entrySet()) {
-			Double entryTime = entry.getValue().get(TIME_INDEX);
-			Double entryTimeliness = 0.0;
-			if (maxTime > 0.0) {
-				entryTimeliness = 1.0 - (entryTime / maxTime);
-			}
-			Double entryProbSafety = entry.getValue().get(SAFETY_INDEX);
-			Double entrySafety = 0.0;
-			if (maxSafety > 0.0) {
-				entrySafety = (entryProbSafety / maxSafety);
-			}
+        Map.Entry<List, ArrayList<Double>> maxEntry = m_scoreboard.entrySet().iterator().next();
+        double maxSingeScore = 0.0;
+        Map.Entry<List, ArrayList<Double>> maxSingleEntry = m_scoreboard.entrySet().iterator().next();
+        for (Map.Entry<List, ArrayList<Double>> entry : m_scoreboard.entrySet())
+        {
+            Double entryTime = entry.getValue().get(TIME_INDEX);
+            Double entryTimeliness = 0.0;
+            if (maxTime>0.0){
+            	entryTimeliness = 1.0-(entryTime / maxTime);
+            }
+            Double entryProbSafety = entry.getValue().get(SAFETY_INDEX);
+            Double entrySafety=0.0;
+            if (maxSafety>0.0){
+            	entrySafety = (entryProbSafety/maxSafety);
+            }
 
-			Double entryEnergy = entry.getValue().get(ENERGY_INDEX) / maxEnergy;
+            Double entryEnergy = entry.getValue().get(ENERGY_INDEX)/maxEnergy;
+            Double entryPsuccess = entry.getValue().get(SUCCESS_INDEX);
 
-			PrismPolicy pp = new PrismPolicy(m_candidates.get(entry.getKey()) + ".adv");
-			pp.readPolicy();
-			String entryConfig = pp.getAllowedReconfigurations().toString();
-			ConfigurationSynthesizer cs = new ConfigurationSynthesizer(Rainbow.instance().allProperties());
-			String entryConfigName = cs
-					.translateId(entryConfig.replace("[", "").replace("]", "").replace("t_set_", ""));
+            PrismPolicy pp = new PrismPolicy(m_candidates.get(entry.getKey())+".adv");
+            pp.readPolicy();
+            String entryConfig = pp.getAllowedReconfigurations().toString();
+            ConfigurationSynthesizer cs = new ConfigurationSynthesizer(Rainbow.instance().allProperties());
+            String entryConfigName = cs.translateId(entryConfig.replace("[", "").replace("]", "").replace("t_set_",""));
+            
+            Double entryScore = m_safetyWeight * entrySafety + m_timelinessWeight * entryTimeliness + m_energyWeight * entryEnergy;
+        	
+            code += String.format("\n %40s & ", String.valueOf(entry.getKey()).replace("[", "").replace("]", ""));
+            code += String.format(" %30s & ", entryConfigName);
+            code += String.format("%5.2f & ", entryPsuccess);
+            code += String.format("%5.2f & %5.2f & %5.2f ", entryTime, entrySafety, entry.getValue().get(0));
+            code += String.format("%3s & %5.2f & %5.2f & %5.2f & %5.2f \\\\", "", entryTimeliness, entrySafety, entryEnergy, entryScore);
 
-			Double entryScore = m_safetyWeight * entrySafety + m_timelinessWeight * entryTimeliness
-					+ m_energyWeight * entryEnergy;
+        	double singleScore = 0.0;
+        	if (m_safetyWeight == 0.6) singleScore = entrySafety;
+        	if (m_timelinessWeight == 0.6) singleScore = entryTimeliness;
+        	if (m_energyWeight == 0.6) singleScore = entryEnergy;
+        	if ( entryScore > maxScore)
+            {
+                maxEntry = entry;
+                maxScore = entryScore;
+            }
 
-			code += String.format("\n %40s & ", String.valueOf(entry.getKey()).replace("[", "").replace("]", ""));
-			code += String.format(" %30s & ", entryConfigName);
-			code += String.format("%5.2f & %5.2f & %5.2f ", entryTime, entrySafety, entry.getValue().get(0));
-			code += String.format("%3s & %5.2f & %5.2f & %5.2f & %5.2f \\\\", "", entryTimeliness, entrySafety,
-					entryEnergy, entryScore);
+        	if (singleScore > maxSingeScore) {
+        		maxSingeScore =singleScore;
+        		maxSingleEntry = entry;
+        	}
+        }
 
-			double singleScore = 0.0;
-			if (m_safetyWeight == 0.6)
-				singleScore = entrySafety;
-			if (m_timelinessWeight == 0.6)
-				singleScore = entryTimeliness;
-			if (m_energyWeight == 0.6)
-				singleScore = entryEnergy;
-			if (entryScore > maxScore) {
-				maxEntry = entry;
-				maxScore = entryScore;
-			}
-			if (singleScore > maxSingeScore) {
-				maxSingeScore = singleScore;
-				maxSingleEntry = entry;
-			}
-		}
-		m_selected_candidate_time = maxEntry.getValue().get(TIME_INDEX);
-		m_selected_candidate_safety = maxEntry.getValue().get(SAFETY_INDEX);
-		m_selected_candidate_energy = maxEntry.getValue().get(ENERGY_INDEX);
-		m_selected_candidate_score = maxScore;
+        m_selected_candidate_time = maxEntry.getValue().get(TIME_INDEX);
+        m_selected_candidate_safety = maxEntry.getValue().get(SAFETY_INDEX);
+        m_selected_candidate_energy = maxEntry.getValue().get(ENERGY_INDEX);
+        m_selected_candidate_score = maxScore;
 
-		// log("Selected candidate policy: "+m_candidates.get(maxEntry.getKey()));
-		// log("Score: "+String.valueOf(m_selected_candidate_score)+" Safety:
-		// "+String.valueOf(m_selected_candidate_safety)+" Time:
-		// "+String.valueOf(m_selected_candidate_time)+" Energy:
-		// "+String.valueOf(m_selected_candidate_energy));
-		// log("Alternate selected, based on really preferring one quality: "
-		// +m_candidates.get(maxSingleEntry.getKey()));
-		// if (!Objects.equals(maxSingleEntry.getKey(), maxEntry.getKey())) {
-		// log("THESE PLANS ARE DIFFERENT");
-		// }
-		// return m_candidates.get(maxEntry.getKey())+".adv";
+    	code +="\n \\hline \n"
+    			+ "\\end{tabular} } \n";
 
-		code += "\n \\hline \n" + "\\end{tabular} } \n";
-
-		return code;
-	}
+    	return code;
+    }
 
 	public static String exportPathToTikz(ArrayList<String> path, String mode, String color) {
 		String code = "\\begin{scope}[> = stealth,  ," + color + "," + mode

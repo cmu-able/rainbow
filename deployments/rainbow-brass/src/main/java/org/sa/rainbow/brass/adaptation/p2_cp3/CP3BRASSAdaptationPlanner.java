@@ -294,7 +294,8 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 					for (IInstruction inst : remainingInstructions) {
 						if (inst instanceof MoveAbsHInstruction) {
 							MoveAbsHInstruction i = (MoveAbsHInstruction) inst;
-							currentPath.push(i.getSourceWaypoint());
+							if (!currentPath.contains(i.getSourceWaypoint()))
+								currentPath.push(i.getSourceWaypoint());	
 						}
 					}
 					currentPath.push(tgt);

@@ -44,7 +44,7 @@ public class DecisionEngine {
     public static double m_selected_candidate_score;
     public static PrismPolicy m_plan;
 	public static double m_real_observed_battery_ratio = 1.0; // We assume that we have less battery than observed if <1
-	public static int m_priority_index = 2;
+	public static int m_priority_index = 3;
 
     public static final double INFINITY = 999999.0;
 

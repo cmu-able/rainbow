@@ -6,8 +6,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.Set;
 
 import org.sa.rainbow.brass.adaptation.PrismConnectorAPI;
 import org.sa.rainbow.brass.adaptation.PrismPolicy;
@@ -129,6 +131,14 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 		if (Objects.equals(null, m_configuration_dictionary.get(id)))
 			return "";
 		return m_configuration_dictionary.get(id);
+	}
+	
+	public String translateConfigToId(String config) {
+		for (Entry<String, String> e : m_configuration_dictionary.entrySet()) {
+			if (e.getValue().equals(config))
+				return e.getKey();
+		}
+		return "";
 	}
 
 	
