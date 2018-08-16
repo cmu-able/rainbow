@@ -260,7 +260,7 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
 
     @Override
     public Boolean visitTacticRef (@NotNull StitchParser.TacticRefContext ctx) {
-        if (ctx.DONE () != null) beh.doStrategyAction (Strategy.ActionKind.NULL);
+        if (ctx.DONE () != null) beh.doStrategyAction (Strategy.ActionKind.DONE);
         else if (ctx.NULLTACTIC () != null) beh.doStrategyAction (Strategy.ActionKind.NULL);
         else if (ctx.DO () != null) {
             beh.doStrategyLoop (ctx.v, ctx.i, ctx.t2);
@@ -729,7 +729,8 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
     public Boolean visitMethodCall (@NotNull StitchParser.MethodCallContext ctx) {
 //        IScope preScope = beh.stitch().scope ();
         beh.beginMethodCallExpression ();
-        this.visitExpressions (ctx.expressions ());
+        if (ctx.expressions() != null) 
+        	this.visitExpressions (ctx.expressions ());
         beh.endMethodCallExpression (ctx.IDENTIFIER (), ctx);
 //        if (preScope != beh.stitch().scope ()) {
 //            System.out.println ("visitMethodCall: Scopes don't match: " + this.toString ());
