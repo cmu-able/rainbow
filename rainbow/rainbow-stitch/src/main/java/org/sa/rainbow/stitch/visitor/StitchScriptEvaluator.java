@@ -286,16 +286,25 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
             args[i++] = e.getResult ();
         }
         Object rv = executeMethod (id.IDENTIFIER ().getText (), args);
-        cExpr.setResult (rv);
+//        cExpr.setResult (rv);
         if (rv instanceof Integer) {
-            expr ().setResult (new MyInteger ((Integer) rv));
+            MyInteger result = new MyInteger ((Integer) rv);
+            cExpr.setResult(result);
+			expr ().setResult (result);
         } else if (rv instanceof Long) {
-            expr ().setResult (new MyInteger ((Long) rv));
+            MyInteger result = new MyInteger ((Long) rv);
+            cExpr.setResult(result);
+			expr ().setResult (result);
         } else if (rv instanceof Float) {
-            expr ().setResult (new MyDouble (((Float) rv).doubleValue ()));
+            MyDouble result = new MyDouble (((Float) rv).doubleValue ());
+            cExpr.setResult(result);
+			expr ().setResult (result);
         } else if (rv instanceof Double) {
-            expr ().setResult (new MyDouble ((Double) rv));
+            MyDouble result = new MyDouble ((Double) rv);
+            cExpr.setResult(result);
+            expr ().setResult (result);
         } else {
+        	cExpr.setResult(rv);
             expr ().setResult (rv);
         }
     }
