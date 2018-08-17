@@ -1,5 +1,5 @@
 package org.sa.rainbow.stitch;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,9 +21,13 @@ import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.xpath.XPath;
+import org.opentest4j.AssertionFailedError;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.stitch.core.ScopedEntity;
 import org.sa.rainbow.stitch.error.DummyStitchProblemHandler;
+import org.sa.rainbow.stitch.error.IStitchProblem;
 import org.sa.rainbow.stitch.error.StitchProblem;
+import org.sa.rainbow.stitch.error.StitchProblemHandler;
 import org.sa.rainbow.stitch.parser.StitchLexer;
 import org.sa.rainbow.stitch.parser.StitchParser;
 import org.sa.rainbow.stitch.parser.StitchParser.ScriptContext;
@@ -32,7 +36,7 @@ import org.sa.rainbow.stitch.visitor.Stitch;
 import org.sa.rainbow.stitch.visitor.StitchBeginEndVisitor;
 
 
-public class StitchTest {
+public class StitchTest  {
 
 	
 	
@@ -40,6 +44,43 @@ public class StitchTest {
 		List<StitchProblem> problems = new ArrayList<>();
 	}
 
+	public static class TestProblemHandler implements StitchProblemHandler {
+
+		@Override
+		public void setProblem(IStitchProblem problem) {
+			if (problem.getSeverity() == IStitchProblem.WARNING) {
+				System.out.println(problem.getMessage());
+			}
+			else {
+				throw new AssertionFailedError(problem.getMessage());
+			}
+		}
+
+		@Override
+		public void addAll(Collection<IStitchProblem> problems) {
+			boolean notWarning = false;
+			for (IStitchProblem p : problems) {
+				System.out.println(p.getMessage());
+				if (p.getSeverity() != IStitchProblem.WARNING) {
+					notWarning = true;
+				}
+			}
+			if (notWarning) throw new AssertionFailedError("Mulltiple problems reported");
+		}
+
+		@Override
+		public Collection<IStitchProblem> unreportedProblems() {
+			return null;
+		}
+
+		@Override
+		public StitchProblemHandler clone() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
+	}
+	
 	protected static String s_executed;
 
 	protected Stitch loadScript(String pathname) throws IOException, FileNotFoundException {
@@ -67,7 +108,7 @@ public class StitchTest {
 		lexer.addErrorListener(errReporter);
 		parser.addErrorListener(errReporter);
 		ScriptContext script = parser.script();
-		assertTrue("Could not parse the script", problems.problems.isEmpty());
+		assertTrue(problems.problems.isEmpty(), "Could not parse the script");
 		String tacticPath = "/script/tactic";
 		final Collection<ParseTree> definedTactics = XPath.findAll(script, tacticPath, parser);
 		IStitchBehavior sb = stitch.getBehavior(Stitch.SCOPER_PASS);
@@ -75,7 +116,7 @@ public class StitchTest {
 		StitchBeginEndVisitor walker = new StitchBeginEndVisitor(sb, rootScope);
 		walker.visit(script);
 
-		
+		stitch.stitchProblemHandler = new TestProblemHandler();
 		return stitch;
 	}
 	

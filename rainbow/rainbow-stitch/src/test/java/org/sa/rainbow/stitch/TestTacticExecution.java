@@ -1,10 +1,10 @@
 package org.sa.rainbow.stitch;
-import static org.junit.Assert.assertEquals;
 
+import static org.junit.jupiter.api.Assertions.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.core.Strategy.Outcome;
 import org.sa.rainbow.stitch.visitor.Stitch;

@@ -1,14 +1,14 @@
 package org.sa.rainbow.stitch;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.visitor.Stitch;
 
