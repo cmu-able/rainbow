@@ -23,12 +23,7 @@ public abstract class P2Analyzer extends AbstractRainbowRunnable implements IRai
 
 	public P2Analyzer(String name) {
 		super(name);
-		String period = Rainbow.instance().getProperty(RainbowConstants.PROPKEY_MODEL_EVAL_PERIOD);
-		if (period != null) {
-			setSleepTime(Long.parseLong(period));
-		} else {
-			setSleepTime(IRainbowRunnable.LONG_SLEEP_TIME);
-		}
+
 	}
 
 	@Override
@@ -51,6 +46,12 @@ public abstract class P2Analyzer extends AbstractRainbowRunnable implements IRai
 	@Override
 	public void initialize(IRainbowReportingPort port) throws RainbowConnectionException {
 		super.initialize(port);
+		String period = Rainbow.instance().getProperty(RainbowConstants.PROPKEY_MODEL_EVAL_PERIOD);
+		if (period != null) {
+			setSleepTime(Long.parseLong(period));
+		} else {
+			setSleepTime(IRainbowRunnable.LONG_SLEEP_TIME);
+		}
 		initializeConnections();
 	}
 
