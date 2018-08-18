@@ -13,7 +13,6 @@ import java.util.function.Consumer;
 
 import com.google.common.base.Objects;
 
-
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -38,7 +37,7 @@ public class EnvMap {
 		m_nodes = new HashMap<>();
 		m_new_node_id = 0;
 		m_arcs = new HashMap<>();
-		m_arcs_lookup =new LinkedList<EnvMapArc>();
+		m_arcs_lookup = new LinkedList<EnvMapArc>();
 		// initWithSimpleMap(); // TODO: Substitute hardwired version of the map by one
 		// parsed from file
 		loadFromFile(props.getProperty(PropertiesConnector.MAP_PROPKEY));
@@ -88,17 +87,51 @@ public class EnvMap {
 	}
 
 	public synchronized EnvMapNode getNode(double x, double y) {
+		float tolerance = SAME_LOCATION_RADIUS;
+		return getNode(x, y, tolerance);
+	}
+
+	public EnvMapNode getNode(double x, double y, double tolerance) {
 		for (EnvMapNode node : m_nodes.values()) {
-			if (node.getX() >= x - SAME_LOCATION_RADIUS && node.getX() <= x + SAME_LOCATION_RADIUS
-					&& node.getY() >= y - SAME_LOCATION_RADIUS && node.getY() <= y + SAME_LOCATION_RADIUS)
+			if (node.getX() >= x - tolerance && node.getX() <= x + tolerance
+					&& node.getY() >= y - tolerance && node.getY() <= y + tolerance)
 				return node;
 		}
 
 		return null;
 	}
-	
-	public synchronized EnvMapArc getArc (String wp1, String wp2) {
-		return m_arcs.get(wp1+wp2);
+
+	public synchronized EnvMapArc getArc(String wp1, String wp2) {
+		return m_arcs.get(wp1 + wp2);
+	}
+
+	protected boolean coordsOnLine(double x, double y, double sx, double sy, double ex, double ey) {
+		double tolerance = 2;
+		double L2 = (((ex - sx) * (ex - sx)) + ((ey - sy) * (ey - sy)));
+		if (L2 == 0)
+			return false;
+		double r = (((x - sx) * (ex - sx)) + ((y - sy) * (ey - sy))) / L2;
+		if (r < 0) {
+			return (Math.sqrt(((sx - x) * (sx - x)) + ((sy - y) * (sy - y))) <= tolerance);
+		} else if ((0 <= r) && (r <= 1)) {
+			double s = (((sy - y) * (ex - sx)) - ((sx - x) * (ey - sy))) / L2;
+			return (Math.abs(s) * Math.sqrt(L2) < tolerance);
+		} else {
+			return (Math.sqrt(((ex - x) * (ex - x)) + ((ey - y) * (ey - y))) <= tolerance);
+		}
+	}
+
+	public EnvMapArc getArc(double x, double y) {
+		LinkedList<EnvMapArc> arcs = getArcs();
+		for (EnvMapArc arc : arcs) {
+			EnvMapNode s = m_nodes.get(arc.getSource());
+			EnvMapNode e = m_nodes.get(arc.getTarget());
+			if (s == null || e == null) continue;
+			if (coordsOnLine(x, y, s.getX(), s.getY(), e.getX(), e.getY())) {
+				return arc;
+			}
+		}
+		return null;
 	}
 
 	public synchronized int getNodeCount() {
@@ -123,21 +156,21 @@ public class EnvMap {
 		}
 		return res;
 	}
-	
+
 	public synchronized String AddNode(String label, double x, double y) {
 		return AddNode(label, x, y, false, false);
 	}
 
 	public synchronized String AddNode(String label, double x, double y, boolean charging, boolean force) {
-		EnvMapNode existing = getNode(x,y);
-		if (force) existing = null;
+		EnvMapNode existing = getNode(x, y);
+		if (force)
+			existing = null;
 		if (existing == null) {
 			EnvMapNode mn = new EnvMapNode(label, x, y, m_new_node_id);
 			mn.setProperty(Phase1MapPropertyKeys.CHARGING_STATION, charging);
 			m_nodes.put(label, mn);
 			m_new_node_id++;
-		}
-		else {
+		} else {
 			if (charging || existing.getProperty(Phase1MapPropertyKeys.CHARGING_STATION) != null) {
 				existing.setProperty(Phase1MapPropertyKeys.CHARGING_STATION, charging);
 			}
@@ -145,7 +178,7 @@ public class EnvMap {
 		}
 		return label;
 	}
-	
+
 	public String getNextNodeId() {
 		int id = m_new_node_id;
 		String candidate = "l" + id;
@@ -162,33 +195,32 @@ public class EnvMap {
 		updateArcsLookup();
 		return arc;
 	}
-	
-    public synchronized void addArc (EnvMapArc a) {
-        if (!doesArcExist(a.getSource(), a.getTarget())){
-     	   m_arcs.put(a.getSource()+a.getTarget(),a);
-     	   updateArcsLookup();
-        }
-     }
 
-    public boolean doesArcExist (String na, String nb) {
-        ListIterator<EnvMapArc> iter = getArcs().listIterator();
-        while(iter.hasNext()){
-            if(iter.next().isArcBetween(na, nb)) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    public Double pathDistance (List<String> path){
-    	Double d=0.0;
-    	for (int i=0; i<path.size()-1;i++){
-    		d += distanceBetween(path.get(i), path.get(i+1));
-    	}
-    	return d;
-    }
-    
-    
+	public synchronized void addArc(EnvMapArc a) {
+		if (!doesArcExist(a.getSource(), a.getTarget())) {
+			m_arcs.put(a.getSource() + a.getTarget(), a);
+			updateArcsLookup();
+		}
+	}
+
+	public boolean doesArcExist(String na, String nb) {
+		ListIterator<EnvMapArc> iter = getArcs().listIterator();
+		while (iter.hasNext()) {
+			if (iter.next().isArcBetween(na, nb)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public Double pathDistance(List<String> path) {
+		Double d = 0.0;
+		for (int i = 0; i < path.size() - 1; i++) {
+			d += distanceBetween(path.get(i), path.get(i + 1));
+		}
+		return d;
+	}
+
 	public synchronized double getNodeX(String n) {
 		EnvMapNode envMapNode = m_nodes.get(n);
 		if (envMapNode != null)
@@ -214,10 +246,8 @@ public class EnvMap {
 	 * Eliminates all arcs in map between nodes with labels na and nb (independently
 	 * of whether na is the source or the target node in the arc)
 	 * 
-	 * @param na
-	 *            String node a label
-	 * @param nb
-	 *            String node b label
+	 * @param na String node a label
+	 * @param nb String node b label
 	 */
 	public synchronized void removeArcs(String na, String nb) {
 		ListIterator<EnvMapArc> iter = getArcs().listIterator();
@@ -254,10 +284,8 @@ public class EnvMap {
 	/**
 	 * Returns Euclidean distance between locations with labels na and nb
 	 * 
-	 * @param na
-	 *            String node label a
-	 * @param nb
-	 *            String node label b
+	 * @param na String node label a
+	 * @param nb String node label b
 	 * @return float distance
 	 */
 	public synchronized double distanceBetween(String na, String nb) {
@@ -278,14 +306,10 @@ public class EnvMap {
 	 * the new node and nb are disabled (note that the order of na and nb in the
 	 * invocation of the method matters!).
 	 * 
-	 * @param n
-	 *            String label of the new node to insert
-	 * @param na
-	 *            String label of the node that the robot is moving away from
-	 * @param nb
-	 *            String label of the node that the robot is moving towards
-	 * @param x
-	 *            float coordinates of the location of the new node in the map
+	 * @param n  String label of the new node to insert
+	 * @param na String label of the node that the robot is moving away from
+	 * @param nb String label of the node that the robot is moving towards
+	 * @param x  float coordinates of the location of the new node in the map
 	 * @param y
 	 */
 	public synchronized String insertNode(String n, String na, String nb, double x, double y, boolean obstacle) {
@@ -294,21 +318,21 @@ public class EnvMap {
 		if (arc == null) {
 			System.out.println("There is no connection between " + na + " and " + nb);
 		}
-		Map<String,Object> allProperties = new HashMap<>();
-		Map<String,Double> allTimes = new HashMap<>();
-		Map<String,Double> allHitrates = new HashMap<>();
-		Map<String,Double> allSuccessrates = new HashMap<>();
+		Map<String, Object> allProperties = new HashMap<>();
+		Map<String, Double> allTimes = new HashMap<>();
+		Map<String, Double> allHitrates = new HashMap<>();
+		Map<String, Double> allSuccessrates = new HashMap<>();
 		if (arc != null) {
 			arc.retrieveAllProperties(allProperties, allTimes, allHitrates, allSuccessrates);
 			allTimes.clear(); // Remove the times because they shouldn't be inherited
 		}
 //		Map<String, Object> allProperties = arc==null?new HashMap<>():arc.getAllProperties();
-		if (!n.equals(na)) { 
+		if (!n.equals(na)) {
 			EnvMapArc arc1 = addArc(na, n, distanceBetween(na, n), true);
 			EnvMapArc arc2 = addArc(n, na, distanceBetween(na, n), true);
 			arc1.loadProperties(allProperties, allTimes, allHitrates, allSuccessrates);
 			arc2.loadProperties(allProperties, allTimes, allHitrates, allSuccessrates);
-			removeArcs(na,nb);
+			removeArcs(na, nb);
 		}
 		if (obstacle) {
 			removeArcs(na, nb);
@@ -317,7 +341,7 @@ public class EnvMap {
 			EnvMapArc arc2 = addArc(n, nb, distanceBetween(nb, n), true);
 			arc1.loadProperties(allProperties, allTimes, allHitrates, allSuccessrates);
 			arc2.loadProperties(allProperties, allTimes, allHitrates, allSuccessrates);
-			removeArcs(na,nb);
+			removeArcs(na, nb);
 		}
 		// Somehow, the planning things that n to nb is still valid
 		// else {
@@ -334,8 +358,7 @@ public class EnvMap {
 	/**
 	 * Reads map information from a JSON file into the EnvMap
 	 * 
-	 * @param mapFile
-	 *            String filename of the JSON map file
+	 * @param mapFile String filename of the JSON map file
 	 */
 	public synchronized void loadFromFile(String mapFile) {
 		JSONObject loadJSONFromFile = loadJSONFromFile(mapFile);
@@ -425,8 +448,9 @@ public class EnvMap {
 				System.out.println("Error parsing coordinates in location " + id);
 			}
 
-			AddNode(id, src_x, src_y, id.indexOf("c") == 0 ? true : false, true); // The last parameter flags that this is a
-																			// charging station
+			AddNode(id, src_x, src_y, id.indexOf("c") == 0 ? true : false, true); // The last parameter flags that this
+																					// is a
+			// charging station
 			// if the location's id starts with "c"... maybe to be changed later
 			System.out.println("Added node " + id + " - X: " + String.valueOf(src_x) + " Y: " + String.valueOf(src_y)
 					+ (id.indexOf("c") == 0 ? " (Charging Station)" : ""));
@@ -471,10 +495,9 @@ public class EnvMap {
 			}
 
 			JSONArray hitrates = (JSONArray) jsonObject.get("hitrate");
-            JSONArray ttimes = (JSONArray) jsonObject.get("time");
-            JSONArray successrates = (JSONArray) jsonObject.get("successrate");
+			JSONArray ttimes = (JSONArray) jsonObject.get("time");
+			JSONArray successrates = (JSONArray) jsonObject.get("successrate");
 
-			
 			JSONArray neighbors = (JSONArray) jsonNode.get("connected-to");
 			for (Object neighbor : neighbors) {
 				String ns = String.valueOf(neighbor);
@@ -483,124 +506,130 @@ public class EnvMap {
 					continue;
 				}
 				double distance = distanceBetweenCoords(getNodeX(id), getNodeY(id), getNodeX(ns), getNodeY(ns));
-				//addArc(id, ns, distance, true);
-				//System.out.println("Added arc [" + id + "," + ns + "] (distance=" + distance + ")");
-                EnvMapArc newarc = new EnvMapArc (id, ns, distance, true);
-                // Add hitrates here
-                
-                if (!Objects.equal(null, hitrates)){
-                	HashMap <String, Double> hitrateDictionary = retrieveHitrates(hitrates, newarc);
-                
-                	for (Map.Entry<String, Double> e: hitrateDictionary.entrySet()){
-                		newarc.addHitRate(e.getKey(), e.getValue());
-                		//System.out.println("Added HitRate: "+e.getKey()+" "+e.getValue());
-                	}
-                }
-                
-                if (!Objects.equal(null, ttimes)){
-                	HashMap <String, Double> timeDictionary = retrieveTimes(ttimes, newarc);
-                	for (Map.Entry<String, Double> e: timeDictionary.entrySet()){
-                		newarc.addTime(e.getKey(), e.getValue());
-                		//System.out.println("Added Time: "+e.getKey()+" "+e.getValue());
-                	}
-                }
-                
-                if (!Objects.equal(null, successrates)){
-                	HashMap <String, Double> srDictionary = retrieveSuccessRates(successrates, newarc);
-                	for (Map.Entry<String, Double> e: srDictionary.entrySet()){
-                		newarc.addSuccessRate(e.getKey(), e.getValue());
-                		//System.out.println("Added Time: "+e.getKey()+" "+e.getValue());
-                	}
-                }
-                
-                addArc (newarc);
-                //addArc(id, ns, distance, true);
-                System.out.println("Added arc ["+id+","+ns+"] (distance="+ distance +")" );
-					
+				// addArc(id, ns, distance, true);
+				// System.out.println("Added arc [" + id + "," + ns + "] (distance=" + distance
+				// + ")");
+				EnvMapArc newarc = new EnvMapArc(id, ns, distance, true);
+				// Add hitrates here
+
+				if (!Objects.equal(null, hitrates)) {
+					HashMap<String, Double> hitrateDictionary = retrieveHitrates(hitrates, newarc);
+
+					for (Map.Entry<String, Double> e : hitrateDictionary.entrySet()) {
+						newarc.addHitRate(e.getKey(), e.getValue());
+						// System.out.println("Added HitRate: "+e.getKey()+" "+e.getValue());
+					}
+				}
+
+				if (!Objects.equal(null, ttimes)) {
+					HashMap<String, Double> timeDictionary = retrieveTimes(ttimes, newarc);
+					for (Map.Entry<String, Double> e : timeDictionary.entrySet()) {
+						newarc.addTime(e.getKey(), e.getValue());
+						// System.out.println("Added Time: "+e.getKey()+" "+e.getValue());
+					}
+				}
+
+				if (!Objects.equal(null, successrates)) {
+					HashMap<String, Double> srDictionary = retrieveSuccessRates(successrates, newarc);
+					for (Map.Entry<String, Double> e : srDictionary.entrySet()) {
+						newarc.addSuccessRate(e.getKey(), e.getValue());
+						// System.out.println("Added Time: "+e.getKey()+" "+e.getValue());
+					}
+				}
+
+				addArc(newarc);
+				// addArc(id, ns, distance, true);
+				System.out.println("Added arc [" + id + "," + ns + "] (distance=" + distance + ")");
+
 			}
 		}
 	}
 
-    public HashMap<String, Double> retrieveHitrates(JSONArray hitrates, EnvMapArc a){
-    	HashMap<String, Double> res = new HashMap<String, Double>();
-    	for (Object hitrate: hitrates){
-    		JSONObject jsonHitrate = (JSONObject) hitrate;
-         	
-         	String srcnode = (String) jsonHitrate.get("from");
-     		String tgtnode = (String) jsonHitrate.get("to");
-     		// Arc data is bidirection, so look for data in both directions
-     		if ((Objects.equal(srcnode, a.getSource()) && Objects.equal(tgtnode, a.getTarget())) || (Objects.equal(srcnode,  a.getTarget()) && Objects.equal(tgtnode,  a.getSource()))){
-     			
-     			for (Object k: jsonHitrate.keySet()){
-             		if (!Objects.equal(k.toString(), "from") && !Objects.equal(k.toString(), "to") && !Objects.equal(k.toString(), "prob")){
-                 		//System.out.println(k.toString());
-             			Double hr = ((Number)((JSONObject)jsonHitrate.get(k.toString())).get("hitrate")).doubleValue();
-             			//System.out.println(hr.toString());
-             			res.put(k.toString(), hr);
-     				}
-             	}    	
-   	    	 return res;
-     		}
-    	 }
-    	System.out.print("Warning: Do not have hitrate data for arc: " + a.getSource() + "->" + a.getTarget());
-    	return res;
-    }
-    
-    public HashMap<String, Double> retrieveSuccessRates(JSONArray successrates, EnvMapArc a){
-    	HashMap<String, Double> res = new HashMap<String, Double>();
-    	for (Object successrate: successrates){
-    		JSONObject jsonSuccessRate = (JSONObject) successrate;
-         	
-         	String srcnode = (String) jsonSuccessRate.get("from");
-     		String tgtnode = (String) jsonSuccessRate.get("to");
-     		
-     		if ((Objects.equal(srcnode, a.getSource()) && Objects.equal(tgtnode, a.getTarget()))|| (Objects.equal(srcnode,  a.getTarget()) && Objects.equal(tgtnode,  a.getSource()))){
-     			
-     			for (Object k: jsonSuccessRate.keySet()){
-             		if (!Objects.equal(k.toString(), "from") && !Objects.equal(k.toString(), "to") && !Objects.equal(k.toString(), "prob")){
-                 		//System.out.println(k.toString());
-             			Double sr = ((Number)((JSONObject)jsonSuccessRate.get(k.toString())).get("successrate")).doubleValue();
-             			//System.out.println(hr.toString());
-             			res.put(k.toString(), sr);
-     				}
-             	}    	
-   	    	 return res;
-     		}
-    	 }
-    	System.out.print("Warning: Do not have successrate data for arc: " + a.getSource() + "->" + a.getTarget());
+	public HashMap<String, Double> retrieveHitrates(JSONArray hitrates, EnvMapArc a) {
+		HashMap<String, Double> res = new HashMap<String, Double>();
+		for (Object hitrate : hitrates) {
+			JSONObject jsonHitrate = (JSONObject) hitrate;
 
-    	return res;
-    }
+			String srcnode = (String) jsonHitrate.get("from");
+			String tgtnode = (String) jsonHitrate.get("to");
+			// Arc data is bidirection, so look for data in both directions
+			if ((Objects.equal(srcnode, a.getSource()) && Objects.equal(tgtnode, a.getTarget()))
+					|| (Objects.equal(srcnode, a.getTarget()) && Objects.equal(tgtnode, a.getSource()))) {
 
-    
-    
-    public HashMap<String, Double> retrieveTimes(JSONArray times, EnvMapArc a){
-    	HashMap<String, Double> res = new HashMap<String, Double>();
-    	for (Object ttime: times){
-    		JSONObject jsonTime = (JSONObject) ttime;
-         	
-         	String srcnode = (String) jsonTime.get("from");
-     		String tgtnode = (String) jsonTime.get("to");
-     		
-     		if ((Objects.equal(srcnode, a.getSource()) && Objects.equal(tgtnode, a.getTarget()))|| (Objects.equal(srcnode,  a.getTarget()) && Objects.equal(tgtnode,  a.getSource()))){
-     			
-     			for (Object k: jsonTime.keySet()){
-             		if (!Objects.equal(k.toString(), "from") && !Objects.equal(k.toString(), "to") && !Objects.equal(k.toString(), "stdev") && !Objects.equal(k.toString(), "mean")){
-                 		//System.out.println(k.toString());
-             			Double hr = ((Number)((JSONObject)jsonTime.get(k.toString())).get("mean")).doubleValue();
-             			//System.out.println(hr.toString());
-             			res.put(k.toString(), hr);
-     				}
-             	}    	
-   	    	 return res;
-     		}
-    	 }
-    	System.out.print("Warning: Do not have timing date for arc: " + a.getSource() + "->" + a.getTarget());
+				for (Object k : jsonHitrate.keySet()) {
+					if (!Objects.equal(k.toString(), "from") && !Objects.equal(k.toString(), "to")
+							&& !Objects.equal(k.toString(), "prob")) {
+						// System.out.println(k.toString());
+						Double hr = ((Number) ((JSONObject) jsonHitrate.get(k.toString())).get("hitrate"))
+								.doubleValue();
+						// System.out.println(hr.toString());
+						res.put(k.toString(), hr);
+					}
+				}
+				return res;
+			}
+		}
+		System.out.print("Warning: Do not have hitrate data for arc: " + a.getSource() + "->" + a.getTarget());
+		return res;
+	}
 
-    	return res;
-    }
-    
-	
+	public HashMap<String, Double> retrieveSuccessRates(JSONArray successrates, EnvMapArc a) {
+		HashMap<String, Double> res = new HashMap<String, Double>();
+		for (Object successrate : successrates) {
+			JSONObject jsonSuccessRate = (JSONObject) successrate;
+
+			String srcnode = (String) jsonSuccessRate.get("from");
+			String tgtnode = (String) jsonSuccessRate.get("to");
+
+			if ((Objects.equal(srcnode, a.getSource()) && Objects.equal(tgtnode, a.getTarget()))
+					|| (Objects.equal(srcnode, a.getTarget()) && Objects.equal(tgtnode, a.getSource()))) {
+
+				for (Object k : jsonSuccessRate.keySet()) {
+					if (!Objects.equal(k.toString(), "from") && !Objects.equal(k.toString(), "to")
+							&& !Objects.equal(k.toString(), "prob")) {
+						// System.out.println(k.toString());
+						Double sr = ((Number) ((JSONObject) jsonSuccessRate.get(k.toString())).get("successrate"))
+								.doubleValue();
+						// System.out.println(hr.toString());
+						res.put(k.toString(), sr);
+					}
+				}
+				return res;
+			}
+		}
+		System.out.print("Warning: Do not have successrate data for arc: " + a.getSource() + "->" + a.getTarget());
+
+		return res;
+	}
+
+	public HashMap<String, Double> retrieveTimes(JSONArray times, EnvMapArc a) {
+		HashMap<String, Double> res = new HashMap<String, Double>();
+		for (Object ttime : times) {
+			JSONObject jsonTime = (JSONObject) ttime;
+
+			String srcnode = (String) jsonTime.get("from");
+			String tgtnode = (String) jsonTime.get("to");
+
+			if ((Objects.equal(srcnode, a.getSource()) && Objects.equal(tgtnode, a.getTarget()))
+					|| (Objects.equal(srcnode, a.getTarget()) && Objects.equal(tgtnode, a.getSource()))) {
+
+				for (Object k : jsonTime.keySet()) {
+					if (!Objects.equal(k.toString(), "from") && !Objects.equal(k.toString(), "to")
+							&& !Objects.equal(k.toString(), "stdev") && !Objects.equal(k.toString(), "mean")) {
+						// System.out.println(k.toString());
+						Double hr = ((Number) ((JSONObject) jsonTime.get(k.toString())).get("mean")).doubleValue();
+						// System.out.println(hr.toString());
+						res.put(k.toString(), hr);
+					}
+				}
+				return res;
+			}
+		}
+		System.out.print("Warning: Do not have timing date for arc: " + a.getSource() + "->" + a.getTarget());
+
+		return res;
+	}
+
 	public synchronized void initWithSimpleMap() {
 		AddNode("l1", 14.474, 69);
 		AddNode("l2", 19.82, 69);
@@ -634,22 +663,25 @@ public class EnvMap {
 		addArc("ls", "l4", 5.4, true);
 	}
 
-	
-	public String exportToTikz(){
-		String code="";
-		for (Map.Entry<String,EnvMapNode> entry : this.getNodes().entrySet() ){
-			code+="\\node [mynode] ("+entry.getValue().m_label+") at ("+String.valueOf(entry.getValue().getX())+","+ String.valueOf(entry.getValue().getY())+") {};\n";
-			code+="\\node[draw=none,fill=none] at ("+String.valueOf(entry.getValue().getX()+2)+","+String.valueOf(entry.getValue().getY()-2)+") { \\scriptsize "+entry.getValue().m_label+"};\n";
+	public String exportToTikz() {
+		String code = "";
+		for (Map.Entry<String, EnvMapNode> entry : this.getNodes().entrySet()) {
+			code += "\\node [mynode] (" + entry.getValue().m_label + ") at (" + String.valueOf(entry.getValue().getX())
+					+ "," + String.valueOf(entry.getValue().getY()) + ") {};\n";
+			code += "\\node[draw=none,fill=none] at (" + String.valueOf(entry.getValue().getX() + 2) + ","
+					+ String.valueOf(entry.getValue().getY() - 2) + ") { \\scriptsize " + entry.getValue().m_label
+					+ "};\n";
 		}
-		code+="\n\\begin{scope}[> = stealth,  -,gray, every node/.style = {black,right,align=center}]\n\n";
+		code += "\n\\begin{scope}[> = stealth,  -,gray, every node/.style = {black,right,align=center}]\n\n";
 		LinkedList<EnvMapArc> arcs = this.getArcs();
-        for (int i=0; i<arcs.size(); i++){
-        	code +="\\draw ("+arcs.get(i).getSource()+") edge [left]   node     {}     ("+arcs.get(i).getTarget()+");\n"; 
-        }
-        code +="\\end{scope}\n";
-        return code;
+		for (int i = 0; i < arcs.size(); i++) {
+			code += "\\draw (" + arcs.get(i).getSource() + ") edge [left]   node     {}     (" + arcs.get(i).getTarget()
+					+ ");\n";
+		}
+		code += "\\end{scope}\n";
+		return code;
 	}
-	
+
 	/**
 	 * Class test
 	 * 
@@ -670,6 +702,5 @@ public class EnvMap {
 //			
 //		}
 //	}
-
 
 }

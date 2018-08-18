@@ -2,7 +2,9 @@ package org.sa.rainbow.brass.confsynthesis;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +66,8 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 	public ConfigurationSynthesizer() {
 		this(PropertiesConfigurationSynthesizer.DEFAULT);
 	}
+	
+	protected static final Set<String> LIGHT_SENSITIVE_CONFIGS = new HashSet<>(Arrays.asList("sol_4", "sol_12", "sol_8"));
 
 	public static void restoreAllConfigs() {
 		m_configuration_dictionary.put("sol_0", "amcl-kinect-35");
@@ -87,10 +91,19 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 		
 	}
 	public static void enableOnlyDarkConfigs() {
-		m_configuration_dictionary.remove("sol_4");
-		m_configuration_dictionary.remove("sol_12");
-		m_configuration_dictionary.remove("sol_8");
+		for (String c : LIGHT_SENSITIVE_CONFIGS) {
+			m_configuration_dictionary.remove(c);
+		}
 	}
+	
+	public static Set<String> getLightSensitiveConfigs() {
+		Set<String> s = new HashSet<> ();
+		for (String c : LIGHT_SENSITIVE_CONFIGS) {
+			s.add(m_configuration_dictionary.get(c));
+		}
+		return s;
+	}
+	
 	public String getConfigurationIndex(String confId){
 		int c = 0;
 		for (String k: m_configurations.keySet()){
