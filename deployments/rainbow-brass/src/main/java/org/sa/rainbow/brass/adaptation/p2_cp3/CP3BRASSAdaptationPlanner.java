@@ -90,6 +90,10 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 	public void initialize(IRainbowReportingPort port) throws RainbowConnectionException {
 		super.initialize(port);
 		initConnectors();
+		initDecisionEngine();
+	}
+
+	protected void initDecisionEngine() throws RainbowConnectionException {
 		try {
 			DecisionEngineCP3.init(Rainbow.instance().allProperties());
 			DecisionEngineCP3.setMap(m_models.getEnvMapModel().getModelInstance());
