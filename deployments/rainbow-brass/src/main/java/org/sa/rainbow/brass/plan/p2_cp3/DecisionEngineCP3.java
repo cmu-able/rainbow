@@ -31,8 +31,10 @@ public class DecisionEngineCP3 extends DecisionEngine {
 	public static boolean choose_balanced_utilty;
 	public static boolean do_not_change_paths;
 	public static String m_selected_candidate;
+	private static Properties s_properties;
 
 	public static void init(Properties props) throws Exception {
+		s_properties = props;
 		DecisionEngine.init(props);
 		MapTranslator.ROBOT_BATTERY_RANGE_MAX = 180000;
 		MapTranslator.CONSIDER_RECONFIGURATION_COST = Boolean
@@ -210,7 +212,7 @@ public class DecisionEngineCP3 extends DecisionEngine {
             PrismPolicy pp = new PrismPolicy(m_candidates.get(entry.getKey())+".adv");
             pp.readPolicy();
             String entryConfig = pp.getAllowedReconfigurations().toString();
-            ConfigurationSynthesizer cs = new ConfigurationSynthesizer(Rainbow.instance().allProperties());
+            ConfigurationSynthesizer cs = new ConfigurationSynthesizer(DecisionEngineCP3.s_properties);
             String entryConfigName = cs.translateId(entryConfig.replace("[", "").replace("]", "").replace("t_set_",""));
             
             Double entryScore = m_safetyWeight * entrySafety + m_timelinessWeight * entryTimeliness + m_energyWeight * entryEnergy;

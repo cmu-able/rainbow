@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.sa.rainbow.brass.model.p2_cp3.CP3ModelAccessor;
+import org.sa.rainbow.brass.model.p2_cp3.ICP3ModelAccessor;
 import org.sa.rainbow.brass.model.p2_cp3.acme.TurtlebotModelInstance.ActiveT;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
@@ -35,7 +36,7 @@ public class ArchitectureGauge extends AbstractGaugeWithProbes {
 
 	private IModelsManagerPort m_modelsPort;
 
-	private CP3ModelAccessor m_models;
+	private ICP3ModelAccessor m_models;
 	
 	public ArchitectureGauge(String id, long beaconPeriod, TypedAttribute gaugeDesc,
 			TypedAttribute modelDesc, List<TypedAttributeWithValue> setupParams,
