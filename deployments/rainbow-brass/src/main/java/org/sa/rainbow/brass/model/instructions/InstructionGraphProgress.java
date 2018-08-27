@@ -107,8 +107,8 @@ public class InstructionGraphProgress {
         List<IInstruction> remainingInstructions = new LinkedList<>();
         IInstruction instPtr = getCurrentInstruction();
 
-        while (instPtr != null && m_instructions.containsKey(instPtr.getNextInstructionLabel())) {
-            String nextLabel = instPtr.getNextInstructionLabel();
+        while (instPtr != null && m_instructions.containsKey(instPtr.getNextInstructionLabel().trim())) {
+            String nextLabel = instPtr.getNextInstructionLabel().trim();
             IInstruction nextInstruction = m_instructions.get(nextLabel);
             remainingInstructions.add(nextInstruction);
             instPtr = m_instructions.get(nextLabel);

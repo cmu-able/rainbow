@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>rainbow</groupId>
@@ -25,7 +26,7 @@
 			<name>Unknown</name>
 		</license>
 	</licenses>
-	
+
 	<!-- Organization which has owns the software. -->
 	<organization>
 		<!-- Organization name. -->
@@ -33,13 +34,12 @@
 		<!-- Organization URL. -->
 		<url>http://www.we.com</url>
 	</organization>
-	
+
 	<!-- List of application developers. -->
 	<developers>
 		<!-- One block per developer. -->
 		<developer>
-			<!-- Unique ID for the developer. This ID is referenced in the
-			changelog. -->
+			<!-- Unique ID for the developer. This ID is referenced in the changelog. -->
 			<id>schemerl</id>
 			<!-- Developer name. -->
 			<name>Bradley Schmerl</name>
@@ -66,35 +66,26 @@
 			</roles>
 		</developer>
 	</developers>
-	
-	<!-- Other people who have contributed to the project. Each 'contributor'
-	entry has the same format as the 'developer' tag above but no ID is
-	required. -->
+
+	<!-- Other people who have contributed to the project. Each 'contributor' 
+		entry has the same format as the 'developer' tag above but no ID is required. -->
 	<contributors>
-		<!--<contributor>
-			<name></name>
-			<email></email>
-			<organization></organization>
-			<roles>
-				<role />
-			</roles>
-		</contributor>-->
+		<!--<contributor> <name></name> <email></email> <organization></organization> 
+			<roles> <role /> </roles> </contributor> -->
 	</contributors>
-	
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	  - SOURCE CONTROL VERSION CONFIGURATION
-	  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-	  
-	<!-- Please note that the URL of the projects will have automatically the
-	artifact name of the super-pom added to the end. -->
+
+	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+		- - - SOURCE CONTROL VERSION CONFIGURATION - - - - - - - - - - - - - - - 
+		- - - - - - - - - - - - - - - - - - - - -->
+
+	<!-- Please note that the URL of the projects will have automatically the 
+		artifact name of the super-pom added to the end. -->
 	<scm>
-		<!-- Source control version, should have the format:
-		scm:svn:http://<host>[:<port>]/<path>. -->
+		<!-- Source control version, should have the format: scm:svn:http://<host>[:<port>]/<path>. -->
 		<connection>
 			scm:svn:svn://acme.able.cs.cmu.edu/rainbow/v2/trunk
 		</connection>
-		<!-- Source control version, should have the format:
-		scm:svn:http://<host>[:<port>]/<path>. -->
+		<!-- Source control version, should have the format: scm:svn:http://<host>[:<port>]/<path>. -->
 		<developerConnection>
 			scm:svn:svn://acme.able.cs.cmu.edu/rainbow/v2/trunk
 		</developerConnection>
@@ -201,45 +192,59 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.12.4</version>
+				<version>2.19</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.junit.platform</groupId>
+						<artifactId>junit-platform-surefire-provider</artifactId>
+						<version>1.1.0</version>
+					</dependency>
+					<dependency>
+						<groupId>org.junit.jupiter</groupId>
+						<artifactId>junit-jupiter-engine</artifactId>
+						<version>5.2.0</version>
+					</dependency>
+				</dependencies>
 				<configuration>
-					<argLine>-XX:-UseSplitVerifier</argLine>
 					<testFailureIgnore>true</testFailureIgnore>
+					<forkMode>always</forkMode>
+					<resuseForks>false</resuseForks>
+					<forkCount>1</forkCount>
 					<additionalClasspathElements>
 						<additionalClasspathElement>
 							${basedir}
 						</additionalClasspathElement>
+						<additionalClasspathElement>
+							${basedir}/src/test/java
+						</additionalClasspathElement>
 					</additionalClasspathElements>
 				</configuration>
 			</plugin>
-				
+
 			<plugin>
-			 <groupId>org.antlr</groupId>
-			 <artifactId>antlr4-maven-plugin</artifactId>
-			 <version>4.3</version>
-			 <configuration>
-				 <visitor>true</visitor>
-				 <listener>false</listener>
-				 <grammars>Stitch.g4</grammars>
-				 <outputDirectory>${project.build.directory}/generated-sources/antlr/org/sa/rainbow/stitch/parser</outputDirectory>
-				 <sourceDirectory>src/main/resources/antlr4/org/sa/rainbow/stitch/parser</sourceDirectory>
-				 <arguments>
-				 	<argument>-package</argument>
-				 	<argument>org.sa.rainbow.stitch.parser</argument>
-				 </arguments>
-				 <!--
-                  <grammars>IM.g4</grammars>
-                  <outputDirectory>${project.build.directory}/generated-sources/antlr/org/sa/rainbow/im/parser</outputDirectory>
-                  <sourceDirectory>src/main/antlr4/org/sa/rainbow/im/parser</sourceDirectory>
-              -->
-			 </configuration>
-			 <executions>
-			     <execution>
-			         <goals>
-			             <goal>antlr4</goal>
-			         </goals>
-			     </execution>
-			 </executions>
+				<groupId>org.antlr</groupId>
+				<artifactId>antlr4-maven-plugin</artifactId>
+				<version>4.3</version>
+				<configuration>
+					<visitor>true</visitor>
+					<listener>false</listener>
+					<grammars>Stitch.g4</grammars>
+					<outputDirectory>${project.build.directory}/generated-sources/antlr/org/sa/rainbow/stitch/parser</outputDirectory>
+					<sourceDirectory>src/main/resources/antlr4/org/sa/rainbow/stitch/parser</sourceDirectory>
+					<arguments>
+						<argument>-package</argument>
+						<argument>org.sa.rainbow.stitch.parser</argument>
+					</arguments>
+					<!-- <grammars>IM.g4</grammars> <outputDirectory>${project.build.directory}/generated-sources/antlr/org/sa/rainbow/im/parser</outputDirectory> 
+						<sourceDirectory>src/main/antlr4/org/sa/rainbow/im/parser</sourceDirectory> -->
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>antlr4</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 
 		</plugins>
@@ -397,12 +402,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
-						<configuration>
-							<includes>
-								<include>**/*Test.java</include>
-								<include>**/*TestCase.java</include>
-							</includes>
-						</configuration>
+
 					</plugin>
 				</plugins>
 			</build>
@@ -475,6 +475,23 @@
 			<artifactId>acme-lib</artifactId>
 			<version>3.5.10</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>5.2.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>5.2.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
+			<version>5.1.0</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>

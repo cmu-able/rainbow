@@ -137,10 +137,11 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
 			planJson.append("'");
 		}
 		planJson.append("]");
-		addFieldsToStatus("PLAN", planJson.toString(), json);
-	    RequestBody body = RequestBody.create (JSON, m_gsonPP.toJson (json));
-        Request request = new Request.Builder ().url (STATUS_SERVER + STATUS_ENDPOINT).post (body).build ();
-        CLIENT.newCall (request).enqueue (m_responseCallback);
+		reportStatus("PLAN", planJson.toString());
+//		addFieldsToStatus("PLAN", planJson.toString(), json);
+//	    RequestBody body = RequestBody.create (JSON, m_gsonPP.toJson (json));
+//        Request request = new Request.Builder ().url (STATUS_SERVER + STATUS_ENDPOINT).post (body).build ();
+//        CLIENT.newCall (request).enqueue (m_responseCallback);
 	}
 
     @Override

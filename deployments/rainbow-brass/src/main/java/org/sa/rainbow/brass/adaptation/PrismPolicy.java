@@ -41,30 +41,32 @@ public class PrismPolicy {
 
         String state = initial_state;
         String action = "";
-        
         while (startEndStateMap.containsKey(state)) { // While current state is mapped to something
         	boolean foundState = false;
+        	String previousState = state;
     		for (String e: startEndStateMap.get(state)){ // For each of the alternative states to which a source state can be mapped (probabilistic branches)
     			if (startEndStateMap.containsKey(e)){  // Lookahead
     				action = stateActionMap.get(state).get(0); 
     				state = e;
     				foundState=true;
-    				}
-        		}
+    			}
+        	}
     		if (!foundState) {
-        	if ((startEndStateMap.get(state).size()==1) && (!startEndStateMap.containsKey(startEndStateMap.get(state).get(0)))){ // Special case for final state
-        		action = stateActionMap.get(state).get(0);
-        		state = startEndStateMap.get(state).get(0);
-        	}
-        	else if ((startEndStateMap.get(state).size() > 1 && !startEndStateMap.containsKey(startEndStateMap.get(state).get(0)) && !startEndStateMap.containsKey(startEndStateMap.get(state).get(1)) )) {
-        		action = stateActionMap.get(state).get(0);
-        		state = startEndStateMap.get(state).get(0);
-        	}
+	        	if ((startEndStateMap.get(state).size()==1) && (!startEndStateMap.containsKey(startEndStateMap.get(state).get(0)))){ // Special case for final state
+	        		action = stateActionMap.get(state).get(0);
+	        		state = startEndStateMap.get(state).get(0);
+	        	}
+	        	else if ((startEndStateMap.get(state).size() > 1 && !startEndStateMap.containsKey(startEndStateMap.get(state).get(0)) && !startEndStateMap.containsKey(startEndStateMap.get(state).get(1)) )) {
+	        		action = stateActionMap.get(state).get(0);
+	        		state = startEndStateMap.get(state).get(0);
+	        	}
     		}
         	
             if (action != "") {
                 m_plan.add(action);
             }
+    		if (previousState.equals(state)) break;
+
         }
     }
 
@@ -195,7 +197,21 @@ public class PrismPolicy {
     public ArrayList<String> getPlan() {
         return m_plan;
     }
-
+    
+    /** 
+     * Returns the list of allowed reconfiguration actions in a plan
+     * @return
+     */
+    public ArrayList<String> getAllowedReconfigurations(){
+    	ArrayList<String> allowed = new ArrayList<String>();
+    	for (int i=0; i< m_plan.size(); i++){
+    		if (m_plan.get(i).startsWith("t_set")){
+    			allowed.add(m_plan.get(i));
+    		}
+    	}
+    	return allowed;
+    }
+    
 
     public ArrayList<String> getPlan(ConfigurationProvider cp, String fromConfiguration){
     	String confSetPrefix = "t_set_";

@@ -71,7 +71,7 @@ public class RobotStateGauge extends RegularPatternGauge {
 	private boolean reported_headlamp_mode;
 
 	private double last_lighting = -1;
-	private MovingAverage lightingTracker = new MovingAverage(10);
+	private MovingAverage lightingTracker = new MovingAverage(3);
 
 	private double reported_speed;
 
@@ -160,10 +160,10 @@ public class RobotStateGauge extends RegularPatternGauge {
 						Map<String, String> fom = new HashMap<>();
 						if (m_models.getRobotStateModel().getModelInstance().getSensors().contains(Sensors.KINECT)) {
 							fom.put(fop.getParameters()[0], Sensors.KINECT.name());
-						} else {
+						} else if (m_models.getRobotStateModel().getModelInstance().getSensors().contains(Sensors.CAMERA)) {
 							fom.put(fop.getParameters()[0], Sensors.CAMERA.name());
 						}
-						issueCommand(fop, fom);
+						if (!fom.isEmpty()) issueCommand(fop, fom);
 					} else {
 						IRainbowOperation cameraOp = m_commands.get("sensor");
 						Map<String, String> cameraMap = new HashMap<>();

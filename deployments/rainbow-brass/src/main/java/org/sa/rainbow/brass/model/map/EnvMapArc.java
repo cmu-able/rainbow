@@ -29,6 +29,20 @@ public class EnvMapArc {
 		return Collections.unmodifiableMap(m_properties);
 	}
 	
+	public void retrieveAllProperties(Map<String,Object> properties, Map<String, Double> times, Map<String,Double> hitrates, Map<String,Double> successrates) {
+		properties.putAll(m_properties);
+		times.putAll(m_times);
+		hitrates.putAll(m_hitrates);
+		successrates.putAll(m_successrates);
+	}
+	
+	public void loadProperties(Map<String,Object> props, Map<String,Double> time, Map<String,Double> hr, Map<String,Double> sr) {
+		m_properties.putAll(props);
+		m_times.putAll(time);
+		m_hitrates.putAll(hr);
+		m_successrates.putAll(sr);
+	}
+	
 	public void loadProperties(Map<String,Object> props) {
 		m_properties.putAll(props);
 	}

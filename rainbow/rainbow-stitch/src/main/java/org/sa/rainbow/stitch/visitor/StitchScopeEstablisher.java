@@ -792,7 +792,8 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
 
     @Override
     public void doStrategyCondition (ConditionKind type, ParserRuleContext ctx) {
-        if (curNode.get () == null) {
+        StrategyNode curNodeL = curNode.get ();
+		if (curNodeL == null) {
             Tool.error (
                     "Expected to be processing condition part of a strategy tree node, but null curNode encountered!!",
                     null, stitchProblemHandler ());
@@ -800,11 +801,13 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
         }
 
         // check for condition expression
-        curNode.get ().setCondFlag (type);
+        curNodeL.setCondFlag (type);
         Expression expr = null;
         switch (type) {
             case APPLICABILITY: // in this case, should be the only expression in
                 // strategy scope
+            	expr = scope().expressions().get(0);
+            	break;
             case EXPRESSION: // proper expression
                 // retrieve the latest expression from the current transient scope
                 expr = scope ().expressions ().get (scope ().expressions ().size () - 1);
@@ -836,7 +839,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
                 break;
         }
 
-        curNode.get ().setCondExpr (expr);
+        curNodeL.setCondExpr (expr);
         debug ("* Condition expr:  " + expr);
     }
 

@@ -1,13 +1,18 @@
 package org.sa.rainbow.brass.adaptation.p2_cp3;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,6 +35,7 @@ import org.sa.rainbow.brass.model.p2_cp3.mission.MissionState.LocationRecording;
 import org.sa.rainbow.brass.model.p2_cp3.mission.MissionState.UtilityPreference;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowState.CP3ModelState;
 import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotState.Sensors;
+import org.sa.rainbow.brass.plan.p2.MapTranslator;
 import org.sa.rainbow.brass.plan.p2_cp3.DecisionEngineCP3;
 import org.sa.rainbow.brass.plan.p2_cp3.PolicyToIGCP3;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
@@ -189,39 +195,18 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 			if (m_adaptationEnabled && reallyHasError() && !m_executingPlan) {
 				String message = "Detected problems: " + reportErrors();
 				BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(), message);
+				BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(), message);
 				log(message);
 				m_errorDetected = false;
 				m_reportingPort.info(getComponentType(), "Determining an appropriate adaptation");
+				BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(), "params: fix_paths =" 
+				+ DecisionEngineCP3.do_not_change_paths 
+				+ ", consider_cost=" + MapTranslator.CONSIDER_RECONFIGURATION_COST 
+				+ ", rc/plan=" + MapTranslator.ROBOT_MAX_RECONF_VAL 
+				+ ", balanced_utility=" + DecisionEngineCP3.choose_balanced_utilty);
 				// DecisionEngineCP3.setMap(m_models.getEnvMapModel().getModelInstance());
 
-				// 1. Determine string for intialization of the planner
-				Set<String> unusableLocalization=new HashSet<>();
-				Set<Sensors> unusableSensors=new HashSet<> ();
-				EnumSet<CP3ModelState> knownConfigErrors = EnumSet.of(CP3ModelState.ARCHITECTURE_ERROR,
-						CP3ModelState.CONFIGURATION_ERROR);
-				String confInitString;
-				if (containsAnyOfTheseErrors(knownConfigErrors)) {
-					confInitString = determineValidReconfigurations(unusableLocalization, unusableSensors);
-				}
-				else if (m_models.getRainbowStateModel().getModelInstance().getProblems().contains(CP3ModelState.TOO_DARK)
-						&& m_models.getTurtlebotModel().getActiveComponents().contains("marker_pose_publisher")) {
-					// Javier this is not write because it would preclude the headlamp configuration, so not sure what to do
-					ConfigurationSynthesizer.enableOnlyDarkConfigs();
-					confInitString = determineValidReconfigurations(unusableLocalization, unusableSensors);
-				} else if (m_models.getRainbowStateModel().getModelInstance().getProblems().contains(CP3ModelState.INSTRUCTION_GRAPH_FAILED)) {
-					// The instruction graph failed for some unknown reason, try another configuration
-					Collection<String> activeComponents = m_models.getTurtlebotModel().getActiveComponents();
-					if (activeComponents.contains("amcl")) unusableLocalization.add("amcl");
-					else if (activeComponents.contains("mrpt")) unusableLocalization.add("mrpt");
-					else if (activeComponents.contains("marker_pose_publisher")) unusableLocalization.add("marker_pose_publisher");
-					EnumSet<Sensors> activeSensors = m_models.getRobotStateModel().getModelInstance().getSensors();
-					unusableSensors.addAll(activeSensors);
-					confInitString = determineValidReconfigurations(unusableLocalization, unusableSensors);
-				}
-				else {
-					log("Error: Unknown error and unknown configuration. This will probably cause a loop");
-					confInitString = determineValidReconfigurations(unusableLocalization, unusableSensors);
-				}
+				String confInitString = processNewValidConfigurations();
 
 				EnvMap copy = m_models.getEnvMapModel()
 						.getModelInstance()/*
@@ -246,35 +231,9 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 				}
 				// Insert a node where the robot is
 
-				IInstruction ci = igModel.getCurrentInstruction();
-				LocationRecording cp = m_models.getMissionStateModel().getModelInstance().getCurrentPose();
-				String srcLabel = null;
-				if (ci instanceof MoveAbsHInstruction) {
-					MoveAbsHInstruction mi = (MoveAbsHInstruction) ci;
-					srcLabel = copy.getNextNodeId();
-					srcLabel = copy.insertNode(srcLabel, mi.getSourceWaypoint(), mi.getTargetWaypoint(), cp.getX(),
-							cp.getY(), false);
-				} else {
-					List<? extends IInstruction> remainingInstructions = igModel.getRemainingInstructions();
-					for (Iterator iterator = remainingInstructions.iterator(); iterator.hasNext()
-							&& !(ci instanceof MoveAbsHInstruction);) {
-						ci = (IInstruction) iterator.next();
-					}
-					if (ci instanceof MoveAbsHInstruction) {
-						MoveAbsHInstruction mi = (MoveAbsHInstruction) ci;
-						srcLabel = mi.getSourceWaypoint();
-					} else {
-						m_reportingPort.error(getComponentType(),
-								"There are no move instructions left -- the last instruction in an instruction graph for BRASS should always be a move",
-								LOGGER);
-						m_reportingPort.error(getComponentType(),
-								"This is the graph: " + Arrays.toString(igModel.getInstructions().toArray()));
-					}
-				}
+				String srcLabel = insertNode(igModel, copy);
 				String tgt = m_models.getMissionStateModel().getModelInstance().getTargetWaypoint();
-				log("Generating candidate paths from " + srcLabel + " to " + tgt);
-				DecisionEngineCP3.generateCandidates(srcLabel, tgt);
-				log("---> found " + DecisionEngineCP3.m_candidates.size());
+				generatePathCandidates(igModel, srcLabel, tgt);
 				// DecisionEngineCP3.generateCandidates("l1", "l8");
 				try {
 					AdaptationTree<BrassPlan> at = scoreAndGeneratePlan(confInitString, copy);
@@ -306,6 +265,110 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 
 	}
 
+	private void generatePathCandidates(InstructionGraphProgress igModel, String srcLabel, String tgt) {
+		if (DecisionEngineCP3.do_not_change_paths) {
+			Stack<String> currentPath = new Stack<>();
+			currentPath.push(srcLabel);
+			List<? extends IInstruction> remainingInstructions = igModel.getRemainingInstructions();
+			for (IInstruction inst : remainingInstructions) {
+				if (inst instanceof MoveAbsHInstruction) {
+					MoveAbsHInstruction i = (MoveAbsHInstruction) inst;
+					if (!currentPath.contains(i.getSourceWaypoint()))
+						currentPath.push(i.getSourceWaypoint());	
+				}
+			}
+			currentPath.push(tgt);
+			log("---> using path " + currentPath.toString());
+			DecisionEngineCP3.generateCandidates(currentPath);
+			BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(), "Using path " + DecisionEngineCP3.m_candidates.keySet().iterator().next().toString());
+
+		} else {
+			log("Generating candidate paths from " + srcLabel + " to " + tgt);
+
+			DecisionEngineCP3.generateCandidates(srcLabel, tgt);
+			log("---> found " + DecisionEngineCP3.m_candidates.size());
+			BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(),
+					"Found " + DecisionEngineCP3.m_candidates.size() + " valid paths");
+		}
+	}
+
+	private String insertNode(InstructionGraphProgress igModel, EnvMap copy) {
+		IInstruction ci = igModel.getCurrentInstruction();
+		LocationRecording cp = m_models.getMissionStateModel().getModelInstance().getCurrentPose();
+		String srcLabel = null;
+		if (ci instanceof MoveAbsHInstruction) {
+			MoveAbsHInstruction mi = (MoveAbsHInstruction) ci;
+			srcLabel = copy.getNextNodeId();
+			srcLabel = copy.insertNode(srcLabel, mi.getSourceWaypoint(), mi.getTargetWaypoint(), cp.getX(),
+					cp.getY(), false);
+		} else {
+			List<? extends IInstruction> remainingInstructions = igModel.getRemainingInstructions();
+			for (Iterator iterator = remainingInstructions.iterator(); iterator.hasNext()
+					&& !(ci instanceof MoveAbsHInstruction);) {
+				ci = (IInstruction) iterator.next();
+			}
+			if (ci instanceof MoveAbsHInstruction) {
+				MoveAbsHInstruction mi = (MoveAbsHInstruction) ci;
+				srcLabel = mi.getSourceWaypoint();
+			} else {
+				m_reportingPort.error(getComponentType(),
+						"There are no move instructions left -- the last instruction in an instruction graph for BRASS should always be a move",
+						LOGGER);
+				m_reportingPort.error(getComponentType(),
+						"This is the graph: " + Arrays.toString(igModel.getInstructions().toArray()));
+			}
+		}
+		return srcLabel;
+	}
+
+	private String processNewValidConfigurations() {
+		// 1. Determine string for intialization of the planner
+		Set<String> unusableLocalization = new HashSet<>();
+		Set<Sensors> unusableSensors = new HashSet<>();
+		EnumSet<CP3ModelState> knownConfigErrors = EnumSet.of(CP3ModelState.ARCHITECTURE_ERROR,
+				CP3ModelState.CONFIGURATION_ERROR);
+		String confInitString;
+		if (containsAnyOfTheseErrors(knownConfigErrors)) {
+//			if (m_models.getRobotStateModel().getModelInstance().getIllumination()<120) {
+//				ConfigurationSynthesizer.enableOnlyDarkConfigs();
+//			}
+			confInitString = determineValidReconfigurations(unusableLocalization, unusableSensors);
+		} else if (m_models.getRainbowStateModel().getModelInstance().getProblems()
+				.contains(CP3ModelState.TOO_DARK)
+				&& m_models.getTurtlebotModel().getActiveComponents().contains("marker_pose_publisher")) {
+			ConfigurationSynthesizer.enableOnlyDarkConfigs();
+			confInitString = determineValidReconfigurations(unusableLocalization, unusableSensors);
+		} else if (m_models.getRainbowStateModel().getModelInstance().getProblems()
+				.contains(CP3ModelState.INSTRUCTION_GRAPH_FAILED)) {
+			// The instruction graph failed for some unknown reason, try another
+			// configuration
+			Collection<String> activeComponents = m_models.getTurtlebotModel().getActiveComponents();
+			EnumSet<Sensors> activeSensors = m_models.getRobotStateModel().getModelInstance().getSensors();
+
+			if (activeComponents.contains("amcl")) {
+				unusableLocalization.add("amcl");
+				unusableSensors.addAll(activeSensors);
+			}
+			else if (activeComponents.contains("mrpt")) {
+				unusableLocalization.add("mrpt");
+				unusableSensors.addAll(activeSensors);
+			}
+			else if (activeComponents.contains("marker_pose_publisher"))
+				if (activeSensors.contains(Sensors.HEADLAMP)) {
+					unusableLocalization.add("marker_pose_publisher");
+					unusableSensors.addAll(activeSensors);
+				}
+				else {
+					ConfigurationSynthesizer.enableOnlyDarkConfigs();
+				}
+			confInitString = determineValidReconfigurations(unusableLocalization, unusableSensors);
+		} else {
+			log("Error: Unknown error and unknown configuration. This will probably cause a loop");
+			confInitString = determineValidReconfigurations(unusableLocalization, unusableSensors);
+		}
+		return confInitString;
+	}
+
 	private AdaptationTree<BrassPlan> scoreAndGeneratePlan(String confInitString, EnvMap copy) throws Exception {
 		try {
 			DecisionEngineCP3.scoreCandidates(copy,
@@ -316,6 +379,13 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 			if (DecisionEngineCP3.m_scoreboard.isEmpty()) {
 				throw new RainbowException("Failed to find a plan for " + confInitString);
 			}
+			String table = DecisionEngineCP3.export(m_models.getEnvMapModel().getModelInstance());
+			long curTime = new Date().getTime();
+			try (BufferedWriter writer = new BufferedWriter(new FileWriter(
+					System.getProperty("user.home") + "/logs/selected_policy" + curTime + ".tex"))) {
+				writer.write(table);
+			} catch (Exception e) {
+			}
 			PrismPolicy pp = new PrismPolicy(DecisionEngineCP3.selectPolicy());
 			pp.readPolicy();
 			ArrayList<String> planArray = pp.getPlan(m_configurationSynthesizer, confInitString);
@@ -324,17 +394,29 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 			}
 			String plan = planArray.toString();
 			m_reportingPort.info(getComponentType(), "Planner chooses the plan " + plan, LOGGER);
+			try (BufferedWriter writer = new BufferedWriter(new FileWriter(
+					System.getProperty("user.home") + "/logs/selected_plan_" + curTime + ""))) {
+				writer.write(plan.toString());
+			} catch (Exception e) {
+			} 
 			ArrayList<String> planToTA = new ArrayList<String>(planArray.size());
+			ArrayList<String> planToReport = new ArrayList<>(planArray.size());
 			for (String cmd : planArray) {
 				if (cmd.contains("_to_")) {
 					Pattern p = Pattern.compile("([^_]*)_to_(.*)");
 					Matcher m = p.matcher(cmd);
 					if (m.matches()) {
 						planToTA.add(m.group(2));
+						planToReport.add(m.group(2));
 					}
+
+				} else {
+					planToReport.add(cmd);
 				}
 			}
 			BRASSHttpConnector.instance(Phases.Phase2).reportNewPlan(planToTA);
+			BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(),
+					"Chose plan: " + planToReport.toString());
 			PolicyToIGCP3 translator = new PolicyToIGCP3(pp, copy);
 			String translate = translator.translate(m_configurationSynthesizer, confInitString);
 
@@ -347,11 +429,21 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 	}
 
 	private String determineValidReconfigurations(Set<String> unusableLocalization, Set<Sensors> unusableSensors) {
-		String confInitString = m_reconfSynth.getCurrentConfigurationInitConstants(unusableLocalization, unusableSensors);
+		String confInitString = m_reconfSynth.getCurrentConfigurationInitConstants(unusableLocalization,
+				unusableSensors);
 		try {
 			log("Looking for reconfigurations from: " + confInitString);
 			m_configurationSynthesizer.generateReconfigurationsFrom(confInitString);
-			log("----> found " + m_configurationSynthesizer.m_reconfigurations.size());
+			log("----> found " + m_configurationSynthesizer.m_reconfigurations.size() + "("
+					+ m_configurationSynthesizer.getNumberOfValidReconfigurations() + " not empty)");
+			StringBuffer nonempty = new StringBuffer();
+			for (Entry<String, List<String>> e : m_configurationSynthesizer.m_reconfigurations.entrySet()) {
+				if (!e.getValue().isEmpty())
+					nonempty.append(m_configurationSynthesizer.translateId(e.getKey()) + " ");
+			}
+			BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(),
+					"Found " + m_configurationSynthesizer.getNumberOfValidReconfigurations()
+							+ " valid reconfigurations: " + nonempty.toString());
 		} catch (RainbowException e1) {
 			e1.printStackTrace();
 			m_reportingPort.error(getComponentType(), "Could not synthesize configurations " + e1.getMessage(), LOGGER);
@@ -364,7 +456,8 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 	private boolean reallyHasError() {
 		EnumSet<CP3ModelState> realErrors = EnumSet.of(CP3ModelState.ARCHITECTURE_ERROR,
 				CP3ModelState.CONFIGURATION_ERROR, CP3ModelState.INSTRUCTION_GRAPH_FAILED);
-		if (containsAnyOfTheseErrors(realErrors)) return true;
+		if (containsAnyOfTheseErrors(realErrors))
+			return true;
 		if (m_models.getRainbowStateModel().getModelInstance().getProblems().contains(CP3ModelState.TOO_DARK)
 				&& m_models.getTurtlebotModel().getActiveComponents().contains("marker_pose_publisher")) {
 			return true;

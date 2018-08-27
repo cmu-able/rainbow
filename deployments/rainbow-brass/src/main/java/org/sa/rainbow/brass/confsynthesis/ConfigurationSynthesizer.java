@@ -2,12 +2,16 @@ package org.sa.rainbow.brass.confsynthesis;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.Set;
 
 import org.sa.rainbow.brass.adaptation.PrismConnectorAPI;
 import org.sa.rainbow.brass.adaptation.PrismPolicy;
@@ -23,9 +27,10 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 	public HashMap<String, DetailedConfiguration> m_configuration_objects = new HashMap<String, DetailedConfiguration>();
 	public LinkedList<String> m_allinstances = new LinkedList<String>();
 	public HashMap<String, List<String>> m_reconfigurations = new HashMap<String, List<String>>();
+	public HashMap<String, Double> m_reconfiguration_costs = new HashMap<String, Double>();
 	public static final HashMap<String, String> m_component_modes;
 	public static DetailedConfigurationBatteryModel m_battery_model;
-	
+	public static final Double RECONF_STEP_TIME_COST = 5.0;
 	static {
 		m_component_modes = new HashMap<String, String>();
 		m_component_modes.put("DISABLED", "0");
@@ -61,6 +66,8 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 	public ConfigurationSynthesizer() {
 		this(PropertiesConfigurationSynthesizer.DEFAULT);
 	}
+	
+	protected static final Set<String> LIGHT_SENSITIVE_CONFIGS = new HashSet<>(Arrays.asList("sol_4", "sol_12", "sol_8"));
 
 	public static void restoreAllConfigs() {
 		m_configuration_dictionary.put("sol_0", "amcl-kinect-35");
@@ -84,10 +91,19 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 		
 	}
 	public static void enableOnlyDarkConfigs() {
-		m_configuration_dictionary.remove("sol_4");
-		m_configuration_dictionary.remove("sol_12");
-		m_configuration_dictionary.remove("sol_8");
+		for (String c : LIGHT_SENSITIVE_CONFIGS) {
+			m_configuration_dictionary.remove(c);
+		}
 	}
+	
+	public static Set<String> getLightSensitiveConfigs() {
+		Set<String> s = new HashSet<> ();
+		for (String c : LIGHT_SENSITIVE_CONFIGS) {
+			s.add(m_configuration_dictionary.get(c));
+		}
+		return s;
+	}
+	
 	public String getConfigurationIndex(String confId){
 		int c = 0;
 		for (String k: m_configurations.keySet()){
@@ -124,12 +140,21 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 	 * identifiers in map
 	 * 
 	 */
-	public String translateId(String id) {
+	public  String translateId(String id) {
 		if (Objects.equals(null, m_configuration_dictionary.get(id)))
 			return "";
 		return m_configuration_dictionary.get(id);
 	}
+	
+	public String translateConfigToId(String config) {
+		for (Entry<String, String> e : m_configuration_dictionary.entrySet()) {
+			if (e.getValue().equals(config))
+				return e.getKey();
+		}
+		return "";
+	}
 
+	
 	public Boolean containsConfiguration(String id) {
 		return (m_configuration_dictionary.containsKey(id) || m_configuration_dictionary.containsValue(id));
 	}
@@ -410,6 +435,12 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 		} catch (Exception e) {
 			System.out.println("Configuration synthesizer: Error model checking reconfiguration from" + from);
 		}
+		try{
+			Double reconf_steps = Double.parseDouble(m_res);
+			m_reconfiguration_costs.put(to, reconf_steps*RECONF_STEP_TIME_COST);
+		} catch(Exception e){
+			System.out.println("Error parsing cost of reconfiguration.");
+		}
 		pp = new PrismPolicy(m_myPolicy + ".adv");
 		pp.readPolicy();
 		String plan = pp.getPlan().toString();
@@ -420,12 +451,14 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 	
 	public ArrayList<String> generateReconfiguration(String from, String to) throws RainbowException {
 		ArrayList<String> reconf = generateUnorderedReconfiguration(from, to);
+		System.out.println("Checked " + m_configuration_dictionary.get(to) + ". " + (reconf.isEmpty()?"No plan":"Plan"));
 		ArrayList<String> res = new ArrayList<String>();
 		ArrayList<String> node_disablement = new ArrayList<String>();
 		ArrayList<String> sensor_disablement = new ArrayList<String>();
 		ArrayList<String> node_enablement = new ArrayList<String>();
 		ArrayList<String> sensor_enablement = new ArrayList<String>();
 		ArrayList<String> speed_enablement = new ArrayList<String>();
+		ArrayList<String> map_enablement = new ArrayList<String> ();
 
 		for (int i = 0; i < reconf.size(); i++) {
 			if (reconf.get(i).endsWith("_disable")
@@ -440,7 +473,12 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 					&& ReconfSynthTest.SENSOR_NAMES.containsValue(reconf.get(i).replace("_enable", ""))) {
 				sensor_enablement.add(reconf.get(i));
 			}
-			if (reconf.get(i).endsWith("_enable")
+			if (reconf.get(i).endsWith("_enable") 
+					&& reconf.get(i).contains("mapServer")
+					&& ReconfSynthTest.COMPONENT_NAMES.containsValue(reconf.get(i).replace("_enable", ""))) {
+				map_enablement.add(reconf.get(i));
+			}
+			else if (reconf.get(i).endsWith("_enable")
 					&& ReconfSynthTest.COMPONENT_NAMES.containsValue(reconf.get(i).replace("_enable", ""))) {
 				node_enablement.add(reconf.get(i));
 			}
@@ -452,6 +490,7 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 		res.addAll(node_disablement);
 		res.addAll(sensor_disablement);
 		res.addAll(sensor_enablement);
+		res.addAll(map_enablement);
 		res.addAll(node_enablement);
 		res.addAll(speed_enablement);
 
@@ -463,6 +502,14 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 		for (String toConf : m_configuration_dictionary.keySet()) {
 			m_reconfigurations.put(toConf, generateReconfiguration(from, toConf));
 		}
+	}
+	
+	public int getNumberOfValidReconfigurations() {
+		int empty = 0;
+		for (String toConf : m_configuration_dictionary.keySet()) {
+			if (m_reconfigurations.get(toConf).isEmpty()) empty++;
+		}
+		return m_reconfigurations.size() - empty;
 	}
 
 	public HashMap<String, List<String>> getLegalReconfigurationsFrom(String fromConfiguration) {
@@ -498,7 +545,7 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 	}
 
 	public Double getReconfigurationTime(String sourceConfiguration, String targetConfiguration) {
-		return 1.0;
+		return getReconfigurationCost(targetConfiguration);
 	}
 
 	public List<String> getReconfigurationPath(String sourceConfiguration, String targetConfiguration) {
@@ -518,7 +565,9 @@ public class ConfigurationSynthesizer implements ConfigurationProvider {
 		System.out.println(cs.getConfigurations().toString());
 	}
 
-
+	public Double getReconfigurationCost(String config){
+		return m_reconfiguration_costs.get(config);
+	}
 
 	
 

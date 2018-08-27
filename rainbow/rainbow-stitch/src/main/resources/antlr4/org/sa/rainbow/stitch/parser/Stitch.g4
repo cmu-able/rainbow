@@ -350,8 +350,8 @@ primaryExpression
   ;
 
 idExpression
-  : IDENTIFIER
-  | methodCall
+  : methodCall
+  | IDENTIFIER
   | INTEGER_LIT
   | FLOAT_LIT
   | STRING_LIT
@@ -366,7 +366,7 @@ postIdExpression
   ;
 
 methodCall
-  : IDENTIFIER LPAREN expressions RPAREN
+  : IDENTIFIER LPAREN expressions? RPAREN
   ;
 
 params
