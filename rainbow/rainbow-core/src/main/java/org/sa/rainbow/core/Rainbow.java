@@ -35,8 +35,11 @@ import java.net.UnknownHostException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -546,8 +549,26 @@ public class Rainbow implements IRainbowEnvironment {
         return Rainbow.m_env;
     }
 
+    
+    protected Map<RainbowComponentT, Map<String,Thread>> m_rainbowThreads = new HashMap<>();
+    
+	@Override
+	public void registerRainbowThread(Thread thread, RainbowComponentT componentType) {
+		Map<String, Thread> threads = m_rainbowThreads.get(componentType);
+		if (threads == null) {
+			threads = new HashMap<> ();
+			m_rainbowThreads.put(componentType, threads);
+		}
+		threads.put(thread.getName(), thread);
+	}
+	
+	
+	@Override
+	public Map<RainbowComponentT, Map<String,Thread>> getRegisteredThreads() {
+		return Collections.unmodifiableMap(m_rainbowThreads);
+	}
 
-
+    
 
 
 }
