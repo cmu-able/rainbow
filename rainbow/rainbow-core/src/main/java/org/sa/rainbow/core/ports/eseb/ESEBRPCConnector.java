@@ -31,6 +31,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowConstants;
 
 import edu.cmu.cs.able.eseb.bus.EventBus;
 import edu.cmu.cs.able.eseb.conn.BusConnection;
@@ -64,7 +65,7 @@ public class ESEBRPCConnector {
     private ESEBRPCConnector (short port, String serverId) throws IOException, ParticipantException {
         m_srvr = ESEBProvider.getBusServer (port);
         ESEBProvider.useServer (m_srvr);
-        setClient ("localhost", port);
+        setClient (Rainbow.instance().getProperty(RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION, "localhost"), port);
         setUpEnvironment (serverId);
 
     }
