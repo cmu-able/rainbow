@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.sa.rainbow.brass.model.p2_cp3.CP3ModelAccessor;
+import org.sa.rainbow.brass.model.p2_cp3.ICP3ModelAccessor;
 import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotState.Sensors;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
@@ -77,7 +78,7 @@ public class RobotStateGauge extends RegularPatternGauge {
 
 	private boolean reported_bump;
 	
-	private CP3ModelAccessor m_models;
+	private ICP3ModelAccessor m_models;
 
 	private IModelsManagerPort m_modelsPort;
 
