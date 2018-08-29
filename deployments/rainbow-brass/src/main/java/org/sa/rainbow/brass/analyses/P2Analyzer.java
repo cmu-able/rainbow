@@ -2,6 +2,7 @@ package org.sa.rainbow.brass.analyses;
 
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.IRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
@@ -24,6 +25,10 @@ public abstract class P2Analyzer extends AbstractRainbowRunnable implements IRai
 	public P2Analyzer(String name) {
 		super(name);
 
+	}
+
+	public P2Analyzer(String name, IRainbowEnvironment env) {
+		super(name, env);
 	}
 
 	@Override

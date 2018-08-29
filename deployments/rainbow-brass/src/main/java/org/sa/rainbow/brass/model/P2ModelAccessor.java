@@ -11,7 +11,7 @@ import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowStateModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IModelsManagerPort;
 
-public class P2ModelAccessor {
+public class P2ModelAccessor implements IP2ModelAccessor {
 
 	protected IModelsManagerPort m_modelsManagerPort;
 	private RainbowStateModelInstance m_rainbowStateModel;
@@ -23,6 +23,7 @@ public class P2ModelAccessor {
 		m_modelsManagerPort = mmp;
 	}
 
+	@Override
 	public RainbowStateModelInstance getRainbowStateModel() {
 		if (m_rainbowStateModel == null)
 			m_rainbowStateModel = (RainbowStateModelInstance) m_modelsManagerPort
@@ -30,6 +31,7 @@ public class P2ModelAccessor {
 		return m_rainbowStateModel;
 	}
 
+	@Override
 	public MissionStateModelInstance getMissionStateModel() {
 		if (m_missionStateModel == null) {
 			m_missionStateModel = (MissionStateModelInstance )m_modelsManagerPort.<MissionState>getModelInstance(new ModelReference("MissionState", MissionStateModelInstance.MISSION_STATE_TYPE));
@@ -37,6 +39,7 @@ public class P2ModelAccessor {
 		return m_missionStateModel;
 	}
 
+	@Override
 	public InstructionGraphModelInstance getInstructionGraphModel() {
 		if (m_instructionGraphModel == null) {
 			m_instructionGraphModel = (InstructionGraphModelInstance )m_modelsManagerPort.<InstructionGraphProgress>getModelInstance(new ModelReference("ExecutingInstructionGraph", InstructionGraphModelInstance.INSTRUCTION_GRAPH_TYPE));
@@ -44,6 +47,7 @@ public class P2ModelAccessor {
 		return m_instructionGraphModel;
 	}
 
+	@Override
 	public EnvMapModelInstance getEnvMapModel() {
 		if (m_envMapModel == null) {
 			m_envMapModel = (EnvMapModelInstance )m_modelsManagerPort.<EnvMap>getModelInstance(new ModelReference("Map", EnvMapModelInstance.ENV_MAP_TYPE));
