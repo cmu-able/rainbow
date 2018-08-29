@@ -22,6 +22,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okio.Buffer;
 
 public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements IBRASSConnector {
 
@@ -43,7 +44,15 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
 
         @Override
         public void onFailure (Call call, IOException e) {
-            System.err.println ("Failed to connect to shim");
+        	try {
+	        	Request rb = call.request();
+	            Request copy = rb.newBuilder().build();
+	            Buffer buffer = new Buffer();
+	            copy.body().writeTo(buffer);
+	            System.out.println("Failed to connect to shim with request" + buffer.readUtf8());
+        	} catch (IOException exc) {
+        		
+        	}
         }
     };
     private Gson                      m_gsonPP;
@@ -99,7 +108,7 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
 
     @Override
     public void reportStatus (String status, String message) {
-//        try {
+        try {
         JsonObject json = getTimeJSON ();
         addFieldsToStatus (status, message, json);
 
@@ -109,9 +118,10 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
         CLIENT.newCall (request).enqueue (m_responseCallback);
 
 //            m_requestQ.offer (request);
-//        }
-//        catch (IOException e) {
-//        }
+        }
+        catch (Exception e) {
+        	System.out.print(message);
+        }
 
     }
 
