@@ -507,7 +507,18 @@ public class PolicyToIGCP3 {
         System.out.println("Setting configuration provider...");
         DecisionEngineCP3.setConfigurationProvider(cs);
         
-		String currentConfStr=cs.configurationToPrismConstants(theArgs.configuration);	
+		String currentConfStr="";
+		if (theArgs.configuration.startsWith("sol")) currentConfStr = cs.configurationToPrismConstants(theArgs.configuration);
+		else {
+			String configuration = cs.translateId(theArgs.configuration);
+			if ("".equals(configuration)) {
+				System.out.println("Unknown configuration: " + theArgs.configuration);
+				System.exit(1);
+			}
+			else {
+				currentConfStr = cs.configurationToPrismConstants(configuration);
+			}
+		}
 		System.out.println("Configuration: "+currentConfStr);
      	cs.generateReconfigurationsFrom(currentConfStr);
 		
