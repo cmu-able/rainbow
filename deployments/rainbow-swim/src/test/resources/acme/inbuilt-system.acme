@@ -1,0 +1,9 @@
+family f1 = {
+
+  component type CT = {
+    property p : int;
+  }
+}
+system s : f1 = new f1 extended with {
+  component c : CT = new CT;
+}
