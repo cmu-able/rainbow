@@ -132,7 +132,7 @@ Family SwimFam extends EnvType with {
 
     Property DIMMER_LEVELS : int <<  default : int = 5; >>; 
     Property DIMMER_MARGIN : float <<  default : float = 0.1; >>;
-    Property ADD_SERVER_LATENCY_SEC : int <<  default : int = 180; >>;
+    Property ADD_SERVER_LATENCY_SEC : int;
     Property THREADS_PER_SERVER : int  <<  default : int = 100; >>;
     Property MAX_ARRIVAL_CAPACITY : float;
     Property RT_THRESHOLD : float;
@@ -177,6 +177,6 @@ System SwimSys : SwimFam = new SwimFam extended with {
     Property DIMMER_LEVELS = 5;
     Property MAX_ARRIVAL_CAPACITY = 22.458;
     Property RT_THRESHOLD = 0.75;
-
+    Property ADD_SERVER_LATENCY_SEC = 120;
 }
 
