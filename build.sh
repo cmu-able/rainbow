@@ -143,6 +143,8 @@ if [[ "$target" == "install" ]]; then
 
   mv bin Rainbow-$VERSION
   zip -r Rainbow-$VERSION Rainbow-$VERSION
+  rm -f Rainbow-build
+  ln -s Rainbow-$VERSION Rainbow-build
 elif [[ "$target" == "clean" ]]; then
   cd $BUILDDIR
   rm -rf bin
