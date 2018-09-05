@@ -162,10 +162,6 @@ System SwimSys : SwimFam = new SwimFam extended with {
         Property deploymentLocation = "${customize.system.target.lb}";
 
         Property isArchEnabled = true;
-
-        Property basicServiceTime = 0.0024;
-        Property optServiceTime = 0.030;
-
     }
     Connector proxyConn_1_0 : ProxyConnT = new ProxyConnT;
     Connector proxyConn_2_0 : ProxyConnT = new ProxyConnT;

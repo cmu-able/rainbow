@@ -204,25 +204,6 @@ public class SwimModelHelper {
     	return ((Double) PropertyHelper.toJavaVal(prop.getValue())).doubleValue();
     }
 
-// These are commented out because the estimated ones should be used
-//	public double getBasicServiceTime() {
-//		IAcmeProperty prop = m_model.getModelInstance().getComponent(LOAD_BALANCER).getProperty("basicServiceTime");
-//		return ((Double) PropertyHelper.toJavaVal(prop.getValue())).doubleValue();
-//	}
-//
-//	public double getBasicServiceTimeVariance() {
-//		return Math.pow(getBasicServiceTime(), 2); // assume exponential
-//	}
-//
-//	public double getOptServiceTime() {
-//		IAcmeProperty prop = m_model.getModelInstance().getComponent(LOAD_BALANCER).getProperty("optServiceTime");
-//		return ((Double) PropertyHelper.toJavaVal(prop.getValue())).doubleValue();
-//	}
-//
-//	public double getOptServiceTimeVariance() {
-//		return Math.pow(getOptServiceTime(), 2); // assume exponential
-//	}
-//
 	public double getOptThroughput() {
     	IAcmeProperty prop = m_model.getModelInstance().getComponent(LOAD_BALANCER).getProperty("optThroughput");
     	return ((Double) PropertyHelper.toJavaVal(prop.getValue())).doubleValue();
