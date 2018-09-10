@@ -27,7 +27,7 @@ EOF
 }
 
 sub probeSystem () {
-  my $response = `../util/swimsimcmd.sh @ARGV`;
+  my $response = `../util/swimcmd.sh @ARGV`;
   if ($response =~ /^error/) {
       $response = "-1\n";
   }

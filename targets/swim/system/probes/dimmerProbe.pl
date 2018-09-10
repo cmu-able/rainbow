@@ -29,7 +29,7 @@ EOF
 }
 
 sub determineDimmer () {
-#  return `../util/swimsimcmd.sh get_dimmer`;
+#  return `../util/swimcmd.sh get_dimmer`;
   return `echo 0.9`;
 #  return "0.9";
 }
