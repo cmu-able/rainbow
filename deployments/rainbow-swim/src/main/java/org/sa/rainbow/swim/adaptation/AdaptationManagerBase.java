@@ -38,6 +38,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.apache.commons.lang.time.StopWatch;
@@ -291,6 +293,10 @@ public abstract class AdaptationManagerBase extends AbstractRainbowRunnable
     protected void log (String txt) {
         m_reportingPort.info (RainbowComponentT.ADAPTATION_MANAGER, txt);
     }
+
+	protected void error (String txt) {
+	    m_reportingPort.error (RainbowComponentT.ADAPTATION_MANAGER, txt);
+	}
 
     @Override
     public boolean isEnabled () {
@@ -777,5 +783,38 @@ public abstract class AdaptationManagerBase extends AbstractRainbowRunnable
         }
 
 
+    }
+    
+
+    /**
+     * This wraps Rainbow.instance().getProperty() so that environment variables can be used
+     * in property values.
+     * 
+     * For example: reachPath = ${PLADAPT}/reach/reach.sh
+     * where PLADAPT is an environment variable
+     * 
+     * @param key property name
+     * @return property value with environment variables replaced with their values
+     */
+    protected String getRainbowPropertyWithEnv(String key) {
+    	String value = Rainbow.instance().getProperty(key);
+        if (null == key) {
+            return null;
+         }
+
+        Pattern p = Pattern.compile("\\$\\{(\\w+)\\}|\\$(\\w+)");
+        Matcher m = p.matcher(value);
+        StringBuffer sb = new StringBuffer();
+        while (m.find()) {
+            String envVarName = null == m.group(1) ? m.group(2) : m.group(1);
+            String envVarValue = System.getenv(envVarName);
+            if (null == envVarValue) {
+            	error("Environment variable " + envVarName + " is not defined");
+            }
+            m.appendReplacement(sb,
+                null == envVarValue ? "" : Matcher.quoteReplacement(envVarValue));
+         }
+        m.appendTail(sb);
+        return sb.toString();
     }
 }

@@ -55,8 +55,8 @@ public class AdaptationManager extends AdaptationManagerBase {
         // the following hardcoded values are like the constants above
     	HashMap<String, Object> params = new HashMap<>();
         params.put(SDPAdaptationManager.getNO_LATENCY(), Boolean.FALSE);
-        params.put(SDPAdaptationManager.getREACH_PATH(), Rainbow.instance().getProperty(PLASDP_REACH_PATH));
-        params.put(SDPAdaptationManager.getREACH_MODEL(), Rainbow.instance().getProperty(PLASDP_REACH_MODEL));
+        params.put(SDPAdaptationManager.getREACH_PATH(), getRainbowPropertyWithEnv(PLASDP_REACH_PATH));
+        params.put(SDPAdaptationManager.getREACH_MODEL(), getRainbowPropertyWithEnv(PLASDP_REACH_MODEL));
 		params.put(SDPAdaptationManager.getREACH_SCOPE(),
 				"S=" + maxServers + " TAP#=" + addServerLatencyPeriods + " D=" + swimModel.getDimmerLevels());
         String yamlParams = Yaml.dump(params);
