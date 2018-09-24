@@ -28,11 +28,13 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 
 import org.apache.commons.lang.NotImplementedException;
+import org.hibernate.internal.jaxb.mapping.orm.JaxbSecondaryTable;
 import org.sa.rainbow.core.IDisposable;
 import org.sa.rainbow.core.IRainbowRunnable;
 import org.sa.rainbow.core.Identifiable;
@@ -46,6 +48,8 @@ import org.sa.rainbow.core.globals.ExitState;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.ModelsManager;
+import org.sa.rainbow.core.models.ProbeDescription;
+import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
 import org.sa.rainbow.core.ports.IEffectorLifecycleBusPort;
 import org.sa.rainbow.core.ports.IGaugeLifecycleBusPort;
 import org.sa.rainbow.core.ports.IMasterCommandPort;
@@ -53,11 +57,13 @@ import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.OperationResult;
 import org.sa.rainbow.core.ports.IModelUSBusPort;
+import org.sa.rainbow.core.ports.IProbeReportPort;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReportingSubscriberCallback;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
+import org.sa.rainbow.translator.probes.IProbeIdentifier;
 import org.sa.rainbow.util.Util;
 
 public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportingSubscriberCallback {
@@ -80,6 +86,9 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	private IModelDSBusPublisherPort m_dsPort;
 	private Map<String, ModelPanel> m_modelSections = new HashMap<>();
 	private Map<String, GaugePanel> m_gaugeSections = new HashMap<>();
+	private Map<String, JTextArea> m_probeSections = new HashMap<>();
+	
+	JDesktopPane desktopPane;
 
 	/**
 	 * Launch the application.
@@ -131,7 +140,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 				quit();
 			}
 		});
-		JDesktopPane desktopPane = new JDesktopPane();
+		desktopPane = new JDesktopPane();
 		desktopPane.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
 		m_frame.getContentPane().add(desktopPane, BorderLayout.CENTER);
 		List<String> expectedDelegateLocations;
@@ -372,6 +381,39 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 				addGaugePanel(g);
 			}
 		}
+		
+		ProbeDescription probes = Rainbow.instance().getRainbowMaster().probeDesc();
+		for (ProbeAttributes p : probes.probes) {
+			String probeId = p.alias + "@" + p.getLocation();
+			if (m_probeSections.get(probeId) == null) {
+				addProbePanel(probeId);
+			}
+		}
+		
+		try {
+			RainbowPortFactory.createProbeReportingPortSubscriber(new IProbeReportPort() {
+				
+				@Override
+				public void dispose() {
+					
+				}
+				
+				@Override
+				public void reportData(IProbeIdentifier probe, String data) {
+					JTextArea ta = m_probeSections.get(probe.id());
+					if (ta != null) {
+						ta.append(data);
+						ta.setCaretPosition(ta.getText().length());
+						if (ta.getText().length() > MAX_TEXT_LENGTH) {
+							ta.setText(ta.getText().substring(TEXT_HALF_LENGTH));
+						}
+					}
+				}
+			});
+		} catch (RainbowConnectionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private void addGaugePanel(String gaugeID) {
@@ -386,6 +428,18 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		JTabbedPane tp = m_tabs.get(RainbowComponentT.MODEL);
 		tp.add(modelName, mp);
 		m_modelSections.put(modelName, mp);
+	}
+	
+	private void addProbePanel(String probeId) {
+		JTextArea p = new JTextArea ();
+		JScrollPane s = new JScrollPane();
+		s.setViewportView(p);
+		s.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		s.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		JTabbedPane tp = m_tabs.get(RainbowComponentT.PROBE);
+		tp.add(probeId, p);
+		m_probeSections.put(probeId, p);
+
 	}
 
 	@Override
@@ -480,7 +534,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		// Termination menu item
 		item = new JMenuItem("Sleep Master+Delegate");
 		item.setMnemonic(KeyEvent.VK_S);
-		item.setToolTipText("Signals Oracle and all Delegates to terminate, then sleep");
+		item.setToolTipText("Signals Master and all Delegates to terminate, then sleep");
 		item.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -489,9 +543,20 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		});
 		item.setEnabled(false);
 		menu.add(item);
+		
+		item = new JMenuItem("Monitor Rainbow Threads");
+		item.setMnemonic(KeyEvent.VK_M);
+		item.setToolTipText("Opens a window for monitoring threads in Rainbow");
+		item.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				monitorRainbow();
+			}
+		});
+		menu.add(item);
+		
 		item = new JMenuItem("Restart Master+Delegate");
 		item.setMnemonic(KeyEvent.VK_R);
-		item.setToolTipText("Signals Oracle and all Delegates to terminate, then restart");
+		item.setToolTipText("Signals Master and all Delegates to terminate, then restart");
 		item.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -503,7 +568,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		menu.add(item);
 		item = new JMenuItem("Destroy Master+Delegate");
 		item.setMnemonic(KeyEvent.VK_D);
-		item.setToolTipText("Signals Oracle and all Delegates to terminate, then self-destruct");
+		item.setToolTipText("Signals Master and all Delegates to terminate, then self-destruct");
 		item.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -516,7 +581,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		// Quit menu item
 		item = new JMenuItem("Force Quit");
 		item.setMnemonic(KeyEvent.VK_Q);
-		item.setToolTipText("Forces the Oracle component to quit immediately");
+		item.setToolTipText("Forces the Master component to quit immediately");
 		item.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -524,6 +589,13 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 			}
 		});
 		menu.add(item);
+	}
+
+	protected void monitorRainbow() {
+		RainbowMonitor adaptationManagerFrame = new RainbowMonitor();
+		adaptationManagerFrame.setMaximizable(true);
+		adaptationManagerFrame.setIconifiable(true);
+		desktopPane.add(adaptationManagerFrame);		
 	}
 
 	protected void forceQuit() {
@@ -615,7 +687,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 				String effID = JOptionPane.showInputDialog(m_frame,
 						"Please identify Effector to test: " + "'name@location' (or just 'name' for localhost)");
 				if (effID == null || effID.length() == 0) {
-					writeText(RainbowComponentT.MASTER, "Sorry, Oracle needs to know what effector to invoke!");
+					writeText(RainbowComponentT.MASTER, "Sorry, Master needs to know what effector to invoke!");
 				}
 				Pair<String, String> namePair = Util.decomposeID(effID);
 				if (namePair.secondValue() == null) { // default to localhost
@@ -643,7 +715,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 			public void actionPerformed(ActionEvent e) {
 				String operationName = JOptionPane.showInputDialog(m_frame, "Please identify the Operation to test:");
 				if (operationName == null || operationName.isEmpty()) {
-					writeText(RainbowComponentT.MASTER, "Sorry, Oracel needs to know what operation to invoke.");
+					writeText(RainbowComponentT.MASTER, "Sorry, Rainbow Master needs to know what operation to invoke.");
 				}
 
 				String argStr = JOptionPane.showInputDialog(m_frame,
@@ -797,7 +869,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 
 		item = new JMenuItem("Software Update...");
 		item.setMnemonic(KeyEvent.VK_U);
-		item.setToolTipText("Allows the update of the Oracle and RainbowDelegate software components");
+		item.setToolTipText("Allows the update of the Master and RainbowDelegate software components");
 		item.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
