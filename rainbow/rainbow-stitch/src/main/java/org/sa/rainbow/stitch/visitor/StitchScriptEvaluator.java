@@ -58,6 +58,7 @@ import org.sa.rainbow.stitch.core.PostVar;
 import org.sa.rainbow.stitch.core.Statement;
 import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.core.Var;
+import org.sa.rainbow.stitch.core.Expression.Kind;
 import org.sa.rainbow.stitch.model.ModelOperator;
 import org.sa.rainbow.stitch.parser.StitchParser;
 import org.sa.rainbow.stitch.util.Tool;
@@ -375,6 +376,9 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 				}
 				set.add(e.getResult());
 			}
+		}
+		if (set.size() == 1 && set.iterator().next() instanceof Set && cExpr.expressions().iterator().next().getKind() == Kind.QUANTIFIED) {
+			Tool.warn("It seems that this expression has a set that has one item that is a set. This might mean you have an extra set of curly braces.", null, stitchProblemHandler());
 		}
 		cExpr.setResult(set);
 	}
