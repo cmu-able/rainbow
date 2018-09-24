@@ -109,7 +109,7 @@ public class MapTranslator {
     
     public static final float  MAXIMUM_KINECT_OFF_DISTANCE_VAL = 6.0f; // Maximum driving distance with kinect off in m.
 
-    public static final Double TRAVERSAL_SUCCESS_THRESHOLD=0.9; // Tolerance for map arc traversal success rate (if lower, segment not considered as a valid map trajectory in a given configuration)
+    public static Double TRAVERSAL_SUCCESS_THRESHOLD=0.9; // Tolerance for map arc traversal success rate (if lower, segment not considered as a valid map trajectory in a given configuration)
     public static final Double TRAVERSAL_HIT_THRESHOLD=0.1; // Tolerance for map arc traversal hit rate(if higher, segment not considered as a vaid map trajectory)
 
     // Goal and stop condition configuration constants
@@ -386,6 +386,10 @@ public class MapTranslator {
 				                    	buf+= " "+ mainUpdateStr+";\n";        
 				                    }
 	                   			}
+                   			}
+                   			else {
+                   				String s = a.m_source + " -> " + a.m_target + " Unsuccessful under " + confStr;
+                   				s = s + "\n";
                    			}
                    		}
                     	

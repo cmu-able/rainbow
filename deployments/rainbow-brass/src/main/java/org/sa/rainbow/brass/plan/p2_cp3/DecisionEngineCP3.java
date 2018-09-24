@@ -40,6 +40,7 @@ public class DecisionEngineCP3 extends DecisionEngine {
 		MapTranslator.CONSIDER_RECONFIGURATION_COST = Boolean
 				.parseBoolean(props.getProperty("rainbow.consider_cost", "false"));
 		MapTranslator.ROBOT_MAX_RECONF_VAL = props.getProperty("rainbow.max_reconfs", "1");
+		MapTranslator.TRAVERSAL_SUCCESS_THRESHOLD = Double.parseDouble(props.getProperty("rainbow.success_threshold", "0.9").trim());
 		DecisionEngineCP3.choose_balanced_utilty = Boolean
 				.parseBoolean(props.getProperty("rainbow.balanced_utility", "true"));
 		DecisionEngineCP3.do_not_change_paths = Boolean.parseBoolean(props.getProperty("rainbow.fix_path", "false"));
@@ -167,10 +168,9 @@ public class DecisionEngineCP3 extends DecisionEngine {
 		if (!Objects.equals(maxSingleEntry.getKey(), maxEntry.getKey())) {
 			log("THESE PLANS ARE DIFFERENT");
 		}
-		log("Choosing the plan: " + (choose_balanced_utilty ? "Balanced" : "Prioritized"));
+		log("Choosing the plan: " + (choose_balanced_utilty ? "Balanced" : "Prioritized") + ", score=" + (choose_balanced_utilty?m_selected_candidate_score:maxSingeScore));
 		m_selected_candidate = DecisionEngineCP3.choose_balanced_utilty ? (balancedCandidate)
 				: (singleCriterionCandidate);
-
 		return m_selected_candidate + ".adv";
 	}
 
