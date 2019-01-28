@@ -40,6 +40,8 @@ import com.google.gson.JsonParser;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.annotation.Arg;
+import net.sourceforge.argparse4j.impl.action.StoreTrueArgumentAction;
+import net.sourceforge.argparse4j.inf.ArgumentAction;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 
 public class PlanningExperiment {
@@ -188,6 +190,7 @@ public class PlanningExperiment {
 	private String m_startConfig;
 	private Properties m_props;
 	private boolean m_dark;
+	private boolean m_singleModel;
 
 	public PlanningExperiment() {
 
@@ -206,6 +209,9 @@ public class PlanningExperiment {
 
 		@Arg(dest = "map")
 		public String map;
+		
+		@Arg(dest = "single_model")
+		public boolean singleModel;
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -213,6 +219,7 @@ public class PlanningExperiment {
 				.description("Run the planner on the specified testcase");
 		parser.addArgument("-p", "--properties").metavar("FILE").type(String.class)
 				.help("The file containing properties/environment variables for PRISM etc.");
+		parser.addArgument("-s", "--single_model").action(new StoreTrueArgumentAction()).help("Use a single model for model checking. (Be careful of state explosion.)");
 		parser.addArgument("map").metavar("FILE").type(String.class).help("The map containing the waypoints");
 		parser.addArgument("start_config").type(String.class)
 				.help("The JSON file specifying the start configuration of the robot");
@@ -244,6 +251,7 @@ public class PlanningExperiment {
 		exp.m_envMap = new EnvMap(null, props);
 		exp.m_startConfig = startConfig.get("start-configuration").getAsString();
 		exp.m_props = props;
+		exp.m_singleModel = theArgs.singleModel;
 
 		/*
 		 * { "path" : ["l1", "l2", "l3", "l4"] // the path starting out on "perturb-loc"
@@ -332,9 +340,9 @@ public class PlanningExperiment {
 			for (int i = pi + 1; i < m_path.size(); i++) {
 				currentPath.push(m_path.get(i));
 			}
-			DecisionEngineCP3.generateCandidates(currentPath);
+			DecisionEngineCP3.generateCandidates(currentPath, !m_singleModel);
 		} else {
-			DecisionEngineCP3.generateCandidates(m_perturbLocation, m_target);
+			DecisionEngineCP3.generateCandidates(m_perturbLocation, m_target, !m_singleModel);
 		}
 		double timeForCandidates = (new Date().getTime() - startTime)/1000.0 - timeForReconfigurations;
 		DecisionEngineCP3.scoreCandidates(m_envMap, 180000, 1);

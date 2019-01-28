@@ -283,13 +283,13 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 			}
 			currentPath.push(tgt);
 			log("---> using path " + currentPath.toString());
-			DecisionEngineCP3.generateCandidates(currentPath);
+			DecisionEngineCP3.generateCandidates(currentPath, true);
 			BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(), "Using path " + DecisionEngineCP3.m_candidates.keySet().iterator().next().toString());
 
 		} else {
 			log("Generating candidate paths from " + srcLabel + " to " + tgt);
 
-			DecisionEngineCP3.generateCandidates(srcLabel, tgt);
+			DecisionEngineCP3.generateCandidates(srcLabel, tgt, true);
 			log("---> found " + DecisionEngineCP3.m_candidates.size());
 			BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(),
 					"Found " + DecisionEngineCP3.m_candidates.size() + " valid paths");

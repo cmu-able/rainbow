@@ -10,9 +10,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 import org.apache.log4j.Logger;
@@ -109,7 +112,8 @@ public class MapTranslator {
     
     public static final float  MAXIMUM_KINECT_OFF_DISTANCE_VAL = 6.0f; // Maximum driving distance with kinect off in m.
 
-    public static Double TRAVERSAL_SUCCESS_THRESHOLD=0.9; // Tolerance for map arc traversal success rate (if lower, segment not considered as a valid map trajectory in a given configuration)
+//    public static Double TRAVERSAL_SUCCESS_THRESHOLD=0.9; // Tolerance for map arc traversal success rate (if lower, segment not considered as a valid map trajectory in a given configuration)
+    public static Double TRAVERSAL_SUCCESS_THRESHOLD=0.1; // Tolerance for map arc traversal success rate (if lower, segment not considered as a valid map trajectory in a given configuration)
     public static final Double TRAVERSAL_HIT_THRESHOLD=0.1; // Tolerance for map arc traversal hit rate(if higher, segment not considered as a vaid map trajectory)
 
     // Goal and stop condition configuration constants
@@ -121,6 +125,8 @@ public class MapTranslator {
 //    public static final String	STOP_PRED_DEF = STOP_PRED + " = "+GOAL_PRED+" | "+ROBOT_BATTERY_VAR+"<"+ROBOT_BATTERY_DELTA+";";
     public static final String	STOP_PRED_DEF = STOP_PRED + " = "+GOAL_PRED+";";
     public static final String	STOP_GUARD_STR = "& (!"+STOP_PRED+")";
+    public static final String FAILED_PRED = "l=lfailed";
+    public static final String NOT_FAILED_PRED="l!=lfailed";
 
     public static final double MAX_DISTANCE = 999.0; // Distance assigned to disabled edges (for distance reward computation)
     public static final double DEFAULT_TIME_TACTIC_TIME=1; // Tactics are not instantaneous;
@@ -198,7 +204,7 @@ public class MapTranslator {
     public static LinkedList<String> generateMoveCommandStrs(){
         synchronized (m_map) {
             LinkedList<String> res = new LinkedList<String> ();
-            LinkedList<EnvMapArc> arcs = m_map.getArcs();
+            LinkedList<? extends EnvMapArc> arcs = m_map.getArcs();
             for (int i=0; i<arcs.size(); i++){
                 res.add(arcs.get(i).getSource()+MOVE_CMD_STR+arcs.get(i).getTarget());
             }
@@ -236,7 +242,7 @@ public class MapTranslator {
 //            buf+="const "+entry.getKey()+"="+String.valueOf(c)+";\n";
             c++;
         }
-        
+        buf += "const lfailed=-1; // location indicating failed transitions\n";
         return buf+"\n";
     }
     
@@ -262,8 +268,9 @@ public class MapTranslator {
         String  buf="// Environment process\n\n";
         buf+="module "+ENVIRONMENT_PLAYER_NAME+MODULE_POSTFIX_STR+"\n";
         buf+="end:bool init false;\n\n";
-        buf+="\t[] true "+ENVIRONMENT_GUARD_STR +" "+STOP_GUARD_STR+"-> "+ENVIRONMENT_UPDATE_HOUSEKEEPING_STR+";\n";
+        buf+="\t[] true "+ENVIRONMENT_GUARD_STR +" "+STOP_GUARD_STR+" & " + NOT_FAILED_PRED +"-> "+ENVIRONMENT_UPDATE_HOUSEKEEPING_STR+";\n";
         buf+="\t[] "+STOP_PRED +"  & !end -> (end'=true);\n";
+        buf+="\t[] !end " + ENVIRONMENT_GUARD_STR + " &" + FAILED_PRED + "-> (end'=true);\n";
         buf+="endmodule\n\n";
         return buf;
     }
@@ -282,7 +289,7 @@ public class MapTranslator {
         buf+="\n"+generateBatteryUpdates();
         buf+="module "+ROBOT_PLAYER_NAME+MODULE_POSTFIX_STR+"\n";
         buf+=ROBOT_BATTERY_VAR+":["+ROBOT_BATTERY_RANGE_MIN+".."+ROBOT_BATTERY_RANGE_MAX_CONST+"] init "+INITIAL_ROBOT_BATTERY_CONST+";\n";
-        buf+=ROBOT_LOCATION_VAR+":[0..1000] init "+INITIAL_ROBOT_LOCATION_CONST+";\n";
+        buf+=ROBOT_LOCATION_VAR+":[-1..1000] init "+INITIAL_ROBOT_LOCATION_CONST+";\n";
 //        buf+=ROBOT_LOCATION_VAR+":[0.."+m_map.getNodeCount()+"] init "+INITIAL_ROBOT_LOCATION_CONST+";\n";
         buf+=ROBOT_CONF_VAR+":[-1.."+m_cp.getConfigurations().size()+"] init "+INITIAL_ROBOT_CONF_CONST+";\n";
         buf+=ROBOT_HEADING_VAR+":[0.."+String.valueOf(MissionState.Heading.values().length)+"] init "+INITIAL_ROBOT_HEADING_CONST+";\n";
@@ -360,17 +367,19 @@ public class MapTranslator {
                 String hitRateComplementGuard = "";
                 if (a.isEnabled()){
                 	if (!a.includesHitRates(m_cp)){ // If no risk of collision exists, generate only a simple deterministic command for the transition
+                		// TODO: Does it make sense, or should we also check the success rate.
                 		buf+="\t ["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] ("+ ROBOT_RECONF_VAR +">0) & ("+ROBOT_LOCATION_VAR+"="+a.getSource()+") "+" & ("+ROBOT_BATTERY_VAR+">="+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+")"+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) -> ("+ROBOT_LOCATION_VAR+"'="+a.getTarget()+") "+" & ("+ROBOT_BATTERY_VAR+"'="+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+")"+ " & ("+ROBOT_HEADING_VAR+"'="+HEADING_CONST_PREFIX + findArcHeading(a).name() + ") & (robot_done'=true);\n";                	
                 		//System.out.println("\t ["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] does not include hitrates");
                 		m_generated_movecommands.add(a.getSource()+MOVE_CMD_STR+a.getTarget());
                 	} else { // If collision risk exist, generate alternative probabilistic branches
-                	    
+                		Set<String> successfulConfs = new HashSet<>();
                    		for (Map.Entry<String, Configuration> c: m_cp.getConfigurations().entrySet()){
                    			confStr=m_cp.translateId(c.getKey());
                    			if ((a.getSuccessRate(confStr)>=TRAVERSAL_SUCCESS_THRESHOLD)||
                    					(!a.existsSuccessRateAboveThreshold(TRAVERSAL_SUCCESS_THRESHOLD) && 
                    							(a.getSuccessRate(confStr)==(a.getMaxSuccessRate())))){
 	                   			if (a.getHitRate(confStr)>=0){
+	                   				successfulConfs.add(c.getKey());
 	                        		m_generated_movecommands.add(a.getSource()+MOVE_CMD_STR+a.getTarget());
 	                   				String confGuard = "("+ROBOT_CONF_VAR+"="+c.getValue().getId()+")";
 				                    buf+="\t ["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] ("+ ROBOT_RECONF_VAR +">0) & ("+ROBOT_LOCATION_VAR+"="+a.getSource()+") "+" & ("+ROBOT_BATTERY_VAR+">="+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+")"+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & "+confGuard+" & (!robot_done) -> ";                	
@@ -391,6 +400,18 @@ public class MapTranslator {
                    				String s = a.m_source + " -> " + a.m_target + " Unsuccessful under " + confStr;
                    				s = s + "\n";
                    			}
+                   		}
+                	    // if not all confs are successful
+                	    //  confGuard = for c in successful_confs : confGuard + "c!=" + c + "&"
+                   		if (!successfulConfs.containsAll(m_cp.getConfigurations().keySet())) {
+                   			StringBuffer confGuard = new StringBuffer("(");
+                   			for (Iterator<String> iterator = successfulConfs.iterator(); iterator.hasNext();) {
+								String c = iterator.next();
+								confGuard.append(ROBOT_CONF_VAR).append("!=").append(c);
+								if (iterator.hasNext()) confGuard.append("&");
+							}
+                   			confGuard.append(")");
+                   			buf += "\t [" + a.getSource() + MOVE_CMD_STR + a.getTarget()+"] ("+ ROBOT_RECONF_VAR +">0) & ("+ROBOT_LOCATION_VAR+"="+a.getSource() + ")" + STOP_GUARD_STR + " " + ROBOT_GUARD_STR + "& " + confGuard.toString() + " & (!robot_done) -> (l'=lfailed) & (robot_done'=true);\n" ;
                    		}
                     	
                    	}
@@ -851,7 +872,8 @@ public class MapTranslator {
     public static String generateEnergyReward(){
         synchronized (m_map) {
             String buf="rewards \"energy\"\n";
-            buf+="\t"+STOP_PRED+" : "+ROBOT_BATTERY_VAR+";\n";
+            buf+="\t"+STOP_PRED+"& "  + NOT_FAILED_PRED + "  : "+ROBOT_BATTERY_VAR+";\n";
+            buf+="\t"+FAILED_PRED + ": 0;\n";
             buf+="endrewards\n\n";
             return buf;		
         }
@@ -892,6 +914,8 @@ public class MapTranslator {
         return buf;
     }
 
+    
+    
     /**
      * Generates the PRISM specification for an adaptation scenario, constrained to a specific path of robot movements
      * @param path List of strings containing the sequence of locations in the path, e.g., ["l1", ..., "l8"]
@@ -1023,6 +1047,40 @@ public class MapTranslator {
         for ( EnvMapPath path : map_paths )  {
             String filename = f_base + "/" + String.valueOf (c);
             exportMapTranslation (filename, path.getPath(), reconfs, inhibitTactics);
+            logInfo("Exported map translation "+String.valueOf(c));
+            specifications.put(path.getPath(), filename);
+            logInfo("Candidate Path distance : "+String.valueOf(path.getDistance())+ " "+String.valueOf(path.getPath()));
+            c++;
+            if (c==cutoff){
+            	break;
+            }
+        }
+        return specifications;
+    }
+    
+    public static String getMapTranslationWithReconfs(List<String> reconfs, boolean inhibitTactics){
+        return getMapTranslation(inhibitTactics) +"\n\n" + generateReconfigurationConstraintModule(reconfs);
+    }
+
+    public static void exportMapTranslationWithReconfs(String f, List<String> reconfs, boolean inhibitTactics){
+        exportTranslation(f, getMapTranslationWithReconfs(reconfs, inhibitTactics));
+    }
+
+    public static Map<List, String> exportConstrainedTranslationFull(String f_base, String source, String target, List<String> reconfs, boolean inhibitTactics) {
+        List<Stack> paths = goFindAllPaths(source, target);
+        int cutoff=1;
+        ArrayList<EnvMapPath> map_paths = new ArrayList<EnvMapPath>();
+        for (int i=0; i<paths.size();i++){
+        	map_paths.add(new EnvMapPath(paths.get(i), m_map));
+        }
+
+        Collections.sort(map_paths);
+
+        Map<List, String> specifications = new HashMap<List, String>();
+        int c=0;
+        for ( EnvMapPath path : map_paths )  {
+            String filename = f_base + "/" + String.valueOf (c);
+            exportMapTranslationWithReconfs (filename, reconfs, inhibitTactics);
             logInfo("Exported map translation "+String.valueOf(c));
             specifications.put(path.getPath(), filename);
             logInfo("Candidate Path distance : "+String.valueOf(path.getDistance())+ " "+String.valueOf(path.getPath()));

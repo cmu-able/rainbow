@@ -554,7 +554,7 @@ public class PolicyToIGCP3 {
 		System.out.println(
 				"Src:" + String.valueOf(node_src.getId()) + " Tgt:" + String.valueOf(node_tgt.getId()));
 							
-		DecisionEngineCP3.generateCandidates(node_src.getLabel(), node_tgt.getLabel(), true); // The last param inhibits reconfiguration tactics
+		DecisionEngineCP3.generateCandidates(node_src.getLabel(), node_tgt.getLabel(), true, true); // The last param inhibits reconfiguration tactics
 		System.out.println("Scoring candidates (from configuration: "+theArgs.configuration+", index: "+cs.getConfigurationIndex(theArgs.configuration)+")...");
 		DecisionEngineCP3.scoreCandidates(map, MapTranslator.ROBOT_BATTERY_RANGE_MAX, 1, cs.getConfigurationIndex(theArgs.configuration));
 		System.out.println(String.valueOf(DecisionEngineCP3.m_scoreboard));	

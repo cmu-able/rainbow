@@ -56,18 +56,21 @@ public class DecisionEngineCP3 extends DecisionEngine {
 		m_safetyWeight = 0.6;
 		m_energyWeight = 0.2;
 		m_timelinessWeight = 0.2;
+		m_priority_index = SAFETY_INDEX;
 	}
 
 	public static void setEnergyPreference() {
 		m_safetyWeight = 0.2;
 		m_energyWeight = 0.6;
 		m_timelinessWeight = 0.2;
+		m_priority_index = ENERGY_INDEX;
 	}
 
 	public static void setTimelinessPreference() {
 		m_safetyWeight = 0.2;
 		m_energyWeight = 0.2;
 		m_timelinessWeight = 0.6;
+		m_priority_index = TIME_INDEX;
 	}
 
 	/**
@@ -77,7 +80,14 @@ public class DecisionEngineCP3 extends DecisionEngine {
 	 * @return
 	 */
 	public static Double getMaxEnergy() {
-		return getMaxItem(ENERGY_INDEX);
+	  	Double res = 0.0;
+    	for (Map.Entry<List, ArrayList<Double>> entry : m_scoreboard.entrySet()){
+    		Double e = entry.getValue().get(ENERGY_INDEX);
+			if (e>res && e != INFINITY){
+    			res = e;
+    		}
+    	}
+    	return res;
 	}
 
 	/**
@@ -313,24 +323,26 @@ public class DecisionEngineCP3 extends DecisionEngine {
 		return code;
 	}
 
-	public static void generateCandidates(List<String> path) {
-		generateCandidates(path, false);
+	public static void generateCandidates(List<String> path, boolean generateSeparatePaths) {
+		generateCandidates(path, false, generateSeparatePaths);
 	}
 
-	public static void generateCandidates(List<String> path, boolean inhibitTactics) {
+	public static void generateCandidates(List<String> path, boolean inhibitTactics, boolean generateSeparatePaths) {
 		m_origin = path.get(0);
 		m_destination = path.get(path.size() - 1);
 		Map<List, String> specifications = new HashMap<List, String>();
 		int c = 0;
 		String filename = m_export_path + "/" + String.valueOf(c);
 		EnvMapPath epath = new EnvMapPath(path, m_mt.getMap());
-		m_mt.exportMapTranslation(filename, epath.getPath(), new ArrayList<String>(), inhibitTactics);
+		if (generateSeparatePaths)
+			m_mt.exportMapTranslation(filename, epath.getPath(), new ArrayList<String>(), inhibitTactics);
+		else
+			m_mt.exportMapTranslationWithReconfs(filename, new ArrayList<>(), inhibitTactics);
 		System.out.println("Exported map translation " + String.valueOf(c));
 		specifications.put(epath.getPath(), filename);
 		System.out.println(
 				"Candidate Path distance : " + String.valueOf(epath.getDistance()) + " " + String.valueOf(path));
 		m_candidates = specifications;
-
 	}
 
 	/**
@@ -364,7 +376,7 @@ public class DecisionEngineCP3 extends DecisionEngine {
 		setTimelinessPreference();
 		for (int i = 180000; i < 180500; i += 500) {
 			System.out.println("Generating candidates for l1-l4...");
-			generateCandidates("l32", "l36");
+			generateCandidates("l32", "l36", true);
 			System.out.println("Scoring candidates...");
 			scoreCandidates(dummyMap, i, 1, "-1");
 			System.out.println(String.valueOf(m_scoreboard));

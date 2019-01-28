@@ -88,16 +88,20 @@ public class DecisionEngine {
      * origin and destination locations
      * @param origin String label of origin map location
      * @param destination String label of destination map location
+     * @param betweenCutoff TODO
      */
 
-    public static void generateCandidates (String origin, String destination){
-        generateCandidates(origin, destination, false);
+    public static void generateCandidates (String origin, String destination, boolean betweenCutoff){
+        generateCandidates(origin, destination, false, betweenCutoff);
     }
 
-    public static void generateCandidates(String origin, String destination, boolean inhibitTactics){
+    public static void generateCandidates(String origin, String destination, boolean inhibitTactics, boolean betweenCutoff){
         m_origin = origin;
         m_destination = destination;
-        m_candidates = m_mt.exportConstrainedTranslationsBetweenCutOff(m_export_path, origin, destination, new ArrayList<String>() , inhibitTactics);	
+        if (betweenCutoff) 
+        	m_candidates = m_mt.exportConstrainedTranslationsBetweenCutOff(m_export_path, origin, destination, new ArrayList<String>() , inhibitTactics);
+        else
+        	m_candidates = m_mt.exportConstrainedTranslationFull(m_export_path, origin, destination, new ArrayList<>(), inhibitTactics);
 //        m_candidates = m_mt.exportConstrainedTranslationsBetween(m_export_path, origin, destination, inhibitTactics);	
 //        m_candidates = m_mt.exportSingleTranslationBetween(m_export_path, origin, destination, inhibitTactics);	
     }

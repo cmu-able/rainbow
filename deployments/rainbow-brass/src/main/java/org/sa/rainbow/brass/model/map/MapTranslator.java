@@ -155,7 +155,7 @@ public class MapTranslator {
     public static LinkedList<String> generateMoveCommandStrs(){
         synchronized (m_map) {
             LinkedList<String> res = new LinkedList<String> ();
-            LinkedList<EnvMapArc> arcs = m_map.getArcs();
+            LinkedList<? extends EnvMapArc> arcs = m_map.getArcs();
             for (int i=0; i<arcs.size(); i++){
                 res.add(arcs.get(i).getSource()+MOVE_CMD_STR+arcs.get(i).getTarget());
             }
