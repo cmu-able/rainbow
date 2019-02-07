@@ -5,18 +5,19 @@ jcctarget="javacc:javacc install"
 TIMESTAMP=`date +'%Y%m%d%H%M'`
 VERSION=$TIMESTAMP
 SKIPTESTS=""
+DEPLOYMENT=""
 
 function usage () {
   echo "Usage $PROG [-s] [-p rainbow-dir] [-d deployment-dir] [-t target] [-v version] [command]"
   echo "    -d -the deployment that you want included in the build, either relative or in the dir deployments"
   echo "    -t -the comma separated list of targets to include in the build, either relative or in the targets dir"
   echo "    -v -the version label to give the release"
-  echo "    -s - skip tests in the build"
-  echo "    -p - the path containing the rainbow source code"
+  echo "    -s -skip tests in the build"
+  echo "    -p -the path containing the rainbow source code"
   echo "command -the build command to give"
 }
 
-while getopts :p:d:t:v:s opt; do
+while getopts :p:d:t:v:sh opt; do
   case $opt in
     p)
       if [ -d "$OPTARG" ]; then
