@@ -206,6 +206,7 @@
 					</dependency>
 				</dependencies>
 				<configuration>
+					<argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
 					<testFailureIgnore>true</testFailureIgnore>
 					<forkMode>always</forkMode>
 					<resuseForks>false</resuseForks>
@@ -415,6 +416,7 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
 						<configuration>
+							<argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
 							<includes>
 								<include>**/*Test.java</include>
 								<include>**/*TestCase.java</include>
@@ -433,6 +435,7 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
 						<configuration>
+							<argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
 							<includes>
 								<include>TestIgnore</include>
 							</includes>
