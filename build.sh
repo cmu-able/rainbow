@@ -111,14 +111,14 @@ mvn -DskipTests $target || exit 1
 cd ../rainbow-acme-model
 mvn -DskipTests $target || exit 1
 cd ../rainbow-utility-model
-mvn $target || exit 1
+mvn $SKIPTESTS $target || exit 1
 cd ../rainbow-stitch
-mvn $target || exit 1
+mvn $SKIPTESTS $target || exit 1
 
 cd ../..
 BUILDDIR=`pwd`
 cd $DEPLOYMENT
-mvn $target || exit 1
+mvn $SKIPTESTS $target || exit 1
 
 if [[ "$target" == "install" ]]; then
   mkdir -p $BUILDDIR/bin/lib
