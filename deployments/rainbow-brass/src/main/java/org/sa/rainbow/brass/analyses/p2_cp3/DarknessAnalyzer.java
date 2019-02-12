@@ -13,6 +13,7 @@ import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowState.CP3ModelState
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RemoveModelProblemCmd;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.SetModelProblemCmd;
 import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotState;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.ModelReference;
@@ -26,6 +27,10 @@ public class DarknessAnalyzer extends P2CP3Analyzer implements IRainbowModelChan
 	public DarknessAnalyzer() {
 		super("Darkness");
 
+	}
+	
+	public DarknessAnalyzer(IRainbowEnvironment env) {
+		super("Darkness",env);
 	}
 
 	protected static class LightingData {

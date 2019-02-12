@@ -9,7 +9,11 @@ import org.sa.rainbow.core.models.ModelReference;
 
 public class CP3RobotState extends RobotState {
 
-	public static enum Sensors {KINECT, CAMERA, LIDAR, HEADLAMP}
+	public static enum Sensors {KINECT, CAMERA, LIDAR, HEADLAMP;
+		public static Sensors valueOfIgnoreCase(String sensor) {
+			return valueOf(sensor.toUpperCase());
+		}
+	}
 
 
 	Deque<TimeStamped<EnumSet<Sensors>>> m_sensorHistory = new ArrayDeque<>();

@@ -6,6 +6,7 @@ import java.util.EnumSet;
 
 import org.sa.rainbow.brass.adaptation.BrassPlan;
 import org.sa.rainbow.brass.model.p2_cp3.CP3ModelAccessor;
+import org.sa.rainbow.brass.model.p2_cp3.ICP3ModelAccessor;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowState;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowState.CP3ModelState;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowStateModelInstance;
@@ -37,7 +38,7 @@ public class ReactiveDarknessPlanner extends AbstractRainbowRunnable implements 
 	private RainbowStateModelInstance m_rainbowStateModel;
 	private CP3RobotStateModelInstance m_robotStateModel;
 	private boolean m_executingPlan;
-	private CP3ModelAccessor m_models;
+	private ICP3ModelAccessor m_models;
 
 	public ReactiveDarknessPlanner() {
 		super("Hello Darkness my old friend");

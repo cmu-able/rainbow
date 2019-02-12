@@ -31,10 +31,14 @@ import edu.cmu.cs.able.eseb.conn.BusConnection;
 import edu.cmu.cs.able.typelib.comp.MapDataValue;
 import edu.cmu.cs.able.typelib.type.DataValue;
 import org.apache.log4j.Logger;
+import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -117,7 +121,8 @@ public class ESEBConnector {
         m_srvr = ESEBProvider.getBusServer (port);
         ESEBProvider.useServer (m_srvr);
         // Create a local client
-        setClient ("localhost", port);
+        String host = Rainbow.instance().getProperty(RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION, "localhost");
+        setClient (host, port);
     }
 
     /**

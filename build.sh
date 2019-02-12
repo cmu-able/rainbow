@@ -5,19 +5,37 @@ jcctarget="javacc:javacc install"
 TIMESTAMP=`date +'%Y%m%d%H%M'`
 VERSION=$TIMESTAMP
 SKIPTESTS=""
-
+DEPLOYMENT=""
+zip="zip -r"
+zipsuffix=""
 
 function usage () {
-  echo "Usage $PROG [-s] [-d deployment-dir] [-t target] [-v version] [command]"
+  echo "Usage $PROG [-s] [-z] [-p rainbow-dir] -d deployment-dir [-t target] [-v version] [command]"
   echo "    -d -the deployment that you want included in the build, either relative or in the dir deployments"
   echo "    -t -the comma separated list of targets to include in the build, either relative or in the targets dir"
   echo "    -v -the version label to give the release"
-  echo "    -s skip tests in the build"
+  echo "    -s -skip tests in the build"
+  echo "    -p -the path containing the rainbow source code"
+  echo "    -z -use gzip rather than zip"
   echo "command -the build command to give"
 }
 
-while getopts :d:t:v:s opt; do
+while getopts :p:d:t:v:shz opt; do
   case $opt in
+    p)
+      if [ -d "$OPTARG" ]; then
+        echo "Setting working directory to '$OPTARG'"
+        cd "$OPTARG"
+      else
+        echo "'$OPTARG' is not a valid directory"
+	usage
+	exit 1
+      fi
+      ;;
+    z) 
+      $zip="tar zcf"
+      $zipsuffix=".tgz"
+      ;;
     d)
       if [ -d "$OPTARG" ]; then
         DEPLOYMENT=$OPTARG
@@ -84,47 +102,48 @@ cd libs/
 
 echo "Doing $target for auxtestlib"
 cd auxtestlib
-mvn $SKIPTESTS $target
+mvn $SKIPTESTS $target || exit 1
 
 echo "Doing $target for incubator"
 cd ../incubator
-mvn $SKIPTESTS $target
+mvn $SKIPTESTS $target || exit 1
 
 echo "Doing $target for parsec"
 cd ../parsec
-mvn -DskipTests $jcctarget
+mvn -DskipTests $jcctarget || exit 1
 
 echo "Doing $target for typelib"
 cd ../typelib
-mvn $SKIPTESTS $jcctarget
+mvn $SKIPTESTS $jcctarget || exit 1
 
 echo "Doing $target for eselib"
 cd ../eseblib
-mvn -DskipTests $target
+mvn -DskipTests $target || exit 1
 
 cd ../../rainbow
 
 echo "Doing $target for rainbow-core"
 cd rainbow-core
-mvn -DskipTests $target
+mvn -DskipTests $target || exit 1
 
 echo "Doing $target for rainbow-acme-model"
 cd ../rainbow-acme-model
-mvn -DskipTests $target
+mvn -DskipTests $target || exit 1
 
 echo "Doing $target for rainbow-utility-model"
-cd ../rainbow-utility-model
+cd ../rainbow-utility-model || exit 1
 mvn $target
 
 echo "Doing $target for rainbow-stitch"
+
 cd ../rainbow-stitch
-mvn $target
+mvn $SKIPTESTS $target || exit 1
 
 cd ../..
 BUILDDIR=`pwd`
 cd $DEPLOYMENT
 echo "Doing $target in $(pwd)"
-mvn $target
+mvn $SKIPTESTS $target || exit 1
 
 if [[ "$target" == "install" ]]; then
   mkdir -p $BUILDDIR/bin/lib
@@ -142,14 +161,16 @@ if [[ "$target" == "install" ]]; then
   cp license.html bin/
 
   mv bin Rainbow-$VERSION
-  zip -r Rainbow-$VERSION Rainbow-$VERSION
+  $zip Rainbow-$VERSION$zipsuffix Rainbow-$VERSION
   rm -f Rainbow-build
   ln -s Rainbow-$VERSION Rainbow-build
+
+
 elif [[ "$target" == "clean" ]]; then
   cd $BUILDDIR
   rm -rf bin
   rm -rf Rainbow-$VERSION
-  rm Rainbow-$VERSION.zip
+  rm Rainbow-$VERSION.tgz
   echo "Build is in Rainbow-$VERSION and Rainbow-$VERSION.zip"
 fi
 

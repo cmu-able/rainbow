@@ -911,6 +911,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 							}
 						}
 					}
+					break;
 				case DEFAULT:
 					// don't evaluate this, but store the default node
 					if (Tool.logger().isInfoEnabled()) {
@@ -962,10 +963,11 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 								@Override
 								public void update(Observable o, Object arg) {
 									// register the result
-									resultMap.put(node, (Boolean) arg);
+									Boolean nodeTrue = (Boolean) arg;
+									resultMap.put(node, nodeTrue);
 									synchronized (this) {
 										// indicate if at least one is true
-										m_nodeTrue |= m_nodeTrue;
+										m_nodeTrue |= nodeTrue;
 									}
 								}
 							});

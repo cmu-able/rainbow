@@ -63,8 +63,15 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
      */
     public AbstractRainbowRunnable (String name) {
         m_name = name;
+        m_rainbowEnvironment = Rainbow.instance();
+    	init();
+    }
 
-        m_thread = new Thread(m_rainbowEnvironment.getThreadGroup(), this, m_name);
+
+	private void init() {
+		m_thread = new Thread(m_rainbowEnvironment.getThreadGroup(), this, m_name);
+		m_rainbowEnvironment.registerRainbowThread(m_thread, getComponentType());
+//        m_thread = new Thread(m_rainbowEnvironment.getThreadGroup(), this, m_name);
         try {
             m_reportingPort = new DisconnectedRainbowDelegateConnectionPort ();
         }
@@ -72,9 +79,16 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
             // Should never happen
             e.printStackTrace ();
         }
+	}
+    
+    public AbstractRainbowRunnable(String name, IRainbowEnvironment env) {
+    	m_name = name;
+    	m_rainbowEnvironment = env;
+    	init();
     }
 
     public void initialize (IRainbowReportingPort port) throws RainbowConnectionException {
+
         m_reportingPort = port;
     }
 

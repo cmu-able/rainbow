@@ -88,16 +88,20 @@ public class DecisionEngine {
      * origin and destination locations
      * @param origin String label of origin map location
      * @param destination String label of destination map location
+     * @param betweenCutoff TODO
      */
 
-    public static void generateCandidates (String origin, String destination){
-        generateCandidates(origin, destination, false);
+    public static void generateCandidates (String origin, String destination, boolean betweenCutoff){
+        generateCandidates(origin, destination, false, betweenCutoff);
     }
 
-    public static void generateCandidates(String origin, String destination, boolean inhibitTactics){
+    public static void generateCandidates(String origin, String destination, boolean inhibitTactics, boolean betweenCutoff){
         m_origin = origin;
         m_destination = destination;
-        m_candidates = m_mt.exportConstrainedTranslationsBetweenCutOff(m_export_path, origin, destination, new ArrayList<String>() , inhibitTactics);	
+        if (betweenCutoff) 
+        	m_candidates = m_mt.exportConstrainedTranslationsBetweenCutOff(m_export_path, origin, destination, new ArrayList<String>() , inhibitTactics);
+        else
+        	m_candidates = m_mt.exportConstrainedTranslationFull(m_export_path, origin, destination, new ArrayList<>(), inhibitTactics);
 //        m_candidates = m_mt.exportConstrainedTranslationsBetween(m_export_path, origin, destination, inhibitTactics);	
 //        m_candidates = m_mt.exportSingleTranslationBetween(m_export_path, origin, destination, inhibitTactics);	
     }
@@ -147,10 +151,11 @@ public class DecisionEngine {
 			System.out.println("Prism initialized with constants: " + m_consts );
             log(m_consts);
             String result;
+            // For every candidate path
             for (List candidate_key : m_candidates.keySet() ){                           	
                 // We generate the policy for the priority QA
 				BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(), "Model checking path " + candidate_key.toString());
-
+				// Get the configuration tht is most likely to be successful on this path
             	result = PrismConnectorAPI.instance().modelCheckFromFileS (m_candidates.get(candidate_key), m_properties_file, m_candidates.get (candidate_key), m_priority_index, m_consts);
 				BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(), "  Finished first model check");
 
@@ -161,6 +166,7 @@ public class DecisionEngine {
                 ArrayList<String> reconfs = pp.getAllowedReconfigurations();
                 System.out.println("\t ** Allowed reconfigurations: "+ reconfs.toString()+"\n\n");
 
+                // Restrict reward model checking to only the most likely successful candidate
                 try {
                     appendToModel(m_candidates.get(candidate_key), "\n\n"+MapTranslator.generateReconfigurationConstraintModule(reconfs));
                 }catch (Exception e) {
@@ -168,6 +174,7 @@ public class DecisionEngine {
 
 				BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(), "  Starting second model check. PP=" + plan + ", AR=" + reconfs);
 
+				// Calculate the reward on this path for the selected configuration
                 result = PrismConnectorAPI.instance().modelCheckFromFileS (m_candidates.get(candidate_key), m_properties_file, m_candidates.get (candidate_key), -1, m_consts);
 				BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(), "  Result is " + result);
                 String[] results = result.split(",");

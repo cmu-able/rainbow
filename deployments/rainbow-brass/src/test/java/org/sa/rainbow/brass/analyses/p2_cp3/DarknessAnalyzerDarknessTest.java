@@ -15,7 +15,7 @@ public class DarknessAnalyzerDarknessTest {
 			arc.addSuccessRate(c, 1.0);
 		}
 		
-		DarknessAnalyzer da = new DarknessAnalyzer();
+		DarknessAnalyzer da = new DarknessAnalyzer(null);
 		
 		da.processDarkData(150, arc);
 		
@@ -46,7 +46,7 @@ public class DarknessAnalyzerDarknessTest {
 			arc.addSuccessRate(c, 1.0);
 		}
 		
-		DarknessAnalyzer da = new DarknessAnalyzer();
+		DarknessAnalyzer da = new DarknessAnalyzer(null);
 		da.processDarkData(20, arc);
 		for (String c : ConfigurationSynthesizer.getLightSensitiveConfigs()) {
 			assertEquals(0.5, arc.getSuccessRate(c), 0.001);

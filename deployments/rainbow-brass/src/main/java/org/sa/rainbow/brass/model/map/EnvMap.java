@@ -2,6 +2,8 @@ package org.sa.rainbow.brass.model.map;
 
 import java.io.FileReader;
 import java.text.NumberFormat;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -11,8 +13,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.function.Consumer;
 
-import com.google.common.base.Objects;
-
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -20,6 +20,8 @@ import org.sa.rainbow.brass.PropertiesConnector;
 import org.sa.rainbow.brass.adaptation.PrismConnector;
 import org.sa.rainbow.brass.model.map.Phase2MapPropertyKeys.ObsLevel;
 import org.sa.rainbow.core.models.ModelReference;
+
+import com.google.common.base.Objects;
 
 /**
  * Created by camara on 12/20/2016.
@@ -76,9 +78,19 @@ public class EnvMap {
 
 	public synchronized void updateArcsLookup() {
 		m_arcs_lookup = new LinkedList<EnvMapArc>(new LinkedHashSet<EnvMapArc>(m_arcs.values()));
+		Collections.sort(m_arcs_lookup, new Comparator<EnvMapArc>() {
+
+			@Override
+			public int compare(EnvMapArc o1, EnvMapArc o2) {
+				if (o1.getSource() == o2.getSource()) {
+					return o1.getTarget().compareTo(o2.getTarget());
+				}
+				return o1.getSource().compareTo(o2.getSource());
+			}
+		});
 	}
 
-	public synchronized LinkedList<EnvMapArc> getArcs() {
+	public synchronized LinkedList<? extends EnvMapArc> getArcs() {
 		return m_arcs_lookup;
 	}
 
@@ -122,7 +134,7 @@ public class EnvMap {
 	}
 
 	public EnvMapArc getArc(double x, double y) {
-		LinkedList<EnvMapArc> arcs = getArcs();
+		LinkedList<? extends EnvMapArc> arcs = getArcs();
 		for (EnvMapArc arc : arcs) {
 			EnvMapNode s = m_nodes.get(arc.getSource());
 			EnvMapNode e = m_nodes.get(arc.getTarget());
@@ -204,7 +216,7 @@ public class EnvMap {
 	}
 
 	public boolean doesArcExist(String na, String nb) {
-		ListIterator<EnvMapArc> iter = getArcs().listIterator();
+		ListIterator<? extends EnvMapArc> iter = getArcs().listIterator();
 		while (iter.hasNext()) {
 			if (iter.next().isArcBetween(na, nb)) {
 				return true;
@@ -250,7 +262,7 @@ public class EnvMap {
 	 * @param nb String node b label
 	 */
 	public synchronized void removeArcs(String na, String nb) {
-		ListIterator<EnvMapArc> iter = getArcs().listIterator();
+		ListIterator<? extends EnvMapArc> iter = getArcs().listIterator();
 		while (iter.hasNext()) {
 			if (iter.next().includesNodes(na, nb)) {
 				iter.remove();
@@ -348,7 +360,7 @@ public class EnvMap {
 		// addArc (nb, n, distanceBetween (nb, n), false);
 		// addArc (n, nb, distanceBetween (nb, n), false);
 		// }
-		LinkedList<EnvMapArc> arcs = getArcs();
+		LinkedList<? extends EnvMapArc> arcs = getArcs();
 		for (EnvMapArc a : arcs) {
 			System.out.println(a.m_source + " -> " + a.m_target + "(" + a.isEnabled() + ")");
 		}
@@ -673,7 +685,7 @@ public class EnvMap {
 					+ "};\n";
 		}
 		code += "\n\\begin{scope}[> = stealth,  -,gray, every node/.style = {black,right,align=center}]\n\n";
-		LinkedList<EnvMapArc> arcs = this.getArcs();
+		LinkedList<? extends EnvMapArc> arcs = this.getArcs();
 		for (int i = 0; i < arcs.size(); i++) {
 			code += "\\draw (" + arcs.get(i).getSource() + ") edge [left]   node     {}     (" + arcs.get(i).getTarget()
 					+ ");\n";

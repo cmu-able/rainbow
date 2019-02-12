@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 
-import org.sa.rainbow.brass.model.p2_cp3.CP3ModelAccessor;
+import org.sa.rainbow.brass.model.p2_cp3.ICP3ModelAccessor;
 import org.sa.rainbow.brass.model.p2_cp3.acme.TurtlebotModelInstance;
 import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotState;
 import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotState.Sensors;
@@ -18,7 +18,7 @@ public class ReconfSynthReal extends ReconfSynth {
 	private CP3RobotState m_rb;
 	
 
-	public ReconfSynthReal(CP3ModelAccessor models) {
+	public ReconfSynthReal(ICP3ModelAccessor models) {
 		m_tb = models.getTurtlebotModel();
 		m_rb = models.getRobotStateModel().getModelInstance();
 	}

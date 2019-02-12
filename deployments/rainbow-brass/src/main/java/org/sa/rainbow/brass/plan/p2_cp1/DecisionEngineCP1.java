@@ -116,7 +116,7 @@ public class DecisionEngineCP1 extends DecisionEngine{
         
         for (int i=3200; i< 3250; i+=500){
         	System.out.println("Generating candidates for l1-l4...");
-            generateCandidates("l4", "l2");
+            generateCandidates("l4", "l2", true);
         	System.out.println("Scoring candidates...");
         	DecisionEngineCP1.m_real_observed_battery_ratio=0.9;
             scoreCandidates(dummyMap, i, 1);

@@ -3,6 +3,7 @@ package org.sa.rainbow.brass.analyses;
 import java.util.Collection;
 import java.util.Date;
 
+import org.sa.rainbow.brass.model.IP2ModelAccessor;
 import org.sa.rainbow.brass.model.P2ModelAccessor;
 import org.sa.rainbow.brass.model.instructions.IInstruction;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
@@ -24,7 +25,7 @@ public class IGWaypointAnalyzer extends P2Analyzer implements IRainbowModelChang
 		super("IG to Waypoint");
 	}
 
-	private P2ModelAccessor m_modelAccessor;
+	private IP2ModelAccessor m_modelAccessor;
 	private boolean m_newIG = false;
 	private IRainbowChangeBusSubscription m_newIGSubscription = new IRainbowChangeBusSubscription() {
 
@@ -50,7 +51,7 @@ public class IGWaypointAnalyzer extends P2Analyzer implements IRainbowModelChang
 		m_modelChangePort.subscribe(m_newIGSubscription, this);
 	}
 
-	protected P2ModelAccessor getModels() {
+	protected IP2ModelAccessor getModels() {
 		return m_modelAccessor;
 	}
 

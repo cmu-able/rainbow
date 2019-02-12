@@ -31,13 +31,16 @@ public class DecisionEngineCP3 extends DecisionEngine {
 	public static boolean choose_balanced_utilty;
 	public static boolean do_not_change_paths;
 	public static String m_selected_candidate;
+	private static Properties s_properties;
 
 	public static void init(Properties props) throws Exception {
+		s_properties = props;
 		DecisionEngine.init(props);
 		MapTranslator.ROBOT_BATTERY_RANGE_MAX = 180000;
 		MapTranslator.CONSIDER_RECONFIGURATION_COST = Boolean
 				.parseBoolean(props.getProperty("rainbow.consider_cost", "false"));
 		MapTranslator.ROBOT_MAX_RECONF_VAL = props.getProperty("rainbow.max_reconfs", "1");
+		MapTranslator.TRAVERSAL_SUCCESS_THRESHOLD = Double.parseDouble(props.getProperty("rainbow.success_threshold", "0.9").trim());
 		DecisionEngineCP3.choose_balanced_utilty = Boolean
 				.parseBoolean(props.getProperty("rainbow.balanced_utility", "true"));
 		DecisionEngineCP3.do_not_change_paths = Boolean.parseBoolean(props.getProperty("rainbow.fix_path", "false"));
@@ -53,18 +56,21 @@ public class DecisionEngineCP3 extends DecisionEngine {
 		m_safetyWeight = 0.6;
 		m_energyWeight = 0.2;
 		m_timelinessWeight = 0.2;
+		m_priority_index = SAFETY_INDEX;
 	}
 
 	public static void setEnergyPreference() {
 		m_safetyWeight = 0.2;
 		m_energyWeight = 0.6;
 		m_timelinessWeight = 0.2;
+		m_priority_index = ENERGY_INDEX;
 	}
 
 	public static void setTimelinessPreference() {
 		m_safetyWeight = 0.2;
 		m_energyWeight = 0.2;
 		m_timelinessWeight = 0.6;
+		m_priority_index = TIME_INDEX;
 	}
 
 	/**
@@ -74,7 +80,14 @@ public class DecisionEngineCP3 extends DecisionEngine {
 	 * @return
 	 */
 	public static Double getMaxEnergy() {
-		return getMaxItem(ENERGY_INDEX);
+	  	Double res = 0.0;
+    	for (Map.Entry<List, ArrayList<Double>> entry : m_scoreboard.entrySet()){
+    		Double e = entry.getValue().get(ENERGY_INDEX);
+			if (e>res && e != INFINITY){
+    			res = e;
+    		}
+    	}
+    	return res;
 	}
 
 	/**
@@ -165,10 +178,9 @@ public class DecisionEngineCP3 extends DecisionEngine {
 		if (!Objects.equals(maxSingleEntry.getKey(), maxEntry.getKey())) {
 			log("THESE PLANS ARE DIFFERENT");
 		}
-		log("Choosing the plan: " + (choose_balanced_utilty ? "Balanced" : "Prioritized"));
+		log("Choosing the plan: " + (choose_balanced_utilty ? "Balanced" : "Prioritized") + ", score=" + (choose_balanced_utilty?m_selected_candidate_score:maxSingeScore));
 		m_selected_candidate = DecisionEngineCP3.choose_balanced_utilty ? (balancedCandidate)
 				: (singleCriterionCandidate);
-
 		return m_selected_candidate + ".adv";
 	}
 
@@ -210,7 +222,7 @@ public class DecisionEngineCP3 extends DecisionEngine {
             PrismPolicy pp = new PrismPolicy(m_candidates.get(entry.getKey())+".adv");
             pp.readPolicy();
             String entryConfig = pp.getAllowedReconfigurations().toString();
-            ConfigurationSynthesizer cs = new ConfigurationSynthesizer(Rainbow.instance().allProperties());
+            ConfigurationSynthesizer cs = new ConfigurationSynthesizer(DecisionEngineCP3.s_properties);
             String entryConfigName = cs.translateId(entryConfig.replace("[", "").replace("]", "").replace("t_set_",""));
             
             Double entryScore = m_safetyWeight * entrySafety + m_timelinessWeight * entryTimeliness + m_energyWeight * entryEnergy;
@@ -311,24 +323,26 @@ public class DecisionEngineCP3 extends DecisionEngine {
 		return code;
 	}
 
-	public static void generateCandidates(List<String> path) {
-		generateCandidates(path, false);
+	public static void generateCandidates(List<String> path, boolean generateSeparatePaths) {
+		generateCandidates(path, false, generateSeparatePaths);
 	}
 
-	public static void generateCandidates(List<String> path, boolean inhibitTactics) {
+	public static void generateCandidates(List<String> path, boolean inhibitTactics, boolean generateSeparatePaths) {
 		m_origin = path.get(0);
 		m_destination = path.get(path.size() - 1);
 		Map<List, String> specifications = new HashMap<List, String>();
 		int c = 0;
 		String filename = m_export_path + "/" + String.valueOf(c);
 		EnvMapPath epath = new EnvMapPath(path, m_mt.getMap());
-		m_mt.exportMapTranslation(filename, epath.getPath(), new ArrayList<String>(), inhibitTactics);
+		if (generateSeparatePaths)
+			m_mt.exportMapTranslation(filename, epath.getPath(), new ArrayList<String>(), inhibitTactics);
+		else
+			m_mt.exportMapTranslationWithReconfs(filename, new ArrayList<>(), inhibitTactics);
 		System.out.println("Exported map translation " + String.valueOf(c));
 		specifications.put(epath.getPath(), filename);
 		System.out.println(
 				"Candidate Path distance : " + String.valueOf(epath.getDistance()) + " " + String.valueOf(path));
 		m_candidates = specifications;
-
 	}
 
 	/**
@@ -362,7 +376,7 @@ public class DecisionEngineCP3 extends DecisionEngine {
 		setTimelinessPreference();
 		for (int i = 180000; i < 180500; i += 500) {
 			System.out.println("Generating candidates for l1-l4...");
-			generateCandidates("l32", "l36");
+			generateCandidates("l32", "l36", true);
 			System.out.println("Scoring candidates...");
 			scoreCandidates(dummyMap, i, 1, "-1");
 			System.out.println(String.valueOf(m_scoreboard));

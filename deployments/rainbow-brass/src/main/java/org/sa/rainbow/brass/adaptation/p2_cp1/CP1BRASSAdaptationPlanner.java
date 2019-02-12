@@ -208,7 +208,7 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 				String tgt = m_models.getMissionStateModel().getModelInstance().getTargetWaypoint();
 				log("Generating candidate paths from " + srcLabel + " to " + tgt);
 
-				DecisionEngineCP1.generateCandidates(srcLabel, tgt);
+				DecisionEngineCP1.generateCandidates(srcLabel, tgt, true);
 				log("---> found " + DecisionEngineCP1.m_candidates.size());
 
 				try {

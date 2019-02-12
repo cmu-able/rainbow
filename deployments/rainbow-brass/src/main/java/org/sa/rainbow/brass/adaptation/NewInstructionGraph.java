@@ -1,6 +1,6 @@
 package org.sa.rainbow.brass.adaptation;
 
-import org.sa.rainbow.brass.model.P2ModelAccessor;
+import org.sa.rainbow.brass.model.IP2ModelAccessor;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphCommandFactory;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
 import org.sa.rainbow.brass.model.instructions.SetInstructionsCmd;
@@ -23,7 +23,7 @@ public class NewInstructionGraph extends BrassPlan {
 
     private IModelsManagerPort m_modelsManager;
     private boolean            m_outcome;
-	private P2ModelAccessor m_models;
+	private IP2ModelAccessor m_models;
 
     protected NewInstructionGraph (InstructionGraphModelInstance m, String instructionGraph) {
         m_instructionGraph = instructionGraph;
@@ -33,7 +33,7 @@ public class NewInstructionGraph extends BrassPlan {
 
     }
     
-    public NewInstructionGraph (P2ModelAccessor models, String instructionGraph) {
+    public NewInstructionGraph (IP2ModelAccessor models, String instructionGraph) {
 		m_models = models;
 		m_instructionGraph = instructionGraph;
     	
