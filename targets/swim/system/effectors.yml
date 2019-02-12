@@ -1,0 +1,32 @@
+# Effectors for Swim
+vars:
+  _effectors.commonPath: "${rainbow.path}/system/effectors"
+  
+
+effectors:
+  setDimmer:
+    location: "${customize.system.target.lb}"
+    command: "${customize.system.target.lb}.setDimmer($<dimmer>)"
+    type: script
+    scriptInfo:
+      path    : "${_effectors.commonPath}/setDimmer.sh"
+      argument: "{0}"
+  addServer:
+    location: "${customize.system.target.lb}"
+# note that the parameter server is ignored by the effector
+    command: "${customize.system.target.lb}.addServer($<server>)"
+    type: script
+    scriptInfo:
+      path    : "${_effectors.commonPath}/addServer.sh"
+      argument: ""
+  removeServer:
+    location: "${customize.system.target.lb}"
+# note that the parameter server is ignored by the effector
+    command: "${customize.system.target.lb}.removeServer($<server>)"
+    type: script
+    scriptInfo:
+      path    : "${_effectors.commonPath}/removeServer.sh"
+      argument: ""
+      
+unused-effectors:
+
