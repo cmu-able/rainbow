@@ -139,6 +139,11 @@ echo "Doing $target for rainbow-stitch"
 cd ../rainbow-stitch
 mvn $SKIPTESTS $target || exit 1
 
+echo "Doing $target for rainbow-gui"
+
+cd ../rainbow-gui
+mvn $SKIPTESTS $target || exit 1
+
 cd ../..
 BUILDDIR=`pwd`
 cd $DEPLOYMENT
