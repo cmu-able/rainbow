@@ -55,7 +55,7 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
     protected IRainbowReportingPort m_reportingPort;
     protected static final int DELAY_TOLERANCE = 500;
 
-    protected IRainbowEnvironment m_rainbowEnvironment;
+    protected IRainbowEnvironment m_rainbowEnvironment = Rainbow.instance ();
 
     /**
      * Default Constructor with name for the thread.
@@ -66,6 +66,7 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
         m_rainbowEnvironment = Rainbow.instance();
     	init();
     }
+
 
 	private void init() {
 		m_thread = new Thread(m_rainbowEnvironment.getThreadGroup(), this, m_name);
@@ -87,7 +88,7 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
     }
 
     public void initialize (IRainbowReportingPort port) throws RainbowConnectionException {
-    	
+
         m_reportingPort = port;
     }
 
