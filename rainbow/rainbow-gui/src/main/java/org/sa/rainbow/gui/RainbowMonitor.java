@@ -16,6 +16,7 @@ import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
+import java.awt.BorderLayout;
 
 public class RainbowMonitor extends JInternalFrame {
 
@@ -158,8 +159,9 @@ public class RainbowMonitor extends JInternalFrame {
 			}
 		}
 		NoRootTreeTableModel ttm = new NoRootTreeTableModel(registeredThreads);
+		getContentPane().setLayout(new BorderLayout(0, 0));
 		m_treeTable = new JXTreeTable(ttm);
-		m_treeTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+//		m_treeTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		m_treeTable.setRootVisible(false);
 		getContentPane().add(new JScrollPane(m_treeTable));
 		setTitle("Rainbow Component Status");
