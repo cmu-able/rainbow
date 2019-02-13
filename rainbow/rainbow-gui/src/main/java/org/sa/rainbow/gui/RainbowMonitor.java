@@ -138,9 +138,11 @@ public class RainbowMonitor extends JInternalFrame {
 	 * Create the frame.
 	 */
 	public RainbowMonitor() {
+		setResizable(true);
 		setIconifiable(true);
 		setMaximizable(true);
 		setClosable(true);
+		setSize(350, 390);
 		m_exceptionHandler = new Thread.UncaughtExceptionHandler() {
 
 			@Override
@@ -166,7 +168,6 @@ public class RainbowMonitor extends JInternalFrame {
 		getContentPane().add(new JScrollPane(m_treeTable));
 		setTitle("Rainbow Component Status");
 		pack();
-		setVisible(true);
 		m_refreshEnabled = true;
 
 		EventQueue.invokeLater(new Runnable() {

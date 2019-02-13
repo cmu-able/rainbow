@@ -419,7 +419,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	private void addGaugePanel(String gaugeID) {
 		GaugePanel gp = new GaugePanel(gaugeID);
 		JTabbedPane tp = m_tabs.get(RainbowComponentT.GAUGE);
-		if (tp.getTabCount() > 10) 
+		if (tp.getTabCount() >= 10) 
 			tp.addTab(shortName(gaugeID), gp);
 		else
 			tp.add(gaugeID, gp);
@@ -455,7 +455,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		s.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		s.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		JTabbedPane tp = m_tabs.get(RainbowComponentT.PROBE);
-		if (tp.getTabCount() > 10) 
+		if (tp.getTabCount() >= 10) 
 			tp.addTab(shortName(probeId), p);
 		else
 			tp.add(probeId, p);
@@ -626,7 +626,8 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		RainbowMonitor adaptationManagerFrame = new RainbowMonitor();
 		adaptationManagerFrame.setMaximizable(true);
 		adaptationManagerFrame.setIconifiable(true);
-		desktopPane.add(adaptationManagerFrame);		
+		desktopPane.add(adaptationManagerFrame);	
+		adaptationManagerFrame.toFront();
 	}
 
 	protected void forceQuit() {
