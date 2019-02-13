@@ -30,18 +30,18 @@ public class RainbowMonitor extends JInternalFrame {
 //	private RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
 //	private OperatingSystemMXBean osMxBean = ManagementFactory.getOperatingSystemMXBean();
 
-//	public static class ThreadData {
-//		Thread thread;
-//		long uptime=0;
-//		long initialCPU;
-//		float cpuUsage = 0;
-//		long lastUpdate = 0;
-//	}
+	public static class ThreadData {
+		Thread thread;
+		long uptime=0;
+		long initialCPU;
+		float cpuUsage = 0;
+		long lastUpdate = 0;
+	}
 	
 	public static class Entry {
 		RainbowComponentT componentType;
-		List<Thread> children;
-//		List<ThreadData> children;
+//		List<Thread> children;
+		List<ThreadData> children;
 	}
 	
 //	protected void calculateThreadStats(NoRootTreeTableModel ttm) {
@@ -78,13 +78,13 @@ public class RainbowMonitor extends JInternalFrame {
 				nt.children = new ArrayList<>(e.getValue().size());
 			
 				Collection<Thread> values = e.getValue().values();
-//				for (Iterator iterator = values.iterator(); iterator.hasNext();) {
-//					Thread thread = (Thread) iterator.next();
-//					ThreadData data = new ThreadData();
-//					data.thread = thread;
-//					nt.children.add(data);
-//				}
-				nt.children.addAll(values);
+				for (Iterator iterator = values.iterator(); iterator.hasNext();) {
+					Thread thread = (Thread) iterator.next();
+					ThreadData data = new ThreadData();
+					data.thread = thread;
+					nt.children.add(data);
+				}
+//				nt.children.addAll(values);
 				members.add(nt);
 			}
 		}
@@ -140,13 +140,13 @@ public class RainbowMonitor extends JInternalFrame {
 				case 0:
 					return nt.componentType.name();
 				}
-			} else if (node instanceof Thread/*Data*/) {
-				Thread/*Data*/ t = (Thread/*Data*/) node;
+			} else if (node instanceof ThreadData) {
+				ThreadData t = (ThreadData) node;
 				switch (column) {
 				case 0:
-					return t/*.thread*/.getName();
+					return t.thread.getName();
 				case 1:
-					if (t/*.thread*/.getState() == State.TERMINATED) {
+					if (t.thread.getState() == State.TERMINATED) {
 						StringBuffer ret = new StringBuffer("Failed: ");
 						if (RainbowMonitor.this.m_uncaughtExceptions.containsKey(t)) {
 							ret.append (m_uncaughtExceptions.get(t).getMessage());
@@ -154,11 +154,11 @@ public class RainbowMonitor extends JInternalFrame {
 						else ret.append("Unknown failure");
 						return ret;
 					}
-					return t/*.thread*/.getState() == State.TERMINATED ? "Failed" : "OK";
+					return t.thread.getState() == State.TERMINATED ? "Failed" : "OK";
 				case 2: 
-					return "???";// t.uptime==0?"???":Long.toString(t.uptime);
+					return t.uptime==0?"???":Long.toString(t.uptime);
 				case 3:
-					return "???";//t.cpuUsage==0?"???":String.format("$.2f",t.cpuUsage);
+					return t.cpuUsage==0?"???":String.format("$.2f",t.cpuUsage);
 				}
 			}
 			return null;
@@ -194,7 +194,7 @@ public class RainbowMonitor extends JInternalFrame {
 		setIconifiable(true);
 		setMaximizable(true);
 		setClosable(true);
-		setSize(350, 390);
+		//setSize(350, 390);
 		m_exceptionHandler = new Thread.UncaughtExceptionHandler() {
 
 			@Override
@@ -213,7 +213,7 @@ public class RainbowMonitor extends JInternalFrame {
 			}
 		}
 		NoRootTreeTableModel ttm = new NoRootTreeTableModel(registeredThreads);
-		getContentPane().setLayout(new BorderLayout(0, 0));
+		//getContentPane().setLayout(new BorderLayout(0, 0));
 		m_treeTable = new JXTreeTable(ttm);
 //		m_treeTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		m_treeTable.setRootVisible(false);
@@ -242,6 +242,7 @@ public class RainbowMonitor extends JInternalFrame {
 				}
 			}
 		});
+		setVisible(true);
 	}
 
 
