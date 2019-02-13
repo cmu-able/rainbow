@@ -423,7 +423,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 			tp.addTab(gaugeID.split("@")[0], gp);
 		else
 			tp.add(gaugeID, gp);
-		tp.setToolTipTextAt(tp.getTabCount()-1, gaugeId);
+		tp.setToolTipTextAt(tp.getTabCount()-1, gaugeID);
 		m_gaugeSections.put(gaugeID, gp);
 		
 		if (tp.getTabCount() > 10 && tp.getTabLayoutPolicy() != JTabbedPane.SCROLL_TAB_LAYOUT) {
