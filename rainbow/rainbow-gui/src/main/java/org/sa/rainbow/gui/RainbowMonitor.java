@@ -26,43 +26,44 @@ import org.sa.rainbow.core.RainbowComponentT;
 
 public class RainbowMonitor extends JInternalFrame {
 	
-	private ThreadMXBean threadMxBean = ManagementFactory.getThreadMXBean();
-	private RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
-	private OperatingSystemMXBean osMxBean = ManagementFactory.getOperatingSystemMXBean();
+//	private ThreadMXBean threadMxBean = ManagementFactory.getThreadMXBean();
+//	private RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
+//	private OperatingSystemMXBean osMxBean = ManagementFactory.getOperatingSystemMXBean();
 
-	public static class ThreadData {
-		Thread thread;
-		long uptime=0;
-		long initialCPU;
-		float cpuUsage = 0;
-		long lastUpdate = 0;
-	}
+//	public static class ThreadData {
+//		Thread thread;
+//		long uptime=0;
+//		long initialCPU;
+//		float cpuUsage = 0;
+//		long lastUpdate = 0;
+//	}
 	
 	public static class Entry {
 		RainbowComponentT componentType;
-		List<ThreadData> children;
+		List<Thread> children;
+//		List<ThreadData> children;
 	}
 	
-	protected void calculateThreadStats(NoRootTreeTableModel ttm) {
-		Map<Long,ThreadInfo> tis = new HashMap<>();
-		ThreadInfo[] ti = threadMxBean.dumpAllThreads(false, false);
-		for (int i = 0; i < ti.length; i++) {
-			tis.put(ti[i].getThreadId(), ti[i]);
-		}
-		
-		List<Entry> members = ttm.members;
-		for (Entry entry : members) {
-			for (ThreadData d : entry.children) {
-				ThreadInfo info = tis.get(d.thread.getId());
-				if (info != null) {
-					d.uptime = runtimeMXBean.getUptime();
-					//http://marjavamitjava.com/calculate-cpu-usage-java-thread-not-just-whole-process/
-//					if (la)
-				}
-			}
-		}
-		
-	}
+//	protected void calculateThreadStats(NoRootTreeTableModel ttm) {
+//		Map<Long,ThreadInfo> tis = new HashMap<>();
+//		ThreadInfo[] ti = threadMxBean.dumpAllThreads(false, false);
+//		for (int i = 0; i < ti.length; i++) {
+//			tis.put(ti[i].getThreadId(), ti[i]);
+//		}
+//		
+//		List<Entry> members = ttm.members;
+//		for (Entry entry : members) {
+//			for (ThreadData d : entry.children) {
+//				ThreadInfo info = tis.get(d.thread.getId());
+//				if (info != null) {
+//					d.uptime = runtimeMXBean.getUptime();
+//					//http://marjavamitjava.com/calculate-cpu-usage-java-thread-not-just-whole-process/
+////					if (la)
+//				}
+//			}
+//		}
+//		
+//	}
 
 	private final static String[] COLUMNNAMES = { "Id", "Status", "Uptime", "% CPU" };
 	public  class NoRootTreeTableModel extends AbstractTreeTableModel {
@@ -77,13 +78,13 @@ public class RainbowMonitor extends JInternalFrame {
 				nt.children = new ArrayList<>(e.getValue().size());
 			
 				Collection<Thread> values = e.getValue().values();
-				for (Iterator iterator = values.iterator(); iterator.hasNext();) {
-					Thread thread = (Thread) iterator.next();
-					ThreadData data = new ThreadData();
-					data.thread = thread;
-					nt.children.add(data);
-				}
-//				nt.children.addAll(values);
+//				for (Iterator iterator = values.iterator(); iterator.hasNext();) {
+//					Thread thread = (Thread) iterator.next();
+//					ThreadData data = new ThreadData();
+//					data.thread = thread;
+//					nt.children.add(data);
+//				}
+				nt.children.addAll(values);
 				members.add(nt);
 			}
 		}
@@ -105,7 +106,7 @@ public class RainbowMonitor extends JInternalFrame {
 
 		@Override
 		public boolean isLeaf(Object node) {
-			return node instanceof ThreadData;
+			return node instanceof Thread/*Data*/;
 		}
 
 		@Override
@@ -127,7 +128,7 @@ public class RainbowMonitor extends JInternalFrame {
 		@Override
 		public int getIndexOfChild(Object parent, Object child) {
 			Entry nt = (Entry) parent;
-			ThreadData t = (ThreadData) child;
+			Thread/*Data*/ t = (Thread/*Data*/) child;
 			return nt.children.indexOf(t);
 		}
 
@@ -139,13 +140,13 @@ public class RainbowMonitor extends JInternalFrame {
 				case 0:
 					return nt.componentType.name();
 				}
-			} else if (node instanceof ThreadData) {
-				ThreadData t = (ThreadData) node;
+			} else if (node instanceof Thread/*Data*/) {
+				Thread/*Data*/ t = (Thread/*Data*/) node;
 				switch (column) {
 				case 0:
-					return t.thread.getName();
+					return t/*.thread*/.getName();
 				case 1:
-					if (t.thread.getState() == State.TERMINATED) {
+					if (t/*.thread*/.getState() == State.TERMINATED) {
 						StringBuffer ret = new StringBuffer("Failed: ");
 						if (RainbowMonitor.this.m_uncaughtExceptions.containsKey(t)) {
 							ret.append (m_uncaughtExceptions.get(t).getMessage());
@@ -153,11 +154,11 @@ public class RainbowMonitor extends JInternalFrame {
 						else ret.append("Unknown failure");
 						return ret;
 					}
-					return t.thread.getState() == State.TERMINATED ? "Failed" : "OK";
+					return t/*.thread*/.getState() == State.TERMINATED ? "Failed" : "OK";
 				case 2: 
-					return t.uptime==0?"???":Long.toString(t.uptime);
+					return "???";// t.uptime==0?"???":Long.toString(t.uptime);
 				case 3:
-					return t.cpuUsage==0?"???":String.format("$.2f",t.cpuUsage);
+					return "???";//t.cpuUsage==0?"???":String.format("$.2f",t.cpuUsage);
 				}
 			}
 			return null;
