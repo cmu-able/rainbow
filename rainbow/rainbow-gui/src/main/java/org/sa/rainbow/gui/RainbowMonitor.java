@@ -194,7 +194,7 @@ public class RainbowMonitor extends JInternalFrame {
 		setIconifiable(true);
 		setMaximizable(true);
 		setClosable(true);
-		setSize(350, 390);
+		//setSize(350, 390);
 		m_exceptionHandler = new Thread.UncaughtExceptionHandler() {
 
 			@Override
@@ -213,7 +213,7 @@ public class RainbowMonitor extends JInternalFrame {
 			}
 		}
 		NoRootTreeTableModel ttm = new NoRootTreeTableModel(registeredThreads);
-		getContentPane().setLayout(new BorderLayout(0, 0));
+		//getContentPane().setLayout(new BorderLayout(0, 0));
 		m_treeTable = new JXTreeTable(ttm);
 //		m_treeTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		m_treeTable.setRootVisible(false);
@@ -242,6 +242,7 @@ public class RainbowMonitor extends JInternalFrame {
 				}
 			}
 		});
+		setVisible(true);
 	}
 
 
