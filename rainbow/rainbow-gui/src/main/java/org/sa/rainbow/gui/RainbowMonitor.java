@@ -229,7 +229,7 @@ public class RainbowMonitor extends JInternalFrame {
 					
 					
 					NoRootTreeTableModel ttm = new NoRootTreeTableModel(registeredThreads);
-					calculateThreadStats(ttm);
+//					calculateThreadStats(ttm);
 					m_treeTable.setTreeTableModel(ttm);
 					try {
 						Thread.sleep(1000);
