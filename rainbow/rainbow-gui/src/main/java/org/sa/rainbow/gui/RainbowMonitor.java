@@ -254,3 +254,4 @@ public class RainbowMonitor extends JInternalFrame {
 	}
 
 }
+
