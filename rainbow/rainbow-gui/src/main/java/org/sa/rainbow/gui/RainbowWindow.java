@@ -420,21 +420,25 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		GaugePanel gp = new GaugePanel(gaugeID);
 		JTabbedPane tp = m_tabs.get(RainbowComponentT.GAUGE);
 		if (tp.getTabCount() > 10) 
-			tp.addTab(gaugeID.split("@")[0], gp);
+			tp.addTab(shortName(gaugeID), gp);
 		else
 			tp.add(gaugeID, gp);
 		tp.setToolTipTextAt(tp.getTabCount()-1, gaugeID);
 		m_gaugeSections.put(gaugeID, gp);
 		
-		if (tp.getTabCount() > 10 && tp.getTabLayoutPolicy() != JTabbedPane.SCROLL_TAB_LAYOUT) {
-			tp.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+		if (tp.getTabCount() == 10/*> 10 && tp.getTabLayoutPolicy() != JTabbedPane.SCROLL_TAB_LAYOUT*/) {
+//			tp.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 			int count = tp.getTabCount();
 			for (int i = 0; i < count; i++) {
 				String label = tp.getTitleAt(i);
-				tp.setTitleAt(i, label.split("@")[0]);
+				tp.setTitleAt(i, shortName(label));
 				tp.setToolTipTextAt(i, label);
 			}
 		}
+	}
+
+	private String shortName(String gaugeID) {
+		return gaugeID.split("@")[0].split(":")[0];
 	}
 
 	private void addModelPanel(String modelName, String modelType) throws RainbowConnectionException {
@@ -451,9 +455,22 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		s.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		s.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		JTabbedPane tp = m_tabs.get(RainbowComponentT.PROBE);
-		tp.add(probeId, p);
+		if (tp.getTabCount() > 10) 
+			tp.addTab(shortName(probeId), p);
+		else
+			tp.add(probeId, p);
+		tp.setToolTipTextAt(tp.getTabCount()-1, probeId);
 		m_probeSections.put(probeId, p);
-
+		
+		if (tp.getTabCount() == 10) {
+//			tp.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+			int count = tp.getTabCount();
+			for (int i = 0; i < count; i++) {
+				String label = tp.getTitleAt(i);
+				tp.setTitleAt(i, shortName(label));
+				tp.setToolTipTextAt(i, label);
+			}
+		}
 	}
 
 	@Override
