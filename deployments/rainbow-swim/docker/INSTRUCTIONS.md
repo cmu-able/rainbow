@@ -28,11 +28,7 @@ This is a multi-stage docker build file that will first build a Rainbow release 
 
 ![Rainbow SWIM desktop](images/swim-login-screen.png)
 
-3. To start SWIM, double-click the SWIM logo
-
-![SWIM](SWIM.png)
-
-This starts the web simulation running with three initial servers responding to the Trace 1.
+3. To start SWIM, double-click the SWIM logo: ![SWIM](SWIM.png). This starts the web simulation running with three initial servers responding to the Trace 1.
 
 4. To start Rainbow, double-click on the Rainbow logo: ![Rainbow](rainbow.png). This will bring up the Rainbow UI, which should look like:
 
@@ -50,7 +46,7 @@ The Rainbow UI window is divided into eight separate panels. These panels are en
    2. **Gauge Panel**: Gauges in Rainbow take system information emitted from probes, and converts them into model information in the form of operations on those models. The _All_ panel displays log information. Each other tab represents the operations that are emitted from the gauge and sent to the Models Manager.
    3. **Models Manager**: The Models Manager manages operations on the models represented in Rainbow, that are used to reason about adaptations on the system. Each tab is a separate model, organzed as a table of model operations that have been executed.
    4. **Analyzers**: Represents the elements that analyze the model and synthesize them to either detect errors or opportunities for adaptation. The log information from each analyzer is organized as a tab. (In this demo, the analyzer and adaptation manager are fused, and so Rainbow does not have any analyzer.)
-   5. **Adaptation Managers*: This panel shows all the elements that make the decision about what adaptation to do. If there is only one adaptation manager (the norm), then all the information will be displayed in the _All_ tab.
+   5. **Adaptation Managers**: This panel shows all the elements that make the decision about what adaptation to do. If there is only one adaptation manager (the norm), then all the information will be displayed in the _All_ tab.
    6. **Executors**: This panel has output from components that manage the execution of adaptations strategies that are chosen by an adaptation manager.
    7. **Effectors**: This panel displays output from effectors.
    8. **Rainbow Master**: This panel displays health and output about Rainbow generally. In this demo, the output is about heartbeat information from Rainbow to the manager.
