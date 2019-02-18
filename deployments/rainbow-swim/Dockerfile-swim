@@ -65,7 +65,7 @@ RUN  ./build.sh -s -d rainbow-swim -t swim i-v${rainbow_version} install
 CMD [/bin/bash]
 
 FROM gabrielmoreno/swim:1.0
-RUN apt update && DEBIAN_FRONTEND=noninteractive apt-get -y install software-properties-common dbus dbus-x11 xorg xserver-xorg-legacy xinit xterm libboost-all-dev libyaml-cpp-dev libpcre3-dev 
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt-get -y install software-properties-common dbus dbus-x11 xorg xserver-xorg-legacy xinit xterm libboost-all-dev libyaml-cpp-dev libpcre3-dev socat
 
 RUN sed -i "s/allowed_users=console/allowed_users=anybody/;$ a needs_root_rights=yes" /etc/X11/Xwrapper.config
 
@@ -78,9 +78,15 @@ RUN \
   rm -rf /var/cache/oracle-jdk8-installer
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
-WORKDIR /root
+RUN mkdir /rainbow
+WORKDIR /rainbow
 COPY --from=builder /root/pladapt ./pladapt
-ENV PLADAPT /root/pladapt
+ENV PLADAPT /rainbow/pladapt
 COPY --from=builder /root/rainbow/Rainbow-build .
-
+RUN echo "export SOCAT_PORT=4242" >> /headless/.bashrc
+COPY deployments/rainbow-swim/docker/rainbow.png /headless/
+COPY deployments/rainbow-swim/docker/SWIM.png /headless/
+COPY deployments/rainbow-swim/docker/Rainbow.desktop /headless/Desktop
+COPY deployments/rainbow-swim/docker/SWIM.desktop /headless/Desktop
+RUN chmod +x /headless/Desktop/Rainbow.desktop /headless/Desktop/SWIM.desktop
 #ENTRYPOINT ["./rainbow-oracle.sh", "swim"]
