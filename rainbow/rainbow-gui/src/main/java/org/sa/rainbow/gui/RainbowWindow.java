@@ -540,9 +540,9 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		s.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		JTabbedPane tp = m_tabs.get(RainbowComponentT.PROBE);
 		if (tp.getTabCount() >= 10)
-			tp.addTab(shortName(probeId), p);
+			tp.addTab(shortName(probeId), s);
 		else
-			tp.add(probeId, p);
+			tp.add(probeId, s);
 		tp.setToolTipTextAt(tp.getTabCount() - 1, probeId);
 		m_probeSections.put(probeId, p);
 
