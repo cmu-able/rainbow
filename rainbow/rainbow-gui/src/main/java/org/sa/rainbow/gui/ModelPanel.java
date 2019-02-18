@@ -203,6 +203,9 @@ public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelC
 			return;
 		IRainbowOperation op = msgToOperation(message);
 		addOperation(op, false);
+		for (Runnable runnable : m_updaters) {
+			runnable.run();
+		}
 	}
 
 	void addOperation(IRainbowOperation op, boolean error) {

@@ -413,15 +413,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 				addGaugePanel(g);
 			}
 		}
-
-		ProbeDescription probes = Rainbow.instance().getRainbowMaster().probeDesc();
-		for (ProbeAttributes p : probes.probes) {
-			String probeId = p.alias + "@" + p.getLocation();
-			if (m_probeSections.get(probeId) == null) {
-				addProbePanel(probeId);
-			}
-		}
-
+		
 		try {
 			m_createProbeReportingPortSubscriber = RainbowPortFactory.createProbeReportingPortSubscriber(new IProbeReportPort() {
 
@@ -432,8 +424,9 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 
 				@Override
 				public void reportData(IProbeIdentifier probe, String data) {
-					JTextArea ta = m_probeSections.get(probe.id());
-					if (ta == null) ta = m_probeSections.get(shortName(probe.id()));
+					String pid = probe.id() + "@" + probe.location();
+					JTextArea ta = m_probeSections.get(pid);
+					if (ta == null) ta = m_probeSections.get(shortName(pid));
 					if (ta != null) {
 						ta.append(data);
 						ta.setCaretPosition(ta.getText().length());
@@ -449,6 +442,17 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
+		ProbeDescription probes = Rainbow.instance().getRainbowMaster().probeDesc();
+		for (ProbeAttributes p : probes.probes) {
+			String probeId = p.alias + "@" + p.getLocation();
+			if (m_probeSections.get(probeId) == null) {
+				addProbePanel(probeId);
+				m_createProbeReportingPortSubscriber.subscribeToProbe(p.alias, p.getLocation());
+			}
+		}
+
+		
 		
 	}
 
