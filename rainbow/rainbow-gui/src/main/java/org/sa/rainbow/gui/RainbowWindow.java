@@ -93,7 +93,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	static {
 		GAUGES_COLOR_LIGHT = bleach(GAUGES_COLOR, .75);
 		SYSTEM_COLOR_LIGHT = bleach(EFFECTORS_COLOR, 0.75);
-		MODELS_MANAGER_COLOR_LIGHT = bleach(EFFECTORS_COLOR, 0.75);
+		MODELS_MANAGER_COLOR_LIGHT = bleach(MODELS_MANAGER_COLOR, 0.75);
 		EXECUTORS_COLOR_LIGHT = bleach(EFFECTORS_COLOR, 0.75);
 		ANALYZERS_COLOR_LIGHT = bleach(EFFECTORS_COLOR, 0.75);
 		ADAPTION_MANAGER_COLOR_LIGHT = bleach(EFFECTORS_COLOR, 0.75);
@@ -424,7 +424,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 
 				@Override
 				public void reportData(IProbeIdentifier probe, String data) {
-					String pid = probe.id() + "@" + probe.location();
+					String pid = probe.id();
 					JTextArea ta = m_probeSections.get(pid);
 					if (ta == null) ta = m_probeSections.get(shortName(pid));
 					if (ta != null) {
