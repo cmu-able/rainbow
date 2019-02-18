@@ -59,6 +59,7 @@ import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.OperationResult;
 import org.sa.rainbow.core.ports.IModelUSBusPort;
 import org.sa.rainbow.core.ports.IProbeReportPort;
+import org.sa.rainbow.core.ports.IProbeReportSubscriberPort;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReportingSubscriberCallback;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
@@ -119,6 +120,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	private Map<String, JTextArea> m_probeSections = new HashMap<>();
 
 	JDesktopPane desktopPane;
+	private IProbeReportSubscriberPort m_createProbeReportingPortSubscriber;
 
 	/**
 	 * Launch the application.
@@ -420,6 +422,33 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 			}
 		}
 
+		try {
+			m_createProbeReportingPortSubscriber = RainbowPortFactory.createProbeReportingPortSubscriber(new IProbeReportPort() {
+
+				@Override
+				public void dispose() {
+
+				}
+
+				@Override
+				public void reportData(IProbeIdentifier probe, String data) {
+					JTextArea ta = m_probeSections.get(probe.id());
+					if (ta == null) ta = m_probeSections.get(shortName(probe.id()));
+					if (ta != null) {
+						ta.append(data);
+						ta.setCaretPosition(ta.getText().length());
+						if (ta.getText().length() > MAX_TEXT_LENGTH) {
+							ta.setText(ta.getText().substring(TEXT_HALF_LENGTH));
+						}
+						TabColorChanger tcc= new TabColorChanger(m_tabs.get(RainbowComponentT.PROBE), ta, SYSTEM_COLOR_LIGHT);
+						tcc.run();
+					}
+				}
+			});
+		} catch (RainbowConnectionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 
@@ -494,7 +523,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		JTabbedPane tp = m_tabs.get(RainbowComponentT.MODEL);
 		tp.add(modelName, mp);
 		m_modelSections.put(modelName, mp);
-		mp.addUpdateListener(new TabColorChanger(tp,mp,GAUGES_COLOR_LIGHT));
+		mp.addUpdateListener(new TabColorChanger(tp,mp,MODELS_MANAGER_COLOR_LIGHT));
 
 	}
 
@@ -522,33 +551,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 			}
 		}
 		
-		try {
-			RainbowPortFactory.createProbeReportingPortSubscriber(new IProbeReportPort() {
 
-				@Override
-				public void dispose() {
-
-				}
-
-				@Override
-				public void reportData(IProbeIdentifier probe, String data) {
-					JTextArea ta = m_probeSections.get(probe.id());
-					if (ta == null) ta = m_probeSections.get(shortName(probeId));
-					if (ta != null) {
-						ta.append(data);
-						ta.setCaretPosition(ta.getText().length());
-						if (ta.getText().length() > MAX_TEXT_LENGTH) {
-							ta.setText(ta.getText().substring(TEXT_HALF_LENGTH));
-						}
-					}
-					TabColorChanger tcc= new TabColorChanger(tp, ta, SYSTEM_COLOR_LIGHT);
-					tcc.run();
-				}
-			});
-		} catch (RainbowConnectionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	@Override
