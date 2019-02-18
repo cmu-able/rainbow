@@ -424,7 +424,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 
 				@Override
 				public void reportData(IProbeIdentifier probe, String data) {
-					String pid = probe.id();
+					String pid = probe.type() + "@" + probe.location();
 					JTextArea ta = m_probeSections.get(pid);
 					if (ta == null) ta = m_probeSections.get(shortName(pid));
 					if (ta != null) {
