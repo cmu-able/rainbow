@@ -3,7 +3,6 @@ package org.sa.rainbow.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.EventQueue;
-import java.awt.ScrollPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -16,6 +15,8 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
@@ -28,13 +29,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextPane;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.hibernate.internal.jaxb.mapping.orm.JaxbSecondaryTable;
 import org.sa.rainbow.core.IDisposable;
 import org.sa.rainbow.core.IRainbowRunnable;
 import org.sa.rainbow.core.Identifiable;
@@ -67,6 +67,12 @@ import org.sa.rainbow.translator.probes.IProbeIdentifier;
 import org.sa.rainbow.util.Util;
 
 public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportingSubscriberCallback {
+	private static final Color GAUGES_COLOR = Color.BLUE;
+	private static final Color EFFECTORS_COLOR = Color.ORANGE;
+	private static final Color MODELS_MANAGER_COLOR = Color.MAGENTA;
+	private static final Color EXECUTORS_COLOR = Color.GREEN;
+	private static final Color ANALYZERS_COLOR = Color.PINK;
+	private static final Color ADAPTION_MANAGER_COLOR = Color.RED;
 	public static final int MAX_TEXT_LENGTH = 100000;
 	/** Convenience constant: size of text field to set to when Max is exceeded. */
 	public static final int TEXT_HALF_LENGTH = 50000;
@@ -87,7 +93,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	private Map<String, ModelPanel> m_modelSections = new HashMap<>();
 	private Map<String, GaugePanel> m_gaugeSections = new HashMap<>();
 	private Map<String, JTextArea> m_probeSections = new HashMap<>();
-	
+
 	JDesktopPane desktopPane;
 
 	/**
@@ -172,7 +178,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.setBackground(Color.WHITE);
-		tabbedPane.setBorder(new LineBorder(Color.RED, 2));
+		tabbedPane.setBorder(new LineBorder(ADAPTION_MANAGER_COLOR, 2));
 		adaptationManagerFrame.getContentPane().add(tabbedPane);
 		m_tabs.put(RainbowComponentT.ADAPTATION_MANAGER, tabbedPane);
 
@@ -187,7 +193,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 
 		JTabbedPane analyzerTabs = new JTabbedPane(JTabbedPane.TOP);
 		;
-		analyzerTabs.setBorder(new LineBorder(Color.PINK, 2));
+		analyzerTabs.setBorder(new LineBorder(ANALYZERS_COLOR, 2));
 		analyzersFrame.getContentPane().add(analyzerTabs, BorderLayout.CENTER);
 
 		JTextArea analyzersTextArea = createTextAreaInTab(analyzerTabs, "All");
@@ -204,7 +210,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		desktopPane.add(executorsFrame);
 
 		JTabbedPane executorsTabs = new JTabbedPane(JTabbedPane.TOP);
-		executorsTabs.setBorder(new LineBorder(Color.GREEN, 2));
+		executorsTabs.setBorder(new LineBorder(EXECUTORS_COLOR, 2));
 		executorsFrame.getContentPane().add(executorsTabs, BorderLayout.CENTER);
 
 		JTextArea executorsTextArea = createTextAreaInTab(executorsTabs, "All");
@@ -219,7 +225,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		desktopPane.add(modelsManagerFrame);
 
 		JTabbedPane modelsManagerTabs = new JTabbedPane(JTabbedPane.TOP);
-		modelsManagerTabs.setBorder(new LineBorder(Color.MAGENTA, 2));
+		modelsManagerTabs.setBorder(new LineBorder(MODELS_MANAGER_COLOR, 2));
 		modelsManagerFrame.getContentPane().add(modelsManagerTabs, BorderLayout.CENTER);
 
 		JTextArea modelsManagerTextArea = createTextAreaInTab(modelsManagerTabs, "All");
@@ -234,7 +240,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		desktopPane.add(effectorsFrame);
 
 		JTabbedPane effectorsTabs = new JTabbedPane(JTabbedPane.TOP);
-		effectorsTabs.setBorder(new LineBorder(Color.ORANGE, 2));
+		effectorsTabs.setBorder(new LineBorder(EFFECTORS_COLOR, 2));
 		effectorsFrame.getContentPane().add(effectorsTabs, BorderLayout.CENTER);
 
 		JTextArea effectorsTextArea = createTextAreaInTab(effectorsTabs, "All");
@@ -249,7 +255,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		desktopPane.add(gaugesFrame);
 
 		JTabbedPane gaugesTabs = new JTabbedPane(JTabbedPane.TOP);
-		gaugesTabs.setBorder(new LineBorder(Color.BLUE, 2));
+		gaugesTabs.setBorder(new LineBorder(GAUGES_COLOR, 2));
 		gaugesFrame.getContentPane().add(gaugesTabs, BorderLayout.CENTER);
 
 		JTextArea gaugesTextArea = createTextAreaInTab(gaugesTabs, "All");
@@ -264,7 +270,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		desktopPane.add(probesFrame);
 
 		JTabbedPane probesTabs = new JTabbedPane(JTabbedPane.TOP);
-		probesTabs.setBorder(new LineBorder(Color.ORANGE, 2));
+		probesTabs.setBorder(new LineBorder(EFFECTORS_COLOR, 2));
 		probesFrame.getContentPane().add(probesTabs, BorderLayout.CENTER);
 
 		JTextArea probesTextArea = createTextAreaInTab(probesTabs, "All");
@@ -381,7 +387,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 				addGaugePanel(g);
 			}
 		}
-		
+
 		ProbeDescription probes = Rainbow.instance().getRainbowMaster().probeDesc();
 		for (ProbeAttributes p : probes.probes) {
 			String probeId = p.alias + "@" + p.getLocation();
@@ -389,15 +395,15 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 				addProbePanel(probeId);
 			}
 		}
-		
+
 		try {
 			RainbowPortFactory.createProbeReportingPortSubscriber(new IProbeReportPort() {
-				
+
 				@Override
 				public void dispose() {
-					
+
 				}
-				
+
 				@Override
 				public void reportData(IProbeIdentifier probe, String data) {
 					JTextArea ta = m_probeSections.get(probe.id());
@@ -417,16 +423,16 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	}
 
 	private void addGaugePanel(String gaugeID) {
-		GaugePanel gp = new GaugePanel(gaugeID);
+		final GaugePanel gp = new GaugePanel(gaugeID);
 		JTabbedPane tp = m_tabs.get(RainbowComponentT.GAUGE);
-		if (tp.getTabCount() >= 10) 
+		if (tp.getTabCount() >= 10)
 			tp.addTab(shortName(gaugeID), gp);
 		else
 			tp.add(gaugeID, gp);
-		tp.setToolTipTextAt(tp.getTabCount()-1, gaugeID);
+		tp.setToolTipTextAt(tp.getTabCount() - 1, gaugeID);
 		m_gaugeSections.put(gaugeID, gp);
-		
-		if (tp.getTabCount() == 10/*> 10 && tp.getTabLayoutPolicy() != JTabbedPane.SCROLL_TAB_LAYOUT*/) {
+
+		if (tp.getTabCount() == 10/* > 10 && tp.getTabLayoutPolicy() != JTabbedPane.SCROLL_TAB_LAYOUT */) {
 //			tp.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 			int count = tp.getTabCount();
 			for (int i = 0; i < count; i++) {
@@ -435,6 +441,32 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 				tp.setToolTipTextAt(i, label);
 			}
 		}
+
+		gp.addUpdateListener(new Runnable() {
+			public void run() {
+				int index = tp.indexOfComponent(gp);
+				synchronized (gp) {
+					final Color c = tp.getBackgroundAt(index);
+					if (c != GAUGES_COLOR) {
+						tp.setBackgroundAt(index, GAUGES_COLOR);
+						final java.util.Timer t = new Timer();
+						t.schedule(new TimerTask() {
+
+							@Override
+							public void run() {
+								SwingUtilities.invokeLater(new Runnable() {
+
+									@Override
+									public void run() {
+										tp.setBackgroundAt(index, c);
+									}
+								});
+							}
+						}, 1000);
+					}
+				}
+			}
+		});
 	}
 
 	private String shortName(String gaugeID) {
@@ -447,21 +479,21 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		tp.add(modelName, mp);
 		m_modelSections.put(modelName, mp);
 	}
-	
+
 	private void addProbePanel(String probeId) {
-		JTextArea p = new JTextArea ();
+		JTextArea p = new JTextArea();
 		JScrollPane s = new JScrollPane();
 		s.setViewportView(p);
 		s.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		s.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		JTabbedPane tp = m_tabs.get(RainbowComponentT.PROBE);
-		if (tp.getTabCount() >= 10) 
+		if (tp.getTabCount() >= 10)
 			tp.addTab(shortName(probeId), p);
 		else
 			tp.add(probeId, p);
-		tp.setToolTipTextAt(tp.getTabCount()-1, probeId);
+		tp.setToolTipTextAt(tp.getTabCount() - 1, probeId);
 		m_probeSections.put(probeId, p);
-		
+
 		if (tp.getTabCount() == 10) {
 //			tp.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 			int count = tp.getTabCount();
@@ -494,8 +526,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	/**
 	 * Creates a series of Oracle-specific menu items.
 	 * 
-	 * @param menu
-	 *            the menu on which to create items.
+	 * @param menu the menu on which to create items.
 	 */
 	private void createRainbowMenu(JMenu menu) {
 		JMenuItem item;
@@ -574,7 +605,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		});
 		item.setEnabled(false);
 		menu.add(item);
-		
+
 		item = new JMenuItem("Monitor Rainbow Threads");
 		item.setMnemonic(KeyEvent.VK_M);
 		item.setToolTipText("Opens a window for monitoring threads in Rainbow");
@@ -584,7 +615,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 			}
 		});
 		menu.add(item);
-		
+
 		item = new JMenuItem("Restart Master+Delegate");
 		item.setMnemonic(KeyEvent.VK_R);
 		item.setToolTipText("Signals Master and all Delegates to terminate, then restart");
@@ -626,7 +657,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		RainbowMonitor adaptationManagerFrame = new RainbowMonitor();
 		adaptationManagerFrame.setMaximizable(true);
 		adaptationManagerFrame.setIconifiable(true);
-		desktopPane.add(adaptationManagerFrame);	
+		desktopPane.add(adaptationManagerFrame);
 		adaptationManagerFrame.toFront();
 	}
 
@@ -659,8 +690,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	/**
 	 * Creates a series of Delegate-specific menu items.
 	 * 
-	 * @param menu
-	 *            the menu on which to create items.
+	 * @param menu the menu on which to create items.
 	 */
 	private void createDelegateMenu(JMenu menu) {
 		JMenuItem item;
@@ -747,7 +777,8 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 			public void actionPerformed(ActionEvent e) {
 				String operationName = JOptionPane.showInputDialog(m_frame, "Please identify the Operation to test:");
 				if (operationName == null || operationName.isEmpty()) {
-					writeText(RainbowComponentT.MASTER, "Sorry, Rainbow Master needs to know what operation to invoke.");
+					writeText(RainbowComponentT.MASTER,
+							"Sorry, Rainbow Master needs to know what operation to invoke.");
 				}
 
 				String argStr = JOptionPane.showInputDialog(m_frame,
@@ -893,8 +924,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	/**
 	 * Creates the help menu items.
 	 * 
-	 * @param menu
-	 *            the menu on which to create items.
+	 * @param menu the menu on which to create items.
 	 */
 	private void createHelpMenu(JMenu menu) {
 		JMenuItem item;
@@ -1093,19 +1123,18 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 			component = RainbowComponentT.MASTER;
 		if (component == RainbowComponentT.GAUGE_MANAGER)
 			component = RainbowComponentT.GAUGE;
-		
+
 		if (component == RainbowComponentT.GAUGE) {
 			for (GaugePanel gp : m_gaugeSections.values()) {
 				gp.processReport(type, message);
 			}
-			
-		}
-		else if (component == RainbowComponentT.MODEL) {
+
+		} else if (component == RainbowComponentT.MODEL) {
 			for (ModelPanel mp : m_modelSections.values()) {
 				mp.processReport(type, message);
 			}
 		}
-		
+
 		writeText(component, msg);
 	}
 
