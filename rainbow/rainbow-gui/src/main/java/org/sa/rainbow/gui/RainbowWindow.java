@@ -2,6 +2,8 @@ package org.sa.rainbow.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -18,7 +20,6 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
@@ -434,7 +435,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 						if (ta.getText().length() > MAX_TEXT_LENGTH) {
 							ta.setText(ta.getText().substring(TEXT_HALF_LENGTH));
 						}
-						TabColorChanger tcc= new TabColorChanger(m_tabs.get(RainbowComponentT.PROBE), ta, SYSTEM_COLOR_LIGHT);
+						TabColorChanger tcc= new TabColorChanger(m_tabs.get(RainbowComponentT.PROBE), ta.getParent().getParent(), SYSTEM_COLOR_LIGHT);
 						tcc.run();
 					}
 				}
@@ -483,12 +484,12 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	private static class TabColorChanger implements Runnable {
 
 		private JTabbedPane m_pane;
-		private JComponent m_panel;
+		private Component m_panel;
 		private Color m_color;
 
-		public TabColorChanger(JTabbedPane pane, JComponent panel, Color color) {
+		public TabColorChanger(JTabbedPane pane, Component container, Color color) {
 			m_pane = pane;
-			m_panel = panel;
+			m_panel = container;
 			m_color = color;
 		}
 
