@@ -429,6 +429,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 					if (ta == null) ta = m_probeSections.get(shortName(pid));
 					if (ta != null) {
 						ta.append(data);
+						ta.append("\n");
 						ta.setCaretPosition(ta.getText().length());
 						if (ta.getText().length() > MAX_TEXT_LENGTH) {
 							ta.setText(ta.getText().substring(TEXT_HALF_LENGTH));
