@@ -1,30 +1,29 @@
 package org.sa.rainbow.gui;
 
-import javax.swing.JPanel;
+import java.awt.BorderLayout;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.sa.rainbow.core.error.RainbowConnectionException;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.table.DefaultTableModel;
+
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.IModelUpdater;
-import org.sa.rainbow.core.models.IModelsManager;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.ports.IModelUSBusPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 
-import java.awt.BorderLayout;
-import java.util.List;
-
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.table.DefaultTableModel;
-
 public class GaugePanel extends JPanel implements IModelUpdater{
 	private JTable m_table;
 	private IModelUSBusPort m_usPort;
 	private String m_gaugeId;
+	private ArrayList<Runnable> updaters = new ArrayList<>(1);
 
 	/**
 	 * Create the panel.
@@ -52,10 +51,17 @@ public class GaugePanel extends JPanel implements IModelUpdater{
 		}
 	}
 
+	public void addUpdateListener(Runnable r) {
+		updaters.add(r);
+	}
+	
 	@Override
 	public void requestModelUpdate(IRainbowOperation command) throws IllegalStateException, RainbowException {
 		if (!m_gaugeId.equals(command.getOrigin())) return;
 		addOperation(command);
+		for (Runnable runnable : updaters) {
+			runnable.run();
+		}
 	}
 	
 	private String[] getTableData(IRainbowOperation command) {
