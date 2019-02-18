@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
@@ -67,12 +68,35 @@ import org.sa.rainbow.translator.probes.IProbeIdentifier;
 import org.sa.rainbow.util.Util;
 
 public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportingSubscriberCallback {
+
+	protected static Color bleach(Color color, double amount) {
+		int red = (int) ((color.getRed() * (1 - amount) / 255 + amount) * 255);
+		int green = (int) ((color.getGreen() * (1 - amount) / 255 + amount) * 255);
+		int blue = (int) ((color.getBlue() * (1 - amount) / 255 + amount) * 255);
+		return new Color(red, green, blue);
+	}
+
 	private static final Color GAUGES_COLOR = Color.BLUE;
 	private static final Color EFFECTORS_COLOR = Color.ORANGE;
+	private static final Color SYSTEM_COLOR_LIGHT;
 	private static final Color MODELS_MANAGER_COLOR = Color.MAGENTA;
+	private static final Color MODELS_MANAGER_COLOR_LIGHT;
 	private static final Color EXECUTORS_COLOR = Color.GREEN;
+	private static final Color EXECUTORS_COLOR_LIGHT;
 	private static final Color ANALYZERS_COLOR = Color.PINK;
+	private static final Color ANALYZERS_COLOR_LIGHT;
 	private static final Color ADAPTION_MANAGER_COLOR = Color.RED;
+	private static final Color ADAPTION_MANAGER_COLOR_LIGHT;
+	private static final Color GAUGES_COLOR_LIGHT;
+
+	static {
+		GAUGES_COLOR_LIGHT = bleach(GAUGES_COLOR, .75);
+		SYSTEM_COLOR_LIGHT = bleach(EFFECTORS_COLOR, 0.75);
+		MODELS_MANAGER_COLOR_LIGHT = bleach(EFFECTORS_COLOR, 0.75);
+		EXECUTORS_COLOR_LIGHT = bleach(EFFECTORS_COLOR, 0.75);
+		ANALYZERS_COLOR_LIGHT = bleach(EFFECTORS_COLOR, 0.75);
+		ADAPTION_MANAGER_COLOR_LIGHT = bleach(EFFECTORS_COLOR, 0.75);
+	}
 	public static final int MAX_TEXT_LENGTH = 100000;
 	/** Convenience constant: size of text field to set to when Max is exceeded. */
 	public static final int TEXT_HALF_LENGTH = 50000;
@@ -396,30 +420,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 			}
 		}
 
-		try {
-			RainbowPortFactory.createProbeReportingPortSubscriber(new IProbeReportPort() {
-
-				@Override
-				public void dispose() {
-
-				}
-
-				@Override
-				public void reportData(IProbeIdentifier probe, String data) {
-					JTextArea ta = m_probeSections.get(probe.id());
-					if (ta != null) {
-						ta.append(data);
-						ta.setCaretPosition(ta.getText().length());
-						if (ta.getText().length() > MAX_TEXT_LENGTH) {
-							ta.setText(ta.getText().substring(TEXT_HALF_LENGTH));
-						}
-					}
-				}
-			});
-		} catch (RainbowConnectionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 	}
 
 	private void addGaugePanel(String gaugeID) {
@@ -442,31 +443,46 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 			}
 		}
 
-		gp.addUpdateListener(new Runnable() {
-			public void run() {
-				int index = tp.indexOfComponent(gp);
-				synchronized (gp) {
-					final Color c = tp.getBackgroundAt(index);
-					if (c != GAUGES_COLOR) {
-						tp.setBackgroundAt(index, GAUGES_COLOR);
-						final java.util.Timer t = new Timer();
-						t.schedule(new TimerTask() {
+		gp.addUpdateListener(new TabColorChanger(tp,gp,GAUGES_COLOR_LIGHT));
+	}
+	
+	private static class TabColorChanger implements Runnable {
 
-							@Override
-							public void run() {
-								SwingUtilities.invokeLater(new Runnable() {
+		private JTabbedPane m_pane;
+		private JComponent m_panel;
+		private Color m_color;
 
-									@Override
-									public void run() {
-										tp.setBackgroundAt(index, c);
-									}
-								});
-							}
-						}, 1000);
-					}
+		public TabColorChanger(JTabbedPane pane, JComponent panel, Color color) {
+			m_pane = pane;
+			m_panel = panel;
+			m_color = color;
+		}
+
+		@Override
+		public void run() {
+			int index = m_pane.indexOfComponent(m_panel);
+			synchronized (m_panel) {
+				final Color c = m_pane.getBackgroundAt(index);
+				if (c != m_color) {
+					m_pane.setBackgroundAt(index, m_color);
+					final java.util.Timer t = new Timer();
+					t.schedule(new TimerTask() {
+
+						@Override
+						public void run() {
+							SwingUtilities.invokeLater(new Runnable() {
+
+								@Override
+								public void run() {
+									m_pane.setBackgroundAt(index, c);
+								}
+							});
+						}
+					}, 1000);
 				}
 			}
-		});
+		}
+		
 	}
 
 	private String shortName(String gaugeID) {
@@ -478,6 +494,8 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		JTabbedPane tp = m_tabs.get(RainbowComponentT.MODEL);
 		tp.add(modelName, mp);
 		m_modelSections.put(modelName, mp);
+		mp.addUpdateListener(new TabColorChanger(tp,mp,GAUGES_COLOR_LIGHT));
+
 	}
 
 	private void addProbePanel(String probeId) {
@@ -502,6 +520,34 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 				tp.setTitleAt(i, shortName(label));
 				tp.setToolTipTextAt(i, label);
 			}
+		}
+		
+		try {
+			RainbowPortFactory.createProbeReportingPortSubscriber(new IProbeReportPort() {
+
+				@Override
+				public void dispose() {
+
+				}
+
+				@Override
+				public void reportData(IProbeIdentifier probe, String data) {
+					JTextArea ta = m_probeSections.get(probe.id());
+					if (ta == null) ta = m_probeSections.get(shortName(probeId));
+					if (ta != null) {
+						ta.append(data);
+						ta.setCaretPosition(ta.getText().length());
+						if (ta.getText().length() > MAX_TEXT_LENGTH) {
+							ta.setText(ta.getText().substring(TEXT_HALF_LENGTH));
+						}
+					}
+					TabColorChanger tcc= new TabColorChanger(tp, ta, SYSTEM_COLOR_LIGHT);
+					tcc.run();
+				}
+			});
+		} catch (RainbowConnectionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 

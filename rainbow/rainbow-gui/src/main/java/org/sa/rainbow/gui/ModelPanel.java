@@ -3,6 +3,7 @@ package org.sa.rainbow.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -51,6 +52,7 @@ public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelC
 	private JTable m_table;
 	private IModelChangeBusSubscriberPort m_modelChangePort;
 	private ModelReference m_ref;
+	private ArrayList<Runnable> m_updaters = new ArrayList<> (1);
 
 	/**
 	 * Create the panel.
@@ -95,6 +97,9 @@ public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelC
 		if (!command.getModelReference().equals(m_ref))
 			return;
 		addOperation(command, false);
+		for (Runnable r : m_updaters) {
+			r.run();
+		}
 	}
 
 	private String[] getTableData(IRainbowOperation command, boolean inerror) {
@@ -233,6 +238,10 @@ public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelC
 			} catch (Throwable t) {
 			}
 		 }
+	}
+
+	public void addUpdateListener(Runnable listener) {
+		m_updaters.add(listener);
 	}
 
 }
