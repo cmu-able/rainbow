@@ -47,10 +47,12 @@ import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.GaugeManager;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.globals.ExitState;
+import org.sa.rainbow.core.models.EffectorDescription;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.ProbeDescription;
+import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
 import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
 import org.sa.rainbow.core.ports.IEffectorLifecycleBusPort;
 import org.sa.rainbow.core.ports.IGaugeLifecycleBusPort;
@@ -65,6 +67,7 @@ import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReportingSubscriberCallback;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.util.Pair;
+import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 import org.sa.rainbow.translator.probes.IProbeIdentifier;
 import org.sa.rainbow.util.Util;
@@ -119,9 +122,11 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	private Map<String, ModelPanel> m_modelSections = new HashMap<>();
 	private Map<String, GaugePanel> m_gaugeSections = new HashMap<>();
 	private Map<String, JTextArea> m_probeSections = new HashMap<>();
+	private Map<String, JTextArea> m_effectorSections = new HashMap<> ();
 
 	JDesktopPane desktopPane;
 	private IProbeReportSubscriberPort m_createProbeReportingPortSubscriber;
+	private IEffectorLifecycleBusPort m_createClientSideEffectorLifecyclePort;
 
 	/**
 	 * Launch the application.
@@ -454,7 +459,55 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 			}
 		}
 
+		try {
+			m_createClientSideEffectorLifecyclePort = RainbowPortFactory.createClientSideEffectorLifecyclePort(new IEffectorLifecycleBusPort() {
+				
+				@Override
+				public void dispose() {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void reportExecuted(IEffectorIdentifier effector, Outcome outcome, List<String> args) {
+					String eid = effector.id();
+					JTextArea ta = m_effectorSections.get(eid);
+					if (ta == null) ta = m_effectorSections.get(shortName(eid));
+					if (ta != null) {
+						ta.append(args.toString() + " -> " + outcome.name() + "\n");
+						ta.setCaretPosition(ta.getText().length());
+						if (ta.getText().length() > MAX_TEXT_LENGTH) {
+							ta.setText(ta.getText().substring(TEXT_HALF_LENGTH));
+						}
+						TabColorChanger tcc= new TabColorChanger(m_tabs.get(RainbowComponentT.EFFECTOR), ta.getParent().getParent(), SYSTEM_COLOR_LIGHT);
+						tcc.run();
+					}
+				}
+				
+				@Override
+				public void reportDeleted(IEffectorIdentifier effector) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void reportCreated(IEffectorIdentifier effector) {
+					// TODO Auto-generated method stub
+					
+				}
+			});
+		} catch (RainbowConnectionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
+		EffectorDescription effectorDesc = Rainbow.instance().getRainbowMaster().effectorDesc();
+		for (EffectorAttributes ea : effectorDesc.effectors) {
+			String effectorId = ea.name + "@" + ea.getLocation();
+			if (m_effectorSections.get(effectorId) == null) {
+				addEffectorPanel(effectorId);
+			}
+		}
 		
 	}
 
@@ -468,15 +521,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		tp.setToolTipTextAt(tp.getTabCount() - 1, gaugeID);
 		m_gaugeSections.put(gaugeID, gp);
 
-		if (tp.getTabCount() == 10/* > 10 && tp.getTabLayoutPolicy() != JTabbedPane.SCROLL_TAB_LAYOUT */) {
-//			tp.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-			int count = tp.getTabCount();
-			for (int i = 0; i < count; i++) {
-				String label = tp.getTitleAt(i);
-				tp.setTitleAt(i, shortName(label));
-				tp.setToolTipTextAt(i, label);
-			}
-		}
+		normalizeLabels(tp);
 
 		gp.addUpdateListener(new TabColorChanger(tp,gp,GAUGES_COLOR_LIGHT));
 	}
@@ -547,6 +592,12 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		tp.setToolTipTextAt(tp.getTabCount() - 1, probeId);
 		m_probeSections.put(probeId, p);
 
+		normalizeLabels(tp);
+		
+
+	}
+
+	private void normalizeLabels(JTabbedPane tp) {
 		if (tp.getTabCount() == 10) {
 //			tp.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 			int count = tp.getTabCount();
@@ -556,10 +607,25 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 				tp.setToolTipTextAt(i, label);
 			}
 		}
-		
-
 	}
 
+	private void addEffectorPanel(String effectorId) {
+		JTextArea e = new JTextArea();
+		JScrollPane s = new JScrollPane();
+		s.setViewportView(e);
+		s.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		s.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		JTabbedPane tp = m_tabs.get(RainbowComponentT.EFFECTOR);
+		if (tp.getTabCount() >= 10) {
+			tp.addTab(shortName(effectorId), s);
+		}
+		else 
+			tp.addTab(effectorId, s);
+		tp.setToolTipTextAt(tp.getTabCount()-1, effectorId);
+		m_effectorSections.put(effectorId, e);
+		
+		normalizeLabels(tp);
+	}
 	@Override
 	public void setMaster(IMasterCommandPort master) {
 		m_master = master;
