@@ -9,6 +9,10 @@ Gabriel A. Moreno, Bradley Schmerl and David Garlan. "SWIM: an exemplar for eval
 
 SWIM is available [here](https://github.com/cps-sei/swim)
 
+You can use this in two ways
+1. Build as described below
+2. Run the demo as a Docker image, as described [here](docker/INSTRUCTIONS.md)
+
 ## Building the Adaptation Manager for SWIM
 The following instructions have been tested in Ubuntu 16.04 LTS.
 
