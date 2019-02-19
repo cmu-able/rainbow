@@ -53,3 +53,5 @@ This is a multi-stage docker build file that will first build a Rainbow release 
 
 5. To start Rainbow adaptation, you must start the probes manually so that Rainbow starts receiving information. To do this, click on `Delegates>Start Probes`. You will start seeing information appearing in all tabs except the Rainbow Master and Analyzers.
 
+There is not much feedback from SWIM about what it is doing, but you should see probes, gauges, and the model changing. Initially, the adaptation manager will decide that there are too many servers given the current predicted load, and so will scale back by removing servers. You should see the removeServer effector firing eventually.
+
