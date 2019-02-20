@@ -474,7 +474,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 					JTextArea ta = m_effectorSections.get(eid);
 					if (ta == null) ta = m_effectorSections.get(shortName(eid));
 					if (ta != null) {
-						ta.append(effector.kind() + args.toString() + " -> " + outcome.name() + "\n");
+						ta.append(effector.id().split("@")[0] + args.toString() + " -> " + outcome.name() + "\n");
 						ta.setCaretPosition(ta.getText().length());
 						if (ta.getText().length() > MAX_TEXT_LENGTH) {
 							ta.setText(ta.getText().substring(TEXT_HALF_LENGTH));

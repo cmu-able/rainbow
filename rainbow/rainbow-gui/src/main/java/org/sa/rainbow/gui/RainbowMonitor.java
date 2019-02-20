@@ -1,7 +1,8 @@
 package org.sa.rainbow.gui;
 
-import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.lang.Thread.State;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.management.ManagementFactory;
@@ -18,6 +19,8 @@ import java.util.Map;
 
 import javax.swing.JInternalFrame;
 import javax.swing.JScrollPane;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
@@ -26,14 +29,15 @@ import org.sa.rainbow.core.RainbowComponentT;
 
 public class RainbowMonitor extends JInternalFrame {
 	
-//	private ThreadMXBean threadMxBean = ManagementFactory.getThreadMXBean();
-//	private RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
-//	private OperatingSystemMXBean osMxBean = ManagementFactory.getOperatingSystemMXBean();
+	private ThreadMXBean threadMxBean = ManagementFactory.getThreadMXBean();
+	private RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
+	private OperatingSystemMXBean osMxBean = ManagementFactory.getOperatingSystemMXBean();
+	private int nrCPUs = osMxBean.getAvailableProcessors();
 
 	public static class ThreadData {
 		Thread thread;
 		long uptime=0;
-		long initialCPU;
+		long initialCPU=-1;
 		float cpuUsage = 0;
 		long lastUpdate = 0;
 	}
@@ -44,28 +48,36 @@ public class RainbowMonitor extends JInternalFrame {
 		List<ThreadData> children;
 	}
 	
-//	protected void calculateThreadStats(NoRootTreeTableModel ttm) {
-//		Map<Long,ThreadInfo> tis = new HashMap<>();
-//		ThreadInfo[] ti = threadMxBean.dumpAllThreads(false, false);
-//		for (int i = 0; i < ti.length; i++) {
-//			tis.put(ti[i].getThreadId(), ti[i]);
-//		}
-//		
-//		List<Entry> members = ttm.members;
-//		for (Entry entry : members) {
-//			for (ThreadData d : entry.children) {
-//				ThreadInfo info = tis.get(d.thread.getId());
-//				if (info != null) {
-//					d.uptime = runtimeMXBean.getUptime();
-//					//http://marjavamitjava.com/calculate-cpu-usage-java-thread-not-just-whole-process/
-////					if (la)
-//				}
-//			}
-//		}
-//		
-//	}
+	protected void calculateThreadStats(NoRootTreeTableModel ttm) {
+		Map<Long,ThreadInfo> tis = new HashMap<>();
+		ThreadInfo[] ti = threadMxBean.dumpAllThreads(false, false);
+		for (int i = 0; i < ti.length; i++) {
+			tis.put(ti[i].getThreadId(), ti[i]);
+		}
+		
+		long uptime = runtimeMXBean.getUptime();
+		List<Entry> members = ttm.members;
+		for (Entry entry : members) {
+			for (ThreadData d : entry.children) {
+				ThreadInfo info = tis.get(d.thread.getId());
+				if (info != null) {
+					if (d.initialCPU == -1) {
+						d.initialCPU = threadMxBean.getThreadCpuTime(d.thread.getId());
+						d.lastUpdate = uptime;
+					}
+					else {
+						d.cpuUsage = (threadMxBean.getThreadCpuTime(d.thread.getId()) - d.initialCPU)*100/((uptime-d.lastUpdate) * 1000000F * nrCPUs);
+					}
+					//http://marjavamitjava.com/calculate-cpu-usage-java-thread-not-just-whole-process/
+//					if (la)
+				}
+			}
+		}
+		
+	}
 
-	private final static String[] COLUMNNAMES = { "Id", "Status", "Uptime", "% CPU" };
+	private final static String[] COLUMNNAMES = { "Id", "Status", "% CPU" };
+	private final static float[] COLUMNWIDTH = {70,15,15};
 	public  class NoRootTreeTableModel extends AbstractTreeTableModel {
 		private List<Entry> members;
 
@@ -106,7 +118,7 @@ public class RainbowMonitor extends JInternalFrame {
 
 		@Override
 		public boolean isLeaf(Object node) {
-			return node instanceof Thread/*Data*/;
+			return node instanceof ThreadData;
 		}
 
 		@Override
@@ -128,7 +140,7 @@ public class RainbowMonitor extends JInternalFrame {
 		@Override
 		public int getIndexOfChild(Object parent, Object child) {
 			Entry nt = (Entry) parent;
-			Thread/*Data*/ t = (Thread/*Data*/) child;
+			ThreadData t = (ThreadData) child;
 			return nt.children.indexOf(t);
 		}
 
@@ -155,9 +167,9 @@ public class RainbowMonitor extends JInternalFrame {
 						return ret;
 					}
 					return t.thread.getState() == State.TERMINATED ? "Failed" : "OK";
-				case 2: 
-					return t.uptime==0?"???":Long.toString(t.uptime);
-				case 3:
+//				case 2: 
+//					return t.uptime==0?"???":Long.toString(t.uptime);
+				case 2:
 					return t.cpuUsage==0?"???":String.format("$.2f",t.cpuUsage);
 				}
 			}
@@ -242,6 +254,13 @@ public class RainbowMonitor extends JInternalFrame {
 				}
 			}
 		});
+		
+		addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				resizeColumns();
+			}
+		});
 		setVisible(true);
 	}
 
@@ -253,5 +272,16 @@ public class RainbowMonitor extends JInternalFrame {
 		super.dispose();
 	}
 
+	private void resizeColumns() {
+		int tW = m_treeTable.getWidth();
+		TableColumn column;
+		TableColumnModel cm = m_treeTable.getColumnModel();
+		int cantCols = cm.getColumnCount();
+		for (int i=0; i< cantCols; i++) {
+			column = m_treeTable.getColumn(i);
+			int pWidth=Math.round(COLUMNWIDTH[i]*tW);
+			column.setPreferredWidth(pWidth);
+		}
+	}
 }
 
