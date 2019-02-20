@@ -18,7 +18,9 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.JInternalFrame;
+import javax.swing.JLabel;
 import javax.swing.JScrollPane;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
@@ -232,6 +234,11 @@ public class RainbowMonitor extends JInternalFrame {
 		getContentPane().add(new JScrollPane(m_treeTable));
 		setTitle("Rainbow Component Status");
 		pack();
+		DefaultTableCellRenderer rightRender = new DefaultTableCellRenderer();
+		rightRender.setHorizontalAlignment(JLabel.RIGHT);
+		for (int i = 1; i<m_treeTable.getColumnCount();i++) 
+			m_treeTable.setDefaultRenderer(m_treeTable.getColumnClass(i), rightRender);
+		
 		m_refreshEnabled = true;
 
 		EventQueue.invokeLater(new Runnable() {
@@ -242,7 +249,7 @@ public class RainbowMonitor extends JInternalFrame {
 					
 					
 					NoRootTreeTableModel ttm = new NoRootTreeTableModel(registeredThreads);
-//					calculateThreadStats(ttm);
+					calculateThreadStats(ttm);
 					m_treeTable.setTreeTableModel(ttm);
 					try {
 						Thread.sleep(1000);
