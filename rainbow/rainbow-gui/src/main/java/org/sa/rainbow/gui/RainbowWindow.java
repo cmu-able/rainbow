@@ -127,6 +127,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	JDesktopPane desktopPane;
 	private IProbeReportSubscriberPort m_createProbeReportingPortSubscriber;
 	private IEffectorLifecycleBusPort m_createClientSideEffectorLifecyclePort;
+	private javax.swing.Timer m_tabTimer;
 
 	/**
 	 * Launch the application.
@@ -343,6 +344,19 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		menuBar.add(menu);
 
 		m_frame.setJMenuBar(menuBar);
+		
+		m_tabTimer = new javax.swing.Timer(1000, new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (m_master.allDelegatesOK()) {
+					initializeTabs();
+					m_tabTimer.stop();
+					m_tabTimer=null;
+				}
+			}
+		});
+		m_tabTimer.start();
 	}
 
 	protected void quit() {
