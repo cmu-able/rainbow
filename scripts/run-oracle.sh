@@ -5,8 +5,9 @@ DEBUG=""
 GUI=""
 WD="."
 PROP=""
+AUTOSTART=""
 
-while getopts :dhr:w:p: opt; do
+while getopts :dhra:w:p: opt; do
   case $opt in
     d)
 	  DEBUG="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=1044"
@@ -16,6 +17,9 @@ while getopts :dhr:w:p: opt; do
 	  ;;
 	r)
 	  ADDR=$OPTARG
+	  ;;
+	a)
+	  AUTOSTART="-autostart"
 	  ;;
   w)
     WD=$OPTARG
@@ -66,6 +70,6 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:lib
 
 echo "java -classpath .${delim}lib/*  -Drainbow.target=$TARGET -Djava.rmi.server.hostname=$ADDR $PROP $DEBUG $* org.sa.rainbow.core.RainbowMaster"
 
-java -classpath ".${delim}lib/*"  -Drainbow.target=$TARGET -Djava.rmi.server.hostname=$ADDR $PROP $DEBUG $* org.sa.rainbow.core.RainbowMaster $GUI
+java -classpath ".${delim}lib/*"  -Drainbow.target=$TARGET -Djava.rmi.server.hostname=$ADDR $PROP $DEBUG $* org.sa.rainbow.core.RainbowMaster $GUI $AUTOSTART
 
  
