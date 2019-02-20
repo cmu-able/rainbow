@@ -1,6 +1,8 @@
 package org.sa.rainbow.gui;
 
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.lang.Thread.State;
@@ -20,6 +22,7 @@ import java.util.Map;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
+import javax.swing.Timer;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
@@ -199,6 +202,7 @@ public class RainbowMonitor extends JInternalFrame {
 	private boolean m_refreshEnabled;
 	private UncaughtExceptionHandler m_exceptionHandler;
 	private Map<Thread, Throwable> m_uncaughtExceptions = new HashMap<>();
+	private Timer m_statsTimer;
 
 	/**
 	 * Create the frame.
@@ -241,10 +245,9 @@ public class RainbowMonitor extends JInternalFrame {
 		
 		m_refreshEnabled = true;
 
-		EventQueue.invokeLater(new Runnable() {
+		Runnable updateStats = new Runnable() {
 			@Override
 			public void run() {
-				while (true) {
 				if (RainbowMonitor.this.m_refreshEnabled) {
 					Map<RainbowComponentT, Map<String, Thread>> registeredThreads = Rainbow.instance().getRegisteredThreads();
 					
@@ -252,17 +255,20 @@ public class RainbowMonitor extends JInternalFrame {
 					NoRootTreeTableModel ttm = new NoRootTreeTableModel(registeredThreads);
 					calculateThreadStats(ttm);
 					m_treeTable.setTreeTableModel(ttm);
-					try {
-						Thread.sleep(5000);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-
-				}
+					
 				}
 			}
+		};
+		m_statsTimer = new Timer(5000, new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				updateStats.run();
+			}
 		});
+		m_statsTimer.start();
+		
+		
 		
 		addComponentListener(new ComponentAdapter() {
 			@Override
@@ -278,6 +284,7 @@ public class RainbowMonitor extends JInternalFrame {
 	@Override
 	public void dispose() {
 		m_refreshEnabled = false;
+		m_statsTimer.stop();
 		super.dispose();
 	}
 
