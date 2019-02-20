@@ -230,7 +230,7 @@ public class RainbowMonitor extends JInternalFrame {
 				e2.getValue().setUncaughtExceptionHandler(m_exceptionHandler);
 			}
 		}
-		NoRootTreeTableModel ttm = new NoRootTreeTableModel(registeredThreads);
+		final NoRootTreeTableModel ttm = new NoRootTreeTableModel(registeredThreads);
 		//getContentPane().setLayout(new BorderLayout(0, 0));
 		m_treeTable = new JXTreeTable(ttm);
 //		m_treeTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -249,12 +249,12 @@ public class RainbowMonitor extends JInternalFrame {
 			@Override
 			public void run() {
 				if (RainbowMonitor.this.m_refreshEnabled) {
-					Map<RainbowComponentT, Map<String, Thread>> registeredThreads = Rainbow.instance().getRegisteredThreads();
+//					Map<RainbowComponentT, Map<String, Thread>> registeredThreads = Rainbow.instance().getRegisteredThreads();
 					
 					
-					NoRootTreeTableModel ttm = new NoRootTreeTableModel(registeredThreads);
+//					NoRootTreeTableModel ttm = new NoRootTreeTableModel(registeredThreads);
 					calculateThreadStats(ttm);
-					m_treeTable.setTreeTableModel(ttm);
+					m_treeTable.updateUI();
 					
 				}
 			}
