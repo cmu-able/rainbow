@@ -84,7 +84,7 @@ implements IESEBMasterCommandPortRemoteInterface {
     }
     
     @Override
-    public boolean autostartProbes() {
-    	return m_stub.autostartProbes();
+    public boolean autoStartProbes() {
+    	return m_stub.autoStartProbes();
     }
 }

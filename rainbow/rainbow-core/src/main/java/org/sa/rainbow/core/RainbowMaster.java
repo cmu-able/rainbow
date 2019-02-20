@@ -838,7 +838,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
     }
     
     @Override
-    public boolean autostartProbes() {
+    public boolean autoStartProbes() {
     	return m_autoStart;
     }
 
