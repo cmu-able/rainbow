@@ -616,7 +616,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 
     @Override
     public boolean allDelegatesOK () {
-        return m_nonCompliantDelegates.isEmpty ();
+        return m_nonCompliantDelegates.isEmpty () && !m_heartbeats.isEmpty();
     }
 
     private void deregisterDelegate (String did, String loc) {
