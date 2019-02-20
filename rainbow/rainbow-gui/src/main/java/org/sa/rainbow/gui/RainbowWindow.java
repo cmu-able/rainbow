@@ -351,6 +351,9 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 			public void actionPerformed(ActionEvent e) {
 				if (m_master.allDelegatesOK()) {
 					initializeTabs();
+					if (m_master.autoStartProbes()) {
+						m_master.startProbes();
+					}
 					m_tabTimer.stop();
 					m_tabTimer=null;
 				}

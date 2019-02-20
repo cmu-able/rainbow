@@ -114,6 +114,8 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 
     private Boolean m_initialized = Boolean.FALSE;
 
+	public boolean m_autoStart = false;
+
     public void setRainbowEnvironment (IRainbowEnvironment env) {
         m_rainbowEnvironment = env;
     }
@@ -750,6 +752,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 
         boolean showHelp = false;
         boolean showGui = true;
+        boolean autoStart = false;
         int lastIdx = args.length - 1;
         for (int i = 0; i <= lastIdx; i++) {
             switch (args[i]) {
@@ -759,6 +762,9 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
             case "-nogui":
                 showGui = false;
                 break;
+            case "-autostart":
+            	autoStart=true;
+            	break;
             default:
                 System.err.println ("Unrecognized or incomplete argument " + args[i]);
                 showHelp = true;
@@ -795,6 +801,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
     		gui.setMaster(master);
             gui.display ();
         }
+        master.m_autoStart=autoStart;
         master.initialize ();
 
         RainbowDelegate localDelegate = new RainbowDelegate ();
@@ -828,6 +835,11 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
         for (IDelegateManagementPort delegate : m_delegates.values ()) {
             delegate.killProbes ();
         }
+    }
+    
+    @Override
+    public boolean autostartProbes() {
+    	return m_autoStart;
     }
 
     @Override
