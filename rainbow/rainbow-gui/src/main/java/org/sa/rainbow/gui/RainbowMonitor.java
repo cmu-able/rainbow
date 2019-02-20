@@ -244,6 +244,7 @@ public class RainbowMonitor extends JInternalFrame {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
+				while (true) {
 				if (RainbowMonitor.this.m_refreshEnabled) {
 					Map<RainbowComponentT, Map<String, Thread>> registeredThreads = Rainbow.instance().getRegisteredThreads();
 					
@@ -252,12 +253,13 @@ public class RainbowMonitor extends JInternalFrame {
 					calculateThreadStats(ttm);
 					m_treeTable.setTreeTableModel(ttm);
 					try {
-						Thread.sleep(1000);
+						Thread.sleep(5000);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 
+				}
 				}
 			}
 		});
