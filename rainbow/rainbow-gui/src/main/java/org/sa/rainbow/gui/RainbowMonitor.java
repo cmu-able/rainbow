@@ -175,7 +175,7 @@ public class RainbowMonitor extends JInternalFrame {
 //				case 2: 
 //					return t.uptime==0?"???":Long.toString(t.uptime);
 				case 2:
-					return t.cpuUsage==0?"???":String.format("$.2f",t.cpuUsage);
+					return t.cpuUsage==0?"???":String.format("#.2f",t.cpuUsage);
 				}
 			}
 			return null;
