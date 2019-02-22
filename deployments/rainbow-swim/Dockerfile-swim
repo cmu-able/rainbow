@@ -56,9 +56,9 @@ ADD libs /root/rainbow/libs
 ADD ide /root/rainbow/ide
 ADD rainbow /root/rainbow/rainbow
 ADD targets /root/rainbow/targets
-ADD scripts /root/rainbow/scripts
 ADD license.html /root/rainbow
 ADD build.sh /root/rainbow
+ADD scripts /root/rainbow/scripts
 WORKDIR /root/rainbow
 RUN ls
 RUN  ./build.sh -s -d rainbow-swim -t swim i-v${rainbow_version} install
