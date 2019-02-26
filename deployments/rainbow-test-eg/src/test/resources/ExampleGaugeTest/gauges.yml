@@ -1,0 +1,37 @@
+gauge-types:
+
+  ExampleGaugeT:
+    commands:
+      location: "MS.setCurrentLocation(double,double,double)"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.msit.test.ExampleGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+        
+
+gauge-instances:
+ 
+  ESG1:
+    type: ExampleGaugeT
+    model: MissionState:MissionState
+    commands:
+      location: "ms.setCurrentLocation($<x>,$<y>,$<w>)"
+      deadline: "ms.setDeadline($<d>)"
+      reconfiguring: "ms.setReconfiguring($<r>)"
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      reportingPeriod: 1000
+      targetProbeType: rostopicprobe
+        #- roslocationprobe
+ 

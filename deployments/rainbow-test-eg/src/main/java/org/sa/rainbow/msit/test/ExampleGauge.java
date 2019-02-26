@@ -1,0 +1,98 @@
+package org.sa.rainbow.msit.test;
+
+import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.sa.rainbow.core.error.RainbowException;
+import org.sa.rainbow.core.gauges.RegularPatternGauge;
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
+import org.sa.rainbow.core.util.TypedAttribute;
+import org.sa.rainbow.core.util.TypedAttributeWithValue;
+
+/**
+ * Created by schmerl on 2/25/2019.
+ */
+public class ExampleGauge extends RegularPatternGauge {
+    private static final String   NAME              = "Test Gauge";
+    protected static final String LOC               = "LocationRecording";
+
+    protected static final String LOC_PATTERN         = "topic: /gazebo/model_states/pose.*position.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z.*\\norientation.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z: (.*)\\n.*w: (.*)(.*)"; //"topic: /o/pose/pose.*position.*\\\\n.*x: (.*)\\\\n.*y: (.*)\\\\n.*z.*\\\\norientation.*\\\\n.*x: (.*)\\\\n.*y: (.*)\\\\n.*z: (.*)\\\\n.*w: (.*)(.*)"; //"topic: /tf/transforms\\[0\\]/transform.*\\ntranslation.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z.*\\nrotation.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z: (.*)\\n.*w: (.*)(.*)";
+    protected String              last_x;
+    protected String              last_y;
+    private String                last_w;
+    protected static final DecimalFormat DF = new DecimalFormat("#.##");
+
+    /**
+     * Main Constructor the Gauge that is hardwired to the Probe.
+     *
+     * @param id
+     *            the unique ID of the Gauge
+     * @param beaconPeriod
+     *            the liveness beacon period of the Gauge
+     * @param gaugeDesc
+     *            the type-name description of the Gauge
+     * @param modelDesc
+     *            the type-name description of the Model the Gauge updates
+     * @param setupParams
+     *            the list of setup parameters with their values
+     * @param mappings
+     *            the list of Gauge Value to Model Property mappings
+     */
+    public ExampleGauge (String id, long beaconPeriod, TypedAttribute gaugeDesc, TypedAttribute modelDesc,
+            List<TypedAttributeWithValue> setupParams, Map<String, IRainbowOperation> mappings)
+                    throws RainbowException {
+        super (NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
+        addPattern (LOC, Pattern.compile (LOC_PATTERN));
+    }
+
+    @Override
+    protected void doMatch (String matchName, Matcher m) {
+        String group = m.group (1);
+        if (LOC.equals (matchName)) {
+            String x = DF.format(Double.parseDouble(group.trim ()));
+            String y =DF.format(Double.parseDouble( m.group (2).trim ()));
+
+            String a = m.group (3).trim ();
+            String b = m.group (4).trim ();
+            String c = m.group (5).trim ();
+            String d = m.group (6).trim ();
+
+            String w = DF.format(yawFromQuarternion (a, b, c, d));
+
+            if (locationDifferent (x, y, w)) {
+                IRainbowOperation op = m_commands.get ("location");
+                Map<String, String> pMap = new HashMap<> ();
+                pMap.put (op.getParameters ()[0], x);
+                pMap.put (op.getParameters ()[1], y);
+                pMap.put (op.getParameters ()[2], w);
+                issueCommand (op, pMap);
+            }
+        }
+       
+    }
+
+    // Converstino to yaw from http://www.chrobotics.com/library/understanding-quaternions
+    private double yawFromQuarternion (String a, String b, String c, String d) {
+        double A = Double.parseDouble (a);
+        double B = Double.parseDouble (b);
+        double C = Double.parseDouble (c);
+        double D = Double.parseDouble (d);
+
+        double w = Math.atan ((2 * (A * B + C * D)) / (A * A - B * B - C * C + D * D));
+        return w;
+    }
+
+    private boolean locationDifferent (String x, String y, String w) {
+        boolean different = !x.equals (last_x) || !y.equals (last_y) || !w.equals (last_w);
+        if (different) {
+            last_x = x;
+            last_y = y;
+            last_w = w;
+        }
+        return different;
+    }
+}
