@@ -31,6 +31,7 @@ public class GuavaRainbowMessage implements IRainbowMessage {
 	}
 
 	public GuavaRainbowMessage(GuavaRainbowMessage m) {
+		m_properties = new HashMap<>();
 		m_properties.putAll(m.m_properties);
 	}
 
