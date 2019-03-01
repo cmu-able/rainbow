@@ -51,17 +51,36 @@ RUN unzip hogna.zip libs/Hogna.jar libs/Opera.jar && \
     mvn install:install-file -Dfile=libs/Hogna.jar -DgroupId=opera -DartifactId=hogna -Dversion=1.0 -Dpackaging=jar && \
     mvn install:install-file -Dfile=libs/Opera.jar -DgroupId=opera -DartifactId=opera -Dversion=1.0 -Dpackaging=jar
 
-ADD deployments /root/rainbow/deployments
 ADD libs /root/rainbow/libs
-ADD ide /root/rainbow/ide
+WORKDIR /root/rainbow/libs/auxtestlib
+RUN mvn -DskipTests install
+WORKDIR /root/rainbow/libs/incubator
+RUN mvn -DskipTests install
+WORKDIR /root/rainbow/libs/parsec
+RUN mvn -DskipTests javacc:javacc install
+WORKDIR /root/rainbow/libs/typelib
+RUN mvn -DskipTests javacc:javacc install
+WORKDIR /root/rainbow/libs/eseblib
+RUN mvn -DskipTests install
+
 ADD rainbow /root/rainbow/rainbow
-ADD targets /root/rainbow/targets
-ADD scripts /root/rainbow/scripts
-ADD license.html /root/rainbow
-ADD build.sh /root/rainbow
-WORKDIR /root/rainbow
-RUN ls
-RUN  ./build.sh -s -d rainbow-swim -t swim i-v${rainbow_version} install
+WORKDIR /root/rainbow/rainbow/rainbow-core
+RUN mvn -DskipTests install
+WORKDIR ../rainbow-acme-model
+RUN mvn -DskipTests install
+WORKDIR ../rainbow-utility-model
+RUN mvn -DskipTests install
+WORKDIR ../rainbow-stitch
+RUN mvn -DskipTests install
+WORKDIR ../rainbow-gui
+RUN mvn -DskiptTests install
+
+WORKDIR ../rainbow-mem-comms
+RUN mvn -DskipTests install
+
+ADD deployments /root/rainbow/deployments
+WORKDIR /root/rainbow/deployments/rainbow-example
+RUN mvn -DskipTests install
 CMD [/bin/bash]
 
 FROM gabrielmoreno/swim:1.0
@@ -82,11 +101,16 @@ RUN mkdir /rainbow
 WORKDIR /rainbow
 COPY --from=builder /root/pladapt ./pladapt
 ENV PLADAPT /rainbow/pladapt
-COPY --from=builder /root/rainbow/Rainbow-build .
+COPY scripts/* ./
+COPY targets/rainbow-example targets/rainbow-example
+COPY license.html .
+COPY --from=builder /root/rainbow/deployments/rainbow-example/target/lib/* lib/
+COPY --from=builder /root/rainbow/deployments/rainbow-example/target/*.jar lib/
+
 RUN echo "export SOCAT_PORT=4242" >> /headless/.bashrc
-COPY deployments/rainbow-swim/docker/rainbow.png /headless/
-COPY deployments/rainbow-swim/docker/SWIM.png /headless/
-COPY deployments/rainbow-swim/docker/Rainbow.desktop /headless/Desktop
-COPY deployments/rainbow-swim/docker/SWIM.desktop /headless/Desktop
+COPY deployments/rainbow-example/docker/rainbow.png /headless/
+COPY deployments/rainbow-example/docker/SWIM.png /headless/
+COPY deployments/rainbow-example/docker/Rainbow.desktop /headless/Desktop
+COPY deployments/rainbow-example/docker/SWIM.desktop /headless/Desktop
 RUN chmod +x /headless/Desktop/Rainbow.desktop /headless/Desktop/SWIM.desktop
 #ENTRYPOINT ["./rainbow-oracle.sh", "swim"]
