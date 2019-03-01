@@ -39,7 +39,8 @@ public class GuavaEventConnector {
 		m_channel = channel;
 		synchronized (EVENT_BUSSES) {
 			if (!EVENT_BUSSES.containsKey(channel)) {
-				EventBus b = new AsyncEventBus(Executors.newCachedThreadPool());
+//				EventBus b = new AsyncEventBus(Executors.newCachedThreadPool());
+				EventBus b = new AsyncEventBus(Executors.newSingleThreadExecutor());
 				EVENT_BUSSES.put(m_channel, b);
 			}
 		}
