@@ -17,6 +17,8 @@ import org.sa.rainbow.core.ports.eseb.RainbowESEBMessage;
 import org.sa.rainbow.core.ports.guava.GuavaEventConnector.ChannelT;
 import org.sa.rainbow.core.ports.guava.GuavaEventConnector.IGuavaMessageListener;
 
+import com.google.common.eventbus.Subscribe;
+
 public class GuavaMasterConnectionPort extends AbstractGuavaReportingPort implements IMasterConnectionPort {
 
 	private static final Logger LOGGER = Logger.getLogger(GuavaMasterConnectionPort.class);
@@ -29,6 +31,7 @@ public class GuavaMasterConnectionPort extends AbstractGuavaReportingPort implem
 		getEventBus().addListener(new IGuavaMessageListener() {
 			
 			@Override
+			@Subscribe
 			public void receive(GuavaRainbowMessage msg) {
 				String type = (String )msg.getProperty (ESEBConstants.MSG_TYPE_KEY);
                 switch (type) {
