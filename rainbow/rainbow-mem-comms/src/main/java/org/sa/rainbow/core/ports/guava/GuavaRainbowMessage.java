@@ -59,7 +59,7 @@ public class GuavaRainbowMessage implements IRainbowMessage {
 
 	public void fillProperties(Properties p) {
 		p.forEach((k, v) -> {
-			m_properties.put((String) k, v);
+			m_properties.put(PROP_PREFIX + ((String) k), v);
 		});
 	}
 
