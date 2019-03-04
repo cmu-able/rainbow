@@ -86,6 +86,7 @@ public interface RainbowConstants {
     /** Property key for the Rainbow target configuration path */
     String PROPKEY_TARGET_PATH = "rainbow.path";
 	String PROPKEY_RAINBOW_GUI = "rainbow.gui";
+	String PROPKEY_SHOW_GUI = "rainbow.showgui";
 
 
     /** The logger level of details */
@@ -199,4 +200,5 @@ public interface RainbowConstants {
     String PROPKEY_EFFECTOR_MANAGER_COMPONENT = "rainbow.effector.manager.class";
 
     String PROPKEY_PORT_TIMEOUT = "rainbow.port.timeout";
+	String PROPKEY_ADAPTATION_HOMEOSTATIC = "rainbow.adaptation.homeostatic";
 }
