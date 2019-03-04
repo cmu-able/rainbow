@@ -23,124 +23,119 @@
  */
 package org.sa.rainbow.model.acme.swim.commands;
 
-import org.acmestudio.acme.core.exception.AcmeException;
-import org.acmestudio.acme.core.exception.AcmeVisitorException;
-import org.acmestudio.acme.core.resource.IAcmeResource;
-import org.acmestudio.acme.core.resource.ParsingFailureException;
-import org.acmestudio.acme.core.type.IAcmeStringValue;
-import org.acmestudio.acme.element.AbstractAcmeElementVisitor;
-import org.acmestudio.acme.element.IAcmeSystem;
-import org.acmestudio.acme.element.property.IAcmeProperty;
-import org.acmestudio.acme.model.command.IAcmeCommand;
-import org.acmestudio.acme.model.command.IAcmePropertyCommand;
-import org.acmestudio.acme.model.util.core.UMStringValue;
-import org.acmestudio.standalone.resource.StandaloneResourceProvider;
-import org.sa.rainbow.core.error.RainbowException;
-import org.sa.rainbow.core.models.IModelInstance;
-import org.sa.rainbow.core.models.IModelsManager;
-import org.sa.rainbow.core.models.ModelReference;
-import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd;
-import org.sa.rainbow.model.acme.swim.SwimModelUpdateOperatorsImpl;
-import org.sa.rainbow.util.Util;
-
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.LinkedList;
-import java.util.List;
 
-public class SwimLoadModelCommand extends AbstractLoadModelCmd<IAcmeSystem> {
+import org.acmestudio.acme.element.IAcmeSystem;
+import org.sa.rainbow.core.models.IModelsManager;
+import org.sa.rainbow.model.acme.AbstractAcmeLoadModelCmd;
+import org.sa.rainbow.model.acme.AcmeModelInstance;
+import org.sa.rainbow.model.acme.swim.SwimModelUpdateOperatorsImpl;
 
-    public class AcmePropertySubstitutionVisitor extends AbstractAcmeElementVisitor {
+public class SwimLoadModelCommand extends AbstractAcmeLoadModelCmd {
 
-        protected List<IAcmeCommand<?>> m_commands = new LinkedList<> ();
+	public SwimLoadModelCommand(String systemName, IModelsManager mm, InputStream is, String source) {
+		super(systemName, mm, is, source);
+	}
 
-        public IAcmeCommand<?> getCommand () {
-            if (m_commands.isEmpty ()) return null;
-            if (m_commands.size () == 1) return m_commands.get (0);
-            return m_commands.get (0).getCommandFactory ().compoundCommand (m_commands);
-        }
-
-        @Override
-        public Object visitIAcmeProperty (IAcmeProperty property, Object data) throws AcmeVisitorException {
-            if (property.getValue () instanceof IAcmeStringValue) {
-                IAcmeStringValue val = (IAcmeStringValue )property.getValue ();
-                String origVal = val.getValue ();
-                String newVal = Util.evalTokens (origVal);
-                if (!newVal.equals (origVal)) {
-                    IAcmePropertyCommand cmd = property.getCommandFactory ().propertyValueSetCommand (property,
-                            new UMStringValue (newVal));
-                    m_commands.add (cmd);
-                }
-            }
-            return data;
-        }
-    }
-
-    private String                      m_systemName;
-    private SwimModelUpdateOperatorsImpl m_result;
-
-    public SwimLoadModelCommand (String systemName, IModelsManager mm, InputStream is, String source) {
-        super ("loadSwimModel", mm, systemName, is, source);
-        m_systemName = systemName;
-    }
-
-    @Override
-    public ModelReference getModelReference () {
-        return new ModelReference (m_systemName, "Acme");
-    }
-
-
-    @Override
-    protected void subExecute () throws RainbowException {
-        try {
-            IAcmeResource resource = StandaloneResourceProvider.instance ()
-                    .acmeResourceForObject (
-                            new File (getOriginalSource ()));
-            m_result = new SwimModelUpdateOperatorsImpl (resource.getModel ().getSystem (m_systemName),
-                    getOriginalSource ());
-
-            // Do property substitution
-            try {
-                AcmePropertySubstitutionVisitor visitor = new AcmePropertySubstitutionVisitor ();
-                m_result.getModelInstance ().visit (visitor, null);
-                IAcmeCommand<?> cmd = visitor.getCommand ();
-                cmd.execute ();
-            }
-            catch (IllegalStateException | AcmeException e) {
-                e.printStackTrace ();
-            }
-
-            doPostExecute ();
-        }
-        catch (ParsingFailureException | IOException e) {
-            throw new RainbowException (e);
-        }
-    }
-
-    @Override
-    protected void subRedo () throws RainbowException {
-        doPostExecute ();
-    }
-
-    @Override
-    protected void subUndo () throws RainbowException {
-        doPostUndo ();
-    }
-
-    @Override
-    public IModelInstance<IAcmeSystem> getResult () {
-        return m_result;
-    }
-
-    @Override
-    public String getName () {
-        return "LoadSwimModel";
-    }
-
-    @Override
-    protected boolean checkModelValidForCommand (Object model) {
-        return true;
-    }
+	@Override
+	protected AcmeModelInstance createAcmeModelInstance(IAcmeSystem system) {
+		return new SwimModelUpdateOperatorsImpl(system, getOriginalSource());
+	}
 
 }
+
+//public class SwimLoadModelCommand extends AbstractLoadModelCmd<IAcmeSystem> {
+//
+//    public class AcmePropertySubstitutionVisitor extends AbstractAcmeElementVisitor {
+//
+//        protected List<IAcmeCommand<?>> m_commands = new LinkedList<> ();
+//
+//        public IAcmeCommand<?> getCommand () {
+//            if (m_commands.isEmpty ()) return null;
+//            if (m_commands.size () == 1) return m_commands.get (0);
+//            return m_commands.get (0).getCommandFactory ().compoundCommand (m_commands);
+//        }
+//
+//        @Override
+//        public Object visitIAcmeProperty (IAcmeProperty property, Object data) throws AcmeVisitorException {
+//            if (property.getValue () instanceof IAcmeStringValue) {
+//                IAcmeStringValue val = (IAcmeStringValue )property.getValue ();
+//                String origVal = val.getValue ();
+//                String newVal = Util.evalTokens (origVal);
+//                if (!newVal.equals (origVal)) {
+//                    IAcmePropertyCommand cmd = property.getCommandFactory ().propertyValueSetCommand (property,
+//                            new UMStringValue (newVal));
+//                    m_commands.add (cmd);
+//                }
+//            }
+//            return data;
+//        }
+//    }
+//
+//    private String                      m_systemName;
+//    private SwimModelUpdateOperatorsImpl m_result;
+//
+//    public SwimLoadModelCommand (String systemName, IModelsManager mm, InputStream is, String source) {
+//        super ("loadSwimModel", mm, systemName, is, source);
+//        m_systemName = systemName;
+//    }
+//
+//    @Override
+//    public ModelReference getModelReference () {
+//        return new ModelReference (m_systemName, "Acme");
+//    }
+//
+//
+//    @Override
+//    protected void subExecute () throws RainbowException {
+//        try {
+//            IAcmeResource resource = StandaloneResourceProvider.instance ()
+//                    .acmeResourceForObject (
+//                            new File (getOriginalSource ()));
+//            m_result = new SwimModelUpdateOperatorsImpl (resource.getModel ().getSystem (m_systemName),
+//                    getOriginalSource ());
+//
+//            // Do property substitution
+//            try {
+//                AcmePropertySubstitutionVisitor visitor = new AcmePropertySubstitutionVisitor ();
+//                m_result.getModelInstance ().visit (visitor, null);
+//                IAcmeCommand<?> cmd = visitor.getCommand ();
+//                cmd.execute ();
+//            }
+//            catch (IllegalStateException | AcmeException e) {
+//                e.printStackTrace ();
+//            }
+//
+//            doPostExecute ();
+//        }
+//        catch (ParsingFailureException | IOException e) {
+//            throw new RainbowException (e);
+//        }
+//    }
+//
+//    @Override
+//    protected void subRedo () throws RainbowException {
+//        doPostExecute ();
+//    }
+//
+//    @Override
+//    protected void subUndo () throws RainbowException {
+//        doPostUndo ();
+//    }
+//
+//    @Override
+//    public IModelInstance<IAcmeSystem> getResult () {
+//        return m_result;
+//    }
+//
+//    @Override
+//    public String getName () {
+//        return "LoadSwimModel";
+//    }
+//
+//    @Override
+//    protected boolean checkModelValidForCommand (Object model) {
+//        return true;
+//    }
+//
+//}
