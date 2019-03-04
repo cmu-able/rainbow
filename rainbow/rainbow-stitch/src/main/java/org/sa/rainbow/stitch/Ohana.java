@@ -209,7 +209,7 @@ public class Ohana {
             public void syntaxError (@NotNull Recognizer<?, ?> recognizer, @Nullable Object offendingSymbol, int
                     line, int charPositionInLine, @NotNull String msg, @Nullable RecognitionException e) {
                 StitchProblem problem = new StitchProblem (new org.sa.rainbow.stitch.error.RecognitionException (msg,
-                                                                                                                  null, line, charPositionInLine),
+                                                                                                                  stitch.path, line, charPositionInLine),
                                                            StitchProblem.ERROR);
                 stitch.stitchProblemHandler.setProblem (problem);
             }
