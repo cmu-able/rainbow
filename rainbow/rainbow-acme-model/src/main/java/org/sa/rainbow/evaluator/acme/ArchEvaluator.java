@@ -27,6 +27,7 @@ import org.acmestudio.acme.environment.IAcmeEnvironment;
 import org.acmestudio.acme.environment.error.AcmeError;
 import org.acmestudio.acme.type.IAcmeTypeChecker;
 import org.acmestudio.acme.type.verification.SimpleModelTypeChecker;
+import org.acmestudio.acme.type.verification.SynchronousTypeChecker;
 import org.acmestudio.standalone.environment.StandaloneEnvironment;
 import org.acmestudio.standalone.environment.StandaloneEnvironment.TypeCheckerType;
 import org.sa.rainbow.core.*;
@@ -191,8 +192,11 @@ public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAn
             // For each Acme model that changed, check to see if it typechecks
             IAcmeEnvironment env = model.getModelInstance ().getContext ().getEnvironment ();
             IAcmeTypeChecker typeChecker = env.getTypeChecker ();
-            if (typeChecker instanceof SimpleModelTypeChecker) {
-                SimpleModelTypeChecker synchChecker = (SimpleModelTypeChecker) typeChecker;
+            if (typeChecker instanceof SynchronousTypeChecker) {
+            	SynchronousTypeChecker synchChecker = (SynchronousTypeChecker) typeChecker;
+            	// This is probably thread unsafe -- changes may be being made while 
+            	// the model is being typechecked
+            	synchChecker.typecheckAllModelsNow();
                 boolean constraintViolated = !synchChecker.typechecks (model.getModelInstance ());
                 ModelReference ref = new ModelReference (model.getModelName (), model.getModelType ());
                 Boolean last = m_lastResult.get (ref);
