@@ -4,7 +4,7 @@ import lib "swimTactics.t.s";
 
 
 define boolean HighRT = Model.LB0.basicResponseTime <= Model.RT_THRESHOLD;
-define boolean Underloaded = Model.Average(/self/components:!ServerT[isArchEnabled==true]/load) < 0.3
+define boolean Underloaded = Model.Average(/self/components:!ServerT[isArchEnabled==true]/load) < 0.3;
 strategy LowerResponseTime1 [HighRT] {
 	t1: (HightRT) -> TAddServer() @[15000] {
 		t1a: (HighRT) -> TIncDimmer() {
