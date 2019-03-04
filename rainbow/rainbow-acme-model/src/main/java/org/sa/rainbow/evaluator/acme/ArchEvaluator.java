@@ -27,6 +27,8 @@ import org.acmestudio.acme.environment.IAcmeEnvironment;
 import org.acmestudio.acme.environment.error.AcmeError;
 import org.acmestudio.acme.type.IAcmeTypeChecker;
 import org.acmestudio.acme.type.verification.SimpleModelTypeChecker;
+import org.acmestudio.standalone.environment.StandaloneEnvironment;
+import org.acmestudio.standalone.environment.StandaloneEnvironment.TypeCheckerType;
 import org.sa.rainbow.core.*;
 import org.sa.rainbow.core.analysis.IRainbowAnalysis;
 import org.sa.rainbow.core.error.RainbowConnectionException;
@@ -120,7 +122,7 @@ public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAn
         } else { // default to using the long sleep value
             setSleepTime (IRainbowRunnable.LONG_SLEEP_TIME);
         }
-
+        StandaloneEnvironment.instance().useTypeChecker(TypeCheckerType.SYNCHRONOUS);
         installEvaluations ();
     }
 
