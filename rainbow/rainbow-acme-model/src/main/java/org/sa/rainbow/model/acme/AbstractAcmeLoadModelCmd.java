@@ -8,6 +8,7 @@ import org.acmestudio.acme.core.type.IAcmeStringValue;
 import org.acmestudio.acme.element.AbstractAcmeElementVisitor;
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.acmestudio.acme.element.property.IAcmeProperty;
+import org.acmestudio.acme.environment.error.AcmeError;
 import org.acmestudio.acme.model.command.IAcmeCommand;
 import org.acmestudio.acme.model.command.IAcmePropertyCommand;
 import org.acmestudio.acme.model.util.core.UMStringValue;
@@ -24,6 +25,7 @@ import org.sa.rainbow.util.Util;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -90,7 +92,15 @@ public abstract class AbstractAcmeLoadModelCmd extends AbstractLoadModelCmd<IAcm
                 e.printStackTrace ();
             }
             doPostExecute ();
-        } catch (ParsingFailureException | IOException e) {
+        } catch (ParsingFailureException e) {
+        	StringBuilder builder = new StringBuilder();
+        	builder.append(e.getMessage()).append("\n");
+        	Collection<? extends AcmeError> errors = e.getErrors();
+        	for (AcmeError err : errors) {
+        		builder.append(err.toString()).append("\n");
+        	}
+        	throw new RainbowException (builder.toString());
+        } catch (IOException e) {
             throw new RainbowException (e);
         }
     }
