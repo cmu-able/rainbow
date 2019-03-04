@@ -2,31 +2,33 @@ module swim.strategies;
 import op "org.sa.rainbow.stitch.lib.*"; 
 import lib "swimTactics.t.s";
 
-strategy IncDimmer
-[ true ] {
-  t1: (true) -> TIncDimmer() { 
-      t1a: (default) -> done;
-  }
+
+define boolean HighRT = Model.LB0.basicResponseTime <= Model.RT_THRESHOLD;
+define boolean Underloaded = Model.Average(/self/components:!ServerT[isArchEnabled==true]/load) < 0.3
+strategy LowerResponseTime1 [HighRT] {
+	t1: (HightRT) -> TAddServer() @[15000] {
+		t1a: (HighRT) -> TIncDimmer() {
+		  t1a1: (default) -> done;
+		}
+		t1b: (default) -> done;
+	}
 }
 
-strategy DecDimmer
-[ true ] {
-  t1: (true) -> TDecDimmer() { 
-      t1a: (default) -> done;
-  }
+strategy LowerResponseTime2 [HighRT] {
+	t1: (HighRT) -> TAddServer() @[15000] {
+	    t1b: (HighRT) -> TAddServer() @[15000] {
+	    	t1b1: (default) -> done;
+	    }
+		t1a: (default) -> done;
+	}
 }
 
-strategy AddServer
-[ true ] {
-  t1: (true) -> TAddServer() @[25000 /*ms*/] { 
-      t1a: (default) -> done;
-  }
+strategy DecreaseCost [Underloaded] {
+	t1: (Underloaded) -> TDecDimmer() {
+		t1a: (Underloaded) -> TRemoveServer() {
+		  t1a1: (default) -> done;
+		}
+	}
 }
 
-strategy RemoveServer
-[ true ] {
-  t1: (true) -> TRemoveServer() { 
-      t1a: (default) -> done;
-  }
-}
 

@@ -7,30 +7,36 @@ import op "org.sa.rainbow.model.acme.swim.Swim";
 define int numberOfServers = Set.size(select s : T.ServerT in M.components | true);
 
 tactic TIncDimmer() {
+    int dimmerLevel = SwimUtils.dimmerFactorToLevel(M.LB0.dimmer, M.DIMMER_LEVELS,M.DIMMER_MARGIN);
     condition {
-	SwimUtils.dimmerFactorToLevel(M.LB0.dimmer, M.DIMMER_LEVELS, M.DIMMER_MARGIN) < M.DIMMER_LEVELS;
+    	
+		dimmerLevel < M.DIMMER_LEVELS;
     }
     action {
         M.setDimmer(M.LB0, SwimUtils.dimmerLevelToFactor(SwimUtils.dimmerFactorToLevel(M.LB0.dimmer, M.DIMMER_LEVELS, M.DIMMER_MARGIN) + 1, M.DIMMER_LEVELS, M.DIMMER_MARGIN));
     }
     effect {
+    	dimmerLevel' > dimmerLevel;
     }
 }
 
 tactic TDecDimmer() {
+	int dimmerLevel = SwimUtils.dimmerFactorToLevel(M.LB0.dimmer, M.DIMMER_LEVELS, M.DIMMER_MARGIN);
     condition {
-	SwimUtils.dimmerFactorToLevel(M.LB0.dimmer, M.DIMMER_LEVELS, M.DIMMER_MARGIN) > 1;
+		dimmerLevel > 1;
     }
     action {
         M.setDimmer(M.LB0, SwimUtils.dimmerLevelToFactor(SwimUtils.dimmerFactorToLevel(M.LB0.dimmer, M.DIMMER_LEVELS, M.DIMMER_MARGIN) - 1, M.DIMMER_LEVELS, M.DIMMER_MARGIN));
     }
     effect {
+    	dimmerLevel' < dimmerLevel;
     }
 }
 
 tactic TAddServer() {
+	int availableServers = Swim.availableServices(M, T.ServerT);
     condition {
-	Swim.availableServices(M, T.ServerT) > 0;
+		Swim.availableServices(M, T.ServerT) > 0;
     }
     action {
 	// add first server not enabled
@@ -41,13 +47,15 @@ tactic TAddServer() {
 	M.addServer(M.LB0, newServer);	
     }
     effect {
-	false; // force it to wait for the timeout value in the strategy
+		availableServers' == availableServers+1;
     }
 }
 
 tactic TRemoveServer() {
+	int availableServers = Swim.availableServices(M, T.ServerT);
+	
     condition {
-	numberOfServers > 1;
+	availableServers > 1;
     }
     action {
 	// remove the server with the highest index
@@ -58,6 +66,7 @@ tactic TRemoveServer() {
 	M.removeServer(M.LB0, lastServer);	
     }
     effect {
+    availableServers' == availableServers-1;
     }
 }
 
