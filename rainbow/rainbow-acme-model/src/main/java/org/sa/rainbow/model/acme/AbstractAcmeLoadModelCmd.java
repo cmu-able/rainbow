@@ -11,6 +11,8 @@ import org.acmestudio.acme.element.property.IAcmeProperty;
 import org.acmestudio.acme.model.command.IAcmeCommand;
 import org.acmestudio.acme.model.command.IAcmePropertyCommand;
 import org.acmestudio.acme.model.util.core.UMStringValue;
+import org.acmestudio.standalone.environment.StandaloneEnvironment;
+import org.acmestudio.standalone.environment.StandaloneEnvironment.TypeCheckerType;
 import org.acmestudio.standalone.resource.StandaloneResourceProvider;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.IModelInstance;

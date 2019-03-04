@@ -196,8 +196,10 @@ public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAn
             	SynchronousTypeChecker synchChecker = (SynchronousTypeChecker) typeChecker;
             	// This is probably thread unsafe -- changes may be being made while 
             	// the model is being typechecked
+            	synchChecker.registerModel(model.getModelInstance().getContext().getModel());
             	synchChecker.typecheckAllModelsNow();
                 boolean constraintViolated = !synchChecker.typechecks (model.getModelInstance ());
+                synchChecker.deregisterModel(model.getModelInstance().getContext().getModel());
                 ModelReference ref = new ModelReference (model.getModelName (), model.getModelType ());
                 Boolean last = m_lastResult.get (ref);
                 if (last == null || last != constraintViolated) {
