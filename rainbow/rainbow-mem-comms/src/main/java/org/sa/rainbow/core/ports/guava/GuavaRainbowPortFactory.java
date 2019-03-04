@@ -246,7 +246,7 @@ public class GuavaRainbowPortFactory implements IRainbowConnectionPortFactory {
 	}
 
 	
-	Map<String,LocalThreadedEffectorExecutionPort> m_effectorExecutionPorts;
+	Map<String,LocalThreadedEffectorExecutionPort> m_effectorExecutionPorts = new HashMap<>();
 	
 	@Override
 	public IEffectorExecutionPort createEffectorExecutionPort(IEffector effector) throws RainbowConnectionException {
