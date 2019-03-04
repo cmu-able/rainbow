@@ -93,12 +93,13 @@ public abstract class AbstractAcmeLoadModelCmd extends AbstractLoadModelCmd<IAcm
             }
             doPostExecute ();
         } catch (ParsingFailureException e) {
-        	StringBuilder builder = new StringBuilder();
+        	StringBuilder builder = new StringBuilder(); 
         	builder.append(e.getMessage()).append("\n");
         	Collection<? extends AcmeError> errors = e.getErrors();
         	for (AcmeError err : errors) {
         		builder.append(err.toString()).append("\n");
         	}
+        	
         	throw new RainbowException (builder.toString());
         } catch (IOException e) {
             throw new RainbowException (e);
