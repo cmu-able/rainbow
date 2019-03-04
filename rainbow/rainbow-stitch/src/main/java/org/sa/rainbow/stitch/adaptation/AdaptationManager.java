@@ -430,7 +430,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 	 * For JUnit testing, used to set a stopwatch object used to time duration.
 	 */
 	StopWatch _stopWatchForTesting = null;
-	private Boolean m_modelError;
+	private boolean m_modelError = false;
 
 	/**
 	 * For JUnit testing, allows fetching the strategy repertoire. NOT for public
