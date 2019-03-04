@@ -39,8 +39,8 @@ public class GuavaEventConnector {
 		m_channel = channel;
 		synchronized (EVENT_BUSSES) {
 			if (!EVENT_BUSSES.containsKey(channel)) {
-//				EventBus b = new AsyncEventBus(Executors.newCachedThreadPool());
-				EventBus b = new AsyncEventBus(Executors.newSingleThreadExecutor());
+				EventBus b = new AsyncEventBus(Executors.newCachedThreadPool());
+//				EventBus b = new AsyncEventBus(Executors.newSingleThreadExecutor());
 				EVENT_BUSSES.put(m_channel, b);
 			}
 		}
@@ -61,7 +61,7 @@ public class GuavaEventConnector {
 		EVENT_BUSSES.get(m_channel).register(new IGuavaMessageListener() {
 
 			@Override
-			public void receive(GuavaRainbowMessage msg) {
+			@Subscribe public void receive(GuavaRainbowMessage msg) {
 				 String repKey = (String) msg.getProperty (ESEBConstants.MSG_REPLY_KEY);
                  Object msgType = msg.getProperty (ESEBConstants.MSG_TYPE_KEY);
 
@@ -109,7 +109,7 @@ public class GuavaEventConnector {
 		}
 		
 		@Override
-		public void receive(GuavaRainbowMessage m) {
+		@Subscribe public void receive(GuavaRainbowMessage m) {
 			m_l.receive(m);
 			ret = true;
 			synchronized (this) {
@@ -137,6 +137,7 @@ public class GuavaEventConnector {
 		EVENT_BUSSES.get(m_channel).register(new IGuavaMessageListener() {
 			
 			@Override
+			@Subscribe
 			public void receive(GuavaRainbowMessage m) {
 				if (!ESEBConstants.MSG_TYPE_REPLY.equals(m.getProperty(ESEBConstants.MSG_TYPE_KEY))) {
 					GuavaRainbowMessage msg = new GuavaRainbowMessage(m);

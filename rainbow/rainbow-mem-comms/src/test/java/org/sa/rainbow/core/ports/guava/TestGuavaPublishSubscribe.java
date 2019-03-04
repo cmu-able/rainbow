@@ -9,8 +9,6 @@ import org.junit.Test;
 import org.sa.rainbow.core.ports.guava.GuavaEventConnector.ChannelT;
 import org.sa.rainbow.core.ports.guava.GuavaEventConnector.IGuavaMessageListener;
 
-import com.google.common.eventbus.Subscribe;
-
 public class TestGuavaPublishSubscribe {
 
 	protected GuavaRainbowMessage result;
@@ -22,7 +20,6 @@ public class TestGuavaPublishSubscribe {
 		conn.addListener(new IGuavaMessageListener() {
 
 			@Override
-			@Subscribe
 			public void receive(GuavaRainbowMessage m) {
 				synchronized (TestGuavaPublishSubscribe.this) {
 					result = m;
@@ -54,7 +51,6 @@ public class TestGuavaPublishSubscribe {
 		conn.addListener(new IGuavaMessageListener() {
 
 			@Override
-			@Subscribe
 			public void receive(GuavaRainbowMessage m) {
 				synchronized (TestGuavaPublishSubscribe.this) {
 					results.add(m);
@@ -88,7 +84,6 @@ public class TestGuavaPublishSubscribe {
 		conn.addListener(new IGuavaMessageListener() {
 
 			@Override
-			@Subscribe
 			public void receive(GuavaRainbowMessage m) {
 				synchronized (TestGuavaPublishSubscribe.this) {
 					results.add(m);
@@ -122,7 +117,6 @@ public class TestGuavaPublishSubscribe {
 		conn.addListener(new IGuavaMessageListener() {
 
 			@Override
-			@Subscribe
 			public void receive(GuavaRainbowMessage m) {
 				synchronized (TestGuavaPublishSubscribe.this) {
 					results.add(m);
@@ -133,7 +127,6 @@ public class TestGuavaPublishSubscribe {
 		conn.addListener(new IGuavaMessageListener() {
 
 			@Override
-			@Subscribe
 			public void receive(GuavaRainbowMessage m) {
 				synchronized (TestGuavaPublishSubscribe.this) {
 					results.add(m);

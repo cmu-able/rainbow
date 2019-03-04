@@ -80,7 +80,7 @@ public class GuavaMasterConnectionPort extends AbstractGuavaReportingPort implem
                         RainbowComponentT compT = RainbowComponentT.valueOf ((String )msg
                                 .getProperty (ESEBConstants.COMPONENT_TYPE_KEY));
                         ReportType reportType = ReportType.valueOf ((String )msg.getProperty (ESEBConstants.REPORT_TYPE_KEY));
-                        report (delegateId, reportType, compT, message);
+                        m_master.report (delegateId, reportType, compT, message);
                     }
                     catch (Exception e) {
                         LOGGER.error ("Failed to process message: " + msg.toString ());

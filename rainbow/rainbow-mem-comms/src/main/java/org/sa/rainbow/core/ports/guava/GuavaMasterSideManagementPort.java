@@ -17,6 +17,8 @@ import org.sa.rainbow.core.ports.eseb.ESEBConstants;
 import org.sa.rainbow.core.ports.guava.GuavaEventConnector.ChannelT;
 import org.sa.rainbow.core.ports.guava.GuavaEventConnector.IGuavaMessageListener;
 
+import com.google.common.eventbus.Subscribe;
+
 public class GuavaMasterSideManagementPort extends AbstractGuavaReportingPort
 		implements IDelegateManagementPort, GuavaManagementPortConstants {
 
@@ -74,21 +76,19 @@ public class GuavaMasterSideManagementPort extends AbstractGuavaReportingPort
 		boolean m_reply = false;
 
 		@Override
-		public void receive(GuavaRainbowMessage msg) {
+		@Subscribe public void receive(GuavaRainbowMessage msg) {
 			m_reply = (Boolean) msg.getProperty(ESEBConstants.MSG_REPLY_VALUE);
 		}
 	}
 
 	@Override
 	public void heartbeat() {
-		// TODO Auto-generated method stub
-
+		m_rainbowMaster.processHeartbeat(m_delegateID);
 	}
 
 	@Override
 	public void requestConfigurationInformation() {
-		// TODO Auto-generated method stub
-
+		m_rainbowMaster.requestDelegateConfiguration(m_delegateID);
 	}
 
 	@Override
