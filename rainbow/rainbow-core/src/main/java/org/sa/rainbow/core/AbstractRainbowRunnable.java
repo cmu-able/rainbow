@@ -252,7 +252,7 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
             	nextRelease += m_sleepTime;
             }
             if (m_threadState == State.STARTED) {  // only process if started
-                if (shouldTerminate()) {
+                if (shouldTerminate() || Rainbow.instance().shouldTerminate()) {
                     // time to stop RainbowRunnable as well
                     doTerminate();
                 } else if (!isTaskBehind && !interrupted) {
