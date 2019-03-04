@@ -7,7 +7,7 @@ WD="."
 PROP=""
 AUTOSTART=""
 
-while getopts :dhra:w:p: opt; do
+while getopts :dhar:w:p: opt; do
   case $opt in
     d)
 	  DEBUG="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=1044"
