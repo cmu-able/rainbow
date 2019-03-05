@@ -76,6 +76,7 @@ import org.sa.rainbow.stitch.core.Tactic;
 import org.sa.rainbow.stitch.error.DummyStitchProblemHandler;
 import org.sa.rainbow.stitch.error.IStitchProblem;
 import org.sa.rainbow.stitch.visitor.Stitch;
+import org.sa.rainbow.stitch.visitor.StitchTypechecker;
 import org.sa.rainbow.util.Beacon;
 import org.sa.rainbow.util.Util;
 
@@ -726,10 +727,10 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 						DummyStitchProblemHandler stitchProblemHandler = new DummyStitchProblemHandler();
 						stitch = Stitch.newInstance(f.getCanonicalPath(), stitchProblemHandler);
 						Ohana.instance().parseFile(stitch);
-//                        StitchTypechecker behavior = (StitchTypechecker )stitchState.getBehavior (Stitch
-// .TYPECHECKER_PASS);
-
-						reportProblems(f, stitchProblemHandler);
+//						StitchTypechecker behavior = (StitchTypechecker) stitch
+//								.getBehavior(Stitch .TYPECHECKER_PASS);
+//						stitch.script.
+//						reportProblems(f, stitchProblemHandler);
 
 						// apply attribute vectors to tactics, if available
 						defineAttributes(stitch, m_utilityModel.attributeVectors);
