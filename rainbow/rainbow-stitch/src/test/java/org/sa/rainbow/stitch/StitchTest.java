@@ -79,6 +79,12 @@ public class StitchTest  {
 			return null;
 		}
 		
+		@Override
+		public void clearProblems() {
+			// TODO Auto-generated method stub
+			
+		}
+		
 	}
 	
 	protected static String s_executed;
