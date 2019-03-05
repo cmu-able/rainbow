@@ -234,11 +234,11 @@ public class Ohana {
         StitchBeginEndVisitor walker = new StitchBeginEndVisitor (sb, m_rootScope);
         walker.visit (script);
 
-//        if (m_typecheckStrategies) {
-//            IStitchBehavior tcb = stitch.getBehavior (Stitch.TYPECHECKER_PASS);
-//            StitchBeginEndVisitor tcWalker = new StitchBeginEndVisitor (tcb, m_rootScope);
-//            tcWalker.visit (script);
-//        }
+        if (m_typecheckStrategies) {
+            IStitchBehavior tcb = stitch.getBehavior (Stitch.TYPECHECKER_PASS);
+            StitchBeginEndVisitor tcWalker = new StitchBeginEndVisitor (tcb, m_rootScope);
+            tcWalker.visit (script);
+        }
 
         ArrayList<ArrayList<ParseTree>> al = new ArrayList<> ();
         ArrayList<ParseTree> alRoot = new ArrayList<> ();
