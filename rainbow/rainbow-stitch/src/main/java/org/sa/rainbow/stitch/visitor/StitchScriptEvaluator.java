@@ -512,7 +512,7 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 		Object lObj = null;
 		Object rObj = null;
 		// deal with null operands
-		if (expr.lrOps[LOP].peek() == null || expr.lrOps[ROP].peek() == null) {
+		if (expr.lrOps[LOP].isEmpty() || expr.lrOps[ROP].isEmpty() || expr.lrOps[LOP].peek() == null || expr.lrOps[ROP].peek() == null) {
 			// if either is NULL, result is NULL
 			final String msg = "One relational operand is NULL: " + expr.lrOps[LOP].pop() + ", " + expr.lrOps[ROP].pop()
 					+ " ... " + opAST.toStringTree();

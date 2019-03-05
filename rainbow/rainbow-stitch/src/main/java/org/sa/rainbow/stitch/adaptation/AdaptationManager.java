@@ -496,8 +496,15 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 				Map<String, Object> moreVars = new HashMap<String, Object>();
 				moreVars.put("_dur_", dur);
 				// check condition of Strategy applicability
+				strategy.stitchState().stitchProblemHandler.clearProblems();
 				if (strategy.isApplicable(moreVars)) {
 					appSubsetByName.put(strategy.getName(), strategy);
+				}
+				Collection<IStitchProblem> problems = strategy.stitchState().stitchProblemHandler.unreportedProblems();
+				if (!problems.isEmpty()) {
+					for (IStitchProblem p : problems) {
+						log(p.getMessage());
+					}
 				}
 			}
 		}
