@@ -91,9 +91,9 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 				Expression e = scope().expressions().get(0);
 				// make sure expr assocaited with var has AST and no known
 				// result
-				if (e.tree() != null && (e.getResult() == null || v.isFunction())) {
-					e.evaluate(null, m_walker);
-				}
+//				if (e.tree() != null && (e.getResult() == null || v.isFunction())) {
+//					e.evaluate(null, m_walker);
+//				}
 				v.setValue(e.getResult());
 			}
 		}
@@ -1509,6 +1509,8 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 
 	@Override
 	public void setupPathFilter(TerminalNode identifier) {
+//		Expression expr = (Expression )scope();
+//		expr.skipQuanPredicate = true;
 		if (identifier != null) {
 			Var v = new Var();
 			v.name = "__path_filter_type";
@@ -1531,7 +1533,8 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 			return;
 		}
 
-		Object result = cExpr.expressions().get(0).getResult();
+		List<Expression> expressions = cExpr.expressions();
+		Object result = expressions.get(0).getResult();
 		Set set = Collections.EMPTY_SET;
 
 		if (result instanceof Set) {
@@ -1574,8 +1577,9 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 		cExpr.setResult(pathVariable.get().getValue());
 
 		if (expression != null) {
+			
 			exprIndex.set(1);
-			Expression expr = cExpr.expressions().get(exprIndex.get());
+			Expression expr = expressions.get(exprIndex.get());
 			Iterator setIterator = ((Set) pathVariable.get().getValue()).iterator();
 			Var __path_element = new Var();
 			__path_element.name = "__path_variable";
@@ -1597,6 +1601,8 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 					setIterator.remove();
 				}
 			}
+			expr.skipQuanPredicate = true;
+
 			scope().vars().remove(__path_element.name);
 		}
 	}
@@ -1683,8 +1689,8 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 		if (checkSkipEval())
 			return;
 		pathVariable.set(null);
+		scope().vars().remove("__path_filter_type");
 		Expression cExpr = doEndComplexExpr();
 		expr().setResult(cExpr.getResult());
-		scope().vars().remove("__path_filter_type");
 	}
 }

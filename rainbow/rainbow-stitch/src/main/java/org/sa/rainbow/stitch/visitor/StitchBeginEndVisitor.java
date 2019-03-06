@@ -141,11 +141,12 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
         if (ctx.expression () != null) {
             hasExpr = true;
             beh.setupPathFilter (ctx.IDENTIFIER ());
-            visitExpression (ctx.expression ());
+//            beh
         }
         if (filter != IStitchBehavior.TypeFilterT.NONE || hasExpr) {
             beh.pathExpressionFilter (filter, ctx.IDENTIFIER (), ctx.expression ());
         }
+        if (hasExpr) visitExpression (ctx.expression ());
         if (ctx.pathExpressionContinuation () != null) {
             visitPathExpressionContinuation (ctx.pathExpressionContinuation ());
         }
@@ -707,15 +708,15 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
 
     @Override
     public Boolean visitIdExpression (@NotNull StitchParser.IdExpressionContext ctx) {
-//        IScope preScope = beh.stitch().scope ();
+        IScope preScope = beh.stitch().scope ();
         if (ctx.methodCall () != null) {
             visitMethodCall (ctx.methodCall ());
         } else {
             beh.doIdentifierExpression (ctx, getIdExpressionKind (ctx));
         }
-//        if (preScope != beh.stitch().scope ()) {
-//            System.out.println ("visitIdExpression: Scopes don't match: " + this.toString ());
-//        }
+        if (preScope != beh.stitch().scope ()) {
+            System.out.println ("visitIdExpression: Scopes don't match: " + this.toString ());
+        }
         return true;
     }
 
