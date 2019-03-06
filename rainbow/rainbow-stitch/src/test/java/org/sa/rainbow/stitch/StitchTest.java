@@ -1,5 +1,6 @@
 package org.sa.rainbow.stitch;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,6 +10,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.acmestudio.acme.core.exception.AcmeException;
+import org.acmestudio.acme.element.IAcmeComponent;
+import org.acmestudio.acme.element.IAcmeSystem;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
@@ -21,8 +25,6 @@ import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.xpath.XPath;
-import org.opentest4j.AssertionFailedError;
-import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.stitch.core.ScopedEntity;
 import org.sa.rainbow.stitch.error.DummyStitchProblemHandler;
 import org.sa.rainbow.stitch.error.IStitchProblem;
@@ -34,6 +36,8 @@ import org.sa.rainbow.stitch.parser.StitchParser.ScriptContext;
 import org.sa.rainbow.stitch.visitor.IStitchBehavior;
 import org.sa.rainbow.stitch.visitor.Stitch;
 import org.sa.rainbow.stitch.visitor.StitchBeginEndVisitor;
+
+import junit.framework.AssertionFailedError;
 
 
 public class StitchTest  {
@@ -114,7 +118,10 @@ public class StitchTest  {
 		lexer.addErrorListener(errReporter);
 		parser.addErrorListener(errReporter);
 		ScriptContext script = parser.script();
-		assertTrue(problems.problems.isEmpty(), "Could not parse the script");
+		for (StitchProblem err : problems.problems) {
+			System.out.println(err.getMessage());
+		}
+		assertTrue("Could not parse the script", problems.problems.isEmpty());
 		String tacticPath = "/script/tactic";
 		final Collection<ParseTree> definedTactics = XPath.findAll(script, tacticPath, parser);
 		IStitchBehavior sb = stitch.getBehavior(Stitch.SCOPER_PASS);
@@ -128,6 +135,20 @@ public class StitchTest  {
 	
 	public static void markExecuted(String s) {
 		s_executed = s;
+	}
+	
+	protected static IAcmeSystem s_system;
+	
+	public static void removeComponent(IAcmeSystem system, String componentName) {
+		s_system = system;
+		IAcmeComponent component = system.getComponent(componentName);
+		assertTrue(component != null);
+		try {
+			system.getCommandFactory().componentDeleteCommand(component).execute();
+		} catch (IllegalStateException | AcmeException e) {
+			e.printStackTrace();
+		}
+		assertTrue(system.getComponent(componentName) == null);
 	}
 	
 }
