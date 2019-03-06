@@ -11,7 +11,7 @@ import java.util.*;
 
 tokens {
     TYPE, EXISTS_UNIQUE,UNARY_MINUS,UNARY_PLUS,POST_INCR,POST_DECR, DO_UNSPEC, EMPTY_STMT, STMT_LIST,
-    EXRR_LIST, STRATEGY_BRANCH, METHOD_CALL, IMPORT_LIB, IMPORT_MODEL, IMPORT_OP
+    EXRR_LIST, STRATEGY_BRANCH, METHOD_CALL, IMPORT_LIB, IMPORT_MODEL, IMPORT_OP, IMPORT_ACME
 }
 
 
@@ -57,6 +57,7 @@ importSt
     ( tl = LIB {((CommonToken )$i).setType(IMPORT_LIB);}
     | tm = MODEL {((CommonToken )$i).setType(IMPORT_MODEL);}
     | to = OP {((CommonToken )$i).setType(IMPORT_OP); }
+    | ta = ACME {((CommonToken )$i).setType(IMPORT_ACME);}
     )
     s = STRING_LIT /*{beh.createImport($i, $s);}*/
     (LBRACE importRename (COMMA importRename)* RBRACE)? SEMICOLON
@@ -436,6 +437,7 @@ IMPORT: 'import';
 LIB: 'lib';
 MODEL: 'model';
 OP: 'op';
+ACME: 'acme';
 AS: 'as';
 TACTIC: 'tactic';
 CONDITION: 'condition';
