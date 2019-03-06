@@ -38,7 +38,7 @@ public class Import {
      * Defines the types of import statements.
      */
     public enum Kind {
-        UNKNOWN, LIB, MODEL, OP
+        UNKNOWN, LIB, MODEL, OP, /* ACME is mostly for testing */ACME
     }
 
     public IScope scope = null;
@@ -54,7 +54,8 @@ public class Import {
             t = Kind.MODEL;
         } else if (str.equals ("op")) {
             t = Kind.OP;
-        }
+        } else if (str.equals("acme"))
+        	t = Kind.ACME;
         return t;
     }
 

@@ -682,6 +682,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 			if (!ok) {
 				break;
 			}
+			
 		}
 		if (Tool.logger().isInfoEnabled()) {
 			Tool.logger().info("Strategy execution trail: " + m_nodeStack.toString());

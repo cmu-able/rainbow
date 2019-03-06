@@ -120,7 +120,7 @@ public class StitchScript extends ScopedEntity implements IScope {
                 } else {// substitute
                     name = rootName + (dotIdx > -1 ? name.substring (dotIdx) : "");
                     if (model.getModelName ().equals (name)) {
-                        obj = model;
+                        obj = model.getModelInstance();
                     } else {
                         obj = model.getModelInstance ().lookupName (name, true);
                     }

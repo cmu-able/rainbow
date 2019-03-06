@@ -560,7 +560,8 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
 
     public boolean awaitSettling () {
         m_settlingCondition = null;
-        ConditionTimer.instance ().registerCondition (effects, getDuration (), m_conditionObserver);
+        long duration = getDuration ();
+		ConditionTimer.instance ().registerCondition (effects, duration, m_conditionObserver);
         // wait for condition to be set...
         while (m_settlingCondition == null && !m_stitch.isCanceled ()) {
             try {
