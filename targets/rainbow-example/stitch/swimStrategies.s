@@ -6,7 +6,7 @@ import model "SwimSys:Acme" { SwimSys as M, SwimFam as T};
 
 
 define boolean HighRT = M.LB0.basicResponseTime >= M.RT_THRESHOLD;
-define boolean Underloaded = M.Average(/M.components:!T.ServerT[isArchEnabled==true]/load) < 0.3;
+define boolean Underloaded = M.seqAverage(/M.components:!T.ServerT[isArchEnabled==true]/...load) < 0.3;
 strategy LowerResponseTime1 [HighRT] {
 	t1: (HightRT) -> TAddServer() @[15000] {
 		t1a: (HighRT) -> TIncDimmer() {

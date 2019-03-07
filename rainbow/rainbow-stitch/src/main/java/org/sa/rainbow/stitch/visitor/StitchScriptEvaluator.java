@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -51,6 +52,7 @@ import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.core.Expression;
+import org.sa.rainbow.stitch.core.Expression.Kind;
 import org.sa.rainbow.stitch.core.IScope;
 import org.sa.rainbow.stitch.core.MyDouble;
 import org.sa.rainbow.stitch.core.MyInteger;
@@ -59,7 +61,6 @@ import org.sa.rainbow.stitch.core.PostVar;
 import org.sa.rainbow.stitch.core.Statement;
 import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.core.Var;
-import org.sa.rainbow.stitch.core.Expression.Kind;
 import org.sa.rainbow.stitch.model.ModelOperator;
 import org.sa.rainbow.stitch.parser.StitchParser;
 import org.sa.rainbow.stitch.util.Tool;
@@ -1620,15 +1621,22 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 
 	@Override
 	public void continueExpressionFilter(TypeFilterT filter, TerminalNode setIdentifier, TerminalNode typeIdentifier,
-			StitchParser.ExpressionContext expression) {
+			StitchParser.ExpressionContext expression, boolean mustBeSet, boolean resultisSet) {
 		if (pathVariable.get() == null) {
 			Tool.error("Path is not definde!", null, stitchProblemHandler());
+			return;
+		}
+		if (mustBeSet && !resultisSet) {
+			Tool.error("Sequence spreads (...) should only appear on the last continuance", null, stitchProblemHandler());
 			return;
 		}
 		Expression cExpr = (Expression) scope();
 
 		Set set = (Set) pathVariable.get().getValue();
-		Set resultSet = new HashSet();
+		Collection resultSet;
+		
+		if (resultisSet) resultSet = new HashSet();
+		else resultSet = new ArrayList();
 		for (Object s : set) {
 			if (s instanceof IAcmeElement) {
 				final Object result = ((IAcmeElement) s).lookupName(setIdentifier.getText());
@@ -1639,9 +1647,16 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 					tSet = (Set) ModelHelper.propertyValueToJava((IAcmeSetValue) result);
 				} else if (result instanceof AcmeSet) {
 					tSet = new HashSet(((AcmeSet) result).getValues());
-				} else if (result instanceof IAcmeProperty
-						&& ((IAcmeProperty) result).getValue() instanceof IAcmeSetValue) {
-					tSet = (Set) ModelHelper.propertyValueToJava(((IAcmeProperty) result).getValue());
+				} else if (result instanceof IAcmeProperty) {
+					if (mustBeSet && !(((IAcmeProperty) result).getValue() instanceof IAcmeSetValue)) {
+						Tool.error("Error! Path set is NULL!" + setIdentifier.getText(), null, stitchProblemHandler());
+						tSet = Collections.EMPTY_SET;
+					} else if (((IAcmeProperty) result).getValue() instanceof IAcmeSetValue) {
+						tSet = (Set) ModelHelper.propertyValueToJava(((IAcmeProperty) result).getValue());
+					} else {
+						resultSet.add(ModelHelper.propertyValueToJava(((IAcmeProperty) result).getValue()));
+						tSet = Collections.emptySet();
+					}
 				} else {
 					Tool.error("Error! Path set is NULL!" + setIdentifier.getText(), null, stitchProblemHandler());
 					tSet = Collections.EMPTY_SET;

@@ -406,7 +406,7 @@ pathExpression
   ;
 
 pathExpressionContinuation
-  : SLASH IDENTIFIER ( (COLON | COLON_BANG) IDENTIFIER)? (LBRACKET expression RBRACKET)? pathExpressionContinuation?
+  : SLASH ELLIPSIS? IDENTIFIER ( (COLON | COLON_BANG) IDENTIFIER)? (LBRACKET expression RBRACKET)? pathExpressionContinuation?
   ;
 
 literalSet
@@ -522,6 +522,7 @@ COLON: ':';
 SEMICOLON: ';';
 COMMA: ',';
 DOT: '.';
+ELLIPSIS: '...';
 DQUOTE: '"';
 SQUOTE: '\'';
 BSLASH: '\\';

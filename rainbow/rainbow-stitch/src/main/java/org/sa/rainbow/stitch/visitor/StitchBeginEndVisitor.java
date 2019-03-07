@@ -168,7 +168,8 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
             visitExpression (ctx.expression ());
         }
 //        if (filter != IStitchBehavior.TypeFilterT.NONE || hasExpr) {
-            beh.continueExpressionFilter (filter, ctx.IDENTIFIER (0), ctx.IDENTIFIER (1), ctx.expression ());
+            boolean resultisSet = ctx.ELLIPSIS() == null;
+			beh.continueExpressionFilter (filter, ctx.IDENTIFIER (0), ctx.IDENTIFIER (1), ctx.expression (), ctx.pathExpressionContinuation () != null, resultisSet);
 //        }
         if (ctx.pathExpressionContinuation () != null) {
             visitPathExpressionContinuation (ctx.pathExpressionContinuation ());

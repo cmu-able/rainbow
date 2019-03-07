@@ -148,7 +148,7 @@ public interface IStitchBehavior {
 
     void continueExpressionFilter (TypeFilterT filter, TerminalNode setIdentidfier, TerminalNode typeIdentifier,
                                    StitchParser.ExpressionContext
-            expression);
+            expression, boolean mustBeSet, boolean resultisSet);
 
     void setupPathFilter (TerminalNode identifier);
 
