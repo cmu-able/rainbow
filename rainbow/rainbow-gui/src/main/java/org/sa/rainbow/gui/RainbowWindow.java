@@ -156,14 +156,14 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	 * Create the application.
 	 */
 	public RainbowWindow(IMasterCommandPort master) {
-		m_master = master;
-		initialize();
+		setMaster(master);
 	}
 
 	public RainbowWindow() {
 		m_master = null;
-		initialize();
 	}
+	
+	
 
 	/**
 	 * Initialize the contents of the frame.
@@ -645,7 +645,9 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	}
 	@Override
 	public void setMaster(IMasterCommandPort master) {
+		boolean needsInit = m_master == null;
 		m_master = master;
+		if (needsInit) initialize();
 		try {
 			if (m_master == null) {
 				// RainbowPortFactory.createDelegateMasterConnectionPort (null);
