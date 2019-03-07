@@ -167,9 +167,9 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
             beh.setupPathFilter (filter != IStitchBehavior.TypeFilterT.NONE ? ctx.IDENTIFIER (0) : null);
             visitExpression (ctx.expression ());
         }
-        if (filter != IStitchBehavior.TypeFilterT.NONE || hasExpr) {
+//        if (filter != IStitchBehavior.TypeFilterT.NONE || hasExpr) {
             beh.continueExpressionFilter (filter, ctx.IDENTIFIER (0), ctx.IDENTIFIER (1), ctx.expression ());
-        }
+//        }
         if (ctx.pathExpressionContinuation () != null) {
             visitPathExpressionContinuation (ctx.pathExpressionContinuation ());
         }
