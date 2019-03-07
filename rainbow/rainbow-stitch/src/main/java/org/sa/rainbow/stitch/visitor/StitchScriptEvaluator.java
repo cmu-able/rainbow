@@ -1447,9 +1447,10 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 			} else {
 				try {
 					IAcmePropertyValue acmeVal = PropertyHelper.toAcmeVal(arg);
+					lookup.put(formalParamName, acmeVal);
 					argList.add(acmeVal);
 				} catch (IllegalArgumentException e) {
-					// Try the bare java value
+					lookup.put(formalParamName, arg);
 					argList.add(arg);
 				}
 			}
