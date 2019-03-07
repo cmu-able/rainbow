@@ -23,6 +23,7 @@ import org.acmestudio.acme.core.type.IAcmeBooleanValue;
 import org.acmestudio.acme.core.type.IAcmeFloatingPointValue;
 import org.acmestudio.acme.core.type.IAcmeIntValue;
 import org.acmestudio.acme.core.type.IAcmeRecordValue;
+import org.acmestudio.acme.core.type.IAcmeSequenceValue;
 import org.acmestudio.acme.core.type.IAcmeSetValue;
 import org.acmestudio.acme.element.IAcmeDesignAnalysisDeclaration;
 import org.acmestudio.acme.element.IAcmeElement;
@@ -32,6 +33,7 @@ import org.acmestudio.acme.environment.error.AcmeError;
 import org.acmestudio.acme.model.DefaultAcmeModel;
 import org.acmestudio.acme.model.util.core.UMBooleanValue;
 import org.acmestudio.acme.model.util.core.UMStringValue;
+import org.acmestudio.acme.rule.AcmeSequence;
 import org.acmestudio.acme.rule.AcmeSet;
 import org.acmestudio.acme.rule.IAcmeDesignAnalysis;
 import org.acmestudio.acme.rule.node.FormalParameterNode;
@@ -1430,7 +1432,13 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 					s.setValues(((IAcmeSetValue) val).getValues());
 					lookup.put(formalParamName, s);
 					argList.add(s);
-				} else {
+				} if (val instanceof IAcmeSequenceValue) {
+					AcmeSequence s = new AcmeSequence();
+					s.setValues(((IAcmeSequenceValue )val).getValues());
+					lookup.put(formalParamName, s);
+					argList.add(s);
+				}
+				else {
 					lookup.put(formalParamName, val);
 					argList.add(val);
 				}
@@ -1447,9 +1455,22 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 				argList.add(inst.getModelInstance());
 			} else {
 				try {
-					IAcmePropertyValue acmeVal = PropertyHelper.toAcmeVal(arg);
-					lookup.put(formalParamName, acmeVal);
-					argList.add(acmeVal);
+					IAcmePropertyValue val = PropertyHelper.toAcmeVal(arg);
+					if (val instanceof IAcmeSetValue) {
+						AcmeSet s = new AcmeSet();
+						s.setValues(((IAcmeSetValue) val).getValues());
+						lookup.put(formalParamName, s);
+						argList.add(s);
+					} if (val instanceof IAcmeSequenceValue) {
+						AcmeSequence s = new AcmeSequence();
+						s.setValues(((IAcmeSequenceValue )val).getValues());
+						lookup.put(formalParamName, s);
+						argList.add(s);
+					}
+					else {
+						lookup.put(formalParamName, val);
+						argList.add(val);
+					}
 				} catch (IllegalArgumentException e) {
 					lookup.put(formalParamName, arg);
 					argList.add(arg);
