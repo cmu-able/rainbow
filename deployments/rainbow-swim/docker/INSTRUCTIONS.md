@@ -13,7 +13,7 @@ This demonstration uses the SWIM simulator with Rainbow as the Self-Adaptive Pla
 In the root Rainbow directory (i.e., the one that contains `deployments`, `libs`, `rainbow` etc., build the docker image using the following command:
 
 ```
-> docker build -t rainbow-swim -f deploymens/rainbow-swim/Dockerfile-swim .
+> docker build -t rainbow-swim -f deployments/rainbow-swim/Dockerfile-swim .
 ```
 
 This is a multi-stage docker build file that will first build a Rainbow release targeted for SWIM and (currently) using the predictive latency-aware (PLA) version of Rainbow described in [''Flexible and Efficient Decision-Making for Proactive Latency-Aware Self-Adaptation''](http://acme.able.cs.cmu.edu/pubs/show.php?id=544).
