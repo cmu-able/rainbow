@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.Stack;
 
 import org.acmestudio.acme.ModelHelper;
+import org.acmestudio.acme.PropertyHelper;
 import org.acmestudio.acme.core.IAcmeType;
 import org.acmestudio.acme.core.exception.AcmeException;
 import org.acmestudio.acme.core.type.IAcmeBooleanValue;
@@ -377,8 +378,11 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 				set.add(e.getResult());
 			}
 		}
-		if (set.size() == 1 && set.iterator().next() instanceof Set && cExpr.expressions().iterator().next().getKind() == Kind.QUANTIFIED) {
-			Tool.warn("It seems that this expression has a set that has one item that is a set. This might mean you have an extra set of curly braces.", null, stitchProblemHandler());
+		if (set.size() == 1 && set.iterator().next() instanceof Set
+				&& cExpr.expressions().iterator().next().getKind() == Kind.QUANTIFIED) {
+			Tool.warn(
+					"It seems that this expression has a set that has one item that is a set. This might mean you have an extra set of curly braces.",
+					null, stitchProblemHandler());
 		}
 		cExpr.setResult(set);
 	}
@@ -512,7 +516,8 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 		Object lObj = null;
 		Object rObj = null;
 		// deal with null operands
-		if (expr.lrOps[LOP].isEmpty() || expr.lrOps[ROP].isEmpty() || expr.lrOps[LOP].peek() == null || expr.lrOps[ROP].peek() == null) {
+		if (expr.lrOps[LOP].isEmpty() || expr.lrOps[ROP].isEmpty() || expr.lrOps[LOP].peek() == null
+				|| expr.lrOps[ROP].peek() == null) {
 			// if either is NULL, result is NULL
 			final String msg = "One relational operand is NULL: " + expr.lrOps[LOP].pop() + ", " + expr.lrOps[ROP].pop()
 					+ " ... " + opAST.toStringTree();
@@ -943,7 +948,7 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 				}
 				// lookup of various combo failed, could indicate invalid
 				// reference
-				if (o == null) 
+				if (o == null)
 					Tool.error("Unresolved reference '" + iden + "'! Perhaps model not accessible?", idAST,
 							stitchProblemHandler());
 				else {
@@ -965,10 +970,10 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 						} catch (IllegalArgumentException | IllegalAccessException e) {
 							Tool.error("Reference field " + iden + " is not STATIC", null, stitchProblemHandler());
 						}
-					}
-					else Tool.error("Unresolved reference '" + iden + "'! Perhaps model not accessible?", idAST,
-							stitchProblemHandler());
-						
+					} else
+						Tool.error("Unresolved reference '" + iden + "'! Perhaps model not accessible?", idAST,
+								stitchProblemHandler());
+
 				}
 			} else {
 				if (o instanceof Var) {
@@ -1439,9 +1444,14 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 				IModelInstance inst = (IModelInstance) arg;
 				lookup.put(formalParamName, inst.getModelInstance());
 				argList.add(inst.getModelInstance());
-
 			} else {
-				argList.add(arg);
+				try {
+					IAcmePropertyValue acmeVal = PropertyHelper.toAcmeVal(arg);
+					argList.add(acmeVal);
+				} catch (IllegalArgumentException e) {
+					// Try the bare java value
+					argList.add(arg);
+				}
 			}
 		}
 
@@ -1577,7 +1587,7 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 		cExpr.setResult(pathVariable.get().getValue());
 
 		if (expression != null) {
-			
+
 			exprIndex.set(1);
 			Expression expr = expressions.get(exprIndex.get());
 			Iterator setIterator = ((Set) pathVariable.get().getValue()).iterator();
