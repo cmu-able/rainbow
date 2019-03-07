@@ -318,7 +318,7 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 			}
 			args[i++] = e.getResult();
 		}
-		Object rv = executeMethod(id.IDENTIFIER().getText(), args);
+		Object rv = executeMethod(mc.getText(), args);
 //        cExpr.setResult (rv);
 		if (rv instanceof Integer) {
 			MyInteger result = new MyInteger((Integer) rv);
