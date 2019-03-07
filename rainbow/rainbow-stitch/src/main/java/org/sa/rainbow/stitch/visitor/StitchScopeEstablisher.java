@@ -53,7 +53,29 @@ import org.sa.rainbow.util.Util;
  */
 public class StitchScopeEstablisher extends BaseStitchBehavior {
 
-    StitchBeginEndVisitor m_walker;
+    public final class StitchImportedDirectAcmeModelInstance extends AcmeModelInstance {
+		private StitchImportedDirectAcmeModelInstance(IAcmeSystem system, String source) {
+			super(system, source);
+		}
+
+		@Override
+		public AcmeModelCommandFactory getCommandFactory() {
+			return null;
+		}
+
+		@Override
+		protected AcmeModelInstance generateInstance(IAcmeSystem sys) {
+			try {
+				return this.getClass().getConstructor(IAcmeSystem.class).newInstance(sys);
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+	}
+
+	StitchBeginEndVisitor m_walker;
 
     public StitchScopeEstablisher (Stitch/*State*/ stitch) {
         super (stitch);
@@ -1094,24 +1116,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
             } else if (imp.type == Import.Kind.ACME) {
             	try {
 					IAcmeResource resource = StandaloneResourceProvider.instance().acmeResourceForString(imp.path);
-					AcmeModelInstance m = new AcmeModelInstance(resource.getModel().getSystems().iterator().next(), imp.path) {
-						
-						@Override
-						public AcmeModelCommandFactory getCommandFactory() {
-							return null;
-						}
-						
-						@Override
-						protected AcmeModelInstance generateInstance(IAcmeSystem sys) {
-							try {
-								return this.getClass().getConstructor(IAcmeSystem.class).newInstance(sys);
-							} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-									| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-								e.printStackTrace();
-							}
-							return null;
-						}
-					};
+					AcmeModelInstance m = new StitchImportedDirectAcmeModelInstance(resource.getModel().getSystems().iterator().next(), imp.path);
 					m_stitch.script.models.add(m);
 				} catch (ParsingFailureException | IOException e) {
 					Tool.error("Could not import Acme from " + imp.path, null, stitchProblemHandler());
