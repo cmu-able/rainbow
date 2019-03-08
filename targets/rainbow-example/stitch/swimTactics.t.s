@@ -52,7 +52,7 @@ tactic TAddServer() {
 }
 
 tactic TRemoveServer() {
-	int availableServers = size(/M.components:!T.ServerT[isArchEnabled]);
+	int availableServers = M.size(/M.components:!T.ServerT[isArchEnabled]);
 	
     condition {
 	availableServers > 1;
