@@ -1380,6 +1380,10 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 				context = ((AcmeModelInstance) o).getModelInstance();
 			}
 		}
+		else {
+			Tool.error("Cannot call '" + name + "' because it should be preceded by a model reference.", null, stitchProblemHandler());
+			return rv;
+		}
 
 		List<FormalParameterNode> formalParams = da.getFormalParameters();
 		if (args.length != formalParams.size()) {
