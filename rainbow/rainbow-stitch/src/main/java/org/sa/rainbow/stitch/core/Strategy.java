@@ -660,9 +660,10 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 	 * @param argsIn the input arguments; there should be NONE
 	 * @return one of the <code>Strategy.Outcome</code> enum values:
 	 *         <code>SUCCESS</code>, <code>FAILURE</code>, <code>STATUSQUO</code>.
+	 * @throws StitchExecutionException 
 	 */
 	@Override
-	public Object evaluate(Object[] argsIn) {
+	public Object evaluate(Object[] argsIn) throws StitchExecutionException {
 		if (argsIn != null && argsIn.length > 0)
 			throw new ArgumentMismatchException("Strategy should have NO argument!");
 
@@ -740,8 +741,9 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 	 * @param argsIn the input arguments; there should be NONE
 	 * @return one of the <code>Strategy.Outcome</code> enum values:
 	 *         <code>SUCCESS</code>, <code>FAILURE</code>, <code>STATUSQUO</code>.
+	 * @throws StitchExecutionException 
 	 */
-	public Object resumeEvaluate(Object[] argsIn) {
+	public Object resumeEvaluate(Object[] argsIn) throws StitchExecutionException {
 		if (m_lastNode == null)
 			return evaluate(argsIn);
 		else {
@@ -1031,7 +1033,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 		}
 	}
 
-	private boolean evaluateFromNode(StrategyNode curNode) {
+	private boolean evaluateFromNode(StrategyNode curNode) throws StitchExecutionException {
 		StrategyNode selected = null;
 		if (!curNode.hasDuration()) {
 			selected = chooseNodeWithoutTimes(curNode);
@@ -1135,8 +1137,9 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 	 * Evaluates tactic action of the given node.
 	 *
 	 * @param curNode the strategy node whose tactic action to evaluate.
+	 * @throws StitchExecutionException 
 	 */
-	private void doTactic(StrategyNode curNode) {
+	private void doTactic(StrategyNode curNode) throws StitchExecutionException {
 		if (Tool.logger().isInfoEnabled()) {
 			Tool.logger().info("Tactic action! " + curNode.getTactic());
 		}

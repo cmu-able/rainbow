@@ -43,7 +43,6 @@ import org.acmestudio.acme.core.type.IAcmeStringValue;
 import org.acmestudio.acme.element.IAcmeElement;
 import org.acmestudio.acme.element.property.IAcmeProperty;
 import org.acmestudio.acme.rule.node.IExpressionNode;
-import org.acmestudio.standalone.resource.StandaloneLanguagePackHelper;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.sa.rainbow.stitch.Ohana;
@@ -295,6 +294,7 @@ public class Expression extends ScopedEntity implements IEvaluableScope, StitchT
 
 					}
 				}
+				
 			} catch (Exception e) {
 				Tool.logger().error("Unexpected Recognition Error evaluating Expression!\n", e);
 			}
