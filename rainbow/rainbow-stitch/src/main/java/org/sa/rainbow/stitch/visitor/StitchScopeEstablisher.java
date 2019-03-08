@@ -35,6 +35,7 @@ import org.sa.rainbow.stitch.core.PostVar;
 import org.sa.rainbow.stitch.core.ScopedEntity;
 import org.sa.rainbow.stitch.core.Statement;
 import org.sa.rainbow.stitch.core.StitchScript;
+import org.sa.rainbow.stitch.core.StitchTypes;
 import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.core.Strategy.ActionKind;
 import org.sa.rainbow.stitch.core.Strategy.ConditionKind;

@@ -61,6 +61,7 @@ import org.sa.rainbow.stitch.core.MyInteger;
 import org.sa.rainbow.stitch.core.MyNumber;
 import org.sa.rainbow.stitch.core.PostVar;
 import org.sa.rainbow.stitch.core.Statement;
+import org.sa.rainbow.stitch.core.StitchTypes;
 import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.core.Var;
 import org.sa.rainbow.stitch.model.ModelOperator;
@@ -180,7 +181,7 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 			return;
 
 		Expression cExpr = (Expression) scope();
-		if (cExpr.getKind() != Expression.Kind.QUANTIFIED) {
+		if (cExpr.getKind() != Kind.QUANTIFIED) {
 			Tool.error("Error! Expected quantified expression not found!!", null, stitchProblemHandler());
 			return;
 		}
@@ -1561,7 +1562,7 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 			return;
 
 		Expression cExpr = (Expression) scope();
-		if (cExpr.getKind() != Expression.Kind.PATH) {
+		if (cExpr.getKind() != Kind.PATH) {
 			Tool.error("Error! Expected path expression not found!", null, stitchProblemHandler());
 			return;
 		}
