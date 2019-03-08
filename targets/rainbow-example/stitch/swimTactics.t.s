@@ -34,7 +34,7 @@ tactic TDecDimmer() {
 }
 
 tactic TAddServer() {
-	int availableServers = Swim.availableServices(M, T.ServerT);
+	int unusedServers = Swim.availableServices(M, T.ServerT);
     condition {
 		Swim.availableServices(M, T.ServerT) > 0;
     }
@@ -47,12 +47,12 @@ tactic TAddServer() {
 	M.addServer(M.LB0, newServer);	
     }
     effect {
-		availableServers' == availableServers+1;
+		unusedServers' == unusedServers-1;
     }
 }
 
 tactic TRemoveServer() {
-	int availableServers = Swim.availableServices(M, T.ServerT);
+	int availableServers = size(/M.components:!T.ServerT[isArchEnabled]);
 	
     condition {
 	availableServers > 1;
