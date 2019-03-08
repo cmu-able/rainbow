@@ -66,7 +66,7 @@ tactic TRemoveServer() {
 	M.removeServer(M.LB0, lastServer);	
     }
     effect {
-    availableServers' == availableServers-1;
+    availableServers' == availableServers - 1;
     }
 }
 
