@@ -326,7 +326,11 @@ public abstract class AdaptationManagerBase extends AbstractRainbowRunnable
             
             StrategyAdaptationResultsVisitor resultCollector = new StrategyAdaptationResultsVisitor
                     (strategy, strategiesExecuted);
-            strategy.visit (resultCollector);
+            try {
+				strategy.visit (resultCollector);
+			} catch (RainbowException e) {
+				// This should not happen for results collector
+			}
             
             for (Strategy str : strategiesExecuted) {
                 String s = str.getName () + ";" + str.outcome ();
