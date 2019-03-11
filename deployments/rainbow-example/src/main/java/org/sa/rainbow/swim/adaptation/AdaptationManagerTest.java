@@ -52,6 +52,7 @@ import org.sa.rainbow.core.adaptation.AdaptationTree;
 import org.sa.rainbow.core.adaptation.DefaultAdaptationTreeWalker;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.health.IRainbowHealthProtocol;
 import org.sa.rainbow.core.models.IModelInstance;
@@ -299,7 +300,11 @@ public final class AdaptationManagerTest extends AbstractRainbowRunnable
             final List<Strategy> strategiesExecuted = new LinkedList<> ();
             StrategyAdaptationResultsVisitor resultCollector = new StrategyAdaptationResultsVisitor
                     (strategy, strategiesExecuted);
-            strategy.visit (resultCollector);
+            try {
+				strategy.visit (resultCollector);
+			} catch (RainbowException e) {
+				// This shouldn't happen with results collector
+			}
 
             for (Strategy str : strategiesExecuted) {
                 String s = str.getName () + ";" + str.outcome ();
