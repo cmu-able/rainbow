@@ -3,8 +3,8 @@ package org.sa.rainbow.stitch;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 
 import org.junit.Test;
@@ -47,7 +47,19 @@ public class TestStitchApplicability extends StitchTest {
 		assertFalse(applicable);
 	}
 	
-
+	@Test
+	public void testPathWithContinuation() throws IOException {
+		
+		Stitch stitch = loadScript("src/test/resources/testStrategyPath.s");
+		Strategy s1 = stitch.script.strategies.get(0);
+		Strategy s2 = stitch.script.strategies.get(1);
+		boolean applicable = s2.isApplicable(Collections.<String,Object>emptyMap());
+		assertTrue(applicable);
+		
+		applicable = s1.isApplicable(Collections.<String,Object>emptyMap());
+		assertTrue(applicable);
+		
+	}
 	
 
 }
