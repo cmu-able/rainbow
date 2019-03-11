@@ -23,6 +23,7 @@ import org.acmestudio.acme.core.type.IAcmeBooleanValue;
 import org.acmestudio.acme.core.type.IAcmeFloatingPointValue;
 import org.acmestudio.acme.core.type.IAcmeIntValue;
 import org.acmestudio.acme.core.type.IAcmeRecordValue;
+import org.acmestudio.acme.core.type.IAcmeSequenceType;
 import org.acmestudio.acme.core.type.IAcmeSequenceValue;
 import org.acmestudio.acme.core.type.IAcmeSetValue;
 import org.acmestudio.acme.element.IAcmeDesignAnalysisDeclaration;
@@ -39,6 +40,7 @@ import org.acmestudio.acme.rule.IAcmeDesignAnalysis;
 import org.acmestudio.acme.rule.node.FormalParameterNode;
 import org.acmestudio.acme.rule.node.IExternalAnalysisExpressionNode;
 import org.acmestudio.acme.rule.node.TypeReferenceNode;
+import org.acmestudio.acme.type.AcmeTypeHelper;
 import org.acmestudio.acme.type.verification.NodeScopeLookup;
 import org.acmestudio.acme.type.verification.RuleTypeChecker;
 import org.acmestudio.standalone.resource.StandaloneLanguagePackHelper;
@@ -1458,6 +1460,16 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 				IModelInstance inst = (IModelInstance) arg;
 				lookup.put(formalParamName, inst.getModelInstance());
 				argList.add(inst.getModelInstance());
+			} else if (arg instanceof List && AcmeTypeHelper.extractTypeStructure(formalParams.get(i).getType()) instanceof IAcmeSequenceType) {
+				AcmeSequence seq = new AcmeSequence();
+				seq.setValues((List )arg);
+				lookup.put(formalParamName, seq);
+				argList.add(seq);
+			} else if (arg instanceof Set) {
+				AcmeSet set = new AcmeSet();
+				set.setValues((Set )arg);
+				lookup.put(formalParamName, set);
+				argList.add(set);
 			} else {
 				try {
 					IAcmePropertyValue val = PropertyHelper.toAcmeVal(arg);
