@@ -18,6 +18,7 @@ import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.border.TitledBorder;
 
@@ -242,13 +243,30 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 
 	@Override
 	public void display() {
-		// TODO Auto-generated method stub
-
+		if (m_frame != null) {
+			SwingUtilities.invokeLater(new Runnable() {
+				
+				@Override
+				public void run() {
+					show();
+				}
+			});
+		}
+	}
+	
+	protected void show() {
+		if (m_frame == null) {
+			initialize();
+//			populateArchitecture();
+		}
+		m_frame.setVisible(true);
 	}
 
 	@Override
 	public void setMaster(IMasterCommandPort master) {
+		boolean needsInit = m_master == null;
 		m_master = master;
+		if (needsInit) initialize();
 	}
 
 }
