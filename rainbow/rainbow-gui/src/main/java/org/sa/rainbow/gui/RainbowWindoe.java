@@ -130,6 +130,7 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		masterFrame.setIconifiable(true);
 		masterFrame.setBounds(0, 0, 420, 30);
 		m_desktopPane.add(masterFrame);
+		masterFrame.setVisible(true);
 //		m_desktopPane.getDesktopManager().minimizeFrame(masterFrame);
 
 		m_oracleMessagePane = new OracleStatusPanel(Color.white, expectedDelegateLocations);
@@ -177,6 +178,8 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 				JScrollPane sp = new JScrollPane();
 				sp.setViewportView(p);
 				frame.add(sp,BorderLayout.CENTER);
+				m_desktopPane.add(frame);
+				frame.setVisible(true);
 				m_desktopPane.getDesktopManager().iconifyFrame(frame);
 				frame.setFrameIcon(new ImageIcon("src/main/resources/gauge.png", shortName(g)) );
 				
