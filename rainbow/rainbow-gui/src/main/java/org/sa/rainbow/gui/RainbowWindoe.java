@@ -2,6 +2,7 @@ package org.sa.rainbow.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -187,18 +188,28 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 	protected void drawConnections(Graphics2D g2, JDesktopPane jDesktopPane) {
 		for (Map.Entry<String, GaugeInfo> entry : m_gauges.entrySet()) {
 			GaugeInfo gInfo = entry.getValue();
-			int x1 = (int )Math.round(gInfo.frame.getBounds().getCenterX());
-			int y1 = (int )Math.round(gInfo.frame.getBounds().getCenterY());
+			Component visibleGFrame = getVisibleComponent(gInfo.frame);
+			int x1 = (int )Math.round(visibleGFrame.getBounds().getCenterX());
+			int y1 = (int )Math.round(visibleGFrame.getBounds().getCenterY());
 			if (gInfo.probes != null) {
 				for (String p : gInfo.probes) {
 					ProbeInfo pInfo = m_probes.get(p);
-					int x2 = (int) Math.round(pInfo.frame.getBounds().getCenterX());
-					int y2 = (int )Math.round(pInfo.frame.getBounds().getCenterY());
+					Component visiblePFrame = getVisibleComponent(pInfo.frame);
+					int x2 = (int) Math.round(visiblePFrame.getBounds().getCenterX());
+					int y2 = (int )Math.round(visiblePFrame.getBounds().getCenterY());
 					g2.drawLine(x1, y1, x2, y2);
 				}
 				
 			}
 		}
+	}
+
+	private Component getVisibleComponent(JInternalFrame frame) {
+		Component visibleGFrame = frame;
+		if (!visibleGFrame.isVisible()) {
+			visibleGFrame = frame.getDesktopIcon();
+		}
+		return visibleGFrame;
 	}
 
 	private void processProbeIntoGauge(GaugeInfo gInfo, Map<String, Object> setupParams, String tpt) {
