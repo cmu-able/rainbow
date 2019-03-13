@@ -173,15 +173,21 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 
 	private void createGauges() {
 		GaugeManager gaugeManager = Rainbow.instance().getRainbowMaster().gaugeManager();
+		int i = 1;
 		for (String g : gaugeManager.getCreatedGauges()) {
 			if (m_gauges.get(g) != null) {
 				JInternalFrame frame = new JInternalFrame(shortName(g), true, false, true);
+				frame.setIconifiable(true);
+
 				frame.setToolTipText(g);
 				JTextArea p = new JTextArea();
 				JScrollPane sp = new JScrollPane();
 				sp.setViewportView(p);
 				frame.add(sp,BorderLayout.CENTER);
 				m_desktopPane.add(frame);
+				frame.setSize(100, 100);
+				frame.setLocation(WIDTH-i*100, HEIGHT-140);
+				i++;
 				frame.setVisible(true);
 //				m_desktopPane.getDesktopManager().iconifyFrame(frame);
 				frame.setFrameIcon(new ImageIcon("src/main/resources/gauge.png", shortName(g)) );
@@ -203,11 +209,12 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 
 	private void createProbes() {
 		ProbeDescription probes = Rainbow.instance().getRainbowMaster().probeDesc();
+		int i = 1;
 		for (ProbeAttributes probe : probes.probes) {
 			String probeId = probe.alias + "@" +probe.getLocation();
-			int i = 1;
 			if (m_probes.get(probeId) == null) {
 				JInternalFrame frame = new JInternalFrame(shortName(probeId), true, false, true);
+				frame.setIconifiable(true);
 				frame.setToolTipText(probeId);
 				JTextArea p = new JTextArea();
 				JScrollPane sp = new JScrollPane();
@@ -215,7 +222,8 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 				frame.add(sp,BorderLayout.CENTER);
 				m_desktopPane.add(frame);
 				frame.setSize(100, 100);
-				frame.setLocation(WIDTH-i++*100, HEIGHT-120);
+				frame.setLocation(WIDTH-i*100, HEIGHT-140);
+				i++;
 				
 //				m_desktopPane.getDesktopManager().iconifyFrame(frame);
 				frame.setFrameIcon(new ImageIcon("src/main/resources/probe.png", shortName(probeId)) );
