@@ -69,6 +69,8 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 	/** Convenience constant: size of text field to set to when Max is exceeded. */
 	public static final int TEXT_HALF_LENGTH = 50000;
 	public static final float TEXT_FONT_SIZE = 9.0f;
+	private static final int WIDTH = 1280;
+	private static final int HEIGHT = 900;
 	
 	class ProbeInfo {
 		JInternalFrame frame;
@@ -103,7 +105,7 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 
 	private void initialize() {
 		m_frame = new JFrame();
-		m_frame.setBounds(0, 0, 1260, 900);
+		m_frame.setBounds(0, 0, WIDTH, HEIGHT);
 		m_frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		m_frame.addWindowFocusListener(new WindowAdapter() {
 			@Override
@@ -203,7 +205,7 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		ProbeDescription probes = Rainbow.instance().getRainbowMaster().probeDesc();
 		for (ProbeAttributes probe : probes.probes) {
 			String probeId = probe.alias + "@" +probe.getLocation();
-			
+			int i = 1;
 			if (m_probes.get(probeId) == null) {
 				JInternalFrame frame = new JInternalFrame(shortName(probeId), true, false, true);
 				frame.setToolTipText(probeId);
@@ -212,6 +214,8 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 				sp.setViewportView(p);
 				frame.add(sp,BorderLayout.CENTER);
 				m_desktopPane.add(frame);
+				frame.setSize(100, 100);
+				frame.setLocation(WIDTH-i++*100, HEIGHT-120);
 				
 //				m_desktopPane.getDesktopManager().iconifyFrame(frame);
 				frame.setFrameIcon(new ImageIcon("src/main/resources/probe.png", shortName(probeId)) );
