@@ -284,16 +284,20 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 				sp.setViewportView(p);
 				frame.add(sp, BorderLayout.CENTER);
 				m_desktopPane.add(frame);
+		
+				frame.getDesktopIcon().setUI(new SimpleDesktopIconUI(frame.getFrameIcon()));
+
+				frame.setVisible(true);
 				frame.setSize(100, 100);
 				frame.setLocation(WIDTH - i * 100, HEIGHT - 340);
 				i++;
-				frame.setVisible(true);
 				m_desktopPane.getDesktopManager().iconifyFrame(frame);
 
 				GaugeInfo info = new GaugeInfo();
 				info.frame = frame;
 				IGauge gauge = Rainbow.instance().lookupGauge(g);
 				info.description = description;
+				info.operations = new HashMap<>();
 				for (String key : gauge.commandKeys()) {
 					info.operations.put(key, new LinkedList<>());
 				}
