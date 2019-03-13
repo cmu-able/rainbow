@@ -213,7 +213,10 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		for (ProbeAttributes probe : probes.probes) {
 			String probeId = probe.alias + "@" +probe.getLocation();
 			if (m_probes.get(probeId) == null) {
-				JInternalFrame frame = new JInternalFrame(shortName(probeId), true, false, true);
+				JInternalFrame frame = new JInternalFrame(shortName(probeId));
+				frame.setFrameIcon(new ImageIcon("probe.png", shortName(probeId)) );
+				frame.setResizable(true);
+				frame.setClosable(false);
 				frame.setIconifiable(true);
 				frame.setToolTipText(probeId);
 				JTextArea p = new JTextArea();
@@ -226,7 +229,6 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 				i++;
 				
 //				m_desktopPane.getDesktopManager().iconifyFrame(frame);
-				frame.setFrameIcon(new ImageIcon("probe.png", shortName(probeId)) );
 				frame.setVisible(true);
 				ProbeInfo info = new ProbeInfo();
 				info.description =probe;
