@@ -128,7 +128,8 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		masterFrame.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		masterFrame.setMaximizable(true);
 		masterFrame.setIconifiable(true);
-		masterFrame.setBounds(0, 0, 420, 30);
+		masterFrame.setResizable(true);
+		masterFrame.setBounds(0, 0, 420, 60);
 		m_desktopPane.add(masterFrame);
 		masterFrame.setVisible(true);
 //		m_desktopPane.getDesktopManager().minimizeFrame(masterFrame);
@@ -180,7 +181,7 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 				frame.add(sp,BorderLayout.CENTER);
 				m_desktopPane.add(frame);
 				frame.setVisible(true);
-				m_desktopPane.getDesktopManager().iconifyFrame(frame);
+//				m_desktopPane.getDesktopManager().iconifyFrame(frame);
 				frame.setFrameIcon(new ImageIcon("src/main/resources/gauge.png", shortName(g)) );
 				
 				GaugeInfo info = new GaugeInfo();
@@ -210,9 +211,11 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 				JScrollPane sp = new JScrollPane();
 				sp.setViewportView(p);
 				frame.add(sp,BorderLayout.CENTER);
-				m_desktopPane.getDesktopManager().iconifyFrame(frame);
-				frame.setFrameIcon(new ImageIcon("src/main/resources/probe.png", shortName(probeId)) );
+				m_desktopPane.add(frame);
 				
+//				m_desktopPane.getDesktopManager().iconifyFrame(frame);
+				frame.setFrameIcon(new ImageIcon("src/main/resources/probe.png", shortName(probeId)) );
+				frame.setVisible(true);
 				ProbeInfo info = new ProbeInfo();
 				info.description =probe;
 				info.frame = frame;
