@@ -190,7 +190,7 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 				i++;
 				frame.setVisible(true);
 //				m_desktopPane.getDesktopManager().iconifyFrame(frame);
-				frame.setFrameIcon(new ImageIcon("src/main/resources/gauge.png", shortName(g)) );
+				frame.setFrameIcon(new ImageIcon("gauge.png", shortName(g)) );
 				
 				GaugeInfo info = new GaugeInfo();
 				info.frame = frame;
@@ -226,7 +226,7 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 				i++;
 				
 //				m_desktopPane.getDesktopManager().iconifyFrame(frame);
-				frame.setFrameIcon(new ImageIcon("src/main/resources/probe.png", shortName(probeId)) );
+				frame.setFrameIcon(new ImageIcon("probe.png", shortName(probeId)) );
 				frame.setVisible(true);
 				ProbeInfo info = new ProbeInfo();
 				info.description =probe;
