@@ -245,7 +245,7 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		try {
 			for (Map.Entry<String, GaugeInfo> entry : m_gauges.entrySet()) {
 				GaugeInfo gInfo = entry.getValue();
-				Object gaugeNode = graph.insertVertex(parent, null, gInfo, gInfo.frame.getX(), gInfo.frame.getY(), gInfo.frame.getWidth(), gInfo.frame.getHeight());
+				Object gaugeNode = graph.insertVertex(parent, gInfo.description.id(), gInfo, gInfo.frame.getX(), gInfo.frame.getY(), gInfo.frame.getWidth(), gInfo.frame.getHeight());
 				graph.insertEdge(parent, null, "edge", parentNode, gaugeNode);
 				if (gInfo.probes == null) {
 					Map<String, Object> configParams = toMap(gInfo.description.configParams());
@@ -267,7 +267,7 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 					}
 					for (String pid : gInfo.probes) {
 						ProbeInfo pInfo = m_probes.get(pid);
-						Object probeNode = graph.insertVertex(parent,null,pInfo, pInfo.frame.getX(), pInfo.frame.getY(), pInfo.frame.getWidth(), pInfo.frame.getHeight());
+						Object probeNode = graph.insertVertex(parent,pInfo.description.name,pInfo, pInfo.frame.getX(), pInfo.frame.getY(), pInfo.frame.getWidth(), pInfo.frame.getHeight());
 						graph.insertEdge(parent, null, "edge", gaugeNode, probeNode);
 					}
 
@@ -280,13 +280,14 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		}
 		mxHierarchicalLayout layout = new mxHierarchicalLayout(graph);
 		layout.execute(parent);
+		int childCount = graph.getModel().getChildCount(parent);
 		for (GaugeInfo gi : m_gauges.values()) {
-			mxRectangle b = graph.getCellBounds(gi);
+			mxRectangle b = graph.getCellBounds(gi.description.id());
 			gi.frame.setBounds((int )b.getX(), (int )b.getY(), (int )b.getWidth(), (int )b.getHeight());
 		}
 		
 		for (ProbeInfo pi : m_probes.values()) {
-			mxRectangle b = graph.getCellBounds(pi);
+			mxRectangle b = graph.getCellBounds(pi.description.name);
 			pi.frame.setBounds((int )b.getX(), (int )b.getY(), (int )b.getWidth(), (int )b.getHeight());
 		}
 	}
