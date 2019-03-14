@@ -177,36 +177,38 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		m_tabTimer.start();
 	}
 
-	Map<String,Object> toMap(List<TypedAttributeWithValue> tavs) {
-		HashMap<String,Object> m = new HashMap<String,Object>();
+	Map<String, Object> toMap(List<TypedAttributeWithValue> tavs) {
+		HashMap<String, Object> m = new HashMap<String, Object>();
 		for (TypedAttributeWithValue tav : tavs) {
 			m.put(tav.getName(), tav.getValue());
 		}
 		return m;
 	}
-	
+
 	protected void drawConnections(Graphics2D g2, JDesktopPane jDesktopPane) {
 		for (Map.Entry<String, GaugeInfo> entry : m_gauges.entrySet()) {
 			GaugeInfo gInfo = entry.getValue();
 			Component visibleGFrame = getVisibleComponent(gInfo.frame);
-			int x1 = (int )Math.round(visibleGFrame.getBounds().getCenterX());
-			int y1 = (int )Math.round(visibleGFrame.getBounds().getCenterY());
+			int x1 = (int) Math.round(visibleGFrame.getBounds().getCenterX());
+			int y1 = (int) Math.round(visibleGFrame.getBounds().getCenterY());
 			if (gInfo.probes != null) {
 				for (String p : gInfo.probes) {
 					ProbeInfo pInfo = m_probes.get(p);
 					Component visiblePFrame = getVisibleComponent(pInfo.frame);
 					int x2 = (int) Math.round(visiblePFrame.getBounds().getCenterX());
-					int y2 = (int )Math.round(visiblePFrame.getBounds().getCenterY());
+					int y2 = (int) Math.round(visiblePFrame.getBounds().getCenterY());
 					g2.drawLine(x1, y1, x2, y2);
 				}
-				
+
 			}
 		}
 	}
 
 	private Component getVisibleComponent(JInternalFrame frame) {
 		Component visibleGFrame = frame;
-		if (!visibleGFrame.isVisible() || frame.isIcon()) {
+		if (!visibleGFrame.isVisible() || frame.isIcon()
+				|| (m_desktopPane.getDesktopManager() instanceof RainbowDesktopManager
+						&& ((RainbowDesktopManager) m_desktopPane.getDesktopManager()).isIcon(frame))) {
 			visibleGFrame = frame.getDesktopIcon();
 		}
 		return visibleGFrame;
@@ -217,8 +219,7 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		if (probe.secondValue() == null) {
 			probe.setSecondValue((String) setupParams.get("targetIP"));
 			gInfo.probes.add(Util.genID(probe.firstValue(), probe.secondValue()));
-		}
-		else if (IGauge.ALL_LOCATIONS.equals(probe.secondValue())) {
+		} else if (IGauge.ALL_LOCATIONS.equals(probe.secondValue())) {
 			Set<String> keySet = m_probes.keySet();
 			for (String probeId : keySet) {
 				Pair<String, String> candidate = Util.decomposeID(tpt);
@@ -227,8 +228,7 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 				}
 
 			}
-		}
-		else {
+		} else {
 			gInfo.probes.add(tpt);
 		}
 	}
@@ -239,9 +239,9 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 			if (gInfo.probes == null) {
 				Map<String, Object> configParams = toMap(gInfo.description.configParams());
 				Map<String, Object> setupParams = toMap(gInfo.description.setupParams());
-				
+
 				entry.getValue().probes = new LinkedList<>();
-				
+
 				if (configParams.get("targetProbeType") instanceof String) {
 					String tpt = (String) configParams.get("targetProbeType");
 					processProbeIntoGauge(gInfo, setupParams, tpt);
@@ -252,11 +252,11 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 						probeId = probeId.trim();
 						processProbeIntoGauge(gInfo, setupParams, probeId);
 					}
-					
+
 				}
-				
+
 			}
-			
+
 		}
 	}
 
@@ -274,7 +274,8 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		int i = 1;
 		for (String g : gaugeManager.getCreatedGauges()) {
 			if (m_gauges.get(g) == null) {
-				GaugeInstanceDescription description = Rainbow.instance().getRainbowMaster().gaugeDesc().instSpec.get(g.split("@")[0].split(":")[0]);
+				GaugeInstanceDescription description = Rainbow.instance().getRainbowMaster().gaugeDesc().instSpec
+						.get(g.split("@")[0].split(":")[0]);
 				JInternalFrame frame = new JInternalFrame(shortName(g), true, false, true);
 				frame.setFrameIcon(new ImageIcon(this.getClass().getResource("/gauge.png"), shortName(g)));
 				frame.setIconifiable(true);
@@ -284,7 +285,7 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 				sp.setViewportView(p);
 				frame.add(sp, BorderLayout.CENTER);
 				m_desktopPane.add(frame);
-		
+
 				frame.getDesktopIcon().setUI(new SimpleDesktopIconUI(frame.getFrameIcon()));
 
 				frame.setVisible(true);

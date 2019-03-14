@@ -4,6 +4,8 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.beans.PropertyVetoException;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.DefaultDesktopManager;
 import javax.swing.JDesktopPane;
@@ -13,6 +15,8 @@ import javax.swing.JInternalFrame.JDesktopIcon;
 
 public class RainbowDesktopManager extends DefaultDesktopManager {
 
+	Set<JInternalFrame> m_iconed = new HashSet<>();
+	
 	@Override
 	public void iconifyFrame(JInternalFrame frame) {
 		JDesktopPane p = frame.getDesktopPane();
@@ -43,7 +47,18 @@ public class RainbowDesktopManager extends DefaultDesktopManager {
 			Rectangle b = frame.getBounds();
 			c.remove(frame);
 			c.repaint(b.x, b.y, b.width, b.height);
+			m_iconed.add(frame);
 		}
+	}
+	
+	@Override
+	public void deiconifyFrame(JInternalFrame f) {
+		super.deiconifyFrame(f);
+		m_iconed.remove(f);
+	}
+	
+	public boolean isIcon(JInternalFrame f) {
+		return m_iconed.contains(f);
 	}
 	
 	@Override
