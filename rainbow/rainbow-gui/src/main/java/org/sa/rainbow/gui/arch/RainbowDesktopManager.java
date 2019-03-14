@@ -56,6 +56,7 @@ public class RainbowDesktopManager extends DefaultDesktopManager {
 			c.repaint(b.x, b.y, b.width, b.height);
 			m_iconed.add(frame);
 			try { frame.setIcon(true);} catch (PropertyVetoException e) {}
+			m_desktop.repaint();
 		}
 	}
 	
@@ -64,6 +65,7 @@ public class RainbowDesktopManager extends DefaultDesktopManager {
 		super.deiconifyFrame(f);
 		m_iconed.remove(f);
 		try {f.setIcon(false);} catch (PropertyVetoException e) {}
+		m_desktop.repaint();
 	}
 	
 	public boolean isIcon(JInternalFrame f) {
