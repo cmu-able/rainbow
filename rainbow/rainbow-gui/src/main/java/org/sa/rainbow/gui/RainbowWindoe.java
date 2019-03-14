@@ -285,8 +285,9 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 				}
 
 			}
-			mxCompactTreeLayout layout = new mxCompactTreeLayout(graph);
-			layout.setLevelDistance(50);
+			graph.setMaximumGraphBounds(new mxRectangle(400,400,WIDTH-400,HEIGHT-400));
+			mxHierarchicalLayout layout = new mxHierarchicalLayout(graph);
+//			layout.setLevelDistance(50);
 			layout.execute(graph.getDefaultParent());
 			for (Object c : cells) {
 				mxRectangle b = graph.getCellBounds(c);
