@@ -206,7 +206,7 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 
 	private Component getVisibleComponent(JInternalFrame frame) {
 		Component visibleGFrame = frame;
-		if (!visibleGFrame.isVisible()) {
+		if (!visibleGFrame.isVisible() || frame.isIcon()) {
 			visibleGFrame = frame.getDesktopIcon();
 		}
 		return visibleGFrame;
