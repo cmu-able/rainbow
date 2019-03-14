@@ -152,7 +152,7 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		masterFrame.setBounds(0, 0, 420, 60);
 		m_desktopPane.add(masterFrame);
 		masterFrame.setVisible(true);
-		m_desktopPane.setDesktopManager(new RainbowDesktopManager());
+		m_desktopPane.setDesktopManager(new RainbowDesktopManager(m_desktopPane));
 //		m_desktopPane.getDesktopManager().minimizeFrame(masterFrame);
 
 		m_oracleMessagePane = new OracleStatusPanel(Color.white, expectedDelegateLocations);
