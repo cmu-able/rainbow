@@ -46,6 +46,7 @@ import org.sa.rainbow.gui.arch.RainbowDesktopIconUI;
 import org.sa.rainbow.gui.arch.RainbowDesktopManager;
 import org.sa.rainbow.util.Util;
 
+import com.mxgraph.layout.mxCompactTreeLayout;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.util.mxRectangle;
@@ -288,8 +289,9 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		} finally {
 			graph.getModel().endUpdate();
 		}
-		mxHierarchicalLayout layout = new mxHierarchicalLayout(graph);
-		layout.execute(parent);
+		mxCompactTreeLayout layout = new mxCompactTreeLayout(graph);
+		layout.setLevelDistance(50);
+		layout.execute(graph.getDefaultParent());
 		for (Object c : cells) {
 			mxRectangle b = graph.getCellBounds(c);
 			com.mxgraph.model.mxCell cell = (mxCell) c;
