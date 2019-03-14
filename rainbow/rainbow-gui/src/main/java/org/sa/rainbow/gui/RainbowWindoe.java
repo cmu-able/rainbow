@@ -42,7 +42,7 @@ import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReporti
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.gui.arch.RainbowDesktopManager;
-import org.sa.rainbow.gui.arch.SimpleDesktopIconUI;
+import org.sa.rainbow.gui.arch.RainbowDesktopIconUI;
 import org.sa.rainbow.util.Util;
 
 public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportingSubscriberCallback {
@@ -286,7 +286,7 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 				frame.add(sp, BorderLayout.CENTER);
 				m_desktopPane.add(frame);
 
-				frame.getDesktopIcon().setUI(new SimpleDesktopIconUI(frame.getFrameIcon()));
+				frame.getDesktopIcon().setUI(new RainbowDesktopIconUI(frame.getFrameIcon()));
 
 				frame.setVisible(true);
 				frame.setSize(100, 100);
@@ -348,7 +348,7 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		sp.setViewportView(p);
 		frame.add(sp, BorderLayout.CENTER);
 		m_desktopPane.add(frame);
-		frame.getDesktopIcon().setUI(new SimpleDesktopIconUI(frame.getFrameIcon()));
+		frame.getDesktopIcon().setUI(new RainbowDesktopIconUI(frame.getFrameIcon()));
 		return frame;
 	}
 
