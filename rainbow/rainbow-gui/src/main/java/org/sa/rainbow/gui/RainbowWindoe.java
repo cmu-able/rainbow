@@ -41,9 +41,12 @@ import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReportingSubscriberCallback;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
-import org.sa.rainbow.gui.arch.RainbowDesktopManager;
 import org.sa.rainbow.gui.arch.RainbowDesktopIconUI;
+import org.sa.rainbow.gui.arch.RainbowDesktopManager;
 import org.sa.rainbow.util.Util;
+
+import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
+import com.mxgraph.view.mxGraph;
 
 public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportingSubscriberCallback {
 
@@ -234,30 +237,48 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 	}
 
 	protected void layoutArchitecture() {
-		for (Map.Entry<String, GaugeInfo> entry : m_gauges.entrySet()) {
-			GaugeInfo gInfo = entry.getValue();
-			if (gInfo.probes == null) {
-				Map<String, Object> configParams = toMap(gInfo.description.configParams());
-				Map<String, Object> setupParams = toMap(gInfo.description.setupParams());
+		mxGraph graph = new mxGraph();
+		Object parent = graph.getDefaultParent();
+		Object parentNode = graph.insertVertex(parent, null, null, 0, 0, 10,10);
+		graph.getModel().beginUpdate();
+		try {
+			for (Map.Entry<String, GaugeInfo> entry : m_gauges.entrySet()) {
+				GaugeInfo gInfo = entry.getValue();
+				Object gaugeNode = graph.insertVertex(parent, null, gInfo, gInfo.frame.getX(), gInfo.frame.getY(), gInfo.frame.getWidth(), gInfo.frame.getHeight());
+				graph.insertEdge(parent, null, "edge", parentNode, gaugeNode);
+				if (gInfo.probes == null) {
+					Map<String, Object> configParams = toMap(gInfo.description.configParams());
+					Map<String, Object> setupParams = toMap(gInfo.description.setupParams());
 
-				entry.getValue().probes = new LinkedList<>();
+					entry.getValue().probes = new LinkedList<>();
 
-				if (configParams.get("targetProbeType") instanceof String) {
-					String tpt = (String) configParams.get("targetProbeType");
-					processProbeIntoGauge(gInfo, setupParams, tpt);
-				}
-				if (configParams.get("targetProbeList") instanceof String) {
-					String probeIds = (String) configParams.get("targetProbeList");
-					for (String probeId : probeIds.split(",")) {
-						probeId = probeId.trim();
-						processProbeIntoGauge(gInfo, setupParams, probeId);
+					if (configParams.get("targetProbeType") instanceof String) {
+						String tpt = (String) configParams.get("targetProbeType");
+						processProbeIntoGauge(gInfo, setupParams, tpt);
+					}
+					if (configParams.get("targetProbeList") instanceof String) {
+						String probeIds = (String) configParams.get("targetProbeList");
+						for (String probeId : probeIds.split(",")) {
+							probeId = probeId.trim();
+							processProbeIntoGauge(gInfo, setupParams, probeId);
+						}
+
+					}
+					for (String pid : gInfo.probes) {
+						ProbeInfo pInfo = m_probes.get(pid);
+						Object probeNode = graph.insertVertex(parent,null,pInfo, pInfo.frame.getX(), pInfo.frame.getY(), pInfo.frame.getWidth(), pInfo.frame.getHeight());
+						graph.insertEdge(parent, null, "edge", gaugeNode, probeNode);
 					}
 
 				}
 
 			}
 
+		} finally {
+			graph.getModel().endUpdate();
 		}
+		mxHierarchicalLayout layout = new mxHierarchicalLayout(graph);
+		layout.execute(parent);
 	}
 
 	protected void quit() {
