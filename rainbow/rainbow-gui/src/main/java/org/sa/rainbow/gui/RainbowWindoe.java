@@ -274,7 +274,7 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		int i = 1;
 		for (String g : gaugeManager.getCreatedGauges()) {
 			if (m_gauges.get(g) == null) {
-				GaugeInstanceDescription description = Rainbow.instance().getRainbowMaster().gaugeDesc().instSpec.get(g);
+				GaugeInstanceDescription description = Rainbow.instance().getRainbowMaster().gaugeDesc().instSpec.get(g.split("@")[0].split(":")[0]);
 				JInternalFrame frame = new JInternalFrame(shortName(g), true, false, true);
 				frame.setFrameIcon(new ImageIcon(this.getClass().getResource("/gauge.png"), shortName(g)));
 				frame.setIconifiable(true);
