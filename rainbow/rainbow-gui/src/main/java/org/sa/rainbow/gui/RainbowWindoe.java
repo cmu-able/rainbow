@@ -298,7 +298,7 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 			com.mxgraph.model.mxCell cell = (mxCell) c;
 			if (cell.getValue() instanceof Component) {
 				Component f = (Component) cell.getValue();
-				f.setBounds((int) b.getX(), (int) b.getY(), (int) b.getWidth(), (int) b.getHeight());
+				f.setBounds((int) b.getX()/50, (int) b.getY(), (int) b.getWidth(), (int) b.getHeight());
 			}
 
 		}
