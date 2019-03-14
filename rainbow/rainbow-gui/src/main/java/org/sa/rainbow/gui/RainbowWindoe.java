@@ -285,23 +285,23 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 				}
 
 			}
-			graph.setMaximumGraphBounds(new mxRectangle(400,400,WIDTH-400,HEIGHT-400));
-			mxHierarchicalLayout layout = new mxHierarchicalLayout(graph);
-//			layout.setLevelDistance(50);
-			layout.execute(graph.getDefaultParent());
-			for (Object c : cells) {
-				mxRectangle b = graph.getCellBounds(c);
-				com.mxgraph.model.mxCell cell = (mxCell) c;
-				if (cell.getValue() instanceof Component) {
-					Component f = (Component) cell.getValue();
-					f.setBounds((int) b.getX(), (int) b.getY(), (int) b.getWidth(), (int) b.getHeight());
-				}
-
-			}
+		
 		} finally {
 			graph.getModel().endUpdate();
 		}
-		
+		graph.setMaximumGraphBounds(new mxRectangle(400,400,WIDTH-400,HEIGHT-400));
+		mxHierarchicalLayout layout = new mxHierarchicalLayout(graph);
+//		layout.setLevelDistance(50);
+		layout.execute(graph.getDefaultParent());
+		for (Object c : cells) {
+			mxRectangle b = graph.getCellBounds(c);
+			com.mxgraph.model.mxCell cell = (mxCell) c;
+			if (cell.getValue() instanceof Component) {
+				Component f = (Component) cell.getValue();
+				f.setBounds((int) b.getX(), (int) b.getY(), (int) b.getWidth(), (int) b.getHeight());
+			}
+
+		}
 //		int childCount = graph.getModel().getChildCount(parent);
 //		for (GaugeInfo gi : m_gauges.values()) {
 //			mxRectangle b = graph.getCellBounds(gi.description.id());
