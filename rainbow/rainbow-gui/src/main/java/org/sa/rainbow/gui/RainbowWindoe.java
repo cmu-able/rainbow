@@ -215,7 +215,7 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 	private void processProbeIntoGauge(GaugeInfo gInfo, Map<String, Object> setupParams, String tpt) {
 		Pair<String, String> probe = Util.decomposeID(tpt);
 		if (probe.secondValue() == null) {
-			probe.setSecondValue((String) setupParams.get("deploymentLocation"));
+			probe.setSecondValue((String) setupParams.get("targetIP"));
 			gInfo.probes.add(Util.genID(probe.firstValue(), probe.secondValue()));
 		}
 		else if (IGauge.ALL_LOCATIONS.equals(probe.secondValue())) {
