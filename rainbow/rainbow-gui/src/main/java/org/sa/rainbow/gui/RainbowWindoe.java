@@ -12,6 +12,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -241,11 +242,13 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		mxGraph graph = new mxGraph();
 		Object parent = graph.getDefaultParent();
 		Object parentNode = graph.insertVertex(parent, null, null, 0, 0, 10,10);
+		Set<Object> cells = new HashSet<>();
 		graph.getModel().beginUpdate();
 		try {
 			for (Map.Entry<String, GaugeInfo> entry : m_gauges.entrySet()) {
 				GaugeInfo gInfo = entry.getValue();
 				Object gaugeNode = graph.insertVertex(parent, gInfo.description.id(), gInfo, gInfo.frame.getX(), gInfo.frame.getY(), gInfo.frame.getWidth(), gInfo.frame.getHeight());
+				cells.add(gaugeNode);
 				graph.insertEdge(parent, null, "edge", parentNode, gaugeNode);
 				if (gInfo.probes == null) {
 					Map<String, Object> configParams = toMap(gInfo.description.configParams());
@@ -268,6 +271,7 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 					for (String pid : gInfo.probes) {
 						ProbeInfo pInfo = m_probes.get(pid);
 						Object probeNode = graph.insertVertex(parent,pInfo.description.name,pInfo, pInfo.frame.getX(), pInfo.frame.getY(), pInfo.frame.getWidth(), pInfo.frame.getHeight());
+						cells.add(probeNode);
 						graph.insertEdge(parent, null, "edge", gaugeNode, probeNode);
 					}
 
@@ -280,6 +284,11 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		}
 		mxHierarchicalLayout layout = new mxHierarchicalLayout(graph);
 		layout.execute(parent);
+		for (Object c : cells) {
+			mxRectangle b = graph.getCellBounds(c);
+			double x = b.getX();
+
+		}
 		int childCount = graph.getModel().getChildCount(parent);
 		for (GaugeInfo gi : m_gauges.values()) {
 			mxRectangle b = graph.getCellBounds(gi.description.id());
