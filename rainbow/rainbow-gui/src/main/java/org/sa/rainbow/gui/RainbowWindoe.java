@@ -47,6 +47,7 @@ import org.sa.rainbow.gui.arch.RainbowDesktopManager;
 import org.sa.rainbow.util.Util;
 
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
+import com.mxgraph.model.mxCell;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
 
@@ -241,13 +242,15 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 	protected void layoutArchitecture() {
 		mxGraph graph = new mxGraph();
 		Object parent = graph.getDefaultParent();
-		Object parentNode = graph.insertVertex(parent, null, null, 0, 0, 10,10);
+		Object parentNode = graph.insertVertex(parent, null, null, 0, 0, 10, 10);
 		Set<Object> cells = new HashSet<>();
 		graph.getModel().beginUpdate();
 		try {
 			for (Map.Entry<String, GaugeInfo> entry : m_gauges.entrySet()) {
 				GaugeInfo gInfo = entry.getValue();
-				Object gaugeNode = graph.insertVertex(parent, gInfo.description.id(), gInfo, gInfo.frame.getX(), gInfo.frame.getY(), gInfo.frame.getWidth(), gInfo.frame.getHeight());
+				Component visibleFrame = getVisibleComponent(gInfo.frame);
+				Object gaugeNode = graph.insertVertex(parent, gInfo.description.id(), visibleFrame, visibleFrame.getX(),
+						visibleFrame.getY(), visibleFrame.getWidth(), visibleFrame.getHeight());
 				cells.add(gaugeNode);
 				graph.insertEdge(parent, null, "edge", parentNode, gaugeNode);
 				if (gInfo.probes == null) {
@@ -270,7 +273,10 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 					}
 					for (String pid : gInfo.probes) {
 						ProbeInfo pInfo = m_probes.get(pid);
-						Object probeNode = graph.insertVertex(parent,pInfo.description.name,pInfo, pInfo.frame.getX(), pInfo.frame.getY(), pInfo.frame.getWidth(), pInfo.frame.getHeight());
+						visibleFrame = getVisibleComponent(pInfo.frame);
+						Object probeNode = graph.insertVertex(parent, pInfo.description.name, visibleFrame,
+								visibleFrame.getX(), visibleFrame.getY(), visibleFrame.getWidth(),
+								visibleFrame.getHeight());
 						cells.add(probeNode);
 						graph.insertEdge(parent, null, "edge", gaugeNode, probeNode);
 					}
@@ -286,19 +292,23 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		layout.execute(parent);
 		for (Object c : cells) {
 			mxRectangle b = graph.getCellBounds(c);
-			double x = b.getX();
+			com.mxgraph.model.mxCell cell = (mxCell) c;
+			if (cell.getValue() instanceof Component) {
+				Component f = (Component) cell.getValue();
+				f.setBounds((int) b.getX(), (int) b.getY(), (int) b.getWidth(), (int) b.getHeight());
+			}
 
 		}
-		int childCount = graph.getModel().getChildCount(parent);
-		for (GaugeInfo gi : m_gauges.values()) {
-			mxRectangle b = graph.getCellBounds(gi.description.id());
-			gi.frame.setBounds((int )b.getX(), (int )b.getY(), (int )b.getWidth(), (int )b.getHeight());
-		}
-		
-		for (ProbeInfo pi : m_probes.values()) {
-			mxRectangle b = graph.getCellBounds(pi.description.name);
-			pi.frame.setBounds((int )b.getX(), (int )b.getY(), (int )b.getWidth(), (int )b.getHeight());
-		}
+//		int childCount = graph.getModel().getChildCount(parent);
+//		for (GaugeInfo gi : m_gauges.values()) {
+//			mxRectangle b = graph.getCellBounds(gi.description.id());
+//			gi.frame.setBounds((int) b.getX(), (int) b.getY(), (int) b.getWidth(), (int) b.getHeight());
+//		}
+//
+//		for (ProbeInfo pi : m_probes.values()) {
+//			mxRectangle b = graph.getCellBounds(pi.description.name);
+//			pi.frame.setBounds((int) b.getX(), (int) b.getY(), (int) b.getWidth(), (int) b.getHeight());
+//		}
 	}
 
 	protected void quit() {
