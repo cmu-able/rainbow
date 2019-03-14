@@ -1,6 +1,7 @@
 package org.sa.rainbow.gui.arch;
 
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.LayoutManager;
 
@@ -25,6 +26,7 @@ public class SimpleDesktopIconUI extends BasicDesktopIconUI {
 		JLabel label = new JLabel(title, icon, SwingConstants.CENTER);
 		label.setVerticalTextPosition(JLabel.BOTTOM);
 		label.setHorizontalTextPosition(JLabel.CENTER);
+		label.setFont(new Font(label.getFont().getFontName(), label.getFont().getStyle(), (int) Math.round(label.getFont().getStyle()*0.8)));
 
 		desktopIcon.setBorder(null);
 		desktopIcon.setOpaque(false);
