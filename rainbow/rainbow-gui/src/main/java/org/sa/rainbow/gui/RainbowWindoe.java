@@ -46,6 +46,7 @@ import org.sa.rainbow.gui.arch.RainbowDesktopManager;
 import org.sa.rainbow.util.Util;
 
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
+import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
 
 public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportingSubscriberCallback {
@@ -279,6 +280,15 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		}
 		mxHierarchicalLayout layout = new mxHierarchicalLayout(graph);
 		layout.execute(parent);
+		for (GaugeInfo gi : m_gauges.values()) {
+			mxRectangle b = graph.getCellBounds(gi);
+			gi.frame.setBounds((int )b.getX(), (int )b.getY(), (int )b.getWidth(), (int )b.getHeight());
+		}
+		
+		for (ProbeInfo pi : m_probes.values()) {
+			mxRectangle b = graph.getCellBounds(pi);
+			pi.frame.setBounds((int )b.getX(), (int )b.getY(), (int )b.getWidth(), (int )b.getHeight());
+		}
 	}
 
 	protected void quit() {
