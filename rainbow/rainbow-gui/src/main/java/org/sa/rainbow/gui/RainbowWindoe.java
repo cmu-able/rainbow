@@ -285,22 +285,22 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 				}
 
 			}
+			mxCompactTreeLayout layout = new mxCompactTreeLayout(graph);
+			layout.setLevelDistance(50);
+			layout.execute(graph.getDefaultParent());
+			for (Object c : cells) {
+				mxRectangle b = graph.getCellBounds(c);
+				com.mxgraph.model.mxCell cell = (mxCell) c;
+				if (cell.getValue() instanceof Component) {
+					Component f = (Component) cell.getValue();
+					f.setBounds((int) b.getX(), (int) b.getY(), (int) b.getWidth(), (int) b.getHeight());
+				}
 
+			}
 		} finally {
 			graph.getModel().endUpdate();
 		}
-		mxCompactTreeLayout layout = new mxCompactTreeLayout(graph);
-		layout.setLevelDistance(50);
-		layout.execute(graph.getDefaultParent());
-		for (Object c : cells) {
-			mxRectangle b = graph.getCellBounds(c);
-			com.mxgraph.model.mxCell cell = (mxCell) c;
-			if (cell.getValue() instanceof Component) {
-				Component f = (Component) cell.getValue();
-				f.setBounds((int) b.getX(), (int) b.getY(), (int) b.getWidth(), (int) b.getHeight());
-			}
-
-		}
+		
 //		int childCount = graph.getModel().getChildCount(parent);
 //		for (GaugeInfo gi : m_gauges.values()) {
 //			mxRectangle b = graph.getCellBounds(gi.description.id());
