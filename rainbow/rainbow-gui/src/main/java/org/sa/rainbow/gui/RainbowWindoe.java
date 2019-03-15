@@ -329,7 +329,7 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 			int gaugeStep = Math.round(GAUGE_REGION.width / (float )processedGauges.size());
 			for (String gid : processedGauges) {
 				JDesktopIcon frameToPosition = m_gauges.get(gid).frame.getDesktopIcon();
-				frameToPosition.setLocation(GAUGE_REGION.x + gidx*gaugeStep + (gaugeStep + frameToPosition.getWidth())/2, GAUGE_REGION.y + (GAUGE_REGION.height + frameToPosition.getHeight())/2);
+				frameToPosition.setLocation(GAUGE_REGION.x + gidx*gaugeStep + (gaugeStep - frameToPosition.getWidth())/2, GAUGE_REGION.y + GAUGE_REGION.height/2 - frameToPosition.getHeight()/2);
 				gidx++;
 			}
 			
@@ -337,7 +337,7 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 			gaugeStep = Math.round(PROBE_REGION.width / (float )processedProbes.size());
 			for (String gid : processedProbes) {
 				JDesktopIcon frameToPosition = m_probes.get(gid).frame.getDesktopIcon();
-				frameToPosition.setLocation(PROBE_REGION.x + gidx*gaugeStep + (gaugeStep + frameToPosition.getWidth())/2, PROBE_REGION.y + (PROBE_REGION.height + frameToPosition.getHeight())/2);
+				frameToPosition.setLocation(PROBE_REGION.x + gidx*gaugeStep + (gaugeStep - frameToPosition.getWidth())/2, PROBE_REGION.y + PROBE_REGION.height/2 - frameToPosition.getHeight()/2);
 				gidx++;
 			}
 			
