@@ -85,7 +85,7 @@ public class RainbowDesktopManager extends DefaultDesktopManager {
 		Dimension pref = frame.getDesktopIcon().getPreferredSize();
 		
 		Rectangle ideal = new Rectangle((int )Math.round(b.getCenterX()-pref.getWidth()/2),
-										(int )Math.round(b.getCenterY()/*-pref.getWidth()/2*/),
+										(int )Math.round(b.getCenterY()-pref.getWidth()/2),
 										pref.width, pref.height);
 		return ideal;
 		

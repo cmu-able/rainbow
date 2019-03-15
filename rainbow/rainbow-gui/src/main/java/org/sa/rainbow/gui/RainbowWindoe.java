@@ -51,43 +51,12 @@ import org.sa.rainbow.gui.arch.RainbowDesktopIconUI;
 import org.sa.rainbow.gui.arch.RainbowDesktopManager;
 import org.sa.rainbow.util.Util;
 
-import javafx.geometry.Rectangle2D;
 
-public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportingSubscriberCallback {
+public class RainbowWindoe extends RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportingSubscriberCallback {
 
-	protected static Color bleach(Color color, double amount) {
-		int red = (int) ((color.getRed() * (1 - amount) / 255 + amount) * 255);
-		int green = (int) ((color.getGreen() * (1 - amount) / 255 + amount) * 255);
-		int blue = (int) ((color.getBlue() * (1 - amount) / 255 + amount) * 255);
-		return new Color(red, green, blue);
-	}
+
 
 	final static int CENTER = 0, WEST = 1, NW = 3, NORTH = 2, NE = 6, EAST = 4, SE = 12, SOUTH = 8, SW = 9;
-	private static final Color GAUGES_COLOR = Color.BLUE;
-	private static final Color EFFECTORS_COLOR = Color.ORANGE;
-	private static final Color SYSTEM_COLOR_LIGHT;
-	private static final Color MODELS_MANAGER_COLOR = Color.MAGENTA;
-	private static final Color MODELS_MANAGER_COLOR_LIGHT;
-	private static final Color EXECUTORS_COLOR = Color.GREEN;
-	private static final Color EXECUTORS_COLOR_LIGHT;
-	private static final Color ANALYZERS_COLOR = Color.PINK;
-	private static final Color ANALYZERS_COLOR_LIGHT;
-	private static final Color ADAPTION_MANAGER_COLOR = Color.RED;
-	private static final Color ADAPTION_MANAGER_COLOR_LIGHT;
-	private static final Color GAUGES_COLOR_LIGHT;
-
-	static {
-		GAUGES_COLOR_LIGHT = bleach(GAUGES_COLOR, .75);
-		SYSTEM_COLOR_LIGHT = bleach(EFFECTORS_COLOR, 0.75);
-		MODELS_MANAGER_COLOR_LIGHT = bleach(MODELS_MANAGER_COLOR, 0.75);
-		EXECUTORS_COLOR_LIGHT = bleach(EFFECTORS_COLOR, 0.75);
-		ANALYZERS_COLOR_LIGHT = bleach(EFFECTORS_COLOR, 0.75);
-		ADAPTION_MANAGER_COLOR_LIGHT = bleach(EFFECTORS_COLOR, 0.75);
-	}
-	public static final int MAX_TEXT_LENGTH = 100000;
-	/** Convenience constant: size of text field to set to when Max is exceeded. */
-	public static final int TEXT_HALF_LENGTH = 50000;
-	public static final float TEXT_FONT_SIZE = 9.0f;
 
 	private static final int WIDTH = 1280;
 	private static final int HEIGHT = 900;
@@ -114,31 +83,19 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 	Map<String, ProbeInfo> m_probes = new HashMap<>();
 	Map<String, GaugeInfo> m_gauges = new HashMap<>();
 	Map<String, JInternalFrame> m_models = new HashMap<>();
-	private IMasterCommandPort m_master;
-	private JFrame m_frame;
-	private JDesktopPane m_desktopPane;
-	private OracleStatusPanel m_oracleMessagePane;
-	Map<RainbowComponentT, JInternalFrame> m_internalFrames = new HashMap<>();
-	private Timer m_tabTimer;
+	
 
 	public RainbowWindoe(IMasterCommandPort master) {
-		setMaster(master);
+		super(master);
 	}
 
 	public RainbowWindoe() {
-		m_master = null;
+		super();
 	}
 
-	private void initialize() {
-		m_frame = new JFrame();
-		m_frame.setBounds(0, 0, WIDTH, HEIGHT);
-		m_frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		m_frame.addWindowFocusListener(new WindowAdapter() {
-			@Override
-			public void windowClosed(WindowEvent e) {
-				quit();
-			}
-		});
+	
+	@Override
+	protected void createDesktopPane() {
 		m_desktopPane = new JDesktopPane() {
 			protected void paintComponent(java.awt.Graphics g) {
 				super.paintComponent(g);
@@ -152,16 +109,10 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		};
 		m_desktopPane.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
 		m_frame.getContentPane().add(m_desktopPane, BorderLayout.CENTER);
+	}
+	
 
-		List<String> expectedDelegateLocations;
-		Throwable error = null;
-		try {
-			expectedDelegateLocations = m_master.getExpectedDelegateLocations();
-		} catch (Throwable e) {
-			expectedDelegateLocations = Arrays.asList("Error");
-			error = e;
-		}
-
+	protected void createMasterUI(List<String> expectedDelegateLocations) {
 		JInternalFrame masterFrame = new JInternalFrame("Rainbow Master");
 		masterFrame.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		masterFrame.setMaximizable(true);
@@ -176,23 +127,6 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		m_oracleMessagePane = new OracleStatusPanel(Color.white, expectedDelegateLocations);
 		masterFrame.getContentPane().add(m_oracleMessagePane, BorderLayout.CENTER);
 		m_internalFrames.put(RainbowComponentT.MASTER, masterFrame);
-
-		m_tabTimer = new javax.swing.Timer(1000, new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (m_master.allDelegatesOK()) {
-					populateArchitecture();
-					layoutArchitecture();
-					if (m_master.autoStartProbes()) {
-						m_master.startProbes();
-					}
-					m_tabTimer.stop();
-					m_tabTimer = null;
-				}
-			}
-		});
-		m_tabTimer.start();
 	}
 
 	Map<String, Object> toMap(List<TypedAttributeWithValue> tavs) {
@@ -307,19 +241,10 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 	}
 
 	protected void layoutArchitecture() {
-//		mxGraph graph = new mxGraph();
-//		Object parent = graph.getDefaultParent();
-//		Object parentNode = graph.insertVertex(parent, null, null, 0, 0, 10, 10);
-//		Set<Object> cells = new HashSet<>();
-//		graph.getModel().beginUpdate();
+
 		try {
 			for (Map.Entry<String, GaugeInfo> entry : m_gauges.entrySet()) {
 				GaugeInfo gInfo = entry.getValue();
-//				Component visibleFrame = getVisibleComponent(gInfo.frame);
-//				Object gaugeNode = graph.insertVertex(parent, gInfo.description.id(), visibleFrame, visibleFrame.getX(),
-//						visibleFrame.getY(), visibleFrame.getWidth(), visibleFrame.getHeight());
-//				cells.add(gaugeNode);
-//				graph.insertEdge(parent, null, "edge", parentNode, gaugeNode);
 				if (gInfo.probes == null) {
 					Map<String, Object> configParams = toMap(gInfo.description.configParams());
 					Map<String, Object> setupParams = toMap(gInfo.description.setupParams());
@@ -338,108 +263,69 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 						}
 
 					}
-//					for (String pid : gInfo.probes) {
-//						ProbeInfo pInfo = m_probes.get(pid);
-//						visibleFrame = getVisibleComponent(pInfo.frame);
-//						Object probeNode = graph.insertVertex(parent, pInfo.description.name, visibleFrame,
-//								visibleFrame.getX(), visibleFrame.getY(), visibleFrame.getWidth(),
-//								visibleFrame.getHeight());
-//						cells.add(probeNode);
-//						graph.insertEdge(parent, null, "edge", gaugeNode, probeNode);
-//					}
 
 				}
 
 			}
 
-			String[] probeLevel = new String[m_probes.size()];
-			String[] gaugeLevel = new String[m_gauges.size()];
-			Arrays.fill(probeLevel, "");
-			Arrays.fill(gaugeLevel, "");
-			;
-			ArrayList<String> processedProbes = new ArrayList<>(m_probes.size());
-			ArrayList<String> processedGauges = new ArrayList<>();
-			for (Entry<String, GaugeInfo> ge : m_gauges.entrySet()) {
-				for (String pid : ge.getValue().probes) {
-					if (processedProbes.contains(pid) && !m_probes.get(pid).gauges.isEmpty()) {
-						String nextToGauge = m_probes.get(pid).gauges.iterator().next();
-						int gi = processedGauges.indexOf(nextToGauge);
-						if (gi == -1) {
-							processedGauges.add(ge.getKey());
-						} else {
-							processedGauges.add(gi + 1, ge.getKey());
-							break;
-						}
+			layoutGaugeProbeLevels();
+
+
+		} finally {
+		}
+	}
+
+	private void layoutGaugeProbeLevels() {
+		ArrayList<String> processedProbes = new ArrayList<>(m_probes.size());
+		ArrayList<String> processedGauges = new ArrayList<>();
+		for (Entry<String, GaugeInfo> ge : m_gauges.entrySet()) {
+			for (String pid : ge.getValue().probes) {
+				if (processedProbes.contains(pid) && !m_probes.get(pid).gauges.isEmpty()) {
+					String nextToGauge = m_probes.get(pid).gauges.iterator().next();
+					int gi = processedGauges.indexOf(nextToGauge);
+					if (gi == -1) {
+						processedGauges.add(ge.getKey());
+					} else {
+						processedGauges.add(gi + 1, ge.getKey());
+						break;
 					}
 				}
-				if (!processedGauges.contains(ge.getKey())) {
-					processedGauges.add(ge.getKey());
-				}
-				for (String pid : ge.getValue().probes) {
-					if (!processedProbes.contains(pid))
-						processedProbes.add(pid);
-				}
 			}
-			for (String pid : m_probes.keySet()) {
+			if (!processedGauges.contains(ge.getKey())) {
+				processedGauges.add(ge.getKey());
+			}
+			for (String pid : ge.getValue().probes) {
 				if (!processedProbes.contains(pid))
 					processedProbes.add(pid);
 			}
-			int gidx = 0;
-			int gaugeStep = Math.round(GAUGE_REGION.width / (float) processedGauges.size());
-			for (String gid : processedGauges) {
-				JDesktopIcon frameToPosition = m_gauges.get(gid).frame.getDesktopIcon();
-				frameToPosition.setLocation(
-						GAUGE_REGION.x + gidx * gaugeStep + (gaugeStep - frameToPosition.getWidth()) / 2,
-						GAUGE_REGION.y + GAUGE_REGION.height / 2 - frameToPosition.getHeight() / 2);
-				gidx++;
-			}
-
-			gidx = 0;
-			gaugeStep = Math.round(PROBE_REGION.width / (float) processedProbes.size());
-			for (String gid : processedProbes) {
-				JDesktopIcon frameToPosition = m_probes.get(gid).frame.getDesktopIcon();
-				frameToPosition.setLocation(
-						PROBE_REGION.x + gidx * gaugeStep + (gaugeStep - frameToPosition.getWidth()) / 2,
-						PROBE_REGION.y + PROBE_REGION.height / 2 - frameToPosition.getHeight() / 2);
-				gidx++;
-			}
-
-//			System.out.println(processedGauges);
-//			System.out.println(processedProbes);
-
-		} finally {
-//			graph.getModel().endUpdate();
 		}
-//		graph.setMaximumGraphBounds(new mxRectangle(400,400,WIDTH-400,HEIGHT-400));
-//		mxCompactTreeLayout layout = new mxCompactTreeLayout(graph);
-////		layout.setLevelDistance(50);
-//		layout.execute(graph.getDefaultParent());
-//		for (Object c : cells) {
-//			mxRectangle b = graph.getCellBounds(c);
-//			com.mxgraph.model.mxCell cell = (mxCell) c;
-//			if (cell.getValue() instanceof Component) {
-//				Component f = (Component) cell.getValue();
-//				f.setBounds((int) b.getX()/50, (int) b.getY(), (int) b.getWidth(), (int) b.getHeight());
-//			}
-//
-//		}
-//		int childCount = graph.getModel().getChildCount(parent);
-//		for (GaugeInfo gi : m_gauges.values()) {
-//			mxRectangle b = graph.getCellBounds(gi.description.id());
-//			gi.frame.setBounds((int) b.getX(), (int) b.getY(), (int) b.getWidth(), (int) b.getHeight());
-//		}
-//
-//		for (ProbeInfo pi : m_probes.values()) {
-//			mxRectangle b = graph.getCellBounds(pi.description.name);
-//			pi.frame.setBounds((int) b.getX(), (int) b.getY(), (int) b.getWidth(), (int) b.getHeight());
-//		}
+		for (String pid : m_probes.keySet()) {
+			if (!processedProbes.contains(pid))
+				processedProbes.add(pid);
+		}
+		int gidx = 0;
+		int gaugeStep = Math.round(GAUGE_REGION.width / (float) processedGauges.size());
+		for (String gid : processedGauges) {
+			JDesktopIcon frameToPosition = m_gauges.get(gid).frame.getDesktopIcon();
+			frameToPosition.setLocation(
+					GAUGE_REGION.x + gidx * gaugeStep + (gaugeStep - frameToPosition.getWidth()) / 2,
+					GAUGE_REGION.y + GAUGE_REGION.height / 2 - frameToPosition.getHeight() / 2);
+			gidx++;
+		}
+
+		gidx = 0;
+		gaugeStep = Math.round(PROBE_REGION.width / (float) processedProbes.size());
+		for (String gid : processedProbes) {
+			JDesktopIcon frameToPosition = m_probes.get(gid).frame.getDesktopIcon();
+			frameToPosition.setLocation(
+					PROBE_REGION.x + gidx * gaugeStep + (gaugeStep - frameToPosition.getWidth()) / 2,
+					PROBE_REGION.y + PROBE_REGION.height / 2 - frameToPosition.getHeight() / 2);
+			gidx++;
+		}
 	}
 
-	protected void quit() {
-		Rainbow.instance().signalTerminate();
-	}
 
-	private void populateArchitecture() {
+	protected void populateUI() {
 		createProbes();
 		createGauges();
 	}
@@ -482,9 +368,7 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		}
 	}
 
-	private String shortName(String g) {
-		return g.split("@")[0].split(":")[0];
-	}
+
 
 	private void createProbes() {
 		ProbeDescription probes = Rainbow.instance().getRainbowMaster().probeDesc();
@@ -527,52 +411,8 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		return frame;
 	}
 
-	@Override
-	public void report(RainbowComponentT component, ReportType type, String message) {
-		// TODO Auto-generated method stub
+	
 
-	}
-
-	@Override
-	public void dispose() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public boolean isDisposed() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void display() {
-		if (m_frame != null) {
-			SwingUtilities.invokeLater(new Runnable() {
-
-				@Override
-				public void run() {
-					show();
-				}
-			});
-		}
-	}
-
-	protected void show() {
-		if (m_frame == null) {
-			initialize();
-//			populateArchitecture();
-		}
-		m_frame.setVisible(true);
-	}
-
-	@Override
-	public void setMaster(IMasterCommandPort master) {
-		boolean needsInit = m_master == null;
-		m_master = master;
-		if (needsInit)
-			initialize();
-	}
 
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
