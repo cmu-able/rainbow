@@ -51,6 +51,8 @@ import org.sa.rainbow.gui.arch.RainbowDesktopIconUI;
 import org.sa.rainbow.gui.arch.RainbowDesktopManager;
 import org.sa.rainbow.util.Util;
 
+import javafx.geometry.Rectangle2D;
+
 public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportingSubscriberCallback {
 
 	protected static Color bleach(Color color, double amount) {
@@ -227,9 +229,17 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 	private Point findClosestCorner(Rectangle r1, Rectangle r2) {
 		Point p = new Point();
 		int outcode = r1.outcode(r2.getCenterX(), r2.getCenterY());
+		if ((outcode & java.awt.geom.Rectangle2D.OUT_LEFT) == 1) 
+			outcode = WEST;
+		else if ((outcode & java.awt.geom.Rectangle2D.OUT_TOP) == 1)
+			outcode = NORTH;
+		else if ((outcode & java.awt.geom.Rectangle2D.OUT_BOTTOM)== 1) 
+			outcode = SOUTH;
+		else if ((outcode & java.awt.geom.Rectangle2D.OUT_RIGHT)== 1)
+			outcode = EAST;
 		switch (outcode) {
 		case NORTH:
-			p.x = r1.x;
+			p.x = r1.x + r1.width/2;
 			p.y = r1.y;
 			break;
 		case NW:
@@ -238,14 +248,14 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 			break;
 		case WEST:
 			p.x = r1.x;
-			p.y = r1.y;
+			p.y = r1.y + r1.height/2;
 			break;
 		case SW:
 			p.x = r1.x;
 			p.y = r1.y + r1.height;
 			break;
 		case SOUTH:
-			p.x = r1.x;
+			p.x = r1.x + r1.width /2;
 			p.y = r1.y + r1.height;
 			break;
 		case SE:
@@ -254,7 +264,7 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 			break;
 		case EAST:
 			p.x = r1.x + r1.width;
-			p.y = r1.y;
+			p.y = r1.y + r1.height/2;
 			break;
 		case NE:
 			p.x = r1.x + r1.width;
