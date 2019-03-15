@@ -65,6 +65,10 @@ public class RainbowDesktopManager extends DefaultDesktopManager {
 		super.deiconifyFrame(f);
 		m_iconed.remove(f);
 		try {f.setIcon(false);} catch (PropertyVetoException e) {}
+		
+		Rectangle r = getBoundsForFrameOf(f);
+		f.setBounds(r);
+
 		m_desktop.repaint();
 	}
 	
@@ -85,6 +89,19 @@ public class RainbowDesktopManager extends DefaultDesktopManager {
 										pref.width, pref.height);
 		return ideal;
 		
+	}
+	
+	protected Rectangle getBoundsForFrameOf(JInternalFrame frame) {
+		JDesktopPane desktopPane = frame.getDesktopPane();
+		if (desktopPane == null)
+			return frame.getBounds();
+		Rectangle b = frame.getDesktopIcon().getBounds();
+		Dimension size = frame.getSize();
+		
+		Rectangle ideal = new Rectangle((int )Math.round(b.getCenterX()-size.getWidth()/2),
+										(int )Math.round(b.getCenterY() - size.getHeight()/2),
+										size.width, size.height);
+		return ideal;
 	}
 	
 	@Override

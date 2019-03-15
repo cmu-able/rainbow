@@ -217,8 +217,8 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 					Rectangle pBounds = visiblePFrame.getBounds();
 //					int x2 = (int) Math.round(pBounds.getCenterX());
 //					int y2 = (int) Math.round(pBounds.getCenterY());
-					Point p1 = findClosestCorner(gBounds, pBounds);
-					Point p2 = findClosestCorner(pBounds,gBounds);
+					Point p1 = findClosestCornerNS(gBounds, pBounds);
+					Point p2 = findClosestCornerNS(pBounds,gBounds);
 					g2.draw(new Line2D.Double(p1.x, p1.y, p2.x, p2.y));
 				}
 
@@ -226,42 +226,46 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		}
 	}
 
-	private Point findClosestCorner(Rectangle r1, Rectangle r2) {
+	private Point findClosestCornerNS(Rectangle r1, Rectangle r2) {
 		Point p = new Point();
 		int outcode = r1.outcode(r2.getCenterX(), r2.getCenterY());
 		switch (outcode) {
 		case NORTH:
+		case NW:
+		case NE:
 			p.x = r1.x + r1.width/2;
 			p.y = r1.y;
 			break;
-		case NW:
-			p.x = r1.x;
-			p.y = r1.y;
-			break;
+//		case NW:
+//			p.x = r1.x;
+//			p.y = r1.y;
+//			break;
 		case WEST:
 			p.x = r1.x;
 			p.y = r1.y + r1.height/2;
 			break;
-		case SW:
-			p.x = r1.x;
-			p.y = r1.y + r1.height;
-			break;
+//		case SW:
+//			p.x = r1.x;
+//			p.y = r1.y + r1.height;
+//			break;
 		case SOUTH:
+		case SW:
+		case SE:
 			p.x = r1.x + r1.width /2;
 			p.y = r1.y + r1.height;
 			break;
-		case SE:
-			p.x = r1.x + r1.width;
-			p.y = r1.y + r1.height;
-			break;
+//		case SE:
+//			p.x = r1.x + r1.width;
+//			p.y = r1.y + r1.height;
+//			break;
 		case EAST:
 			p.x = r1.x + r1.width;
 			p.y = r1.y + r1.height/2;
 			break;
-		case NE:
-			p.x = r1.x + r1.width;
-			p.y = r1.y;
-			break;
+//		case NE:
+//			p.x = r1.x + r1.width;
+//			p.y = r1.y;
+//			break;
 		default /* CENTER */:
 			System.out.println("outcode = CENTER");
 		}
