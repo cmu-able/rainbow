@@ -128,7 +128,7 @@ public class OracleStatusPanel extends JPanel {
         return label;
     }
     
-    public Component getStatusPane() {
+    public JPanel getStatusPane() {
     	return m_statusPane;
     }
 }

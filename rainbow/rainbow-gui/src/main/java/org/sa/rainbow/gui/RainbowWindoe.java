@@ -113,8 +113,14 @@ public class RainbowWindoe extends RainbowWindow
 	@Override
 	protected void createMasterUI(List<String> expectedDelegateLocations) {
 		super.createMasterUI(expectedDelegateLocations);
-		Component statusPane = m_oracleMessagePane.getStatusPane();
+		
+		// Update status pane to be in menu
+		JPanel statusPane = m_oracleMessagePane.getStatusPane();
 		statusPane.getParent().remove(statusPane);
+		((FlowLayout )statusPane.getLayout()).setAlignment(FlowLayout.RIGHT);
+		statusPane.setBorder(null);
+		statusPane.setAlignmentX(Component.RIGHT_ALIGNMENT);
+		statusPane.setBackground(m_menuBar.getBackground());
 		m_menuBar.add(statusPane);
 
 	}
