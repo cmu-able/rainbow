@@ -133,12 +133,13 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		});
 		m_desktopPane = new JDesktopPane() {
 			protected void paintComponent(java.awt.Graphics g) {
+				super.paintComponent(g);
+
 				g.drawRect(GAUGE_REGION.x, GAUGE_REGION.y, GAUGE_REGION.width, GAUGE_REGION.height);
 				g.drawRect(PROBE_REGION.x, PROBE_REGION.y, PROBE_REGION.width, PROBE_REGION.height);
 				Graphics2D g2 = (Graphics2D) g;
 				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 				drawConnections(g2, this);
-				super.paintComponent(g);
 			}
 		};
 		m_desktopPane.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
