@@ -108,6 +108,8 @@ public class RainbowWindoe extends RainbowWindow implements IRainbowGUI, IDispos
 			}
 		};
 		m_desktopPane.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
+		m_desktopPane.setDesktopManager(new RainbowDesktopManager(m_desktopPane));
+
 		m_frame.getContentPane().add(m_desktopPane, BorderLayout.CENTER);
 	}
 	
@@ -129,7 +131,6 @@ public class RainbowWindoe extends RainbowWindow implements IRainbowGUI, IDispos
 		masterFrame.setBounds(0, 0, 420, 60);
 		m_desktopPane.add(masterFrame);
 		masterFrame.setVisible(true);
-		m_desktopPane.setDesktopManager(new RainbowDesktopManager(m_desktopPane));
 //		m_desktopPane.getDesktopManager().minimizeFrame(masterFrame);
 
 		m_oracleMessagePane = new OracleStatusPanel(Color.white, expectedDelegateLocations);
@@ -336,6 +337,7 @@ public class RainbowWindoe extends RainbowWindow implements IRainbowGUI, IDispos
 	protected void populateUI() {
 		createProbes();
 		createGauges();
+		layoutArchitecture();
 	}
 
 	private void createGauges() {

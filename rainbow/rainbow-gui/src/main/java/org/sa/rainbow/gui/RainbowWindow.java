@@ -128,6 +128,8 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	protected IProbeReportSubscriberPort m_createProbeReportingPortSubscriber;
 	protected IEffectorLifecycleBusPort m_createClientSideEffectorLifecyclePort;
 	private javax.swing.Timer m_tabTimer;
+	protected JInternalFrame m_masterFrame;
+	private JMenuBar m_menuBar;
 
 	/**
 	 * Launch the application.
@@ -362,44 +364,44 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	}
 
 	protected void createMasterUI(List<String> expectedDelegateLocations) {
-		JInternalFrame masterFrame = new JInternalFrame("Rainbow Master");
-		masterFrame.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		masterFrame.setMaximizable(true);
-		masterFrame.setIconifiable(true);
-		masterFrame.setBounds(0, 0, 420, 250);
-		m_desktopPane.add(masterFrame);
+		m_masterFrame = new JInternalFrame("Rainbow Master");
+		m_masterFrame.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		m_masterFrame.setMaximizable(true);
+		m_masterFrame.setIconifiable(true);
+		m_masterFrame.setBounds(0, 0, 420, 250);
+		m_desktopPane.add(m_masterFrame);
 		m_oracleMessagePane = new OracleStatusPanel(Color.white, expectedDelegateLocations);
-		masterFrame.getContentPane().add(m_oracleMessagePane, BorderLayout.CENTER);
-		m_internalFrames.put(RainbowComponentT.MASTER, masterFrame);
-		masterFrame.setVisible(true);
+		m_masterFrame.getContentPane().add(m_oracleMessagePane, BorderLayout.CENTER);
+		m_internalFrames.put(RainbowComponentT.MASTER, m_masterFrame);
+		m_masterFrame.setVisible(true);
 	}
 
 	protected void createMenuBar() {
-		JMenuBar menuBar = new JMenuBar();
-		menuBar.setOpaque(true);
-		menuBar.setBackground(Color.LIGHT_GRAY);
+		m_menuBar = new JMenuBar();
+		m_menuBar.setOpaque(true);
+		m_menuBar.setBackground(Color.LIGHT_GRAY);
 
 		JMenu menu = new JMenu("Rainbow");
 		menu.setMnemonic(KeyEvent.VK_R);
 		createRainbowMenu(menu);
-		menuBar.add(menu);
+		m_menuBar.add(menu);
 
 		menu = new JMenu("Delegates");
 		menu.setMnemonic(KeyEvent.VK_D);
 		createDelegateMenu(menu);
-		menuBar.add(menu);
+		m_menuBar.add(menu);
 
 		menu = new JMenu("Info");
 		menu.setMnemonic(KeyEvent.VK_I);
 		createInformationMenu(menu);
-		menuBar.add(menu);
+		m_menuBar.add(menu);
 
 		menu = new JMenu("Help");
 		menu.setMnemonic(KeyEvent.VK_H);
 		createHelpMenu(menu);
-		menuBar.add(menu);
+		m_menuBar.add(menu);
 
-		m_frame.setJMenuBar(menuBar);
+		m_frame.setJMenuBar(m_menuBar);
 	}
 
 	protected void quit() {
