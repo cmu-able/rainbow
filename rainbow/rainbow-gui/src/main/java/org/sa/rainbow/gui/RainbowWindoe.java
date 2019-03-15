@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,6 +24,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
+import javax.swing.JInternalFrame.JDesktopIcon;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
@@ -81,9 +83,11 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 	/** Convenience constant: size of text field to set to when Max is exceeded. */
 	public static final int TEXT_HALF_LENGTH = 50000;
 	public static final float TEXT_FONT_SIZE = 9.0f;
+	
 	private static final int WIDTH = 1280;
 	private static final int HEIGHT = 900;
-
+	private static final Rectangle PROBE_REGION = new Rectangle((int )(WIDTH*2/3f), (int )(HEIGHT-HEIGHT/4f), (int )(WIDTH-2/3f*WIDTH), (int )(HEIGHT/4f));
+	private static final Rectangle GAUGE_REGION = new Rectangle((int )(WIDTH*2/3f), (int )(HEIGHT-2*HEIGHT/4f), (int )(WIDTH-2/3f*WIDTH), (int )(HEIGHT/4f));
 	class ProbeInfo {
 		JInternalFrame frame;
 		ProbeAttributes description;
@@ -318,9 +322,24 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 				if (!processedProbes.contains(pid))
 					processedProbes.add(pid);
 			}
+			int gidx = 0;
+			int gaugeStep = Math.round(GAUGE_REGION.width / (float )processedGauges.size());
+			for (String gid : processedGauges) {
+				JDesktopIcon frameToPosition = m_gauges.get(gid).frame.getDesktopIcon();
+				frameToPosition.setLocation(GAUGE_REGION.x + gidx*gaugeStep + (gaugeStep + frameToPosition.getWidth())/2, GAUGE_REGION.y + (GAUGE_REGION.height + frameToPosition.getHeight())/2);
+				gidx++;
+			}
 			
-			System.out.println(processedGauges);
-			System.out.println(processedProbes);
+			gidx = 0;
+			gaugeStep = Math.round(PROBE_REGION.width / (float )processedProbes.size());
+			for (String gid : processedProbes) {
+				JDesktopIcon frameToPosition = m_probes.get(gid).frame.getDesktopIcon();
+				frameToPosition.setLocation(PROBE_REGION.x + gidx*gaugeStep + (gaugeStep + frameToPosition.getWidth())/2, PROBE_REGION.y + (PROBE_REGION.height + frameToPosition.getHeight())/2);
+				gidx++;
+			}
+			
+//			System.out.println(processedGauges);
+//			System.out.println(processedProbes);
 			
 		} finally {
 //			graph.getModel().endUpdate();
