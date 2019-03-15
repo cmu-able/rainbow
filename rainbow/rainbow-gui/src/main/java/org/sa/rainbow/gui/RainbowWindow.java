@@ -361,7 +361,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		m_allTabs.put(RainbowComponentT.ADAPTATION_MANAGER, adaptationMgrTextArea);
 	}
 
-	private void createMasterUI(List<String> expectedDelegateLocations) {
+	protected void createMasterUI(List<String> expectedDelegateLocations) {
 		JInternalFrame masterFrame = new JInternalFrame("Rainbow Master");
 		masterFrame.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		masterFrame.setMaximizable(true);
@@ -374,7 +374,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		masterFrame.setVisible(true);
 	}
 
-	private void createMenuBar() {
+	protected void createMenuBar() {
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.setOpaque(true);
 		menuBar.setBackground(Color.LIGHT_GRAY);
@@ -452,7 +452,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		m_frame.setVisible(true);
 	}
 
-	private void populateUI() {
+	protected void populateUI() {
 		ModelsManager modelsManager = Rainbow.instance().getRainbowMaster().modelsManager();
 		Collection<? extends String> types = modelsManager.getRegisteredModelTypes();
 		for (String t : types) {

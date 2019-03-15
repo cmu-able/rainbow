@@ -111,7 +111,15 @@ public class RainbowWindoe extends RainbowWindow implements IRainbowGUI, IDispos
 		m_frame.getContentPane().add(m_desktopPane, BorderLayout.CENTER);
 	}
 	
-
+	@Override
+	protected void createProbesUI() {
+	}
+	
+	@Override
+	protected void createGaugesUI() {
+	}
+	
+	@Override
 	protected void createMasterUI(List<String> expectedDelegateLocations) {
 		JInternalFrame masterFrame = new JInternalFrame("Rainbow Master");
 		masterFrame.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
