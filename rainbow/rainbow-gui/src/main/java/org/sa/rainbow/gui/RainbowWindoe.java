@@ -229,14 +229,6 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 	private Point findClosestCorner(Rectangle r1, Rectangle r2) {
 		Point p = new Point();
 		int outcode = r1.outcode(r2.getCenterX(), r2.getCenterY());
-		if ((outcode & java.awt.geom.Rectangle2D.OUT_LEFT) == 1) 
-			outcode = WEST;
-		else if ((outcode & java.awt.geom.Rectangle2D.OUT_TOP) == 1)
-			outcode = NORTH;
-		else if ((outcode & java.awt.geom.Rectangle2D.OUT_BOTTOM)== 1) 
-			outcode = SOUTH;
-		else if ((outcode & java.awt.geom.Rectangle2D.OUT_RIGHT)== 1)
-			outcode = EAST;
 		switch (outcode) {
 		case NORTH:
 			p.x = r1.x + r1.width/2;
