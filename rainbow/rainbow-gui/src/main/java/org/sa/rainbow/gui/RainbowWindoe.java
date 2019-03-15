@@ -5,12 +5,14 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -58,6 +60,7 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		return new Color(red, green, blue);
 	}
 
+	final static int CENTER = 0, WEST = 1, NW = 3, NORTH = 2, NE = 6, EAST = 4, SE = 12, SOUTH = 8, SW = 9;
 	private static final Color GAUGES_COLOR = Color.BLUE;
 	private static final Color EFFECTORS_COLOR = Color.ORANGE;
 	private static final Color SYSTEM_COLOR_LIGHT;
@@ -83,11 +86,14 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 	/** Convenience constant: size of text field to set to when Max is exceeded. */
 	public static final int TEXT_HALF_LENGTH = 50000;
 	public static final float TEXT_FONT_SIZE = 9.0f;
-	
+
 	private static final int WIDTH = 1280;
 	private static final int HEIGHT = 900;
-	private static final Rectangle PROBE_REGION = new Rectangle((int )(WIDTH*1/3f), (int )(HEIGHT-HEIGHT/4f), (int )(2/3f*WIDTH), (int )(HEIGHT/4f));
-	private static final Rectangle GAUGE_REGION = new Rectangle((int )(WIDTH*1/3f), (int )(HEIGHT-2*HEIGHT/4f), (int )(2/3f*WIDTH), (int )(HEIGHT/4f));
+	private static final Rectangle PROBE_REGION = new Rectangle((int) (WIDTH * 1 / 3f), (int) (HEIGHT - HEIGHT / 4f),
+			(int) (2 / 3f * WIDTH), (int) (HEIGHT / 4f));
+	private static final Rectangle GAUGE_REGION = new Rectangle((int) (WIDTH * 1 / 3f),
+			(int) (HEIGHT - 2 * HEIGHT / 4f), (int) (2 / 3f * WIDTH), (int) (HEIGHT / 4f));
+
 	class ProbeInfo {
 		JInternalFrame frame;
 		ProbeAttributes description;
@@ -135,8 +141,8 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 			protected void paintComponent(java.awt.Graphics g) {
 				super.paintComponent(g);
 
-				g.drawRect(GAUGE_REGION.x, GAUGE_REGION.y, GAUGE_REGION.width, GAUGE_REGION.height);
-				g.drawRect(PROBE_REGION.x, PROBE_REGION.y, PROBE_REGION.width, PROBE_REGION.height);
+//				g.drawRect(GAUGE_REGION.x, GAUGE_REGION.y, GAUGE_REGION.width, GAUGE_REGION.height);
+//				g.drawRect(PROBE_REGION.x, PROBE_REGION.y, PROBE_REGION.width, PROBE_REGION.height);
 				Graphics2D g2 = (Graphics2D) g;
 				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 				drawConnections(g2, this);
@@ -199,19 +205,66 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		for (Map.Entry<String, GaugeInfo> entry : m_gauges.entrySet()) {
 			GaugeInfo gInfo = entry.getValue();
 			Component visibleGFrame = getVisibleComponent(gInfo.frame);
-			int x1 = (int) Math.round(visibleGFrame.getBounds().getCenterX());
-			int y1 = (int) Math.round(visibleGFrame.getBounds().getCenterY());
+			Rectangle gBounds = visibleGFrame.getBounds();
+//			int x1 = (int) Math.round(gBounds.getCenterX());
+//			int y1 = (int) Math.round(gBounds.getCenterY());
 			if (gInfo.probes != null) {
 				for (String p : gInfo.probes) {
 					ProbeInfo pInfo = m_probes.get(p);
 					Component visiblePFrame = getVisibleComponent(pInfo.frame);
-					int x2 = (int) Math.round(visiblePFrame.getBounds().getCenterX());
-					int y2 = (int) Math.round(visiblePFrame.getBounds().getCenterY());
-					g2.drawLine(x1, y1, x2, y2);
+					Rectangle pBounds = visiblePFrame.getBounds();
+//					int x2 = (int) Math.round(pBounds.getCenterX());
+//					int y2 = (int) Math.round(pBounds.getCenterY());
+					Point p1 = findClosestCorner(gBounds, pBounds);
+					Point p2 = findClosestCorner(pBounds,gBounds);
+					g2.draw(new Line2D.Double(p1.x, p1.y, p2.x, p2.y));
 				}
 
 			}
 		}
+	}
+
+	private Point findClosestCorner(Rectangle r1, Rectangle r2) {
+		Point p = new Point();
+		int outcode = r1.outcode(r2.getCenterX(), r2.getCenterY());
+		switch (outcode) {
+		case NORTH:
+			p.x = r1.x;
+			p.y = r1.y;
+			break;
+		case NW:
+			p.x = r1.x;
+			p.y = r1.y;
+			break;
+		case WEST:
+			p.x = r1.x;
+			p.y = r1.y;
+			break;
+		case SW:
+			p.x = r1.x;
+			p.y = r1.y + r1.height;
+			break;
+		case SOUTH:
+			p.x = r1.x;
+			p.y = r1.y + r1.height;
+			break;
+		case SE:
+			p.x = r1.x + r1.width;
+			p.y = r1.y + r1.height;
+			break;
+		case EAST:
+			p.x = r1.x + r1.width;
+			p.y = r1.y;
+			break;
+		case NE:
+			p.x = r1.x + r1.width;
+			p.y = r1.y;
+			break;
+		default /* CENTER */:
+			System.out.println("outcode = CENTER");
+		}
+		return p;
+
 	}
 
 	private Component getVisibleComponent(JInternalFrame frame) {
@@ -326,24 +379,28 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 					processedProbes.add(pid);
 			}
 			int gidx = 0;
-			int gaugeStep = Math.round(GAUGE_REGION.width / (float )processedGauges.size());
+			int gaugeStep = Math.round(GAUGE_REGION.width / (float) processedGauges.size());
 			for (String gid : processedGauges) {
 				JDesktopIcon frameToPosition = m_gauges.get(gid).frame.getDesktopIcon();
-				frameToPosition.setLocation(GAUGE_REGION.x + gidx*gaugeStep + (gaugeStep - frameToPosition.getWidth())/2, GAUGE_REGION.y + GAUGE_REGION.height/2 - frameToPosition.getHeight()/2);
+				frameToPosition.setLocation(
+						GAUGE_REGION.x + gidx * gaugeStep + (gaugeStep - frameToPosition.getWidth()) / 2,
+						GAUGE_REGION.y + GAUGE_REGION.height / 2 - frameToPosition.getHeight() / 2);
 				gidx++;
 			}
-			
+
 			gidx = 0;
-			gaugeStep = Math.round(PROBE_REGION.width / (float )processedProbes.size());
+			gaugeStep = Math.round(PROBE_REGION.width / (float) processedProbes.size());
 			for (String gid : processedProbes) {
 				JDesktopIcon frameToPosition = m_probes.get(gid).frame.getDesktopIcon();
-				frameToPosition.setLocation(PROBE_REGION.x + gidx*gaugeStep + (gaugeStep - frameToPosition.getWidth())/2, PROBE_REGION.y + PROBE_REGION.height/2 - frameToPosition.getHeight()/2);
+				frameToPosition.setLocation(
+						PROBE_REGION.x + gidx * gaugeStep + (gaugeStep - frameToPosition.getWidth()) / 2,
+						PROBE_REGION.y + PROBE_REGION.height / 2 - frameToPosition.getHeight() / 2);
 				gidx++;
 			}
-			
+
 //			System.out.println(processedGauges);
 //			System.out.println(processedProbes);
-			
+
 		} finally {
 //			graph.getModel().endUpdate();
 		}
