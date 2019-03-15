@@ -129,7 +129,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	protected IEffectorLifecycleBusPort m_createClientSideEffectorLifecyclePort;
 	private javax.swing.Timer m_tabTimer;
 	protected JInternalFrame m_masterFrame;
-	private JMenuBar m_menuBar;
+	protected JMenuBar m_menuBar;
 
 	/**
 	 * Launch the application.

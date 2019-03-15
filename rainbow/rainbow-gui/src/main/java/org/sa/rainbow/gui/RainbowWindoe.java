@@ -4,17 +4,13 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
+import java.awt.FlowLayout;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,18 +20,16 @@ import java.util.Set;
 
 import javax.swing.ImageIcon;
 import javax.swing.JDesktopPane;
-import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JInternalFrame.JDesktopIcon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.SwingUtilities;
-import javax.swing.Timer;
-import javax.swing.border.TitledBorder;
+import javax.swing.border.LineBorder;
 
 import org.sa.rainbow.core.IDisposable;
 import org.sa.rainbow.core.Rainbow;
-import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
 import org.sa.rainbow.core.gauges.GaugeManager;
 import org.sa.rainbow.core.gauges.IGauge;
@@ -43,7 +37,6 @@ import org.sa.rainbow.core.models.ProbeDescription;
 import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IMasterCommandPort;
-import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReportingSubscriberCallback;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
@@ -51,10 +44,8 @@ import org.sa.rainbow.gui.arch.RainbowDesktopIconUI;
 import org.sa.rainbow.gui.arch.RainbowDesktopManager;
 import org.sa.rainbow.util.Util;
 
-
-public class RainbowWindoe extends RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportingSubscriberCallback {
-
-
+public class RainbowWindoe extends RainbowWindow
+		implements IRainbowGUI, IDisposable, IRainbowReportingSubscriberCallback {
 
 	final static int CENTER = 0, WEST = 1, NW = 3, NORTH = 2, NE = 6, EAST = 4, SE = 12, SOUTH = 8, SW = 9;
 
@@ -83,7 +74,6 @@ public class RainbowWindoe extends RainbowWindow implements IRainbowGUI, IDispos
 	Map<String, ProbeInfo> m_probes = new HashMap<>();
 	Map<String, GaugeInfo> m_gauges = new HashMap<>();
 	Map<String, JInternalFrame> m_models = new HashMap<>();
-	
 
 	public RainbowWindoe(IMasterCommandPort master) {
 		super(master);
@@ -93,7 +83,6 @@ public class RainbowWindoe extends RainbowWindow implements IRainbowGUI, IDispos
 		super();
 	}
 
-	
 	@Override
 	protected void createDesktopPane() {
 		m_desktopPane = new JDesktopPane() {
@@ -112,30 +101,22 @@ public class RainbowWindoe extends RainbowWindow implements IRainbowGUI, IDispos
 
 		m_frame.getContentPane().add(m_desktopPane, BorderLayout.CENTER);
 	}
-	
+
 	@Override
 	protected void createProbesUI() {
 	}
-	
+
 	@Override
 	protected void createGaugesUI() {
 	}
-	
+
 	@Override
 	protected void createMasterUI(List<String> expectedDelegateLocations) {
-		JInternalFrame masterFrame = new JInternalFrame("Rainbow Master");
-		masterFrame.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		masterFrame.setMaximizable(true);
-		masterFrame.setIconifiable(true);
-		masterFrame.setResizable(true);
-		masterFrame.setBounds(0, 0, 420, 60);
-		m_desktopPane.add(masterFrame);
-		masterFrame.setVisible(true);
-//		m_desktopPane.getDesktopManager().minimizeFrame(masterFrame);
+		super.createMasterUI(expectedDelegateLocations);
+		Component statusPane = m_oracleMessagePane.getStatusPane();
+		statusPane.getParent().remove(statusPane);
+		m_menuBar.add(statusPane);
 
-		m_oracleMessagePane = new OracleStatusPanel(Color.white, expectedDelegateLocations);
-		masterFrame.getContentPane().add(m_oracleMessagePane, BorderLayout.CENTER);
-		m_internalFrames.put(RainbowComponentT.MASTER, masterFrame);
 	}
 
 	Map<String, Object> toMap(List<TypedAttributeWithValue> tavs) {
@@ -161,7 +142,7 @@ public class RainbowWindoe extends RainbowWindow implements IRainbowGUI, IDispos
 //					int x2 = (int) Math.round(pBounds.getCenterX());
 //					int y2 = (int) Math.round(pBounds.getCenterY());
 					Point p1 = findClosestCornerNS(gBounds, pBounds);
-					Point p2 = findClosestCornerNS(pBounds,gBounds);
+					Point p2 = findClosestCornerNS(pBounds, gBounds);
 					g2.draw(new Line2D.Double(p1.x, p1.y, p2.x, p2.y));
 				}
 
@@ -176,7 +157,7 @@ public class RainbowWindoe extends RainbowWindow implements IRainbowGUI, IDispos
 		case NORTH:
 		case NW:
 		case NE:
-			p.x = r1.x + r1.width/2;
+			p.x = r1.x + r1.width / 2;
 			p.y = r1.y;
 			break;
 //		case NW:
@@ -185,7 +166,7 @@ public class RainbowWindoe extends RainbowWindow implements IRainbowGUI, IDispos
 //			break;
 		case WEST:
 			p.x = r1.x;
-			p.y = r1.y + r1.height/2;
+			p.y = r1.y + r1.height / 2;
 			break;
 //		case SW:
 //			p.x = r1.x;
@@ -194,7 +175,7 @@ public class RainbowWindoe extends RainbowWindow implements IRainbowGUI, IDispos
 		case SOUTH:
 		case SW:
 		case SE:
-			p.x = r1.x + r1.width /2;
+			p.x = r1.x + r1.width / 2;
 			p.y = r1.y + r1.height;
 			break;
 //		case SE:
@@ -203,7 +184,7 @@ public class RainbowWindoe extends RainbowWindow implements IRainbowGUI, IDispos
 //			break;
 		case EAST:
 			p.x = r1.x + r1.width;
-			p.y = r1.y + r1.height/2;
+			p.y = r1.y + r1.height / 2;
 			break;
 //		case NE:
 //			p.x = r1.x + r1.width;
@@ -279,7 +260,6 @@ public class RainbowWindoe extends RainbowWindow implements IRainbowGUI, IDispos
 
 			layoutGaugeProbeLevels();
 
-
 		} finally {
 		}
 	}
@@ -333,7 +313,6 @@ public class RainbowWindoe extends RainbowWindow implements IRainbowGUI, IDispos
 		}
 	}
 
-
 	protected void populateUI() {
 		createProbes();
 		createGauges();
@@ -378,8 +357,6 @@ public class RainbowWindoe extends RainbowWindow implements IRainbowGUI, IDispos
 		}
 	}
 
-
-
 	private void createProbes() {
 		ProbeDescription probes = Rainbow.instance().getRainbowMaster().probeDesc();
 		int i = 1;
@@ -420,9 +397,6 @@ public class RainbowWindoe extends RainbowWindow implements IRainbowGUI, IDispos
 		frame.getDesktopIcon().setUI(new RainbowDesktopIconUI(frame.getFrameIcon()));
 		return frame;
 	}
-
-	
-
 
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
