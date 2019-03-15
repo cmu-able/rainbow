@@ -10,12 +10,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.swing.ImageIcon;
@@ -45,12 +46,6 @@ import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.gui.arch.RainbowDesktopIconUI;
 import org.sa.rainbow.gui.arch.RainbowDesktopManager;
 import org.sa.rainbow.util.Util;
-
-import com.mxgraph.layout.mxCompactTreeLayout;
-import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
-import com.mxgraph.model.mxCell;
-import com.mxgraph.util.mxRectangle;
-import com.mxgraph.view.mxGraph;
 
 public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportingSubscriberCallback {
 
@@ -94,6 +89,7 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		ProbeAttributes description;
 		List<String> reports;
 		boolean hasError;
+		List<String> gauges = new LinkedList<>();
 	}
 
 	class GaugeInfo {
@@ -221,39 +217,43 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 		return visibleGFrame;
 	}
 
-	private void processProbeIntoGauge(GaugeInfo gInfo, Map<String, Object> setupParams, String tpt) {
+	private void processProbeIntoGauge(String gaugeKey, GaugeInfo gInfo, Map<String, Object> setupParams, String tpt) {
 		Pair<String, String> probe = Util.decomposeID(tpt);
 		if (probe.secondValue() == null) {
 			probe.setSecondValue((String) setupParams.get("targetIP"));
-			gInfo.probes.add(Util.genID(probe.firstValue(), probe.secondValue()));
+			String pid = Util.genID(probe.firstValue(), probe.secondValue());
+			gInfo.probes.add(pid);
+			m_probes.get(pid).gauges.add(gaugeKey);
 		} else if (IGauge.ALL_LOCATIONS.equals(probe.secondValue())) {
 			Set<String> keySet = m_probes.keySet();
 			for (String probeId : keySet) {
 				Pair<String, String> candidate = Util.decomposeID(tpt);
 				if (candidate.firstValue().equals(probe.firstValue())) {
 					gInfo.probes.add(probeId);
+					m_probes.get(probeId).gauges.add(gaugeKey);
 				}
 
 			}
 		} else {
 			gInfo.probes.add(tpt);
+			m_probes.get(tpt).gauges.add(gaugeKey);
 		}
 	}
 
 	protected void layoutArchitecture() {
-		mxGraph graph = new mxGraph();
-		Object parent = graph.getDefaultParent();
-		Object parentNode = graph.insertVertex(parent, null, null, 0, 0, 10, 10);
-		Set<Object> cells = new HashSet<>();
-		graph.getModel().beginUpdate();
+//		mxGraph graph = new mxGraph();
+//		Object parent = graph.getDefaultParent();
+//		Object parentNode = graph.insertVertex(parent, null, null, 0, 0, 10, 10);
+//		Set<Object> cells = new HashSet<>();
+//		graph.getModel().beginUpdate();
 		try {
 			for (Map.Entry<String, GaugeInfo> entry : m_gauges.entrySet()) {
 				GaugeInfo gInfo = entry.getValue();
-				Component visibleFrame = getVisibleComponent(gInfo.frame);
-				Object gaugeNode = graph.insertVertex(parent, gInfo.description.id(), visibleFrame, visibleFrame.getX(),
-						visibleFrame.getY(), visibleFrame.getWidth(), visibleFrame.getHeight());
-				cells.add(gaugeNode);
-				graph.insertEdge(parent, null, "edge", parentNode, gaugeNode);
+//				Component visibleFrame = getVisibleComponent(gInfo.frame);
+//				Object gaugeNode = graph.insertVertex(parent, gInfo.description.id(), visibleFrame, visibleFrame.getX(),
+//						visibleFrame.getY(), visibleFrame.getWidth(), visibleFrame.getHeight());
+//				cells.add(gaugeNode);
+//				graph.insertEdge(parent, null, "edge", parentNode, gaugeNode);
 				if (gInfo.probes == null) {
 					Map<String, Object> configParams = toMap(gInfo.description.configParams());
 					Map<String, Object> setupParams = toMap(gInfo.description.setupParams());
@@ -262,46 +262,82 @@ public class RainbowWindoe implements IRainbowGUI, IDisposable, IRainbowReportin
 
 					if (configParams.get("targetProbeType") instanceof String) {
 						String tpt = (String) configParams.get("targetProbeType");
-						processProbeIntoGauge(gInfo, setupParams, tpt);
+						processProbeIntoGauge(entry.getKey(), gInfo, setupParams, tpt);
 					}
 					if (configParams.get("targetProbeList") instanceof String) {
 						String probeIds = (String) configParams.get("targetProbeList");
 						for (String probeId : probeIds.split(",")) {
 							probeId = probeId.trim();
-							processProbeIntoGauge(gInfo, setupParams, probeId);
+							processProbeIntoGauge(entry.getKey(), gInfo, setupParams, probeId);
 						}
 
 					}
-					for (String pid : gInfo.probes) {
-						ProbeInfo pInfo = m_probes.get(pid);
-						visibleFrame = getVisibleComponent(pInfo.frame);
-						Object probeNode = graph.insertVertex(parent, pInfo.description.name, visibleFrame,
-								visibleFrame.getX(), visibleFrame.getY(), visibleFrame.getWidth(),
-								visibleFrame.getHeight());
-						cells.add(probeNode);
-						graph.insertEdge(parent, null, "edge", gaugeNode, probeNode);
-					}
+//					for (String pid : gInfo.probes) {
+//						ProbeInfo pInfo = m_probes.get(pid);
+//						visibleFrame = getVisibleComponent(pInfo.frame);
+//						Object probeNode = graph.insertVertex(parent, pInfo.description.name, visibleFrame,
+//								visibleFrame.getX(), visibleFrame.getY(), visibleFrame.getWidth(),
+//								visibleFrame.getHeight());
+//						cells.add(probeNode);
+//						graph.insertEdge(parent, null, "edge", gaugeNode, probeNode);
+//					}
 
 				}
 
 			}
-		
-		} finally {
-			graph.getModel().endUpdate();
-		}
-		graph.setMaximumGraphBounds(new mxRectangle(400,400,WIDTH-400,HEIGHT-400));
-		mxCompactTreeLayout layout = new mxCompactTreeLayout(graph);
-//		layout.setLevelDistance(50);
-		layout.execute(graph.getDefaultParent());
-		for (Object c : cells) {
-			mxRectangle b = graph.getCellBounds(c);
-			com.mxgraph.model.mxCell cell = (mxCell) c;
-			if (cell.getValue() instanceof Component) {
-				Component f = (Component) cell.getValue();
-				f.setBounds((int) b.getX()/50, (int) b.getY(), (int) b.getWidth(), (int) b.getHeight());
-			}
 
+			String[] probeLevel = new String[m_probes.size()];
+			String[] gaugeLevel = new String[m_gauges.size()];
+			Arrays.fill(probeLevel, "");
+			Arrays.fill(gaugeLevel, "");
+			;
+			ArrayList<String> processedProbes = new ArrayList<>(m_probes.size());
+			ArrayList<String> processedGauges = new ArrayList<>();
+			for (Entry<String, GaugeInfo> ge : m_gauges.entrySet()) {
+				for (String pid : ge.getValue().probes) {
+					if (processedProbes.contains(pid) && !m_probes.get(pid).gauges.isEmpty()) {
+						String nextToGauge = m_probes.get(pid).gauges.iterator().next();
+						int gi = processedGauges.indexOf(nextToGauge);
+						if (gi == -1) {
+							processedGauges.add(ge.getKey());
+						} else {
+							processedGauges.add(gi + 1, ge.getKey());
+							break;
+						}
+					}
+				}
+				if (!processedGauges.contains(ge.getKey())) {
+					processedGauges.add(ge.getKey());
+				}
+				for (String pid : ge.getValue().probes) {
+					if (!processedProbes.contains(pid))
+						processedProbes.add(pid);
+				}
+			}
+			for (String pid : m_probes.keySet()) {
+				if (!processedProbes.contains(pid))
+					processedProbes.add(pid);
+			}
+			
+			System.out.println(processedGauges);
+			System.out.println(processedProbes);
+			
+		} finally {
+//			graph.getModel().endUpdate();
 		}
+//		graph.setMaximumGraphBounds(new mxRectangle(400,400,WIDTH-400,HEIGHT-400));
+//		mxCompactTreeLayout layout = new mxCompactTreeLayout(graph);
+////		layout.setLevelDistance(50);
+//		layout.execute(graph.getDefaultParent());
+//		for (Object c : cells) {
+//			mxRectangle b = graph.getCellBounds(c);
+//			com.mxgraph.model.mxCell cell = (mxCell) c;
+//			if (cell.getValue() instanceof Component) {
+//				Component f = (Component) cell.getValue();
+//				f.setBounds((int) b.getX()/50, (int) b.getY(), (int) b.getWidth(), (int) b.getHeight());
+//			}
+//
+//		}
 //		int childCount = graph.getModel().getChildCount(parent);
 //		for (GaugeInfo gi : m_gauges.values()) {
 //			mxRectangle b = graph.getCellBounds(gi.description.id());
