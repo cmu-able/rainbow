@@ -81,18 +81,18 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		return new Color(red, green, blue);
 	}
 
-	private static final Color GAUGES_COLOR = Color.BLUE;
-	private static final Color EFFECTORS_COLOR = Color.ORANGE;
+	public static final Color GAUGES_COLOR = Color.BLUE;
+	public static final Color EFFECTORS_COLOR = Color.ORANGE;
 	public static final Color SYSTEM_COLOR_LIGHT;
 	private static final Color MODELS_MANAGER_COLOR = Color.MAGENTA;
-	private static final Color MODELS_MANAGER_COLOR_LIGHT;
-	private static final Color EXECUTORS_COLOR = Color.GREEN;
-	private static final Color EXECUTORS_COLOR_LIGHT;
-	private static final Color ANALYZERS_COLOR = Color.PINK;
-	private static final Color ANALYZERS_COLOR_LIGHT;
-	private static final Color ADAPTION_MANAGER_COLOR = Color.RED;
-	private static final Color ADAPTION_MANAGER_COLOR_LIGHT;
-	private static final Color GAUGES_COLOR_LIGHT;
+	public static final Color MODELS_MANAGER_COLOR_LIGHT;
+	public static final Color EXECUTORS_COLOR = Color.GREEN;
+	public static final Color EXECUTORS_COLOR_LIGHT;
+	public static final Color ANALYZERS_COLOR = Color.PINK;
+	public static final Color ANALYZERS_COLOR_LIGHT;
+	public static final Color ADAPTION_MANAGER_COLOR = Color.RED;
+	public static final Color ADAPTION_MANAGER_COLOR_LIGHT;
+	public static final Color GAUGES_COLOR_LIGHT;
 
 	static {
 		GAUGES_COLOR_LIGHT = bleach(GAUGES_COLOR, .75);

@@ -37,6 +37,7 @@ import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
 import org.sa.rainbow.core.gauges.GaugeManager;
 import org.sa.rainbow.core.gauges.IGauge;
+import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.models.ProbeDescription;
 import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
 import org.sa.rainbow.core.ports.IMasterCommandPort;
@@ -377,7 +378,7 @@ public class RainbowWindoe extends RainbowWindow
 						.get(g.split("@")[0].split(":")[0]);
 				GaugeInfo info = new GaugeInfo();
 
-				JInternalFrame frame = new JInternalFrame(shortName(g), true, false, true);
+				final JInternalFrame frame = new JInternalFrame(shortName(g), true, false, true);
 				frame.setFrameIcon(new ImageIcon(this.getClass().getResource("/gauge.png"), shortName(g)));
 				frame.setIconifiable(true);
 				frame.setToolTipText(g);
@@ -391,10 +392,10 @@ public class RainbowWindoe extends RainbowWindow
 				IGauge gauge = Rainbow.instance().lookupGauge(g);
 				info.setDescription(description);
 				info.setOperations(new HashMap<>());
-				for (String key : gauge.commandKeys()) {
-					info.getOperations().put(key, new LinkedList<>());
+				for (Pair<String, OperationRepresentation> key : description.commandSignatures()) {
+					info.getOperations().put(key.secondValue().getName(), new LinkedList<>());
 				}
-				ArchGuagePanel p = new ArchGuagePanel(g, info);
+				final ArchGuagePanel p = new ArchGuagePanel(g, info);
 				p.createContent();
 				Dimension preferredSize = frame.getPreferredSize();
 				Dimension pSize = p.getPreferredSize();
@@ -410,6 +411,25 @@ public class RainbowWindoe extends RainbowWindow
 				m_desktopPane.getDesktopManager().iconifyFrame(frame);
 
 				m_gauges.put(g, info);
+				p.addUpdateListener(() -> {
+					final JComponent vFrame = getVIsibleComponentToHiglight(frame);
+					vFrame.setBorder(new LineBorder(GAUGES_COLOR));
+					p.m_table.setSelectionBackground(GAUGES_COLOR_LIGHT);
+					final java.util.Timer t = new Timer();
+					t.schedule(new TimerTask() {
+
+						@Override
+						public void run() {
+							SwingUtilities.invokeLater(new Runnable() {
+
+								@Override
+								public void run() {
+									vFrame.setBorder(null);
+								}
+							});
+						}
+					}, 1000);
+				});
 			}
 		}
 	}

@@ -59,32 +59,36 @@ public class ArchGuagePanel extends GaugePanel {
 	@Override
 	public void requestModelUpdate(IRainbowOperation command) throws IllegalStateException, RainbowException {
 		boolean update = true;
-		processOperation(command, update);
+		m_table.clearSelection();
+		processOperation(command, update, false);
 	}
 
 	@Override
 	public void requestModelUpdate(List<IRainbowOperation> commands, boolean transaction)
 			throws IllegalStateException, RainbowException {
+		m_table.clearSelection();
+
 		for (IRainbowOperation op : commands) {
-			processOperation(op, false);
+			processOperation(op, false, true);
 		}
 		for (Runnable runnable : updaters) {
 			runnable.run();
 		}
 	}
 
-	protected void processOperation(IRainbowOperation command, boolean update) throws RainbowException {
+	protected void processOperation(IRainbowOperation command, boolean update, boolean extend) throws RainbowException {
 		if (!m_gaugeId.equals(command.getOrigin()))
 			return;
-		updateOperation(command);
+		int row = updateOperation(command);
 		if (update) {
 			for (Runnable runnable : updaters) {
 				runnable.run();
 			}
 		}
+		m_table.changeSelection(row, 0, false, extend);
 	}
 
-	private void updateOperation(IRainbowOperation op) throws RainbowException {
+	private int updateOperation(IRainbowOperation op) throws RainbowException {
 		DefaultTableModel tableModel = (DefaultTableModel) m_table.getModel();
 		String[] data = getTableData(op);
 		Integer row = m_op2row.get(data[0]);
@@ -94,6 +98,7 @@ public class ArchGuagePanel extends GaugePanel {
 		tableModel.setValueAt(data[2], row, 2);
 		m_gaugeInfo.getOperations().get(op.getName()).add(op);
 		m_table.firePropertyChange("model", 0, 1);
+		return row;
 	}
 
 }
