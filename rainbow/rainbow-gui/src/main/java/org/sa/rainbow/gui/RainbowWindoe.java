@@ -387,6 +387,9 @@ public class RainbowWindoe extends RainbowWindow
 				ArchGuagePanel p = new ArchGuagePanel(g, info);
 				p.createContent();
 				Dimension preferredSize = frame.getPreferredSize();
+				Dimension pSize = p.getPreferredSize();
+				preferredSize.setSize(new Dimension(Math.max(preferredSize.width,pSize.width), preferredSize.height + pSize.height));
+				frame.setSize(preferredSize);
 //				JScrollPane sp = new JScrollPane();
 //				sp.setViewportView(p);
 				frame.add(p, BorderLayout.CENTER);
