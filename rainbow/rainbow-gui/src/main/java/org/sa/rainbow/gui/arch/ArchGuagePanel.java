@@ -42,7 +42,6 @@ public class ArchGuagePanel extends GaugePanel {
 		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		m_table.setAutoscrolls(true);
-		m_table.setPreferredScrollableViewportSize(new Dimension(250,50*m_op2row.size()));
 		TableColumnAdjuster tca = new TableColumnAdjuster(m_table);
 		tca.setDynamicAdjustment(true);
 		List<Pair<String, OperationRepresentation>> signatures = m_gaugeInfo.getDescription().commandSignatures();
@@ -52,6 +51,8 @@ public class ArchGuagePanel extends GaugePanel {
 			tableModel.addRow(new String[] { name, "", "" });
 			m_op2row.put(name, row++);
 		}
+		m_table.setPreferredScrollableViewportSize(new Dimension(250,50*m_op2row.size()));
+
 		
 	}
 
