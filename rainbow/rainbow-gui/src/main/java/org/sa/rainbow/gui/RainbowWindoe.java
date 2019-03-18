@@ -448,6 +448,7 @@ public class RainbowWindoe extends RainbowWindow
 
 				m_probes.put(probeId, info);
 			}
+			m_createProbeReportingPortSubscriber.subscribeToProbe(probe.alias, probe.getLocation());
 
 		}
 	}
