@@ -34,7 +34,7 @@ This is a multi-stage docker build file that will first build a Rainbow release 
 
    ![Rainbow UI](images/rainbow-ui-1.png)
 
-   To get more details on each element (probes, models, gauges, etc.) you need to select `Rainbow>Populate Panels`:
+   Once Rainbow has finished starting up, it will populate the various panels with more detail.
 
    ![Populatae Panels](images/rainbow-ui-2.png)
 
@@ -51,7 +51,7 @@ This is a multi-stage docker build file that will first build a Rainbow release 
    7. **Effectors**: This panel displays output from effectors.
    8. **Rainbow Master**: This panel displays health and output about Rainbow generally. In this demo, the output is about heartbeat information from Rainbow to the manager.
 
-5. To start Rainbow adaptation, you must start the probes manually so that Rainbow starts receiving information. To do this, click on `Delegates>Start Probes`. You will start seeing information appearing in all tabs except the Rainbow Master and Analyzers.
+5. In this demonstrator, probes are started automatically, and so SWIM needs to be running before Rainbow is started. If not, errors will appear in the various panels because the probes will not be able to connect to SWIM.
 
 There is not much feedback from SWIM about what it is doing, but you should see probes, gauges, and the model changing. Initially, the adaptation manager will decide that there are too many servers given the current predicted load, and so will scale back by removing servers. You should see the removeServer effector firing eventually.
 
