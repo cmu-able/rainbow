@@ -413,7 +413,7 @@ public class RainbowWindoe extends RainbowWindow
 				m_gauges.put(g, info);
 				p.addUpdateListener(() -> {
 					final JComponent vFrame = getVIsibleComponentToHiglight(frame);
-					vFrame.setBorder(new LineBorder(GAUGES_COLOR));
+					vFrame.setBorder(new LineBorder(GAUGES_COLOR, 2));
 					p.m_table.setSelectionBackground(GAUGES_COLOR_LIGHT);
 					final java.util.Timer t = new Timer();
 					t.schedule(new TimerTask() {
