@@ -34,11 +34,7 @@ This is a multi-stage docker build file that will first build a Rainbow release 
 
    ![Rainbow UI](images/rainbow-ui-1.png)
 
-   Once Rainbow has finished starting up, it will populate the various panels with more detail.
-
-   ![Populatae Panels](images/rainbow-ui-2.png)
-
-   The Rainbow UI window is divided into eight separate panels. These panels are enumerated below:
+   Once Rainbow has finished starting up, it will populate the various panels with more detail. The Rainbow UI window is divided into eight separate panels. These panels are enumerated below:
 
    ![Rainbow Panels](images/rainbow-ui-3.png)
 
