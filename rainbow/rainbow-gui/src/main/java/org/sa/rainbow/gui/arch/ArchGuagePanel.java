@@ -92,6 +92,7 @@ public class ArchGuagePanel extends GaugePanel {
 		tableModel.setValueAt(data[1], row, 1);
 		tableModel.setValueAt(data[2], row, 2);
 		m_gaugeInfo.getOperations().get(op.getName()).add(op);
+		m_table.firePropertyChange("model", 0, 1);
 	}
 
 }
