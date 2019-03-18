@@ -20,16 +20,26 @@ import org.sa.rainbow.core.ports.IModelUSBusPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 
 public class GaugePanel extends JPanel implements IModelUpdater{
-	private JTable m_table;
-	private IModelUSBusPort m_usPort;
-	private String m_gaugeId;
-	private ArrayList<Runnable> updaters = new ArrayList<>(1);
+	protected JTable m_table;
+	protected IModelUSBusPort m_usPort;
+	protected String m_gaugeId;
+	protected ArrayList<Runnable> updaters = new ArrayList<>(1);
 
 	/**
 	 * Create the panel.
 	 */
 	public GaugePanel(String gaugeId) {
 		m_gaugeId = gaugeId;
+		createContent();
+		try {
+			m_usPort = RainbowPortFactory.createModelsManagerUSPort(this);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	protected void createContent() {
 		setLayout(new BorderLayout(0, 0));
 		
 		JScrollPane scrollPane = new JScrollPane();
@@ -43,12 +53,6 @@ public class GaugePanel extends JPanel implements IModelUpdater{
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		m_table.setAutoscrolls(true);
 		m_table.addComponentListener(new JTableCellDisplayer(m_table));
-		try {
-			m_usPort = RainbowPortFactory.createModelsManagerUSPort(this);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	public void addUpdateListener(Runnable r) {
@@ -64,7 +68,7 @@ public class GaugePanel extends JPanel implements IModelUpdater{
 		}
 	}
 	
-	private String[] getTableData(IRainbowOperation command) {
+	protected String[] getTableData(IRainbowOperation command) {
 		String[] data = new String[4];
 		data[0] = command.getName();
 		data[1] = command.getTarget();
