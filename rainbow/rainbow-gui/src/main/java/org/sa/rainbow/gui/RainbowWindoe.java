@@ -372,10 +372,9 @@ public class RainbowWindoe extends RainbowWindow
 				frame.setToolTipText(g);
 			
 				frame.setVisible(true);
-//				frame.setSize(100, 100);
+				frame.setSize(100, 100);
 				frame.setLocation(WIDTH - i * 100, HEIGHT - 340);
 				i++;
-				m_desktopPane.getDesktopManager().iconifyFrame(frame);
 
 				info.setFrame(frame);
 				IGauge gauge = Rainbow.instance().lookupGauge(g);
@@ -392,6 +391,7 @@ public class RainbowWindoe extends RainbowWindow
 				m_desktopPane.add(frame);
 
 				frame.getDesktopIcon().setUI(new RainbowDesktopIconUI(frame.getFrameIcon()));
+				m_desktopPane.getDesktopManager().iconifyFrame(frame);
 
 				m_gauges.put(g, info);
 			}
