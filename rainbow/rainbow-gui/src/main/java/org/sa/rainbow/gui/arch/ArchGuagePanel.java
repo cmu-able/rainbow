@@ -48,6 +48,7 @@ public class ArchGuagePanel extends GaugePanel {
 			tableModel.addRow(new String[] { name, "", "" });
 			m_op2row.put(name, row++);
 		}
+		m_table.setSize(250,50*m_op2row.size());
 	}
 
 	@Override
