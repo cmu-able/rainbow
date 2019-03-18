@@ -15,6 +15,7 @@ import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.gui.GaugePanel;
+import org.sa.rainbow.gui.widgets.TableColumnAdjuster;
 
 public class ArchGuagePanel extends GaugePanel {
 
@@ -36,7 +37,7 @@ public class ArchGuagePanel extends GaugePanel {
 		Object[] colNames = { "Operation", "Target", "Parameters" };
 		DefaultTableModel tableModel = new DefaultTableModel(data, colNames);
 		m_table = new JTable(tableModel);
-		m_table.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+//		m_table.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
 		scrollPane.setViewportView(m_table);
 		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -50,6 +51,8 @@ public class ArchGuagePanel extends GaugePanel {
 			m_op2row.put(name, row++);
 		}
 		m_table.setPreferredScrollableViewportSize(new Dimension(250,50*m_op2row.size()));
+		TableColumnAdjuster tca = new TableColumnAdjuster(m_table);
+		tca.setDynamicAdjustment(true);
 	}
 
 	@Override
