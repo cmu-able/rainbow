@@ -106,7 +106,7 @@ public class RainbowWindoe extends RainbowWindow
 	Map<String, GaugeInfo> m_gauges = new HashMap<>();
 	Map<String, JInternalFrame> m_models = new HashMap<>();
 
-	private Map<String,JTextArea> m_probeTextAreas = new HashMap<>(); 
+	private Map<String, JTextArea> m_probeTextAreas = new HashMap<>();
 
 	public RainbowWindoe(IMasterCommandPort master) {
 		super(master);
@@ -150,7 +150,7 @@ public class RainbowWindoe extends RainbowWindow
 		// Update status pane to be in menu
 		JPanel statusPane = m_oracleMessagePane.getStatusPane();
 		statusPane.getParent().remove(statusPane);
-		((FlowLayout )statusPane.getLayout()).setAlignment(FlowLayout.RIGHT);
+		((FlowLayout) statusPane.getLayout()).setAlignment(FlowLayout.RIGHT);
 		statusPane.setBorder(null);
 		statusPane.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		statusPane.setBackground(m_menuBar.getBackground());
@@ -169,14 +169,14 @@ public class RainbowWindoe extends RainbowWindow
 	protected void drawConnections(Graphics2D g2, JDesktopPane jDesktopPane) {
 		for (Map.Entry<String, GaugeInfo> entry : m_gauges.entrySet()) {
 			GaugeInfo gInfo = entry.getValue();
-			Component visibleGFrame = getVisibleComponent(gInfo.getFrame());
+			Component visibleGFrame = getVisibleFrame(gInfo.getFrame());
 			Rectangle gBounds = visibleGFrame.getBounds();
 //			int x1 = (int) Math.round(gBounds.getCenterX());
 //			int y1 = (int) Math.round(gBounds.getCenterY());
 			if (gInfo.getProbes() != null) {
 				for (String p : gInfo.getProbes()) {
 					ProbeInfo pInfo = m_probes.get(p);
-					Component visiblePFrame = getVisibleComponent(pInfo.frame);
+					Component visiblePFrame = getVisibleFrame(pInfo.frame);
 					Rectangle pBounds = visiblePFrame.getBounds();
 //					int x2 = (int) Math.round(pBounds.getCenterX());
 //					int y2 = (int) Math.round(pBounds.getCenterY());
@@ -236,12 +236,22 @@ public class RainbowWindoe extends RainbowWindow
 
 	}
 
-	private JComponent getVisibleComponent(JInternalFrame frame) {
+	private JComponent getVisibleFrame(JInternalFrame frame) {
 		JComponent visibleGFrame = frame;
 		if (!visibleGFrame.isVisible() || frame.isIcon()
 				|| (m_desktopPane.getDesktopManager() instanceof RainbowDesktopManager
 						&& ((RainbowDesktopManager) m_desktopPane.getDesktopManager()).isIcon(frame))) {
 			visibleGFrame = frame.getDesktopIcon();
+		}
+		return visibleGFrame;
+	}
+
+	private JComponent getVIsibleComponentToHiglight(JInternalFrame frame) {
+		JComponent visibleGFrame = frame;
+		if (!visibleGFrame.isVisible() || frame.isIcon()
+				|| (m_desktopPane.getDesktopManager() instanceof RainbowDesktopManager
+						&& ((RainbowDesktopManager) m_desktopPane.getDesktopManager()).isIcon(frame))) {
+			visibleGFrame = (JComponent) (frame.getDesktopIcon()).getComponent(0);
 		}
 		return visibleGFrame;
 	}
@@ -371,7 +381,7 @@ public class RainbowWindoe extends RainbowWindow
 				frame.setFrameIcon(new ImageIcon(this.getClass().getResource("/gauge.png"), shortName(g)));
 				frame.setIconifiable(true);
 				frame.setToolTipText(g);
-			
+
 				frame.setVisible(true);
 				frame.setSize(100, 100);
 				frame.setLocation(WIDTH - i * 100, HEIGHT - 340);
@@ -388,7 +398,8 @@ public class RainbowWindoe extends RainbowWindow
 				p.createContent();
 				Dimension preferredSize = frame.getPreferredSize();
 				Dimension pSize = p.getPreferredSize();
-				preferredSize.setSize(new Dimension(Math.max(preferredSize.width,pSize.width), preferredSize.height + pSize.height));
+				preferredSize.setSize(
+						new Dimension(Math.max(preferredSize.width, pSize.width), preferredSize.height + pSize.height));
 				frame.setSize(preferredSize);
 //				JScrollPane sp = new JScrollPane();
 //				sp.setViewportView(p);
@@ -405,29 +416,30 @@ public class RainbowWindoe extends RainbowWindow
 
 	private void createProbes() {
 		try {
-			m_createProbeReportingPortSubscriber = RainbowPortFactory.createProbeReportingPortSubscriber(new IProbeReportPort() {
+			m_createProbeReportingPortSubscriber = RainbowPortFactory
+					.createProbeReportingPortSubscriber(new IProbeReportPort() {
 
-				@Override
-				public void dispose() {
+						@Override
+						public void dispose() {
 
-				}
+						}
 
-				@Override
-				public void reportData(IProbeIdentifier probe, String data) {
-					String pid = probe.type() + "@" + probe.location();
-					ProbeInfo probeInfo = m_probes.get(pid);
-					final JComponent vc = getVisibleComponent(probeInfo.frame);
-					vc.setBorder(new LineBorder(SYSTEM_COLOR_LIGHT));
-					m_probeSections.get(pid).setText(data);
-					ComponentReseter tcc = new ComponentReseter(1000,()->vc.setBorder(null));
-					tcc.run();
-				}
-			});
+						@Override
+						public void reportData(IProbeIdentifier probe, String data) {
+							String pid = probe.type() + "@" + probe.location();
+							ProbeInfo probeInfo = m_probes.get(pid);
+							final JComponent vc = getVIsibleComponentToHiglight(probeInfo.frame);
+							vc.setBorder(new LineBorder(SYSTEM_COLOR_LIGHT, 2));
+							m_probeSections.get(pid).setText(data);
+							ComponentReseter tcc = new ComponentReseter(1000, () -> vc.setBorder(null));
+							tcc.run();
+						}
+					});
 		} catch (RainbowConnectionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		ProbeDescription probes = Rainbow.instance().getRainbowMaster().probeDesc();
 		int i = 1;
 		for (ProbeAttributes probe : probes.probes) {
@@ -461,7 +473,7 @@ public class RainbowWindoe extends RainbowWindow
 		frame.setIconifiable(true);
 		frame.setToolTipText(probeId);
 		JTextArea p = new JTextArea();
-		m_probeSections .put(probeId,p);
+		m_probeSections.put(probeId, p);
 		JScrollPane sp = new JScrollPane();
 		sp.setViewportView(p);
 		frame.add(sp, BorderLayout.CENTER);
