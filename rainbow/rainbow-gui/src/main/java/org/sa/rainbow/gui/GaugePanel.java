@@ -30,7 +30,6 @@ public class GaugePanel extends JPanel implements IModelUpdater{
 	 */
 	public GaugePanel(String gaugeId) {
 		m_gaugeId = gaugeId;
-		createContent();
 		try {
 			m_usPort = RainbowPortFactory.createModelsManagerUSPort(this);
 		} catch (Exception e) {
@@ -39,7 +38,7 @@ public class GaugePanel extends JPanel implements IModelUpdater{
 		}
 	}
 
-	protected void createContent() {
+	public void createContent() {
 		setLayout(new BorderLayout(0, 0));
 		
 		JScrollPane scrollPane = new JScrollPane();

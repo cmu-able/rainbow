@@ -26,7 +26,7 @@ public class ArchGuagePanel extends GaugePanel {
 	}
 
 	@Override
-	protected void createContent() {
+	public void createContent() {
 		setLayout(new BorderLayout(0, 0));
 		JScrollPane scrollPane = new JScrollPane();
 		add(scrollPane, BorderLayout.CENTER);

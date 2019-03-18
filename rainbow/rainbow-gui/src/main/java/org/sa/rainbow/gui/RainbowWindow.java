@@ -572,6 +572,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 
 	private void addGaugePanel(String gaugeID) {
 		final GaugePanel gp = new GaugePanel(gaugeID);
+		gp.createContent();
 		JTabbedPane tp = m_tabs.get(RainbowComponentT.GAUGE);
 		if (tp.getTabCount() >= 10)
 			tp.addTab(shortName(gaugeID), gp);

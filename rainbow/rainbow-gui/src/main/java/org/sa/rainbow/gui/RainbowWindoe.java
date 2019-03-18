@@ -385,6 +385,7 @@ public class RainbowWindoe extends RainbowWindow
 					info.getOperations().put(key, new LinkedList<>());
 				}
 				ArchGuagePanel p = new ArchGuagePanel(g, info);
+				p.createContent();
 				JScrollPane sp = new JScrollPane();
 				sp.setViewportView(p);
 				frame.add(sp, BorderLayout.CENTER);
