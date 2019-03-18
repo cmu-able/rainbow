@@ -2,6 +2,7 @@ package org.sa.rainbow.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Graphics2D;
@@ -385,6 +386,7 @@ public class RainbowWindoe extends RainbowWindow
 				}
 				ArchGuagePanel p = new ArchGuagePanel(g, info);
 				p.createContent();
+				Dimension preferredSize = frame.getPreferredSize();
 //				JScrollPane sp = new JScrollPane();
 //				sp.setViewportView(p);
 				frame.add(p, BorderLayout.CENTER);
