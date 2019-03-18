@@ -386,9 +386,9 @@ public class RainbowWindoe extends RainbowWindow
 				}
 				ArchGuagePanel p = new ArchGuagePanel(g, info);
 				p.createContent();
-				JScrollPane sp = new JScrollPane();
-				sp.setViewportView(p);
-				frame.add(sp, BorderLayout.CENTER);
+//				JScrollPane sp = new JScrollPane();
+//				sp.setViewportView(p);
+				frame.add(p, BorderLayout.CENTER);
 				m_desktopPane.add(frame);
 
 				frame.getDesktopIcon().setUI(new RainbowDesktopIconUI(frame.getFrameIcon()));
