@@ -1,6 +1,7 @@
 package org.sa.rainbow.gui.arch;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.List;
 
@@ -48,7 +49,7 @@ public class ArchGuagePanel extends GaugePanel {
 			tableModel.addRow(new String[] { name, "", "" });
 			m_op2row.put(name, row++);
 		}
-		m_table.setSize(250,50*m_op2row.size());
+		m_table.setPreferredScrollableViewportSize(new Dimension(250,50*m_op2row.size()));
 	}
 
 	@Override
