@@ -70,6 +70,9 @@ public class GaugeInstanceDescription extends GaugeTypeDescription {
 
     private Beacon m_beacon = null;
 
+
+	private Map<String, Object> m_additionalInfo;
+
     /**
      * Main Constructor.
      */
@@ -185,5 +188,17 @@ public class GaugeInstanceDescription extends GaugeTypeDescription {
     public static String genID (GaugeInstanceDescription gd) {
         return gd.gaugeName () + ":" + gd.gaugeType () + "@" + gd.location ();
     }
+
+
+	public void setAdditionalInfo(Map<String, Object> additional) {
+		m_additionalInfo = additional;
+	}
+
+
+	public Map<String, Object> getAdditionalInfo() {
+		return m_additionalInfo;
+	}
+	
+	
 
 }
