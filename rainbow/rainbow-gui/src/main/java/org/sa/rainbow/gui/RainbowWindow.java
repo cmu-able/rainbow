@@ -83,7 +83,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 
 	private static final Color GAUGES_COLOR = Color.BLUE;
 	private static final Color EFFECTORS_COLOR = Color.ORANGE;
-	private static final Color SYSTEM_COLOR_LIGHT;
+	public static final Color SYSTEM_COLOR_LIGHT;
 	private static final Color MODELS_MANAGER_COLOR = Color.MAGENTA;
 	private static final Color MODELS_MANAGER_COLOR_LIGHT;
 	private static final Color EXECUTORS_COLOR = Color.GREEN;
