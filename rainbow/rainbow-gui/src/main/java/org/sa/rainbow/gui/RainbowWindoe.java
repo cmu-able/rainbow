@@ -10,6 +10,8 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.geom.Line2D;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -124,9 +126,13 @@ public class RainbowWindoe extends RainbowWindow
 	}
 
 	private void init() {
-		String specs = Rainbow.instance().getProperty("rainbow.gui.specs");
+		File specs = Util.getRelativeToPath (Rainbow.instance ().getTargetPath (),Rainbow.instance().getProperty("rainbow.gui.specs"));
 		if (specs != null) {
-			m_uidb = (Map<String, Object>) Yaml.load(specs);
+			try {
+				m_uidb = (Map<String, Object>) Yaml.load(specs);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
