@@ -124,6 +124,8 @@ public class ArchGuagePanel extends GaugePanel {
 						String xLabel = (String) builtin.get("xlabel");
 						String yLabel = (String) builtin.get("ylabel");
 						String command = (String) builtin.get("command");
+						String upper = (String )builtin.get("upper");
+						String lower = (String )builtin.get("lower");
 						final String value = (String) builtin.get("value");
 						if (command != null && value != null) {
 							final OperationRepresentation rep = OperationRepresentation.parseCommandSignature(command);
@@ -137,8 +139,9 @@ public class ArchGuagePanel extends GaugePanel {
 							ICommandProcessor processor = (op) -> {
 								return Double.parseDouble(op.getParameters()[theParam]);
 							};
-							TimeSeriesPanel ts = new TimeSeriesPanel(xLabel != null ? xLabel : "",
-									yLabel != null ? yLabel : "",processor);
+							TimeSeriesPanel ts = new TimeSeriesPanel(null,
+									 null,Double.parseDouble(upper), Double.parseDouble(lower), processor);
+							ts.setSampleWindow(10);
 							return new RainbowTimeSeriesIconUI(ts);
 						}
 					}

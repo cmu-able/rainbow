@@ -23,24 +23,31 @@ public class TimeSeriesPanel extends JPanel {
 	private ICommandProcessor m_processor;
 	private TimeSeries m_series;
 	private int m_sampleWindow = 100;
+	private JFreeChart m_chart;
+	private Double m_upper;
+	private Double m_lower;
 	
-	public TimeSeriesPanel(String xLabel, String yLabel, ICommandProcessor processor) {
+	public TimeSeriesPanel(String xLabel, String yLabel, Double upper, Double lower, ICommandProcessor processor) {
+		m_upper = upper;
+		m_lower = lower;
 		m_processor = processor;
 		setLayout(new BorderLayout(0, 0));
 
 		m_dataset = createDataSet();
-		JFreeChart chart = ChartFactory.createTimeSeriesChart("", xLabel, yLabel, m_dataset);
-		ChartPanel chartPanel = new ChartPanel(chart);
+		m_chart = ChartFactory.createTimeSeriesChart(null, null, null, m_dataset, false, false, false);
+		ChartPanel chartPanel = new ChartPanel(m_chart);
 		add(chartPanel, BorderLayout.CENTER);
 	}
 
 	public void setSampleWindow(int i) {
 		m_sampleWindow = i;
+		m_series.setMaximumItemCount(i);
 	}
 	
 	private XYDataset createDataSet() {
 		m_series = new TimeSeries("");
-		
+//		if (m_upper != null) m_series.getsetMaxY(m_upper);
+//		if (m_lower != null) m_series.setMinY(m_upper);
 		return new TimeSeriesCollection(m_series);
 	}
 	
