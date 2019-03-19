@@ -13,6 +13,7 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.plaf.DesktopIconUI;
 import javax.swing.table.DefaultTableModel;
 
+import org.ho.yaml.Yaml;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
@@ -124,8 +125,8 @@ public class ArchGuagePanel extends GaugePanel {
 						String xLabel = (String) builtin.get("xlabel");
 						String yLabel = (String) builtin.get("ylabel");
 						String command = (String) builtin.get("command");
-						String upper = (String )builtin.get("upper");
-						String lower = (String )builtin.get("lower");
+						Double upper = (Double )builtin.get("upper");
+						Double lower = (Double )builtin.get("lower");
 						final String value = (String) builtin.get("value");
 						if (command != null && value != null) {
 							final OperationRepresentation rep = OperationRepresentation.parseCommandSignature(command);
@@ -140,7 +141,7 @@ public class ArchGuagePanel extends GaugePanel {
 								return Double.parseDouble(op.getParameters()[theParam]);
 							};
 							TimeSeriesPanel ts = new TimeSeriesPanel(null,
-									 null,Double.parseDouble(upper), Double.parseDouble(lower), processor);
+									 null,upper,lower, processor);
 							ts.setSampleWindow(10);
 							return new RainbowTimeSeriesIconUI(ts);
 						}
