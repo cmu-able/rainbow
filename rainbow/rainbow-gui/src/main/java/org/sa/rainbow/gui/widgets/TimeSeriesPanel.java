@@ -36,6 +36,7 @@ public class TimeSeriesPanel extends JPanel {
 		m_dataset = createDataSet();
 		m_chart = ChartFactory.createTimeSeriesChart(null, null, null, m_dataset, false, false, false);
 		ChartPanel chartPanel = new ChartPanel(m_chart);
+		chartPanel.setSize(100, 50);
 		add(chartPanel, BorderLayout.CENTER);
 	}
 
