@@ -1,26 +1,27 @@
 package org.sa.rainbow.gui.arch;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.JInternalFrame;
+import javax.swing.JInternalFrame.JDesktopIcon;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.plaf.DesktopIconUI;
 import javax.swing.table.DefaultTableModel;
 
-import org.ho.yaml.Yaml;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
-import org.sa.rainbow.core.ports.eseb.converters.CommandRepresentationConverter;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.gui.GaugePanel;
+import org.sa.rainbow.gui.widgets.ICommandUpdate;
 import org.sa.rainbow.gui.widgets.TableColumnAdjuster;
 import org.sa.rainbow.gui.widgets.TimeSeriesPanel;
 import org.sa.rainbow.gui.widgets.TimeSeriesPanel.ICommandProcessor;
@@ -88,6 +89,11 @@ public class ArchGuagePanel extends GaugePanel {
 	protected void processOperation(IRainbowOperation command, boolean update, boolean extend) throws RainbowException {
 
 		int row = updateOperation(command);
+		JDesktopIcon desktopIcon = m_gaugeInfo.getFrame().getDesktopIcon();
+		Component c = desktopIcon.getComponent(0);
+		if (c instanceof ICommandUpdate) {
+			((ICommandUpdate )c).newCommand(command);
+		}
 		if (update) {
 			for (Runnable runnable : updaters) {
 				runnable.run();

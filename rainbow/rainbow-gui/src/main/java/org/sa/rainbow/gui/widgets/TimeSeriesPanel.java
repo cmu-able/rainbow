@@ -13,7 +13,7 @@ import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 
-public class TimeSeriesPanel extends JPanel {
+public class TimeSeriesPanel extends JPanel implements ICommandUpdate {
 	
 	public static interface ICommandProcessor {
 		double process(IRainbowOperation command);
@@ -52,6 +52,7 @@ public class TimeSeriesPanel extends JPanel {
 		return new TimeSeriesCollection(m_series);
 	}
 	
+	@Override
 	public void newCommand(IRainbowOperation cmd) {
 		if (m_series.getItemCount() >= m_sampleWindow)
 			m_series.delete(0, 0, false);
