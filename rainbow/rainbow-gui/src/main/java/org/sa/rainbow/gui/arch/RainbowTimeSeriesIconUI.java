@@ -14,18 +14,22 @@ import org.sa.rainbow.gui.widgets.TimeSeriesPanel;
 
 public class RainbowTimeSeriesIconUI extends BasicDesktopIconUI {
 	
-	private Object series;
+	private TimeSeriesPanel series;
 
 	public RainbowTimeSeriesIconUI(TimeSeriesPanel panel) {
+		super();
 		this.series = panel;
 		
+	}
+	
+	@Override
+	protected void installComponents() {
 		frame = desktopIcon.getInternalFrame();
 		String title = frame.getTitle();
-		JPanel p = new JPanel();
 		desktopIcon.setBorder(null);
 		desktopIcon.setOpaque(false);
 		desktopIcon.setLayout(new BorderLayout());
-		desktopIcon.add(panel, BorderLayout.CENTER);
+		desktopIcon.add(series, BorderLayout.CENTER);
 		JLabel l = new JLabel(title, SwingConstants.CENTER);
 		desktopIcon.add(l, BorderLayout.SOUTH);
 	}
