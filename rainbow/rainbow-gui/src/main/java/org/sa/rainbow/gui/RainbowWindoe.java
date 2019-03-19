@@ -11,6 +11,7 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,6 +32,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 
+import org.ho.yaml.Yaml;
 import org.sa.rainbow.core.IDisposable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.error.RainbowConnectionException;
@@ -109,12 +111,23 @@ public class RainbowWindoe extends RainbowWindow
 
 	private Map<String, JTextArea> m_probeTextAreas = new HashMap<>();
 
+	private Map<String,Object> m_uidb;
+
 	public RainbowWindoe(IMasterCommandPort master) {
 		super(master);
+		init();
 	}
 
 	public RainbowWindoe() {
 		super();
+		init();
+	}
+
+	private void init() {
+		String specs = Rainbow.instance().getProperty("rainbow.gui.specs");
+		if (specs != null) {
+			m_uidb = (Map<String, Object>) Yaml.load(specs);
+		}
 	}
 
 	@Override
@@ -407,7 +420,7 @@ public class RainbowWindoe extends RainbowWindow
 				frame.add(p, BorderLayout.CENTER);
 				m_desktopPane.add(frame);
 
-				frame.getDesktopIcon().setUI(new RainbowDesktopIconUI(frame.getFrameIcon()));
+				frame.getDesktopIcon().setUI(p.createIcon(frame, (Map<String, Object>) (m_uidb!=null?m_uidb.get("gauges"):Collections.<String,Object>emptyMap())));
 				m_desktopPane.getDesktopManager().iconifyFrame(frame);
 
 				m_gauges.put(g, info);
@@ -425,6 +438,7 @@ public class RainbowWindoe extends RainbowWindow
 								@Override
 								public void run() {
 									vFrame.setBorder(null);
+									p.m_table.clearSelection();
 								}
 							});
 						}

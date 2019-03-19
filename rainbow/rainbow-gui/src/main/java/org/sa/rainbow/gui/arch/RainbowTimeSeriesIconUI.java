@@ -1,55 +1,48 @@
 package org.sa.rainbow.gui.arch;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridLayout;
 import java.awt.LayoutManager;
 
-import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.plaf.basic.BasicDesktopIconUI;
 
-public class RainbowDesktopIconUI extends BasicDesktopIconUI {
-	private final Icon icon;
+import org.sa.rainbow.gui.widgets.TimeSeriesPanel;
 
-	public RainbowDesktopIconUI(Icon icon) {
-		this.icon = icon;
-	}
+public class RainbowTimeSeriesIconUI extends BasicDesktopIconUI {
 	
+	private Object series;
 
-	@Override
-	protected void installComponents() {
+	public RainbowTimeSeriesIconUI(TimeSeriesPanel panel) {
+		this.series = panel;
+		
 		frame = desktopIcon.getInternalFrame();
 		String title = frame.getTitle();
-
-		JLabel label = new JLabel(title, icon, SwingConstants.CENTER);
-		label.setVerticalTextPosition(JLabel.BOTTOM);
-		label.setHorizontalTextPosition(JLabel.CENTER);
-		label.setFont(new Font(label.getFont().getFontName(), label.getFont().getStyle(), 8));
-
+		JPanel p = new JPanel();
 		desktopIcon.setBorder(null);
 		desktopIcon.setOpaque(false);
-		desktopIcon.setLayout(new GridLayout(1, 1));
-		desktopIcon.add(label);
+		desktopIcon.setLayout(new BorderLayout());
+		desktopIcon.add(panel, BorderLayout.CENTER);
+		JLabel l = new JLabel(title, SwingConstants.CENTER);
+		desktopIcon.add(l, BorderLayout.SOUTH);
 	}
-
+	
 	@Override
 	protected void uninstallComponents() {
 		desktopIcon.setLayout(null);
 		desktopIcon.removeAll();
 		frame = null;
 	}
-
-	@Override
-	public Dimension getMinimumSize(JComponent c) {
-
+	
+	public java.awt.Dimension getMinimumSize(javax.swing.JComponent c) {
 		LayoutManager layout = desktopIcon.getLayout();
 		Dimension size = layout.minimumLayoutSize(desktopIcon);
 		return new Dimension(size.width + 15, size.height + 15);
 	}
-
+	
 	@Override
 	public Dimension getPreferredSize(JComponent c) {
 		return getMinimumSize(c);

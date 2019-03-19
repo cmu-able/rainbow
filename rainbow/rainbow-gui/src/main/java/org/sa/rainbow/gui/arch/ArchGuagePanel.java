@@ -4,18 +4,25 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import javax.swing.JInternalFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.plaf.DesktopIconUI;
 import javax.swing.table.DefaultTableModel;
 
 import org.sa.rainbow.core.error.RainbowException;
+import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
+import org.sa.rainbow.core.ports.eseb.converters.CommandRepresentationConverter;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.gui.GaugePanel;
 import org.sa.rainbow.gui.widgets.TableColumnAdjuster;
+import org.sa.rainbow.gui.widgets.TimeSeriesPanel;
+import org.sa.rainbow.gui.widgets.TimeSeriesPanel.ICommandProcessor;
 
 public class ArchGuagePanel extends GaugePanel {
 
@@ -51,13 +58,14 @@ public class ArchGuagePanel extends GaugePanel {
 			tableModel.addRow(new String[] { name, "", "" });
 			m_op2row.put(name, row++);
 		}
-		m_table.setPreferredScrollableViewportSize(new Dimension(250,50*m_op2row.size()));
+		m_table.setPreferredScrollableViewportSize(new Dimension(250, 50 * m_op2row.size()));
 
-		
 	}
 
 	@Override
 	public void requestModelUpdate(IRainbowOperation command) throws IllegalStateException, RainbowException {
+		if (!m_gaugeId.equals(command.getOrigin()))
+			return;
 		boolean update = true;
 		m_table.clearSelection();
 		processOperation(command, update, false);
@@ -77,8 +85,7 @@ public class ArchGuagePanel extends GaugePanel {
 	}
 
 	protected void processOperation(IRainbowOperation command, boolean update, boolean extend) throws RainbowException {
-		if (!m_gaugeId.equals(command.getOrigin()))
-			return;
+
 		int row = updateOperation(command);
 		if (update) {
 			for (Runnable runnable : updaters) {
@@ -99,6 +106,48 @@ public class ArchGuagePanel extends GaugePanel {
 		m_gaugeInfo.getOperations().get(op.getName()).add(op);
 //		m_table.firePropertyChange("model", 0, 1);
 		return row;
+	}
+
+	public DesktopIconUI createIcon(JInternalFrame frame, Map<String, Object> uidb) {
+
+		if (m_gaugeInfo != null && m_gaugeInfo.getDescription() != null) {
+			GaugeInstanceDescription desc = m_gaugeInfo.getDescription();
+			Map<String, Object> ui = (Map<String, Object>) uidb.get(desc.gaugeName());
+			if (ui == null) {
+				ui = (Map<String, Object>) uidb.get(desc.gaugeType());
+			}
+			if (ui != null) {
+				Map<String, Object> builtin;
+				if ((builtin = (Map<String, Object>) ui.get("builtin")) != null) {
+					String category = (String) builtin.get("category");
+					if ("timeseries".equals(category)) {
+						String xLabel = (String) builtin.get("xlabel");
+						String yLabel = (String) builtin.get("ylabel");
+						String command = (String) builtin.get("command");
+						final String value = (String) builtin.get("value");
+						if (command != null && value != null) {
+							final OperationRepresentation rep = OperationRepresentation.parseCommandSignature(command);
+							int param = 0;
+							String[] parameters = rep.getParameters();
+							for (String p : parameters) {
+								if (value.equals(p)) break;
+								param++;
+							}
+							final int theParam = param;
+							ICommandProcessor processor = (op) -> {
+								return Double.parseDouble(op.getParameters()[theParam]);
+							};
+							TimeSeriesPanel ts = new TimeSeriesPanel(xLabel != null ? xLabel : "",
+									yLabel != null ? yLabel : "",processor);
+							return new RainbowTimeSeriesIconUI(ts);
+						}
+					}
+				}
+			}
+
+		}
+
+		return new RainbowDesktopIconUI(frame.getFrameIcon());
 	}
 
 }
