@@ -44,5 +44,10 @@
 			<artifactId>jgraphx</artifactId>
 			<version>v3.9.3</version>
 		</dependency>
+		<dependency>
+			<groupId>org.beryx</groupId>
+			<artifactId>awt-color-factory</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 	</dependencies>
 </project>
