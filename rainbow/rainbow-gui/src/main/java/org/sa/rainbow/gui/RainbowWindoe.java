@@ -362,7 +362,7 @@ public class RainbowWindoe extends RainbowWindow
 				g.addEdge("root-" + gN.getId(), root, gN);
 				for (String probe : gaugeInfo.getProbes()) {
 					ProbeInfo pi = m_probes.get(probe);
-					String pid = pi.description.name;
+					String pid = probe;
 					Node pN = processedIds.get(pid);
 					if (pN == null) {
 						pN = g.addNode(pid);
