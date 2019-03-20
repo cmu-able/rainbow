@@ -6,12 +6,15 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Graphics2D;
+import java.awt.HeadlessException;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Toolkit;
 import java.awt.geom.Line2D;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -34,6 +37,14 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 
+import org.graphstream.graph.EdgeRejectedException;
+import org.graphstream.graph.Graph;
+import org.graphstream.graph.IdAlreadyInUseException;
+import org.graphstream.graph.Node;
+import org.graphstream.graph.implementations.DefaultGraph;
+import org.graphstream.graph.implementations.SingleGraph;
+import org.graphstream.stream.file.FileSinkDOT;
+import org.graphstream.stream.file.FileSourceDOT;
 import org.ho.yaml.Yaml;
 import org.sa.rainbow.core.IDisposable;
 import org.sa.rainbow.core.Rainbow;
@@ -113,7 +124,7 @@ public class RainbowWindoe extends RainbowWindow
 
 	private Map<String, JTextArea> m_probeTextAreas = new HashMap<>();
 
-	private Map<String,Object> m_uidb;
+	private Map<String, Object> m_uidb;
 
 	public RainbowWindoe(IMasterCommandPort master) {
 		super(master);
@@ -126,7 +137,8 @@ public class RainbowWindoe extends RainbowWindow
 	}
 
 	private void init() {
-		File specs = Util.getRelativeToPath (Rainbow.instance ().getTargetPath (),Rainbow.instance().getProperty("rainbow.gui.specs"));
+		File specs = Util.getRelativeToPath(Rainbow.instance().getTargetPath(),
+				Rainbow.instance().getProperty("rainbow.gui.specs"));
 		if (specs != null) {
 			try {
 				m_uidb = (Map<String, Object>) Yaml.load(specs);
@@ -327,10 +339,88 @@ public class RainbowWindoe extends RainbowWindow
 
 			}
 
-			layoutGaugeProbeLevels();
+			if (!layoutDOT())
+				layoutGaugeProbeLevels();
 
 		} finally {
 		}
+	}
+
+	private boolean layoutDOT() {
+		try {
+			int res = Toolkit.getDefaultToolkit().getScreenResolution();
+			Graph g = new SingleGraph("gauges-and-probes");
+			Node root = g.addNode("root");
+			for (Entry<String, GaugeInfo> ge : m_gauges.entrySet()) {
+				GaugeInfo gaugeInfo = ge.getValue();
+				Node gN = g.addNode(gaugeInfo.getDescription().gaugeName());
+				Dimension size = getVisibleFrame(gaugeInfo.getFrame()).getSize();
+				gN.addAttribute("width", toInches(size.width, res));
+				gN.addAttribute("height", toInches(size.height, res));
+				g.addEdge("root-" + gN.getId(), root, gN);
+				for (String probe : gaugeInfo.getProbes()) {
+					ProbeInfo pi = m_probes.get(probe);
+					Node pN = g.addNode(pi.description.name);
+					size = getVisibleFrame(pi.frame).getSize();
+					pN.addAttribute("width", toInches(size.width, res));
+					pN.addAttribute("height", toInches(size.height, res));
+					g.addEdge(gN.getId() + "-" + pN.getId(), gN, pN);
+				}
+
+			}
+			g.setAttribute("spline", "compound");
+			g.setAttribute("size", "" + toInches(Math.max(GAUGE_REGION.width, PROBE_REGION.width), res) + ","
+					+ toInches(GAUGE_REGION.height + PROBE_REGION.height, res));
+
+			FileSinkDOT fs = new FileSinkDOT();
+			File tmp = File.createTempFile("rainbow", "dot");
+			File tmpo = File.createTempFile("layout", "dot");
+			fs.writeAll(g, tmp.getAbsolutePath());
+
+			Runtime rt = Runtime.getRuntime();
+			String[] args = { "/usr/bin/dot", "-Tdot", tmp.getAbsolutePath(), "-o", tmpo.getAbsolutePath() };
+			Process p = rt.exec(args);
+			p.waitFor();
+			Graph inGraph = new DefaultGraph("input");
+			FileSourceDOT in = new FileSourceDOT();
+			in.addSink(inGraph);
+			try {
+				in.readAll(tmpo.getAbsolutePath());
+			} finally {
+				in.removeSink(inGraph);
+			}
+			for (Node n : inGraph.getNodeSet()) {
+				if (m_gauges.containsKey(n.getId())) {
+					GaugeInfo gi = m_gauges.get(n.getId());
+					String pos = (String )n.getAttribute("pos");
+					int x = fromInches(Float.parseFloat(pos.split(",")[0]), res);
+					int y = fromInches(Float.parseFloat(pos.split(",")[1]), res);
+					getVisibleFrame(gi.getFrame()).setLocation(GAUGE_REGION.x + x, GAUGE_REGION.y + y);
+				} 
+				else if (m_probes.containsKey(n.getId())) {
+					ProbeInfo pi = m_probes.get(n.getId());
+					String pos = (String )n.getAttribute("pos");
+					int x = fromInches(Float.parseFloat(pos.split(",")[0]), res);
+					int y = fromInches(Float.parseFloat(pos.split(",")[1]), res);
+					getVisibleFrame(pi.frame).setLocation(GAUGE_REGION.x + x, GAUGE_REGION.y + y);
+				}
+			}
+
+		} catch (HeadlessException | IdAlreadyInUseException | EdgeRejectedException | IOException | InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+
+		return true;
+	}
+
+	protected float toInches(int unit, float res) {
+		return unit / res;
+	}
+	
+	protected int fromInches(float unit, int res) {
+		return Math.round(unit * res);
 	}
 
 	private void layoutGaugeProbeLevels() {
@@ -426,7 +516,9 @@ public class RainbowWindoe extends RainbowWindow
 				frame.add(p, BorderLayout.CENTER);
 				m_desktopPane.add(frame);
 
-				frame.getDesktopIcon().setUI(p.createIcon(frame, (Map<String, Object>) (m_uidb!=null?m_uidb.get("gauges"):Collections.<String,Object>emptyMap())));
+				frame.getDesktopIcon()
+						.setUI(p.createIcon(frame, (Map<String, Object>) (m_uidb != null ? m_uidb.get("gauges")
+								: Collections.<String, Object>emptyMap())));
 				m_desktopPane.getDesktopManager().iconifyFrame(frame);
 
 				m_gauges.put(g, info);
