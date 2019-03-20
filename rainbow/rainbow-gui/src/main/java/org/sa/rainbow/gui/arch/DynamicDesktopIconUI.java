@@ -10,6 +10,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.event.MouseInputListener;
 import javax.swing.plaf.basic.BasicDesktopIconUI;
 
 import org.sa.rainbow.gui.widgets.TimeSeriesPanel;
@@ -17,6 +18,7 @@ import org.sa.rainbow.gui.widgets.TimeSeriesPanel;
 public class DynamicDesktopIconUI extends BasicDesktopIconUI {
 	
 	private JComponent series;
+	private MouseInputListener m_createMouseInputListener;
 
 	public DynamicDesktopIconUI(JComponent panel) {
 		super();
@@ -32,7 +34,7 @@ public class DynamicDesktopIconUI extends BasicDesktopIconUI {
 		desktopIcon.setOpaque(false);
 		desktopIcon.setLayout(new BorderLayout());
 		desktopIcon.add(series, BorderLayout.CENTER);
-		String labelText = String.format("<html><div style=\"width:%dpx;\">%s</div><html>", series.getPreferredSize().width, title);
+		String labelText = String.format("<html><div style=\"width:%dpx;text-align: center;\">%s</div><html>", series.getMinimumSize().width, title);
 		JLabel label = new JLabel(labelText, SwingConstants.CENTER);
 		label.setFont(new Font(label.getFont().getFontName(), label.getFont().getStyle(), 8));
 
@@ -61,5 +63,21 @@ public class DynamicDesktopIconUI extends BasicDesktopIconUI {
 	@Override
 	public Dimension getMaximumSize(JComponent c) {
 		return getMinimumSize(c);
+	}
+	
+	@Override
+	protected void installListeners() {
+		super.installListeners();
+		m_createMouseInputListener = createMouseInputListener();
+		series.addMouseListener(m_createMouseInputListener);
+		series.addMouseMotionListener(m_createMouseInputListener);
+	}
+	
+	@Override
+	protected void uninstallListeners() {
+		super.uninstallListeners();
+		series.removeMouseListener(m_createMouseInputListener);
+		series.removeMouseMotionListener(m_createMouseInputListener);
+		m_createMouseInputListener = null;
 	}
 }
