@@ -2,6 +2,7 @@ package org.sa.rainbow.gui.arch;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.LayoutManager;
 
 import javax.swing.JComponent;
@@ -30,8 +31,10 @@ public class DynamicDesktopIconUI extends BasicDesktopIconUI {
 		desktopIcon.setOpaque(false);
 		desktopIcon.setLayout(new BorderLayout());
 		desktopIcon.add(series, BorderLayout.CENTER);
-		JLabel l = new JLabel(title, SwingConstants.CENTER);
-		desktopIcon.add(l, BorderLayout.SOUTH);
+		JLabel label = new JLabel(title, SwingConstants.CENTER);
+		label.setFont(new Font(label.getFont().getFontName(), label.getFont().getStyle(), 8));
+
+		desktopIcon.add(label, BorderLayout.SOUTH);
 	}
 	
 	@Override
@@ -44,7 +47,7 @@ public class DynamicDesktopIconUI extends BasicDesktopIconUI {
 	public java.awt.Dimension getMinimumSize(javax.swing.JComponent c) {
 		LayoutManager layout = desktopIcon.getLayout();
 		Dimension size = layout.minimumLayoutSize(desktopIcon);
-		return new Dimension(size.width + 15, size.height + 15);
+		return new Dimension(size.width, size.height + 40);
 	}
 	
 	@Override

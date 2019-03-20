@@ -6,12 +6,12 @@ import java.awt.Color;
 
 import javax.swing.JPanel;
 
+import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.MeterInterval;
 import org.jfree.chart.plot.MeterPlot;
 import org.jfree.data.Range;
 import org.jfree.data.general.DefaultValueDataset;
-import org.jfree.data.general.ValueDataset;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.gui.widgets.TimeSeriesPanel.ICommandProcessor;
 
@@ -34,6 +34,8 @@ public class MeterPanel extends JPanel implements ICommandUpdate {
 
 		m_dataset = createDataSet();
 		m_chart = createChart();
+		ChartPanel cp = new ChartPanel(m_chart);
+		add(cp, BorderLayout.CENTER);
 	}
 
 	private JFreeChart createChart() {
