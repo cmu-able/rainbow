@@ -17,7 +17,6 @@ import org.sa.rainbow.gui.widgets.TimeSeriesPanel.ICommandProcessor;
 
 public class MeterPanel extends JPanel implements ICommandUpdate {
 
-	
 	private Double m_lower;
 	private Double m_upper;
 	private Double m_redZone;
@@ -30,18 +29,21 @@ public class MeterPanel extends JPanel implements ICommandUpdate {
 		m_upper = upper;
 		m_redZone = redZone;
 		m_processor = processor;
-		
-		setLayout(new BorderLayout(0,0));
-		
+
+		setLayout(new BorderLayout(0, 0));
+
 		m_dataset = createDataSet();
 		m_chart = createChart();
 	}
-	
+
 	private JFreeChart createChart() {
 		MeterPlot meter = new MeterPlot(m_dataset);
 		meter.setRange(new Range(m_lower, m_upper));
-		meter.addInterval(new MeterInterval("High", new Range(m_redZone,m_upper), Color.red, new BasicStroke(4.0f), new Color(255,0,0,128)));
-		JFreeChart chart = new JFreeChart(null,JFreeChart.DEFAULT_TITLE_FONT,meter,false);
+		if (m_redZone != null) {
+			meter.addInterval(new MeterInterval("High", new Range(m_redZone, m_upper), Color.red, new BasicStroke(4.0f),
+					new Color(255, 0, 0, 128)));
+		}
+		JFreeChart chart = new JFreeChart(null, JFreeChart.DEFAULT_TITLE_FONT, meter, false);
 		return chart;
 	}
 
@@ -49,7 +51,7 @@ public class MeterPanel extends JPanel implements ICommandUpdate {
 		DefaultValueDataset value = new DefaultValueDataset();
 		return value;
 	}
-	
+
 	@Override
 	public void newCommand(IRainbowOperation cmd) {
 		m_dataset.setValue(m_processor.process(cmd));
