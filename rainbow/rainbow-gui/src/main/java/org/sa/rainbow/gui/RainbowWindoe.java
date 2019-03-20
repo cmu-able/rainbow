@@ -376,8 +376,8 @@ public class RainbowWindoe extends RainbowWindow
 
 			}
 			g.setAttribute("spline", "compound");
-			g.setAttribute("size", "" + toInches(Math.max(GAUGE_REGION.width, PROBE_REGION.width), res) + ","
-					+ toInches(GAUGE_REGION.height + PROBE_REGION.height, res));
+//			g.setAttribute("size", "" + toInches(Math.max(GAUGE_REGION.width, PROBE_REGION.width), res) + ","
+//					+ toInches(GAUGE_REGION.height + PROBE_REGION.height, res));
 
 			FileSinkDOT fs = new FileSinkDOT();
 			File tmp = File.createTempFile("rainbow", "dot");
@@ -385,7 +385,7 @@ public class RainbowWindoe extends RainbowWindow
 			fs.writeAll(g, tmp.getAbsolutePath());
 
 			Runtime rt = Runtime.getRuntime();
-			String[] args = { "/usr/bin/dot", "-Tdot", tmp.getAbsolutePath(), "-o", tmpo.getAbsolutePath() };
+			String[] args = { "/usr/bin/dot", "-Tdot", /*"-Gdpi=" + res, tmp.getAbsolutePath(),*/ "-o", tmpo.getAbsolutePath() };
 			Process p = rt.exec(args);
 			p.waitFor();
 			Graph inGraph = new DefaultGraph("input");
@@ -427,7 +427,7 @@ public class RainbowWindoe extends RainbowWindow
 	}
 
 	protected int fromInches(float unit, int res) {
-		return Math.round(unit / res);
+		return Math.round(unit);
 	}
 
 	private void layoutGaugeProbeLevels() {
