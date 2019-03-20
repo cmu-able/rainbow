@@ -51,7 +51,7 @@ public class TimeSeriesPanel extends JPanel implements ICommandUpdate {
 	public void setSampleWindow(int i) {
 		m_sampleWindow = i;
 		m_series.setMaximumItemCount(i);
-		m_chart.getXYPlot().getDomainAxis().setRange(0,m_sampleWindow);
+//		m_chart.getXYPlot().getDomainAxis().setRange(0,m_sampleWindow);
 //		m_chart.getXYPlot().getDomainAxis().setAutoRange(false);
 	}
 	

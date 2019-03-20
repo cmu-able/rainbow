@@ -22,7 +22,7 @@ public class BooleanPanel extends JPanel implements ICommandUpdate {
 		m_onColor = onColor;
 		m_offColor = offColor;
 		m_processor = processor;
-		setMinimumSize(new Dimension(25,25));
+		setMinimumSize(new Dimension(26,26));
 	}
 
 	@Override
@@ -40,10 +40,10 @@ public class BooleanPanel extends JPanel implements ICommandUpdate {
 		if (value != null) {
 			Color c = value?m_onColor:m_offColor;
 			g2.setColor(c);
-			g2.fillOval(0,0, size.width, size.height);
+			g2.fillOval(size.width/2-13,size.height/2-13, 26,26);
 		}
 		g2.setColor(Color.BLACK);
-		g2.drawOval(0, 0, size.width, size.height);
+		g2.drawOval(size.width/2-13,size.height/2-13, 26,26);
 		
 	}
 
