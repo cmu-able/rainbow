@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -351,6 +352,7 @@ public class RainbowWindoe extends RainbowWindow
 			int res = Toolkit.getDefaultToolkit().getScreenResolution();
 			Graph g = new SingleGraph("gauges-and-probes");
 			Node root = g.addNode("root");
+			Map<String, Node> processedIds = new HashMap<>();
 			for (Entry<String, GaugeInfo> ge : m_gauges.entrySet()) {
 				GaugeInfo gaugeInfo = ge.getValue();
 				Node gN = g.addNode(gaugeInfo.getDescription().gaugeName());
@@ -360,10 +362,15 @@ public class RainbowWindoe extends RainbowWindow
 				g.addEdge("root-" + gN.getId(), root, gN);
 				for (String probe : gaugeInfo.getProbes()) {
 					ProbeInfo pi = m_probes.get(probe);
-					Node pN = g.addNode(pi.description.name);
-					size = getVisibleFrame(pi.frame).getSize();
-					pN.addAttribute("width", toInches(size.width, res));
-					pN.addAttribute("height", toInches(size.height, res));
+					String pid = pi.description.name;
+					Node pN = processedIds.get(pid);
+					if (pN == null) {
+						pN = g.addNode(pid);
+						size = getVisibleFrame(pi.frame).getSize();
+						pN.addAttribute("width", toInches(size.width, res));
+						pN.addAttribute("height", toInches(size.height, res));
+						processedIds.put(pid, pN);
+					}
 					g.addEdge(gN.getId() + "-" + pN.getId(), gN, pN);
 				}
 
@@ -392,21 +399,21 @@ public class RainbowWindoe extends RainbowWindow
 			for (Node n : inGraph.getNodeSet()) {
 				if (m_gauges.containsKey(n.getId())) {
 					GaugeInfo gi = m_gauges.get(n.getId());
-					String pos = (String )n.getAttribute("pos");
+					String pos = (String) n.getAttribute("pos");
 					int x = fromInches(Float.parseFloat(pos.split(",")[0]), res);
 					int y = fromInches(Float.parseFloat(pos.split(",")[1]), res);
 					getVisibleFrame(gi.getFrame()).setLocation(GAUGE_REGION.x + x, GAUGE_REGION.y + y);
-				} 
-				else if (m_probes.containsKey(n.getId())) {
+				} else if (m_probes.containsKey(n.getId())) {
 					ProbeInfo pi = m_probes.get(n.getId());
-					String pos = (String )n.getAttribute("pos");
+					String pos = (String) n.getAttribute("pos");
 					int x = fromInches(Float.parseFloat(pos.split(",")[0]), res);
 					int y = fromInches(Float.parseFloat(pos.split(",")[1]), res);
 					getVisibleFrame(pi.frame).setLocation(GAUGE_REGION.x + x, GAUGE_REGION.y + y);
 				}
 			}
 
-		} catch (HeadlessException | IdAlreadyInUseException | EdgeRejectedException | IOException | InterruptedException e) {
+		} catch (HeadlessException | IdAlreadyInUseException | EdgeRejectedException | IOException
+				| InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
@@ -418,7 +425,7 @@ public class RainbowWindoe extends RainbowWindow
 	protected float toInches(int unit, float res) {
 		return unit / res;
 	}
-	
+
 	protected int fromInches(float unit, int res) {
 		return Math.round(unit * res);
 	}
