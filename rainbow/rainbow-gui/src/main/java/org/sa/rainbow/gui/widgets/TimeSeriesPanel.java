@@ -9,6 +9,7 @@ import javax.swing.JPanel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.data.Range;
 import org.jfree.data.time.Second;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
@@ -39,6 +40,7 @@ public class TimeSeriesPanel extends JPanel implements ICommandUpdate {
 		m_chart = ChartFactory.createTimeSeriesChart(null, null, null, m_dataset, false, false, false);
 		m_chart.getXYPlot().getRenderer().setSeriesStroke(0, new BasicStroke(6.0f));
 		m_chart.getXYPlot().getRangeAxis().setVisible(false);
+		m_chart.getXYPlot().getRangeAxis().setRange(new Range(lower, upper));
 		m_chart.getXYPlot().getDomainAxis().setVisible(false);
 		ChartPanel chartPanel = new ChartPanel(m_chart);
 		chartPanel.setMinimumSize(new Dimension(80, 50));
@@ -49,6 +51,8 @@ public class TimeSeriesPanel extends JPanel implements ICommandUpdate {
 	public void setSampleWindow(int i) {
 		m_sampleWindow = i;
 		m_series.setMaximumItemCount(i);
+		m_chart.getXYPlot().getDomainAxis().setRange(0,m_sampleWindow);
+		m_chart.getXYPlot().getDomainAxis().setAutoRange(false);
 	}
 	
 	private XYDataset createDataSet() {
