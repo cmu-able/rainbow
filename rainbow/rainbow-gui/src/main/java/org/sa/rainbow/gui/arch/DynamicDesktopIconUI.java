@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.LayoutManager;
+import java.text.MessageFormat;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -31,7 +32,7 @@ public class DynamicDesktopIconUI extends BasicDesktopIconUI {
 		desktopIcon.setOpaque(false);
 		desktopIcon.setLayout(new BorderLayout());
 		desktopIcon.add(series, BorderLayout.CENTER);
-		JLabel label = new JLabel(title, SwingConstants.CENTER);
+		JLabel label = new JLabel(MessageFormat.format("<html><div width=%d>%ss</div></html>", series.getPreferredSize().width, title), SwingConstants.CENTER);
 		label.setFont(new Font(label.getFont().getFontName(), label.getFont().getStyle(), 8));
 
 		desktopIcon.add(label, BorderLayout.SOUTH);
