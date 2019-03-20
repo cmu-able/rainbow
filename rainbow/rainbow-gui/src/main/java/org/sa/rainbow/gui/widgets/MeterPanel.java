@@ -38,7 +38,8 @@ public class MeterPanel extends JPanel implements ICommandUpdate {
 		m_dataset = createDataSet();
 		m_chart = createChart();
 		ChartPanel cp = new ChartPanel(m_chart);
-		cp.setMinimumSize(new Dimension(50, 50));
+		cp.setMinimumSize(new Dimension(50, 40));
+		setOpaque(false);
 		cp.setSize(50, 50);
 		add(cp, BorderLayout.CENTER);
 	}
