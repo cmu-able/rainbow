@@ -22,7 +22,7 @@ public class BooleanPanel extends JPanel implements ICommandUpdate {
 		m_onColor = onColor;
 		m_offColor = offColor;
 		m_processor = processor;
-		setSize(25,25);
+		setMinimumSize(new Dimension(25,25));
 	}
 
 	@Override

@@ -30,7 +30,7 @@ public class TimeSeriesPanel extends JPanel implements ICommandUpdate {
 	private Double m_upper;
 	private Double m_lower;
 	
-	public TimeSeriesPanel(String xLabel, String yLabel, Double upper, Double lower, ICommandProcessor processor) {
+	public TimeSeriesPanel(String xLabel, String yLabel, Double upper, Double lower, ICommandProcessor<Double> processor) {
 		m_upper = upper;
 		m_lower = lower;
 		m_processor = processor;
@@ -52,7 +52,7 @@ public class TimeSeriesPanel extends JPanel implements ICommandUpdate {
 		m_sampleWindow = i;
 		m_series.setMaximumItemCount(i);
 		m_chart.getXYPlot().getDomainAxis().setRange(0,m_sampleWindow);
-		m_chart.getXYPlot().getDomainAxis().setAutoRange(false);
+//		m_chart.getXYPlot().getDomainAxis().setAutoRange(false);
 	}
 	
 	private XYDataset createDataSet() {

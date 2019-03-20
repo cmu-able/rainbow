@@ -144,7 +144,7 @@ public class ArchGuagePanel extends GaugePanel {
 						Double lower = (Double) builtin.get("lower");
 						final String value = (String) builtin.get("value");
 						if (command != null && value != null) {
-							ICommandProcessor processor = createOperationProcessor(command, value, s -> {
+							ICommandProcessor<Double> processor = createOperationProcessor(command, value, s -> {
 								return Double.parseDouble(s);
 							});
 							TimeSeriesPanel ts = new TimeSeriesPanel(null, null, upper, lower, processor);
@@ -158,7 +158,7 @@ public class ArchGuagePanel extends GaugePanel {
 						Double lower = (Double) builtin.get("lower");
 						Double threshold = (Double) builtin.get("threshold");
 						if (command != null && value != null) {
-							ICommandProcessor processor = createOperationProcessor(command, value, s -> {
+							ICommandProcessor<Double> processor = createOperationProcessor(command, value, s -> {
 								return Double.parseDouble(s);
 							});
 							MeterPanel meter = new MeterPanel(lower, upper, threshold, processor);
@@ -170,7 +170,7 @@ public class ArchGuagePanel extends GaugePanel {
 						final String onColor = (String) builtin.get("oncolor");
 						final String offColor = (String) builtin.get("offcolor");
 						if (command != null && value != null) {
-							ICommandProcessor processor = createOperationProcessor(command, value, s -> {
+							ICommandProcessor<Boolean> processor = createOperationProcessor(command, value, s -> {
 								return Boolean.parseBoolean(s);
 							});
 							BooleanPanel onoff = new BooleanPanel(
@@ -188,7 +188,7 @@ public class ArchGuagePanel extends GaugePanel {
 		return new RainbowDesktopIconUI(frame.getFrameIcon());
 	}
 
-	protected <T> ICommandProcessor createOperationProcessor(String command, final String value, IConverter<T> cvt) {
+	protected <T> ICommandProcessor<T> createOperationProcessor(String command, final String value, IConverter<T> cvt) {
 		final OperationRepresentation rep = OperationRepresentation.parseCommandSignature(command);
 		int param = 0;
 		String[] parameters = rep.getParameters();
