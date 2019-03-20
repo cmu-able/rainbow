@@ -351,6 +351,8 @@ public class RainbowWindoe extends RainbowWindow
 		try {
 			int res = Toolkit.getDefaultToolkit().getScreenResolution();
 			Graph g = new SingleGraph("gauges-and-probes");
+			Node addNode = g.addNode("node");
+			addNode.setAttribute("fixedsize", true);
 			Node root = g.addNode("root");
 			Map<String, Node> processedIds = new HashMap<>();
 			for (Entry<String, GaugeInfo> ge : m_gauges.entrySet()) {
