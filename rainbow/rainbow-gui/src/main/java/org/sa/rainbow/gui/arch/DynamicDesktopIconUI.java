@@ -47,7 +47,8 @@ public class DynamicDesktopIconUI extends BasicDesktopIconUI {
 	public java.awt.Dimension getMinimumSize(javax.swing.JComponent c) {
 		LayoutManager layout = desktopIcon.getLayout();
 		Dimension size = layout.minimumLayoutSize(desktopIcon);
-		return new Dimension(size.width, size.height + 40);
+		
+		return new Dimension(size.width, size.height);
 	}
 	
 	@Override

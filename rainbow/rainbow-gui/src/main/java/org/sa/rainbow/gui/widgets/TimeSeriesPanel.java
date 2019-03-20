@@ -2,6 +2,7 @@ package org.sa.rainbow.gui.widgets;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 
 import javax.swing.JPanel;
 
@@ -39,6 +40,7 @@ public class TimeSeriesPanel extends JPanel implements ICommandUpdate {
 		m_chart.getXYPlot().getRenderer().setSeriesStroke(0, new BasicStroke(6.0f));
 		m_chart.getXYPlot();
 		ChartPanel chartPanel = new ChartPanel(m_chart);
+		chartPanel.setMinimumSize(new Dimension(100, 50));
 		chartPanel.setSize(100, 50);
 		add(chartPanel, BorderLayout.CENTER);
 	}
