@@ -34,7 +34,7 @@ public class DynamicDesktopIconUI extends BasicDesktopIconUI {
 		desktopIcon.setOpaque(false);
 		desktopIcon.setLayout(new BorderLayout());
 		desktopIcon.add(series, BorderLayout.CENTER);
-		String labelText = String.format("<html><div style=\"width:%dpx;text-align: center;\">%s</div><html>", series.getMinimumSize().width, title);
+		String labelText = String.format("<html><div style=\"width:%dpx;text-align: center;\">%s</div><html>", Math.max(50,series.getMinimumSize().width), title);
 		JLabel label = new JLabel(labelText, SwingConstants.CENTER);
 		label.setFont(new Font(label.getFont().getFontName(), label.getFont().getStyle(), 8));
 

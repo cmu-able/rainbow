@@ -1,6 +1,7 @@
 package org.sa.rainbow.gui.arch;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.util.HashMap;
@@ -15,19 +16,26 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.plaf.DesktopIconUI;
 import javax.swing.table.DefaultTableModel;
 
+import org.beryx.awt.color.ColorFactory;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.gui.GaugePanel;
+import org.sa.rainbow.gui.widgets.BooleanPanel;
 import org.sa.rainbow.gui.widgets.ICommandUpdate;
 import org.sa.rainbow.gui.widgets.MeterPanel;
 import org.sa.rainbow.gui.widgets.TableColumnAdjuster;
 import org.sa.rainbow.gui.widgets.TimeSeriesPanel;
 import org.sa.rainbow.gui.widgets.TimeSeriesPanel.ICommandProcessor;
 
+
 public class ArchGuagePanel extends GaugePanel {
+
+	interface IConverter<T> {
+		T convert(String s);
+	}
 
 	private GaugeInfo m_gaugeInfo;
 	private HashMap<String, Integer> m_op2row = new HashMap<>();
@@ -93,7 +101,7 @@ public class ArchGuagePanel extends GaugePanel {
 		JDesktopIcon desktopIcon = m_gaugeInfo.getFrame().getDesktopIcon();
 		Component c = desktopIcon.getComponent(0);
 		if (c instanceof ICommandUpdate) {
-			((ICommandUpdate )c).newCommand(command);
+			((ICommandUpdate) c).newCommand(command);
 		}
 		if (update) {
 			for (Runnable runnable : updaters) {
@@ -132,27 +140,44 @@ public class ArchGuagePanel extends GaugePanel {
 						String xLabel = (String) builtin.get("xlabel");
 						String yLabel = (String) builtin.get("ylabel");
 						String command = (String) builtin.get("command");
-						Double upper = (Double )builtin.get("upper");
-						Double lower = (Double )builtin.get("lower");
+						Double upper = (Double) builtin.get("upper");
+						Double lower = (Double) builtin.get("lower");
 						final String value = (String) builtin.get("value");
 						if (command != null && value != null) {
-							ICommandProcessor processor = createOperationProcessor(command, value);
-							TimeSeriesPanel ts = new TimeSeriesPanel(null,
-									 null,upper,lower, processor);
+							ICommandProcessor processor = createOperationProcessor(command, value, s -> {
+								return Double.parseDouble(s);
+							});
+							TimeSeriesPanel ts = new TimeSeriesPanel(null, null, upper, lower, processor);
 							ts.setSampleWindow(10);
 							return new DynamicDesktopIconUI(ts);
 						}
-					}
-					else if ("meter".equals(category)) {
+					} else if ("meter".equals(category)) {
 						String command = (String) builtin.get("command");
 						final String value = (String) builtin.get("value");
-						Double upper = (Double )builtin.get("upper");
-						Double lower = (Double )builtin.get("lower");
-						Double threshold = (Double )builtin.get("threshold");
+						Double upper = (Double) builtin.get("upper");
+						Double lower = (Double) builtin.get("lower");
+						Double threshold = (Double) builtin.get("threshold");
 						if (command != null && value != null) {
-							ICommandProcessor processor = createOperationProcessor(command, value);
+							ICommandProcessor processor = createOperationProcessor(command, value, s -> {
+								return Double.parseDouble(s);
+							});
 							MeterPanel meter = new MeterPanel(lower, upper, threshold, processor);
 							return new DynamicDesktopIconUI(meter);
+						}
+					} else if ("onoff".equals(category)) {
+						String command = (String) builtin.get("command");
+						final String value = (String) builtin.get("value");
+						final String onColor = (String) builtin.get("oncolor");
+						final String offColor = (String) builtin.get("offcolor");
+						if (command != null && value != null) {
+							ICommandProcessor processor = createOperationProcessor(command, value, s -> {
+								return Boolean.parseBoolean(s);
+							});
+							BooleanPanel onoff = new BooleanPanel(
+									onColor == null ? Color.GREEN : ColorFactory.valueOf(onColor),
+									offColor == null ? Color.RED : ColorFactory.valueOf(offColor), processor);
+							return new DynamicDesktopIconUI(onoff);
+
 						}
 					}
 				}
@@ -163,17 +188,18 @@ public class ArchGuagePanel extends GaugePanel {
 		return new RainbowDesktopIconUI(frame.getFrameIcon());
 	}
 
-	protected ICommandProcessor createOperationProcessor(String command, final String value) {
+	protected <T> ICommandProcessor createOperationProcessor(String command, final String value, IConverter<T> cvt) {
 		final OperationRepresentation rep = OperationRepresentation.parseCommandSignature(command);
 		int param = 0;
 		String[] parameters = rep.getParameters();
 		for (String p : parameters) {
-			if (value.equals(p)) break;
+			if (value.equals(p))
+				break;
 			param++;
 		}
 		final int theParam = param;
-		ICommandProcessor processor = (op) -> {
-			return Double.parseDouble(op.getParameters()[theParam]);
+		ICommandProcessor<T> processor = (op) -> {
+			return cvt.convert(op.getParameters()[theParam]);
 		};
 		return processor;
 	}

@@ -23,7 +23,7 @@ public class MeterPanel extends JPanel implements ICommandUpdate {
 	private Double m_lower;
 	private Double m_upper;
 	private Double m_redZone;
-	private ICommandProcessor m_processor;
+	private ICommandProcessor<Double> m_processor;
 	private DefaultValueDataset m_dataset;
 	private JFreeChart m_chart;
 
