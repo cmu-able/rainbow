@@ -427,7 +427,7 @@ public class RainbowWindoe extends RainbowWindow
 	}
 
 	protected int fromInches(float unit, int res) {
-		return Math.round(unit * res);
+		return Math.round(unit / res);
 	}
 
 	private void layoutGaugeProbeLevels() {
