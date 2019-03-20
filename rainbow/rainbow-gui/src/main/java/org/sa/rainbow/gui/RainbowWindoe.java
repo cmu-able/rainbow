@@ -355,7 +355,7 @@ public class RainbowWindoe extends RainbowWindow
 			Map<String, Node> processedIds = new HashMap<>();
 			for (Entry<String, GaugeInfo> ge : m_gauges.entrySet()) {
 				GaugeInfo gaugeInfo = ge.getValue();
-				Node gN = g.addNode(gaugeInfo.getDescription().gaugeName());
+				Node gN = g.addNode(ge.getKey());
 				Dimension size = getVisibleFrame(gaugeInfo.getFrame()).getSize();
 				gN.addAttribute("width", toInches(size.width, res));
 				gN.addAttribute("height", toInches(size.height, res));
