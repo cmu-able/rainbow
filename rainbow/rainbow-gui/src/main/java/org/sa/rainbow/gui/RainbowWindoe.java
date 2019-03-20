@@ -351,8 +351,7 @@ public class RainbowWindoe extends RainbowWindow
 		try {
 			int res = Toolkit.getDefaultToolkit().getScreenResolution();
 			Graph g = new SingleGraph("gauges-and-probes");
-			Node addNode = g.addNode("node");
-			addNode.setAttribute("fixedsize", true);
+		
 			Node root = g.addNode("root");
 			Map<String, Node> processedIds = new HashMap<>();
 			for (Entry<String, GaugeInfo> ge : m_gauges.entrySet()) {
@@ -361,6 +360,7 @@ public class RainbowWindoe extends RainbowWindow
 				Dimension size = getVisibleFrame(gaugeInfo.getFrame()).getSize();
 				gN.addAttribute("width", toInches(size.width, res));
 				gN.addAttribute("height", toInches(size.height, res));
+				gN.addAttribute("fixedsize", true);
 				g.addEdge("root-" + gN.getId(), root, gN);
 				for (String probe : gaugeInfo.getProbes()) {
 					ProbeInfo pi = m_probes.get(probe);
@@ -371,6 +371,7 @@ public class RainbowWindoe extends RainbowWindow
 						size = getVisibleFrame(pi.frame).getSize();
 						pN.addAttribute("width", toInches(size.width, res));
 						pN.addAttribute("height", toInches(size.height, res));
+						pN.addAttribute("fixedsize", true);
 						processedIds.put(pid, pN);
 					}
 					g.addEdge(gN.getId() + "-" + pN.getId(), gN, pN);
@@ -429,7 +430,7 @@ public class RainbowWindoe extends RainbowWindow
 	}
 
 	protected int fromInches(float unit, int res) {
-		return Math.round(unit);
+		return Math.round(unit/2);
 	}
 
 	private void layoutGaugeProbeLevels() {
