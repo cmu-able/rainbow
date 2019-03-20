@@ -12,11 +12,11 @@ import javax.swing.plaf.basic.BasicDesktopIconUI;
 
 import org.sa.rainbow.gui.widgets.TimeSeriesPanel;
 
-public class RainbowTimeSeriesIconUI extends BasicDesktopIconUI {
+public class DynamicDesktopIconUI extends BasicDesktopIconUI {
 	
-	private TimeSeriesPanel series;
+	private JComponent series;
 
-	public RainbowTimeSeriesIconUI(TimeSeriesPanel panel) {
+	public DynamicDesktopIconUI(JComponent panel) {
 		super();
 		this.series = panel;
 		

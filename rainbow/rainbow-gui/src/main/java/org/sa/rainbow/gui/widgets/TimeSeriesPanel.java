@@ -36,7 +36,8 @@ public class TimeSeriesPanel extends JPanel implements ICommandUpdate {
 
 		m_dataset = createDataSet();
 		m_chart = ChartFactory.createTimeSeriesChart(null, null, null, m_dataset, false, false, false);
-		m_chart.getXYPlot().getRenderer().setSeriesStroke(0, new BasicStroke(4.0f));
+		m_chart.getXYPlot().getRenderer().setSeriesStroke(0, new BasicStroke(6.0f));
+		m_chart.getXYPlot();
 		ChartPanel chartPanel = new ChartPanel(m_chart);
 		chartPanel.setSize(100, 50);
 		add(chartPanel, BorderLayout.CENTER);

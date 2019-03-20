@@ -22,6 +22,7 @@ import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.gui.GaugePanel;
 import org.sa.rainbow.gui.widgets.ICommandUpdate;
+import org.sa.rainbow.gui.widgets.MeterPanel;
 import org.sa.rainbow.gui.widgets.TableColumnAdjuster;
 import org.sa.rainbow.gui.widgets.TimeSeriesPanel;
 import org.sa.rainbow.gui.widgets.TimeSeriesPanel.ICommandProcessor;
@@ -135,21 +136,23 @@ public class ArchGuagePanel extends GaugePanel {
 						Double lower = (Double )builtin.get("lower");
 						final String value = (String) builtin.get("value");
 						if (command != null && value != null) {
-							final OperationRepresentation rep = OperationRepresentation.parseCommandSignature(command);
-							int param = 0;
-							String[] parameters = rep.getParameters();
-							for (String p : parameters) {
-								if (value.equals(p)) break;
-								param++;
-							}
-							final int theParam = param;
-							ICommandProcessor processor = (op) -> {
-								return Double.parseDouble(op.getParameters()[theParam]);
-							};
+							ICommandProcessor processor = createOperationProcessor(command, value);
 							TimeSeriesPanel ts = new TimeSeriesPanel(null,
 									 null,upper,lower, processor);
 							ts.setSampleWindow(10);
-							return new RainbowTimeSeriesIconUI(ts);
+							return new DynamicDesktopIconUI(ts);
+						}
+					}
+					else if ("meter".equals(category)) {
+						String command = (String) builtin.get("command");
+						final String value = (String) builtin.get("value");
+						Double upper = (Double )builtin.get("upper");
+						Double lower = (Double )builtin.get("lower");
+						Double threshold = (Double )builtin.get("threshold");
+						if (command != null && value != null) {
+							ICommandProcessor processor = createOperationProcessor(command, value);
+							MeterPanel meter = new MeterPanel(lower, upper, threshold, processor);
+							return new DynamicDesktopIconUI(meter);
 						}
 					}
 				}
@@ -158,6 +161,21 @@ public class ArchGuagePanel extends GaugePanel {
 		}
 
 		return new RainbowDesktopIconUI(frame.getFrameIcon());
+	}
+
+	protected ICommandProcessor createOperationProcessor(String command, final String value) {
+		final OperationRepresentation rep = OperationRepresentation.parseCommandSignature(command);
+		int param = 0;
+		String[] parameters = rep.getParameters();
+		for (String p : parameters) {
+			if (value.equals(p)) break;
+			param++;
+		}
+		final int theParam = param;
+		ICommandProcessor processor = (op) -> {
+			return Double.parseDouble(op.getParameters()[theParam]);
+		};
+		return processor;
 	}
 
 }
