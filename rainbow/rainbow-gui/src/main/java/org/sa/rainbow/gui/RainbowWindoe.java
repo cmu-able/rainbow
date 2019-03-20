@@ -385,7 +385,7 @@ public class RainbowWindoe extends RainbowWindow
 			fs.writeAll(g, tmp.getAbsolutePath());
 
 			Runtime rt = Runtime.getRuntime();
-			String[] args = { "/usr/bin/dot", "-Tdot", /*"-Gdpi=" + res, tmp.getAbsolutePath(),*/ "-o", tmpo.getAbsolutePath() };
+			String[] args = { "/usr/bin/dot", "-Tdot", /*"-Gdpi=" + res, */tmp.getAbsolutePath(), "-o", tmpo.getAbsolutePath() };
 			Process p = rt.exec(args);
 			p.waitFor();
 			Graph inGraph = new DefaultGraph("input");
