@@ -18,12 +18,12 @@ import org.sa.rainbow.core.models.commands.IRainbowOperation;
 
 public class TimeSeriesPanel extends JPanel implements ICommandUpdate {
 	
-	public static interface ICommandProcessor {
-		double process(IRainbowOperation command);
+	public static interface ICommandProcessor<T> {
+		T process(IRainbowOperation command);
 	}
 
 	private XYDataset m_dataset;
-	private ICommandProcessor m_processor;
+	private ICommandProcessor<Double> m_processor;
 	private TimeSeries m_series;
 	private int m_sampleWindow = 100;
 	private JFreeChart m_chart;
