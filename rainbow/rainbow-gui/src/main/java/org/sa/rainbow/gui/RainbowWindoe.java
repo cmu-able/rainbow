@@ -644,7 +644,6 @@ public class RainbowWindoe extends RainbowWindow
 
 				final JInternalFrame frame = new JInternalFrame(shortName(g), true, false, true);
 				frame.setFrameIcon(new ImageIcon(this.getClass().getResource("/gauge.png"), shortName(g)));
-				frame.addPropertyChangeListener(e->System.out.println(g + " selected."));
 				frame.setIconifiable(true);
 				frame.setToolTipText(g);
 
@@ -676,6 +675,7 @@ public class RainbowWindoe extends RainbowWindow
 						.setUI(p.createIcon(frame, (Map<String, Object>) (m_uidb != null ? m_uidb.get("gauges")
 								: Collections.<String, Object>emptyMap())));
 				m_desktopPane.getDesktopManager().iconifyFrame(frame);
+				frame.addPropertyChangeListener(e->System.out.println(g + " selected."));
 
 				m_gauges.put(g, info);
 				p.addUpdateListener(() -> {
