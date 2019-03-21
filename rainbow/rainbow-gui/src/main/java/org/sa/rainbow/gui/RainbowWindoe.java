@@ -399,19 +399,26 @@ public class RainbowWindoe extends RainbowWindow
 			} finally {
 				in.removeSink(inGraph);
 			}
+			Rectangle graphBB = getBoundingBox(inGraph.getAttribute("bb", String.class));
+			Node node = inGraph.getNode("root");
+			if (node != null) {
+				graphBB = adjustFromTop(graphBB, node.getAttribute("height", Float.class));
+			}
 			for (Node n : inGraph.getNodeSet()) {
 				if (m_gauges.containsKey(n.getId())) {
 					GaugeInfo gi = m_gauges.get(n.getId());
 					String pos = (String) n.getAttribute("pos");
-					int x = fromInches(Float.parseFloat(pos.split(",")[0]), res);
-					int y = fromInches(Float.parseFloat(pos.split(",")[1]), res);
-					getVisibleFrame(gi.getFrame()).setLocation(GAUGE_REGION.x + x, GAUGE_REGION.y + y);
+					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0]), Float.parseFloat(pos.split(",")[1]), getVisibleFrame(gi.getFrame()).getBounds().getSize());
+					Point realPoint = convertOrigin(location, graphBB);
+					realPoint.translate(GAUGE_REGION.x, GAUGE_REGION.y);
+					getVisibleFrame(gi.getFrame()).setLocation(realPoint);
 				} else if (m_probes.containsKey(n.getId())) {
 					ProbeInfo pi = m_probes.get(n.getId());
 					String pos = (String) n.getAttribute("pos");
-					int x = fromInches(Float.parseFloat(pos.split(",")[0]), res);
-					int y = fromInches(Float.parseFloat(pos.split(",")[1]), res);
-					getVisibleFrame(pi.frame).setLocation(GAUGE_REGION.x + x, GAUGE_REGION.y + y);
+					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0]), Float.parseFloat(pos.split(",")[1]), getVisibleFrame(pi.frame).getBounds().getSize());
+					Point realPoint = convertOrigin(location, graphBB);
+					realPoint.translate(GAUGE_REGION.x, GAUGE_REGION.y);
+					getVisibleFrame(pi.frame).setLocation(realPoint);
 				}
 			}
 
@@ -425,12 +432,32 @@ public class RainbowWindoe extends RainbowWindow
 		return true;
 	}
 
+	private Point convertOrigin(Point location, Rectangle graphBB) {
+		return new Point(location.x, graphBB.height-location.y);
+	}
+
+	private Rectangle adjustFromTop(Rectangle graphBB, Float attribute) {
+		graphBB.setSize(graphBB.width, graphBB.height - Math.round(attribute)); 
+		return graphBB;
+	}
+
+	private Rectangle getBoundingBox(String attribute) {
+		String[] r = attribute.split(",");
+		return new Rectangle(Math.round(Float.parseFloat(r[0])),Math.round(Float.parseFloat(r[1])),Math.round(Float.parseFloat(r[2])),Math.round(Float.parseFloat(r[3])));
+	}
+
+
+	private Point getTopLeft(float centerX, float centerY, Dimension size) {
+		return new Point((int) Math.round(centerX - size.getWidth() / 2),
+				(int) Math.round(centerY - size.getHeight() / 2));
+	}
+
 	protected float toInches(int unit, float res) {
 		return unit / res;
 	}
 
 	protected int fromInches(float unit, int res) {
-		return Math.round(unit/2);
+		return Math.round(unit);
 	}
 
 	private void layoutGaugeProbeLevels() {
