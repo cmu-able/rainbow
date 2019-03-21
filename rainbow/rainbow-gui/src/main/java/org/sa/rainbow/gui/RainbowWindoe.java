@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,10 +61,10 @@ import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.models.ProbeDescription;
 import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
 import org.sa.rainbow.core.ports.IMasterCommandPort;
+import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.ports.IProbeReportPort;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReportingSubscriberCallback;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
-import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.gui.arch.ArchGuagePanel;
@@ -123,6 +124,25 @@ public class RainbowWindoe extends RainbowWindow
 		boolean hasError;
 		List<String> gauges = new LinkedList<>();
 	}
+	
+	public static class SelectionManager {
+		public interface ISelectionListener {
+			public void selectionChanged(Object o);
+		}
+		
+		Collection<ISelectionListener> m_listeners = new HashSet<> ();
+		
+		public void addSelectionListener(ISelectionListener l) { m_listeners.add(l);}
+		public void removeSelectionListener(ISelectionListener l) { m_listeners.remove(l);}
+		public void selectionChanged(Object o) {
+			for (ISelectionListener l : m_listeners) {
+				SwingUtilities.invokeLater(() -> l.selectionChanged(o));
+			}
+		}
+		
+	}
+	
+	SelectionManager m_selectionManager  = new SelectionManager();
 
 	Map<String, ProbeInfo> m_probes = new HashMap<>();
 	Map<String, GaugeInfo> m_gauges = new HashMap<>();
@@ -675,7 +695,11 @@ public class RainbowWindoe extends RainbowWindow
 						.setUI(p.createIcon(frame, (Map<String, Object>) (m_uidb != null ? m_uidb.get("gauges")
 								: Collections.<String, Object>emptyMap())));
 				m_desktopPane.getDesktopManager().iconifyFrame(frame);
-				frame.addPropertyChangeListener(e->System.out.println(g + " selected."));
+				frame.addPropertyChangeListener(e->{
+					if ("selection".equals(e.getPropertyName())) {
+						m_selectionManager.selectionChanged(info);
+					}
+				});
 
 				m_gauges.put(g, info);
 				p.addUpdateListener(() -> {
@@ -747,7 +771,11 @@ public class RainbowWindoe extends RainbowWindow
 				info.hasError = false;
 
 				m_probes.put(probeId, info);
-				frame.addPropertyChangeListener(e->System.out.println(probeId + " selected"));
+				frame.addPropertyChangeListener(e->{
+					if ("selection".equals(e.getPropertyName())) {
+						m_selectionManager.selectionChanged(info);
+					}
+				});
 			}
 			m_createProbeReportingPortSubscriber.subscribeToProbe(probe.alias, probe.getLocation());
 
@@ -789,12 +817,16 @@ public class RainbowWindoe extends RainbowWindow
 		});
 	}
 	
+	ImageIcon icon = new ImageIcon("/error.png");
+
+	
 	@Override
 	public void report(RainbowComponentT component, ReportType type, String message) {
 		super.report(component, type, message);
 		if (type == ReportType.ERROR || type == ReportType.FATAL) {
 			m_errorArea.append(message);
 			m_errorArea.setCaretPosition(m_errorArea.getText().length());
+			m_selectionPanel.setIconAt(2, icon);
 		}
 	}
 
