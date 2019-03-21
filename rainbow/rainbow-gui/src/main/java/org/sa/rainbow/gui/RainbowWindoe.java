@@ -34,6 +34,7 @@ import javax.swing.JInternalFrame;
 import javax.swing.JInternalFrame.JDesktopIcon;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
@@ -67,6 +68,7 @@ import org.sa.rainbow.gui.arch.ArchGuagePanel;
 import org.sa.rainbow.gui.arch.GaugeInfo;
 import org.sa.rainbow.gui.arch.RainbowDesktopIconUI;
 import org.sa.rainbow.gui.arch.RainbowDesktopManager;
+import org.sa.rainbow.gui.widgets.DesktopScrollPane;
 import org.sa.rainbow.translator.probes.IProbeIdentifier;
 import org.sa.rainbow.util.Util;
 
@@ -130,6 +132,10 @@ public class RainbowWindoe extends RainbowWindow
 
 	private ArrayList<java.awt.geom.Line2D> m_lines;
 
+	private JPanel m_rootPane;
+
+	private JTabbedPane m_selectionPanel;
+
 	public RainbowWindoe(IMasterCommandPort master) {
 		super(master);
 		init();
@@ -154,6 +160,11 @@ public class RainbowWindoe extends RainbowWindow
 
 	@Override
 	protected void createDesktopPane() {
+		m_rootPane = new JPanel();
+		m_rootPane.setLayout(new BorderLayout());
+		
+		
+		
 		m_desktopPane = new JDesktopPane() {
 			protected void paintComponent(java.awt.Graphics g) {
 				super.paintComponent(g);
@@ -168,7 +179,15 @@ public class RainbowWindoe extends RainbowWindow
 		m_desktopPane.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
 		m_desktopPane.setDesktopManager(new RainbowDesktopManager(m_desktopPane));
 
-		m_frame.getContentPane().add(m_desktopPane, BorderLayout.CENTER);
+//		m_frame.getContentPane().add(m_desktopPane, BorderLayout.CENTER);
+		
+		DesktopScrollPane dsp = new DesktopScrollPane(m_desktopPane);
+		m_frame.getContentPane().add(dsp, BorderLayout.CENTER);
+		
+		m_selectionPanel = new JTabbedPane(JTabbedPane.LEFT);
+		m_selectionPanel.setPreferredSize(new Dimension(WIDTH, 200));
+		m_frame.getContentPane().add(m_selectionPanel, BorderLayout.SOUTH);
+
 	}
 
 	@Override
@@ -177,6 +196,10 @@ public class RainbowWindoe extends RainbowWindow
 
 	@Override
 	protected void createGaugesUI() {
+	}
+	
+	@Override
+	protected void createModelsManagerUI() {
 	}
 
 	@Override
@@ -207,6 +230,8 @@ public class RainbowWindoe extends RainbowWindow
 			for (Line2D l : m_lines) {
 				g2.draw(l);
 			}
+			
+			return;
 			
 		}
 		for (Map.Entry<String, GaugeInfo> entry : m_gauges.entrySet()) {
@@ -443,11 +468,11 @@ public class RainbowWindoe extends RainbowWindow
 					for (int i = 0; i < posS.length; i++) {
 						String pos = posS[i];
 						String[] point = pos.split(",");
-						Point location = new Point(Math.round(Float.parseFloat(pos.split(",")[0])), Math.round(Float.parseFloat(pos.split(",")[1])));
+						Point location = new Point(Math.round(Float.parseFloat(point[0])), Math.round(Float.parseFloat(point[1])));
 						Point realPoint = convertOrigin(location, graphBB);
 						realPoint.translate(GAUGE_REGION.x, GAUGE_REGION.y);
 						locs[i] = realPoint;
-						if (i > 1) {
+						if (i >= 1) {
 							m_lines.add(new Line2D.Float(locs[i-1].x, locs[i-1].y, locs[i].x, locs[i].y));
 						}
 					}
