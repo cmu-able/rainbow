@@ -38,6 +38,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 
+import org.graphstream.graph.Edge;
 import org.graphstream.graph.EdgeRejectedException;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.IdAlreadyInUseException;
@@ -127,6 +128,8 @@ public class RainbowWindoe extends RainbowWindow
 
 	private Map<String, Object> m_uidb;
 
+	private ArrayList<java.awt.geom.Line2D> m_lines;
+
 	public RainbowWindoe(IMasterCommandPort master) {
 		super(master);
 		init();
@@ -200,6 +203,12 @@ public class RainbowWindoe extends RainbowWindow
 	}
 
 	protected void drawConnections(Graphics2D g2, JDesktopPane jDesktopPane) {
+		if (m_lines != null && !m_lines.isEmpty()) {
+			for (Line2D l : m_lines) {
+				g2.draw(l);
+			}
+			
+		}
 		for (Map.Entry<String, GaugeInfo> entry : m_gauges.entrySet()) {
 			GaugeInfo gInfo = entry.getValue();
 			Component visibleGFrame = getVisibleFrame(gInfo.getFrame());
@@ -349,9 +358,10 @@ public class RainbowWindoe extends RainbowWindow
 
 	private boolean layoutDOT() {
 		try {
+			m_lines = new ArrayList<Line2D> ();
 			int res = Toolkit.getDefaultToolkit().getScreenResolution();
 			Graph g = new SingleGraph("gauges-and-probes");
-		
+			
 			Node root = g.addNode("root");
 			Map<String, Node> processedIds = new HashMap<>();
 			for (Entry<String, GaugeInfo> ge : m_gauges.entrySet()) {
@@ -373,14 +383,14 @@ public class RainbowWindoe extends RainbowWindow
 						pN.addAttribute("width", toInches(size.width, res));
 						pN.addAttribute("height", toInches(size.height, res));
 						pN.addAttribute("fixedsize", true);
-						gN.addAttribute("shape", "box");
+						pN.addAttribute("shape", "box");
 						processedIds.put(pid, pN);
 					}
 					g.addEdge(gN.getId() + "-" + pN.getId(), gN, pN);
 				}
 
 			}
-			g.setAttribute("spline", "ortho");
+			g.setAttribute("splines", "ortho");
 //			g.setAttribute("size", "" + toInches(Math.max(GAUGE_REGION.width, PROBE_REGION.width), res) + ","
 //					+ toInches(GAUGE_REGION.height + PROBE_REGION.height, res));
 
@@ -422,6 +432,26 @@ public class RainbowWindoe extends RainbowWindow
 					Point realPoint = convertOrigin(location, graphBB);
 					realPoint.translate(GAUGE_REGION.x, GAUGE_REGION.y);
 					getVisibleFrame(pi.frame).setLocation(realPoint);
+				}
+			}
+			
+			for (Edge e : inGraph.getEdgeSet()) {
+				if (!e.getId().contains("root")) {
+					String posA = e.getAttribute("pos");
+					String[] posS = posA.split(" ");
+					Point[] locs = new Point[posS.length];
+					for (int i = 0; i < posS.length; i++) {
+						String pos = posS[i];
+						String[] point = pos.split(",");
+						Point location = new Point(Math.round(Float.parseFloat(pos.split(",")[0])), Math.round(Float.parseFloat(pos.split(",")[1])));
+						Point realPoint = convertOrigin(location, graphBB);
+						realPoint.translate(GAUGE_REGION.x, GAUGE_REGION.y);
+						locs[i] = realPoint;
+						if (i > 1) {
+							m_lines.add(new Line2D.Float(locs[i-1].x, locs[i-1].y, locs[i].x, locs[i].y));
+						}
+					}
+					
 				}
 			}
 
