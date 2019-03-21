@@ -361,6 +361,7 @@ public class RainbowWindoe extends RainbowWindow
 				gN.addAttribute("width", toInches(size.width, res));
 				gN.addAttribute("height", toInches(size.height, res));
 				gN.addAttribute("fixedsize", true);
+				gN.addAttribute("shape", "box");
 				g.addEdge("root-" + gN.getId(), root, gN);
 				for (String probe : gaugeInfo.getProbes()) {
 					ProbeInfo pi = m_probes.get(probe);
@@ -372,13 +373,14 @@ public class RainbowWindoe extends RainbowWindow
 						pN.addAttribute("width", toInches(size.width, res));
 						pN.addAttribute("height", toInches(size.height, res));
 						pN.addAttribute("fixedsize", true);
+						gN.addAttribute("shape", "box");
 						processedIds.put(pid, pN);
 					}
 					g.addEdge(gN.getId() + "-" + pN.getId(), gN, pN);
 				}
 
 			}
-			g.setAttribute("spline", "compound");
+			g.setAttribute("spline", "ortho");
 //			g.setAttribute("size", "" + toInches(Math.max(GAUGE_REGION.width, PROBE_REGION.width), res) + ","
 //					+ toInches(GAUGE_REGION.height + PROBE_REGION.height, res));
 
