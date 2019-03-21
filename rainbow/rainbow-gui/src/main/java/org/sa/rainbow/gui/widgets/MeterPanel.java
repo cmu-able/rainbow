@@ -18,7 +18,7 @@ import org.jfree.data.general.DefaultValueDataset;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.gui.widgets.TimeSeriesPanel.ICommandProcessor;
 
-public class MeterPanel extends JPanel implements ICommandUpdate {
+public class MeterPanel extends ChartPanelContainer implements ICommandUpdate {
 
 	private Double m_lower;
 	private Double m_upper;
@@ -37,11 +37,11 @@ public class MeterPanel extends JPanel implements ICommandUpdate {
 
 		m_dataset = createDataSet();
 		m_chart = createChart();
-		ChartPanel cp = new ChartPanel(m_chart);
-		cp.setMinimumSize(new Dimension(50, 40));
+		m_chartPanel = new ChartPanel(m_chart);
+		m_chartPanel.setMinimumSize(new Dimension(50, 40));
 		setOpaque(false);
-		cp.setSize(50, 50);
-		add(cp, BorderLayout.CENTER);
+		m_chartPanel.setSize(50, 50);
+		add(m_chartPanel, BorderLayout.CENTER);
 	}
 
 	private JFreeChart createChart() {

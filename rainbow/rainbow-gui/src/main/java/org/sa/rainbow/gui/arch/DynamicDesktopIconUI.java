@@ -32,16 +32,17 @@ public class DynamicDesktopIconUI extends BasicDesktopIconUI {
 	@Override
 	protected void installComponents() {
 		frame = desktopIcon.getInternalFrame();
+//		frame.setGlassPane(glass);
 		String title = frame.getTitle();
 		desktopIcon.setBorder(null);
 		desktopIcon.setOpaque(false);
-		desktopIcon.setLayout(new BorderLayout());
-		desktopIcon.add(series, BorderLayout.CENTER);
+		desktopIcon.getInternalFrame().setLayout(new BorderLayout());
+		desktopIcon.getInternalFrame().add(series, BorderLayout.CENTER);
 		String labelText = String.format("<html><div style=\"width:%dpx;text-align: center;\">%s</div><html>", Math.max(50,series.getMinimumSize().width), title);
 		JLabel label = new JLabel(labelText, SwingConstants.CENTER);
 		label.setFont(new Font(label.getFont().getFontName(), label.getFont().getStyle(), 8));
 
-		desktopIcon.add(label, BorderLayout.SOUTH);
+		desktopIcon.getInternalFrame().add(label, BorderLayout.SOUTH);
 	}
 	
 	@Override

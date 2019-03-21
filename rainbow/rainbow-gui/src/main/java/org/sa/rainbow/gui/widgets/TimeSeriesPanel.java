@@ -16,7 +16,7 @@ import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 
-public class TimeSeriesPanel extends JPanel implements ICommandUpdate {
+public class TimeSeriesPanel extends ChartPanelContainer implements ICommandUpdate {
 	
 	public static interface ICommandProcessor<T> {
 		T process(IRainbowOperation command);
@@ -29,7 +29,6 @@ public class TimeSeriesPanel extends JPanel implements ICommandUpdate {
 	private JFreeChart m_chart;
 	private Double m_upper;
 	private Double m_lower;
-	
 	public TimeSeriesPanel(String xLabel, String yLabel, Double upper, Double lower, ICommandProcessor<Double> processor) {
 		m_upper = upper;
 		m_lower = lower;
@@ -42,10 +41,10 @@ public class TimeSeriesPanel extends JPanel implements ICommandUpdate {
 		m_chart.getXYPlot().getRangeAxis().setVisible(false);
 		m_chart.getXYPlot().getRangeAxis().setRange(new Range(lower, upper));
 		m_chart.getXYPlot().getDomainAxis().setVisible(false);
-		ChartPanel chartPanel = new ChartPanel(m_chart);
-		chartPanel.setMinimumSize(new Dimension(80, 50));
-		chartPanel.setSize(100, 50);
-		add(chartPanel, BorderLayout.CENTER);
+		m_chartPanel = new ChartPanel(m_chart);
+		m_chartPanel.setMinimumSize(new Dimension(80, 50));
+		m_chartPanel.setSize(100, 50);
+		add(m_chartPanel, BorderLayout.CENTER);
 	}
 
 	public void setSampleWindow(int i) {
