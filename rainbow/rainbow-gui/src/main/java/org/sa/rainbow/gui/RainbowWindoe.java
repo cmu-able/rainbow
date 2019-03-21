@@ -51,6 +51,7 @@ import org.graphstream.stream.file.FileSourceDOT;
 import org.ho.yaml.Yaml;
 import org.sa.rainbow.core.IDisposable;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
 import org.sa.rainbow.core.gauges.GaugeManager;
@@ -136,6 +137,8 @@ public class RainbowWindoe extends RainbowWindow
 
 	private JTabbedPane m_selectionPanel;
 
+	private JTabbedPane m_logTabs;
+
 	public RainbowWindoe(IMasterCommandPort master) {
 		super(master);
 		init();
@@ -188,18 +191,40 @@ public class RainbowWindoe extends RainbowWindow
 		m_selectionPanel.setPreferredSize(new Dimension(WIDTH, 200));
 		m_frame.getContentPane().add(m_selectionPanel, BorderLayout.SOUTH);
 
+		m_logTabs = new JTabbedPane(JTabbedPane.BOTTOM);
+		m_selectionPanel.addTab("Logs", m_logTabs);
+		
+	
 	}
 
 	@Override
 	protected void createProbesUI() {
+		JTextArea probeLogs = createTextAreaInTab(m_logTabs, "Probes");
+		m_allTabs.put(RainbowComponentT.MASTER,probeLogs);
 	}
 
 	@Override
 	protected void createGaugesUI() {
+		JTextArea gaugesLogs = createTextAreaInTab(m_logTabs, "Gauges");
+		m_allTabs.put(RainbowComponentT.MASTER,gaugesLogs);
 	}
 	
 	@Override
 	protected void createModelsManagerUI() {
+		JTextArea modelsLogs = createTextAreaInTab(m_logTabs, "Models");
+		m_allTabs.put(RainbowComponentT.MASTER,modelsLogs);
+	}
+	
+	@Override
+	protected void createAdaptationManagerUI() {
+		JTextArea modelsLogs = createTextAreaInTab(m_logTabs, "Adaptation Manager");
+		m_allTabs.put(RainbowComponentT.MASTER,modelsLogs);
+	}
+	
+	@Override
+	protected void createExecutorsUI() {
+		JTextArea modelsLogs = createTextAreaInTab(m_logTabs, "Execution");
+		m_allTabs.put(RainbowComponentT.MASTER,modelsLogs);
 	}
 
 	@Override
@@ -214,6 +239,11 @@ public class RainbowWindoe extends RainbowWindow
 		statusPane.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		statusPane.setBackground(m_menuBar.getBackground());
 		m_menuBar.add(statusPane);
+		
+		JTextArea managementText = m_oracleMessagePane.getTextArea();
+		managementText.getParent().getParent().remove(managementText.getParent());
+		m_logTabs.addTab("Management", managementText.getParent());
+		m_allTabs.put(RainbowComponentT.MASTER,managementText);
 
 	}
 

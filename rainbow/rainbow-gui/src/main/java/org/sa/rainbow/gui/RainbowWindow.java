@@ -408,7 +408,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		Rainbow.instance().signalTerminate();
 	}
 
-	private JTextArea createTextAreaInTab(JTabbedPane tabbedPane, String title) {
+	protected JTextArea createTextAreaInTab(JTabbedPane tabbedPane, String title) {
 		JTextArea ta = new JTextArea();
 		ta.setFont(ta.getFont().deriveFont(TEXT_FONT_SIZE));
 		ta.setEditable(false);

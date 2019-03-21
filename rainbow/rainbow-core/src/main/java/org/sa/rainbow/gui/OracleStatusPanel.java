@@ -131,4 +131,8 @@ public class OracleStatusPanel extends JPanel {
     public JPanel getStatusPane() {
     	return m_statusPane;
     }
+    
+    public JTextArea getTextArea() {
+    	return m_textArea;
+    }
 }
