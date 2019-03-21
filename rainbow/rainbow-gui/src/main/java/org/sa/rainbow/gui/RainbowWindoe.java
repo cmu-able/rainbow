@@ -447,15 +447,17 @@ public class RainbowWindoe extends RainbowWindow
 					GaugeInfo gi = m_gauges.get(n.getId());
 					String pos = (String) n.getAttribute("pos");
 					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0]), Float.parseFloat(pos.split(",")[1]), getVisibleFrame(gi.getFrame()).getBounds().getSize());
-					Point realPoint = convertOrigin(location, graphBB);
-					realPoint.translate(GAUGE_REGION.x, GAUGE_REGION.y);
+//					Point realPoint = convertOrigin(location, graphBB);
+//					realPoint.translate(GAUGE_REGION.x, GAUGE_REGION.y);
+					Point realPoint = location;
 					getVisibleFrame(gi.getFrame()).setLocation(realPoint);
 				} else if (m_probes.containsKey(n.getId())) {
 					ProbeInfo pi = m_probes.get(n.getId());
 					String pos = (String) n.getAttribute("pos");
 					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0]), Float.parseFloat(pos.split(",")[1]), getVisibleFrame(pi.frame).getBounds().getSize());
-					Point realPoint = convertOrigin(location, graphBB);
-					realPoint.translate(GAUGE_REGION.x, GAUGE_REGION.y);
+//					Point realPoint = convertOrigin(location, graphBB);
+//					realPoint.translate(GAUGE_REGION.x, GAUGE_REGION.y);
+					Point realPoint = location;
 					getVisibleFrame(pi.frame).setLocation(realPoint);
 				}
 			}
@@ -469,8 +471,9 @@ public class RainbowWindoe extends RainbowWindow
 						String pos = posS[i];
 						String[] point = pos.split(",");
 						Point location = new Point(Math.round(Float.parseFloat(point[0])), Math.round(Float.parseFloat(point[1])));
-						Point realPoint = convertOrigin(location, graphBB);
-						realPoint.translate(GAUGE_REGION.x, GAUGE_REGION.y);
+//						Point realPoint = convertOrigin(location, graphBB);
+//						realPoint.translate(GAUGE_REGION.x, GAUGE_REGION.y);
+						Point realPoint = location;
 						locs[i] = realPoint;
 						if (i >= 1) {
 							m_lines.add(new Line2D.Float(locs[i-1].x, locs[i-1].y, locs[i].x, locs[i].y));
