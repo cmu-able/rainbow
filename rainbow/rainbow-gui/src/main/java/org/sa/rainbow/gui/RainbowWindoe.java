@@ -233,16 +233,17 @@ public class RainbowWindoe extends RainbowWindow
 		m_masterFrame.setVisible(false);
 		// Update status pane to be in menu
 		JPanel statusPane = m_oracleMessagePane.getStatusPane();
-		statusPane.getParent().remove(statusPane);
 		((FlowLayout) statusPane.getLayout()).setAlignment(FlowLayout.RIGHT);
 		statusPane.setBorder(null);
 		statusPane.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		statusPane.setBackground(m_menuBar.getBackground());
 		m_menuBar.add(statusPane);
 		
+		// These removals are hacsk
+		statusPane.getParent().remove(statusPane);
 		JTextArea managementText = m_oracleMessagePane.getTextArea();
-		managementText.getParent().getParent().remove(managementText.getParent());
-		m_logTabs.addTab("Management", managementText.getParent());
+		managementText.getParent().getParent().getParent().remove(managementText.getParent().getParent());
+		m_logTabs.addTab("Management", managementText.getParent().getParent());
 		m_allTabs.put(RainbowComponentT.MASTER,managementText);
 
 	}
