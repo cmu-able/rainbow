@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.LayoutManager;
+import java.awt.event.MouseEvent;
 import java.text.MessageFormat;
 
 import javax.swing.JComponent;
@@ -19,6 +20,8 @@ public class DynamicDesktopIconUI extends BasicDesktopIconUI {
 	
 	private JComponent series;
 	private MouseInputListener m_createMouseInputListener;
+	
+	
 
 	public DynamicDesktopIconUI(JComponent panel) {
 		super();
@@ -79,5 +82,20 @@ public class DynamicDesktopIconUI extends BasicDesktopIconUI {
 		series.removeMouseListener(m_createMouseInputListener);
 		series.removeMouseMotionListener(m_createMouseInputListener);
 		m_createMouseInputListener = null;
+	}
+	
+	@Override
+	protected MouseInputListener createMouseInputListener() {
+		return new SelectionMouseInputHandler();
+	}
+	
+	class SelectionMouseInputHandler extends MouseInputHandler {
+		@Override
+		public void mousePressed(MouseEvent e) {
+			super.mousePressed(e);
+			if (e.getClickCount() == 1) {
+				frame.firePropertyChange("selection", 0, 1);
+			}
+		}
 	}
 }

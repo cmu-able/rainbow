@@ -63,6 +63,7 @@ import org.sa.rainbow.core.ports.IMasterCommandPort;
 import org.sa.rainbow.core.ports.IProbeReportPort;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReportingSubscriberCallback;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
+import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.gui.arch.ArchGuagePanel;
@@ -139,6 +140,11 @@ public class RainbowWindoe extends RainbowWindow
 
 	private JTabbedPane m_logTabs;
 
+	private JTabbedPane m_detailsTabs;
+
+	private JTextArea m_errorArea;
+
+
 	public RainbowWindoe(IMasterCommandPort master) {
 		super(master);
 		init();
@@ -194,7 +200,12 @@ public class RainbowWindoe extends RainbowWindow
 		m_logTabs = new JTabbedPane(JTabbedPane.BOTTOM);
 		m_selectionPanel.addTab("Logs", m_logTabs);
 		
-	
+		m_detailsTabs = new JTabbedPane(JTabbedPane.BOTTOM);
+		m_selectionPanel.addTab("Details", m_detailsTabs);
+		
+		m_errorArea = createTextAreaInTab(m_selectionPanel, "Errors");
+		
+		
 	}
 
 	@Override
@@ -206,25 +217,39 @@ public class RainbowWindoe extends RainbowWindow
 	@Override
 	protected void createGaugesUI() {
 		JTextArea gaugesLogs = createTextAreaInTab(m_logTabs, "Gauges");
-		m_allTabs.put(RainbowComponentT.MASTER,gaugesLogs);
+		m_allTabs.put(RainbowComponentT.GAUGE_MANAGER,gaugesLogs);
+		m_allTabs.put(RainbowComponentT.GAUGE,gaugesLogs);
 	}
 	
 	@Override
 	protected void createModelsManagerUI() {
 		JTextArea modelsLogs = createTextAreaInTab(m_logTabs, "Models");
-		m_allTabs.put(RainbowComponentT.MASTER,modelsLogs);
+		m_allTabs.put(RainbowComponentT.MODEL,modelsLogs);
 	}
 	
 	@Override
 	protected void createAdaptationManagerUI() {
 		JTextArea modelsLogs = createTextAreaInTab(m_logTabs, "Adaptation Manager");
-		m_allTabs.put(RainbowComponentT.MASTER,modelsLogs);
+		m_allTabs.put(RainbowComponentT.ADAPTATION_MANAGER,modelsLogs);
 	}
 	
 	@Override
 	protected void createExecutorsUI() {
 		JTextArea modelsLogs = createTextAreaInTab(m_logTabs, "Execution");
-		m_allTabs.put(RainbowComponentT.MASTER,modelsLogs);
+		m_allTabs.put(RainbowComponentT.EXECUTOR,modelsLogs);
+	}
+	
+	@Override
+	protected void createAnalyzersUI() {
+		JTextArea modelsLogs = createTextAreaInTab(m_logTabs, "Analyzers");
+		m_allTabs.put(RainbowComponentT.ANALYSIS,modelsLogs);
+	}
+	
+	@Override
+	protected void createEffectorsUI() {
+		JTextArea modelsLogs = createTextAreaInTab(m_logTabs, "Effectors");
+		m_allTabs.put(RainbowComponentT.EFFECTOR,modelsLogs);
+		m_allTabs.put(RainbowComponentT.EFFECTOR_MANAGER,modelsLogs);
 	}
 
 	@Override
@@ -243,8 +268,9 @@ public class RainbowWindoe extends RainbowWindow
 		statusPane.getParent().remove(statusPane);
 		JTextArea managementText = m_oracleMessagePane.getTextArea();
 		managementText.getParent().getParent().getParent().remove(managementText.getParent().getParent());
-		m_logTabs.addTab("Management", managementText.getParent().getParent());
+		m_logTabs.insertTab("Management", null, managementText.getParent().getParent(),null,0);
 		m_allTabs.put(RainbowComponentT.MASTER,managementText);
+		m_logTabs.setSelectedIndex(0);
 
 	}
 
@@ -618,6 +644,7 @@ public class RainbowWindoe extends RainbowWindow
 
 				final JInternalFrame frame = new JInternalFrame(shortName(g), true, false, true);
 				frame.setFrameIcon(new ImageIcon(this.getClass().getResource("/gauge.png"), shortName(g)));
+				frame.addPropertyChangeListener(e->System.out.println(g + " selected."));
 				frame.setIconifiable(true);
 				frame.setToolTipText(g);
 
@@ -720,6 +747,7 @@ public class RainbowWindoe extends RainbowWindow
 				info.hasError = false;
 
 				m_probes.put(probeId, info);
+				frame.addPropertyChangeListener(e->System.out.println(probeId + " selected"));
 			}
 			m_createProbeReportingPortSubscriber.subscribeToProbe(probe.alias, probe.getLocation());
 
@@ -759,6 +787,15 @@ public class RainbowWindoe extends RainbowWindow
 				}
 			}
 		});
+	}
+	
+	@Override
+	public void report(RainbowComponentT component, ReportType type, String message) {
+		super.report(component, type, message);
+		if (type == ReportType.ERROR || type == ReportType.FATAL) {
+			m_errorArea.append(message);
+			m_errorArea.setCaretPosition(m_errorArea.getText().length());
+		}
 	}
 
 }
