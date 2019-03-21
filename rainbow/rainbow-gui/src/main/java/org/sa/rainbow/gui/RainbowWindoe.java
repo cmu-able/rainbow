@@ -402,7 +402,8 @@ public class RainbowWindoe extends RainbowWindow
 			Rectangle graphBB = getBoundingBox(inGraph.getAttribute("bb", String.class));
 			Node node = inGraph.getNode("root");
 			if (node != null) {
-				graphBB = adjustFromTop(graphBB, node.getAttribute("height", Float.class));
+				String h = node.getAttribute("height");
+				graphBB = adjustFromTop(graphBB, Float.valueOf(h));
 			}
 			for (Node n : inGraph.getNodeSet()) {
 				if (m_gauges.containsKey(n.getId())) {
