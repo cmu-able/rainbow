@@ -24,6 +24,11 @@ public class ProbeTabbedPane extends JTabbedPane {
 
 	public void setProbeInfo(ProbeInfo probeInfo) {
 		m_probeInfo = probeInfo;
+		if (description != null)
+			description.unbind();
+		if (probeInfo != null) {
+			initDataBindings();
+		}
 	}
 
 	public ProbeTabbedPane() {
@@ -37,7 +42,6 @@ public class ProbeTabbedPane extends JTabbedPane {
 		
 		m_probeDetailPanel = new ProbeDetailPanel();
 		addTab("Spec", null, m_probeDetailPanel, null);
-		initDataBindings();
 	}
 
 	protected void initDataBindings() {
