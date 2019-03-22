@@ -25,6 +25,8 @@ public class ProbeDetailPanel extends JPanel {
 	private JTextField m_locationJTextField;
 	private JTextField m_nameJTextField;
 	private JTextField m_typeJTextField;
+	private JLabel m_alias;
+	private JTextField m_aliasTextField;
 
 	public ProbeDetailPanel(org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes newProbeAttributes) {
 		this();
@@ -39,14 +41,6 @@ public class ProbeDetailPanel extends JPanel {
 		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 1.0E-4 };
 		setLayout(gridBagLayout);
 
-		JLabel kindNameLabel = new JLabel("KindName:");
-		GridBagConstraints labelGbc_0 = new GridBagConstraints();
-		labelGbc_0.anchor = GridBagConstraints.EAST;
-		labelGbc_0.insets = new Insets(5, 5, 5, 5);
-		labelGbc_0.gridx = 0;
-		labelGbc_0.gridy = 1;
-		add(kindNameLabel, labelGbc_0);
-
 		JLabel locationLabel = new JLabel("Location:");
 		GridBagConstraints labelGbc_1 = new GridBagConstraints();
 		labelGbc_1.anchor = GridBagConstraints.EAST;
@@ -56,6 +50,7 @@ public class ProbeDetailPanel extends JPanel {
 		add(locationLabel, labelGbc_1);
 
 		m_locationJTextField = new JTextField();
+		m_locationJTextField.setEditable(false);
 		GridBagConstraints componentGbc_1 = new GridBagConstraints();
 		componentGbc_1.insets = new Insets(5, 0, 5, 0);
 		componentGbc_1.fill = GridBagConstraints.HORIZONTAL;
@@ -73,6 +68,7 @@ public class ProbeDetailPanel extends JPanel {
 		add(nameLabel, gbc_nameLabel);
 
 		m_nameJTextField = new JTextField();
+		m_nameJTextField.setEditable(false);
 		GridBagConstraints gbc_nameJTextField = new GridBagConstraints();
 		gbc_nameJTextField.insets = new Insets(5, 0, 5, 5);
 		gbc_nameJTextField.fill = GridBagConstraints.HORIZONTAL;
@@ -80,29 +76,57 @@ public class ProbeDetailPanel extends JPanel {
 		gbc_nameJTextField.gridy = 0;
 		add(m_nameJTextField, gbc_nameJTextField);
 
-		m_kindNameJTextField = new JTextField();
-		GridBagConstraints componentGbc_0 = new GridBagConstraints();
-		componentGbc_0.insets = new Insets(5, 0, 5, 5);
-		componentGbc_0.fill = GridBagConstraints.HORIZONTAL;
-		componentGbc_0.gridx = 1;
-		componentGbc_0.gridy = 1;
-		add(m_kindNameJTextField, componentGbc_0);
-
 		JLabel typeLabel = new JLabel("Type:");
 		GridBagConstraints gbc_typeLabel = new GridBagConstraints();
 		gbc_typeLabel.anchor = GridBagConstraints.EAST;
 		gbc_typeLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_typeLabel.gridx = 0;
-		gbc_typeLabel.gridy = 2;
+		gbc_typeLabel.gridy = 1;
 		add(typeLabel, gbc_typeLabel);
 
 		m_typeJTextField = new JTextField();
+		m_typeJTextField.setEditable(false);
 		GridBagConstraints gbc_typeJTextField = new GridBagConstraints();
 		gbc_typeJTextField.insets = new Insets(5, 0, 5, 5);
 		gbc_typeJTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_typeJTextField.gridx = 1;
-		gbc_typeJTextField.gridy = 2;
+		gbc_typeJTextField.gridy = 1;
 		add(m_typeJTextField, gbc_typeJTextField);
+
+		m_alias = new JLabel("Reporting As:");
+		GridBagConstraints gbc_alias = new GridBagConstraints();
+		gbc_alias.anchor = GridBagConstraints.EAST;
+		gbc_alias.insets = new Insets(5, 0, 5, 5);
+		gbc_alias.gridx = 2;
+		gbc_alias.gridy = 1;
+		add(m_alias, gbc_alias);
+
+		m_aliasTextField = new JTextField();
+		m_aliasTextField.setEditable(false);
+		GridBagConstraints gbc_aliasTextField = new GridBagConstraints();
+		gbc_aliasTextField.insets = new Insets(5, 0, 5, 0);
+		gbc_aliasTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_aliasTextField.gridx = 3;
+		gbc_aliasTextField.gridy = 1;
+		add(m_aliasTextField, gbc_aliasTextField);
+		m_aliasTextField.setColumns(10);
+
+		JLabel kindNameLabel = new JLabel("Kind");
+		GridBagConstraints labelGbc_0 = new GridBagConstraints();
+		labelGbc_0.anchor = GridBagConstraints.EAST;
+		labelGbc_0.insets = new Insets(5, 5, 5, 5);
+		labelGbc_0.gridx = 0;
+		labelGbc_0.gridy = 2;
+		add(kindNameLabel, labelGbc_0);
+
+		m_kindNameJTextField = new JTextField();
+		m_kindNameJTextField.setEditable(false);
+		GridBagConstraints componentGbc_0 = new GridBagConstraints();
+		componentGbc_0.insets = new Insets(5, 0, 5, 5);
+		componentGbc_0.fill = GridBagConstraints.HORIZONTAL;
+		componentGbc_0.gridx = 1;
+		componentGbc_0.gridy = 2;
+		add(m_kindNameJTextField, componentGbc_0);
 
 		if (m_probeAttributes != null) {
 			m_bindingGroup = initDataBindings();
@@ -135,15 +159,22 @@ public class ProbeDetailPanel extends JPanel {
 		autoBinding_2.bind();
 		//
 		BeanProperty<ProbeAttributes, String> typeProperty = BeanProperty.create("kind");
-		BeanProperty<JTextField,String> textProperty_3 = BeanProperty.create("text");
-		AutoBinding<ProbeAttributes,String,JTextField,String> autoBinding_3 = Bindings.createAutoBinding(UpdateStrategy.READ, m_probeAttributes, typeProperty, m_typeJTextField, textProperty_3);
+		BeanProperty<JTextField, String> textProperty_3 = BeanProperty.create("text");
+		AutoBinding<ProbeAttributes, String, JTextField, String> autoBinding_3 = Bindings.createAutoBinding(
+				UpdateStrategy.READ, m_probeAttributes, typeProperty, m_typeJTextField, textProperty_3);
 		autoBinding_3.bind();
+		
+		BeanProperty<ProbeAttributes,String> aliasProperty = BeanProperty.create("alias");
+		BeanProperty<JTextField, String> textProperty_4 = BeanProperty.create("text");
+		AutoBinding<ProbeAttributes,String,JTextField,String> autoBinding_4 = Bindings.createAutoBinding(UpdateStrategy.READ, m_probeAttributes, aliasProperty, m_aliasTextField, textProperty_4);
+		autoBinding_4.bind();
 		//
 		BindingGroup bindingGroup = new BindingGroup();
 		bindingGroup.addBinding(autoBinding);
 		bindingGroup.addBinding(autoBinding_1);
 		bindingGroup.addBinding(autoBinding_2);
 		bindingGroup.addBinding(autoBinding_3);
+		bindingGroup.addBinding(autoBinding_4);
 		//
 
 		return bindingGroup;
