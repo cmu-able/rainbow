@@ -712,6 +712,7 @@ public class RainbowWindoe extends RainbowWindow
 								: Collections.<String, Object>emptyMap())));
 				m_desktopPane.getDesktopManager().iconifyFrame(frame);
 				frame.addPropertyChangeListener(e->{
+					System.out.println("Selected " + g);
 					if ("selection".equals(e.getPropertyName())) {
 						m_selectionManager.selectionChanged(info);
 					}
@@ -788,6 +789,7 @@ public class RainbowWindoe extends RainbowWindow
 
 				m_probes.put(probeId, info);
 				frame.addPropertyChangeListener(e->{
+					System.out.println("Selected " + probeId);
 					if ("selection".equals(e.getPropertyName())) {
 						m_selectionManager.selectionChanged(info);
 					}
