@@ -71,6 +71,7 @@ import org.sa.rainbow.gui.arch.ArchGuagePanel;
 import org.sa.rainbow.gui.arch.GaugeInfo;
 import org.sa.rainbow.gui.arch.RainbowDesktopIconUI;
 import org.sa.rainbow.gui.arch.RainbowDesktopManager;
+import org.sa.rainbow.gui.arch.elements.ProbeTabbedPane;
 import org.sa.rainbow.gui.widgets.DesktopScrollPane;
 import org.sa.rainbow.translator.probes.IProbeIdentifier;
 import org.sa.rainbow.util.Util;
@@ -119,9 +120,9 @@ public class RainbowWindoe extends RainbowWindow
 
 	public class ProbeInfo {
 		JInternalFrame frame;
-		ProbeAttributes description;
-		List<String> reports;
-		boolean hasError;
+		public ProbeAttributes description;
+		public List<String> reports;
+		public boolean hasError;
 		List<String> gauges = new LinkedList<>();
 	}
 	
@@ -160,9 +161,11 @@ public class RainbowWindoe extends RainbowWindow
 
 	private JTabbedPane m_logTabs;
 
-	private JTabbedPane m_detailsTabs;
+	private JPanel m_detailsPanel;
 
 	private JTextArea m_errorArea;
+
+	private ProbeTabbedPane m_probePanel;
 
 
 	public RainbowWindoe(IMasterCommandPort master) {
@@ -220,12 +223,20 @@ public class RainbowWindoe extends RainbowWindow
 		m_logTabs = new JTabbedPane(JTabbedPane.BOTTOM);
 		m_selectionPanel.addTab("Logs", m_logTabs);
 		
-		m_detailsTabs = new JTabbedPane(JTabbedPane.BOTTOM);
-		m_selectionPanel.addTab("Details", m_detailsTabs);
+		m_detailsPanel = new JPanel();
+		m_detailsPanel.setLayout(new BorderLayout(0, 0));
+		m_selectionPanel.addTab("Details", m_detailsPanel);
 		
 		m_errorArea = createTextAreaInTab(m_selectionPanel, "Errors");
 		
-		
+		m_selectionManager.addSelectionListener(o-> {
+			if (o instanceof ProbeInfo) {
+				ProbeInfo probeInfo = (ProbeInfo) o;
+				m_selectionPanel.setSelectedIndex(1);
+				m_probePanel.setVisible(true);
+				m_probePanel.setProbeInfo(probeInfo);
+			}
+		});
 	}
 
 	@Override
@@ -780,6 +791,9 @@ public class RainbowWindoe extends RainbowWindow
 			m_createProbeReportingPortSubscriber.subscribeToProbe(probe.alias, probe.getLocation());
 
 		}
+		m_probePanel = new ProbeTabbedPane();
+		m_detailsPanel.add(m_probePanel,BorderLayout.CENTER);
+		m_probePanel.setVisible(false);
 	}
 
 	private JInternalFrame addProbeFrame(String probeId) {
