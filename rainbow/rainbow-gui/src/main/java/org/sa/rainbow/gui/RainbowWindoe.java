@@ -241,6 +241,11 @@ public class RainbowWindoe extends RainbowWindow
 
 	@Override
 	protected void createProbesUI() {
+		
+		m_probePanel = new ProbeTabbedPane();
+		m_detailsPanel.add(m_probePanel,BorderLayout.CENTER);
+		m_probePanel.setVisible(false);
+		
 		JTextArea probeLogs = createTextAreaInTab(m_logTabs, "Probes");
 		m_allTabs.put(RainbowComponentT.MASTER,probeLogs);
 	}
@@ -791,9 +796,7 @@ public class RainbowWindoe extends RainbowWindow
 			m_createProbeReportingPortSubscriber.subscribeToProbe(probe.alias, probe.getLocation());
 
 		}
-		m_probePanel = new ProbeTabbedPane();
-		m_detailsPanel.add(m_probePanel,BorderLayout.CENTER);
-		m_probePanel.setVisible(false);
+	
 	}
 
 	private JInternalFrame addProbeFrame(String probeId) {
@@ -831,7 +834,7 @@ public class RainbowWindoe extends RainbowWindow
 		});
 	}
 	
-	ImageIcon icon = new ImageIcon("/error.png");
+	ImageIcon icon = new ImageIcon(this.getClass().getResource("/error.png"));
 
 	
 	@Override
