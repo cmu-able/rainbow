@@ -46,10 +46,10 @@ public class DescriptionAttributes implements Comparable<DescriptionAttributes> 
     public String name = null;
     /** The target location, e.g., hostname, of the element */
     
-    private String location = null;
+    public String location = null;
     /** The String name of the "kind" for this element */
     
-    private String kindName = null;
+    public String kindName = null;
     /** Key'd map of info attributes, not sorted. */
     
     private Map<String,String> info = null;
