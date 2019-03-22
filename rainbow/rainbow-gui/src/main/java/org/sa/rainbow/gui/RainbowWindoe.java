@@ -229,14 +229,14 @@ public class RainbowWindoe extends RainbowWindow
 		
 		m_errorArea = createTextAreaInTab(m_selectionPanel, "Errors");
 		
-//		m_selectionManager.addSelectionListener(o-> {
-//			if (o instanceof ProbeInfo) {
-//				ProbeInfo probeInfo = (ProbeInfo) o;
-//				m_selectionPanel.setSelectedIndex(1);
-//				m_probePanel.setVisible(true);
-//				m_probePanel.setProbeInfo(probeInfo);
-//			}
-//		});
+		m_selectionManager.addSelectionListener(o-> {
+			if (o instanceof ProbeInfo) {
+				ProbeInfo probeInfo = (ProbeInfo) o;
+				m_selectionPanel.setSelectedIndex(1);
+				m_probePanel.setVisible(true);
+				m_probePanel.setProbeInfo(probeInfo);
+			}
+		});
 	}
 
 	@Override
