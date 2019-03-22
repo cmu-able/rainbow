@@ -129,55 +129,16 @@ public class ProbeDetailPanel extends JPanel {
 		add(m_kindNameJTextField, componentGbc_0);
 
 		if (m_probeAttributes != null) {
-			m_bindingGroup = initDataBindings();
+			initDataBindings();
 		}
 	}
 
-	protected BindingGroup initDataBindings() {
-		BeanProperty<org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes, java.lang.String> kindNameProperty = BeanProperty
-				.create("kindName");
-		BeanProperty<javax.swing.JTextField, java.lang.String> textProperty = BeanProperty.create("text");
-		AutoBinding<org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes, java.lang.String, javax.swing.JTextField, java.lang.String> autoBinding = Bindings
-				.createAutoBinding(AutoBinding.UpdateStrategy.READ, m_probeAttributes, kindNameProperty,
-						m_kindNameJTextField, textProperty);
-		autoBinding.bind();
-		//
-		BeanProperty<org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes, java.lang.String> locationProperty = BeanProperty
-				.create("location");
-		BeanProperty<javax.swing.JTextField, java.lang.String> textProperty_1 = BeanProperty.create("text");
-		AutoBinding<org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes, java.lang.String, javax.swing.JTextField, java.lang.String> autoBinding_1 = Bindings
-				.createAutoBinding(AutoBinding.UpdateStrategy.READ, m_probeAttributes, locationProperty,
-						m_locationJTextField, textProperty_1);
-		autoBinding_1.bind();
-		//
-		BeanProperty<org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes, java.lang.String> nameProperty = BeanProperty
-				.create("name");
-		BeanProperty<javax.swing.JTextField, java.lang.String> textProperty_2 = BeanProperty.create("text");
-		AutoBinding<org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes, java.lang.String, javax.swing.JTextField, java.lang.String> autoBinding_2 = Bindings
-				.createAutoBinding(AutoBinding.UpdateStrategy.READ, m_probeAttributes, nameProperty,
-						m_locationJTextField, textProperty_2);
-		autoBinding_2.bind();
-		//
-		BeanProperty<ProbeAttributes, String> typeProperty = BeanProperty.create("kind");
-		BeanProperty<JTextField, String> textProperty_3 = BeanProperty.create("text");
-		AutoBinding<ProbeAttributes, String, JTextField, String> autoBinding_3 = Bindings.createAutoBinding(
-				UpdateStrategy.READ, m_probeAttributes, typeProperty, m_typeJTextField, textProperty_3);
-		autoBinding_3.bind();
-		
-		BeanProperty<ProbeAttributes,String> aliasProperty = BeanProperty.create("alias");
-		BeanProperty<JTextField, String> textProperty_4 = BeanProperty.create("text");
-		AutoBinding<ProbeAttributes,String,JTextField,String> autoBinding_4 = Bindings.createAutoBinding(UpdateStrategy.READ, m_probeAttributes, aliasProperty, m_aliasTextField, textProperty_4);
-		autoBinding_4.bind();
-		//
-		BindingGroup bindingGroup = new BindingGroup();
-		bindingGroup.addBinding(autoBinding);
-		bindingGroup.addBinding(autoBinding_1);
-		bindingGroup.addBinding(autoBinding_2);
-		bindingGroup.addBinding(autoBinding_3);
-		bindingGroup.addBinding(autoBinding_4);
-		//
-
-		return bindingGroup;
+	protected void initDataBindings() {
+		m_kindNameJTextField.setText(m_probeAttributes.kindName);
+		m_locationJTextField.setText(m_probeAttributes.location);
+		m_nameJTextField.setText(m_probeAttributes.name);;
+		m_typeJTextField.setText("n/a");
+		m_aliasTextField.setText(m_probeAttributes.alias);
 	}
 
 	public org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes getProbeAttributes() {
@@ -191,15 +152,7 @@ public class ProbeDetailPanel extends JPanel {
 	public void setProbeAttributes(org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes newProbeAttributes,
 			boolean update) {
 		m_probeAttributes = newProbeAttributes;
-		if (update) {
-			if (m_bindingGroup != null) {
-				m_bindingGroup.unbind();
-				m_bindingGroup = null;
-			}
-			if (m_probeAttributes != null) {
-				m_bindingGroup = initDataBindings();
-			}
-		}
+		initDataBindings();
 	}
 
 }
