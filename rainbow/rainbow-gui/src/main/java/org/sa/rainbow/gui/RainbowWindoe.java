@@ -242,9 +242,9 @@ public class RainbowWindoe extends RainbowWindow
 	@Override
 	protected void createProbesUI() {
 		
-//		m_probePanel = new ProbeTabbedPane();
-//		m_detailsPanel.add(m_probePanel,BorderLayout.CENTER);
-//		m_probePanel.setVisible(true);
+		m_probePanel = new ProbeTabbedPane();
+		m_detailsPanel.add(m_probePanel,BorderLayout.CENTER);
+		m_probePanel.setVisible(true);
 		
 		JTextArea probeLogs = createTextAreaInTab(m_logTabs, "Probes");
 		m_allTabs.put(RainbowComponentT.MASTER,probeLogs);
