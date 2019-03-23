@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,6 +94,7 @@ public class ArchGuagePanel extends GaugePanel {
 		for (Runnable runnable : updaters) {
 			runnable.run();
 		}
+		
 	}
 
 	protected void processOperation(IRainbowOperation command, boolean update, boolean extend) throws RainbowException {
@@ -108,6 +110,9 @@ public class ArchGuagePanel extends GaugePanel {
 				runnable.run();
 			}
 		}
+		for (IGaugeReportUpdate r : reporters) {
+			r.update(command);
+		}
 		m_table.changeSelection(row, 0, false, extend);
 	}
 
@@ -119,7 +124,7 @@ public class ArchGuagePanel extends GaugePanel {
 			throw new RainbowException(data[0] + " is not a known command");
 		tableModel.setValueAt(data[1], row, 1);
 		tableModel.setValueAt(data[2], row, 2);
-		m_gaugeInfo.getOperations().get(op.getName()).add(op);
+		m_gaugeInfo.getOperations().get(op.getName()).add(new Pair<>(new Date(),op));
 //		m_table.firePropertyChange("model", 0, 1);
 		return row;
 	}

@@ -71,6 +71,7 @@ import org.sa.rainbow.gui.arch.ArchGuagePanel;
 import org.sa.rainbow.gui.arch.GaugeInfo;
 import org.sa.rainbow.gui.arch.RainbowDesktopIconUI;
 import org.sa.rainbow.gui.arch.RainbowDesktopManager;
+import org.sa.rainbow.gui.arch.elements.GaugeDetailPanel;
 import org.sa.rainbow.gui.arch.elements.ProbeTabbedPane;
 import org.sa.rainbow.gui.widgets.DesktopScrollPane;
 import org.sa.rainbow.translator.probes.IProbeIdentifier;
@@ -125,25 +126,31 @@ public class RainbowWindoe extends RainbowWindow
 		public boolean hasError;
 		List<String> gauges = new LinkedList<>();
 	}
-	
+
 	public static class SelectionManager {
 		public interface ISelectionListener {
 			public void selectionChanged(Object o);
 		}
-		
-		Collection<ISelectionListener> m_listeners = new HashSet<> ();
-		
-		public void addSelectionListener(ISelectionListener l) { m_listeners.add(l);}
-		public void removeSelectionListener(ISelectionListener l) { m_listeners.remove(l);}
+
+		Collection<ISelectionListener> m_listeners = new HashSet<>();
+
+		public void addSelectionListener(ISelectionListener l) {
+			m_listeners.add(l);
+		}
+
+		public void removeSelectionListener(ISelectionListener l) {
+			m_listeners.remove(l);
+		}
+
 		public void selectionChanged(Object o) {
 			for (ISelectionListener l : m_listeners) {
 				SwingUtilities.invokeLater(() -> l.selectionChanged(o));
 			}
 		}
-		
+
 	}
-	
-	SelectionManager m_selectionManager  = new SelectionManager();
+
+	SelectionManager m_selectionManager = new SelectionManager();
 
 	Map<String, ProbeInfo> m_probes = new HashMap<>();
 	Map<String, GaugeInfo> m_gauges = new HashMap<>();
@@ -167,6 +174,7 @@ public class RainbowWindoe extends RainbowWindow
 
 	private ProbeTabbedPane m_probePanel;
 
+	private GaugeDetailPanel m_gaugePanel;
 
 	public RainbowWindoe(IMasterCommandPort master) {
 		super(master);
@@ -194,9 +202,7 @@ public class RainbowWindoe extends RainbowWindow
 	protected void createDesktopPane() {
 		m_rootPane = new JPanel();
 		m_rootPane.setLayout(new BorderLayout());
-		
-		
-		
+
 		m_desktopPane = new JDesktopPane() {
 			protected void paintComponent(java.awt.Graphics g) {
 				super.paintComponent(g);
@@ -212,80 +218,92 @@ public class RainbowWindoe extends RainbowWindow
 		m_desktopPane.setDesktopManager(new RainbowDesktopManager(m_desktopPane));
 
 //		m_frame.getContentPane().add(m_desktopPane, BorderLayout.CENTER);
-		
+
 		DesktopScrollPane dsp = new DesktopScrollPane(m_desktopPane);
 		m_frame.getContentPane().add(dsp, BorderLayout.CENTER);
-		
+
 		m_selectionPanel = new JTabbedPane(JTabbedPane.LEFT);
 		m_selectionPanel.setPreferredSize(new Dimension(WIDTH, 200));
 		m_frame.getContentPane().add(m_selectionPanel, BorderLayout.SOUTH);
 
 		m_logTabs = new JTabbedPane(JTabbedPane.BOTTOM);
 		m_selectionPanel.addTab("Logs", m_logTabs);
-		
+
 		m_detailsPanel = new JPanel();
 		m_detailsPanel.setLayout(new BorderLayout(0, 0));
 		m_selectionPanel.addTab("Details", m_detailsPanel);
-		
+
 		m_errorArea = createTextAreaInTab(m_selectionPanel, "Errors");
-		
-		m_selectionManager.addSelectionListener(o-> {
+
+		m_selectionManager.addSelectionListener(o -> {
+			m_probePanel.setVisible(false);
+			m_gaugePanel.setVisible(false);
 			if (o instanceof ProbeInfo) {
 				ProbeInfo probeInfo = (ProbeInfo) o;
 				m_selectionPanel.setSelectedIndex(1);
 				m_probePanel.setVisible(true);
 				m_probePanel.setProbeInfo(probeInfo);
+			} else if (o instanceof GaugeInfo) {
+				GaugeInfo gaugeInfo = (GaugeInfo) o;
+				m_selectionPanel.setSelectedIndex(1);
+				m_gaugePanel.setVisible(true);
+				m_gaugePanel.initDataBindings(gaugeInfo);
 			}
 		});
 	}
 
 	@Override
 	protected void createProbesUI() {
-		
+
 		m_probePanel = new ProbeTabbedPane();
-		m_detailsPanel.add(m_probePanel,BorderLayout.CENTER);
-		m_probePanel.setVisible(true);
-		
+		m_detailsPanel.add(m_probePanel, BorderLayout.CENTER);
+		m_probePanel.setVisible(false);
+
 		JTextArea probeLogs = createTextAreaInTab(m_logTabs, "Probes");
-		m_allTabs.put(RainbowComponentT.MASTER,probeLogs);
+		m_allTabs.put(RainbowComponentT.MASTER, probeLogs);
 	}
 
 	@Override
 	protected void createGaugesUI() {
+
+		m_gaugePanel = new GaugeDetailPanel();
+		m_detailsPanel.add(m_gaugePanel, BorderLayout.CENTER);
+		m_gaugePanel.setVisible(false);
+
 		JTextArea gaugesLogs = createTextAreaInTab(m_logTabs, "Gauges");
-		m_allTabs.put(RainbowComponentT.GAUGE_MANAGER,gaugesLogs);
-		m_allTabs.put(RainbowComponentT.GAUGE,gaugesLogs);
+		m_allTabs.put(RainbowComponentT.GAUGE_MANAGER, gaugesLogs);
+		m_allTabs.put(RainbowComponentT.GAUGE, gaugesLogs);
 	}
-	
+
 	@Override
 	protected void createModelsManagerUI() {
 		JTextArea modelsLogs = createTextAreaInTab(m_logTabs, "Models");
-		m_allTabs.put(RainbowComponentT.MODEL,modelsLogs);
+		m_allTabs.put(RainbowComponentT.MODEL, modelsLogs);
 	}
-	
+
 	@Override
 	protected void createAdaptationManagerUI() {
 		JTextArea modelsLogs = createTextAreaInTab(m_logTabs, "Adaptation Manager");
-		m_allTabs.put(RainbowComponentT.ADAPTATION_MANAGER,modelsLogs);
+		m_allTabs.put(RainbowComponentT.ADAPTATION_MANAGER, modelsLogs);
 	}
-	
+
 	@Override
 	protected void createExecutorsUI() {
 		JTextArea modelsLogs = createTextAreaInTab(m_logTabs, "Execution");
-		m_allTabs.put(RainbowComponentT.EXECUTOR,modelsLogs);
+		m_allTabs.put(RainbowComponentT.EXECUTOR, modelsLogs);
 	}
-	
+
 	@Override
 	protected void createAnalyzersUI() {
 		JTextArea modelsLogs = createTextAreaInTab(m_logTabs, "Analyzers");
-		m_allTabs.put(RainbowComponentT.ANALYSIS,modelsLogs);
+		m_allTabs.put(RainbowComponentT.ANALYSIS, modelsLogs);
 	}
-	
+
 	@Override
 	protected void createEffectorsUI() {
 		JTextArea modelsLogs = createTextAreaInTab(m_logTabs, "Effectors");
-		m_allTabs.put(RainbowComponentT.EFFECTOR,modelsLogs);
-		m_allTabs.put(RainbowComponentT.EFFECTOR_MANAGER,modelsLogs);
+		m_allTabs.put(RainbowComponentT.EFFECTOR, modelsLogs);
+		m_allTabs.put(RainbowComponentT.EFFECTOR_MANAGER, modelsLogs);
 	}
 
 	@Override
@@ -299,13 +317,13 @@ public class RainbowWindoe extends RainbowWindow
 		statusPane.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		statusPane.setBackground(m_menuBar.getBackground());
 		m_menuBar.add(statusPane);
-		
+
 		// These removals are hacsk
 		statusPane.getParent().remove(statusPane);
 		JTextArea managementText = m_oracleMessagePane.getTextArea();
 		managementText.getParent().getParent().getParent().remove(managementText.getParent().getParent());
-		m_logTabs.insertTab("Management", null, managementText.getParent().getParent(),null,0);
-		m_allTabs.put(RainbowComponentT.MASTER,managementText);
+		m_logTabs.insertTab("Management", null, managementText.getParent().getParent(), null, 0);
+		m_allTabs.put(RainbowComponentT.MASTER, managementText);
 		m_logTabs.setSelectedIndex(0);
 
 	}
@@ -323,9 +341,9 @@ public class RainbowWindoe extends RainbowWindow
 			for (Line2D l : m_lines) {
 				g2.draw(l);
 			}
-			
+
 			return;
-			
+
 		}
 		for (Map.Entry<String, GaugeInfo> entry : m_gauges.entrySet()) {
 			GaugeInfo gInfo = entry.getValue();
@@ -476,10 +494,10 @@ public class RainbowWindoe extends RainbowWindow
 
 	private boolean layoutDOT() {
 		try {
-			m_lines = new ArrayList<Line2D> ();
+			m_lines = new ArrayList<Line2D>();
 			int res = Toolkit.getDefaultToolkit().getScreenResolution();
 			Graph g = new SingleGraph("gauges-and-probes");
-			
+
 			Node root = g.addNode("root");
 			Map<String, Node> processedIds = new HashMap<>();
 			for (Entry<String, GaugeInfo> ge : m_gauges.entrySet()) {
@@ -518,7 +536,8 @@ public class RainbowWindoe extends RainbowWindow
 			fs.writeAll(g, tmp.getAbsolutePath());
 
 			Runtime rt = Runtime.getRuntime();
-			String[] args = { "/usr/bin/dot", "-Tdot", /*"-Gdpi=" + res, */tmp.getAbsolutePath(), "-o", tmpo.getAbsolutePath() };
+			String[] args = { "/usr/bin/dot", "-Tdot", /* "-Gdpi=" + res, */tmp.getAbsolutePath(), "-o",
+					tmpo.getAbsolutePath() };
 			Process p = rt.exec(args);
 			p.waitFor();
 			Graph inGraph = new DefaultGraph("input");
@@ -533,13 +552,14 @@ public class RainbowWindoe extends RainbowWindow
 			Node node = inGraph.getNode("root");
 			if (node != null) {
 				double h = node.getAttribute("height");
-				graphBB = adjustFromTop(graphBB, (float )h);
+				graphBB = adjustFromTop(graphBB, (float) h);
 			}
 			for (Node n : inGraph.getNodeSet()) {
 				if (m_gauges.containsKey(n.getId())) {
 					GaugeInfo gi = m_gauges.get(n.getId());
 					String pos = (String) n.getAttribute("pos");
-					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0]), Float.parseFloat(pos.split(",")[1]), getVisibleFrame(gi.getFrame()).getBounds().getSize());
+					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0]),
+							Float.parseFloat(pos.split(",")[1]), getVisibleFrame(gi.getFrame()).getBounds().getSize());
 //					Point realPoint = convertOrigin(location, graphBB);
 //					realPoint.translate(GAUGE_REGION.x, GAUGE_REGION.y);
 					Point realPoint = location;
@@ -547,14 +567,15 @@ public class RainbowWindoe extends RainbowWindow
 				} else if (m_probes.containsKey(n.getId())) {
 					ProbeInfo pi = m_probes.get(n.getId());
 					String pos = (String) n.getAttribute("pos");
-					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0]), Float.parseFloat(pos.split(",")[1]), getVisibleFrame(pi.frame).getBounds().getSize());
+					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0]),
+							Float.parseFloat(pos.split(",")[1]), getVisibleFrame(pi.frame).getBounds().getSize());
 //					Point realPoint = convertOrigin(location, graphBB);
 //					realPoint.translate(GAUGE_REGION.x, GAUGE_REGION.y);
 					Point realPoint = location;
 					getVisibleFrame(pi.frame).setLocation(realPoint);
 				}
 			}
-			
+
 			for (Edge e : inGraph.getEdgeSet()) {
 				if (!e.getId().contains("root")) {
 					String posA = e.getAttribute("pos");
@@ -563,16 +584,17 @@ public class RainbowWindoe extends RainbowWindow
 					for (int i = 0; i < posS.length; i++) {
 						String pos = posS[i];
 						String[] point = pos.split(",");
-						Point location = new Point(Math.round(Float.parseFloat(point[0])), Math.round(Float.parseFloat(point[1])));
+						Point location = new Point(Math.round(Float.parseFloat(point[0])),
+								Math.round(Float.parseFloat(point[1])));
 //						Point realPoint = convertOrigin(location, graphBB);
 //						realPoint.translate(GAUGE_REGION.x, GAUGE_REGION.y);
 						Point realPoint = location;
 						locs[i] = realPoint;
 						if (i >= 1) {
-							m_lines.add(new Line2D.Float(locs[i-1].x, locs[i-1].y, locs[i].x, locs[i].y));
+							m_lines.add(new Line2D.Float(locs[i - 1].x, locs[i - 1].y, locs[i].x, locs[i].y));
 						}
 					}
-					
+
 				}
 			}
 
@@ -587,19 +609,19 @@ public class RainbowWindoe extends RainbowWindow
 	}
 
 	private Point convertOrigin(Point location, Rectangle graphBB) {
-		return new Point(location.x, graphBB.height-location.y);
+		return new Point(location.x, graphBB.height - location.y);
 	}
 
 	private Rectangle adjustFromTop(Rectangle graphBB, Float attribute) {
-		graphBB.setSize(graphBB.width, graphBB.height - Math.round(attribute)); 
+		graphBB.setSize(graphBB.width, graphBB.height - Math.round(attribute));
 		return graphBB;
 	}
 
 	private Rectangle getBoundingBox(String attribute) {
 		String[] r = attribute.split(",");
-		return new Rectangle(Math.round(Float.parseFloat(r[0])),Math.round(Float.parseFloat(r[1])),Math.round(Float.parseFloat(r[2])),Math.round(Float.parseFloat(r[3])));
+		return new Rectangle(Math.round(Float.parseFloat(r[0])), Math.round(Float.parseFloat(r[1])),
+				Math.round(Float.parseFloat(r[2])), Math.round(Float.parseFloat(r[3])));
 	}
-
 
 	private Point getTopLeft(float centerX, float centerY, Dimension size) {
 		return new Point((int) Math.round(centerX - size.getWidth() / 2),
@@ -711,7 +733,7 @@ public class RainbowWindoe extends RainbowWindow
 						.setUI(p.createIcon(frame, (Map<String, Object>) (m_uidb != null ? m_uidb.get("gauges")
 								: Collections.<String, Object>emptyMap())));
 				m_desktopPane.getDesktopManager().iconifyFrame(frame);
-				frame.addPropertyChangeListener(e->{
+				frame.addPropertyChangeListener(e -> {
 					System.out.println("Selected " + g);
 					if ("selection".equals(e.getPropertyName())) {
 						m_selectionManager.selectionChanged(info);
@@ -719,6 +741,11 @@ public class RainbowWindoe extends RainbowWindow
 				});
 
 				m_gauges.put(g, info);
+				p.addGaugeReportListener(c -> {
+
+					if (m_gaugePanel.m_gaugeInfo == info)
+						m_gaugePanel.initDataBindings(info);
+				});
 				p.addUpdateListener(() -> {
 					final JComponent vFrame = getVIsibleComponentToHiglight(frame);
 					vFrame.setBorder(new LineBorder(GAUGES_COLOR, 2));
@@ -738,6 +765,7 @@ public class RainbowWindoe extends RainbowWindow
 							});
 						}
 					}, 1000);
+
 				});
 			}
 		}
@@ -790,7 +818,7 @@ public class RainbowWindoe extends RainbowWindow
 				info.hasError = false;
 
 				m_probes.put(probeId, info);
-				frame.addPropertyChangeListener(e->{
+				frame.addPropertyChangeListener(e -> {
 					System.out.println("Selected " + probeId);
 					if ("selection".equals(e.getPropertyName())) {
 						m_selectionManager.selectionChanged(info);
@@ -800,7 +828,7 @@ public class RainbowWindoe extends RainbowWindow
 			m_createProbeReportingPortSubscriber.subscribeToProbe(probe.alias, probe.getLocation());
 
 		}
-	
+
 	}
 
 	private JInternalFrame addProbeFrame(String probeId) {
@@ -837,10 +865,9 @@ public class RainbowWindoe extends RainbowWindow
 			}
 		});
 	}
-	
+
 	ImageIcon icon = new ImageIcon(this.getClass().getResource("/error.png"));
 
-	
 	@Override
 	public void report(RainbowComponentT component, ReportType type, String message) {
 		super.report(component, type, message);

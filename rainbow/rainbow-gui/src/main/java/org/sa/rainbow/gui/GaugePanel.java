@@ -20,10 +20,16 @@ import org.sa.rainbow.core.ports.IModelUSBusPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 
 public class GaugePanel extends JPanel implements IModelUpdater{
+	
+	public static interface IGaugeReportUpdate {
+		void update(IRainbowOperation o);
+	}
+	
 	protected JTable m_table;
 	protected IModelUSBusPort m_usPort;
 	protected String m_gaugeId;
 	protected ArrayList<Runnable> updaters = new ArrayList<>(1);
+	protected ArrayList<IGaugeReportUpdate> reporters = new ArrayList<>(1);
 
 	/**
 	 * Create the panel.
@@ -58,12 +64,19 @@ public class GaugePanel extends JPanel implements IModelUpdater{
 		updaters.add(r);
 	}
 	
+	public void addGaugeReportListener(IGaugeReportUpdate r) {
+		reporters.add(r);
+	}
+	
 	@Override
 	public void requestModelUpdate(IRainbowOperation command) throws IllegalStateException, RainbowException {
 		if (!m_gaugeId.equals(command.getOrigin())) return;
 		addOperation(command);
 		for (Runnable runnable : updaters) {
 			runnable.run();
+		}
+		for (IGaugeReportUpdate r : reporters) {
+			r.update(command);
 		}
 	}
 	
@@ -89,6 +102,9 @@ public class GaugePanel extends JPanel implements IModelUpdater{
 			if (!command.getOrigin().equals(m_gaugeId)) return;
 			String[] data = getTableData(command);
 			tableModel.addRow(data);
+			for (IGaugeReportUpdate r : reporters) {
+				r.update(command);
+			}
 		}
 		m_table.setModel(tableModel);
 		tableModel.fireTableDataChanged();		

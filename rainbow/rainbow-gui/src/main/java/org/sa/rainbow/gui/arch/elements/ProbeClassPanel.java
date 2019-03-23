@@ -35,6 +35,7 @@ public class ProbeClassPanel extends JPanel {
 		add(lblClass, gbc_lblClass);
 		
 		m_classField = new JTextField();
+		m_classField.setEditable(false);
 		GridBagConstraints gbc_classField = new GridBagConstraints();
 		gbc_classField.insets = new Insets(0, 0, 5, 0);
 		gbc_classField.fill = GridBagConstraints.HORIZONTAL;
@@ -51,6 +52,7 @@ public class ProbeClassPanel extends JPanel {
 		add(lblArguments, gbc_lblArguments);
 		
 		m_argsField = new JTextField();
+		m_argsField.setEditable(false);
 		GridBagConstraints gbc_argsField = new GridBagConstraints();
 		gbc_argsField.insets = new Insets(0, 0, 5, 0);
 		gbc_argsField.fill = GridBagConstraints.HORIZONTAL;
@@ -67,6 +69,7 @@ public class ProbeClassPanel extends JPanel {
 		add(m_label, gbc_label);
 		
 		m_periodField = new JTextField();
+		m_periodField.setEditable(false);
 		GridBagConstraints gbc_periodField = new GridBagConstraints();
 		gbc_periodField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_periodField.gridx = 1;

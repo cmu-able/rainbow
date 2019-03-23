@@ -55,6 +55,7 @@ public class ProbeTabbedPane extends JTabbedPane {
 	public void updateReports(String alias) {
 		if (m_probeInfo == null) return;
 		if (!m_probeInfo.description.alias.equals(alias)) return;
+		m_reportText.setText("");
 		int lower = Math.max(100, m_probeInfo.reports.size());
 		for (int i = 0; i < lower; i++) {
 			m_reportText.append(m_probeInfo.reports.get(i));
