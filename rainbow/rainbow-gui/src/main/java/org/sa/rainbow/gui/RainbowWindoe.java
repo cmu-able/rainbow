@@ -260,7 +260,7 @@ public class RainbowWindoe extends RainbowWindow
 	protected void createProbesUI() {
 
 		m_probePanel = new ProbeTabbedPane();
-//		m_detailsPanel.add(m_probePanel);
+		m_detailsPanel.add(m_probePanel);
 		((CardLayout )m_detailsPanel.getLayout()).addLayoutComponent( m_probePanel, "probes");
 		m_probePanel.setVisible(false);
 
@@ -272,7 +272,7 @@ public class RainbowWindoe extends RainbowWindow
 	protected void createGaugesUI() {
 
 		m_gaugePanel = new GaugeDetailPanel();
-//		m_detailsPanel.add(m_gaugePanel);
+		m_detailsPanel.add(m_gaugePanel);
 		m_gaugePanel.setVisible(false);
 		((CardLayout )m_detailsPanel.getLayout()).addLayoutComponent( m_gaugePanel, "gauges");
 
