@@ -274,7 +274,7 @@ public class RainbowWindoe extends RainbowWindow
 		m_gaugePanel = new GaugeDetailPanel();
 //		m_detailsPanel.add(m_gaugePanel);
 		m_gaugePanel.setVisible(false);
-		((CardLayout )m_detailsPanel.getLayout()).addLayoutComponent( m_probePanel, "gauges");
+		((CardLayout )m_detailsPanel.getLayout()).addLayoutComponent( m_gaugePanel, "gauges");
 
 		JTextArea gaugesLogs = createTextAreaInTab(m_logTabs, "Gauges");
 		m_allTabs.put(RainbowComponentT.GAUGE_MANAGER, gaugesLogs);
