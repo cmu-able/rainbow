@@ -1,6 +1,7 @@
 package org.sa.rainbow.gui;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -230,7 +231,7 @@ public class RainbowWindoe extends RainbowWindow
 		m_selectionPanel.addTab("Logs", m_logTabs);
 
 		m_detailsPanel = new JPanel();
-		m_detailsPanel.setLayout(new BorderLayout(0, 0));
+		m_detailsPanel.setLayout(new CardLayout());
 		m_selectionPanel.addTab("Details", m_detailsPanel);
 
 		m_errorArea = createTextAreaInTab(m_selectionPanel, "Errors");
@@ -243,11 +244,14 @@ public class RainbowWindoe extends RainbowWindow
 				m_selectionPanel.setSelectedIndex(1);
 				m_probePanel.setVisible(true);
 				m_probePanel.setProbeInfo(probeInfo);
+				((CardLayout )m_detailsPanel.getLayout()).show(m_detailsPanel, "probes");
 			} else if (o instanceof GaugeInfo) {
 				GaugeInfo gaugeInfo = (GaugeInfo) o;
 				m_selectionPanel.setSelectedIndex(1);
 				m_gaugePanel.setVisible(true);
 				m_gaugePanel.initDataBindings(gaugeInfo);
+				((CardLayout )m_detailsPanel.getLayout()).show(m_detailsPanel, "gauges");
+
 			}
 		});
 	}
@@ -256,7 +260,8 @@ public class RainbowWindoe extends RainbowWindow
 	protected void createProbesUI() {
 
 		m_probePanel = new ProbeTabbedPane();
-		m_detailsPanel.add(m_probePanel, BorderLayout.CENTER);
+		m_detailsPanel.add(m_probePanel);
+		((CardLayout )m_detailsPanel.getLayout()).addLayoutComponent( m_probePanel, "probes");
 		m_probePanel.setVisible(false);
 
 		JTextArea probeLogs = createTextAreaInTab(m_logTabs, "Probes");
@@ -267,8 +272,9 @@ public class RainbowWindoe extends RainbowWindow
 	protected void createGaugesUI() {
 
 		m_gaugePanel = new GaugeDetailPanel();
-		m_detailsPanel.add(m_gaugePanel, BorderLayout.CENTER);
+		m_detailsPanel.add(m_gaugePanel);
 		m_gaugePanel.setVisible(false);
+		((CardLayout )m_detailsPanel.getLayout()).addLayoutComponent( m_probePanel, "gauges");
 
 		JTextArea gaugesLogs = createTextAreaInTab(m_logTabs, "Gauges");
 		m_allTabs.put(RainbowComponentT.GAUGE_MANAGER, gaugesLogs);
