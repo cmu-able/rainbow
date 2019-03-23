@@ -48,5 +48,24 @@ public class ProbeTabbedPane extends JTabbedPane {
 		BeanProperty<ProbeDetailPanel, ProbeAttributes> probeDetailPanelBeanProperty = BeanProperty.create("probeAttributes");
 		description = Bindings.createAutoBinding(UpdateStrategy.READ, m_probeInfo.description, m_probeDetailPanel, probeDetailPanelBeanProperty);
 		description.bind();
+		
+		updateReports(m_probeInfo.description.alias);
 	}
+
+	public void updateReports(String alias) {
+		if (m_probeInfo == null) return;
+		if (!m_probeInfo.description.alias.equals(alias)) return;
+		int lower = Math.max(100, m_probeInfo.reports.size());
+		for (int i = 0; i < lower; i++) {
+			m_reportText.append(m_probeInfo.reports.get(i));
+			m_reportText.append("\n");
+		}
+	}
+	
+	public void addToReports(String alias) {
+		if (m_probeInfo == null) return;
+		if (!m_probeInfo.description.alias.equals(alias)) return;
+		m_reportText.setText(m_probeInfo.reports.get(m_probeInfo.reports.size()-1) + "\n" + m_reportText.getText());
+	}
+	
 }

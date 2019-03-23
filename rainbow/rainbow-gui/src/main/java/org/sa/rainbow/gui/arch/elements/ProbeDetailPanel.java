@@ -7,15 +7,10 @@ import java.awt.Insets;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-
-import org.jdesktop.beansbinding.AutoBinding;
-import org.jdesktop.beansbinding.BeanProperty;
-import org.jdesktop.beansbinding.BindingGroup;
-import org.jdesktop.beansbinding.Bindings;
-import org.jdesktop.beansbinding.AutoBinding.UpdateStrategy;
-import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
-
 import javax.swing.SwingConstants;
+
+import org.jdesktop.beansbinding.BindingGroup;
+import org.sa.rainbow.translator.probes.IProbe.Kind;
 
 public class ProbeDetailPanel extends JPanel {
 
@@ -27,6 +22,8 @@ public class ProbeDetailPanel extends JPanel {
 	private JTextField m_typeJTextField;
 	private JLabel m_alias;
 	private JTextField m_aliasTextField;
+	private ProbeScriptPanel m_probeScriptPanel;
+	private ProbeClassPanel m_probeClassPanel;
 
 	public ProbeDetailPanel(org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes newProbeAttributes) {
 		this();
@@ -37,8 +34,8 @@ public class ProbeDetailPanel extends JPanel {
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 0, 0, 0, 0, 0 };
 		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0 };
-		gridBagLayout.columnWeights = new double[] { 0.0, 1.0, 0.0, 1.0, 1.0E-4 };
-		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 1.0E-4 };
+		gridBagLayout.columnWeights = new double[] { 0.0, 1.0, 1.0, 1.0, 1.0E-4 };
+		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 1.0, 1.0, 1.0E-4 };
 		setLayout(gridBagLayout);
 
 		JLabel locationLabel = new JLabel("Location:");
@@ -127,6 +124,25 @@ public class ProbeDetailPanel extends JPanel {
 		componentGbc_0.gridx = 1;
 		componentGbc_0.gridy = 2;
 		add(m_kindNameJTextField, componentGbc_0);
+		
+		m_probeClassPanel = new ProbeClassPanel();
+		GridBagConstraints gbc_probeClassPanel = new GridBagConstraints();
+		gbc_probeClassPanel.gridwidth = 3;
+		gbc_probeClassPanel.insets = new Insets(0, 0, 5, 5);
+		gbc_probeClassPanel.fill = GridBagConstraints.BOTH;
+		gbc_probeClassPanel.gridx = 1;
+		gbc_probeClassPanel.gridy = 3;
+		add(m_probeClassPanel, gbc_probeClassPanel);
+		m_probeClassPanel.setVisible(false);
+		
+		m_probeScriptPanel = new ProbeScriptPanel();
+		GridBagConstraints gbc_probeScriptPanel = new GridBagConstraints();
+		gbc_probeScriptPanel.gridwidth = 3;
+		gbc_probeScriptPanel.fill = GridBagConstraints.BOTH;
+		gbc_probeScriptPanel.gridx = 1;
+		gbc_probeScriptPanel.gridy = 3;
+		add(m_probeScriptPanel, gbc_probeScriptPanel);
+		m_probeScriptPanel.setVisible(false);
 
 		if (m_probeAttributes != null) {
 			initDataBindings();
@@ -139,6 +155,14 @@ public class ProbeDetailPanel extends JPanel {
 		m_nameJTextField.setText(m_probeAttributes.name);;
 		m_typeJTextField.setText("n/a");
 		m_aliasTextField.setText(m_probeAttributes.alias);
+		if (m_probeAttributes.kind == Kind.SCRIPT) {
+			m_probeScriptPanel.addDataBindings(m_probeAttributes);
+			m_probeScriptPanel.setVisible(true);
+		}
+		else if (m_probeAttributes.kind == Kind.JAVA) {
+			m_probeClassPanel.addDataBindings(m_probeAttributes);
+			m_probeScriptPanel.setVisible(true);
+		}
 	}
 
 	public org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes getProbeAttributes() {

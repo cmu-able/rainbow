@@ -757,11 +757,13 @@ public class RainbowWindoe extends RainbowWindow
 						public void reportData(IProbeIdentifier probe, String data) {
 							String pid = probe.type() + "@" + probe.location();
 							ProbeInfo probeInfo = m_probes.get(pid);
+							probeInfo.reports.add(0, data);
 							final JComponent vc = getVIsibleComponentToHiglight(probeInfo.frame);
 							vc.setBorder(new LineBorder(SYSTEM_COLOR_LIGHT, 2));
 							m_probeSections.get(pid).setText(data);
 							ComponentReseter tcc = new ComponentReseter(1000, () -> vc.setBorder(null));
 							tcc.run();
+							m_probePanel.addToReports(probeInfo.description.alias);
 						}
 					});
 		} catch (RainbowConnectionException e) {
