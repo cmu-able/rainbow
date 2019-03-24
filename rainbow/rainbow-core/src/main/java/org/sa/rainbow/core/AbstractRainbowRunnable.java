@@ -262,8 +262,8 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
                         if (errorCount < 3) {
                             // Change this so that the error is reported, but the thread doesn't terminate
                             String errMsg = MessageFormat
-                                    .format("Runtime error in {0}! ... Continuing for {1} more attempts.",
-                                            m_name, (3 - ++errorCount));
+                                    .format("[{2}]: Runtime error in {0}! ... Continuing for {1} more attempts.",
+                                            m_name, (3 - ++errorCount), id());
                             m_reportingPort.error (getComponentType (), errMsg, t);
                             t.printStackTrace ();
                         }
