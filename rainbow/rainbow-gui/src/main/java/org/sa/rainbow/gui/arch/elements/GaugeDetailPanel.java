@@ -173,6 +173,7 @@ public class GaugeDetailPanel extends JPanel {
 	}
 
 	public void initDataBindings(GaugeInfo gi) {
+		if (gi == m_gaugeInfo) return;
 		if (gi != m_gaugeInfo) {
 			m_gaugeInfo = gi;
 			clearTable((DefaultTableModel) m_publishedOperations.getModel());
