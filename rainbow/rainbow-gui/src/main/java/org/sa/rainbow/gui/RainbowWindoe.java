@@ -28,6 +28,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -40,6 +42,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
+import javax.swing.plaf.InternalFrameUI;
 
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.EdgeRejectedException;
@@ -70,6 +73,7 @@ import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.gui.arch.ArchGuagePanel;
 import org.sa.rainbow.gui.arch.GaugeInfo;
+import org.sa.rainbow.gui.arch.IErrorDisplay;
 import org.sa.rainbow.gui.arch.RainbowDesktopIconUI;
 import org.sa.rainbow.gui.arch.RainbowDesktopManager;
 import org.sa.rainbow.gui.arch.elements.GaugeDetailPanel;
@@ -119,6 +123,8 @@ public class RainbowWindoe extends RainbowWindow
 			(int) (2 / 3f * WIDTH), (int) (HEIGHT / 4f));
 	private static final Rectangle GAUGE_REGION = new Rectangle((int) (WIDTH * 1 / 3f),
 			(int) (HEIGHT - 2 * HEIGHT / 4f), (int) (2 / 3f * WIDTH), (int) (HEIGHT / 4f));
+
+	public static final ImageIcon ERROR_ICON = new ImageIcon(RainbowWindoe.class.getResource("/error.png"));
 
 	public class ProbeInfo {
 		JInternalFrame frame;
@@ -872,15 +878,42 @@ public class RainbowWindoe extends RainbowWindow
 		});
 	}
 
-	ImageIcon icon = new ImageIcon(this.getClass().getResource("/error.png"));
-
+	private static Pattern ERROR_PATTERN=Pattern.compile("\\[(.*)\\]:.*");
 	@Override
 	public void report(RainbowComponentT component, ReportType type, String message) {
 		super.report(component, type, message);
 		if (type == ReportType.ERROR || type == ReportType.FATAL) {
 			m_errorArea.append(message);
 			m_errorArea.setCaretPosition(m_errorArea.getText().length());
-			m_selectionPanel.setIconAt(2, icon);
+			m_selectionPanel.setIconAt(2, ERROR_ICON);
+			
+			Matcher m = ERROR_PATTERN.matcher(message);
+			if (m.matches()) {
+				m_errorArea.append("Error in component: " + m.group(1));
+				switch (component) {
+				case GAUGE:
+					GaugeInfo gi = m_gauges.get(m.group(1));
+					if (gi != null) {
+						InternalFrameUI f = gi.getFrame().getUI();
+						if (f instanceof IErrorDisplay) {
+							IErrorDisplay e = (IErrorDisplay )f;
+							e.displayError(message);
+						}
+					}
+					break;
+				case PROBE:
+					ProbeInfo pi = m_probes.get(m.group(1));
+					if (pi != null) {
+						InternalFrameUI f = pi.frame.getUI();
+						if (f instanceof IErrorDisplay) {
+							IErrorDisplay e = (IErrorDisplay )f;
+							e.displayError(message);
+						}
+					}
+					
+				}
+			}
+			
 		}
 	}
 
