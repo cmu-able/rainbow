@@ -48,13 +48,13 @@ public class RainbowDesktopIconUI extends BasicDesktopIconUI /*implements IError
 		layerPane.add(m_errorPane, 1);
 		m_errorPane.setVisible(false);
 		JPanel contents = new JPanel();
-		contents.setLayout(new BorderLayout(0,0));
+		contents.setLayout(new GridLayout(1, 1));
 		layerPane.add(contents, 0);
 		
 		
 		desktopIcon.setBorder(null);
 		desktopIcon.setOpaque(false);
-		desktopIcon.setLayout(new GridLayout(1, 1));
+		desktopIcon.setLayout(new BorderLayout(0,0));
 		contents.add(label);
 		contents.setOpaque(false);
 
