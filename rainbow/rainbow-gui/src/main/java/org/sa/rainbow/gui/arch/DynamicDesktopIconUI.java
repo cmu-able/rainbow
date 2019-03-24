@@ -55,10 +55,12 @@ public class DynamicDesktopIconUI extends BasicDesktopIconUI implements IErrorDi
 		m_errorPane.setVisible(false);
 		JPanel contents = new JPanel();
 		contents.setLayout(new BorderLayout(0,0));
+		contents.setOpaque(false);
 		layerPane.add(contents, 0);
 		contents./*desktopIcon.*//*getInternalFrame().*/add(series, BorderLayout.CENTER);
 
 		contents/*desktopIcon*//*.getInternalFrame()*/.add(label, BorderLayout.SOUTH);
+		desktopIcon.add(contents);
 	}
 	
 	@Override

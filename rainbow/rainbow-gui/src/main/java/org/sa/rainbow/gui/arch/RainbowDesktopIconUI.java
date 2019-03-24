@@ -56,6 +56,8 @@ public class RainbowDesktopIconUI extends BasicDesktopIconUI /*implements IError
 		desktopIcon.setOpaque(false);
 		desktopIcon.setLayout(new GridLayout(1, 1));
 		contents.add(label);
+		contents.setOpaque(false);
+
 		desktopIcon.add(contents);
 	}
 
