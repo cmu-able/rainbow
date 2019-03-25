@@ -888,7 +888,7 @@ public class RainbowWindoe extends RainbowWindow
 			m_selectionPanel.setIconAt(2, ERROR_ICON);
 			
 			Matcher m = ERROR_PATTERN.matcher(message);
-			if (m.matches()) {
+			if (m.find()) {
 				m_errorArea.append("Error in component: " + m.group(1));
 				switch (component) {
 				case GAUGE:
