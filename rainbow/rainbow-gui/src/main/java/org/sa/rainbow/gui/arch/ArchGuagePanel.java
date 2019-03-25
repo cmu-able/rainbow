@@ -11,6 +11,7 @@ import java.util.Map;
 
 import javax.swing.JInternalFrame;
 import javax.swing.JInternalFrame.JDesktopIcon;
+import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -102,7 +103,7 @@ public class ArchGuagePanel extends GaugePanel {
 
 		int row = updateOperation(command);
 		JDesktopIcon desktopIcon = m_gaugeInfo.getFrame().getDesktopIcon();
-		Component c = ((JPanel )desktopIcon.getComponent(0)).getComponent(0);
+		Component c = ((JPanel )((JLayeredPane )desktopIcon.getComponent(0)).getComponent(0)).getComponent(0);
 		if (c instanceof ICommandUpdate) {
 			((ICommandUpdate) c).newCommand(command);
 		}
