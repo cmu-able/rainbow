@@ -76,6 +76,7 @@ import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.gui.arch.ArchGuagePanel;
+import org.sa.rainbow.gui.arch.ArchModelPanel;
 import org.sa.rainbow.gui.arch.GaugeInfo;
 import org.sa.rainbow.gui.arch.IErrorDisplay;
 import org.sa.rainbow.gui.arch.RainbowDesktopIconUI;
@@ -137,11 +138,12 @@ public class RainbowWindoe extends RainbowWindow
 		public boolean hasError;
 		List<String> gauges = new LinkedList<>();
 	}
-	
+
 	public class ModelInfo {
 		ModelReference modelRef;
 		JInternalFrame frame;
 		List<String> gauges = new LinkedList<>();
+		public ArchModelPanel panel;
 	}
 
 	public static class SelectionManager {
@@ -260,13 +262,13 @@ public class RainbowWindoe extends RainbowWindow
 				m_selectionPanel.setSelectedIndex(1);
 				m_probePanel.setVisible(true);
 				m_probePanel.setProbeInfo(probeInfo);
-				((CardLayout )m_detailsPanel.getLayout()).show(m_detailsPanel, "probes");
+				((CardLayout) m_detailsPanel.getLayout()).show(m_detailsPanel, "probes");
 			} else if (o instanceof GaugeInfo) {
 				GaugeInfo gaugeInfo = (GaugeInfo) o;
 				m_selectionPanel.setSelectedIndex(1);
 				m_gaugePanel.setVisible(true);
 				m_gaugePanel.initDataBindings(gaugeInfo);
-				((CardLayout )m_detailsPanel.getLayout()).show(m_detailsPanel, "gauges");
+				((CardLayout) m_detailsPanel.getLayout()).show(m_detailsPanel, "gauges");
 
 			}
 		});
@@ -277,7 +279,7 @@ public class RainbowWindoe extends RainbowWindow
 
 		m_probePanel = new ProbeTabbedPane();
 		m_detailsPanel.add(m_probePanel);
-		((CardLayout )m_detailsPanel.getLayout()).addLayoutComponent( m_probePanel, "probes");
+		((CardLayout) m_detailsPanel.getLayout()).addLayoutComponent(m_probePanel, "probes");
 		m_probePanel.setVisible(false);
 
 		JTextArea probeLogs = createTextAreaInTab(m_logTabs, "Probes");
@@ -290,7 +292,7 @@ public class RainbowWindoe extends RainbowWindow
 		m_gaugePanel = new GaugeDetailPanel();
 		m_detailsPanel.add(m_gaugePanel);
 		m_gaugePanel.setVisible(false);
-		((CardLayout )m_detailsPanel.getLayout()).addLayoutComponent( m_gaugePanel, "gauges");
+		((CardLayout) m_detailsPanel.getLayout()).addLayoutComponent(m_gaugePanel, "gauges");
 
 		JTextArea gaugesLogs = createTextAreaInTab(m_logTabs, "Gauges");
 		m_allTabs.put(RainbowComponentT.GAUGE_MANAGER, gaugesLogs);
@@ -504,7 +506,8 @@ public class RainbowWindoe extends RainbowWindow
 					}
 
 				}
-				ModelInfo mi = m_models.get(new ModelReference(gInfo.getDescription().modelDesc().getName(), gInfo.getDescription().modelDesc().getType()).toString());
+				ModelInfo mi = m_models.get(new ModelReference(gInfo.getDescription().modelDesc().getName(),
+						gInfo.getDescription().modelDesc().getType()).toString());
 				mi.gauges.add(entry.getKey());
 
 			}
@@ -523,8 +526,8 @@ public class RainbowWindoe extends RainbowWindow
 			Graph g = new SingleGraph("gauges-and-probes");
 
 			Node root = g.addNode("root");
-			Map<String, Node> processedIds = new HashMap<>();	
-			
+			Map<String, Node> processedIds = new HashMap<>();
+
 			for (Entry<String, GaugeInfo> ge : m_gauges.entrySet()) {
 				GaugeInfo gaugeInfo = ge.getValue();
 				Node gN = g.addNode(ge.getKey());
@@ -549,10 +552,9 @@ public class RainbowWindoe extends RainbowWindow
 					}
 					g.addEdge(gN.getId() + "-" + pN.getId(), gN, pN);
 				}
-				
 
 			}
-			for (Entry<String,ModelInfo> me : m_models.entrySet()) {
+			for (Entry<String, ModelInfo> me : m_models.entrySet()) {
 				ModelInfo mi = me.getValue();
 				Node mN = g.addNode(me.getKey());
 				g.addEdge("root-" + mN.getId(), root, mN);
@@ -614,10 +616,9 @@ public class RainbowWindoe extends RainbowWindow
 //					realPoint.translate(GAUGE_REGION.x, GAUGE_REGION.y);
 					Point realPoint = location;
 					getVisibleFrame(pi.frame).setLocation(realPoint);
-				}
-				else if (m_models.containsKey(n.getId())) {
+				} else if (m_models.containsKey(n.getId())) {
 					ModelInfo mi = m_models.get(n.getId());
-					String pos = (String )n.getAttribute("pos");
+					String pos = (String) n.getAttribute("pos");
 					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0]),
 							Float.parseFloat(pos.split(",")[1]), getVisibleFrame(mi.frame).getBounds().getSize());
 					Point realPoint = location;
@@ -737,8 +738,8 @@ public class RainbowWindoe extends RainbowWindow
 
 	protected void populateUI() {
 		createProbes();
-		createGauges();
 		createModels();
+		createGauges();
 		layoutArchitecture();
 	}
 
@@ -748,32 +749,49 @@ public class RainbowWindoe extends RainbowWindow
 		for (String t : types) {
 			Collection<? extends IModelInstance<?>> models = modelsManager.getModelsOfType(t);
 			for (IModelInstance<?> m : models) {
-				
-				try {
-					String modelName = m.getModelName();
-					String modelType = m.getModelType();
+
+				String modelName = m.getModelName();
+				String modelType = m.getModelType();
+				ModelReference modelRef = new ModelReference(modelName, modelType);
+				if (!m_models.containsKey(modelRef.toString())) {
 					JInternalFrame frame = new JInternalFrame(modelName, false, false, true);
 					frame.setVisible(true);
-					ModelReference modelRef = new ModelReference(modelName, modelType);
-					ModelPanel mp = new ModelPanel(modelRef);
+					ArchModelPanel mp = new ArchModelPanel(modelRef);
 					frame.add(mp);
 					frame.setSize(mp.getPreferredSize());
 					ModelInfo mi = new ModelInfo();
 					mi.frame = frame;
 					mi.modelRef = modelRef;
 					m_models.put(modelRef.toString(), mi);
-					
+					mi.panel = mp;
+
 					frame.addPropertyChangeListener(e -> {
 						System.out.println("Selected " + modelRef.toString());
 						if ("selection".equals(e.getPropertyName())) {
 							m_selectionManager.selectionChanged(mi);
 						}
 					});
-					
+					mp.addUpdateListener(()-> {
+						final JComponent vFrame = getVIsibleComponentToHiglight(frame);
+						vFrame.setBorder(new LineBorder(MODELS_MANAGER_COLOR, 2));
+						mp.m_table.setSelectionBackground(MODELS_MANAGER_COLOR_LIGHT);
+						final java.util.Timer timer = new Timer();
+						timer.schedule(new TimerTask() {
+
+							@Override
+							public void run() {
+								SwingUtilities.invokeLater(new Runnable() {
+
+									@Override
+									public void run() {
+										vFrame.setBorder(null);
+										mp.m_table.clearSelection();
+									}
+								});
+							}
+						}, 1000);
+					});
 					m_desktopPane.add(frame);
-				} catch (RainbowConnectionException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
 			}
 		}
@@ -954,15 +972,24 @@ public class RainbowWindoe extends RainbowWindow
 		});
 	}
 
-	private static Pattern ERROR_PATTERN=Pattern.compile("\\[(.*)\\]:.*");
+	private static Pattern ERROR_PATTERN = Pattern.compile("\\[(.*)\\]:.*");
+
 	@Override
 	public void report(RainbowComponentT component, ReportType type, String message) {
 		super.report(component, type, message);
+		
+		if (component == RainbowComponentT.MODEL) {
+			Collection<ModelInfo> values = m_models.values();
+			for (ModelInfo mi : values) {
+				mi.panel.processReport(type, message);
+			}
+		}
+		
 		if (type == ReportType.ERROR || type == ReportType.FATAL) {
 			m_errorArea.append(message);
 			m_errorArea.setCaretPosition(m_errorArea.getText().length());
 			m_selectionPanel.setIconAt(2, ERROR_ICON);
-			
+
 			Matcher m = ERROR_PATTERN.matcher(message);
 			if (m.find()) {
 				m_errorArea.append("Error in component: " + m.group(1));
@@ -972,7 +999,7 @@ public class RainbowWindoe extends RainbowWindow
 					if (gi != null) {
 						DesktopIconUI f = gi.getFrame().getDesktopIcon().getUI();
 						if (f instanceof IErrorDisplay) {
-							IErrorDisplay e = (IErrorDisplay )f;
+							IErrorDisplay e = (IErrorDisplay) f;
 							e.displayError(message);
 						}
 					}
@@ -982,14 +1009,14 @@ public class RainbowWindoe extends RainbowWindow
 					if (pi != null) {
 						InternalFrameUI f = pi.frame.getUI();
 						if (f instanceof IErrorDisplay) {
-							IErrorDisplay e = (IErrorDisplay )f;
+							IErrorDisplay e = (IErrorDisplay) f;
 							e.displayError(message);
 						}
 					}
-					
+
 				}
 			}
-			
+
 		}
 	}
 
