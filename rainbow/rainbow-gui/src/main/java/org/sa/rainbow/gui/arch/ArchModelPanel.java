@@ -52,7 +52,7 @@ public class ArchModelPanel extends JPanel implements IModelsManager, IRainbowMo
 			if ("true".equals(tm.getValueAt(row, 4))) {
 				c.setBackground(m_red);
 			}
-			else c.setBackground(Color.WHITE);
+			else if (c.getBackground() == m_red) c.setBackground(Color.WHITE);
 			return c;
 		}
 	}

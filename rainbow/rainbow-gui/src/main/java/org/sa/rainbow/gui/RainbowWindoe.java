@@ -753,7 +753,7 @@ public class RainbowWindoe extends RainbowWindow
 				String modelName = m.getModelName();
 				String modelType = m.getModelType();
 				ModelReference modelRef = new ModelReference(modelName, modelType);
-				if (!m_models.containsKey(modelRef.toString())) {
+				if (!m_models.containsKey(modelRef.toString()) && !"UtilityModel".equals(modelType) && !"ExecutionHistory".equals(modelType)) {
 					JInternalFrame frame = new JInternalFrame(modelName, false, false, true);
 					frame.setVisible(true);
 					ArchModelPanel mp = new ArchModelPanel(modelRef);
@@ -853,7 +853,7 @@ public class RainbowWindoe extends RainbowWindow
 						m_gaugePanel.initDataBindings(info);
 				});
 				p.addUpdateListener(() -> {
-					final JComponent vFrame = getVIsibleComponentToHiglight(frame);
+					final JComponent vFrame = getVisibleFrame(frame);
 					vFrame.setBorder(new LineBorder(GAUGES_COLOR, 2));
 					p.m_table.setSelectionBackground(GAUGES_COLOR_LIGHT);
 					final java.util.Timer t = new Timer();
