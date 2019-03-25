@@ -32,32 +32,35 @@ public class RainbowDesktopIconUI extends BasicDesktopIconUI /*implements IError
 	protected void installComponents() {
 		frame = desktopIcon.getInternalFrame();
 		String title = frame.getTitle();
-
+		desktopIcon.setBorder(null);
+		desktopIcon.setOpaque(false);
+		desktopIcon.setLayout(new BorderLayout(0,0));
 		JLabel label = new JLabel(title, icon, SwingConstants.CENTER);
 		label.setVerticalTextPosition(JLabel.BOTTOM);
 		label.setHorizontalTextPosition(JLabel.CENTER);
 		label.setFont(new Font(label.getFont().getFontName(), label.getFont().getStyle(), 8));
 
 		JLayeredPane layerPane = new JLayeredPane();
+//		layerPane.setLayout(new BorderLayout(0,0));
 		m_errorPane = new JPanel();
 		m_errorPane.setOpaque(false);
 		m_errorPane.setLayout(new BorderLayout(0, 0));
 		m_errorIcon = new JLabel(RainbowWindoe.ERROR_ICON);
 		m_errorPane.add(m_errorIcon, BorderLayout.WEST);
+		desktopIcon.add(layerPane, BorderLayout.CENTER);
 		layerPane.add(m_errorPane, 1);
 		m_errorPane.setVisible(true);
 		JPanel contents = new JPanel();
-		contents.setLayout(new GridLayout(1, 1));
+		contents.setLayout(new BorderLayout(0,0));
 		layerPane.add(contents, 0);
 		
 		
-		desktopIcon.setBorder(null);
-		desktopIcon.setOpaque(false);
-		desktopIcon.setLayout(new BorderLayout(0,0));
+	
 		contents.add(label);
 		contents.setOpaque(false);
 		desktopIcon.add(layerPane, BorderLayout.CENTER);
-
+		layerPane.setMinimumSize(label.getMinimumSize());
+		layerPane.setPreferredSize(label.getPreferredSize());
 //		desktopIcon.add(layerPane);
 	}
 
