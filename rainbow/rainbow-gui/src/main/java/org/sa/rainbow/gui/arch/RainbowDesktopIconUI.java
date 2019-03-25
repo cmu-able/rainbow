@@ -58,6 +58,8 @@ public class RainbowDesktopIconUI extends BasicDesktopIconUI /*implements IError
 	
 		contents.add(label);
 		contents.setOpaque(false);
+		contents.setLocation(0, 0);
+		m_errorPane.setLocation(0, 0);
 		desktopIcon.add(layerPane, BorderLayout.CENTER);
 		layerPane.setMinimumSize(label.getMinimumSize());
 		layerPane.setPreferredSize(label.getPreferredSize());
