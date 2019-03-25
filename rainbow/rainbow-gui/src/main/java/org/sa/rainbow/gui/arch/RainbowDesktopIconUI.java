@@ -43,17 +43,16 @@ public class RainbowDesktopIconUI extends BasicDesktopIconUI implements IErrorDi
 //		layerPane.setLayout(new BorderLayout(0,0));
 		m_errorIcon = new JLabel(RainbowWindoe.ERROR_ICON);
 		desktopIcon.add(layerPane, BorderLayout.CENTER);
-		layerPane.add(m_errorIcon, 1);
+		layerPane.add(m_errorIcon, 0);
 		JPanel contents = new JPanel();
 		contents.setLayout(new BorderLayout(0,0));
-		layerPane.add(contents, 0);
+		layerPane.add(contents, 1);
 		
-//		m_errorIcon.setVisible(false);
+		m_errorIcon.setVisible(false);
 	
 		contents.add(label);
 		contents.setOpaque(false);
 		contents.setLocation(0, 0);
-		m_errorIcon.setLocation(0, 0);
 		desktopIcon.add(layerPane, BorderLayout.CENTER);
 		layerPane.setMinimumSize(label.getMinimumSize());
 		layerPane.setPreferredSize(label.getPreferredSize());
