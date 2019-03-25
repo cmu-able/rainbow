@@ -188,7 +188,7 @@ public class GaugeDetailPanel extends JPanel {
 			GaugeInstanceDescription desc = m_gaugeInfo.getDescription();
 			m_nameField.setText(desc.gaugeName());
 			m_typeField.setText(desc.gaugeType());
-			m_modelField.setText(desc.modelDesc().toString());
+			m_modelField.setText(desc.modelDesc().getName() + ":" + desc.modelDesc().getType());
 			List<Pair<String, OperationRepresentation>> commandSignatures = desc.commandSignatures();
 			for (Pair<String, OperationRepresentation> cs : commandSignatures) {
 				String[] od = getOperationData(cs.secondValue());

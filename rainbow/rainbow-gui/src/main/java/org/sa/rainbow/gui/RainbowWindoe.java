@@ -63,6 +63,9 @@ import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
 import org.sa.rainbow.core.gauges.GaugeManager;
 import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
+import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelReference;
+import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.ProbeDescription;
 import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
 import org.sa.rainbow.core.ports.IMasterCommandPort;
@@ -134,6 +137,12 @@ public class RainbowWindoe extends RainbowWindow
 		public boolean hasError;
 		List<String> gauges = new LinkedList<>();
 	}
+	
+	public class ModelInfo {
+		ModelReference modelRef;
+		JInternalFrame frame;
+		List<String> gauges = new LinkedList<>();
+	}
 
 	public static class SelectionManager {
 		public interface ISelectionListener {
@@ -162,7 +171,7 @@ public class RainbowWindoe extends RainbowWindow
 
 	Map<String, ProbeInfo> m_probes = new HashMap<>();
 	Map<String, GaugeInfo> m_gauges = new HashMap<>();
-	Map<String, JInternalFrame> m_models = new HashMap<>();
+	Map<String, ModelInfo> m_models = new HashMap<>();
 
 	private Map<String, JTextArea> m_probeTextAreas = new HashMap<>();
 
@@ -495,6 +504,8 @@ public class RainbowWindoe extends RainbowWindow
 					}
 
 				}
+				ModelInfo mi = m_models.get(new ModelReference(gInfo.getDescription().modelDesc().getName(), gInfo.getDescription().modelDesc().getType()).toString());
+				mi.gauges.add(entry.getKey());
 
 			}
 
@@ -512,7 +523,8 @@ public class RainbowWindoe extends RainbowWindow
 			Graph g = new SingleGraph("gauges-and-probes");
 
 			Node root = g.addNode("root");
-			Map<String, Node> processedIds = new HashMap<>();
+			Map<String, Node> processedIds = new HashMap<>();	
+			
 			for (Entry<String, GaugeInfo> ge : m_gauges.entrySet()) {
 				GaugeInfo gaugeInfo = ge.getValue();
 				Node gN = g.addNode(ge.getKey());
@@ -521,7 +533,7 @@ public class RainbowWindoe extends RainbowWindow
 				gN.addAttribute("height", toInches(size.height, res));
 				gN.addAttribute("fixedsize", true);
 				gN.addAttribute("shape", "box");
-				g.addEdge("root-" + gN.getId(), root, gN);
+				processedIds.put(ge.getKey(), gN);
 				for (String probe : gaugeInfo.getProbes()) {
 					ProbeInfo pi = m_probes.get(probe);
 					String pid = probe;
@@ -537,7 +549,23 @@ public class RainbowWindoe extends RainbowWindow
 					}
 					g.addEdge(gN.getId() + "-" + pN.getId(), gN, pN);
 				}
+				
 
+			}
+			for (Entry<String,ModelInfo> me : m_models.entrySet()) {
+				ModelInfo mi = me.getValue();
+				Node mN = g.addNode(me.getKey());
+				g.addEdge("root-" + mN.getId(), root, mN);
+				Dimension size = mi.frame.getSize();
+				mN.addAttribute("width", toInches(size.width, res));
+				mN.addAttribute("height", toInches(size.height, res));
+				mN.addAttribute("fixedsize", true);
+				mN.addAttribute("shape", "box");
+				for (String ga : mi.gauges) {
+					if (processedIds.containsKey(ga)) {
+						g.addEdge(mN.getId() + "-" + ga, mN, processedIds.get(ga));
+					}
+				}
 			}
 			g.setAttribute("splines", "ortho");
 //			g.setAttribute("size", "" + toInches(Math.max(GAUGE_REGION.width, PROBE_REGION.width), res) + ","
@@ -701,7 +729,43 @@ public class RainbowWindoe extends RainbowWindow
 	protected void populateUI() {
 		createProbes();
 		createGauges();
+		createModels();
 		layoutArchitecture();
+	}
+
+	private void createModels() {
+		ModelsManager modelsManager = Rainbow.instance().getRainbowMaster().modelsManager();
+		Collection<? extends String> types = modelsManager.getRegisteredModelTypes();
+		for (String t : types) {
+			Collection<? extends IModelInstance<?>> models = modelsManager.getModelsOfType(t);
+			for (IModelInstance<?> m : models) {
+				
+				try {
+					String modelName = m.getModelName();
+					String modelType = m.getModelType();
+					JInternalFrame frame = new JInternalFrame(modelName, false, false, true);
+					frame.setVisible(true);
+					ModelReference modelRef = new ModelReference(modelName, modelType);
+					ModelPanel mp = new ModelPanel(modelRef);
+					frame.add(mp);
+					frame.setSize(mp.getPreferredSize());
+					ModelInfo mi = new ModelInfo();
+					mi.frame = frame;
+					mi.modelRef = modelRef;
+					m_models.put(modelRef.toString(), mi);
+					
+					frame.addPropertyChangeListener(e -> {
+						System.out.println("Selected " + modelRef.toString());
+						if ("selection".equals(e.getPropertyName())) {
+							m_selectionManager.selectionChanged(mi);
+						}
+					});
+				} catch (RainbowConnectionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	private void createGauges() {
