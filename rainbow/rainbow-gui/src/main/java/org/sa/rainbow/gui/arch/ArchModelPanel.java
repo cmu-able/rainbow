@@ -96,7 +96,7 @@ public class ArchModelPanel extends JPanel implements IModelsManager, IRainbowMo
 		}
 		
 		IModelInstance<Object> mi = Rainbow.instance().getRainbowMaster().modelsManager().getModelInstance(ref);
-		m_table.setPreferredScrollableViewportSize(new Dimension(200, 80));
+		m_table.setPreferredScrollableViewportSize(new Dimension(200, 120));
 		m_table.setFont(new Font(m_table.getFont().getFontName(), m_table.getFont().getStyle(), 8));
 		m_table.getTableHeader().setFont(new Font(m_table.getTableHeader().getFont().getFontName(), m_table.getFont().getStyle(), 8));
 
@@ -174,10 +174,10 @@ public class ArchModelPanel extends JPanel implements IModelsManager, IRainbowMo
 	private void addOperation(IRainbowOperation op, boolean error, boolean extend) {
 		DefaultTableModel tableModel = (DefaultTableModel) m_table.getModel();
 		String[] data = getTableData(op, error);
-		Integer row = m_op2row.get(op.getName());
+		Integer row = m_op2row.get(op.getName() + op.getTarget());
 		if (row == null) {
 			row = m_op2row.size();
-			m_op2row.put(op.getName(), row);
+			m_op2row.put(op.getName()+ op.getTarget(), row);
 			tableModel.addRow(data);
 		}
 		else {
