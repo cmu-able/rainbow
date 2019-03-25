@@ -18,9 +18,8 @@ import javax.swing.plaf.basic.BasicDesktopIconUI;
 
 import org.sa.rainbow.gui.RainbowWindoe;
 
-public class RainbowDesktopIconUI extends BasicDesktopIconUI /*implements IErrorDisplay*/ {
+public class RainbowDesktopIconUI extends BasicDesktopIconUI implements IErrorDisplay {
 	private final Icon icon;
-	private JPanel m_errorPane;
 	private JLabel m_errorIcon;
 
 	public RainbowDesktopIconUI(Icon icon) {
@@ -42,29 +41,24 @@ public class RainbowDesktopIconUI extends BasicDesktopIconUI /*implements IError
 
 		JLayeredPane layerPane = new JLayeredPane();
 //		layerPane.setLayout(new BorderLayout(0,0));
-		m_errorPane = new JPanel();
-		m_errorPane.setOpaque(false);
-		m_errorPane.setLayout(new BorderLayout(0, 0));
 		m_errorIcon = new JLabel(RainbowWindoe.ERROR_ICON);
-		m_errorPane.add(m_errorIcon, BorderLayout.WEST);
 		desktopIcon.add(layerPane, BorderLayout.CENTER);
-		layerPane.add(m_errorPane, 1);
-		m_errorPane.setVisible(true);
+		layerPane.add(m_errorIcon, 1);
 		JPanel contents = new JPanel();
 		contents.setLayout(new BorderLayout(0,0));
 		layerPane.add(contents, 0);
 		
-		
+		m_errorIcon.setVisible(false);
 	
 		contents.add(label);
 		contents.setOpaque(false);
 		contents.setLocation(0, 0);
-		m_errorPane.setLocation(0, 0);
+		m_errorIcon.setLocation(0, 0);
 		desktopIcon.add(layerPane, BorderLayout.CENTER);
 		layerPane.setMinimumSize(label.getMinimumSize());
 		layerPane.setPreferredSize(label.getPreferredSize());
 		contents.setBounds(0, 0, label.getMinimumSize().width, label.getMinimumSize().height);
-		m_errorPane.setBounds(0, 0, label.getMinimumSize().width, label.getMinimumSize().height);
+		m_errorIcon.setBounds(0, 0, m_errorIcon.getMinimumSize().width, m_errorIcon.getMinimumSize().height);
 		
 //		desktopIcon.add(layerPane);
 	}
@@ -108,5 +102,17 @@ public class RainbowDesktopIconUI extends BasicDesktopIconUI /*implements IError
 				frame.firePropertyChange("selection", 0, 1);
 			}
 		}
+	}
+
+	@Override
+	public void displayError(String message) {
+		m_errorIcon.setVisible(true);
+		m_errorIcon.setToolTipText(message);
+	}
+
+
+	@Override
+	public void clearError() {
+		m_errorIcon.setVisible(false);
 	}
 }

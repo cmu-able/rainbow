@@ -20,7 +20,6 @@ public class DynamicDesktopIconUI extends BasicDesktopIconUI implements IErrorDi
 	
 	private JComponent series;
 	private MouseInputListener m_createMouseInputListener;
-	private JPanel m_errorPane;
 	private JLabel m_errorIcon;
 	
 	
@@ -45,14 +44,10 @@ public class DynamicDesktopIconUI extends BasicDesktopIconUI implements IErrorDi
 
 		// Create component with layer
 		JLayeredPane layerPane = new JLayeredPane();
-		m_errorPane = new JPanel();
-		m_errorPane.setOpaque(false);
-		m_errorPane.setLayout(new BorderLayout(0,0));
 		m_errorIcon = new JLabel(RainbowWindoe.ERROR_ICON);
-		m_errorPane.add(m_errorIcon, BorderLayout.WEST);
 		desktopIcon.add(layerPane, BorderLayout.CENTER);
-		layerPane.add(m_errorPane, 1);
-		m_errorPane.setVisible(false);
+		layerPane.add(m_errorIcon, 1);
+		m_errorIcon.setVisible(false);
 		JPanel contents = new JPanel();
 		contents.setLayout(new BorderLayout(0,0));
 		contents.setOpaque(false);
@@ -60,7 +55,12 @@ public class DynamicDesktopIconUI extends BasicDesktopIconUI implements IErrorDi
 		contents./*desktopIcon.*//*getInternalFrame().*/add(series, BorderLayout.CENTER);
 
 		contents/*desktopIcon*//*.getInternalFrame()*/.add(label, BorderLayout.SOUTH);
-		desktopIcon.add(contents);
+		desktopIcon.add(layerPane);
+		
+		layerPane.setMinimumSize(contents.getMinimumSize());
+		layerPane.setPreferredSize(contents.getPreferredSize());
+		contents.setBounds(0,0,contents.getMinimumSize().width,contents.getMinimumSize().height);
+		m_errorIcon.setBounds(0, 0, m_errorIcon.getMinimumSize().width, m_errorIcon.getMinimumSize().height);
 	}
 	
 	@Override
@@ -120,11 +120,13 @@ public class DynamicDesktopIconUI extends BasicDesktopIconUI implements IErrorDi
 
 	@Override
 	public void displayError(String message) {
-		m_errorPane.setVisible(true);
+		m_errorIcon.setVisible(true);
+		m_errorIcon.setToolTipText(message);
+
 	}
 	
 	@Override
 	public void clearError() {
-		m_errorPane.setVisible(false);
+		m_errorIcon.setVisible(false);
 	}
 }
