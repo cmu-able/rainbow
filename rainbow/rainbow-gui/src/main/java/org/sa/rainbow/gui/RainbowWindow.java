@@ -74,7 +74,7 @@ import org.sa.rainbow.util.Util;
 
 public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportingSubscriberCallback {
 
-	protected static Color bleach(Color color, double amount) {
+	public static Color bleach(Color color, double amount) {
 		int red = (int) ((color.getRed() * (1 - amount) / 255 + amount) * 255);
 		int green = (int) ((color.getGreen() * (1 - amount) / 255 + amount) * 255);
 		int blue = (int) ((color.getBlue() * (1 - amount) / 255 + amount) * 255);

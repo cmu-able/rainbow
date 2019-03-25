@@ -37,16 +37,20 @@ import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowModelChan
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.gui.JTableCellDisplayer;
 import org.sa.rainbow.gui.ModelPanel;
+import org.sa.rainbow.gui.RainbowWindow;
+import org.sa.rainbow.gui.widgets.TableColumnAdjuster;
 
 public class ArchModelPanel extends JPanel implements IModelsManager, IRainbowModelChangeCallback{
+	private Color m_red = RainbowWindow.bleach(Color.red, 0.75);
 	public class ModelErrorRenderer extends DefaultTableCellRenderer implements TableCellRenderer {
+
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int column) {
 			Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 			TableModel tm = table.getModel();
 			if ("true".equals(tm.getValueAt(row, 4))) {
-				c.setBackground(Color.RED);
+				c.setBackground(m_red);
 			}
 			else c.setBackground(Color.WHITE);
 			return c;
@@ -94,7 +98,11 @@ public class ArchModelPanel extends JPanel implements IModelsManager, IRainbowMo
 		IModelInstance<Object> mi = Rainbow.instance().getRainbowMaster().modelsManager().getModelInstance(ref);
 		m_table.setPreferredScrollableViewportSize(new Dimension(200, 80));
 		m_table.setFont(new Font(m_table.getFont().getFontName(), m_table.getFont().getStyle(), 8));
+		m_table.getTableHeader().setFont(new Font(m_table.getTableHeader().getFont().getFontName(), m_table.getFont().getStyle(), 8));
 
+		TableColumnAdjuster tca = new TableColumnAdjuster(m_table);
+		tca.setDynamicAdjustment(true);
+		
 	}
 
 

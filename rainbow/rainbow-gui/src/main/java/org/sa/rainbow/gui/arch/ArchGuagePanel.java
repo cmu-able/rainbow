@@ -103,7 +103,7 @@ public class ArchGuagePanel extends GaugePanel {
 
 		int row = updateOperation(command);
 		JDesktopIcon desktopIcon = m_gaugeInfo.getFrame().getDesktopIcon();
-		Component c = ((JPanel )((JLayeredPane )desktopIcon.getComponent(0)).getComponent(0)).getComponent(0);
+		Component c = ((JPanel )((JLayeredPane )desktopIcon.getComponent(0)).getComponent(1)).getComponent(0);
 		if (c instanceof ICommandUpdate) {
 			((ICommandUpdate) c).newCommand(command);
 		}
