@@ -44,7 +44,6 @@ public class RainbowDesktopIconUI extends BasicDesktopIconUI /*implements IError
 		m_errorPane.setLayout(new BorderLayout(0, 0));
 		m_errorIcon = new JLabel(RainbowWindoe.ERROR_ICON);
 		m_errorPane.add(m_errorIcon, BorderLayout.WEST);
-		desktopIcon.add(layerPane, BorderLayout.CENTER);
 		layerPane.add(m_errorPane, 1);
 		m_errorPane.setVisible(true);
 		JPanel contents = new JPanel();
@@ -57,8 +56,9 @@ public class RainbowDesktopIconUI extends BasicDesktopIconUI /*implements IError
 		desktopIcon.setLayout(new BorderLayout(0,0));
 		contents.add(label);
 		contents.setOpaque(false);
+		desktopIcon.add(layerPane, BorderLayout.CENTER);
 
-		desktopIcon.add(contents);
+//		desktopIcon.add(layerPane);
 	}
 
 	@Override
