@@ -46,7 +46,7 @@ public class RainbowDesktopIconUI extends BasicDesktopIconUI /*implements IError
 		m_errorPane.add(m_errorIcon, BorderLayout.WEST);
 		desktopIcon.add(layerPane, BorderLayout.CENTER);
 		layerPane.add(m_errorPane, 1);
-		m_errorPane.setVisible(false);
+		m_errorPane.setVisible(true);
 		JPanel contents = new JPanel();
 		contents.setLayout(new GridLayout(1, 1));
 		layerPane.add(contents, 0);
