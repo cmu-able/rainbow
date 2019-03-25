@@ -48,7 +48,7 @@ public class RainbowDesktopIconUI extends BasicDesktopIconUI implements IErrorDi
 		contents.setLayout(new BorderLayout(0,0));
 		layerPane.add(contents, 0);
 		
-		m_errorIcon.setVisible(false);
+//		m_errorIcon.setVisible(false);
 	
 		contents.add(label);
 		contents.setOpaque(false);
