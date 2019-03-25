@@ -122,6 +122,7 @@ public class DynamicDesktopIconUI extends BasicDesktopIconUI implements IErrorDi
 	public void displayError(String message) {
 		m_errorIcon.setVisible(true);
 		m_errorIcon.setToolTipText(message);
+		desktopIcon.invalidate();
 
 	}
 	
