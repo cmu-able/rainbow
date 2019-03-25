@@ -769,6 +769,8 @@ public class RainbowWindoe extends RainbowWindow
 							m_selectionManager.selectionChanged(mi);
 						}
 					});
+					
+					m_desktopPane.add(frame);
 				} catch (RainbowConnectionException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
