@@ -42,6 +42,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
+import javax.swing.plaf.DesktopIconUI;
 import javax.swing.plaf.InternalFrameUI;
 
 import org.graphstream.graph.Edge;
@@ -894,7 +895,7 @@ public class RainbowWindoe extends RainbowWindow
 				case GAUGE:
 					GaugeInfo gi = m_gauges.get(m.group(1));
 					if (gi != null) {
-						InternalFrameUI f = gi.getFrame().getUI();
+						DesktopIconUI f = gi.getFrame().getDesktopIcon().getUI();
 						if (f instanceof IErrorDisplay) {
 							IErrorDisplay e = (IErrorDisplay )f;
 							e.displayError(message);
