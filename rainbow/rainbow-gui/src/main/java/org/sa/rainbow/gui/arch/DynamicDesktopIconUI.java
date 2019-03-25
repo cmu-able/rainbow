@@ -46,12 +46,12 @@ public class DynamicDesktopIconUI extends BasicDesktopIconUI implements IErrorDi
 		JLayeredPane layerPane = new JLayeredPane();
 		m_errorIcon = new JLabel(RainbowWindoe.ERROR_ICON);
 		desktopIcon.add(layerPane, BorderLayout.CENTER);
-		layerPane.add(m_errorIcon, 1);
-		m_errorIcon.setVisible(false);
+		layerPane.add(m_errorIcon, 0);
+//		m_errorIcon.setVisible(false);
 		JPanel contents = new JPanel();
 		contents.setLayout(new BorderLayout(0,0));
 		contents.setOpaque(false);
-		layerPane.add(contents, 0);
+		layerPane.add(contents, 1);
 		contents./*desktopIcon.*//*getInternalFrame().*/add(series, BorderLayout.CENTER);
 
 		contents/*desktopIcon*//*.getInternalFrame()*/.add(label, BorderLayout.SOUTH);
