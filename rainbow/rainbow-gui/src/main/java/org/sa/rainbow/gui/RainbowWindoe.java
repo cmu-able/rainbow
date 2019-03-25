@@ -620,7 +620,7 @@ public class RainbowWindoe extends RainbowWindow
 					ModelInfo mi = m_models.get(n.getId());
 					String pos = (String) n.getAttribute("pos");
 					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0]),
-							Float.parseFloat(pos.split(",")[1]), getVisibleFrame(mi.frame).getBounds().getSize());
+							Float.parseFloat(pos.split(",")[1]) + 20, getVisibleFrame(mi.frame).getBounds().getSize());
 					Point realPoint = location;
 					getVisibleFrame(mi.frame).setLocation(realPoint);
 

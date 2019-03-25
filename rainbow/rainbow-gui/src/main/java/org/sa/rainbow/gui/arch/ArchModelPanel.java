@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -44,9 +45,10 @@ public class ArchModelPanel extends JPanel implements IModelsManager, IRainbowMo
 				int row, int column) {
 			Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 			TableModel tm = table.getModel();
-			if (!"false".equals(tm.getValueAt(row, 4))) {
+			if ("true".equals(tm.getValueAt(row, 4))) {
 				c.setBackground(Color.RED);
 			}
+			else c.setBackground(Color.WHITE);
 			return c;
 		}
 	}
@@ -90,7 +92,8 @@ public class ArchModelPanel extends JPanel implements IModelsManager, IRainbowMo
 		}
 		
 		IModelInstance<Object> mi = Rainbow.instance().getRainbowMaster().modelsManager().getModelInstance(ref);
-		m_table.setPreferredScrollableViewportSize(new Dimension(300, 200));
+		m_table.setPreferredScrollableViewportSize(new Dimension(200, 80));
+		m_table.setFont(new Font(m_table.getFont().getFontName(), m_table.getFont().getStyle(), 8));
 
 	}
 
