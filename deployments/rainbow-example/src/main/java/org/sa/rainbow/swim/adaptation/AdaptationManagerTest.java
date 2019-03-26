@@ -125,7 +125,7 @@ public final class AdaptationManagerTest extends AbstractRainbowRunnable
                 CommandEventT ct = CommandEventT.valueOf (type);
                 return (ct.isEnd ()
                         && "setTypecheckResult".equals (message.getProperty (IModelChangeBusPort.COMMAND_PROP))
-                        && m_modelRef.equals (Util.genModelRef (modelName, modelType)));
+                        && m_modelRef.toString().equals (Util.genModelRef (modelName, modelType)));
             } catch (Exception e) {
                 return false;
             }
