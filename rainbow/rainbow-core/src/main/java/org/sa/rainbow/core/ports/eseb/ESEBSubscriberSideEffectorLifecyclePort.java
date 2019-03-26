@@ -107,6 +107,15 @@ IEffectorLifecycleBusPort {
                     catch (Exception e) {
                     }
                     reportExecuted (mei, outcome, args);
+                    break;
+                case IEffectorProtocol.EFFECTOR_EXECUTING:
+                    mei = new MessageEffectorIdentifier (msg);
+                    size = (int )msg.getProperty (IEffectorProtocol.ARGUMENT + IEffectorProtocol.SIZE);
+                    args = new ArrayList<> (size);
+                    for (int i = 0; i < size; i++) {
+                        args.add ((String )msg.getProperty (IEffectorProtocol.ARGUMENT + i));
+                    }
+                    reportExecuting(mei, args);
                 }
             }
         });
@@ -126,5 +135,10 @@ IEffectorLifecycleBusPort {
     public void reportExecuted (IEffectorIdentifier effector, Outcome outcome, List<String> args) {
         m_delegate.reportExecuted (effector, outcome, args);
     }
+
+	@Override
+	public void reportExecuting(IEffectorIdentifier effector, List<String> args) {
+		m_delegate.reportExecuting(effector, args);
+	}
 
 }

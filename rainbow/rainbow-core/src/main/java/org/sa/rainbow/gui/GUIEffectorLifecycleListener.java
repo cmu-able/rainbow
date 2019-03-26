@@ -118,4 +118,15 @@ public class GUIEffectorLifecycleListener implements IEffectorLifecycleBusPort {
 
     }
 
+	@Override
+	public void reportExecuting(IEffectorIdentifier effector, List<String> args) {
+//	       EffectorInformation ei = new EffectorInformation (args, new Date ());
+//	        List<EffectorInformation> info = informationMap.get (effector.id ());
+//	        if (info == null) {
+//	            info = new LinkedList<> ();
+//	            informationMap.put (effector.id (), info);
+//	        }
+//	        info.add (0, ei);
+	}
+
 }

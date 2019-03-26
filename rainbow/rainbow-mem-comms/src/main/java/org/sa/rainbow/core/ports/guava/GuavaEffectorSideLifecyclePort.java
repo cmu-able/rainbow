@@ -62,4 +62,16 @@ public class GuavaEffectorSideLifecyclePort implements IEffectorLifecycleBusPort
 		msg.setProperty(IEffectorProtocol.LOCATION,
 				Rainbow.instance().getProperty(RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION));
 	}
+
+	@Override
+	public void reportExecuting(IEffectorIdentifier effector, List<String> args) {
+		GuavaRainbowMessage msg = new GuavaRainbowMessage();
+		msg.setProperty(ESEBConstants.MSG_TYPE_KEY, IEffectorProtocol.EFFECTOR_EXECUTED);
+		setCommonEffectorProperties(effector, msg);
+		msg.setProperty(IEffectorProtocol.ARGUMENT + IEffectorProtocol.SIZE, args.size());
+		for (int i = 0; i < args.size(); i++) {
+			msg.setProperty(IEffectorProtocol.ARGUMENT + i, args.get(i));
+		}
+		m_eventBus.publish(msg);
+	}
 }

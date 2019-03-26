@@ -24,9 +24,9 @@
 package org.sa.rainbow.core.ports.eseb;
 
 
+import org.sa.rainbow.core.IRainbowMaster;
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.Rainbow;
-import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
@@ -85,7 +85,7 @@ public class ESEBGaugeModelUSBusPort extends AbstractESEBDisposablePort implemen
         // Issue: don't want commands to be executable by the gauge - they can only be passed
         // to the bus. 
         if (Rainbow.instance ().isMaster ()) {
-            RainbowMaster master = Rainbow.instance ().getRainbowMaster ();
+            IRainbowMaster master = Rainbow.instance ().getRainbowMaster ();
             return master.modelsManager ().getModelInstance (modelRef);
         }
         throw new UnsupportedOperationException (

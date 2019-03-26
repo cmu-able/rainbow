@@ -79,5 +79,17 @@ public class ESEBEffectorSideLifecyclePort extends AbstractESEBDisposablePort im
         getConnectionRole().publish (msg);
     }
 
+	@Override
+	public void reportExecuting(IEffectorIdentifier effector, List<String> args) {
+        RainbowESEBMessage msg = getConnectionRole().createMessage ();
+        msg.setProperty (ESEBConstants.MSG_TYPE_KEY, IEffectorProtocol.EFFECTOR_EXECUTING);
+        setCommonEffectorProperties (effector, msg);
+        msg.setProperty (IEffectorProtocol.ARGUMENT + IEffectorProtocol.SIZE, args.size ());
+        for (int i = 0; i < args.size (); i++) {
+            msg.setProperty (IEffectorProtocol.ARGUMENT + i, args.get (i));
+        }
+        getConnectionRole().publish (msg);
+	}
+
 
 }
