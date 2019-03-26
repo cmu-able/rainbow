@@ -11,7 +11,6 @@ import java.awt.HeadlessException;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
-import java.awt.Toolkit;
 import java.awt.geom.Line2D;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -45,6 +44,7 @@ import javax.swing.border.LineBorder;
 import javax.swing.plaf.DesktopIconUI;
 import javax.swing.plaf.InternalFrameUI;
 
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.EdgeRejectedException;
 import org.graphstream.graph.Graph;
@@ -58,16 +58,22 @@ import org.ho.yaml.Yaml;
 import org.sa.rainbow.core.IDisposable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
+import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
+import org.sa.rainbow.core.adaptation.IAdaptationManager;
+import org.sa.rainbow.core.analysis.IRainbowAnalysis;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
 import org.sa.rainbow.core.gauges.GaugeManager;
 import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
+import org.sa.rainbow.core.models.EffectorDescription;
+import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.ProbeDescription;
 import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
+import org.sa.rainbow.core.ports.IEffectorLifecycleBusPort;
 import org.sa.rainbow.core.ports.IMasterCommandPort;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.ports.IProbeReportPort;
@@ -81,9 +87,14 @@ import org.sa.rainbow.gui.arch.GaugeInfo;
 import org.sa.rainbow.gui.arch.IErrorDisplay;
 import org.sa.rainbow.gui.arch.RainbowDesktopIconUI;
 import org.sa.rainbow.gui.arch.RainbowDesktopManager;
+import org.sa.rainbow.gui.arch.elements.ArchConsolePanel;
 import org.sa.rainbow.gui.arch.elements.GaugeDetailPanel;
+import org.sa.rainbow.gui.arch.elements.IUIReporter;
+import org.sa.rainbow.gui.arch.elements.IUIUpdater;
 import org.sa.rainbow.gui.arch.elements.ProbeTabbedPane;
 import org.sa.rainbow.gui.widgets.DesktopScrollPane;
+import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
+import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
 import org.sa.rainbow.translator.probes.IProbeIdentifier;
 import org.sa.rainbow.util.Util;
 
@@ -174,6 +185,10 @@ public class RainbowWindoe extends RainbowWindow
 	Map<String, ProbeInfo> m_probes = new HashMap<>();
 	Map<String, GaugeInfo> m_gauges = new HashMap<>();
 	Map<String, ModelInfo> m_models = new HashMap<>();
+	Map<String, JComponent> m_analyzers = new HashMap<>();
+	Map<String, JComponent> m_adaptationManagers = new HashMap<>();
+	Map<String, JComponent> m_executors = new HashMap<>();
+	Map<String,ArchEffectorPanel> m_effectors = new HashMap<>();
 
 	private Map<String, JTextArea> m_probeTextAreas = new HashMap<>();
 
@@ -194,6 +209,7 @@ public class RainbowWindoe extends RainbowWindow
 	private ProbeTabbedPane m_probePanel;
 
 	private GaugeDetailPanel m_gaugePanel;
+
 
 	public RainbowWindoe(IMasterCommandPort master) {
 		super(master);
@@ -522,7 +538,7 @@ public class RainbowWindoe extends RainbowWindow
 	private boolean layoutDOT() {
 		try {
 			m_lines = new ArrayList<Line2D>();
-			int res = Toolkit.getDefaultToolkit().getScreenResolution();
+			int res = 72; // Toolkit.getDefaultToolkit().getScreenResolution();
 			Graph g = new SingleGraph("gauges-and-probes");
 
 			Node root = g.addNode("root");
@@ -557,9 +573,8 @@ public class RainbowWindoe extends RainbowWindow
 			for (Entry<String, ModelInfo> me : m_models.entrySet()) {
 				ModelInfo mi = me.getValue();
 				Node mN = g.addNode(me.getKey());
-				g.addEdge("root-" + mN.getId(), root, mN);
 				Dimension size = mi.frame.getSize();
-				mN.addAttribute("width", toInches(size.width, res));
+				mN.addAttribute("width", toInches(size.width + 40, res));
 				mN.addAttribute("height", toInches(size.height, res));
 				mN.addAttribute("fixedsize", true);
 				mN.addAttribute("shape", "box");
@@ -568,8 +583,64 @@ public class RainbowWindoe extends RainbowWindow
 						g.addEdge(mN.getId() + "-" + ga, mN, processedIds.get(ga));
 					}
 				}
+				processedIds.put(me.getKey(), mN);
 			}
-			g.setAttribute("splines", "ortho");
+			for (IRainbowAnalysis a : Rainbow.instance().getRainbowMaster().analyzers()) {
+				JComponent comp = m_analyzers.get(a.id());
+				Node aN = g.addNode(a.id());
+				Dimension size = comp.getSize();
+				aN.addAttribute("width", toInches(size.width + 40, res));
+				aN.addAttribute("height", toInches(size.height, res));
+				aN.addAttribute("fixedsize", true);
+				aN.addAttribute("shape", "box");
+				for (String m : m_models.keySet()) {
+					if (processedIds.containsKey(m))
+						g.addEdge(aN.getId() + "-" + m, aN, processedIds.get(m));
+				}
+				
+			}
+			
+			Map<String, Node> model2am = new HashMap<>();
+			
+			for (IAdaptationManager<?> am : Rainbow.instance().getRainbowMaster().adaptationManagers().values()) {
+				JComponent comp = m_adaptationManagers.get(am.id());
+				Node aN = g.addNode(am.id());
+				Dimension size = comp.getSize();
+				aN.addAttribute("width", toInches(size.width + 40, res));
+				aN.addAttribute("height", toInches(size.height, res));
+				aN.addAttribute("fixedsize", true);
+				aN.addAttribute("shape", "box");
+				String model = am.getManagedModel().toString();
+				model2am.put(model, aN);
+				Node n = processedIds.get(model);
+				if (n != null) {
+					g.addEdge(aN.getId() + "-" + n.getId(), aN, n);
+
+				}
+			}
+			
+			for (IAdaptationExecutor<?> ae : Rainbow.instance().getRainbowMaster().adaptationExecutors().values()) {
+				JComponent comp = m_executors.get(ae.id());
+				Node aN = g.addNode(ae.id());
+				Dimension size = comp.getSize();
+				aN.addAttribute("width", toInches(size.width + 40, res));
+				aN.addAttribute("height", toInches(size.height, res));
+				aN.addAttribute("fixedsize", true);
+				aN.addAttribute("shape", "box");
+				String model = ae.getManagedModel().toString();
+				Node n = processedIds.get(model);
+				if (n != null) {
+					g.addEdge(aN.getId() + "-" + n.getId(), aN, n);
+
+				}
+				Node aM = model2am.get(model);
+				if (aM != null) {
+					g.addEdge(aM.getId() + "-" + aN.getId(), aM, aN);
+				}
+			}
+			
+			g.setAttribute("splines", "compound");
+			g.setAttribute("rankdir", "BT"); // Put probes and effectors at bottom
 //			g.setAttribute("size", "" + toInches(Math.max(GAUGE_REGION.width, PROBE_REGION.width), res) + ","
 //					+ toInches(GAUGE_REGION.height + PROBE_REGION.height, res));
 
@@ -619,7 +690,7 @@ public class RainbowWindoe extends RainbowWindow
 				} else if (m_models.containsKey(n.getId())) {
 					ModelInfo mi = m_models.get(n.getId());
 					String pos = (String) n.getAttribute("pos");
-					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0]),
+					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0]) + 10,
 							Float.parseFloat(pos.split(",")[1]) + 10, getVisibleFrame(mi.frame).getBounds().getSize());
 					Point realPoint = location;
 					getVisibleFrame(mi.frame).setLocation(realPoint);
@@ -740,7 +811,249 @@ public class RainbowWindoe extends RainbowWindow
 		createProbes();
 		createModels();
 		createGauges();
+		createAnalyzers();
+		createAdaptationManagers();
+		createExecutors();
+		createEffectors();
 		layoutArchitecture();
+	}
+
+	private void createEffectors() {
+		try {
+			m_createClientSideEffectorLifecyclePort = RainbowPortFactory
+					.createClientSideEffectorLifecyclePort(new IEffectorLifecycleBusPort() {
+
+						@Override
+						public void dispose() {
+							// TODO Auto-generated method stub
+
+						}
+
+						@Override
+						public void reportExecuted(IEffectorIdentifier effector, Outcome outcome, List<String> args) {
+							String eid = effector.id();
+							ArchEffectorPanel ta = m_effectors.get(eid);
+
+							if (ta != null) {
+								ta.reportExecuted(effector, outcome, args);
+//						ta.append(effector.id().split("@")[0] + args.toString() + " -> " + outcome.name() + "\n");
+//						ta.setCaretPosition(ta.getText().length());
+//						if (ta.getText().length() > MAX_TEXT_LENGTH) {
+//							ta.setText(ta.getText().substring(TEXT_HALF_LENGTH));
+//						}
+//						TabColorChanger tcc= new TabColorChanger(m_tabs.get(RainbowComponentT.EFFECTOR), ta.getParent().getParent(), SYSTEM_COLOR_LIGHT);
+//						tcc.run();
+							}
+						}
+
+						@Override
+						public void reportExecuting(IEffectorIdentifier effector, List<String> args) {
+							String eid = effector.id();
+							ArchEffectorPanel ta = m_effectors.get(eid);
+
+							if (ta != null)
+								ta.reportExecuting(effector,args);
+						}
+
+						@Override
+						public void reportDeleted(IEffectorIdentifier effector) {
+							// TODO Auto-generated method stub
+
+						}
+
+						@Override
+						public void reportCreated(IEffectorIdentifier effector) {
+							// TODO Auto-generated method stub
+
+						}
+					});
+		} catch (RainbowConnectionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		EffectorDescription effectorDesc = Rainbow.instance().getRainbowMaster().effectorDesc();
+		for (EffectorAttributes ea : effectorDesc.effectors) {
+			String effectorId = ea.name + "@" + ea.getLocation();
+			if (m_effectors.get(effectorId) == null) {
+				JInternalFrame frame = new JInternalFrame(shortName(effectorId), true, false, true);
+				frame.setVisible(true);
+				ArchEffectorPanel uiComp = new ArchEffectorPanel();
+				
+				frame.add(uiComp);
+				frame.setSize(uiComp.getPreferredSize());
+				frame.addPropertyChangeListener(e -> {
+					System.out.println("Selected " + effectorId);
+					if ("selection".equals(e.getPropertyName())) {
+						m_selectionManager.selectionChanged(ea);
+					}
+				});
+				m_desktopPane.add(frame);
+				m_effectors .put(effectorId,uiComp);
+			}
+		}
+	}
+
+	private void createExecutors() {
+		Map<String, IAdaptationExecutor<?>> executors = Rainbow.instance().getRainbowMaster().adaptationExecutors();
+		Map<String, Object> aui = m_uidb.containsKey("managers") ? (Map<String, Object>) m_uidb.get("executors")
+				: Collections.<String, Object>emptyMap();
+		for (IAdaptationExecutor a : executors.values()) {
+			String clazz = (String) aui.get(a.getClass().getName());
+			if (clazz != null) {
+				JComponent uiComp = null;
+				try {
+					Class<? extends JComponent> uiClass = (Class<? extends JComponent>) this.getClass().getClassLoader()
+							.loadClass(clazz);
+					uiComp = uiClass.newInstance();
+
+				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+				}
+				if (uiComp == null) {
+					uiComp = new ArchConsolePanel();
+				}
+				m_executors.put(a.id(), uiComp);
+				JInternalFrame frame = new JInternalFrame(a.id(), true, false, true);
+				frame.setVisible(true);
+				frame.add(uiComp);
+				frame.setSize(uiComp.getPreferredSize());
+				frame.addPropertyChangeListener(e -> {
+					System.out.println("Selected " + a.id());
+					if ("selection".equals(e.getPropertyName())) {
+						m_selectionManager.selectionChanged(a);
+					}
+				});
+				if (uiComp instanceof IUIUpdater) {
+					((IUIUpdater) uiComp).addUpdateListener(() -> {
+						final JComponent vFrame = getVisibleFrame(frame);
+						vFrame.setBorder(new LineBorder(ANALYZERS_COLOR, 2));
+						final java.util.Timer timer = new Timer();
+						timer.schedule(new TimerTask() {
+
+							@Override
+							public void run() {
+								SwingUtilities.invokeLater(new Runnable() {
+
+									@Override
+									public void run() {
+										vFrame.setBorder(null);
+									}
+								});
+							}
+						}, 1000);
+					});
+				}
+				m_desktopPane.add(frame);
+			}
+		}
+	}
+
+	private void createAdaptationManagers() {
+		Map<String, IAdaptationManager<?>> analyzers = Rainbow.instance().getRainbowMaster().adaptationManagers();
+		Map<String, Object> aui = m_uidb.containsKey("managers") ? (Map<String, Object>) m_uidb.get("managers")
+				: Collections.<String, Object>emptyMap();
+		for (IAdaptationManager a : analyzers.values()) {
+			String clazz = (String) aui.get(a.getClass().getName());
+			if (clazz != null) {
+				JComponent uiComp = null;
+				try {
+					Class<? extends JComponent> uiClass = (Class<? extends JComponent>) this.getClass().getClassLoader()
+							.loadClass(clazz);
+					uiComp = uiClass.newInstance();
+
+				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+				}
+				if (uiComp == null) {
+					uiComp = new ArchConsolePanel();
+				}
+				m_adaptationManagers.put(a.id(), uiComp);
+				JInternalFrame frame = new JInternalFrame(a.id(), true, false, true);
+				frame.setVisible(true);
+				frame.add(uiComp);
+				frame.setSize(uiComp.getPreferredSize());
+				frame.addPropertyChangeListener(e -> {
+					System.out.println("Selected " + a.id());
+					if ("selection".equals(e.getPropertyName())) {
+						m_selectionManager.selectionChanged(a);
+					}
+				});
+				if (uiComp instanceof IUIUpdater) {
+					((IUIUpdater) uiComp).addUpdateListener(() -> {
+						final JComponent vFrame = getVisibleFrame(frame);
+						vFrame.setBorder(new LineBorder(ANALYZERS_COLOR, 2));
+						final java.util.Timer timer = new Timer();
+						timer.schedule(new TimerTask() {
+
+							@Override
+							public void run() {
+								SwingUtilities.invokeLater(new Runnable() {
+
+									@Override
+									public void run() {
+										vFrame.setBorder(null);
+									}
+								});
+							}
+						}, 1000);
+					});
+				}
+				m_desktopPane.add(frame);
+			}
+		}
+	}
+
+	private void createAnalyzers() {
+		Collection<IRainbowAnalysis> analyzers = Rainbow.instance().getRainbowMaster().analyzers();
+		Map<String, Object> aui = m_uidb.containsKey("analyzers") ? (Map<String, Object>) m_uidb.get("analyzers")
+				: Collections.<String, Object>emptyMap();
+		for (IRainbowAnalysis a : analyzers) {
+			String clazz = (String) aui.get(a.getClass().getName());
+			if (clazz != null) {
+				JComponent uiComp = null;
+				try {
+					Class<? extends JComponent> uiClass = (Class<? extends JComponent>) this.getClass().getClassLoader()
+							.loadClass(clazz);
+					uiComp = uiClass.newInstance();
+
+				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+				}
+				if (uiComp == null) {
+					uiComp = new ArchConsolePanel();
+				}
+				m_analyzers.put(a.id(), uiComp);
+				JInternalFrame frame = new JInternalFrame(a.id(), true, false, true);
+				frame.setVisible(true);
+				frame.add(uiComp);
+				frame.setSize(uiComp.getPreferredSize());
+				frame.addPropertyChangeListener(e -> {
+					System.out.println("Selected " + a.id());
+					if ("selection".equals(e.getPropertyName())) {
+						m_selectionManager.selectionChanged(a);
+					}
+				});
+				if (uiComp instanceof IUIUpdater) {
+					((IUIUpdater) uiComp).addUpdateListener(() -> {
+						final JComponent vFrame = getVisibleFrame(frame);
+						vFrame.setBorder(new LineBorder(ANALYZERS_COLOR, 2));
+						final java.util.Timer timer = new Timer();
+						timer.schedule(new TimerTask() {
+
+							@Override
+							public void run() {
+								SwingUtilities.invokeLater(new Runnable() {
+
+									@Override
+									public void run() {
+										vFrame.setBorder(null);
+									}
+								});
+							}
+						}, 1000);
+					});
+				}
+				m_desktopPane.add(frame);
+			}
+		}
 	}
 
 	private void createModels() {
@@ -753,8 +1066,9 @@ public class RainbowWindoe extends RainbowWindow
 				String modelName = m.getModelName();
 				String modelType = m.getModelType();
 				ModelReference modelRef = new ModelReference(modelName, modelType);
-				if (!m_models.containsKey(modelRef.toString()) && !"UtilityModel".equals(modelType) && !"ExecutionHistory".equals(modelType)) {
-					JInternalFrame frame = new JInternalFrame(modelName, false, false, true);
+				if (!m_models.containsKey(modelRef.toString()) && !"UtilityModel".equals(modelType)
+						&& !"ExecutionHistory".equals(modelType)) {
+					JInternalFrame frame = new JInternalFrame(modelName, true, false, true);
 					frame.setVisible(true);
 					ArchModelPanel mp = new ArchModelPanel(modelRef);
 					frame.add(mp);
@@ -771,8 +1085,8 @@ public class RainbowWindoe extends RainbowWindow
 							m_selectionManager.selectionChanged(mi);
 						}
 					});
-					mp.addUpdateListener(()-> {
-						final JComponent vFrame = getVIsibleComponentToHiglight(frame);
+					mp.addUpdateListener(() -> {
+						final JComponent vFrame = getVisibleFrame(frame);
 						vFrame.setBorder(new LineBorder(MODELS_MANAGER_COLOR, 2));
 						mp.m_table.setSelectionBackground(MODELS_MANAGER_COLOR_LIGHT);
 						final java.util.Timer timer = new Timer();
@@ -977,20 +1291,34 @@ public class RainbowWindoe extends RainbowWindow
 	@Override
 	public void report(RainbowComponentT component, ReportType type, String message) {
 		super.report(component, type, message);
-		
+		Matcher m = ERROR_PATTERN.matcher(message);
 		if (component == RainbowComponentT.MODEL) {
 			Collection<ModelInfo> values = m_models.values();
 			for (ModelInfo mi : values) {
 				mi.panel.processReport(type, message);
 			}
+		} else if (component == RainbowComponentT.ANALYSIS && m.find()) {
+			JComponent c = m_analyzers.get(m.group(1));
+			if (c instanceof IUIReporter) {
+				((IUIReporter) c).processReport(type, message);
+			}
+		} else if (component == RainbowComponentT.ADAPTATION_MANAGER && m.find()) {
+			JComponent c = m_adaptationManagers.get(m.group(1));
+			if (c instanceof IUIReporter) {
+				((IUIReporter) c).processReport(type, message);
+			}
+		} else if (component == RainbowComponentT.EXECUTOR && m.find()) {
+			JComponent c = m_executors.get(m.group(1));
+			if (c instanceof IUIReporter) {
+				((IUIReporter) c).processReport(type, message);
+			}
 		}
-		
+
 		if (type == ReportType.ERROR || type == ReportType.FATAL) {
 			m_errorArea.append(message);
 			m_errorArea.setCaretPosition(m_errorArea.getText().length());
 			m_selectionPanel.setIconAt(2, ERROR_ICON);
 
-			Matcher m = ERROR_PATTERN.matcher(message);
 			if (m.find()) {
 				m_errorArea.append("Error in component: " + m.group(1));
 				switch (component) {

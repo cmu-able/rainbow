@@ -521,6 +521,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		try {
 			m_createClientSideEffectorLifecyclePort = RainbowPortFactory.createClientSideEffectorLifecyclePort(new IEffectorLifecycleBusPort() {
 				
+				Color m_c;
 				@Override
 				public void dispose() {
 					// TODO Auto-generated method stub
@@ -538,8 +539,15 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 						if (ta.getText().length() > MAX_TEXT_LENGTH) {
 							ta.setText(ta.getText().substring(TEXT_HALF_LENGTH));
 						}
-						TabColorChanger tcc= new TabColorChanger(m_tabs.get(RainbowComponentT.EFFECTOR), ta.getParent().getParent(), SYSTEM_COLOR_LIGHT);
-						tcc.run();
+						final JTextArea taa = ta;
+						SwingUtilities.invokeLater(() -> {
+							
+							int index = m_tabs.get(RainbowComponentT.EFFECTOR).indexOfComponent(taa.getParent().getParent());
+							synchronized (m_tabs.get(RainbowComponentT.EFFECTOR)) {
+								
+									m_tabs.get(RainbowComponentT.EFFECTOR).setBackgroundAt(index, m_c);
+							}
+						});
 					}
 				}
 				
@@ -553,6 +561,33 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 				public void reportCreated(IEffectorIdentifier effector) {
 					// TODO Auto-generated method stub
 					
+				}
+
+				@Override
+				public void reportExecuting(IEffectorIdentifier effector, List<String> args) {
+					String eid = effector.id();
+					JTextArea ta = m_effectorSections.get(eid);
+					if (ta == null) ta = m_effectorSections.get(shortName(eid));
+					if (ta != null) {
+						ta.append(effector.id().split("@")[0] + args.toString() + " -> running\n");
+						ta.setCaretPosition(ta.getText().length());
+						if (ta.getText().length() > MAX_TEXT_LENGTH) {
+							ta.setText(ta.getText().substring(TEXT_HALF_LENGTH));
+						}
+						final JTextArea taa = ta;
+						SwingUtilities.invokeLater(() -> {
+							
+							int index = m_tabs.get(RainbowComponentT.EFFECTOR).indexOfComponent(taa.getParent().getParent());
+							synchronized (m_tabs.get(RainbowComponentT.EFFECTOR)) {
+								Color c = m_tabs.get(RainbowComponentT.EFFECTOR).getBackgroundAt(index);
+								if (c != SYSTEM_COLOR_LIGHT) {
+									m_c = m_tabs.get(RainbowComponentT.EFFECTOR).getBackgroundAt(index);
+									m_tabs.get(RainbowComponentT.EFFECTOR).setBackgroundAt(index, SYSTEM_COLOR_LIGHT);
+								}
+							}
+						});
+						
+					}
 				}
 			});
 		} catch (RainbowConnectionException e) {

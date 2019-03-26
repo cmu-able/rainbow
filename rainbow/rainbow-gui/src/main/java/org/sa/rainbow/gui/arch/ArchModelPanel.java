@@ -38,9 +38,11 @@ import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.gui.JTableCellDisplayer;
 import org.sa.rainbow.gui.ModelPanel;
 import org.sa.rainbow.gui.RainbowWindow;
+import org.sa.rainbow.gui.arch.elements.IUIReporter;
+import org.sa.rainbow.gui.arch.elements.IUIUpdater;
 import org.sa.rainbow.gui.widgets.TableColumnAdjuster;
 
-public class ArchModelPanel extends JPanel implements IModelsManager, IRainbowModelChangeCallback{
+public class ArchModelPanel extends JPanel implements IUIUpdater, IUIReporter, IModelsManager, IRainbowModelChangeCallback{
 	private Color m_red = RainbowWindow.bleach(Color.red, 0.75);
 	public class ModelErrorRenderer extends DefaultTableCellRenderer implements TableCellRenderer {
 
@@ -77,7 +79,7 @@ public class ArchModelPanel extends JPanel implements IModelsManager, IRainbowMo
 		p.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
 		add(p, BorderLayout.CENTER);
-		m_table.setAutoscrolls(true);
+//		m_table.setAutoscrolls(true);
 		m_table.addComponentListener(new JTableCellDisplayer(m_table));
 		try {
 			m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort();
@@ -251,6 +253,7 @@ public class ArchModelPanel extends JPanel implements IModelsManager, IRainbowMo
 		 }
 	}
 
+	@Override
 	public void addUpdateListener(Runnable listener) {
 		m_updaters.add(listener);
 	}
