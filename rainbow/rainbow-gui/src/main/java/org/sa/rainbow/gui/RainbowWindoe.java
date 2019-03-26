@@ -356,10 +356,10 @@ public class RainbowWindoe extends RainbowWindow
 		statusPane.setBorder(null);
 		statusPane.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		statusPane.setBackground(m_menuBar.getBackground());
-		m_menuBar.add(statusPane);
 
 		// These removals are hacsk
 		statusPane.getParent().remove(statusPane);
+		m_menuBar.add(statusPane);
 		JTextArea managementText = m_oracleMessagePane.getTextArea();
 		managementText.getParent().getParent().getParent().remove(managementText.getParent().getParent());
 		m_logTabs.insertTab("Management", null, managementText.getParent().getParent(), null, 0);
@@ -660,7 +660,7 @@ public class RainbowWindoe extends RainbowWindow
 		while (!(a.getParent() instanceof JInternalFrame) && a.getParent() != null) {
 			a = a.getParent();
 		}
-		return a;
+		return a.getParent();
 	}
 
 	protected Graph createGraphToLayout() {
@@ -746,7 +746,7 @@ public class RainbowWindoe extends RainbowWindow
 		}
 
 		Set<Node> executorNodes = new HashSet<>();
-		
+
 		for (IAdaptationExecutor<?> ae : Rainbow.instance().getRainbowMaster().adaptationExecutors().values()) {
 			JComponent comp = m_executors.get(ae.id());
 			Node aN = g.addNode(ae.id());
@@ -767,7 +767,7 @@ public class RainbowWindoe extends RainbowWindow
 			}
 			executorNodes.add(aN);
 		}
-		
+
 		Collection<Entry<String, ArchEffectorPanel>> values = m_effectors.entrySet();
 		for (Entry<String, ArchEffectorPanel> entry : values) {
 			Node eN = g.addNode(entry.getKey());
