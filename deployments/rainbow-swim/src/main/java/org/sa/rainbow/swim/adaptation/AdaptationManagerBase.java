@@ -222,6 +222,11 @@ public abstract class AdaptationManagerBase extends AbstractRainbowRunnable
         	initializeAdaptationMgr(swimModel);
         }
     }
+    
+    @Override
+    public ModelReference getManagedModel() {
+    	return m_modelRef;
+    }
 
     /*
      * (non-Javadoc)
