@@ -189,7 +189,7 @@ public class RainbowWindoe extends RainbowWindow
 	Map<String, JComponent> m_analyzers = new HashMap<>();
 	Map<String, JComponent> m_adaptationManagers = new HashMap<>();
 	Map<String, JComponent> m_executors = new HashMap<>();
-	Map<String,ArchEffectorPanel> m_effectors = new HashMap<>();
+	Map<String, ArchEffectorPanel> m_effectors = new HashMap<>();
 
 	private Map<String, JTextArea> m_probeTextAreas = new HashMap<>();
 
@@ -210,7 +210,6 @@ public class RainbowWindoe extends RainbowWindow
 	private ProbeTabbedPane m_probePanel;
 
 	private GaugeDetailPanel m_gaugePanel;
-
 
 	public RainbowWindoe(IMasterCommandPort master) {
 		super(master);
@@ -598,11 +597,11 @@ public class RainbowWindoe extends RainbowWindow
 					if (processedIds.containsKey(m))
 						g.addEdge(aN.getId() + "-" + m, aN, processedIds.get(m));
 				}
-				
+
 			}
-			
+
 			Map<String, Node> model2am = new HashMap<>();
-			
+
 			for (IAdaptationManager<?> am : Rainbow.instance().getRainbowMaster().adaptationManagers().values()) {
 				JComponent comp = m_adaptationManagers.get(am.id());
 				Node aN = g.addNode(am.id());
@@ -619,7 +618,7 @@ public class RainbowWindoe extends RainbowWindow
 
 				}
 			}
-			
+
 			for (IAdaptationExecutor<?> ae : Rainbow.instance().getRainbowMaster().adaptationExecutors().values()) {
 				JComponent comp = m_executors.get(ae.id());
 				Node aN = g.addNode(ae.id());
@@ -639,7 +638,7 @@ public class RainbowWindoe extends RainbowWindow
 					g.addEdge(aM.getId() + "-" + aN.getId(), aM, aN);
 				}
 			}
-			
+
 			g.setAttribute("splines", "compound");
 			g.setAttribute("rankdir", "BT"); // Put probes and effectors at bottom
 //			g.setAttribute("size", "" + toInches(Math.max(GAUGE_REGION.width, PROBE_REGION.width), res) + ","
@@ -853,7 +852,7 @@ public class RainbowWindoe extends RainbowWindow
 							ArchEffectorPanel ta = m_effectors.get(eid);
 
 							if (ta != null)
-								ta.reportExecuting(effector,args);
+								ta.reportExecuting(effector, args);
 						}
 
 						@Override
@@ -872,7 +871,7 @@ public class RainbowWindoe extends RainbowWindow
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		EffectorDescription effectorDesc = Rainbow.instance().getRainbowMaster().effectorDesc();
 		for (EffectorAttributes ea : effectorDesc.effectors) {
 			String effectorId = ea.name + "@" + ea.getLocation();
@@ -880,7 +879,7 @@ public class RainbowWindoe extends RainbowWindow
 				JInternalFrame frame = new JInternalFrame(shortName(effectorId), true, false, true);
 				frame.setVisible(true);
 				ArchEffectorPanel uiComp = new ArchEffectorPanel();
-				
+
 				frame.add(uiComp);
 				frame.setSize(uiComp.getPreferredSize());
 				frame.addPropertyChangeListener(e -> {
@@ -890,7 +889,7 @@ public class RainbowWindoe extends RainbowWindow
 					}
 				});
 				m_desktopPane.add(frame);
-				m_effectors .put(effectorId,uiComp);
+				m_effectors.put(effectorId, uiComp);
 			}
 		}
 	}
@@ -901,8 +900,8 @@ public class RainbowWindoe extends RainbowWindow
 				: Collections.<String, Object>emptyMap();
 		for (IAdaptationExecutor a : executors.values()) {
 			String clazz = (String) aui.get(a.getClass().getName());
+			JComponent uiComp = null;
 			if (clazz != null) {
-				JComponent uiComp = null;
 				try {
 					Class<? extends JComponent> uiClass = (Class<? extends JComponent>) this.getClass().getClassLoader()
 							.loadClass(clazz);
@@ -910,42 +909,42 @@ public class RainbowWindoe extends RainbowWindow
 
 				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 				}
-				if (uiComp == null) {
-					uiComp = new ArchConsolePanel();
-				}
-				m_executors.put(a.id(), uiComp);
-				JInternalFrame frame = new JInternalFrame(a.id(), true, false, true);
-				frame.setVisible(true);
-				frame.add(uiComp);
-				frame.setSize(uiComp.getPreferredSize());
-				frame.addPropertyChangeListener(e -> {
-					System.out.println("Selected " + a.id());
-					if ("selection".equals(e.getPropertyName())) {
-						m_selectionManager.selectionChanged(a);
-					}
-				});
-				if (uiComp instanceof IUIUpdater) {
-					((IUIUpdater) uiComp).addUpdateListener(() -> {
-						final JComponent vFrame = getVisibleFrame(frame);
-						vFrame.setBorder(new LineBorder(ANALYZERS_COLOR, 2));
-						final java.util.Timer timer = new Timer();
-						timer.schedule(new TimerTask() {
-
-							@Override
-							public void run() {
-								SwingUtilities.invokeLater(new Runnable() {
-
-									@Override
-									public void run() {
-										vFrame.setBorder(null);
-									}
-								});
-							}
-						}, 1000);
-					});
-				}
-				m_desktopPane.add(frame);
 			}
+			if (uiComp == null) {
+				uiComp = new ArchConsolePanel();
+			}
+			m_executors.put(a.id(), uiComp);
+			JInternalFrame frame = new JInternalFrame(a.id(), true, false, true);
+			frame.setVisible(true);
+			frame.add(uiComp);
+			frame.setSize(uiComp.getPreferredSize());
+			frame.addPropertyChangeListener(e -> {
+				System.out.println("Selected " + a.id());
+				if ("selection".equals(e.getPropertyName())) {
+					m_selectionManager.selectionChanged(a);
+				}
+			});
+			if (uiComp instanceof IUIUpdater) {
+				((IUIUpdater) uiComp).addUpdateListener(() -> {
+					final JComponent vFrame = getVisibleFrame(frame);
+					vFrame.setBorder(new LineBorder(ANALYZERS_COLOR, 2));
+					final java.util.Timer timer = new Timer();
+					timer.schedule(new TimerTask() {
+
+						@Override
+						public void run() {
+							SwingUtilities.invokeLater(new Runnable() {
+
+								@Override
+								public void run() {
+									vFrame.setBorder(null);
+								}
+							});
+						}
+					}, 1000);
+				});
+			}
+			m_desktopPane.add(frame);
 		}
 	}
 
@@ -955,8 +954,8 @@ public class RainbowWindoe extends RainbowWindow
 				: Collections.<String, Object>emptyMap();
 		for (IAdaptationManager a : analyzers.values()) {
 			String clazz = (String) aui.get(a.getClass().getName());
+			JComponent uiComp = null;
 			if (clazz != null) {
-				JComponent uiComp = null;
 				try {
 					Class<? extends JComponent> uiClass = (Class<? extends JComponent>) this.getClass().getClassLoader()
 							.loadClass(clazz);
@@ -964,42 +963,43 @@ public class RainbowWindoe extends RainbowWindow
 
 				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 				}
-				if (uiComp == null) {
-					uiComp = new ArchConsolePanel();
-				}
-				m_adaptationManagers.put(a.id(), uiComp);
-				JInternalFrame frame = new JInternalFrame(a.id(), true, false, true);
-				frame.setVisible(true);
-				frame.add(uiComp);
-				frame.setSize(uiComp.getPreferredSize());
-				frame.addPropertyChangeListener(e -> {
-					System.out.println("Selected " + a.id());
-					if ("selection".equals(e.getPropertyName())) {
-						m_selectionManager.selectionChanged(a);
-					}
-				});
-				if (uiComp instanceof IUIUpdater) {
-					((IUIUpdater) uiComp).addUpdateListener(() -> {
-						final JComponent vFrame = getVisibleFrame(frame);
-						vFrame.setBorder(new LineBorder(ANALYZERS_COLOR, 2));
-						final java.util.Timer timer = new Timer();
-						timer.schedule(new TimerTask() {
-
-							@Override
-							public void run() {
-								SwingUtilities.invokeLater(new Runnable() {
-
-									@Override
-									public void run() {
-										vFrame.setBorder(null);
-									}
-								});
-							}
-						}, 1000);
-					});
-				}
-				m_desktopPane.add(frame);
 			}
+			if (uiComp == null) {
+				uiComp = new ArchConsolePanel();
+			}
+			m_adaptationManagers.put(a.id(), uiComp);
+			JInternalFrame frame = new JInternalFrame(a.id(), true, false, true);
+			frame.setVisible(true);
+			frame.add(uiComp);
+			frame.setSize(uiComp.getPreferredSize());
+			frame.addPropertyChangeListener(e -> {
+				System.out.println("Selected " + a.id());
+				if ("selection".equals(e.getPropertyName())) {
+					m_selectionManager.selectionChanged(a);
+				}
+			});
+			if (uiComp instanceof IUIUpdater) {
+				((IUIUpdater) uiComp).addUpdateListener(() -> {
+					final JComponent vFrame = getVisibleFrame(frame);
+					vFrame.setBorder(new LineBorder(ANALYZERS_COLOR, 2));
+					final java.util.Timer timer = new Timer();
+					timer.schedule(new TimerTask() {
+
+						@Override
+						public void run() {
+							SwingUtilities.invokeLater(new Runnable() {
+
+								@Override
+								public void run() {
+									vFrame.setBorder(null);
+								}
+							});
+						}
+					}, 1000);
+				});
+			}
+			m_desktopPane.add(frame);
+
 		}
 	}
 
@@ -1009,8 +1009,8 @@ public class RainbowWindoe extends RainbowWindow
 				: Collections.<String, Object>emptyMap();
 		for (IRainbowAnalysis a : analyzers) {
 			String clazz = (String) aui.get(a.getClass().getName());
+			JComponent uiComp = null;
 			if (clazz != null) {
-				JComponent uiComp = null;
 				try {
 					Class<? extends JComponent> uiClass = (Class<? extends JComponent>) this.getClass().getClassLoader()
 							.loadClass(clazz);
@@ -1018,42 +1018,43 @@ public class RainbowWindoe extends RainbowWindow
 
 				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 				}
-				if (uiComp == null) {
-					uiComp = new ArchConsolePanel();
-				}
-				m_analyzers.put(a.id(), uiComp);
-				JInternalFrame frame = new JInternalFrame(a.id(), true, false, true);
-				frame.setVisible(true);
-				frame.add(uiComp);
-				frame.setSize(uiComp.getPreferredSize());
-				frame.addPropertyChangeListener(e -> {
-					System.out.println("Selected " + a.id());
-					if ("selection".equals(e.getPropertyName())) {
-						m_selectionManager.selectionChanged(a);
-					}
-				});
-				if (uiComp instanceof IUIUpdater) {
-					((IUIUpdater) uiComp).addUpdateListener(() -> {
-						final JComponent vFrame = getVisibleFrame(frame);
-						vFrame.setBorder(new LineBorder(ANALYZERS_COLOR, 2));
-						final java.util.Timer timer = new Timer();
-						timer.schedule(new TimerTask() {
 
-							@Override
-							public void run() {
-								SwingUtilities.invokeLater(new Runnable() {
-
-									@Override
-									public void run() {
-										vFrame.setBorder(null);
-									}
-								});
-							}
-						}, 1000);
-					});
-				}
-				m_desktopPane.add(frame);
 			}
+			if (uiComp == null) {
+				uiComp = new ArchConsolePanel();
+			}
+			m_analyzers.put(a.id(), uiComp);
+			JInternalFrame frame = new JInternalFrame(a.id(), true, false, true);
+			frame.setVisible(true);
+			frame.add(uiComp);
+			frame.setSize(uiComp.getPreferredSize());
+			frame.addPropertyChangeListener(e -> {
+				System.out.println("Selected " + a.id());
+				if ("selection".equals(e.getPropertyName())) {
+					m_selectionManager.selectionChanged(a);
+				}
+			});
+			if (uiComp instanceof IUIUpdater) {
+				((IUIUpdater) uiComp).addUpdateListener(() -> {
+					final JComponent vFrame = getVisibleFrame(frame);
+					vFrame.setBorder(new LineBorder(ANALYZERS_COLOR, 2));
+					final java.util.Timer timer = new Timer();
+					timer.schedule(new TimerTask() {
+
+						@Override
+						public void run() {
+							SwingUtilities.invokeLater(new Runnable() {
+
+								@Override
+								public void run() {
+									vFrame.setBorder(null);
+								}
+							});
+						}
+					}, 1000);
+				});
+			}
+			m_desktopPane.add(frame);
 		}
 	}
 
