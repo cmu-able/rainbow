@@ -3,6 +3,7 @@ package org.sa.rainbow.gui;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
@@ -44,7 +45,6 @@ import javax.swing.border.LineBorder;
 import javax.swing.plaf.DesktopIconUI;
 import javax.swing.plaf.InternalFrameUI;
 
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.EdgeRejectedException;
 import org.graphstream.graph.Graph;
@@ -538,109 +538,7 @@ public class RainbowWindoe extends RainbowWindow
 	private boolean layoutDOT() {
 		try {
 			m_lines = new ArrayList<Line2D>();
-			int res = 72; // Toolkit.getDefaultToolkit().getScreenResolution();
-			Graph g = new SingleGraph("gauges-and-probes");
-
-			Node root = g.addNode("root");
-			Map<String, Node> processedIds = new HashMap<>();
-
-			for (Entry<String, GaugeInfo> ge : m_gauges.entrySet()) {
-				GaugeInfo gaugeInfo = ge.getValue();
-				Node gN = g.addNode(ge.getKey());
-				Dimension size = getVisibleFrame(gaugeInfo.getFrame()).getSize();
-				gN.addAttribute("width", toInches(size.width, res));
-				gN.addAttribute("height", toInches(size.height, res));
-				gN.addAttribute("fixedsize", true);
-				gN.addAttribute("shape", "box");
-				processedIds.put(ge.getKey(), gN);
-				for (String probe : gaugeInfo.getProbes()) {
-					ProbeInfo pi = m_probes.get(probe);
-					String pid = probe;
-					Node pN = processedIds.get(pid);
-					if (pN == null) {
-						pN = g.addNode(pid);
-						size = getVisibleFrame(pi.frame).getSize();
-						pN.addAttribute("width", toInches(size.width, res));
-						pN.addAttribute("height", toInches(size.height, res));
-						pN.addAttribute("fixedsize", true);
-						pN.addAttribute("shape", "box");
-						processedIds.put(pid, pN);
-					}
-					g.addEdge(gN.getId() + "-" + pN.getId(), gN, pN);
-				}
-
-			}
-			for (Entry<String, ModelInfo> me : m_models.entrySet()) {
-				ModelInfo mi = me.getValue();
-				Node mN = g.addNode(me.getKey());
-				Dimension size = mi.frame.getSize();
-				mN.addAttribute("width", toInches(size.width + 40, res));
-				mN.addAttribute("height", toInches(size.height, res));
-				mN.addAttribute("fixedsize", true);
-				mN.addAttribute("shape", "box");
-				for (String ga : mi.gauges) {
-					if (processedIds.containsKey(ga)) {
-						g.addEdge(mN.getId() + "-" + ga, mN, processedIds.get(ga));
-					}
-				}
-				processedIds.put(me.getKey(), mN);
-			}
-			for (IRainbowAnalysis a : Rainbow.instance().getRainbowMaster().analyzers()) {
-				JComponent comp = m_analyzers.get(a.id());
-				Node aN = g.addNode(a.id());
-				Dimension size = comp.getSize();
-				aN.addAttribute("width", toInches(size.width + 40, res));
-				aN.addAttribute("height", toInches(size.height, res));
-				aN.addAttribute("fixedsize", true);
-				aN.addAttribute("shape", "box");
-				for (String m : m_models.keySet()) {
-					if (processedIds.containsKey(m))
-						g.addEdge(aN.getId() + "-" + m, aN, processedIds.get(m));
-				}
-
-			}
-
-			Map<String, Node> model2am = new HashMap<>();
-
-			for (IAdaptationManager<?> am : Rainbow.instance().getRainbowMaster().adaptationManagers().values()) {
-				JComponent comp = m_adaptationManagers.get(am.id());
-				Node aN = g.addNode(am.id());
-				Dimension size = comp.getSize();
-				aN.addAttribute("width", toInches(size.width + 40, res));
-				aN.addAttribute("height", toInches(size.height, res));
-				aN.addAttribute("fixedsize", true);
-				aN.addAttribute("shape", "box");
-				String model = am.getManagedModel().toString();
-				model2am.put(model, aN);
-				Node n = processedIds.get(model);
-				if (n != null) {
-					g.addEdge(aN.getId() + "-" + n.getId(), aN, n);
-
-				}
-			}
-
-			for (IAdaptationExecutor<?> ae : Rainbow.instance().getRainbowMaster().adaptationExecutors().values()) {
-				JComponent comp = m_executors.get(ae.id());
-				Node aN = g.addNode(ae.id());
-				Dimension size = comp.getSize();
-				aN.addAttribute("width", toInches(size.width + 40, res));
-				aN.addAttribute("height", toInches(size.height, res));
-				aN.addAttribute("fixedsize", true);
-				aN.addAttribute("shape", "box");
-				String model = ae.getManagedModel().toString();
-				Node n = processedIds.get(model);
-				if (n != null) {
-					g.addEdge(aN.getId() + "-" + n.getId(), aN, n);
-
-				}
-				Node aM = model2am.get(model);
-				if (aM != null) {
-					g.addEdge(aM.getId() + "-" + aN.getId(), aM, aN);
-				}
-			}
-
-			g.setAttribute("splines", "compound");
-			g.setAttribute("rankdir", "BT"); // Put probes and effectors at bottom
+			Graph g = createGraphToLayout();
 //			g.setAttribute("size", "" + toInches(Math.max(GAUGE_REGION.width, PROBE_REGION.width), res) + ","
 //					+ toInches(GAUGE_REGION.height + PROBE_REGION.height, res));
 
@@ -695,6 +593,34 @@ public class RainbowWindoe extends RainbowWindow
 					Point realPoint = location;
 					getVisibleFrame(mi.frame).setLocation(realPoint);
 
+				} else if (m_analyzers.containsKey(n.getId())) {
+					JComponent a = m_analyzers.get(n.getId());
+					String pos = (String) n.getAttribute("pos");
+					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0]) + 10,
+							Float.parseFloat(pos.split(",")[1]) + 10, getDesktopFram(a).getBounds().getSize());
+					Point realPoint = location;
+					getDesktopFram(a).setLocation(realPoint);
+				} else if (m_adaptationManagers.containsKey(n.getId())) {
+					JComponent a = m_adaptationManagers.get(n.getId());
+					String pos = (String) n.getAttribute("pos");
+					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0]) + 10,
+							Float.parseFloat(pos.split(",")[1]) + 10, getDesktopFram(a).getBounds().getSize());
+					Point realPoint = location;
+					getDesktopFram(a).setLocation(realPoint);
+				} else if (m_executors.containsKey(n.getId())) {
+					JComponent a = m_executors.get(n.getId());
+					String pos = (String) n.getAttribute("pos");
+					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0]) + 10,
+							Float.parseFloat(pos.split(",")[1]) + 10, getDesktopFram(a).getBounds().getSize());
+					Point realPoint = location;
+					getDesktopFram(a).setLocation(realPoint);
+				} else if (m_effectors.containsKey(n.getId())) {
+					JComponent a = m_effectors.get(n.getId());
+					String pos = (String) n.getAttribute("pos");
+					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0]) + 10,
+							Float.parseFloat(pos.split(",")[1]) + 10, getDesktopFram(a).getBounds().getSize());
+					Point realPoint = location;
+					getDesktopFram(a).setLocation(realPoint);
 				}
 			}
 
@@ -728,6 +654,136 @@ public class RainbowWindoe extends RainbowWindow
 		}
 
 		return true;
+	}
+
+	private Container getDesktopFram(Container a) {
+		while (!(a.getParent() instanceof JInternalFrame) && a.getParent() != null) {
+			a = a.getParent();
+		}
+		return a;
+	}
+
+	protected Graph createGraphToLayout() {
+		int res = 76; // Toolkit.getDefaultToolkit().getScreenResolution();
+		Graph g = new SingleGraph("gauges-and-probes");
+
+		Node root = g.addNode("root");
+		Map<String, Node> processedIds = new HashMap<>();
+
+		for (Entry<String, GaugeInfo> ge : m_gauges.entrySet()) {
+			GaugeInfo gaugeInfo = ge.getValue();
+			Node gN = g.addNode(ge.getKey());
+			Dimension size = getVisibleFrame(gaugeInfo.getFrame()).getSize();
+			gN.addAttribute("width", toInches(size.width, res));
+			gN.addAttribute("height", toInches(size.height, res));
+			gN.addAttribute("fixedsize", true);
+			gN.addAttribute("shape", "box");
+			processedIds.put(ge.getKey(), gN);
+			for (String probe : gaugeInfo.getProbes()) {
+				ProbeInfo pi = m_probes.get(probe);
+				String pid = probe;
+				Node pN = processedIds.get(pid);
+				if (pN == null) {
+					pN = g.addNode(pid);
+					size = getVisibleFrame(pi.frame).getSize();
+					pN.addAttribute("width", toInches(size.width, res));
+					pN.addAttribute("height", toInches(size.height, res));
+					pN.addAttribute("fixedsize", true);
+					pN.addAttribute("shape", "box");
+					processedIds.put(pid, pN);
+				}
+				g.addEdge(gN.getId() + "-" + pN.getId(), gN, pN);
+			}
+
+		}
+		for (Entry<String, ModelInfo> me : m_models.entrySet()) {
+			ModelInfo mi = me.getValue();
+			Node mN = g.addNode(me.getKey());
+			Dimension size = mi.frame.getSize();
+			mN.addAttribute("width", toInches(size.width + 40, res));
+			mN.addAttribute("height", toInches(size.height, res));
+			mN.addAttribute("fixedsize", true);
+			mN.addAttribute("shape", "box");
+			for (String ga : mi.gauges) {
+				if (processedIds.containsKey(ga)) {
+					g.addEdge(mN.getId() + "-" + ga, mN, processedIds.get(ga));
+				}
+			}
+			processedIds.put(me.getKey(), mN);
+		}
+		for (IRainbowAnalysis a : Rainbow.instance().getRainbowMaster().analyzers()) {
+			JComponent comp = m_analyzers.get(a.id());
+			Node aN = g.addNode(a.id());
+			Dimension size = getDesktopFram(comp).getSize();
+			aN.addAttribute("width", toInches(size.width + 40, res));
+			aN.addAttribute("height", toInches(size.height, res));
+			aN.addAttribute("fixedsize", true);
+			aN.addAttribute("shape", "box");
+			for (String m : m_models.keySet()) {
+				if (processedIds.containsKey(m))
+					g.addEdge(aN.getId() + "-" + m, aN, processedIds.get(m));
+			}
+
+		}
+
+		Map<String, Node> model2am = new HashMap<>();
+
+		for (IAdaptationManager<?> am : Rainbow.instance().getRainbowMaster().adaptationManagers().values()) {
+			JComponent comp = m_adaptationManagers.get(am.id());
+			Node aN = g.addNode(am.id());
+			Dimension size = getDesktopFram(comp).getSize();
+			aN.addAttribute("width", toInches(size.width + 40, res));
+			aN.addAttribute("height", toInches(size.height, res));
+			aN.addAttribute("fixedsize", true);
+			aN.addAttribute("shape", "box");
+			String model = am.getManagedModel().toString();
+			model2am.put(model, aN);
+			Node n = processedIds.get(model);
+			if (n != null) {
+				g.addEdge(aN.getId() + "-" + n.getId(), aN, n);
+
+			}
+		}
+
+		Set<Node> executorNodes = new HashSet<>();
+		
+		for (IAdaptationExecutor<?> ae : Rainbow.instance().getRainbowMaster().adaptationExecutors().values()) {
+			JComponent comp = m_executors.get(ae.id());
+			Node aN = g.addNode(ae.id());
+			Dimension size = getDesktopFram(comp).getSize();
+			aN.addAttribute("width", toInches(size.width + 40, res));
+			aN.addAttribute("height", toInches(size.height, res));
+			aN.addAttribute("fixedsize", true);
+			aN.addAttribute("shape", "box");
+			String model = ae.getManagedModel().toString();
+			Node n = processedIds.get(model);
+			if (n != null) {
+				g.addEdge(aN.getId() + "-" + n.getId(), aN, n);
+
+			}
+			Node aM = model2am.get(model);
+			if (aM != null) {
+				g.addEdge(aM.getId() + "-" + aN.getId(), aM, aN);
+			}
+			executorNodes.add(aN);
+		}
+		
+		Collection<Entry<String, ArchEffectorPanel>> values = m_effectors.entrySet();
+		for (Entry<String, ArchEffectorPanel> entry : values) {
+			Node eN = g.addNode(entry.getKey());
+			Dimension size = getDesktopFram(entry.getValue()).getSize();
+			eN.addAttribute("width", toInches(size.width + 40, res));
+			eN.addAttribute("height", toInches(size.height, res));
+			eN.addAttribute("fixedsize", true);
+			eN.addAttribute("shape", "box");
+			for (Node ex : executorNodes) {
+				g.addEdge(ex.getId() + "-" + eN.getId(), ex, eN);
+			}
+		}
+
+		g.setAttribute("splines", "compound");
+		g.setAttribute("rankdir", "BT"); // Put probes and effectors at bottom
+		return g;
 	}
 
 	private Point convertOrigin(Point location, Rectangle graphBB) {
