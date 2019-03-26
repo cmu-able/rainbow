@@ -120,7 +120,7 @@ public abstract class AdaptationManagerBase extends AbstractRainbowRunnable
     private IRainbowAdaptationEnqueuePort<Strategy> m_enqueuePort          = null;
     private IModelChangeBusSubscriberPort           m_modelChangePort      = null;
     private IModelsManagerPort                      m_modelsManagerPort    = null;
-    private String m_modelRef;
+    private ModelReference m_modelRef;
     private FileChannel                   m_strategyLog              = null;
     private IRainbowChangeBusSubscription m_modelTypecheckingChanged = new IRainbowChangeBusSubscription () {
 
@@ -186,7 +186,7 @@ public abstract class AdaptationManagerBase extends AbstractRainbowRunnable
 
     @Override
     public void setModelToManage (ModelReference model) {
-        m_modelRef = model.getModelName () + ":" + model.getModelType ();
+        m_modelRef = model;
         try {
             m_strategyLog = new FileOutputStream (new File (new File (Rainbow.instance ().getTargetPath (), "log"),
                                                             model.getModelName () + "-adaptation.log")).getChannel ();
