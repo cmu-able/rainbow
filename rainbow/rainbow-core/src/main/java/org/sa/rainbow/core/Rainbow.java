@@ -62,6 +62,7 @@ public class Rainbow implements IRainbowEnvironment {
 
     private static final String PROPKEY_PROPFILENAME = "rainbow.properties";
 
+
 	/**
      * Exit status that Rainbow would report when it exits, default to sleeping.
      */

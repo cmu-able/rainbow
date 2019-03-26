@@ -946,4 +946,19 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 		return Collections.<String>emptyList();
 	}
 
+	@Override
+	public Collection<IRainbowAnalysis> analyzers() {
+		return Collections.unmodifiableCollection(m_analyses);
+	}
+	
+	@Override
+	public Map<String,IAdaptationManager<?>> adaptationManagers() {
+		return Collections.unmodifiableMap(m_adaptationManagers);
+	}
+	
+	@Override
+	public Map<String, IAdaptationExecutor<?>> adaptationExecutors() {
+		return Collections.unmodifiableMap(m_adaptationExecutors);
+	}
+
 }
