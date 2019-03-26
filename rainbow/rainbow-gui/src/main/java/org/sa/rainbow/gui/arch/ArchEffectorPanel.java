@@ -34,7 +34,7 @@ public class ArchEffectorPanel extends JPanel implements IEffectorLifecycleBusPo
 		p.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		p.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		m_table.addComponentListener(new JTableCellDisplayer(m_table));
-		m_table.setPreferredScrollableViewportSize(new Dimension(150, 50));
+		m_table.setSize(new Dimension(150, 75));
 		m_table.setFont(new Font(m_table.getFont().getFontName(), m_table.getFont().getStyle(), 8));
 		m_table.getTableHeader().setFont(new Font(m_table.getTableHeader().getFont().getFontName(), m_table.getFont().getStyle(), 8));
 
