@@ -81,6 +81,7 @@ import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReporti
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
+import org.sa.rainbow.gui.arch.ArchEffectorPanel;
 import org.sa.rainbow.gui.arch.ArchGuagePanel;
 import org.sa.rainbow.gui.arch.ArchModelPanel;
 import org.sa.rainbow.gui.arch.GaugeInfo;
