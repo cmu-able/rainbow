@@ -190,6 +190,7 @@ public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAn
         final AcmeModelInstance model = m_modelCheckQ.poll ();
         if (model != null) {
             // For each Acme model that changed, check to see if it typechecks
+        	m_reportingPort.info(getComponentType(), MessageFormat.format("[{0}]: Checking constraints", id()));
             IAcmeEnvironment env = model.getModelInstance ().getContext ().getEnvironment ();
             IAcmeTypeChecker typeChecker = env.getTypeChecker ();
             if (typeChecker instanceof SynchronousTypeChecker) {
@@ -211,25 +212,30 @@ public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAn
                         m_modelUSPort.updateModel (cmd);
                     } catch (IllegalStateException e) {
                         m_reportingPort.error (RainbowComponentT.ANALYSIS,
-                                               "Could not execute set typecheck command on model", e);
+                                               MessageFormat.format("[{0}]: Could not execute set typecheck command on model", id()), e);
                     }
                 }
                 if (constraintViolated) {
                     try {
                         Set<? extends AcmeError> errors = env.getAllRegisteredErrors ();
+                        Set<String> errorStrs = new HashSet<>();
+                        for (AcmeError error : errors) {
+							String[] causes = error.getMessageText().split("->");
+							errorStrs.add(causes[causes.length-1]);
+						}
+                        
+                        
                         m_reportingPort.info (RainbowComponentT.ANALYSIS,
-                                              "Model " + model.getModelName () + ":" + model.getModelType () + " " +
-                                                      "constraints violated: "
-                                                      + errors.toString ());
+                        					  MessageFormat.format("[{3}]: Model {0}:{1} constraints violated: {2}", model.getModelName(), model.getModelType(), errorStrs, id()));
                     } catch (Exception e) {
                         m_reportingPort.error (RainbowComponentT.ANALYSIS,
-                                               "There's an error reporting the constraint violation", e);
-                        m_reportingPort.info (RainbowComponentT.ANALYSIS, "Model " + model.getModelName () + ":"
-                                + model.getModelType () + " constraints violated: <error in reporting>");
+                                              MessageFormat.format("[{0}]: There's an error reporting the constraint violation", id()), e);
+                        m_reportingPort.info (RainbowComponentT.ANALYSIS,
+          					  MessageFormat.format("[{3}]: Model {0}:{1} Evaluation Error: {2}", model.getModelName(), model.getModelType(), e.getMessage(), id()));
                     }
                 } else {
                     m_reportingPort.info (RainbowComponentT.ANALYSIS,
-                                          "Model " + model.getModelName () + ":" + model.getModelType () + " ok");
+                                          MessageFormat.format("[{0}]: Model {1}:{2} ok", id(), model.getModelName (), model.getModelType ()));
                 }
 
             }
@@ -280,7 +286,7 @@ public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAn
         // Assuming that the model manager is local, otherwise this call will be slow when done this often
         @SuppressWarnings("rawtypes")
         IModelInstance model = m_modelsManagerPort.getModelInstance (ref); //ref.getModelType (), ref.getModelName ());
-        if (model instanceof AcmeModelInstance) {
+        if (model instanceof AcmeModelInstance && !m_modelCheckQ.contains(model)) {
             m_modelCheckQ.offer ((AcmeModelInstance) model);
         }
     }
