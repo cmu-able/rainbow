@@ -10,6 +10,7 @@ import java.text.NumberFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Matcher;
@@ -79,10 +80,11 @@ public class ArchStitchAdapationManager extends JPanel implements IUIReporter{
 	}
 	
 	private static final Pattern Q_PATTERN = Pattern.compile("Queuing (.*)");
-	private static final Pattern S_PATTERN = Pattern.compile("Scores:.*\\[(.*)\\]", Pattern.DOTALL);
+	private static final Pattern S_PATTERN = Pattern.compile("Scores:.*\\[(.*)\\].*", Pattern.DOTALL);
 	
 	@Override
-	public void processReport(ReportType type, String message) {
+	public synchronized void processReport(ReportType type, String message) {
+		// Messages may come out of order.
 		DefaultTableModel model = (DefaultTableModel) m_table.getModel();
 		if (message.contains("Considering")) {
 			for (int i = 0; i < model.getRowCount(); i++) {
@@ -95,11 +97,16 @@ public class ArchStitchAdapationManager extends JPanel implements IUIReporter{
 			Matcher qM = Q_PATTERN.matcher(message);
 			if (qM.matches()) {
 				String s = qM.group(1);
+				boolean added = false;
 				for (int row=0; row < model.getRowCount(); row++) {
 					if (model.getValueAt(row, 0).equals(s)) {
 						model.setValueAt("Queued", row, 2);
 						m_table.setRowSelectionInterval(row, row);
+						added = true;
 					}
+				}
+				if (!added) {
+					model.addRow(new Object[] {"s","","Queued"});
 				}
 				processBorder();
 			}
@@ -118,7 +125,20 @@ public class ArchStitchAdapationManager extends JPanel implements IUIReporter{
 				Map<String, String> scoreTable = new HashMap<>();
 				for (String score : scores) {
 					String[] parts = score.split(":");
-					model.addRow(new Object[] {parts[0], formatter.format(Double.parseDouble(parts[1].trim())), ""});
+//					model.addRow(new Object[] {parts[0], formatter.format(Double.parseDouble(parts[1].trim())), ""});
+					scoreTable.put(parts[0], formatter.format(Double.parseDouble(parts[1].trim())));
+				}
+				for (int r=0; r < model.getRowCount(); r++) {
+					Object valueAt = model.getValueAt(0, 0);
+					String s = scoreTable.get(valueAt);
+					if (s != null) {
+						model.setValueAt(s, r, 1);
+						scoreTable.remove(valueAt);
+					}
+				}
+				for (Entry<String,String> e : scoreTable.entrySet()) {
+					model.addRow(new Object[] {e.getKey(), e.getValue(), ""});
+
 				}
 			}
 		}
