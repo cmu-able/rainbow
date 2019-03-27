@@ -903,7 +903,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
         Tactic tactic = (Tactic) scope ();
         tactic.setHasDuration (true);
         // retrieve the first expression from the current scoep
-        Expression expr = tactic.expressions ().get (0);
+        Expression expr = tactic.expressions ().get (tactic.expressions().size()-1);
         expr.setTree (ctx);
         tactic.setDurationExpr (expr);
         debug ("* Duration gathered: has it? " + tactic.hasDuration () + ", expr = " + tactic.getDurationExpr ().tree
