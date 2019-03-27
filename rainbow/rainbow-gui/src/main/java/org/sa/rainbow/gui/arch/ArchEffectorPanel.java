@@ -66,8 +66,8 @@ public class ArchEffectorPanel extends JPanel implements IEffectorLifecycleBusPo
 	@Override
 	public void reportExecuted(IEffectorIdentifier effector, Outcome outcome, List<String> args) {
 		DefaultTableModel tableModel = (DefaultTableModel) m_table.getModel();
-		tableModel.setValueAt(args.toString(), 0, 0);
-		tableModel.setValueAt(outcome.toString(), 0, 1);
+		tableModel.setValueAt(args.toString(), 0, 1);
+		tableModel.setValueAt(outcome.toString(), 0, 2);
 		m_table.clearSelection();
 	}
 
