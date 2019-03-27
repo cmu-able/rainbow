@@ -560,7 +560,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 				buf.append(entry.getKey()).append("\n");
 			}
 			buf.append("  ]\n");
-			log(MessageFormat.format("[[{0}]]: Scores: {1}", id(), buf.toString()));
+			m_reportingPort.info(getComponentType(), MessageFormat.format("[[{0}]]: Scores: {1}", id(), buf.toString()));
 			Util.dataLogger().info(IRainbowHealthProtocol.DATA_ADAPTATION_SCORE + buf.toString());
 //		}
 
