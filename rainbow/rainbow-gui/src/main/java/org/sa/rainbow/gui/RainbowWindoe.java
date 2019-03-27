@@ -1145,7 +1145,7 @@ public class RainbowWindoe extends RainbowWindow
 					});
 					mp.addUpdateListener(() -> {
 						final JComponent vFrame = getVisibleFrame(frame);
-						vFrame.setBorder(new LineBorder(MODELS_MANAGER_COLOR, 2));
+						mp.setBorder(new LineBorder(MODELS_MANAGER_COLOR, 2));
 						mp.m_table.setSelectionBackground(MODELS_MANAGER_COLOR_LIGHT);
 						final java.util.Timer timer = new Timer();
 						timer.schedule(new TimerTask() {
@@ -1156,7 +1156,7 @@ public class RainbowWindoe extends RainbowWindow
 
 									@Override
 									public void run() {
-										vFrame.setBorder(null);
+										mp.setBorder(null);
 										mp.m_table.clearSelection();
 									}
 								});
