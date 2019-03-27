@@ -11,6 +11,7 @@ import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.core.StitchExecutionException;
 import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.core.Var;
+import org.sa.rainbow.stitch.core.Strategy.Outcome;
 import org.sa.rainbow.stitch.history.ExecutionHistoryCommandFactory;
 import org.sa.rainbow.stitch.history.ExecutionHistoryModelInstance;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData;
@@ -94,8 +95,10 @@ public class StitchExecutionVisitor extends DefaultAdaptationExecutorVisitor<Str
 		} catch (IOException e) {
 			m_executor.getReportingPort().error(m_executor.getComponentType(),
 					MessageFormat.format("[[{0}]]: Failed to parse the stitchState file",m_executor.id()), e);
+			adaptation.setOutcome(Outcome.FAILURE);
 		} catch (StitchExecutionException e) {
 			m_executor.getReportingPort().error(m_executor.getComponentType(), MessageFormat.format("[[{0}]]: Failed to execute the strategy: {1}", m_executor.id(), adaptation.getName()), e);
+			adaptation.setOutcome(Outcome.FAILURE);
 		} finally {
 			actualExecutedAdaptation.markExecuting(false);
 		}
