@@ -983,23 +983,30 @@ public class RainbowWindoe extends RainbowWindow
 			if (uiComp instanceof IUIUpdater) {
 				final JComponent fComp = uiComp;
 				final java.util.Timer timer = new Timer();
-				((IUIUpdater) uiComp).addUpdateListener(() -> {
-					fComp.setBorder(new LineBorder(ANALYZERS_COLOR, 2));
-					timer.cancel();
-					timer.schedule(new TimerTask() {
+				Runnable r = new Runnable() {
+					TimerTask currentTask;
+					
+					@Override
+					public void run() {
+						if (currentTask != null) currentTask.cancel();
+						fComp.setBorder(new LineBorder(EXECUTORS_COLOR, 2));
+						timer.schedule(new TimerTask() {
 
-						@Override
-						public void run() {
-							SwingUtilities.invokeLater(new Runnable() {
+							@Override
+							public void run() {
+								SwingUtilities.invokeLater(new Runnable() {
 
-								@Override
-								public void run() {
-									fComp.setBorder(null);
-								}
-							});
-						}
-					}, 1000);
-				});
+									@Override
+									public void run() {
+										fComp.setBorder(null);
+									}
+								});
+							}
+						}, 1000);
+					}
+					
+				};
+				((IUIUpdater) uiComp).addUpdateListener(r);
 			}
 			m_desktopPane.add(frame);
 		}
@@ -1038,23 +1045,30 @@ public class RainbowWindoe extends RainbowWindow
 			if (uiComp instanceof IUIUpdater) {
 				final JComponent fComp = uiComp;
 				final java.util.Timer timer = new Timer();
-				((IUIUpdater) uiComp).addUpdateListener(() -> {
-					fComp.setBorder(new LineBorder(ADAPTION_MANAGER_COLOR, 2));
-					timer.cancel();
-					timer.schedule(new TimerTask() {
+				Runnable r = new Runnable() {
+					TimerTask currentTask;
+					
+					@Override
+					public void run() {
+						if (currentTask != null) currentTask.cancel();
+						fComp.setBorder(new LineBorder(ADAPTION_MANAGER_COLOR, 2));
+						timer.schedule(new TimerTask() {
 
-						@Override
-						public void run() {
-							SwingUtilities.invokeLater(new Runnable() {
+							@Override
+							public void run() {
+								SwingUtilities.invokeLater(new Runnable() {
 
-								@Override
-								public void run() {
-									fComp.setBorder(null);
-								}
-							});
-						}
-					}, 1000);
-				});
+									@Override
+									public void run() {
+										fComp.setBorder(null);
+									}
+								});
+							}
+						}, 1000);
+					}
+					
+				};
+				((IUIUpdater) uiComp).addUpdateListener(r);
 			}
 			
 			m_desktopPane.add(frame);
@@ -1095,24 +1109,31 @@ public class RainbowWindoe extends RainbowWindow
 			});
 			if (uiComp instanceof IUIUpdater) {
 				final java.util.Timer timer = new Timer();
-				((IUIUpdater) uiComp).addUpdateListener(() -> {
-					final JComponent vFrame = getVisibleFrame(frame);
-					vFrame.setBorder(new LineBorder(ANALYZERS_COLOR, 2));
-					timer.cancel();
-					timer.schedule(new TimerTask() {
+				final JComponent fComp = uiComp;
+				Runnable r = new Runnable() {
+					TimerTask currentTask;
+					
+					@Override
+					public void run() {
+						if (currentTask != null) currentTask.cancel();
+						fComp.setBorder(new LineBorder(ANALYZERS_COLOR, 2));
+						timer.schedule(new TimerTask() {
 
-						@Override
-						public void run() {
-							SwingUtilities.invokeLater(new Runnable() {
+							@Override
+							public void run() {
+								SwingUtilities.invokeLater(new Runnable() {
 
-								@Override
-								public void run() {
-									vFrame.setBorder(null);
-								}
-							});
-						}
-					}, 1000);
-				});
+									@Override
+									public void run() {
+										fComp.setBorder(null);
+									}
+								});
+							}
+						}, 1000);
+					}
+					
+				};
+				((IUIUpdater) uiComp).addUpdateListener(r);
 			}
 			m_desktopPane.add(frame);
 		}
@@ -1148,25 +1169,32 @@ public class RainbowWindoe extends RainbowWindow
 						}
 					});
 					final java.util.Timer timer = new Timer();
-					mp.addUpdateListener(() -> {
-						timer.cancel();
-						mp.setBorder(new LineBorder(MODELS_MANAGER_COLOR, 2));
-						mp.m_table.setSelectionBackground(MODELS_MANAGER_COLOR_LIGHT);
-						timer.schedule(new TimerTask() {
+					Runnable r = new Runnable() {
+						TimerTask currentTask;
+						
+						@Override
+						public void run() {
+							if (currentTask != null) currentTask.cancel();
+							mp.setBorder(new LineBorder(MODELS_MANAGER_COLOR, 2));
+							mp.m_table.setSelectionBackground(MODELS_MANAGER_COLOR_LIGHT);
+							timer.schedule(new TimerTask() {
 
-							@Override
-							public void run() {
-								SwingUtilities.invokeLater(new Runnable() {
+								@Override
+								public void run() {
+									SwingUtilities.invokeLater(new Runnable() {
 
-									@Override
-									public void run() {
-										mp.setBorder(null);
-										mp.m_table.clearSelection();
-									}
-								});
-							}
-						}, 1000);
-					});
+										@Override
+										public void run() {
+											mp.setBorder(null);
+											mp.m_table.clearSelection();
+										}
+									});
+								}
+							}, 1000);
+						}
+						
+					};
+					mp.addUpdateListener(r);
 					m_desktopPane.add(frame);
 				}
 			}
