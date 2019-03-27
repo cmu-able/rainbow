@@ -27,6 +27,7 @@
 package org.sa.rainbow.stitch.visitor;
 
 import org.sa.rainbow.stitch.Ohana;
+import org.sa.rainbow.stitch.adaptation.StitchExecutor;
 import org.sa.rainbow.stitch.core.*;
 import org.sa.rainbow.stitch.error.StitchProblemHandler;
 
@@ -68,7 +69,7 @@ public class Stitch {
     };
     private final ThreadLocal<Expression>        expr         = new ThreadLocal<> ();  // expression "currently" in
     // use for evaluation
-
+    private final ThreadLocal<StitchExecutor> executor = new ThreadLocal<>();
     public String               path                 = null;
     public StitchScript         script               = null;
     public StitchProblemHandler stitchProblemHandler = null;  //ALI: ADDED; SWC: made public
@@ -328,5 +329,13 @@ public class Stitch {
     public void setScope (IScope s) {
         scope.set (s);
     }
+
+	public void setExecutor(StitchExecutor executor) {
+		this.executor.set(executor);
+	}
+	
+	public StitchExecutor executor() {
+		return this.executor.get();
+	}
 }
 

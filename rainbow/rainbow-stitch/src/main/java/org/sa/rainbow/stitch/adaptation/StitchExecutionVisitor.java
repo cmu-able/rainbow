@@ -47,6 +47,7 @@ public class StitchExecutionVisitor extends DefaultAdaptationExecutorVisitor<Str
 	protected boolean evaluate(Strategy adaptation) {
 		// Clone the adaptation strategy so that we can run them in parallel
 		Strategy actualExecutedAdaptation = adaptation;// .clone ();
+		actualExecutedAdaptation.m_stitch.setExecutor(m_executor);
 		try {
 			synchronized (adaptation) {
 				if (actualExecutedAdaptation.isExecuting()) {

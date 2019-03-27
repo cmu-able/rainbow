@@ -28,9 +28,11 @@ package org.sa.rainbow.stitch.core;
 
 import org.acmestudio.acme.element.IAcmeElement;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.stitch.Ohana;
+import org.sa.rainbow.stitch.adaptation.StitchExecutor;
 import org.sa.rainbow.stitch.error.ArgumentMismatchException;
 import org.sa.rainbow.stitch.history.ExecutionHistoryModelInstance;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData;
@@ -39,6 +41,7 @@ import org.sa.rainbow.stitch.visitor.IStitchBehavior;
 import org.sa.rainbow.stitch.visitor.Stitch;
 import org.sa.rainbow.stitch.visitor.StitchBeginEndVisitor;
 
+import java.text.MessageFormat;
 import java.util.*;
 
 /**
@@ -375,6 +378,8 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
 
 	public Object evaluate(Object[] argsIn, StitchBeginEndVisitor walker) throws StitchExecutionException {
 		long start = new Date().getTime();
+		StitchExecutor executor = stitchState().executor();
+		executor.reportingPort().info(executor.getComponentType(), MessageFormat.format("[[{0}]]: Tactic started: {1}({2})", executor.id(),this.m_name,Arrays.toString(argsIn)));
 		setArgs(argsIn);
 		ExecutionHistoryModelInstance modelInstance = m_executionHistoryModel;
 
@@ -462,6 +467,7 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
 			return null; // Tactic doesn't return a result
 		} finally {
 			stitchState()./* stitch(). */script.unfreezeModel();
+			executor.reportingPort().info(executor.getComponentType(), MessageFormat.format("[[{0}]]: Tactic finished: {2}", executor.id(), m_name));
 
 		}
 	}
@@ -598,24 +604,29 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
 	}
 
 	public boolean awaitSettling() {
+		StitchExecutor e = stitchState().executor();
+		boolean ret = false;
 		m_settlingCondition = null;
 		long duration = getDuration();
+		e.getReportingPort().info(e.getComponentType(), MessageFormat.format("[[{0}]]: Tactic {1} @{2} check effect", e.id(), m_name, duration));
 		ConditionTimer.instance().registerCondition(effects, duration, m_conditionObserver);
 		// wait for condition to be set...
 		while (m_settlingCondition == null && !m_stitch.isCanceled()) {
 			try {
 				Thread.sleep(ConditionTimer.SLEEP_TIME_LONG);
-			} catch (InterruptedException e) {
+			} catch (InterruptedException ex) {
 			}
 		}
 		if (m_stitch.isCanceled()) {
-			return false;
+			ret = false;
 		} else {
 			if (Tool.logger().isInfoEnabled()) {
 				Tool.logger().info("=> awaitTacticSettling done! " + m_settlingCondition);
 			}
-			return m_settlingCondition.booleanValue();
+			ret = m_settlingCondition.booleanValue();
 		}
+		e.getReportingPort().info(e.getComponentType(), MessageFormat.format("[[{0}]]: Tactic {1} effect: {2}", e.id(), m_name, ret));
+		return ret;
 	}
 
 }
