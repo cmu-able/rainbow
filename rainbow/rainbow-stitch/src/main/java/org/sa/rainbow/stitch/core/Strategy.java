@@ -1168,6 +1168,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 								ExecutionHistoryData.ExecutionStateT.STARTED, null));
 			}
 			long start = new Date().getTime();
+			tactic.stitchState().setExecutor(m_executor);
 			tactic.evaluate(args);
 			if (m_executor != null)
 				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
