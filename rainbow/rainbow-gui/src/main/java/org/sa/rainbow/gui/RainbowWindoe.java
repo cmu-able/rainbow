@@ -1344,7 +1344,7 @@ public class RainbowWindoe extends RainbowWindow
 		});
 	}
 
-	private static Pattern ERROR_PATTERN = Pattern.compile("\\[\\[(.*)\\]\\]:(.*)", Pattern.DOTALL);
+	private static Pattern ERROR_PATTERN = Pattern.compile("\\[\\[(.*)\\]\\]: (.*)", Pattern.DOTALL);
 	
 
 	@Override
