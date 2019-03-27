@@ -1035,7 +1035,7 @@ public class RainbowWindoe extends RainbowWindow
 			JInternalFrame frame = new JInternalFrame(a.id(), true, false, true);
 			frame.setVisible(true);
 			frame.add(uiComp);
-			frame.setSize(uiComp.getPreferredSize());
+//			frame.setSize(uiComp.getPreferredSize());
 			frame.addPropertyChangeListener(e -> {
 				System.out.println("Selected " + a.id());
 				if ("selection".equals(e.getPropertyName())) {

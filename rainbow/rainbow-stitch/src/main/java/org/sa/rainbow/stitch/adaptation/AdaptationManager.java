@@ -95,7 +95,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 		SERIAL, MULTI_PRONE
 	}
 
-	public static final String NAME = "Rainbow Adaptation Manager";
+	public static final String NAME = "Stitch AM";
 	public static final double FAILURE_RATE_THRESHOLD = 0.95;
 	public static final double MIN_UTILITY_THRESHOLD = 0.40;
 	private static double m_minUtilityThreshold = 0.0;
@@ -393,6 +393,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 				return;
 			if (Rainbow.instance().getProperty(RainbowConstants.PROPKEY_ADAPTATION_HOMEOSTATIC, false)
 					|| m_modelError) {
+				m_reportingPort.info(getComponentType(),MessageFormat.format("[[{0}]]: Considering adaptations", id()));
 
 				Util.dataLogger().info(IRainbowHealthProtocol.DATA_ADAPTATION_SELECTION_BEGIN);
 				Strategy selectedStrategy = checkAdaptation();

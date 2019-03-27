@@ -76,7 +76,7 @@ public class ArchModelPanel extends JPanel implements IUIUpdater, IUIReporter, I
 		m_table.setDefaultRenderer(Object.class, new ModelErrorRenderer());
 		JScrollPane p = new JScrollPane(m_table);
 		p.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		p.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		p.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 
 		add(p, BorderLayout.CENTER);
 //		m_table.setAutoscrolls(true);
