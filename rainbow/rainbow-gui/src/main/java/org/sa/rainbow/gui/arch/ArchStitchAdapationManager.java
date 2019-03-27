@@ -90,6 +90,7 @@ public class ArchStitchAdapationManager extends JPanel implements IUIReporter{
 			for (int i = 0; i < model.getRowCount(); i++) {
 				model.removeRow(i);
 			}
+			m_lblStatus.setText("Running");
 			setBorder(new LineBorder(RainbowWindow.ADAPTION_MANAGER_COLOR, 2));
 			m_borderSetTime = new Date().getTime();
 		}
@@ -106,7 +107,7 @@ public class ArchStitchAdapationManager extends JPanel implements IUIReporter{
 					}
 				}
 				if (!added) {
-					model.addRow(new Object[] {"s","","Queued"});
+					model.addRow(new Object[] {s,"","Queued"});
 				}
 				processBorder();
 			}
@@ -115,6 +116,7 @@ public class ArchStitchAdapationManager extends JPanel implements IUIReporter{
 			for (int r=0; r < model.getRowCount(); r++) {
 				model.setValueAt("Inapplicable", r, 2);
 			}
+			m_lblStatus.setText("None applicable");
 			processBorder();
 		}
 		else if (message.contains("Scores")) {

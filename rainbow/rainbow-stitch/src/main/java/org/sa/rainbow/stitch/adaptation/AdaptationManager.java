@@ -324,7 +324,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 			for (Strategy str : strategiesExecuted) {
 				String s = str.getName() + ":" + str.outcome();
 				log("*S* outcome: " + s);
-				m_reportingPort.info(getComponentType(), MessageFormat.format("[[{0}]]: {1}", id(),s));
+				m_reportingPort.info(getComponentType(), MessageFormat.format("[[{0}]]: Finished {1}", id(),s));
 				Util.dataLogger().info(IRainbowHealthProtocol.DATA_ADAPTATION_STRATEGY + s);
 				tallyStrategyOutcome(str);
 			}
