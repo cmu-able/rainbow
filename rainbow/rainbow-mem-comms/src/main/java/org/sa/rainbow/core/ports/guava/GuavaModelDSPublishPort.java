@@ -84,7 +84,7 @@ public class GuavaModelDSPublishPort implements IModelDSBusPublisherPort, IModel
 
 				@Override
 				public void receive(GuavaRainbowMessage m) {
-					OperationResult reply = (OperationResult) msg.getProperty(ESEBConstants.MSG_UPDATE_MODEL_REPLY);
+					OperationResult reply = (OperationResult) m.getProperty(ESEBConstants.MSG_UPDATE_MODEL_REPLY);
 					result.result = reply.result;
 					result.reply = reply.reply;
 				}
