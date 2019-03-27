@@ -22,9 +22,9 @@ public class ArchAnalyzerGUI extends JPanel implements IUIUpdater, IUIReporter {
 	private JTextField m_textField;
 	private JLabel m_statusLabel;
 	
-	private static final Color OK_COLOR = RainbowWindow.bleach(Color.GREEN, 0.75);
-	private static final Color ERROR_COLOR = RainbowWindow.bleach(Color.RED, 0.75);
-	private static final Color CHECKING_COLOR = RainbowWindow.ANALYZERS_COLOR_LIGHT;
+	private static final Color OK_COLOR = Color.GREEN;
+	private static final Color ERROR_COLOR = Color.RED;
+	private static final Color CHECKING_COLOR = RainbowWindow.ANALYZERS_COLOR;
 
 	public ArchAnalyzerGUI() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
@@ -69,19 +69,19 @@ public class ArchAnalyzerGUI extends JPanel implements IUIUpdater, IUIReporter {
 		Matcher m = CONSTRAINT_PATTERN.matcher(message);
 		if (message.contains("ok")) {
 			m_statusLabel.setText("OK");
-			m_statusLabel.setBackground(OK_COLOR);
+			m_statusLabel.setForeground(OK_COLOR);
 			m_textField.setText("");
 			this.setBorder(null);
 		}
 		else if (message.contains("Checking")) {
 			m_statusLabel.setText("Checking...");
-			m_statusLabel.setBackground(CHECKING_COLOR);
+			m_statusLabel.setForeground(CHECKING_COLOR);
 			m_textField.setText("");
 			this.setBorder(new LineBorder(RainbowWindow.ANALYZERS_COLOR, 2));
 		}
 		else if (m.matches()) {
 			m_statusLabel.setText("Error");
-			m_statusLabel.setBackground(ERROR_COLOR);
+			m_statusLabel.setForeground(ERROR_COLOR);
 			m_textField.setText(m.group(1));
 			this.setBorder(null);
 		}
