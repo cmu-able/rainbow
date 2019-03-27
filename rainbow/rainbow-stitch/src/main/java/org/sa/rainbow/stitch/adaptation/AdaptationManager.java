@@ -399,7 +399,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 				Util.dataLogger().info(IRainbowHealthProtocol.DATA_ADAPTATION_SELECTION_END);
 				if (selectedStrategy != null) {
 					log(">> do strategy: " + selectedStrategy.getName());
-					m_reportingPort.info(getComponentType(),MessageFormat.format("[[{0}]]: Queuing {1}", id(), selectedStrategy));
+					m_reportingPort.info(getComponentType(),MessageFormat.format("[[{0}]]: Queuing {1}", id(), selectedStrategy.getName()));
 					// strategy args removed...
 					Object[] args = new Object[0];
 					AdaptationTree<Strategy> at = new AdaptationTree<Strategy>(selectedStrategy);
@@ -706,8 +706,8 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 			}
 			log(MessageFormat.format("[[{0}]]: current model properties: {1}", id(), Arrays.toString(conds)));
 			log(MessageFormat.format("[[{0}]]: current model utilities:  {1}", id(), Arrays.toString(currentUtility)));
-			log(MessageFormat.format("[[{0}]]: {1}: predicted utilities: ", id(), strategy.getName(),Arrays.toString(utilityOfItem)));
-			log(MessageFormat.format("[[{0}]]: {1} : score = ", id(), strategy.getName(), score));
+			log(MessageFormat.format("[[{0}]]: {1}: predicted utilities: {2}", id(), strategy.getName(),Arrays.toString(utilityOfItem)));
+			log(MessageFormat.format("[[{0}]]: {1} : score = {2}", id(), strategy.getName(), score));
 			Util.dataLogger().info(IRainbowHealthProtocol.DATA_ADAPTATION_STRATEGY_ATTR2 + s);
 			log("aggAtt': " + s);
 		}
