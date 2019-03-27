@@ -952,7 +952,7 @@ public class RainbowWindoe extends RainbowWindow
 
 	private void createExecutors() {
 		Map<String, IAdaptationExecutor<?>> executors = Rainbow.instance().getRainbowMaster().adaptationExecutors();
-		Map<String, Object> aui = m_uidb.containsKey("managers") ? (Map<String, Object>) m_uidb.get("executors")
+		Map<String, Object> aui = m_uidb.containsKey("executors") ? (Map<String, Object>) m_uidb.get("executors")
 				: Collections.<String, Object>emptyMap();
 		for (IAdaptationExecutor a : executors.values()) {
 			String clazz = (String) aui.get(a.getClass().getName());
