@@ -552,7 +552,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 		}
 		log(">> repertoire: " + appSubsetByName.size() + " / " + availCnt + " strateg" + (availCnt > 1 ? "ies" : "y"));
 		SortedMap<Double, Strategy> scoredStrategies = scoreStrategies(appSubsetByName);
-		if (Util.dataLogger().isInfoEnabled()) {
+//		if (Util.dataLogger().isInfoEnabled()) {
 			StringBuffer buf = new StringBuffer();
 			buf.append("  [\n");
 			for (Map.Entry<Double, Strategy> entry : scoredStrategies.entrySet()) {
@@ -562,7 +562,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 			buf.append("  ]\n");
 			log(MessageFormat.format("[[{0}]]: Scores: {1}", id(), buf.toString()));
 			Util.dataLogger().info(IRainbowHealthProtocol.DATA_ADAPTATION_SCORE + buf.toString());
-		}
+//		}
 
 		if (_stopWatchForTesting != null) {
 			_stopWatchForTesting.stop();
