@@ -129,7 +129,7 @@ public class ArchStitchAdapationManager extends JPanel implements IUIReporter{
 					String[] parts = score.split(":");
 					if (parts.length != 2) continue;
 //					model.addRow(new Object[] {parts[0], formatter.format(Double.parseDouble(parts[1].trim())), ""});
-					scoreTable.put(parts[0], formatter.format(Double.parseDouble(parts[1].trim())));
+					scoreTable.put(parts[0].trim(), formatter.format(Double.parseDouble(parts[1].trim())));
 				}
 				for (int r=0; r < model.getRowCount(); r++) {
 					Object valueAt = model.getValueAt(0, 0);
