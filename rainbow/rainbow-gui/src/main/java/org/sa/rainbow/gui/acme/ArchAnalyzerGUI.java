@@ -23,7 +23,7 @@ import org.sa.rainbow.gui.RainbowWindow;
 import org.sa.rainbow.gui.arch.elements.IUIReporter;
 import org.sa.rainbow.gui.arch.elements.IUIUpdater;
 
-public class ArchAnalyzerGUI extends JPanel implements IUIUpdater, IUIReporter {
+public class ArchAnalyzerGUI extends JPanel implements IUIReporter {
 	private JTextField m_textField;
 	private JLabel m_statusLabel;
 	
@@ -121,10 +121,5 @@ public class ArchAnalyzerGUI extends JPanel implements IUIUpdater, IUIReporter {
 		}
 	}
 
-	@Override
-	public void addUpdateListener(Runnable listener) {
-		// TODO Auto-generated method stub
-		
-	}
-	
+
 }
