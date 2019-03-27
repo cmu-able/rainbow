@@ -1344,7 +1344,8 @@ public class RainbowWindoe extends RainbowWindow
 		});
 	}
 
-	private static Pattern ERROR_PATTERN = Pattern.compile("\\[(.*)\\]:.*");
+	private static Pattern ERROR_PATTERN = Pattern.compile("\\[\\[(.*)\\]\\]:(.*)", Pattern.DOTALL);
+	
 
 	@Override
 	public void report(RainbowComponentT component, ReportType type, String message) {
@@ -1355,17 +1356,17 @@ public class RainbowWindoe extends RainbowWindow
 			for (ModelInfo mi : values) {
 				mi.panel.processReport(type, message);
 			}
-		} else if (component == RainbowComponentT.ANALYSIS && m.find()) {
+		} else if (component == RainbowComponentT.ANALYSIS && m.matches()) {
 			JComponent c = m_analyzers.get(m.group(1));
 			if (c instanceof IUIReporter) {
 				((IUIReporter) c).processReport(type, message);
 			}
-		} else if (component == RainbowComponentT.ADAPTATION_MANAGER && m.find()) {
+		} else if (component == RainbowComponentT.ADAPTATION_MANAGER && m.matches()) {
 			JComponent c = m_adaptationManagers.get(m.group(1));
 			if (c instanceof IUIReporter) {
 				((IUIReporter) c).processReport(type, message);
 			}
-		} else if (component == RainbowComponentT.EXECUTOR && m.find()) {
+		} else if (component == RainbowComponentT.EXECUTOR && m.matches()) {
 			JComponent c = m_executors.get(m.group(1));
 			if (c instanceof IUIReporter) {
 				((IUIReporter) c).processReport(type, message);
@@ -1377,7 +1378,7 @@ public class RainbowWindoe extends RainbowWindow
 			m_errorArea.setCaretPosition(m_errorArea.getText().length());
 			m_selectionPanel.setIconAt(2, ERROR_ICON);
 
-			if (m.find()) {
+			if (m.matches()) {
 				m_errorArea.append("Error in component: " + m.group(1));
 				switch (component) {
 				case GAUGE:
@@ -1386,7 +1387,7 @@ public class RainbowWindoe extends RainbowWindow
 						DesktopIconUI f = gi.getFrame().getDesktopIcon().getUI();
 						if (f instanceof IErrorDisplay) {
 							IErrorDisplay e = (IErrorDisplay) f;
-							e.displayError(message);
+							e.displayError(m.group(2));
 						}
 					}
 					break;

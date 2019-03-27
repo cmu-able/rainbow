@@ -62,7 +62,7 @@ public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAn
 
     private static final String SET_TYPECHECK_OPERATION_NAME = "setTypecheckResult";
 
-    private static final String NAME = "Rainbow Acme Architecture Constraint Evaluator";
+    private static final String NAME = "Architecture Evaluator";
 
     private IModelChangeBusSubscriberPort m_modelChangePort;
     private IModelUSBusPort               m_modelUSPort;
@@ -158,7 +158,7 @@ public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAn
                     m_evaluations.add (evaluationInstance);
                 } catch (Throwable e) {
                     m_reportingPort.error (RainbowComponentT.ANALYSIS, MessageFormat.format (
-                            "Failed to instantiate {0} as an IArchEvaluation", evaluation.trim ()), e);
+                            "[[{2}]]: Failed to instantiate {0} as an IArchEvaluation", evaluation.trim (), id()), e);
                 }
             }
         }
@@ -190,7 +190,7 @@ public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAn
         final AcmeModelInstance model = m_modelCheckQ.poll ();
         if (model != null) {
             // For each Acme model that changed, check to see if it typechecks
-        	m_reportingPort.info(getComponentType(), MessageFormat.format("[{0}]: Checking constraints", id()));
+        	m_reportingPort.info(getComponentType(), MessageFormat.format("[[{0}]]: Checking constraints", id()));
             IAcmeEnvironment env = model.getModelInstance ().getContext ().getEnvironment ();
             IAcmeTypeChecker typeChecker = env.getTypeChecker ();
             if (typeChecker instanceof SynchronousTypeChecker) {
@@ -212,7 +212,7 @@ public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAn
                         m_modelUSPort.updateModel (cmd);
                     } catch (IllegalStateException e) {
                         m_reportingPort.error (RainbowComponentT.ANALYSIS,
-                                               MessageFormat.format("[{0}]: Could not execute set typecheck command on model", id()), e);
+                                               MessageFormat.format("[[{0}]]: Could not execute set typecheck command on model", id()), e);
                     }
                 }
                 if (constraintViolated) {
@@ -226,16 +226,16 @@ public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAn
                         
                         
                         m_reportingPort.info (RainbowComponentT.ANALYSIS,
-                        					  MessageFormat.format("[{3}]: Model {0}:{1} constraints violated: {2}", model.getModelName(), model.getModelType(), errorStrs, id()));
+                        					  MessageFormat.format("[[{3}]]: Model {0}:{1} constraints violated: {2}", model.getModelName(), model.getModelType(), errorStrs, id()));
                     } catch (Exception e) {
                         m_reportingPort.error (RainbowComponentT.ANALYSIS,
-                                              MessageFormat.format("[{0}]: There's an error reporting the constraint violation", id()), e);
+                                              MessageFormat.format("[[{0}]]: There's an error reporting the constraint violation", id()), e);
                         m_reportingPort.info (RainbowComponentT.ANALYSIS,
-          					  MessageFormat.format("[{3}]: Model {0}:{1} Evaluation Error: {2}", model.getModelName(), model.getModelType(), e.getMessage(), id()));
+          					  MessageFormat.format("[[{3}]]: Model {0}:{1} Evaluation Error: {2}", model.getModelName(), model.getModelType(), e.getMessage(), id()));
                     }
                 } else {
                     m_reportingPort.info (RainbowComponentT.ANALYSIS,
-                                          MessageFormat.format("[{0}]: Model {1}:{2} ok", id(), model.getModelName (), model.getModelType ()));
+                                          MessageFormat.format("[[{0}]]: Model {1}:{2} ok", id(), model.getModelName (), model.getModelType ()));
                 }
 
             }

@@ -29,7 +29,7 @@ public class ArchEffectorPanel extends JPanel implements IEffectorLifecycleBusPo
 
 		JScrollPane p = new JScrollPane();
 		add(p, BorderLayout.CENTER);
-		m_table = new JTable(new DefaultTableModel(new Object[][] {}, new String[] {"Arguments", "Outcome"}));
+		m_table = new JTable(new DefaultTableModel(new Object[][] {new String[] {"",""}}, new String[] {"Arguments", "Outcome"}));
 		p.setViewportView(m_table);
 		p.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		p.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -67,6 +67,7 @@ public class ArchEffectorPanel extends JPanel implements IEffectorLifecycleBusPo
 	public void reportExecuted(IEffectorIdentifier effector, Outcome outcome, List<String> args) {
 		DefaultTableModel tableModel = (DefaultTableModel) m_table.getModel();
 		tableModel.setValueAt(args.toString(), 0, 0);
+		tableModel.setValueAt(outcome.toString(), 0, 1);
 		m_table.clearSelection();
 	}
 
@@ -75,7 +76,7 @@ public class ArchEffectorPanel extends JPanel implements IEffectorLifecycleBusPo
 		DefaultTableModel tableModel = (DefaultTableModel) m_table.getModel();
 		tableModel.setValueAt(args.toString(), 0, 0);
 		m_table.changeSelection(0, 0, false, false);
-		m_table.changeSelection(0, 2, false, true);
+		m_table.changeSelection(0, 1, false, true);
 	}
 
 
