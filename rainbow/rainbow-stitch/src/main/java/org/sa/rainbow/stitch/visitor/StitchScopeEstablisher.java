@@ -893,6 +893,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
                        + ", expr == " + curNode.get ().getDurationExpr ().tree ().toStringTree ());
     }
 
+    @Override
     public void doTacticDuration (ParserRuleContext ctx) {
         if (!(scope () instanceof Tactic)) {
             Tool.error ("Unexpectedly processing tactic duration outside of a tactic", null, stitchProblemHandler ());

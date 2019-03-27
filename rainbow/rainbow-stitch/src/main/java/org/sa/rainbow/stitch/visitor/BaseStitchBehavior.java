@@ -381,7 +381,7 @@ public abstract class BaseStitchBehavior implements IStitchBehavior {
     }
 
     @Override
-    public void doTacticDuration (StitchParser.ExpressionContext expression) {
+    public void doTacticDuration (ParserRuleContext ctx) {
 
     }
 }
