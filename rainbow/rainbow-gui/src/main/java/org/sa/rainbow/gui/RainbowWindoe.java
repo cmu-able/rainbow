@@ -1359,17 +1359,17 @@ public class RainbowWindoe extends RainbowWindow
 		} else if (component == RainbowComponentT.ANALYSIS && m.matches()) {
 			JComponent c = m_analyzers.get(m.group(1));
 			if (c instanceof IUIReporter) {
-				((IUIReporter) c).processReport(type, message);
+				((IUIReporter) c).processReport(type, m.group(2));
 			}
 		} else if (component == RainbowComponentT.ADAPTATION_MANAGER && m.matches()) {
 			JComponent c = m_adaptationManagers.get(m.group(1));
 			if (c instanceof IUIReporter) {
-				((IUIReporter) c).processReport(type, message);
+				((IUIReporter) c).processReport(type, m.group(2));
 			}
 		} else if (component == RainbowComponentT.EXECUTOR && m.matches()) {
 			JComponent c = m_executors.get(m.group(1));
 			if (c instanceof IUIReporter) {
-				((IUIReporter) c).processReport(type, message);
+				((IUIReporter) c).processReport(type, m.group(2));
 			}
 		}
 
