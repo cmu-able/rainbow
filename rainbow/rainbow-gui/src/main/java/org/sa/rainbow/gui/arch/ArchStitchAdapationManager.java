@@ -81,6 +81,7 @@ public class ArchStitchAdapationManager extends JPanel implements IUIReporter{
 	
 	private static final Pattern Q_PATTERN = Pattern.compile("Queuing (.*)");
 	private static final Pattern S_PATTERN = Pattern.compile("Scores:.*\\[(.*)\\].*", Pattern.DOTALL);
+	private static final Pattern F_PATTERN = Pattern.compile("Finished\\s*(.*):(.*)");
 	
 	@Override
 	public synchronized void processReport(ReportType type, String message) {
@@ -109,7 +110,6 @@ public class ArchStitchAdapationManager extends JPanel implements IUIReporter{
 				if (!added) {
 					model.addRow(new Object[] {s,"","Queued"});
 				}
-				processBorder();
 			}
 		}
 		else if (message.contains("No applicable")) {
@@ -127,6 +127,7 @@ public class ArchStitchAdapationManager extends JPanel implements IUIReporter{
 				Map<String, String> scoreTable = new HashMap<>();
 				for (String score : scores) {
 					String[] parts = score.split(":");
+					if (parts.length != 2) continue;
 //					model.addRow(new Object[] {parts[0], formatter.format(Double.parseDouble(parts[1].trim())), ""});
 					scoreTable.put(parts[0], formatter.format(Double.parseDouble(parts[1].trim())));
 				}
@@ -143,6 +144,18 @@ public class ArchStitchAdapationManager extends JPanel implements IUIReporter{
 
 				}
 			}
+		}
+		else if (message.contains("Finished")) {
+			Matcher fM = F_PATTERN.matcher(message);
+			if (fM.matches()) {
+				for (int r=1; r<model.getRowCount();r++) {
+					if (fM.group(1).equals(model.getValueAt(r, 0)))
+						model.setValueAt(fM.group(2), r, 2);
+				}
+			}
+			m_lblStatus.setText("Idle");
+			processBorder();
+			
 		}
 	}
 	
