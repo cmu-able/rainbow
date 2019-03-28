@@ -8,7 +8,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.acmestudio.acme.core.exception.AcmeException;
 import org.acmestudio.acme.element.IAcmeComponent;
@@ -71,7 +74,7 @@ public class StitchTest {
 
 		@Override
 		public Collection<IStitchProblem> unreportedProblems() {
-			return null;
+			return Collections.<IStitchProblem>emptyList();
 		}
 
 		@Override
@@ -165,6 +168,22 @@ public class StitchTest {
 			e.printStackTrace();
 		}
 		assertTrue(system.getComponent(componentName) == null);
+	}
+	
+	public static void delayedRemoveComponent(final IAcmeSystem system, final String componentName, int delay) {
+		Timer t = new Timer();
+		t.schedule(new TimerTask() {
+			
+			@Override
+			public void run() {
+				removeComponent(system,componentName);
+			}
+		}, delay);
+	}
+	
+	public static final int availableComponents(IAcmeSystem system) {
+		s_system = system;
+		return system.getComponents().size();
 	}
 
 }

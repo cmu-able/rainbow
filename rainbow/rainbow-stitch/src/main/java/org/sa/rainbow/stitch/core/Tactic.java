@@ -379,7 +379,7 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
 	public Object evaluate(Object[] argsIn, StitchBeginEndVisitor walker) throws StitchExecutionException {
 		long start = new Date().getTime();
 		StitchExecutor executor = stitchState().executor();
-		executor.reportingPort().info(executor.getComponentType(), MessageFormat.format("[[{0}]]: Tactic started: {1}({2})", executor.id(),this.m_name,Arrays.toString(argsIn)));
+		if (executor != null) executor.reportingPort().info(executor.getComponentType(), MessageFormat.format("[[{0}]]: Tactic started: {1}({2})", executor.id(),this.m_name,Arrays.toString(argsIn)));
 		setArgs(argsIn);
 		ExecutionHistoryModelInstance modelInstance = m_executionHistoryModel;
 
@@ -467,7 +467,7 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
 			return null; // Tactic doesn't return a result
 		} finally {
 			stitchState()./* stitch(). */script.unfreezeModel();
-			executor.reportingPort().info(executor.getComponentType(), MessageFormat.format("[[{0}]]: Tactic finished: {2}", executor.id(), m_name));
+			if (executor != null) executor.reportingPort().info(executor.getComponentType(), MessageFormat.format("[[{0}]]: Tactic finished: {1}", executor.id(), m_name));
 
 		}
 	}
@@ -520,7 +520,13 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
 	 */
 	public boolean checkEffect() {
 		boolean effMet = true;
-		for (Expression expr : effects) {
+		// Last expression might be duration expression
+		List<Expression> effectsToCheck = effects;
+		if (this.hasDuration())
+			effectsToCheck = effects.subList(0, effects.size()-1);
+		
+		
+		for (Expression expr : effectsToCheck) {
 			expr.clearState();
 			effMet &= (Boolean) expr.evaluate(null);
 			if (!stitchState().stitchProblemHandler.unreportedProblems().isEmpty())
@@ -608,8 +614,8 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
 		boolean ret = false;
 		m_settlingCondition = null;
 		long duration = getDuration();
-		e.getReportingPort().info(e.getComponentType(), MessageFormat.format("[[{0}]]: Tactic {1} @{2} check effect", e.id(), m_name, duration));
-		ConditionTimer.instance().registerCondition(effects, duration, m_conditionObserver);
+		if (e != null) e.getReportingPort().info(e.getComponentType(), MessageFormat.format("[[{0}]]: Tactic {1} @{2} check effect", e.id(), m_name, duration));
+		ConditionTimer.instance().registerCondition(hasDuration()?effects.subList(0, effects.size()-1):effects, duration, m_conditionObserver);
 		// wait for condition to be set...
 		while (m_settlingCondition == null && !m_stitch.isCanceled()) {
 			try {
@@ -625,7 +631,7 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
 			}
 			ret = m_settlingCondition.booleanValue();
 		}
-		e.getReportingPort().info(e.getComponentType(), MessageFormat.format("[[{0}]]: Tactic {1} effect: {2}", e.id(), m_name, ret));
+		if (e != null) e.getReportingPort().info(e.getComponentType(), MessageFormat.format("[[{0}]]: Tactic {1} effect: {2}", e.id(), m_name, ret));
 		return ret;
 	}
 
