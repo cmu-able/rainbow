@@ -146,8 +146,6 @@ public class ArchStitchExecutorPanel extends JPanel implements IUIReporter {
 		m_treeTable = new JXTreeTable();
 		
 		JScrollPane p = new JScrollPane(m_treeTable);
-		p.setVerticalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		p.setHorizontalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		m_treeTable.setPreferredScrollableViewportSize(new Dimension(200,100));
 		
 		m_treeTable.setRootVisible(false);
