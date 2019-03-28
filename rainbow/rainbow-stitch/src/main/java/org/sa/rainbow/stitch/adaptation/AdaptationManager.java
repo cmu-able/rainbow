@@ -899,9 +899,14 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 		String typecheckSt = (String) message.getProperty(IModelChangeBusPort.PARAMETER_PROP + "0");
 		Boolean typechecks = Boolean.valueOf(typecheckSt);
 		// Cause the thread to wake up if it is sleeping
-		m_modelError = !typechecks;
+		if (m_modelError) 
+			m_modelError = !typechecks;
 		if (!typechecks) {
-			activeThread().interrupt();
+			if (m_pendingStrategies.size() == 0) {
+				m_modelError = !typechecks;
+				activeThread().interrupt();
+				
+			}
 		}
 	}
 
