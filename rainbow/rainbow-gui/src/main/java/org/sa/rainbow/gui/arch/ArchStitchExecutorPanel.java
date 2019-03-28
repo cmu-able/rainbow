@@ -51,9 +51,9 @@ public class ArchStitchExecutorPanel extends JPanel implements IUIReporter {
 			if (arg0 instanceof StrategyNode) {
 				StrategyNode node = (StrategyNode) arg0;
 				switch(index) {
-				case 1: 
+				case 0: 
 					return node.label();
-				case 2:
+				case 1:
 					StringBuffer nodeRep = new StringBuffer();
 					ConditionKind condFlag = node.getCondFlag();
 					switch (condFlag) {
@@ -98,6 +98,7 @@ public class ArchStitchExecutorPanel extends JPanel implements IUIReporter {
 						}
 						nodeRep.append(")");
 					}
+					return node.toString();
 					
 				}
 				
@@ -176,7 +177,7 @@ public class ArchStitchExecutorPanel extends JPanel implements IUIReporter {
 			if (m.matches()) {
 				for (int row=0; row<m_treeTable.getRowCount(); row++) {
 					if (m_treeTable.getValueAt(row, 0).equals(m.group(1))) {
-						m_treeTable.setValueAt("EXECUTING", row, 3);
+						m_treeTable.setValueAt("EXECUTING", row, 2);
 					}
 				}
 			}
@@ -186,7 +187,7 @@ public class ArchStitchExecutorPanel extends JPanel implements IUIReporter {
 			if (m.matches()) {
 				for (int row=0; row<m_treeTable.getRowCount(); row++) {
 					if (m_treeTable.getValueAt(row, 0).equals(m.group(1))) {
-						m_treeTable.setValueAt("SETTLING " + m.group(2), row, 3);
+						m_treeTable.setValueAt("SETTLING " + m.group(2), row, 2);
 					}
 				}
 			}
@@ -196,7 +197,7 @@ public class ArchStitchExecutorPanel extends JPanel implements IUIReporter {
 			if (m.matches()) {
 				for (int row=0; row<m_treeTable.getRowCount(); row++) {
 					if (m_treeTable.getValueAt(row, 0).equals(m.group(1))) {
-						m_treeTable.setValueAt(m.group(2), row, 3);
+						m_treeTable.setValueAt(m.group(2), row, 2);
 					}
 				}
 			}
