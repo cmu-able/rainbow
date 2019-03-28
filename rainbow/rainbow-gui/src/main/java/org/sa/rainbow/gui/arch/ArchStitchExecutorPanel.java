@@ -98,7 +98,7 @@ public class ArchStitchExecutorPanel extends JPanel implements IUIReporter {
 						}
 						nodeRep.append(")");
 					}
-					return node.toString();
+					return nodeRep.toString();
 					
 				}
 				
