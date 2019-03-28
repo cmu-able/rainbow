@@ -148,7 +148,7 @@ public class ArchStitchAdapationManager extends JPanel implements IUIReporter{
 		else if (message.contains("Finished")) {
 			Matcher fM = F_PATTERN.matcher(message);
 			if (fM.matches()) {
-				for (int r=1; r<model.getRowCount();r++) {
+				for (int r=0; r<model.getRowCount();r++) {
 					if (fM.group(1).equals(model.getValueAt(r, 0)))
 						model.setValueAt(fM.group(2), r, 2);
 				}
