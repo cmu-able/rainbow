@@ -27,6 +27,7 @@
 package org.sa.rainbow.stitch.core;
 
 import org.acmestudio.acme.element.IAcmeElement;
+import org.antlr.v4.parse.ANTLRParser.labeledAlt_return;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation;
@@ -39,6 +40,7 @@ import org.sa.rainbow.stitch.util.Tool;
 import org.sa.rainbow.stitch.visitor.Stitch;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.*;
 
 /**
@@ -1169,6 +1171,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 			}
 			long start = new Date().getTime();
 			tactic.stitchState().setExecutor(m_executor);
+			if (m_executor != null) m_executor.getReportingPort().info(m_executor.getComponentType(), MessageFormat.format("[[{0}]]: Executing node {1}:{2}", m_executor.id(), curNode.label(), tactic.getName()));
 			tactic.evaluate(args);
 			if (m_executor != null)
 				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
@@ -1202,6 +1205,8 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 			}
 		} finally {
 			tactic.markExecuting(false);
+			if (m_executor != null) m_executor.getReportingPort().info(m_executor.getComponentType(), MessageFormat.format("[[{0}]]: Finished executing node {1}:{2}->{3}", m_executor.id(), curNode.label(), tactic.getName(), tactic.hasError()?"Error":getOutcome()));
+
 		}
 	}
 
