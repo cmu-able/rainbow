@@ -712,7 +712,7 @@ public class RainbowWindoe extends RainbowWindow
 			ModelInfo mi = me.getValue();
 			Node mN = g.addNode(me.getKey());
 			Dimension size = mi.frame.getSize();
-			mN.addAttribute("width", toInches(size.width + 40, res));
+			mN.addAttribute("width", toInches(size.width /*+ 40*/, res));
 			mN.addAttribute("height", toInches(size.height, res));
 			mN.addAttribute("fixedsize", true);
 			mN.addAttribute("shape", "box");
@@ -727,7 +727,7 @@ public class RainbowWindoe extends RainbowWindow
 			JComponent comp = m_analyzers.get(a.id());
 			Node aN = g.addNode(a.id());
 			Dimension size = getDesktopFram(comp).getSize();
-			aN.addAttribute("width", toInches(size.width + 40, res));
+			aN.addAttribute("width", toInches(size.width /*+ 40*/, res));
 			aN.addAttribute("height", toInches(size.height, res));
 			aN.addAttribute("fixedsize", true);
 			aN.addAttribute("shape", "box");
@@ -744,7 +744,7 @@ public class RainbowWindoe extends RainbowWindow
 			JComponent comp = m_adaptationManagers.get(am.id());
 			Node aN = g.addNode(am.id());
 			Dimension size = getDesktopFram(comp).getSize();
-			aN.addAttribute("width", toInches(size.width + 40, res));
+			aN.addAttribute("width", toInches(size.width/* + 40*/, res));
 			aN.addAttribute("height", toInches(size.height, res));
 			aN.addAttribute("fixedsize", true);
 			aN.addAttribute("shape", "box");
@@ -763,7 +763,7 @@ public class RainbowWindoe extends RainbowWindow
 			JComponent comp = m_executors.get(ae.id());
 			Node aN = g.addNode(ae.id());
 			Dimension size = getDesktopFram(comp).getSize();
-			aN.addAttribute("width", toInches(size.width + 40, res));
+			aN.addAttribute("width", toInches(size.width/* + 40*/, res));
 			aN.addAttribute("height", toInches(size.height, res));
 			aN.addAttribute("fixedsize", true);
 			aN.addAttribute("shape", "box");
