@@ -951,7 +951,8 @@ public class RainbowWindoe extends RainbowWindow
 				ArchEffectorPanel uiComp = new ArchEffectorPanel();
 
 				frame.add(uiComp);
-				frame.setSize(uiComp.getPreferredSize());
+				Dimension s = uiComp.getPreferredSize();
+				frame.setSize(s.width, s.height+25);
 				frame.addPropertyChangeListener(e -> {
 					System.out.println("Selected " + effectorId);
 					if ("selection".equals(e.getPropertyName())) {
@@ -1116,7 +1117,8 @@ public class RainbowWindoe extends RainbowWindow
 			JInternalFrame frame = new JInternalFrame(a.id(), true, false, true);
 			frame.setVisible(true);
 			frame.add(uiComp);
-			frame.setSize(uiComp.getPreferredSize().width, uiComp.getPreferredSize().height+25);
+			Dimension s = uiComp.getPreferredSize();
+			frame.setSize(s.width, s.height+25);
 			frame.addPropertyChangeListener(e -> {
 				System.out.println("Selected " + a.id());
 				if ("selection".equals(e.getPropertyName())) {
@@ -1171,7 +1173,8 @@ public class RainbowWindoe extends RainbowWindow
 					frame.setVisible(true);
 					ArchModelPanel mp = new ArchModelPanel(modelRef);
 					frame.add(mp);
-					frame.setSize(mp.getPreferredSize());
+					Dimension s = mp.getPreferredSize();
+					frame.setSize(s.width, s.height + 25);
 					ModelInfo mi = new ModelInfo();
 					mi.frame = frame;
 					mi.modelRef = modelRef;
