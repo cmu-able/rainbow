@@ -45,7 +45,7 @@ public class ArchStitchExecutorPanel extends JPanel implements IUIReporter {
 		
 		public void setStatusForNode(StrategyNode node, String status) {
 			m_statusMap.put(node, status);
-			this.modelSupport.fireNewRoot();
+//			this.modelSupport.fireNewRoot();
 		}
 		
 		@Override
@@ -230,7 +230,7 @@ public class ArchStitchExecutorPanel extends JPanel implements IUIReporter {
 	}
 
 	protected void updateStatus(String label, String status) {
-		StitchTreeTableModel model = (StitchTreeTableModel )m_treeTable.getModel();
+		StitchTreeTableModel model = (StitchTreeTableModel )m_treeTable.getTreeTableModel();
 		StrategyNode n = model.m_strategy.nodes.get(label);
 		if (n != null) {
 			model.setStatusForNode(n, status);
