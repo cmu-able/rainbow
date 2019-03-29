@@ -215,6 +215,8 @@ public class RainbowWindoe extends RainbowWindow
 
 	private JLabel m_statusWindow;
 
+	private Timer m_uiTimer = new Timer();
+	
 	public RainbowWindoe(IMasterCommandPort master) {
 		super(master);
 		init();
@@ -995,7 +997,7 @@ public class RainbowWindoe extends RainbowWindow
 			});
 			if (uiComp instanceof IUIUpdater) {
 				final JComponent fComp = uiComp;
-				final java.util.Timer timer = new Timer();
+//				final java.util.Timer timer = new Timer();
 				Runnable r = new Runnable() {
 					TimerTask currentTask;
 					
@@ -1003,7 +1005,7 @@ public class RainbowWindoe extends RainbowWindow
 					public void run() {
 						if (currentTask != null) currentTask.cancel();
 						fComp.setBorder(new LineBorder(EXECUTORS_COLOR, 2));
-						timer.schedule(new TimerTask() {
+						m_uiTimer.schedule(new TimerTask() {
 
 							@Override
 							public void run() {
@@ -1058,7 +1060,7 @@ public class RainbowWindoe extends RainbowWindow
 			});
 			if (uiComp instanceof IUIUpdater) {
 				final JComponent fComp = uiComp;
-				final java.util.Timer timer = new Timer();
+//				final java.util.Timer timer = new Timer();
 				Runnable r = new Runnable() {
 					TimerTask currentTask;
 					
@@ -1066,7 +1068,7 @@ public class RainbowWindoe extends RainbowWindow
 					public void run() {
 						if (currentTask != null) currentTask.cancel();
 						fComp.setBorder(new LineBorder(ADAPTION_MANAGER_COLOR, 2));
-						timer.schedule(new TimerTask() {
+						m_uiTimer.schedule(new TimerTask() {
 
 							@Override
 							public void run() {
@@ -1122,7 +1124,7 @@ public class RainbowWindoe extends RainbowWindow
 				}
 			});
 			if (uiComp instanceof IUIUpdater) {
-				final java.util.Timer timer = new Timer();
+//				final java.util.Timer timer = new Timer();
 				final JComponent fComp = uiComp;
 				Runnable r = new Runnable() {
 					TimerTask currentTask;
@@ -1131,7 +1133,7 @@ public class RainbowWindoe extends RainbowWindow
 					public void run() {
 						if (currentTask != null) currentTask.cancel();
 						fComp.setBorder(new LineBorder(ANALYZERS_COLOR, 2));
-						timer.schedule(new TimerTask() {
+						m_uiTimer.schedule(new TimerTask() {
 
 							@Override
 							public void run() {
@@ -1182,7 +1184,7 @@ public class RainbowWindoe extends RainbowWindow
 							m_selectionManager.selectionChanged(mi);
 						}
 					});
-					final java.util.Timer timer = new Timer();
+//					final java.util.Timer timer = new Timer();
 					Runnable r = new Runnable() {
 						TimerTask currentTask;
 						
@@ -1191,7 +1193,7 @@ public class RainbowWindoe extends RainbowWindow
 							if (currentTask != null) currentTask.cancel();
 							mp.setBorder(new LineBorder(MODELS_MANAGER_COLOR, 2));
 							mp.m_table.setSelectionBackground(MODELS_MANAGER_COLOR_LIGHT);
-							timer.schedule(new TimerTask() {
+							m_uiTimer.schedule(new TimerTask() {
 
 								@Override
 								public void run() {
@@ -1274,8 +1276,8 @@ public class RainbowWindoe extends RainbowWindow
 					final JComponent vFrame = getVisibleFrame(frame);
 					vFrame.setBorder(new LineBorder(GAUGES_COLOR, 2));
 					p.m_table.setSelectionBackground(GAUGES_COLOR_LIGHT);
-					final java.util.Timer t = new Timer();
-					t.schedule(new TimerTask() {
+//					final java.util.Timer t = new Timer();
+					m_uiTimer.schedule(new TimerTask() {
 
 						@Override
 						public void run() {
