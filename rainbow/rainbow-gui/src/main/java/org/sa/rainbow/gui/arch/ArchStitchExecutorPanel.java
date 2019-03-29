@@ -212,31 +212,33 @@ public class ArchStitchExecutorPanel extends JPanel implements IUIReporter {
 		else if (message.contains("Executing node")) {
 			Matcher m = S_START_TACTIC.matcher(message);
 			if (m.matches()) {
-				for (int row=0; row<m_treeTable.getRowCount(); row++) {
-					if (m_treeTable.getValueAt(row, 0).equals(m.group(1))) {
-						m_treeTable.setValueAt("EXECUTING", row, 2);
-					}
-				}
+				updateStatus(m.group(1), "EXECUTING");
 			}
 		}
 		else if (message.contains("Settling")) {
 			Matcher m = S_SETTLE_TACTIC.matcher(message);
 			if (m.matches()) {
-				for (int row=0; row<m_treeTable.getRowCount(); row++) {
-					if (m_treeTable.getValueAt(row, 0).equals(m.group(1))) {
-						m_treeTable.setValueAt("SETTLING " + m.group(2), row, 2);
-					}
-				}
+				updateStatus(m.group(1), "SETTLING");
 			}
 		}
 		else if (message.contains("Finished executing")) {
 			Matcher m = S_END_TACTIC.matcher(message);
 			if (m.matches()) {
-				for (int row=0; row<m_treeTable.getRowCount(); row++) {
-					if (m_treeTable.getValueAt(row, 0).equals(m.group(1))) {
-						m_treeTable.setValueAt(m.group(2), row, 2);
-					}
-				}
+				updateStatus(m.group(1), m.group(2));
+			}
+		}
+	}
+
+	protected void updateStatus(String label, String status) {
+		StitchTreeTableModel model = (StitchTreeTableModel )m_treeTable.getModel();
+		StrategyNode n = model.m_strategy.nodes.get(label);
+		if (n != null) {
+			model.setStatusForNode(n, status);
+		}
+		m_treeTable.repaint();
+		for (int row=0; row<m_treeTable.getRowCount(); row++) {
+			if (m_treeTable.getValueAt(row, 0).equals(label)) {
+				m_treeTable.changeSelection(row, 1, false, true);
 			}
 		}
 	}
