@@ -600,37 +600,37 @@ public class RainbowWindoe extends RainbowWindow
 				} else if (m_models.containsKey(n.getId())) {
 					ModelInfo mi = m_models.get(n.getId());
 					String pos = (String) n.getAttribute("pos");
-					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0]) + 10,
-							Float.parseFloat(pos.split(",")[1]) + 10, getVisibleFrame(mi.frame).getBounds().getSize());
+					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0])/* + 10*/,
+							Float.parseFloat(pos.split(",")[1])/* + 10*/, getVisibleFrame(mi.frame).getBounds().getSize());
 					Point realPoint = location;
 					getVisibleFrame(mi.frame).setLocation(realPoint);
 
 				} else if (m_analyzers.containsKey(n.getId())) {
 					JComponent a = m_analyzers.get(n.getId());
 					String pos = (String) n.getAttribute("pos");
-					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0]) + 10,
-							Float.parseFloat(pos.split(",")[1]) + 10, getDesktopFram(a).getBounds().getSize());
+					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0])/* + 10*/,
+							Float.parseFloat(pos.split(",")[1])/* + 10*/, getDesktopFram(a).getBounds().getSize());
 					Point realPoint = location;
 					getDesktopFram(a).setLocation(realPoint);
 				} else if (m_adaptationManagers.containsKey(n.getId())) {
 					JComponent a = m_adaptationManagers.get(n.getId());
 					String pos = (String) n.getAttribute("pos");
-					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0]) + 10,
-							Float.parseFloat(pos.split(",")[1]) + 10, getDesktopFram(a).getBounds().getSize());
+					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0]) /*+ 10*/,
+							Float.parseFloat(pos.split(",")[1]) /*+ 10*/, getDesktopFram(a).getBounds().getSize());
 					Point realPoint = location;
 					getDesktopFram(a).setLocation(realPoint);
 				} else if (m_executors.containsKey(n.getId())) {
 					JComponent a = m_executors.get(n.getId());
 					String pos = (String) n.getAttribute("pos");
-					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0]) + 10,
-							Float.parseFloat(pos.split(",")[1]) + 10, getDesktopFram(a).getBounds().getSize());
+					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0])/* + 10*/,
+							Float.parseFloat(pos.split(",")[1])/* + 10*/, getDesktopFram(a).getBounds().getSize());
 					Point realPoint = location;
 					getDesktopFram(a).setLocation(realPoint);
 				} else if (m_effectors.containsKey(n.getId())) {
 					JComponent a = m_effectors.get(n.getId());
 					String pos = (String) n.getAttribute("pos");
-					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0]) + 10,
-							Float.parseFloat(pos.split(",")[1]) + 10, getDesktopFram(a).getBounds().getSize());
+					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0])/* + 10*/,
+							Float.parseFloat(pos.split(",")[1])/* + 10*/, getDesktopFram(a).getBounds().getSize());
 					Point realPoint = location;
 					getDesktopFram(a).setLocation(realPoint);
 				}
