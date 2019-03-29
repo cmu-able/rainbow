@@ -62,7 +62,7 @@ public class ArchStitchExecutorPanel extends JPanel implements IUIReporter {
 
 		@Override
 		public Object getValueAt(Object arg0, int index) {
-			if (arg0 instanceof String && index == 1) {
+			if (arg0 instanceof String && index == 0) {
 				return ((String )arg0);
 			}
 			if (arg0 instanceof StrategyNode) {
@@ -173,7 +173,7 @@ public class ArchStitchExecutorPanel extends JPanel implements IUIReporter {
 		DefaultTableColumnModel cm = new DefaultTableColumnModel();
 		cm.addColumn(new TableColumn(0,50));
 		cm.addColumn(new TableColumn(1,230));
-		cm.addColumn(new TableColumn(120));
+		cm.addColumn(new TableColumn(2,120));
 		m_treeTable.setColumnModel(cm);
 		
 		m_treeTable.setFont(new Font(m_treeTable.getFont().getFontName(), m_treeTable.getFont().getStyle(), 8));
