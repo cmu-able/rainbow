@@ -171,14 +171,14 @@ public class ArchStitchExecutorPanel extends JPanel implements IUIReporter {
 		m_treeTable.setAutoResizeMode(JXTreeTable.AUTO_RESIZE_ALL_COLUMNS);
 		m_treeTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		DefaultTableColumnModel cm = new DefaultTableColumnModel();
-		cm.addColumn(new TableColumn(0,70));
+		cm.addColumn(new TableColumn(0,50));
 		cm.addColumn(new TableColumn(1,230));
-		cm.addColumn(new TableColumn(100));
+		cm.addColumn(new TableColumn(120));
 		m_treeTable.setColumnModel(cm);
 		
 		m_treeTable.setFont(new Font(m_treeTable.getFont().getFontName(), m_treeTable.getFont().getStyle(), 8));
 		m_treeTable.getTableHeader().setFont(new Font(m_treeTable.getTableHeader().getFont().getFontName(), m_treeTable.getFont().getStyle(), 8));
-
+		m_treeTable.setTreeTableModel(new StitchTreeTableModel(null));
 		TableColumnAdjuster tca = new TableColumnAdjuster(m_treeTable);
 		tca.setDynamicAdjustment(true);
 		add(p);

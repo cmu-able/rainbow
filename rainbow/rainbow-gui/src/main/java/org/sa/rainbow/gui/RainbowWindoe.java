@@ -297,6 +297,7 @@ public class RainbowWindoe extends RainbowWindow
 		m_statusWindow.setSize(m_statusWindow.getPreferredSize());
 		m_statusWindow.setLocation(0, 0);
 		m_statusWindow.setVisible(true);
+		m_frame.getContentPane().add(m_statusWindow);
 	}
 
 	@Override
