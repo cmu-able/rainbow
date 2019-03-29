@@ -27,6 +27,7 @@ public class GuavaEventConnector {
 	private static final Map<String, IGuavaMessageListener> m_replyListeners = new HashMap<>();
 
 	private ChannelT m_channel;
+	private static Thread REPLY_THREAD = null;
 
 	interface IGuavaMessageListener {
 		@Subscribe
@@ -44,6 +45,48 @@ public class GuavaEventConnector {
 
 			}
 		}
+		if (REPLY_THREAD == null) {
+			REPLY_THREAD  = 	new Thread(new Runnable() {
+
+				@Override
+				public void run() {
+					GuavaRainbowMessage msg;
+					try {
+						while ((msg = REPLY_Q.take()) != null) {
+							String repKey = (String) msg.getProperty(ESEBConstants.MSG_REPLY_KEY);
+
+							IGuavaMessageListener l;
+							synchronized (m_replyListeners) {
+								l = m_replyListeners.remove(repKey);
+							}
+							if (l != null) {
+								GuavaRainbowMessage gmsg = new GuavaRainbowMessage(msg);
+								sanitizeMessage(gmsg);
+								l.receive(gmsg);
+							} else {
+								LOGGER.error(MessageFormat.format(
+										"Received a reply on ESEB for which there is no listener. For reply key: {0}",
+
+										repKey));
+								LOGGER.info(msg.toString());
+								synchronized (m_replyListeners) {
+									for (String rk : m_replyListeners.keySet()) {
+										LOGGER.info(rk + " -> " + m_replyListeners.get(rk));
+									}
+								}
+							}
+						}
+					} catch (InterruptedException e) {
+					}
+				}
+
+				private void sanitizeMessage(GuavaRainbowMessage gmsg) {
+					gmsg.removeProperty(ESEBConstants.MSG_REPLY_KEY);
+				}
+
+			}, "REPLIES");
+			REPLY_THREAD.start();
+		}
 	}
 
 	public void publish(GuavaRainbowMessage msg) {
@@ -58,45 +101,7 @@ public class GuavaEventConnector {
 			m_replyListeners.put(replyKey, receiveListener);
 		}
 
-		new Thread(new Runnable() {
 
-			@Override
-			public void run() {
-				GuavaRainbowMessage msg;
-				try {
-					while ((msg = REPLY_Q.take()) != null) {
-						String repKey = (String) msg.getProperty(ESEBConstants.MSG_REPLY_KEY);
-
-						IGuavaMessageListener l;
-						synchronized (m_replyListeners) {
-							l = m_replyListeners.remove(repKey);
-						}
-						if (l != null) {
-							GuavaRainbowMessage gmsg = new GuavaRainbowMessage(msg);
-							sanitizeMessage(gmsg);
-							l.receive(gmsg);
-						} else {
-							LOGGER.error(MessageFormat.format(
-									"Received a reply on ESEB for which there is no listener. For reply key: {0}",
-
-									repKey));
-							LOGGER.info(msg.toString());
-							synchronized (m_replyListeners) {
-								for (String rk : m_replyListeners.keySet()) {
-									LOGGER.info(rk + " -> " + m_replyListeners.get(rk));
-								}
-							}
-						}
-					}
-				} catch (InterruptedException e) {
-				}
-			}
-
-			private void sanitizeMessage(GuavaRainbowMessage gmsg) {
-				gmsg.removeProperty(ESEBConstants.MSG_REPLY_KEY);
-			}
-
-		});
 
 		EVENT_BUSSES.get(m_channel).register(new IGuavaMessageListener() {
 
