@@ -1,6 +1,7 @@
 package org.sa.rainbow.gui.arch;
 
 import java.awt.Dimension;
+import java.awt.Font;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -10,6 +11,8 @@ import java.util.regex.Pattern;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.table.DefaultTableColumnModel;
+import javax.swing.table.TableColumn;
 
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
@@ -17,6 +20,7 @@ import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.gui.arch.elements.IUIReporter;
+import org.sa.rainbow.gui.widgets.TableColumnAdjuster;
 import org.sa.rainbow.stitch.adaptation.AdaptationManager;
 import org.sa.rainbow.stitch.adaptation.StitchStrategyAccessor;
 import org.sa.rainbow.stitch.core.Expression;
@@ -24,6 +28,7 @@ import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.core.Strategy.ActionKind;
 import org.sa.rainbow.stitch.core.Strategy.ConditionKind;
 import org.sa.rainbow.stitch.core.StrategyNode;
+import java.awt.BorderLayout;
 
 public class ArchStitchExecutorPanel extends JPanel implements IUIReporter {
 	
@@ -33,21 +38,33 @@ public class ArchStitchExecutorPanel extends JPanel implements IUIReporter {
 
 		public StitchTreeTableModel(Strategy strategy) {
 			m_strategy = strategy;
-			
 		}
 		
 		@Override
 		public Object getRoot() {
-			return m_strategy.getRootNode();
+			return m_strategy!=null?m_strategy.getRootNode():"Nothing to execute";
 		}
 		
 		@Override
 		public int getColumnCount() {
 			return 3;
 		}
+		
+		@Override
+		public String getColumnName(int column) {
+			switch (column) {
+			case 0: return "Label";
+			case 1: return "Step";
+			case 2: return "Status";
+			}
+			return null;
+		}
 
 		@Override
 		public Object getValueAt(Object arg0, int index) {
+			if (arg0 instanceof String && index == 1) {
+				return ((String )arg0);
+			}
 			if (arg0 instanceof StrategyNode) {
 				StrategyNode node = (StrategyNode) arg0;
 				switch(index) {
@@ -144,15 +161,26 @@ public class ArchStitchExecutorPanel extends JPanel implements IUIReporter {
 	private JXTreeTable m_treeTable;
 
 	public ArchStitchExecutorPanel() {
+		setLayout(new BorderLayout(0, 0));
 		m_treeTable = new JXTreeTable();
 		
 		JScrollPane p = new JScrollPane(m_treeTable);
-		m_treeTable.setPreferredScrollableViewportSize(new Dimension(200,100));
+		m_treeTable.setPreferredScrollableViewportSize(new Dimension(400,100));
 		
 		m_treeTable.setRootVisible(false);
 		m_treeTable.setAutoResizeMode(JXTreeTable.AUTO_RESIZE_ALL_COLUMNS);
 		m_treeTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		DefaultTableColumnModel cm = new DefaultTableColumnModel();
+		cm.addColumn(new TableColumn(0,70));
+		cm.addColumn(new TableColumn(1,230));
+		cm.addColumn(new TableColumn(100));
+		m_treeTable.setColumnModel(cm);
 		
+		m_treeTable.setFont(new Font(m_treeTable.getFont().getFontName(), m_treeTable.getFont().getStyle(), 8));
+		m_treeTable.getTableHeader().setFont(new Font(m_treeTable.getTableHeader().getFont().getFontName(), m_treeTable.getFont().getStyle(), 8));
+
+		TableColumnAdjuster tca = new TableColumnAdjuster(m_treeTable);
+		tca.setDynamicAdjustment(true);
 		add(p);
 	}
 
@@ -214,7 +242,10 @@ public class ArchStitchExecutorPanel extends JPanel implements IUIReporter {
 			}
 		}
 		if (s != null) {
-			m_treeTable.setTreeTableModel(new StitchTreeTableModel(s));
+			StitchTreeTableModel tm = new StitchTreeTableModel(s);
+		
+			m_treeTable.setTreeTableModel(tm);
+			
 			m_treeTable.expandAll();
 		}
 	}

@@ -7,6 +7,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.HeadlessException;
 import java.awt.Point;
@@ -36,6 +37,7 @@ import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 import javax.swing.JInternalFrame.JDesktopIcon;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -211,6 +213,8 @@ public class RainbowWindoe extends RainbowWindow
 
 	private GaugeDetailPanel m_gaugePanel;
 
+	private JLabel m_statusWindow;
+
 	public RainbowWindoe(IMasterCommandPort master) {
 		super(master);
 		init();
@@ -288,6 +292,11 @@ public class RainbowWindoe extends RainbowWindow
 
 			}
 		});
+		m_statusWindow = new JLabel("Waiting for Rainbow to start...");
+		m_statusWindow.setFont(new Font(m_statusWindow.getFont().getFontName(), m_statusWindow.getFont().getStyle(), 18));
+		m_statusWindow.setSize(m_statusWindow.getPreferredSize());
+		m_statusWindow.setLocation(0, 0);
+		m_statusWindow.setVisible(true);
 	}
 
 	@Override
@@ -864,6 +873,7 @@ public class RainbowWindoe extends RainbowWindow
 	}
 
 	protected void populateUI() {
+		m_statusWindow.setText("Populating UI");
 		createProbes();
 		createModels();
 		createGauges();
@@ -872,6 +882,7 @@ public class RainbowWindoe extends RainbowWindow
 		createExecutors();
 		createEffectors();
 		layoutArchitecture();
+		m_statusWindow.setVisible(false);
 	}
 
 	private void createEffectors() {
