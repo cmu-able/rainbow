@@ -676,7 +676,7 @@ public class RainbowWindoe extends RainbowWindow
 	}
 
 	protected Graph createGraphToLayout() {
-		int res = 72; // Toolkit.getDefaultToolkit().getScreenResolution();
+		int res = 80; // Toolkit.getDefaultToolkit().getScreenResolution();
 		Graph g = new SingleGraph("gauges-and-probes");
 
 		Node root = g.addNode("root");
