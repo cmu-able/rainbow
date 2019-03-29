@@ -224,7 +224,7 @@ public class ArchStitchExecutorPanel extends JPanel implements IUIReporter {
 		else if (message.contains("Finished executing")) {
 			Matcher m = S_END_TACTIC.matcher(message);
 			if (m.matches()) {
-				updateStatus(m.group(1), m.group(2));
+				updateStatus(m.group(1), m.group(3));
 			}
 		}
 	}

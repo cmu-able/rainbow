@@ -614,7 +614,6 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
 		boolean ret = false;
 		m_settlingCondition = null;
 		long duration = getDuration();
-		if (e != null) e.getReportingPort().info(e.getComponentType(), MessageFormat.format("[[{0}]]: Tactic {1} @{2} check effect", e.id(), m_name, duration));
 		ConditionTimer.instance().registerCondition(hasDuration()?effects.subList(0, effects.size()-1):effects, duration, m_conditionObserver);
 		// wait for condition to be set...
 		while (m_settlingCondition == null && !m_stitch.isCanceled()) {
