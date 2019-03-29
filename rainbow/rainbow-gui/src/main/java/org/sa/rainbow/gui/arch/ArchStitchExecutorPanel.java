@@ -1,10 +1,13 @@
 package org.sa.rainbow.gui.arch;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,16 +31,21 @@ import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.core.Strategy.ActionKind;
 import org.sa.rainbow.stitch.core.Strategy.ConditionKind;
 import org.sa.rainbow.stitch.core.StrategyNode;
-import java.awt.BorderLayout;
 
 public class ArchStitchExecutorPanel extends JPanel implements IUIReporter {
 	
 	public static class StitchTreeTableModel extends AbstractTreeTableModel {
 
 		private Strategy m_strategy;
+		Map<StrategyNode, String> m_statusMap = new HashMap<>();
 
 		public StitchTreeTableModel(Strategy strategy) {
 			m_strategy = strategy;
+		}
+		
+		public void setStatusForNode(StrategyNode node, String status) {
+			m_statusMap.put(node, status);
+			this.modelSupport.fireNewRoot();
 		}
 		
 		@Override
@@ -70,6 +78,7 @@ public class ArchStitchExecutorPanel extends JPanel implements IUIReporter {
 				switch(index) {
 				case 0: 
 					return node.label();
+				case 2: return m_statusMap.get(arg0);
 				case 1:
 					StringBuffer nodeRep = new StringBuffer();
 					ConditionKind condFlag = node.getCondFlag();
