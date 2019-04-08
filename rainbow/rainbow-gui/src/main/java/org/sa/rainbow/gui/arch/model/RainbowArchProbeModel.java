@@ -28,7 +28,7 @@ public class RainbowArchProbeModel extends RainbowArchModelElement {
 
 	@Override
 	public String getId() {
-		return Util.genID(m_probeDesc.name, m_probeDesc.location);
+		return Util.genID(m_probeDesc.alias, m_probeDesc.location);
 	}
 
 	public ProbeAttributes getProbeDesc() {
