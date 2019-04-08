@@ -109,7 +109,7 @@ public abstract class AbstractRainbowController implements IRainbowUIController,
 	public void move(Point2D point, boolean isUserSet) {
 		Point realPoint = new Point((int) Math.round(point.getX()), (int) Math.round(point.getY()));
 		if (!isUserSet) { // let's assume that the point is the center
-			Dimension size = m_frame.getSize();
+			Dimension size = getVisibleFrame().getSize();
 			new Point((int) Math.round(point.getX() - size.getWidth() / 2),
 					(int) Math.round(point.getY() - size.getHeight() / 2));
 		}

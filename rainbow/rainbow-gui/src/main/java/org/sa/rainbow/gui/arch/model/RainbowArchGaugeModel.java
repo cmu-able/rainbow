@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
@@ -14,6 +15,8 @@ import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.IModelUpdater;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
+import org.sa.rainbow.core.ports.IModelUSBusPort;
+import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.util.Pair;
 
 public class RainbowArchGaugeModel extends RainbowArchModelElement implements IModelUpdater{
@@ -26,6 +29,8 @@ public class RainbowArchGaugeModel extends RainbowArchModelElement implements IM
 	private Map<String, List<Pair<Date, IRainbowOperation>>> m_operations;
 	private List<String> m_probes = null;
 
+	private IModelUSBusPort m_usPort;
+	
 	public RainbowArchGaugeModel(GaugeInstanceDescription gaugeDesc) {
 		super();
 		m_gaugeDesc = gaugeDesc;
@@ -33,6 +38,12 @@ public class RainbowArchGaugeModel extends RainbowArchModelElement implements IM
 		m_operations = new HashMap<>();
 		for (Pair<String, OperationRepresentation> key : gaugeDesc.commandSignatures()) {
 			m_operations.put(key.secondValue().getName(), new LinkedList<>());
+		}
+		try {
+			m_usPort = RainbowPortFactory.createModelsManagerUSPort(this);
+		} catch (RainbowConnectionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 	}
@@ -70,6 +81,8 @@ public class RainbowArchGaugeModel extends RainbowArchModelElement implements IM
 
 	@Override
 	public void requestModelUpdate(IRainbowOperation command) throws IllegalStateException, RainbowException {
+		if (!getId().equals(command.getOrigin())) return;
+
 		addOperation(command);
 	}
 
