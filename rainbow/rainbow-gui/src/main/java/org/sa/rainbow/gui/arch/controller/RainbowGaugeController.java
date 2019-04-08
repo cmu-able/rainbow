@@ -60,6 +60,7 @@ public class RainbowGaugeController extends AbstractRainbowController {
 						: Collections.<String, Object>emptyMap())));
 		parent.getDesktopManager().iconifyFrame(frame);
 		m_frame = frame;
+		attachControllerToFrame(m_frame);
 		return m_frame;
 	}
 

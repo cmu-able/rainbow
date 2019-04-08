@@ -45,6 +45,7 @@ public class RainbowProbeController extends AbstractRainbowController {
 		m_frame.getDesktopIcon().setUI(new RainbowDesktopIconUI(m_frame.getFrameIcon()));
 		parent.getDesktopManager().iconifyFrame(m_frame);
 		m_frame.setVisible(true);
+		attachControllerToFrame(m_frame);
 		return m_frame;
 	}
 
