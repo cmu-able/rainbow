@@ -37,7 +37,7 @@ public class GaugePanel extends JPanel implements IModelUpdater{
 	public GaugePanel(String gaugeId) {
 		m_gaugeId = gaugeId;
 		try {
-			m_usPort = RainbowPortFactory.createModelsManagerUSPort(this);
+//			m_usPort = RainbowPortFactory.createModelsManagerUSPort(this);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

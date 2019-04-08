@@ -395,14 +395,14 @@ public class RainbowWindoe extends RainbowWindow
 	}
 
 	protected void drawConnections(Graphics2D g2, JDesktopPane jDesktopPane) {
-//		if (m_lines != null && !m_lines.isEmpty()) {
-//			for (Line2D l : m_lines) {
-//				g2.draw(l);
-//			}
-//
-//			return;
-//
-//		}
+		if (m_lines != null && !m_lines.isEmpty()) {
+			for (Line2D l : m_lines) {
+				g2.draw(l);
+			}
+
+			return;
+
+		}
 //		for (Map.Entry<String, GaugeInfo> entry : m_gauges.entrySet()) {
 //			GaugeInfo gInfo = entry.getValue();
 //			Component visibleGFrame = getVisibleFrame(gInfo.getFrame());

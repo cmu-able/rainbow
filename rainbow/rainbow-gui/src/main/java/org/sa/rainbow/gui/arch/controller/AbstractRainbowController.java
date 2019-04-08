@@ -32,11 +32,11 @@ public abstract class AbstractRainbowController implements IRainbowUIController,
 		}
 
 		public void run() {
+			JComponent vFrame = getVisibleFrame();
 			if (currentTask != null)
 				currentTask.cancel();
 			else
-				preBorder = m_component.getBorder();
-			JComponent vFrame = getVisibleFrame();
+				preBorder = vFrame.getBorder();
 			currentTask = new TimerTask() {
 
 				@Override
