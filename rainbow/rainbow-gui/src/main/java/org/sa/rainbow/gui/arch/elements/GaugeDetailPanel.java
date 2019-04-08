@@ -24,6 +24,7 @@ import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.gui.arch.GaugeInfo;
+import org.sa.rainbow.gui.arch.model.RainbowArchGaugeModel;
 
 public class GaugeDetailPanel extends JPanel {
 	private JTextField m_nameField;
@@ -33,7 +34,7 @@ public class GaugeDetailPanel extends JPanel {
 	private JTable m_operations;
 	private JTable m_setup;
 	private JTable m_config;
-	public GaugeInfo m_gaugeInfo;
+	public RainbowArchGaugeModel m_gaugeInfo;
 
 	public GaugeDetailPanel() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
@@ -172,7 +173,7 @@ public class GaugeDetailPanel extends JPanel {
 
 	}
 
-	public void initDataBindings(GaugeInfo gi) {
+	public void initDataBindings(RainbowArchGaugeModel gi) {
 		if (gi == m_gaugeInfo) return;
 		if (gi != m_gaugeInfo) {
 			m_gaugeInfo = gi;
@@ -185,7 +186,7 @@ public class GaugeDetailPanel extends JPanel {
 			m_modelField.setText("");
 		}
 		if (m_gaugeInfo != null) {
-			GaugeInstanceDescription desc = m_gaugeInfo.getDescription();
+			GaugeInstanceDescription desc = m_gaugeInfo.getGaugeDesc();
 			m_nameField.setText(desc.gaugeName());
 			m_typeField.setText(desc.gaugeType());
 			m_modelField.setText(desc.modelDesc().getName() + ":" + desc.modelDesc().getType());

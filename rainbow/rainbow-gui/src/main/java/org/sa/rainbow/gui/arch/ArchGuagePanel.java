@@ -26,6 +26,7 @@ import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.gui.GaugePanel;
+import org.sa.rainbow.gui.arch.model.RainbowArchGaugeModel;
 import org.sa.rainbow.gui.widgets.BooleanPanel;
 import org.sa.rainbow.gui.widgets.ICommandUpdate;
 import org.sa.rainbow.gui.widgets.MeterPanel;
@@ -40,12 +41,14 @@ public class ArchGuagePanel extends GaugePanel {
 		T convert(String s);
 	}
 
-	private GaugeInfo m_gaugeInfo;
+	private RainbowArchGaugeModel m_gaugeInfo;
 	private HashMap<String, Integer> m_op2row = new HashMap<>();
+	private JInternalFrame m_frame;
 
-	public ArchGuagePanel(String gaugeId, GaugeInfo gaugeInfo) {
+	public ArchGuagePanel(String gaugeId, RainbowArchGaugeModel gaugeInfo, JInternalFrame frame) {
 		super(gaugeId);
 		m_gaugeInfo = gaugeInfo;
+		m_frame = frame;
 	}
 
 	@Override
@@ -65,7 +68,7 @@ public class ArchGuagePanel extends GaugePanel {
 		m_table.setAutoscrolls(true);
 		TableColumnAdjuster tca = new TableColumnAdjuster(m_table);
 		tca.setDynamicAdjustment(true);
-		List<Pair<String, OperationRepresentation>> signatures = m_gaugeInfo.getDescription().commandSignatures();
+		List<Pair<String, OperationRepresentation>> signatures = m_gaugeInfo.getGaugeDesc().commandSignatures();
 		int row = 0;
 		for (Pair<String, OperationRepresentation> pair : signatures) {
 			String name = pair.secondValue().getName();
@@ -102,7 +105,7 @@ public class ArchGuagePanel extends GaugePanel {
 	protected void processOperation(IRainbowOperation command, boolean update, boolean extend) throws RainbowException {
 
 		int row = updateOperation(command);
-		JDesktopIcon desktopIcon = m_gaugeInfo.getFrame().getDesktopIcon();
+		JDesktopIcon desktopIcon = m_frame.getDesktopIcon();
 		Component c = ((JPanel )((JLayeredPane )desktopIcon.getComponent(0)).getComponent(1)).getComponent(0);
 		if (c instanceof ICommandUpdate) {
 			((ICommandUpdate) c).newCommand(command);
@@ -133,8 +136,8 @@ public class ArchGuagePanel extends GaugePanel {
 
 	public DesktopIconUI createIcon(JInternalFrame frame, Map<String, Object> uidb) {
 
-		if (m_gaugeInfo != null && m_gaugeInfo.getDescription() != null) {
-			GaugeInstanceDescription desc = m_gaugeInfo.getDescription();
+		if (m_gaugeInfo != null && m_gaugeInfo.getGaugeDesc() != null) {
+			GaugeInstanceDescription desc = m_gaugeInfo.getGaugeDesc();
 			Map<String, Object> ui = (Map<String, Object>) uidb.get(desc.gaugeName());
 			if (ui == null) {
 				ui = (Map<String, Object>) uidb.get(desc.gaugeType());

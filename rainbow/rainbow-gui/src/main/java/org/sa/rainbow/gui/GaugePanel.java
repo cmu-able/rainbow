@@ -25,7 +25,7 @@ public class GaugePanel extends JPanel implements IModelUpdater{
 		void update(IRainbowOperation o);
 	}
 	
-	protected JTable m_table;
+	public JTable m_table;
 	protected IModelUSBusPort m_usPort;
 	protected String m_gaugeId;
 	protected ArrayList<Runnable> updaters = new ArrayList<>(1);
