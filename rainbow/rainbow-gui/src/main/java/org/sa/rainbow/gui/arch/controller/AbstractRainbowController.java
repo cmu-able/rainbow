@@ -113,7 +113,7 @@ public abstract class AbstractRainbowController implements IRainbowUIController,
 			new Point((int) Math.round(point.getX() - size.getWidth() / 2),
 					(int) Math.round(point.getY() - size.getHeight() / 2));
 		}
-		m_frame.setLocation(realPoint);
+		getVisibleFrame().setLocation(realPoint);
 		if (isUserSet) {
 			m_model.setUserLocation(realPoint);
 		}
