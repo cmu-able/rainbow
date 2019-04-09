@@ -36,6 +36,8 @@ public class RainbowModelController extends AbstractRainbowController {
 		Dimension s = m_mp.getPreferredSize();
 		frame.setSize(s.width, s.height + 25);
 		m_frame = frame;
+		parent.add(frame);
+		attachControllerToFrame(frame);
 		return m_frame;
 	}
 
