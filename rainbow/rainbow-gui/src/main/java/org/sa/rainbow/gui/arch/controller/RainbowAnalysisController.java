@@ -39,7 +39,8 @@ public class RainbowAnalysisController extends AbstractRainbowController {
 	@Override
 	public JInternalFrame createView(JDesktopPane parent) {
 		IRainbowAnalysis a = getModel().getAnalysis();
-		String clazz = (String) m_uidb.get(a.getClass().getName());
+		String key = "analyzers";
+		String clazz = getCustomClass(a, key);
 		m_uiComp = null;
 		if (clazz != null) {
 			try {
@@ -63,6 +64,15 @@ public class RainbowAnalysisController extends AbstractRainbowController {
 		parent.add(m_frame);
 		attachControllerToFrame(m_frame);
 		return m_frame;
+	}
+
+	protected String getCustomClass(Object a, String key) {
+		Map<Object, Object> map = (Map<Object,Object>) m_uidb.get(key);
+		String clazz = null;
+		if (map != null) {
+			clazz = (String) map.get(a.getClass().getName());
+		}
+		return clazz;
 	}
 
 	@Override

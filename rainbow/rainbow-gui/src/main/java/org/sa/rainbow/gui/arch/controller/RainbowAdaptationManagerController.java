@@ -36,7 +36,7 @@ public class RainbowAdaptationManagerController extends AbstractRainbowControlle
 
 	@Override
 	public JInternalFrame createView(JDesktopPane parent) {
-		String clazz = (String) m_uidb.get(getModel().getAdaptationManager().getClass().getName());
+		String clazz = (String) ((Map<Object,Object>) m_uidb.get("managers")).get(getModel().getAdaptationManager().getClass().getName());
 		m_uiComp = null;
 		if (clazz != null) {
 			try {
@@ -60,6 +60,15 @@ public class RainbowAdaptationManagerController extends AbstractRainbowControlle
 		attachControllerToFrame(m_frame);
 
 		return m_frame;
+	}
+	
+		protected String getCustomClass(Object a, String key) {
+		Map<Object, Object> map = (Map<Object,Object>) m_uidb.get(key);
+		String clazz = null;
+		if (map != null) {
+			clazz = (String) map.get(a.getClass().getName());
+		}
+		return clazz;
 	}
 
 	@Override

@@ -36,7 +36,7 @@ public class RainbowExecutorController extends AbstractRainbowController {
 
 	@Override
 	public JInternalFrame createView(JDesktopPane parent) {
-		String clazz = (String) m_uidb.get(getModel().getExecutor().getClass().getName());
+		String clazz = (String) ((Map<Object,Object>) m_uidb.get("executors")).get(getModel().getExecutor().getClass().getName());
 		m_uiComp = null;
 		if (clazz != null) {
 			try {
