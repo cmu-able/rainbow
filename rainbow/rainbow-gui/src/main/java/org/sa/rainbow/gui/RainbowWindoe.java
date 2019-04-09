@@ -76,6 +76,7 @@ import org.sa.rainbow.core.ports.IProbeReportPort;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReportingSubscriberCallback;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.util.Pair;
+import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.gui.arch.ArchModelPanel;
 import org.sa.rainbow.gui.arch.RainbowDesktopManager;
@@ -538,7 +539,9 @@ public class RainbowWindoe extends RainbowWindow
 						}
 
 					}
-					RainbowArchModelModel mm = m_rainbowModel.getModel(gInfo.getGaugeDesc().modelDesc().toString());
+					TypedAttribute model = gInfo.getGaugeDesc().modelDesc();
+					String modelref = new ModelReference(model.getName(), model.getType()).toString();
+					RainbowArchModelModel mm = m_rainbowModel.getModel(modelref);
 					mm.addGaugeReference(gInfo.getId());
 					
 				}
