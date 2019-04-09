@@ -5,7 +5,6 @@ import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -26,7 +25,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -39,12 +37,10 @@ import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
-import javax.swing.plaf.DesktopIconUI;
 
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.EdgeRejectedException;
@@ -82,21 +78,26 @@ import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.gui.arch.ArchModelPanel;
-import org.sa.rainbow.gui.arch.GaugeInfo;
-import org.sa.rainbow.gui.arch.IErrorDisplay;
-import org.sa.rainbow.gui.arch.RainbowDesktopIconUI;
 import org.sa.rainbow.gui.arch.RainbowDesktopManager;
 import org.sa.rainbow.gui.arch.controller.IRainbowUIController;
+import org.sa.rainbow.gui.arch.controller.RainbowAdaptationManagerController;
+import org.sa.rainbow.gui.arch.controller.RainbowAnalysisController;
 import org.sa.rainbow.gui.arch.controller.RainbowEffectorController;
+import org.sa.rainbow.gui.arch.controller.RainbowExecutorController;
 import org.sa.rainbow.gui.arch.controller.RainbowGaugeController;
+import org.sa.rainbow.gui.arch.controller.RainbowModelController;
 import org.sa.rainbow.gui.arch.controller.RainbowProbeController;
 import org.sa.rainbow.gui.arch.elements.ArchConsolePanel;
 import org.sa.rainbow.gui.arch.elements.GaugeDetailPanel;
 import org.sa.rainbow.gui.arch.elements.IUIReporter;
 import org.sa.rainbow.gui.arch.elements.IUIUpdater;
 import org.sa.rainbow.gui.arch.elements.ProbeTabbedPane;
+import org.sa.rainbow.gui.arch.model.RainbowArchAdapationManagerModel;
+import org.sa.rainbow.gui.arch.model.RainbowArchAnalysisModel;
 import org.sa.rainbow.gui.arch.model.RainbowArchEffectorModel;
+import org.sa.rainbow.gui.arch.model.RainbowArchExecutorModel;
 import org.sa.rainbow.gui.arch.model.RainbowArchGaugeModel;
+import org.sa.rainbow.gui.arch.model.RainbowArchModelModel;
 import org.sa.rainbow.gui.arch.model.RainbowArchProbeModel;
 import org.sa.rainbow.gui.arch.model.RainbowSystemModel;
 import org.sa.rainbow.gui.widgets.DesktopScrollPane;
@@ -192,10 +193,10 @@ public class RainbowWindoe extends RainbowWindow
 
 //	Map<String, ProbeInfo> m_probes = new HashMap<>();
 //	Map<String, GaugeInfo> m_gauges = new HashMap<>();
-	Map<String, ModelInfo> m_models = new HashMap<>();
-	Map<String, JComponent> m_analyzers = new HashMap<>();
-	Map<String, JComponent> m_adaptationManagers = new HashMap<>();
-	Map<String, JComponent> m_executors = new HashMap<>();
+//	Map<String, ModelInfo> m_models = new HashMap<>();
+//	Map<String, JComponent> m_analyzers = new HashMap<>();
+//	Map<String, JComponent> m_adaptationManagers = new HashMap<>();
+//	Map<String, JComponent> m_executors = new HashMap<>();
 //	Map<String, ArchEffectorPanel> m_effectors = new HashMap<>();
 
 	private Map<String, JTextArea> m_probeTextAreas = new HashMap<>();
@@ -537,9 +538,9 @@ public class RainbowWindoe extends RainbowWindow
 						}
 
 					}
-					ModelInfo mi = m_models.get(new ModelReference(gInfo.getGaugeDesc().modelDesc().getName(),
-							gInfo.getGaugeDesc().modelDesc().getType()).toString());
-					mi.gauges.add(gInfo.getId());
+					RainbowArchModelModel mm = m_rainbowModel.getModel(gInfo.getGaugeDesc().modelDesc().toString());
+					mm.addGaugeReference(gInfo.getId());
+					
 				}
 			}
 //			for (Map.Entry<String, GaugeInfo> entry : m_gauges.entrySet()) {
@@ -642,35 +643,35 @@ public class RainbowWindoe extends RainbowWindow
 //					realPoint.translate(GAUGE_REGION.x, GAUGE_REGION.y);
 					Point realPoint = location;
 					getVisibleFrame(pi.frame).setLocation(realPoint);
-				}*/ else if (m_models.containsKey(n.getId())) {
-					ModelInfo mi = m_models.get(n.getId());
+				}*/ else if (m_rainbowModel.hasModel(n.getId())) {
+					RainbowArchModelModel mi = m_rainbowModel.getModel(n.getId());
 					String pos = (String) n.getAttribute("pos");
-					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0])/* + 10*/,
-							Float.parseFloat(pos.split(",")[1])/* + 10*/, getVisibleFrame(mi.frame).getBounds().getSize());
-					Point realPoint = location;
-					getVisibleFrame(mi.frame).setLocation(realPoint);
+					Point2D location = new Point2D.Float(Float.parseFloat(pos.split(",")[0])/* + 10*/,
+							Float.parseFloat(pos.split(",")[1])); ///* + 10*/, getDesktopFram(a).getBounds().getSize());
+					Point2D realPoint = location;
+					mi.getController().move(realPoint, false);
 
-				} else if (m_analyzers.containsKey(n.getId())) {
-					JComponent a = m_analyzers.get(n.getId());
+				} else if (m_rainbowModel.hasAnalyzer(n.getId())) {
+					RainbowArchAnalysisModel a = m_rainbowModel.getAnalyzer(n.getId());
 					String pos = (String) n.getAttribute("pos");
-					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0])/* + 10*/,
-							Float.parseFloat(pos.split(",")[1])/* + 10*/, getDesktopFram(a).getBounds().getSize());
-					Point realPoint = location;
-					getDesktopFram(a).setLocation(realPoint);
-				} else if (m_adaptationManagers.containsKey(n.getId())) {
-					JComponent a = m_adaptationManagers.get(n.getId());
+					Point2D location = new Point2D.Float(Float.parseFloat(pos.split(",")[0])/* + 10*/,
+							Float.parseFloat(pos.split(",")[1])); ///* + 10*/, getDesktopFram(a).getBounds().getSize());
+					Point2D realPoint = location;
+					a.getController().move(realPoint, false);
+				} else if (m_rainbowModel.hasAdaptationManager(n.getId())) {
+					RainbowArchAdapationManagerModel am = m_rainbowModel.getAdaptationManager(n.getId());
 					String pos = (String) n.getAttribute("pos");
-					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0]) /*+ 10*/,
-							Float.parseFloat(pos.split(",")[1]) /*+ 10*/, getDesktopFram(a).getBounds().getSize());
-					Point realPoint = location;
-					getDesktopFram(a).setLocation(realPoint);
-				} else if (m_executors.containsKey(n.getId())) {
-					JComponent a = m_executors.get(n.getId());
+					Point2D location = new Point2D.Float(Float.parseFloat(pos.split(",")[0])/* + 10*/,
+							Float.parseFloat(pos.split(",")[1])); ///* + 10*/, getDesktopFram(a).getBounds().getSize());
+					Point2D realPoint = location;
+					am.getController().move(realPoint, false);
+				} else if (m_rainbowModel.hasExecutor(n.getId())) {
+					RainbowArchExecutorModel ex = m_rainbowModel.getExecutor(n.getId());
 					String pos = (String) n.getAttribute("pos");
-					Point location = getTopLeft(Float.parseFloat(pos.split(",")[0])/* + 10*/,
-							Float.parseFloat(pos.split(",")[1])/* + 10*/, getDesktopFram(a).getBounds().getSize());
-					Point realPoint = location;
-					getDesktopFram(a).setLocation(realPoint);
+					Point2D location = new Point2D.Float(Float.parseFloat(pos.split(",")[0])/* + 10*/,
+							Float.parseFloat(pos.split(",")[1])); ///* + 10*/, getDesktopFram(a).getBounds().getSize());
+					Point2D realPoint = location;
+					ex.getController().move(realPoint, false);
 				} else if (m_rainbowModel.hasEffector(n.getId())) {
 					RainbowArchEffectorModel effectorModel = m_rainbowModel.getEffectorModel(n.getId());
 					String pos = (String) n.getAttribute("pos");
@@ -759,32 +760,31 @@ public class RainbowWindoe extends RainbowWindow
 			}
 
 		}
-		for (Entry<String, ModelInfo> me : m_models.entrySet()) {
-			ModelInfo mi = me.getValue();
-			Node mN = g.addNode(me.getKey());
-			Dimension size = mi.frame.getSize();
+		for (RainbowArchModelModel m : m_rainbowModel.getModels()) {
+			Node mN = g.addNode(m.getId());
+			Dimension size = m.getController().getView().getSize();
 			mN.addAttribute("width", toInches(size.width /*+ 40*/, res));
 			mN.addAttribute("height", toInches(size.height, res));
 			mN.addAttribute("fixedsize", true);
 			mN.addAttribute("shape", "box");
-			for (String ga : mi.gauges) {
+			for (String ga : m.getGaugeReferences()) {
 				if (processedIds.containsKey(ga)) {
 					g.addEdge(mN.getId() + "-" + ga, mN, processedIds.get(ga));
 				}
 			}
-			processedIds.put(me.getKey(), mN);
+			processedIds.put(m.getId(), mN);
 		}
 		for (IRainbowAnalysis a : Rainbow.instance().getRainbowMaster().analyzers()) {
-			JComponent comp = m_analyzers.get(a.id());
-			Node aN = g.addNode(a.id());
-			Dimension size = getDesktopFram(comp).getSize();
+			RainbowArchAnalysisModel am = m_rainbowModel.getAnalyzer(a.id());
+			Node aN = g.addNode(am.getId());
+			Dimension size = am.getController().getView().getSize();
 			aN.addAttribute("width", toInches(size.width /*+ 40*/, res));
 			aN.addAttribute("height", toInches(size.height, res));
 			aN.addAttribute("fixedsize", true);
 			aN.addAttribute("shape", "box");
-			for (String m : m_models.keySet()) {
-				if (processedIds.containsKey(m))
-					g.addEdge(aN.getId() + "-" + m, aN, processedIds.get(m));
+			for (RainbowArchModelModel m : m_rainbowModel.getModels()) {
+				if (processedIds.containsKey(m.getId()))
+					g.addEdge(aN.getId() + "-" + m, aN, processedIds.get(m.getId()));
 			}
 
 		}
@@ -792,9 +792,9 @@ public class RainbowWindoe extends RainbowWindow
 		Map<String, Node> model2am = new HashMap<>();
 
 		for (IAdaptationManager<?> am : Rainbow.instance().getRainbowMaster().adaptationManagers().values()) {
-			JComponent comp = m_adaptationManagers.get(am.id());
-			Node aN = g.addNode(am.id());
-			Dimension size = getDesktopFram(comp).getSize();
+			RainbowArchAdapationManagerModel amm = m_rainbowModel.getAdaptationManager(am.id());
+			Node aN = g.addNode(amm.getId());
+			Dimension size = amm.getController().getView().getSize();
 			aN.addAttribute("width", toInches(size.width/* + 40*/, res));
 			aN.addAttribute("height", toInches(size.height, res));
 			aN.addAttribute("fixedsize", true);
@@ -811,9 +811,10 @@ public class RainbowWindoe extends RainbowWindow
 		Set<Node> executorNodes = new HashSet<>();
 
 		for (IAdaptationExecutor<?> ae : Rainbow.instance().getRainbowMaster().adaptationExecutors().values()) {
-			JComponent comp = m_executors.get(ae.id());
+			RainbowArchExecutorModel ex = m_rainbowModel.getExecutor(ae.id());
+
 			Node aN = g.addNode(ae.id());
-			Dimension size = getDesktopFram(comp).getSize();
+			Dimension size = ex.getController().getView().getSize();
 			aN.addAttribute("width", toInches(size.width/* + 40*/, res));
 			aN.addAttribute("height", toInches(size.height, res));
 			aN.addAttribute("fixedsize", true);
@@ -1039,61 +1040,65 @@ public class RainbowWindoe extends RainbowWindow
 		Map<String, Object> aui = m_uidb.containsKey("executors") ? (Map<String, Object>) m_uidb.get("executors")
 				: Collections.<String, Object>emptyMap();
 		for (IAdaptationExecutor a : executors.values()) {
-			String clazz = (String) aui.get(a.getClass().getName());
-			JComponent uiComp = null;
-			if (clazz != null) {
-				try {
-					Class<? extends JComponent> uiClass = (Class<? extends JComponent>) this.getClass().getClassLoader()
-							.loadClass(clazz);
-					uiComp = uiClass.newInstance();
-
-				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-				}
-			}
-			if (uiComp == null) {
-				uiComp = new ArchConsolePanel();
-			}
-			m_executors.put(a.id(), uiComp);
-			JInternalFrame frame = new JInternalFrame(a.id(), true, false, true);
-			frame.setVisible(true);
-			frame.add(uiComp);
-			Dimension s = uiComp.getPreferredSize();
-			frame.setSize(s.width, s.height+25);
-			frame.addPropertyChangeListener(e -> {
-				System.out.println("Selected " + a.id());
-				if ("selection".equals(e.getPropertyName())) {
-					m_selectionManager.selectionChanged(a);
-				}
-			});
-			if (uiComp instanceof IUIUpdater) {
-				final JComponent fComp = uiComp;
-//				final java.util.Timer timer = new Timer();
-				Runnable r = new Runnable() {
-					TimerTask currentTask;
-					
-					@Override
-					public void run() {
-						if (currentTask != null) currentTask.cancel();
-						fComp.setBorder(new LineBorder(EXECUTORS_COLOR, 2));
-						m_uiTimer.schedule(new TimerTask() {
-
-							@Override
-							public void run() {
-								SwingUtilities.invokeLater(new Runnable() {
-
-									@Override
-									public void run() {
-										fComp.setBorder(null);
-									}
-								});
-							}
-						}, 1000);
-					}
-					
-				};
-				((IUIUpdater) uiComp).addUpdateListener(r);
-			}
-			m_desktopPane.add(frame);
+			RainbowArchExecutorModel model = new RainbowArchExecutorModel(a);
+			RainbowExecutorController ctrl = new RainbowExecutorController(model, m_selectionManager, m_uidb);
+			ctrl.createView(m_desktopPane);
+			m_rainbowModel.addExecutor(model);
+//			String clazz = (String) aui.get(a.getClass().getName());
+//			JComponent uiComp = null;
+//			if (clazz != null) {
+//				try {
+//					Class<? extends JComponent> uiClass = (Class<? extends JComponent>) this.getClass().getClassLoader()
+//							.loadClass(clazz);
+//					uiComp = uiClass.newInstance();
+//
+//				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+//				}
+//			}
+//			if (uiComp == null) {
+//				uiComp = new ArchConsolePanel();
+//			}
+//			m_executors.put(a.id(), uiComp);
+//			JInternalFrame frame = new JInternalFrame(a.id(), true, false, true);
+//			frame.setVisible(true);
+//			frame.add(uiComp);
+//			Dimension s = uiComp.getPreferredSize();
+//			frame.setSize(s.width, s.height+25);
+//			frame.addPropertyChangeListener(e -> {
+//				System.out.println("Selected " + a.id());
+//				if ("selection".equals(e.getPropertyName())) {
+//					m_selectionManager.selectionChanged(a);
+//				}
+//			});
+//			if (uiComp instanceof IUIUpdater) {
+//				final JComponent fComp = uiComp;
+////				final java.util.Timer timer = new Timer();
+//				Runnable r = new Runnable() {
+//					TimerTask currentTask;
+//					
+//					@Override
+//					public void run() {
+//						if (currentTask != null) currentTask.cancel();
+//						fComp.setBorder(new LineBorder(EXECUTORS_COLOR, 2));
+//						m_uiTimer.schedule(new TimerTask() {
+//
+//							@Override
+//							public void run() {
+//								SwingUtilities.invokeLater(new Runnable() {
+//
+//									@Override
+//									public void run() {
+//										fComp.setBorder(null);
+//									}
+//								});
+//							}
+//						}, 1000);
+//					}
+//					
+//				};
+//				((IUIUpdater) uiComp).addUpdateListener(r);
+//			}
+//			m_desktopPane.add(frame);
 		}
 	}
 
@@ -1102,62 +1107,66 @@ public class RainbowWindoe extends RainbowWindow
 		Map<String, Object> aui = m_uidb.containsKey("managers") ? (Map<String, Object>) m_uidb.get("managers")
 				: Collections.<String, Object>emptyMap();
 		for (IAdaptationManager a : analyzers.values()) {
-			String clazz = (String) aui.get(a.getClass().getName());
-			JComponent uiComp = null;
-			if (clazz != null) {
-				try {
-					Class<? extends JComponent> uiClass = (Class<? extends JComponent>) this.getClass().getClassLoader()
-							.loadClass(clazz);
-					uiComp = uiClass.newInstance();
-
-				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-				}
-			}
-			if (uiComp == null) {
-				uiComp = new ArchConsolePanel();
-			}
-			m_adaptationManagers.put(a.id(), uiComp);
-			JInternalFrame frame = new JInternalFrame(a.id(), true, false, true);
-			frame.setVisible(true);
-			frame.add(uiComp);
-			Dimension pf = uiComp.getPreferredSize();
-			frame.setSize(pf.width, pf.height+25);
-			frame.addPropertyChangeListener(e -> {
-				System.out.println("Selected " + a.id());
-				if ("selection".equals(e.getPropertyName())) {
-					m_selectionManager.selectionChanged(a);
-				}
-			});
-			if (uiComp instanceof IUIUpdater) {
-				final JComponent fComp = uiComp;
-//				final java.util.Timer timer = new Timer();
-				Runnable r = new Runnable() {
-					TimerTask currentTask;
-					
-					@Override
-					public void run() {
-						if (currentTask != null) currentTask.cancel();
-						fComp.setBorder(new LineBorder(ADAPTION_MANAGER_COLOR, 2));
-						m_uiTimer.schedule(new TimerTask() {
-
-							@Override
-							public void run() {
-								SwingUtilities.invokeLater(new Runnable() {
-
-									@Override
-									public void run() {
-										fComp.setBorder(null);
-									}
-								});
-							}
-						}, 1000);
-					}
-					
-				};
-				((IUIUpdater) uiComp).addUpdateListener(r);
-			}
-			
-			m_desktopPane.add(frame);
+			RainbowArchAdapationManagerModel model = new RainbowArchAdapationManagerModel(a);
+			RainbowAdaptationManagerController ctrl = new RainbowAdaptationManagerController(model, m_selectionManager, m_uidb);
+			ctrl.createView(m_desktopPane);
+			m_rainbowModel.addAdaptationManager(model);
+//			String clazz = (String) aui.get(a.getClass().getName());
+//			JComponent uiComp = null;
+//			if (clazz != null) {
+//				try {
+//					Class<? extends JComponent> uiClass = (Class<? extends JComponent>) this.getClass().getClassLoader()
+//							.loadClass(clazz);
+//					uiComp = uiClass.newInstance();
+//
+//				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+//				}
+//			}
+//			if (uiComp == null) {
+//				uiComp = new ArchConsolePanel();
+//			}
+//			m_adaptationManagers.put(a.id(), uiComp);
+//			JInternalFrame frame = new JInternalFrame(a.id(), true, false, true);
+//			frame.setVisible(true);
+//			frame.add(uiComp);
+//			Dimension pf = uiComp.getPreferredSize();
+//			frame.setSize(pf.width, pf.height+25);
+//			frame.addPropertyChangeListener(e -> {
+//				System.out.println("Selected " + a.id());
+//				if ("selection".equals(e.getPropertyName())) {
+//					m_selectionManager.selectionChanged(a);
+//				}
+//			});
+//			if (uiComp instanceof IUIUpdater) {
+//				final JComponent fComp = uiComp;
+////				final java.util.Timer timer = new Timer();
+//				Runnable r = new Runnable() {
+//					TimerTask currentTask;
+//					
+//					@Override
+//					public void run() {
+//						if (currentTask != null) currentTask.cancel();
+//						fComp.setBorder(new LineBorder(ADAPTION_MANAGER_COLOR, 2));
+//						m_uiTimer.schedule(new TimerTask() {
+//
+//							@Override
+//							public void run() {
+//								SwingUtilities.invokeLater(new Runnable() {
+//
+//									@Override
+//									public void run() {
+//										fComp.setBorder(null);
+//									}
+//								});
+//							}
+//						}, 1000);
+//					}
+//					
+//				};
+//				((IUIUpdater) uiComp).addUpdateListener(r);
+//			}
+//			
+//			m_desktopPane.add(frame);
 
 		}
 	}
@@ -1167,62 +1176,48 @@ public class RainbowWindoe extends RainbowWindow
 		Map<String, Object> aui = m_uidb.containsKey("analyzers") ? (Map<String, Object>) m_uidb.get("analyzers")
 				: Collections.<String, Object>emptyMap();
 		for (IRainbowAnalysis a : analyzers) {
-			String clazz = (String) aui.get(a.getClass().getName());
-			JComponent uiComp = null;
-			if (clazz != null) {
-				try {
-					Class<? extends JComponent> uiClass = (Class<? extends JComponent>) this.getClass().getClassLoader()
-							.loadClass(clazz);
-					uiComp = uiClass.newInstance();
-
-				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-				}
-
-			}
-			if (uiComp == null) {
-				uiComp = new ArchConsolePanel();
-			}
-			m_analyzers.put(a.id(), uiComp);
-			JInternalFrame frame = new JInternalFrame(a.id(), true, false, true);
-			frame.setVisible(true);
-			frame.add(uiComp);
-			Dimension s = uiComp.getPreferredSize();
-			frame.setSize(s.width, s.height+25);
-			frame.addPropertyChangeListener(e -> {
-				System.out.println("Selected " + a.id());
-				if ("selection".equals(e.getPropertyName())) {
-					m_selectionManager.selectionChanged(a);
-				}
-			});
-			if (uiComp instanceof IUIUpdater) {
-//				final java.util.Timer timer = new Timer();
-				final JComponent fComp = uiComp;
-				Runnable r = new Runnable() {
-					TimerTask currentTask;
-					
-					@Override
-					public void run() {
-						if (currentTask != null) currentTask.cancel();
-						fComp.setBorder(new LineBorder(ANALYZERS_COLOR, 2));
-						m_uiTimer.schedule(new TimerTask() {
-
-							@Override
-							public void run() {
-								SwingUtilities.invokeLater(new Runnable() {
-
-									@Override
-									public void run() {
-										fComp.setBorder(null);
-									}
-								});
-							}
-						}, 1000);
-					}
-					
-				};
-				((IUIUpdater) uiComp).addUpdateListener(r);
-			}
-			m_desktopPane.add(frame);
+			RainbowArchAnalysisModel model = new RainbowArchAnalysisModel(a);
+			RainbowAnalysisController ctrl = new RainbowAnalysisController(model, m_selectionManager, m_uidb);
+			ctrl.createView(m_desktopPane);
+			m_rainbowModel.addAnalyzer(model);
+			
+//			m_analyzers.put(a.id(), uiComp);
+//			
+//			frame.addPropertyChangeListener(e -> {
+//				System.out.println("Selected " + a.id());
+//				if ("selection".equals(e.getPropertyName())) {
+//					m_selectionManager.selectionChanged(a);
+//				}
+//			});
+//			if (uiComp instanceof IUIUpdater) {
+////				final java.util.Timer timer = new Timer();
+//				final JComponent fComp = uiComp;
+//				Runnable r = new Runnable() {
+//					TimerTask currentTask;
+//					
+//					@Override
+//					public void run() {
+//						if (currentTask != null) currentTask.cancel();
+//						fComp.setBorder(new LineBorder(ANALYZERS_COLOR, 2));
+//						m_uiTimer.schedule(new TimerTask() {
+//
+//							@Override
+//							public void run() {
+//								SwingUtilities.invokeLater(new Runnable() {
+//
+//									@Override
+//									public void run() {
+//										fComp.setBorder(null);
+//									}
+//								});
+//							}
+//						}, 1000);
+//					}
+//					
+//				};
+//				((IUIUpdater) uiComp).addUpdateListener(r);
+//			}
+//			m_desktopPane.add(frame);
 		}
 	}
 
@@ -1236,54 +1231,58 @@ public class RainbowWindoe extends RainbowWindow
 				String modelName = m.getModelName();
 				String modelType = m.getModelType();
 				ModelReference modelRef = new ModelReference(modelName, modelType);
-				if (!m_models.containsKey(modelRef.toString()) && !"UtilityModel".equals(modelType)
+				if (!m_rainbowModel.hasModel(modelRef.toString()) && !"UtilityModel".equals(modelType)
 						&& !"ExecutionHistory".equals(modelType)) {
-					JInternalFrame frame = new JInternalFrame(modelName, true, false, true);
-					frame.setVisible(true);
-					ArchModelPanel mp = new ArchModelPanel(modelRef);
-					frame.add(mp);
-					Dimension s = mp.getPreferredSize();
-					frame.setSize(s.width, s.height + 25);
-					ModelInfo mi = new ModelInfo();
-					mi.frame = frame;
-					mi.modelRef = modelRef;
-					m_models.put(modelRef.toString(), mi);
-					mi.panel = mp;
-
-					frame.addPropertyChangeListener(e -> {
-						System.out.println("Selected " + modelRef.toString());
-						if ("selection".equals(e.getPropertyName())) {
-							m_selectionManager.selectionChanged(mi);
-						}
-					});
-//					final java.util.Timer timer = new Timer();
-					Runnable r = new Runnable() {
-						TimerTask currentTask;
-						
-						@Override
-						public void run() {
-							if (currentTask != null) currentTask.cancel();
-							mp.setBorder(new LineBorder(MODELS_MANAGER_COLOR, 2));
-							mp.m_table.setSelectionBackground(MODELS_MANAGER_COLOR_LIGHT);
-							m_uiTimer.schedule(new TimerTask() {
-
-								@Override
-								public void run() {
-									SwingUtilities.invokeLater(new Runnable() {
-
-										@Override
-										public void run() {
-											mp.setBorder(null);
-											mp.m_table.clearSelection();
-										}
-									});
-								}
-							}, 1000);
-						}
-						
-					};
-					mp.addUpdateListener(r);
-					m_desktopPane.add(frame);
+					RainbowArchModelModel model = new RainbowArchModelModel(modelRef);
+					IRainbowUIController ctrl = new RainbowModelController(model, m_selectionManager);
+					JInternalFrame frame = ctrl.createView(m_desktopPane);
+					m_rainbowModel.addModel(model);
+//					JInternalFrame frame = new JInternalFrame(modelName, true, false, true);
+//					frame.setVisible(true);
+//					ArchModelPanel mp = new ArchModelPanel(modelRef);
+//					frame.add(mp);
+//					Dimension s = mp.getPreferredSize();
+//					frame.setSize(s.width, s.height + 25);
+//					ModelInfo mi = new ModelInfo();
+//					mi.frame = frame;
+//					mi.modelRef = modelRef;
+//					m_models.put(modelRef.toString(), mi);
+//					mi.panel = mp;
+//
+//					frame.addPropertyChangeListener(e -> {
+//						System.out.println("Selected " + modelRef.toString());
+//						if ("selection".equals(e.getPropertyName())) {
+//							m_selectionManager.selectionChanged(mi);
+//						}
+//					});
+////					final java.util.Timer timer = new Timer();
+//					Runnable r = new Runnable() {
+//						TimerTask currentTask;
+//						
+//						@Override
+//						public void run() {
+//							if (currentTask != null) currentTask.cancel();
+//							mp.setBorder(new LineBorder(MODELS_MANAGER_COLOR, 2));
+//							mp.m_table.setSelectionBackground(MODELS_MANAGER_COLOR_LIGHT);
+//							m_uiTimer.schedule(new TimerTask() {
+//
+//								@Override
+//								public void run() {
+//									SwingUtilities.invokeLater(new Runnable() {
+//
+//										@Override
+//										public void run() {
+//											mp.setBorder(null);
+//											mp.m_table.clearSelection();
+//										}
+//									});
+//								}
+//							}, 1000);
+//						}
+//						
+//					};
+//					mp.addUpdateListener(r);
+//					m_desktopPane.add(frame);
 				}
 			}
 		}
@@ -1447,39 +1446,39 @@ public class RainbowWindoe extends RainbowWindow
 
 	}
 
-	private JInternalFrame addProbeFrame(String probeId) {
-		JInternalFrame frame = new JInternalFrame(shortName(probeId));
-		frame.setFrameIcon(new ImageIcon(this.getClass().getResource("/probe.png"), shortName(probeId)));
-		frame.setResizable(true);
-		frame.setClosable(false);
-		frame.setIconifiable(true);
-		frame.setToolTipText(probeId);
-		JTextArea p = new JTextArea();
-		m_probeSections.put(probeId, p);
-		JScrollPane sp = new JScrollPane();
-		sp.setViewportView(p);
-		frame.add(sp, BorderLayout.CENTER);
-		m_desktopPane.add(frame);
-		frame.getDesktopIcon().setUI(new RainbowDesktopIconUI(frame.getFrameIcon()));
-		return frame;
-	}
+//	private JInternalFrame addProbeFrame(String probeId) {
+//		JInternalFrame frame = new JInternalFrame(shortName(probeId));
+//		frame.setFrameIcon(new ImageIcon(this.getClass().getResource("/probe.png"), shortName(probeId)));
+//		frame.setResizable(true);
+//		frame.setClosable(false);
+//		frame.setIconifiable(true);
+//		frame.setToolTipText(probeId);
+//		JTextArea p = new JTextArea();
+//		m_probeSections.put(probeId, p);
+//		JScrollPane sp = new JScrollPane();
+//		sp.setViewportView(p);
+//		frame.add(sp, BorderLayout.CENTER);
+//		m_desktopPane.add(frame);
+//		frame.getDesktopIcon().setUI(new RainbowDesktopIconUI(frame.getFrameIcon()));
+//		return frame;
+//	}
 
 	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-//					UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-					RainbowWindoe window = new RainbowWindoe(null);
-					JInternalFrame frame = window.addProbeFrame("Test");
-					frame.setSize(100, 100);
-					frame.setLocation(100, 100);
-					frame.setVisible(true);
-					window.m_frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+//		EventQueue.invokeLater(new Runnable() {
+//			public void run() {
+//				try {
+////					UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+//					RainbowWindoe window = new RainbowWindoe(null);
+//					JInternalFrame frame = window.addProbeFrame("Test");
+//					frame.setSize(100, 100);
+//					frame.setLocation(100, 100);
+//					frame.setVisible(true);
+//					window.m_frame.setVisible(true);
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		});
 	}
 
 	private static Pattern ERROR_PATTERN = Pattern.compile("\\[\\[(.*)\\]\\]: (.*)", Pattern.DOTALL);
@@ -1490,25 +1489,26 @@ public class RainbowWindoe extends RainbowWindow
 		super.report(component, type, message);
 		Matcher m = ERROR_PATTERN.matcher(message);
 		if (component == RainbowComponentT.MODEL) {
-			Collection<ModelInfo> values = m_models.values();
-			for (ModelInfo mi : values) {
-				mi.panel.processReport(type, message);
+			Collection<RainbowArchModelModel> values = m_rainbowModel.getModels();
+			for (RainbowArchModelModel mi : values) {
+				mi.getController().processReport(type, message);
 			}
 		} else if (component == RainbowComponentT.ANALYSIS && m.matches()) {
-			JComponent c = m_analyzers.get(m.group(1));
-			if (c instanceof IUIReporter) {
-				((IUIReporter) c).processReport(type, m.group(2));
-			}
+			RainbowArchAnalysisModel ma = m_rainbowModel.getAnalyzer(m.group(1));
+//			JComponent c = m_analyzers.get(m.group(1));
+			ma.getController().processReport(type, m.group(2));
+//			if (c instanceof IUIReporter) {
+//				((IUIReporter) c).processReport(type, m.group(2));
+//			}
 		} else if (component == RainbowComponentT.ADAPTATION_MANAGER && m.matches()) {
-			JComponent c = m_adaptationManagers.get(m.group(1));
-			if (c instanceof IUIReporter) {
-				((IUIReporter) c).processReport(type, m.group(2));
-			}
+			RainbowArchAdapationManagerModel mam = m_rainbowModel.getAdaptationManager(m.group(1));
+			mam.getController().processReport(type, m.group(2));
+//			if (c instanceof IUIReporter) {
+//				((IUIReporter) c).processReport(type, m.group(2));
+//			}
 		} else if (component == RainbowComponentT.EXECUTOR && m.matches()) {
-			JComponent c = m_executors.get(m.group(1));
-			if (c instanceof IUIReporter) {
-				((IUIReporter) c).processReport(type, m.group(2));
-			}
+			RainbowArchExecutorModel ex = m_rainbowModel.getExecutor(m.group(1));
+			ex.getController().processReport(type, m.group(2));
 		}
 
 		if (type == ReportType.ERROR || type == ReportType.FATAL) {
