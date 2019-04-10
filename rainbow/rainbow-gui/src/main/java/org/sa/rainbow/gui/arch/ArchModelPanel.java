@@ -81,21 +81,7 @@ public class ArchModelPanel extends JPanel implements IUIUpdater, IUIReporter, I
 		add(p, BorderLayout.CENTER);
 //		m_table.setAutoscrolls(true);
 		m_table.addComponentListener(new JTableCellDisplayer(m_table));
-		try {
-			m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort();
 
-			m_modelChangePort.subscribe(new IRainbowChangeBusSubscription() {
-
-				@Override
-				public boolean matches(IRainbowMessage message) {
-					return ref.getModelName().equals(message.getProperty(IModelChangeBusPort.MODEL_NAME_PROP))
-							&& ref.getModelType().equals(message.getProperty(IModelChangeBusPort.MODEL_TYPE_PROP));
-				}
-			}, this);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		
 		IModelInstance<Object> mi = Rainbow.instance().getRainbowMaster().modelsManager().getModelInstance(ref);
 		m_table.setPreferredScrollableViewportSize(new Dimension(200, 120));
