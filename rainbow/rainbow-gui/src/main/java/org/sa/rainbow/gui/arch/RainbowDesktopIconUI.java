@@ -94,13 +94,13 @@ public class RainbowDesktopIconUI extends BasicDesktopIconUI implements IErrorDi
 	}
 	
 	class SelectionMouseInputHandler extends MouseInputHandler {
-		@Override
-		public void mousePressed(MouseEvent e) {
-			super.mousePressed(e);
-			if (e.getClickCount() == 1) {
-				frame.firePropertyChange("selection", 0, 1);
-			}
-		}
+//		@Override
+//		public void mousePressed(MouseEvent e) {
+//			super.mousePressed(e);
+//			if (e.getClickCount() == 1) {
+//				frame.firePropertyChange("selection", 0, 1);
+//			}
+//		}
 	}
 
 	@Override

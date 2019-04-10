@@ -148,7 +148,7 @@ public class RainbowWindoe extends RainbowWindow
 
 	public static class SelectionManager {
 		public interface ISelectionListener {
-			public void selectionChanged(Object o);
+			public void selectionChanged(Object o, Boolean selected);
 		}
 
 		Collection<ISelectionListener> m_listeners = new HashSet<>();
@@ -161,9 +161,9 @@ public class RainbowWindoe extends RainbowWindow
 			m_listeners.remove(l);
 		}
 
-		public void selectionChanged(Object o) {
+		public void selectionChanged(Object o, Boolean selected) {
 			for (ISelectionListener l : m_listeners) {
-				SwingUtilities.invokeLater(() -> l.selectionChanged(o));
+				SwingUtilities.invokeLater(() -> l.selectionChanged(o, selected));
 			}
 		}
 
@@ -252,7 +252,8 @@ public class RainbowWindoe extends RainbowWindow
 
 		m_errorArea = createTextAreaInTab(m_selectionPanel, "Errors");
 
-		m_selectionManager.addSelectionListener(o -> {
+		m_selectionManager.addSelectionListener((o,selected) -> {
+			if (!selected) return;
 			m_probePanel.setVisible(false);
 			m_gaugePanel.setVisible(false);
 			if (o instanceof RainbowArchProbeModel) {

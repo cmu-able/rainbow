@@ -83,8 +83,8 @@ public abstract class AbstractRainbowController implements IRainbowUIController,
 
 	protected void attachControllerToFrame(JInternalFrame frame) {
 		frame.addPropertyChangeListener(e -> {
-			if ("selection".equals(e.getPropertyName())) {
-				m_selectionManager.selectionChanged(this.getModel());
+			if ("selected".equals(e.getPropertyName())) {
+				m_selectionManager.selectionChanged(this.getModel(),(Boolean )e.getNewValue());
 			}
 		});
 	}
