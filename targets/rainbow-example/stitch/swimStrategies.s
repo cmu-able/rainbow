@@ -9,7 +9,7 @@ define boolean HighRT = M.LB0.basicResponseTime >= M.RT_THRESHOLD;
 define boolean Underloaded = M.seqAverage(/M.components:!T.ServerT[isArchEnabled==true]/...load) < 0.3;
 strategy LowerResponseTime1 [HighRT] {
 	t1: (HightRT) -> TAddServer() @[15000] {
-		t1a: (HighRT) -> TIncDimmer() {
+		t1a: (HighRT) -> TDecDimmer() {
 		  t1a1: (default) -> done;
 		}
 		t1b: (default) -> done;
@@ -26,11 +26,19 @@ strategy LowerResponseTime2 [HighRT] {
 }
 
 strategy DecreaseCost [Underloaded] {
-	t1: (Underloaded) -> TDecDimmer() {
-		t1a: (Underloaded) -> TRemoveServer() {
+	t1: (Underloaded) -> TRemoveServer() {
+		t1a: (success) -> done;
+	}
+/*	t1: (Underloaded) -> TRemoveServer() {
+		t1a: (Underloaded) -> TIncDimmer() {
 		  t1a1: (default) -> done;
 		}
 	}
+	t2: (Underloaded) -> TIncDimmer() {
+		t2a: (Underloaded) -> TRemoveServer() {
+		  t2a1: (default) -> done;
+		}
+	}*/
 }
 
 
