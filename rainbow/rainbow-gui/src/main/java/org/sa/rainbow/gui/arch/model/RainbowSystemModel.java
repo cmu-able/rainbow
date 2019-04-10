@@ -137,4 +137,15 @@ public class RainbowSystemModel {
 		return m_executors.values();
 	}
 
+	public RainbowArchModelElement getRainbowElement(String id) {
+		RainbowArchModelElement el = getProbe(id);
+		if (el == null) el = getGauge(id);
+		if (el == null) el = getModel(id);
+		if (el == null) el = getAnalyzer(id);
+		if (el == null) el = getAdaptationManager(id);
+		if (el == null) el = getExecutor(id);
+		if (el == null) el = getEffectorModel(id);
+		return el;
+	}
+
 }

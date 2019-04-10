@@ -28,7 +28,6 @@ import org.sa.rainbow.gui.arch.model.RainbowArchGaugeModel;
 
 public class GaugeDetailPanel extends JPanel {
 	private JTextField m_nameField;
-	private JTable m_publishedOperations;
 	private JTextField m_typeField;
 	private JTextField m_modelField;
 	private JTable m_operations;
@@ -38,9 +37,9 @@ public class GaugeDetailPanel extends JPanel {
 
 	public GaugeDetailPanel() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[] { 0, 0, 0, 0, 0, 0 };
+		gridBagLayout.columnWidths = new int[] { 0, 0, 0, 0, 0 };
 		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0 };
-		gridBagLayout.columnWeights = new double[] { 0.0, 1.0, 0.0, 1.0, 1.0, Double.MIN_VALUE };
+		gridBagLayout.columnWeights = new double[] { 0.0, 1.0, 0.0, 1.0, Double.MIN_VALUE };
 		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE };
 		setLayout(gridBagLayout);
 
@@ -73,7 +72,7 @@ public class GaugeDetailPanel extends JPanel {
 		m_setup = new JTable(new DefaultTableModel(new Object[][] {}, new String[] { "Name", "Type", "Value" }));
 		GridBagConstraints gbc_setup = new GridBagConstraints();
 		gbc_setup.gridheight = 3;
-		gbc_setup.insets = new Insets(0, 0, 5, 5);
+		gbc_setup.insets = new Insets(0, 0, 5, 0);
 		gbc_setup.fill = GridBagConstraints.BOTH;
 		gbc_setup.gridx = 3;
 		gbc_setup.gridy = 0;
@@ -81,13 +80,13 @@ public class GaugeDetailPanel extends JPanel {
 		sp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		add(sp, gbc_setup);
 
-		JLabel lblCommands = new JLabel("Published operations:");
-		GridBagConstraints gbc_lblCommands = new GridBagConstraints();
-		gbc_lblCommands.insets = new Insets(0, 0, 5, 0);
-		gbc_lblCommands.anchor = GridBagConstraints.WEST;
-		gbc_lblCommands.gridx = 4;
-		gbc_lblCommands.gridy = 0;
-		add(lblCommands, gbc_lblCommands);
+//		JLabel lblCommands = new JLabel("Published operations:");
+//		GridBagConstraints gbc_lblCommands = new GridBagConstraints();
+//		gbc_lblCommands.insets = new Insets(0, 0, 5, 0);
+//		gbc_lblCommands.anchor = GridBagConstraints.WEST;
+//		gbc_lblCommands.gridx = 4;
+//		gbc_lblCommands.gridy = 0;
+//		add(lblCommands, gbc_lblCommands);
 
 		JLabel lblType = new JLabel("Type:");
 		GridBagConstraints gbc_lblType = new GridBagConstraints();
@@ -106,16 +105,16 @@ public class GaugeDetailPanel extends JPanel {
 		gbc_typeField.gridy = 1;
 		add(m_typeField, gbc_typeField);
 
-		m_publishedOperations = new JTable(
-				new DefaultTableModel(new Object[][] {}, new String[] { "Operation", "Target", "Parameters" }));
-		GridBagConstraints gbc_publishedOperations = new GridBagConstraints();
-		gbc_publishedOperations.fill = GridBagConstraints.BOTH;
-		gbc_publishedOperations.gridheight = 3;
-		gbc_publishedOperations.gridx = 4;
-		gbc_publishedOperations.gridy = 1;
-		 sp = new JScrollPane(m_publishedOperations);
-		sp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		add(sp, gbc_publishedOperations);
+//		m_publishedOperations = new JTable(
+//				new DefaultTableModel(new Object[][] {}, new String[] { "Operation", "Target", "Parameters" }));
+//		GridBagConstraints gbc_publishedOperations = new GridBagConstraints();
+//		gbc_publishedOperations.fill = GridBagConstraints.BOTH;
+//		gbc_publishedOperations.gridheight = 3;
+//		gbc_publishedOperations.gridx = 4;
+//		gbc_publishedOperations.gridy = 1;
+//		 sp = new JScrollPane(m_publishedOperations);
+//		sp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+//		add(sp, gbc_publishedOperations);
 
 		JLabel lblModel = new JLabel("Model:");
 		GridBagConstraints gbc_lblModel = new GridBagConstraints();
@@ -163,7 +162,6 @@ public class GaugeDetailPanel extends JPanel {
 
 		m_config = new JTable(new DefaultTableModel(new Object[][] {}, new String[] { "Name", "Type", "Value" }));
 		GridBagConstraints gbc_config = new GridBagConstraints();
-		gbc_config.insets = new Insets(0, 0, 0, 5);
 		gbc_config.fill = GridBagConstraints.BOTH;
 		gbc_config.gridx = 3;
 		gbc_config.gridy = 3;
@@ -177,10 +175,9 @@ public class GaugeDetailPanel extends JPanel {
 		if (gi == m_gaugeInfo) return;
 		if (gi != m_gaugeInfo) {
 			m_gaugeInfo = gi;
-			clearTable((DefaultTableModel) m_publishedOperations.getModel());
-			clearTable((DefaultTableModel) m_operations.getModel());
-			clearTable((DefaultTableModel) m_setup.getModel());
-			clearTable((DefaultTableModel) m_config.getModel());
+			GaugeTabbedPane.clearTable((DefaultTableModel) m_operations.getModel());
+			GaugeTabbedPane.clearTable((DefaultTableModel) m_setup.getModel());
+			GaugeTabbedPane.clearTable((DefaultTableModel) m_config.getModel());
 			m_nameField.setText("");
 			m_typeField.setText("");
 			m_modelField.setText("");
@@ -192,7 +189,7 @@ public class GaugeDetailPanel extends JPanel {
 			m_modelField.setText(desc.modelDesc().getName() + ":" + desc.modelDesc().getType());
 			List<Pair<String, OperationRepresentation>> commandSignatures = desc.commandSignatures();
 			for (Pair<String, OperationRepresentation> cs : commandSignatures) {
-				String[] od = getOperationData(cs.secondValue());
+				String[] od = GaugeTabbedPane.getOperationData(cs.secondValue());
 				String[] row = new String[] { cs.firstValue(), od[0], od[1], od[2] };
 				((DefaultTableModel) m_operations.getModel()).addRow(row);
 			}
@@ -211,16 +208,11 @@ public class GaugeDetailPanel extends JPanel {
 				}
 			});
 
-			for (int i = 0; i < Math.min(100, operations.size()); i++) {
-				String[] row = getOperationData(operations.get(i).secondValue());
-				((DefaultTableModel) m_publishedOperations.getModel()).addRow(row);
-			}
+			
 		}
 	}
 
-	public void updateReport(IRainbowOperation op) {
-		((DefaultTableModel) m_publishedOperations.getModel()).insertRow(0, getOperationData(op));
-	}
+
 
 	protected void fillPAram(List<TypedAttributeWithValue> configParams, JTable t) {
 		for (TypedAttributeWithValue tav : configParams) {
@@ -229,23 +221,8 @@ public class GaugeDetailPanel extends JPanel {
 		}
 	}
 
-	protected String[] getOperationData(IRainbowOperation command) {
-		String[] data = new String[4];
-		data[0] = command.getName();
-		data[1] = command.getTarget();
-		StringBuffer params = new StringBuffer();
-		for (String p : command.getParameters()) {
-			params.append(p);
-			params.append(",");
-		}
-		data[2] = params.toString();
-		return data;
-	}
+	
 
-	protected void clearTable(DefaultTableModel m) {
-		for (int i = 0; i < m.getRowCount(); i++) {
-			m.removeRow(0);
-		}
-	}
+	
 
 }

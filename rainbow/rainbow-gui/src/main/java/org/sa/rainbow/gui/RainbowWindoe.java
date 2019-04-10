@@ -3,7 +3,6 @@ package org.sa.rainbow.gui;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -22,7 +21,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,7 +30,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;
-import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
@@ -41,7 +38,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
-import javax.swing.border.LineBorder;
 
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.EdgeRejectedException;
@@ -79,7 +75,6 @@ import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
-import org.sa.rainbow.gui.arch.ArchModelPanel;
 import org.sa.rainbow.gui.arch.RainbowDesktopManager;
 import org.sa.rainbow.gui.arch.controller.IRainbowUIController;
 import org.sa.rainbow.gui.arch.controller.RainbowAdaptationManagerController;
@@ -89,16 +84,15 @@ import org.sa.rainbow.gui.arch.controller.RainbowExecutorController;
 import org.sa.rainbow.gui.arch.controller.RainbowGaugeController;
 import org.sa.rainbow.gui.arch.controller.RainbowModelController;
 import org.sa.rainbow.gui.arch.controller.RainbowProbeController;
-import org.sa.rainbow.gui.arch.elements.ArchConsolePanel;
 import org.sa.rainbow.gui.arch.elements.GaugeDetailPanel;
-import org.sa.rainbow.gui.arch.elements.IUIReporter;
-import org.sa.rainbow.gui.arch.elements.IUIUpdater;
+import org.sa.rainbow.gui.arch.elements.GaugeTabbedPane;
 import org.sa.rainbow.gui.arch.elements.ProbeTabbedPane;
 import org.sa.rainbow.gui.arch.model.RainbowArchAdapationManagerModel;
 import org.sa.rainbow.gui.arch.model.RainbowArchAnalysisModel;
 import org.sa.rainbow.gui.arch.model.RainbowArchEffectorModel;
 import org.sa.rainbow.gui.arch.model.RainbowArchExecutorModel;
 import org.sa.rainbow.gui.arch.model.RainbowArchGaugeModel;
+import org.sa.rainbow.gui.arch.model.RainbowArchModelElement;
 import org.sa.rainbow.gui.arch.model.RainbowArchModelModel;
 import org.sa.rainbow.gui.arch.model.RainbowArchProbeModel;
 import org.sa.rainbow.gui.arch.model.RainbowSystemModel;
@@ -196,7 +190,7 @@ public class RainbowWindoe extends RainbowWindow
 
 	private ProbeTabbedPane m_probePanel;
 
-	private GaugeDetailPanel m_gaugePanel;
+	private GaugeTabbedPane m_gaugePanel;
 
 	private JLabel m_statusWindow;
 
@@ -299,7 +293,7 @@ public class RainbowWindoe extends RainbowWindow
 	@Override
 	protected void createGaugesUI() {
 
-		m_gaugePanel = new GaugeDetailPanel();
+		m_gaugePanel = new GaugeTabbedPane();
 		m_detailsPanel.add(m_gaugePanel);
 		m_gaugePanel.setVisible(false);
 		((CardLayout) m_detailsPanel.getLayout()).addLayoutComponent(m_gaugePanel, "gauges");
@@ -432,8 +426,7 @@ public class RainbowWindoe extends RainbowWindow
 				}
 			}
 
-			if (!layoutDOT())
-				layoutGaugeProbeLevels();
+			layoutDOT();
 
 		} finally {
 		}
@@ -471,59 +464,67 @@ public class RainbowWindoe extends RainbowWindow
 				graphBB = adjustFromTop(graphBB, (float) h);
 			}
 			for (Node n : inGraph.getNodeSet()) {
-				if (m_rainbowModel.hasGauge(n.getId())) {
-					RainbowArchGaugeModel gauge = m_rainbowModel.getGauge(n.getId());
+				RainbowArchModelElement model = m_rainbowModel.getRainbowElement(n.getId());
+				if (model != null) {
 					String pos = (String) n.getAttribute("pos");
 					Point2D location = new Point2D.Float(Float.parseFloat(pos.split(",")[0])/* + 10*/,
 							Float.parseFloat(pos.split(",")[1])); ///* + 10*/, getDesktopFram(a).getBounds().getSize());
 					Point2D realPoint = location;
-					gauge.getController().move(realPoint, false);
+					model.getController().move(realPoint, false);
 				}
-				else if (m_rainbowModel.hasProbe(n.getId())) {
-					RainbowArchProbeModel probe = m_rainbowModel.getProbe(n.getId());
-					String pos = (String) n.getAttribute("pos");
-					Point2D location = new Point2D.Float(Float.parseFloat(pos.split(",")[0])/* + 10*/,
-							Float.parseFloat(pos.split(",")[1])); ///* + 10*/, getDesktopFram(a).getBounds().getSize());
-					Point2D realPoint = location;
-					probe.getController().move(realPoint, false);
-				}
-				else if (m_rainbowModel.hasModel(n.getId())) {
-					RainbowArchModelModel mi = m_rainbowModel.getModel(n.getId());
-					String pos = (String) n.getAttribute("pos");
-					Point2D location = new Point2D.Float(Float.parseFloat(pos.split(",")[0])/* + 10*/,
-							Float.parseFloat(pos.split(",")[1])); ///* + 10*/, getDesktopFram(a).getBounds().getSize());
-					Point2D realPoint = location;
-					mi.getController().move(realPoint, false);
-
-				} else if (m_rainbowModel.hasAnalyzer(n.getId())) {
-					RainbowArchAnalysisModel a = m_rainbowModel.getAnalyzer(n.getId());
-					String pos = (String) n.getAttribute("pos");
-					Point2D location = new Point2D.Float(Float.parseFloat(pos.split(",")[0])/* + 10*/,
-							Float.parseFloat(pos.split(",")[1])); ///* + 10*/, getDesktopFram(a).getBounds().getSize());
-					Point2D realPoint = location;
-					a.getController().move(realPoint, false);
-				} else if (m_rainbowModel.hasAdaptationManager(n.getId())) {
-					RainbowArchAdapationManagerModel am = m_rainbowModel.getAdaptationManager(n.getId());
-					String pos = (String) n.getAttribute("pos");
-					Point2D location = new Point2D.Float(Float.parseFloat(pos.split(",")[0])/* + 10*/,
-							Float.parseFloat(pos.split(",")[1])); ///* + 10*/, getDesktopFram(a).getBounds().getSize());
-					Point2D realPoint = location;
-					am.getController().move(realPoint, false);
-				} else if (m_rainbowModel.hasExecutor(n.getId())) {
-					RainbowArchExecutorModel ex = m_rainbowModel.getExecutor(n.getId());
-					String pos = (String) n.getAttribute("pos");
-					Point2D location = new Point2D.Float(Float.parseFloat(pos.split(",")[0])/* + 10*/,
-							Float.parseFloat(pos.split(",")[1])); ///* + 10*/, getDesktopFram(a).getBounds().getSize());
-					Point2D realPoint = location;
-					ex.getController().move(realPoint, false);
-				} else if (m_rainbowModel.hasEffector(n.getId())) {
-					RainbowArchEffectorModel effectorModel = m_rainbowModel.getEffectorModel(n.getId());
-					String pos = (String) n.getAttribute("pos");
-					Point2D location = new Point2D.Float(Float.parseFloat(pos.split(",")[0])/* + 10*/,
-							Float.parseFloat(pos.split(",")[1])); ///* + 10*/, getDesktopFram(a).getBounds().getSize());
-					Point2D realPoint = location;
-					effectorModel.getController().move(realPoint, false);
-				} 
+//				if (m_rainbowModel.hasGauge(n.getId())) {
+//					RainbowArchGaugeModel gauge = m_rainbowModel.getGauge(n.getId());
+//					String pos = (String) n.getAttribute("pos");
+//					Point2D location = new Point2D.Float(Float.parseFloat(pos.split(",")[0])/* + 10*/,
+//							Float.parseFloat(pos.split(",")[1])); ///* + 10*/, getDesktopFram(a).getBounds().getSize());
+//					Point2D realPoint = location;
+//					gauge.getController().move(realPoint, false);
+//				}
+//				else if (m_rainbowModel.hasProbe(n.getId())) {
+//					RainbowArchProbeModel probe = m_rainbowModel.getProbe(n.getId());
+//					String pos = (String) n.getAttribute("pos");
+//					Point2D location = new Point2D.Float(Float.parseFloat(pos.split(",")[0])/* + 10*/,
+//							Float.parseFloat(pos.split(",")[1])); ///* + 10*/, getDesktopFram(a).getBounds().getSize());
+//					Point2D realPoint = location;
+//					probe.getController().move(realPoint, false);
+//				}
+//				else if (m_rainbowModel.hasModel(n.getId())) {
+//					RainbowArchModelModel mi = m_rainbowModel.getModel(n.getId());
+//					String pos = (String) n.getAttribute("pos");
+//					Point2D location = new Point2D.Float(Float.parseFloat(pos.split(",")[0])/* + 10*/,
+//							Float.parseFloat(pos.split(",")[1])); ///* + 10*/, getDesktopFram(a).getBounds().getSize());
+//					Point2D realPoint = location;
+//					mi.getController().move(realPoint, false);
+//
+//				} else if (m_rainbowModel.hasAnalyzer(n.getId())) {
+//					RainbowArchAnalysisModel a = m_rainbowModel.getAnalyzer(n.getId());
+//					String pos = (String) n.getAttribute("pos");
+//					Point2D location = new Point2D.Float(Float.parseFloat(pos.split(",")[0])/* + 10*/,
+//							Float.parseFloat(pos.split(",")[1])); ///* + 10*/, getDesktopFram(a).getBounds().getSize());
+//					Point2D realPoint = location;
+//					a.getController().move(realPoint, false);
+//				} else if (m_rainbowModel.hasAdaptationManager(n.getId())) {
+//					RainbowArchAdapationManagerModel am = m_rainbowModel.getAdaptationManager(n.getId());
+//					String pos = (String) n.getAttribute("pos");
+//					Point2D location = new Point2D.Float(Float.parseFloat(pos.split(",")[0])/* + 10*/,
+//							Float.parseFloat(pos.split(",")[1])); ///* + 10*/, getDesktopFram(a).getBounds().getSize());
+//					Point2D realPoint = location;
+//					am.getController().move(realPoint, false);
+//				} else if (m_rainbowModel.hasExecutor(n.getId())) {
+//					RainbowArchExecutorModel ex = m_rainbowModel.getExecutor(n.getId());
+//					String pos = (String) n.getAttribute("pos");
+//					Point2D location = new Point2D.Float(Float.parseFloat(pos.split(",")[0])/* + 10*/,
+//							Float.parseFloat(pos.split(",")[1])); ///* + 10*/, getDesktopFram(a).getBounds().getSize());
+//					Point2D realPoint = location;
+//					ex.getController().move(realPoint, false);
+//				} else if (m_rainbowModel.hasEffector(n.getId())) {
+//					RainbowArchEffectorModel effectorModel = m_rainbowModel.getEffectorModel(n.getId());
+//					String pos = (String) n.getAttribute("pos");
+//					Point2D location = new Point2D.Float(Float.parseFloat(pos.split(",")[0])/* + 10*/,
+//							Float.parseFloat(pos.split(",")[1])); ///* + 10*/, getDesktopFram(a).getBounds().getSize());
+//					Point2D realPoint = location;
+//					effectorModel.getController().move(realPoint, false);
+//				} 
 			}
 
 			for (Edge e : inGraph.getEdgeSet()) {
@@ -706,54 +707,7 @@ public class RainbowWindoe extends RainbowWindow
 		return Math.round(unit);
 	}
 
-	private void layoutGaugeProbeLevels() {
-//		ArrayList<String> processedProbes = new ArrayList<>(m_probes.size());
-//		ArrayList<String> processedGauges = new ArrayList<>();
-//		for (Entry<String, GaugeInfo> ge : m_gauges.entrySet()) {
-//			for (String pid : ge.getValue().getProbes()) {
-//				if (processedProbes.contains(pid) && !m_probes.get(pid).gauges.isEmpty()) {
-//					String nextToGauge = m_probes.get(pid).gauges.iterator().next();
-//					int gi = processedGauges.indexOf(nextToGauge);
-//					if (gi == -1) {
-//						processedGauges.add(ge.getKey());
-//					} else {
-//						processedGauges.add(gi + 1, ge.getKey());
-//						break;
-//					}
-//				}
-//			}
-//			if (!processedGauges.contains(ge.getKey())) {
-//				processedGauges.add(ge.getKey());
-//			}
-//			for (String pid : ge.getValue().getProbes()) {
-//				if (!processedProbes.contains(pid))
-//					processedProbes.add(pid);
-//			}
-//		}
-//		for (String pid : m_probes.keySet()) {
-//			if (!processedProbes.contains(pid))
-//				processedProbes.add(pid);
-//		}
-//		int gidx = 0;
-//		int gaugeStep = Math.round(GAUGE_REGION.width / (float) processedGauges.size());
-//		for (String gid : processedGauges) {
-//			JDesktopIcon frameToPosition = m_gauges.get(gid).getFrame().getDesktopIcon();
-//			frameToPosition.setLocation(
-//					GAUGE_REGION.x + gidx * gaugeStep + (gaugeStep - frameToPosition.getWidth()) / 2,
-//					GAUGE_REGION.y + GAUGE_REGION.height / 2 - frameToPosition.getHeight() / 2);
-//			gidx++;
-//		}
-//
-//		gidx = 0;
-//		gaugeStep = Math.round(PROBE_REGION.width / (float) processedProbes.size());
-//		for (String gid : processedProbes) {
-//			JDesktopIcon frameToPosition = m_probes.get(gid).frame.getDesktopIcon();
-//			frameToPosition.setLocation(
-//					PROBE_REGION.x + gidx * gaugeStep + (gaugeStep - frameToPosition.getWidth()) / 2,
-//					PROBE_REGION.y + PROBE_REGION.height / 2 - frameToPosition.getHeight() / 2);
-//			gidx++;
-//		}
-	}
+
 
 	protected void populateUI() {
 		m_statusWindow.setText("Populating UI");

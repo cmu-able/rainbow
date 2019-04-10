@@ -68,6 +68,12 @@ public abstract class RainbowArchModelElement {
 
 	public abstract String getId();
 
-
+	public void addPropertyChangeListener (PropertyChangeListener l) {
+		pcs.addPropertyChangeListener(l);
+	}
+	
+	public void removePropertyChangeListener(PropertyChangeListener l) {
+		pcs.removePropertyChangeListener(l);
+	}
 
 }
