@@ -25,7 +25,8 @@ import org.sa.rainbow.gui.arch.controller.RainbowModelController;
 
 public class RainbowArchModelModel extends RainbowArchModelElement implements IRainbowModelChangeCallback {
 
-	private static final String OPERATION_PROP = "operation";
+	public static final String OPERATION_PROP = "operation";
+	public static final String OPERATION__ERROR_PROP = "operrror";
 	private ModelReference m_modelRef;
 	private Set<String> m_gauges = new HashSet<>();
 	private List<Pair<Date,IRainbowOperation>> m_reports = new LinkedList<>();
@@ -104,6 +105,8 @@ public class RainbowArchModelModel extends RainbowArchModelElement implements IR
 	
 	public void reportErrorForOperation(IRainbowOperation op, String error) {
 		m_errors.add(new Pair<> (new Date(), op));
+		pcs.firePropertyChange(OPERATION__ERROR_PROP, null, op);
+
 	}
 
 	public List<Pair<Date, IRainbowOperation>> getReports() {

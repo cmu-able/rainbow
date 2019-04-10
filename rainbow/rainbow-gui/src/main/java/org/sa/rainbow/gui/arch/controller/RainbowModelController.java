@@ -7,6 +7,7 @@ import java.beans.PropertyChangeEvent;
 import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 
+import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.gui.RainbowWindoe;
 import org.sa.rainbow.gui.RainbowWindoe.SelectionManager;
@@ -43,8 +44,15 @@ public class RainbowModelController extends AbstractRainbowController {
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		// TODO Auto-generated method stub
-
+		switch (evt.getPropertyName()) {
+		case RainbowArchModelModel.OPERATION_PROP:
+			m_mp.addOperation((IRainbowOperation )evt.getNewValue(), false, false);
+			break;
+		case RainbowArchModelModel.OPERATION__ERROR_PROP:
+			m_mp.addOperation((IRainbowOperation )evt.getNewValue(), true, false);
+			m_frame.setFrameIcon(RainbowWindoe.ERROR_ICON);
+			break;
+		}
 	}
 
 	@Override

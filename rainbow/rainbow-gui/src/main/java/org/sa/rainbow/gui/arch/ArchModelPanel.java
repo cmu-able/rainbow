@@ -159,7 +159,7 @@ public class ArchModelPanel extends JPanel implements IUIUpdater, IUIReporter, I
 	}
 
 
-	private void addOperation(IRainbowOperation op, boolean error, boolean extend) {
+	public void addOperation(IRainbowOperation op, boolean error, boolean extend) {
 		DefaultTableModel tableModel = (DefaultTableModel) m_table.getModel();
 		String[] data = getTableData(op, error);
 		Integer row = m_op2row.get(op.getName() + op.getTarget());
