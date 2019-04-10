@@ -46,50 +46,6 @@ gauge-types:
         default: ~
     comment: "DimmerGaugeT measures and reports the dimmer value of the system"
 
-  ArrivalRateT:
-    commands:
-      arrivalRate : LoadBalancerT.setArrivalRate(double)
-    setupParams:
-      targetIP:
-        type:    String
-        default: "localhost"
-      beaconPeriod:
-        type:    long
-        default: 30000
-      javaClass:
-        type:    String
-        default: "org.sa.rainbow.translator.swim.gauges.SimpleGauge"
-    configParams:
-      samplingFrequency:
-        type:    long
-        default: 5000
-      targetProbeType:
-        type:    String
-        default: ~
-    comment: "ArrivalRateT measures and reports the request arrival rate"
-
-  ArrivalRateTST:
-    commands:
-      arrivalRate : BogusT.observe(double)
-    setupParams:
-      targetIP:
-        type:    String
-        default: "localhost"
-      beaconPeriod:
-        type:    long
-        default: 30000
-      javaClass:
-        type:    String
-        default: "org.sa.rainbow.translator.swim.gauges.SimpleGauge"
-    configParams:
-      samplingFrequency:
-        type:    long
-        default: 5000
-      targetProbeType:
-        type:    String
-        default: ~
-    comment: "DimmerGaugeTST feeds the time series predictor for the request arrival rate"
-
   BasicResponseTimeT:
     commands:
       basicResponseTime : LoadBalancerT.setBasicResponseTime(double)
@@ -134,50 +90,6 @@ gauge-types:
         default: ~
     comment: ""
 
-  BasicThroughputT:
-    commands:
-      basicThroughput : LoadBalancerT.setBasicThroughput(double)
-    setupParams:
-      targetIP:
-        type:    String
-        default: "localhost"
-      beaconPeriod:
-        type:    long
-        default: 30000
-      javaClass:
-        type:    String
-        default: "org.sa.rainbow.translator.swim.gauges.SimpleGauge"
-    configParams:
-      samplingFrequency:
-        type:    long
-        default: 15000
-      targetProbeType:
-        type:    String
-        default: ~
-    comment: ""
-
-  OptThroughputT:
-    commands:
-      optThroughput : LoadBalancerT.setOptThroughput(double)
-    setupParams:
-      targetIP:
-        type:    String
-        default: "localhost"
-      beaconPeriod:
-        type:    long
-        default: 30000
-      javaClass:
-        type:    String
-        default: "org.sa.rainbow.translator.swim.gauges.SimpleGauge"
-    configParams:
-      samplingFrequency:
-        type:    long
-        default: 15000
-      targetProbeType:
-        type:    String
-        default: ~
-    comment: ""
-
   ServerEnablementGaugeT:
     commands:
       enableServer: ServerT.enableServer(boolean)
@@ -194,7 +106,7 @@ gauge-types:
     configParams:
       samplingFrequency:
         type: long
-        default: 15000
+        default: 10000
       targetProbeType:
         type: String
         default: ~
@@ -219,7 +131,7 @@ gauge-types:
     configParams:
       samplingFrequency:
         type: long
-        default: 15000
+        default: 10000
       targetProbeType:
         type: String
         default: ~
@@ -229,26 +141,6 @@ gauge-types:
     comment: "ServerActivationGaugeT reports if a server is active or not. serverNum is the server number (e.g., 1, 2 3), so that if there are N active servers, this server is active if N >= serverNum"
 
 gauge-instances:
-  ArrivalRateTSG0:
-    type:  ArrivalRateTST
-    model: "ArrivalRate:TSP"
-    commands:
-      arrivalRate : x.observe($<arrivalRate>)
-    setupValues:
-      targetIP: "${customize.system.target.lb}"
-    configValues:
-      targetProbeType  : arrivalRate
-    comment: ""
-  ArrivalRateG0:
-    type:  ArrivalRateT
-    model: "SwimSys:Acme"
-    commands:
-      arrivalRate : LB0.setArrivalRate($<arrivalRate>)
-    setupValues:
-      targetIP: "${customize.system.target.lb}"
-    configValues:
-      targetProbeType  : arrivalRate
-    comment: ""
   DimmerG0:
     type:  DimmerGaugeT
     model: "SwimSys:Acme"
@@ -355,26 +247,6 @@ gauge-instances:
     configValues:
       targetProbeType  : load1
     comment: "LoadG1 is associated with the component server1 of the System"
-  BasicThroughputG0:
-    type:  BasicThroughputT
-    model: "SwimSys:Acme"
-    commands:
-      basicThroughput : LB0.setBasicThroughput($<basicThroughput>)
-    setupValues:
-      targetIP: "${customize.system.target.lb}"
-    configValues:
-      targetProbeType  : basicThroughput
-    comment: ""
-  OptThroughputG0:
-    type:  OptThroughputT
-    model: "SwimSys:Acme"
-    commands:
-      optThroughput : LB0.setOptThroughput($<optThroughput>)
-    setupValues:
-      targetIP: "${customize.system.target.lb}"
-    configValues:
-      targetProbeType  : optThroughput
-    comment: ""
   LoadG2:
     type:  LoadGaugeT
     model: "SwimSys:Acme"

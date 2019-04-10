@@ -112,5 +112,6 @@ COPY deployments/rainbow-example/docker/rainbow.png /headless/
 COPY deployments/rainbow-example/docker/SWIM.png /headless/
 COPY deployments/rainbow-example/docker/Rainbow.desktop /headless/Desktop
 COPY deployments/rainbow-example/docker/SWIM.desktop /headless/Desktop
-RUN chmod +x /headless/Desktop/Rainbow.desktop /headless/Desktop/SWIM.desktop
+COPY deployments/rainbow-example/docker/Rainbow-debug.desktop /headless/Desktop
+RUN chmod +x /headless/Desktop/Rainbow.desktop /headless/Desktop/SWIM.desktop /headless/Desktop/Rainbow-debug.desktop
 #ENTRYPOINT ["./rainbow-oracle.sh", "swim"]

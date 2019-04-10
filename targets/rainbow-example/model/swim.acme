@@ -66,6 +66,9 @@ Family EnvType = {
 
 Family SwimFam extends EnvType with {
 
+    analysis Average(s : set{float}):float =
+      sum(s) / size(s);
+
     Port Type HttpPortT extends ArchPortT with {
 
     }
@@ -179,7 +182,8 @@ System SwimSys : SwimFam = new SwimFam extended with {
     Property RT_THRESHOLD = 0.75;
     Property ADD_SERVER_LATENCY_SEC = 120;
     
-    rule GoodResponseTime = invariant LB0.basicResponseTime <= RT_THRESHOLD && LB0.optResponseTime <= RT_THRESHOLD;
-    rule NoOverloadedServer = invariant ! exists s : ServerT in self.components | (s.isArchEnabled and s.load > 1) 
+    rule GoodResponseTime = invariant LB0.basicResponseTime <= RT_THRESHOLD and LB0.optResponseTime <= RT_THRESHOLD;
+    rule NoOverloadedServer = invariant ! exists s :! ServerT in self.components | (s.isArchEnabled and s.load > 1); 
+    rule SystemUtilized = invariant !Average(/self/components:!ServerT[isArchEnabled==true]/load) < 0.3; 
 }
 

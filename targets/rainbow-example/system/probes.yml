@@ -50,14 +50,6 @@ probes:
       mode: continual
       path    : "${_probes.commonPath}/genericProbe.pl"
       argument: "-d 5000 get_utilization server3"
-  ArrivalRateProbe:
-    alias: arrivalRate
-    location: "${customize.system.target.lb}"
-    type: script
-    scriptInfo:
-      mode: continual
-      path    : "${_probes.commonPath}/genericProbe.pl"
-      argument: "-d 5000 get_arrival_rate"
   BasicResponseTimeProbe:
     alias: basicResponseTime
     location: "${customize.system.target.lb}"
@@ -74,22 +66,6 @@ probes:
       mode: continual
       path    : "${_probes.commonPath}/genericProbe.pl"
       argument: "get_opt_rt"
-  BasicThroughputProbe:
-    alias: basicThroughput
-    location: "${customize.system.target.lb}"
-    type: script
-    scriptInfo:
-      mode: continual
-      path    : "${_probes.commonPath}/genericProbe.pl"
-      argument: "get_basic_throughput"
-  OptThroughputProbe:
-    alias: optThroughput
-    location: "${customize.system.target.lb}"
-    type: script
-    scriptInfo:
-      mode: continual
-      path    : "${_probes.commonPath}/genericProbe.pl"
-      argument: "get_opt_throughput"
 unused-probes:
 
 

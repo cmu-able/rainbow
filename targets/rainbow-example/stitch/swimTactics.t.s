@@ -15,7 +15,7 @@ tactic TIncDimmer() {
     action {
         M.setDimmer(M.LB0, SwimUtils.dimmerLevelToFactor(SwimUtils.dimmerFactorToLevel(M.LB0.dimmer, M.DIMMER_LEVELS, M.DIMMER_MARGIN) + 1, M.DIMMER_LEVELS, M.DIMMER_MARGIN));
     }
-    effect {
+    effect @[16000] {
     	dimmerLevel' > dimmerLevel;
     }
 }
@@ -28,7 +28,7 @@ tactic TDecDimmer() {
     action {
         M.setDimmer(M.LB0, SwimUtils.dimmerLevelToFactor(SwimUtils.dimmerFactorToLevel(M.LB0.dimmer, M.DIMMER_LEVELS, M.DIMMER_MARGIN) - 1, M.DIMMER_LEVELS, M.DIMMER_MARGIN));
     }
-    effect {
+    effect @[16000]{
     	dimmerLevel' < dimmerLevel;
     }
 }
@@ -46,7 +46,7 @@ tactic TAddServer() {
 	object newServer = SwimUtils.minOverProperty("index", servers);
 	M.addServer(M.LB0, newServer);	
     }
-    effect {
+    effect @[30000] {
 		unusedServers' == unusedServers-1;
     }
 }
@@ -65,7 +65,7 @@ tactic TRemoveServer() {
 	object lastServer = SwimUtils.maxOverProperty("index", servers);
 	M.removeServer(M.LB0, lastServer);	
     }
-    effect {
+    effect @[30000] {
     availableServers' == availableServers - 1;
     }
 }
