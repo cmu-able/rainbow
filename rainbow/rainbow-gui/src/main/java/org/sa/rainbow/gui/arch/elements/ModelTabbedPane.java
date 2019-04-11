@@ -59,7 +59,8 @@ public class ModelTabbedPane extends JTabbedPane implements PropertyChangeListen
 			return;
 		if (m_model != null)
 			m_model.removePropertyChangeListener(this);
-		if (m_model == null) return;
+		m_model = model;
+		if (model == null) return;
 		m_modelInfo.initDataBinding(model);
 		List<OperationData> collection = m_model.getReports().stream()
 				.map(p -> new OperationData(p.secondValue(), p.firstValue(), false)).collect(Collectors.toList());
