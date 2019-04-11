@@ -125,7 +125,7 @@ public class ModelInfoPanel extends JPanel {
 		TableColumnAdjuster tca = new TableColumnAdjuster(m_table);
 		m_table.addComponentListener(new JTableCellDisplayer(m_table));
 		m_table.setDefaultRenderer(Object.class,
-				new ModelErrorRenderer((tm, row) -> !"".equals(tm.getValueAt(row, 4))));
+				new ModelErrorRenderer((tm, row) -> !"".equals(tm.getValueAt(row, 3))));
 
 	}
 
