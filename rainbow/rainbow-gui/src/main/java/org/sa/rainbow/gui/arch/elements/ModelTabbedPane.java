@@ -59,8 +59,8 @@ public class ModelTabbedPane extends JTabbedPane implements PropertyChangeListen
 			return;
 		if (m_model != null)
 			m_model.removePropertyChangeListener(this);
+		if (m_model == null) return;
 		m_modelInfo.initDataBinding(model);
-		List<Pair<Date, IRainbowOperation>> reports = new LinkedList<>();
 		List<OperationData> collection = m_model.getReports().stream()
 				.map(p -> new OperationData(p.secondValue(), p.firstValue(), false)).collect(Collectors.toList());
 		collection.addAll(m_model.getErrors().stream()
@@ -80,6 +80,7 @@ public class ModelTabbedPane extends JTabbedPane implements PropertyChangeListen
 				((DefaultTableModel) m_table.getModel()).addRow(row);
 			}
 		}
+		m_model.addPropertyChangeListener(this);
 
 	}
 

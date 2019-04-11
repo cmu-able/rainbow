@@ -22,7 +22,9 @@ import javax.swing.table.DefaultTableModel;
 
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd;
 import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation;
+import org.sa.rainbow.core.models.commands.AbstractSaveModelCmd;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.gui.arch.model.RainbowArchModelModel;
 import org.sa.rainbow.gui.widgets.TableColumnAdjuster;
@@ -104,7 +106,7 @@ public class ModelInfoPanel extends JPanel {
 		gbc_lblOperations.gridx = 0;
 		gbc_lblOperations.gridy = 3;
 		add(lblOperations, gbc_lblOperations);
-		
+
 		JScrollPane scrollBar = new JScrollPane();
 		GridBagConstraints gbc_table = new GridBagConstraints();
 
@@ -114,16 +116,18 @@ public class ModelInfoPanel extends JPanel {
 		gbc_table.gridy = 4;
 		add(scrollBar, gbc_table);
 
-		m_table = new JTable(new DefaultTableModel(new Object[][] {}, new String[] {"Name", "Target", "Arguments", "Issues"}));
+		m_table = new JTable(
+				new DefaultTableModel(new Object[][] {}, new String[] { "Name", "Target", "Arguments", "Issues" }));
 		scrollBar.setViewportView(m_table);
 		TableColumnAdjuster tca = new TableColumnAdjuster(m_table);
-	
+
 	}
 
 	public void initDataBinding(RainbowArchModelModel model) {
-		if (model == m_selectedModel) return;
+		if (model == m_selectedModel)
+			return;
 //		if (m_selectedModel != null) m_selected
-		GaugeTabbedPane.clearTable((DefaultTableModel )m_table.getModel());
+		GaugeTabbedPane.clearTable((DefaultTableModel) m_table.getModel());
 		m_selectedModel = model;
 		IModelInstance<Object> rm = Rainbow.instance().getRainbowMaster().modelsManager()
 				.getModelInstance(model.getModelRef());
@@ -144,42 +148,54 @@ public class ModelInfoPanel extends JPanel {
 						commandMethods.put(name, method);
 						unhandledCommands.remove(name);
 					} else {
-						name = name + "cmd";
-						if (commands.containsKey(name)) {
-							commandMethods.put(name, method);
-							unhandledCommands.remove(name);
+						if (name.endsWith("cmd")) {
+							name = name.substring(0, name.length() - 3);
+							if (commands.containsKey(name)) {
+								commandMethods.put(name, method);
+								unhandledCommands.remove(name);
+							}
+						} else {
+							name = name + "cmd";
+							if (commands.containsKey(name)) {
+								commandMethods.put(name, method);
+								unhandledCommands.remove(name);
+							} else {
+								if (!method.getName().equals("generateCommand") &&
+										!AbstractSaveModelCmd.class.isAssignableFrom(method.getReturnType()) &&
+										!AbstractLoadModelCmd.class.isAssignableFrom(method.getReturnType()))
+									unhandledMethods.add(method);
+							}
 						}
-						else unhandledMethods.add(method);
 					}
-					
+
 				}
 			}
 
 			for (Entry<String, Method> e : commandMethods.entrySet()) {
 				String commandName = e.getKey();
-				Object[] row = new Object[] {commandName, "target", "args", "ok"};
+				Object[] row = new Object[] { commandName, "target", "args", "ok" };
 				Parameter[] parameters = e.getValue().getParameters();
 				if (parameters.length > 0) {
-					row[1] = parameters[0].getName() + " : " + parameters[0].getType().getName();
+					row[1] = parameters[0].getName() + " : " + parameters[0].getType().getSimpleName();
 					fillParameters(row, parameters, 1);
 				}
-				((DefaultTableModel )m_table.getModel()).addRow(row);
+				((DefaultTableModel) m_table.getModel()).addRow(row);
 			}
 			for (String command : unhandledCommands) {
-				Object[] row = new Object[] {command, "target : String", "unknown", "unhandled"};
+				Object[] row = new Object[] { command, "target : String", "unknown", "unhandled" };
 				Class<? extends AbstractRainbowModelOperation<?, Object>> class1 = commands.get(command);
-			    Constructor<?> constructor = class1.getConstructors()[0];
-			    fillParameters(row, constructor.getParameters(), 2);
-				((DefaultTableModel )m_table.getModel()).addRow(row);
+				Constructor<?> constructor = class1.getConstructors()[0];
+				fillParameters(row, constructor.getParameters(), 2);
+				((DefaultTableModel) m_table.getModel()).addRow(row);
 			}
 			for (Method m : unhandledMethods) {
-				Object[] row = new Object[] {m.getName(), "target : String", "unknown", "potential"};
+				Object[] row = new Object[] { m.getName(), "target : String", "unknown", "potential" };
 				Parameter[] parameters = m.getParameters();
 				if (parameters.length > 0) {
 					row[1] = parameters[0].getName() + " : " + parameters[0].getType().getName();
 					fillParameters(row, parameters, 1);
 				}
-				((DefaultTableModel )m_table.getModel()).addRow(row);
+				((DefaultTableModel) m_table.getModel()).addRow(row);
 			}
 		}
 	}
@@ -189,11 +205,11 @@ public class ModelInfoPanel extends JPanel {
 		for (int i = start; i < parameters.length; i++) {
 			b.append(parameters[i].getName());
 			b.append(" : ");
-			b.append(parameters[i].getType().getName());
+			b.append(parameters[i].getType().getSimpleName());
 			if (i + 1 < parameters.length)
 				b.append(", ");
 		}
-		if (b.length() > 0) 
+		if (b.length() > 0)
 			row[2] = b.toString();
 	}
 
