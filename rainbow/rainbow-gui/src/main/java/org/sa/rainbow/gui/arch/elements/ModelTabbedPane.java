@@ -49,6 +49,9 @@ public class ModelTabbedPane extends JTabbedPane implements PropertyChangeListen
 		scrollPane.setViewportView(m_table);
 		TableColumnAdjuster tca = new TableColumnAdjuster(m_table);
 		tca.setDynamicAdjustment(true);
+		
+		m_modelInfo = new ModelInfoPanel();
+		addTab("Specification", m_modelInfo);
 	}
 
 	public void initDataBindings(RainbowArchModelModel model) {
