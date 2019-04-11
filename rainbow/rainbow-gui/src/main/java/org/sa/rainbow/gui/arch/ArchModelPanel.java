@@ -1,8 +1,6 @@
 package org.sa.rainbow.gui.arch;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.util.ArrayList;
@@ -15,10 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableModel;
 
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.error.RainbowException;
@@ -32,33 +27,15 @@ import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
-import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowChangeBusSubscription;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowModelChangeCallback;
-import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.gui.JTableCellDisplayer;
 import org.sa.rainbow.gui.ModelPanel;
-import org.sa.rainbow.gui.RainbowWindow;
 import org.sa.rainbow.gui.arch.elements.IUIReporter;
 import org.sa.rainbow.gui.arch.elements.IUIUpdater;
+import org.sa.rainbow.gui.widgets.ModelErrorRenderer;
 import org.sa.rainbow.gui.widgets.TableColumnAdjuster;
 
 public class ArchModelPanel extends JPanel implements IUIUpdater, IUIReporter, IModelsManager, IRainbowModelChangeCallback{
-	private Color m_red = RainbowWindow.bleach(Color.red, 0.75);
-	public class ModelErrorRenderer extends DefaultTableCellRenderer implements TableCellRenderer {
-
-		@Override
-		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-				int row, int column) {
-			Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-			TableModel tm = table.getModel();
-			if ("true".equals(tm.getValueAt(row, 4))) {
-				c.setBackground(m_red);
-			}
-			else if (c.getBackground() == m_red) c.setBackground(Color.WHITE);
-			return c;
-		}
-	}
-	
 	public JTable m_table;
 	private IModelChangeBusSubscriberPort m_modelChangePort;
 	private ModelReference m_ref;
@@ -73,7 +50,7 @@ public class ArchModelPanel extends JPanel implements IUIUpdater, IUIReporter, I
 		Object[] colNames = { "Operation", "Target", "Parameters", "Origin", "State" };
 		m_table = new JTable(new DefaultTableModel(data, colNames));
 		m_table.removeColumn(m_table.getColumnModel().getColumn(4));
-		m_table.setDefaultRenderer(Object.class, new ModelErrorRenderer());
+		m_table.setDefaultRenderer(Object.class, new ModelErrorRenderer((tm,row) -> "true".equals(tm.getValueAt(row, 4))));
 		JScrollPane p = new JScrollPane(m_table);
 		p.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		p.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
