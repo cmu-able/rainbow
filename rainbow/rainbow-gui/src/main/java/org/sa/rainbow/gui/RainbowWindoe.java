@@ -86,6 +86,7 @@ import org.sa.rainbow.gui.arch.controller.RainbowModelController;
 import org.sa.rainbow.gui.arch.controller.RainbowProbeController;
 import org.sa.rainbow.gui.arch.elements.GaugeDetailPanel;
 import org.sa.rainbow.gui.arch.elements.GaugeTabbedPane;
+import org.sa.rainbow.gui.arch.elements.ModelTabbedPane;
 import org.sa.rainbow.gui.arch.elements.ProbeTabbedPane;
 import org.sa.rainbow.gui.arch.model.RainbowArchAdapationManagerModel;
 import org.sa.rainbow.gui.arch.model.RainbowArchAnalysisModel;
@@ -191,6 +192,8 @@ public class RainbowWindoe extends RainbowWindow
 	private ProbeTabbedPane m_probePanel;
 
 	private GaugeTabbedPane m_gaugePanel;
+	
+	private ModelTabbedPane m_modelPanel;
 
 	private JLabel m_statusWindow;
 
@@ -256,6 +259,7 @@ public class RainbowWindoe extends RainbowWindow
 			if (!selected) return;
 			m_probePanel.setVisible(false);
 			m_gaugePanel.setVisible(false);
+			m_modelPanel.setVisible(false);
 			if (o instanceof RainbowArchProbeModel) {
 				RainbowArchProbeModel probeInfo = (RainbowArchProbeModel) o;
 				m_selectionPanel.setSelectedIndex(1);
@@ -268,6 +272,13 @@ public class RainbowWindoe extends RainbowWindow
 				m_gaugePanel.setVisible(true);
 				m_gaugePanel.initDataBindings(gaugeInfo);
 				((CardLayout) m_detailsPanel.getLayout()).show(m_detailsPanel, "gauges");
+
+			}  else if (o instanceof RainbowArchModelModel) {
+				RainbowArchModelModel gaugeInfo = (RainbowArchModelModel) o;
+				m_selectionPanel.setSelectedIndex(1);
+				m_modelPanel.setVisible(true);
+				m_modelPanel.initDataBindings(gaugeInfo);
+				((CardLayout) m_detailsPanel.getLayout()).show(m_detailsPanel, "models");
 
 			}
 		});
@@ -306,6 +317,12 @@ public class RainbowWindoe extends RainbowWindow
 
 	@Override
 	protected void createModelsManagerUI() {
+		m_modelPanel = new ModelTabbedPane();
+		m_detailsPanel.add(m_modelPanel);
+		m_modelPanel.setVisible(false);
+		((CardLayout) m_detailsPanel.getLayout()).addLayoutComponent(m_modelPanel, "models");
+
+		
 		JTextArea modelsLogs = createTextAreaInTab(m_logTabs, "Models");
 		m_allTabs.put(RainbowComponentT.MODEL, modelsLogs);
 	}

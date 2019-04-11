@@ -47,10 +47,12 @@ public class RainbowModelController extends AbstractRainbowController {
 		switch (evt.getPropertyName()) {
 		case RainbowArchModelModel.OPERATION_PROP:
 			m_mp.addOperation((IRainbowOperation )evt.getNewValue(), false, false);
+			highlightActivity();
 			break;
 		case RainbowArchModelModel.OPERATION__ERROR_PROP:
 			m_mp.addOperation((IRainbowOperation )evt.getNewValue(), true, false);
 			m_frame.setFrameIcon(RainbowWindoe.ERROR_ICON);
+			highlightActivity();
 			break;
 		}
 	}
