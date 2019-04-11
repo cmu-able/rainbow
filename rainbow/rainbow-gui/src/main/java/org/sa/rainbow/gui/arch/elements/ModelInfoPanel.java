@@ -1,5 +1,7 @@
 package org.sa.rainbow.gui.arch.elements;
 
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -18,7 +20,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableModel;
 
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.models.IModelInstance;
@@ -26,10 +31,28 @@ import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd;
 import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation;
 import org.sa.rainbow.core.models.commands.AbstractSaveModelCmd;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
+import org.sa.rainbow.gui.JTableCellDisplayer;
+import org.sa.rainbow.gui.RainbowWindow;
 import org.sa.rainbow.gui.arch.model.RainbowArchModelModel;
 import org.sa.rainbow.gui.widgets.TableColumnAdjuster;
 
 public class ModelInfoPanel extends JPanel {
+	
+	private static Color m_red = RainbowWindow.bleach(Color.red, 0.75);
+	public class ModelErrorRenderer extends DefaultTableCellRenderer implements TableCellRenderer {
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+				int row, int column) {
+			Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			TableModel tm = table.getModel();
+			if (!"".equals(tm.getValueAt(row, 4))) {
+				c.setBackground(m_red);
+			}
+			else if (c.getBackground() == m_red) c.setBackground(Color.WHITE);
+			return c;
+		}
+	}
 	private JTextField m_modelName;
 	private JTextField m_modelType;
 	private JTextField m_sourceText;
@@ -38,9 +61,9 @@ public class ModelInfoPanel extends JPanel {
 
 	public ModelInfoPanel() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[] { 0, 0, 0 };
+		gridBagLayout.columnWidths = new int[] { 0, 0, 0, 0 };
 		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0, 0 };
-		gridBagLayout.columnWeights = new double[] { 0.0, 1.0, Double.MIN_VALUE };
+		gridBagLayout.columnWeights = new double[] { 0.0, 0.3, 0.7, Double.MIN_VALUE };
 		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE };
 		setLayout(gridBagLayout);
 
@@ -101,25 +124,25 @@ public class ModelInfoPanel extends JPanel {
 
 		JLabel lblOperations = new JLabel("Operations:");
 		GridBagConstraints gbc_lblOperations = new GridBagConstraints();
-		gbc_lblOperations.anchor = GridBagConstraints.EAST;
+		gbc_lblOperations.anchor = GridBagConstraints.WEST;
 		gbc_lblOperations.insets = new Insets(0, 0, 5, 5);
-		gbc_lblOperations.gridx = 0;
-		gbc_lblOperations.gridy = 3;
+		gbc_lblOperations.gridx = 2;
+		gbc_lblOperations.gridy = 0;
 		add(lblOperations, gbc_lblOperations);
 
 		JScrollPane scrollBar = new JScrollPane();
 		GridBagConstraints gbc_table = new GridBagConstraints();
-
-		gbc_table.gridwidth = 2;
 		gbc_table.fill = GridBagConstraints.BOTH;
-		gbc_table.gridx = 0;
-		gbc_table.gridy = 4;
+		gbc_table.gridx = 2;
+		gbc_table.gridy = 1;
 		add(scrollBar, gbc_table);
 
 		m_table = new JTable(
 				new DefaultTableModel(new Object[][] {}, new String[] { "Name", "Target", "Arguments", "Issues" }));
 		scrollBar.setViewportView(m_table);
 		TableColumnAdjuster tca = new TableColumnAdjuster(m_table);
+		m_table.addComponentListener(new JTableCellDisplayer(m_table));
+
 
 	}
 
@@ -160,9 +183,9 @@ public class ModelInfoPanel extends JPanel {
 								commandMethods.put(name, method);
 								unhandledCommands.remove(name);
 							} else {
-								if (!method.getName().equals("generateCommand") &&
-										!AbstractSaveModelCmd.class.isAssignableFrom(method.getReturnType()) &&
-										!AbstractLoadModelCmd.class.isAssignableFrom(method.getReturnType()))
+								if (!method.getName().equals("generateCommand")
+										&& !AbstractSaveModelCmd.class.isAssignableFrom(method.getReturnType())
+										&& !AbstractLoadModelCmd.class.isAssignableFrom(method.getReturnType()))
 									unhandledMethods.add(method);
 							}
 						}
@@ -173,26 +196,28 @@ public class ModelInfoPanel extends JPanel {
 
 			for (Entry<String, Method> e : commandMethods.entrySet()) {
 				String commandName = e.getKey();
-				Object[] row = new Object[] { commandName, "target", "args", "ok" };
+				Object[] row = new Object[] { commandName, "target", "args", "" };
 				Parameter[] parameters = e.getValue().getParameters();
 				if (parameters.length > 0) {
-					row[1] = parameters[0].getName() + " : " + parameters[0].getType().getSimpleName();
+					String paramname = parameters[0].getName();
+					row[1] = !paramname.startsWith("arg")?(paramname + " : "):"" + parameters[0].getType().getSimpleName();
 					fillParameters(row, parameters, 1);
 				}
 				((DefaultTableModel) m_table.getModel()).addRow(row);
 			}
 			for (String command : unhandledCommands) {
-				Object[] row = new Object[] { command, "target : String", "unknown", "unhandled" };
+				Object[] row = new Object[] { command, "target : String", "unknown", "No corresponding method factory entry." };
 				Class<? extends AbstractRainbowModelOperation<?, Object>> class1 = commands.get(command);
 				Constructor<?> constructor = class1.getConstructors()[0];
 				fillParameters(row, constructor.getParameters(), 2);
 				((DefaultTableModel) m_table.getModel()).addRow(row);
 			}
 			for (Method m : unhandledMethods) {
-				Object[] row = new Object[] { m.getName(), "target : String", "unknown", "potential" };
+				Object[] row = new Object[] { m.getName(), "target : String", "unknown", "No corresponding entry in factory table." };
 				Parameter[] parameters = m.getParameters();
 				if (parameters.length > 0) {
-					row[1] = parameters[0].getName() + " : " + parameters[0].getType().getName();
+					String paramname = parameters[0].getName();
+					row[1] = !paramname.startsWith("arg")?(paramname + " : "):"" + parameters[0].getType().getName();
 					fillParameters(row, parameters, 1);
 				}
 				((DefaultTableModel) m_table.getModel()).addRow(row);
@@ -203,8 +228,11 @@ public class ModelInfoPanel extends JPanel {
 	protected void fillParameters(Object[] row, Parameter[] parameters, int start) {
 		StringBuffer b = new StringBuffer();
 		for (int i = start; i < parameters.length; i++) {
-			b.append(parameters[i].getName());
-			b.append(" : ");
+			String name = parameters[i].getName();
+			if (!name.startsWith("arg")) {
+				b.append(name);
+				b.append(" : ");
+			}
 			b.append(parameters[i].getType().getSimpleName());
 			if (i + 1 < parameters.length)
 				b.append(", ");
