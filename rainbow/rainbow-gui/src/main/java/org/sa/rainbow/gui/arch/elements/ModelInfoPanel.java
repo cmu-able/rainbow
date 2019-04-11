@@ -14,6 +14,7 @@ import java.util.Set;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -103,17 +104,20 @@ public class ModelInfoPanel extends JPanel {
 		gbc_lblOperations.gridx = 0;
 		gbc_lblOperations.gridy = 3;
 		add(lblOperations, gbc_lblOperations);
-
-		m_table = new JTable(new DefaultTableModel(new Object[][] {}, new String[] {"Name", "Target", "Arguments", "Issues"}));
+		
+		JScrollPane scrollBar = new JScrollPane();
 		GridBagConstraints gbc_table = new GridBagConstraints();
-		gbc_table.anchor = GridBagConstraints.EAST;
+
 		gbc_table.gridwidth = 2;
-		gbc_table.insets = new Insets(0, 0, 0, 5);
-		gbc_table.fill = GridBagConstraints.VERTICAL;
+		gbc_table.fill = GridBagConstraints.BOTH;
 		gbc_table.gridx = 0;
 		gbc_table.gridy = 4;
-		add(m_table, gbc_table);
+		add(scrollBar, gbc_table);
+
+		m_table = new JTable(new DefaultTableModel(new Object[][] {}, new String[] {"Name", "Target", "Arguments", "Issues"}));
+		scrollBar.setViewportView(m_table);
 		TableColumnAdjuster tca = new TableColumnAdjuster(m_table);
+	
 	}
 
 	public void initDataBinding(RainbowArchModelModel model) {
