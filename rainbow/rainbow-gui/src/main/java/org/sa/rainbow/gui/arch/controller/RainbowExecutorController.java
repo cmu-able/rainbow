@@ -61,11 +61,11 @@ public class RainbowExecutorController extends AbstractRainbowController {
 		return m_frame;
 	}
 	
-	protected String getCustomClass(Object a, String key) {
+	protected String getCustomClass(String key, String a) {
 		Map<Object, Object> map = (Map<Object,Object>) m_uidb.get(key);
 		String clazz = null;
 		if (map != null) {
-			clazz = (String) map.get(a.getClass().getName());
+			clazz = (String) map.get(a);
 		}
 		return clazz;
 	}

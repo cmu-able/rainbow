@@ -28,6 +28,7 @@ import org.sa.rainbow.core.models.commands.AbstractSaveModelCmd;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.gui.JTableCellDisplayer;
 import org.sa.rainbow.gui.arch.model.RainbowArchModelModel;
+import org.sa.rainbow.gui.arch.model.RainbowArchModelModel.RainbowModelOperationRepresentation;
 import org.sa.rainbow.gui.widgets.ModelErrorRenderer;
 import org.sa.rainbow.gui.widgets.TableColumnAdjuster;
 
@@ -141,91 +142,23 @@ public class ModelInfoPanel extends JPanel {
 		m_modelType.setText(model.getModelRef().getModelType());
 		if (rm != null) {
 			m_sourceText.setText(rm.getOriginalSource());
-			Method[] methods = rm.getCommandFactory().getClass().getMethods();
-			Map<String, Class<? extends AbstractRainbowModelOperation<?, Object>>> commands = rm.getCommandFactory()
-					.getCommands();
-			Map<String, Method> commandMethods = new HashMap<>();
-			Set<String> unhandledCommands = new HashSet<>(commands.keySet());
-			Set<Method> unhandledMethods = new HashSet<>();
-			for (Method method : methods) {
-				if (IRainbowOperation.class.isAssignableFrom(method.getReturnType())) {
-					String name = method.getName().toLowerCase();
-					if (commands.containsKey(name)) {
-						commandMethods.put(name, method);
-						unhandledCommands.remove(name);
-					} else {
-						if (name.endsWith("cmd")) {
-							name = name.substring(0, name.length() - 3);
-							if (commands.containsKey(name)) {
-								commandMethods.put(name, method);
-								unhandledCommands.remove(name);
-							}
-						} else {
-							name = name + "cmd";
-							if (commands.containsKey(name)) {
-								commandMethods.put(name, method);
-								unhandledCommands.remove(name);
-							} else {
-								if (!method.getName().equals("generateCommand")
-										&& !AbstractSaveModelCmd.class.isAssignableFrom(method.getReturnType())
-										&& !AbstractLoadModelCmd.class.isAssignableFrom(method.getReturnType()))
-									unhandledMethods.add(method);
-							}
-						}
-					}
+			Map<String, RainbowModelOperationRepresentation> operationsAccepted = model.getOperationsAccepted();
+			for (RainbowModelOperationRepresentation o : operationsAccepted.values()) {
+				Object[] row = new Object[] {o.getName(), o.getTarget(), "", o.getWarning()};
+				String[] parameters = o.getParameters();
+				StringBuffer b = new StringBuffer ();
+				for (int i = 0; i < parameters.length; i++) {
+					String p = parameters[i];
+					b.append(p);
+					if (i+1 < parameters.length) b.append(", ");
+				}
+				row[2] = b.toString();
+				((DefaultTableModel) m_table.getModel()).addRow(row);
 
-				}
-			}
-
-			for (Entry<String, Method> e : commandMethods.entrySet()) {
-				String commandName = e.getKey();
-				Object[] row = new Object[] { commandName, "target", "args", "" };
-				Parameter[] parameters = e.getValue().getParameters();
-				if (parameters.length > 0) {
-					String paramname = parameters[0].getName();
-					row[1] = !paramname.startsWith("arg") ? (paramname + " : ")
-							: "" + parameters[0].getType().getSimpleName();
-					fillParameters(row, parameters, 1);
-				}
-				((DefaultTableModel) m_table.getModel()).addRow(row);
-			}
-			for (String command : unhandledCommands) {
-				Object[] row = new Object[] { command, "target : String", "unknown",
-						"No corresponding method factory entry." };
-				Class<? extends AbstractRainbowModelOperation<?, Object>> class1 = commands.get(command);
-				Constructor<?> constructor = class1.getConstructors()[0];
-				fillParameters(row, constructor.getParameters(), 2);
-				((DefaultTableModel) m_table.getModel()).addRow(row);
-			}
-			for (Method m : unhandledMethods) {
-				Object[] row = new Object[] { m.getName(), "target : String", "unknown",
-						"No corresponding entry in factory table." };
-				Parameter[] parameters = m.getParameters();
-				if (parameters.length > 0) {
-					String paramname = parameters[0].getName();
-					row[1] = !paramname.startsWith("arg") ? (paramname + " : ")
-							: "" + parameters[0].getType().getName();
-					fillParameters(row, parameters, 1);
-				}
-				((DefaultTableModel) m_table.getModel()).addRow(row);
 			}
 		}
 	}
 
-	protected void fillParameters(Object[] row, Parameter[] parameters, int start) {
-		StringBuffer b = new StringBuffer();
-		for (int i = start; i < parameters.length; i++) {
-			String name = parameters[i].getName();
-			if (!name.startsWith("arg")) {
-				b.append(name);
-				b.append(" : ");
-			}
-			b.append(parameters[i].getType().getSimpleName());
-			if (i + 1 < parameters.length)
-				b.append(", ");
-		}
-		if (b.length() > 0)
-			row[2] = b.toString();
-	}
+
 
 }
