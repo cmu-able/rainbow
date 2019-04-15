@@ -9,6 +9,7 @@ import org.sa.rainbow.core.ports.IModelsManagerPort;
 
 public class CP1ModelAccessor extends P2ModelAccessor{
 	private CP1RobotStateModelInstance m_robotStateModel;
+	private CP1PowerModelInstance m_powerModel;
 	
 	public CP1ModelAccessor (IModelsManagerPort mmp) {
 		super(mmp);
@@ -21,6 +22,14 @@ public class CP1ModelAccessor extends P2ModelAccessor{
 			m_robotStateModel = modelInstance;
 		}
 		return m_robotStateModel;
+	}
+	
+	public CP1PowerModelInstance getPowerModel() {
+		if (m_powerModel == null) {
+			CP1PowerModelInstance modelInstance = (CP1PowerModelInstance )m_modelsManagerPort.<SimpleConfigurationStore>getModelInstance(new ModelReference("Power", CP1PowerModelInstance.POWER_MODEL_TYPE));
+			m_powerModel = modelInstance;
+		}
+		return m_powerModel;
 	}
 	
 
