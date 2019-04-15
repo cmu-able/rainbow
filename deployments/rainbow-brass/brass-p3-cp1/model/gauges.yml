@@ -100,6 +100,23 @@ gauge-types:
         type: String
         default: ~
         
+  BRASSPowerModelGaugeT:
+    commands:
+      update: "PM.updatePowerModel(String)"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.brass.p3_cp1.gauges.PowerModelChangeGauge"
+    configParams:
+      targetPorbeType:
+        type: String
+        default: ~
 
 gauge-instances:
   IGG1:
@@ -162,3 +179,14 @@ gauge-instances:
     configValues:
       reportingPeriod: 2000
       targetProbeType: targetwaypointprobe
+
+  PMG1:
+    type: BRASSPowerModelGaugeT
+    model: PowerModel:PowerModel
+    commands:
+      update: "pm.updatePowerModel($<pmfile>)"
+    seupValues:
+      targetIP: "${customize.syste.target.master}"
+    configValues:
+      reportingPeriod: 2000
+      targetProbeType: powermodelprobe
