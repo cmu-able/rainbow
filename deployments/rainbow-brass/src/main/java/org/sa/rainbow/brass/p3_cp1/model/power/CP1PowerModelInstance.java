@@ -32,7 +32,7 @@ public class CP1PowerModelInstance implements IModelInstance<SimpleConfiguration
 
 	@Override
 	public IModelInstance<SimpleConfigurationStore> copyModelInstance(String newName) throws RainbowCopyException {
-		return new CP1PowerModelInstance(pm.copy(), getOriginalSource());
+		return new CP1PowerModelInstance(m_powerModel.copy(), getOriginalSource());
 	}
 
 	@Override

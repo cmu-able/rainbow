@@ -1,8 +1,10 @@
 package org.sa.rainbow.brass.p3_cp1.model;
 
+import org.sa.rainbow.brass.confsynthesis.SimpleConfigurationStore;
 import org.sa.rainbow.brass.model.P2ModelAccessor;
 import org.sa.rainbow.brass.model.robot.RobotState;
 import org.sa.rainbow.brass.model.robot.RobotStateModelInstance;
+import org.sa.rainbow.brass.p3_cp1.model.power.CP1PowerModelInstance;
 import org.sa.rainbow.brass.p3_cp1.model.robot.CP1RobotStateModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IModelsManagerPort;

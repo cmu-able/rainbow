@@ -131,4 +131,11 @@ public class SimpleConfigurationStore implements ConfigurationProvider {
 		System.out.println(cs.getLegalReconfigurationsFrom("sol_432"));
 	}
 
+	public SimpleConfigurationStore copy() {
+		SimpleConfigurationStore cp = new SimpleConfigurationStore();
+		cp.m_configuration_objects.clear();
+		cp.m_configuration_objects.putAll(m_configuration_objects);
+		return cp;
+	}
+
 }
