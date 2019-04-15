@@ -44,7 +44,8 @@ public class EnergyConsumptionAnalyzer extends P2CP1Analyzer {
 	@Override
 	public void initialize(IRainbowReportingPort port) throws RainbowConnectionException {
 		super.initialize(port);
-		m_powerModel = new SimpleConfigurationStore(Rainbow.instance().allProperties());
+//		m_powerModel = new SimpleConfigurationStore(Rainbow.instance().allProperties());
+		m_powerModel = getModels().getPowerModel().getModelInstance();
 		m_powerModel.populate();
 	}
 
