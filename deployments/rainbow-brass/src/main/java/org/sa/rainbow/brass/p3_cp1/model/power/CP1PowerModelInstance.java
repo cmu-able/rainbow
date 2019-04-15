@@ -7,7 +7,7 @@ import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.ModelCommandFactory;
 
-public class PowerModelInstance implements IModelInstance<SimpleConfigurationStore> {
+public class CP1PowerModelInstance implements IModelInstance<SimpleConfigurationStore> {
 
 	public static final String POWER_MODEL_TYPE = "PowerModel";
 	private SimpleConfigurationStore m_powerModel;
@@ -15,7 +15,7 @@ public class PowerModelInstance implements IModelInstance<SimpleConfigurationSto
 	private PowerModelCommandFactory m_commandFactory;
 	private String m_source;
 
-	public PowerModelInstance(SimpleConfigurationStore pm, String source) {
+	public CP1PowerModelInstance(SimpleConfigurationStore pm, String source) {
 		setModelInstance(pm);
 		setOriginalSource(source);
 	}
@@ -32,7 +32,7 @@ public class PowerModelInstance implements IModelInstance<SimpleConfigurationSto
 
 	@Override
 	public IModelInstance<SimpleConfigurationStore> copyModelInstance(String newName) throws RainbowCopyException {
-		return new PowerModelInstance(pm.copy(), getOriginalSource());
+		return new CP1PowerModelInstance(pm.copy(), getOriginalSource());
 	}
 
 	@Override

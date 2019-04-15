@@ -9,8 +9,8 @@ import org.sa.rainbow.core.models.commands.ModelCommandFactory;
 public class PowerModelCommandFactory extends ModelCommandFactory<SimpleConfigurationStore> {
 
 	public PowerModelCommandFactory(
-			PowerModelInstance model) {
-		super(PowerModelInstance.class, model);
+			CP1PowerModelInstance model) {
+		super(CP1PowerModelInstance.class, model);
 	}
 
 	@Override
