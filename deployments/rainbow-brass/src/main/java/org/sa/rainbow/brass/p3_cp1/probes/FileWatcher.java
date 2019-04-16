@@ -15,6 +15,7 @@ public class FileWatcher extends Thread {
 	private Path m_filePath;
 	private WatchService m_watchService;
 	private IFileWatcherCaller m_caller;
+	private boolean m_running = true;
 
 	public FileWatcher (String target, IFileWatcherCaller callback){
 		m_filePath = Paths.get(target);
@@ -42,12 +43,12 @@ public class FileWatcher extends Thread {
 		if (m_debug)
 			System.out.println("running...");
 
-		while (true) {
+		while (m_running) {
 			WatchKey key;
 			try {
 				//return signaled key, meaning events occurred on the object
 				key = m_watchService.take();
-			} catch (InterruptedException ex) {
+			} catch (InterruptedException | ClosedWatchServiceException ex) {
 				return;
 			}
 
@@ -70,6 +71,16 @@ public class FileWatcher extends Thread {
 			//resetting the key goes back ready state
 			key.reset();
 			}
+	}
+
+
+	public void cancel() {
+		m_running = false;
+		try {
+			m_watchService.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }
