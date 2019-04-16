@@ -39,6 +39,8 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
+import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
+import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.EdgeRejectedException;
 import org.graphstream.graph.Graph;
@@ -49,6 +51,7 @@ import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.stream.file.FileSinkDOT;
 import org.graphstream.stream.file.FileSourceDOT;
 import org.ho.yaml.Yaml;
+import org.sa.raibow.gui.stitch.StitchTokenMaker;
 import org.sa.rainbow.core.IDisposable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
@@ -84,7 +87,7 @@ import org.sa.rainbow.gui.arch.controller.RainbowExecutorController;
 import org.sa.rainbow.gui.arch.controller.RainbowGaugeController;
 import org.sa.rainbow.gui.arch.controller.RainbowModelController;
 import org.sa.rainbow.gui.arch.controller.RainbowProbeController;
-import org.sa.rainbow.gui.arch.elements.GaugeDetailPanel;
+import org.sa.rainbow.gui.arch.elements.AdaptationManagerTabbedPane;
 import org.sa.rainbow.gui.arch.elements.GaugeTabbedPane;
 import org.sa.rainbow.gui.arch.elements.ModelTabbedPane;
 import org.sa.rainbow.gui.arch.elements.ProbeTabbedPane;
@@ -139,11 +142,6 @@ public class RainbowWindoe extends RainbowWindow
 	final static int CENTER = 0, WEST = 1, NW = 3, NORTH = 2, NE = 6, EAST = 4, SE = 12, SOUTH = 8, SW = 9;
 
 	private static final int WIDTH = 1280;
-	private static final int HEIGHT = 900;
-	private static final Rectangle PROBE_REGION = new Rectangle((int) (WIDTH * 1 / 3f), (int) (HEIGHT - HEIGHT / 4f),
-			(int) (2 / 3f * WIDTH), (int) (HEIGHT / 4f));
-	private static final Rectangle GAUGE_REGION = new Rectangle((int) (WIDTH * 1 / 3f),
-			(int) (HEIGHT - 2 * HEIGHT / 4f), (int) (2 / 3f * WIDTH), (int) (HEIGHT / 4f));
 
 	public static final ImageIcon ERROR_ICON = new ImageIcon(RainbowWindoe.class.getResource("/error.png"));
 
@@ -194,6 +192,8 @@ public class RainbowWindoe extends RainbowWindow
 	private GaugeTabbedPane m_gaugePanel;
 	
 	private ModelTabbedPane m_modelPanel;
+	
+	private AdaptationManagerTabbedPane m_amPanel;
 
 	private JLabel m_statusWindow;
 
@@ -218,6 +218,8 @@ public class RainbowWindoe extends RainbowWindow
 				e.printStackTrace();
 			}
 		}
+		AbstractTokenMakerFactory atmf = (AbstractTokenMakerFactory)TokenMakerFactory.getDefaultInstance();
+		atmf.putMapping("text/stitch", StitchTokenMaker.class.getCanonicalName());
 	}
 
 	@Override
@@ -280,6 +282,11 @@ public class RainbowWindoe extends RainbowWindow
 				m_modelPanel.initDataBindings(gaugeInfo);
 				((CardLayout) m_detailsPanel.getLayout()).show(m_detailsPanel, "models");
 
+			} else if (o instanceof RainbowArchAdapationManagerModel) {
+				RainbowArchAdapationManagerModel amModel = (RainbowArchAdapationManagerModel) o;
+				m_selectionPanel.setSelectedIndex(1);
+				m_amPanel.setVisible(true);
+				((CardLayout) m_detailsPanel.getLayout()).show(m_amPanel, "adaptationmanagers");
 			}
 		});
 		m_statusWindow = new JLabel("Waiting for Rainbow to start...");
@@ -329,6 +336,13 @@ public class RainbowWindoe extends RainbowWindow
 
 	@Override
 	protected void createAdaptationManagerUI() {
+		m_amPanel = new AdaptationManagerTabbedPane();
+		m_detailsPanel.add(m_amPanel);
+		m_amPanel.setVisible(true);
+		
+		((CardLayout) m_detailsPanel.getLayout()).addLayoutComponent(m_amPanel, "adaptationmanagers");
+
+		
 		JTextArea modelsLogs = createTextAreaInTab(m_logTabs, "Adaptation Manager");
 		m_allTabs.put(RainbowComponentT.ADAPTATION_MANAGER, modelsLogs);
 	}
