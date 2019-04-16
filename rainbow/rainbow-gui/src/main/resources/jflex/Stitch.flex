@@ -14,6 +14,7 @@ import javax.swing.text.Segment;
 import org.fife.ui.rsyntaxtextarea.AbstractJFlexTokenMaker;
 import org.fife.ui.rsyntaxtextarea.Token;
 import org.fife.ui.rsyntaxtextarea.TokenMaker;
+import org.fife.ui.rsyntaxtextarea.TokenImpl;
 
 
 /**
@@ -26,7 +27,7 @@ import org.fife.ui.rsyntaxtextarea.TokenMaker;
 
 %public
 %class StitchTokenMaker
-%extends AbstractJFlexTokenMaker
+%extends AbstractJFlexCTokenMaker
 %unicode
 %type org.fife.ui.rsyntaxtextarea.Token
 
@@ -108,7 +109,7 @@ import org.fife.ui.rsyntaxtextarea.TokenMaker;
 		this.offsetShift = -text.offset + startOffset;
 
 		// Start off in the proper state.
-		
+		int state=Token.NULL;
 
 		s = text;
 		try {
@@ -145,7 +146,7 @@ import org.fife.ui.rsyntaxtextarea.TokenMaker;
 		//zzStartRead = zzEndRead = s.offset;
 		zzStartRead = s.offset;
 		zzEndRead = zzStartRead + s.count - 1;
-		zzCurrentPos = zzMarkedPos = zzPushbackPos = s.offset;
+		zzCurrentPos = zzMarkedPos = s.offset;
 		zzLexicalState = YYINITIAL;
 		zzReader = reader;
 		zzAtBOL  = true;
