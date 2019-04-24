@@ -141,8 +141,8 @@ public class StitchTokenMaker extends AbstractTokenMaker {
 
 				}
 			}
-			if (newTokenType == Token.NULL || newTokenType == -1 || newTokenType == Token.WHITESPACE) {
-				if (currentTokenType == Token.NULL || currentTokenType == Token.WHITESPACE || currentTokenType == -1) {
+			if (newTokenType == Token.NULL || newTokenType == -1) {
+				if (currentTokenType == Token.NULL || currentTokenType == -1) {
 					skip = true;
 					currentTokenStart = i;
 				}
