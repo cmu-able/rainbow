@@ -100,11 +100,15 @@ public class StitchTokenMaker extends AbstractTokenMaker {
 			if (currentTokenType == Token.LITERAL_STRING_DOUBLE_QUOTE && array[i] != '"') {
 				continue;
 			}
-			else if (currentTokenType == Token.COMMENT_MULTILINE && !isEOC(array,i)) {
-				i++;i++; // Suck up '*/' token
-				continue;
+			else if (currentTokenType == Token.COMMENT_MULTILINE) {
+				if (!isEOC(array,i)) {
+					continue;
+				} 
+				else {
+					i++;
+				} 
 			}
-			else if (currentTokenType == Token.COMMENT_EOL) {
+			if (currentTokenType == Token.COMMENT_EOL) {
 				continue;
 			}
 
