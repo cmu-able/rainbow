@@ -1,26 +1,22 @@
 package org.sa.rainbow.gui.arch.elements;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
 import javax.swing.JTabbedPane;
 
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rtextarea.RTextScrollPane;
 import org.sa.rainbow.core.Rainbow;
-import org.sa.rainbow.core.RainbowConstants;
-import org.sa.rainbow.util.Util;
+import org.sa.rainbow.core.models.ModelReference;
+import org.sa.rainbow.core.models.UtilityPreferenceDescription;
 
 // Be careful, this is stitch specific
 public class AdaptationManagerTabbedPane extends JTabbedPane {
 
 	public AdaptationManagerTabbedPane() {
 		setTabPlacement(JTabbedPane.BOTTOM);
-
+		UtilityModelPane ump = new UtilityModelPane();
+		UtilityPreferenceDescription upd = (UtilityPreferenceDescription) Rainbow.instance().getRainbowMaster().modelsManager().getModelInstance(new ModelReference("SwimSys", "UtilityModel")).getModelInstance();
+		addTab("Utilities", ump);
 		addTab("Stitch Scripts", new StitchDetailPane());
+		ump.initBindings(upd);
+		
 		
 //		File stitchPath = Util.getRelativeToPath(Rainbow.instance().getTargetPath(),
 //				Rainbow.instance().getProperty(RainbowConstants.PROPKEY_SCRIPT_PATH));

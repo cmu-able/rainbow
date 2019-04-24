@@ -61,6 +61,7 @@ public class StitchDetailPane extends JPanel {
 			if (!e.getValueIsAdjusting()) {
 				String key = (String )list.getSelectedValue();
 				m_textArea.setText(m_stitchData.get(key));
+				m_textArea.setCaretPosition(0);
 			}
 		});
 		
