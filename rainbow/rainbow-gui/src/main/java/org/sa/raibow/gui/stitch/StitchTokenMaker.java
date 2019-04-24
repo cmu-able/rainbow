@@ -47,19 +47,20 @@ public class StitchTokenMaker extends AbstractTokenMaker {
 			new TokenInfo(";", Token.SEPARATOR), new TokenInfo("@", Token.OPERATOR),
 			new TokenInfo("<=", Token.OPERATOR), new TokenInfo(">=", Token.OPERATOR),
 			new TokenInfo("<", Token.OPERATOR), new TokenInfo(">", Token.OPERATOR), new TokenInfo("+", Token.OPERATOR),
-			new TokenInfo("*", Token.OPERATOR), new TokenInfo("/", Token.OPERATOR), new TokenInfo("'", Token.OPERATOR),
-			new TokenInfo("...", Token.OPERATOR), new TokenInfo("==", Token.OPERATOR),
-			new TokenInfo("|", Token.OPERATOR), new TokenInfo("#", Token.OPERATOR), new TokenInfo("=", Token.OPERATOR),
-			new TokenInfo("+=", Token.OPERATOR), new TokenInfo("-=", Token.OPERATOR),
-			new TokenInfo("*=", Token.OPERATOR), new TokenInfo("/=", Token.OPERATOR),
-			new TokenInfo("%=", Token.OPERATOR), new TokenInfo("%", Token.OPERATOR),
-			new TokenInfo("++", Token.OPERATOR), new TokenInfo("--", Token.OPERATOR),
-			new TokenInfo("!", Token.OPERATOR), new TokenInfo("->", Token.OPERATOR),
-			new TokenInfo("<->", Token.OPERATOR), new TokenInfo(",", Token.SEPARATOR),
-			new TokenInfo("{", Token.SEPARATOR), new TokenInfo("}", Token.SEPARATOR),
-			new TokenInfo("(", Token.SEPARATOR), new TokenInfo(")", Token.SEPARATOR),
-			new TokenInfo("[", Token.SEPARATOR), new TokenInfo("]", Token.SEPARATOR),
-			new TokenInfo(".", Token.SEPARATOR), new TokenInfo(":", Token.SEPARATOR) };
+			new TokenInfo("-", Token.OPERATOR), new TokenInfo("*", Token.OPERATOR), new TokenInfo("/", Token.OPERATOR),
+			new TokenInfo("'", Token.OPERATOR), new TokenInfo("...", Token.OPERATOR),
+			new TokenInfo("==", Token.OPERATOR), new TokenInfo("|", Token.OPERATOR), new TokenInfo("#", Token.OPERATOR),
+			new TokenInfo("=", Token.OPERATOR), new TokenInfo("+=", Token.OPERATOR),
+			new TokenInfo("-=", Token.OPERATOR), new TokenInfo("*=", Token.OPERATOR),
+			new TokenInfo("/=", Token.OPERATOR), new TokenInfo("%=", Token.OPERATOR),
+			new TokenInfo("%", Token.OPERATOR), new TokenInfo("++", Token.OPERATOR),
+			new TokenInfo("--", Token.OPERATOR), new TokenInfo("!", Token.OPERATOR),
+			new TokenInfo("->", Token.OPERATOR), new TokenInfo("<->", Token.OPERATOR),
+			new TokenInfo(",", Token.SEPARATOR), new TokenInfo("{", Token.SEPARATOR),
+			new TokenInfo("}", Token.SEPARATOR), new TokenInfo("(", Token.SEPARATOR),
+			new TokenInfo(")", Token.SEPARATOR), new TokenInfo("[", Token.SEPARATOR),
+			new TokenInfo("]", Token.SEPARATOR), new TokenInfo(".", Token.SEPARATOR),
+			new TokenInfo(":", Token.SEPARATOR) };
 	private int currentTokenStart;
 	private int currentTokenType;
 
@@ -104,8 +105,7 @@ public class StitchTokenMaker extends AbstractTokenMaker {
 				// Lookahead to make sure it isn't an identifier
 				if (i + 1 < end && (Character.isLetter(array[i + 1]) || '_' == array[i + 1])) {
 					newTokenType = Token.IDENTIFIER;
-				}
-				else {
+				} else {
 					currentTokenType = newTokenType;
 				}
 			} else {
