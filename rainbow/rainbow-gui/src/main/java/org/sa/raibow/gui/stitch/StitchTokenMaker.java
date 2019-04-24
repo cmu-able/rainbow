@@ -43,7 +43,25 @@ public class StitchTokenMaker extends AbstractTokenMaker {
 			new TokenInfo("float", Token.DATA_TYPE), new TokenInfo("boolean", Token.DATA_TYPE),
 			new TokenInfo("char", Token.DATA_TYPE), new TokenInfo("string", Token.DATA_TYPE),
 			new TokenInfo("set", Token.DATA_TYPE), new TokenInfo("sequence", Token.DATA_TYPE),
-			new TokenInfo("record", Token.DATA_TYPE), new TokenInfo("enum", Token.DATA_TYPE) };
+			new TokenInfo("record", Token.DATA_TYPE), new TokenInfo("enum", Token.DATA_TYPE),
+			new TokenInfo(";", Token.SEPARATOR), new TokenInfo("@", Token.OPERATOR),
+			new TokenInfo("<=", Token.OPERATOR), new TokenInfo(">=", Token.OPERATOR),
+			new TokenInfo("<", Token.OPERATOR), new TokenInfo(">", Token.OPERATOR),
+			new TokenInfo("+", Token.OPERATOR), new TokenInfo("*", Token.OPERATOR),
+			new TokenInfo("/", Token.OPERATOR), new TokenInfo("'", Token.OPERATOR),
+			new TokenInfo("...", Token.OPERATOR), new TokenInfo("==", Token.OPERATOR),
+			new TokenInfo("|", Token.OPERATOR), new TokenInfo("#", Token.OPERATOR),
+			new TokenInfo("=", Token.OPERATOR),new TokenInfo("+=", Token.OPERATOR),
+			new TokenInfo("-=", Token.OPERATOR),new TokenInfo("*=", Token.OPERATOR),
+			new TokenInfo("/=", Token.OPERATOR),new TokenInfo("%=", Token.OPERATOR),
+			new TokenInfo("%", Token.OPERATOR),new TokenInfo("++", Token.OPERATOR),
+			new TokenInfo("--", Token.OPERATOR),new TokenInfo("!", Token.OPERATOR),
+			new TokenInfo("->", Token.OPERATOR),new TokenInfo("<->", Token.OPERATOR),
+			new TokenInfo(",", Token.SEPARATOR),new TokenInfo("{", Token.SEPARATOR),
+			new TokenInfo("}", Token.SEPARATOR), new TokenInfo("(", Token.SEPARATOR),
+			new TokenInfo(")", Token.SEPARATOR),new TokenInfo("[", Token.SEPARATOR),
+			new TokenInfo("]", Token.SEPARATOR), new TokenInfo(".", Token.SEPARATOR),
+			new TokenInfo(":", Token.SEPARATOR)};
 	private int currentTokenStart;
 	private int currentTokenType;
 
