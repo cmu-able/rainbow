@@ -286,6 +286,7 @@ public class RainbowWindoe extends RainbowWindow
 				RainbowArchAdapationManagerModel amModel = (RainbowArchAdapationManagerModel) o;
 				m_selectionPanel.setSelectedIndex(1);
 				m_amPanel.setVisible(true);
+				m_amPanel.initBindings();
 				((CardLayout) m_detailsPanel.getLayout()).show(m_amPanel, "adaptationmanagers");
 			}
 		});

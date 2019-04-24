@@ -9,13 +9,14 @@ import org.sa.rainbow.core.models.UtilityPreferenceDescription;
 // Be careful, this is stitch specific
 public class AdaptationManagerTabbedPane extends JTabbedPane {
 
+	private UtilityModelPane m_ump;
+
 	public AdaptationManagerTabbedPane() {
 		setTabPlacement(JTabbedPane.BOTTOM);
-		UtilityModelPane ump = new UtilityModelPane();
-		UtilityPreferenceDescription upd = (UtilityPreferenceDescription) Rainbow.instance().getRainbowMaster().modelsManager().getModelInstance(new ModelReference("SwimSys", "UtilityModel")).getModelInstance();
-		addTab("Utilities", ump);
+		m_ump = new UtilityModelPane();
+
+		addTab("Utilities", m_ump);
 		addTab("Stitch Scripts", new StitchDetailPane());
-		ump.initBindings(upd);
 		
 		
 //		File stitchPath = Util.getRelativeToPath(Rainbow.instance().getTargetPath(),
@@ -45,5 +46,11 @@ public class AdaptationManagerTabbedPane extends JTabbedPane {
 //
 //			}
 //		}
+	}
+	
+	public void initBindings() {
+		UtilityPreferenceDescription upd = (UtilityPreferenceDescription) Rainbow.instance().getRainbowMaster().modelsManager().getModelInstance(new ModelReference("SwimSys", "UtilityModel")).getModelInstance();
+		m_ump.initBindings(upd);
+
 	}
 }
