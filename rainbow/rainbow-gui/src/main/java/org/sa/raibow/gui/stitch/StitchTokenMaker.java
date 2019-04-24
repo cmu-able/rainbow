@@ -75,6 +75,8 @@ public class StitchTokenMaker extends AbstractTokenMaker {
 		}
 		super.addToken(segment, start, end, tokenType, startOffset);
 	}
+	
+	
 
 	@Override
 	public Token getTokenList(Segment text, int startTokenType, int startOffset) {
@@ -96,6 +98,13 @@ public class StitchTokenMaker extends AbstractTokenMaker {
 
 		for (int i = offset; i < end; i++) {
 			if (currentTokenType == Token.LITERAL_STRING_DOUBLE_QUOTE && array[i] != '"') {
+				continue;
+			}
+			else if (currentTokenType == Token.COMMENT_MULTILINE && !isEOC(array,i)) {
+				i++;i++; // Suck up '*/' token
+				continue;
+			}
+			else if (currentTokenType == Token.COMMENT_EOL) {
 				continue;
 			}
 
@@ -137,6 +146,11 @@ public class StitchTokenMaker extends AbstractTokenMaker {
 						newTokenType = Token.IDENTIFIER;
 					else
 						newTokenType = Token.NULL;
+				} else if ('/' == ch) {
+					if (i+1 < end) {
+						if ('*' == array[i+1]) newTokenType = Token.COMMENT_MULTILINE;
+						else if ('/' == array[i+1]) newTokenType = Token.COMMENT_EOL;
+					}
 				} else if ((newTokenType = wordsToHighlight.get(array, i, i)) != -1) {
 
 				}
@@ -326,8 +340,10 @@ public class StitchTokenMaker extends AbstractTokenMaker {
 
 		// Remember what token type to begin the next line with.
 		case Token.LITERAL_STRING_DOUBLE_QUOTE:
+		case Token.COMMENT_MULTILINE:
 			addToken(text, currentTokenStart, end - 1, currentTokenType, newStartOffset + currentTokenStart);
 			break;
+			
 
 		// Do nothing if everything was okay.
 		case Token.NULL:
@@ -345,6 +361,15 @@ public class StitchTokenMaker extends AbstractTokenMaker {
 		return firstToken;
 
 	}
+
+	private boolean isEOC(char[] array, int i) {
+		if (i+2 < array.length) {
+			return array[i] == '*' && array[i+1]=='/';
+		}
+		return false;
+	}
+
+
 
 	@Override
 	public TokenMap getWordsToHighlight() {
