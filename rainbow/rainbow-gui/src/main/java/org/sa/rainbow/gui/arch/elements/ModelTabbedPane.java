@@ -46,6 +46,7 @@ public class ModelTabbedPane extends JTabbedPane implements PropertyChangeListen
 		Object[][] data = {};
 		Object[] colNames = { "Operation", "Target", "Parameters", "Origin", "State" };
 		m_table = new JTable(new DefaultTableModel(data, colNames));
+		m_table.removeColumn(m_table.getColumnModel().getColumn(4));
 		scrollPane.setViewportView(m_table);
 		TableColumnAdjuster tca = new TableColumnAdjuster(m_table);
 		tca.setDynamicAdjustment(true);
