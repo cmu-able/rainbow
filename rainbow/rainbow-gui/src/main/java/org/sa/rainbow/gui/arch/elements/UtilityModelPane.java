@@ -30,10 +30,22 @@ import org.sa.rainbow.core.models.UtilityPreferenceDescription;
 public class UtilityModelPane extends JPanel {
 	public class UtilityFunctionListRenderer extends JLabel implements ListCellRenderer<UtilityFunction> {
 
+		public UtilityFunctionListRenderer() {
+			setOpaque(true);
+		}
+		
 		@Override
 		public Component getListCellRendererComponent(JList<? extends UtilityFunction> list, UtilityFunction value,
 				int index, boolean isSelected, boolean cellHasFocus) {
 			setText(value.label());
+			if (isSelected) {
+				setBackground(list.getSelectionBackground());
+				setForeground(list.getSelectionForeground());
+			}
+			else {
+				setBackground(list.getBackground());
+				setForeground(list.getForeground());
+			}
 			return this;
 		}
 
@@ -51,10 +63,10 @@ public class UtilityModelPane extends JPanel {
 	 */
 	public UtilityModelPane() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[]{150, 0, 0, 0};
-		gridBagLayout.rowHeights = new int[]{0, 0, 0, 75, 0, 0};
-		gridBagLayout.columnWeights = new double[]{0, 0.0, 1.0, Double.MIN_VALUE};
-		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gridBagLayout.columnWidths = new int[]{150, 0, 0, 0, 0, 0};
+		gridBagLayout.rowHeights = new int[]{0, 0, 0, 75, 0};
+		gridBagLayout.columnWeights = new double[]{0, 0.0, 1.0, 0.0, 1.0, Double.MIN_VALUE};
+		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 1.0, 1.0, Double.MIN_VALUE};
 		setLayout(gridBagLayout);
 		
 		JLabel lblUtilityFunctions = new JLabel("Utility Functions:");
@@ -67,7 +79,7 @@ public class UtilityModelPane extends JPanel {
 		
 		m_utilityFunctions = new JList();
 		GridBagConstraints gbc_list = new GridBagConstraints();
-		gbc_list.gridheight = 4;
+		gbc_list.gridheight = 3;
 		gbc_list.insets = new Insets(0, 0, 0, 5);
 		gbc_list.fill = GridBagConstraints.BOTH;
 		gbc_list.gridx = 0;
@@ -87,7 +99,7 @@ public class UtilityModelPane extends JPanel {
 		m_funcLabel = new JTextField();
 		m_funcLabel.setEditable(false);
 		GridBagConstraints gbc_textField = new GridBagConstraints();
-		gbc_textField.insets = new Insets(0, 0, 5, 0);
+		gbc_textField.insets = new Insets(0, 0, 5, 5);
 		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_textField.gridx = 2;
 		gbc_textField.gridy = 1;
@@ -97,7 +109,7 @@ public class UtilityModelPane extends JPanel {
 		JLabel lblMapping = new JLabel("Mapping:");
 		lblMapping.setHorizontalAlignment(SwingConstants.RIGHT);
 		GridBagConstraints gbc_lblMapping = new GridBagConstraints();
-		gbc_lblMapping.anchor = GridBagConstraints.EAST;
+		gbc_lblMapping.anchor = GridBagConstraints.NORTHEAST;
 		gbc_lblMapping.insets = new Insets(0, 0, 5, 5);
 		gbc_lblMapping.gridx = 1;
 		gbc_lblMapping.gridy = 2;
@@ -106,18 +118,21 @@ public class UtilityModelPane extends JPanel {
 		m_mappingText = new JTextField();
 		m_mappingText.setEditable(false);
 		GridBagConstraints gbc_mappingText = new GridBagConstraints();
-		gbc_mappingText.insets = new Insets(0, 0, 5, 0);
+		gbc_mappingText.anchor = GridBagConstraints.NORTH;
+		gbc_mappingText.insets = new Insets(0, 0, 5, 5);
 		gbc_mappingText.fill = GridBagConstraints.HORIZONTAL;
 		gbc_mappingText.gridx = 2;
 		gbc_mappingText.gridy = 2;
 		add(m_mappingText, gbc_mappingText);
 		m_mappingText.setColumns(10);
 		
+		
+		
 		JLabel lblDescription = new JLabel("Description:");
 		lblDescription.setHorizontalAlignment(SwingConstants.RIGHT);
 		GridBagConstraints gbc_lblDescription = new GridBagConstraints();
 		gbc_lblDescription.anchor = GridBagConstraints.NORTHEAST;
-		gbc_lblDescription.insets = new Insets(0, 0, 5, 5);
+		gbc_lblDescription.insets = new Insets(0, 0, 0, 5);
 		gbc_lblDescription.gridx = 1;
 		gbc_lblDescription.gridy = 3;
 		add(lblDescription, gbc_lblDescription);
@@ -125,7 +140,7 @@ public class UtilityModelPane extends JPanel {
 		m_descriptionText = new JTextArea();
 		m_descriptionText.setEditable(false);
 		GridBagConstraints gbc_descriptionText = new GridBagConstraints();
-		gbc_descriptionText.insets = new Insets(0, 0, 5, 0);
+		gbc_descriptionText.insets = new Insets(0, 0, 0, 5);
 		gbc_descriptionText.fill = GridBagConstraints.BOTH;
 		gbc_descriptionText.gridx = 2;
 		gbc_descriptionText.gridy = 3;
@@ -134,10 +149,10 @@ public class UtilityModelPane extends JPanel {
 		JLabel lblFunction = new JLabel("Function:");
 		lblFunction.setHorizontalAlignment(SwingConstants.RIGHT);
 		GridBagConstraints gbc_lblFunction = new GridBagConstraints();
-		gbc_lblFunction.insets = new Insets(0, 0, 0, 5);
-		gbc_lblFunction.anchor = GridBagConstraints.NORTHEAST;
-		gbc_lblFunction.gridx = 1;
-		gbc_lblFunction.gridy = 4;
+		gbc_lblFunction.insets = new Insets(0, 0, 5, 0);
+		gbc_lblFunction.anchor = GridBagConstraints.WEST;
+		gbc_lblFunction.gridx = 4;
+		gbc_lblFunction.gridy = 1;
 		add(lblFunction, gbc_lblFunction);
 		
 		
@@ -169,11 +184,12 @@ public class UtilityModelPane extends JPanel {
 				XYSeriesCollection data = new XYSeriesCollection(series);
 				JFreeChart chart = ChartFactory.createXYLineChart(f.label(), "X", "Utility", data,PlotOrientation.VERTICAL, false, true, false);
 				m_graphPanel = new ChartPanel(chart);
-				GridBagConstraints gbc_m_graphPanel = new GridBagConstraints();
-				gbc_m_graphPanel.fill = GridBagConstraints.BOTH;
-				gbc_m_graphPanel.gridx = 2;
-				gbc_m_graphPanel.gridy = 4;
-				add(m_graphPanel, gbc_m_graphPanel);
+				GridBagConstraints gbc_panel = new GridBagConstraints();
+				gbc_panel.gridheight = 2;
+				gbc_panel.fill = GridBagConstraints.BOTH;
+				gbc_panel.gridx = 4;
+				gbc_panel.gridy = 2;
+				add(m_graphPanel, gbc_panel);
 			}
 		});
 		
