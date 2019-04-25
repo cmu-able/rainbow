@@ -11,13 +11,14 @@ import org.sa.rainbow.gui.arch.model.RainbowArchAdapationManagerModel;
 // Be careful, this is stitch specific
 public class AdaptationManagerTabbedPane extends JTabbedPane {
 
-	private UtilityModelPane m_ump;
+	private UtilityFunctionPane m_utilityFunctionPanel;
 
 	public AdaptationManagerTabbedPane() {
 		setTabPlacement(JTabbedPane.BOTTOM);
-		m_ump = new UtilityModelPane();
+		m_utilityFunctionPanel = new UtilityFunctionPane();
 
-		addTab("Utilities", m_ump);
+//		addTab("Utilities");
+		addTab("Utility Functions", m_utilityFunctionPanel);
 		addTab("Stitch Scripts", new StitchDetailPane());
 
 //		File stitchPath = Util.getRelativeToPath(Rainbow.instance().getTargetPath(),
@@ -55,10 +56,10 @@ public class AdaptationManagerTabbedPane extends JTabbedPane {
 				.getModelInstance(new ModelReference(managedModel.getModelName(), "UtilityModel"));
 		if (utilityModel != null) {
 			UtilityPreferenceDescription upd = (UtilityPreferenceDescription) utilityModel.getModelInstance();
-			m_ump.initBindings(upd);
+			m_utilityFunctionPanel.initBindings(upd);
 		}
 		else {
-			removeTabAt(indexOfComponent(m_ump));
+			removeTabAt(indexOfComponent(m_utilityFunctionPanel));
 		}
 
 	}
