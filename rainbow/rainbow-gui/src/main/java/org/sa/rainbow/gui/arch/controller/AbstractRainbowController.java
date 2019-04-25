@@ -91,6 +91,7 @@ public abstract class AbstractRainbowController implements IRainbowUIController,
 				move(new Point2D.Double(loc.x, loc.y), true);
 			}
 		});
+		getVisibleFrame().putClientProperty("controller", this);
 	}
 
 	@Override
