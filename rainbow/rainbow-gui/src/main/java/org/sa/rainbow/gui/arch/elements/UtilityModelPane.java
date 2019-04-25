@@ -124,7 +124,7 @@ public class UtilityModelPane extends JPanel {
 				m_scenarioName.setText(scenario);
 				Map<String, Double> weightTable = m_upd.weights.get(scenario);
 //				m_weightTable.removeAll();
-				DefaultTableModel tm = new DefaultTableModel();
+				DefaultTableModel tm = new DefaultTableModel(new Object[][] {}, new String[] { "Utility", "Weight" });
 				for (Entry<String, Double> w : weightTable.entrySet()) {
 					String label = m_upd.getUtilityFunctions().get(w.getKey()).label();
 					tm.addRow(new Object[] {label, w.getValue()});
@@ -138,7 +138,7 @@ public class UtilityModelPane extends JPanel {
 				String tactic = (String) m_tacticList.getSelectedValue();
 				m_selectedTacticField.setText(tactic + " Impact Vector");
 				Map<String, Object> impactModel = m_upd.attributeVectors.get(tactic);
-				DefaultTableModel tm = new DefaultTableModel();
+				DefaultTableModel tm = new DefaultTableModel(new Object[][] {}, new String[] { "Utility", "Impact" });
 
 				for (Entry<String, Object> im : impactModel.entrySet()) {
 					String label = m_upd.getUtilityFunctions().get(im.getKey()).label();
@@ -167,6 +167,7 @@ public class UtilityModelPane extends JPanel {
 		for (Entry<String, Map<String, Object>> te : upd.attributeVectors.entrySet()) {
 			tacticListModel.addElement(te.getKey());
 		}
+		m_tacticList.setModel(tacticListModel);
 
 	}
 

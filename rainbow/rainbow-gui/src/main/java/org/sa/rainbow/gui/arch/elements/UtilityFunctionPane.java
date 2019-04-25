@@ -191,7 +191,7 @@ public class UtilityFunctionPane extends JPanel {
 				GridBagConstraints gbc_panel = new GridBagConstraints();
 				gbc_panel.gridheight = 2;
 				gbc_panel.fill = GridBagConstraints.BOTH;
-				gbc_panel.gridx = 4;
+				gbc_panel.gridx = 3;
 				gbc_panel.gridy = 2;
 				add(m_graphPanel, gbc_panel);
 			}
