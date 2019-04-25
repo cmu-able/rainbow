@@ -43,8 +43,8 @@ public class RainbowEffectorController extends AbstractRainbowController  {
 		m_frame.setVisible(true);
 		m_effectorUI = new ArchEffectorPanel();
 		setupDiagram(m_frame, m_effectorUI);
-		attachControllerToFrame(m_frame);
 		parent.add(m_frame);
+		attachControllerToFrame(m_frame);
 		return m_frame;
 	
 

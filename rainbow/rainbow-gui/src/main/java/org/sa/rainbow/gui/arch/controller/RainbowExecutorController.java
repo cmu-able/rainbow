@@ -55,9 +55,9 @@ public class RainbowExecutorController extends AbstractRainbowController {
 		frame.add(m_uiComp);
 		Dimension s = m_uiComp.getPreferredSize();
 		frame.setSize(s.width, s.height+25);
-		attachControllerToFrame(frame);
 		parent.add(frame);
 		m_frame = frame;
+		attachControllerToFrame(frame);
 		return m_frame;
 	}
 	
