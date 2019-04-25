@@ -85,6 +85,7 @@ public class RainbowAdaptationManagerController extends AbstractRainbowControlle
 		if (m_uiComp instanceof IUIReporter) {
 			((IUIReporter )m_uiComp).processReport(type, message);
 		}
+		getModel().addReport(message);
 	}
 
 }
