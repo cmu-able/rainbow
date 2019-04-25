@@ -262,6 +262,7 @@ public class RainbowWindoe extends RainbowWindow
 			m_probePanel.setVisible(false);
 			m_gaugePanel.setVisible(false);
 			m_modelPanel.setVisible(false);
+			m_amPanel.setVisible(false);
 			if (o instanceof RainbowArchProbeModel) {
 				RainbowArchProbeModel probeInfo = (RainbowArchProbeModel) o;
 				m_selectionPanel.setSelectedIndex(1);
@@ -287,7 +288,7 @@ public class RainbowWindoe extends RainbowWindow
 				m_selectionPanel.setSelectedIndex(1);
 				m_amPanel.setVisible(true);
 				m_amPanel.initBindings(amModel);
-				((CardLayout) m_detailsPanel.getLayout()).show(m_amPanel, "adaptationmanagers");
+				((CardLayout) m_detailsPanel.getLayout()).show(m_detailsPanel, "adaptationmanagers");
 			}
 		});
 		m_statusWindow = new JLabel("Waiting for Rainbow to start...");
