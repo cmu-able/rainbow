@@ -1,6 +1,8 @@
 package org.sa.rainbow.gui.arch.elements;
 
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+
 import java.awt.GridBagLayout;
 
 import javax.swing.DefaultListModel;
@@ -16,6 +18,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
 
 import org.sa.rainbow.core.models.UtilityPreferenceDescription;
+import org.sa.rainbow.gui.widgets.TableColumnAdjuster;
 
 import javax.swing.JTable;
 
@@ -92,14 +95,15 @@ public class UtilityModelPane extends JPanel {
 		gbc_scenarioList.gridy = 1;
 		add(m_scenarioList, gbc_scenarioList);
 		m_scenarioList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
+	
 		m_weightTable = new JTable(new Object[][] {}, new String[] { "Utility", "Weight" });
 		GridBagConstraints gbc_weightTable = new GridBagConstraints();
 		gbc_weightTable.insets = new Insets(0, 0, 0, 5);
 		gbc_weightTable.fill = GridBagConstraints.BOTH;
 		gbc_weightTable.gridx = 1;
 		gbc_weightTable.gridy = 1;
-		add(m_weightTable, gbc_weightTable);
+		JScrollPane wsp = new JScrollPane(m_weightTable);
+		add(wsp, gbc_weightTable);
 
 		m_tacticList = new JList();
 		GridBagConstraints gbc_tacticList = new GridBagConstraints();
@@ -116,7 +120,8 @@ public class UtilityModelPane extends JPanel {
 		gbc_impactTable.fill = GridBagConstraints.BOTH;
 		gbc_impactTable.gridx = 3;
 		gbc_impactTable.gridy = 1;
-		add(m_impactTable, gbc_impactTable);
+		JScrollPane isp = new JScrollPane(m_impactTable);
+		add(isp, gbc_impactTable);
 
 		m_scenarioList.addListSelectionListener(e -> {
 			if (!e.getValueIsAdjusting()) {
@@ -147,6 +152,10 @@ public class UtilityModelPane extends JPanel {
 				m_impactTable.setModel(tm);
 			}
 		});
+		TableColumnAdjuster stca = new TableColumnAdjuster(m_weightTable);
+		stca.setDynamicAdjustment(true);
+		TableColumnAdjuster ttca = new TableColumnAdjuster(m_impactTable);
+		ttca.setDynamicAdjustment(true);
 	}
 
 	public void initBindings(UtilityPreferenceDescription upd) {
