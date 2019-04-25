@@ -3,12 +3,15 @@ package org.sa.rainbow.gui.arch.elements;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.text.MessageFormat;
+import java.util.Arrays;
 
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
 import org.sa.rainbow.translator.effectors.IEffectorIdentifier.Kind;
 
@@ -27,12 +30,12 @@ public class EffectorDetailPanel extends JPanel {
 	 */
 	public EffectorDetailPanel() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[]{0, 0, 0};
-		gridBagLayout.rowHeights = new int[]{0, 0, 0, 0, 0};
-		gridBagLayout.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
-		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gridBagLayout.columnWidths = new int[] { 0, 0, 0 };
+		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0 };
+		gridBagLayout.columnWeights = new double[] { 0.0, 1.0, Double.MIN_VALUE };
+		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		setLayout(gridBagLayout);
-		
+
 		JLabel lblName = new JLabel("Name:");
 		GridBagConstraints gbc_lblName = new GridBagConstraints();
 		gbc_lblName.insets = new Insets(0, 0, 5, 5);
@@ -40,7 +43,7 @@ public class EffectorDetailPanel extends JPanel {
 		gbc_lblName.gridx = 0;
 		gbc_lblName.gridy = 0;
 		add(lblName, gbc_lblName);
-		
+
 		m_nameField = new JTextField();
 		m_nameField.setEditable(false);
 		GridBagConstraints gbc_nameField = new GridBagConstraints();
@@ -50,7 +53,7 @@ public class EffectorDetailPanel extends JPanel {
 		gbc_nameField.gridy = 0;
 		add(m_nameField, gbc_nameField);
 		m_nameField.setColumns(10);
-		
+
 		JLabel lblLocation = new JLabel("Location:");
 		GridBagConstraints gbc_lblLocation = new GridBagConstraints();
 		gbc_lblLocation.anchor = GridBagConstraints.EAST;
@@ -58,7 +61,7 @@ public class EffectorDetailPanel extends JPanel {
 		gbc_lblLocation.gridx = 0;
 		gbc_lblLocation.gridy = 1;
 		add(lblLocation, gbc_lblLocation);
-		
+
 		m_locationField = new JTextField();
 		m_locationField.setEditable(false);
 		GridBagConstraints gbc_locationField = new GridBagConstraints();
@@ -68,7 +71,7 @@ public class EffectorDetailPanel extends JPanel {
 		gbc_locationField.gridy = 1;
 		add(m_locationField, gbc_locationField);
 		m_locationField.setColumns(10);
-		
+
 		JLabel lblRespondsToOperation = new JLabel("Responds To Operation:");
 		GridBagConstraints gbc_lblRespondsToOperation = new GridBagConstraints();
 		gbc_lblRespondsToOperation.anchor = GridBagConstraints.EAST;
@@ -76,7 +79,7 @@ public class EffectorDetailPanel extends JPanel {
 		gbc_lblRespondsToOperation.gridx = 0;
 		gbc_lblRespondsToOperation.gridy = 2;
 		add(lblRespondsToOperation, gbc_lblRespondsToOperation);
-		
+
 		m_commandField = new JTextField();
 		m_commandField.setEditable(false);
 		GridBagConstraints gbc_commandField = new GridBagConstraints();
@@ -86,7 +89,7 @@ public class EffectorDetailPanel extends JPanel {
 		gbc_commandField.gridy = 2;
 		add(m_commandField, gbc_commandField);
 		m_commandField.setColumns(10);
-		
+
 		m_internalFrame = new JInternalFrame("ScriptInfo");
 		GridBagConstraints gbc_m_internalFrame = new GridBagConstraints();
 		gbc_m_internalFrame.fill = GridBagConstraints.BOTH;
@@ -96,12 +99,12 @@ public class EffectorDetailPanel extends JPanel {
 		gbc_m_internalFrame.gridy = 3;
 		add(m_internalFrame, gbc_m_internalFrame);
 		GridBagLayout gridBagLayout_1 = new GridBagLayout();
-		gridBagLayout_1.columnWidths = new int[]{0, 0, 0};
-		gridBagLayout_1.rowHeights = new int[]{0, 0, 0};
-		gridBagLayout_1.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
-		gridBagLayout_1.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		gridBagLayout_1.columnWidths = new int[] { 0, 0, 0 };
+		gridBagLayout_1.rowHeights = new int[] { 0, 0, 0 };
+		gridBagLayout_1.columnWeights = new double[] { 0.0, 1.0, Double.MIN_VALUE };
+		gridBagLayout_1.rowWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
 		m_internalFrame.getContentPane().setLayout(gridBagLayout_1);
-		
+
 		m_lblPath = new JLabel("Path:");
 		GridBagConstraints gbc_m_lblPath = new GridBagConstraints();
 		gbc_m_lblPath.insets = new Insets(0, 0, 5, 5);
@@ -109,7 +112,7 @@ public class EffectorDetailPanel extends JPanel {
 		gbc_m_lblPath.gridx = 0;
 		gbc_m_lblPath.gridy = 0;
 		m_internalFrame.getContentPane().add(m_lblPath, gbc_m_lblPath);
-		
+
 		m_pathField = new JTextField();
 		m_pathField.setEditable(false);
 		GridBagConstraints gbc_pathField = new GridBagConstraints();
@@ -119,7 +122,7 @@ public class EffectorDetailPanel extends JPanel {
 		gbc_pathField.gridy = 0;
 		m_internalFrame.getContentPane().add(m_pathField, gbc_pathField);
 		m_pathField.setColumns(10);
-		
+
 		JLabel lblArgs = new JLabel("Args:");
 		GridBagConstraints gbc_lblArgs = new GridBagConstraints();
 		gbc_lblArgs.anchor = GridBagConstraints.EAST;
@@ -127,7 +130,7 @@ public class EffectorDetailPanel extends JPanel {
 		gbc_lblArgs.gridx = 0;
 		gbc_lblArgs.gridy = 1;
 		m_internalFrame.getContentPane().add(lblArgs, gbc_lblArgs);
-		
+
 		m_argsField = new JTextField();
 		m_argsField.setEditable(false);
 		GridBagConstraints gbc_argsField = new GridBagConstraints();
@@ -139,17 +142,18 @@ public class EffectorDetailPanel extends JPanel {
 		m_internalFrame.setVisible(true);
 
 	}
-	
+
 	public void initBindings(EffectorAttributes ea) {
 		m_ea = ea;
 		m_nameField.setText(ea.name);
 		m_locationField.setText(ea.location);
-		m_commandField.setText(ea.getCommandPattern().toString());
+		OperationRepresentation cp = ea.getCommandPattern();
+		m_commandField.setText(MessageFormat.format("{0}.{1}({2})", cp.getTarget(), cp.getName(), cp.getParameters()==null?"":Arrays.toString(cp.getParameters())));
 		if (ea.getKind() == Kind.SCRIPT) {
 			m_internalFrame.setTitle("Script Information");
 			m_lblPath.setText("Path:");
-			m_pathField.setText(ea.getArrays().get("path").toString());
-			m_argsField.setText(ea.getArrays().get("args").toString());
+			m_pathField.setText(ea.getInfo().get("path").toString());
+			m_argsField.setText(ea.getInfo().get("argument").toString());
 		}
 	}
 }

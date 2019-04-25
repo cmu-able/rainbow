@@ -17,6 +17,8 @@ import org.sa.rainbow.gui.arch.model.RainbowArchEffectorModel;
 import org.sa.rainbow.gui.arch.model.RainbowArchEffectorModel.EffectorExecutions;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
+
 public class EffectorExecutionPane extends JPanel implements PropertyChangeListener {
 	private JTable m_table;
 	private RainbowArchEffectorModel m_effModel;
@@ -58,7 +60,7 @@ public class EffectorExecutionPane extends JPanel implements PropertyChangeListe
 	}
 
 	protected Object[] createRow(EffectorExecutions ex) {
-		return new Object[] {getDateCol(ex.executionDuration, ex.outcome), ex.args.toArray().toString(), ex.outcome!=null?ex.outcome:"Pending"};
+		return new Object[] {getDateCol(ex.executionDuration, ex.outcome), Arrays.toString(ex.args.toArray()), ex.outcome!=null?ex.outcome:"Pending"};
 	}
 
 	private Object getDateCol(long executionDuration, Outcome outcome) {
