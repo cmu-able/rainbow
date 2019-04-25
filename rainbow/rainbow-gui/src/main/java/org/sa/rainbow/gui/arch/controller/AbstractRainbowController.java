@@ -86,6 +86,10 @@ public abstract class AbstractRainbowController implements IRainbowUIController,
 			if ("selected".equals(e.getPropertyName())) {
 				m_selectionManager.selectionChanged(this.getModel(),(Boolean )e.getNewValue());
 			}
+			else if ("userdragged".equals(e.getPropertyName())) {
+				Point loc = (Point) e.getNewValue();
+				move(new Point2D.Double(loc.x, loc.y), true);
+			}
 		});
 	}
 

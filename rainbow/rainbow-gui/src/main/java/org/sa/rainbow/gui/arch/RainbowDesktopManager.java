@@ -13,6 +13,9 @@ import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 import javax.swing.JInternalFrame.JDesktopIcon;
 
+import org.hibernate.id.CompositeNestedGeneratedValueGenerator.GenerationContextLocator;
+import org.sa.rainbow.gui.arch.controller.AbstractRainbowController;
+
 
 public class RainbowDesktopManager extends DefaultDesktopManager {
 
@@ -107,7 +110,12 @@ public class RainbowDesktopManager extends DefaultDesktopManager {
 	@Override
 	public void endDraggingFrame(JComponent f) {
 		super.endDraggingFrame(f);
-		
+		Object ctrl = f.getClientProperty("controller");
+		if (ctrl instanceof AbstractRainbowController) {
+			AbstractRainbowController controller = (AbstractRainbowController) ctrl;
+			controller.move(f.getLocation(), true);
+			
+		}
 	}
 	
 	@Override
