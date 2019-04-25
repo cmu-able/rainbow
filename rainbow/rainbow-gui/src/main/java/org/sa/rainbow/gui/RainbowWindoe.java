@@ -88,6 +88,7 @@ import org.sa.rainbow.gui.arch.controller.RainbowGaugeController;
 import org.sa.rainbow.gui.arch.controller.RainbowModelController;
 import org.sa.rainbow.gui.arch.controller.RainbowProbeController;
 import org.sa.rainbow.gui.arch.elements.AdaptationManagerTabbedPane;
+import org.sa.rainbow.gui.arch.elements.EffectorTabbedPane;
 import org.sa.rainbow.gui.arch.elements.GaugeTabbedPane;
 import org.sa.rainbow.gui.arch.elements.ModelTabbedPane;
 import org.sa.rainbow.gui.arch.elements.ProbeTabbedPane;
@@ -194,6 +195,8 @@ public class RainbowWindoe extends RainbowWindow
 	private ModelTabbedPane m_modelPanel;
 	
 	private AdaptationManagerTabbedPane m_amPanel;
+	
+	private EffectorTabbedPane m_effectorPanel;
 
 	private JLabel m_statusWindow;
 
@@ -263,6 +266,7 @@ public class RainbowWindoe extends RainbowWindow
 			m_gaugePanel.setVisible(false);
 			m_modelPanel.setVisible(false);
 			m_amPanel.setVisible(false);
+			m_effectorPanel.setVisible(false);
 			if (o instanceof RainbowArchProbeModel) {
 				RainbowArchProbeModel probeInfo = (RainbowArchProbeModel) o;
 				m_selectionPanel.setSelectedIndex(1);
@@ -289,6 +293,15 @@ public class RainbowWindoe extends RainbowWindow
 				m_amPanel.setVisible(true);
 				m_amPanel.initBindings(amModel);
 				((CardLayout) m_detailsPanel.getLayout()).show(m_detailsPanel, "adaptationmanagers");
+			} else if (o instanceof RainbowArchEffectorModel) {
+				RainbowArchEffectorModel effModel = (RainbowArchEffectorModel) o;
+				m_selectionPanel.setSelectedIndex(1);
+				m_effectorPanel.setVisible(true);
+				m_effectorPanel.initBindings(effModel);
+				
+				((CardLayout) m_detailsPanel.getLayout()).show(m_detailsPanel, "effectors");
+
+				
 			}
 		});
 		m_statusWindow = new JLabel("Waiting for Rainbow to start...");
@@ -363,6 +376,13 @@ public class RainbowWindoe extends RainbowWindow
 
 	@Override
 	protected void createEffectorsUI() {
+		m_effectorPanel = new EffectorTabbedPane();
+		m_detailsPanel.add(m_effectorPanel);
+		m_effectorPanel.setVisible(false);
+		((CardLayout) m_detailsPanel.getLayout()).addLayoutComponent(m_effectorPanel, "effectors");
+
+		
+		
 		JTextArea modelsLogs = createTextAreaInTab(m_logTabs, "Effectors");
 		m_allTabs.put(RainbowComponentT.EFFECTOR, modelsLogs);
 		m_allTabs.put(RainbowComponentT.EFFECTOR_MANAGER, modelsLogs);
@@ -1298,17 +1318,10 @@ public class RainbowWindoe extends RainbowWindow
 			}
 		} else if (component == RainbowComponentT.ANALYSIS && m.matches()) {
 			RainbowArchAnalysisModel ma = m_rainbowModel.getAnalyzer(m.group(1));
-//			JComponent c = m_analyzers.get(m.group(1));
 			ma.getController().processReport(type, m.group(2));
-//			if (c instanceof IUIReporter) {
-//				((IUIReporter) c).processReport(type, m.group(2));
-//			}
 		} else if (component == RainbowComponentT.ADAPTATION_MANAGER && m.matches()) {
 			RainbowArchAdapationManagerModel mam = m_rainbowModel.getAdaptationManager(m.group(1));
 			mam.getController().processReport(type, m.group(2));
-//			if (c instanceof IUIReporter) {
-//				((IUIReporter) c).processReport(type, m.group(2));
-//			}
 		} else if (component == RainbowComponentT.EXECUTOR && m.matches()) {
 			RainbowArchExecutorModel ex = m_rainbowModel.getExecutor(m.group(1));
 			ex.getController().processReport(type, m.group(2));
@@ -1326,11 +1339,6 @@ public class RainbowWindoe extends RainbowWindow
 					RainbowArchGaugeModel gi = m_rainbowModel.getGauge(m.group(1));
 					if (gi != null) {
 						gi.setError(message);
-//						DesktopIconUI f = gi.getFrame().getDesktopIcon().getUI();
-//						if (f instanceof IErrorDisplay) {
-//							IErrorDisplay e = (IErrorDisplay) f;
-//							e.displayError(m.group(2));
-//						}
 					}
 					break;
 				case PROBE:
@@ -1338,15 +1346,6 @@ public class RainbowWindoe extends RainbowWindow
 					if (pm != null) {
 						pm.setError(message);
 					}
-//					ProbeInfo pi = m_probes.get(m.group(1));
-//					if (pi != null) {
-//						InternalFrameUI f = pi.frame.getUI();
-//						if (f instanceof IErrorDisplay) {
-//							IErrorDisplay e = (IErrorDisplay) f;
-//							e.displayError(message);
-//						}
-//					}
-
 				}
 			}
 

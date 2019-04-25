@@ -41,7 +41,7 @@ public class ProbeTabbedPane extends JTabbedPane {
 		scrollPane.setViewportView(m_reportText);
 		
 		m_probeDetailPanel = new ProbeDetailPanel();
-		addTab("Spec", null, m_probeDetailPanel, null);
+		addTab("Specification", null, m_probeDetailPanel, null);
 	}
 
 	protected void initDataBindings() {
