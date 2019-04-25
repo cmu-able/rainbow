@@ -23,6 +23,10 @@ public class RainbowArchEffectorModel extends RainbowArchModelElement {
 	private EffectorAttributes m_effDesc;
 	private List<EffectorExecutions> m_executions = new LinkedList<>(); // Most recent execution is at head
 
+	public List<EffectorExecutions> getExecutions() {
+		return m_executions;
+	}
+
 	public EffectorAttributes getEffectorAttributes() {
 		return m_effDesc;
 	}
