@@ -3,8 +3,10 @@ package org.sa.rainbow.gui.arch.elements;
 import javax.swing.JTabbedPane;
 
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.UtilityPreferenceDescription;
+import org.sa.rainbow.gui.arch.model.RainbowArchAdapationManagerModel;
 
 // Be careful, this is stitch specific
 public class AdaptationManagerTabbedPane extends JTabbedPane {
@@ -17,8 +19,7 @@ public class AdaptationManagerTabbedPane extends JTabbedPane {
 
 		addTab("Utilities", m_ump);
 		addTab("Stitch Scripts", new StitchDetailPane());
-		
-		
+
 //		File stitchPath = Util.getRelativeToPath(Rainbow.instance().getTargetPath(),
 //				Rainbow.instance().getProperty(RainbowConstants.PROPKEY_SCRIPT_PATH));
 //		if (stitchPath != null) {
@@ -47,10 +48,18 @@ public class AdaptationManagerTabbedPane extends JTabbedPane {
 //			}
 //		}
 	}
-	
-	public void initBindings() {
-		UtilityPreferenceDescription upd = (UtilityPreferenceDescription) Rainbow.instance().getRainbowMaster().modelsManager().getModelInstance(new ModelReference("SwimSys", "UtilityModel")).getModelInstance();
-		m_ump.initBindings(upd);
+
+	public void initBindings(RainbowArchAdapationManagerModel amModel) {
+		ModelReference managedModel = amModel.getAdaptationManager().getManagedModel();
+		IModelInstance<Object> utilityModel = Rainbow.instance().getRainbowMaster().modelsManager()
+				.getModelInstance(new ModelReference(managedModel.getModelName(), "UtilityModel"));
+		if (utilityModel != null) {
+			UtilityPreferenceDescription upd = (UtilityPreferenceDescription) utilityModel.getModelInstance();
+			m_ump.initBindings(upd);
+		}
+		else {
+			removeTabAt(indexOfComponent(m_ump));
+		}
 
 	}
 }

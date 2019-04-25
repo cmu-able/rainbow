@@ -1,7 +1,7 @@
 package org.sa.rainbow.gui.arch.elements;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -184,6 +184,7 @@ public class UtilityModelPane extends JPanel {
 				XYSeriesCollection data = new XYSeriesCollection(series);
 				JFreeChart chart = ChartFactory.createXYLineChart(f.label(), "X", "Utility", data,PlotOrientation.VERTICAL, false, true, false);
 				m_graphPanel = new ChartPanel(chart);
+				m_graphPanel.setSize(new Dimension(175,175));
 				GridBagConstraints gbc_panel = new GridBagConstraints();
 				gbc_panel.gridheight = 2;
 				gbc_panel.fill = GridBagConstraints.BOTH;
