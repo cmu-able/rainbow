@@ -13,12 +13,15 @@ public class AdaptationManagerTabbedPane extends JTabbedPane {
 
 	private UtilityFunctionPane m_utilityFunctionPanel;
 	private UtilityModelPane m_utilityModelPanel;
+	private ReportHistoryPane m_reportHistoryPanel;
 
 	public AdaptationManagerTabbedPane() {
 		setTabPlacement(JTabbedPane.BOTTOM);
 		m_utilityFunctionPanel = new UtilityFunctionPane();
 		m_utilityModelPanel = new UtilityModelPane();
-
+		m_reportHistoryPanel = new ReportHistoryPane();
+		
+		addTab("Activity", m_reportHistoryPanel);
 		addTab("Utilities", m_utilityModelPanel);
 		addTab("Utility Functions", m_utilityFunctionPanel);
 		addTab("Stitch Scripts", new StitchDetailPane());
@@ -53,6 +56,7 @@ public class AdaptationManagerTabbedPane extends JTabbedPane {
 	}
 
 	public void initBindings(RainbowArchAdapationManagerModel amModel) {
+		m_reportHistoryPanel.initBindings(amModel);
 		ModelReference managedModel = amModel.getAdaptationManager().getManagedModel();
 		IModelInstance<Object> utilityModel = Rainbow.instance().getRainbowMaster().modelsManager()
 				.getModelInstance(new ModelReference(managedModel.getModelName(), "UtilityModel"));
