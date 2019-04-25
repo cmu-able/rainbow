@@ -12,12 +12,14 @@ import org.sa.rainbow.gui.arch.model.RainbowArchAdapationManagerModel;
 public class AdaptationManagerTabbedPane extends JTabbedPane {
 
 	private UtilityFunctionPane m_utilityFunctionPanel;
+	private UtilityModelPane m_utilityModelPanel;
 
 	public AdaptationManagerTabbedPane() {
 		setTabPlacement(JTabbedPane.BOTTOM);
 		m_utilityFunctionPanel = new UtilityFunctionPane();
+		m_utilityModelPanel = new UtilityModelPane();
 
-//		addTab("Utilities");
+		addTab("Utilities", m_utilityModelPanel);
 		addTab("Utility Functions", m_utilityFunctionPanel);
 		addTab("Stitch Scripts", new StitchDetailPane());
 
@@ -57,9 +59,11 @@ public class AdaptationManagerTabbedPane extends JTabbedPane {
 		if (utilityModel != null) {
 			UtilityPreferenceDescription upd = (UtilityPreferenceDescription) utilityModel.getModelInstance();
 			m_utilityFunctionPanel.initBindings(upd);
+			m_utilityModelPanel.initBindings(upd);
 		}
 		else {
 			removeTabAt(indexOfComponent(m_utilityFunctionPanel));
+			removeTabAt(indexOfComponent(m_utilityModelPanel));
 		}
 
 	}

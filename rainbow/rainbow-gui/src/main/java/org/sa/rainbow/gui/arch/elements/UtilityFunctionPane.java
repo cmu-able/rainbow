@@ -27,7 +27,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.sa.rainbow.core.models.UtilityFunction;
 import org.sa.rainbow.core.models.UtilityPreferenceDescription;
 
-public class UtilityModelPane extends JPanel {
+public class UtilityFunctionPane extends JPanel {
 	public class UtilityFunctionListRenderer extends JLabel implements ListCellRenderer<UtilityFunction> {
 
 		public UtilityFunctionListRenderer() {
@@ -61,11 +61,11 @@ public class UtilityModelPane extends JPanel {
 	/**
 	 * Create the panel.
 	 */
-	public UtilityModelPane() {
+	public UtilityFunctionPane() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[]{150, 0, 0, 0, 0, 0};
+		gridBagLayout.columnWidths = new int[]{150, 0, 0, 175,0};
 		gridBagLayout.rowHeights = new int[]{0, 0, 0, 75, 0};
-		gridBagLayout.columnWeights = new double[]{0, 0.0, 1.0, 0.0, 1.0, Double.MIN_VALUE};
+		gridBagLayout.columnWeights = new double[]{0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
 		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 1.0, 1.0, Double.MIN_VALUE};
 		setLayout(gridBagLayout);
 		
@@ -138,6 +138,8 @@ public class UtilityModelPane extends JPanel {
 		add(lblDescription, gbc_lblDescription);
 		
 		m_descriptionText = new JTextArea();
+		m_descriptionText.setWrapStyleWord(true);
+		m_descriptionText.setLineWrap(true);
 		m_descriptionText.setEditable(false);
 		GridBagConstraints gbc_descriptionText = new GridBagConstraints();
 		gbc_descriptionText.insets = new Insets(0, 0, 0, 5);
@@ -151,7 +153,7 @@ public class UtilityModelPane extends JPanel {
 		GridBagConstraints gbc_lblFunction = new GridBagConstraints();
 		gbc_lblFunction.insets = new Insets(0, 0, 5, 0);
 		gbc_lblFunction.anchor = GridBagConstraints.WEST;
-		gbc_lblFunction.gridx = 4;
+		gbc_lblFunction.gridx = 3;
 		gbc_lblFunction.gridy = 1;
 		add(lblFunction, gbc_lblFunction);
 		
