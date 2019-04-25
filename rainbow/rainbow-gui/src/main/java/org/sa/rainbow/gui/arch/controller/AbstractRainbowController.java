@@ -91,7 +91,7 @@ public abstract class AbstractRainbowController implements IRainbowUIController,
 				move(new Point2D.Double(loc.x, loc.y), true);
 			}
 		});
-		getVisibleFrame().putClientProperty("controller", this);
+		getVisibleFrame(frame).putClientProperty("controller", this);
 	}
 
 	@Override
@@ -129,14 +129,18 @@ public abstract class AbstractRainbowController implements IRainbowUIController,
 		return m_frame.isIcon() ? m_frame.getDesktopIcon() : m_frame;
 	}
 
-	protected JComponent getVisibleFrame() {
-		JComponent visibleGFrame = m_frame;
+	protected JComponent getVisibleFrame(JComponent visibleGFrame) {
 		if (!visibleGFrame.isVisible() || m_frame.isIcon()
 				|| (m_frame.getDesktopPane().getDesktopManager() instanceof RainbowDesktopManager
 						&& ((RainbowDesktopManager) m_frame.getDesktopPane().getDesktopManager()).isIcon(m_frame))) {
 			visibleGFrame = m_frame.getDesktopIcon();
 		}
 		return visibleGFrame;
+	}
+	
+	protected JComponent getVisibleFrame() {
+		JComponent visibleGFrame = m_frame;
+		return getVisibleFrame(visibleGFrame);
 	}
 
 	protected void highlightActivity() {
