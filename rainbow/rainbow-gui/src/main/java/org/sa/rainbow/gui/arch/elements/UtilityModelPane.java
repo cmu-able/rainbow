@@ -185,6 +185,7 @@ public class UtilityModelPane extends JPanel {
 				JFreeChart chart = ChartFactory.createXYLineChart(f.label(), "X", "Utility", data,PlotOrientation.VERTICAL, false, true, false);
 				m_graphPanel = new ChartPanel(chart);
 				m_graphPanel.setSize(new Dimension(175,175));
+				m_graphPanel.setMinimumSize(new Dimension(175,175));
 				GridBagConstraints gbc_panel = new GridBagConstraints();
 				gbc_panel.gridheight = 2;
 				gbc_panel.fill = GridBagConstraints.BOTH;
