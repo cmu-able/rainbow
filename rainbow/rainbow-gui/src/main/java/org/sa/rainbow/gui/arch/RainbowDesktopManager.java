@@ -105,6 +105,12 @@ public class RainbowDesktopManager extends DefaultDesktopManager {
 	}
 	
 	@Override
+	public void endDraggingFrame(JComponent f) {
+		super.endDraggingFrame(f);
+		
+	}
+	
+	@Override
 	public void dragFrame(JComponent f, int newX, int newY) {
 		f.setLocation(newX, newY);
 		m_desktop.repaint();
