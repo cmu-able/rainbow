@@ -14,6 +14,7 @@ import javax.swing.table.DefaultTableModel;
 
 import org.sa.rainbow.gui.arch.model.IReportingModel;
 import org.sa.rainbow.gui.arch.model.IReportingModel.ReportDatum;
+import org.sa.rainbow.gui.widgets.TableColumnAdjuster;
 
 public class ReportHistoryPane extends JPanel implements PropertyChangeListener{
 	private JTable m_table;
@@ -32,6 +33,8 @@ public class ReportHistoryPane extends JPanel implements PropertyChangeListener{
 		
 		m_table = new JTable();
 		scrollPane.setViewportView(m_table);
+		TableColumnAdjuster tca = new TableColumnAdjuster(m_table);
+		tca.setDynamicAdjustment(true);
 	}
 	
 	public void initBindings(IReportingModel model) {
