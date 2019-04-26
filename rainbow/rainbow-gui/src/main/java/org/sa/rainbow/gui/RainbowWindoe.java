@@ -543,20 +543,6 @@ public class RainbowWindoe extends RainbowWindow
 		Node root = g.addNode("root");
 		Map<String, Node> processedIds = new HashMap<>();
 		
-		for (RainbowArchProbeModel probeInfo : m_rainbowModel.getProbes()) {
-			Node pN = g.addNode(probeInfo.getId());
-			Dimension size = probeInfo.getController().getView().getSize();
-			pN.addAttribute("width", toInches(size.width, res));
-			pN.addAttribute("height", toInches(size.height, res));
-			pN.addAttribute("fixedsize", true);
-			pN.addAttribute("shape", "box");
-			Point loc;
-			if ((loc = probeInfo.getLocation()) != null) {
-				pN.addAttribute("pos", "" + toInches(loc.x + size.width/2, res) + "," + toInches(loc.y + size.height/2,res));
-			}
-			processedIds.put(probeInfo.getId(), pN);
-		}
-		
 		for (RainbowArchGaugeModel gaugeInfo : m_rainbowModel.getGauges()) {
 			Node gN = g.addNode(gaugeInfo.getId());
 			Dimension size = gaugeInfo.getController().getView().getSize();
@@ -573,19 +559,19 @@ public class RainbowWindoe extends RainbowWindow
 				RainbowArchProbeModel pi = m_rainbowModel.getProbe(probe);
 				String pid = probe;
 				Node pN = processedIds.get(pid);
-//				if (pN == null) {
-//					pN = g.addNode(pid);
-//					size = pi.getController().getView().getSize();
-//					pN.addAttribute("width", toInches(size.width, res));
-//					pN.addAttribute("height", toInches(size.height, res));
-//					pN.addAttribute("fixedsize", true);
-//					pN.addAttribute("shape", "box");
-//					if ((loc = pi.getLocation()) != null) {
-//						pN.addAttribute("pos", "" + toInches(loc.x + size.width/2, res) + "," + toInches(loc.y + size.height/2,res));
-//					}
-//					processedIds.put(pid, pN);
-//				}
-				g.addEdge(pN.getId() + "-" + gN.getId(), pN, gN);
+				if (pN == null) {
+					pN = g.addNode(pid);
+					size = pi.getController().getView().getSize();
+					pN.addAttribute("width", toInches(size.width, res));
+					pN.addAttribute("height", toInches(size.height, res));
+					pN.addAttribute("fixedsize", true);
+					pN.addAttribute("shape", "box");
+					if ((loc = pi.getLocation()) != null) {
+						pN.addAttribute("pos", "" + toInches(loc.x + size.width/2, res) + "," + toInches(loc.y + size.height/2,res));
+					}
+					processedIds.put(pid, pN);
+				}
+				g.addEdge(gN.getId() + "-" + pN.getId(), gN, pN);
 			}
 
 		}
@@ -602,7 +588,7 @@ public class RainbowWindoe extends RainbowWindow
 			}
 			for (String ga : m.getGaugeReferences()) {
 				if (processedIds.containsKey(ga)) {
-					g.addEdge(ga + "-" + mN.getId(), processedIds.get(ga), mN);
+					g.addEdge(mN.getId() + "-" + ga, mN, processedIds.get(ga));
 				}
 			}
 			processedIds.put(m.getId(), mN);
