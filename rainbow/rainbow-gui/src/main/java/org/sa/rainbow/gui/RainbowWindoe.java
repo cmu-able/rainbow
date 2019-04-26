@@ -26,8 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -112,38 +110,6 @@ import org.sa.rainbow.util.Util;
 public class RainbowWindoe extends RainbowWindow
 		implements IRainbowGUI, IDisposable, IRainbowReportingSubscriberCallback {
 
-	public class ComponentReseter implements Runnable {
-
-		private int m_delay;
-		private Runnable m_task;
-
-		public ComponentReseter(int delay, Runnable task) {
-			m_delay = delay;
-			m_task = task;
-		}
-
-		@Override
-		public void run() {
-			final java.util.Timer t = new Timer();
-			t.schedule(new TimerTask() {
-
-				@Override
-				public void run() {
-					SwingUtilities.invokeLater(new Runnable() {
-
-						@Override
-						public void run() {
-							m_task.run();
-						}
-					});
-				}
-			}, m_delay);
-		}
-
-	}
-
-	final static int CENTER = 0, WEST = 1, NW = 3, NORTH = 2, NE = 6, EAST = 4, SE = 12, SOUTH = 8, SW = 9;
-
 	private static final int WIDTH = 1280;
 
 	public static final ImageIcon ERROR_ICON = new ImageIcon(RainbowWindoe.class.getResource("/error.png"));
@@ -206,9 +172,10 @@ public class RainbowWindoe extends RainbowWindow
 		
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
-			if (RainbowArchModelElement.LOCATION_PROPERTY.equals(evt.getPropertyName())) {
-				layoutDOT();
-			}
+			// DOT layout does not allow to fix node positions
+//			if (RainbowArchModelElement.LOCATION_PROPERTY.equals(evt.getPropertyName())) {
+//				layoutDOT();
+//			}
 		}
 	};
 
@@ -576,6 +543,20 @@ public class RainbowWindoe extends RainbowWindow
 		Node root = g.addNode("root");
 		Map<String, Node> processedIds = new HashMap<>();
 		
+		for (RainbowArchProbeModel probeInfo : m_rainbowModel.getProbes()) {
+			Node pN = g.addNode(probeInfo.getId());
+			Dimension size = probeInfo.getController().getView().getSize();
+			pN.addAttribute("width", toInches(size.width, res));
+			pN.addAttribute("height", toInches(size.height, res));
+			pN.addAttribute("fixedsize", true);
+			pN.addAttribute("shape", "box");
+			Point loc;
+			if ((loc = probeInfo.getLocation()) != null) {
+				pN.addAttribute("pos", "" + toInches(loc.x + size.width/2, res) + "," + toInches(loc.y + size.height/2,res));
+			}
+			processedIds.put(probeInfo.getId(), pN);
+		}
+		
 		for (RainbowArchGaugeModel gaugeInfo : m_rainbowModel.getGauges()) {
 			Node gN = g.addNode(gaugeInfo.getId());
 			Dimension size = gaugeInfo.getController().getView().getSize();
@@ -592,19 +573,19 @@ public class RainbowWindoe extends RainbowWindow
 				RainbowArchProbeModel pi = m_rainbowModel.getProbe(probe);
 				String pid = probe;
 				Node pN = processedIds.get(pid);
-				if (pN == null) {
-					pN = g.addNode(pid);
-					size = pi.getController().getView().getSize();
-					pN.addAttribute("width", toInches(size.width, res));
-					pN.addAttribute("height", toInches(size.height, res));
-					pN.addAttribute("fixedsize", true);
-					pN.addAttribute("shape", "box");
-					if ((loc = pi.getLocation()) != null) {
-						pN.addAttribute("pos", "" + toInches(loc.x + size.width/2, res) + "," + toInches(loc.y + size.height/2,res));
-					}
-					processedIds.put(pid, pN);
-				}
-				g.addEdge(gN.getId() + "-" + pN.getId(), gN, pN);
+//				if (pN == null) {
+//					pN = g.addNode(pid);
+//					size = pi.getController().getView().getSize();
+//					pN.addAttribute("width", toInches(size.width, res));
+//					pN.addAttribute("height", toInches(size.height, res));
+//					pN.addAttribute("fixedsize", true);
+//					pN.addAttribute("shape", "box");
+//					if ((loc = pi.getLocation()) != null) {
+//						pN.addAttribute("pos", "" + toInches(loc.x + size.width/2, res) + "," + toInches(loc.y + size.height/2,res));
+//					}
+//					processedIds.put(pid, pN);
+//				}
+				g.addEdge(pN.getId() + "-" + gN.getId(), pN, gN);
 			}
 
 		}
@@ -617,11 +598,11 @@ public class RainbowWindoe extends RainbowWindow
 			mN.addAttribute("shape", "box");
 			Point loc;
 			if ((loc = m.getLocation()) != null) {
-				mN.addAttribute("pos", "" + toInches(loc.x + size.width/2, res) + "," + toInches(loc.y + size.height/2,res));
+				mN.addAttribute("pos", "" + (loc.x + size.width/2) + "," + (loc.y + size.height/2));
 			}
 			for (String ga : m.getGaugeReferences()) {
 				if (processedIds.containsKey(ga)) {
-					g.addEdge(mN.getId() + "-" + ga, mN, processedIds.get(ga));
+					g.addEdge(ga + "-" + mN.getId(), processedIds.get(ga), mN);
 				}
 			}
 			processedIds.put(m.getId(), mN);
