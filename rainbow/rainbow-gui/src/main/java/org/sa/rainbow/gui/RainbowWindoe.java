@@ -101,6 +101,7 @@ import org.sa.rainbow.gui.arch.model.RainbowArchModelElement;
 import org.sa.rainbow.gui.arch.model.RainbowArchModelModel;
 import org.sa.rainbow.gui.arch.model.RainbowArchProbeModel;
 import org.sa.rainbow.gui.arch.model.RainbowSystemModel;
+import org.sa.rainbow.gui.visitor.GraphStreamGraphConstructor;
 import org.sa.rainbow.gui.widgets.DesktopScrollPane;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
@@ -468,7 +469,12 @@ public class RainbowWindoe extends RainbowWindow
 	private boolean layoutDOT() {
 		try {
 			m_lines = new ArrayList<Line2D>();
-			Graph g = createGraphToLayout();
+			
+			GraphStreamGraphConstructor gc = new GraphStreamGraphConstructor();
+			m_rainbowModel.visit(gc);
+			Graph g = gc.m_graph;
+			
+//			Graph g = createGraphToLayout();
 //			g.setAttribute("size", "" + toInches(Math.max(GAUGE_REGION.width, PROBE_REGION.width), res) + ","
 //					+ toInches(GAUGE_REGION.height + PROBE_REGION.height, res));
 
@@ -570,21 +576,8 @@ public class RainbowWindoe extends RainbowWindow
 			}
 			processedIds.put(gaugeInfo.getId(), gN);
 			for (String probe : gaugeInfo.getProbes()) {
-				RainbowArchProbeModel pi = m_rainbowModel.getProbe(probe);
 				String pid = probe;
 				Node pN = processedIds.get(pid);
-//				if (pN == null) {
-//					pN = g.addNode(pid);
-//					size = pi.getController().getView().getSize();
-//					pN.addAttribute("width", toInches(size.width, res));
-//					pN.addAttribute("height", toInches(size.height, res));
-//					pN.addAttribute("fixedsize", true);
-//					pN.addAttribute("shape", "box");
-//					if ((loc = pi.getLocation()) != null) {
-//						pN.addAttribute("pos", "" + toInches(loc.x + size.width/2, res) + "," + toInches(loc.y + size.height/2,res));
-//					}
-//					processedIds.put(pid, pN);
-//				}
 				g.addEdge(gN.getId() + "-" + pN.getId(), gN, pN);
 			}
 

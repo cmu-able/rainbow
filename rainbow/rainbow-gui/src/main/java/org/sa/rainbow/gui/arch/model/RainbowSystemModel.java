@@ -10,6 +10,17 @@ import org.sa.rainbow.gui.arch.controller.RainbowProbeController;
 import org.sa.rainbow.util.Util;
 
 public class RainbowSystemModel {
+	
+	public interface IRainbowModelVisitor {
+		void visitSystem(RainbowSystemModel model);
+		void visitProbe(RainbowArchProbeModel probe);
+		void visitGauge(RainbowArchGaugeModel gauge);
+		void visitModel(RainbowArchModelModel gauge);
+		void visitAnalysis(RainbowArchAnalysisModel analysis);
+		void visitAdaptationManager(RainbowArchAdapationManagerModel adaptationManager);
+		void visitExecutor(RainbowArchExecutorModel executor);
+		void visitEffector(RainbowArchEffectorModel effector);
+	}
 
 	protected Map<String, RainbowArchEffectorModel> m_effectors = new HashMap<>();
 	protected Map<String, RainbowArchProbeModel> m_probes = new HashMap<>();
@@ -146,6 +157,39 @@ public class RainbowSystemModel {
 		if (el == null) el = getExecutor(id);
 		if (el == null) el = getEffectorModel(id);
 		return el;
+	}
+	
+	public void visit(IRainbowModelVisitor visitor) {
+		
+		visitor.visitSystem(this);
+		
+		for (RainbowArchProbeModel p : m_probes.values()) {
+			visitor.visitProbe(p);
+		}
+		
+		for (RainbowArchGaugeModel g : m_gauges.values()) {
+			visitor.visitGauge(g);
+		}
+		
+		for (RainbowArchModelModel m : m_models.values()) {
+			visitor.visitModel(m);
+		}
+		
+		for (RainbowArchAnalysisModel a : m_analyzers.values()) {
+			visitor.visitAnalysis(a);
+		}
+		
+		for (RainbowArchAdapationManagerModel a : m_managers.values()) {
+			visitor.visitAdaptationManager(a);
+		}
+		
+		for (RainbowArchExecutorModel e : m_executors.values()) {
+			visitor.visitExecutor(e);
+		}
+		
+		for (RainbowArchEffectorModel e : m_effectors.values()) {
+			visitor.visitEffector(e);
+		}
 	}
 
 }
