@@ -97,7 +97,7 @@ public class DOTStringGraphConstructor implements IRainbowModelVisitor {
 		m_graph.append(node.toString());
 		processedIds.put(gauge.getId(), node);
 		for (String probe : gauge.getProbes()) {
-			m_graph.append("\"").append(gauge.getId()).append("\" -- \"").append("\"").append(probe).append("\";\n");
+			m_graph.append("\"").append(gauge.getId()).append("\" -- \"").append(probe).append("\";\n");
 		}
 	}
 
