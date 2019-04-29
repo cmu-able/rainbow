@@ -73,7 +73,7 @@ public class GraphStreamGraphConstructor implements IRainbowModelVisitor {
 		processedIds.put(gauge.getId(), gN);
 		for (String probe : gauge.getProbes()) {
 			Node pN = processedIds.get(probe);
-			m_graph.addEdge(pN.getId() + "-" + gN.getId(), pN, gN);
+			m_graph.addEdge(pN.getId() + "-" + gN.getId(), gN, pN);
 		}
 	}
 
@@ -84,7 +84,7 @@ public class GraphStreamGraphConstructor implements IRainbowModelVisitor {
 		processedIds.put(model.getId(), mN);
 		for (String ga : model.getGaugeReferences()) {
 			if (processedIds.containsKey(ga))
-				m_graph.addEdge(ga + "-" + mN.getId(), processedIds.get(ga), mN);
+				m_graph.addEdge(ga + "-" + mN.getId(), mN, processedIds.get(ga));
 		}
 	}
 
