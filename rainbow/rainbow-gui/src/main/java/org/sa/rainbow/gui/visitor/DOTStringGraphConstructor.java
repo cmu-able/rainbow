@@ -67,11 +67,11 @@ public class DOTStringGraphConstructor implements IRainbowModelVisitor {
 	public void postVisitSystem(RainbowSystemModel model) {
 		StringBuilder same = new StringBuilder("same; ");
 		for (RainbowArchProbeModel probe : model.getProbes()) {
-			same.append(probe.getId()).append(";");
+			same.append("\"").append(probe.getId()).append("\";");
 		}
 		
 		for (RainbowArchEffectorModel eff : model.getEffectors()) {
-			same.append(eff.getId()).append(";");
+			same.append("\"").append(eff.getId()).append("\";");
 		}
 		m_graph.append("{rank=same; ").append(same.toString()).append("};\n").append("}\n");
 	}
