@@ -15,8 +15,10 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,7 +27,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,8 +48,6 @@ import org.graphstream.graph.Graph;
 import org.graphstream.graph.IdAlreadyInUseException;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.DefaultGraph;
-import org.graphstream.graph.implementations.SingleGraph;
-import org.graphstream.stream.file.FileSinkDOT;
 import org.graphstream.stream.file.FileSourceDOT;
 import org.ho.yaml.Yaml;
 import org.sa.raibow.gui.stitch.StitchTokenMaker;
@@ -101,7 +100,7 @@ import org.sa.rainbow.gui.arch.model.RainbowArchModelElement;
 import org.sa.rainbow.gui.arch.model.RainbowArchModelModel;
 import org.sa.rainbow.gui.arch.model.RainbowArchProbeModel;
 import org.sa.rainbow.gui.arch.model.RainbowSystemModel;
-import org.sa.rainbow.gui.visitor.GraphStreamGraphConstructor;
+import org.sa.rainbow.gui.visitor.DOTStringGraphConstructor;
 import org.sa.rainbow.gui.widgets.DesktopScrollPane;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
@@ -470,14 +469,21 @@ public class RainbowWindoe extends RainbowWindow
 		try {
 			m_lines = new ArrayList<Line2D>();
 			
-			GraphStreamGraphConstructor gc = new GraphStreamGraphConstructor();
-			m_rainbowModel.visit(gc);
-			Graph g = gc.m_graph;
+//			GraphStreamGraphConstructor gc = new GraphStreamGraphConstructor();
+//			m_rainbowModel.visit(gc);
+//			Graph g = gc.m_graph;
+//			
+//			FileSinkDOT fs = new FileSinkDOT();
+			File tmp = File.createTempFile("rainbow", ".dot");
+			File tmpo = File.createTempFile("layout", ".dot");
+//			fs.writeAll(g, tmp.getAbsolutePath());
 			
-			FileSinkDOT fs = new FileSinkDOT();
-			File tmp = File.createTempFile("rainbow", "dot");
-			File tmpo = File.createTempFile("layout", "dot");
-			fs.writeAll(g, tmp.getAbsolutePath());
+			DOTStringGraphConstructor gc = new DOTStringGraphConstructor();
+			m_rainbowModel.visit(gc);
+			
+			try (BufferedWriter writer = new BufferedWriter(new FileWriter(tmp))) {
+				writer.append(gc.m_graph);
+			}
 
 			Runtime rt = Runtime.getRuntime();
 			String[] args = { "/usr/bin/dot", "-Tdot", /* "-Gdpi=" + res, */tmp.getAbsolutePath(), "-o",
