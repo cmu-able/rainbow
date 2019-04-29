@@ -56,6 +56,20 @@ public class GraphStreamGraphConstructor implements IRainbowModelVisitor {
 		m_graph.setAttribute("rankdir", "BT");
 		m_system = model;
 	}
+	
+	public void postVisitSystem(RainbowSystemModel model) {
+		StringBuffer same = new StringBuffer("same; ");
+		for (RainbowArchProbeModel probe : model.getProbes()) {
+			same.append(probe.getId());
+			same.append(";");
+		}
+		
+		for (RainbowArchEffectorModel eff : model.getEffectors()) {
+			same.append(eff.getId());
+			same.append(";");
+		}
+		m_graph.setAttribute("rank", same.toString());
+	}
 
 	@Override
 	public void visitProbe(RainbowArchProbeModel probeInfo) {

@@ -13,6 +13,7 @@ public class RainbowSystemModel {
 	
 	public interface IRainbowModelVisitor {
 		void visitSystem(RainbowSystemModel model);
+		void postVisitSystem(RainbowSystemModel model);
 		void visitProbe(RainbowArchProbeModel probe);
 		void visitGauge(RainbowArchGaugeModel gauge);
 		void visitModel(RainbowArchModelModel gauge);
@@ -190,6 +191,7 @@ public class RainbowSystemModel {
 		for (RainbowArchEffectorModel e : m_effectors.values()) {
 			visitor.visitEffector(e);
 		}
+		visitor.postVisitSystem(this);
 	}
 
 }
