@@ -27,7 +27,7 @@ public class DOTStringGraphConstructor implements IRainbowModelVisitor {
 	private RainbowSystemModel m_system;
 	private Map<String,String> model2am;
 	private HashSet<String> executorNodes;
-	private StringBuilder m_graph;
+	public StringBuilder m_graph;
 	
 	protected float toInches(int unit, float res) {
 		return unit / res;
