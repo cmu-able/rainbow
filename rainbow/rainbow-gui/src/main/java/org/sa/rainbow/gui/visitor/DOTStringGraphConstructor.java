@@ -126,7 +126,7 @@ public class DOTStringGraphConstructor implements IRainbowModelVisitor {
 		m_graph.append(node.toString());
 		for (RainbowArchModelModel m : m_system.getModels()) {
 			if (processedIds.containsKey(m.getId()))
-				m_graph.append("\"").append(analysis.getId()).append("\" -- \"").append(m.getId());
+				m_graph.append("\"").append(analysis.getId()).append("\" -- \"").append(m.getId()).append("\";\n");
 		}
 	}
 
