@@ -105,7 +105,7 @@ public class StitchTokenMaker extends AbstractTokenMaker {
 					continue;
 				} 
 				else {
-					i++;
+					i++;i++;
 				} 
 			}
 			if (currentTokenType == Token.COMMENT_EOL) {
