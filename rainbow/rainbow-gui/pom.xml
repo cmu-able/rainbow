@@ -17,23 +17,7 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-			<plugin>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifestEntries>
-							<Class-Path>lib/com.alexmerz.graphviz.jar</Class-Path>
-						</manifestEntries>
-						<manifest>
-							<addClasspath>true</addClasspath>
-							<classpathPrefix>lib</classpathPrefix>
-						</manifest>
-					</archive>
-					<descriptorRefs>
-						<rescriptorRef>jar-with-dependencies</rescriptorRef>
-					</descriptorRefs>
-				</configuration>
-			</plugin>
+			
 			<!-- <plugin> <groupId>de.jflex</groupId> <artifactId>jflex-maven-plugin</artifactId> 
 				<version>1.6.1</version> <executions> <execution> <goals> <goal>generate</goal> 
 				</goals> <configuration> <outputDirectory>target/generated-sources/jflex</outputDirectory> 
@@ -103,13 +87,7 @@
 			<version>2.2-SNAPSHOT</version>
 		</dependency>
 
-		<dependency>
-			<groupId>com.alexmerz.graphviz</groupId>
-			<artifactId>jpdg</artifactId>
-			<version>0.86</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/lib/com.alexmerz.graphviz.jar</systemPath>
-		</dependency>
+
 
 	</dependencies>
 </project>
