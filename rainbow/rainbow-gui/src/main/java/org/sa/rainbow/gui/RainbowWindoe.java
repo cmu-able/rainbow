@@ -515,7 +515,7 @@ public class RainbowWindoe extends RainbowWindow
 		ArrayList<com.alexmerz.graphviz.objects.Graph> graphs = gvp.getGraphs();
 		com.alexmerz.graphviz.objects.Graph graph = graphs.get(0);
 
-		for (com.alexmerz.graphviz.objects.Node n : graph.getNodes(true)) {
+		for (com.alexmerz.graphviz.objects.Node n : graph.getNodes(false)) {
 			RainbowArchModelElement model = m_rainbowModel.getRainbowElement(n.getId().getLabel());
 			if (model != null) {
 				String pos = n.getAttribute("pos");
