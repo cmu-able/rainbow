@@ -18,6 +18,7 @@ import java.beans.PropertyChangeListener;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -107,6 +108,9 @@ import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
 import org.sa.rainbow.translator.probes.IProbeIdentifier;
 import org.sa.rainbow.util.Util;
 
+import com.alexmerz.graphviz.ParseException;
+import com.alexmerz.graphviz.Parser;
+
 public class RainbowWindoe extends RainbowWindow
 		implements IRainbowGUI, IDisposable, IRainbowReportingSubscriberCallback {
 
@@ -159,17 +163,17 @@ public class RainbowWindoe extends RainbowWindow
 	private ProbeTabbedPane m_probePanel;
 
 	private GaugeTabbedPane m_gaugePanel;
-	
+
 	private ModelTabbedPane m_modelPanel;
-	
+
 	private AdaptationManagerTabbedPane m_amPanel;
-	
+
 	private EffectorTabbedPane m_effectorPanel;
 
 	private JLabel m_statusWindow;
-	
+
 	private PropertyChangeListener locationChange = new PropertyChangeListener() {
-		
+
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
 			// DOT layout does not allow to fix node positions
@@ -179,7 +183,6 @@ public class RainbowWindoe extends RainbowWindow
 		}
 	};
 
-	
 	public RainbowWindoe(IMasterCommandPort master) {
 		super(master);
 		init();
@@ -200,7 +203,7 @@ public class RainbowWindoe extends RainbowWindow
 				e.printStackTrace();
 			}
 		}
-		AbstractTokenMakerFactory atmf = (AbstractTokenMakerFactory)TokenMakerFactory.getDefaultInstance();
+		AbstractTokenMakerFactory atmf = (AbstractTokenMakerFactory) TokenMakerFactory.getDefaultInstance();
 		atmf.putMapping("text/stitch", StitchTokenMaker.class.getCanonicalName());
 	}
 
@@ -239,8 +242,9 @@ public class RainbowWindoe extends RainbowWindow
 
 		m_errorArea = createTextAreaInTab(m_selectionPanel, "Errors");
 
-		m_selectionManager.addSelectionListener((o,selected) -> {
-			if (!selected) return;
+		m_selectionManager.addSelectionListener((o, selected) -> {
+			if (!selected)
+				return;
 			m_probePanel.setVisible(false);
 			m_gaugePanel.setVisible(false);
 			m_modelPanel.setVisible(false);
@@ -259,7 +263,7 @@ public class RainbowWindoe extends RainbowWindow
 				m_gaugePanel.initDataBindings(gaugeInfo);
 				((CardLayout) m_detailsPanel.getLayout()).show(m_detailsPanel, "gauges");
 
-			}  else if (o instanceof RainbowArchModelModel) {
+			} else if (o instanceof RainbowArchModelModel) {
 				RainbowArchModelModel gaugeInfo = (RainbowArchModelModel) o;
 				m_selectionPanel.setSelectedIndex(1);
 				m_modelPanel.setVisible(true);
@@ -277,14 +281,14 @@ public class RainbowWindoe extends RainbowWindow
 				m_selectionPanel.setSelectedIndex(1);
 				m_effectorPanel.setVisible(true);
 				m_effectorPanel.initBindings(effModel);
-				
+
 				((CardLayout) m_detailsPanel.getLayout()).show(m_detailsPanel, "effectors");
 
-				
 			}
 		});
 		m_statusWindow = new JLabel("Waiting for Rainbow to start...");
-		m_statusWindow.setFont(new Font(m_statusWindow.getFont().getFontName(), m_statusWindow.getFont().getStyle(), 18));
+		m_statusWindow
+				.setFont(new Font(m_statusWindow.getFont().getFontName(), m_statusWindow.getFont().getStyle(), 18));
 		m_statusWindow.setSize(m_statusWindow.getPreferredSize());
 		m_statusWindow.setLocation(0, 0);
 		m_statusWindow.setVisible(true);
@@ -323,7 +327,6 @@ public class RainbowWindoe extends RainbowWindow
 		m_modelPanel.setVisible(false);
 		((CardLayout) m_detailsPanel.getLayout()).addLayoutComponent(m_modelPanel, "models");
 
-		
 		JTextArea modelsLogs = createTextAreaInTab(m_logTabs, "Models");
 		m_allTabs.put(RainbowComponentT.MODEL, modelsLogs);
 	}
@@ -333,10 +336,9 @@ public class RainbowWindoe extends RainbowWindow
 		m_amPanel = new AdaptationManagerTabbedPane();
 		m_detailsPanel.add(m_amPanel);
 		m_amPanel.setVisible(true);
-		
+
 		((CardLayout) m_detailsPanel.getLayout()).addLayoutComponent(m_amPanel, "adaptationmanagers");
 
-		
 		JTextArea modelsLogs = createTextAreaInTab(m_logTabs, "Adaptation Manager");
 		m_allTabs.put(RainbowComponentT.ADAPTATION_MANAGER, modelsLogs);
 	}
@@ -360,8 +362,6 @@ public class RainbowWindoe extends RainbowWindow
 		m_effectorPanel.setVisible(false);
 		((CardLayout) m_detailsPanel.getLayout()).addLayoutComponent(m_effectorPanel, "effectors");
 
-		
-		
 		JTextArea modelsLogs = createTextAreaInTab(m_logTabs, "Effectors");
 		m_allTabs.put(RainbowComponentT.EFFECTOR, modelsLogs);
 		m_allTabs.put(RainbowComponentT.EFFECTOR_MANAGER, modelsLogs);
@@ -408,7 +408,8 @@ public class RainbowWindoe extends RainbowWindow
 		}
 	}
 
-	private void processProbeIntoGauge(String gaugeKey, RainbowArchGaugeModel gInfo, Map<String, Object> setupParams, String tpt) {
+	private void processProbeIntoGauge(String gaugeKey, RainbowArchGaugeModel gInfo, Map<String, Object> setupParams,
+			String tpt) {
 		Pair<String, String> probe = Util.decomposeID(tpt);
 		if (probe.secondValue() == null) {
 			probe.setSecondValue((String) setupParams.get("targetIP"));
@@ -455,7 +456,7 @@ public class RainbowWindoe extends RainbowWindow
 					String modelref = new ModelReference(model.getName(), model.getType()).toString();
 					RainbowArchModelModel mm = m_rainbowModel.getModel(modelref);
 					mm.addGaugeReference(gInfo.getId());
-					
+
 				}
 			}
 
@@ -468,7 +469,7 @@ public class RainbowWindoe extends RainbowWindow
 	private boolean layoutDOT() {
 		try {
 			m_lines = new ArrayList<Line2D>();
-			
+
 //			GraphStreamGraphConstructor gc = new GraphStreamGraphConstructor();
 //			m_rainbowModel.visit(gc);
 //			Graph g = gc.m_graph;
@@ -477,10 +478,10 @@ public class RainbowWindoe extends RainbowWindow
 			File tmp = File.createTempFile("rainbow", ".dot");
 			File tmpo = File.createTempFile("layout", ".dot");
 //			fs.writeAll(g, tmp.getAbsolutePath());
-			
+
 			DOTStringGraphConstructor gc = new DOTStringGraphConstructor();
 			m_rainbowModel.visit(gc);
-			
+
 			try (BufferedWriter writer = new BufferedWriter(new FileWriter(tmp))) {
 				writer.append(gc.m_graph);
 			}
@@ -490,50 +491,9 @@ public class RainbowWindoe extends RainbowWindow
 					tmpo.getAbsolutePath() };
 			Process p = rt.exec(args);
 			p.waitFor();
-			Graph inGraph = new DefaultGraph("input");
-			FileSourceDOT in = new FileSourceDOT();
-			in.addSink(inGraph);
-			try {
-				in.readAll(tmpo.getAbsolutePath());
-			} finally {
-				in.removeSink(inGraph);
-			}
-			Rectangle graphBB = getBoundingBox(inGraph.getAttribute("bb", String.class));
-			Node node = inGraph.getNode("root");
-			if (node != null) {
-				double h = node.getAttribute("height");
-				graphBB = adjustFromTop(graphBB, (float) h);
-			}
-			for (Node n : inGraph.getNodeSet()) {
-				RainbowArchModelElement model = m_rainbowModel.getRainbowElement(n.getId());
-				if (model != null) {
-					String pos = (String) n.getAttribute("pos");
-					Point2D location = new Point2D.Float(Float.parseFloat(pos.split(",")[0])/* + 10*/,
-							Float.parseFloat(pos.split(",")[1])); ///* + 10*/, getDesktopFram(a).getBounds().getSize());
-					Point2D realPoint = location;
-					model.getController().move(realPoint, false);
-				}
-			}
 
-			for (Edge e : inGraph.getEdgeSet()) {
-				if (!e.getId().contains("root")) {
-					String posA = e.getAttribute("pos");
-					String[] posS = posA.split(" ");
-					Point[] locs = new Point[posS.length];
-					for (int i = 0; i < posS.length; i++) {
-						String pos = posS[i];
-						String[] point = pos.split(",");
-						Point location = new Point(Math.round(Float.parseFloat(point[0])),
-								Math.round(Float.parseFloat(point[1])));
-						Point realPoint = location;
-						locs[i] = realPoint;
-						if (i >= 1) {
-							m_lines.add(new Line2D.Float(locs[i - 1].x, locs[i - 1].y, locs[i].x, locs[i].y));
-						}
-					}
-
-				}
-			}
+			loadLayoutIntoDisplayMerz(tmpo);
+//			loadLayoutIntoDisplayGraphstream(tmpo);
 
 		} catch (HeadlessException | IdAlreadyInUseException | EdgeRejectedException | IOException
 				| InterruptedException e) {
@@ -544,7 +504,92 @@ public class RainbowWindoe extends RainbowWindow
 		return true;
 	}
 
+	protected void loadLayoutIntoDisplayMerz(File tmpo) throws IOException, FileNotFoundException {
+		Parser gvp = new Parser();
+		try (FileReader fr = new FileReader(tmpo)) {
+			gvp.parse(fr);
+		} catch (ParseException e1) {
+			e1.printStackTrace();
+		}
 
+		ArrayList<com.alexmerz.graphviz.objects.Graph> graphs = gvp.getGraphs();
+		com.alexmerz.graphviz.objects.Graph graph = graphs.get(0);
+
+		for (com.alexmerz.graphviz.objects.Node n : graph.getNodes(true)) {
+			RainbowArchModelElement model = m_rainbowModel.getRainbowElement(n.getId().getId());
+			if (model != null) {
+				String pos = n.getAttribute("pos");
+				String[] posA = pos.split(",");
+				Point2D location = new Point2D.Float(Float.parseFloat(posA[0]), Float.parseFloat(posA[1]));
+				model.getController().move(location, false);
+			}
+		}
+
+		for (com.alexmerz.graphviz.objects.Edge e : graph.getEdges()) {
+			String posA = e.getAttribute("pos");
+			String[] posS = posA.split(" ");
+			Point[] locs = new Point[posS.length];
+			for (int i = 0; i < posS.length; i++) {
+				String pos = posS[i];
+				String[] point = pos.split(",");
+				Point location = new Point(Math.round(Float.parseFloat(point[0])),
+						Math.round(Float.parseFloat(point[1])));
+				Point realPoint = location;
+				locs[i] = realPoint;
+				if (i >= 1) {
+					m_lines.add(new Line2D.Float(locs[i - 1].x, locs[i - 1].y, locs[i].x, locs[i].y));
+				}
+			}
+
+		}
+	}
+
+	protected void loadLayoutIntoDisplayGraphstream(File tmpo) throws IOException {
+		Graph inGraph = new DefaultGraph("input");
+		FileSourceDOT in = new FileSourceDOT();
+		in.addSink(inGraph);
+		try {
+			in.readAll(tmpo.getAbsolutePath());
+		} finally {
+			in.removeSink(inGraph);
+		}
+		Rectangle graphBB = getBoundingBox(inGraph.getAttribute("bb", String.class));
+		Node node = inGraph.getNode("root");
+		if (node != null) {
+			double h = node.getAttribute("height");
+			graphBB = adjustFromTop(graphBB, (float) h);
+		}
+		for (Node n : inGraph.getNodeSet()) {
+			RainbowArchModelElement model = m_rainbowModel.getRainbowElement(n.getId());
+			if (model != null) {
+				String pos = (String) n.getAttribute("pos");
+				Point2D location = new Point2D.Float(Float.parseFloat(pos.split(",")[0])/* + 10 */,
+						Float.parseFloat(pos.split(",")[1])); /// * + 10*/, getDesktopFram(a).getBounds().getSize());
+				Point2D realPoint = location;
+				model.getController().move(realPoint, false);
+			}
+		}
+
+		for (Edge e : inGraph.getEdgeSet()) {
+			if (!e.getId().contains("root")) {
+				String posA = e.getAttribute("pos");
+				String[] posS = posA.split(" ");
+				Point[] locs = new Point[posS.length];
+				for (int i = 0; i < posS.length; i++) {
+					String pos = posS[i];
+					String[] point = pos.split(",");
+					Point location = new Point(Math.round(Float.parseFloat(point[0])),
+							Math.round(Float.parseFloat(point[1])));
+					Point realPoint = location;
+					locs[i] = realPoint;
+					if (i >= 1) {
+						m_lines.add(new Line2D.Float(locs[i - 1].x, locs[i - 1].y, locs[i].x, locs[i].y));
+					}
+				}
+
+			}
+		}
+	}
 
 	private Point convertOrigin(Point location, Rectangle graphBB) {
 		return new Point(location.x, graphBB.height - location.y);
@@ -574,8 +619,6 @@ public class RainbowWindoe extends RainbowWindow
 		return Math.round(unit);
 	}
 
-
-
 	protected void populateUI() {
 		m_statusWindow.setText("Populating UI");
 		createProbes();
@@ -603,14 +646,16 @@ public class RainbowWindoe extends RainbowWindow
 						@Override
 						public void reportExecuted(IEffectorIdentifier effector, Outcome outcome, List<String> args) {
 							RainbowArchEffectorModel model = m_rainbowModel.getEffectorModel(effector.id());
-							if (model != null) model.executed(outcome, args);
+							if (model != null)
+								model.executed(outcome, args);
 
 						}
 
 						@Override
 						public void reportExecuting(IEffectorIdentifier effector, List<String> args) {
 							RainbowArchEffectorModel model = m_rainbowModel.getEffectorModel(effector.id());
-							if (model != null) model.executing(args);
+							if (model != null)
+								model.executing(args);
 						}
 
 						@Override
@@ -664,7 +709,8 @@ public class RainbowWindoe extends RainbowWindow
 			RainbowArchAdapationManagerModel model = new RainbowArchAdapationManagerModel(a);
 			model.addPropertyChangeListener(locationChange);
 
-			RainbowAdaptationManagerController ctrl = new RainbowAdaptationManagerController(model, m_selectionManager, m_uidb);
+			RainbowAdaptationManagerController ctrl = new RainbowAdaptationManagerController(model, m_selectionManager,
+					m_uidb);
 			ctrl.createView(m_desktopPane);
 			m_rainbowModel.addAdaptationManager(model);
 		}
@@ -720,8 +766,7 @@ public class RainbowWindoe extends RainbowWindow
 				IRainbowUIController ctrl = new RainbowGaugeController(model, m_selectionManager, m_uidb);
 				JInternalFrame frame = ctrl.createView(m_desktopPane);
 				m_rainbowModel.addGauge(model);
-				
-				
+
 			}
 		}
 	}
@@ -738,13 +783,13 @@ public class RainbowWindoe extends RainbowWindow
 
 						@Override
 						public void reportData(IProbeIdentifier probe, String data) {
-							
+
 							String pid = probe.type() + "@" + probe.location();
 							RainbowArchProbeModel pm = m_rainbowModel.getProbe(pid);
 							if (pm != null) {
 								pm.addReport(data);
 								m_probePanel.addToReports(pid);
-								
+
 							}
 
 						}
@@ -830,7 +875,6 @@ public class RainbowWindoe extends RainbowWindow
 	}
 
 	private static Pattern ERROR_PATTERN = Pattern.compile("\\[\\[(.*)\\]\\]: (.*)", Pattern.DOTALL);
-	
 
 	@Override
 	public void report(RainbowComponentT component, ReportType type, String message) {

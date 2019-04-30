@@ -126,6 +126,14 @@
 			<artifactId>rainbow-stitch</artifactId>
 			<version>2.2-SNAPSHOT</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>com.alexmerz.graphviz</groupId>
+			<artifactId>jpdg</artifactId>
+			<version>0.86</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/lib/com.alexmerz.graphviz.jar</systemPath>
+		</dependency>
 
 	</dependencies>
 </project>
