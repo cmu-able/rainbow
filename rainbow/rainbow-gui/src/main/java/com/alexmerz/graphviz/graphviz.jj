@@ -1,0 +1,735 @@
+/***************************************************************
+ *    JPGD - Java-based Parser for Graphviz Documents
+ *    Copyright (C) 2006, 2015  Alexander Merz, Braxton Fitts
+ *
+ *   This library is free software; you can redistribute it and/or
+ *   modify it under the terms of the GNU Lesser General Public
+ *   License as published by the Free Software Foundation; either
+ *   version 2.1 of the License.
+ *
+ *   This library is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *   Lesser General Public License for more details.
+ *
+ *   You should have received a copy of the GNU Lesser General Public
+ *   License along with this library; if not, write to the Free Software
+ *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+/**
+ * JavaCC file
+ * $Id: graphviz.jj,v 1.7 2006/04/05 22:38:29 Alexander Exp $
+ *
+ */
+ 
+options {
+  JDK_VERSION = "1.7";
+  STATIC=false;
+  JAVA_UNICODE_ESCAPE=true;
+  IGNORE_CASE=true;
+}
+PARSER_BEGIN(Parser)
+package com.alexmerz.graphviz;
+
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Stack;
+
+import com.alexmerz.graphviz.objects.Edge;
+import com.alexmerz.graphviz.objects.Graph;
+import com.alexmerz.graphviz.objects.Id;
+import com.alexmerz.graphviz.objects.Node;
+import com.alexmerz.graphviz.objects.PortNode;
+
+/**
+ * The parser creates a list of Graph objects
+ * found in a Reader object.
+ * 
+ * @version $Id: graphviz.jj,v 1.7 2006/04/05 22:38:29 Alexander Exp $
+ */
+public class Parser {
+  
+  private Stack<Graph> graphs = new Stack<Graph>();
+  private ArrayList<Graph> graphGeneralList = new ArrayList<Graph>();
+  private int direction = Graph.UNDIRECTED;
+  private ArrayList<Node> nodeList = new ArrayList<Node>();
+  private ArrayList<Graph> graphList = new ArrayList<Graph>();
+
+  /**
+   * Returns the main Graphs found in the Reader stream
+   *
+   * @return the list of main Graphs
+   */
+  public ArrayList<Graph> getGraphs() {
+	  return graphGeneralList;
+  }
+  
+  public Parser() {
+  }
+  
+  /**
+   * Parses a Graphviz document
+   *
+   * @param in the Reader to parse
+   * @return normally true should be returned, if false then
+   *         something in the JDK is broken...
+   */
+  public boolean parse(Reader in) throws ParseException {
+  	
+  	// The Art of Unix Programming: If in doubt, use brute force!
+	// Throw away line endings and spaces at the end of the file
+	// that could be more effective the extending the grammar
+    StringBuffer sb = new StringBuffer();
+    int i;
+	try {
+		i = in.read();		
+		while(i!=-1) {
+			sb.append((char)i);
+			i = in.read();
+		}
+	} catch (IOException e) {
+		return false;
+	}
+	return parse(sb);
+  }
+
+  /**
+   * Parses a Graphviz document
+   *
+   * @param sb the StringBuffer containing the document
+   * @return normally true should be returned, if false then
+   *         something in the JDK is broken...
+   */    
+  public boolean parse(StringBuffer sb) throws ParseException {
+    String is = sb.toString().trim();
+  	is.trim();
+  	StringReader ins = new StringReader(is);
+  	
+  	Parser p = new Parser(ins);
+    p.graphs(graphGeneralList);
+    return true;
+  }    	
+    
+  /**
+   * Creates a node, if the node wasn't used before
+   * if a node with the given id/label already
+   * exists, the existing node object is returned
+   * instead.
+   *
+   * @param g the Graph
+   * @param id the Id of the node
+   * @param label the Label of the node
+   * @return a Node object
+   */
+  protected Node createNode(Graph g, String id, String label) {
+  	Id nid = new Id();
+  	nid.setId(id);
+  	nid.setLabel(label);
+  	Node n = null;
+  	Id tid = null;
+  	for(int i=0; i<nodeList.size(); i++) {
+  		n = nodeList.get(i);
+  		tid = n.getId();
+  		if(tid.isEqual(nid)) {
+  			return n;
+  		}
+  	}
+  	n = new Node();
+  	n.setId(nid);
+  	nodeList.add(n);  	
+  	g.addNode(n);
+  	return n;
+  }
+
+  /**
+  * Check is node represents a cluster/subgraph
+  * and sets the flag in the node
+  * 
+  * @param n the node to check
+  */  
+  protected void checkIfNodeIsSubgraph(Node n) {
+	// check if node represents a cluster/subgraph		
+	for(int i=0; i<graphList.size(); i++) {
+		if(graphList.get(i).getId().isEqual(n.getId())) {
+			n.representsSubgraph(true);
+			break;
+		}			
+	}		  	
+  }
+  
+  /**
+   * adds Graph attributes to the graph
+   * 
+   * @param g the graph
+   * @param ht the Hashtable containing the attributes
+   */
+  protected void addAttributes(Graph g, Hashtable<String,String> ht) { 
+  		Enumeration<String> e = ht.keys();				
+  		String key;
+      	while(e.hasMoreElements()) {
+      		key = e.nextElement();
+			g.addAttribute(key, ht.get(key));
+      	}
+  }
+
+  /**
+   * adds Edge attributes to an Edge object
+   * 
+   * @param edge the edge object
+   * @param ht the Hashtable containing the attributes
+   */
+  protected void addAttributes(Edge edge, Hashtable<String,String> ht) { 
+  		Enumeration<String> e = ht.keys();				
+  		String key;
+      	while(e.hasMoreElements()) {
+      		key = e.nextElement();
+			edge.setAttribute(key, ht.get(key));
+      	}
+  }  
+
+  /**
+   * adds Node attributes to a Node object
+   * 
+   * @param n the Node object
+   * @param ht the Hashtable containing the attributes
+   */
+  protected void addAttributes(Node n, Hashtable<String,String>ht) { 
+  		Enumeration<String> e = ht.keys();				
+  		String key;
+      	while(e.hasMoreElements()) {
+      		key = e.nextElement();
+			n.setAttribute(key, ht.get(key));
+      	}
+  }
+  
+}
+PARSER_END(Parser)
+
+SKIP :
+{
+	"\t"
+}
+
+TOKEN_MGR_DECLS : {
+
+	/**
+	 * used to determine if the graph is a digraph or not
+	 */
+    boolean isDigraph = false; 
+    
+    /**
+     * used to select the correct edge operator 
+     * already on Tokenizer level
+     *
+     * @return true if the graph was defined as digraph
+     */
+    public boolean isDigraph() {
+    	return isDigraph;
+    }
+
+}
+
+// Drop comments
+
+MORE : { "/*": IN_COMMENT }
+< IN_COMMENT > MORE : { <  ~[] > }
+< IN_COMMENT > SKIP : { "*/": DEFAULT } 
+
+MORE : { "//": IN_COMMENT_OL }
+< IN_COMMENT_OL > MORE : { <  ~["\r","\n"] > }
+< IN_COMMENT_OL > SKIP : { "\n"|"\r": DEFAULT } 
+
+// Edge operators
+TOKEN : { < EDGE_DIRECTED : "->" > 	{ 
+		if(!isDigraph()) {			
+			throw GraphvizTokenMgrError.create(
+				GraphvizTokenMgrError.DIRECTED_EDGE_NOT_ALLOWED,
+				matchedToken.beginLine, 
+				matchedToken.beginColumn);
+		}}}
+TOKEN : { < EDGE_UNDIRECTED : "--" > {
+		if(isDigraph()) {			
+			throw GraphvizTokenMgrError.create(
+				GraphvizTokenMgrError.UNDIRECTED_EDGE_NOT_ALLOWED,
+				matchedToken.beginLine, 
+				matchedToken.beginColumn);
+		}}}
+		
+// several characters
+TOKEN : { < SEMI : ";" >}
+TOKEN : { < DOUBLE : ":" >}
+TOKEN : { < COMMA : "," >}
+TOKEN : { < EQUAL : "=" >}
+TOKEN : { < SPACE : " " > }
+TOKEN : { < LBRACKET: "[" > }
+TOKEN : { < RBRACKET: "]" > }
+TOKEN : { < LBRACE: "{" > }
+TOKEN : { < RBRACE: "}" > }
+
+// EOL definition
+TOKEN : { < LB : "\r\n"|"\r"|"\n" >}
+
+// Keywords
+TOKEN : { < SUBGRAPH : "subgraph" >}
+TOKEN : { < NODE : "node" >}
+TOKEN : { < EDGE : "edge" >}
+TOKEN : { < DIGRAPH : "digraph" > {isDigraph = true;} }
+TOKEN : { < GRAPH : "graph" > }
+TOKEN : { < STRICT : "strict" > }
+
+// String/Id/Number definition
+TOKEN : { < STRING:
+      "\""
+      (   (~["\"","\\","\n","\r"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","'","\"", "\n", "\r"]
+            | ["0"-"7"] ( ["0"-"7"] )?
+            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+            )
+          )
+      )*
+      "\""
+  > }
+
+TOKEN : {
+	< ID : ("_"|["a"-"z"]|["A"-"Z"])("_"|["a"-"z"]|["A"-"Z"]|["0"-"9"])* > 
+}
+
+TOKEN : { < NUMBER :
+         ("-")? (["0"-"9"])* "." (["0"-"9"])+ 
+        | "." (["0"-"9"])+ 
+        | ("-")? (["0"-"9"])+ >}
+
+/**
+ * Production for all graph definitions in the stream
+ */
+void graphs(ArrayList<Graph> gglist) : {}
+{
+	(graph(gglist))+
+	| <EOF>
+
+}
+
+/**
+ * Production for a single graph 
+ */
+void graph(ArrayList<Graph> gglist) : 
+{
+	Graph g = new Graph();
+	Token st = null; Id id = null;	
+	graphs.push(g);
+}
+{
+	[(<SPACE>|<LB>)+]
+	[st = <STRICT> (<SPACE>)+]  // strict keyword
+	( (<GRAPH>(<SPACE>)+) {     // graph or digraph keyword
+		g.setType(Graph.UNDIRECTED);
+		direction=Graph.UNDIRECTED;	}
+	  | ( <DIGRAPH>(<SPACE>)+ ) {
+		g.setType(Graph.DIRECTED);	  	
+		 direction=Graph.DIRECTED; }
+	)
+	[id = id() {g.setId(id);} (<SPACE>)+] 	
+	<LBRACE>   // the closing RBRACE is part of the stmt_list
+	 stmt_list()	
+	{
+		if(null!=st) g.setStrict(true);
+		gglist.add(g);
+	}	
+}
+
+/**
+ * Production for the statements in the graph
+ */
+void stmt_list() : {}
+{
+	LOOKAHEAD(reallist()) reallist() // more then one statement in the graph
+	|( [(<SPACE>)+]	stmt() <RBRACE> )  // this is just a special case
+}
+
+/**
+ * Production for more then one statement in a graph
+ */
+void reallist() : {}
+{
+		(
+	    	[(<SPACE>)+]			 
+	    	(
+		 	 lb()  // single empty line
+		 	 |(stmt() lb())  // a statement
+		 	)
+		)+
+		<RBRACE>
+}
+
+/**
+ * Production for the different types of statements
+ */
+void stmt() : {}
+{	
+	LOOKAHEAD(graph_attrib_assign()) graph_attrib_assign() 
+	| LOOKAHEAD(edge()) edge()
+  	| LOOKAHEAD(subgraph()) subgraph()	 	
+	| LOOKAHEAD(generic_attributes()) generic_attributes()  	
+	| LOOKAHEAD(node_listing()) node_listing()
+	| single_node()			
+}
+
+/**
+ * Production for the statement ending
+ * yes lb is misleading..
+ */
+void lb() : {}
+{
+	<SEMI>|<LB>
+}
+
+/**
+ * Production for an edge
+ * The source is a single node, a list of nodes (matrix) or a subgraph.
+ * The target is a single node, a list of nodes (matrix) or a subgraph.
+ */
+void edge() : {
+	ArrayList<PortNode> sources = new ArrayList<PortNode>();
+    ArrayList<PortNode> targets = new ArrayList<PortNode>();
+    Node n=null;
+    PortNode pn=null;
+    ArrayList<Node> nl = null;
+    Hashtable<String,String> ht = null;
+    ArrayList<Edge> el = new ArrayList<Edge>();
+  	Graph g = graphs.peek();
+}
+{
+	( LOOKAHEAD(subgraph()) n = subgraph() {
+			sources.add(new PortNode(n));
+		}
+	  | LOOKAHEAD(matrix()) nl = matrix() [(<SPACE>)+]  {
+	  			for(int i=0;i<nl.size();i++) {
+	  				sources.add(new PortNode(nl.get(i)));
+	  			}
+	  		}
+	  | pn = node_port() [(<SPACE>)+]  {
+	  		sources.add(pn);
+	    }
+	)
+	
+	( edge_op() [(<SPACE>)+]
+	  ( LOOKAHEAD(subgraph()) n = subgraph() {
+		  		targets.add(new PortNode(n)); }
+	    | LOOKAHEAD(matrix()) nl = matrix() [(<SPACE>)+]  {
+	  			for(int i=0;i<nl.size();i++) {
+	  				targets.add(new PortNode(nl.get(i)));
+	  			}}
+	    | pn = node_port() [(<SPACE>)+]  {
+	  			targets.add(pn); }
+	  )
+	  {
+	  	for(int i=0; i<sources.size(); i++) {
+	  		for(int a=0;a<targets.size();a++) {
+	  			el.add(new Edge(sources.get(i), targets.get(a), g.getType()));
+	  		}
+	  	}
+	  	sources = targets;
+	  	targets = new ArrayList<PortNode>();
+	  }
+	)+  	    	  	 
+	
+	[ht=attribute_list()]
+	{
+		for(int i=0;i<el.size();i++) {
+			Edge e = el.get(i);
+			if(ht!=null) {
+				Enumeration<String> en = ht.keys();
+				while(en.hasMoreElements()) {
+					String key = en.nextElement();
+					e.setAttribute(key, ht.get(key));
+				}
+			}
+			g.addEdge(e);
+		}
+	}
+}
+
+/**
+ * Production for the edge operator
+ */
+void edge_op() : {}
+{
+	<EDGE_DIRECTED>|<EDGE_UNDIRECTED>
+}
+
+/**
+ * Production for a list of nodes
+ */
+ArrayList<Node> matrix() : {
+	ArrayList<Node> nl = new ArrayList<Node>();
+	Node n=null;
+} 
+{
+	<LBRACE>
+	 [(<SPACE>)+]
+	 (n = node() {nl.add(n);} [(<SPACE>)+] )+
+	<RBRACE> 
+	{return nl;}
+}
+	
+/**
+ * Production for generic graph/edge/node attributes
+ * edge [color=blue]
+ */
+void generic_attributes() : {
+	Graph g = (Graph) graphs.peek();
+	Hashtable<String, String> ht = null;
+	Enumeration<String> e = null;
+	String key;			
+}
+{
+	<GRAPH>	[(<SPACE>)+] 
+	[ht = attribute_list()] 
+	
+	{
+		e = ht.keys();		
+      	while(e.hasMoreElements()) {
+      		key = e.nextElement();
+			g.addGenericGraphAttribute(key, ht.get(key));
+      	}
+	}
+	|<EDGE> [(<SPACE>)+] [ht = attribute_list()] {
+		e = ht.keys();				
+      	while(e.hasMoreElements()) {
+      		key = e.nextElement();
+			g.addGenericEdgeAttribute(key, ht.get(key));
+      	}
+	}
+	|<NODE>	[(<SPACE>)+] [ht = attribute_list()]{
+		e = ht.keys();				
+      	while(e.hasMoreElements()) {
+      		key = e.nextElement();
+			g.addGenericNodeAttribute(key, ht.get(key));
+      	}
+	}	
+}
+
+/**
+ * Production for a subgraph
+ */
+Node subgraph() : {
+	Id id=null;
+	Graph g = new Graph();
+    Graph parent = graphs.peek();
+	graphs.push(g);
+	g.setType(parent.getType());
+	g.setStrict(parent.isStrict());
+}
+{
+	[<SUBGRAPH> (<SPACE>)+ ]	
+	[id = id() (<SPACE>)* {g.setId(id);}]
+	<LBRACE>
+	[(<LB>)+]
+	 (
+		LOOKAHEAD(sg_stmt_list()) sg_stmt_list()
+	 )+	 
+	 [(<SPACE>)+]
+	[stmt()]	
+    <RBRACE>	    
+	[(<SPACE>)+] {
+		if(id==null) {
+			g.setId(new Id());
+		}
+		graphs.pop();
+		parent.addSubgraph(g);
+		Node n = createNode(parent, g.getId().getId(), g.getId().getLabel());
+		n.representsSubgraph(true);
+		return n;
+	}	
+}
+
+/**
+ * Production for the statements in a subgraph
+ */
+void sg_stmt_list() : {}
+{
+	   [(<SPACE>)+] 
+	   stmt()
+       (<SEMI>|<LB>)+	   	   	
+}
+
+/**
+ * Production for graph layout attributes
+ * (label="test")
+ */
+void graph_attrib_assign() : {Token id = null; String value = null;} 
+{
+	id = <ID> [(<SPACE>)+] <EQUAL> [(<SPACE>)+] value = value() 
+	[(<SPACE>)+] 
+	{
+		graphs.peek().addAttribute(id.image, value);
+	}
+}
+	
+/**
+ * Production for Node having port information (node:"e")
+ */
+PortNode node_port() : {Node n=null; Id port=null;}
+{
+	n = node() [<DOUBLE> port = id()] {
+		PortNode pn = new PortNode();
+		pn.setNode(n);
+		if(port != null) {
+			if(!port.getId().equals("")) {
+				pn.setPort(port.getId());
+			} else if(!port.getLabel().equals("")) {
+				pn.setPort(port.getLabel());
+			}
+		}
+		return pn;
+	}
+}	
+
+/**
+ * Production for listing of nodes
+ * (node1 node2 [color=grey];)
+ */
+void node_listing() : {
+	Node n=null; 
+	ArrayList<Node> nl = new ArrayList<Node>(); 
+	Hashtable<String,String> ht=null;}
+{
+	n=node() {nl.add(n);} ((<SPACE>)+ n=node() {nl.add(n);})+ 
+	[
+	   ht=attribute_list()
+	   {	   	
+	   	for(int i=0;i<nl.size();i++) {
+	   		n = nl.get(i);
+		   	addAttributes(n, ht);
+	   	}   			   	
+	   }
+	] 
+	
+}
+
+/**
+ * Production for a single node on a line
+ */
+void single_node() : {Node n=null; Hashtable<String,String> ht=null;}
+{
+	n=node() [(<SPACE>)+] 
+	[
+	   ht=attribute_list()
+	   {addAttributes(n, ht);}
+	] 
+	
+}
+
+/**
+ * Production for an attribute list
+ */
+Hashtable<String,String> attribute_list() : {	
+	Hashtable<String,String> ht = new Hashtable<String,String>();
+	String[] kv;
+}
+{
+	<LBRACKET> 
+     [<LB>]	
+	 [(<SPACE>)+ [<LB>]] 
+
+	  [(kv = attribute() {ht.put(kv[0], kv[1]);})+]      
+	<RBRACKET>	
+	[(<SPACE>)+] 
+	{		
+		return ht;
+	}
+}
+
+/**
+ * Production for an attribute in an attribute list
+ */
+String[] attribute() : {
+	Token id=null; 
+	String[] kv = new String[2];
+	kv[0] = "";
+	kv[1] = "";
+}
+{
+	id = <ID> 
+	[LOOKAHEAD(attrib_value()) kv[1]=attrib_value()]
+    [(<SPACE>)+][<COMMA> (<SPACE>)*][<LB>]
+	{
+		kv[0] = id.image;
+		return kv;
+	}
+}
+
+/** 
+ * Production for the value of an attribute assignment
+ */
+String attrib_value() : {String v="";}
+{
+	[(<SPACE>)+]<EQUAL>[(<SPACE>)+] v=value()
+	{
+		return v;
+	}
+}
+
+/**
+ * Production for a single node
+ */
+Node node() : {
+	Token t=null;
+	Id i = new Id();
+	Node n =null;
+	Graph c = (Graph)graphs.peek();	
+}
+{
+	(t= <ID>|t=<NUMBER>) {
+		i.setId(t.image);
+		n = createNode(c, t.image, "");
+		checkIfNodeIsSubgraph(n);		
+		return n;
+	}
+	| t=fixString() {
+		i.setLabel(t.image);
+		n= createNode(c, "", t.image.substring(1, t.image.length()-1));		
+		checkIfNodeIsSubgraph(n);				
+		return n;		
+	}
+}
+
+/**
+ * Production for single id element
+ */
+Id id() : { Token id = null; Token text=null;Id i = new Id();} 
+{
+	id = <ID> { i.setId(id.image); return i;}
+	| text = fixString() {
+			if(text!=null) {
+				i.setLabel(text.image.substring(1, text.image.length()-1)); 
+			}
+			return i;
+	}	
+}
+
+/**
+ * Production for a value
+ */
+String value() : { Token text=null;} 
+{
+	text = <ID> { return text.image;}
+	| text = fixString() {	return text.image.substring(1, text.image.length()-1); }
+    | text = <NUMBER> {	return text.image; }
+}
+
+/**
+ * Produce a string token with the escaped new lines removed
+ */
+Token fixString() : { Token text = null;}
+{
+	text = <STRING> {
+		return Token.newToken(text.kind, text.image.replaceAll("\\\\(\\r|\\n|\\r\\n)", ""));
+	}
+}
