@@ -330,22 +330,24 @@ public class RainbowWindoe extends RainbowWindow
 	@Override
 	protected void createAdaptationManagerUI() {
 		if (m_uidb.containsKey("details")) {
-			String className = ((Map<String,String>)m_uidb.get("details")).get("adaptationmanagers");
-			try {
-				Class<?> clazz = this.getClass().forName(className);
-				m_amPanel = (AdaptationManagerTabbedPane) clazz.newInstance();
-				
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			String className = ((Map<String, String>) m_uidb.get("details")).get("adaptationmanagers");
+			if (className != null) {
+				try {
+					Class<?> clazz = this.getClass().forName(className);
+					m_amPanel = (AdaptationManagerTabbedPane) clazz.newInstance();
+
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InstantiationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
-			
+
 		}
 		if (m_amPanel == null) {
 			m_amPanel = new AdaptationManagerTabbedPane();
