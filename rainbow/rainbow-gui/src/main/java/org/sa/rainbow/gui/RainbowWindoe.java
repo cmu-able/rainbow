@@ -330,7 +330,7 @@ public class RainbowWindoe extends RainbowWindow
 	@Override
 	protected void createAdaptationManagerUI() {
 		if (m_uidb.containsKey("details")) {
-			String className = ((Map<String,String>)m_uidb.get("details")).get("adaptationamanagers");
+			String className = ((Map<String,String>)m_uidb.get("details")).get("adaptationmanagers");
 			try {
 				Class<?> clazz = this.getClass().forName(className);
 				m_amPanel = (AdaptationManagerTabbedPane) clazz.newInstance();
