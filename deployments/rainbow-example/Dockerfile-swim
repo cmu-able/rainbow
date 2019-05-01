@@ -66,14 +66,14 @@ RUN mvn -DskipTests install
 ADD rainbow /root/rainbow/rainbow
 WORKDIR /root/rainbow/rainbow/rainbow-core
 RUN mvn -DskipTests install
+WORKDIR ../rainbow-gui
+RUN mvn -DskipTests install
 WORKDIR ../rainbow-acme-model
 RUN mvn -DskipTests install
 WORKDIR ../rainbow-utility-model
 RUN mvn -DskipTests install
 WORKDIR ../rainbow-stitch
 RUN mvn -DskipTests install
-WORKDIR ../rainbow-gui
-RUN mvn -DskiptTests install
 
 WORKDIR ../rainbow-mem-comms
 RUN mvn -DskipTests install
@@ -83,20 +83,18 @@ WORKDIR /root/rainbow/deployments/rainbow-example
 RUN mvn -DskipTests install
 CMD [/bin/bash]
 
+
 FROM gabrielmoreno/swim:1.0
+ARG BUILD_ENV
 RUN apt update && DEBIAN_FRONTEND=noninteractive apt-get -y install software-properties-common dbus dbus-x11 xorg xserver-xorg-legacy xinit xterm libboost-all-dev libyaml-cpp-dev libpcre3-dev socat
 
 RUN sed -i "s/allowed_users=console/allowed_users=anybody/;$ a needs_root_rights=yes" /etc/X11/Xwrapper.config
 
 RUN \
-  echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
-  add-apt-repository -y ppa:webupd8team/java && \
+  add-apt-repository -y ppa:openjdk-r/ppa && \
   apt-get update && \
-  apt-get install -y oracle-java8-installer --allow-unauthenticated && \
-  rm -rf /var/lib/apt/lists/* && \
-  rm -rf /var/cache/oracle-jdk8-installer
+  apt-get -y install openjdk-8-jdk
 
-ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
 RUN mkdir /rainbow
 WORKDIR /rainbow
 COPY --from=builder /root/pladapt ./pladapt
@@ -113,5 +111,7 @@ COPY deployments/rainbow-example/docker/SWIM.png /headless/
 COPY deployments/rainbow-example/docker/Rainbow.desktop /headless/Desktop
 COPY deployments/rainbow-example/docker/SWIM.desktop /headless/Desktop
 COPY deployments/rainbow-example/docker/Rainbow-debug.desktop /headless/Desktop
-RUN chmod +x /headless/Desktop/Rainbow.desktop /headless/Desktop/SWIM.desktop /headless/Desktop/Rainbow-debug.desktop
+RUN echo "BUILD_ENV=$BUILD_ENV"
+RUN if [ "$BUILD_ENV" != "debug" ]; then rm -f /headless/Desktop/Rainbow-debug.desktop; fi
+RUN chmod +x /headless/Desktop/*
 #ENTRYPOINT ["./rainbow-oracle.sh", "swim"]
