@@ -1,4 +1,4 @@
-package org.sa.rainbow.gui.arch.elements;
+package org.sa.rainbow.stitch.gui.manager;
 
 import java.awt.Component;
 import java.awt.Dimension;

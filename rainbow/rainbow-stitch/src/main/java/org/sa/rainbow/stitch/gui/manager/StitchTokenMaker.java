@@ -1,4 +1,4 @@
-package org.sa.raibow.gui.stitch;
+package org.sa.rainbow.stitch.gui.manager;
 
 import javax.swing.text.Segment;
 

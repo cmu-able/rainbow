@@ -1,4 +1,4 @@
-package org.sa.rainbow.gui.arch.elements;
+package org.sa.rainbow.stitch.gui.manager;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;

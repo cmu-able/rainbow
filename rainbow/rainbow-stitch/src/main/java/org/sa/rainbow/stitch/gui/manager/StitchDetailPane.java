@@ -1,4 +1,4 @@
-package org.sa.rainbow.gui.arch.elements;
+package org.sa.rainbow.stitch.gui.manager;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -14,7 +14,9 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 
+import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
@@ -25,6 +27,11 @@ public class StitchDetailPane extends JPanel {
 	
 	private Map<String,String> m_stitchData = new HashMap<>();
 	private RSyntaxTextArea m_textArea;
+	
+	static {
+		AbstractTokenMakerFactory atmf = (AbstractTokenMakerFactory) TokenMakerFactory.getDefaultInstance();
+		atmf.putMapping("text/stitch", StitchTokenMaker.class.getCanonicalName());
+	}
 	/**
 	 * Create the panel.
 	 */

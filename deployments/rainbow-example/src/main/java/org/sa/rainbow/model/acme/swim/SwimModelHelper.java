@@ -7,8 +7,6 @@ import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.stitch.lib.SwimUtils;
 
-import pladapt.GenericConfiguration;
-
 /**
  * Helper to query SWIM ACME model
  * 
@@ -167,26 +165,7 @@ public class SwimModelHelper {
     	return ((Double) PropertyHelper.toJavaVal(prop.getValue())).doubleValue();
 	}
 
-	public int getNumServers(GenericConfiguration config) {
-		int numServers = getNumActiveServers(config);
-		if (config.getInt(CONFIG_ADD_SERVER_PROGRESS) < getAddServerLatencyPeriods()) {
-
-			// there's a server booting
-			numServers++;
-		}
-		return numServers;
-	}
 	
-	public int getNumActiveServers(GenericConfiguration config) {
-		return config.getInt(CONFIG_SERVERS) + 1;
-	}
-	
-	public double getDimmer(GenericConfiguration config) {
-		int level = config.getInt(CONFIG_DIMMER) + 1;
-    	int dimmerLevels = getDimmerLevels();
-    	double dimmerMargin = getDimmerMargin();
-		return SwimUtils.dimmerLevelToFactor(level, dimmerLevels, dimmerMargin);
-	}
 	
 	public double getBasicResponseTime() {
     	IAcmeProperty prop = m_model.getModelInstance().getComponent(LOAD_BALANCER).getProperty("basicResponseTime");

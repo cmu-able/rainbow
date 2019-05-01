@@ -41,8 +41,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
-import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
-import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.EdgeRejectedException;
 import org.graphstream.graph.Graph;
@@ -51,7 +49,6 @@ import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.DefaultGraph;
 import org.graphstream.stream.file.FileSourceDOT;
 import org.ho.yaml.Yaml;
-import org.sa.raibow.gui.stitch.StitchTokenMaker;
 import org.sa.rainbow.core.IDisposable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
@@ -203,8 +200,7 @@ public class RainbowWindoe extends RainbowWindow
 				e.printStackTrace();
 			}
 		}
-		AbstractTokenMakerFactory atmf = (AbstractTokenMakerFactory) TokenMakerFactory.getDefaultInstance();
-		atmf.putMapping("text/stitch", StitchTokenMaker.class.getCanonicalName());
+
 	}
 
 	@Override
@@ -333,7 +329,27 @@ public class RainbowWindoe extends RainbowWindow
 
 	@Override
 	protected void createAdaptationManagerUI() {
-		m_amPanel = new AdaptationManagerTabbedPane();
+		if (m_uidb.containsKey("details")) {
+			String className = ((Map<String,String>)m_uidb.get("details")).get("adaptationamangers");
+			try {
+				Class<?> clazz = this.getClass().forName(className);
+				m_amPanel = (AdaptationManagerTabbedPane) clazz.newInstance();
+				
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InstantiationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		if (m_amPanel == null) {
+			m_amPanel = new AdaptationManagerTabbedPane();
+		}
 		m_detailsPanel.add(m_amPanel);
 		m_amPanel.setVisible(true);
 

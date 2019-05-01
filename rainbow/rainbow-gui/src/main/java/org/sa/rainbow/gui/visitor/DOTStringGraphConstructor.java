@@ -73,7 +73,7 @@ public class DOTStringGraphConstructor implements IRainbowModelVisitor {
 		for (RainbowArchEffectorModel eff : model.getEffectors()) {
 			same.append("\"").append(eff.getId()).append("\";");
 		}
-		m_graph.append("{rank=same; ").append(same.toString()).append("};\n").append("}\n");
+		m_graph.append("{rank=").append(same.toString()).append("};\n").append("}\n");
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package org.sa.rainbow.gui.arch;
+package org.sa.rainbow.stitch.gui.executor;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;

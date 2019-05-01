@@ -1,4 +1,4 @@
-package org.sa.rainbow.gui.acme;
+package org.sa.rainbow.evaluator.acme.gui;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -21,7 +21,6 @@ import javax.swing.border.LineBorder;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.gui.RainbowWindow;
 import org.sa.rainbow.gui.arch.elements.IUIReporter;
-import org.sa.rainbow.gui.arch.elements.IUIUpdater;
 
 public class ArchAnalyzerGUI extends JPanel implements IUIReporter {
 	private JTextField m_textField;
