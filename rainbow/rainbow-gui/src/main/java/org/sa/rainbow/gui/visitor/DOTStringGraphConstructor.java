@@ -75,13 +75,13 @@ public class DOTStringGraphConstructor implements IRainbowModelVisitor {
 		}
 		m_graph.append("{rank=").append(same.toString()).append("};\n");
 		
-		// Put Adaptation Manager and their Executor on same level
-		for (RainbowArchExecutorModel ex : model.getExecutors()) {
-			same = new StringBuilder("{rank=same;");
-			String modelRef = ex.getExecutor().getManagedModel().toString();
-				same.append("\"").append(ex.getId()).append("\";\"").append(modelRef).append("\";};\n");
-				m_graph.append(same.toString());
-		}
+//		// Put Adaptation Manager and their Executor on same level
+//		for (RainbowArchExecutorModel ex : model.getExecutors()) {
+//			same = new StringBuilder("{rank=same;");
+//			String modelRef = ex.getExecutor().getManagedModel().toString();
+//				same.append("\"").append(ex.getId()).append("\";\"").append(modelRef).append("\";};\n");
+//				m_graph.append(same.toString());
+//		}
 		m_graph.append("}\n");
 	}
 
