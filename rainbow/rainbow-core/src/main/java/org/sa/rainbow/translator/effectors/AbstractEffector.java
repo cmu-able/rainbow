@@ -128,6 +128,10 @@ public abstract class AbstractEffector implements IEffector {
             LOGGER.info (msg);
         }
     }
+    
+    void reportExecuting(List<String> args) {
+    	m_effectorManagementPort.reportExecuting(this, args);
+    }
 
     void reportExecuted (Outcome r, List<String> args) {
         m_effectorManagementPort.reportExecuted (this, r, args);
