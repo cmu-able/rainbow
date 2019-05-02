@@ -129,24 +129,33 @@ public class DesktopScrollPane extends JScrollPane {
                 JInternalFrame frame = null;
                 JInternalFrame[] frames = getAllFrames();
 
-                for (int i=0; i < frames.length; i++) {
+				for (int i=0; i < frames.length; i++) {
 
                     frame = frames[i];
-
-                    if (frame.getX() < minX) { // get minimum X
-                        minX = frame.getX();
+                    int fx = frame.getX();
+                    int fy = frame.getY();
+                    int fw = frame.getWidth();
+                    int fh = frame.getHeight();
+                    if (frame.isIcon()) {
+                    	fx = frame.getDesktopIcon().getX();
+                    	fy = frame.getDesktopIcon().getY();
+                    	fw = frame.getDesktopIcon().getWidth();
+                    	fh = frame.getDesktopIcon().getHeight();
                     }
-                    if ((frame.getX() + frame.getWidth()) > maxX)
+                    if (fx < minX) { // get minimum X
+                        minX = fx;
+                    }
+					if ((fx + fw) > maxX)
                     {
-                        maxX = frame.getX() + frame.getWidth();
+                        maxX = fx + fw;
                     }
 
-                    if (frame.getY() < minY) { // get minimum Y
-                        minY = frame.getY();
+                    if (fy < minY) { // get minimum Y
+                        minY = fy;
                     }
-                    if ((frame.getY() + frame.getHeight()) > maxY)
+					if ((fy + fh) > maxY)
                     {
-                        maxY = frame.getY() + frame.getHeight();
+                        maxY = fy + fh;
                     }
                 }
 
@@ -163,7 +172,9 @@ public class DesktopScrollPane extends JScrollPane {
 
                     for (int i=0; i < frames.length; i++) {
                         frame = frames[i];
-                        frame.setLocation(frame.getX()-minX, frame.getY()-minY);
+                        int fx = !frame.isIcon()?frame.getX():frame.getDesktopIcon().getX();
+                        int fy = !frame.isIcon()?frame.getY():frame.getDesktopIcon().getY();
+                        frame.setLocation(fx-minX, fy-minY);
                     }
 
                     // have to scroll (set the viewport) to the right or up the amount
