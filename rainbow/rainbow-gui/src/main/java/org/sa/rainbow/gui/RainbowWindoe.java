@@ -11,6 +11,9 @@ import java.awt.HeadlessException;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.beans.PropertyChangeEvent;
@@ -35,8 +38,11 @@ import javax.swing.ImageIcon;
 import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
@@ -98,6 +104,7 @@ import org.sa.rainbow.gui.arch.model.RainbowArchModelElement;
 import org.sa.rainbow.gui.arch.model.RainbowArchModelModel;
 import org.sa.rainbow.gui.arch.model.RainbowArchProbeModel;
 import org.sa.rainbow.gui.arch.model.RainbowSystemModel;
+import org.sa.rainbow.gui.arch.model.RainbowSystemModel.IRainbowModelVisitor;
 import org.sa.rainbow.gui.visitor.DOTStringGraphConstructor;
 import org.sa.rainbow.gui.widgets.DesktopScrollPane;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
@@ -478,13 +485,13 @@ public class RainbowWindoe extends RainbowWindow
 				}
 			}
 
-			layoutDOT();
+			layoutDOT("dot");
 
 		} finally {
 		}
 	}
 
-	private boolean layoutDOT() {
+	private boolean layoutDOT(String layout) {
 		try {
 			m_lines = new ArrayList<Line2D>();
 
@@ -505,7 +512,7 @@ public class RainbowWindoe extends RainbowWindow
 			}
 
 			Runtime rt = Runtime.getRuntime();
-			String[] args = { "/usr/bin/dot", "-Tdot", /* "-Gdpi=" + res, */tmp.getAbsolutePath(), "-o",
+			String[] args = { "/usr/bin/dot", "-K" + layout, "-Tdot", /* "-Gdpi=" + res, */tmp.getAbsolutePath(), "-o",
 					tmpo.getAbsolutePath() };
 			Process p = rt.exec(args);
 			p.waitFor();
@@ -937,6 +944,168 @@ public class RainbowWindoe extends RainbowWindow
 			}
 
 		}
+	}
+	
+	@Override
+	protected void createMenuBar() {
+		super.createMenuBar();
+		JMenu menu = new JMenu("Layout");
+		menu.setMnemonic(KeyEvent.VK_L);
+		createLayoutMenu(menu);
+		m_menuBar.add(menu, 3);
+	}
+
+	private void createLayoutMenu(JMenu menu) {
+		JMenuItem item;
+		
+		item = new JMenuItem("Dot");
+		item.setMnemonic(KeyEvent.VK_D);
+		item.setToolTipText("Layout desktop using the dot default layout");
+		item.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				layoutDOT("dot");
+			}
+		});
+		menu.add(item);
+
+		item = new JMenuItem("Circo");
+		item.setMnemonic(KeyEvent.VK_C);
+		item.setToolTipText("Layout desktop using the Circo layout");
+		item.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				layoutDOT("circo");
+			}
+		});
+		menu.add(item);
+
+		item = new JMenuItem("FDP");
+		item.setMnemonic(KeyEvent.VK_F);
+		item.setToolTipText("Layout desktop using the FDP layout");
+		item.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				layoutDOT("fdp");
+			}
+		});
+		menu.add(item);
+		
+		item = new JMenuItem("Neato");
+		item.setMnemonic(KeyEvent.VK_N);
+		item.setToolTipText("Layout desktop using the neato layout");
+		item.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				layoutDOT("neato");
+			}
+		});
+		menu.add(item);
+		
+		item = new JMenuItem("Twopi");
+		item.setMnemonic(KeyEvent.VK_T);
+		item.setToolTipText("Layout desktop using the twopi layout");
+		item.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				layoutDOT("twopi");
+			}
+		});
+		menu.add(item);
+		
+		item = new JMenuItem("Osage");
+		item.setMnemonic(KeyEvent.VK_O);
+		item.setToolTipText("Layout desktop using the osage layout");
+		item.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				layoutDOT("osage");
+			}
+		});
+		menu.add(item);
+		
+		item = new JMenuItem("Patchwork");
+		item.setMnemonic(KeyEvent.VK_P);
+		item.setToolTipText("Layout desktop using the patchwork layout");
+		item.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				layoutDOT("patchwork");
+			}
+		});
+		menu.add(item);
+		menu.add(new JSeparator());
+		
+		item = new JMenuItem("Reset user position");
+		item.setMnemonic(KeyEvent.VK_N);
+		item.setToolTipText("Remove the user defined locations");
+		item.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				m_rainbowModel.visit(new IRainbowModelVisitor() {
+					
+					protected void rs(RainbowArchModelElement el) {
+						el.setUserLocation(null);
+					}
+					
+					@Override
+					public void visitSystem(RainbowSystemModel model) {
+						// TODO Auto-generated method stub
+						
+					}
+					
+					@Override
+					public void visitProbe(RainbowArchProbeModel probe) {
+						rs(probe);
+					}
+					
+					@Override
+					public void visitModel(RainbowArchModelModel gauge) {
+						rs(gauge);
+					}
+					
+					@Override
+					public void visitGauge(RainbowArchGaugeModel gauge) {
+						rs(gauge);
+					}
+					
+					@Override
+					public void visitExecutor(RainbowArchExecutorModel executor) {
+						rs(executor);
+					}
+					
+					@Override
+					public void visitEffector(RainbowArchEffectorModel effector) {
+						rs(effector);
+					}
+					
+					@Override
+					public void visitAnalysis(RainbowArchAnalysisModel analysis) {
+						rs(analysis);
+					}
+					
+					@Override
+					public void visitAdaptationManager(RainbowArchAdapationManagerModel adaptationManager) {
+						rs(adaptationManager);
+					}
+					
+					@Override
+					public void postVisitSystem(RainbowSystemModel model) {
+						// TODO Auto-generated method stub
+						
+					}
+				});
+			}
+		});
+		menu.add(item);
 	}
 
 }
