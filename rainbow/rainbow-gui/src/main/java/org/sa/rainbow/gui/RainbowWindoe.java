@@ -305,8 +305,8 @@ public class RainbowWindoe extends RainbowWindow
 			}else if (o instanceof RainbowArchAnalysisModel) {
 				RainbowArchAnalysisModel anModel = (RainbowArchAnalysisModel) o;
 				m_selectionPanel.setSelectedIndex(1);
-				m_exPanel.setVisible(true);
-				m_exPanel.initBindings(anModel);
+				m_anPanel.setVisible(true);
+				m_anPanel.initBindings(anModel);
 				
 				((CardLayout) m_detailsPanel.getLayout()).show(m_detailsPanel, "analyzers");
 
