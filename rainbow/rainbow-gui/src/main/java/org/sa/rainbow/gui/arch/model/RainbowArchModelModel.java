@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
@@ -253,6 +254,11 @@ public class RainbowArchModelModel extends RainbowArchModelElement implements IR
 
 	public Map<String, RainbowModelOperationRepresentation> getOperationsAccepted() {
 		return m_operationsAccepted;
+	}
+
+	@Override
+	public AbstractRainbowRunnable getRunnable() {
+		return null;
 	}
 
 }

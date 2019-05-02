@@ -3,6 +3,7 @@ package org.sa.rainbow.gui.arch.model;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.gui.arch.controller.RainbowAdaptationManagerController;
 
@@ -42,6 +43,11 @@ public class RainbowArchAdapationManagerModel extends RainbowArchModelElement im
 	@Override
 	public List<ReportDatum> getReports() {
 		return m_reports;
+	}
+
+	@Override
+	public AbstractRainbowRunnable getRunnable() {
+		return (AbstractRainbowRunnable )getAdaptationManager();
 	}
 
 }

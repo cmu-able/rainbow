@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
@@ -104,5 +105,10 @@ public class RainbowArchGaugeModel extends RainbowArchModelElement implements IM
 
 	public Collection<String> getProbes() {
 		return m_probes;
+	}
+
+	@Override
+	public AbstractRainbowRunnable getRunnable() {
+		return null;
 	}
 }

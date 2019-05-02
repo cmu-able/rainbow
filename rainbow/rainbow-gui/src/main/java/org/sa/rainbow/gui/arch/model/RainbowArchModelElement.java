@@ -5,6 +5,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
+import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.gui.arch.controller.IRainbowUIController;
 
 public abstract class RainbowArchModelElement {
@@ -67,6 +68,8 @@ public abstract class RainbowArchModelElement {
 	}
 
 	public abstract String getId();
+	
+	public abstract AbstractRainbowRunnable getRunnable();
 
 	public void addPropertyChangeListener (PropertyChangeListener l) {
 		pcs.addPropertyChangeListener(l);

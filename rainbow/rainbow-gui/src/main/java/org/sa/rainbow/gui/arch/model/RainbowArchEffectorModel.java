@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
 import org.sa.rainbow.gui.arch.controller.AbstractRainbowController;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
@@ -88,6 +89,11 @@ public class RainbowArchEffectorModel extends RainbowArchModelElement {
 			pcs.firePropertyChange(EFFECTOR_EXECUTING, null, ex);
 
 		}
+	}
+
+	@Override
+	public AbstractRainbowRunnable getRunnable() {
+		return null;
 	}
 	
 	

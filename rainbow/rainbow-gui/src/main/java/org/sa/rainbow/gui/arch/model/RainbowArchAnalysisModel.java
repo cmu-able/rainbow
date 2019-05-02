@@ -1,5 +1,6 @@
 package org.sa.rainbow.gui.arch.model;
 
+import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.analysis.IRainbowAnalysis;
 import org.sa.rainbow.gui.arch.controller.IRainbowUIController;
 import org.sa.rainbow.gui.arch.controller.RainbowAnalysisController;
@@ -25,6 +26,11 @@ public class RainbowArchAnalysisModel extends RainbowArchModelElement {
 	@Override
 	public RainbowAnalysisController getController() {
 		return (RainbowAnalysisController) super.getController();
+	}
+
+	@Override
+	public AbstractRainbowRunnable getRunnable() {
+		return (AbstractRainbowRunnable) getAnalysis();
 	}
 	
 }

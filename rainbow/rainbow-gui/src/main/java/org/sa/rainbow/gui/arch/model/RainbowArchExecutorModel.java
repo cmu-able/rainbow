@@ -1,5 +1,6 @@
 package org.sa.rainbow.gui.arch.model;
 
+import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.gui.arch.controller.IRainbowUIController;
@@ -26,5 +27,10 @@ public class RainbowArchExecutorModel extends RainbowArchModelElement {
 	@Override
 	public RainbowExecutorController getController() {
 		return (RainbowExecutorController) super.getController();
+	}
+
+	@Override
+	public AbstractRainbowRunnable getRunnable() {
+		return (AbstractRainbowRunnable) getExecutor();
 	}
 }

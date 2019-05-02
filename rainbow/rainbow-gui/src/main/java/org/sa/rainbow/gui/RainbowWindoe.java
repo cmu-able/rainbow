@@ -91,6 +91,7 @@ import org.sa.rainbow.gui.arch.controller.RainbowGaugeController;
 import org.sa.rainbow.gui.arch.controller.RainbowModelController;
 import org.sa.rainbow.gui.arch.controller.RainbowProbeController;
 import org.sa.rainbow.gui.arch.elements.AdaptationManagerTabbedPane;
+import org.sa.rainbow.gui.arch.elements.DefaultThreadInfoPane;
 import org.sa.rainbow.gui.arch.elements.EffectorTabbedPane;
 import org.sa.rainbow.gui.arch.elements.GaugeTabbedPane;
 import org.sa.rainbow.gui.arch.elements.ModelTabbedPane;
@@ -187,6 +188,10 @@ public class RainbowWindoe extends RainbowWindow
 		}
 	};
 
+	private DefaultThreadInfoPane m_exPanel;
+
+	private DefaultThreadInfoPane m_anPanel;
+
 	public RainbowWindoe(IMasterCommandPort master) {
 		super(master);
 		init();
@@ -253,6 +258,8 @@ public class RainbowWindoe extends RainbowWindow
 			m_modelPanel.setVisible(false);
 			m_amPanel.setVisible(false);
 			m_effectorPanel.setVisible(false);
+			m_anPanel.setVisible(false);
+			m_exPanel.setVisible(false);
 			if (o instanceof RainbowArchProbeModel) {
 				RainbowArchProbeModel probeInfo = (RainbowArchProbeModel) o;
 				m_selectionPanel.setSelectedIndex(1);
@@ -286,6 +293,22 @@ public class RainbowWindoe extends RainbowWindow
 				m_effectorPanel.initBindings(effModel);
 
 				((CardLayout) m_detailsPanel.getLayout()).show(m_detailsPanel, "effectors");
+
+			} else if (o instanceof RainbowArchExecutorModel) {
+				RainbowArchExecutorModel exModel = (RainbowArchExecutorModel) o;
+				m_selectionPanel.setSelectedIndex(1);
+				m_exPanel.setVisible(true);
+				m_exPanel.initBindings(exModel);
+				
+				((CardLayout) m_detailsPanel.getLayout()).show(m_detailsPanel, "executors");
+
+			}else if (o instanceof RainbowArchAnalysisModel) {
+				RainbowArchAnalysisModel anModel = (RainbowArchAnalysisModel) o;
+				m_selectionPanel.setSelectedIndex(1);
+				m_exPanel.setVisible(true);
+				m_exPanel.initBindings(anModel);
+				
+				((CardLayout) m_detailsPanel.getLayout()).show(m_detailsPanel, "analyzers");
 
 			}
 		});
@@ -370,12 +393,72 @@ public class RainbowWindoe extends RainbowWindow
 
 	@Override
 	protected void createExecutorsUI() {
+		
+		if (m_uidb.containsKey("details")) {
+			String className = ((Map<String, String>) m_uidb.get("details")).get("executors");
+			if (className != null) {
+				try {
+					Class<?> clazz = this.getClass().forName(className);
+					m_amPanel = (AdaptationManagerTabbedPane) clazz.newInstance();
+
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InstantiationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+
+		}
+		if (m_exPanel == null) {
+			m_exPanel = new DefaultThreadInfoPane();
+		}
+		m_detailsPanel.add(m_exPanel);
+		m_exPanel.setVisible(true);
+
+		((CardLayout) m_detailsPanel.getLayout()).addLayoutComponent(m_exPanel, "executors");
+
+		
+		
 		JTextArea modelsLogs = createTextAreaInTab(m_logTabs, "Execution");
 		m_allTabs.put(RainbowComponentT.EXECUTOR, modelsLogs);
 	}
 
 	@Override
 	protected void createAnalyzersUI() {
+		if (m_uidb.containsKey("details")) {
+			String className = ((Map<String, String>) m_uidb.get("details")).get("analyzers");
+			if (className != null) {
+				try {
+					Class<?> clazz = this.getClass().forName(className);
+					m_amPanel = (AdaptationManagerTabbedPane) clazz.newInstance();
+
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InstantiationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+
+		}
+		if (m_anPanel == null) {
+			m_anPanel = new DefaultThreadInfoPane();
+		}
+		m_detailsPanel.add(m_anPanel);
+		m_anPanel.setVisible(true);
+
+		((CardLayout) m_detailsPanel.getLayout()).addLayoutComponent(m_anPanel, "analyzers");
+		
+		
 		JTextArea modelsLogs = createTextAreaInTab(m_logTabs, "Analyzers");
 		m_allTabs.put(RainbowComponentT.ANALYSIS, modelsLogs);
 	}

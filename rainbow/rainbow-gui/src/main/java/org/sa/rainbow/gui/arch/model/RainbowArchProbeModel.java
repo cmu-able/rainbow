@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
 import org.sa.rainbow.gui.arch.controller.AbstractRainbowController;
 import org.sa.rainbow.util.Util;
@@ -55,6 +56,11 @@ public class RainbowArchProbeModel extends RainbowArchModelElement {
 
 	public void addListeningGauge(String gaugeKey) {
 		m_listeningGauges.add(gaugeKey);
+	}
+
+	@Override
+	public AbstractRainbowRunnable getRunnable() {
+		return null;
 	}
 
 }
