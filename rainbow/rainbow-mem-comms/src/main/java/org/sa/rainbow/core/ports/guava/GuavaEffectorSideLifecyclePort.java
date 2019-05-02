@@ -66,7 +66,7 @@ public class GuavaEffectorSideLifecyclePort implements IEffectorLifecycleBusPort
 	@Override
 	public void reportExecuting(IEffectorIdentifier effector, List<String> args) {
 		GuavaRainbowMessage msg = new GuavaRainbowMessage();
-		msg.setProperty(ESEBConstants.MSG_TYPE_KEY, IEffectorProtocol.EFFECTOR_EXECUTED);
+		msg.setProperty(ESEBConstants.MSG_TYPE_KEY, IEffectorProtocol.EFFECTOR_EXECUTING);
 		setCommonEffectorProperties(effector, msg);
 		msg.setProperty(IEffectorProtocol.ARGUMENT + IEffectorProtocol.SIZE, args.size());
 		for (int i = 0; i < args.size(); i++) {
