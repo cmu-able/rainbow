@@ -47,5 +47,15 @@ probes:
       period: 20000
       argument: "~/cp1/current-target-waypoint"
       
+  BRASSPowerModelProbe:
+    # probe to report changes to the power model
+    alias: powermodelupdateprobe
+    location: "${customize.system.target.ros}"
+    type: java
+    javaInfo:
+      class: org.sa.rainbow.brass.p3_cp1.probes
+      period: 20000
+      argument: "~/cp1/learned_model"
+      
       
       
