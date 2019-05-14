@@ -189,4 +189,4 @@ gauge-instances:
       targetIP: "${customize.syste.target.master}"
     configValues:
       reportingPeriod: 2000
-      targetProbeType: powermodelprobe
+      targetProbeType: powermodelupdateprobe
