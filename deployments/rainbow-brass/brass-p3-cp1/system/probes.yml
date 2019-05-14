@@ -55,7 +55,7 @@ probes:
     javaInfo:
       class: org.sa.rainbow.brass.p3_cp1.probes
       period: 20000
-      argument: "~/cp1/config_list.json"
+      argument: "/home/mars/cp1/config_list.json"
       
       
       
