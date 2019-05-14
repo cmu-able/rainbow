@@ -34,12 +34,12 @@ public class LoadPowerModelCmd extends AbstractLoadModelCmd<SimpleConfigurationS
 
 	@Override
 	protected void subExecute() throws RainbowException {
-		if (m_stream == null) {
+//		if (m_stream == null) {
 			SimpleConfigurationStore store = new SimpleConfigurationStore(Rainbow.instance().allProperties());
 			m_result = new CP1PowerModelInstance(store, getOriginalSource());
 			m_result.setModelReference(getModelReference());
 			doPostExecute();
-		}
+//		}
 	}
 
 	@Override
