@@ -182,7 +182,7 @@ gauge-instances:
 
   PMG1:
     type: BRASSPowerModelGaugeT
-    model: PowerModel:PowerModel
+    model: Power:PowerModel
     commands:
       update: "pm.updatePowerModel($<pmfile>)"
     setupValues:
