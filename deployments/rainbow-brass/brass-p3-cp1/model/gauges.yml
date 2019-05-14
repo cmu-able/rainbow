@@ -186,7 +186,7 @@ gauge-instances:
     commands:
       update: "pm.updatePowerModel($<pmfile>)"
     setupValues:
-      targetIP: "${customize.syste.target.master}"
+      targetIP: "${customize.system.target.master}"
     configValues:
       reportingPeriod: 2000
       targetProbeType: powermodelupdateprobe
