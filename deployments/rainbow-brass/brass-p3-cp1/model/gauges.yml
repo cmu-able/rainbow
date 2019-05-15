@@ -190,3 +190,4 @@ gauge-instances:
     configValues:
       reportingPeriod: 2000
       targetProbeType: powermodelupdateprobe
+      
