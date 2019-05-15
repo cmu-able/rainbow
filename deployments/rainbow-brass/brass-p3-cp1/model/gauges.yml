@@ -114,9 +114,12 @@ gauge-types:
         type: String
         default: "org.sa.rainbow.brass.p3_cp1.gauges.PowerModelChangeGauge"
     configParams:
-      targetPorbeType:
+      targetProbeType:
         type: String
         default: ~
+      reportinPerio:
+        type: long
+        default: 2000
 
 gauge-instances:
   IGG1:
