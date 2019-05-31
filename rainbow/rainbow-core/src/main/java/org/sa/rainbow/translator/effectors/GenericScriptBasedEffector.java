@@ -154,7 +154,7 @@ public class GenericScriptBasedEffector extends AbstractEffector implements IBas
 //                    r = Outcome.FAILURE;
 //                }
             }
-            log(" --STDOUT+STDERR-----\n" + Util.getProcessOutput(p));
+//            log(" --STDOUT+STDERR-----\n" + Util.getProcessOutput(p));
             log("Done!");
         } catch (IOException e) {
             LOGGER.error ("Process I/O failed!", e);
