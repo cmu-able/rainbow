@@ -43,6 +43,9 @@ public class BRASSRosTopicProbe extends AbstractProbe implements IBashBasedScrip
                 	line = br.readLine();
                 }
 			}
+			catch (IOException e) {
+				log(e.getMessage());
+			}
 		}
     }
 
