@@ -22,6 +22,29 @@ public class BRASSRosTopicProbe extends AbstractProbe implements IBashBasedScrip
     private String  m_path;
     private String  m_params;
     private Process m_process;
+    
+    
+    public class ErrorStreamGobbler extends Thread {
+    	private InputStream m_inputStream;
+
+		public ErrorStreamGobbler(InputStream is) {
+    		m_inputStream = is;
+    	}
+		
+		@Override
+			public void run() {
+			try {
+				InputStreamReader isr = new InputStreamReader (m_inputStream);
+                BufferedReader br = new BufferedReader (isr);
+                String line = br.readLine ();
+                while (line != null) {
+                	System.err.println(line);
+                	log(line);
+                	line = br.readLine();
+                }
+			}
+		}
+    }
 
     public class StreamGobbler extends Thread {
         private final InputStream m_inputStream;
@@ -105,7 +128,9 @@ public class BRASSRosTopicProbe extends AbstractProbe implements IBashBasedScrip
             try {
                 m_process = pb.start ();
                 StreamGobbler outputProcessor = new StreamGobbler (m_process.getInputStream ());
+                ErrorStreamGobbler esg = new ErrorStreamGobbler(m_process.getErrorStream());
                 outputProcessor.start ();
+                esg.start();
             } catch (IOException e) {
                 RainbowLogger.error (RainbowComponentT.PROBE, "Process I/O failed!", e, getLoggingPort (), LOGGER);
 
