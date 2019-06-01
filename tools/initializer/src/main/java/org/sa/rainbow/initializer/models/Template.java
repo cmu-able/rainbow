@@ -7,20 +7,20 @@ import java.util.List;
  */
 public class Template {
     /**
-     * A list of variables in the specific template.
+     * A list of variables in this specific template.
      */
-    private List<Variable> variables;
+    private List<Variable> localVariables;
     /**
      * The content of the template, with placeholders for variables.
      */
     private String content;
 
-    public List<Variable> getVariables() {
-        return variables;
+    public List<Variable> getLocalVariables() {
+        return localVariables;
     }
 
-    public void setVariables(List<Variable> variables) {
-        this.variables = variables;
+    public void setLocalVariables(List<Variable> localVariables) {
+        this.localVariables = localVariables;
     }
 
     public String getContent() {
