@@ -1,5 +1,7 @@
 package org.sa.rainbow.initializer.models;
 
+import freemarker.template.Template;
+
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +18,12 @@ public class TemplateSet {
      */
     private List<Variable> variables;
 
+
+    public TemplateSet(Map<String, Template> templates, List<Variable> variables) {
+        this.templates = templates;
+        this.variables = variables;
+    }
+
     public Map<String, Template> getTemplates() {
         return templates;
     }
@@ -31,4 +39,5 @@ public class TemplateSet {
     public void setVariables(List<Variable> variables) {
         this.variables = variables;
     }
+
 }
