@@ -17,6 +17,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.JInternalFrame.JDesktopIcon;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
+import javax.swing.plaf.basic.BasicBorders;
 
 import org.sa.rainbow.gui.RainbowWindoe.SelectionManager;
 import org.sa.rainbow.gui.arch.ArchEffectorPanel;
@@ -96,13 +97,13 @@ public abstract class AbstractRainbowController implements IRainbowUIController,
 				if (vf instanceof JDesktopIcon) {
 					if (selected) {
 						if (m_highlightAct == null)
-							vf.setBorder(new LineBorder(Color.GRAY, 4));
+							vf.setBorder(BasicBorders.getInternalFrameBorder());
 						else
 							synchronized (m_highlightAct) {
 								if (m_highlightAct.currentTask != null) {
-									m_highlightAct.preBorder = new LineBorder(Color.GRAY, 4);
+									m_highlightAct.preBorder = BasicBorders.getInternalFrameBorder();
 								} else {
-									vf.setBorder(new LineBorder(Color.GRAY, 4));
+									vf.setBorder(BasicBorders.getInternalFrameBorder());
 								}
 							}
 					} else {
