@@ -1,7 +1,10 @@
 package org.sa.rainbow.gui.arch.controller;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.beans.PropertyChangeListener;
@@ -58,9 +61,11 @@ public abstract class AbstractRainbowController implements IRainbowUIController,
 		}
 
 		protected void unhighlight(JComponent vFrame) {
-			vFrame.setBorder(preBorder);
+			synchronized (this) {
+				vFrame.setBorder(preBorder);
+			}
 		}
-		
+
 		protected void highlight(JComponent vFrame) {
 			vFrame.setBorder(new LineBorder(highlightColors()[0], 2));
 		}
@@ -84,9 +89,31 @@ public abstract class AbstractRainbowController implements IRainbowUIController,
 	protected void attachControllerToFrame(JInternalFrame frame) {
 		frame.addPropertyChangeListener(e -> {
 			if ("selected".equals(e.getPropertyName())) {
-				m_selectionManager.selectionChanged(this.getModel(),(Boolean )e.getNewValue());
-			}
-			else if ("userdragged".equals(e.getPropertyName())) {
+				Boolean selected = (Boolean) e.getNewValue();
+				m_selectionManager.selectionChanged(this.getModel(), selected);
+				if (selected) {
+					if (m_highlightAct == null)
+						getVisibleFrame().setBorder(new LineBorder(Color.GRAY, 4));
+					synchronized (m_highlightAct) {
+						if (m_highlightAct.currentTask != null) {
+							m_highlightAct.preBorder = new LineBorder(Color.GRAY, 4);
+						} else {
+							getVisibleFrame().setBorder(new LineBorder(Color.GRAY, 4));
+						}
+					}
+				} else {
+					if (m_highlightAct == null)
+						getVisibleFrame().setBorder(new LineBorder(null));
+					synchronized (m_highlightAct) {
+						if (m_highlightAct.currentTask != null) {
+							m_highlightAct.preBorder = new LineBorder(null);
+						} else {
+							getVisibleFrame().setBorder(new LineBorder(null));
+						}
+					}
+				}
+
+			} else if ("userdragged".equals(e.getPropertyName())) {
 				Point loc = (Point) e.getNewValue();
 				move(new Point2D.Double(loc.x, loc.y), true);
 			}
@@ -140,9 +167,10 @@ public abstract class AbstractRainbowController implements IRainbowUIController,
 	}
 
 	protected void highlightActivity() {
-		if (m_highlightAct == null) m_highlightAct = new HighlightBorderActivity(m_frame);
+		if (m_highlightAct == null)
+			m_highlightAct = new HighlightBorderActivity(m_frame);
 		m_highlightAct.run();
-		
+
 	}
 
 	protected abstract Color[] highlightColors();
