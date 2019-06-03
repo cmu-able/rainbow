@@ -2,8 +2,9 @@ package org.sa.rainbow.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.EventQueue;
-import java.awt.ScrollPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -16,6 +17,8 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
@@ -28,13 +31,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextPane;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.hibernate.internal.jaxb.mapping.orm.JaxbSecondaryTable;
 import org.sa.rainbow.core.IDisposable;
 import org.sa.rainbow.core.IRainbowRunnable;
 import org.sa.rainbow.core.Identifiable;
@@ -45,10 +47,12 @@ import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.GaugeManager;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.globals.ExitState;
+import org.sa.rainbow.core.models.EffectorDescription;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.ProbeDescription;
+import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
 import org.sa.rainbow.core.models.ProbeDescription.ProbeAttributes;
 import org.sa.rainbow.core.ports.IEffectorLifecycleBusPort;
 import org.sa.rainbow.core.ports.IGaugeLifecycleBusPort;
@@ -58,15 +62,46 @@ import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.OperationResult;
 import org.sa.rainbow.core.ports.IModelUSBusPort;
 import org.sa.rainbow.core.ports.IProbeReportPort;
+import org.sa.rainbow.core.ports.IProbeReportSubscriberPort;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReportingSubscriberCallback;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.util.Pair;
+import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 import org.sa.rainbow.translator.probes.IProbeIdentifier;
 import org.sa.rainbow.util.Util;
 
 public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportingSubscriberCallback {
+
+	public static Color bleach(Color color, double amount) {
+		int red = (int) ((color.getRed() * (1 - amount) / 255 + amount) * 255);
+		int green = (int) ((color.getGreen() * (1 - amount) / 255 + amount) * 255);
+		int blue = (int) ((color.getBlue() * (1 - amount) / 255 + amount) * 255);
+		return new Color(red, green, blue);
+	}
+
+	public static final Color GAUGES_COLOR = Color.BLUE;
+	public static final Color EFFECTORS_COLOR = Color.ORANGE;
+	public static final Color SYSTEM_COLOR_LIGHT;
+	public static final Color MODELS_MANAGER_COLOR = Color.MAGENTA;
+	public static final Color MODELS_MANAGER_COLOR_LIGHT;
+	public static final Color EXECUTORS_COLOR = Color.GREEN;
+	public static final Color EXECUTORS_COLOR_LIGHT;
+	public static final Color ANALYZERS_COLOR = Color.PINK;
+	public static final Color ANALYZERS_COLOR_LIGHT;
+	public static final Color ADAPTION_MANAGER_COLOR = Color.RED;
+	public static final Color ADAPTION_MANAGER_COLOR_LIGHT;
+	public static final Color GAUGES_COLOR_LIGHT;
+
+	static {
+		GAUGES_COLOR_LIGHT = bleach(GAUGES_COLOR, .75);
+		SYSTEM_COLOR_LIGHT = bleach(EFFECTORS_COLOR, 0.75);
+		MODELS_MANAGER_COLOR_LIGHT = bleach(MODELS_MANAGER_COLOR, 0.75);
+		EXECUTORS_COLOR_LIGHT = bleach(EFFECTORS_COLOR, 0.75);
+		ANALYZERS_COLOR_LIGHT = bleach(EFFECTORS_COLOR, 0.75);
+		ADAPTION_MANAGER_COLOR_LIGHT = bleach(EFFECTORS_COLOR, 0.75);
+	}
 	public static final int MAX_TEXT_LENGTH = 100000;
 	/** Convenience constant: size of text field to set to when Max is exceeded. */
 	public static final int TEXT_HALF_LENGTH = 50000;
@@ -75,20 +110,26 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	Map<RainbowComponentT, JInternalFrame> m_internalFrames = new HashMap<>();
 	Map<RainbowComponentT, JTabbedPane> m_tabs = new HashMap<>();
 	Map<RainbowComponentT, JTextArea> m_allTabs = new HashMap<>();
-	private JFrame m_frame;
-	private IMasterCommandPort m_master;
-	private OracleStatusPanel m_oracleMessagePane;
-	private GUIGaugeLifecycleListener m_gaugeListener;
-	private IGaugeLifecycleBusPort m_gaugeLifecyclePort;
-	private GUIEffectorLifecycleListener m_effectorListener;
-	private IEffectorLifecycleBusPort m_effectorLifecyclePort;
-	private IModelUSBusPort m_usPort;
-	private IModelDSBusPublisherPort m_dsPort;
-	private Map<String, ModelPanel> m_modelSections = new HashMap<>();
-	private Map<String, GaugePanel> m_gaugeSections = new HashMap<>();
-	private Map<String, JTextArea> m_probeSections = new HashMap<>();
-	
-	JDesktopPane desktopPane;
+	protected JFrame m_frame;
+	protected IMasterCommandPort m_master;
+	protected OracleStatusPanel m_oracleMessagePane;
+	protected GUIGaugeLifecycleListener m_gaugeListener;
+	protected IGaugeLifecycleBusPort m_gaugeLifecyclePort;
+	protected GUIEffectorLifecycleListener m_effectorListener;
+	protected IEffectorLifecycleBusPort m_effectorLifecyclePort;
+	protected IModelUSBusPort m_usPort;
+	protected IModelDSBusPublisherPort m_dsPort;
+	protected Map<String, ModelPanel> m_modelSections = new HashMap<>();
+	protected Map<String, GaugePanel> m_gaugeSections = new HashMap<>();
+	protected Map<String, JTextArea> m_probeSections = new HashMap<>();
+	protected Map<String, JTextArea> m_effectorSections = new HashMap<> ();
+
+	protected JDesktopPane m_desktopPane;
+	protected IProbeReportSubscriberPort m_createProbeReportingPortSubscriber;
+	protected IEffectorLifecycleBusPort m_createClientSideEffectorLifecyclePort;
+	private javax.swing.Timer m_tabTimer;
+	protected JInternalFrame m_masterFrame;
+	protected JMenuBar m_menuBar;
 
 	/**
 	 * Launch the application.
@@ -117,14 +158,14 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	 * Create the application.
 	 */
 	public RainbowWindow(IMasterCommandPort master) {
-		m_master = master;
-		initialize();
+		setMaster(master);
 	}
 
 	public RainbowWindow() {
 		m_master = null;
-		initialize();
 	}
+	
+	
 
 	/**
 	 * Initialize the contents of the frame.
@@ -133,16 +174,13 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		m_frame = new JFrame();
 		m_frame.setBounds(100, 100, 1260, 900);
 		m_frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		m_frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		m_frame.addWindowFocusListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				quit();
 			}
 		});
-		desktopPane = new JDesktopPane();
-		desktopPane.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
-		m_frame.getContentPane().add(desktopPane, BorderLayout.CENTER);
+		createDesktopPane();
 		List<String> expectedDelegateLocations;
 		Throwable error = null;
 		try {
@@ -152,119 +190,58 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 			error = e;
 		}
 
-		JInternalFrame masterFrame = new JInternalFrame("Rainbow Master");
-		masterFrame.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		masterFrame.setMaximizable(true);
-		masterFrame.setIconifiable(true);
-		masterFrame.setBounds(0, 0, 420, 250);
-		desktopPane.add(masterFrame);
-		m_oracleMessagePane = new OracleStatusPanel(Color.white, expectedDelegateLocations);
-		masterFrame.getContentPane().add(m_oracleMessagePane, BorderLayout.CENTER);
-		m_internalFrames.put(RainbowComponentT.MASTER, masterFrame);
 
-		JInternalFrame adaptationManagerFrame = new JInternalFrame("Adaptation Managers");
-		adaptationManagerFrame.setMaximizable(true);
-		adaptationManagerFrame.setIconifiable(true);
-		adaptationManagerFrame.setBounds(420, 0, 420, 250);
-		desktopPane.add(adaptationManagerFrame);
-		adaptationManagerFrame.getContentPane().setLayout(new BorderLayout(0, 0));
-		m_internalFrames.put(RainbowComponentT.ADAPTATION_MANAGER, adaptationManagerFrame);
+		createAdaptationManagerUI();
 
-		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		tabbedPane.setBackground(Color.WHITE);
-		tabbedPane.setBorder(new LineBorder(Color.RED, 2));
-		adaptationManagerFrame.getContentPane().add(tabbedPane);
-		m_tabs.put(RainbowComponentT.ADAPTATION_MANAGER, tabbedPane);
+		createAnalyzersUI();
 
-		JTextArea adaptationMgrTextArea = createTextAreaInTab(tabbedPane, "All");
-		m_allTabs.put(RainbowComponentT.ADAPTATION_MANAGER, adaptationMgrTextArea);
+		createExecutorsUI();
 
-		JInternalFrame analyzersFrame = new JInternalFrame("Analyzers");
-		analyzersFrame.setMaximizable(true);
-		analyzersFrame.setIconifiable(true);
-		analyzersFrame.setBounds(840, 0, 420, 500);
-		desktopPane.add(analyzersFrame);
+		createModelsManagerUI();
 
-		JTabbedPane analyzerTabs = new JTabbedPane(JTabbedPane.TOP);
-		;
-		analyzerTabs.setBorder(new LineBorder(Color.PINK, 2));
-		analyzersFrame.getContentPane().add(analyzerTabs, BorderLayout.CENTER);
+		createEffectorsUI();
 
-		JTextArea analyzersTextArea = createTextAreaInTab(analyzerTabs, "All");
-		m_internalFrames.put(RainbowComponentT.ANALYSIS, analyzersFrame);
-		m_allTabs.put(RainbowComponentT.ANALYSIS, analyzersTextArea);
-		m_tabs.put(RainbowComponentT.ANALYSIS, analyzerTabs);
+		createGaugesUI();
 
-		// analyzerTabs.addTab("New tab", null, textArea, null);
+		createProbesUI();
 
-		JInternalFrame executorsFrame = new JInternalFrame("Executors");
-		executorsFrame.setMaximizable(true);
-		executorsFrame.setIconifiable(true);
-		executorsFrame.setBounds(0, 250, 420, 250);
-		desktopPane.add(executorsFrame);
+		createMenuBar();
+		
+		createMasterUI(expectedDelegateLocations);
 
-		JTabbedPane executorsTabs = new JTabbedPane(JTabbedPane.TOP);
-		executorsTabs.setBorder(new LineBorder(Color.GREEN, 2));
-		executorsFrame.getContentPane().add(executorsTabs, BorderLayout.CENTER);
+		
+		m_tabTimer = new javax.swing.Timer(1000, new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (m_master.allDelegatesOK()) {
+					populateUI();
+					if (m_master.autoStartProbes()) {
+						m_master.startProbes();
+					}
+					m_tabTimer.stop();
+					m_tabTimer=null;
+				}
+			}
+		});
+		m_tabTimer.start();
+	}
 
-		JTextArea executorsTextArea = createTextAreaInTab(executorsTabs, "All");
-		m_internalFrames.put(RainbowComponentT.EXECUTOR, executorsFrame);
-		m_allTabs.put(RainbowComponentT.EXECUTOR, executorsTextArea);
-		m_tabs.put(RainbowComponentT.EXECUTOR, executorsTabs);
+	protected void createDesktopPane() {
+		m_desktopPane = new JDesktopPane();
+		m_desktopPane.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
+		m_frame.getContentPane().add(m_desktopPane, BorderLayout.CENTER);
+	}
 
-		JInternalFrame modelsManagerFrame = new JInternalFrame("Models Manager");
-		modelsManagerFrame.setMaximizable(true);
-		modelsManagerFrame.setIconifiable(true);
-		modelsManagerFrame.setBounds(420, 250, 420, 250);
-		desktopPane.add(modelsManagerFrame);
-
-		JTabbedPane modelsManagerTabs = new JTabbedPane(JTabbedPane.TOP);
-		modelsManagerTabs.setBorder(new LineBorder(Color.MAGENTA, 2));
-		modelsManagerFrame.getContentPane().add(modelsManagerTabs, BorderLayout.CENTER);
-
-		JTextArea modelsManagerTextArea = createTextAreaInTab(modelsManagerTabs, "All");
-		m_internalFrames.put(RainbowComponentT.MODEL, modelsManagerFrame);
-		m_allTabs.put(RainbowComponentT.MODEL, modelsManagerTextArea);
-		m_tabs.put(RainbowComponentT.MODEL, modelsManagerTabs);
-
-		JInternalFrame effectorsFrame = new JInternalFrame("Effectors");
-		effectorsFrame.setMaximizable(true);
-		effectorsFrame.setIconifiable(true);
-		effectorsFrame.setBounds(0, 500, 420, 250);
-		desktopPane.add(effectorsFrame);
-
-		JTabbedPane effectorsTabs = new JTabbedPane(JTabbedPane.TOP);
-		effectorsTabs.setBorder(new LineBorder(Color.ORANGE, 2));
-		effectorsFrame.getContentPane().add(effectorsTabs, BorderLayout.CENTER);
-
-		JTextArea effectorsTextArea = createTextAreaInTab(effectorsTabs, "All");
-		m_internalFrames.put(RainbowComponentT.EFFECTOR, effectorsFrame);
-		m_allTabs.put(RainbowComponentT.EFFECTOR, effectorsTextArea);
-		m_tabs.put(RainbowComponentT.EFFECTOR, effectorsTabs);
-
-		JInternalFrame gaugesFrame = new JInternalFrame("Gauges");
-		gaugesFrame.setMaximizable(true);
-		gaugesFrame.setIconifiable(true);
-		gaugesFrame.setBounds(420, 500, 420, 250);
-		desktopPane.add(gaugesFrame);
-
-		JTabbedPane gaugesTabs = new JTabbedPane(JTabbedPane.TOP);
-		gaugesTabs.setBorder(new LineBorder(Color.BLUE, 2));
-		gaugesFrame.getContentPane().add(gaugesTabs, BorderLayout.CENTER);
-
-		JTextArea gaugesTextArea = createTextAreaInTab(gaugesTabs, "All");
-		m_internalFrames.put(RainbowComponentT.GAUGE, gaugesFrame);
-		m_allTabs.put(RainbowComponentT.GAUGE, gaugesTextArea);
-		m_tabs.put(RainbowComponentT.GAUGE, gaugesTabs);
-
+	protected void createProbesUI() {
 		JInternalFrame probesFrame = new JInternalFrame("Probes");
 		probesFrame.setMaximizable(true);
 		probesFrame.setIconifiable(true);
 		probesFrame.setBounds(840, 500, 420, 250);
-		desktopPane.add(probesFrame);
+		m_desktopPane.add(probesFrame);
 
 		JTabbedPane probesTabs = new JTabbedPane(JTabbedPane.TOP);
-		probesTabs.setBorder(new LineBorder(Color.ORANGE, 2));
+		probesTabs.setBorder(new LineBorder(EFFECTORS_COLOR, 2));
 		probesFrame.getContentPane().add(probesTabs, BorderLayout.CENTER);
 
 		JTextArea probesTextArea = createTextAreaInTab(probesTabs, "All");
@@ -272,46 +249,166 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		m_allTabs.put(RainbowComponentT.PROBE, probesTextArea);
 		m_tabs.put(RainbowComponentT.PROBE, probesTabs);
 		probesFrame.setVisible(true);
-		gaugesFrame.setVisible(true);
-		effectorsFrame.setVisible(true);
-		modelsManagerFrame.setVisible(true);
-		executorsFrame.setVisible(true);
-		analyzersFrame.setVisible(true);
-		adaptationManagerFrame.setVisible(true);
-		masterFrame.setVisible(true);
+	}
 
-		JMenuBar menuBar = new JMenuBar();
-		menuBar.setOpaque(true);
-		menuBar.setBackground(Color.LIGHT_GRAY);
+	protected void createGaugesUI() {
+		JInternalFrame gaugesFrame = new JInternalFrame("Gauges");
+		gaugesFrame.setMaximizable(true);
+		gaugesFrame.setIconifiable(true);
+		gaugesFrame.setBounds(420, 500, 420, 250);
+		m_desktopPane.add(gaugesFrame);
+
+		JTabbedPane gaugesTabs = new JTabbedPane(JTabbedPane.TOP);
+		gaugesTabs.setBorder(new LineBorder(GAUGES_COLOR, 2));
+		gaugesFrame.getContentPane().add(gaugesTabs, BorderLayout.CENTER);
+
+		JTextArea gaugesTextArea = createTextAreaInTab(gaugesTabs, "All");
+		m_internalFrames.put(RainbowComponentT.GAUGE, gaugesFrame);
+		m_allTabs.put(RainbowComponentT.GAUGE, gaugesTextArea);
+		m_tabs.put(RainbowComponentT.GAUGE, gaugesTabs);
+		gaugesFrame.setVisible(true);
+	}
+
+	protected void createEffectorsUI() {
+		JInternalFrame effectorsFrame = new JInternalFrame("Effectors");
+		effectorsFrame.setMaximizable(true);
+		effectorsFrame.setIconifiable(true);
+		effectorsFrame.setBounds(0, 500, 420, 250);
+		m_desktopPane.add(effectorsFrame);
+
+		JTabbedPane effectorsTabs = new JTabbedPane(JTabbedPane.TOP);
+		effectorsTabs.setBorder(new LineBorder(EFFECTORS_COLOR, 2));
+		effectorsFrame.getContentPane().add(effectorsTabs, BorderLayout.CENTER);
+
+		JTextArea effectorsTextArea = createTextAreaInTab(effectorsTabs, "All");
+		m_internalFrames.put(RainbowComponentT.EFFECTOR, effectorsFrame);
+		m_allTabs.put(RainbowComponentT.EFFECTOR, effectorsTextArea);
+		m_tabs.put(RainbowComponentT.EFFECTOR, effectorsTabs);
+		effectorsFrame.setVisible(true);
+	}
+
+	protected void createModelsManagerUI() {
+		JInternalFrame modelsManagerFrame = new JInternalFrame("Models Manager");
+		modelsManagerFrame.setMaximizable(true);
+		modelsManagerFrame.setIconifiable(true);
+		modelsManagerFrame.setBounds(420, 250, 420, 250);
+		m_desktopPane.add(modelsManagerFrame);
+
+		JTabbedPane modelsManagerTabs = new JTabbedPane(JTabbedPane.TOP);
+		modelsManagerTabs.setBorder(new LineBorder(MODELS_MANAGER_COLOR, 2));
+		modelsManagerFrame.getContentPane().add(modelsManagerTabs, BorderLayout.CENTER);
+
+		JTextArea modelsManagerTextArea = createTextAreaInTab(modelsManagerTabs, "All");
+		m_internalFrames.put(RainbowComponentT.MODEL, modelsManagerFrame);
+		m_allTabs.put(RainbowComponentT.MODEL, modelsManagerTextArea);
+		m_tabs.put(RainbowComponentT.MODEL, modelsManagerTabs);
+		modelsManagerFrame.setVisible(true);
+	}
+
+	protected void createExecutorsUI() {
+		JInternalFrame executorsFrame = new JInternalFrame("Executors");
+		executorsFrame.setMaximizable(true);
+		executorsFrame.setIconifiable(true);
+		executorsFrame.setBounds(0, 250, 420, 250);
+		m_desktopPane.add(executorsFrame);
+
+		JTabbedPane executorsTabs = new JTabbedPane(JTabbedPane.TOP);
+		executorsTabs.setBorder(new LineBorder(EXECUTORS_COLOR, 2));
+		executorsFrame.getContentPane().add(executorsTabs, BorderLayout.CENTER);
+
+		JTextArea executorsTextArea = createTextAreaInTab(executorsTabs, "All");
+		m_internalFrames.put(RainbowComponentT.EXECUTOR, executorsFrame);
+		m_allTabs.put(RainbowComponentT.EXECUTOR, executorsTextArea);
+		m_tabs.put(RainbowComponentT.EXECUTOR, executorsTabs);
+		executorsFrame.setVisible(true);
+	}
+
+	protected void createAnalyzersUI() {
+		JInternalFrame analyzersFrame = new JInternalFrame("Analyzers");
+		analyzersFrame.setMaximizable(true);
+		analyzersFrame.setIconifiable(true);
+		analyzersFrame.setBounds(840, 0, 420, 500);
+		m_desktopPane.add(analyzersFrame);
+
+		JTabbedPane analyzerTabs = new JTabbedPane(JTabbedPane.TOP);
+		;
+		analyzerTabs.setBorder(new LineBorder(ANALYZERS_COLOR, 2));
+		analyzersFrame.getContentPane().add(analyzerTabs, BorderLayout.CENTER);
+
+		JTextArea analyzersTextArea = createTextAreaInTab(analyzerTabs, "All");
+		m_internalFrames.put(RainbowComponentT.ANALYSIS, analyzersFrame);
+		m_allTabs.put(RainbowComponentT.ANALYSIS, analyzersTextArea);
+		m_tabs.put(RainbowComponentT.ANALYSIS, analyzerTabs);
+		analyzersFrame.setVisible(true);
+		// analyzerTabs.addTab("New tab", null, textArea, null);
+	}
+
+	protected void createAdaptationManagerUI() {
+		JInternalFrame adaptationManagerFrame = new JInternalFrame("Adaptation Managers");
+		adaptationManagerFrame.setMaximizable(true);
+		adaptationManagerFrame.setIconifiable(true);
+		adaptationManagerFrame.setBounds(420, 0, 420, 250);
+		m_desktopPane.add(adaptationManagerFrame);
+		adaptationManagerFrame.getContentPane().setLayout(new BorderLayout(0, 0));
+		m_internalFrames.put(RainbowComponentT.ADAPTATION_MANAGER, adaptationManagerFrame);
+		adaptationManagerFrame.setVisible(true);
+
+		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane.setBackground(Color.WHITE);
+		tabbedPane.setBorder(new LineBorder(ADAPTION_MANAGER_COLOR, 2));
+		adaptationManagerFrame.getContentPane().add(tabbedPane);
+		m_tabs.put(RainbowComponentT.ADAPTATION_MANAGER, tabbedPane);
+
+		JTextArea adaptationMgrTextArea = createTextAreaInTab(tabbedPane, "All");
+		m_allTabs.put(RainbowComponentT.ADAPTATION_MANAGER, adaptationMgrTextArea);
+	}
+
+	protected void createMasterUI(List<String> expectedDelegateLocations) {
+		m_masterFrame = new JInternalFrame("Rainbow Master");
+		m_masterFrame.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		m_masterFrame.setMaximizable(true);
+		m_masterFrame.setIconifiable(true);
+		m_masterFrame.setBounds(0, 0, 420, 250);
+		m_desktopPane.add(m_masterFrame);
+		m_oracleMessagePane = new OracleStatusPanel(Color.white, expectedDelegateLocations);
+		m_masterFrame.getContentPane().add(m_oracleMessagePane, BorderLayout.CENTER);
+		m_internalFrames.put(RainbowComponentT.MASTER, m_masterFrame);
+		m_masterFrame.setVisible(true);
+	}
+
+	protected void createMenuBar() {
+		m_menuBar = new JMenuBar();
+		m_menuBar.setOpaque(true);
+		m_menuBar.setBackground(Color.LIGHT_GRAY);
 
 		JMenu menu = new JMenu("Rainbow");
 		menu.setMnemonic(KeyEvent.VK_R);
 		createRainbowMenu(menu);
-		menuBar.add(menu);
+		m_menuBar.add(menu);
 
 		menu = new JMenu("Delegates");
 		menu.setMnemonic(KeyEvent.VK_D);
 		createDelegateMenu(menu);
-		menuBar.add(menu);
+		m_menuBar.add(menu);
 
 		menu = new JMenu("Info");
 		menu.setMnemonic(KeyEvent.VK_I);
 		createInformationMenu(menu);
-		menuBar.add(menu);
+		m_menuBar.add(menu);
 
 		menu = new JMenu("Help");
 		menu.setMnemonic(KeyEvent.VK_H);
 		createHelpMenu(menu);
-		menuBar.add(menu);
+		m_menuBar.add(menu);
 
-		m_frame.setJMenuBar(menuBar);
+		m_frame.setJMenuBar(m_menuBar);
 	}
 
 	protected void quit() {
 		Rainbow.instance().signalTerminate();
 	}
 
-	private JTextArea createTextAreaInTab(JTabbedPane tabbedPane, String title) {
+	protected JTextArea createTextAreaInTab(JTabbedPane tabbedPane, String title) {
 		JTextArea ta = new JTextArea();
 		ta.setFont(ta.getFont().deriveFont(TEXT_FONT_SIZE));
 		ta.setEditable(false);
@@ -352,12 +449,12 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	protected void show() {
 		if (m_frame == null) {
 			initialize();
-			initializeTabs();
+			populateUI();
 		}
 		m_frame.setVisible(true);
 	}
 
-	private void initializeTabs() {
+	protected void populateUI() {
 		ModelsManager modelsManager = Rainbow.instance().getRainbowMaster().modelsManager();
 		Collection<? extends String> types = modelsManager.getRegisteredModelTypes();
 		for (String t : types) {
@@ -382,31 +479,28 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 			}
 		}
 		
-		ProbeDescription probes = Rainbow.instance().getRainbowMaster().probeDesc();
-		for (ProbeAttributes p : probes.probes) {
-			String probeId = p.alias + "@" + p.getLocation();
-			if (m_probeSections.get(probeId) == null) {
-				addProbePanel(probeId);
-			}
-		}
-		
 		try {
-			RainbowPortFactory.createProbeReportingPortSubscriber(new IProbeReportPort() {
-				
+			m_createProbeReportingPortSubscriber = RainbowPortFactory.createProbeReportingPortSubscriber(new IProbeReportPort() {
+
 				@Override
 				public void dispose() {
-					
+
 				}
-				
+
 				@Override
 				public void reportData(IProbeIdentifier probe, String data) {
-					JTextArea ta = m_probeSections.get(probe.id());
+					String pid = probe.type() + "@" + probe.location();
+					JTextArea ta = m_probeSections.get(pid);
+					if (ta == null) ta = m_probeSections.get(shortName(pid));
 					if (ta != null) {
 						ta.append(data);
+						ta.append("\n");
 						ta.setCaretPosition(ta.getText().length());
 						if (ta.getText().length() > MAX_TEXT_LENGTH) {
 							ta.setText(ta.getText().substring(TEXT_HALF_LENGTH));
 						}
+						TabColorChanger tcc= new TabColorChanger(m_tabs.get(RainbowComponentT.PROBE), ta.getParent().getParent(), SYSTEM_COLOR_LIGHT);
+						tcc.run();
 					}
 				}
 			});
@@ -414,13 +508,160 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
+		ProbeDescription probes = Rainbow.instance().getRainbowMaster().probeDesc();
+		for (ProbeAttributes p : probes.probes) {
+			String probeId = p.alias + "@" + p.getLocation();
+			if (m_probeSections.get(probeId) == null) {
+				addProbePanel(probeId);
+				m_createProbeReportingPortSubscriber.subscribeToProbe(p.alias, p.getLocation());
+			}
+		}
+
+		try {
+			m_createClientSideEffectorLifecyclePort = RainbowPortFactory.createClientSideEffectorLifecyclePort(new IEffectorLifecycleBusPort() {
+				
+				Color m_c;
+				@Override
+				public void dispose() {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void reportExecuted(IEffectorIdentifier effector, Outcome outcome, List<String> args) {
+					String eid = effector.id();
+					JTextArea ta = m_effectorSections.get(eid);
+					if (ta == null) ta = m_effectorSections.get(shortName(eid));
+					if (ta != null) {
+						ta.append(effector.id().split("@")[0] + args.toString() + " -> " + outcome.name() + "\n");
+						ta.setCaretPosition(ta.getText().length());
+						if (ta.getText().length() > MAX_TEXT_LENGTH) {
+							ta.setText(ta.getText().substring(TEXT_HALF_LENGTH));
+						}
+						final JTextArea taa = ta;
+						SwingUtilities.invokeLater(() -> {
+							
+							int index = m_tabs.get(RainbowComponentT.EFFECTOR).indexOfComponent(taa.getParent().getParent());
+							synchronized (m_tabs.get(RainbowComponentT.EFFECTOR)) {
+								
+									m_tabs.get(RainbowComponentT.EFFECTOR).setBackgroundAt(index, m_c);
+							}
+						});
+					}
+				}
+				
+				@Override
+				public void reportDeleted(IEffectorIdentifier effector) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void reportCreated(IEffectorIdentifier effector) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void reportExecuting(IEffectorIdentifier effector, List<String> args) {
+					String eid = effector.id();
+					JTextArea ta = m_effectorSections.get(eid);
+					if (ta == null) ta = m_effectorSections.get(shortName(eid));
+					if (ta != null) {
+						ta.append(effector.id().split("@")[0] + args.toString() + " -> running\n");
+						ta.setCaretPosition(ta.getText().length());
+						if (ta.getText().length() > MAX_TEXT_LENGTH) {
+							ta.setText(ta.getText().substring(TEXT_HALF_LENGTH));
+						}
+						final JTextArea taa = ta;
+						SwingUtilities.invokeLater(() -> {
+							
+							int index = m_tabs.get(RainbowComponentT.EFFECTOR).indexOfComponent(taa.getParent().getParent());
+							synchronized (m_tabs.get(RainbowComponentT.EFFECTOR)) {
+								Color c = m_tabs.get(RainbowComponentT.EFFECTOR).getBackgroundAt(index);
+								if (c != SYSTEM_COLOR_LIGHT) {
+									m_c = m_tabs.get(RainbowComponentT.EFFECTOR).getBackgroundAt(index);
+									m_tabs.get(RainbowComponentT.EFFECTOR).setBackgroundAt(index, SYSTEM_COLOR_LIGHT);
+								}
+							}
+						});
+						
+					}
+				}
+			});
+		} catch (RainbowConnectionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		EffectorDescription effectorDesc = Rainbow.instance().getRainbowMaster().effectorDesc();
+		for (EffectorAttributes ea : effectorDesc.effectors) {
+			String effectorId = ea.name + "@" + ea.getLocation();
+			if (m_effectorSections.get(effectorId) == null) {
+				addEffectorPanel(effectorId);
+			}
+		}
+		
 	}
 
 	private void addGaugePanel(String gaugeID) {
-		GaugePanel gp = new GaugePanel(gaugeID);
+		final GaugePanel gp = new GaugePanel(gaugeID);
+		gp.createContent();
 		JTabbedPane tp = m_tabs.get(RainbowComponentT.GAUGE);
-		tp.add(gaugeID, gp);
+		if (tp.getTabCount() >= 10)
+			tp.addTab(shortName(gaugeID), gp);
+		else
+			tp.add(gaugeID, gp);
+		tp.setToolTipTextAt(tp.getTabCount() - 1, gaugeID);
 		m_gaugeSections.put(gaugeID, gp);
+
+		normalizeLabels(tp);
+
+		gp.addUpdateListener(new TabColorChanger(tp,gp,GAUGES_COLOR_LIGHT));
+	}
+	
+	private static class TabColorChanger implements Runnable {
+
+		private JTabbedPane m_pane;
+		private Component m_panel;
+		private Color m_color;
+
+		public TabColorChanger(JTabbedPane pane, Component container, Color color) {
+			m_pane = pane;
+			m_panel = container;
+			m_color = color;
+		}
+
+		@Override
+		public void run() {
+			int index = m_pane.indexOfComponent(m_panel);
+			synchronized (m_panel) {
+				final Color c = m_pane.getBackgroundAt(index);
+				if (c != m_color) {
+					m_pane.setBackgroundAt(index, m_color);
+					final java.util.Timer t = new Timer();
+					t.schedule(new TimerTask() {
+
+						@Override
+						public void run() {
+							SwingUtilities.invokeLater(new Runnable() {
+
+								@Override
+								public void run() {
+									m_pane.setBackgroundAt(index, c);
+								}
+							});
+						}
+					}, 1000);
+				}
+			}
+		}
+		
+	}
+
+	protected String shortName(String gaugeID) {
+		return gaugeID.split("@")[0].split(":")[0];
 	}
 
 	private void addModelPanel(String modelName, String modelType) throws RainbowConnectionException {
@@ -428,23 +669,63 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		JTabbedPane tp = m_tabs.get(RainbowComponentT.MODEL);
 		tp.add(modelName, mp);
 		m_modelSections.put(modelName, mp);
+		mp.addUpdateListener(new TabColorChanger(tp,mp,MODELS_MANAGER_COLOR_LIGHT));
+
 	}
-	
+
 	private void addProbePanel(String probeId) {
-		JTextArea p = new JTextArea ();
+		JTextArea p = new JTextArea();
 		JScrollPane s = new JScrollPane();
 		s.setViewportView(p);
 		s.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		s.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		JTabbedPane tp = m_tabs.get(RainbowComponentT.PROBE);
-		tp.add(probeId, p);
+		if (tp.getTabCount() >= 10)
+			tp.addTab(shortName(probeId), s);
+		else
+			tp.add(probeId, s);
+		tp.setToolTipTextAt(tp.getTabCount() - 1, probeId);
 		m_probeSections.put(probeId, p);
+
+		normalizeLabels(tp);
+		
 
 	}
 
+	private void normalizeLabels(JTabbedPane tp) {
+		if (tp.getTabCount() == 10) {
+//			tp.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+			int count = tp.getTabCount();
+			for (int i = 0; i < count; i++) {
+				String label = tp.getTitleAt(i);
+				tp.setTitleAt(i, shortName(label));
+				tp.setToolTipTextAt(i, label);
+			}
+		}
+	}
+
+	private void addEffectorPanel(String effectorId) {
+		JTextArea e = new JTextArea();
+		JScrollPane s = new JScrollPane();
+		s.setViewportView(e);
+		s.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		s.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		JTabbedPane tp = m_tabs.get(RainbowComponentT.EFFECTOR);
+		if (tp.getTabCount() >= 10) {
+			tp.addTab(shortName(effectorId), s);
+		}
+		else 
+			tp.addTab(effectorId, s);
+		tp.setToolTipTextAt(tp.getTabCount()-1, effectorId);
+		m_effectorSections.put(effectorId, e);
+		
+		normalizeLabels(tp);
+	}
 	@Override
 	public void setMaster(IMasterCommandPort master) {
+		boolean needsInit = m_master == null;
 		m_master = master;
+		if (needsInit) initialize();
 		try {
 			if (m_master == null) {
 				// RainbowPortFactory.createDelegateMasterConnectionPort (null);
@@ -463,8 +744,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	/**
 	 * Creates a series of Oracle-specific menu items.
 	 * 
-	 * @param menu
-	 *            the menu on which to create items.
+	 * @param menu the menu on which to create items.
 	 */
 	private void createRainbowMenu(JMenu menu) {
 		JMenuItem item;
@@ -475,7 +755,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				initializeTabs();
+				populateUI();
 			}
 		});
 		menu.add(item);
@@ -543,7 +823,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		});
 		item.setEnabled(false);
 		menu.add(item);
-		
+
 		item = new JMenuItem("Monitor Rainbow Threads");
 		item.setMnemonic(KeyEvent.VK_M);
 		item.setToolTipText("Opens a window for monitoring threads in Rainbow");
@@ -553,7 +833,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 			}
 		});
 		menu.add(item);
-		
+
 		item = new JMenuItem("Restart Master+Delegate");
 		item.setMnemonic(KeyEvent.VK_R);
 		item.setToolTipText("Signals Master and all Delegates to terminate, then restart");
@@ -595,7 +875,8 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		RainbowMonitor adaptationManagerFrame = new RainbowMonitor();
 		adaptationManagerFrame.setMaximizable(true);
 		adaptationManagerFrame.setIconifiable(true);
-		desktopPane.add(adaptationManagerFrame);		
+		m_desktopPane.add(adaptationManagerFrame);
+		adaptationManagerFrame.toFront();
 	}
 
 	protected void forceQuit() {
@@ -627,8 +908,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	/**
 	 * Creates a series of Delegate-specific menu items.
 	 * 
-	 * @param menu
-	 *            the menu on which to create items.
+	 * @param menu the menu on which to create items.
 	 */
 	private void createDelegateMenu(JMenu menu) {
 		JMenuItem item;
@@ -715,7 +995,8 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 			public void actionPerformed(ActionEvent e) {
 				String operationName = JOptionPane.showInputDialog(m_frame, "Please identify the Operation to test:");
 				if (operationName == null || operationName.isEmpty()) {
-					writeText(RainbowComponentT.MASTER, "Sorry, Rainbow Master needs to know what operation to invoke.");
+					writeText(RainbowComponentT.MASTER,
+							"Sorry, Rainbow Master needs to know what operation to invoke.");
 				}
 
 				String argStr = JOptionPane.showInputDialog(m_frame,
@@ -861,8 +1142,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	/**
 	 * Creates the help menu items.
 	 * 
-	 * @param menu
-	 *            the menu on which to create items.
+	 * @param menu the menu on which to create items.
 	 */
 	private void createHelpMenu(JMenu menu) {
 		JMenuItem item;
@@ -1061,19 +1341,18 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 			component = RainbowComponentT.MASTER;
 		if (component == RainbowComponentT.GAUGE_MANAGER)
 			component = RainbowComponentT.GAUGE;
-		
+
 		if (component == RainbowComponentT.GAUGE) {
 			for (GaugePanel gp : m_gaugeSections.values()) {
 				gp.processReport(type, message);
 			}
-			
-		}
-		else if (component == RainbowComponentT.MODEL) {
+
+		} else if (component == RainbowComponentT.MODEL) {
 			for (ModelPanel mp : m_modelSections.values()) {
 				mp.processReport(type, message);
 			}
 		}
-		
+
 		writeText(component, msg);
 	}
 

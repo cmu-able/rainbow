@@ -1,0 +1,102 @@
+dtmc
+// Init must include 
+// const double AddServer_LATENCY 
+// const int HORIZON
+// const double PERIOD
+// const int DIMMER_LEVELS
+// const double DIMMER_MARGIN
+// const int MAX_SERVERS
+// const double RT_THRESHOLD
+// const int ini_servers
+// const int ini_dimmer
+// const double serviceTimeMean
+// const double serviceTimeVariance
+// const double lowServiceTimeMean
+// const double lowServiceTimeVariance
+// const int threads
+///
+const int AddServer_state = 0;
+//#init
+label "initState" = servers = ini_servers & dimmer = ini_dimmer;
+
+label "final" = time = HORIZON & readyToTick;
+formula sys_go = readyToTick;
+formula strategyDone = leaf;
+
+// NLA clock: makes strategy complete before advancing in the horizon
+// and computing utility
+module clk
+	time : [0..HORIZON] init 0;
+	readyToTick : bool init true;
+	[ticknla] !strategyDone & readyToTick & time < HORIZON -> 1 : (readyToTick'=false);
+	[tick] strategyDone & readyToTick & time < HORIZON -> 1 : (time' = time + 1) & (readyToTick'=false);
+	[tack] !readyToTick -> 1 : (readyToTick'=true);
+endmodule
+
+module env
+//#environment
+
+// system
+module sys
+	servers : [1..MAX_SERVERS] init ini_servers;
+	dimmer : [1..DIMMER_LEVELS] init ini_dimmer;
+	
+	[AddServer_complete] servers < MAX_SERVERS -> 1 : (servers' = servers + 1);
+	[RemoveServer_start] servers > 1 -> 1 : (servers' = servers - 1);
+	[IncDimmer_start] dimmer < DIMMER_LEVELS -> 1 : (dimmer' = dimmer + 1);
+	[DecDimmer_start] dimmer > 1 -> 1 : (dimmer' = dimmer - 1);
+	[MaxDimmer_start] true -> 1 : (dimmer' = DIMMER_LEVELS);
+	[MinDimmer_start] true -> 1 : (dimmer' = 1);
+endmodule
+
+
+// continuous equivalent for the dimmer level
+formula dimmerFactor = DIMMER_MARGIN + (1 - 2 * DIMMER_MARGIN) * (dimmer - 1) / (DIMMER_LEVELS - 1);
+
+//*****************************************************************
+// Queuing model G/G/c LPS with round-robin allocation to servers
+//*****************************************************************
+formula arrivalRate = stateValue;
+
+// TODO for now assume arrivals have exponential distribution,
+// otherwise we need to introduce variance into the probability tree
+formula arrivalRateVariance = pow(arrivalRate, 2);
+
+formula lambda = arrivalRate / servers;
+formula beta = dimmerFactor * serviceTimeMean + (1-dimmerFactor) * lowServiceTimeMean;
+formula rho = lambda * beta;
+formula overloaded = (rho >= 1);
+formula ca2 = pow(arrivalRate, 2) / (arrivalRateVariance * servers);
+formula cs2 = (dimmerFactor * serviceTimeVariance + (1-dimmerFactor) * lowServiceTimeVariance) / pow(beta, 2);
+formula dp = pow(rho, threads * (1+cs2)/(ca2 + cs2));
+formula rb = ((ca2 + cs2) / 2) * dp * beta / (1 - rho);
+formula rz = ((ca2 + cs2) / (1 + cs2)) * (1 - dp) * beta / (1 - rho);
+formula totalTime = rb + rz;
+formula rt = (arrivalRate=0 ? 0 : totalTime);
+
+// Response time to clients utility function
+const double SERVER_COST_SEC = 1;
+const double MAX_ARRIVAL_CAPACITY = 1/0.04452713;
+const double MAX_ARRIVAL_CAPACITY_LOW = 1/0.002430258;
+
+const double NORMAL_REVENUE = 1.5;
+const double LOW_REVENUE = 1;
+formula poweredServers = (AddServer_state > 0 ? servers + 1 : servers);
+formula cost = poweredServers;
+formula spacing = MAX_SERVERS + 1;
+formula maxThroughput = MAX_SERVERS * MAX_ARRIVAL_CAPACITY;
+formula latePenalty = maxThroughput * NORMAL_REVENUE * spacing;
+
+formula throughput = arrivalRate;
+
+formula positiveUtilityTemp = throughput * (dimmerFactor * NORMAL_REVENUE + (1-dimmerFactor) * LOW_REVENUE);
+formula positiveUtility = ((positiveUtilityTemp - floor(positiveUtilityTemp) >= 0.5) ? ceil(positiveUtilityTemp) : floor(positiveUtilityTemp)) * spacing;
+
+formula uTotal = (overloaded) ? (-latePenalty - 2 * spacing + poweredServers + (1-dimmerFactor))
+					: (((rt>RT_THRESHOLD) ? min(0, throughput * NORMAL_REVENUE * spacing - latePenalty) : positiveUtility) - cost);
+
+rewards "util"
+	!readyToTick & strategyDone: (1000000.0 / HORIZON) + (PERIOD)*(uTotal);
+endrewards
+
+

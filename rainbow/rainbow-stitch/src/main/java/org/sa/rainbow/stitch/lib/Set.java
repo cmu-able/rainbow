@@ -119,5 +119,9 @@ public abstract class Set {
         Collections.shuffle(itemList);
         return new HashSet<E>(itemList.subList(0, count));
     }
+    
+    public static <E> boolean contains(java.util.Set<E> set, E element) {
+    	return set.contains(element);
+    }
 
 }

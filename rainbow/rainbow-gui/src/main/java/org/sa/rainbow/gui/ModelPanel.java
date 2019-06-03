@@ -3,6 +3,7 @@ package org.sa.rainbow.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -51,6 +52,7 @@ public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelC
 	private JTable m_table;
 	private IModelChangeBusSubscriberPort m_modelChangePort;
 	private ModelReference m_ref;
+	private ArrayList<Runnable> m_updaters = new ArrayList<> (1);
 
 	/**
 	 * Create the panel.
@@ -95,6 +97,9 @@ public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelC
 		if (!command.getModelReference().equals(m_ref))
 			return;
 		addOperation(command, false);
+		for (Runnable r : m_updaters) {
+			r.run();
+		}
 	}
 
 	private String[] getTableData(IRainbowOperation command, boolean inerror) {
@@ -198,6 +203,9 @@ public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelC
 			return;
 		IRainbowOperation op = msgToOperation(message);
 		addOperation(op, false);
+		for (Runnable runnable : m_updaters) {
+			runnable.run();
+		}
 	}
 
 	void addOperation(IRainbowOperation op, boolean error) {
@@ -213,8 +221,8 @@ public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelC
 	public static OperationRepresentation pullOutOfString(String msg) {
 		Matcher m = strPattern.matcher(msg);
 		if (m.find()) {
-			OperationRepresentation rep = new OperationRepresentation(m.group(4),
-					new ModelReference(m.group(1), m.group(2)), m.group(3),
+			OperationRepresentation rep = new OperationRepresentation(m.group(3),
+					new ModelReference(m.group(1), m.group(2)), m.group(4),
 					m.group(5).replaceAll("\\[", "").replaceAll("\\]", "").split(","));
 			rep.setOrigin(m.group(6));
 			return rep;
@@ -233,6 +241,10 @@ public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelC
 			} catch (Throwable t) {
 			}
 		 }
+	}
+
+	public void addUpdateListener(Runnable listener) {
+		m_updaters.add(listener);
 	}
 
 }

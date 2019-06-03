@@ -133,7 +133,7 @@ public abstract class AbstractGaugeWithProbes extends AbstractGauge {
     @Override
     public void dispose () {
         super.dispose ();
-        m_probeReportingPort.dispose ();
+        if (m_probeReportingPort !=null) m_probeReportingPort.dispose ();
         m_probeReportingPort = null;
     }
 

@@ -121,6 +121,11 @@ public class TacticExecutor extends AbstractRainbowRunnable implements IAdaptati
         m_executionThreadGroup = new ThreadGroup (m_modelRef.toString () + " ThreadGroup");
 
     }
+    
+    @Override
+    public ModelReference getManagedModel() {
+    	return m_modelRef;
+    }
 
     @Override
     public IModelDSBusPublisherPort getOperationPublishingPort () {

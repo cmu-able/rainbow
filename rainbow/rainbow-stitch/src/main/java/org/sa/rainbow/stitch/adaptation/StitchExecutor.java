@@ -42,6 +42,7 @@ import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.history.ExecutionHistoryModelInstance;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData;
 
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -96,6 +97,11 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
         }
         m_executionThreadGroup = new ThreadGroup (m_modelRef.toString () + " ThreadGroup");
     }
+    
+    @Override
+    public ModelReference getManagedModel() {
+    	return m_modelRef;
+    }
 
     /* (non-Javadoc)
      * @see org.sa.rainbow.core.IDisposable#dispose()
@@ -130,6 +136,7 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
             // use a StitchExecutionVisitor to visit this adaptation
             AdaptationTree<Strategy> at = m_adapationDQPort.dequeue ();
             log ("Dequeued an adaptation");
+            log(MessageFormat.format("[[{0}]]: Executing an adaptation", id()));
 //            final AtomicInteger numLL = new AtomicInteger (0);
 //            // Count the number of parallel threads in the tree so that we can wait until they are finished
 //            at.visit (new IAdaptationVisitor<Strategy> () {

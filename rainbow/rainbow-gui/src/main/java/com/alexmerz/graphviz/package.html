@@ -1,0 +1,26 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=Cp1252"/>
+<title></title>
+</head>
+<body>
+<p>
+This package contains the Tokenizer 
+and Parser classes to create a datastructure 
+from an Reader containing a Graphviz document.
+<br>The typical usage:
+</p>
+
+<pre>
+File f = new File( "file.viz" );
+FileReader in = new FileReader(f);
+Parser p = new Parser();            
+p.parse(in);
+ArrayList&lt;Graph&gt; graphlist = p.getGraphs();
+</pre>
+
+<p>
+<i>graphlist</i> contains a list of com.alexmerz.graphviz.Graph objects.
+Instead of a Reader object, you can also provide a StringBuffer</p>
+</body>
+</html>

@@ -1,5 +1,6 @@
 package org.sa.rainbow.core.adaptation;
 
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 
 import java.util.Collection;
@@ -23,7 +24,7 @@ public abstract class DefaultAdaptationTreeWalker<S extends IEvaluable> implemen
     }
 
     @Override
-    public boolean visitSequence (AdaptationTree<S> tree) {
+    public boolean visitSequence (AdaptationTree<S> tree) throws RainbowException {
         Collection<AdaptationTree<S>> subTrees = tree.getSubTrees ();
         for (AdaptationTree<S> adt : subTrees) {
             adt.visit (this);
@@ -32,17 +33,17 @@ public abstract class DefaultAdaptationTreeWalker<S extends IEvaluable> implemen
     }
 
     @Override
-    public boolean visitSequenceStopSuccess (AdaptationTree<S> tree) {
+    public boolean visitSequenceStopSuccess (AdaptationTree<S> tree) throws RainbowException {
         return visitSequence (tree);
     }
 
     @Override
-    public boolean visitSequenceStopFailure (AdaptationTree<S> tree) {
+    public boolean visitSequenceStopFailure (AdaptationTree<S> tree) throws RainbowException {
         return visitSequence (tree);
     }
 
     @Override
-    public boolean visitParallel (AdaptationTree<S> tree) {
+    public boolean visitParallel (AdaptationTree<S> tree) throws RainbowException {
        return visitSequence (tree);
     }
 

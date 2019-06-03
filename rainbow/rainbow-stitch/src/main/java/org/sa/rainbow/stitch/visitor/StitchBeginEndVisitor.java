@@ -141,11 +141,12 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
         if (ctx.expression () != null) {
             hasExpr = true;
             beh.setupPathFilter (ctx.IDENTIFIER ());
-            visitExpression (ctx.expression ());
+//            beh
         }
         if (filter != IStitchBehavior.TypeFilterT.NONE || hasExpr) {
             beh.pathExpressionFilter (filter, ctx.IDENTIFIER (), ctx.expression ());
         }
+        if (hasExpr) visitExpression (ctx.expression ());
         if (ctx.pathExpressionContinuation () != null) {
             visitPathExpressionContinuation (ctx.pathExpressionContinuation ());
         }
@@ -166,9 +167,10 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
             beh.setupPathFilter (filter != IStitchBehavior.TypeFilterT.NONE ? ctx.IDENTIFIER (0) : null);
             visitExpression (ctx.expression ());
         }
-        if (filter != IStitchBehavior.TypeFilterT.NONE || hasExpr) {
-            beh.continueExpressionFilter (filter, ctx.IDENTIFIER (0), ctx.IDENTIFIER (1), ctx.expression ());
-        }
+//        if (filter != IStitchBehavior.TypeFilterT.NONE || hasExpr) {
+            boolean resultisSet = ctx.ELLIPSIS() == null;
+			beh.continueExpressionFilter (filter, ctx.IDENTIFIER (0), ctx.IDENTIFIER (1), ctx.expression (), ctx.pathExpressionContinuation () != null, resultisSet);
+//        }
         if (ctx.pathExpressionContinuation () != null) {
             visitPathExpressionContinuation (ctx.pathExpressionContinuation ());
         }
@@ -707,15 +709,15 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
 
     @Override
     public Boolean visitIdExpression (@NotNull StitchParser.IdExpressionContext ctx) {
-//        IScope preScope = beh.stitch().scope ();
+        IScope preScope = beh.stitch().scope ();
         if (ctx.methodCall () != null) {
             visitMethodCall (ctx.methodCall ());
         } else {
             beh.doIdentifierExpression (ctx, getIdExpressionKind (ctx));
         }
-//        if (preScope != beh.stitch().scope ()) {
-//            System.out.println ("visitIdExpression: Scopes don't match: " + this.toString ());
-//        }
+        if (preScope != beh.stitch().scope ()) {
+            System.out.println ("visitIdExpression: Scopes don't match: " + this.toString ());
+        }
         return true;
     }
 

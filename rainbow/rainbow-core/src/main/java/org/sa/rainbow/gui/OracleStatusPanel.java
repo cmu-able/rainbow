@@ -60,7 +60,7 @@ public class OracleStatusPanel extends JPanel {
         m_statusPane.setAlignmentX (Component.LEFT_ALIGNMENT);
         add (m_statusPane, BorderLayout.PAGE_START);
 
-        JLabel lblNewLabel = new JLabel ("Status:");
+        JLabel lblNewLabel = new JLabel ("Delegate Status:");
         m_statusPane.add (lblNewLabel);
 
         m_textArea = new JTextArea (RainbowGUI.TEXT_ROWS, RainbowGUI.TEXT_COLUMNS);
@@ -126,5 +126,13 @@ public class OracleStatusPanel extends JPanel {
         }
         label.setVisible (true);
         return label;
+    }
+    
+    public JPanel getStatusPane() {
+    	return m_statusPane;
+    }
+    
+    public JTextArea getTextArea() {
+    	return m_textArea;
     }
 }

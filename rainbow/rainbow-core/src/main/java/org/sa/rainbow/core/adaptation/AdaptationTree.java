@@ -4,6 +4,8 @@ package org.sa.rainbow.core.adaptation;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.sa.rainbow.core.error.RainbowException;
+
 /**
  * Implements an adaptation tree that specifies how to execute adaptations. Leaf nodes of the tree have evaluable
  * adaptations stored as data, and no children. Subtrees may be added as children, and the execution of these trees
@@ -106,8 +108,9 @@ public class AdaptationTree<T extends IEvaluable> {
      * @param visitor
      *            the visitor to visit the tree
      * @return
+     * @throws RainbowException 
      */
-    public boolean visit (IAdaptationVisitor<T> visitor) {
+    public boolean visit (IAdaptationVisitor<T> visitor) throws RainbowException {
         switch (operator) {
         case LEAF:
             return visitor.visitLeaf (this);

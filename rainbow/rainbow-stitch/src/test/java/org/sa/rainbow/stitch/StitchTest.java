@@ -1,5 +1,6 @@
 package org.sa.rainbow.stitch;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -7,8 +8,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
+import org.acmestudio.acme.core.exception.AcmeException;
+import org.acmestudio.acme.element.IAcmeComponent;
+import org.acmestudio.acme.element.IAcmeSystem;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
@@ -21,8 +28,6 @@ import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.misc.Nullable;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.xpath.XPath;
-import org.opentest4j.AssertionFailedError;
-import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.stitch.core.ScopedEntity;
 import org.sa.rainbow.stitch.error.DummyStitchProblemHandler;
 import org.sa.rainbow.stitch.error.IStitchProblem;
@@ -35,11 +40,10 @@ import org.sa.rainbow.stitch.visitor.IStitchBehavior;
 import org.sa.rainbow.stitch.visitor.Stitch;
 import org.sa.rainbow.stitch.visitor.StitchBeginEndVisitor;
 
+import junit.framework.AssertionFailedError;
 
-public class StitchTest  {
+public class StitchTest {
 
-	
-	
 	public static class ProblemStorer {
 		List<StitchProblem> problems = new ArrayList<>();
 	}
@@ -50,8 +54,7 @@ public class StitchTest  {
 		public void setProblem(IStitchProblem problem) {
 			if (problem.getSeverity() == IStitchProblem.WARNING) {
 				System.out.println(problem.getMessage());
-			}
-			else {
+			} else {
 				throw new AssertionFailedError(problem.getMessage());
 			}
 		}
@@ -65,12 +68,13 @@ public class StitchTest  {
 					notWarning = true;
 				}
 			}
-			if (notWarning) throw new AssertionFailedError("Mulltiple problems reported");
+			if (notWarning)
+				throw new AssertionFailedError("Mulltiple problems reported");
 		}
 
 		@Override
 		public Collection<IStitchProblem> unreportedProblems() {
-			return null;
+			return Collections.<IStitchProblem>emptyList();
 		}
 
 		@Override
@@ -78,17 +82,23 @@ public class StitchTest  {
 			// TODO Auto-generated method stub
 			return null;
 		}
-		
+
+		@Override
+		public void clearProblems() {
+			// TODO Auto-generated method stub
+
+		}
+
 	}
-	
+
 	protected static String s_executed;
 
-	protected Stitch loadScript(String pathname) throws IOException, FileNotFoundException {
-		File f = new File (pathname);
-	    ScopedEntity rootScope = new ScopedEntity (null, "Ohana2 Stitch Root Scope", Stitch.NULL_STITCH);
-	
-		DummyStitchProblemHandler stitchProblemHandler = new DummyStitchProblemHandler ();
-	    Stitch stitch = Stitch.newInstance (f.getCanonicalPath (), stitchProblemHandler);
+	protected Stitch loadScript(String pathname, boolean buildScope, boolean typecheck) throws IOException, FileNotFoundException {
+		File f = new File(pathname);
+		ScopedEntity rootScope = new ScopedEntity(null, "Ohana2 Stitch Root Scope", Stitch.NULL_STITCH);
+
+		DummyStitchProblemHandler stitchProblemHandler = new DummyStitchProblemHandler();
+		Stitch stitch = Stitch.newInstance(f.getCanonicalPath(), stitchProblemHandler);
 		FileInputStream is = new FileInputStream(f);
 		StitchLexer lexer = new StitchLexer(new ANTLRInputStream(is));
 		lexer.setTokenFactory(new CommonTokenFactory());
@@ -108,20 +118,72 @@ public class StitchTest  {
 		lexer.addErrorListener(errReporter);
 		parser.addErrorListener(errReporter);
 		ScriptContext script = parser.script();
-		assertTrue(problems.problems.isEmpty(), "Could not parse the script");
+		for (StitchProblem err : problems.problems) {
+			System.out.println(err.getMessage());
+		}
+		assertTrue("Could not parse the script", problems.problems.isEmpty());
+		
+		if (typecheck) {
+			IStitchBehavior sb = stitch.getBehavior(Stitch.SCOPER_PASS);
+			ScopedEntity tcscope = new ScopedEntity(null, "Ohana2 Stitch Root Scope", Stitch.NULL_STITCH);
+			sb.stitch().setScope(tcscope);
+			StitchBeginEndVisitor walker = new StitchBeginEndVisitor(sb, tcscope);
+			walker.visit(script);
+			IStitchBehavior tcb = stitch.getBehavior(Stitch.TYPECHECKER_PASS);
+			walker = new StitchBeginEndVisitor(tcb, tcscope);
+			walker.visit(script);
+		}
+		
+		
 		String tacticPath = "/script/tactic";
-		final Collection<ParseTree> definedTactics = XPath.findAll(script, tacticPath, parser);
-		IStitchBehavior sb = stitch.getBehavior(Stitch.SCOPER_PASS);
-		sb.stitch().setScope(rootScope);
-		StitchBeginEndVisitor walker = new StitchBeginEndVisitor(sb, rootScope);
-		walker.visit(script);
+		if (buildScope) {
+			final Collection<ParseTree> definedTactics = XPath.findAll(script, tacticPath, parser);
+			IStitchBehavior sb = stitch.getBehavior(Stitch.SCOPER_PASS);
+			sb.stitch().setScope(rootScope);
+			StitchBeginEndVisitor walker = new StitchBeginEndVisitor(sb, rootScope);
+			walker.visit(script);
+		}
 
 		stitch.stitchProblemHandler = new TestProblemHandler();
 		return stitch;
+	}
+
+	protected Stitch loadScript(String pathname) throws FileNotFoundException, IOException {
+		return loadScript(pathname, true, false);
 	}
 	
 	public static void markExecuted(String s) {
 		s_executed = s;
 	}
+
+	protected static IAcmeSystem s_system;
+
+	public static void removeComponent(IAcmeSystem system, String componentName) {
+		s_system = system;
+		IAcmeComponent component = system.getComponent(componentName);
+		assertTrue(component != null);
+		try {
+			system.getCommandFactory().componentDeleteCommand(component).execute();
+		} catch (IllegalStateException | AcmeException e) {
+			e.printStackTrace();
+		}
+		assertTrue(system.getComponent(componentName) == null);
+	}
 	
+	public static void delayedRemoveComponent(final IAcmeSystem system, final String componentName, int delay) {
+		Timer t = new Timer();
+		t.schedule(new TimerTask() {
+			
+			@Override
+			public void run() {
+				removeComponent(system,componentName);
+			}
+		}, delay);
+	}
+	
+	public static final int availableComponents(IAcmeSystem system) {
+		s_system = system;
+		return system.getComponents().size();
+	}
+
 }

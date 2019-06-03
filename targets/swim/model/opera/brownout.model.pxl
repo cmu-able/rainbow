@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE Model SYSTEM "Opera.dtd">
+<Model>
+	<Scenarios>
+		<Services>
+			<Service canMigrate="false" name="Browser" runsInContainer="Client"/>
+			<Service canMigrate="false" name="ProxyServer" runsInContainer="ProxyContainer"/>
+			<Service canMigrate="false" name="WebServer" runsInContainer="WebContainer"/>
+		</Services>
+
+		<Scenario name="normal" triggeredByService="Browser">
+			<Call bytesReceived="0" bytesSent="0" callee="ProxyServer" caller="Browser" invocations="1" type="s">
+				<Demand CPUDemand="0.0001" DiskDemand="0" />
+			</Call>
+			<Call bytesReceived="0" bytesSent="0" callee="WebServer" caller="ProxyServer" invocations="1" type="s">
+				<Demand CPUDemand="0.0183273" DiskDemand="0" />
+			</Call>
+		</Scenario>
+		<Scenario name="low" triggeredByService="Browser">
+			<Call bytesReceived="0" bytesSent="0" callee="ProxyServer" caller="Browser" invocations="1" type="s">
+				<Demand CPUDemand="0.0001" DiskDemand="0" />
+			</Call>
+			<Call bytesReceived="0" bytesSent="0" callee="WebServer" caller="ProxyServer" invocations="1" type="s">
+				<Demand CPUDemand="0.001084" DiskDemand="0" />
+			</Call>
+		</Scenario>
+	</Scenarios>
+
+	<Topology> 
+		<Node CPUParallelism="1" CPURatio="1" DiskParallelism="1" DiskRatio="1" name="ClientHost" type="client"/>
+		<Node CPUParallelism="1" CPURatio="1" DiskParallelism="1" DiskRatio="1" name="ProxyHost" type="delay"/>
+		<Node CPUParallelism="1" CPURatio="1" DiskParallelism="1" DiskRatio="1" name="WebHost" type="server"/>
+
+		<Cluster name="ClientCluster">
+			<Container canMigrate="false" name="Client" parallelism="1000" runsOnNode="ClientHost" server="false"/>
+		</Cluster>
+		<Cluster name="ProxyCluster">
+			<Container canMigrate="false" name="ProxyContainer" parallelism="10000" runsOnNode="ProxyHost" server="true"/>
+		</Cluster>
+		<Cluster name="WebCluster">
+			<Container canMigrate="false" name="WebContainer" parallelism="400" runsOnNode="WebHost" server="true"/>
+		</Cluster>
+
+		<Middlware fixedOverheadReceive="0" fixedOverheadSend="0" name="http" overheadPerByteReceived="0" overheadPerByteSent="0"/>
+		<Network connectsNodes="ClientHost ProxyHost" latency="0" name="Internet" overheadPerByte="0"/>
+		<Network connectsNodes="ProxyHost WebHost DataHost" latency="0" name="Intranet" overheadPerByte="0"/>
+	</Topology>
+
+	<Workloads kind="HL">
+		<Users>0</Users>
+		<WorkloadMixes openModel="true">
+			<Mix load="20" scenario="normal"/>
+			<Mix load="20" scenario="low"/>
+		</WorkloadMixes>
+	</Workloads>
+
+  <!-- these are required even for an open model, but seem to be ignored in that case -->
+  <ThinkTimes>
+    <ThinkTime scenario="normal" time="10"/>
+    <ThinkTime scenario="low" time="10"/>
+  </ThinkTimes>
+  
+  	<Requirements>
+		<ResponseTime maxResponseTime="100000" minResponseTime="100" scenario="normal"/>
+		<ResponseTime maxResponseTime="100000" minResponseTime="100" scenario="low"/>
+	</Requirements>
+
+</Model>

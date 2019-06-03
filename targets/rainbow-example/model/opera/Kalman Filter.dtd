@@ -1,0 +1,63 @@
+<!ELEMENT  Settings (Add+)>
+
+<!ELEMENT  Add EMPTY>
+<!ATTLIST  Add key   (modelFile|modelResultsFile|modelUpdate|traceFile|iterationsMax) #REQUIRED>
+<!ATTLIST  Add value CDATA #REQUIRED>
+<!--
+Settings:
+    modelFile
+            The pxl file that contains the model. It is mandatory that the estimator has a model
+            specified. If no file is given here, then a model must be added using the API.
+            Default: [null]
+    modelResultsFile
+            The file where the document with results will be stored. If this setting is missing,
+            then the results will not be written anywhere.
+            Default: [null]
+    modelUpdate
+            This setting is used to specify if the model object should be updated with the estimated
+            parameters. If the value is "false" then then, at the end of estimation, the model will
+            be in the same state as it was at the begining.
+            Default: true
+    traceFile
+            This setting is used to specify a file where the values for the metrics (measured and
+            estimated) and model parameters are to be recorded. The file will be organized as a
+            table, where a new row is added at each iteration. If no file is specified, then the
+            trace is disabled.
+            Default: [null]
+    iterationsMax
+            The maximum numbers of iterations the estimator will execute.
+            Default: 20;
+-->
+
+
+<!ELEMENT  MeasuredMetrics (MeasuredMetric+)>
+
+<!ELEMENT  MeasuredMetric EMPTY>
+<!ATTLIST  MeasuredMetric name CDATA #REQUIRED>
+<!ATTLIST  MeasuredMetric description CDATA "">
+<!ATTLIST  MeasuredMetric default CDATA #REQUIRED>
+<!ATTLIST  MeasuredMetric scale CDATA "1">
+
+
+<!ELEMENT  EstimatedMetrics (EstimatedMetric+)>
+
+<!ELEMENT  EstimatedMetric EMPTY>
+<!ATTLIST  EstimatedMetric name CDATA #REQUIRED>
+<!ATTLIST  EstimatedMetric description CDATA "">
+<!ATTLIST  EstimatedMetric scale CDATA "1">
+<!ATTLIST  EstimatedMetric default CDATA "1">
+<!ATTLIST  EstimatedMetric xPath CDATA #REQUIRED>
+
+
+<!ELEMENT  ModelParameters (ModelParameter+)>
+
+<!ELEMENT  ModelParameter EMPTY>
+<!ATTLIST  ModelParameter name CDATA #REQUIRED>
+<!ATTLIST  ModelParameter description CDATA "">
+<!ATTLIST  ModelParameter default CDATA "1">
+<!ATTLIST  ModelParameter scale CDATA "1">
+<!ATTLIST  ModelParameter xPath CDATA #REQUIRED>
+
+
+<!ELEMENT  Config (Settings?, MeasuredMetrics, EstimatedMetrics, ModelParameters)>
+

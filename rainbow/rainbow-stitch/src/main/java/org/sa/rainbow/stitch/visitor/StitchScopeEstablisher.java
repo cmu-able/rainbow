@@ -2,12 +2,17 @@ package org.sa.rainbow.stitch.visitor;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.acmestudio.acme.core.resource.IAcmeResource;
+import org.acmestudio.acme.core.resource.ParsingFailureException;
+import org.acmestudio.acme.element.IAcmeSystem;
+import org.acmestudio.standalone.resource.StandaloneResourceProvider;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -20,6 +25,7 @@ import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.models.ModelReference;
+import org.sa.rainbow.model.acme.AcmeModelCommandFactory;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.core.Expression;
@@ -29,6 +35,7 @@ import org.sa.rainbow.stitch.core.PostVar;
 import org.sa.rainbow.stitch.core.ScopedEntity;
 import org.sa.rainbow.stitch.core.Statement;
 import org.sa.rainbow.stitch.core.StitchScript;
+import org.sa.rainbow.stitch.core.StitchTypes;
 import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.core.Strategy.ActionKind;
 import org.sa.rainbow.stitch.core.Strategy.ConditionKind;
@@ -47,7 +54,29 @@ import org.sa.rainbow.util.Util;
  */
 public class StitchScopeEstablisher extends BaseStitchBehavior {
 
-    StitchBeginEndVisitor m_walker;
+    public final class StitchImportedDirectAcmeModelInstance extends AcmeModelInstance {
+		private StitchImportedDirectAcmeModelInstance(IAcmeSystem system, String source) {
+			super(system, source);
+		}
+
+		@Override
+		public AcmeModelCommandFactory getCommandFactory() {
+			return null;
+		}
+
+		@Override
+		protected AcmeModelInstance generateInstance(IAcmeSystem sys) {
+			try {
+				return this.getClass().getConstructor(IAcmeSystem.class).newInstance(sys);
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+	}
+
+	StitchBeginEndVisitor m_walker;
 
     public StitchScopeEstablisher (Stitch/*State*/ stitch) {
         super (stitch);
@@ -96,6 +125,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
         if (ctx.MODEL () != null) type = Import.Kind.MODEL;
         else if (ctx.LIB () != null) type = Import.Kind.LIB;
         else if (ctx.OP () != null) type = Import.Kind.OP;
+        else if (ctx.ACME () != null) type = Import.Kind.ACME;
         String target = path.getText ();
 
         Import imp = new Import ();
@@ -863,6 +893,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
                        + ", expr == " + curNode.get ().getDurationExpr ().tree ().toStringTree ());
     }
 
+    @Override
     public void doTacticDuration (ParserRuleContext ctx) {
         if (!(scope () instanceof Tactic)) {
             Tool.error ("Unexpectedly processing tactic duration outside of a tactic", null, stitchProblemHandler ());
@@ -872,7 +903,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
         Tactic tactic = (Tactic) scope ();
         tactic.setHasDuration (true);
         // retrieve the first expression from the current scoep
-        Expression expr = tactic.expressions ().get (0);
+        Expression expr = tactic.expressions ().get (tactic.expressions().size()-1);
         expr.setTree (ctx);
         tactic.setDurationExpr (expr);
         debug ("* Duration gathered: has it? " + tactic.hasDuration () + ", expr = " + tactic.getDurationExpr ().tree
@@ -1084,6 +1115,14 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
                                         + "' to import!", e, null, stitchProblemHandler ());
                     e.printStackTrace ();
                 }
+            } else if (imp.type == Import.Kind.ACME) {
+            	try {
+					IAcmeResource resource = StandaloneResourceProvider.instance().acmeResourceForString(imp.path);
+					AcmeModelInstance m = new StitchImportedDirectAcmeModelInstance(resource.getModel().getSystems().iterator().next(), imp.path);
+					m_stitch.script.models.add(m);
+				} catch (ParsingFailureException | IOException e) {
+					Tool.error("Could not import Acme from " + imp.path, null, stitchProblemHandler());
+				}
             } else if (imp.type == Import.Kind.MODEL) {
                 if (Rainbow.instance ().getRainbowMaster ().modelsManager () != null) {
                     ModelReference model = Util.decomposeModelReference (imp.path);

@@ -82,4 +82,9 @@ implements IESEBMasterCommandPortRemoteInterface {
     public boolean allDelegatesOK () {
         return m_delegate.allDelegatesOK ();
     }
+    
+    @Override
+    public boolean autoStartProbes() {
+    	return m_delegate.autoStartProbes();
+    }
 }

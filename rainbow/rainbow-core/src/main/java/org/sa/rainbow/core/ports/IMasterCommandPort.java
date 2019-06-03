@@ -47,6 +47,8 @@ public interface IMasterCommandPort {
     void destroyDelegates ();
 
     boolean allDelegatesOK ();
+    
+    boolean autoStartProbes();
 
     void killDelegate (String ipOfDelegate);
 

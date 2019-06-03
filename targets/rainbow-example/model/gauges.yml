@@ -1,0 +1,271 @@
+#
+# Gauge Type and Gauge Instance Specifications
+#  - time periods generally in milliseconds
+gauge-types:
+  LoadGaugeT:
+    commands:
+      load : ServerT.setLoad(double)
+    setupParams:
+      targetIP:
+        type:    String
+        default: "localhost"
+      beaconPeriod:
+        type:    long
+        default: 20000
+      javaClass:
+        type:    String
+        default: "org.sa.rainbow.translator.swim.gauges.SimpleGauge"
+    configParams:
+      samplingFrequency:
+        type:    long
+        default: 5000
+      targetProbeType:
+        type:    String
+        default: ~
+    comment: "LoadGaugeT measures and reports CPU load of the target host"
+
+  DimmerGaugeT:
+    commands:
+      dimmer : ServerT.setDimmer(double)
+    setupParams:
+      targetIP:
+        type:    String
+        default: "localhost"
+      beaconPeriod:
+        type:    long
+        default: 30000
+      javaClass:
+        type:    String
+        default: "org.sa.rainbow.translator.swim.gauges.SimpleGauge"
+    configParams:
+      samplingFrequency:
+        type:    long
+        default: 15000
+      targetProbeType:
+        type:    String
+        default: ~
+    comment: "DimmerGaugeT measures and reports the dimmer value of the system"
+
+  BasicResponseTimeT:
+    commands:
+      basicResponseTime : LoadBalancerT.setBasicResponseTime(double)
+    setupParams:
+      targetIP:
+        type:    String
+        default: "localhost"
+      beaconPeriod:
+        type:    long
+        default: 30000
+      javaClass:
+        type:    String
+        default: "org.sa.rainbow.translator.swim.gauges.SimpleGauge"
+    configParams:
+      samplingFrequency:
+        type:    long
+        default: 15000
+      targetProbeType:
+        type:    String
+        default: ~
+    comment: ""
+
+  OptResponseTimeT:
+    commands:
+      optResponseTime : LoadBalancerT.setOptResponseTime(double)
+    setupParams:
+      targetIP:
+        type:    String
+        default: "localhost"
+      beaconPeriod:
+        type:    long
+        default: 30000
+      javaClass:
+        type:    String
+        default: "org.sa.rainbow.translator.swim.gauges.SimpleGauge"
+    configParams:
+      samplingFrequency:
+        type:    long
+        default: 15000
+      targetProbeType:
+        type:    String
+        default: ~
+    comment: ""
+
+  ServerEnablementGaugeT:
+    commands:
+      enableServer: ServerT.enableServer(boolean)
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.translator.swim.gauges.ServerEnabledGauge"
+    configParams:
+      samplingFrequency:
+        type: long
+        default: 10000
+      targetProbeType:
+        type: String
+        default: ~
+      serverNum:
+        type: int
+        default: 0
+    comment: "ServerEnablementGaugeT reports enablement/disablement of servers. serverNum is the server number (e.g., 1, 2 3), so that if there are N servers enabled, this server is enabled if N >= serverNum"
+
+  ServerActivationGaugeT:
+    commands:
+      activateServer: ServerT.activateServer(boolean)
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.translator.swim.gauges.ServerActiveGauge"
+    configParams:
+      samplingFrequency:
+        type: long
+        default: 10000
+      targetProbeType:
+        type: String
+        default: ~
+      serverNum:
+        type: int
+        default: 0
+    comment: "ServerActivationGaugeT reports if a server is active or not. serverNum is the server number (e.g., 1, 2 3), so that if there are N active servers, this server is active if N >= serverNum"
+
+gauge-instances:
+  DimmerG0:
+    type:  DimmerGaugeT
+    model: "SwimSys:Acme"
+    commands:
+      dimmer : LB0.setDimmer($<dimmer>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      targetProbeType  : dimmer
+    comment: "DimmerG0 is associated with the component LB0 of the System, SwimSys, defined as an Acme model"
+  ServerEnabledG1:
+    type:  ServerEnablementGaugeT
+    model: "SwimSys:Acme"
+    commands:
+      serverEnabled : server1.enableServer($<servers>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      targetProbeType  : servers
+      serverNum: 1
+    comment: ""
+  ServerEnabledG2:
+    type:  ServerEnablementGaugeT
+    model: "SwimSys:Acme"
+    commands:
+      serverEnabled : server2.enableServer($<servers>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      targetProbeType  : servers
+      serverNum: 2
+    comment: ""
+  ServerEnabledG3:
+    type:  ServerEnablementGaugeT
+    model: "SwimSys:Acme"
+    commands:
+      serverEnabled : server3.enableServer($<servers>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      targetProbeType  : servers
+      serverNum: 3
+    comment: ""
+  ServerActiveG1:
+    type:  ServerActivationGaugeT
+    model: "SwimSys:Acme"
+    commands:
+      activateServer : server1.activateServer($<activeServers>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      targetProbeType  : activeServers
+      serverNum: 1
+    comment: ""
+  ServerActiveG2:
+    type:  ServerActivationGaugeT
+    model: "SwimSys:Acme"
+    commands:
+      activateServer : server2.activateServer($<activeServers>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      targetProbeType  : activeServers
+      serverNum: 2
+    comment: ""
+  ServerActiveG3:
+    type:  ServerActivationGaugeT
+    model: "SwimSys:Acme"
+    commands:
+      activateServer : server3.activateServer($<activeServers>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      targetProbeType  : activeServers
+      serverNum: 3
+    comment: ""
+  BasicResponseTimeG0:
+    type:  BasicResponseTimeT
+    model: "SwimSys:Acme"
+    commands:
+      basicResponseTime : LB0.setBasicResponseTime($<basicResponseTime>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      targetProbeType  : basicResponseTime
+    comment: ""
+  OptResponseTimeG0:
+    type:  OptResponseTimeT
+    model: "SwimSys:Acme"
+    commands:
+      optResponseTime : LB0.setOptResponseTime($<optResponseTime>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      targetProbeType  : optResponseTime
+    comment: ""
+  LoadG1:
+    type:  LoadGaugeT
+    model: "SwimSys:Acme"
+    commands:
+      load : server1.setLoad($<load>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      targetProbeType  : load1
+    comment: "LoadG1 is associated with the component server1 of the System"
+  LoadG2:
+    type:  LoadGaugeT
+    model: "SwimSys:Acme"
+    commands:
+      load : server2.setLoad($<load>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      targetProbeType  : load2
+    comment: "LoadG2 is associated with the component server2 of the System"
+  LoadG3:
+    type:  LoadGaugeT
+    model: "SwimSys:Acme"
+    commands:
+      load : server3.setLoad($<load>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      targetProbeType  : load3
+    comment: "LoadG3 is associated with the component server3 of the System"
+unused-gauge-instances: 
+

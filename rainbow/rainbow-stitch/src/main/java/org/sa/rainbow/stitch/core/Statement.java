@@ -154,6 +154,8 @@ public class Statement extends ScopedEntity implements IEvaluableScope {
 			try {
 				walker.visit(tree());
 			} catch (Exception e) {
+				e.printStackTrace();
+				Tool.error("Unexpected Recognition Error evaluating Statement!\n",e, null, m_stitch.stitchProblemHandler);
 				Tool.logger().error("Unexpected Recognition Error evaluating Statement!\n", e);
 			}
 			m_stitch.popExpression();

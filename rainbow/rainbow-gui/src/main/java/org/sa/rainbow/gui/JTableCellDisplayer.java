@@ -7,7 +7,7 @@ import java.awt.event.ComponentEvent;
 import javax.swing.JTable;
 import javax.swing.JViewport;
 
-class JTableCellDisplayer extends ComponentAdapter
+public class JTableCellDisplayer extends ComponentAdapter
     {
         boolean selRow      = false;
         boolean selCol      = false;

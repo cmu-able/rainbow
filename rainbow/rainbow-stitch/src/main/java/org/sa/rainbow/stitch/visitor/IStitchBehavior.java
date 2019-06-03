@@ -148,11 +148,11 @@ public interface IStitchBehavior {
 
     void continueExpressionFilter (TypeFilterT filter, TerminalNode setIdentidfier, TerminalNode typeIdentifier,
                                    StitchParser.ExpressionContext
-            expression);
+            expression, boolean mustBeSet, boolean resultisSet);
 
     void setupPathFilter (TerminalNode identifier);
 
-    void doTacticDuration (StitchParser.ExpressionContext expression);
+    void doTacticDuration (ParserRuleContext expression);
 
     /**
      * Created by schmerl on 10/20/2016.

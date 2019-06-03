@@ -209,7 +209,7 @@ public class Ohana {
             public void syntaxError (@NotNull Recognizer<?, ?> recognizer, @Nullable Object offendingSymbol, int
                     line, int charPositionInLine, @NotNull String msg, @Nullable RecognitionException e) {
                 StitchProblem problem = new StitchProblem (new org.sa.rainbow.stitch.error.RecognitionException (msg,
-                                                                                                                  null, line, charPositionInLine),
+                                                                                                                  stitch.path, line, charPositionInLine),
                                                            StitchProblem.ERROR);
                 stitch.stitchProblemHandler.setProblem (problem);
             }
@@ -236,7 +236,7 @@ public class Ohana {
 
 //        if (m_typecheckStrategies) {
 //            IStitchBehavior tcb = stitch.getBehavior (Stitch.TYPECHECKER_PASS);
-//            StitchBeginEndVisitor tcWalker = new StitchBeginEndVisitor (tcb, m_rootScope);
+//            StitchBeginEndVisitor tcWalker = new StitchBeginEndVisitor (tcb, stitch.scope());
 //            tcWalker.visit (script);
 //        }
 

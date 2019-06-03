@@ -371,7 +371,7 @@ public abstract class BaseStitchBehavior implements IStitchBehavior {
 
     @Override
     public void continueExpressionFilter (TypeFilterT filter, TerminalNode setIdentidfier, TerminalNode
-            typeIdentifier, StitchParser.ExpressionContext expression) {
+            typeIdentifier, StitchParser.ExpressionContext expression, boolean mustBeSet, boolean resultisSet) {
 
     }
 
@@ -381,7 +381,7 @@ public abstract class BaseStitchBehavior implements IStitchBehavior {
     }
 
     @Override
-    public void doTacticDuration (StitchParser.ExpressionContext expression) {
+    public void doTacticDuration (ParserRuleContext ctx) {
 
     }
 }
