@@ -62,9 +62,9 @@ public abstract class AbstractRainbowController implements IRainbowUIController,
 		}
 
 		protected void unhighlight(JComponent vFrame) {
-			synchronized (this) {
+//			synchronized (this) {
 				vFrame.setBorder(preBorder);
-			}
+//			}
 		}
 
 		protected void highlight(JComponent vFrame) {
@@ -97,23 +97,23 @@ public abstract class AbstractRainbowController implements IRainbowUIController,
 					if (selected) {
 						if (m_highlightAct == null)
 							vf.setBorder(new LineBorder(Color.GRAY, 4));
-						synchronized (m_highlightAct) {
+//						synchronized (m_highlightAct) {
 							if (m_highlightAct.currentTask != null) {
 								m_highlightAct.preBorder = new LineBorder(Color.GRAY, 4);
 							} else {
 								vf.setBorder(new LineBorder(Color.GRAY, 4));
 							}
-						}
+//						}
 					} else {
 						if (m_highlightAct == null)
-							vf.setBorder(new LineBorder(null));
-						synchronized (m_highlightAct) {
+							vf.setBorder(null);
+//						synchronized (m_highlightAct) {
 							if (m_highlightAct.currentTask != null) {
-								m_highlightAct.preBorder = new LineBorder(null);
+								m_highlightAct.preBorder = null;
 							} else {
-								vf.setBorder(new LineBorder(null));
+								vf.setBorder(null);
 							}
-						}
+//						}
 					}
 				}
 
