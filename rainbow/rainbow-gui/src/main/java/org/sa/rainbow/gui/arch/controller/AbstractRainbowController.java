@@ -13,13 +13,14 @@ import java.util.TimerTask;
 
 import javax.swing.JComponent;
 import javax.swing.JInternalFrame;
-import javax.swing.SwingUtilities;
 import javax.swing.JInternalFrame.JDesktopIcon;
+import javax.swing.SwingUtilities;
+import javax.swing.border.AbstractBorder;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
-import javax.swing.plaf.basic.BasicBorders;
+import javax.swing.plaf.UIResource;
 import javax.swing.plaf.metal.MetalBorders;
-import javax.swing.plaf.metal.MetalBorders.InternalFrameBorder;
+import javax.swing.plaf.metal.MetalLookAndFeel;
 
 import org.sa.rainbow.gui.RainbowWindoe.SelectionManager;
 import org.sa.rainbow.gui.arch.ArchEffectorPanel;
@@ -28,6 +29,38 @@ import org.sa.rainbow.gui.arch.model.RainbowArchModelElement;
 
 public abstract class AbstractRainbowController implements IRainbowUIController, PropertyChangeListener {
 
+	static class IconFrameSelectedBorder extends AbstractBorder implements UIResource {
+		private static final int corner = 14;
+		
+		@Override
+		public void paintBorder(Component c, Graphics g, int x, int y, int w, int h) {
+			Color background = MetalLookAndFeel.getPrimaryControlDarkShadow();
+			Color highlight = MetalLookAndFeel.getPrimaryControlShadow();
+			Color shadow = MetalLookAndFeel.getPrimaryControlInfo();
+			
+            g.setColor(background);
+            // Draw outermost lines
+            g.drawLine( 1, 0, w-2, 0);
+            g.drawLine( 0, 1, 0, h-2);
+            g.drawLine( w-1, 1, w-1, h-2);
+            g.drawLine( 1, h-1, w-2, h-1);
+
+            // Draw the bulk of the border
+            for (int i = 1; i < 5; i++) {
+                g.drawRect(x+i,y+i,w-(i*2)-1, h-(i*2)-1);
+            }
+			
+		}
+		
+		@Override
+		public Insets getBorderInsets(Component c, Insets newInsets) {
+			newInsets.set(5, 5, 5, 5);
+			return newInsets;
+		}
+		
+	}
+	
+	
 	protected class HighlightBorderActivity {
 		TimerTask currentTask;
 		Border preBorder;
@@ -131,7 +164,7 @@ public abstract class AbstractRainbowController implements IRainbowUIController,
 	}
 
 	protected Border getBorder() {
-		return new MetalBorders.InternalFrameBorder();
+		return new IconFrameSelectedBorder();
 	}
 
 	@Override
