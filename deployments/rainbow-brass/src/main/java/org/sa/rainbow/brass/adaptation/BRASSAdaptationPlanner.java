@@ -25,6 +25,7 @@ import org.sa.rainbow.core.adaptation.AdaptationTree;
 import org.sa.rainbow.core.adaptation.DefaultAdaptationTreeWalker;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
@@ -143,7 +144,12 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
         // (b) start listening to model events to generate new plans again
 
         AdaptationResultsVisitor v = new AdaptationResultsVisitor (plan);
-        plan.visit (v);
+        try {
+			plan.visit (v);
+		} catch (RainbowException e1) {
+			log(e1.getMessage());
+			e1.printStackTrace();
+		}
         if (v.m_allOk) {
             BRASSHttpConnector.instance (Phases.Phase1).reportStatus (DASPhase1StatusT.ADAPTATION_COMPLETED.name(),
                     "Finished adapting the system");
@@ -381,5 +387,10 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
         }
 
     }
+
+	@Override
+	public ModelReference getManagedModel() {
+		return m_modelRef;
+	}
 
 }

@@ -144,7 +144,13 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 		// (b) start listening to model events to generate new plans again
 
 		AdaptationResultsVisitor v = new AdaptationResultsVisitor(plan);
-		plan.visit(v);
+		try {
+			plan.visit(v);
+		} catch (RainbowException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			log(e1.getMessage());
+		}
 		if (v.m_allOk) {
 			log("Adaptation was successfully deployed");
 			BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTED.name(),
@@ -498,6 +504,11 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 			m_allOk &= adaptation.getOutcome();
 		}
 
+	}
+
+	@Override
+	public ModelReference getManagedModel() {
+		return m_modelRef;
 	}
 
 }
