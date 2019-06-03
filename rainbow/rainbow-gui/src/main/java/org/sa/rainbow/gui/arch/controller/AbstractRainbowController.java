@@ -131,25 +131,34 @@ public abstract class AbstractRainbowController implements IRainbowUIController,
 				JComponent vf = getVisibleFrame();
 				if (vf instanceof JDesktopIcon) {
 					if (selected) {
-						if (m_highlightAct == null)
+						if (m_highlightAct == null) {
 							vf.setBorder(getBorder());
+							vf.setSize(vf.getWidth() + 10, vf.getHeight() + 10);
+						}
 						else
 							synchronized (m_highlightAct) {
 								if (m_highlightAct.currentTask != null) {
 									m_highlightAct.preBorder = getBorder();
+									vf.setSize(vf.getWidth() + 10, vf.getHeight() + 10);
 								} else {
+									vf.setSize(vf.getWidth() + 10, vf.getHeight() + 10);
 									vf.setBorder(getBorder());
 								}
 							}
 					} else {
-						if (m_highlightAct == null)
+						if (m_highlightAct == null) {
 							vf.setBorder(null);
+							vf.setSize(vf.getWidth() - 10, vf.getHeight() - 10);
+
+						}
 						else
 							synchronized (m_highlightAct) {
 								if (m_highlightAct.currentTask != null) {
 									m_highlightAct.preBorder = null;
+									vf.setSize(vf.getWidth() - 10, vf.getHeight() - 10);
 								} else {
 									vf.setBorder(null);
+									vf.setSize(vf.getWidth() - 10, vf.getHeight() - 10);
 								}
 							}
 					}
