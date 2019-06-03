@@ -53,5 +53,11 @@ public interface IESEBMasterCommandPortRemoteInterface extends IMasterCommandPor
     @Override
     @ReturnTypeMapping ("bool")
     boolean allDelegatesOK ();
+    
+    @Override
+    @ReturnTypeMapping("bool")
+    boolean autoStartProbes();
+    
+    
 
 }
