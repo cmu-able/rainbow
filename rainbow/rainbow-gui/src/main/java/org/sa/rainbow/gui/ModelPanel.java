@@ -221,8 +221,8 @@ public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelC
 	public static OperationRepresentation pullOutOfString(String msg) {
 		Matcher m = strPattern.matcher(msg);
 		if (m.find()) {
-			OperationRepresentation rep = new OperationRepresentation(m.group(4),
-					new ModelReference(m.group(1), m.group(2)), m.group(3),
+			OperationRepresentation rep = new OperationRepresentation(m.group(3),
+					new ModelReference(m.group(1), m.group(2)), m.group(4),
 					m.group(5).replaceAll("\\[", "").replaceAll("\\]", "").split(","));
 			rep.setOrigin(m.group(6));
 			return rep;

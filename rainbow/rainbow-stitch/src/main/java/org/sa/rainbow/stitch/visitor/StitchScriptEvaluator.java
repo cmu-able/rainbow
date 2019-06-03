@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -15,12 +16,15 @@ import java.util.Set;
 import java.util.Stack;
 
 import org.acmestudio.acme.ModelHelper;
+import org.acmestudio.acme.PropertyHelper;
 import org.acmestudio.acme.core.IAcmeType;
 import org.acmestudio.acme.core.exception.AcmeException;
 import org.acmestudio.acme.core.type.IAcmeBooleanValue;
 import org.acmestudio.acme.core.type.IAcmeFloatingPointValue;
 import org.acmestudio.acme.core.type.IAcmeIntValue;
 import org.acmestudio.acme.core.type.IAcmeRecordValue;
+import org.acmestudio.acme.core.type.IAcmeSequenceType;
+import org.acmestudio.acme.core.type.IAcmeSequenceValue;
 import org.acmestudio.acme.core.type.IAcmeSetValue;
 import org.acmestudio.acme.element.IAcmeDesignAnalysisDeclaration;
 import org.acmestudio.acme.element.IAcmeElement;
@@ -30,11 +34,13 @@ import org.acmestudio.acme.environment.error.AcmeError;
 import org.acmestudio.acme.model.DefaultAcmeModel;
 import org.acmestudio.acme.model.util.core.UMBooleanValue;
 import org.acmestudio.acme.model.util.core.UMStringValue;
+import org.acmestudio.acme.rule.AcmeSequence;
 import org.acmestudio.acme.rule.AcmeSet;
 import org.acmestudio.acme.rule.IAcmeDesignAnalysis;
 import org.acmestudio.acme.rule.node.FormalParameterNode;
 import org.acmestudio.acme.rule.node.IExternalAnalysisExpressionNode;
 import org.acmestudio.acme.rule.node.TypeReferenceNode;
+import org.acmestudio.acme.type.AcmeTypeHelper;
 import org.acmestudio.acme.type.verification.NodeScopeLookup;
 import org.acmestudio.acme.type.verification.RuleTypeChecker;
 import org.acmestudio.standalone.resource.StandaloneLanguagePackHelper;
@@ -50,15 +56,16 @@ import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.core.Expression;
+import org.sa.rainbow.stitch.core.Expression.Kind;
 import org.sa.rainbow.stitch.core.IScope;
 import org.sa.rainbow.stitch.core.MyDouble;
 import org.sa.rainbow.stitch.core.MyInteger;
 import org.sa.rainbow.stitch.core.MyNumber;
 import org.sa.rainbow.stitch.core.PostVar;
 import org.sa.rainbow.stitch.core.Statement;
+import org.sa.rainbow.stitch.core.StitchTypes;
 import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.core.Var;
-import org.sa.rainbow.stitch.core.Expression.Kind;
 import org.sa.rainbow.stitch.model.ModelOperator;
 import org.sa.rainbow.stitch.parser.StitchParser;
 import org.sa.rainbow.stitch.util.Tool;
@@ -91,9 +98,9 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 				Expression e = scope().expressions().get(0);
 				// make sure expr assocaited with var has AST and no known
 				// result
-				if (e.tree() != null && (e.getResult() == null || v.isFunction())) {
-					e.evaluate(null, m_walker);
-				}
+//				if (e.tree() != null && (e.getResult() == null || v.isFunction())) {
+//					e.evaluate(null, m_walker);
+//				}
 				v.setValue(e.getResult());
 			}
 		}
@@ -176,7 +183,7 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 			return;
 
 		Expression cExpr = (Expression) scope();
-		if (cExpr.getKind() != Expression.Kind.QUANTIFIED) {
+		if (cExpr.getKind() != Kind.QUANTIFIED) {
 			Tool.error("Error! Expected quantified expression not found!!", null, stitchProblemHandler());
 			return;
 		}
@@ -314,7 +321,7 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 			}
 			args[i++] = e.getResult();
 		}
-		Object rv = executeMethod(id.IDENTIFIER().getText(), args);
+		Object rv = executeMethod(mc.getText(), args);
 //        cExpr.setResult (rv);
 		if (rv instanceof Integer) {
 			MyInteger result = new MyInteger((Integer) rv);
@@ -377,8 +384,11 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 				set.add(e.getResult());
 			}
 		}
-		if (set.size() == 1 && set.iterator().next() instanceof Set && cExpr.expressions().iterator().next().getKind() == Kind.QUANTIFIED) {
-			Tool.warn("It seems that this expression has a set that has one item that is a set. This might mean you have an extra set of curly braces.", null, stitchProblemHandler());
+		if (set.size() == 1 && set.iterator().next() instanceof Set
+				&& cExpr.expressions().iterator().next().getKind() == Kind.QUANTIFIED) {
+			Tool.warn(
+					"It seems that this expression has a set that has one item that is a set. This might mean you have an extra set of curly braces.",
+					null, stitchProblemHandler());
 		}
 		cExpr.setResult(set);
 	}
@@ -512,7 +522,8 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 		Object lObj = null;
 		Object rObj = null;
 		// deal with null operands
-		if (expr.lrOps[LOP].peek() == null || expr.lrOps[ROP].peek() == null) {
+		if (expr.lrOps[LOP].isEmpty() || expr.lrOps[ROP].isEmpty() || expr.lrOps[LOP].peek() == null
+				|| expr.lrOps[ROP].peek() == null) {
 			// if either is NULL, result is NULL
 			final String msg = "One relational operand is NULL: " + expr.lrOps[LOP].pop() + ", " + expr.lrOps[ROP].pop()
 					+ " ... " + opAST.toStringTree();
@@ -943,7 +954,7 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 				}
 				// lookup of various combo failed, could indicate invalid
 				// reference
-				if (o == null) 
+				if (o == null)
 					Tool.error("Unresolved reference '" + iden + "'! Perhaps model not accessible?", idAST,
 							stitchProblemHandler());
 				else {
@@ -965,10 +976,10 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 						} catch (IllegalArgumentException | IllegalAccessException e) {
 							Tool.error("Reference field " + iden + " is not STATIC", null, stitchProblemHandler());
 						}
-					}
-					else Tool.error("Unresolved reference '" + iden + "'! Perhaps model not accessible?", idAST,
-							stitchProblemHandler());
-						
+					} else
+						Tool.error("Unresolved reference '" + iden + "'! Perhaps model not accessible?", idAST,
+								stitchProblemHandler());
+
 				}
 			} else {
 				if (o instanceof Var) {
@@ -1371,6 +1382,10 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 				context = ((AcmeModelInstance) o).getModelInstance();
 			}
 		}
+		else {
+			Tool.error("Cannot call '" + name + "' because it should be preceded by a model reference.", null, stitchProblemHandler());
+			return rv;
+		}
 
 		List<FormalParameterNode> formalParams = da.getFormalParameters();
 		if (args.length != formalParams.size()) {
@@ -1424,7 +1439,13 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 					s.setValues(((IAcmeSetValue) val).getValues());
 					lookup.put(formalParamName, s);
 					argList.add(s);
-				} else {
+				} if (val instanceof IAcmeSequenceValue) {
+					AcmeSequence s = new AcmeSequence();
+					s.setValues(((IAcmeSequenceValue )val).getValues());
+					lookup.put(formalParamName, s);
+					argList.add(s);
+				}
+				else {
 					lookup.put(formalParamName, val);
 					argList.add(val);
 				}
@@ -1439,9 +1460,38 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 				IModelInstance inst = (IModelInstance) arg;
 				lookup.put(formalParamName, inst.getModelInstance());
 				argList.add(inst.getModelInstance());
-
+			} else if (arg instanceof List && AcmeTypeHelper.extractTypeStructure(formalParams.get(i).getType()) instanceof IAcmeSequenceType) {
+				AcmeSequence seq = new AcmeSequence();
+				seq.setValues((List )arg);
+				lookup.put(formalParamName, seq);
+				argList.add(seq);
+			} else if (arg instanceof Set) {
+				AcmeSet set = new AcmeSet();
+				set.setValues((Set )arg);
+				lookup.put(formalParamName, set);
+				argList.add(set);
 			} else {
-				argList.add(arg);
+				try {
+					IAcmePropertyValue val = PropertyHelper.toAcmeVal(arg);
+					if (val instanceof IAcmeSetValue) {
+						AcmeSet s = new AcmeSet();
+						s.setValues(((IAcmeSetValue) val).getValues());
+						lookup.put(formalParamName, s);
+						argList.add(s);
+					} if (val instanceof IAcmeSequenceValue) {
+						AcmeSequence s = new AcmeSequence();
+						s.setValues(((IAcmeSequenceValue )val).getValues());
+						lookup.put(formalParamName, s);
+						argList.add(s);
+					}
+					else {
+						lookup.put(formalParamName, val);
+						argList.add(val);
+					}
+				} catch (IllegalArgumentException e) {
+					lookup.put(formalParamName, arg);
+					argList.add(arg);
+				}
 			}
 		}
 
@@ -1509,6 +1559,8 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 
 	@Override
 	public void setupPathFilter(TerminalNode identifier) {
+//		Expression expr = (Expression )scope();
+//		expr.skipQuanPredicate = true;
 		if (identifier != null) {
 			Var v = new Var();
 			v.name = "__path_filter_type";
@@ -1526,12 +1578,13 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 			return;
 
 		Expression cExpr = (Expression) scope();
-		if (cExpr.getKind() != Expression.Kind.PATH) {
+		if (cExpr.getKind() != Kind.PATH) {
 			Tool.error("Error! Expected path expression not found!", null, stitchProblemHandler());
 			return;
 		}
 
-		Object result = cExpr.expressions().get(0).getResult();
+		List<Expression> expressions = cExpr.expressions();
+		Object result = expressions.get(0).getResult();
 		Set set = Collections.EMPTY_SET;
 
 		if (result instanceof Set) {
@@ -1574,8 +1627,9 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 		cExpr.setResult(pathVariable.get().getValue());
 
 		if (expression != null) {
+
 			exprIndex.set(1);
-			Expression expr = cExpr.expressions().get(exprIndex.get());
+			Expression expr = expressions.get(exprIndex.get());
 			Iterator setIterator = ((Set) pathVariable.get().getValue()).iterator();
 			Var __path_element = new Var();
 			__path_element.name = "__path_variable";
@@ -1597,21 +1651,30 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 					setIterator.remove();
 				}
 			}
+			expr.skipQuanPredicate = true;
+
 			scope().vars().remove(__path_element.name);
 		}
 	}
 
 	@Override
 	public void continueExpressionFilter(TypeFilterT filter, TerminalNode setIdentifier, TerminalNode typeIdentifier,
-			StitchParser.ExpressionContext expression) {
+			StitchParser.ExpressionContext expression, boolean mustBeSet, boolean resultisSet) {
 		if (pathVariable.get() == null) {
 			Tool.error("Path is not definde!", null, stitchProblemHandler());
+			return;
+		}
+		if (mustBeSet && !resultisSet) {
+			Tool.error("Sequence spreads (...) should only appear on the last continuance", null, stitchProblemHandler());
 			return;
 		}
 		Expression cExpr = (Expression) scope();
 
 		Set set = (Set) pathVariable.get().getValue();
-		Set resultSet = new HashSet();
+		Collection resultSet;
+		
+		if (resultisSet) resultSet = new HashSet();
+		else resultSet = new ArrayList();
 		for (Object s : set) {
 			if (s instanceof IAcmeElement) {
 				final Object result = ((IAcmeElement) s).lookupName(setIdentifier.getText());
@@ -1622,9 +1685,16 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 					tSet = (Set) ModelHelper.propertyValueToJava((IAcmeSetValue) result);
 				} else if (result instanceof AcmeSet) {
 					tSet = new HashSet(((AcmeSet) result).getValues());
-				} else if (result instanceof IAcmeProperty
-						&& ((IAcmeProperty) result).getValue() instanceof IAcmeSetValue) {
-					tSet = (Set) ModelHelper.propertyValueToJava(((IAcmeProperty) result).getValue());
+				} else if (result instanceof IAcmeProperty) {
+					if (mustBeSet && !(((IAcmeProperty) result).getValue() instanceof IAcmeSetValue)) {
+						Tool.error("Error! Path set is NULL!" + setIdentifier.getText(), null, stitchProblemHandler());
+						tSet = Collections.EMPTY_SET;
+					} else if (((IAcmeProperty) result).getValue() instanceof IAcmeSetValue) {
+						tSet = (Set) ModelHelper.propertyValueToJava(((IAcmeProperty) result).getValue());
+					} else {
+						resultSet.add(ModelHelper.propertyValueToJava(((IAcmeProperty) result).getValue()));
+						tSet = Collections.emptySet();
+					}
 				} else {
 					Tool.error("Error! Path set is NULL!" + setIdentifier.getText(), null, stitchProblemHandler());
 					tSet = Collections.EMPTY_SET;
@@ -1683,8 +1753,8 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 		if (checkSkipEval())
 			return;
 		pathVariable.set(null);
+		scope().vars().remove("__path_filter_type");
 		Expression cExpr = doEndComplexExpr();
 		expr().setResult(cExpr.getResult());
-		scope().vars().remove("__path_filter_type");
 	}
 }

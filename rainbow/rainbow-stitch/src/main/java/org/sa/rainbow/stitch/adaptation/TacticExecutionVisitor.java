@@ -4,9 +4,12 @@ import org.sa.rainbow.core.adaptation.AdaptationTree;
 import org.sa.rainbow.core.adaptation.DefaultAdaptationExecutorVisitor;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
+import org.sa.rainbow.stitch.core.StitchExecutionException;
 import org.sa.rainbow.stitch.core.Tactic;
+import org.sa.rainbow.stitch.error.IStitchProblem;
 import org.sa.rainbow.stitch.history.ExecutionHistoryCommandFactory;
 
+import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -29,8 +32,19 @@ public class TacticExecutionVisitor extends DefaultAdaptationExecutorVisitor<Tac
     @Override
     protected boolean evaluate (Tactic adaptation) {
         m_executor.log ("Executing Strategey " + adaptation.getName () + "...");
-        adaptation.evaluate (null);
-        return adaptation.checkEffect ();
+        try {
+			adaptation.evaluate (null);
+			return adaptation.checkEffect ();
+		} catch (StitchExecutionException e) {
+			m_executor.log("Execution failed: " + e.getMessage());
+			Collection<IStitchProblem> unreportedProblems = adaptation.m_stitch.stitchProblemHandler.unreportedProblems();
+			m_executor.log("-------------------");
+			for (IStitchProblem p : unreportedProblems) {
+				m_executor.log(p.getMessage() + "\n");
+			}
+			m_executor.log("-------------------");
+			return false;
+		}
     }
 
     @Override

@@ -44,6 +44,8 @@ public interface IAdaptationManager<S extends IEvaluable> extends IRainbowRunnab
      *            The model to manage
      */
     void setModelToManage (ModelReference modelRef);
+    
+    ModelReference getManagedModel();
 
     /**
      * Marks a particular adaptation as executed by an adaptation executor

@@ -1,5 +1,6 @@
 package org.sa.rainbow.core.adaptation;
 
+import org.sa.rainbow.core.error.RainbowException;
 
 public interface IAdaptationVisitor<T2 extends IEvaluable> {
     /**
@@ -9,7 +10,7 @@ public interface IAdaptationVisitor<T2 extends IEvaluable> {
      * @param tree
      * @return
      */
-    boolean visitLeaf (AdaptationTree<T2> tree);
+    boolean visitLeaf (AdaptationTree<T2> tree) throws RainbowException;
 
     /**
      * Visits each subtree of three in sequence. Returns true if all subtrees return true. False otherwise.
@@ -17,7 +18,7 @@ public interface IAdaptationVisitor<T2 extends IEvaluable> {
      * @param tree
      * @return
      */
-    boolean visitSequence (AdaptationTree<T2> tree);
+    boolean visitSequence (AdaptationTree<T2> tree)throws RainbowException;
 
     /**
      * Visits each subtree of the tree in sequence, stopping when the first one is successful.
@@ -25,7 +26,7 @@ public interface IAdaptationVisitor<T2 extends IEvaluable> {
      * @param tree
      * @return true if a successful adpatation was executed, false otherwise.
      */
-    boolean visitSequenceStopSuccess (AdaptationTree<T2> tree);
+    boolean visitSequenceStopSuccess (AdaptationTree<T2> tree)throws RainbowException;
 
     /**
      * Visits each subtree in sequence, stopping if a failure is reached.
@@ -33,7 +34,7 @@ public interface IAdaptationVisitor<T2 extends IEvaluable> {
      * @param tree
      * @return true if all adaptations executed. False otherwise.
      */
-    boolean visitSequenceStopFailure (AdaptationTree<T2> tree);
+    boolean visitSequenceStopFailure (AdaptationTree<T2> tree)throws RainbowException;
 
     /**
      * Spawns a thread for each subtree to execute in parallel.
@@ -41,6 +42,6 @@ public interface IAdaptationVisitor<T2 extends IEvaluable> {
      * @param tree
      * @return false if one of the subtrees fails.
      */
-    boolean visitParallel (AdaptationTree<T2> tree);
+    boolean visitParallel (AdaptationTree<T2> tree)throws RainbowException;
 
 }

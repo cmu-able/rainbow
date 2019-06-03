@@ -1,12 +1,13 @@
 package org.sa.rainbow.core.adaptation;
 
-import org.sa.rainbow.core.RainbowComponentT;
-import org.sa.rainbow.core.ports.IRainbowReportingPort;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+
+import org.sa.rainbow.core.RainbowComponentT;
+import org.sa.rainbow.core.error.RainbowException;
+import org.sa.rainbow.core.ports.IRainbowReportingPort;
 
 /**
  * An abstract class that defines the semantics for executing adaptation trees. Subclasses will define how to evaluate a
@@ -38,7 +39,11 @@ public abstract class DefaultAdaptationExecutorVisitor<S extends IEvaluable> ext
     @Override
     public void run () {
         //Start the visitor
-        m_result = m_adtToVisit.visit (this);
+        try {
+			m_result = m_adtToVisit.visit (this);
+		} catch (RainbowException e) {
+			m_reporter.error (RainbowComponentT.EXECUTOR, "Failed to execute", e);
+		}
         // Indicate that the execution of this tree has finished
         if (m_done != null) {
             m_done.countDown ();
@@ -47,7 +52,7 @@ public abstract class DefaultAdaptationExecutorVisitor<S extends IEvaluable> ext
     }
 
     @Override
-    public final boolean visitLeaf (AdaptationTree<S> tree) {
+    public final boolean visitLeaf (AdaptationTree<S> tree) throws RainbowException {
         S s = tree.getHead ();
         m_reporter.info (RainbowComponentT.EXECUTOR, "Visiting execution leaf");
         Object evaluate = this.evaluate (s);
@@ -62,10 +67,10 @@ public abstract class DefaultAdaptationExecutorVisitor<S extends IEvaluable> ext
      *            The adaptation to evaluate
      * @return true if the adaptation successfully completes
      */
-    protected abstract boolean evaluate (S adaptation);
+    protected abstract boolean evaluate (S adaptation) throws RainbowException;
 
     @Override
-    public final boolean visitSequence (AdaptationTree<S> tree) {
+    public final boolean visitSequence (AdaptationTree<S> tree) throws RainbowException {
         Collection<AdaptationTree<S>> subTrees = tree.getSubTrees ();
         // Will return true of all branches are successful
         boolean ret = true;
@@ -114,7 +119,7 @@ public abstract class DefaultAdaptationExecutorVisitor<S extends IEvaluable> ext
             CountDownLatch doneSignal);
 
     @Override
-    public final boolean visitSequenceStopSuccess (AdaptationTree<S> tree) {
+    public final boolean visitSequenceStopSuccess (AdaptationTree<S> tree) throws RainbowException {
         Collection<AdaptationTree<S>> subTrees = tree.getSubTrees ();
         for (AdaptationTree<S> adt : subTrees) {
             boolean ret = adt.visit (this);
@@ -124,7 +129,7 @@ public abstract class DefaultAdaptationExecutorVisitor<S extends IEvaluable> ext
     }
 
     @Override
-    public final boolean visitSequenceStopFailure (AdaptationTree<S> tree) {
+    public final boolean visitSequenceStopFailure (AdaptationTree<S> tree) throws RainbowException {
         Collection<AdaptationTree<S>> subTrees = tree.getSubTrees ();
         for (AdaptationTree<S> adt : subTrees) {
             boolean ret = adt.visit (this);

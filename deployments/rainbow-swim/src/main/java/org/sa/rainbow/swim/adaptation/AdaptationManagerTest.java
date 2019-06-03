@@ -52,6 +52,7 @@ import org.sa.rainbow.core.adaptation.AdaptationTree;
 import org.sa.rainbow.core.adaptation.DefaultAdaptationTreeWalker;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.health.IRainbowHealthProtocol;
 import org.sa.rainbow.core.models.IModelInstance;
@@ -111,7 +112,7 @@ public final class AdaptationManagerTest extends AbstractRainbowRunnable
     private IRainbowAdaptationEnqueuePort<Strategy> m_enqueuePort          = null;
     private IModelChangeBusSubscriberPort           m_modelChangePort      = null;
     private IModelsManagerPort                      m_modelsManagerPort    = null;
-    private String m_modelRef;
+    private ModelReference m_modelRef;
     private FileChannel                   m_strategyLog              = null;
     private IRainbowChangeBusSubscription m_modelTypecheckingChanged = new IRainbowChangeBusSubscription () {
 
@@ -124,7 +125,7 @@ public final class AdaptationManagerTest extends AbstractRainbowRunnable
                 CommandEventT ct = CommandEventT.valueOf (type);
                 return (ct.isEnd ()
                         && "setTypecheckResult".equals (message.getProperty (IModelChangeBusPort.COMMAND_PROP))
-                        && m_modelRef.equals (Util.genModelRef (modelName, modelType)));
+                        && m_modelRef.toString().equals (Util.genModelRef (modelName, modelType)));
             } catch (Exception e) {
                 return false;
             }
@@ -170,7 +171,7 @@ public final class AdaptationManagerTest extends AbstractRainbowRunnable
 
     @Override
     public void setModelToManage (ModelReference model) {
-        m_modelRef = model.getModelName () + ":" + model.getModelType ();
+        m_modelRef = model;
         try {
             m_strategyLog = new FileOutputStream (new File (new File (Rainbow.instance ().getTargetPath (), "log"),
                                                             model.getModelName () + "-adaptation.log")).getChannel ();
@@ -200,6 +201,11 @@ public final class AdaptationManagerTest extends AbstractRainbowRunnable
         }
 
         initAdaptationRepertoire ();
+    }
+    
+    @Override
+    public ModelReference getManagedModel() {
+    	return m_modelRef;
     }
 
     /*
@@ -299,7 +305,11 @@ public final class AdaptationManagerTest extends AbstractRainbowRunnable
             final List<Strategy> strategiesExecuted = new LinkedList<> ();
             StrategyAdaptationResultsVisitor resultCollector = new StrategyAdaptationResultsVisitor
                     (strategy, strategiesExecuted);
-            strategy.visit (resultCollector);
+            try {
+				strategy.visit (resultCollector);
+			} catch (RainbowException e) {
+				// This should never happen with results collector
+			}
 
             for (Strategy str : strategiesExecuted) {
                 String s = str.getName () + ";" + str.outcome ();

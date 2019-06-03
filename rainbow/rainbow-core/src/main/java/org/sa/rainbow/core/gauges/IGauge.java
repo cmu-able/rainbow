@@ -23,6 +23,8 @@
  */
 package org.sa.rainbow.core.gauges;
 
+import java.util.Set;
+
 import org.sa.rainbow.core.ports.IGaugeConfigurationPort;
 import org.sa.rainbow.core.ports.IGaugeQueryPort;
 
@@ -54,6 +56,8 @@ public interface IGauge extends IGaugeIdentifier, IGaugeConfigurationPort, IGaug
      * @return int  the beacon period in milliseconds
      */
     long beaconPeriod ();
+    
+    Set<? extends String> commandKeys();
 
 
 

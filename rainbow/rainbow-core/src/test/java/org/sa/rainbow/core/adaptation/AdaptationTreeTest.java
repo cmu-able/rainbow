@@ -1,18 +1,20 @@
 package org.sa.rainbow.core.adaptation;
 
-import auxtestlib.DefaultTCase;
-import org.apache.log4j.Logger;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.sa.rainbow.core.RainbowComponentT;
-import org.sa.rainbow.core.ports.IRainbowReportingPort;
-
 import java.text.MessageFormat;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.log4j.Logger;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.sa.rainbow.core.RainbowComponentT;
+import org.sa.rainbow.core.error.RainbowException;
+import org.sa.rainbow.core.ports.IRainbowReportingPort;
+
+import auxtestlib.DefaultTCase;
 
 public class AdaptationTreeTest extends DefaultTCase {
 
@@ -114,7 +116,7 @@ public class AdaptationTreeTest extends DefaultTCase {
         }
 
         @Override
-        protected boolean evaluate (IEvaluable adaptation) {
+        protected boolean evaluate (IEvaluable adaptation) throws RainbowException {
             return (Boolean )adaptation.evaluate (null);
         }
 
@@ -180,7 +182,7 @@ public class AdaptationTreeTest extends DefaultTCase {
                                                                                                                  new ThreadGroup ("execution"), "", countdownLatch, new TestCaseReportingPort ()) {
 
             @Override
-            protected boolean evaluate (IEvaluable adaptation) {
+            protected boolean evaluate (IEvaluable adaptation) throws RainbowException{
                 return (Boolean )adaptation.evaluate (null);
             }
 

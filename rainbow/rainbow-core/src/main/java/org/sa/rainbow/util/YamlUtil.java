@@ -288,6 +288,8 @@ public abstract class YamlUtil {
                             }
                         }
                     }
+                    Map<String,Object> additional = (Map<String, Object>) attrMap.get("additional");
+                    gaugeInstSpec.setAdditionalInfo(additional);
                 }
                 Util.LOGGER.trace (" - Gauge Instances collected: " + gd.instSpec.keySet ());
             }
