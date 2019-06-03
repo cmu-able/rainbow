@@ -1,0 +1,42 @@
+vars:
+  _effectors.path: "${rainbow.path}/system/effectors"
+  
+effector-types:
+  changeInstructionGraphT:
+    command: setInstructions($<ig>)
+    type: script
+    scriptInfo:
+      path: "${_effectors.path}/setInstructionFile.sh"
+      argument: "{0}"
+  
+  completedTaskFailedT:
+    command: setModelProblem(INSTRUCTION_GRAPH_FAILED)
+    type: script
+    scriptInfo:
+      path: "${_effectors.path}/current-task-finished.sh"
+      argument: 0
+      
+  completedTaskSuccessT:
+    command: removeModelProblem(INSTRUCTION_GRAPH_FAILED)
+    type: script
+    scriptInfo:
+      path: "${_effectors.path}/current-task-finished.sh"
+      argument: 1
+
+effectors:
+  
+  changeInstructionGraph:
+    effector-type: changeInstructionGraphT
+    location: "${customize.system.target.master}"
+       
+  taskFailed:
+    effector-type: completedTaskFailedT
+    location: "${customize.system.target.master}"
+    
+  taskSucceeded:
+    effector-type: completedTaskSuccessT
+    location: "${customize.system.target.master}"
+    
+#  changeDeadline:
+#    effector-type: changeDeadlineT
+#    location: "${customize.system.target.master}"

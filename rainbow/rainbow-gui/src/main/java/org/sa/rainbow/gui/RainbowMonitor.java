@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +27,7 @@ import javax.swing.Timer;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+
 
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
@@ -83,6 +85,7 @@ public class RainbowMonitor extends JInternalFrame {
 
 	private final static String[] COLUMNNAMES = { "Id", "Status", "% CPU" };
 	private final static float[] COLUMNWIDTH = {70,15,15};
+
 	public  class NoRootTreeTableModel extends AbstractTreeTableModel {
 		private List<Entry> members;
 
@@ -102,6 +105,7 @@ public class RainbowMonitor extends JInternalFrame {
 					nt.children.add(data);
 				}
 //				nt.children.addAll(values);
+
 				members.add(nt);
 			}
 		}
@@ -124,6 +128,7 @@ public class RainbowMonitor extends JInternalFrame {
 		@Override
 		public boolean isLeaf(Object node) {
 			return node instanceof ThreadData;
+
 		}
 
 		@Override
@@ -146,6 +151,7 @@ public class RainbowMonitor extends JInternalFrame {
 		public int getIndexOfChild(Object parent, Object child) {
 			Entry nt = (Entry) parent;
 			ThreadData t = (ThreadData) child;
+
 			return nt.children.indexOf(t);
 		}
 
@@ -164,6 +170,7 @@ public class RainbowMonitor extends JInternalFrame {
 					return t.thread.getName();
 				case 1:
 					if (t.thread.getState() == State.TERMINATED) {
+
 						StringBuffer ret = new StringBuffer("Failed: ");
 						if (RainbowMonitor.this.m_uncaughtExceptions.containsKey(t)) {
 							ret.append (m_uncaughtExceptions.get(t).getMessage());
@@ -176,6 +183,7 @@ public class RainbowMonitor extends JInternalFrame {
 //					return t.uptime==0?"???":Long.toString(t.uptime);
 				case 2:
 					return t.cpuUsage==0?"???":String.format("%.2f",t.cpuUsage);
+
 				}
 			}
 			return null;
@@ -204,6 +212,7 @@ public class RainbowMonitor extends JInternalFrame {
 	private Map<Thread, Throwable> m_uncaughtExceptions = new HashMap<>();
 	private Timer m_statsTimer;
 
+
 	/**
 	 * Create the frame.
 	 */
@@ -213,6 +222,7 @@ public class RainbowMonitor extends JInternalFrame {
 		setMaximizable(true);
 		setClosable(true);
 		//setSize(350, 390);
+
 		m_exceptionHandler = new Thread.UncaughtExceptionHandler() {
 
 			@Override
@@ -234,6 +244,7 @@ public class RainbowMonitor extends JInternalFrame {
 		//getContentPane().setLayout(new BorderLayout(0, 0));
 		m_treeTable = new JXTreeTable(ttm);
 //		m_treeTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
 		m_treeTable.setRootVisible(false);
 		getContentPane().add(new JScrollPane(m_treeTable));
 		setTitle("Rainbow Component Status");
@@ -300,4 +311,5 @@ public class RainbowMonitor extends JInternalFrame {
 		}
 	}
 }
+
 
