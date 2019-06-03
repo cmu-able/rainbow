@@ -1,4 +1,6 @@
-package org.sa.rainbow.initializer.models;
+package org.sa.rainbow.initializer.configuration;
+import org.sa.rainbow.initializer.models.Variable;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -10,7 +12,7 @@ import java.io.*;
  * The Configuration class represent a set of key-values of required variables
  */
 
-public class Configuration {
+public class ConfigurationLoader {
     /**
      * A map of key values for the required variables.
      */
@@ -21,6 +23,10 @@ public class Configuration {
     private List<Variable> localVariables;
     private Set<String> variableSet;
 
+    public ConfigurationLoader(){
+        config = new HashMap<String, String>();
+        variableSet = new HashSet<String>();
+    }
     public List<Variable> getLocalVariables() {
         return localVariables;
     }
@@ -34,7 +40,6 @@ public class Configuration {
         }
     }
 
-
     /* Load configuration setting from a file (java .properties file) */
     public void loadConfiguration(File file){
 
@@ -47,6 +52,7 @@ public class Configuration {
 
             Set<Entry<Object, Object>> entries = prop.entrySet();
             for (Entry<Object, Object> entry : entries) {
+
                 if(variableSet.contains(entry.getKey())){
                     config.put((String)entry.getKey(), (String)entry.getValue());
                 }
@@ -60,5 +66,8 @@ public class Configuration {
         }
 
     }
+
+//    public abstract Configuration load(String templatePath);
+
 
 }
