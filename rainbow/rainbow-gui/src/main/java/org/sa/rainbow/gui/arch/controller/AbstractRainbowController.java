@@ -18,6 +18,8 @@ import javax.swing.JInternalFrame.JDesktopIcon;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.plaf.basic.BasicBorders;
+import javax.swing.plaf.metal.MetalBorders;
+import javax.swing.plaf.metal.MetalBorders.InternalFrameBorder;
 
 import org.sa.rainbow.gui.RainbowWindoe.SelectionManager;
 import org.sa.rainbow.gui.arch.ArchEffectorPanel;
@@ -97,13 +99,13 @@ public abstract class AbstractRainbowController implements IRainbowUIController,
 				if (vf instanceof JDesktopIcon) {
 					if (selected) {
 						if (m_highlightAct == null)
-							vf.setBorder(BasicBorders.getInternalFrameBorder());
+							vf.setBorder(getBorder());
 						else
 							synchronized (m_highlightAct) {
 								if (m_highlightAct.currentTask != null) {
-									m_highlightAct.preBorder = BasicBorders.getInternalFrameBorder();
+									m_highlightAct.preBorder = getBorder();
 								} else {
-									vf.setBorder(BasicBorders.getInternalFrameBorder());
+									vf.setBorder(getBorder());
 								}
 							}
 					} else {
@@ -126,6 +128,10 @@ public abstract class AbstractRainbowController implements IRainbowUIController,
 			}
 		});
 		getVisibleFrame().putClientProperty("controller", this);
+	}
+
+	protected Border getBorder() {
+		return new MetalBorders.InternalFrameBorder();
 	}
 
 	@Override
