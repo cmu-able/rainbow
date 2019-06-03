@@ -14,6 +14,7 @@ import java.util.TimerTask;
 import javax.swing.JComponent;
 import javax.swing.JInternalFrame;
 import javax.swing.SwingUtilities;
+import javax.swing.JInternalFrame.JDesktopIcon;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 
@@ -91,24 +92,27 @@ public abstract class AbstractRainbowController implements IRainbowUIController,
 			if ("selected".equals(e.getPropertyName())) {
 				Boolean selected = (Boolean) e.getNewValue();
 				m_selectionManager.selectionChanged(this.getModel(), selected);
-				if (selected) {
-					if (m_highlightAct == null)
-						getVisibleFrame().setBorder(new LineBorder(Color.GRAY, 4));
-					synchronized (m_highlightAct) {
-						if (m_highlightAct.currentTask != null) {
-							m_highlightAct.preBorder = new LineBorder(Color.GRAY, 4);
-						} else {
-							getVisibleFrame().setBorder(new LineBorder(Color.GRAY, 4));
+				JComponent vf = getVisibleFrame();
+				if (vf instanceof JDesktopIcon) {
+					if (selected) {
+						if (m_highlightAct == null)
+							vf.setBorder(new LineBorder(Color.GRAY, 4));
+						synchronized (m_highlightAct) {
+							if (m_highlightAct.currentTask != null) {
+								m_highlightAct.preBorder = new LineBorder(Color.GRAY, 4);
+							} else {
+								vf.setBorder(new LineBorder(Color.GRAY, 4));
+							}
 						}
-					}
-				} else {
-					if (m_highlightAct == null)
-						getVisibleFrame().setBorder(new LineBorder(null));
-					synchronized (m_highlightAct) {
-						if (m_highlightAct.currentTask != null) {
-							m_highlightAct.preBorder = new LineBorder(null);
-						} else {
-							getVisibleFrame().setBorder(new LineBorder(null));
+					} else {
+						if (m_highlightAct == null)
+							vf.setBorder(new LineBorder(null));
+						synchronized (m_highlightAct) {
+							if (m_highlightAct.currentTask != null) {
+								m_highlightAct.preBorder = new LineBorder(null);
+							} else {
+								vf.setBorder(new LineBorder(null));
+							}
 						}
 					}
 				}
