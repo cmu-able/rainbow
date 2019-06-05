@@ -108,6 +108,7 @@ public class SimulationSelectionWindow {
 				panel.setLayout(new BorderLayout());
 				panel.add(label, BorderLayout.SOUTH);
 				panel.add(m_seriesImages.get(index), BorderLayout.CENTER);
+				panel.setSize(400, 120);
 				return panel;
 			}
 		});
@@ -153,12 +154,12 @@ public class SimulationSelectionWindow {
 								if (tm != null) {
 									xyplot.removeDomainMarker(tm);
 								}
-								tm = new ValueMarker(sec);
+								l.setText("Simulation Running..." + sec + "secs");
+								tm = new ValueMarker(1000*sec++);
 								tm.setPaint(Color.BLACK);
 								tm.setStroke(new BasicStroke(2));
 								xyplot.addDomainMarker(tm);
 								
-								l.setText("Simulation Running..." + sec + "secs");
 								try {
 									Thread.sleep(1000);
 								} catch (InterruptedException e1) {
