@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.swing.DefaultListCellRenderer;
@@ -135,7 +136,10 @@ public class SimulationSelectionWindow {
 	private ImageIcon getArrivalRateAsChart(List<Integer> arrivalRate) {
 		TimeSeries series = new TimeSeries("");
 		TimeSeriesCollection tsc = new TimeSeriesCollection(series);
-		arrivalRate.forEach(i -> series.add(new Second(), i, true));
+		int s = 0;
+		for (Integer i : arrivalRate) {
+			series.add(new Second(new Date(1000*s++)), i, true);
+		}
 		JFreeChart chart = ChartFactory.createTimeSeriesChart(null, null, null, tsc, false, false, false);
 		chart.getXYPlot().getRenderer().setSeriesStroke(0, new BasicStroke(3));
 		chart.getXYPlot().getRangeAxis().setVisible(false);
