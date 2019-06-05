@@ -113,7 +113,8 @@ public class SimulationSelectionWindow {
 						cellHasFocus);
 				label.setPreferredSize(new Dimension(500,20));
 				JPanel panel = new JPanel();
-				panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+//				panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+				panel.setLayout(new FlowLayout());
 				ChartPanel comp = m_seriesImages.get(index);
 				comp.setSize(500, 100);
 				comp.setMaximumSize(new Dimension(500, 120));
