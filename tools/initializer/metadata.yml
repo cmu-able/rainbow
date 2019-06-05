@@ -1,0 +1,31 @@
+- variables:
+    - probe:
+        description:
+        default:
+- files:
+    rainbow.properties: templates/rainbow.tfl
+    rainbow-gui.properties: templates/rainbow-gui.tfl
+    ui.yml: templates/ui.tfl
+    model/gauges.yml: templates/modelGauges.tfl
+    model/swim.acme: templates/modelSwimAcme.tfl
+    model/swim.mtd: templates/modelSwimMtd.tfl
+    model/tsp.yml: templates/modelTsp.tfl
+    # model/.acmeproject:
+    # model/.project:
+    'model/opera/Kalman Filter.dtd': templates/modelFilter.tfl
+    model/opera/brownout.kalman.config: templates/modelConfig.tfl
+    model/opera/brownout.model.pxl: templates/modelBrownout.tfl
+    model/opera/opera.config: templates/operaConfig.tfl
+    stitch/swimStrategies.s: templates/swimStrategies.tfl
+    stitch/swimTactics.t.s: templates/swimTactics.tfl
+    stitch/utilities.yml: templates/stitchUtil.tfl
+    # stitch/README.txt:
+    system/effectors.yml: templates/systemEffectors.tfl
+    system/probes.yml: templates/systemProbes.tfl
+    system/effectors/addServer.sh: templates/systemAddServer.tfl
+    system/effectors/removeServer.sh: templates/systemRemoveServer.tfl
+    system/effectors/setDimmer.sh: templates/setDimmer.tfl
+    system/probes/dimmerProbe.pl: templates/dimmerProbe.tfl
+    system/probes/genericProbe.pl: templates/genericProbe.tfl
+    system/util/cmdhelper.sh: templates/cmdHelper.tfl
+    system/util/swimcmd.sh: templates/swimcmd.tfl
