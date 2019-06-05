@@ -24,7 +24,7 @@ public class ConfigurationLoader {
     private Set<String> variableSet;
 
     public ConfigurationLoader(){
-        config = new HashMap<String, String>();
+        config = new HashMap<>();
         variableSet = new HashSet<String>();
     }
     public List<Variable> getLocalVariables() {
