@@ -70,6 +70,7 @@ public class SWIMDriver {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
+					window.m_frame.setSize(520, 300);
 					window.m_frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();

@@ -108,13 +108,10 @@ public class SimulationSelectionWindow {
 				JPanel panel = new JPanel();
 				panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
 				ChartPanel comp = m_seriesImages.get(index);
-				comp.setSize(400, 120);
-				comp.setMaximumSize(new Dimension(400, 120));
+				comp.setSize(500, 120);
+				comp.setMaximumSize(new Dimension(500, 120));
 				panel.add(comp);
 				panel.add(label);
-
-				panel.setSize(400, 120);
-				panel.setMaximumSize(new Dimension(400, 120));
 				return panel;
 			}
 		});
