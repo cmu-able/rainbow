@@ -122,6 +122,8 @@ public class SimulationSelectionWindow {
 				panel.add(comp);
 				panel.add(label);
 				panel.setSize(500, 120);
+				panel.setPreferredSize(new Dimension(500,120));
+				panel.setMaximumSize(new Dimension(500, 120));
 				if (isSelected) {
 					panel.setBackground(m_list.getSelectionBackground());
 					comp.setBackground(m_list.getSelectionBackground());
