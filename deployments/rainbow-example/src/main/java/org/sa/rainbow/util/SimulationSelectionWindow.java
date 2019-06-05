@@ -117,13 +117,13 @@ public class SimulationSelectionWindow {
 				panel.setLayout(new FlowLayout());
 				ChartPanel comp = m_seriesImages.get(index);
 				comp.setSize(500, 100);
-				comp.setMaximumSize(new Dimension(500, 120));
+				comp.setMaximumSize(new Dimension(500, 130));
 				comp.setPreferredSize(new Dimension(500,100));
 				panel.add(comp);
 				panel.add(label);
 				panel.setSize(500, 120);
-				panel.setPreferredSize(new Dimension(500,120));
-				panel.setMaximumSize(new Dimension(500, 120));
+				panel.setPreferredSize(new Dimension(500,130));
+				panel.setMaximumSize(new Dimension(500, 130));
 				if (isSelected) {
 					panel.setBackground(m_list.getSelectionBackground());
 					comp.setBackground(m_list.getSelectionBackground());
