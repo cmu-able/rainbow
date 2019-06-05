@@ -125,7 +125,7 @@ public class SimulationSelectionWindow {
 					comp.setBackground(m_list.getSelectionBackground());
 				} else {
 					panel.setBackground(m_list.getBackground());
-					comp.setBackground(m_list.getBackground());
+					comp.setBackground(m_list.getBackground()); 
 				}
 				return panel;
 			}
