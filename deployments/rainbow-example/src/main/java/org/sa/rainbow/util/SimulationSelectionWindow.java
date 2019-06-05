@@ -166,18 +166,19 @@ public class SimulationSelectionWindow {
 						final List<Integer> ar = m_arrivalRates.get(index);
 						new Thread(() -> {
 							int sec = 0;
-							ValueMarker tm = null; 
-							
+							ValueMarker tm = new ValueMarker(1000*sec); 
+							tm.setPaint(Color.BLACK);
+							tm.setStroke(new BasicStroke(2));
+							xyplot.addDomainMarker(tm);
+
 							while (sec < ar.size()) {
-								if (tm != null) {
-									xyplot.removeDomainMarker(tm);
-								}
+//								if (tm != null) {
+//									xyplot.removeDomainMarker(tm);
+//								}
 								
 								l.setText("Simulation Running..." + DurationFormatUtils.formatDuration(sec*1000, "HH:mm:ss", true));
-								tm = new ValueMarker(1000*sec++);
-								tm.setPaint(Color.BLACK);
-								tm.setStroke(new BasicStroke(2));
-								xyplot.addDomainMarker(tm);
+								tm.setValue(1000*sec++);
+								xyplot.setDataset(xyplot.getDataset());
 								m_list.revalidate();
 								try {
 									Thread.sleep(1000);
