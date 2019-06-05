@@ -3,8 +3,11 @@ package org.sa.rainbow.initializer.configuration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import static org.junit.Assert.assertEquals;
+
 import org.sa.rainbow.initializer.models.Variable;
+
 import java.io.File;
 import java.io.*;
 import java.util.*;
@@ -15,8 +18,8 @@ import java.nio.file.Files;
 public class ConfigurationTest {
     private Path tempPath;
 
-    private void createConfigProperties(File configFile) throws IOException{
-        try(BufferedWriter writer = new BufferedWriter(new FileWriter(configFile))){
+    private void createConfigProperties(File configFile) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(configFile))) {
             Properties properties = new Properties();
             properties.setProperty("probe", "DimmerProbe");
             properties.setProperty("mode", "continual");
@@ -24,13 +27,15 @@ public class ConfigurationTest {
             properties.store(writer, "test");
         }
     }
+
     @Before
-    public void setup() throws Exception{
+    public void setup() throws Exception {
         tempPath = Files.createTempDirectory("config");
         createConfigProperties(tempPath.resolve("test.properties").toFile());
     }
+
     @After
-    public void tearDown() throws Exception{
+    public void tearDown() throws Exception {
         // delete everything under tempPath
         Files.walk(tempPath).sorted(Comparator.reverseOrder()).forEach(path -> {
             try {
@@ -40,8 +45,9 @@ public class ConfigurationTest {
             }
         });
     }
+
     @Test
-    public void load() throws Exception{
+    public void load() throws Exception {
         ConfigurationLoader config = new ConfigurationLoader();
         List<Variable> list = new ArrayList<>();
         Variable v = new Variable("probe");
@@ -53,7 +59,7 @@ public class ConfigurationTest {
             Map<String, String> result = config.getConfig();
             assertEquals("DimmerProbe", result.get("probe"));
             assertEquals("continual", result.get("mode"));
-        }catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
