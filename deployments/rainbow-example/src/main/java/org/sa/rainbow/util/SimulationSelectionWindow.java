@@ -112,6 +112,7 @@ public class SimulationSelectionWindow {
 				comp.setMaximumSize(new Dimension(500, 120));
 				panel.add(comp);
 				panel.add(label);
+				panel.setSize(500, 120);
 				return panel;
 			}
 		});
