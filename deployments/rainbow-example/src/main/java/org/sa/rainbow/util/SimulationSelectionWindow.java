@@ -94,7 +94,7 @@ public class SimulationSelectionWindow {
 		m_frame.getContentPane().add(m_label, BorderLayout.NORTH);
 
 		m_scrollPane = new JScrollPane();
-		m_frame.getContentPane().add(m_scrollPane, BorderLayout.WEST);
+		m_frame.getContentPane().add(m_scrollPane, BorderLayout.CENTER);
 
 		m_list = new JList();
 		m_scrollPane.setViewportView(m_list);
