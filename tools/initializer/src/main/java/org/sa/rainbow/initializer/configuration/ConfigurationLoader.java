@@ -41,7 +41,7 @@ public class ConfigurationLoader {
     }
 
     /* Load configuration setting from a file (java .properties file) */
-    public void loadConfiguration(File file){
+    public void loadConfiguration(File file) throws IOException{
 
         try (InputStream input = new FileInputStream(file)) {
 
@@ -57,17 +57,12 @@ public class ConfigurationLoader {
                     config.put((String)entry.getKey(), (String)entry.getValue());
                 }
                 else{
-                    System.out.println("Variable error: variable don't exist.");
+                    throw new InvalidVariableException("Invalid variable in property files");
                 }
             }
 
-        } catch (IOException ex) {
-            ex.printStackTrace();
+
         }
-
     }
-
-//    public abstract Configuration load(String templatePath);
-
 
 }
