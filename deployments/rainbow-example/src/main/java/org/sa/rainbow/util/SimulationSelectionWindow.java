@@ -179,7 +179,7 @@ public class SimulationSelectionWindow {
 								l.setText("Simulation Running..." + DurationFormatUtils.formatDuration(sec*1000, "HH:mm:ss", true));
 								tm.setValue(1000*sec++);
 								xyplot.setDataset(xyplot.getDataset());
-								m_list.revalidate();
+								m_list.repaint();
 								try {
 									Thread.sleep(1000);
 								} catch (InterruptedException e1) {
