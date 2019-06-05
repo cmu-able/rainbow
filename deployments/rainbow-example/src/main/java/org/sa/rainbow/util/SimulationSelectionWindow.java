@@ -108,12 +108,19 @@ public class SimulationSelectionWindow {
 				JPanel panel = new JPanel();
 				panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
 				ChartPanel comp = m_seriesImages.get(index);
-				comp.setSize(500, 120);
+				comp.setSize(500, 100);
 				comp.setMaximumSize(new Dimension(500, 120));
+				comp.setPreferredSize(new Dimension(500,100));
 				panel.add(comp);
 				panel.add(label);
 				panel.setSize(500, 120);
-				if (isSelected) panel.setBackground(m_list.getBackground());
+				if (isSelected) {
+					panel.setBackground(m_list.getSelectionBackground());
+					comp.setBackground(m_list.getSelectionBackground());
+				} else {
+					panel.setBackground(m_list.getBackground());
+					comp.setBackground(m_list.getBackground());
+				}
 				return panel;
 			}
 		});
