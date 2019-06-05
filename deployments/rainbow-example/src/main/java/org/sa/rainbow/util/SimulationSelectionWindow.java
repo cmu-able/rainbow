@@ -109,6 +109,7 @@ public class SimulationSelectionWindow {
 				panel.add(label, BorderLayout.SOUTH);
 				panel.add(m_seriesImages.get(index), BorderLayout.CENTER);
 				panel.setSize(400, 120);
+				panel.setMaximumSize(new Dimension(400, 120));
 				return panel;
 			}
 		});
