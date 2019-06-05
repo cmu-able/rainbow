@@ -183,6 +183,7 @@ public class SimulationSelectionWindow {
 		chart.removeLegend();
 		((XYPlot) chart.getPlot()).clearAnnotations();
 		ChartPanel cp = new ChartPanel(chart);
+		cp.setSize(400, 100);
 		return cp;
 //		ImageIcon image = new ImageIcon(chart.createBufferedImage(400, 100));
 //		return image;
