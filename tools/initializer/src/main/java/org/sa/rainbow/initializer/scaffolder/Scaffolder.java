@@ -36,8 +36,8 @@ public class Scaffolder {
     /**
      * Constructs a scaffolder instance with given TemplateSet and corresponding configuration.
      *
-     * @param templateSet   the template set.
-     * @param configuration the corresponding configuration.
+     * @param templateSet   the template set
+     * @param configuration the corresponding configuration
      */
     public Scaffolder(TemplateSet templateSet, Map<String, String> configuration) {
         this.templateSet = templateSet;
@@ -60,12 +60,27 @@ public class Scaffolder {
         this.configuration = configuration;
     }
 
+    /**
+     * Generate a single file using template, and write its content to the given path.
+     * The given path must be writable.
+     *
+     * @param path     the path to write to
+     * @param template the template to process
+     * @throws IOException       if the output path cannot be written to
+     * @throws TemplateException if we cannot process the template
+     */
     private void writeFile(Path path, Template template) throws IOException, TemplateException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(path.toFile()))) {
             template.process(configuration, writer);
         }
     }
 
+    /**
+     * Generates the working directory with template set and configuration.
+     *
+     * @throws IOException          if the working directory cannot be written to
+     * @throws ScaffoldingException if a variable is missing or a template is invalid
+     */
     public void scaffold() throws IOException, ScaffoldingException {
         try {
             for (Map.Entry<String, Template> entry : templateSet.getTemplates().entrySet()) {
