@@ -13,6 +13,8 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -29,6 +31,7 @@ import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.apache.commons.lang.time.DurationFormatUtils;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -49,6 +52,9 @@ public class SimulationSelectionWindow {
 	private JScrollPane m_scrollPane;
 	private List<List<Integer>> m_arrivalRates = new ArrayList<>();
 
+	private static final SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
+
+	
 	/**
 	 * Launch the application.
 	 */
@@ -166,12 +172,13 @@ public class SimulationSelectionWindow {
 								if (tm != null) {
 									xyplot.removeDomainMarker(tm);
 								}
-								l.setText("Simulation Running..." + sec + "secs");
+								
+								l.setText("Simulation Running..." + DurationFormatUtils.formatDuration(sec*1000, "**H:mm:ss", true));
 								tm = new ValueMarker(1000*sec++);
 								tm.setPaint(Color.BLACK);
 								tm.setStroke(new BasicStroke(2));
 								xyplot.addDomainMarker(tm);
-								
+								cp.repaint();
 								try {
 									Thread.sleep(1000);
 								} catch (InterruptedException e1) {
