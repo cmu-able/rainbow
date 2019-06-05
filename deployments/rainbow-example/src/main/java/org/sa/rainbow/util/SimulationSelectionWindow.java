@@ -5,6 +5,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -19,7 +20,6 @@ import java.util.List;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -137,20 +137,28 @@ public class SimulationSelectionWindow {
 						Process p = pb.start();
 						Container parent = m_btnRunSwimSimulation.getParent();
 						parent.remove(m_btnRunSwimSimulation);
-						JLabel l = new JLabel("Simulation Running...");
+						final JLabel l = new JLabel("Simulation Running...");
 						parent.add(l);
-						
+						parent.repaint();
 						ChartPanel cp = m_seriesImages.get(index);
 						final XYPlot xyplot = cp.getChart().getXYPlot();
-						final ValueMarker tm = new ValueMarker(0);
-						tm.setPaint(Color.GREEN);
-						xyplot.addDomainMarker(tm);
+						
 						
 						final List<Integer> ar = m_arrivalRates.get(index);
 						new Thread(() -> {
 							int sec = 0;
+							ValueMarker tm = null; 
+							
 							while (sec < ar.size()) {
-								tm.setValue(sec++);
+								if (tm != null) {
+									xyplot.removeDomainMarker(tm);
+								}
+								tm = new ValueMarker(sec);
+								tm.setPaint(Color.BLACK);
+								tm.setStroke(new BasicStroke(2));
+								xyplot.addDomainMarker(tm);
+								
+								l.setText("Simulation Running..." + sec + "secs");
 								try {
 									Thread.sleep(1000);
 								} catch (InterruptedException e1) {
@@ -177,13 +185,14 @@ public class SimulationSelectionWindow {
 			series.add(new Second(new Date(1000 * s++)), i, true);
 		}
 		JFreeChart chart = ChartFactory.createTimeSeriesChart(null, null, null, tsc, false, false, false);
-		chart.getXYPlot().getRenderer().setSeriesStroke(0, new BasicStroke(2));
+		chart.getXYPlot().getRenderer().setSeriesStroke(0, new BasicStroke(1));
 		chart.getXYPlot().getRangeAxis().setVisible(false);
 		chart.getXYPlot().getDomainAxis().setVisible(false);
 		chart.removeLegend();
 		((XYPlot) chart.getPlot()).clearAnnotations();
 		ChartPanel cp = new ChartPanel(chart);
 		cp.setSize(400, 100);
+		cp.setMaximumSize(new Dimension(400,100));
 		return cp;
 //		ImageIcon image = new ImageIcon(chart.createBufferedImage(400, 100));
 //		return image;
