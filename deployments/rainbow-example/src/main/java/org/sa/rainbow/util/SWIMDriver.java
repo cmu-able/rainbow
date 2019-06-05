@@ -63,6 +63,7 @@ public class SWIMDriver {
 		
 		SimulationSelectionWindow window = new SimulationSelectionWindow();
 		for (String f : files) {
+			f = f.replaceAll("\\\"", "");
 			List<Integer> ar = getArrivalRate(wd + f);
 			window.addSimulationSeries(ar, f);
 		}
