@@ -178,7 +178,7 @@ public class SimulationSelectionWindow {
 								tm.setPaint(Color.BLACK);
 								tm.setStroke(new BasicStroke(2));
 								xyplot.addDomainMarker(tm);
-								cp.getChart().fireChartChanged();
+								m_list.revalidate();
 								try {
 									Thread.sleep(1000);
 								} catch (InterruptedException e1) {
