@@ -103,8 +103,11 @@ RUN echo "export SOCAT_PORT=4242" >> /headless/.bashrc
 COPY deployments/rainbow-example/docker/rainbow.png /headless/
 COPY deployments/rainbow-example/docker/SWIM.png /headless/
 COPY deployments/rainbow-example/docker/Rainbow.desktop /headless/Desktop
-COPY deployments/rainbow-example/docker/SWIM.desktop /headless/Desktop
+#COPY deployments/rainbow-example/docker/SWIM.desktop /headless/Desktop
 COPY deployments/rainbow-example/docker/Rainbow-debug.desktop /headless/Desktop
+COPY deployments/rainbow-example/docker/SWIM-driver.desktop /headless/Desktop
+COPY deployments/rainbow-example/docker/swim-driver.sh /rainbow
+RUN chmod +x /rainbow/swim-driver.sh
 RUN echo "BUILD_ENV=$BUILD_ENV"
 RUN if [ "$BUILD_ENV" != "debug" ]; then rm -f /headless/Desktop/Rainbow-debug.desktop; fi
 RUN chmod +x /headless/Desktop/*
