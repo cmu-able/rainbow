@@ -107,12 +107,12 @@ public class SimulationSelectionWindow {
 		m_list.setFixedCellHeight(120);
 		m_list.setCellRenderer(new DefaultListCellRenderer() {
 			@Override
-			public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
+			public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
 					boolean cellHasFocus) {
 				JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected,
 						cellHasFocus);
 				JPanel panel = new JPanel();
-				panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+				panel.setLayout(new BoxLayout(panel,BoxLayout.X_AXIS));
 				ChartPanel comp = m_seriesImages.get(index);
 				comp.setSize(500, 100);
 				comp.setMaximumSize(new Dimension(500, 120));
