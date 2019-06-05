@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.swing.BoxLayout;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -105,9 +106,13 @@ public class SimulationSelectionWindow {
 				JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected,
 						cellHasFocus);
 				JPanel panel = new JPanel();
-				panel.setLayout(new BorderLayout());
-				panel.add(label, BorderLayout.SOUTH);
-				panel.add(m_seriesImages.get(index), BorderLayout.CENTER);
+				panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+				ChartPanel comp = m_seriesImages.get(index);
+				comp.setSize(400, 120);
+				comp.setMaximumSize(new Dimension(400, 120));
+				panel.add(comp);
+				panel.add(label);
+
 				panel.setSize(400, 120);
 				panel.setMaximumSize(new Dimension(400, 120));
 				return panel;
