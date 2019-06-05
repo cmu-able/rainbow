@@ -173,7 +173,7 @@ public class SimulationSelectionWindow {
 									xyplot.removeDomainMarker(tm);
 								}
 								
-								l.setText("Simulation Running..." + DurationFormatUtils.formatDuration(sec*1000, "**H:mm:ss", true));
+								l.setText("Simulation Running..." + DurationFormatUtils.formatDuration(sec*1000, "HH:mm:ss", true));
 								tm = new ValueMarker(1000*sec++);
 								tm.setPaint(Color.BLACK);
 								tm.setStroke(new BasicStroke(2));
