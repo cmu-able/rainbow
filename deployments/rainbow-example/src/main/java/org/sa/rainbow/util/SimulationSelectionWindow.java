@@ -111,8 +111,9 @@ public class SimulationSelectionWindow {
 					boolean cellHasFocus) {
 				JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected,
 						cellHasFocus);
+				label.setPreferredSize(new Dimension(500,20));
 				JPanel panel = new JPanel();
-				panel.setLayout(new BoxLayout(panel,BoxLayout.X_AXIS));
+				panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
 				ChartPanel comp = m_seriesImages.get(index);
 				comp.setSize(500, 100);
 				comp.setMaximumSize(new Dimension(500, 120));
