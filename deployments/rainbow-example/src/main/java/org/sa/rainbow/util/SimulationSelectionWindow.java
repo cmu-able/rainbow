@@ -98,7 +98,7 @@ public class SimulationSelectionWindow {
 
 		m_list = new JList();
 		m_scrollPane.setViewportView(m_list);
-
+		m_list.setFixedCellHeight(120);
 		m_list.setCellRenderer(new DefaultListCellRenderer() {
 			@Override
 			public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
@@ -113,6 +113,7 @@ public class SimulationSelectionWindow {
 				panel.add(comp);
 				panel.add(label);
 				panel.setSize(500, 120);
+				if (isSelected) panel.setBackground(m_list.getBackground());
 				return panel;
 			}
 		});
