@@ -1,4 +1,4 @@
-- variables:
+variables:
     - project_name:
         description: name of the project
         default: example_project
@@ -54,27 +54,27 @@
         description: name of a gauge instance
         default: LoadG1
 
-- files:
-    model/gauges.yml
-    model/swim.acme
-    model/swim.mtd
-    model/tsp.yml
+files:
+    - model/gauges.yml.ftl
+    - model/swim.acme.ftl
+    - model/swim.mtd.ftl
+    - model/tsp.yml.ftl
     # model/.acmeproject: templates/model/.acmeproject.ftl
     # model/.project: templates/model/.project.ftl
-    'model/opera/Kalman Filter.dtd'
-    model/opera/brownout.kalman.config
-    model/opera/brownout.model.pxl
-    model/opera/opera.config
-    stitch/swimStrategies.s
-    stitch/swimTactics.t.s
-    stitch/utilities.yml
+    - model/opera/kalmanFilter.dtd.ftl
+    - model/opera/brownout.kalman.config.ftl
+    - model/opera/brownout.model.pxl.ftl
+    - model/opera/opera.config.ftl
+    - stitch/swimStrategies.s.ftl
+    - stitch/swimTactics.t.s.ftl
+    - stitch/utilities.yml.ftl
     # stitch/README.txt:
 
-    system/effectors.yml
-    system/probes.yml
-    system/effectors/defaultEffector.sh
-    system/probes/defaultProbe.pl
-    system/util/cmdhelper.sh
-    rainbow.properties
-    rainbow-gui.properties
-    ui.yml
+    - system/effectors.yml.ftl
+    - system/probes.yml.ftl
+    - system/effectors/defaultEffector.sh.ftl
+    - system/probes/defaultProbe.pl.ftl
+    - system/util/cmdhelper.sh.ftl
+    - rainbow.properties.ftl.ftl
+    - rainbow-gui.properties.ftl
+    - ui.yml.ftl
