@@ -46,19 +46,19 @@
         default: 1
   
 - files:
-    model/gauges.yml: templates/modelGauges.ftl
-    model/swim.acme: templates/modelSwimAcme.ftl
-    model/swim.mtd: templates/modelSwimMtd.ftl
-    model/tsp.yml: templates/modelTsp.ftl
-    # model/.acmeproject:
-    # model/.project:
-    'model/opera/Kalman Filter.dtd': templates/modelFilter.ftl
-    model/opera/brownout.kalman.config: templates/modelConfig.ftl
-    model/opera/brownout.model.pxl: templates/modelBrownout.ftl
-    model/opera/opera.config: templates/operaConfig.ftl
-    stitch/swimStrategies.s: templates/swimStrategies.ftl
-    stitch/swimTactics.t.s: templates/swimTactics.ftl
-    stitch/utilities.yml: templates/stitchUtil.ftl
+    model/gauges.yml: templates/model/gauges.yml.ftl
+    model/swim.acme: templates/model/swim.acme.ftl
+    model/swim.mtd: templates/model/swim.mtd.ftl
+    model/tsp.yml: templates/model/tsp.yml.ftl
+    model/.acmeproject: templates/model/.acmeproject.ftl
+    model/.project: templates/model/.project.ftl
+    'model/opera/Kalman Filter.dtd': templates/model/opera/kalmanFilter.dtd.ftl
+    model/opera/brownout.kalman.config: templates/model/opera/brownout.kalman.config.ftl
+    model/opera/brownout.model.pxl: templates/model/opera/brownout.model.pxl.ftl
+    model/opera/opera.config: templates/model/opera/opera.config.ftl
+    stitch/swimStrategies.s: templates/stitch/swimStrategies.s.ftl
+    stitch/swimTactics.t.s: templates/stitch/swimTactics.t.s.ftl
+    stitch/utilities.yml: templates/stitch/utilities.yml.ftl
     # stitch/README.txt:
 
     system/effectors.yml: templates/system/effectors.yml.ftl
