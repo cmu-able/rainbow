@@ -51,8 +51,8 @@
         description: name of a gauge type
         default: LoadGaugeT
     - gaugeInstanceName:
-          description: name of a gauge instance
-          default: LoadG1
+        description: name of a gauge instance
+        default: LoadG1
 
 - files:
     model/gauges.yml: templates/model/gauges.yml.ftl
