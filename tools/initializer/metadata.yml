@@ -44,14 +44,23 @@
     - number_of_effector_managers:
         description: number of effector managers the target would have
         default: 1
-  
+    - utilName:
+        description: name of a utility
+        default: default_util
+    - gaugeTypeName:
+        description: name of a gauge type
+        default: LoadGaugeT
+    - gaugeInstanceName:
+          description: name of a gauge instance
+          default: LoadG1
+
 - files:
     model/gauges.yml: templates/model/gauges.yml.ftl
     model/swim.acme: templates/model/swim.acme.ftl
     model/swim.mtd: templates/model/swim.mtd.ftl
     model/tsp.yml: templates/model/tsp.yml.ftl
-    model/.acmeproject: templates/model/.acmeproject.ftl
-    model/.project: templates/model/.project.ftl
+    # model/.acmeproject: templates/model/.acmeproject.ftl
+    # model/.project: templates/model/.project.ftl
     'model/opera/Kalman Filter.dtd': templates/model/opera/kalmanFilter.dtd.ftl
     model/opera/brownout.kalman.config: templates/model/opera/brownout.kalman.config.ftl
     model/opera/brownout.model.pxl: templates/model/opera/brownout.model.pxl.ftl
