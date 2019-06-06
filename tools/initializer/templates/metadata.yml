@@ -55,26 +55,26 @@
         default: LoadG1
 
 - files:
-    model/gauges.yml: templates/model/gauges.yml.ftl
-    model/swim.acme: templates/model/swim.acme.ftl
-    model/swim.mtd: templates/model/swim.mtd.ftl
-    model/tsp.yml: templates/model/tsp.yml.ftl
+    model/gauges.yml
+    model/swim.acme
+    model/swim.mtd
+    model/tsp.yml
     # model/.acmeproject: templates/model/.acmeproject.ftl
     # model/.project: templates/model/.project.ftl
-    'model/opera/Kalman Filter.dtd': templates/model/opera/kalmanFilter.dtd.ftl
-    model/opera/brownout.kalman.config: templates/model/opera/brownout.kalman.config.ftl
-    model/opera/brownout.model.pxl: templates/model/opera/brownout.model.pxl.ftl
-    model/opera/opera.config: templates/model/opera/opera.config.ftl
-    stitch/swimStrategies.s: templates/stitch/swimStrategies.s.ftl
-    stitch/swimTactics.t.s: templates/stitch/swimTactics.t.s.ftl
-    stitch/utilities.yml: templates/stitch/utilities.yml.ftl
+    'model/opera/Kalman Filter.dtd'
+    model/opera/brownout.kalman.config
+    model/opera/brownout.model.pxl
+    model/opera/opera.config
+    stitch/swimStrategies.s
+    stitch/swimTactics.t.s
+    stitch/utilities.yml
     # stitch/README.txt:
 
-    system/effectors.yml: templates/system/effectors.yml.ftl
-    system/probes.yml: templates/system/probes.yml.ftl
-    system/effectors/defaultEffector.sh: templates/system/effectors/defaultEffector.sh.ftl
-    system/probes/defaultProbe.pl: templates/system/probes/defaultProbe.pl.ftl
-    system/util/cmdhelper.sh: templates/cmdHelper.sh.ftl
-    rainbow.properties: templates/rainbow.ftl
-    rainbow-gui.properties: templates/rainbow-gui.ftl
-    ui.yml: templates/ui.ftl
+    system/effectors.yml
+    system/probes.yml
+    system/effectors/defaultEffector.sh
+    system/probes/defaultProbe.pl
+    system/util/cmdhelper.sh
+    rainbow.properties
+    rainbow-gui.properties
+    ui.yml
