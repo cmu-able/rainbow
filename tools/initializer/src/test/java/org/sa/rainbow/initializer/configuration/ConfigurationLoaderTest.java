@@ -3,27 +3,28 @@ package org.sa.rainbow.initializer.configuration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.sa.rainbow.initializer.models.Variable;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 
-import org.sa.rainbow.initializer.models.Variable;
 
-import java.io.File;
-import java.io.*;
-import java.util.*;
-import java.nio.file.Path;
-import java.nio.file.Files;
-
-
-public class ConfigurationTest {
+public class ConfigurationLoaderTest {
     private Path tempPath;
+    private File testProperties;
 
     private void createConfigProperties(File configFile) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(configFile))) {
             Properties properties = new Properties();
             properties.setProperty("probe", "DimmerProbe");
             properties.setProperty("mode", "continual");
-
             properties.store(writer, "test");
         }
     }
@@ -31,7 +32,8 @@ public class ConfigurationTest {
     @Before
     public void setup() throws Exception {
         tempPath = Files.createTempDirectory("config");
-        createConfigProperties(tempPath.resolve("test.properties").toFile());
+        testProperties = tempPath.resolve("test.properties").toFile();
+        createConfigProperties(testProperties);
     }
 
     @After
@@ -48,21 +50,25 @@ public class ConfigurationTest {
 
     @Test
     public void load() throws Exception {
-        ConfigurationLoader config = new ConfigurationLoader();
         List<Variable> list = new ArrayList<>();
-        Variable v = new Variable("probe");
-        list.add(v);
+        list.add(new Variable("probe"));
         list.add(new Variable("mode"));
-        config.setLocalVariables(list);
+        list.add(new Variable("should-have-default", "should have default value", "default"));
+        ConfigurationLoader config = new ConfigurationLoader(list);
         try {
-            config.loadConfiguration(tempPath.resolve("test.properties").toFile());
-            Map<String, String> result = config.getConfig();
+            Map<String, String> result = config.loadConfiguration(testProperties);
             assertEquals("DimmerProbe", result.get("probe"));
             assertEquals("continual", result.get("mode"));
+            assertEquals("default", result.get("should-have-default"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
     }
 
+    @Test(expected = InvalidVariableException.class)
+    public void invalidVariable() throws Exception {
+        List<Variable> variables = Collections.singletonList(new Variable("allowed"));
+        (new ConfigurationLoader(variables)).loadConfiguration(testProperties); // should throw an exception
+    }
 }
