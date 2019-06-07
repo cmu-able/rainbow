@@ -1,1 +1,0 @@
-# effector execution definition goes here
