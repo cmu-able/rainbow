@@ -13,7 +13,6 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.Map;
 
 public class IntegrationTests {
@@ -28,10 +27,14 @@ public class IntegrationTests {
     }
 
     @Test
-    public void createDefaultTarget() throws Exception{
+    public void createDefaultTarget() throws Exception {
         TemplateSetLoader loader = new FileTemplateSetLoader(new File("templates"));
         TemplateSet templateSet = loader.load();
-        Map<String, String> configuration = Collections.emptyMap();
+        File tempFile = File.createTempFile("integration", ".properties");
+        tempFile.deleteOnExit();
+        Files.write(tempFile.toPath(), new byte[]{});
+        ConfigurationLoader configurationLoader = new ConfigurationLoader(templateSet.getVariables());
+        Map<String, String> configuration = configurationLoader.loadConfiguration(tempFile);
         Scaffolder scaffolder = new Scaffolder(templateSet, configuration);
         scaffolder.scaffold();
     }
