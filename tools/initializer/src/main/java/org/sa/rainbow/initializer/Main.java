@@ -131,7 +131,6 @@ public class Main {
 
                     ConfigurationLoader configurationLoader = new ConfigurationLoader(templateSet.getVariables());
                     Map<String, Object> configuration = configurationLoader.loadConfiguration(file.toFile());
-
                     Scaffolder scaffolder = new Scaffolder(templateSet, configuration);
                     scaffolder.setBaseDirectory(Paths.get(".")); //TODO: make it a parameter
                     scaffolder.scaffold();
