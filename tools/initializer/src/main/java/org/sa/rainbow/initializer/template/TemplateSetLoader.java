@@ -19,6 +19,10 @@ import java.util.Collections;
  */
 public abstract class TemplateSetLoader {
     /**
+     * The suffix of all template files.
+     */
+    public static final String TEMPLATE_EXTENSION = ".ftl";
+    /**
      * The name of metadata file.
      */
     protected static final String METADATA_FILENAME = "metadata.yml";
