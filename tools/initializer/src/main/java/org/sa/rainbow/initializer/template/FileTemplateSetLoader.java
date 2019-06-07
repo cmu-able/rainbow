@@ -39,7 +39,7 @@ public class FileTemplateSetLoader extends TemplateSetLoader {
      */
     @Override
     protected Template loadTemplate(String path) throws IOException {
-        return configuration.getTemplate(path + ".tfl");
+        return configuration.getTemplate(path + TEMPLATE_EXTENSION);
     }
 
     /**
