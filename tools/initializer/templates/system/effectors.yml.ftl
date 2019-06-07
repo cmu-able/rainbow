@@ -4,7 +4,7 @@ vars:
   
 
 effectors:
-  [=default_effector]:
+  [=effector]:
     location: 
     command: 
     type: 

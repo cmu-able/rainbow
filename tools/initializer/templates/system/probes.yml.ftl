@@ -2,7 +2,7 @@ vars:
   _probes.commonPath: "${rainbow.path}/system/probes"
 
 probes:
-  [=default_probe]:
+  [=probe]:
     alias: 
     location: 
     type: 
