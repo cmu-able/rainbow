@@ -55,7 +55,7 @@ public abstract class TemplateSetLoader {
      */
     protected Metadata loadMetadata(Reader reader) throws InvalidMetadataException {
         Yaml yaml = new Yaml();
-        Metadata metadata = yaml.load(reader);
+        Metadata metadata = yaml.loadAs(reader, Metadata.class);
         if (metadata.getFiles() == null) {
             throw new InvalidMetadataException("field 'files' is required in metadata.");
         }

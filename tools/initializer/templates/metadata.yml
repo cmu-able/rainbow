@@ -1,0 +1,97 @@
+variables:
+  - name: project_name
+    description: name of the project
+    value: example_project
+
+  - name: probe
+    description: name of your first probe in the system
+    value: default_probe
+
+  - name: gauge
+    description: name of your first gauge in the system
+    value: default_gauge
+
+  - name: effector
+    description: name of your first effector in the system
+    value: default_effector
+
+  - name: logging_level
+    description: Config for Log4J, with levels OFF,FATAL,ERROR,WARN,INFO,DEBUG,TRACE,ALL
+    value: DEBUG
+
+  - name: event_log_path
+    description: path to which events would be logged to
+    value: log
+
+  - name: rainbow_master_location_host
+    description: Location information of the master and this deployment
+    value: 127.0.0.1
+
+  - name: rainbow_deployment_location
+    description: Location information of the deployed delegate
+    value: 127.0.0.1
+
+  - name: rainbow_deployment_environment
+    description: Use "cygwin" for Windows, "linux" for MacOSX
+    value: linux
+
+  - name: rainbow_event_service
+    description: Event infrastructure, type of event middleware rmi | jms | que | eseb
+    value: eseb
+
+  - name: number_of_models
+    description: number of models the target would have
+    value: 1
+
+  - name: number_of_analyses
+    description: number of analyses the target would have
+    value: 1
+
+  - name: number_of_adaption_managers
+    description: number of adaptation managers the target would have
+    value: 1
+
+  - name: number_of_adaption_executors
+    description: number of adaptation executors the target would have
+    value: 1
+
+  - name: number_of_effector_managers
+    description: number of effector managers the target would have
+    value: 1
+
+  - name: utilName
+    description: name of a utility
+    value: default_util
+
+  - name: gaugeTypeName
+    description: name of a gauge type
+    value: LoadGaugeT
+
+  - name: gaugeInstanceName
+    description: name of a gauge instance
+    value: LoadG1
+
+files:
+  - model/gauges.yml
+  - model/swim.acme
+  - model/swim.mtd
+  - model/tsp.yml
+  # model/.acmeproject: templates/model/.acmeproject
+  # model/.project: templates/model/.project
+  - model/opera/kalmanFilter.dtd
+  - model/opera/brownout.kalman.config
+  - model/opera/brownout.model.pxl
+  - model/opera/opera.config
+  - stitch/swimStrategies.s
+  - stitch/swimTactics.t.s
+  - stitch/utilities.yml
+  # stitch/README.txt:
+
+  - system/effectors.yml
+  - system/probes.yml
+  - system/effectors/defaultEffector.sh
+  - system/probes/defaultProbe.pl
+  - system/util/cmdhelper.sh
+  - rainbow.properties
+  - rainbow-gui.properties
+  - ui.yml
