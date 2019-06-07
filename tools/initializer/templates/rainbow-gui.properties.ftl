@@ -47,7 +47,7 @@ rainbow.deployment.factory.class = org.sa.rainbow.core.ports.guava.GuavaRainbowP
 rainbow.model.number=[=number_of_models]
 
 # Rainbow Acme model
-[#list 1..number_of_models as num]
+[#list 1..number_of_models?number as num]
 	rainbow.model.path_[=num] = 
 	rainbow.model.load.class_[=num] = 
 	rainbow.model.name_[=num] = 
@@ -58,7 +58,7 @@ rainbow.model.number=[=number_of_models]
 ### Rainbow analyses
 rainbow.analyses.size = [=number_of_analyses]
 # Checks architecture for architectural errors
-[#list 1..number_of_analyses as num]
+[#list 1..number_of_analyses?number as num]
 	rainbow.analyses_[=num] = org.sa.rainbow.evaluator.acme.ArchEvaluator
 [/#list]
 
@@ -69,19 +69,19 @@ rainbow.adaptation.pla.operaConfig = model/opera/opera.config
 rainbow.adaptation.plasb.prismTemplate = template.prism
 
 rainbow.adaptation.manager.size = [=number_of_adaption_managers]
-[#list 1..number_of_adaption_managers as num]
+[#list 1..number_of_adaption_managers?number as num]
 	rainbow.adaptation.manager.class_[=num] = org.sa.rainbow.stitch.adaptation.AdaptationManager
 	rainbow.adaptation.manager.model_[=num] = 
 [/#list]
 
 rainbow.adaptation.executor.size = [=number_of_adaption_executors]
-[#list 1..number_of_adaption_executors as num]
+[#list 1..number_of_adaption_executors?number as num]
 	rainbow.adaptation.executor.class_[=num] = org.sa.rainbow.stitch.adaptation.StitchExecutor
 	rainbow.adaptation.executor.model_[=num] = 
 [/#list]
 
 rainbow.effector.manager.size = [=number_of_effector_managers]
-[#list 1..number_of_effector_managers as num]
+[#list 1..number_of_effector_managers?number as num]
 	rainbow.effector.manager.class_[=num] = org.sa.rainbow.effectors.acme.AcmeEffectorManager
 [/#list]
 
