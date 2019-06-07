@@ -73,8 +73,8 @@ variables:
 
 files:
   - model/gauges.yml
-  - model/swim.acme
-  - model/swim.mtd
+  - model/example_project.acme
+  - model/example_project.mtd
   - model/tsp.yml
   # model/.acmeproject: templates/model/.acmeproject
   # model/.project: templates/model/.project
@@ -82,8 +82,8 @@ files:
   - model/opera/brownout.kalman.config
   - model/opera/brownout.model.pxl
   - model/opera/opera.config
-  - stitch/swimStrategies.s
-  - stitch/swimTactics.t.s
+  - stitch/example_projectStrategies.s
+  - stitch/example_projectTactics.t.s
   - stitch/utilities.yml
   # stitch/README.txt:
 
