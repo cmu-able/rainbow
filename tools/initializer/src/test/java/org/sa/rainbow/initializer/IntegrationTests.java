@@ -15,6 +15,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
+import static org.junit.Assert.assertNotEquals;
+
 public class IntegrationTests {
 
     private Path tempDirectory;
@@ -36,6 +38,7 @@ public class IntegrationTests {
         ConfigurationLoader configurationLoader = new ConfigurationLoader(templateSet.getVariables());
         Map<String, String> configuration = configurationLoader.loadConfiguration(tempFile);
         Scaffolder scaffolder = new Scaffolder(templateSet, configuration);
+        scaffolder.setBaseDirectory(tempDirectory);
         scaffolder.scaffold();
     }
 }
