@@ -160,6 +160,7 @@ public class SimulationSelectionWindow {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				if (!this.isEnabled()) return;
 				int index = m_list.getSelectedIndex();
 				if (index != -1) {
 					String[] cmds = new String[] { "xterm", "-e",
@@ -174,6 +175,7 @@ public class SimulationSelectionWindow {
 						final JLabel l = new JLabel("Simulation Running...");
 						parent.add(l);
 						parent.repaint();
+						this.setEnabled(false);
 						ChartPanel cp = m_seriesImages.get(index);
 						final XYPlot xyplot = cp.getChart().getXYPlot();
 						
