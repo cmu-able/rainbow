@@ -52,10 +52,11 @@ public class GaugeTabbedPane extends JTabbedPane implements PropertyChangeListen
 			model.removePropertyChangeListener(this);
 		}
 		m_gaugeModel = model;
-		m_gaugeModel.addPropertyChangeListener(this);
-		clearTable((DefaultTableModel) m_publishedOperations.getModel());
+//		clearTable((DefaultTableModel) m_publishedOperations.getModel());
+		m_publishedOperations.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "Operation", "Target", "Parameters" }));
 		m_gaugeDetailPanel.initDataBindings(model);
 		updateOperationTable(model);
+		m_gaugeModel.addPropertyChangeListener(this);
 	}
 
 	protected void updateOperationTable(RainbowArchGaugeModel model) {
