@@ -16,12 +16,11 @@ import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.swing.BoxLayout;
+import javax.swing.AbstractAction;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -155,8 +154,8 @@ public class SimulationSelectionWindow {
 				}
 			}
 		});
-
-		m_btnRunSwimSimulation.addActionListener(new ActionListener() {
+		
+		m_btnRunSwimSimulation.setAction(new AbstractAction() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -210,7 +209,10 @@ public class SimulationSelectionWindow {
 
 				}
 			}
+			
 		});
+
+		
 	}
 
 	private ChartPanel getArrivalRateAsChart(List<Integer> arrivalRate) {
