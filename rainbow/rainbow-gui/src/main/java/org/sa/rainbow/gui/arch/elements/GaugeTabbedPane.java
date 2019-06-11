@@ -18,6 +18,7 @@ import org.sa.rainbow.gui.arch.model.RainbowArchGaugeModel;
 
 public class GaugeTabbedPane extends JTabbedPane implements PropertyChangeListener {
 	private RainbowArchGaugeModel m_gaugeModel;
+
 	public RainbowArchGaugeModel getGaugeModel() {
 		return m_gaugeModel;
 	}
@@ -28,30 +29,31 @@ public class GaugeTabbedPane extends JTabbedPane implements PropertyChangeListen
 
 	private GaugeDetailPanel m_gaugeDetailPanel;
 	private JTable m_publishedOperations;
-	
+
 	public GaugeTabbedPane() {
 		setTabPlacement(JTabbedPane.BOTTOM);
-		
+
 		JScrollPane scrollPane = new JScrollPane();
 		addTab("Operations", null, scrollPane, null);
-		
+
 		m_publishedOperations = new JTable(
 				new DefaultTableModel(new Object[][] {}, new String[] { "Operation", "Target", "Parameters" }));
-		
+
 		scrollPane.setViewportView(m_publishedOperations);
-		
+
 		m_gaugeDetailPanel = new GaugeDetailPanel();
-		addTab ("Specification", null, m_gaugeDetailPanel, null);
+		addTab("Specification", null, m_gaugeDetailPanel, null);
 	}
-	
+
 	public void initDataBindings(RainbowArchGaugeModel model) {
-		if (model == m_gaugeModel) return;
+		if (model == m_gaugeModel)
+			return;
 		if (model != null) {
 			model.removePropertyChangeListener(this);
 		}
 		m_gaugeModel = model;
 		m_gaugeModel.addPropertyChangeListener(this);
-		clearTable((DefaultTableModel )m_publishedOperations.getModel());
+		clearTable((DefaultTableModel) m_publishedOperations.getModel());
 		m_gaugeDetailPanel.initDataBindings(model);
 		updateOperationTable(model);
 	}
@@ -66,14 +68,13 @@ public class GaugeTabbedPane extends JTabbedPane implements PropertyChangeListen
 			((DefaultTableModel) m_publishedOperations.getModel()).addRow(row);
 		}
 	}
-	
-	
+
 	public static void clearTable(DefaultTableModel m) {
 		for (int i = 0; i < m.getRowCount(); i++) {
 			m.removeRow(0);
 		}
 	}
-	
+
 	public static String[] getOperationData(IRainbowOperation command) {
 		String[] data = new String[4];
 		data[0] = command.getName();
@@ -91,12 +92,17 @@ public class GaugeTabbedPane extends JTabbedPane implements PropertyChangeListen
 	public void propertyChange(PropertyChangeEvent evt) {
 		switch (evt.getPropertyName()) {
 		case RainbowArchGaugeModel.GAUGEREPORT:
-			((DefaultTableModel) m_publishedOperations.getModel()).insertRow(0, getOperationData((IRainbowOperation )evt.getNewValue()));
+			IRainbowOperation op = (IRainbowOperation) evt.getNewValue();
+			if (m_gaugeModel.getId().equals(op.getOrigin())) {
+				String[] operationData = getOperationData(op);
+				((DefaultTableModel) m_publishedOperations.getModel()).insertRow(0, operationData);
+			}
 			break;
 		case RainbowArchGaugeModel.GAUGEREPORTS:
-			List<IRainbowOperation> ops = (List )evt.getNewValue();
-			for (IRainbowOperation op : ops) {
-				((DefaultTableModel) m_publishedOperations.getModel()).insertRow(0, getOperationData((IRainbowOperation )evt.getNewValue()));
+			List<IRainbowOperation> ops = (List) evt.getNewValue();
+			for (IRainbowOperation o : ops) {
+				if (m_gaugeModel.getId().equals(o.getOrigin()))
+					((DefaultTableModel) m_publishedOperations.getModel()).insertRow(0, getOperationData(o));
 			}
 			break;
 		}

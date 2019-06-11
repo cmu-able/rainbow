@@ -10,6 +10,8 @@ import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
@@ -141,6 +143,15 @@ public class SimulationSelectionWindow {
 			public void valueChanged(ListSelectionEvent e) {
 				if (e.getFirstIndex() != -1) {
 					m_btnRunSwimSimulation.setEnabled(true);
+				}
+			}
+		});
+		
+		m_list.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2) {
+					m_btnRunSwimSimulation.getAction().actionPerformed(null);
 				}
 			}
 		});
