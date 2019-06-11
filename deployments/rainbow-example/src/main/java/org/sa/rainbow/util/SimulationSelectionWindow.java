@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -155,8 +156,8 @@ public class SimulationSelectionWindow {
 			}
 		});
 		
-		m_btnRunSwimSimulation.setAction(new AbstractAction() {
-
+		AbstractAction action = new AbstractAction() {
+			
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				int index = m_list.getSelectedIndex();
@@ -210,7 +211,9 @@ public class SimulationSelectionWindow {
 				}
 			}
 			
-		});
+		};
+		action.putValue(Action.NAME, "Run SWIM Simulation" );
+		m_btnRunSwimSimulation.setAction(action);
 
 		
 	}
