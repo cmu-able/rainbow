@@ -133,4 +133,9 @@ public class ReactiveDarknessPlanner extends AbstractRainbowRunnable implements 
 		return m_adaptationEnabled;
 	}
 
+	@Override
+	public ModelReference getManagedModel() {
+		return m_modelRef;
+	}
+
 }

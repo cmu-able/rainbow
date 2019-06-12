@@ -33,6 +33,7 @@ import org.sa.rainbow.core.adaptation.AdaptationTree;
 import org.sa.rainbow.core.adaptation.DefaultAdaptationTreeWalker;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
 import org.sa.rainbow.core.ports.IModelsManagerPort;
@@ -123,7 +124,12 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 		// (b) start listening to model events to generate new plans again
 
 		AdaptationResultsVisitor v = new AdaptationResultsVisitor(plan);
-		plan.visit(v);
+		try {
+			plan.visit(v);
+		} catch (RainbowException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		if (m_reportAdapted) {
 			if (v.m_allOk) {
 				BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTED.name(),
@@ -341,6 +347,11 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 			m_allOk &= adaptation.getOutcome();
 		}
 
+	}
+
+	@Override
+	public ModelReference getManagedModel() {
+		return m_modelRef;
 	}
 
 }
