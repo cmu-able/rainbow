@@ -550,7 +550,14 @@ public class RainbowWindoe extends RainbowWindow
 					Map<String, Object> setupParams = toMap(gInfo.getGaugeDesc().setupParams());
 					if (configParams.get("targetProbeType") instanceof String) {
 						String tpt = (String) configParams.get("targetProbeType");
-						processProbeIntoGauge(gInfo.getId(), gInfo, setupParams, tpt);
+						if (tpt.contains(",")) {
+							for (String probeId : tpt.split(",")) {
+								probeId = probeId.trim();
+								processProbeIntoGauge(gInfo.getId(), gInfo, setupParams, probeId);
+							}
+						}
+						else 
+							processProbeIntoGauge(gInfo.getId(), gInfo, setupParams, tpt);
 					}
 					if (configParams.get("targetProbeList") instanceof String) {
 						String probeIds = (String) configParams.get("targetProbeList");
