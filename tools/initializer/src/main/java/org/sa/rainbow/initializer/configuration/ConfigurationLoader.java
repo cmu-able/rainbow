@@ -49,6 +49,7 @@ public class ConfigurationLoader {
         try (InputStream input = new FileInputStream(file)) {
             Yaml yaml = new Yaml();
             tmpConfig = yaml.load(input);
+            if(tmpConfig == null) return config;
             for(Map.Entry element: tmpConfig.entrySet()){
                 String key = (String) element.getKey();
                 if (!variableNames.contains(key)) {

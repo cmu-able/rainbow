@@ -32,7 +32,7 @@ public class IntegrationTests {
     public void createDefaultTarget() throws Exception {
         TemplateSetLoader loader = new FileTemplateSetLoader(new File("templates"));
         TemplateSet templateSet = loader.load();
-        File tempFile = File.createTempFile("integration", ".properties");
+        File tempFile = File.createTempFile("integration", ".yml");
         tempFile.deleteOnExit();
         Files.write(tempFile.toPath(), new byte[]{});
         ConfigurationLoader configurationLoader = new ConfigurationLoader(templateSet.getVariables());
