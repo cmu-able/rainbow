@@ -1,1 +1,1 @@
-# This is a swim.acme file.
+# This is a model definition file.
