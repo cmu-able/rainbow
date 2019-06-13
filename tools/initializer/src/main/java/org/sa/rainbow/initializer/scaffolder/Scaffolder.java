@@ -31,7 +31,7 @@ public class Scaffolder {
     /**
      * A configuration is simply a K-V mapping of each variable to its value.
      */
-    private Map<String, String> configuration;
+    private Map<String, Object> configuration;
 
     /**
      * Constructs a scaffolder instance with given TemplateSet and corresponding configuration.
@@ -39,7 +39,7 @@ public class Scaffolder {
      * @param templateSet   the template set
      * @param configuration the corresponding configuration
      */
-    public Scaffolder(TemplateSet templateSet, Map<String, String> configuration) {
+    public Scaffolder(TemplateSet templateSet, Map<String, Object> configuration) {
         this.templateSet = templateSet;
         this.configuration = configuration;
     }
@@ -52,11 +52,11 @@ public class Scaffolder {
         this.templateSet = templateSet;
     }
 
-    public Map<String, String> getConfiguration() {
+    public Map<String, Object> getConfiguration() {
         return configuration;
     }
 
-    public void setConfiguration(Map<String, String> configuration) {
+    public void setConfiguration(Map<String, Object> configuration) {
         this.configuration = configuration;
     }
 

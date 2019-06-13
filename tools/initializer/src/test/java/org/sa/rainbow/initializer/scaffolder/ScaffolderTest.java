@@ -63,7 +63,7 @@ public class ScaffolderTest {
         Map<String, Template> templates = Collections.singletonMap("path/to/example.txt", configuration.getTemplate("example.txt.ftl"));
         List<Variable> variables = Collections.singletonList(new Variable("name"));
         TemplateSet templateSet = new TemplateSet(templates, variables);
-        Map<String, String> configuration = Collections.singletonMap("name", "world");
+        Map<String, Object> configuration = Collections.singletonMap("name", "world");
 
         Scaffolder scaffolder = new Scaffolder(templateSet, configuration);
         scaffolder.setBaseDirectory(baseDirectory);

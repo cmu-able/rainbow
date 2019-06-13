@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.Map.Entry;
+import org.yaml.snakeyaml.Yaml;
+
 
 /**
  * The Configuration class represent a set of key-values of required variables.
@@ -17,7 +19,7 @@ public class ConfigurationLoader {
     /**
      * A map of key values for the required variables.
      */
-    private final Map<String, String> defaultConfig;
+    private final Map<String, Object> defaultConfig;
 
     /**
      * A set of known variable names.
@@ -36,26 +38,27 @@ public class ConfigurationLoader {
     }
 
     /**
-     * Loads configuration setting from a file (java .properties file)
+     * Loads configuration setting from a Yaml file ( .yml file)
      *
      * @param file the properties file to load.
-     * @throws IOException if the file cannot be loaded as properties file.
+     * @throws IOException if the file cannot be loaded as Yaml file.
      */
-    public Map<String, String> loadConfiguration(File file) throws IOException {
-        Map<String, String> config = new HashMap<>(defaultConfig);
+    public Map<String, Object> loadConfiguration(File file) throws IOException {
+        Map<String, Object> config = new HashMap<>(defaultConfig);
+        Map<String, Object> tmpConfig;
         try (InputStream input = new FileInputStream(file)) {
-            Properties prop = new Properties();
-            prop.load(input);
-            Set<Entry<Object, Object>> entries = prop.entrySet();
-            for (Entry<Object, Object> entry : entries) {
-                String name = (String) entry.getKey();
-                String value = (String) entry.getValue();
-                // The name was not known as the name of a variable.
-                if (!variableNames.contains(name)) {
-                    throw new InvalidVariableException("unknown variable: " + name);
+            Yaml yaml = new Yaml();
+            tmpConfig = yaml.load(input);
+            if(tmpConfig == null) return config;
+            for(Map.Entry element: tmpConfig.entrySet()){
+                String key = (String) element.getKey();
+                if (!variableNames.contains(key)) {
+                    throw new InvalidVariableException("unknown variable: " + key);
+                }else {
+                    config.put(key,element.getValue());
                 }
-                config.put(name, value);
             }
+
         }
         return config;
     }
