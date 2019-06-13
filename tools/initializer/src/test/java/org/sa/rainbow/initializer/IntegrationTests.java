@@ -36,7 +36,7 @@ public class IntegrationTests {
         tempFile.deleteOnExit();
         Files.write(tempFile.toPath(), new byte[]{});
         ConfigurationLoader configurationLoader = new ConfigurationLoader(templateSet.getVariables());
-        Map<String, String> configuration = configurationLoader.loadConfiguration(tempFile);
+        Map<String, Object> configuration = configurationLoader.loadConfiguration(tempFile);
         Scaffolder scaffolder = new Scaffolder(templateSet, configuration);
         scaffolder.setBaseDirectory(tempDirectory);
         scaffolder.scaffold();

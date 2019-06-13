@@ -4,6 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.sa.rainbow.initializer.models.Variable;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -18,22 +19,23 @@ import static org.junit.Assert.assertEquals;
 
 public class ConfigurationLoaderTest {
     private Path tempPath;
-    private File testProperties;
+    private File testYML;
 
     private void createConfigProperties(File configFile) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(configFile))) {
-            Properties properties = new Properties();
-            properties.setProperty("probe", "DimmerProbe");
-            properties.setProperty("mode", "continual");
-            properties.store(writer, "test");
+            Map<String, Object> data = new HashMap<String, Object>();
+            data.put("probe", new String[]{"dimmerProbe", "genericProbe"});
+            data.put("mode", "continual");
+            Yaml yaml = new Yaml();
+            yaml.dump(data, writer);
         }
     }
 
     @Before
     public void setup() throws Exception {
         tempPath = Files.createTempDirectory("config");
-        testProperties = tempPath.resolve("test.properties").toFile();
-        createConfigProperties(testProperties);
+        testYML = tempPath.resolve("test.yml").toFile();
+        createConfigProperties(testYML);
     }
 
     @After
@@ -56,10 +58,17 @@ public class ConfigurationLoaderTest {
         list.add(new Variable("should-have-default", "should have default value", "default"));
         ConfigurationLoader config = new ConfigurationLoader(list);
         try {
-            Map<String, String> result = config.loadConfiguration(testProperties);
-            assertEquals("DimmerProbe", result.get("probe"));
+            Map<String, Object> result = config.loadConfiguration(testYML);
+            ArrayList<String> tmpList=new ArrayList<String>();
+            tmpList.add("dimmerProbe");
+            tmpList.add("genericProbe");
+            assertEquals(tmpList, result.get("probe"));
+            assertEquals(result.get("probe") instanceof ArrayList, true);
             assertEquals("continual", result.get("mode"));
+            assertEquals(result.get("mode") instanceof ArrayList, false);
             assertEquals("default", result.get("should-have-default"));
+            assertEquals(result.get("default") instanceof ArrayList, false);
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -69,6 +78,6 @@ public class ConfigurationLoaderTest {
     @Test(expected = InvalidVariableException.class)
     public void invalidVariable() throws Exception {
         List<Variable> variables = Collections.singletonList(new Variable("allowed"));
-        (new ConfigurationLoader(variables)).loadConfiguration(testProperties); // should throw an exception
+        (new ConfigurationLoader(variables)).loadConfiguration(testYML); // should throw an exception
     }
 }
