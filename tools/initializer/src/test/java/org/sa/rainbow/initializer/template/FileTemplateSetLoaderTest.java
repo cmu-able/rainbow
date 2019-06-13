@@ -56,7 +56,7 @@ public class FileTemplateSetLoaderTest {
         Files.createDirectory(simpleDirectory);
 
         createMetadata(tempPath.resolve("metadata.yml").toFile());
-        createSimpleTemplate(simpleDirectory.resolve("simple.txt.tfl").toFile());
+        createSimpleTemplate(simpleDirectory.resolve("simple.txt.ftl").toFile());
     }
 
     @After
