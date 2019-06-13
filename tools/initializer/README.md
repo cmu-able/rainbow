@@ -1,6 +1,5 @@
 # initializer usage
 
-## To run an initializer
 1.Create a metadata.yml in your work directory to include all variables and files that you want to generate
   
   Include your self-defined variables and template files in the following format:
