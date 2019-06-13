@@ -130,7 +130,7 @@ public class Main {
                     System.out.println(cmd.getOptionValue("c"));
 
                     ConfigurationLoader configurationLoader = new ConfigurationLoader(templateSet.getVariables());
-                    Map<String, String> configuration = configurationLoader.loadConfiguration(file.toFile());
+                    Map<String, Object> configuration = configurationLoader.loadConfiguration(file.toFile());
 
                     Scaffolder scaffolder = new Scaffolder(templateSet, configuration);
                     scaffolder.setBaseDirectory(Paths.get(".")); //TODO: make it a parameter
