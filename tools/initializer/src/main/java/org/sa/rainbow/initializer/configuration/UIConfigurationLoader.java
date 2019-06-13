@@ -108,9 +108,9 @@ public class UIConfigurationLoader {
      * @throws IOException
      */
     public void loadConfiguration() throws IOException {
-        Metadata metadata = loadMetadata();
-        Map<String, Template> templates = new HashMap<>();
-        for (Variable var : metadata.getVariables()) {
+        TemplateSetLoader loader = new FileTemplateSetLoader(new File("templates"));
+        TemplateSet templateSet = loader.load();
+        for (Variable var : templateSet.getVariables()) {
             System.out.println("\'"+var.getName()+"\'"+" will be initiated as: ("+var.getValue()+")");
         }
         System.out.println("Is it OK(y/n)?");
@@ -126,7 +126,7 @@ public class UIConfigurationLoader {
             System.out.println(answer);
             System.out.println("Please enter yes/y or no/n.");
             System.out.println("Is it OK(Y/N)?");
-            answer = mockInput(cnt);
+            answer = scanner.nextLine();
             cnt++;
             if(cnt == 3)
                 break;
@@ -136,8 +136,6 @@ public class UIConfigurationLoader {
         // if answer is yes, we will generate configuration using default values.
         if(answer.equals("yes") || answer.equals("y")) {
             System.out.println("We will use the default values to initialize.");
-            TemplateSetLoader loader = new FileTemplateSetLoader(new File("templates"));
-            TemplateSet templateSet = loader.load();
             defaultConfiguration(templateSet.getVariables());
         }
         // if answer is no, we will call an editor for users
@@ -173,10 +171,10 @@ public class UIConfigurationLoader {
      * @param cnt
      * @return String
      */
-    public String mockInput(int cnt) {
-        if(cnt < 2)
-            return "other";
-        else
-            return "yes";
-    }
+//    public String mockInput(int cnt) {
+//        if(cnt < 2)
+//            return "other";
+//        else
+//            return "yes";
+//    }
 }

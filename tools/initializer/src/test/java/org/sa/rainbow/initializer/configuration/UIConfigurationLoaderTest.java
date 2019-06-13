@@ -4,7 +4,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.sa.rainbow.initializer.models.TemplateSet;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -14,36 +16,42 @@ public class UIConfigurationLoaderTest {
 
     @Before
     public void prepare() {
-       cfg  = spy(UIConfigurationLoader.class);
+        cfg = new UIConfigurationLoader();
     }
 
     @Test
     public void loadY() throws Exception {
-        when(cfg.mockInput(0)).thenReturn("yes");
         try {
+            String input = "yes";
+            InputStream in = new ByteArrayInputStream(input.getBytes());
+            System.setIn(in);
             cfg.loadConfiguration();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw e;
         }
     }
 
     @Test
     public void loadN() throws Exception {
-        when(cfg.mockInput(0)).thenReturn("no");
         try {
+            String input = "no";
+            InputStream in = new ByteArrayInputStream(input.getBytes());
+            System.setIn(in);
             cfg.loadConfiguration();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw e;
         }
     }
 
     @Test
     public void loadOther() throws Exception {
-        when(cfg.mockInput(2)).thenReturn("oth");
         try {
+            String input = "other";
+            InputStream in = new ByteArrayInputStream(input.getBytes());
+            System.setIn(in);
             cfg.loadConfiguration();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw e;
         }
     }
 
@@ -52,7 +60,7 @@ public class UIConfigurationLoaderTest {
         try {
             cfg.loadConfiguration();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new Exception(e);
         }
     }
 }
