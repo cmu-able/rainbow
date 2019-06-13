@@ -1,6 +1,6 @@
 model:
-  name: SwimSys
-  type: Acme
+  name: 
+  type: 
 utilities:
   [=utilName]:
     label:
