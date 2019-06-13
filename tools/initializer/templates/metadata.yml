@@ -1,19 +1,44 @@
 variables:
+
   - name: project_name
     description: name of the project
     value: example_project
 
+  - name: model_file_extension
+    description: file extension for the model that would be used in the system
+    value: acme
+
   - name: probe
-    description: name of your first probe in the system
+    description: the first probe in the system (TO BE REPLACED BY probes)
     value: default_probe
+
+  - name: effector
+    description: the first effector in the system (TO BE REPLACED BY effectors)
+    value: default_effector
+
+  - probes:
+
+    - name: probe_1
+      description: the first probe in the system
+      value: default_probe_1
+
+    - name: probe_2
+      description: the second probe in the system
+      value: default_probe_2
+
+  - effectors:
+
+    - name: effector_1
+      description: the first effector in the system
+      value: default_effector_1
+
+    - name: effector_2
+      description: the second effector in the system
+      value: default_effector_2
 
   - name: gauge
     description: name of your first gauge in the system
     value: default_gauge
-
-  - name: effector
-    description: name of your first effector in the system
-    value: default_effector
 
   - name: logging_level
     description: Config for Log4J, with levels OFF,FATAL,ERROR,WARN,INFO,DEBUG,TRACE,ALL
@@ -90,8 +115,6 @@ files:
   - system/effectors.yml
   - system/probes.yml
   - system/effectors/defaultEffector.sh
-  - system/probes/defaultProbe.pl
+  - system/probes/defaultProbe.sh
   - system/util/cmdhelper.sh
   - rainbow.properties
-  - rainbow-gui.properties
-  - ui.yml
