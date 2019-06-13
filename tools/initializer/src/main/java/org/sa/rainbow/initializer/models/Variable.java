@@ -17,7 +17,7 @@ public class Variable {
     /**
      * The default value of the variable.
      */
-    private String value = "";
+    private Object value = "";
 
     /**
      * Constructs a new Variable with no name.
@@ -74,11 +74,11 @@ public class Variable {
         this.description = description;
     }
 
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(Object value) {
         this.value = value;
     }
 }
