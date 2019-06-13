@@ -42,11 +42,9 @@ public class ConfigurationLoaderTest {
 
     private void createConfigProperties(File configFile) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(configFile))) {
-            Map<String, Object> data = new HashMap<String, Object>();
-//            data.put("probe", new String[]{"dimmerProbe", "genericProbe"});
+            Map<String, Object> data = new HashMap<>();
             data.put("mode", "continual");
             data.put("probe", createTestingProbeList());
-
             Yaml yaml = new Yaml();
             yaml.dump(data, writer);
         }
@@ -78,21 +76,21 @@ public class ConfigurationLoaderTest {
         list.add(new Variable("mode"));
         list.add(new Variable("should-have-default", "should have default value", "default"));
         ConfigurationLoader config = new ConfigurationLoader(list);
+        Map<String, Object> result;
         try {
-            Map<String, Object> result = config.loadConfiguration(testYML);
-            assertEquals(createTestingProbeList(), result.get("probe"));
-            assertTrue(result.get("probe") instanceof ArrayList);
-            assertEquals("continual", result.get("mode"));
-            assertFalse(result.get("mode") instanceof ArrayList);
-            assertTrue(result.get("mode") instanceof String);
-            assertEquals("default", result.get("should-have-default"));
-            assertFalse(result.get("should-have-default") instanceof ArrayList);
-            assertTrue(result.get("should-have-default") instanceof String);
+            result = config.loadConfiguration(testYML);
 
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
+        assertEquals(createTestingProbeList(), result.get("probe"));
+        assertTrue(result.get("probe") instanceof ArrayList);
+        assertEquals("continual", result.get("mode"));
+        assertFalse(result.get("mode") instanceof ArrayList);
+        assertTrue(result.get("mode") instanceof String);
+        assertEquals("default", result.get("should-have-default"));
+        assertFalse(result.get("should-have-default") instanceof ArrayList);
+        assertTrue(result.get("should-have-default") instanceof String);
     }
 
     @Test(expected = InvalidVariableException.class)
