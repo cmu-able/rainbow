@@ -46,6 +46,7 @@ public class ConfigurationLoaderTest {
 //            data.put("probe", new String[]{"dimmerProbe", "genericProbe"});
             data.put("mode", "continual");
             data.put("probe", createTestingProbeList());
+
             Yaml yaml = new Yaml();
             yaml.dump(data, writer);
         }
