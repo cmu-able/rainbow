@@ -14,7 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 
 public class ConfigurationLoaderTest {
@@ -59,15 +59,15 @@ public class ConfigurationLoaderTest {
         ConfigurationLoader config = new ConfigurationLoader(list);
         try {
             Map<String, Object> result = config.loadConfiguration(testYML);
-            ArrayList<String> tmpList=new ArrayList<String>();
+            ArrayList<String> tmpList=new ArrayList<>();
             tmpList.add("dimmerProbe");
             tmpList.add("genericProbe");
             assertEquals(tmpList, result.get("probe"));
-            assertEquals(result.get("probe") instanceof ArrayList, true);
+            assertTrue(result.get("probe") instanceof ArrayList);
             assertEquals("continual", result.get("mode"));
-            assertEquals(result.get("mode") instanceof ArrayList, false);
+            assertFalse(result.get("mode") instanceof ArrayList);
             assertEquals("default", result.get("should-have-default"));
-            assertEquals(result.get("default") instanceof ArrayList, false);
+            assertFalse(result.get("default") instanceof ArrayList);
 
         } catch (IOException e) {
             throw new RuntimeException(e);
