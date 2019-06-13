@@ -1,6 +1,5 @@
 package org.sa.rainbow.initializer.configuration;
 
-import freemarker.template.Template;
 import org.sa.rainbow.initializer.models.TemplateSet;
 import org.sa.rainbow.initializer.models.Variable;
 import org.sa.rainbow.initializer.template.FileTemplateSetLoader;
@@ -118,8 +117,6 @@ public class UIConfigurationLoader {
         Scanner scanner = new Scanner(System.in);
         String answer = scanner.nextLine();
 
-        // String answer = mockInput(0);
-
         // if answer is invalid, try three times
         int cnt = 1;
         while(!answer.equals("yes") && !answer.equals("y") && !answer.equals("no") && !answer.equals("n")) {
@@ -146,7 +143,6 @@ public class UIConfigurationLoader {
                 File file = new File("config.yml");
                 file.createNewFile();
                 desktop.open(file);
-                // fileConfiguration(file);
             } catch (Exception e) {
                 e.printStackTrace(System.out);
             }
@@ -165,16 +161,4 @@ public class UIConfigurationLoader {
         return variableNames;
     }
 
-    /**
-     * This is for unit test mocking
-     *
-     * @param cnt
-     * @return String
-     */
-//    public String mockInput(int cnt) {
-//        if(cnt < 2)
-//            return "other";
-//        else
-//            return "yes";
-//    }
 }
