@@ -20,12 +20,32 @@ import static org.junit.Assert.*;
 public class ConfigurationLoaderTest {
     private Path tempPath;
     private File testYML;
+    private Map<String, String> createTestingProbe(String name, String description, String value){
+        Map<String, String> probe = new HashMap<>();
+        probe.put("name", name);
+        probe.put("description",description);
+        probe.put("value", value);
+        return probe;
+    }
+    private ArrayList<Map<String, String>> createTestingProbeList(){
+        Map<String, String> probe1 = createTestingProbe("probe_1"
+                ,"the first probe in the system"
+                ,"default_probe_1");
+        Map<String, String> probe2 = createTestingProbe("probe_2"
+                ,"the second probe in the system"
+                ,"default_probe_2");
+        ArrayList<Map<String, String>> probeList=new ArrayList<>();
+        probeList.add(probe1);
+        probeList.add(probe2);
+        return probeList;
+    }
 
     private void createConfigProperties(File configFile) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(configFile))) {
             Map<String, Object> data = new HashMap<String, Object>();
-            data.put("probe", new String[]{"dimmerProbe", "genericProbe"});
+//            data.put("probe", new String[]{"dimmerProbe", "genericProbe"});
             data.put("mode", "continual");
+            data.put("probe", createTestingProbeList());
             Yaml yaml = new Yaml();
             yaml.dump(data, writer);
         }
@@ -59,15 +79,14 @@ public class ConfigurationLoaderTest {
         ConfigurationLoader config = new ConfigurationLoader(list);
         try {
             Map<String, Object> result = config.loadConfiguration(testYML);
-            ArrayList<String> tmpList=new ArrayList<>();
-            tmpList.add("dimmerProbe");
-            tmpList.add("genericProbe");
-            assertEquals(tmpList, result.get("probe"));
+            assertEquals(createTestingProbeList(), result.get("probe"));
             assertTrue(result.get("probe") instanceof ArrayList);
             assertEquals("continual", result.get("mode"));
             assertFalse(result.get("mode") instanceof ArrayList);
+            assertTrue(result.get("mode") instanceof String);
             assertEquals("default", result.get("should-have-default"));
-            assertFalse(result.get("default") instanceof ArrayList);
+            assertFalse(result.get("should-have-default") instanceof ArrayList);
+            assertTrue(result.get("should-have-default") instanceof String);
 
         } catch (IOException e) {
             throw new RuntimeException(e);
