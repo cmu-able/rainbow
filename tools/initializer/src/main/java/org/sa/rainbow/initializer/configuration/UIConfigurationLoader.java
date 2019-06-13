@@ -108,15 +108,9 @@ public class UIConfigurationLoader {
      * @throws IOException
      */
     public void loadConfiguration() throws IOException {
-<<<<<<< HEAD
         TemplateSetLoader loader = new FileTemplateSetLoader(new File("templates"));
         TemplateSet templateSet = loader.load();
         for (Variable var : templateSet.getVariables()) {
-=======
-        Metadata metadata = loadMetadata();
-        Map<String, Template> templates = new HashMap<>();
-        for (Variable var : metadata.getVariables()) {
->>>>>>> 0284c8b9aaa70b8b29187f3be783dabbc9f1c170
             System.out.println("\'"+var.getName()+"\'"+" will be initiated as: ("+var.getValue()+")");
         }
         System.out.println("Is it OK(y/n)?");
@@ -132,11 +126,7 @@ public class UIConfigurationLoader {
             System.out.println(answer);
             System.out.println("Please enter yes/y or no/n.");
             System.out.println("Is it OK(Y/N)?");
-<<<<<<< HEAD
             answer = scanner.nextLine();
-=======
-            answer = mockInput(cnt);
->>>>>>> 0284c8b9aaa70b8b29187f3be783dabbc9f1c170
             cnt++;
             if(cnt == 3)
                 break;
@@ -146,11 +136,6 @@ public class UIConfigurationLoader {
         // if answer is yes, we will generate configuration using default values.
         if(answer.equals("yes") || answer.equals("y")) {
             System.out.println("We will use the default values to initialize.");
-<<<<<<< HEAD
-=======
-            TemplateSetLoader loader = new FileTemplateSetLoader(new File("templates"));
-            TemplateSet templateSet = loader.load();
->>>>>>> 0284c8b9aaa70b8b29187f3be783dabbc9f1c170
             defaultConfiguration(templateSet.getVariables());
         }
         // if answer is no, we will call an editor for users
@@ -186,19 +171,10 @@ public class UIConfigurationLoader {
      * @param cnt
      * @return String
      */
-<<<<<<< HEAD
 //    public String mockInput(int cnt) {
 //        if(cnt < 2)
 //            return "other";
 //        else
 //            return "yes";
 //    }
-=======
-    public String mockInput(int cnt) {
-        if(cnt < 2)
-            return "other";
-        else
-            return "yes";
-    }
->>>>>>> 0284c8b9aaa70b8b29187f3be783dabbc9f1c170
 }
