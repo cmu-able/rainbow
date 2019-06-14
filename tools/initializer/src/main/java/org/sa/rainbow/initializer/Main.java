@@ -40,16 +40,6 @@ public class Main {
                 return;
             }
 
-            if (!cmd.hasOption("t") && !cmd.hasOption("c")) {
-                UIConfigurationLoader configLoader = new UIConfigurationLoader();
-                if (configLoader.loadConfiguration()) {
-                    configuration = configLoader.getDefaultConfig();
-                } else {
-                    return;
-                }
-
-            }
-
             // if user provides a template flag, parse template path
             if (cmd.hasOption("t")) {
                 Path file = optionParser.handleTemplateOption(cmd);
@@ -62,6 +52,13 @@ public class Main {
                 Path file = optionParser.handleConfigOption(cmd);
                 ConfigurationLoader configurationLoader = new ConfigurationLoader(templateSet.getVariables());
                 configuration = configurationLoader.loadConfiguration(file.toFile());
+            } else {
+                UIConfigurationLoader configLoader = new UIConfigurationLoader();
+                if (configLoader.loadConfiguration()) {
+                    configuration = configLoader.getDefaultConfig();
+                } else {
+                    return;
+                }
             }
 
             Scaffolder scaffolder = new Scaffolder(templateSet, configuration);
