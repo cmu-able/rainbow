@@ -56,7 +56,7 @@ public class FileTemplateSetLoaderTest {
         Files.createDirectory(simpleDirectory);
 
         createMetadata(tempPath.resolve("metadata.yml").toFile());
-        createSimpleTemplate(simpleDirectory.resolve("simple.txt.tfl").toFile());
+        createSimpleTemplate(simpleDirectory.resolve("simple.txt.ftl").toFile());
     }
 
     @After
@@ -78,7 +78,7 @@ public class FileTemplateSetLoaderTest {
         StringWriter writer = new StringWriter();
         template.process(Collections.singletonMap("name", "world"), writer);
         writer.close();
-        assertEquals("Hello, world!\n", writer.toString());
+        assertEquals("Hello, world!" + System.lineSeparator(), writer.toString());
     }
 
     @Test
