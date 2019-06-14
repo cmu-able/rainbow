@@ -1,33 +1,23 @@
 # initializer usage
 
-1.Create a metadata.yml in your work directory to include all variables and files that you want to generate
-  
-  Include your self-defined variables and template files in the following format:
-```
-variables:
-    - name: your_variable_name
-      description: write your descriptions of the variable
-      value: the default value of the variable
-```
-
-```
-files:
-    - your_initialization_file_name
-```
-2.Compile using maven
+## Maven compile
 ```
 mvn package
 ```
-3.Use the jar file to run the initializer 
-- To see the help menu:
+## Run the initializer 
+### To see the help menu:
 ```
 java -jar target/rainbow-initializer-1.0-SNAPSHOT-shaded.jar -h
 ```
-- To load a template:
+### To use the default initialization
 ```
-java -jar target/rainbow-initializer-1.0-SNAPSHOT-shaded.jar -t <path_or_uri_to_template> 
+java -jar target/rainbow-initializer-1.0-SNAPSHOT-shaded.jar
 ```
-- To load a configuration:
+(We have already included default initialization for you in ./templates, check metadata.yml for more details.)
+
+### To custormize initialization
+
+Use -t To load templates and -c to load configurations:
 ```
-java -jar target/rainbow-initializer-1.0-SNAPSHOT-shaded.jar -c <path_or_uri_to_config> 
+java -jar target/rainbow-initializer-1.0-SNAPSHOT-shaded.jar -t <path_or_uri_to_template> -c <path_or_uri_to_config> 
 ```
