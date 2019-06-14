@@ -30,7 +30,7 @@ public class FileTemplateSetLoaderTest {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(metadataFile))) {
             Metadata metadata = new Metadata();
             metadata.setVariables(Collections.singletonList(new Variable("name")));
-            metadata.setFiles(Collections.singletonList("simple/simple.txt.ftl"));
+            metadata.setTemplates(Collections.singletonList("simple/simple.txt.ftl"));
             Yaml yaml = new Yaml();
             yaml.dump(metadata, writer);
         }

@@ -82,14 +82,23 @@ public class Scaffolder {
 
     private Map<String, Template> loadMapping() throws IOException, TemplateException {
         Template templateMapping = templateSet.getTemplates().get(mappingTemplatePath);
-        StringWriter writer = new StringWriter();
-        templateMapping.process(configuration, writer);
-        Yaml yaml = new Yaml();
-        Map<String, String> templateNameMapping = yaml.load(writer.toString());
         Map<String, Template> mapping = new HashMap<>();
-        templateNameMapping.forEach((path, templatePath) -> {
-            mapping.put(path, templateSet.getTemplates().get(templatePath));
-        });
+        if (templateMapping == null) {
+            // Use default mapping
+            templateSet.getTemplates().forEach((path, template) -> {
+                String actualPath = path.replaceAll("\\.*$", "");
+                mapping.put(actualPath, template);
+            });
+        } else {
+            StringWriter writer = new StringWriter();
+            templateMapping.process(configuration, writer);
+            Yaml yaml = new Yaml();
+            Map<String, String> templateNameMapping = yaml.load(writer.toString());
+
+            templateNameMapping.forEach((path, templatePath) -> {
+                mapping.put(path, templateSet.getTemplates().get(templatePath));
+            });
+        }
         return mapping;
     }
 
