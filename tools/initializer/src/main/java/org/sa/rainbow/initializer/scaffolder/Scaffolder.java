@@ -77,6 +77,13 @@ public class Scaffolder {
         }
     }
 
+    /**
+     * Loads a mapping of each resulting file to its template from a template of mapping YAML file.
+     *
+     * @return a mapping of each file to its template.
+     * @throws IOException       if an I/O exception occur during template processing.
+     * @throws TemplateException if the template of mapping file is invalid.
+     */
     private Map<String, Template> loadMapping() throws IOException, TemplateException {
         Template templateMapping = templateSet.getTemplates().get(mappingTemplatePath);
         Map<String, Template> mapping = new HashMap<>();
