@@ -1,73 +1,71 @@
 package org.sa.rainbow.initializer.configuration;
 
-import org.sa.rainbow.initializer.models.TemplateSet;
 import org.sa.rainbow.initializer.models.Variable;
-import org.sa.rainbow.initializer.template.FileTemplateSetLoader;
-import org.sa.rainbow.initializer.template.InvalidMetadataException;
-import org.sa.rainbow.initializer.template.TemplateSetLoader;
-import org.sa.rainbow.initializer.template.models.Metadata;
+import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
-import java.awt.*;
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
-import java.util.List;
-import org.sa.rainbow.initializer.template.models.Metadata;
-import org.yaml.snakeyaml.Yaml;
-
-import java.awt.*;
-import java.io.*;
-import java.util.*;
-import java.util.List;
 
 /**
- * This class is used to load configuration from interfactive inputs.
+ * This class is used to load configuration from interactive inputs.
  *
  * @author Liwen Feng
  * @since 1.0
  */
-public class UIConfigurationLoader {
-    /*
-     * The default configuration file.
-     */
-    protected static final String METADATA_FILENAME = "metadata.yml";
+public class UIConfigurationLoader extends ConfigurationLoader {
+    private List<Variable> variables;
 
-    /**
-     * A map of key values for the required variables.
-     */
-    private final Map<String, Object> defaultConfig;
-
-
-    /**
-     * A set of known variable names.
-     * Please note that we may not want to use defaultConfig directly
-     * because some variables may be required but have no default values.
-     */
-    private final Set<String> variableNames;
-
-    public UIConfigurationLoader() {
-        this.defaultConfig = new HashMap<>();
-        this.variableNames = new HashSet<>();
+    public UIConfigurationLoader(List<Variable> variables) {
+        super(variables);
+        this.variables = variables;
     }
 
-    public void defaultConfiguration(List<Variable> variables) {
-        for (Variable variable : variables) {
-            variableNames.add(variable.getName());
-            defaultConfig.put(variable.getName(), variable.getValue());
+    /**
+     * Loads configuration setting from a Yaml file ( .yml file)
+     *
+     * @param file the properties file to load.
+     * @throws IOException if the file cannot be loaded as Yaml file.
+     */
+    @Override
+    public Map<String, Object> loadConfiguration(File file) throws IOException {
+        return super.loadConfiguration(file);
+    }
+
+    /**
+     * Writes default values to a given configuration file, with descriptions as comments.
+     *
+     * @param configFile config file to write.
+     * @throws IOException if an I/O exception occur while writing to config file.
+     */
+    private void writeDefaultConfiguration(File configFile) throws IOException {
+        DumperOptions options = new DumperOptions();
+        options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+        options.setPrettyFlow(true);
+        Yaml yaml = new Yaml(options);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(configFile))) {
+            for (Variable variable : this.variables) {
+                writer.write("# " + variable.getDescription());
+                writer.newLine();
+                yaml.dump(Collections.singletonMap(variable.getName(), variable.getValue()), writer);
+                writer.newLine();
+            }
         }
     }
 
     /**
      * load variables from interactive inputs
      *
-     * @return TemplateSet
-     * @throws IOException
+     * @return true if default values are used, false otherwise.
+     * @throws IOException if an I/O exception occur during interactive I/O
+     *                     or writing config file.
      */
     public boolean loadConfiguration() throws IOException {
-        TemplateSetLoader loader = new FileTemplateSetLoader(new File("templates"));
-        TemplateSet templateSet = loader.load();
-        for (Variable var : templateSet.getVariables()) {
-            System.out.println("\'"+var.getName()+"\'"+" will be initiated as: ("+var.getValue()+")");
+        for (Map.Entry<String, Object> entry : defaultConfig.entrySet()) {
+            System.out.printf("'%s' will be initiated as: (%s)%n", entry.getKey(), entry.getValue());
         }
         System.out.println("Is it OK(y/n)?");
 
@@ -76,35 +74,30 @@ public class UIConfigurationLoader {
 
         // if answer is invalid, try three times
         int cnt = 1;
-        while(!answer.equals("yes") && !answer.equals("y") && !answer.equals("no") && !answer.equals("n")) {
+        while (!answer.equals("yes") && !answer.equals("y") && !answer.equals("no") && !answer.equals("n")) {
             System.out.println(answer);
             System.out.println("Please enter yes/y or no/n.");
             System.out.println("Is it OK(Y/N)?");
             answer = scanner.nextLine();
             cnt++;
-            if(cnt == 3)
+            if (cnt == 3) {
                 break;
+            }
         }
-        System.out.println(answer);
 
         // if answer is yes, we will generate configuration using default values.
-        if(answer.equals("yes") || answer.equals("y")) {
+        if (answer.equals("yes") || answer.equals("y")) {
             System.out.println("We will use the default values to initialize.");
-            defaultConfiguration(templateSet.getVariables());
             return true;
         }
+
         // if answer is no, we will call an editor for users
-        else if(answer.equals("no") || answer.equals("n")){
+        else if (answer.equals("no") || answer.equals("n")) {
             System.out.println("Please set your own configurations in 'config.yml' and run again.");
-            try {
-                File file = new File("config.yml");
-                file.createNewFile();
-            } catch (Exception e) {
-                throw e;
-            }
+            File file = new File("config.yml");
+            writeDefaultConfiguration(file);
             return false;
-        }
-        else {
+        } else {
             System.out.println("Abort!");
             return false;
         }

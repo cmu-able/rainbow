@@ -53,7 +53,7 @@ public class Main {
                 ConfigurationLoader configurationLoader = new ConfigurationLoader(templateSet.getVariables());
                 configuration = configurationLoader.loadConfiguration(file.toFile());
             } else {
-                UIConfigurationLoader configLoader = new UIConfigurationLoader();
+                UIConfigurationLoader configLoader = new UIConfigurationLoader(templateSet.getVariables());
                 if (configLoader.loadConfiguration()) {
                     configuration = configLoader.getDefaultConfig();
                 } else {

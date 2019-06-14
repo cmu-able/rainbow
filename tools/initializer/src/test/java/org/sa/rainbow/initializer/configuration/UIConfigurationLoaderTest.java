@@ -3,6 +3,7 @@ package org.sa.rainbow.initializer.configuration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.sa.rainbow.initializer.models.Variable;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -11,6 +12,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.Comparator;
 
 
@@ -19,7 +21,7 @@ public class UIConfigurationLoaderTest {
 
     @Before
     public void prepare() {
-        cfg  = new UIConfigurationLoader();
+        cfg  = new UIConfigurationLoader(Collections.singletonList(new Variable("foo", "foo")));
     }
 
     @Test
