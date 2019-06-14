@@ -41,26 +41,30 @@ rainbow.event.service = [=rainbow_event_service]
 eBus Relay
 
 rainbow.delegate.beaconperiod = 10000
-rainbow.deployment.factory.class = org.sa.rainbow.core.ports.guava.GuavaRainbowPortFactory
+rainbow.deployment.factory.class = org.sa.rainbow.core.ports.eseb.ESEBRainbowPortFactory
 
 ### Rainbow models
 rainbow.model.number=[=number_of_models]
 
 # Rainbow Acme model
-[#list 1..number_of_models?number as num]
-	rainbow.model.path_[=num] = 
-	rainbow.model.load.class_[=num] = 
-	rainbow.model.name_[=num] = 
-	rainbow.model.saveOnClose_[=num] = 
-	rainbow.model.saveLocation_[=num] = 
-[/#list]
+[#if number_of_models?number > 0]
+	[#list 1..number_of_models?number as num]
+		rainbow.model.path_[=num] = 
+		rainbow.model.load.class_[=num] = 
+		rainbow.model.name_[=num] = 
+		rainbow.model.saveOnClose_[=num] = 
+		rainbow.model.saveLocation_[=num] = 
+	[/#list]
+[/#if]
 
 ### Rainbow analyses
 rainbow.analyses.size = [=number_of_analyses]
 # Checks architecture for architectural errors
-[#list 1..number_of_analyses?number as num]
-	rainbow.analyses_[=num] = org.sa.rainbow.evaluator.acme.ArchEvaluator
-[/#list]
+[#if number_of_analyses?number > 0]
+	[#list 1..number_of_analyses?number as num]
+		rainbow.analyses_[=num] = org.sa.rainbow.evaluator.acme.ArchEvaluator
+	[/#list]
+[/#if]
 
 #Rainbow adaptation & stitch components
 rainbow.adaptation.plasdp.reachPath = ${PLADAPT}/reach/reach.sh
@@ -69,21 +73,27 @@ rainbow.adaptation.pla.operaConfig = model/opera/opera.config
 rainbow.adaptation.plasb.prismTemplate = template.prism
 
 rainbow.adaptation.manager.size = [=number_of_adaption_managers]
-[#list 1..number_of_adaption_managers?number as num]
-	rainbow.adaptation.manager.class_[=num] = org.sa.rainbow.stitch.adaptation.AdaptationManager
-	rainbow.adaptation.manager.model_[=num] = 
-[/#list]
+[#if number_of_adaption_managers?number > 0]
+	[#list 1..number_of_adaption_managers?number as num]
+		rainbow.adaptation.manager.class_[=num] = org.sa.rainbow.stitch.adaptation.AdaptationManager
+		rainbow.adaptation.manager.model_[=num] = 
+	[/#list]
+[#/if]
 
 rainbow.adaptation.executor.size = [=number_of_adaption_executors]
-[#list 1..number_of_adaption_executors?number as num]
-	rainbow.adaptation.executor.class_[=num] = org.sa.rainbow.stitch.adaptation.StitchExecutor
-	rainbow.adaptation.executor.model_[=num] = 
-[/#list]
+[#if number_of_adaption_executors?number > 0]
+	[#list 1..number_of_adaption_executors?number as num]
+		rainbow.adaptation.executor.class_[=num] = org.sa.rainbow.stitch.adaptation.StitchExecutor
+		rainbow.adaptation.executor.model_[=num] = 
+	[/#list]
+[#/if]
 
 rainbow.effector.manager.size = [=number_of_effector_managers]
-[#list 1..number_of_effector_managers?number as num]
-	rainbow.effector.manager.class_[=num] = org.sa.rainbow.effectors.acme.AcmeEffectorManager
-[/#list]
+[#if number_of_effector_managers?number > 0]
+	[#list 1..number_of_effector_managers?number as num]
+		rainbow.effector.manager.class_[=num] = org.sa.rainbow.effectors.acme.AcmeEffectorManager
+	[/#list]
+[/#if]
 
 rainbow.gui = 
 rainbow.gui.specs = 
