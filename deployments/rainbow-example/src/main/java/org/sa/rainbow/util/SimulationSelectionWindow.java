@@ -53,6 +53,7 @@ public class SimulationSelectionWindow {
 	private JLabel m_label;
 	private JScrollPane m_scrollPane;
 	private List<List<Integer>> m_arrivalRates = new ArrayList<>();
+	private int m_multiplier = 1;
 
 	private static final SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
 
@@ -77,6 +78,11 @@ public class SimulationSelectionWindow {
 	 * Create the application.
 	 */
 	public SimulationSelectionWindow() {
+		initialize();
+	}
+
+	public SimulationSelectionWindow(int multiplier) {
+		m_multiplier = multiplier;
 		initialize();
 	}
 
@@ -119,13 +125,13 @@ public class SimulationSelectionWindow {
 				panel.setLayout(new FlowLayout());
 				ChartPanel comp = m_seriesImages.get(index);
 				comp.setSize(500, 100);
-				comp.setMaximumSize(new Dimension(500, 130));
+				comp.setMaximumSize(new Dimension(500, 140));
 				comp.setPreferredSize(new Dimension(500,100));
 				panel.add(comp);
 				panel.add(label);
 				panel.setSize(500, 120);
-				panel.setPreferredSize(new Dimension(500,130));
-				panel.setMaximumSize(new Dimension(500, 130));
+				panel.setPreferredSize(new Dimension(500,140));
+				panel.setMaximumSize(new Dimension(500, 140));
 				if (isSelected) {
 					panel.setBackground(m_list.getSelectionBackground());
 					comp.setBackground(m_list.getSelectionBackground());
@@ -164,7 +170,7 @@ public class SimulationSelectionWindow {
 				int index = m_list.getSelectedIndex();
 				if (index != -1) {
 					String[] cmds = new String[] { "xterm", "-e",
-							MessageFormat.format("./run.sh sim {0} | tee swim-console.out", index) };
+							MessageFormat.format("./run.sh sim {0} | tee swim-console.out", index*m_multiplier) };
 					ProcessBuilder pb = new ProcessBuilder(cmds);
 					File workDir = new File("/headless/seams-swim/swim/simulations/swim/");
 					pb.directory(workDir);
@@ -220,7 +226,7 @@ public class SimulationSelectionWindow {
 		
 	}
 
-	private ChartPanel getArrivalRateAsChart(List<Integer> arrivalRate) {
+	public static ChartPanel getArrivalRateAsChart(List<Integer> arrivalRate) {
 		TimeSeries series = new TimeSeries("");
 		TimeSeriesCollection tsc = new TimeSeriesCollection(series);
 		int s = 0;

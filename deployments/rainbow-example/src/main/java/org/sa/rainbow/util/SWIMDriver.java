@@ -61,7 +61,10 @@ public class SWIMDriver {
 		String property = props.getProperty("*.source.interArrivalsFile");
 		String[] files = property.split("=")[1].trim().split(",");
 		
-		SimulationSelectionWindow window = new SimulationSelectionWindow();
+		String bd = props.getProperty("*.bootDelay");
+		int multiplier = bd.split("=")[1].split(",").length;
+		
+		SimulationSelectionWindow window = new SimulationSelectionWindow(multiplier);
 		for (String f : files) {
 			f = f.replaceAll("\\\"", "").replaceAll("\\}","").replaceAll("\\{","").trim();
 			List<Integer> ar = getArrivalRate(wd + f);
