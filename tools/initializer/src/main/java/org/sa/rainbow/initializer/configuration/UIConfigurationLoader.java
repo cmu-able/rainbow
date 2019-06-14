@@ -20,6 +20,12 @@ import java.io.*;
 import java.util.*;
 import java.util.List;
 
+/**
+ * This class is used to load configuration from interfactive inputs.
+ *
+ * @author Liwen Feng
+ * @since 1.0
+ */
 public class UIConfigurationLoader {
     /*
      * The default configuration file.
