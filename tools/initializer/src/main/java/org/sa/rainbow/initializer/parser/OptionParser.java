@@ -27,6 +27,7 @@ public class OptionParser {
                 .hasArg()
                 .desc("load template from path to local directory")
                 .longOpt("template")
+                .required()
                 .build();
         Option option_config = Option.builder("c")
                 .argName("path_to_config")
