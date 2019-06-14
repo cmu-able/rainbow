@@ -63,7 +63,7 @@ public class UIConfigurationLoader {
      * @return TemplateSet
      * @throws IOException
      */
-    public void loadConfiguration() throws IOException {
+    public boolean loadConfiguration() throws IOException {
         TemplateSetLoader loader = new FileTemplateSetLoader(new File("templates"));
         TemplateSet templateSet = loader.load();
         for (Variable var : templateSet.getVariables()) {
@@ -91,6 +91,7 @@ public class UIConfigurationLoader {
         if(answer.equals("yes") || answer.equals("y")) {
             System.out.println("We will use the default values to initialize.");
             defaultConfiguration(templateSet.getVariables());
+            return true;
         }
         // if answer is no, we will call an editor for users
         else if(answer.equals("no") || answer.equals("n")){
@@ -101,11 +102,12 @@ public class UIConfigurationLoader {
             } catch (Exception e) {
                 throw e;
             }
+            return false;
         }
         else {
             System.out.println("Abort!");
+            return false;
         }
-
     }
 
     public Map<String, Object> getDefaultConfig() {

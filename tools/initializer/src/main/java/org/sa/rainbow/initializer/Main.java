@@ -2,6 +2,7 @@ package org.sa.rainbow.initializer;
 
 import org.apache.commons.cli.*;
 import org.sa.rainbow.initializer.configuration.ConfigurationLoader;
+import org.sa.rainbow.initializer.configuration.UIConfigurationLoader;
 import org.sa.rainbow.initializer.models.TemplateSet;
 import org.sa.rainbow.initializer.parser.OptionParser;
 import org.sa.rainbow.initializer.scaffolder.Scaffolder;
@@ -10,6 +11,7 @@ import org.sa.rainbow.initializer.template.TemplateSetLoader;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -30,9 +32,12 @@ public class Main {
             CommandLineParser parser = new DefaultParser();
             cmd = parser.parse(options, args);
 
+            Map<String, Object> configuration = new HashMap<String, Object>();
+
             if (cmd.hasOption("h")) {
                 HelpFormatter formatter = new HelpFormatter();
                 formatter.printHelp("rainbow_initializer", options, true);
+                return;
             }
 
             // if user provides a template flag, parse template path
@@ -46,11 +51,26 @@ public class Main {
             if (cmd.hasOption("c")) {
                 Path file = optionParser.handleConfigOption(cmd);
                 ConfigurationLoader configurationLoader = new ConfigurationLoader(templateSet.getVariables());
-                Map<String, Object> configuration = configurationLoader.loadConfiguration(file.toFile());
-                Scaffolder scaffolder = new Scaffolder(templateSet, configuration);
-                scaffolder.setBaseDirectory(Paths.get("."));
-                scaffolder.scaffold();
+                configuration = configurationLoader.loadConfiguration(file.toFile());
+            } else {
+                UIConfigurationLoader configLoader = new UIConfigurationLoader();
+                if (configLoader.loadConfiguration()) {
+                    configuration = configLoader.getDefaultConfig();
+                } else {
+                    return;
+                }
             }
+
+            Scaffolder scaffolder = new Scaffolder(templateSet, configuration);
+
+            if (cmd.hasOption("p")) {
+                Path destination_path = Paths.get(cmd.getOptionValue("p"));
+                scaffolder.setBaseDirectory(destination_path);
+            } else {
+                scaffolder.setBaseDirectory(Paths.get("."));
+            }
+
+            scaffolder.scaffold();
         }
 
         // print error if parse fails

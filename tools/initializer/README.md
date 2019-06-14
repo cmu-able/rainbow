@@ -11,13 +11,20 @@ java -jar target/rainbow-initializer-1.0-SNAPSHOT-shaded.jar -h
 ```
 ### To use the default initialization
 ```
-java -jar target/rainbow-initializer-1.0-SNAPSHOT-shaded.jar
+java -jar target/rainbow-initializer-1.0-SNAPSHOT-shaded.jar -t <path_to_templates_folder>
 ```
-(We have already included default initialization for you in ./templates, check metadata.yml for more details.)
+(If you would like to use the default option, <path_to_templates_folder> should point to 
+the /rainbow/tools/initializer/templates folder in your machine)
 
 ### To custormize initialization
 
-Use -t To load templates and -c to load configurations:
+Use -c to load configurations:
 ```
-java -jar target/rainbow-initializer-1.0-SNAPSHOT-shaded.jar -t <path_to_template> -c <path_to_config> 
+java -jar target/rainbow-initializer-1.0-SNAPSHOT-shaded.jar -t <path_to_templates_folder> -c <path_to_configuration_file> 
+```
+### To custormize your target directory path:
+
+use -p to load destination directory of which the new target would locate:
+```
+-p <path_to_target_destination>
 ```
