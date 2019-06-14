@@ -2,7 +2,7 @@
 # Purpose:  Common configuration file for the Rainbow infrastructure.
 #           Properties are loaded by class org.sa.rainbow.Rainbow .
 # Target:   
-# 
+#
 # Framework-defined special properties:
 #     rainbow.path - the canonical path to the target configuration location
 #
@@ -16,8 +16,8 @@
 
 ### Utility mechanism configuration
 #- Config for Log4J, with levels:  OFF,FATAL,ERROR,WARN,INFO,DEBUG,TRACE,ALL
-logging.level = DEBUG
-event.log.path = log
+logging.level = [=logging_level]
+event.log.path = [=event_log_path]
 logging.path = ${event.log.path}/rainbow.out
 monitoring.log.path = ${event.log.path}/rainbow-data.log
 # (default)
@@ -28,42 +28,43 @@ monitoring.log.path = ${event.log.path}/rainbow-data.log
 ### Rainbow component customization
 ## Rainbow host info and communication infrastructure
 #- Location information of the master and this deployment
-rainbow.master.location.host = 127.0.0.1
+rainbow.master.location.host = [=rainbow_master_location_host]
 #- Location information of the deployed delegate
-rainbow.deployment.location = 127.0.0.1
+rainbow.deployment.location = [=rainbow_deployment_location]
 #- default registry port; change if port-tunneling
 rainbow.master.location.port = 1100
 #- OS platform, supported modes are:  cygwin | linux
 #  Use "cygwin" for Windows, "linux" for MacOSX
-rainbow.deployment.environment = linux
+rainbow.deployment.environment = [=rainbow_deployment_environment]
 #- Event infrastructure, type of event middleware: rmi | jms | que | eseb
-rainbow.event.service = eseb
+rainbow.event.service = [=rainbow_event_service]
 eBus Relay
 
 rainbow.delegate.beaconperiod = 10000
 rainbow.deployment.factory.class = org.sa.rainbow.core.ports.eseb.ESEBRainbowPortFactory
 
 ### Rainbow models
-rainbow.model.number=2
+rainbow.model.number=[=number_of_models]
 
-# Rainbow Acme model of SWIM
-rainbow.model.path_0 = model/swim.acme
-rainbow.model.load.class_0 = org.sa.rainbow.model.acme.swim.commands.SwimCommandFactory
-rainbow.model.name_0 = SwimSys
-rainbow.model.saveOnClose_0=true
-rainbow.model.saveLocation_0=model/swim-post.acme
-
-
-# Time series predictor for arrival rate
-rainbow.model.path_1=model/tsp.yml
-rainbow.model.load.class_1=org.sa.rainbow.timeseriespredictor.model.TimeSeriesPredictorModelCommandFactory
-rainbow.model.name_1=ArrivalRate
-
+# Rainbow Acme model
+[#if number_of_models?number > 0]
+	[#list 1..number_of_models?number as num]
+		rainbow.model.path_[=num] = 
+		rainbow.model.load.class_[=num] = 
+		rainbow.model.name_[=num] = 
+		rainbow.model.saveOnClose_[=num] = 
+		rainbow.model.saveLocation_[=num] = 
+	[/#list]
+[/#if]
 
 ### Rainbow analyses
-rainbow.analyses.size = 0
+rainbow.analyses.size = [=number_of_analyses]
 # Checks architecture for architectural errors
-#rainbow.analyses_0 = org.sa.rainbow.evaluator.acme.ArchEvaluator
+[#if number_of_analyses?number > 0]
+	[#list 1..number_of_analyses?number as num]
+		rainbow.analyses_[=num] = org.sa.rainbow.evaluator.acme.ArchEvaluator
+	[/#list]
+[/#if]
 
 #Rainbow adaptation & stitch components
 rainbow.adaptation.plasdp.reachPath = ${PLADAPT}/reach/reach.sh
@@ -71,21 +72,35 @@ rainbow.adaptation.plasdp.reachModel = ${PLADAPT}/reach/model/reachAddSvrDimmer
 rainbow.adaptation.pla.operaConfig = model/opera/opera.config
 rainbow.adaptation.plasb.prismTemplate = template.prism
 
-rainbow.adaptation.manager.size = 1
-rainbow.adaptation.manager.class_0=org.sa.rainbow.swim.adaptation.AdaptationManager
-rainbow.adaptation.manager.model_0=SwimSys:Acme
+rainbow.adaptation.manager.size = [=number_of_adaption_managers]
+[#if number_of_adaption_managers?number > 0]
+	[#list 1..number_of_adaption_managers?number as num]
+		rainbow.adaptation.manager.class_[=num] = org.sa.rainbow.stitch.adaptation.AdaptationManager
+		rainbow.adaptation.manager.model_[=num] = 
+	[/#list]
+[#/if]
 
-rainbow.adaptation.executor.size = 1
-rainbow.adaptation.executor.class_0=org.sa.rainbow.stitch.adaptation.StitchExecutor
-rainbow.adaptation.executor.model_0=SwimSys:Acme
+rainbow.adaptation.executor.size = [=number_of_adaption_executors]
+[#if number_of_adaption_executors?number > 0]
+	[#list 1..number_of_adaption_executors?number as num]
+		rainbow.adaptation.executor.class_[=num] = org.sa.rainbow.stitch.adaptation.StitchExecutor
+		rainbow.adaptation.executor.model_[=num] = 
+	[/#list]
+[#/if]
 
-rainbow.effector.manager.size = 1
-rainbow.effector.manager.class_0=org.sa.rainbow.effectors.acme.AcmeEffectorManager
+rainbow.effector.manager.size = [=number_of_effector_managers]
+[#if number_of_effector_managers?number > 0]
+	[#list 1..number_of_effector_managers?number as num]
+		rainbow.effector.manager.class_[=num] = org.sa.rainbow.effectors.acme.AcmeEffectorManager
+	[/#list]
+[/#if]
 
+rainbow.gui = 
+rainbow.gui.specs = 
 
-customize.model.evaluate.period = 60000
-customize.model.timeseriespredictor.args=LES 0.8 0.15
-customize.model.timeseriespredictor.traininglength=15
+customize.model.evaluate.period = 
+customize.model.timeseriespredictor.args = 
+customize.model.timeseriespredictor.traininglength = 
 
 ## Translator customization
 #- Gauge spec
@@ -101,9 +116,9 @@ customize.effectors.path = system/effectors.yml
 customize.scripts.path = stitch
 #- Utilities description file, Strategy evaluation config, and minimum score threshold
 customize.utility.path = stitch/utilities.yml
-customize.utility.trackStrategy = uC
-customize.utility.score.minimum.threshold = 0.033
-customize.utility.scenario = scenario 1
+customize.utility.trackStrategy = 
+customize.utility.score.minimum.threshold = 
+customize.utility.scenario = 
 #- Whether to enable prediction, ONLY enable if system has predictor probes!
 #customize.prediction.enable = false
 
@@ -113,15 +128,4 @@ customize.utility.scenario = scenario 1
 # and are replaced by Rainbow with the actual values
 customize.system.target.master = ${rainbow.deployment.location}
 customize.system.target.lb = ${rainbow.deployment.location}
-customize.system.target.lb.httpPort = 1081
-customize.system.target.web0 = ${rainbow.deployment.location}
-customize.system.target.web0.httpPort = 1080
-customize.system.target.web1 = 10.0.0.98
-customize.system.target.web1.httpPort = 1080
-customize.system.target.db = 10.0.0.21
-customize.system.target.web2 = 10.0.0.183
-customize.system.target.web2.httpPort=1080
-customize.system.target.web2.disabled=true
-customize.system.target.client1=10.0.0.146
-customize.system.target.client2=10.0.0.1
-customize.system.target.bad=10.0.0.1
+customize.system.target.lb.httpPort = 

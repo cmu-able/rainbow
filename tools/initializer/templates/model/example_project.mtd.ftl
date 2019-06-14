@@ -1,1 +1,1 @@
-# This is a swim.mtd file.
+# This is a .mtd file.
