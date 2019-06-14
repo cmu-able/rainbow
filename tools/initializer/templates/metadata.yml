@@ -112,25 +112,25 @@ variables:
     description: name of a gauge instance
     value: LoadG1
 
-files:
-  - model/gauges.yml
-  - model/example_project.acme
-  - model/example_project.mtd
-  - model/tsp.yml
+templates:
+  - model/gauges.yml.ftl
+  - model/example_project.acme.ftl
+  - model/example_project.mtd.ftl
+  - model/tsp.yml.ftl
   # model/.acmeproject: templates/model/.acmeproject
   # model/.project: templates/model/.project
-  - model/opera/kalmanFilter.dtd
-  - model/opera/brownout.kalman.config
-  - model/opera/brownout.model.pxl
-  - model/opera/opera.config
-  - stitch/example_projectStrategies.s
-  - stitch/example_projectTactics.t.s
-  - stitch/utilities.yml
+  - model/opera/kalmanFilter.dtd.ftl
+  - model/opera/brownout.kalman.config.ftl
+  - model/opera/brownout.model.pxl.ftl
+  - model/opera/opera.config.ftl
+  - stitch/example_projectStrategies.s.ftl
+  - stitch/example_projectTactics.t.s.ftl
+  - stitch/utilities.yml.ftl
   # stitch/README.txt:
 
-  - system/effectors.yml
-  - system/probes.yml
-  - system/effectors/defaultEffector.sh
-  - system/probes/defaultProbe.sh
-  - system/util/cmdhelper.sh
-  - rainbow.properties
+  - system/effectors.yml.ftl
+  - system/probes.yml.ftl
+  - system/effectors/defaultEffector.sh.ftl
+  - system/probes/defaultProbe.sh.ftl
+  - system/util/cmdhelper.sh.ftl
+  - rainbow.properties.ftl
