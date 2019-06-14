@@ -3,7 +3,7 @@ vars:
 
 probes:
 	[#list probes as one_probe]
-  	[=one_probe]:
+	[=one_probe]:
     	alias: 
     	location: 
 		type: 

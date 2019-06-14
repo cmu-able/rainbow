@@ -4,7 +4,7 @@ vars:
   
 
 effectors:
-  	[#list effectors as one_effector]
+	[#list effectors as one_effector]
 	[=one_effector]:
 	   	location: 
 	   	command: 
