@@ -62,7 +62,14 @@ public class Main {
             }
 
             Scaffolder scaffolder = new Scaffolder(templateSet, configuration);
-            scaffolder.setBaseDirectory(Paths.get("."));
+
+            if (cmd.hasOption("p")) {
+                Path destination_path = Paths.get(cmd.getOptionValue("p"));
+                scaffolder.setBaseDirectory(destination_path);
+            } else {
+                scaffolder.setBaseDirectory(Paths.get("."));
+            }
+
             scaffolder.scaffold();
         }
 

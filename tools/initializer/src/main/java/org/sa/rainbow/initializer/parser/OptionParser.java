@@ -20,7 +20,8 @@ public class OptionParser {
      * Constructor for an option parser that takes -t, -c and -h flags.
      */
     public OptionParser () {
-        // initializer, as a command line tool, could take in two flags, -t for template and -c for config
+        // initializer, as a command line tool, could take in three flags, -t for template,
+        // -c for config, and -p for destination directory path
         options = new Options();
         Option option_template = Option.builder("t")
                 .argName("path_to_template")
@@ -35,8 +36,15 @@ public class OptionParser {
                 .desc("load configuration from path to local file")
                 .longOpt("config")
                 .build();
+        Option option_path = Option.builder("p")
+                .argName("path_to_new_target")
+                .hasArg()
+                .desc("desired directory of which new target will locate")
+                .longOpt("path")
+                .build();
         options.addOption(option_template);
         options.addOption(option_config);
+        options.addOption(option_path);
 
         // help info can be displayed when using the -h or --help flag
         Option option_help = Option.builder("h")
