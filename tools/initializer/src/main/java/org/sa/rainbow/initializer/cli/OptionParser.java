@@ -1,4 +1,4 @@
-package org.sa.rainbow.initializer.parser;
+package org.sa.rainbow.initializer.cli;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -17,7 +17,7 @@ public class OptionParser {
     private Options options;
 
     /**
-     * Constructor for an option parser that takes -t, -c and -h flags.
+     * Constructor for an option cli that takes -t, -c and -h flags.
      */
     public OptionParser () {
         // initializer, as a command line tool, could take in three flags, -t for template,

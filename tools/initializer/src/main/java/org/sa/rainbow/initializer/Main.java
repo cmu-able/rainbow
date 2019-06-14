@@ -1,17 +1,17 @@
 package org.sa.rainbow.initializer;
 
 import org.apache.commons.cli.*;
+import org.sa.rainbow.initializer.cli.OptionParser;
 import org.sa.rainbow.initializer.configuration.ConfigurationLoader;
 import org.sa.rainbow.initializer.configuration.UIConfigurationLoader;
 import org.sa.rainbow.initializer.models.TemplateSet;
-import org.sa.rainbow.initializer.parser.OptionParser;
 import org.sa.rainbow.initializer.scaffolder.Scaffolder;
 import org.sa.rainbow.initializer.template.FileTemplateSetLoader;
 import org.sa.rainbow.initializer.template.TemplateSetLoader;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -23,16 +23,15 @@ public class Main {
 
         OptionParser optionParser = new OptionParser();
         Options options = optionParser.getOptions();
-        TemplateSet templateSet = null;
+        TemplateSet templateSet;
 
         try {
-
             // parse command line arguments
             CommandLine cmd;
             CommandLineParser parser = new DefaultParser();
             cmd = parser.parse(options, args);
 
-            Map<String, Object> configuration = new HashMap<String, Object>();
+            Map<String, Object> configuration;
 
             if (cmd.hasOption("h")) {
                 HelpFormatter formatter = new HelpFormatter();
@@ -45,13 +44,26 @@ public class Main {
                 Path file = optionParser.handleTemplateOption(cmd);
                 TemplateSetLoader templateSetLoader = new FileTemplateSetLoader(file.toFile());
                 templateSet = templateSetLoader.load();
+            } else {
+                // Should not happen
+                return;
             }
 
+            Path configPath = null;
             // if user provides a config flag, parse the config path
             if (cmd.hasOption("c")) {
-                Path file = optionParser.handleConfigOption(cmd);
+                configPath = optionParser.handleConfigOption(cmd);
+            } else {
+                Path defaultConfigPath = Paths.get("config.yml");
+                if (Files.isRegularFile(defaultConfigPath)) {
+                    System.out.println("Note: using config.yml");
+                    configPath = defaultConfigPath;
+                }
+            }
+
+            if (configPath != null) {
                 ConfigurationLoader configurationLoader = new ConfigurationLoader(templateSet.getVariables());
-                configuration = configurationLoader.loadConfiguration(file.toFile());
+                configuration = configurationLoader.loadConfiguration(configPath.toFile());
             } else {
                 UIConfigurationLoader configLoader = new UIConfigurationLoader();
                 if (configLoader.loadConfiguration()) {
