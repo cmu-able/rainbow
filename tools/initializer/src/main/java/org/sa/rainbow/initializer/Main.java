@@ -22,6 +22,7 @@ public class Main {
         OptionParser optionParser = new OptionParser();
         Options options = optionParser.getOptions();
         TemplateSet templateSet = null;
+
         try {
 
             // parse command line arguments
