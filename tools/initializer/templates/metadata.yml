@@ -23,38 +23,20 @@ variables:
   - name: probes
     description: list of probes that the system would have
     value:
-
-    - name: probe_1
-      description: the first probe in the system
-      value: default_probe_1
-
-    - name: probe_2
-      description: the second probe in the system
-      value: default_probe_2
+      - default_probe_1
+      - default_probe_2
 
   - name: effectors
     description: list of effectors that the system would have
     value:
+      - default_effector_1
+      - default_effector_2
 
-    - name: effector_1
-      description: the first effector in the system
-      value: default_effector_1
-
-    - name: effector_2
-      description: the second effector in the system
-      value: default_effector_2
-
-  - name: gaugaes
+  - name: gauges
     description: list of gauges that the system would have
     value:
-      
-    - name: gauge_1
-      description: the first gauge in the system
-      value: default_gauge_1
-
-    - name: gauge_2
-      description: the second gauge in the system
-      value: default_gauge_2
+      - default_gauge_1
+      - default_gauge_2
 
   - name: logging_level
     description: Config for Log4J, with levels OFF,FATAL,ERROR,WARN,INFO,DEBUG,TRACE,ALL
