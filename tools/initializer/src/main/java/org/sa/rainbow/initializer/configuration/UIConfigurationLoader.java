@@ -94,12 +94,10 @@ public class UIConfigurationLoader {
         }
         // if answer is no, we will call an editor for users
         else if(answer.equals("no") || answer.equals("n")){
-            System.out.println("Please set your own configurations and run again.");
+            System.out.println("Please set your own configurations in 'config.yml' and run again.");
             try {
-                Desktop desktop = Desktop.getDesktop();
                 File file = new File("config.yml");
                 file.createNewFile();
-                desktop.open(file);
             } catch (Exception e) {
                 throw e;
             }
