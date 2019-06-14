@@ -5,13 +5,13 @@ vars:
 
 effectors:
   	[#list effectors as one_effector]
-	  	[=one_effector]:
-	    	location: 
-	    	command: 
-	    	type: 
-	    	scriptInfo:
-	      		path    : 
-	      		argument: 
+	[=one_effector]:
+	   	location: 
+	   	command: 
+	   	type: 
+	   	scriptInfo:
+      		path    : 
+      		argument: 
 	[/#list]
 
       
