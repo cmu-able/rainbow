@@ -1,30 +1,67 @@
 # initializer usage
 
 ## Maven compile
+
 ```
 mvn package
 ```
-## Run the initializer 
-### To see the help menu:
+
+## Run the initializer
+
+### To see the help menu
+
 ```
 java -jar target/rainbow-initializer-1.0-SNAPSHOT-shaded.jar -h
 ```
+
 ### To use the default initialization
+
 ```
 java -jar target/rainbow-initializer-1.0-SNAPSHOT-shaded.jar -t <path_to_templates_folder>
 ```
-(If you would like to use the default option, <path_to_templates_folder> should point to 
+
+(If you would like to use the default option, <path_to_templates_folder> should point to
 the /rainbow/tools/initializer/templates folder in your machine)
 
 ### To custormize initialization
 
 Use -c to load configurations:
+
 ```
-java -jar target/rainbow-initializer-1.0-SNAPSHOT-shaded.jar -t <path_to_templates_folder> -c <path_to_configuration_file> 
+java -jar target/rainbow-initializer-1.0-SNAPSHOT-shaded.jar -t <path_to_templates_folder> -c <path_to_configuration_file>
 ```
+
 ### To custormize your target directory path:
 
 use -p to load destination directory of which the new target would locate:
+
 ```
 -p <path_to_target_destination>
+
 ```
+
+## Template syntax
+
+- Variable declaration
+
+```
+[=variable_name]
+```
+
+- If clause
+
+```
+[#if condition]
+    // execution block
+[/#if]
+```
+
+- Loop clause
+
+```
+[#list sequence as loopVariable]
+  // repeatThis
+[/#list]
+```
+
+For more details, please check https://freemarker.apache.org.
