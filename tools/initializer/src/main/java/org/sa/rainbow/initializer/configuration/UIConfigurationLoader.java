@@ -58,38 +58,6 @@ public class UIConfigurationLoader {
     }
 
     /**
-     * Loads the metadata from a reader.
-     *
-     * @param reader the reader to read metadata from.
-     * @return the parsed metadata.
-     */
-    protected Metadata loadMetadata(Reader reader) throws InvalidMetadataException {
-        Yaml yaml = new Yaml();
-        Metadata metadata = yaml.loadAs(reader, Metadata.class);
-        if (metadata.getFiles() == null) {
-            throw new InvalidMetadataException("field 'files' is required in metadata.");
-        }
-        if (metadata.getVariables() == null) {
-            metadata.setVariables(Collections.emptyList());
-        }
-        return metadata;
-    }
-
-    /**
-     * Loads the metadata from the root directory.
-     *
-     * @return the parsed Metadata
-     * @throws IOException if metadata cannot be read or parsed.
-     */
-    private Metadata loadMetadata() throws IOException {
-        Metadata metadata;
-        try (Reader reader = new BufferedReader(new FileReader(new File("templates", METADATA_FILENAME)))) {
-            metadata = loadMetadata(reader);
-        }
-        return metadata;
-    }
-
-    /**
      * load variables from interactive inputs
      *
      * @return TemplateSet

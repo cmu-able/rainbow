@@ -1,15 +1,18 @@
 package org.sa.rainbow.initializer.configuration;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.sa.rainbow.initializer.models.TemplateSet;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Comparator;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 public class UIConfigurationLoaderTest {
     UIConfigurationLoader cfg;
@@ -38,6 +41,7 @@ public class UIConfigurationLoaderTest {
         System.setIn(in);
         try {
             cfg.loadConfiguration();
+            tearDown();
         } catch (IOException e) {
             throw e;
         }
@@ -62,6 +66,15 @@ public class UIConfigurationLoaderTest {
         System.setIn(in);
         try {
             cfg.loadConfiguration();
+        } catch (IOException e) {
+            throw e;
+        }
+    }
+
+    public void tearDown() throws Exception {
+        try {
+            Path path = Paths.get("config.yml");
+            Files.delete(path);
         } catch (IOException e) {
             throw e;
         }
