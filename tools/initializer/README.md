@@ -19,5 +19,5 @@ java -jar target/rainbow-initializer-1.0-SNAPSHOT-shaded.jar
 
 Use -t To load templates and -c to load configurations:
 ```
-java -jar target/rainbow-initializer-1.0-SNAPSHOT-shaded.jar -t <path_or_uri_to_template> -c <path_or_uri_to_config> 
+java -jar target/rainbow-initializer-1.0-SNAPSHOT-shaded.jar -t <path_to_template> -c <path_to_config> 
 ```
