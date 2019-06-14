@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import static org.junit.Assert.*;
@@ -29,7 +30,13 @@ public class OptionParserTests {
 
     @After
     public void tearDown() throws Exception {
-        return;
+        try {
+            Files.delete(configFile);
+            Files.delete(templateDir);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     @Test
