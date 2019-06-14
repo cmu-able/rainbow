@@ -5,10 +5,7 @@ import freemarker.template.TemplateException;
 import org.sa.rainbow.initializer.models.TemplateSet;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.StringWriter;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -86,18 +83,26 @@ public class Scaffolder {
         if (templateMapping == null) {
             // Use default mapping
             templateSet.getTemplates().forEach((path, template) -> {
+                // Strip ".ftl" suffix from the template name as resulting path.
                 String actualPath = path.replaceAll("\\.*$", "");
                 mapping.put(actualPath, template);
             });
         } else {
+            // Fill the mapping templates with configuration.
             StringWriter writer = new StringWriter();
             templateMapping.process(configuration, writer);
             Yaml yaml = new Yaml();
             Map<String, String> templateNameMapping = yaml.load(writer.toString());
 
-            templateNameMapping.forEach((path, templatePath) -> {
-                mapping.put(path, templateSet.getTemplates().get(templatePath));
-            });
+            for (Map.Entry<String, String> entry : templateNameMapping.entrySet()) {
+                String templatePath = entry.getValue();
+                String resultPath = entry.getKey();
+                Template template = templateSet.getTemplates().get(templatePath);
+                if (template == null) {
+                    throw new FileNotFoundException("missing template: " + template);
+                }
+                mapping.put(resultPath, template);
+            }
         }
         return mapping;
     }
