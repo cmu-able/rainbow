@@ -22,3 +22,8 @@ Use -c to load configurations:
 ```
 java -jar target/rainbow-initializer-1.0-SNAPSHOT-shaded.jar -t <path_to_templates_folder> -c <path_to_configuration_file> 
 ```
+### To custormize your target directory path:
+use command option:
+```
+-p <path_to_target_destination>
+```
