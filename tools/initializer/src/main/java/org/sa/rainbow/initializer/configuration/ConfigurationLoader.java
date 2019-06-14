@@ -19,14 +19,14 @@ public class ConfigurationLoader {
     /**
      * A map of key values for the required variables.
      */
-    private final Map<String, Object> defaultConfig;
+    protected final Map<String, Object> defaultConfig;
 
     /**
      * A set of known variable names.
      * Please note that we may not want to use defaultConfig directly
      * because some variables may be required but have no default values.
      */
-    private final Set<String> variableNames;
+    protected final Set<String> variableNames;
 
     public ConfigurationLoader(List<Variable> variables) {
         defaultConfig = new HashMap<>();
