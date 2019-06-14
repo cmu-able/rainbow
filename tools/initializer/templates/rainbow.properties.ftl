@@ -78,7 +78,7 @@ rainbow.adaptation.manager.size = [=number_of_adaption_managers]
 		rainbow.adaptation.manager.class_[=num] = org.sa.rainbow.stitch.adaptation.AdaptationManager
 		rainbow.adaptation.manager.model_[=num] = 
 	[/#list]
-[#/if]
+[/#if]
 
 rainbow.adaptation.executor.size = [=number_of_adaption_executors]
 [#if number_of_adaption_executors?number > 0]
@@ -86,7 +86,7 @@ rainbow.adaptation.executor.size = [=number_of_adaption_executors]
 		rainbow.adaptation.executor.class_[=num] = org.sa.rainbow.stitch.adaptation.StitchExecutor
 		rainbow.adaptation.executor.model_[=num] = 
 	[/#list]
-[#/if]
+[/#if]
 
 rainbow.effector.manager.size = [=number_of_effector_managers]
 [#if number_of_effector_managers?number > 0]
