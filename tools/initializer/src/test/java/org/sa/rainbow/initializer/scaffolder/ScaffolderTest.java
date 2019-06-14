@@ -13,10 +13,7 @@ import org.sa.rainbow.initializer.models.Variable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 
@@ -43,6 +40,8 @@ public class ScaffolderTest {
         // A simple template for testing
         loader.putTemplate("example.txt.ftl", "Hello, [=name]!\n".getBytes());
 
+        // A simple mapping for testing
+        loader.putTemplate("mapping.yml.ftl", "hello.[=name].txt: example.txt.ftl\n".getBytes());
         configuration.setTemplateLoader(loader);
     }
 
@@ -60,7 +59,9 @@ public class ScaffolderTest {
 
     @Test
     public void scaffold() throws Exception {
-        Map<String, Template> templates = Collections.singletonMap("path/to/example.txt", configuration.getTemplate("example.txt.ftl"));
+        Map<String, Template> templates = new HashMap<>();
+        templates.put("example.txt.ftl", configuration.getTemplate("example.txt.ftl"));
+        templates.put("mapping.yml.ftl", configuration.getTemplate("mapping.yml.ftl"));
         List<Variable> variables = Collections.singletonList(new Variable("name"));
         TemplateSet templateSet = new TemplateSet(templates, variables);
         Map<String, Object> configuration = Collections.singletonMap("name", "world");
@@ -70,6 +71,6 @@ public class ScaffolderTest {
         scaffolder.scaffold();
 
         // read the content of expected files, and assert its content.
-        assertEquals("Hello, world!\n", new String(Files.readAllBytes(baseDirectory.resolve("path/to/example.txt"))));
+        assertEquals("Hello, world!\n", new String(Files.readAllBytes(baseDirectory.resolve("hello.world.txt"))));
     }
 }

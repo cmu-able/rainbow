@@ -39,7 +39,7 @@ public class FileTemplateSetLoader extends TemplateSetLoader {
      */
     @Override
     protected Template loadTemplate(String path) throws IOException {
-        return configuration.getTemplate(path + TEMPLATE_EXTENSION);
+        return configuration.getTemplate(path);
     }
 
     /**
@@ -66,6 +66,7 @@ public class FileTemplateSetLoader extends TemplateSetLoader {
         for (String file : metadata.getFiles()) {
             templates.put(file, loadTemplate(file));
         }
+        templates.put(FILE_MAPPING_TEMPLATE_FILENAME, loadTemplate(FILE_MAPPING_TEMPLATE_FILENAME));
         return new TemplateSet(templates, metadata.getVariables());
     }
 
