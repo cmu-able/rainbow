@@ -15,7 +15,7 @@ public class Metadata {
     /**
      * A list of files to be loaded as templates.
      */
-    private List<String> files;
+    private List<String> templates;
 
     public List<Variable> getVariables() {
         return variables;
@@ -25,11 +25,11 @@ public class Metadata {
         this.variables = variables;
     }
 
-    public List<String> getFiles() {
-        return files;
+    public List<String> getTemplates() {
+        return templates;
     }
 
-    public void setFiles(List<String> files) {
-        this.files = files;
+    public void setTemplates(List<String> templates) {
+        this.templates = templates;
     }
 }

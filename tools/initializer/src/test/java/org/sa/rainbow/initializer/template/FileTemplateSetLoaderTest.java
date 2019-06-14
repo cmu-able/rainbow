@@ -30,7 +30,7 @@ public class FileTemplateSetLoaderTest {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(metadataFile))) {
             Metadata metadata = new Metadata();
             metadata.setVariables(Collections.singletonList(new Variable("name")));
-            metadata.setFiles(Collections.singletonList("simple/simple.txt"));
+            metadata.setTemplates(Collections.singletonList("simple/simple.txt.ftl"));
             Yaml yaml = new Yaml();
             yaml.dump(metadata, writer);
         }
@@ -49,6 +49,13 @@ public class FileTemplateSetLoaderTest {
         }
     }
 
+    private void createSimpleMapping(File simpleMapping) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(simpleMapping))) {
+            writer.write("simple/simple.txt : simple/simple.txt.ftl");
+            writer.newLine();
+        }
+    }
+
     @Before
     public void setUp() throws Exception {
         tempPath = Files.createTempDirectory("template");
@@ -57,6 +64,7 @@ public class FileTemplateSetLoaderTest {
 
         createMetadata(tempPath.resolve("metadata.yml").toFile());
         createSimpleTemplate(simpleDirectory.resolve("simple.txt.ftl").toFile());
+        createSimpleMapping(tempPath.resolve("mapping.yml.ftl").toFile());
     }
 
     @After
@@ -74,7 +82,7 @@ public class FileTemplateSetLoaderTest {
     @Test
     public void loadTemplate() throws Exception {
         TemplateSetLoader loader = new FileTemplateSetLoader(tempPath.toFile());
-        Template template = loader.loadTemplate("simple/simple.txt");
+        Template template = loader.loadTemplate("simple/simple.txt.ftl");
         StringWriter writer = new StringWriter();
         template.process(Collections.singletonMap("name", "world"), writer);
         writer.close();

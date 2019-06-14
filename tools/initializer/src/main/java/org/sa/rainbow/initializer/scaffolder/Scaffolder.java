@@ -3,14 +3,15 @@ package org.sa.rainbow.initializer.scaffolder;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.sa.rainbow.initializer.models.TemplateSet;
+import org.yaml.snakeyaml.Yaml;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
+
 
 /**
  * The scaffolder loads template and configuration, and generates resulting work directory.
@@ -19,6 +20,7 @@ import java.util.Map;
  * @since 1.0
  */
 public class Scaffolder {
+    private String mappingTemplatePath = "mapping.yml.ftl";
     /**
      * The base directory for the scaffolder to create directories and files.
      * Defaults to current working directory.
@@ -76,6 +78,43 @@ public class Scaffolder {
     }
 
     /**
+     * Loads a mapping of each resulting file to its template from a template of mapping YAML file.
+     *
+     * @return a mapping of each file to its template.
+     * @throws IOException       if an I/O exception occur during template processing.
+     * @throws TemplateException if the template of mapping file is invalid.
+     */
+    private Map<String, Template> loadMapping() throws IOException, TemplateException {
+        Template templateMapping = templateSet.getTemplates().get(mappingTemplatePath);
+        Map<String, Template> mapping = new HashMap<>();
+        if (templateMapping == null) {
+            // Use default mapping
+            templateSet.getTemplates().forEach((path, template) -> {
+                // Strip ".ftl" suffix from the template name as resulting path.
+                String actualPath = path.replaceAll("\\.*$", "");
+                mapping.put(actualPath, template);
+            });
+        } else {
+            // Fill the mapping templates with configuration.
+            StringWriter writer = new StringWriter();
+            templateMapping.process(configuration, writer);
+            Yaml yaml = new Yaml();
+            Map<String, String> templateNameMapping = yaml.load(writer.toString());
+
+            for (Map.Entry<String, String> entry : templateNameMapping.entrySet()) {
+                String templatePath = entry.getValue();
+                String resultPath = entry.getKey();
+                Template template = templateSet.getTemplates().get(templatePath);
+                if (template == null) {
+                    throw new FileNotFoundException("missing template: " + template);
+                }
+                mapping.put(resultPath, template);
+            }
+        }
+        return mapping;
+    }
+
+    /**
      * Generates the working directory with template set and configuration.
      *
      * @throws IOException          if the working directory cannot be written to
@@ -83,7 +122,8 @@ public class Scaffolder {
      */
     public void scaffold() throws IOException, ScaffoldingException {
         try {
-            for (Map.Entry<String, Template> entry : templateSet.getTemplates().entrySet()) {
+            Map<String, Template> mapping = loadMapping();
+            for (Map.Entry<String, Template> entry : mapping.entrySet()) {
                 String s = entry.getKey();
                 Template template = entry.getValue();
 
@@ -110,5 +150,13 @@ public class Scaffolder {
 
     public void setBaseDirectory(Path baseDirectory) {
         this.baseDirectory = baseDirectory;
+    }
+
+    public String getMappingTemplatePath() {
+        return mappingTemplatePath;
+    }
+
+    public void setMappingTemplatePath(String mappingTemplatePath) {
+        this.mappingTemplatePath = mappingTemplatePath;
     }
 }

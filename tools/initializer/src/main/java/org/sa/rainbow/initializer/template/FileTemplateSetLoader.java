@@ -39,7 +39,7 @@ public class FileTemplateSetLoader extends TemplateSetLoader {
      */
     @Override
     protected Template loadTemplate(String path) throws IOException {
-        return configuration.getTemplate(path + TEMPLATE_EXTENSION);
+        return configuration.getTemplate(path);
     }
 
     /**
@@ -63,8 +63,13 @@ public class FileTemplateSetLoader extends TemplateSetLoader {
     public TemplateSet load() throws IOException {
         Metadata metadata = loadMetadata();
         Map<String, Template> templates = new HashMap<>();
-        for (String file : metadata.getFiles()) {
+        for (String file : metadata.getTemplates()) {
             templates.put(file, loadTemplate(file));
+        }
+        try {
+            templates.put(FILE_MAPPING_TEMPLATE_FILENAME, loadTemplate(FILE_MAPPING_TEMPLATE_FILENAME));
+        } catch (IOException ignored) {
+            // if mapping cannot be loaded, use defaults.
         }
         return new TemplateSet(templates, metadata.getVariables());
     }

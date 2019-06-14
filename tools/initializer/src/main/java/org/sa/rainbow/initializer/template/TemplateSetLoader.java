@@ -25,7 +25,11 @@ public abstract class TemplateSetLoader {
     /**
      * The name of metadata file.
      */
-    protected static final String METADATA_FILENAME = "metadata.yml";
+    public static final String METADATA_FILENAME = "metadata.yml";
+    /**
+     * The name of file list file template.
+     */
+    public static final String FILE_MAPPING_TEMPLATE_FILENAME = "mapping.yml" + TEMPLATE_EXTENSION;
     /**
      * The FreeMarker configuration.
      */
@@ -60,9 +64,6 @@ public abstract class TemplateSetLoader {
     protected Metadata loadMetadata(Reader reader) throws InvalidMetadataException {
         Yaml yaml = new Yaml();
         Metadata metadata = yaml.loadAs(reader, Metadata.class);
-        if (metadata.getFiles() == null) {
-            throw new InvalidMetadataException("field 'files' is required in metadata.");
-        }
         if (metadata.getVariables() == null) {
             metadata.setVariables(Collections.emptyList());
         }
