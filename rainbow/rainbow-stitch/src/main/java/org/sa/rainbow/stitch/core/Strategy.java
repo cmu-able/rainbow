@@ -1154,6 +1154,10 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 				rv = true;
 			}
 		}
+		if (child.getActionFlag() == ActionKind.TACTIC) {
+			Tactic t = stitchState().findTactic(child.getTactic());
+			rv = rv && t.checkCondition();
+		}
 		return rv;
 	}
 
