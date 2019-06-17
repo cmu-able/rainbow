@@ -961,12 +961,21 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 				// for every condition, register a timed condition to be evaluated in timing
 				// thread
 				for (final StrategyNode node : childrenNodes) {
-					final Expression expr = node.getCondExpr();
+					Expression expr = node.getCondExpr();
+					List<Expression> conditions = new LinkedList<>();
 					expr.clearState(); // make sure we're really reevaluating, not using cached value
 					// register a condition. Should only process this for the node duration that is
 					// dates back to when this method is called, otherwise the time will be @[x] +
 					// the time taken to get to here, not @[x]
-					ConditionTimer.instance().registerCondition(Collections.singletonList(expr),
+					conditions.add(expr);
+					if (node.getActionFlag() == ActionKind.TACTIC) {
+						String tactic = node.getTactic();
+						Tactic t = stitchState().findTactic(tactic);
+						if (t != null) {
+							conditions.addAll(t.conditions);
+						}
+					}
+					ConditionTimer.instance().registerCondition(conditions,
 							branchWait - (System.currentTimeMillis() - start), new Observer() {
 
 								@Override
