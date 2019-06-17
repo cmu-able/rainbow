@@ -200,6 +200,10 @@ public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAn
             	synchChecker.registerModel(model.getModelInstance().getContext().getModel());
             	synchChecker.typecheckAllModelsNow();
                 boolean constraintViolated = !synchChecker.typechecks (model.getModelInstance ());
+                if (constraintViolated) {
+                	String msg = getConstraintMessage(model, env);
+                	msg += "\n";
+                }
                 synchChecker.deregisterModel(model.getModelInstance().getContext().getModel());
                 ModelReference ref = new ModelReference (model.getModelName (), model.getModelType ());
                 Boolean last = m_lastResult.get (ref);
@@ -217,16 +221,9 @@ public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAn
                 }
                 if (constraintViolated) {
                     try {
-                        Set<? extends AcmeError> errors = env.getAllRegisteredErrors ();
-                        Set<String> errorStrs = new HashSet<>();
-                        for (AcmeError error : errors) {
-							String[] causes = error.getMessageText().split("->");
-							errorStrs.add(causes[causes.length-1]);
-						}
-                        
-                        
+                        String msg = getConstraintMessage(model, env);
                         m_reportingPort.info (RainbowComponentT.ANALYSIS,
-                        					  MessageFormat.format("[[{3}]]: Model {0}:{1} constraints violated: {2}", model.getModelName(), model.getModelType(), errorStrs, id()));
+                        					  msg);
                     } catch (Exception e) {
                         m_reportingPort.error (RainbowComponentT.ANALYSIS,
                                               MessageFormat.format("[[{0}]]: There's an error reporting the constraint violation", id()), e);
@@ -272,6 +269,18 @@ public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAn
             }
         }
     }
+
+	protected String getConstraintMessage(final AcmeModelInstance model, IAcmeEnvironment env) {
+		Set<? extends AcmeError> errors = env.getAllRegisteredErrors ();
+		Set<String> errorStrs = new HashSet<>();
+		for (AcmeError error : errors) {
+			String[] causes = error.getMessageText().split("->");
+			errorStrs.add(causes[causes.length-1]);
+		}
+		
+		String msg = MessageFormat.format("[[{3}]]: Model {0}:{1} constraints violated: {2}", model.getModelName(), model.getModelType(), errorStrs, id());
+		return msg;
+	}
 
 /* (non-Javadoc)
  * @see org.sa.rainbow.model.evaluator.IArchEvaluator#getModel()
