@@ -236,17 +236,17 @@ public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAn
 								MessageFormat.format("[[{0}]]: Could not execute set typecheck command on model", id()),
 								e);
 					}
-				}
-				else if (!m_fixedErrors.isEmpty()) {
-					 AcmeTypecheckSetCmd cmd = model.getCommandFactory ().setTypecheckResultCmd
-	                            (model.getModelInstance (), true);
+				} else if (!m_fixedErrors.isEmpty()) {
+					AcmeTypecheckSetCmd cmd = model.getCommandFactory().setTypecheckResultCmd(model.getModelInstance(),
+							true);
 
-	                    try {
-	                        m_modelUSPort.updateModel (cmd);
-	                    } catch (IllegalStateException e) {
-	                        m_reportingPort.error (RainbowComponentT.ANALYSIS,
-	                                               MessageFormat.format("[[{0}]]: Could not execute set typecheck command on model", id()), e);
-	                    }
+					try {
+						m_modelUSPort.updateModel(cmd);
+					} catch (IllegalStateException e) {
+						m_reportingPort.error(RainbowComponentT.ANALYSIS,
+								MessageFormat.format("[[{0}]]: Could not execute set typecheck command on model", id()),
+								e);
+					}
 				}
 
 //				if (last == null || last != constraintViolated) {
@@ -261,49 +261,50 @@ public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAn
 //								e);
 //					}
 //				}
-				
+
 				if (m_fixedErrors.isEmpty() && m_oldErrors.isEmpty() && m_newErrors.isEmpty()) {
 					m_reportingPort.info(RainbowComponentT.ANALYSIS, MessageFormat.format("[[{0}]]: Model {1}:{2} ok",
 							id(), model.getModelName(), model.getModelType()));
-				}
-				else {
+				} else {
 					StringBuffer newErrorS = new StringBuffer();
 					StringBuffer oldErrorS = new StringBuffer();
 					StringBuffer fixedErrorS = new StringBuffer();
-					
+
 					for (AcmeError e : m_newErrors) {
 						IAcmeObject source = e.getSource();
 						if (source instanceof IAcmeElement) {
-							newErrorS.append(((IAcmeElement)source).getQualifiedName());
+							newErrorS.append(((IAcmeElement) source).getQualifiedName());
 							newErrorS.append(", ");
 						}
 					}
-					
+
 					for (AcmeError e : m_fixedErrors) {
 						IAcmeObject source = e.getSource();
 						if (source instanceof IAcmeElement) {
-							fixedErrorS.append(((IAcmeElement)source).getQualifiedName());
+							fixedErrorS.append(((IAcmeElement) source).getQualifiedName());
 							fixedErrorS.append(", ");
 						}
 					}
 					for (AcmeError e : m_oldErrors) {
 						IAcmeObject source = e.getSource();
 						if (source instanceof IAcmeElement) {
-							oldErrorS.append(((IAcmeElement)source).getQualifiedName());
+							oldErrorS.append(((IAcmeElement) source).getQualifiedName());
 							oldErrorS.append(", ");
 						}
 					}
 					StringBuffer errorStrs = new StringBuffer();
-					if (!m_newErrors.isEmpty()) errorStrs.append("Error in: ").append(newErrorS);
-					if (!m_fixedErrors.isEmpty()) errorStrs.append("Fixed errors in ").append(fixedErrorS);
-					if (!m_oldErrors.isEmpty()) errorStrs.append("Still errors in: ").append(oldErrorS);
-					String msg = MessageFormat.format("[[{3}]]: Model {0}:{1} constraints violated: {2}", model.getModelName(),
+					if (!m_newErrors.isEmpty())
+						errorStrs.append("Error in: ").append(newErrorS);
+					if (!m_fixedErrors.isEmpty())
+						errorStrs.append("Fixed errors in ").append(fixedErrorS);
+					if (!m_oldErrors.isEmpty())
+						errorStrs.append("Still errors in: ").append(oldErrorS);
+					String msg = MessageFormat.format("[[{3}]]: Model {0}:{1} Errors: {2}", model.getModelName(),
 							model.getModelType(), errorStrs, id());
 					m_reportingPort.info(RainbowComponentT.ANALYSIS, msg);
 
 				}
-				
-				
+
 //				if (constraintViolated) {
 //					try {
 //						String msg = getConstraintMessage(model, env);
@@ -359,18 +360,19 @@ public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAn
 	Set<AcmeError> m_fixedErrors = new HashSet<>();
 
 	protected void processNewOldAndFixedErrors(final AcmeModelInstance model, IAcmeEnvironment env) {
-    	Set<? extends AcmeError> errors = env.getAllRegisteredErrors();
-    	Set<AcmeError> rootCauses = new HashSet<AcmeError> ();
-    	for (AcmeError error : errors) {
-    		ErrorHelper.populateRootCauseSet(error, rootCauses);
+		Set<? extends AcmeError> errors = env.getAllRegisteredErrors();
+		Set<AcmeError> rootCauses = new HashSet<AcmeError>();
+		for (AcmeError error : errors) {
+			ErrorHelper.populateRootCauseSet(error, rootCauses);
 		}
-    	
-    	 m_fixedErrors = new HashSet<> (m_oldErrors);
-    	 m_fixedErrors.removeAll(rootCauses);
-    	 m_newErrors = new HashSet<>(rootCauses);
-    	 m_newErrors.removeAll(m_oldErrors);
-    	 m_oldErrors.retainAll(rootCauses);
-    }
+
+		m_oldErrors.addAll(m_newErrors);
+		m_fixedErrors = new HashSet<>(m_oldErrors);
+		m_fixedErrors.removeAll(rootCauses);
+		m_newErrors = new HashSet<>(rootCauses);
+		m_newErrors.removeAll(m_oldErrors);
+		m_oldErrors.retainAll(rootCauses);
+	}
 
 	protected String getConstraintMessage(final AcmeModelInstance model, IAcmeEnvironment env) {
 		Set<? extends AcmeError> errors = env.getAllRegisteredErrors();

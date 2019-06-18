@@ -22,6 +22,7 @@ import javax.swing.border.LineBorder;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.gui.RainbowWindow;
 import org.sa.rainbow.gui.arch.elements.IUIReporter;
+import javax.swing.JScrollPane;
 
 public class ArchAnalyzerGUI extends JPanel implements IUIReporter {
 	private JTextArea m_textField;
@@ -34,9 +35,9 @@ public class ArchAnalyzerGUI extends JPanel implements IUIReporter {
 	public ArchAnalyzerGUI() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[]{0, 0, 0};
-		gridBagLayout.rowHeights = new int[]{0, 0, 0};
-		gridBagLayout.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
-		gridBagLayout.rowWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
+		gridBagLayout.rowHeights = new int[]{0, 0, 0, 0};
+		gridBagLayout.columnWeights = new double[]{1.0, 1.0, Double.MIN_VALUE};
+		gridBagLayout.rowWeights = new double[]{0.0, 1.0, 1.0, Double.MIN_VALUE};
 		setLayout(gridBagLayout);
 		
 		JLabel lblStatus = new JLabel("Status:");
@@ -57,21 +58,28 @@ public class ArchAnalyzerGUI extends JPanel implements IUIReporter {
 		
 		m_textField = new JTextArea();
 		GridBagConstraints gbc_textField = new GridBagConstraints();
+		gbc_textField.insets = new Insets(0, 0, 5, 0);
 		gbc_textField.fill = GridBagConstraints.BOTH;
 		gbc_textField.anchor = GridBagConstraints.WEST;
 		gbc_textField.gridwidth = 2;
 		gbc_textField.gridx = 0;
 		gbc_textField.gridy = 1;
 		m_textField.setFont(new Font(m_textField.getFont().getFontName(), m_textField.getFont().getStyle(), 8));
-		add(m_textField, gbc_textField);
 		Dimension s = new Dimension(200, 40);
 		setPreferredSize(new Dimension(260, 70));
 		setSize(s);
+		
+		m_scrollPane = new JScrollPane();
+		
+		add(m_scrollPane, gbc_textField);
+		m_scrollPane.setViewportView(m_textField);
+		m_textField.setLineWrap(true);
 	}
 
 	
 	Pattern CONSTRAINT_PATTERN = Pattern.compile(".*Errors: (.*).*", Pattern.DOTALL);
 	private long m_setTime;
+	private JScrollPane m_scrollPane;
 	
 	@Override
 	public void processReport(ReportType type, String message) {
