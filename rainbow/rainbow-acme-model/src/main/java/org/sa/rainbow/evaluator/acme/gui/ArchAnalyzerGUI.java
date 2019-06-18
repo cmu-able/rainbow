@@ -98,7 +98,7 @@ public class ArchAnalyzerGUI extends JPanel implements IUIReporter {
 			m_setTime = new Date().getTime();
 		}
 		else if (m.matches()) {
-			m_statusLabel.setText("Error! Will check later.");
+			m_statusLabel.setText("Error! Will check again later.");
 			m_statusLabel.setForeground(ERROR_COLOR);
 			m_textField.setText(m.group(1));
 			processBorder();
