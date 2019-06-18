@@ -238,7 +238,8 @@ public class ArchStitchExecutorPanel extends JPanel implements IUIReporter {
 		m_treeTable.repaint();
 		for (int row=0; row<m_treeTable.getRowCount(); row++) {
 			if (m_treeTable.getValueAt(row, 0).equals(label)) {
-				m_treeTable.changeSelection(row, 1, true, true);
+				m_treeTable.addRowSelectionInterval(row, row);
+//				m_treeTable.changeSelection(row, 1, true, true);
 			}
 		}
 	}
