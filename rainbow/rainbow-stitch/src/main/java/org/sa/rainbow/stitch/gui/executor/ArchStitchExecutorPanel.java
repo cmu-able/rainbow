@@ -16,7 +16,6 @@ import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
-import javax.swing.tree.TreeSelectionModel;
 
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
@@ -179,7 +178,7 @@ public class ArchStitchExecutorPanel extends JPanel implements IUIReporter {
 		
 		m_treeTable.setRootVisible(false);
 		m_treeTable.setAutoResizeMode(JXTreeTable.AUTO_RESIZE_ALL_COLUMNS);
-		m_treeTable.setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
+		m_treeTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		DefaultTableColumnModel cm = new DefaultTableColumnModel();
 		cm.addColumn(new TableColumn(0,50));
 		cm.addColumn(new TableColumn(1,230));
@@ -239,7 +238,7 @@ public class ArchStitchExecutorPanel extends JPanel implements IUIReporter {
 		m_treeTable.repaint();
 		for (int row=0; row<m_treeTable.getRowCount(); row++) {
 			if (m_treeTable.getValueAt(row, 0).equals(label)) {
-				m_treeTable.changeSelection(row, 1, false, true);
+				m_treeTable.changeSelection(row, 1, true, true);
 			}
 		}
 	}
