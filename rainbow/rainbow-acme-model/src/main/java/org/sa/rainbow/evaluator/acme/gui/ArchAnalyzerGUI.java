@@ -35,9 +35,9 @@ public class ArchAnalyzerGUI extends JPanel implements IUIReporter {
 	public ArchAnalyzerGUI() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[]{0, 0, 0};
-		gridBagLayout.rowHeights = new int[]{0, 0, 0, 0};
+		gridBagLayout.rowHeights = new int[] {0, 0};
 		gridBagLayout.columnWeights = new double[]{1.0, 1.0, Double.MIN_VALUE};
-		gridBagLayout.rowWeights = new double[]{0.0, 1.0, 1.0, Double.MIN_VALUE};
+		gridBagLayout.rowWeights = new double[]{0.0, 1.0};
 		setLayout(gridBagLayout);
 		
 		JLabel lblStatus = new JLabel("Status:");
@@ -58,7 +58,6 @@ public class ArchAnalyzerGUI extends JPanel implements IUIReporter {
 		
 		m_textField = new JTextArea();
 		GridBagConstraints gbc_textField = new GridBagConstraints();
-		gbc_textField.insets = new Insets(0, 0, 5, 0);
 		gbc_textField.fill = GridBagConstraints.BOTH;
 		gbc_textField.anchor = GridBagConstraints.WEST;
 		gbc_textField.gridwidth = 2;
