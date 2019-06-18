@@ -293,11 +293,13 @@ public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAn
 							oldErrorS.append(", ");
 						}
 					}
-					StringBuffer msg = new StringBuffer();
-					if (!m_newErrors.isEmpty()) msg.append("Error in: ").append(newErrorS);
-					if (!m_fixedErrors.isEmpty()) msg.append("Fixed errors in ").append(fixedErrorS);
-					if (!m_oldErrors.isEmpty()) msg.append("Still errors in: ").append(oldErrorS);
-					m_reportingPort.info(RainbowComponentT.ANALYSIS, msg.toString());
+					StringBuffer errorStrs = new StringBuffer();
+					if (!m_newErrors.isEmpty()) errorStrs.append("Error in: ").append(newErrorS);
+					if (!m_fixedErrors.isEmpty()) errorStrs.append("Fixed errors in ").append(fixedErrorS);
+					if (!m_oldErrors.isEmpty()) errorStrs.append("Still errors in: ").append(oldErrorS);
+					String msg = MessageFormat.format("[[{3}]]: Model {0}:{1} constraints violated: {2}", model.getModelName(),
+							model.getModelType(), errorStrs, id());
+					m_reportingPort.info(RainbowComponentT.ANALYSIS, msg);
 
 				}
 				
