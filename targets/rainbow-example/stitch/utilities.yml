@@ -12,7 +12,7 @@ model:
 utilities:
   uR:
     label: "Average Response Time"
-    mapping: "[EXPR]LB0.basicResponseTime"
+    mapping: "[EXPR]LB0.optResponseTime"
     description: "Client experienced response time in milliseconds, R, defined as a float property 'ClientT.experRespTime' in the architecture"
     utility:
       0: 1.00
