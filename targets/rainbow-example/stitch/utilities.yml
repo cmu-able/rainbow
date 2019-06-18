@@ -57,24 +57,24 @@ vectors:
 # Utility: [^] R; [<>] M; [v] C; [<>]A
 # assume each server will drop response time by 1000 ms and increase cost by 1 unit
   TAddServer:
-    uR: -1000
+    uR: -1.000
     uC: +1.00
     uA: 0
     
   TRemoveServer:
-    uR: +1000
+    uR: +1.000
     uC: -1
     uA: 0
 
 # Utility: [^] R; [<>] M; [^] C; [v]A
 # assume each level of fidelity reduces response time by 500 ms, and reduce cost by 10% of unit, increases annoyance of users 5% for low-quality service
   TIncDimmer:
-    uR: -500
+    uR: -0.500
     uC: -0.10
     uA: +5
     
   TDecDimmer:
-    uR: 500
+    uR: -0.500
     uC: 0.1
     uA: -5
 
