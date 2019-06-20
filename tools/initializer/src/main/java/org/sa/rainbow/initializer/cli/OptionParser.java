@@ -1,4 +1,4 @@
-package org.sa.rainbow.initializer.parser;
+package org.sa.rainbow.initializer.cli;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -17,7 +17,7 @@ public class OptionParser {
     private Options options;
 
     /**
-     * Constructor for an option parser that takes -t, -c and -h flags.
+     * Constructor for an option cli that takes -t, -c and -h flags.
      */
     public OptionParser () {
         // initializer, as a command line tool, could take in three flags, -t for template,
@@ -26,9 +26,8 @@ public class OptionParser {
         Option option_template = Option.builder("t")
                 .argName("path_to_template")
                 .hasArg()
-                .desc("load template from path to local directory")
+                .desc("(REQUIRED) load template from path to local directory")
                 .longOpt("template")
-                .required()
                 .build();
         Option option_config = Option.builder("c")
                 .argName("path_to_config")

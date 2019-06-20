@@ -1,11 +1,10 @@
-package org.sa.rainbow.initializer.parser;
+package org.sa.rainbow.initializer.cli;
 
 import org.apache.commons.cli.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

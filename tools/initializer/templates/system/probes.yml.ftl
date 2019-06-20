@@ -2,7 +2,8 @@ vars:
     _probes.commonPath: "${rainbow.path}/system/probes"
 
 probes:
-    [#list probes as one_probe]
+[#if probes??]
+[#list probes as one_probe]
     [=one_probe]:
         alias:
         location:
@@ -11,6 +12,7 @@ probes:
         mode:
             path:
             argument:
-    [/#list]
+[/#list]
+[/#if]
 
 unused-probes:

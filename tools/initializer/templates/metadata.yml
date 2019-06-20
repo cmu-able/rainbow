@@ -8,18 +8,6 @@ variables:
     description: file extension for the model that would be used in the system
     value: acme
 
-  - name: probe
-    description: the first probe in the system (TO BE REPLACED BY probes)
-    value: default_probe
-
-  - name: effector
-    description: the first effector in the system (TO BE REPLACED BY effectors)
-    value: default_effector
-
-  - name: gauge
-    description: the first gauge in the system (TO BE REPLACED BY effectors)
-    value: default_gauge
-
   - name: probes
     description: list of probes that the system would have
     value:
