@@ -221,4 +221,11 @@ public class ArchModelPanel extends JPanel implements IUIUpdater, IUIReporter, I
 		m_updaters.add(listener);
 	}
 
+
+	@Override
+	public boolean isModelLocked(ModelReference modelRef) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }
