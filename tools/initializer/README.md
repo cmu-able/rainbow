@@ -92,3 +92,5 @@ format:
 ```
 - model/gauges.yml.ftl
 ```
+
+In addition, specify which file should be loaded from which template in mapping.yml.ftl.
