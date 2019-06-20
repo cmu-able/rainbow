@@ -29,15 +29,17 @@ import java.util.Map.Entry;
 
 import org.sa.rainbow.core.error.RainbowCopyException;
 import org.sa.rainbow.core.error.RainbowException;
+import org.sa.rainbow.core.models.IAdaptationModel;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData;
+import org.sa.rainbow.stitch.util.ExecutionHistoryData.ExecutionStateT;
 
-public class ExecutionHistoryModelInstance implements IModelInstance<Map<String, ExecutionHistoryData>> {
+public class ExecutionHistoryModelInstance implements IAdaptationModel<Map<String, ExecutionHistoryData>> {
 
 	public static final String EXECUTION_HISTORY_TYPE = "ExecutionHistory";
 	public static final String TACTIC = "Tactic";
 	public static final String STRATEGY = "Strategy";
-	public static final String ADAPTATION_TREE = "AdaptationTree";
+	public static final String ADAPTATION_TREE = "AdapttionTree";
 
 	Map<String, ExecutionHistoryData> m_tacticHistoryMap;
 	private String m_name;
@@ -104,6 +106,15 @@ public class ExecutionHistoryModelInstance implements IModelInstance<Map<String,
 
 	public void markDisruption(double level) {
 
+	}
+
+	@Override
+	public boolean isAdaptationOccuring() {
+		for (ExecutionHistoryData e : m_tacticHistoryMap.values()) {
+			if (e.getCurrentExecutionState() != ExecutionStateT.NOT_EXECUTING)
+				return true;
+		}
+		return false;
 	}
 
 }

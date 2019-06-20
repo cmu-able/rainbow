@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -229,7 +230,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 			if (!mm.getRegisteredModelTypes().contains(ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE)) {
 				mm.registerModelType(ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE);
 			}
-			String historyModelName = "strategy-execution-" + this.id();
+			String historyModelName = "strategy-execution-" + model.toString();
 			IModelInstance strategyExecutionHistory = mm.getModelInstance(
 					new ModelReference(historyModelName, ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE));
 			if (strategyExecutionHistory == null) {
@@ -439,6 +440,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 					// strategy args removed...
 					Object[] args = new Object[0];
 					AdaptationTree<Strategy> at = new AdaptationTree<Strategy>(selectedStrategy);
+					at.setId(UUID.randomUUID().toString());
 					m_pendingStrategies.add(at);
 					m_modelUSBusPort.updateModel(m_historyModel.getCommandFactory().strategyExecutionStateCommand(
 							"New Adaptation Tree", ExecutionHistoryModelInstance.ADAPTATION_TREE,

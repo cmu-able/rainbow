@@ -224,7 +224,7 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
 
             if (!Rainbow.instance ().shouldTerminate ()) {
 				m_modelUSBusPort.updateModel(
-						m_historyModel.getCommandFactory().strategyExecutionStateCommand("New Adaptation Tree",
+						m_historyModel.getCommandFactory().strategyExecutionStateCommand(at.getId(),
 								ExecutionHistoryModelInstance.ADAPTATION_TREE, ExecutionStateT.ADAPTATION_DONE, null));
                 final IAdaptationManager<Strategy> adaptationManager = Rainbow.instance ()
                         .getRainbowMaster ().adaptationManagerForModel (this.m_modelRef.toString ());
