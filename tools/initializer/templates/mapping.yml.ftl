@@ -12,13 +12,17 @@ stitch/utilities.yml: stitch/utilities.yml.ftl
 system/effectors.yml: system/effectors.yml.ftl
 system/probes.yml: system/probes.yml.ftl
 
+[#if effectors??]
 [#list effectors as effector]
 system/effectors/[=effector].sh: system/effectors/defaultEffector.sh.ftl
 [/#list]
+[/#if]
 
+[# if probes]
 [#list probes as probe]
 system/probes/[=probe].sh: system/probes/defaultProbe.sh.ftl
 [/#list]
+[/#if]
 
 system/util/cmdhelper.sh: system/util/cmdhelper.sh.ftl
 rainbow.properties: rainbow.properties.ftl

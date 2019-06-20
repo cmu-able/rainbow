@@ -3,6 +3,7 @@ vars:
     _effectors.commonPath: "${rainbow.path}/system/effectors"
 
 effectors:
+[#if effectors??]
 [#list effectors as one_effector]
     [=one_effector]:
         location:
@@ -12,5 +13,6 @@ effectors:
             path    :
             argument:
 [/#list]
+[/#if]
 
 unused-effectors:
