@@ -31,6 +31,8 @@ public class AdaptationTree<T extends IEvaluable> {
 
     private AdaptationTree<T> parent = null;
 
+	private String m_id;
+
     public AdaptationTree (T head) {
         this.data = head;
         operator = AdaptationExecutionOperatorT.LEAF;
@@ -39,6 +41,14 @@ public class AdaptationTree<T extends IEvaluable> {
     public AdaptationTree (AdaptationExecutionOperatorT operator) {
         this.operator = operator;
         this.data = null;
+    }
+    
+    public void setId(String id) {
+    	m_id = id;
+    }
+    
+    public String getId() {
+    	return m_id;
     }
 
     public void addLeaf (T root, T leaf) {
