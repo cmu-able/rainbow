@@ -46,6 +46,7 @@ public class Main {
                 templateSet = templateSetLoader.load();
             } else {
                 // Should not happen
+                System.out.println("Parse error: missing required option -t, please use -t <path_to_template>");
                 return;
             }
 
@@ -53,12 +54,6 @@ public class Main {
             // if user provides a config flag, parse the config path
             if (cmd.hasOption("c")) {
                 configPath = optionParser.handleConfigOption(cmd);
-            } else {
-                Path defaultConfigPath = Paths.get("config.yml");
-                if (Files.isRegularFile(defaultConfigPath)) {
-                    System.out.println("Note: using config.yml");
-                    configPath = defaultConfigPath;
-                }
             }
 
             if (configPath != null) {
