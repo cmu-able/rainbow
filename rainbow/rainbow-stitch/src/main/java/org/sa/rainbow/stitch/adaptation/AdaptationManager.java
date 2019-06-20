@@ -54,16 +54,19 @@ import org.sa.rainbow.core.adaptation.AdaptationTree;
 import org.sa.rainbow.core.adaptation.DefaultAdaptationExecutorVisitor;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.health.IRainbowHealthProtocol;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
+import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.UtilityFunction;
 import org.sa.rainbow.core.models.UtilityPreferenceDescription;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowChangeBusSubscription;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowModelChangeCallback;
+import org.sa.rainbow.core.ports.IModelUSBusPort;
 import org.sa.rainbow.core.ports.IModelsManagerPort;
 import org.sa.rainbow.core.ports.IRainbowAdaptationEnqueuePort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
@@ -75,6 +78,9 @@ import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.core.Tactic;
 import org.sa.rainbow.stitch.error.DummyStitchProblemHandler;
 import org.sa.rainbow.stitch.error.IStitchProblem;
+import org.sa.rainbow.stitch.history.ExecutionHistoryModelInstance;
+import org.sa.rainbow.stitch.util.ExecutionHistoryData;
+import org.sa.rainbow.stitch.util.ExecutionHistoryData.ExecutionStateT;
 import org.sa.rainbow.stitch.visitor.Stitch;
 import org.sa.rainbow.stitch.visitor.StitchTypechecker;
 import org.sa.rainbow.util.Beacon;
@@ -148,6 +154,8 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 		}
 	};
 	private UtilityPreferenceDescription m_utilityModel;
+	private ExecutionHistoryModelInstance m_historyModel;
+	private IModelUSBusPort m_modelUSBusPort;
 
 	/**
 	 * Default constructor.
@@ -183,6 +191,8 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 		m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort();
 		m_modelChangePort.subscribe(m_modelTypecheckingChanged, this);
 		m_modelsManagerPort = RainbowPortFactory.createModelsManagerRequirerPort();
+		m_modelUSBusPort = RainbowPortFactory.createModelsManagerClientUSPort(this);
+
 	}
 
 	@Override
@@ -213,6 +223,26 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 
 		} else {
 			m_utilityModel = modelInstance.getModelInstance();
+		}
+		ModelsManager mm = Rainbow.instance().getRainbowMaster().modelsManager();
+		try {
+			if (!mm.getRegisteredModelTypes().contains(ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE)) {
+				mm.registerModelType(ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE);
+			}
+			String historyModelName = "strategy-execution-" + this.id();
+			IModelInstance strategyExecutionHistory = mm.getModelInstance(
+					new ModelReference(historyModelName, ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE));
+			if (strategyExecutionHistory == null) {
+				m_historyModel = new ExecutionHistoryModelInstance(new HashMap<String, ExecutionHistoryData>(),
+						historyModelName, "memory");
+				mm.registerModel(
+						new ModelReference(historyModelName, ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE),
+						m_historyModel);
+			} else {
+				m_historyModel = (ExecutionHistoryModelInstance) strategyExecutionHistory;
+			}
+		} catch (RainbowModelException e) {
+			m_reportingPort.warn(getComponentType(), "Could not create a tactic execution history model", e);
 		}
 //        for (String k : m_utilityModel.utilities.keySet ()) {
 //            UtilityAttributes ua = m_utilityModel.utilities.get (k);
@@ -393,7 +423,8 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 				return;
 			if (Rainbow.instance().getProperty(RainbowConstants.PROPKEY_ADAPTATION_HOMEOSTATIC, false)
 					|| m_modelError) {
-				// Reset model error because we don't want to continuously deal with the same problem
+				// Reset model error because we don't want to continuously deal with the same
+				// problem
 				m_modelError = false;
 				m_reportingPort.info(getComponentType(),
 						MessageFormat.format("[[{0}]]: Considering adaptations", id()));
@@ -409,6 +440,9 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 					Object[] args = new Object[0];
 					AdaptationTree<Strategy> at = new AdaptationTree<Strategy>(selectedStrategy);
 					m_pendingStrategies.add(at);
+					m_modelUSBusPort.updateModel(m_historyModel.getCommandFactory().strategyExecutionStateCommand(
+							"New Adaptation Tree", ExecutionHistoryModelInstance.ADAPTATION_TREE,
+							ExecutionStateT.ADAPTATION_QUEUED, null));
 					m_enqueuePort.offerAdaptation(at, null);
 					String logMessage = selectedStrategy.getName();
 					strategyLog(logMessage);
@@ -899,13 +933,13 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 		String typecheckSt = (String) message.getProperty(IModelChangeBusPort.PARAMETER_PROP + "0");
 		Boolean typechecks = Boolean.valueOf(typecheckSt);
 		// Cause the thread to wake up if it is sleeping
-		if (m_modelError) 
+		if (m_modelError)
 			m_modelError = !typechecks;
 		if (!typechecks) {
 			if (m_pendingStrategies.size() == 0) {
 				m_modelError = !typechecks;
 				activeThread().interrupt();
-				
+
 			}
 		}
 	}

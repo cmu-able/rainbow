@@ -40,7 +40,7 @@ import java.util.*;
 public final class ExecutionHistoryData {
 
     public enum ExecutionStateT {
-        NOT_EXECUTING, STARTED, EXECUTING, WAITING, FINISHED
+        NOT_EXECUTING, ADAPTATION_QUEUED, ADAPTATION_EXECUTING, STRATEGY_EXECUTING, NODE_EXECUTING, TACTIC_EXECUTING, TACTIC_SETTLING, TACTIC_DONE, NODE_DONE, STRATEGY_DONE, ADAPTATION_DONE, TACTIC_ERROR
     }
 
     public static class ExecutionPoint {
@@ -211,7 +211,7 @@ public final class ExecutionHistoryData {
     }
 
     public ExecutionStateT getCurrentExecutionState () {
-        return m_executions.getLast ().m_state;
+        return m_executions.isEmpty()?ExecutionStateT.NOT_EXECUTING:m_executions.getLast ().m_state;
     }
 
     public String getLastExecutionResult () {
@@ -219,7 +219,7 @@ public final class ExecutionHistoryData {
         String data = null;
         while (i.hasNext () && data == null) {
             ExecutionPoint point = i.next ();
-            if (point.m_state == ExecutionStateT.FINISHED) {
+            if (point.m_state == ExecutionStateT.ADAPTATION_DONE) {
                 data = point.m_data;
             }
         }
@@ -263,12 +263,12 @@ public final class ExecutionHistoryData {
         m_executions.add (p);
 
         switch (newState) {
-        case STARTED:
-            addExecutionTransition (type, ExecutionStateT.EXECUTING, null);
-            break;
-        case FINISHED:
+        case ADAPTATION_DONE:
             addExecutionTransition (type, ExecutionStateT.NOT_EXECUTING, null);
             break;
+//        case FINISHED:
+//            addExecutionTransition (type, ExecutionStateT.NOT_EXECUTING, null);
+//            break;
         default:
         }
     }

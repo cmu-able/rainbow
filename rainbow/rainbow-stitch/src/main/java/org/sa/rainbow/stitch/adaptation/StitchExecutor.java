@@ -23,6 +23,10 @@
  */
 package org.sa.rainbow.stitch.adaptation;
 
+import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.concurrent.CountDownLatch;
+
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
@@ -30,22 +34,21 @@ import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.adaptation.AdaptationTree;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
-import org.sa.rainbow.core.adaptation.IAdaptationVisitor;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.ModelsManager;
-import org.sa.rainbow.core.ports.*;
+import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
+import org.sa.rainbow.core.ports.IModelUSBusPort;
+import org.sa.rainbow.core.ports.IRainbowAdaptationDequeuePort;
+import org.sa.rainbow.core.ports.IRainbowReportingPort;
+import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.history.ExecutionHistoryModelInstance;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData;
-
-import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicInteger;
+import org.sa.rainbow.stitch.util.ExecutionHistoryData.ExecutionStateT;
 
 /**
  * The Strategy Executor serves the role of maintaining the active thread(s) to carry a strategy/ies. This design
@@ -96,6 +99,27 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
             + ":" + model.getModelType ());
         }
         m_executionThreadGroup = new ThreadGroup (m_modelRef.toString () + " ThreadGroup");
+        ModelsManager mm = Rainbow.instance ().getRainbowMaster ().modelsManager ();
+        try {
+            if (!mm.getRegisteredModelTypes ().contains (ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE)) {
+                mm.registerModelType (ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE);
+            }
+            String historyModelName = "strategy-execution-" + this.id ();
+            IModelInstance strategyExecutionHistory = mm.getModelInstance(new ModelReference(historyModelName,ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE));
+			if (strategyExecutionHistory == null) {
+				 m_historyModel = new ExecutionHistoryModelInstance (new HashMap<String, ExecutionHistoryData> (),
+		                    historyModelName, "memory");
+		            mm.registerModel (new ModelReference (historyModelName,
+		                    ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE), m_historyModel);
+            }
+			else {
+				m_historyModel = (ExecutionHistoryModelInstance )strategyExecutionHistory;
+			}
+           
+        }
+        catch (RainbowModelException e) {
+            m_reportingPort.warn (getComponentType (), "Could not create a tactic execution history model", e);
+        }
     }
     
     @Override
@@ -135,6 +159,9 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
             // Because we are dealing only in stitch in this executor, then
             // use a StitchExecutionVisitor to visit this adaptation
             AdaptationTree<Strategy> at = m_adapationDQPort.dequeue ();
+			m_modelUSBusPort
+					.updateModel(m_historyModel.getCommandFactory().strategyExecutionStateCommand("New Adaptation Tree",
+							ExecutionHistoryModelInstance.ADAPTATION_TREE, ExecutionStateT.ADAPTATION_EXECUTING, null));
             log ("Dequeued an adaptation");
             log(MessageFormat.format("[[{0}]]: Executing an adaptation", id()));
 //            final AtomicInteger numLL = new AtomicInteger (0);
@@ -196,6 +223,9 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
             }
 
             if (!Rainbow.instance ().shouldTerminate ()) {
+				m_modelUSBusPort.updateModel(
+						m_historyModel.getCommandFactory().strategyExecutionStateCommand("New Adaptation Tree",
+								ExecutionHistoryModelInstance.ADAPTATION_TREE, ExecutionStateT.ADAPTATION_DONE, null));
                 final IAdaptationManager<Strategy> adaptationManager = Rainbow.instance ()
                         .getRainbowMaster ().adaptationManagerForModel (this.m_modelRef.toString ());
                 if (adaptationManager != null) {
@@ -482,20 +512,7 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
         m_modelDSPort = RainbowPortFactory.createModelDSPublishPort (this);
         m_modelUSBusPort = RainbowPortFactory.createModelsManagerClientUSPort (this);
         // Create a tactics execution model
-        ModelsManager mm = Rainbow.instance ().getRainbowMaster ().modelsManager ();
-        try {
-            if (!mm.getRegisteredModelTypes ().contains (ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE)) {
-                mm.registerModelType (ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE);
-            }
-            String historyModelName = "strategy-execution-" + this.id ();
-            m_historyModel = new ExecutionHistoryModelInstance (new HashMap<String, ExecutionHistoryData> (),
-                    historyModelName, "memory");
-            mm.registerModel (new ModelReference (historyModelName,
-                    ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE), m_historyModel);
-        }
-        catch (RainbowModelException e) {
-            m_reportingPort.warn (getComponentType (), "Could not create a tactic execution history model", e);
-        }
+ 
         log ("Strategy executor initialized");
     }
 
