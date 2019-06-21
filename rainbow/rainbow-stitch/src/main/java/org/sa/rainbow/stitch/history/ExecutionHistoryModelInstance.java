@@ -31,6 +31,7 @@ import org.sa.rainbow.core.error.RainbowCopyException;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.IAdaptationModel;
 import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData.ExecutionStateT;
 
@@ -109,9 +110,9 @@ public class ExecutionHistoryModelInstance implements IAdaptationModel<Map<Strin
 	}
 
 	@Override
-	public boolean isAdaptationOccuring() {
+	public boolean isAdaptationOccuring(ModelReference model) {
 		for (ExecutionHistoryData e : m_tacticHistoryMap.values()) {
-			if (e.getCurrentExecutionState() != ExecutionStateT.NOT_EXECUTING)
+			if (e.getCurrentExecutionState() != ExecutionStateT.NOT_EXECUTING && e.getModelReference().equals(model))
 				return true;
 		}
 		return false;
