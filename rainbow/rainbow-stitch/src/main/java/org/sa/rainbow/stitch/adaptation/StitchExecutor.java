@@ -104,7 +104,7 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
             if (!mm.getRegisteredModelTypes ().contains (ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE)) {
                 mm.registerModelType (ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE);
             }
-            String historyModelName = "strategy-execution-" + this.id ();
+            String historyModelName = "strategy-execution-" + model.toString();
             IModelInstance strategyExecutionHistory = mm.getModelInstance(new ModelReference(historyModelName,ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE));
 			if (strategyExecutionHistory == null) {
 				 m_historyModel = new ExecutionHistoryModelInstance (new HashMap<String, ExecutionHistoryData> (),
