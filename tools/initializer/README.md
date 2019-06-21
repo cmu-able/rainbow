@@ -65,3 +65,32 @@ use -p to load destination directory of which the new target would locate:
 ```
 
 For more details, please check https://freemarker.apache.org.
+
+# Developer Guide
+
+## Variable usage
+
+To use a variable, you need to first declare it in templates/metadata.yml. 
+Then you can configure its value in your_config.yml.
+
+To add a variable in templates/metadata.yml, specify the variable name, 
+description and default value in the following format:
+
+```
+  - name: project_name
+    description: name of the project
+    value: example_project
+```
+
+## Template file usage
+To add an template file, you need to first declare it in templates/metadata.yml.
+Then you can add your template file in templates/ folder.
+
+To add a template in templates/metadata.yml, specify the file name(path) in the following
+format:
+
+```
+- model/gauges.yml.ftl
+```
+
+In addition, specify which file should be loaded from which template in mapping.yml.ftl.
