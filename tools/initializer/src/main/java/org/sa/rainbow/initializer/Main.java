@@ -54,6 +54,8 @@ public class Main {
             // if user provides a config flag, parse the config path
             if (cmd.hasOption("c")) {
                 configPath = optionParser.handleConfigOption(cmd);
+            } else {
+                System.out.println("No configuration file provided, using default.");
             }
 
             if (configPath != null) {
