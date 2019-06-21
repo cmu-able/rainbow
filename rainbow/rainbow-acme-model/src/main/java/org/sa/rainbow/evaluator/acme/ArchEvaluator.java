@@ -205,6 +205,10 @@ public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAn
 		final AcmeModelInstance model = m_modelCheckQ.poll();
 		if (model != null) {
 			// For each Acme model that changed, check to see if it typechecks
+			if (m_modelsManagerPort.isModelLocked(new ModelReference(model.getModelName(), model.getModelType()))) {
+				m_reportingPort.info(getComponentType(), MessageFormat.format("[[{0}]]: Adaptation currently occuring", id()));
+;
+			}
 			m_reportingPort.info(getComponentType(), MessageFormat.format("[[{0}]]: Checking constraints", id()));
 			IAcmeEnvironment env = model.getModelInstance().getContext().getEnvironment();
 			IAcmeTypeChecker typeChecker = env.getTypeChecker();

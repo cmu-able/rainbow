@@ -1075,7 +1075,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 			setOutcome(Outcome.SUCCESS);
 			if (m_executor != null) {
 				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
-						.strategyExecutionStateCommand(this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+						.strategyExecutionStateCommand(m_executor.getManagedModel(), this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
 								ExecutionHistoryData.ExecutionStateT.NODE_DONE, Outcome.SUCCESS.toString()));
 				m_executor.getReportingPort().info(m_executor.getComponentType(), MessageFormat
 						.format("[[{0}]]: Finished executing node {1}:{2}->{3}", m_executor.id(), curNode.label(), "done", Outcome.SUCCESS));
@@ -1089,7 +1089,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 			setOutcome(Outcome.STATUSQUO);
 			if (m_executor != null) {
 				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
-						.strategyExecutionStateCommand(this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+						.strategyExecutionStateCommand(m_executor.getManagedModel(), this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
 								ExecutionHistoryData.ExecutionStateT.NODE_DONE, Outcome.STATUSQUO.toString()));
 				m_executor.getReportingPort().info(m_executor.getComponentType(), MessageFormat
 						.format("[[{0}]]: Finished executing node {1}:{2}->{3}", m_executor.id(), curNode.label(), "done", Outcome.STATUSQUO));
@@ -1134,7 +1134,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 			setOutcome(Outcome.FAILURE);
 			if (m_executor != null) {
 				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
-						.strategyExecutionStateCommand(this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+						.strategyExecutionStateCommand(m_executor.getManagedModel(), this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
 								ExecutionHistoryData.ExecutionStateT.NODE_DONE, Outcome.FAILURE.toString()));
 				m_executor.getReportingPort().info(m_executor.getComponentType(), MessageFormat
 						.format("[[{0}]]: Finished executing node {1}:{2}->{3}", m_executor.id(), curNode.label(), "done", Outcome.FAILURE));
@@ -1195,7 +1195,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 						"Could not execute " + curNode.getTactic());
 				setOutcome(Outcome.STATUSQUO);
 				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
-						.strategyExecutionStateCommand(this.getQualifiedName(), ExecutionHistoryModelInstance.STRATEGY,
+						.strategyExecutionStateCommand(m_executor.getManagedModel(), this.getQualifiedName(), ExecutionHistoryModelInstance.STRATEGY,
 								ExecutionHistoryData.ExecutionStateT.TACTIC_ERROR, "Could not execute " + curNode.getTactic()));
 				return;
 			}
@@ -1209,14 +1209,14 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 			if (m_executor != null) {
 				tactic.setHistoryModel(m_executor.getExecutionHistoryModel());
 				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
-						.strategyExecutionStateCommand(tactic.getQualifiedName(), ExecutionHistoryModelInstance.TACTIC,
+						.strategyExecutionStateCommand(m_executor.getManagedModel(), tactic.getQualifiedName(), ExecutionHistoryModelInstance.TACTIC,
 								ExecutionHistoryData.ExecutionStateT.TACTIC_EXECUTING, null));
 			}
 			long start = new Date().getTime();
 			tactic.stitchState().setExecutor(m_executor);
 			if (m_executor != null) {
 				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
-						.strategyExecutionStateCommand(this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+						.strategyExecutionStateCommand(m_executor.getManagedModel(), this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
 								ExecutionHistoryData.ExecutionStateT.NODE_EXECUTING, null));
 
 				m_executor.getReportingPort().info(m_executor.getComponentType(), MessageFormat
@@ -1225,7 +1225,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 			tactic.evaluate(args);
 			if (m_executor != null) {
 				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
-						.strategyExecutionStateCommand(tactic.getQualifiedName(), ExecutionHistoryModelInstance.TACTIC,
+						.strategyExecutionStateCommand(m_executor.getManagedModel(), tactic.getQualifiedName(), ExecutionHistoryModelInstance.TACTIC,
 								ExecutionHistoryData.ExecutionStateT.TACTIC_SETTLING, Long.toString(tactic.getDuration())));
 			// TODO: calculated settling based on Tactic effect settling
 				m_executor.getReportingPort().info(m_executor.getComponentType(), MessageFormat.format("[[{0}]]: Settling node {1}:{2}@{3}", m_executor.id(), curNode.label(), tactic.getName(),tactic.getDuration()));
@@ -1235,7 +1235,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 			// TODO: then await condition stuff
 			if (m_executor != null) {
 				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
-						.strategyExecutionStateCommand(tactic.getQualifiedName(), ExecutionHistoryModelInstance.TACTIC,
+						.strategyExecutionStateCommand(m_executor.getManagedModel(), tactic.getQualifiedName(), ExecutionHistoryModelInstance.TACTIC,
 								ExecutionHistoryData.ExecutionStateT.TACTIC_DONE, Boolean.toString(effectGood)));
 				AbstractRainbowModelOperation recordTacticDurationCmd = m_executor.getExecutionHistoryModel()
 						.getCommandFactory()
@@ -1260,7 +1260,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 			if (m_executor != null) {
 				String msg = tactic.hasError() ? "Error" : (effectGood?"SUCCESS":"FAIL");
 				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
-						.strategyExecutionStateCommand(this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+						.strategyExecutionStateCommand(m_executor.getManagedModel(), this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
 								ExecutionHistoryData.ExecutionStateT.NODE_DONE, msg));
 				m_executor.getReportingPort().info(m_executor.getComponentType(),
 						MessageFormat.format("[[{0}]]: Finished executing node {1}:{2}->{3}", m_executor.id(),

@@ -6,6 +6,7 @@ import java.util.Map;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData;
@@ -17,10 +18,12 @@ AbstractRainbowModelOperation<ExecutionHistoryData.ExecutionPoint, Map<String, E
 
     private ExecutionHistoryData m_data;
     private ExecutionHistoryData m_oldData;
+	private ModelReference m_modelReference;
 
     public StrategyExecutionStateCommand (String commandName, IModelInstance<Map<String, ExecutionHistoryData>> model,
-            String target, String type, String newState, String data) {
-        super (commandName, model, target, type, newState, data);
+            String target, String modelref, String type, String newState, String data) {
+        super (commandName, model, target, modelref, type, newState, data);
+        m_modelReference = ModelReference.fromString(modelref);
     }
 
     @Override
@@ -39,6 +42,7 @@ AbstractRainbowModelOperation<ExecutionHistoryData.ExecutionPoint, Map<String, E
         if (datum == null) {
             datum = new ExecutionHistoryData ();
             datum.setIdentifier (getTarget ());
+            datum.setModel(m_modelReference);
             getModelContext ().getModelInstance ().put (getTarget (), datum);
         }
         else {

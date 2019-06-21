@@ -443,7 +443,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 					at.setId(UUID.randomUUID().toString());
 					m_pendingStrategies.add(at);
 					m_modelUSBusPort.updateModel(m_historyModel.getCommandFactory().strategyExecutionStateCommand(
-							"New Adaptation Tree", ExecutionHistoryModelInstance.ADAPTATION_TREE,
+							 m_modelRef, at.getId(), ExecutionHistoryModelInstance.ADAPTATION_TREE,
 							ExecutionStateT.ADAPTATION_QUEUED, null));
 					m_enqueuePort.offerAdaptation(at, null);
 					String logMessage = selectedStrategy.getName();

@@ -81,7 +81,8 @@ public class StitchExecutionVisitor extends DefaultAdaptationExecutorVisitor<Str
 			v.setValue(0L);
 			actualExecutedAdaptation.stitchState()./* stitch(). */script.addVar(v.name, v);
 			m_executor.getHistoryModelUSPort()
-					.updateModel(m_historyFactory.strategyExecutionStateCommand(adaptation.getQualifiedName(),
+					.updateModel(m_historyFactory.strategyExecutionStateCommand(m_executor.getManagedModel(),
+							adaptation.getQualifiedName(),
 							ExecutionHistoryModelInstance.STRATEGY,
 							ExecutionHistoryData.ExecutionStateT.STRATEGY_EXECUTING, null));
 			o = (Strategy.Outcome) actualExecutedAdaptation.evaluate(null);
@@ -90,7 +91,8 @@ public class StitchExecutionVisitor extends DefaultAdaptationExecutorVisitor<Str
 			m_executor.log(MessageFormat.format("[[{0}]]: Outcome({1}): {2}", m_executor.id(),
 					actualExecutedAdaptation.getName(), o));
 			m_executor.getHistoryModelUSPort()
-					.updateModel(m_historyFactory.strategyExecutionStateCommand(adaptation.getQualifiedName(),
+					.updateModel(m_historyFactory.strategyExecutionStateCommand(m_executor.getManagedModel(),
+							adaptation.getQualifiedName(),
 							ExecutionHistoryModelInstance.STRATEGY, ExecutionHistoryData.ExecutionStateT.STRATEGY_DONE,
 							o.toString()));
 			adaptation.setOutcome(o);

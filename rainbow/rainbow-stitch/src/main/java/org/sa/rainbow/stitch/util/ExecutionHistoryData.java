@@ -27,6 +27,9 @@
 package org.sa.rainbow.stitch.util;
 
 import javax.annotation.Nonnull;
+
+import org.sa.rainbow.core.models.ModelReference;
+
 import java.util.*;
 
 /**
@@ -69,6 +72,7 @@ public final class ExecutionHistoryData {
     private long                       m_min           = Long.MAX_VALUE;
     private long                       m_max           = Long.MIN_VALUE;
     private double                     m_numSuccesses  = 0;
+    private ModelReference			   m_targetedModel = null;
 
     private LinkedList<ExecutionPoint> m_executions    = new LinkedList<> ();
 
@@ -96,13 +100,13 @@ public final class ExecutionHistoryData {
      * @param max
      *            initial maximum duration value read from storage
      */
-    public ExecutionHistoryData (String iden, int sampleSize, double mean, double variance, long min, long max,
+    public ExecutionHistoryData (String iden, ModelReference modelRef, int sampleSize, double mean, double variance, long min, long max,
             double numSuccesses, @Nonnull List<ExecutionPoint> executions) {
-        initData (iden, sampleSize, mean, variance, min, max, numSuccesses, executions);
+        initData (modelRef, iden, sampleSize, mean, variance, min, max, numSuccesses, executions);
     }
 
     public ExecutionHistoryData (ExecutionHistoryData ed) {
-        this (ed.m_qualifiedIden, ed.m_sampleSize, ed.m_mean, ed.m_variance, ed.m_min, ed.m_max, ed.m_numSuccesses,
+        this ( ed.m_qualifiedIden, ed.m_targetedModel,ed.m_sampleSize, ed.m_mean, ed.m_variance, ed.m_min, ed.m_max, ed.m_numSuccesses,
                 ed.m_executions);
     }
 
@@ -110,6 +114,7 @@ public final class ExecutionHistoryData {
      * Initializes the data items for this history data entry, called only once. With the exception of the identifier,
      * no other set method is provided to convey the semantic that updates to data values occur internally when a new
      * sample measurement is supplied via {@link #addDurationSample(long)}.
+     * @param modelRef 
      * 
      * @param iden
      *            fully-qualified string identifier for this data
@@ -124,7 +129,7 @@ public final class ExecutionHistoryData {
      * @param max
      *            initial maximum duration value read from storage
      */
-    public void initData (String iden,
+    public void initData (ModelReference modelRef, String iden,
             int sampleSize,
             double mean,
             double variance,
@@ -134,7 +139,7 @@ public final class ExecutionHistoryData {
             List<ExecutionPoint> executions) {
 
         if (m_qualifiedIden != null) return;
-
+        m_targetedModel = modelRef;
         m_qualifiedIden = iden;
         m_sampleSize = sampleSize;
         m_mean = mean;
@@ -150,6 +155,10 @@ public final class ExecutionHistoryData {
      */
     public String getIdentifier () {
         return m_qualifiedIden;
+    }
+    
+    public ModelReference getModelReference() {
+    	return m_targetedModel;
     }
 
     /**
@@ -279,9 +288,13 @@ public final class ExecutionHistoryData {
     @Override
     public String toString () {
         StringBuffer sb = new StringBuffer (m_qualifiedIden);
-        sb.append ("\t").append (m_sampleSize).append ("\t").append (m_mean).append ("\t").append (m_variance)
+        sb.append("\t").append(m_targetedModel.toString()).append ("\t").append (m_sampleSize).append ("\t").append (m_mean).append ("\t").append (m_variance)
         .append ("\t").append (m_min).append ("\t").append (m_max).append ("\t").append (getSuccessRate ());
         return sb.toString ();
     }
+
+	public void setModel(ModelReference modelReference) {
+		m_targetedModel = modelReference;
+	}
 
 }

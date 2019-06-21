@@ -491,13 +491,13 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
 	@Override
 	public boolean isModelLocked(ModelReference modelRef) {
 		if (m_adaptationModels.get(modelRef.toString()) != null) 
-				return m_adaptationModels.get(modelRef.toString()).isAdaptationOccuring();
+				return m_adaptationModels.get(modelRef.toString()).isAdaptationOccuring(modelRef);
 		else {
 			IAdaptationModel<?> am = 
 					findAssociatedAdapttionModel(modelRef);
 			if (am != null) {
 				m_adaptationModels.put(modelRef.toString(), am);
-				return am.isAdaptationOccuring();
+				return am.isAdaptationOccuring(modelRef);
 			}
 		}
 		return false;

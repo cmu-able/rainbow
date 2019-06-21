@@ -160,7 +160,7 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
             // use a StitchExecutionVisitor to visit this adaptation
             AdaptationTree<Strategy> at = m_adapationDQPort.dequeue ();
 			m_modelUSBusPort
-					.updateModel(m_historyModel.getCommandFactory().strategyExecutionStateCommand("New Adaptation Tree",
+					.updateModel(m_historyModel.getCommandFactory().strategyExecutionStateCommand(getManagedModel(), at.getId(),
 							ExecutionHistoryModelInstance.ADAPTATION_TREE, ExecutionStateT.ADAPTATION_EXECUTING, null));
             log ("Dequeued an adaptation");
             log(MessageFormat.format("[[{0}]]: Executing an adaptation", id()));
@@ -224,7 +224,7 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
 
             if (!Rainbow.instance ().shouldTerminate ()) {
 				m_modelUSBusPort.updateModel(
-						m_historyModel.getCommandFactory().strategyExecutionStateCommand(at.getId(),
+						m_historyModel.getCommandFactory().strategyExecutionStateCommand(getManagedModel(), at.getId(),
 								ExecutionHistoryModelInstance.ADAPTATION_TREE, ExecutionStateT.ADAPTATION_DONE, null));
                 final IAdaptationManager<Strategy> adaptationManager = Rainbow.instance ()
                         .getRainbowMaster ().adaptationManagerForModel (this.m_modelRef.toString ());
