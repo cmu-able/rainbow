@@ -254,7 +254,7 @@ public class EventBasedStitchExecutorPanel extends JPanel implements IRainbowMod
 
 	@Override
 	public synchronized void onEvent(ModelReference reference, IRainbowMessage message) {
-		ExecutionStateT eventType = ExecutionStateT.valueOf(message.getProperty(IModelChangeBusPort.PARAMETER_PROP)+"2");
+		ExecutionStateT eventType = ExecutionStateT.valueOf((String) message.getProperty(IModelChangeBusPort.PARAMETER_PROP+"2"));
 		String target = (String) message.getProperty(IModelChangeBusPort.TARGET_PROP);
 		String[] targetConstituents = target.split("\\.");
 		switch (eventType) {
@@ -273,7 +273,7 @@ public class EventBasedStitchExecutorPanel extends JPanel implements IRainbowMod
 			updateStatus(targetConstituents[targetConstituents.length-1], "EXECUTING");
 			break;
 		case TACTIC_EXECUTING:
-			String[] strategy = ((String) message.getProperty(IModelChangeBusPort.PARAMETER_PROP)+"3").split("\\.");
+			String[] strategy = ((String) message.getProperty(IModelChangeBusPort.PARAMETER_PROP+"3")).split("\\.");
 			m_tacticToStrategy.put(target, strategy[strategy.length-1]);
 			break;
 		case TACTIC_SETTLING:
@@ -283,7 +283,7 @@ public class EventBasedStitchExecutorPanel extends JPanel implements IRainbowMod
 			m_tacticToStrategy.remove(target);
 			break;
 		case NODE_DONE:
-			updateStatus(targetConstituents[targetConstituents.length-1], (String) message.getProperty(IModelChangeBusPort.PARAMETER_PROP)+"3");
+			updateStatus(targetConstituents[targetConstituents.length-1], (String) message.getProperty(IModelChangeBusPort.PARAMETER_PROP+"3"));
 			break;
 		}
 	}
