@@ -1232,7 +1232,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 						.updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
 								.strategyExecutionStateCommand(m_executor.getManagedModel(), tactic.getQualifiedName(),
 										ExecutionHistoryModelInstance.TACTIC,
-										ExecutionHistoryData.ExecutionStateT.TACTIC_EXECUTING, null));
+										ExecutionHistoryData.ExecutionStateT.TACTIC_EXECUTING, "Called by " + this.getQualifiedName()));
 			}
 			long start = new Date().getTime();
 			tactic.stitchState().setExecutor(m_executor);
