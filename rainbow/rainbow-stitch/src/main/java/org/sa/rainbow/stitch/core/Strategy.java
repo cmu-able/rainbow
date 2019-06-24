@@ -994,10 +994,14 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 				// Wait for a condition to succeed, or until timeout
 				boolean nodeTrue;
 				long allottedTime = start + branchWait;
+				boolean timeOut = System.currentTimeMillis() < allottedTime;
+				boolean allResults = resultMap.size() == childrenNodes.size();
+//				int count = 0;
 				do {
 					// Problem here is that we will always wait at lease SLEEP_TIME_LONG (100ms) for
 					// a condition to evaluate. Probably ok.
 					try {
+//						count++;
 						Thread.sleep(ConditionTimer.SLEEP_TIME_LONG);
 					} catch (InterruptedException e) {
 					}
@@ -1008,10 +1012,14 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 					}
 					// while no condition is true, the stitch evaluation hasn't been cancelled,
 					// and we haven't waited past the time it takes to evaluated,
-				} while (!nodeTrue && !m_stitch.isCanceled() && System.currentTimeMillis() < allottedTime
+					timeOut = System.currentTimeMillis() < allottedTime;
+					allResults = resultMap.size() == childrenNodes.size();
+				} while (!nodeTrue 
+						&& !m_stitch.isCanceled()
+						&& timeOut
 				// (and each condition has been evaluated at least once?)
-						&& resultMap.size() == childrenNodes.size());
-
+						&& !allResults);
+//				System.out.println("count=" + count + ", branchWait=" + branchWait + ", nodeTrue=" + nodeTrue + ", timeout=" + timeOut + ", allResults=" + allResults);
 				if (m_nodeTrue) {
 					List<StrategyNode> matchingNodes = new ArrayList<>();
 					for (Map.Entry<StrategyNode, Boolean> e : resultMap.entrySet()) {
@@ -1303,7 +1311,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 		}
 	}
 
-	private List<StrategyNode> gatherChildrenNodes(StrategyNode node) {
+	public List<StrategyNode> gatherChildrenNodes(StrategyNode node) {
 		List<StrategyNode> children = new ArrayList<StrategyNode>();
 		for (String label : node.getChildren()) {
 			children.add(nodes.get(label));
