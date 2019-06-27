@@ -4,8 +4,9 @@ import javax.swing.JTabbedPane;
 
 import org.sa.rainbow.gui.arch.elements.ReportHistoryPane;
 import org.sa.rainbow.gui.arch.model.RainbowArchExecutorModel;
+import org.sa.rainbow.gui.arch.elements.DefaultThreadInfoPane;
 
-public class StitchExecutorTabbedPane extends JTabbedPane {
+public class StitchExecutorTabbedPane extends DefaultThreadInfoPane {
 
 	private EventBasedStitchExecutorPanel m_strategyExecutionPanel;
 

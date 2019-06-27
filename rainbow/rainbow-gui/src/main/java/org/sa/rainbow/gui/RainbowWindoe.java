@@ -399,7 +399,7 @@ public class RainbowWindoe extends RainbowWindow
 			if (className != null) {
 				try {
 					Class<?> clazz = this.getClass().forName(className);
-					m_amPanel = (AdaptationManagerTabbedPane) clazz.newInstance();
+					m_exPanel = (DefaultThreadInfoPane) clazz.newInstance();
 
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block
@@ -811,6 +811,7 @@ public class RainbowWindoe extends RainbowWindow
 			model.addPropertyChangeListener(locationChange);
 
 			RainbowExecutorController ctrl = new RainbowExecutorController(model, m_selectionManager, m_uidb);
+			ctrl.getModel().addPropertyChangeListener(locationChange);
 			ctrl.createView(m_desktopPane);
 			m_rainbowModel.addExecutor(model);
 		}
