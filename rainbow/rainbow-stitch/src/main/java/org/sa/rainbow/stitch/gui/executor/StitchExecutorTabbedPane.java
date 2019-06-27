@@ -7,12 +7,12 @@ import org.sa.rainbow.gui.arch.model.RainbowArchExecutorModel;
 
 public class StitchExecutorTabbedPane extends JTabbedPane {
 
-	private StrategyExecutionPanel m_strategyExecutionPanel;
+	private EventBasedStitchExecutorPanel m_strategyExecutionPanel;
 
 	public StitchExecutorTabbedPane() {
 		setTabPlacement(JTabbedPane.BOTTOM);
 
-		m_strategyExecutionPanel = new StrategyExecutionPanel();
+		m_strategyExecutionPanel = new EventBasedStitchExecutorPanel();
 		addTab("Activity", m_strategyExecutionPanel);
 	}
 	

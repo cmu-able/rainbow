@@ -175,7 +175,6 @@ public class EventBasedStitchExecutorPanel extends JPanel implements IRainbowMod
 	
 	
 	private JXTreeTable m_treeTable;
-	private ScheduledExecutorService m_executionScheduler;
 	
 	protected Collection<ExecutionHistoryModelInstance> m_listeningTo = new HashSet<>();
 	
