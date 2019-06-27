@@ -8,12 +8,12 @@ import org.sa.rainbow.gui.arch.elements.DefaultThreadInfoPane;
 
 public class StitchExecutorTabbedPane extends DefaultThreadInfoPane {
 
-	private EventBasedStitchExecutorPanel m_strategyExecutionPanel;
+	private StrategyExecutionPanel m_strategyExecutionPanel;
 
 	public StitchExecutorTabbedPane() {
 		setTabPlacement(JTabbedPane.BOTTOM);
 
-		m_strategyExecutionPanel = new EventBasedStitchExecutorPanel();
+		m_strategyExecutionPanel = new StrategyExecutionPanel();
 		addTab("Activity", m_strategyExecutionPanel);
 	}
 	
