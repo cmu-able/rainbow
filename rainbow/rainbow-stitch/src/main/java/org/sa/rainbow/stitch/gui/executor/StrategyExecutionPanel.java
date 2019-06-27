@@ -339,6 +339,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 			StrategyInstanceData sid = sd.addNewRun();
 			sid.setStatus(eventType);
 			m_listModel.addElement(sid);
+			m_strategiesExecuted.setModel(m_listModel);
 			break;
 		}
 		case STRATEGY_SETTLING: {
