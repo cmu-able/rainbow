@@ -48,7 +48,8 @@ AbstractRainbowModelOperation<ExecutionHistoryData.ExecutionPoint, Map<String, E
         else {
             m_oldData = new ExecutionHistoryData (datum);
         }
-        datum.addExecutionTransition (getParameters ()[1], ExecutionStateT.valueOf (getParameters ()[2]),
+        ExecutionStateT valueOf = ExecutionStateT.valueOf (getParameters ()[2]);
+		datum.addExecutionTransition (getParameters ()[1], valueOf,
                 getParameters ()[3]);
         m_data = datum;
     }
