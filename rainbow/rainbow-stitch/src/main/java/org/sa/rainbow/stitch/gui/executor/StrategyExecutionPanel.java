@@ -69,8 +69,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 			} else if (isSelected) {
 				setBackground(list.getSelectionBackground());
 				setForeground(list.getSelectionForeground());
-			}
-			else {
+			} else {
 				setBackground(list.getBackground());
 				setForeground(list.getForeground());
 			}
@@ -145,7 +144,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 	private JTextField m_successesField;
 	private JTextField m_failuresField;
 	private Map<String, StrategyData> m_strategyData = new HashMap<>();
-	private JList m_strategiesExecuted;
+	private JList<StrategyInstanceData> m_strategiesExecuted;
 
 	private final IRainbowChangeBusSubscription m_strategyExecutionSubscriber = new IRainbowChangeBusSubscription() {
 
@@ -160,7 +159,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 
 	};
 	private IModelChangeBusSubscriberPort m_modelChangePort;
-	private DefaultListModel m_listModel;
+	private DefaultListModel<StrategyInstanceData> m_listModel;
 	private Map<String, String> m_tacticToStrategy = new HashMap<>();
 	private RSyntaxTextArea m_strategyText;
 	protected Map<String, String> m_pathToText = new HashMap<>();
@@ -206,7 +205,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		m_strategyText.setCodeFoldingEnabled(true);
 		m_strategyText.setSyntaxEditingStyle("text/stitch");
 		m_strategyText.setEditable(false);
-		
+
 		GridBagConstraints gbc_m_strategyText = new GridBagConstraints();
 		gbc_m_strategyText.gridheight = 4;
 		gbc_m_strategyText.insets = new Insets(0, 0, 5, 0);
@@ -248,13 +247,13 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		gbc_failuresField.gridy = 2;
 		add(m_failuresField, gbc_failuresField);
 		m_failuresField.setColumns(10);
-		
-		m_numberOfRunsFields.setEnabled(false);
-    	m_failuresField.setEnabled(false);
-    	m_successesField.setEnabled(false);
 
-		m_strategiesExecuted = new JList();
-		m_listModel = new DefaultListModel();
+		m_numberOfRunsFields.setEnabled(false);
+		m_failuresField.setEnabled(false);
+		m_successesField.setEnabled(false);
+
+		m_strategiesExecuted = new JList<>();
+		m_listModel = new DefaultListModel<>();
 		m_strategiesExecuted.setModel(m_listModel);
 //		scrollPane.setViewportView(m_strategiesExecuted);
 		add(m_strategiesExecuted, gbc_scrollPane);
@@ -269,57 +268,52 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 
 		m_strategiesExecuted.setCellRenderer(new StrategyInstanceDataRenderer());
 		m_strategiesExecuted.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		m_strategiesExecuted.addListSelectionListener(new ListSelectionListener() {
-			
-			@Override
-			public void valueChanged(ListSelectionEvent e) {
-				ListSelectionModel lsm = (ListSelectionModel)e.getSource();
+		m_strategiesExecuted.addListSelectionListener((e) -> {
+			ListSelectionModel lsm = (ListSelectionModel) e.getSource();
 
-		        int firstIndex = e.getFirstIndex();
-		        if (!lsm.isSelectionEmpty()) {
-		        	StrategyInstanceData sid = (StrategyInstanceData) m_listModel.get(firstIndex);
-		        	m_numberOfRunsFields.setText(Integer.toString(sid.strategyData.numberOfRuns));
-		        	m_failuresField.setText(Integer.toString(sid.strategyData.numberOfFailures));
-		        	m_successesField.setText(Integer.toString(sid.strategyData.numberOfSuccesses));
-		        	String path = sid.strategyData.strategy.m_stitch.path;
-		        	String stitchText = m_pathToText.get(path);
-					if (stitchText == null) {
-		        		try {
-							stitchText = new String(Files.readAllBytes(new File(path).toPath()));
-							m_pathToText.put(path, stitchText);
-						} catch (IOException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
-		        	}
-					m_strategyText.setText(stitchText);
-					Pattern p = Pattern.compile("strategy.*" + sid.strategyData.name);
-					Matcher m = p.matcher(stitchText);
-					if (m.find()) {
-						int location = m.start();
-						m_strategyText.setCaretPosition(location);
-						try {
-							m_strategyText.addLineHighlight(m_strategyText.getLineOfOffset(location), Color.BLUE);
-							for (TraceData trace : sid.traces) {
-								p = Pattern.compile(trace.label + "\\s*:");
-								m = p.matcher(stitchText);
-								if (m.find(location)) {
-									m_strategyText.addLineHighlight(m_strategyText.getLineOfOffset(m.start()), Color.BLUE);
-
-								}
-							}
-						} catch (BadLocationException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
+			int firstIndex = e.getFirstIndex();
+			if (!lsm.isSelectionEmpty()) {
+				StrategyInstanceData sid = (StrategyInstanceData) m_listModel.get(firstIndex);
+				m_numberOfRunsFields.setText(Integer.toString(sid.strategyData.numberOfRuns));
+				m_failuresField.setText(Integer.toString(sid.strategyData.numberOfFailures));
+				m_successesField.setText(Integer.toString(sid.strategyData.numberOfSuccesses));
+				String path = sid.strategyData.strategy.m_stitch.path;
+				String stitchText = m_pathToText.get(path);
+				if (stitchText == null) {
+					try {
+						stitchText = new String(Files.readAllBytes(new File(path).toPath()));
+						m_pathToText.put(path, stitchText);
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
 					}
-		        }
-		        else {
-		        	m_numberOfRunsFields.setText("");
-		        	m_failuresField.setText("");
-		        	m_successesField.setText("");
-		        	m_strategyText.setText("");
-		        }
+				}
+				m_strategyText.setText(stitchText);
+				Pattern p = Pattern.compile("strategy.*" + sid.strategyData.name);
+				Matcher m = p.matcher(stitchText);
+				if (m.find()) {
+					int location = m.start();
+					m_strategyText.setCaretPosition(location);
+					try {
+						m_strategyText.addLineHighlight(m_strategyText.getLineOfOffset(location), Color.BLUE);
+						for (TraceData trace : sid.traces) {
+							p = Pattern.compile(trace.label + "\\s*:");
+							m = p.matcher(stitchText);
+							if (m.find(location)) {
+								m_strategyText.addLineHighlight(m_strategyText.getLineOfOffset(m.start()), Color.BLUE);
+
+							}
+						}
+					} catch (BadLocationException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+			} else {
+				m_numberOfRunsFields.setText("");
+				m_failuresField.setText("");
+				m_successesField.setText("");
+				m_strategyText.setText("");
 			}
 		});
 
@@ -355,8 +349,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 			String strategyName = targetConstituents[targetConstituents.length - 1];
 			StrategyData sd = getStrategyData(strategyName);
 			sd.getCurrentRun().setStatus(eventType);
-			Outcome outcome = Outcome
-					.valueOf((String) message.getProperty(IModelChangeBusPort.PARAMETER_PROP + "3"));
+			Outcome outcome = Outcome.valueOf((String) message.getProperty(IModelChangeBusPort.PARAMETER_PROP + "3"));
 			sd.getCurrentRun().outcome = outcome;
 			switch (outcome) {
 			case SUCCESS:
