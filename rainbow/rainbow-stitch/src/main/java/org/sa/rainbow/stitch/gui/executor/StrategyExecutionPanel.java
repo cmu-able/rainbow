@@ -286,7 +286,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 					try {
 						File stitchPath = Util.getRelativeToPath(Rainbow.instance().getTargetPath(),
 								Rainbow.instance().getProperty(RainbowConstants.PROPKEY_SCRIPT_PATH));
-						stitchText = new String(Files.readAllBytes(new File(stitchPath, path).toPath()));
+						stitchText = new String(Files.readAllBytes(new File(path).toPath()));
 						m_pathToText.put(path, stitchText);
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
