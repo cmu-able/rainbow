@@ -64,7 +64,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 				}
 				setFont(italicFont);
 			}
-			if (value.outcome != Outcome.SUCCESS) {
+			if (value.outcome != null && value.outcome != Outcome.SUCCESS) {
 				this.setBackground(isSelected ? DARK_ERROR_COLOR : ERROR_COLOR);
 			} else if (isSelected) {
 				setBackground(list.getSelectionBackground());
@@ -408,6 +408,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		StrategyData strategyData = m_strategyData.get(strategyName);
 		if (strategyData == null) {
 			strategyData = new StrategyData();
+			strategyData.name = strategyName;
 			m_strategyData.put(strategyName, strategyData);
 			List<Stitch> stitches = Ohana.instance().listStitches();
 			OUTER: for (Stitch stitch : stitches) {
