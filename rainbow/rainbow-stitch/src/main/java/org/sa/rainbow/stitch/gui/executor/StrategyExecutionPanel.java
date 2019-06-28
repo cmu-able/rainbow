@@ -300,12 +300,12 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 					int location = m.start();
 					m_strategyText.setCaretPosition(location);
 					try {
-						m_strategyText.addLineHighlight(m_strategyText.getLineOfOffset(location), Color.BLUE);
+						m_strategyText.addLineHighlight(m_strategyText.getLineOfOffset(location), Color.LIGHT_GRAY);
 						for (TraceData trace : sid.traces) {
 							p = Pattern.compile(trace.label + "\\s*:");
 							m = p.matcher(stitchText);
 							if (m.find(location)) {
-								m_strategyText.addLineHighlight(m_strategyText.getLineOfOffset(m.start()), Color.BLUE);
+								m_strategyText.addLineHighlight(m_strategyText.getLineOfOffset(m.start()), Color.LIGHT_GRAY);
 
 							}
 						}
