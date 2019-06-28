@@ -1079,6 +1079,12 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 		// do action on the selected node
 		switch (selected.getActionFlag()) {
 		case DONE:
+			if (m_executor != null) {
+				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+						.strategyExecutionStateCommand(m_executor.getManagedModel(),
+								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+								ExecutionHistoryData.ExecutionStateT.NODE_EXECUTING, null));
+			}
 			if (Tool.logger().isInfoEnabled()) {
 				Tool.logger().info("DONE action!");
 			}
@@ -1095,6 +1101,12 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 			}
 			break;
 		case NULL:
+			if (m_executor != null) {
+				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+						.strategyExecutionStateCommand(m_executor.getManagedModel(),
+								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+								ExecutionHistoryData.ExecutionStateT.NODE_EXECUTING, null));
+			}
 			if (Tool.logger().isInfoEnabled()) {
 				Tool.logger().info("NULL action!");
 			}
@@ -1114,6 +1126,12 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 			doTactic(curNode);
 			break;
 		case DOLOOP:
+			if (m_executor != null) {
+				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+						.strategyExecutionStateCommand(m_executor.getManagedModel(),
+								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+								ExecutionHistoryData.ExecutionStateT.NODE_EXECUTING, null));
+			}
 			// LOOP! treat the target node as child node and proceed
 			if (Tool.logger().isInfoEnabled()) {
 				Tool.logger().info("LOOP action! " + curNode.label());
@@ -1140,8 +1158,20 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 				// consider Strategy failed
 				setOutcome(Outcome.FAILURE);
 			}
+			if (m_executor != null)
+				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+						.strategyExecutionStateCommand(m_executor.getManagedModel(),
+								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+								ExecutionHistoryData.ExecutionStateT.NODE_DONE, getOutcome().toString()));
+
 			break;
 		default: // serious error?
+			if (m_executor != null) {
+				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+						.strategyExecutionStateCommand(m_executor.getManagedModel(),
+								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+								ExecutionHistoryData.ExecutionStateT.NODE_EXECUTING, null));
+			}
 			Tool.error("Selected node " + selected.label() + "has unknown action kind! " + selected.getActionFlag(),
 					null, stitchState().stitchProblemHandler);
 //                System.out.println ("Selected node " + selected.label () + "has unknown action kind! " + selected
@@ -1232,7 +1262,8 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 						.updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
 								.strategyExecutionStateCommand(m_executor.getManagedModel(), tactic.getQualifiedName(),
 										ExecutionHistoryModelInstance.TACTIC,
-										ExecutionHistoryData.ExecutionStateT.TACTIC_EXECUTING, "Called by " + this.getQualifiedName()));
+										ExecutionHistoryData.ExecutionStateT.TACTIC_EXECUTING,
+										"Called by " + this.getQualifiedName()));
 			}
 			long start = new Date().getTime();
 			tactic.stitchState().setExecutor(m_executor);
