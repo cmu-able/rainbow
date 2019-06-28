@@ -183,7 +183,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		gbc_scrollPane.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane.gridx = 0;
 		gbc_scrollPane.gridy = 0;
-		add(scrollPane, gbc_scrollPane);
+//		add(scrollPane, gbc_scrollPane);
 
 		JLabel lblNewLabel = new JLabel("Number of Runs:");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
@@ -256,7 +256,8 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		m_strategiesExecuted = new JList();
 		m_listModel = new DefaultListModel();
 		m_strategiesExecuted.setModel(m_listModel);
-		scrollPane.setViewportView(m_strategiesExecuted);
+//		scrollPane.setViewportView(m_strategiesExecuted);
+		add(m_strategiesExecuted, gbc_scrollPane);
 
 		try {
 			m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort();
