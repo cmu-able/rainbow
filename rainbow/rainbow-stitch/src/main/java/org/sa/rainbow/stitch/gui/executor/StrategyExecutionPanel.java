@@ -274,9 +274,8 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		m_strategiesExecuted.addListSelectionListener((e) -> {
 			JList ls = (JList) e.getSource();
 
-			int firstIndex = e.getFirstIndex();
-			if (!ls.isSelectionEmpty()) {
-				StrategyInstanceData sid = (StrategyInstanceData) m_listModel.get(firstIndex);
+			if (!ls.isSelectionEmpty() && !e.getValueIsAdjusting()) {
+				StrategyInstanceData sid = (StrategyInstanceData) m_strategiesExecuted.getSelectedValue();
 				m_numberOfRunsFields.setText(Integer.toString(sid.strategyData.numberOfRuns));
 				m_failuresField.setText(Integer.toString(sid.strategyData.numberOfFailures));
 				m_successesField.setText(Integer.toString(sid.strategyData.numberOfSuccesses));
