@@ -30,6 +30,8 @@ import javax.swing.text.BadLocationException;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
+import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.ModelReference;
@@ -45,6 +47,7 @@ import org.sa.rainbow.stitch.core.Strategy.Outcome;
 import org.sa.rainbow.stitch.history.ExecutionHistoryModelInstance;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData.ExecutionStateT;
 import org.sa.rainbow.stitch.visitor.Stitch;
+import org.sa.rainbow.util.Util;
 
 public class StrategyExecutionPanel extends JPanel implements IRainbowModelChangeCallback {
 	static public class StrategyInstanceDataRenderer extends JLabel implements ListCellRenderer<StrategyInstanceData> {
@@ -269,10 +272,10 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		m_strategiesExecuted.setCellRenderer(new StrategyInstanceDataRenderer());
 		m_strategiesExecuted.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		m_strategiesExecuted.addListSelectionListener((e) -> {
-			ListSelectionModel lsm = (ListSelectionModel) e.getSource();
+			JList ls = (JList) e.getSource();
 
 			int firstIndex = e.getFirstIndex();
-			if (!lsm.isSelectionEmpty()) {
+			if (!ls.isSelectionEmpty()) {
 				StrategyInstanceData sid = (StrategyInstanceData) m_listModel.get(firstIndex);
 				m_numberOfRunsFields.setText(Integer.toString(sid.strategyData.numberOfRuns));
 				m_failuresField.setText(Integer.toString(sid.strategyData.numberOfFailures));
@@ -281,7 +284,9 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 				String stitchText = m_pathToText.get(path);
 				if (stitchText == null) {
 					try {
-						stitchText = new String(Files.readAllBytes(new File(path).toPath()));
+						File stitchPath = Util.getRelativeToPath(Rainbow.instance().getTargetPath(),
+								Rainbow.instance().getProperty(RainbowConstants.PROPKEY_SCRIPT_PATH));
+						stitchText = new String(Files.readAllBytes(new File(stitchPath, path).toPath()));
 						m_pathToText.put(path, stitchText);
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
