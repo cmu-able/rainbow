@@ -69,6 +69,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		@Override
 		public Component getListCellRendererComponent(JList<? extends Strategy> list, Strategy value, int index,
 				boolean isSelected, boolean cellHasFocus) {
+			if (value == null) return this;
 			setText(value.getName());
 
 			if (isSelected) {
