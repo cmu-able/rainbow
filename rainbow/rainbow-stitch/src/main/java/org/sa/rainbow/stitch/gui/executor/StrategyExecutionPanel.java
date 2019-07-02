@@ -221,7 +221,6 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE };
 		setLayout(gridBagLayout);
 
-		JScrollPane scrollPane = new JScrollPane();
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
 		gbc_scrollPane.gridheight = 4;
 		gbc_scrollPane.insets = new Insets(0, 0, 0, 5);
