@@ -2,6 +2,7 @@ package org.sa.rainbow.stitch.gui.executor;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -368,11 +369,17 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 				Pattern p = Pattern.compile("strategy.*" + sid.strategyData.name);
 				Matcher m = p.matcher(stitchText);
 				if (m.find()) {
-					int location = m.start();
+					final int location = m.start();
 					m_strategyText.setCaretPosition(location);
 					try {
-						Rectangle vr = m_strategyText.modelToView(location);
-						m_strategyText.scrollRectToVisible(vr);
+						EventQueue.invokeLater(new Runnable() {
+							public void run() {
+								try {
+									Rectangle vr = m_strategyText.modelToView(location);
+									m_strategyText.scrollRectToVisible(vr);
+								} catch (BadLocationException e) {}
+							}
+						});
 						
 						int lineOfOffset = m_strategyText.getLineOfOffset(location);
 //						((JViewport) m_strategyText.getParent()).setViewPosition(
