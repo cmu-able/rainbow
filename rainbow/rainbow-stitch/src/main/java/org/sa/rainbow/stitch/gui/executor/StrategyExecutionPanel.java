@@ -7,6 +7,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -371,9 +372,13 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 					int location = m.start();
 					m_strategyText.setCaretPosition(location);
 					try {
-						((JViewport) m_strategyText.getParent()).setViewPosition(
-								new Point(0, m_strategyText.yForLine(m_strategyText.getLineOfOffset(location))));
-						m_strategyText.addLineHighlight(m_strategyText.getLineOfOffset(location), Color.LIGHT_GRAY);
+						Rectangle vr = m_strategyText.modelToView(location);
+						m_strategyText.scrollRectToVisible(vr);
+						
+						int lineOfOffset = m_strategyText.getLineOfOffset(location);
+//						((JViewport) m_strategyText.getParent()).setViewPosition(
+//								new Point(0, m_strategyText.yForLine(lineOfOffset)));
+						m_strategyText.addLineHighlight(lineOfOffset, Color.LIGHT_GRAY);
 						for (TraceData trace : sid.traces) {
 							p = Pattern.compile(trace.label + "\\s*:");
 							m = p.matcher(stitchText);
