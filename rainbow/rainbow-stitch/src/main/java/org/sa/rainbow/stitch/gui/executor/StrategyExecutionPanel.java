@@ -7,9 +7,12 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,7 +20,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -25,12 +30,15 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.text.BadLocationException;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.adaptation.AdaptationTree;
+import org.sa.rainbow.core.adaptation.IEvaluable;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.ModelReference;
@@ -38,17 +46,43 @@ import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowChangeBusSubscription;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowModelChangeCallback;
+import org.sa.rainbow.core.ports.IRainbowAdaptationEnqueuePort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
+import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.core.StitchScript;
 import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.core.Strategy.Outcome;
+import org.sa.rainbow.stitch.gui.executor.StrategyExecutionPanel.StrategyComboRenderer;
 import org.sa.rainbow.stitch.history.ExecutionHistoryModelInstance;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData.ExecutionStateT;
 import org.sa.rainbow.stitch.visitor.Stitch;
 import org.sa.rainbow.util.Util;
 
 public class StrategyExecutionPanel extends JPanel implements IRainbowModelChangeCallback {
+	public class StrategyComboRenderer extends JLabel implements ListCellRenderer<Strategy> {
+
+		public StrategyComboRenderer() {
+			setOpaque(true);
+		}
+
+		@Override
+		public Component getListCellRendererComponent(JList<? extends Strategy> list, Strategy value, int index,
+				boolean isSelected, boolean cellHasFocus) {
+			setText(value.getName());
+
+			if (isSelected) {
+				setBackground(list.getSelectionBackground());
+				setForeground(list.getSelectionForeground());
+			} else {
+				setBackground(list.getBackground());
+				setForeground(list.getForeground());
+			}
+			return this;
+		}
+
+	}
+
 	static public class StrategyInstanceDataRenderer extends JLabel implements ListCellRenderer<StrategyInstanceData> {
 
 		private Font italicFont;
@@ -165,6 +199,9 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 	private Map<String, String> m_tacticToStrategy = new HashMap<>();
 	private RSyntaxTextArea m_strategyText;
 	protected Map<String, String> m_pathToText = new HashMap<>();
+	private JComboBox m_comboBox;
+	private JLabel m_label;
+	private IRainbowAdaptationEnqueuePort<IEvaluable> m_strategyEnqPort;
 
 	/**
 	 * Create the panel.
@@ -173,7 +210,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 0, 0, 0, 0, 0 };
 		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0 };
-		gridBagLayout.columnWeights = new double[] { 1.0, 0.0, 0.0, 1.0, Double.MIN_VALUE };
+		gridBagLayout.columnWeights = new double[] { 1.0, 0.0, 1.0, 1.0, Double.MIN_VALUE };
 		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE };
 		setLayout(gridBagLayout);
 
@@ -210,7 +247,6 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 
 		GridBagConstraints gbc_m_strategyText = new GridBagConstraints();
 		gbc_m_strategyText.gridheight = 4;
-		gbc_m_strategyText.insets = new Insets(0, 0, 5, 0);
 		gbc_m_strategyText.fill = GridBagConstraints.BOTH;
 		gbc_m_strategyText.gridx = 3;
 		gbc_m_strategyText.gridy = 0;
@@ -270,6 +306,46 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 
 		m_strategiesExecuted.setCellRenderer(new StrategyInstanceDataRenderer());
 		m_strategiesExecuted.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+		m_label = new JLabel("Execute:");
+		m_label.setVerticalAlignment(SwingConstants.TOP);
+		GridBagConstraints gbc_label = new GridBagConstraints();
+		gbc_label.insets = new Insets(0, 0, 0, 5);
+		gbc_label.anchor = GridBagConstraints.NORTHEAST;
+		gbc_label.gridx = 1;
+		gbc_label.gridy = 3;
+		add(m_label, gbc_label);
+
+		m_comboBox = new JComboBox();
+		GridBagConstraints gbc_comboBox = new GridBagConstraints();
+		gbc_comboBox.anchor = GridBagConstraints.NORTH;
+		gbc_comboBox.insets = new Insets(0, 0, 0, 5);
+		gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
+		gbc_comboBox.gridx = 2;
+		gbc_comboBox.gridy = 3;
+		add(m_comboBox, gbc_comboBox);
+		
+		m_strategyEnqPort = RainbowPortFactory.createAdaptationEnqueuePort(new ModelReference("SwimSys", "Acme"));
+
+		ArrayList<Strategy> sArray = new ArrayList<>();
+		for (Stitch s : Ohana.instance().listStitches()) {
+			for (Strategy t : s.script.strategies) {
+				sArray.add(t);
+			}
+		}
+
+		DefaultComboBoxModel<Strategy> sModel = new DefaultComboBoxModel<>(sArray.toArray(new Strategy[0]));
+		m_comboBox.setModel(sModel);
+		m_comboBox.setRenderer(new StrategyComboRenderer());
+		m_comboBox.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Strategy s = (Strategy) m_comboBox.getSelectedItem();
+				m_strategyEnqPort.offerAdaptation(new AdaptationTree<IEvaluable>(s),new Object[0]);
+			}
+		});
+
 		m_strategiesExecuted.addListSelectionListener((e) -> {
 			JList ls = (JList) e.getSource();
 
@@ -298,13 +374,15 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 					int location = m.start();
 					m_strategyText.setCaretPosition(location);
 					try {
-						((JScrollPane )m_strategyText.getParent()).getViewport().setViewPosition(new Point(0, m_strategyText.yForLine(m_strategyText.getLineOfOffset(location))));
+						((JScrollPane) m_strategyText.getParent()).getViewport().setViewPosition(
+								new Point(0, m_strategyText.yForLine(m_strategyText.getLineOfOffset(location))));
 						m_strategyText.addLineHighlight(m_strategyText.getLineOfOffset(location), Color.LIGHT_GRAY);
 						for (TraceData trace : sid.traces) {
 							p = Pattern.compile(trace.label + "\\s*:");
 							m = p.matcher(stitchText);
 							if (m.find(location)) {
-								m_strategyText.addLineHighlight(m_strategyText.getLineOfOffset(m.start()), Color.LIGHT_GRAY);
+								m_strategyText.addLineHighlight(m_strategyText.getLineOfOffset(m.start()),
+										Color.LIGHT_GRAY);
 
 							}
 						}
