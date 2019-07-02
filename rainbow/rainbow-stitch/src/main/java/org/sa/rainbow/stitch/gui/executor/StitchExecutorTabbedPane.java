@@ -18,5 +18,6 @@ public class StitchExecutorTabbedPane extends DefaultThreadInfoPane {
 	}
 	
 	public void initBinding(RainbowArchExecutorModel model) {
+		m_strategyExecutionPanel.initBinding(model);
 	}
 }

@@ -48,6 +48,7 @@ import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowChangeBusSubscription;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowModelChangeCallback;
+import org.sa.rainbow.gui.arch.model.RainbowArchExecutorModel;
 import org.sa.rainbow.core.ports.IRainbowAdaptationEnqueuePort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
@@ -341,28 +342,6 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 			}
 		});
 		
-		this.addFocusListener(new FocusListener() {
-			
-			@Override
-			public void focusLost(FocusEvent e) {
-				
-			}
-			
-			@Override
-			public void focusGained(FocusEvent e) {
-				if (m_comboBox.getModel().getSize() != 0) return;
-				ArrayList<Strategy> sArray = new ArrayList<>();
-				for (Stitch s : Ohana.instance().listStitches()) {
-					for (Strategy t : s.script.strategies) {
-						sArray.add(t);
-					}
-				}
-
-				DefaultComboBoxModel<Strategy> sModel = new DefaultComboBoxModel<>(sArray.toArray(new Strategy[0]));
-				m_comboBox.setModel(sModel);				
-			}
-		});
-
 		m_strategiesExecuted.addListSelectionListener((e) -> {
 			JList ls = (JList) e.getSource();
 
@@ -416,6 +395,18 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 			}
 		});
 
+	}
+	
+	public void initBinding(RainbowArchExecutorModel model) {
+		ArrayList<Strategy> sArray = new ArrayList<>();
+		for (Stitch s : Ohana.instance().listStitches()) {
+			for (Strategy t : s.script.strategies) {
+				sArray.add(t);
+			}
+		}
+
+		DefaultComboBoxModel<Strategy> sModel = new DefaultComboBoxModel<>(sArray.toArray(new Strategy[0]));
+		m_comboBox.setModel(sModel);				
 	}
 
 	@Override
