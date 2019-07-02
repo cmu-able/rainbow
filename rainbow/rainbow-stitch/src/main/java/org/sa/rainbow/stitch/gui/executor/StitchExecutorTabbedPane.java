@@ -4,6 +4,7 @@ import javax.swing.JTabbedPane;
 
 import org.sa.rainbow.gui.arch.elements.ReportHistoryPane;
 import org.sa.rainbow.gui.arch.model.RainbowArchExecutorModel;
+import org.sa.rainbow.gui.arch.model.RainbowArchModelElement;
 import org.sa.rainbow.gui.arch.elements.DefaultThreadInfoPane;
 
 public class StitchExecutorTabbedPane extends DefaultThreadInfoPane {
@@ -17,7 +18,10 @@ public class StitchExecutorTabbedPane extends DefaultThreadInfoPane {
 		addTab("Activity", m_strategyExecutionPanel);
 	}
 	
-	public void initBinding(RainbowArchExecutorModel model) {
-		m_strategyExecutionPanel.initBinding(model);
+	@Override
+	public void initBindings(RainbowArchModelElement el) {
+		m_strategyExecutionPanel.initBinding((RainbowArchExecutorModel )model);
+		
 	}
+	
 }
