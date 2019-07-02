@@ -30,6 +30,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.JViewport;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
@@ -72,7 +73,8 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		@Override
 		public Component getListCellRendererComponent(JList<? extends Strategy> list, Strategy value, int index,
 				boolean isSelected, boolean cellHasFocus) {
-			if (value == null) return this;
+			if (value == null)
+				return this;
 			setText(value.getName());
 
 			if (isSelected) {
@@ -328,20 +330,19 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		gbc_comboBox.gridx = 2;
 		gbc_comboBox.gridy = 3;
 		add(m_comboBox, gbc_comboBox);
-		
-		m_strategyEnqPort = RainbowPortFactory.createAdaptationEnqueuePort(new ModelReference("SwimSys", "Acme"));
 
+		m_strategyEnqPort = RainbowPortFactory.createAdaptationEnqueuePort(new ModelReference("SwimSys", "Acme"));
 
 		m_comboBox.setRenderer(new StrategyComboRenderer());
 		m_comboBox.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				Strategy s = (Strategy) m_comboBox.getSelectedItem();
-				m_strategyEnqPort.offerAdaptation(new AdaptationTree<IEvaluable>(s),new Object[0]);
+				m_strategyEnqPort.offerAdaptation(new AdaptationTree<IEvaluable>(s), new Object[0]);
 			}
 		});
-		
+
 		m_strategiesExecuted.addListSelectionListener((e) -> {
 			JList ls = (JList) e.getSource();
 
@@ -370,7 +371,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 					int location = m.start();
 					m_strategyText.setCaretPosition(location);
 					try {
-						((JScrollPane) m_strategyText.getParent()).getViewport().setViewPosition(
+						((JViewport) m_strategyText.getParent()).setViewPosition(
 								new Point(0, m_strategyText.yForLine(m_strategyText.getLineOfOffset(location))));
 						m_strategyText.addLineHighlight(m_strategyText.getLineOfOffset(location), Color.LIGHT_GRAY);
 						for (TraceData trace : sid.traces) {
@@ -396,7 +397,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		});
 
 	}
-	
+
 	public void initBinding(RainbowArchExecutorModel model) {
 		ArrayList<Strategy> sArray = new ArrayList<>();
 		for (Stitch s : Ohana.instance().listStitches()) {
@@ -406,7 +407,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		}
 
 		DefaultComboBoxModel<Strategy> sModel = new DefaultComboBoxModel<>(sArray.toArray(new Strategy[0]));
-		m_comboBox.setModel(sModel);				
+		m_comboBox.setModel(sModel);
 	}
 
 	@Override
