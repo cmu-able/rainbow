@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -24,8 +25,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.text.BadLocationException;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
@@ -299,6 +298,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 					int location = m.start();
 					m_strategyText.setCaretPosition(location);
 					try {
+						((JScrollPane )m_strategyText.getParent()).getViewport().setViewPosition(new Point(0, m_strategyText.yForLine(m_strategyText.getLineOfOffset(location))));
 						m_strategyText.addLineHighlight(m_strategyText.getLineOfOffset(location), Color.LIGHT_GRAY);
 						for (TraceData trace : sid.traces) {
 							p = Pattern.compile(trace.label + "\\s*:");
