@@ -7,12 +7,9 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,17 +23,19 @@ import java.util.regex.Pattern;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.JViewport;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
@@ -51,21 +50,31 @@ import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowChangeBusSubscription;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowModelChangeCallback;
-import org.sa.rainbow.gui.arch.model.RainbowArchExecutorModel;
 import org.sa.rainbow.core.ports.IRainbowAdaptationEnqueuePort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
-import org.sa.rainbow.model.acme.AcmeModelInstance;
+import org.sa.rainbow.gui.arch.model.RainbowArchExecutorModel;
 import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.core.StitchScript;
 import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.core.Strategy.Outcome;
-import org.sa.rainbow.stitch.gui.executor.StrategyExecutionPanel.StrategyComboRenderer;
 import org.sa.rainbow.stitch.history.ExecutionHistoryModelInstance;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData.ExecutionStateT;
 import org.sa.rainbow.stitch.visitor.Stitch;
 import org.sa.rainbow.util.Util;
 
 public class StrategyExecutionPanel extends JPanel implements IRainbowModelChangeCallback {
+	
+	public static Color bleach(Color color, double amount) {
+		int red = (int) ((color.getRed() * (1 - amount) / 255 + amount) * 255);
+		int green = (int) ((color.getGreen() * (1 - amount) / 255 + amount) * 255);
+		int blue = (int) ((color.getBlue() * (1 - amount) / 255 + amount) * 255);
+		return new Color(red, green, blue);
+	}
+	
+	public static final Color EXECUTING_COLOR = bleach(Color.GREEN, .5);
+	public static final Color SETTLING_COLOR = bleach(Color.YELLOW, 0.5);
+	public static final Color ERROR_COLOR = bleach(Color.RED, 0.5);
+	
 	public class StrategyComboRenderer extends JLabel implements ListCellRenderer<Strategy> {
 
 		public StrategyComboRenderer() {
@@ -207,9 +216,10 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 	private Map<String, String> m_tacticToStrategy = new HashMap<>();
 	private RSyntaxTextArea m_strategyText;
 	protected Map<String, String> m_pathToText = new HashMap<>();
-	private JComboBox m_comboBox;
-	private JLabel m_label;
+	private JComboBox<Strategy> m_comboBox;
+	private JButton m_executeBtn;
 	private IRainbowAdaptationEnqueuePort<IEvaluable> m_strategyEnqPort;
+	private Color m_defaultHighlightColor;
 
 	/**
 	 * Create the panel.
@@ -251,6 +261,8 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		m_strategyText.setCodeFoldingEnabled(true);
 		m_strategyText.setSyntaxEditingStyle("text/stitch");
 		m_strategyText.setEditable(false);
+		
+		m_defaultHighlightColor = m_strategyText.getSelectionColor();
 
 		GridBagConstraints gbc_m_strategyText = new GridBagConstraints();
 		gbc_m_strategyText.gridheight = 4;
@@ -314,16 +326,16 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		m_strategiesExecuted.setCellRenderer(new StrategyInstanceDataRenderer());
 		m_strategiesExecuted.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-		m_label = new JLabel("Execute:");
-		m_label.setVerticalAlignment(SwingConstants.TOP);
+		m_executeBtn = new JButton("Execute:");
+		m_executeBtn.setVerticalAlignment(SwingConstants.TOP);
 		GridBagConstraints gbc_label = new GridBagConstraints();
 		gbc_label.insets = new Insets(0, 0, 0, 5);
 		gbc_label.anchor = GridBagConstraints.NORTHEAST;
 		gbc_label.gridx = 1;
 		gbc_label.gridy = 3;
-		add(m_label, gbc_label);
+		add(m_executeBtn, gbc_label);
 
-		m_comboBox = new JComboBox();
+		m_comboBox = new JComboBox<Strategy>();
 		GridBagConstraints gbc_comboBox = new GridBagConstraints();
 		gbc_comboBox.anchor = GridBagConstraints.NORTH;
 		gbc_comboBox.insets = new Insets(0, 0, 0, 5);
@@ -335,13 +347,9 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		m_strategyEnqPort = RainbowPortFactory.createAdaptationEnqueuePort(new ModelReference("SwimSys", "Acme"));
 
 		m_comboBox.setRenderer(new StrategyComboRenderer());
-		m_comboBox.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				Strategy s = (Strategy) m_comboBox.getSelectedItem();
-				m_strategyEnqPort.offerAdaptation(new AdaptationTree<IEvaluable>(s), new Object[0]);
-			}
+		m_executeBtn.addActionListener((e) -> {
+			Strategy s = (Strategy) m_comboBox.getSelectedItem();
+			m_strategyEnqPort.offerAdaptation(new AdaptationTree<IEvaluable>(s), new Object[0]);
 		});
 
 		m_strategiesExecuted.addListSelectionListener((e) -> {
@@ -352,53 +360,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 				m_numberOfRunsFields.setText(Integer.toString(sid.strategyData.numberOfRuns));
 				m_failuresField.setText(Integer.toString(sid.strategyData.numberOfFailures));
 				m_successesField.setText(Integer.toString(sid.strategyData.numberOfSuccesses));
-				String path = sid.strategyData.strategy.m_stitch.path;
-				String stitchText = m_pathToText.get(path);
-				if (stitchText == null) {
-					try {
-						File stitchPath = Util.getRelativeToPath(Rainbow.instance().getTargetPath(),
-								Rainbow.instance().getProperty(RainbowConstants.PROPKEY_SCRIPT_PATH));
-						stitchText = new String(Files.readAllBytes(new File(path).toPath()));
-						m_pathToText.put(path, stitchText);
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				}
-				m_strategyText.setText(stitchText);
-				Pattern p = Pattern.compile("strategy.*" + sid.strategyData.name);
-				Matcher m = p.matcher(stitchText);
-				if (m.find()) {
-					final int location = m.start();
-					m_strategyText.setCaretPosition(location);
-					try {
-						EventQueue.invokeLater(new Runnable() {
-							public void run() {
-								try {
-									Rectangle vr = m_strategyText.modelToView(location);
-									m_strategyText.scrollRectToVisible(vr);
-								} catch (BadLocationException e) {}
-							}
-						});
-						
-						int lineOfOffset = m_strategyText.getLineOfOffset(location);
-//						((JViewport) m_strategyText.getParent()).setViewPosition(
-//								new Point(0, m_strategyText.yForLine(lineOfOffset)));
-						m_strategyText.addLineHighlight(lineOfOffset, Color.LIGHT_GRAY);
-						for (TraceData trace : sid.traces) {
-							p = Pattern.compile(trace.label + "\\s*:");
-							m = p.matcher(stitchText);
-							if (m.find(location)) {
-								m_strategyText.addLineHighlight(m_strategyText.getLineOfOffset(m.start()),
-										Color.LIGHT_GRAY);
-
-							}
-						}
-					} catch (BadLocationException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				}
+				updateStrategyText(sid);
 			} else {
 				m_numberOfRunsFields.setText("");
 				m_failuresField.setText("");
@@ -407,6 +369,90 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 			}
 		});
 
+	}
+
+	protected void updateStrategyText(StrategyInstanceData sid) {
+		String path = sid.strategyData.strategy.m_stitch.path;
+		String stitchText = m_pathToText.get(path);
+		if (stitchText == null) {
+			try {
+				File stitchPath = Util.getRelativeToPath(Rainbow.instance().getTargetPath(),
+						Rainbow.instance().getProperty(RainbowConstants.PROPKEY_SCRIPT_PATH));
+				stitchText = new String(Files.readAllBytes(new File(path).toPath()));
+				m_pathToText.put(path, stitchText);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+		m_strategyText.setText(stitchText);
+		Pattern p = Pattern.compile("strategy.*" + sid.strategyData.name);
+		Matcher m = p.matcher(stitchText);
+		if (m.find()) {
+			final int location = m.start();
+			m_strategyText.setCaretPosition(location);
+			m_strategyText.setSelectionColor(m_defaultHighlightColor);
+			try {
+				EventQueue.invokeLater(new Runnable() {
+					public void run() {
+						try {
+							Rectangle vr = m_strategyText.modelToView(location);
+							m_strategyText.scrollRectToVisible(vr);
+						} catch (BadLocationException e) {
+						}
+					}
+				});
+
+				int lineOfOffset = m_strategyText.getLineOfOffset(location);
+//						((JViewport) m_strategyText.getParent()).setViewPosition(
+//								new Point(0, m_strategyText.yForLine(lineOfOffset)));
+				Color highlightColor = Color.LIGHT_GRAY;
+				m_strategyText.removeAllLineHighlights();
+				m_strategyText.addLineHighlight(lineOfOffset, highlightColor);
+				for (TraceData trace : sid.traces) {
+					p = Pattern.compile(trace.label + "\\s*:");
+					if (trace.state == ExecutionStateT.TACTIC_EXECUTING || trace.state == ExecutionStateT.TACTIC_SETTLING) {
+						p = Pattern.compile(trace.label + "\\s*\\(");
+					}
+					m = p.matcher(stitchText);
+					if (m.find(location)) {
+						switch (trace.state) {
+						case NODE_EXECUTING: 
+						case NODE_DONE: 
+							highlightColor = EXECUTING_COLOR; 
+							m_strategyText.addLineHighlight(m_strategyText.getLineOfOffset(m.start()),
+									highlightColor);
+							break;
+						case STRATEGY_EXECUTING:
+						case STRATEGY_DONE: 
+							highlightColor = EXECUTING_COLOR; 
+							m_strategyText.addLineHighlight(m_strategyText.getLineOfOffset(m.start()),
+									highlightColor);
+							break;
+						case STRATEGY_SETTLING:
+							highlightColor = SETTLING_COLOR; 
+							m_strategyText.addLineHighlight(m_strategyText.getLineOfOffset(m.start()),
+									highlightColor);
+							break;
+						case TACTIC_EXECUTING:
+							m_strategyText.setSelectionColor(EXECUTING_COLOR);
+							m_strategyText.select(m.start(), m.start() + trace.label.length());
+							break;
+						case TACTIC_SETTLING:
+							m_strategyText.setSelectionColor(SETTLING_COLOR);
+							m_strategyText.select(m.start(), m.start() + trace.label.length());
+							break;
+							
+						}
+						
+
+					}
+				}
+			} catch (BadLocationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
 	}
 
 	public void initBinding(RainbowArchExecutorModel model) {
@@ -471,6 +517,8 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 			StrategyData sd = getStrategyData(strategyName);
 			sd.getCurrentRun().addTraceElement(nodeLabel, eventType);
 			m_strategiesExecuted.repaint();
+			if (m_comboBox.getSelectedItem() == sd.strategy) 
+				updateStrategyText(sd.getCurrentRun());
 			break;
 		}
 		case TACTIC_EXECUTING: {
@@ -479,12 +527,16 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 			StrategyData sd = getStrategyData(strategyName);
 			sd.getCurrentRun().addTraceElement(target, eventType);
 			m_tacticToStrategy.put(target, strategyName);
+			if (m_comboBox.getSelectedItem() == sd.strategy) 
+				updateStrategyText(sd.getCurrentRun());
 			break;
 		}
 		case TACTIC_SETTLING: {
 			String strategyName = m_tacticToStrategy.get(target);
 			StrategyData sd = getStrategyData(strategyName);
 			sd.getCurrentRun().setTraceStatus(target, eventType);
+			if (m_comboBox.getSelectedItem() == sd.strategy) 
+				updateStrategyText(sd.getCurrentRun());
 			break;
 		}
 		case TACTIC_DONE: {
@@ -492,6 +544,8 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 			StrategyData sd = getStrategyData(strategyName);
 			sd.getCurrentRun().setTraceStatus(target, eventType);
 			m_tacticToStrategy.remove(target);
+			if (m_comboBox.getSelectedItem() == sd.strategy) 
+				updateStrategyText(sd.getCurrentRun());
 			break;
 		}
 		case NODE_DONE: {
@@ -500,6 +554,8 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 			StrategyData sd = getStrategyData(strategyName);
 			sd.getCurrentRun().setTraceStatus(nodeLabel, eventType);
 			m_strategiesExecuted.repaint();
+			if (m_comboBox.getSelectedItem() == sd.strategy) 
+				updateStrategyText(sd.getCurrentRun());
 
 			break;
 		}
