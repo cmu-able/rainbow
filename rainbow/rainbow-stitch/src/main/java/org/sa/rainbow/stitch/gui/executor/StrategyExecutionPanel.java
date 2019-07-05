@@ -522,10 +522,10 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 			break;
 		}
 		case TACTIC_EXECUTING: {
+			String tacticName = targetConstituents[targetConstituents.length-1];
 			targetConstituents = ((String) message.getProperty(IModelChangeBusPort.PARAMETER_PROP + "3")).split("\\.");
 			String strategyName = targetConstituents[targetConstituents.length - 1];
 			StrategyData sd = getStrategyData(strategyName);
-			String tacticName = targetConstituents[targetConstituents.length-1];
 			sd.getCurrentRun().addTraceElement(tacticName, eventType);
 			m_tacticToStrategy.put(tacticName, strategyName);
 			if (m_comboBox.getSelectedItem() == sd.strategy) 
@@ -533,18 +533,19 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 			break;
 		}
 		case TACTIC_SETTLING: {
-			String strategyName = m_tacticToStrategy.get(target);
-			StrategyData sd = getStrategyData(strategyName);
 			String tacticName = targetConstituents[targetConstituents.length-1];
+
+			String strategyName = m_tacticToStrategy.get(tacticName);
+			StrategyData sd = getStrategyData(strategyName);
 			sd.getCurrentRun().setTraceStatus(tacticName, eventType);
 			if (m_comboBox.getSelectedItem() == sd.strategy) 
 				updateStrategyText(sd.getCurrentRun());
 			break;
 		}
 		case TACTIC_DONE: {
-			String strategyName = m_tacticToStrategy.get(target);
-			StrategyData sd = getStrategyData(strategyName);
 			String tacticName = targetConstituents[targetConstituents.length-1];
+			String strategyName = m_tacticToStrategy.get(tacticName);
+			StrategyData sd = getStrategyData(strategyName);
 			sd.getCurrentRun().setTraceStatus(tacticName, eventType);
 			m_tacticToStrategy.remove(tacticName);
 			if (m_comboBox.getSelectedItem() == sd.strategy) 
