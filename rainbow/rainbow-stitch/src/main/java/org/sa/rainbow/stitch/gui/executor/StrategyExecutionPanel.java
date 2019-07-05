@@ -435,7 +435,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 									highlightColor);
 							break;
 						case TACTIC_EXECUTING:
-							m_strategyText.setSelectionColor(EXECUTING_COLOR);
+//							m_strategyText.setSelectionColor(EXECUTING_COLOR);
 							m_strategyText.select(m.start(), m.start() + trace.label.length());
 							break;
 						case TACTIC_SETTLING:
