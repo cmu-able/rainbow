@@ -386,8 +386,12 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 			final int location = m.start();
 			m_strategyText.setCaretPosition(location);
 			m_strategyText.setSelectionColor(m_defaultHighlightColor);
+			
 			EventQueue.invokeLater(() -> {
 				try {
+					Rectangle vr = m_strategyText.modelToView(location);
+					int componentHeight = getVisibleRect().height;
+					m_strategyText.scrollRectToVisible(new Rectangle (vr.x, vr.y, vr.width,componentHeight));
 					int lineOfOffset = m_strategyText.getLineOfOffset(location);
 //							((JViewport) m_strategyText.getParent()).setViewPosition(
 //									new Point(0, m_strategyText.yForLine(lineOfOffset)));
@@ -422,12 +426,13 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 								break;
 							case TACTIC_EXECUTING:
 //								m_strategyText.setSelectionColor(EXECUTING_COLOR);
+								m_strategyText.requestFocusInWindow();
 								m_strategyText.setCaretPosition(ma.start());
 								m_strategyText.moveCaretPosition(ma.start() + trace.label.length());
 								break;
 							case TACTIC_SETTLING:
-
 								m_strategyText.setSelectionColor(SETTLING_COLOR);
+								m_strategyText.requestFocusInWindow();
 								m_strategyText.setCaretPosition(m.start());
 								m_strategyText.moveCaretPosition(ma.start() + trace.label.length());
 								break;
@@ -439,8 +444,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 						}
 					}
 
-					Rectangle vr = m_strategyText.modelToView(location);
-					m_strategyText.scrollRectToVisible(vr);
+				
 				} catch (BadLocationException e) {
 				}
 			});
