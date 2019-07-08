@@ -433,7 +433,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 							case TACTIC_SETTLING:
 								m_strategyText.setSelectionColor(SETTLING_COLOR);
 								m_strategyText.requestFocusInWindow();
-								m_strategyText.setCaretPosition(m.start());
+								m_strategyText.setCaretPosition(ma.start());
 								m_strategyText.moveCaretPosition(ma.start() + trace.label.length());
 								break;
 							case TACTIC_DONE:
