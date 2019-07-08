@@ -111,7 +111,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 				StrategyInstanceData value, int index, boolean isSelected, boolean cellHasFocus) {
 			setOpaque(true);
 			setText(value.strategyData.name);
-			if (value.currentState != ExecutionStateT.STRATEGY_DONE) {
+			if (value.currentState != ExecutionStateT.STRATEGY_DONE && value.currentState != ExecutionStateT.NOT_EXECUTING) {
 				if (italicFont == null) {
 					italicFont = new Font(this.getFont().getName(), Font.ITALIC, this.getFont().getSize());
 				}
@@ -119,6 +119,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 			}
 			if (value.outcome != null && value.outcome != Outcome.SUCCESS) {
 				this.setBackground(isSelected ? DARK_ERROR_COLOR : ERROR_COLOR);
+				if (isSelected) this.setForeground(Color.WHITE);
 			} else if (isSelected) {
 				setBackground(list.getSelectionBackground());
 				setForeground(list.getSelectionForeground());
