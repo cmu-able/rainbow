@@ -398,6 +398,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 				try {
 					Rectangle vr = m_strategyText.modelToView(location);
 					int componentHeight = getVisibleRect().height;
+					int loc = location;
 					m_strategyText.scrollRectToVisible(new Rectangle (vr.x, vr.y, vr.width,componentHeight));
 					int lineOfOffset = m_strategyText.getLineOfOffset(location);
 //							((JViewport) m_strategyText.getParent()).setViewPosition(
@@ -412,7 +413,8 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 							pa = Pattern.compile(trace.label + "\\s*\\(");
 						}
 						Matcher ma = pa.matcher(m_strategyText.getText());
-						if (ma.find(location)) {
+						if (ma.find(loc)) {
+							loc = ma.start();
 							switch (trace.state) {
 							case NODE_EXECUTING:
 							case NODE_DONE:
