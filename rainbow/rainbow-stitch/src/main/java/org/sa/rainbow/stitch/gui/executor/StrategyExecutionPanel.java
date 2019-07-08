@@ -103,6 +103,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 	static public class StrategyInstanceDataRenderer extends JLabel implements ListCellRenderer<StrategyInstanceData> {
 
 		private Font italicFont;
+		private Font normalFont;
 		private static final Color ERROR_COLOR = Color.RED;
 		private static final Color DARK_ERROR_COLOR = new Color(139, 0, 0);
 
@@ -113,9 +114,14 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 			setText(value.strategyData.name);
 			if (value.currentState != ExecutionStateT.STRATEGY_DONE && value.currentState != ExecutionStateT.NOT_EXECUTING) {
 				if (italicFont == null) {
+					normalFont = this.getFont();
 					italicFont = new Font(this.getFont().getName(), Font.ITALIC, this.getFont().getSize());
 				}
 				setFont(italicFont);
+			} else {
+				if (normalFont == null)
+					normalFont = this.getFont();
+				setFont(normalFont);
 			}
 			if (value.outcome != null && value.outcome != Outcome.SUCCESS) {
 				this.setBackground(isSelected ? DARK_ERROR_COLOR : ERROR_COLOR);
