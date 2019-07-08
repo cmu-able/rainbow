@@ -4,12 +4,11 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,6 +17,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,9 +33,6 @@ import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
@@ -261,6 +258,9 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		m_strategyText.setCodeFoldingEnabled(true);
 		m_strategyText.setSyntaxEditingStyle("text/stitch");
 		m_strategyText.setEditable(false);
+		Font f = findAppropriateFont();
+		if (f != null)
+			m_strategyText.setFont(f);
 
 		m_defaultHighlightColor = m_strategyText.getSelectionColor();
 
@@ -369,6 +369,21 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 			}
 		});
 
+	}
+	
+	public static Font findAppropriateFont() {
+		String text = "\u29d6";
+		String[] fontFamilies = GraphicsEnvironment.
+                getLocalGraphicsEnvironment().
+                getAvailableFontFamilyNames();
+        Vector<String> croatFreindlyFonts = new Vector<String>();
+        for (String name : fontFamilies) {
+            Font font = new Font(name, Font.PLAIN, 12);
+            if (font.canDisplayUpTo(text)<0) {
+                return font;
+            }
+        }
+        return null;
 	}
 
 	protected void updateStrategyText(StrategyInstanceData sid) {
