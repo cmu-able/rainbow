@@ -63,18 +63,18 @@ import org.sa.rainbow.stitch.visitor.Stitch;
 import org.sa.rainbow.util.Util;
 
 public class StrategyExecutionPanel extends JPanel implements IRainbowModelChangeCallback {
-	
+
 	public static Color bleach(Color color, double amount) {
 		int red = (int) ((color.getRed() * (1 - amount) / 255 + amount) * 255);
 		int green = (int) ((color.getGreen() * (1 - amount) / 255 + amount) * 255);
 		int blue = (int) ((color.getBlue() * (1 - amount) / 255 + amount) * 255);
 		return new Color(red, green, blue);
 	}
-	
+
 	public static final Color EXECUTING_COLOR = bleach(Color.GREEN, .5);
 	public static final Color SETTLING_COLOR = bleach(Color.YELLOW, 0.5);
 	public static final Color ERROR_COLOR = bleach(Color.RED, 0.5);
-	
+
 	public class StrategyComboRenderer extends JLabel implements ListCellRenderer<Strategy> {
 
 		public StrategyComboRenderer() {
@@ -199,16 +199,9 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 	private Map<String, StrategyData> m_strategyData = new HashMap<>();
 	private JList<StrategyInstanceData> m_strategiesExecuted;
 
-	private final IRainbowChangeBusSubscription m_strategyExecutionSubscriber = new IRainbowChangeBusSubscription() {
+	private final IRainbowChangeBusSubscription m_strategyExecutionSubscriber=new IRainbowChangeBusSubscription(){
 
-		@Override
-		public boolean matches(IRainbowMessage message) {
-			String type = (String) message.getProperty(IModelChangeBusPort.MODEL_TYPE_PROP);
-			if (type != null && ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE.equals(type)) {
-				return true;
-			}
-			return false;
-		}
+	@Override public boolean matches(IRainbowMessage message){String type=(String)message.getProperty(IModelChangeBusPort.MODEL_TYPE_PROP);if(type!=null&&ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE.equals(type)){return true;}return false;}
 
 	};
 	private IModelChangeBusSubscriberPort m_modelChangePort;
@@ -261,7 +254,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		m_strategyText.setCodeFoldingEnabled(true);
 		m_strategyText.setSyntaxEditingStyle("text/stitch");
 		m_strategyText.setEditable(false);
-		
+
 		m_defaultHighlightColor = m_strategyText.getSelectionColor();
 
 		GridBagConstraints gbc_m_strategyText = new GridBagConstraints();
@@ -386,74 +379,75 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 			}
 		}
 		m_strategyText.setText(stitchText);
+		
 		Pattern p = Pattern.compile("strategy.*" + sid.strategyData.name);
 		Matcher m = p.matcher(stitchText);
 		if (m.find()) {
 			final int location = m.start();
 			m_strategyText.setCaretPosition(location);
 			m_strategyText.setSelectionColor(m_defaultHighlightColor);
-			try {
-				EventQueue.invokeLater(new Runnable() {
-					public void run() {
-						try {
-							Rectangle vr = m_strategyText.modelToView(location);
-							m_strategyText.scrollRectToVisible(vr);
-						} catch (BadLocationException e) {
+			EventQueue.invokeLater(() -> {
+				try {
+					int lineOfOffset = m_strategyText.getLineOfOffset(location);
+//							((JViewport) m_strategyText.getParent()).setViewPosition(
+//									new Point(0, m_strategyText.yForLine(lineOfOffset)));
+					Color highlightColor = Color.LIGHT_GRAY;
+					m_strategyText.removeAllLineHighlights();
+					m_strategyText.addLineHighlight(lineOfOffset, highlightColor);
+					for (TraceData trace : sid.traces) {
+						Pattern pa = Pattern.compile(trace.label + "\\s*:");
+						if (trace.state == ExecutionStateT.TACTIC_EXECUTING
+								|| trace.state == ExecutionStateT.TACTIC_SETTLING) {
+							pa = Pattern.compile(trace.label + "\\s*\\(");
+						}
+						Matcher ma = pa.matcher(m_strategyText.getText());
+						if (ma.find(location)) {
+							switch (trace.state) {
+							case NODE_EXECUTING:
+							case NODE_DONE:
+								highlightColor = EXECUTING_COLOR;
+								m_strategyText.addLineHighlight(m_strategyText.getLineOfOffset(ma.start()),
+										highlightColor);
+								break;
+							case STRATEGY_EXECUTING:
+							case STRATEGY_DONE:
+								highlightColor = EXECUTING_COLOR;
+								m_strategyText.addLineHighlight(m_strategyText.getLineOfOffset(ma.start()),
+										highlightColor);
+								break;
+							case STRATEGY_SETTLING:
+								highlightColor = SETTLING_COLOR;
+								m_strategyText.addLineHighlight(m_strategyText.getLineOfOffset(ma.start()),
+										highlightColor);
+								break;
+							case TACTIC_EXECUTING:
+//								m_strategyText.setSelectionColor(EXECUTING_COLOR);
+								m_strategyText.setCaretPosition(ma.start());
+								m_strategyText.moveCaretPosition(ma.start() + trace.label.length());
+								break;
+							case TACTIC_SETTLING:
+
+								m_strategyText.setSelectionColor(SETTLING_COLOR);
+								m_strategyText.setCaretPosition(m.start());
+								m_strategyText.moveCaretPosition(ma.start() + trace.label.length());
+								break;
+							case TACTIC_DONE:
+								m_strategyText.setCaretPosition(ma.start());
+								break;
+							}
+
 						}
 					}
-				});
 
-				int lineOfOffset = m_strategyText.getLineOfOffset(location);
-//						((JViewport) m_strategyText.getParent()).setViewPosition(
-//								new Point(0, m_strategyText.yForLine(lineOfOffset)));
-				Color highlightColor = Color.LIGHT_GRAY;
-				m_strategyText.removeAllLineHighlights();
-				m_strategyText.addLineHighlight(lineOfOffset, highlightColor);
-				for (TraceData trace : sid.traces) {
-					p = Pattern.compile(trace.label + "\\s*:");
-					if (trace.state == ExecutionStateT.TACTIC_EXECUTING || trace.state == ExecutionStateT.TACTIC_SETTLING) {
-						p = Pattern.compile(trace.label + "\\s*\\(");
-					}
-					m = p.matcher(stitchText);
-					if (m.find(location)) {
-						switch (trace.state) {
-						case NODE_EXECUTING: 
-						case NODE_DONE: 
-							highlightColor = EXECUTING_COLOR; 
-							m_strategyText.addLineHighlight(m_strategyText.getLineOfOffset(m.start()),
-									highlightColor);
-							break;
-						case STRATEGY_EXECUTING:
-						case STRATEGY_DONE: 
-							highlightColor = EXECUTING_COLOR; 
-							m_strategyText.addLineHighlight(m_strategyText.getLineOfOffset(m.start()),
-									highlightColor);
-							break;
-						case STRATEGY_SETTLING:
-							highlightColor = SETTLING_COLOR; 
-							m_strategyText.addLineHighlight(m_strategyText.getLineOfOffset(m.start()),
-									highlightColor);
-							break;
-						case TACTIC_EXECUTING:
-//							m_strategyText.setSelectionColor(EXECUTING_COLOR);
-							m_strategyText.select(m.start(), m.start() + trace.label.length());
-							break;
-						case TACTIC_SETTLING:
-							m_strategyText.setSelectionColor(SETTLING_COLOR);
-							m_strategyText.select(m.start(), m.start() + trace.label.length());
-							break;
-							
-						}
-						
-
-					}
+					Rectangle vr = m_strategyText.modelToView(location);
+					m_strategyText.scrollRectToVisible(vr);
+				} catch (BadLocationException e) {
 				}
-			} catch (BadLocationException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+			});
+
 		}
 	}
+
 
 	public void initBinding(RainbowArchExecutorModel model) {
 		ArrayList<Strategy> sArray = new ArrayList<>();
@@ -517,38 +511,38 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 			StrategyData sd = getStrategyData(strategyName);
 			sd.getCurrentRun().addTraceElement(nodeLabel, eventType);
 			m_strategiesExecuted.repaint();
-			if (m_comboBox.getSelectedItem() == sd.strategy) 
+			if (m_comboBox.getSelectedItem() == sd.strategy)
 				updateStrategyText(sd.getCurrentRun());
 			break;
 		}
 		case TACTIC_EXECUTING: {
-			String tacticName = targetConstituents[targetConstituents.length-1];
+			String tacticName = targetConstituents[targetConstituents.length - 1];
 			targetConstituents = ((String) message.getProperty(IModelChangeBusPort.PARAMETER_PROP + "3")).split("\\.");
 			String strategyName = targetConstituents[targetConstituents.length - 1];
 			StrategyData sd = getStrategyData(strategyName);
 			sd.getCurrentRun().addTraceElement(tacticName, eventType);
 			m_tacticToStrategy.put(tacticName, strategyName);
-			if (m_comboBox.getSelectedItem() == sd.strategy) 
+			if (m_comboBox.getSelectedItem() == sd.strategy)
 				updateStrategyText(sd.getCurrentRun());
 			break;
 		}
 		case TACTIC_SETTLING: {
-			String tacticName = targetConstituents[targetConstituents.length-1];
+			String tacticName = targetConstituents[targetConstituents.length - 1];
 
 			String strategyName = m_tacticToStrategy.get(tacticName);
 			StrategyData sd = getStrategyData(strategyName);
 			sd.getCurrentRun().setTraceStatus(tacticName, eventType);
-			if (m_comboBox.getSelectedItem() == sd.strategy) 
+			if (m_comboBox.getSelectedItem() == sd.strategy)
 				updateStrategyText(sd.getCurrentRun());
 			break;
 		}
 		case TACTIC_DONE: {
-			String tacticName = targetConstituents[targetConstituents.length-1];
+			String tacticName = targetConstituents[targetConstituents.length - 1];
 			String strategyName = m_tacticToStrategy.get(tacticName);
 			StrategyData sd = getStrategyData(strategyName);
 			sd.getCurrentRun().setTraceStatus(tacticName, eventType);
 			m_tacticToStrategy.remove(tacticName);
-			if (m_comboBox.getSelectedItem() == sd.strategy) 
+			if (m_comboBox.getSelectedItem() == sd.strategy)
 				updateStrategyText(sd.getCurrentRun());
 			break;
 		}
@@ -558,7 +552,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 			StrategyData sd = getStrategyData(strategyName);
 			sd.getCurrentRun().setTraceStatus(nodeLabel, eventType);
 			m_strategiesExecuted.repaint();
-			if (m_comboBox.getSelectedItem() == sd.strategy) 
+			if (m_comboBox.getSelectedItem() == sd.strategy)
 				updateStrategyText(sd.getCurrentRun());
 
 			break;
