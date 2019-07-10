@@ -217,6 +217,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 	private JButton m_executeBtn;
 	private IRainbowAdaptationEnqueuePort<IEvaluable> m_strategyEnqPort;
 	private Color m_defaultHighlightColor;
+	private static String settlingString = "\u2026";
 
 	/**
 	 * Create the panel.
@@ -259,8 +260,10 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		m_strategyText.setSyntaxEditingStyle("text/stitch");
 		m_strategyText.setEditable(false);
 		Font f = findAppropriateFont();
-		if (f != null)
+		if (f != null) 
 			m_strategyText.setFont(f);
+		else
+			settlingString = "...";
 
 		m_defaultHighlightColor = m_strategyText.getSelectionColor();
 
@@ -372,11 +375,11 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 	}
 	
 	public static Font findAppropriateFont() {
-		String text = "\u29d6";
+		
+		String text = settlingString;
 		String[] fontFamilies = GraphicsEnvironment.
                 getLocalGraphicsEnvironment().
                 getAvailableFontFamilyNames();
-        Vector<String> croatFreindlyFonts = new Vector<String>();
         for (String name : fontFamilies) {
             Font font = new Font(name, Font.PLAIN, 12);
             if (font.canDisplayUpTo(text)<0) {
@@ -456,14 +459,14 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 								break;
 							case TACTIC_SETTLING:
 								m_strategyText.setSelectionColor(SETTLING_COLOR);
-								m_strategyText.replaceRange(trace.label + "\u29D6", ma.start(), ma.start() + trace.label.length());
+								m_strategyText.replaceRange(trace.label + settlingString, ma.start(), ma.start() + trace.label.length());
 								m_strategyText.requestFocusInWindow();
 								m_strategyText.setCaretPosition(ma.start());
 								m_strategyText.moveCaretPosition(ma.start() + trace.label.length());
 								break;
 							case TACTIC_DONE:
 								m_strategyText.setCaretPosition(ma.start());
-								m_strategyText.replaceRange(trace.label, ma.start(), ma.start() + trace.label.length()+1);
+								m_strategyText.replaceRange(trace.label, ma.start(), ma.start() + trace.label.length()+settlingString.length());
 
 								break;
 							}
