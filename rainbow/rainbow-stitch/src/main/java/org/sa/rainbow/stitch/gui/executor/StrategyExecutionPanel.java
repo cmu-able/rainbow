@@ -62,6 +62,8 @@ import org.sa.rainbow.stitch.util.ExecutionHistoryData.ExecutionStateT;
 import org.sa.rainbow.stitch.visitor.Stitch;
 import org.sa.rainbow.util.Util;
 
+import edu.cmu.cs.able.eseb.rpc.ExecutionState;
+
 public class StrategyExecutionPanel extends JPanel implements IRainbowModelChangeCallback {
 
 	public static Color bleach(Color color, double amount) {
@@ -438,7 +440,8 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 					for (TraceData trace : sid.traces) {
 						Pattern pa = Pattern.compile(trace.label + "\\s*:");
 						if (trace.state == ExecutionStateT.TACTIC_EXECUTING
-								|| trace.state == ExecutionStateT.TACTIC_SETTLING) {
+								|| trace.state == ExecutionStateT.TACTIC_SETTLING
+								|| trace.state == ExecutionStateT.TACTIC_DONE) {
 							pa = Pattern.compile(trace.label + "\\s*\\(");
 						}
 						Matcher ma = pa.matcher(m_strategyText.getText());
