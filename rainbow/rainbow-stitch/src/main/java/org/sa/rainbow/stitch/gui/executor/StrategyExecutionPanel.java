@@ -508,8 +508,8 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 													final int digits = (int) Math
 															.round(Math.floor(Math.log10(tactic.getDuration() / 1000))) + 2;
 
-													m_strategyText.replaceRange(trace.label, ma.start(),
-															ma.start() + trace.label.length() + settlingString.length() + digits);
+													m_strategyText.replaceRange(trace.label, start1,
+															start1 + trace.label.length() + settlingString.length() + digits);
 												} else {
 													m_strategyText
 															.replaceRange(
