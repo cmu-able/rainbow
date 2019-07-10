@@ -1257,6 +1257,13 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 		tactic.markExecuting(true);
 		try {
 			if (m_executor != null) {
+				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+						.strategyExecutionStateCommand(m_executor.getManagedModel(),
+								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+								ExecutionHistoryData.ExecutionStateT.NODE_EXECUTING, null));
+
+				m_executor.getReportingPort().info(m_executor.getComponentType(), MessageFormat
+						.format("[[{0}]]: Executing node {1}:{2}", m_executor.id(), curNode.label(), tactic.getName()));
 				tactic.setHistoryModel(m_executor.getExecutionHistoryModel());
 				m_executor.getHistoryModelUSPort()
 						.updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
@@ -1267,15 +1274,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 			}
 			long start = new Date().getTime();
 			tactic.stitchState().setExecutor(m_executor);
-			if (m_executor != null) {
-				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
-						.strategyExecutionStateCommand(m_executor.getManagedModel(),
-								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
-								ExecutionHistoryData.ExecutionStateT.NODE_EXECUTING, null));
-
-				m_executor.getReportingPort().info(m_executor.getComponentType(), MessageFormat
-						.format("[[{0}]]: Executing node {1}:{2}", m_executor.id(), curNode.label(), tactic.getName()));
-			}
+			
 			tactic.evaluate(args);
 			if (m_executor != null) {
 				m_executor.getHistoryModelUSPort()
