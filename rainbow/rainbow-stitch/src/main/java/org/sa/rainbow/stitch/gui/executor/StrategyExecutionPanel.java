@@ -505,12 +505,12 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 												m_strategyText.replaceRange(
 														trace.label + settlingString
 																+ StringUtils.leftPad("" + m_time, digits - 1) + "s",
-														ma.start(), ma.start() + trace.label.length() + digits);
+														ma.start(), ma.start() + trace.label.length() + settlingString.length() + digits);
 
 												m_strategyText.requestFocusInWindow();
 												m_strategyText.setCaretPosition(ma.start());
 												m_strategyText
-														.moveCaretPosition(ma.start() + trace.label.length() + digits);
+														.moveCaretPosition(ma.start() + trace.label.length() + settlingString.length()+ digits);
 
 											}
 										}
