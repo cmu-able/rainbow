@@ -490,7 +490,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 										m_settlingTimer = new Timer();
 									else
 										m_settlingTimer.cancel();
-
+									final int start1 = ma.start();
 									m_settlingTimer.scheduleAtFixedRate(new TimerTask() {
 
 										long m_time = tactic.getDuration() / 1000;
@@ -509,12 +509,12 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 																			+ StringUtils.leftPad("" + m_time,
 																					digits - 1)
 																			+ "s",
-																	ma.start(), ma.start() + trace.label.length()
+																			start1, start1 + trace.label.length()
 																			+ settlingString.length() + digits);
 
 													m_strategyText.requestFocusInWindow();
-													m_strategyText.setCaretPosition(ma.start());
-													m_strategyText.moveCaretPosition(ma.start() + trace.label.length()
+													m_strategyText.setCaretPosition(start1);
+													m_strategyText.moveCaretPosition(start1 + trace.label.length()
 															+ settlingString.length() + digits);
 
 												}
