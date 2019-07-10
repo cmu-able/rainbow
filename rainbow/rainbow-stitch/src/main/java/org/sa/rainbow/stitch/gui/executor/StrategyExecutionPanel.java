@@ -505,6 +505,11 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 												if (m_time <= 0) {
 													m_settlingTimer.cancel();
 													m_settlingTimer = null;
+													final int digits = (int) Math
+															.round(Math.floor(Math.log10(tactic.getDuration() / 1000))) + 2;
+
+													m_strategyText.replaceRange(trace.label, ma.start(),
+															ma.start() + trace.label.length() + settlingString.length() + digits);
 												} else {
 													m_strategyText
 															.replaceRange(
@@ -512,7 +517,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 																			+ StringUtils.leftPad("" + m_time,
 																					digits - 1)
 																			+ "s",
-																			start1, start1 + trace.label.length()
+																	start1, start1 + trace.label.length()
 																			+ settlingString.length() + digits);
 
 													m_strategyText.requestFocusInWindow();
@@ -531,13 +536,11 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 							case TACTIC_DONE: {
 								m_strategyText.setCaretPosition(ma.start());
 								Tactic tactic = sid.strategyData.script.m_stitch.findTactic(trace.label);
-								if (tactic.getDuration() > 0) {
-									if (m_settlingTimer != null) {
-										synchronized (m_settlingTimer) {
-											m_settlingTimer.cancel();
-										}
-										m_settlingTimer = null;
+								if (tactic.getDuration() > 0 && m_settlingTimer != null) {
+									synchronized (m_settlingTimer) {
+										m_settlingTimer.cancel();
 									}
+									m_settlingTimer = null;
 									final int digits = (int) Math
 											.round(Math.floor(Math.log10(tactic.getDuration() / 1000))) + 2;
 
