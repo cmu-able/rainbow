@@ -425,7 +425,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 			m_strategyText.setCaretPosition(location);
 			m_strategyText.setSelectionColor(m_defaultHighlightColor);
 
-			EventQueue.invokeLater(() -> {
+//			EventQueue.invokeLater(() -> {
 				try {
 					Rectangle vr = m_strategyText.modelToView(location);
 					int componentHeight = getVisibleRect().height;
@@ -451,7 +451,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 							case NODE_EXECUTING:
 							case NODE_DONE:
 								highlightColor = EXECUTING_COLOR;
-								m_strategyText.addLineHighlight(m_strategyText.getLineOfOffset(ma.start()),
+								m_strategyText.addLineHighlight(m_strategyText.getLineOfOffset(loc),
 										highlightColor);
 								break;
 							case STRATEGY_EXECUTING:
@@ -572,7 +572,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 
 				} catch (BadLocationException e) {
 				}
-			});
+//			});
 
 		}
 	}
