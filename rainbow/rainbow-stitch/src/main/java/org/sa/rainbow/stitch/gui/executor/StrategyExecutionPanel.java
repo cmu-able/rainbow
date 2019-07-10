@@ -441,7 +441,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 						Pattern pa = Pattern.compile(trace.label + "\\s*:");
 						if (trace.state == ExecutionStateT.TACTIC_EXECUTING
 								|| trace.state == ExecutionStateT.TACTIC_SETTLING
-								/*|| trace.state == ExecutionStateT.TACTIC_DONE*/) {
+								|| trace.state == ExecutionStateT.TACTIC_DONE) {
 							pa = Pattern.compile(trace.label + "\\s*\\(");
 						}
 						Matcher ma = pa.matcher(m_strategyText.getText());
@@ -475,7 +475,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 								m_strategyText.setSelectionColor(SETTLING_COLOR);
 
 								Tactic tactic = sid.strategyData.script.m_stitch.findTactic(trace.label);
-								if (tactic.getDuration() > 0) {
+								if (tactic.getDuration() > 0 && m_settlingTimer == null) {
 									final int start = ma.start();
 									final int digits = (int) Math
 											.round(Math.floor(Math.log10(tactic.getDuration() / 1000))) + 2;
@@ -499,17 +499,28 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 										long m_time = tactic.getDuration() / 1000;
 
 										@Override
-										public void run() {
-											synchronized (m_settlingTimer) {
-												m_time = m_time - 1;
-												if (m_time <= 0) {
-													m_settlingTimer.cancel();
-													m_settlingTimer = null;
+										public boolean cancel() {
+											try {
+												if (m_strategyText.getText(start1,trace.label.length()+settlingString.length()).equals(trace.label + settlingString)) {
 													final int digits = (int) Math
 															.round(Math.floor(Math.log10(tactic.getDuration() / 1000))) + 2;
 
 													m_strategyText.replaceRange(trace.label, start1,
 															start1 + trace.label.length() + settlingString.length() + digits);
+												}
+											} catch (BadLocationException e) {
+											}
+											return super.cancel();
+										}
+										
+										@Override
+										public void run() {
+											synchronized (m_settlingTimer) {
+												m_time = m_time - 1;
+												if (m_time <= 0) {
+													m_settlingTimer = null;
+													cancel();
+													
 												} else {
 													m_strategyText
 															.replaceRange(
@@ -534,6 +545,11 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 							}
 								break;
 							case TACTIC_DONE: {
+								if (m_settlingTimer != null) {
+									m_settlingTimer.cancel();
+									m_settlingTimer = null;
+								}
+								
 //								m_strategyText.setCaretPosition(ma.start());
 //								Tactic tactic = sid.strategyData.script.m_stitch.findTactic(trace.label);
 //								if (tactic.getDuration() > 0 && m_settlingTimer != null) {
