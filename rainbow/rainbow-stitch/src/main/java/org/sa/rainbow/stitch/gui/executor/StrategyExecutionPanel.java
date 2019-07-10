@@ -272,7 +272,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		m_strategyText.setCodeFoldingEnabled(true);
 		m_strategyText.setSyntaxEditingStyle("text/stitch");
 		m_strategyText.setEditable(false);
-		Font f = null; //findAppropriateFont();
+		Font f = null; // findAppropriateFont();
 		if (f != null)
 			m_strategyText.setFont(f);
 		else
@@ -497,21 +497,27 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 
 										@Override
 										public void run() {
-											m_time = m_time - 1;
-											if (m_time <= 0) {
-												m_settlingTimer.cancel();
-												m_settlingTimer = null;
-											} else {
-												m_strategyText.replaceRange(
-														trace.label + settlingString
-																+ StringUtils.leftPad("" + m_time, digits - 1) + "s",
-														ma.start(), ma.start() + trace.label.length() + settlingString.length() + digits);
+											synchronized (m_settlingTimer) {
+												m_time = m_time - 1;
+												if (m_time <= 0) {
+													m_settlingTimer.cancel();
+													m_settlingTimer = null;
+												} else {
+													m_strategyText
+															.replaceRange(
+																	trace.label + settlingString
+																			+ StringUtils.leftPad("" + m_time,
+																					digits - 1)
+																			+ "s",
+																	ma.start(), ma.start() + trace.label.length()
+																			+ settlingString.length() + digits);
 
-												m_strategyText.requestFocusInWindow();
-												m_strategyText.setCaretPosition(ma.start());
-												m_strategyText
-														.moveCaretPosition(ma.start() + trace.label.length() + settlingString.length()+ digits);
+													m_strategyText.requestFocusInWindow();
+													m_strategyText.setCaretPosition(ma.start());
+													m_strategyText.moveCaretPosition(ma.start() + trace.label.length()
+															+ settlingString.length() + digits);
 
+												}
 											}
 										}
 									}, 0, 1000);
@@ -524,7 +530,9 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 								Tactic tactic = sid.strategyData.script.m_stitch.findTactic(trace.label);
 								if (tactic.getDuration() > 0) {
 									if (m_settlingTimer != null) {
-										m_settlingTimer.cancel();
+										synchronized (m_settlingTimer) {
+											m_settlingTimer.cancel();
+										}
 										m_settlingTimer = null;
 									}
 									final int digits = (int) Math
