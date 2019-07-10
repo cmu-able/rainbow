@@ -441,7 +441,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 						Pattern pa = Pattern.compile(trace.label + "\\s*:");
 						if (trace.state == ExecutionStateT.TACTIC_EXECUTING
 								|| trace.state == ExecutionStateT.TACTIC_SETTLING
-								|| trace.state == ExecutionStateT.TACTIC_DONE) {
+								/*|| trace.state == ExecutionStateT.TACTIC_DONE*/) {
 							pa = Pattern.compile(trace.label + "\\s*\\(");
 						}
 						Matcher ma = pa.matcher(m_strategyText.getText());
