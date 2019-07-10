@@ -17,7 +17,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,6 +35,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.text.BadLocationException;
 
+import org.apache.commons.lang.StringUtils;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.sa.rainbow.core.Rainbow;
@@ -54,6 +56,7 @@ import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.core.StitchScript;
 import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.core.Strategy.Outcome;
+import org.sa.rainbow.stitch.core.Tactic;
 import org.sa.rainbow.stitch.history.ExecutionHistoryModelInstance;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData.ExecutionStateT;
 import org.sa.rainbow.stitch.visitor.Stitch;
@@ -109,7 +112,8 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 				StrategyInstanceData value, int index, boolean isSelected, boolean cellHasFocus) {
 			setOpaque(true);
 			setText(value.strategyData.name);
-			if (value.currentState != ExecutionStateT.STRATEGY_DONE && value.currentState != ExecutionStateT.NOT_EXECUTING) {
+			if (value.currentState != ExecutionStateT.STRATEGY_DONE
+					&& value.currentState != ExecutionStateT.NOT_EXECUTING) {
 				if (italicFont == null) {
 					normalFont = this.getFont();
 					italicFont = new Font(this.getFont().getName(), Font.ITALIC, this.getFont().getSize());
@@ -122,7 +126,8 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 			}
 			if (value.outcome != null && value.outcome != Outcome.SUCCESS) {
 				this.setBackground(isSelected ? DARK_ERROR_COLOR : ERROR_COLOR);
-				if (isSelected) this.setForeground(Color.WHITE);
+				if (isSelected)
+					this.setForeground(Color.WHITE);
 			} else if (isSelected) {
 				setBackground(list.getSelectionBackground());
 				setForeground(list.getSelectionForeground());
@@ -203,9 +208,16 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 	private Map<String, StrategyData> m_strategyData = new HashMap<>();
 	private JList<StrategyInstanceData> m_strategiesExecuted;
 
-	private final IRainbowChangeBusSubscription m_strategyExecutionSubscriber=new IRainbowChangeBusSubscription(){
+	private final IRainbowChangeBusSubscription m_strategyExecutionSubscriber = new IRainbowChangeBusSubscription() {
 
-	@Override public boolean matches(IRainbowMessage message){String type=(String)message.getProperty(IModelChangeBusPort.MODEL_TYPE_PROP);if(type!=null&&ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE.equals(type)){return true;}return false;}
+		@Override
+		public boolean matches(IRainbowMessage message) {
+			String type = (String) message.getProperty(IModelChangeBusPort.MODEL_TYPE_PROP);
+			if (type != null && ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE.equals(type)) {
+				return true;
+			}
+			return false;
+		}
 
 	};
 	private IModelChangeBusSubscriberPort m_modelChangePort;
@@ -217,6 +229,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 	private JButton m_executeBtn;
 	private IRainbowAdaptationEnqueuePort<IEvaluable> m_strategyEnqPort;
 	private Color m_defaultHighlightColor;
+	private Timer m_settlingTimer;
 	private static String settlingString = "\u2026";
 
 	/**
@@ -260,7 +273,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		m_strategyText.setSyntaxEditingStyle("text/stitch");
 		m_strategyText.setEditable(false);
 		Font f = findAppropriateFont();
-		if (f != null) 
+		if (f != null)
 			m_strategyText.setFont(f);
 		else
 			settlingString = "...";
@@ -373,20 +386,18 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		});
 
 	}
-	
+
 	public static Font findAppropriateFont() {
-		
+
 		String text = settlingString;
-		String[] fontFamilies = GraphicsEnvironment.
-                getLocalGraphicsEnvironment().
-                getAvailableFontFamilyNames();
-        for (String name : fontFamilies) {
-            Font font = new Font(name, Font.PLAIN, 12);
-            if (font.canDisplayUpTo(text)<0) {
-                return font;
-            }
-        }
-        return null;
+		String[] fontFamilies = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+		for (String name : fontFamilies) {
+			Font font = new Font(name, Font.PLAIN, 12);
+			if (font.canDisplayUpTo(text) < 0) {
+				return font;
+			}
+		}
+		return null;
 	}
 
 	protected void updateStrategyText(StrategyInstanceData sid) {
@@ -404,20 +415,20 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 			}
 		}
 		m_strategyText.setText(stitchText);
-		
+
 		Pattern p = Pattern.compile("strategy.*" + sid.strategyData.name);
 		Matcher m = p.matcher(stitchText);
 		if (m.find()) {
 			final int location = m.start();
 			m_strategyText.setCaretPosition(location);
 			m_strategyText.setSelectionColor(m_defaultHighlightColor);
-			
+
 			EventQueue.invokeLater(() -> {
 				try {
 					Rectangle vr = m_strategyText.modelToView(location);
 					int componentHeight = getVisibleRect().height;
 					int loc = location;
-					m_strategyText.scrollRectToVisible(new Rectangle (vr.x, vr.y, vr.width,componentHeight));
+					m_strategyText.scrollRectToVisible(new Rectangle(vr.x, vr.y, vr.width, componentHeight));
 					int lineOfOffset = m_strategyText.getLineOfOffset(location);
 //							((JViewport) m_strategyText.getParent()).setViewPosition(
 //									new Point(0, m_strategyText.yForLine(lineOfOffset)));
@@ -457,31 +468,84 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 								m_strategyText.setCaretPosition(ma.start());
 								m_strategyText.moveCaretPosition(ma.start() + trace.label.length());
 								break;
-							case TACTIC_SETTLING:
+							case TACTIC_SETTLING: {
 								m_strategyText.setSelectionColor(SETTLING_COLOR);
-								m_strategyText.replaceRange(trace.label + settlingString, ma.start(), ma.start() + trace.label.length());
-								m_strategyText.requestFocusInWindow();
-								m_strategyText.setCaretPosition(ma.start());
-								m_strategyText.moveCaretPosition(ma.start() + trace.label.length());
-								break;
-							case TACTIC_DONE:
-								m_strategyText.setCaretPosition(ma.start());
-								m_strategyText.replaceRange(trace.label, ma.start(), ma.start() + trace.label.length()+settlingString.length());
 
+								Tactic tactic = sid.strategyData.script.m_stitch.findTactic(trace.label);
+								if (tactic.getDuration() > 0) {
+									final int start = ma.start();
+									final int digits = (int) Math
+											.round(Math.floor(Math.log10(tactic.getDuration() / 1000))) + 2;
+									m_strategyText
+											.replaceRange(
+													trace.label + settlingString
+															+ StringUtils.leftPad("" + tactic.getDuration() / 1000,
+																	digits - 1)
+															+ "s",
+													ma.start(), ma.start() + trace.label.length());
+									m_strategyText.requestFocusInWindow();
+									m_strategyText.setCaretPosition(ma.start());
+									m_strategyText.moveCaretPosition(ma.start() + trace.label.length());
+									if (m_settlingTimer == null)
+										m_settlingTimer = new Timer();
+									else
+										m_settlingTimer.cancel();
+
+									m_settlingTimer.scheduleAtFixedRate(new TimerTask() {
+
+										long m_time = tactic.getDuration() / 1000;
+
+										@Override
+										public void run() {
+											m_time = m_time - 1;
+											if (m_time <= 0) {
+												m_settlingTimer.cancel();
+												m_settlingTimer = null;
+											} else {
+												m_strategyText.replaceRange(
+														trace.label + settlingString
+																+ StringUtils.leftPad("" + m_time, digits - 1) + "s",
+														ma.start(), ma.start() + trace.label.length() + digits);
+
+												m_strategyText.requestFocusInWindow();
+												m_strategyText.setCaretPosition(ma.start());
+												m_strategyText
+														.moveCaretPosition(ma.start() + trace.label.length() + digits);
+
+											}
+										}
+									}, 0, 1000);
+
+								}
+							}
+								break;
+							case TACTIC_DONE: {
+								m_strategyText.setCaretPosition(ma.start());
+								Tactic tactic = sid.strategyData.script.m_stitch.findTactic(trace.label);
+								if (tactic.getDuration() > 0) {
+									if (m_settlingTimer != null) {
+										m_settlingTimer.cancel();
+										m_settlingTimer = null;
+									}
+									final int digits = (int) Math
+											.round(Math.floor(Math.log10(tactic.getDuration() / 1000))) + 2;
+
+									m_strategyText.replaceRange(trace.label, ma.start(),
+											ma.start() + trace.label.length() + settlingString.length() + digits);
+								}
+							}
 								break;
 							}
 
 						}
 					}
 
-				
 				} catch (BadLocationException e) {
 				}
 			});
 
 		}
 	}
-
 
 	public void initBinding(RainbowArchExecutorModel model) {
 		ArrayList<Strategy> sArray = new ArrayList<>();
