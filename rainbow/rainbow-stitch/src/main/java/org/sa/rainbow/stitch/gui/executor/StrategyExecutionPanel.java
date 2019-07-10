@@ -12,10 +12,12 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.format.ResolverStyle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -437,7 +439,10 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 					Color highlightColor = Color.LIGHT_GRAY;
 					m_strategyText.removeAllLineHighlights();
 					m_strategyText.addLineHighlight(lineOfOffset, highlightColor);
-					for (TraceData trace : sid.traces) {
+					ListIterator<TraceData> li = sid.traces.listIterator(sid.traces.size());
+					while (li.hasPrevious()) {
+//					for (TraceData trace : sid.traces) {
+						TraceData trace = li.previous();
 						Pattern pa = Pattern.compile(trace.label + "\\s*:");
 						if (trace.state == ExecutionStateT.TACTIC_EXECUTING
 								|| trace.state == ExecutionStateT.TACTIC_SETTLING
