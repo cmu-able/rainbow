@@ -272,7 +272,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		m_strategyText.setCodeFoldingEnabled(true);
 		m_strategyText.setSyntaxEditingStyle("text/stitch");
 		m_strategyText.setEditable(false);
-		Font f = findAppropriateFont();
+		Font f = null; //findAppropriateFont();
 		if (f != null)
 			m_strategyText.setFont(f);
 		else
