@@ -2,6 +2,7 @@ package org.sa.rainbow.stitch.gui.executor;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.io.File;
@@ -20,11 +21,15 @@ import javax.swing.text.BadLocationException;
 import org.apache.commons.lang.StringUtils;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.sa.rainbow.stitch.core.Tactic;
+import org.sa.rainbow.stitch.gui.executor.StrategyCodeExecutionTracer.DurationCountdownTask;
+import org.sa.rainbow.stitch.gui.executor.StrategyCodeExecutionTracer.StrategyDurationCountdownTask;
 import org.sa.rainbow.stitch.gui.executor.StrategyExecutionPanel.StrategyInstanceData;
 import org.sa.rainbow.stitch.gui.executor.StrategyExecutionPanel.TraceData;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData.ExecutionStateT;
 
 public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
+
+	
 
 	protected static final Map<String, String> PATH_TO_STITCHTEXT = new HashMap<>();
 	private static String SETTLING_STRING = "\u2026";
@@ -42,13 +47,13 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 
 	protected static class DurationCountdownTask extends TimerTask {
 
-		private StrategyCodeExecutionTracer m_textArea;
-		private int m_startLocationInTextEditor;
-		private int m_endLocationInTextEditor;
-		private long m_totalDuration;
-		private String m_textToHighlight;
-		private int m_digits;
-		private long m_remainingTime;
+		protected StrategyCodeExecutionTracer m_textArea;
+		protected int m_startLocationInTextEditor;
+		protected int m_endLocationInTextEditor;
+		protected long m_totalDuration;
+		protected String m_textToHighlight;
+		protected int m_digits;
+		protected long m_remainingTime;
 
 		public DurationCountdownTask(StrategyCodeExecutionTracer textArea, int startLocationInTextEditor,
 				int endLocationInTextEditor, long totalDuration) {
@@ -58,6 +63,7 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 			m_totalDuration = totalDuration;
 			m_textToHighlight = textArea.getText().substring(startLocationInTextEditor, endLocationInTextEditor);
 			m_digits = (int) Math.round(Math.floor(Math.log10(m_totalDuration / 1000))) + 2;
+//			textArea.add
 		}
 
 		protected void setUpInitialHighlight() {
@@ -71,6 +77,7 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 			m_textArea.setCaretPosition(m_startLocationInTextEditor);
 			m_textArea.moveCaretPosition(m_endLocationInTextEditor);
 			m_remainingTime = m_totalDuration/1000;
+			
 		}
 		
 		@Override
@@ -112,6 +119,44 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 				m_textArea.moveCaretPosition(m_endLocationInTextEditor
 				+ SETTLING_STRING.length() + m_digits);
 
+			}
+		}
+
+	}
+	
+	public class StrategyDurationCountdownTask extends DurationCountdownTask {
+
+		private int m_padSize;
+
+		public StrategyDurationCountdownTask(StrategyCodeExecutionTracer strategyCodeExecutionTracer, int start, int end,
+				long duration) {
+			super(strategyCodeExecutionTracer, start, end, duration);
+		}
+		
+		@Override
+		protected void setUpInitialHighlight() {
+			m_textArea.requestFocusInWindow();
+			m_textArea.setCaretPosition(m_startLocationInTextEditor);
+			m_textArea.moveCaretPosition(m_endLocationInTextEditor);
+			m_remainingTime = m_totalDuration/1000;
+			m_padSize = Long.toString(m_totalDuration).length();
+		}
+		
+		@Override
+		public boolean cancel() {
+			m_textArea.replaceRange(Long.toString(m_totalDuration), m_startLocationInTextEditor, m_endLocationInTextEditor);
+			return super.cancel();
+		}
+		
+		@Override
+		protected void countDownOneSecond() {
+			m_remainingTime -= 1;
+			if (m_remainingTime <= 0) cancel();
+			else {
+				m_textArea.replaceRange(StringUtils.leftPad("" + (m_remainingTime*1000), m_padSize), m_startLocationInTextEditor, m_endLocationInTextEditor);
+				m_textArea.requestFocusInWindow();
+				m_textArea.setCaretPosition(m_startLocationInTextEditor);
+				m_textArea.moveCaretPosition(m_endLocationInTextEditor);
 			}
 		}
 
@@ -204,8 +249,15 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 						case STRATEGY_DONE:
 							higlightLineOfLocation(loc, EXECUTING_COLOR);
 							break;
-						case STRATEGY_SETTLING:
+						case STRATEGY_SETTLING: {
 							higlightLineOfLocation(loc, SETTLING_COLOR);
+							setSelectionColor(SETTLING_COLOR);
+							pa = Pattern.compile("@\\[[^\\d]*(\\d*)[^\\d]*\\]");
+							ma = pa.matcher(stitchText);
+							if (ma.find(loc)) {
+								setUpStrategySettlingTimer(ma.start(1), ma.group(1), Long.parseLong(ma.group(1)));
+							}
+						}
 							break;
 						case TACTIC_EXECUTING:
 							// Just select the call location
@@ -250,6 +302,13 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 		task.setUpInitialHighlight();
 		m_settlingTimer.scheduleAtFixedRate(task, 0, 1000);
 	}
+	
+	private void setUpStrategySettlingTimer(int loc, String highlight, long duration) {
+		m_settlingTimer = new Timer();
+		StrategyDurationCountdownTask task = new StrategyDurationCountdownTask(this, loc, loc + highlight.length(), duration);
+		task.setUpInitialHighlight();
+		m_settlingTimer.scheduleAtFixedRate(task, 0, 1000);
+	}
 
 	protected void higlightLineOfLocation(final int location, Color highlightColor) throws BadLocationException {
 		int lineOfOffset = getLineOfOffset(location);
@@ -260,6 +319,11 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 		Rectangle vr = modelToView(location);
 		int componentHeight = getVisibleRect().height;
 		scrollRectToVisible(new Rectangle(vr.x, vr.y, vr.width, componentHeight));
+	}
+	
+	@Override
+	protected void paintComponent(Graphics g) {
+		super.paintComponent(g);
 	}
 
 }
