@@ -385,6 +385,8 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 			StrategyData sd = getStrategyData(strategyName);
 			sd.getCurrentRun().setTraceStatus(nodeLabel, eventType);
 			m_strategiesExecuted.repaint();
+			if (m_comboBox.getSelectedItem() == sd.strategy)
+				m_strategyText.showExecutionTrace(sd.getCurrentRun());
 			break;
 		}
 		case STRATEGY_DONE: {
