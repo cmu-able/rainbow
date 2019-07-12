@@ -210,7 +210,6 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 	public void showExecutionTrace(StrategyInstanceData sid) {
 		String path = sid.strategyData.strategy.m_stitch.path;
 		String stitchText = getStitchCodeText(path);
-		setText(stitchText);
 
 		// Find the location of the strategy
 		Pattern p = Pattern.compile("strategy.*" + sid.strategyData.name);
@@ -324,6 +323,13 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
+	}
+
+	public void showStrategy(StrategyInstanceData sid) {
+		String path = sid.strategyData.strategy.m_stitch.path;
+		String stitchText = getStitchCodeText(path);
+		
+		setText(stitchText);
 	}
 
 }

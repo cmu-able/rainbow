@@ -338,6 +338,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 				m_numberOfRunsFields.setText(Integer.toString(sid.strategyData.numberOfRuns));
 				m_failuresField.setText(Integer.toString(sid.strategyData.numberOfFailures));
 				m_successesField.setText(Integer.toString(sid.strategyData.numberOfSuccesses));
+				m_strategyText.showStrategy(sid);
 				m_strategyText.showExecutionTrace(sid);
 			} else {
 				m_numberOfRunsFields.setText("");
