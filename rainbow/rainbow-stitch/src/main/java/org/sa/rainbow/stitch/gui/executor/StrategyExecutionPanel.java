@@ -328,6 +328,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		m_executeBtn.addActionListener((e) -> {
 			Strategy s = (Strategy) m_comboBox.getSelectedItem();
 			m_strategyEnqPort.offerAdaptation(new AdaptationTree<IEvaluable>(s), new Object[0]);
+
 		});
 
 		m_strategiesExecuted.addListSelectionListener((e) -> {
@@ -378,6 +379,8 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 			sid.setStatus(eventType);
 			m_listModel.addElement(sid);
 			m_strategiesExecuted.setModel(m_listModel);
+			m_strategyText.showStrategy(sid);
+
 			break;
 		}
 		case STRATEGY_SETTLING: {
