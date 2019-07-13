@@ -1007,7 +1007,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 					// a condition to evaluate. Probably ok.
 					try {
 //						count++;
-						Thread.sleep(ConditionTimer.SLEEP_TIME_LONG);
+						Thread.sleep(branchWait - (System.currentTimeMillis() - start));
 					} catch (InterruptedException e) {
 					}
 					// Need to synchronize because the timer thread will also
