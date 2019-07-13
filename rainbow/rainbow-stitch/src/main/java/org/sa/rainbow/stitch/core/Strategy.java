@@ -999,10 +999,10 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 				boolean allResults = resultMap.size() == childrenNodes.size();
 //				int count = 0;
 				do {
-					m_executor.getExecutionHistoryModel().getCommandFactory().strategyExecutionStateCommand(
+					m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory().strategyExecutionStateCommand(
 							m_executor.getManagedModel(), this.getQualifiedName() + "." + parentNode.label(),
 							ExecutionHistoryModelInstance.STRATEGY, ExecutionStateT.STRATEGY_SETTLING,
-							Long.toString(branchWait));
+							Long.toString(branchWait)));
 					// Problem here is that we will always wait at lease SLEEP_TIME_LONG (100ms) for
 					// a condition to evaluate. Probably ok.
 					try {
