@@ -191,6 +191,8 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 
 	private Color m_defaultHighlightColor;
 	private Timer m_settlingTimer;
+	private String m_stitchText;
+	private Object m_strategyName;
 
 	public StrategyCodeExecutionTracer() {
 		super();
@@ -208,12 +210,15 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 	}
 
 	public void showExecutionTrace(StrategyInstanceData sid) {
-		String path = sid.strategyData.strategy.m_stitch.path;
-		String stitchText = getStitchCodeText(path);
-
+		if (m_stitchText == null || !sid.strategyData.name.equals(m_strategyName)) {
+			String path = sid.strategyData.strategy.m_stitch.path;
+			m_stitchText = getStitchCodeText(path);
+			m_strategyName = sid.strategyData.name;
+			setText(m_stitchText);
+		}
 		// Find the location of the strategy
 		Pattern p = Pattern.compile("strategy.*" + sid.strategyData.name);
-		Matcher m = p.matcher(stitchText);
+		Matcher m = p.matcher(m_stitchText);
 		// If the strategy is in there (which it should be)
 		if (m.find()) {
 			int loc = m.start();
@@ -236,7 +241,7 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 							|| trace.state == ExecutionStateT.TACTIC_DONE) {
 						pa = Pattern.compile(textToHighlight + "\\s*\\(");
 					}
-					Matcher ma = pa.matcher(stitchText);
+					Matcher ma = pa.matcher(m_stitchText);
 					if (ma.find(loc)) {
 						loc = ma.start();
 						switch (trace.state) {
@@ -252,7 +257,7 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 							higlightLineOfLocation(loc, SETTLING_COLOR);
 							setSelectionColor(SETTLING_COLOR);
 							pa = Pattern.compile("@\\[[^\\d]*(\\d*)[^\\d]*\\]");
-							ma = pa.matcher(stitchText);
+							ma = pa.matcher(m_stitchText);
 							if (ma.find(loc)) {
 								setUpStrategySettlingTimer(ma.start(1), ma.group(1), Long.parseLong(ma.group(1)));
 							}
@@ -326,10 +331,14 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 	}
 
 	public void showStrategy(StrategyInstanceData sid) {
-		String path = sid.strategyData.strategy.m_stitch.path;
-		String stitchText = getStitchCodeText(path);
+		if (m_settlingTimer != null)
+			m_settlingTimer.cancel();
+		m_settlingTimer = null;
 		
-		setText(stitchText);
+		String path = sid.strategyData.strategy.m_stitch.path;
+		m_stitchText = getStitchCodeText(path);
+		m_strategyName = sid.strategyData.name;
+		setText(m_stitchText);
 	}
 
 }
