@@ -1044,6 +1044,10 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 						break;
 					}
 				}
+				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory().strategyExecutionStateCommand(
+						m_executor.getManagedModel(), this.getQualifiedName() + "." + parentNode.label(),
+						ExecutionHistoryModelInstance.STRATEGY, ExecutionStateT.NODE_DONE,
+						selected == null && defaultNode == null?Outcome.FAILURE.toString():Outcome.SUCCESS.toString()));
 				if (selected != null)
 					return selected;
 				if (defaultNode != null) {
@@ -1055,6 +1059,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 			}
 		} finally {
 			// make sure to reset the node true flag
+				
 			m_nodeTrue = new Boolean(false);
 		}
 	}
