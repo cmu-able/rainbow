@@ -260,6 +260,7 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 							pa = Pattern.compile("@\\[[^\\d]*(\\d*)[^\\d]*\\]");
 							ma = pa.matcher(m_stitchText);
 							if (ma.find(loc)) {
+								int realStart = ma.start();
 								setUpStrategySettlingTimer(ma.start(1), ma.group(1), Long.parseLong(ma.group(1)));
 							}
 						}
