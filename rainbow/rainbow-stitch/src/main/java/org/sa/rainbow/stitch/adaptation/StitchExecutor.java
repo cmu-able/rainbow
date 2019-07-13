@@ -76,6 +76,8 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
 
     private ExecutionHistoryModelInstance           m_historyModel;
 
+	private boolean m_executionLocked;
+
     /**
      */
     public StitchExecutor () {
@@ -154,7 +156,9 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
      */
     @Override
     protected void runAction () {
-        if (!m_adapationDQPort.isEmpty ()) {
+        if (!m_adapationDQPort.isEmpty () && !m_executionLocked) {
+        	try {
+        		m_executionLocked = true;
             // retrieve the next adaptation in the queue and execute it
             // Because we are dealing only in stitch in this executor, then
             // use a StitchExecutionVisitor to visit this adaptation
@@ -164,51 +168,7 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
 							ExecutionHistoryModelInstance.ADAPTATION_TREE, ExecutionStateT.ADAPTATION_EXECUTING, null));
             log ("Dequeued an adaptation");
             log(MessageFormat.format("[[{0}]]: Executing an adaptation", id()));
-//            final AtomicInteger numLL = new AtomicInteger (0);
-//            // Count the number of parallel threads in the tree so that we can wait until they are finished
-//            at.visit (new IAdaptationVisitor<Strategy> () {
-//                @Override
-//                public boolean visitLeaf (AdaptationTree<Strategy> tree) {
-//                    return false;
-//                }
-//
-//                @Override
-//                public boolean visitSequence (AdaptationTree<Strategy> tree) {
-//                    for (AdaptationTree<Strategy> t :
-//                         tree.getSubTrees ()) {
-//                        t.visit (this);
-//                    }
-//                    return true;
-//                }
-//
-//                @Override
-//                public boolean visitSequenceStopSuccess (AdaptationTree<Strategy> tree) {
-//                    for (AdaptationTree<Strategy> t :
-//                            tree.getSubTrees ()) {
-//                        t.visit (this);
-//                    }
-//                    return true;
-//                }
-//
-//                @Override
-//                public boolean visitSequenceStopFailure (AdaptationTree<Strategy> tree) {
-//                    for (AdaptationTree<Strategy> t :
-//                            tree.getSubTrees ()) {
-//                        t.visit (this);
-//                    }
-//                    return true;
-//                }
-//
-//                @Override
-//                public boolean visitParallel (AdaptationTree<Strategy> tree) {
-//                    numLL.addAndGet (tree.getSubTrees ().size ());
-//                    for (AdaptationTree<Strategy> t :
-//                            tree.getSubTrees ()) {
-//                        t.visit (this);
-//                    }
-//                    return true;
-//                }
-//            });
+
             final CountDownLatch done = new CountDownLatch (1);
             StitchExecutionVisitor stitchVisitor = new StitchExecutionVisitor (this, this.m_modelRef,
                                                                                m_historyModel.getCommandFactory (),
@@ -233,46 +193,10 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
                             .markStrategyExecuted (at);
                 }
             }
-//            
-//            
-//            
-//            Strategy strategy = at.getHead ();
-//            strategy.setExecutor (this);
-//            log("Executing Strategy " + strategy.getName() + "...");
-//            Strategy.Outcome o = null;
-//            try {
-//                // provide var for _dur_
-//                Var v = new Var();
-//                v.scope = strategy.stitch().scope;
-//                v.setType("long");
-//                v.name = "_dur_";
-////                if (Rainbow.predictionEnabled()) {  // provide future duration
-////                    v.setValue(strategy.estimateAvgTimeCost());
-////                } else {
-//                v.setValue(0L);
-////                }
-//                strategy.stitch().script.addVar(v.name, v);
-//                // execute strategy
-//                o = (Strategy.Outcome )strategy.evaluate (null);
-//                // cleanup, remove temp var
-//                strategy.stitch().script.vars().remove(v.name);
-//            } catch (NullPointerException e) {
-//                // see if cause of NPE is Rainbow termination
-//                if (!Rainbow.shouldTerminate()) {  // nope, terminate and re-throw
-//                    terminate();
-//                    throw e;
-//                }
-//            }
-//            log(" - Outcome: " + o);
-//            if (! Rainbow.shouldTerminate()) {
-//                // TODO: Should we check for evaluation outcome?
-//                IAdaptationManager<Strategy> adaptationManager = Rainbow.instance ()
-//                        .getRainbowMaster ().adaptationManagerForModel (m_modelRef);
-//                if (adaptationManager != null) {
-//                    adaptationManager
-//                    .markStrategyExecuted (strategy);
-//                }
-//            }
+
+			} finally {
+				m_executionLocked = false;
+			}
         }
     }
 
