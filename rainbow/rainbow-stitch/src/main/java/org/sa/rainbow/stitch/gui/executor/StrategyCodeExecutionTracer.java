@@ -247,6 +247,7 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 						switch (trace.state) {
 						case NODE_EXECUTING:
 						case NODE_DONE:
+							if (m_settlingTimer != null) {m_settlingTimer.cancel (); m_settlingTimer = null;}
 							higlightLineOfLocation(loc, EXECUTING_COLOR);
 							break;
 						case STRATEGY_EXECUTING:
