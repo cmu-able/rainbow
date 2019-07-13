@@ -308,6 +308,7 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 	}
 	
 	private void setUpStrategySettlingTimer(int loc, String highlight, long duration) {
+		if (m_settlingTimer != null) m_settlingTimer.cancel(); // can only be settling one at a time
 		m_settlingTimer = new Timer();
 		StrategyDurationCountdownTask task = new StrategyDurationCountdownTask(this, loc, loc + highlight.length(), duration);
 		task.setUpInitialHighlight();
