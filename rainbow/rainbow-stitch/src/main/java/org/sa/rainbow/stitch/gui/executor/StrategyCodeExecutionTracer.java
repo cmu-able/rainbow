@@ -144,7 +144,9 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 		
 		@Override
 		public boolean cancel() {
-			m_textArea.replaceRange(Long.toString(m_totalDuration), m_startLocationInTextEditor, m_endLocationInTextEditor);
+			String durationStr = Long.toString(m_totalDuration);
+			if (!m_textArea.getText().substring(m_startLocationInTextEditor, m_endLocationInTextEditor).equals(durationStr))
+				m_textArea.replaceRange(durationStr, m_startLocationInTextEditor, m_endLocationInTextEditor);
 			return super.cancel();
 		}
 		
@@ -193,6 +195,7 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 	private Timer m_settlingTimer;
 	private String m_stitchText;
 	private Object m_strategyName;
+	private DurationCountdownTask m_task;
 
 	public StrategyCodeExecutionTracer() {
 		super();
@@ -297,24 +300,30 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 
 	private void pullDownSettlingTimer() {
 		if (m_settlingTimer != null) {
+			if (m_task != null) m_task.cancel();
 			m_settlingTimer.cancel();
 			m_settlingTimer = null;
 		}
 	}
 
 	private void setUpSettlingTimer(int loc, String textToHighlight, long duration) {
-		m_settlingTimer = new Timer();
-		DurationCountdownTask task = new DurationCountdownTask(this, loc, loc + textToHighlight.length(), duration);
-		task.setUpInitialHighlight();
-		m_settlingTimer.scheduleAtFixedRate(task, 0, 1000);
+		setupNewSettlingTImer();
+		m_task = new DurationCountdownTask(this, loc, loc + textToHighlight.length(), duration);
+		m_task.setUpInitialHighlight();
+		m_settlingTimer.scheduleAtFixedRate(m_task, 0, 1000);
 	}
 	
 	private void setUpStrategySettlingTimer(int loc, String highlight, long duration) {
+		setupNewSettlingTImer();
+		m_task = new StrategyDurationCountdownTask(this, loc, loc + highlight.length(), duration);
+		m_task.setUpInitialHighlight();
+		m_settlingTimer.scheduleAtFixedRate(m_task, 0, 1000);
+	}
+
+	protected void setupNewSettlingTImer() {
+		if (m_task != null) m_task.cancel();
 		if (m_settlingTimer != null) m_settlingTimer.cancel(); // can only be settling one at a time
 		m_settlingTimer = new Timer();
-		StrategyDurationCountdownTask task = new StrategyDurationCountdownTask(this, loc, loc + highlight.length(), duration);
-		task.setUpInitialHighlight();
-		m_settlingTimer.scheduleAtFixedRate(task, 0, 1000);
 	}
 
 	protected void higlightLineOfLocation(final int location, Color highlightColor) throws BadLocationException {
