@@ -2,6 +2,7 @@ package org.sa.rainbow.stitch.gui.executor;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -46,8 +47,6 @@ import org.sa.rainbow.stitch.util.ExecutionHistoryData.ExecutionStateT;
 import org.sa.rainbow.stitch.visitor.Stitch;
 
 public class StrategyExecutionPanel extends JPanel implements IRainbowModelChangeCallback {
-
-
 
 	public class StrategyComboRenderer extends JLabel implements ListCellRenderer<Strategy> {
 
@@ -241,7 +240,6 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		m_strategyText = new StrategyCodeExecutionTracer();
 		RTextScrollPane sp = new RTextScrollPane(m_strategyText);
 
-
 		GridBagConstraints gbc_m_strategyText = new GridBagConstraints();
 		gbc_m_strategyText.gridheight = 4;
 		gbc_m_strategyText.fill = GridBagConstraints.BOTH;
@@ -365,105 +363,109 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 
 	@Override
 	public void onEvent(ModelReference reference, IRainbowMessage message) {
-		ExecutionStateT eventType = ExecutionStateT
+		final ExecutionStateT eventType = ExecutionStateT
 				.valueOf((String) message.getProperty(IModelChangeBusPort.PARAMETER_PROP + "2"));
-		String target = (String) message.getProperty(IModelChangeBusPort.TARGET_PROP);
-		String[] targetConstituents = target.split("\\.");
-		switch (eventType) {
-		case STRATEGY_EXECUTING: {
-			String strategyName = targetConstituents[targetConstituents.length - 1];
+		final String target = (String) message.getProperty(IModelChangeBusPort.TARGET_PROP);
+		EventQueue.invokeLater(() -> {
+			String[] targetConstituents = target.split("\\.");
+			switch (eventType) {
+			case STRATEGY_EXECUTING: {
+				String strategyName = targetConstituents[targetConstituents.length - 1];
 
-			StrategyData sd = getStrategyData(strategyName);
-			sd.numberOfRuns++;
-			StrategyInstanceData sid = sd.addNewRun();
-			sid.setStatus(eventType);
-			m_listModel.addElement(sid);
-			m_strategiesExecuted.setModel(m_listModel);
-			m_strategyText.showStrategy(sid);
+				StrategyData sd = getStrategyData(strategyName);
+				sd.numberOfRuns++;
+				StrategyInstanceData sid = sd.addNewRun();
+				sid.setStatus(eventType);
+				m_listModel.addElement(sid);
+				m_strategiesExecuted.setModel(m_listModel);
+				m_strategyText.showStrategy(sid);
 
-			break;
-		}
-		case STRATEGY_SETTLING: {
-			String nodeLabel = targetConstituents[targetConstituents.length - 1];
-			String strategyName = targetConstituents[targetConstituents.length - 2];
-			StrategyData sd = getStrategyData(strategyName);
-			sd.getCurrentRun().setTraceStatus(nodeLabel, eventType);
-			m_strategiesExecuted.repaint();
-			if (m_comboBox.getSelectedItem() == sd.strategy)
-				m_strategyText.showExecutionTrace(sd.getCurrentRun());
-			break;
-		}
-		case STRATEGY_DONE: {
-			String strategyName = targetConstituents[targetConstituents.length - 1];
-			StrategyData sd = getStrategyData(strategyName);
-			sd.getCurrentRun().setStatus(eventType);
-			Outcome outcome = Outcome.valueOf((String) message.getProperty(IModelChangeBusPort.PARAMETER_PROP + "3"));
-			sd.getCurrentRun().outcome = outcome;
-			switch (outcome) {
-			case SUCCESS:
-				sd.numberOfSuccesses++;
-				break;
-			case FAILURE:
-				sd.numberOfFailures++;
 				break;
 			}
+			case STRATEGY_SETTLING: {
+				String nodeLabel = targetConstituents[targetConstituents.length - 1];
+				String strategyName = targetConstituents[targetConstituents.length - 2];
+				StrategyData sd = getStrategyData(strategyName);
+				sd.getCurrentRun().setTraceStatus(nodeLabel, eventType);
+				m_strategiesExecuted.repaint();
+				if (m_comboBox.getSelectedItem() == sd.strategy)
+					m_strategyText.showExecutionTrace(sd.getCurrentRun());
+				break;
+			}
+			case STRATEGY_DONE: {
+				String strategyName = targetConstituents[targetConstituents.length - 1];
+				StrategyData sd = getStrategyData(strategyName);
+				sd.getCurrentRun().setStatus(eventType);
+				Outcome outcome = Outcome
+						.valueOf((String) message.getProperty(IModelChangeBusPort.PARAMETER_PROP + "3"));
+				sd.getCurrentRun().outcome = outcome;
+				switch (outcome) {
+				case SUCCESS:
+					sd.numberOfSuccesses++;
+					break;
+				case FAILURE:
+					sd.numberOfFailures++;
+					break;
+				}
 
-			m_strategiesExecuted.repaint();
-			break;
-		}
-		case NODE_EXECUTING: {
-			String nodeLabel = targetConstituents[targetConstituents.length - 1];
-			String strategyName = targetConstituents[targetConstituents.length - 2];
-			StrategyData sd = getStrategyData(strategyName);
-			sd.getCurrentRun().addTraceElement(nodeLabel, eventType);
-			m_strategiesExecuted.repaint();
-			if (m_comboBox.getSelectedItem() == sd.strategy)
-				m_strategyText.showExecutionTrace(sd.getCurrentRun());
-			break;
-		}
-		case TACTIC_EXECUTING: {
-			String tacticName = targetConstituents[targetConstituents.length - 1];
-			targetConstituents = ((String) message.getProperty(IModelChangeBusPort.PARAMETER_PROP + "3")).split("\\.");
-			String strategyName = targetConstituents[targetConstituents.length - 1];
-			StrategyData sd = getStrategyData(strategyName);
-			sd.getCurrentRun().addTraceElement(tacticName, eventType);
-			m_tacticToStrategy.put(tacticName, strategyName);
-			if (m_comboBox.getSelectedItem() == sd.strategy)
-				m_strategyText.showExecutionTrace(sd.getCurrentRun());
-			break;
-		}
-		case TACTIC_SETTLING: {
-			String tacticName = targetConstituents[targetConstituents.length - 1];
+				m_strategiesExecuted.repaint();
+				break;
+			}
+			case NODE_EXECUTING: {
+				String nodeLabel = targetConstituents[targetConstituents.length - 1];
+				String strategyName = targetConstituents[targetConstituents.length - 2];
+				StrategyData sd = getStrategyData(strategyName);
+				sd.getCurrentRun().addTraceElement(nodeLabel, eventType);
+				m_strategiesExecuted.repaint();
+				if (m_comboBox.getSelectedItem() == sd.strategy)
+					m_strategyText.showExecutionTrace(sd.getCurrentRun());
+				break;
+			}
+			case TACTIC_EXECUTING: {
+				String tacticName = targetConstituents[targetConstituents.length - 1];
+				targetConstituents = ((String) message.getProperty(IModelChangeBusPort.PARAMETER_PROP + "3"))
+						.split("\\.");
+				String strategyName = targetConstituents[targetConstituents.length - 1];
+				StrategyData sd = getStrategyData(strategyName);
+				sd.getCurrentRun().addTraceElement(tacticName, eventType);
+				m_tacticToStrategy.put(tacticName, strategyName);
+				if (m_comboBox.getSelectedItem() == sd.strategy)
+					m_strategyText.showExecutionTrace(sd.getCurrentRun());
+				break;
+			}
+			case TACTIC_SETTLING: {
+				String tacticName = targetConstituents[targetConstituents.length - 1];
 
-			String strategyName = m_tacticToStrategy.get(tacticName);
-			StrategyData sd = getStrategyData(strategyName);
-			sd.getCurrentRun().setTraceStatus(tacticName, eventType);
-			if (m_comboBox.getSelectedItem() == sd.strategy)
-				m_strategyText.showExecutionTrace(sd.getCurrentRun());
-			break;
-		}
-		case TACTIC_DONE: {
-			String tacticName = targetConstituents[targetConstituents.length - 1];
-			String strategyName = m_tacticToStrategy.get(tacticName);
-			StrategyData sd = getStrategyData(strategyName);
-			sd.getCurrentRun().setTraceStatus(tacticName, eventType);
-			m_tacticToStrategy.remove(tacticName);
-			if (m_comboBox.getSelectedItem() == sd.strategy)
-				m_strategyText.showExecutionTrace(sd.getCurrentRun());
-			break;
-		}
-		case NODE_DONE: {
-			String strategyName = targetConstituents[targetConstituents.length - 2];
-			String nodeLabel = targetConstituents[targetConstituents.length - 1];
-			StrategyData sd = getStrategyData(strategyName);
-			sd.getCurrentRun().setTraceStatus(nodeLabel, eventType);
-			m_strategiesExecuted.repaint();
-			if (m_comboBox.getSelectedItem() == sd.strategy)
-				m_strategyText.showExecutionTrace(sd.getCurrentRun());
+				String strategyName = m_tacticToStrategy.get(tacticName);
+				StrategyData sd = getStrategyData(strategyName);
+				sd.getCurrentRun().setTraceStatus(tacticName, eventType);
+				if (m_comboBox.getSelectedItem() == sd.strategy)
+					m_strategyText.showExecutionTrace(sd.getCurrentRun());
+				break;
+			}
+			case TACTIC_DONE: {
+				String tacticName = targetConstituents[targetConstituents.length - 1];
+				String strategyName = m_tacticToStrategy.get(tacticName);
+				StrategyData sd = getStrategyData(strategyName);
+				sd.getCurrentRun().setTraceStatus(tacticName, eventType);
+				m_tacticToStrategy.remove(tacticName);
+				if (m_comboBox.getSelectedItem() == sd.strategy)
+					m_strategyText.showExecutionTrace(sd.getCurrentRun());
+				break;
+			}
+			case NODE_DONE: {
+				String strategyName = targetConstituents[targetConstituents.length - 2];
+				String nodeLabel = targetConstituents[targetConstituents.length - 1];
+				StrategyData sd = getStrategyData(strategyName);
+				sd.getCurrentRun().setTraceStatus(nodeLabel, eventType);
+				m_strategiesExecuted.repaint();
+				if (m_comboBox.getSelectedItem() == sd.strategy)
+					m_strategyText.showExecutionTrace(sd.getCurrentRun());
 
-			break;
-		}
-		}
+				break;
+			}
+			}
+		});
 	}
 
 	private StrategyData getStrategyData(String strategyName) {

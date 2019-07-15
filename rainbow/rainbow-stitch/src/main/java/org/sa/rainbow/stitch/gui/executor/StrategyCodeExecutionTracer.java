@@ -1,6 +1,7 @@
 package org.sa.rainbow.stitch.gui.executor;
 
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GraphicsEnvironment;
@@ -105,6 +106,7 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 				cancel();
 			} else {
 //				synchronized (m_textArea) {
+				EventQueue.invokeLater(() -> {
 					m_textArea.replaceRange(
 							m_textToHighlight + SETTLING_STRING
 									+ StringUtils.leftPad("" + m_remainingTime, m_digits - 1) + "s",
@@ -115,7 +117,9 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 					m_textArea.setCaretPosition(m_startLocationInTextEditor);
 					m_textArea.moveCaretPosition(m_endLocationInTextEditor + SETTLING_STRING.length() + m_digits);
 //				}
+				});
 			}
+
 		}
 
 	}
@@ -159,12 +163,14 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 				cancel();
 			else {
 //				synchronized (m_textArea) {
+				EventQueue.invokeLater(() -> {
 					m_textArea.replaceRange(StringUtils.leftPad("" + (m_remainingTime * 1000), m_padSize),
 							m_startLocationInTextEditor, m_endLocationInTextEditor);
 					m_textArea.requestFocusInWindow();
 					m_textArea.setCaretPosition(m_startLocationInTextEditor);
 					m_textArea.moveCaretPosition(m_endLocationInTextEditor);
 //				}
+				});
 			}
 		}
 
@@ -272,7 +278,8 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 							pa = Pattern.compile("@\\[[^\\d]*(\\d*)[^\\d]*\\]");
 							ma = pa.matcher(m_stitchText);
 							if (ma.find(loc)) {
-								setUpStrategySettlingTimer(ma.start(1), ma.group(1), Long.parseLong(ma.group(1)), trace.label);
+								setUpStrategySettlingTimer(ma.start(1), ma.group(1), Long.parseLong(ma.group(1)),
+										trace.label);
 							}
 						}
 							break;
@@ -313,7 +320,7 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 			t.cancel();
 		}
 	}
-	
+
 	private void pullDownStrategySettlingTimer(String nodeLabel) {
 		TimerTask t;
 		if ((t = m_nodeSettlingTasks.remove(nodeLabel)) != null) {
@@ -324,7 +331,7 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 	private void setUpTacticSettlingTimer(int loc, String textToHighlight, long duration, String tacticName) {
 		DurationCountdownTask t;
 		if ((t = m_tacticSettlingTasks.remove(tacticName)) != null)
-			t.cancel();		
+			t.cancel();
 		t = new DurationCountdownTask(this, loc, loc + textToHighlight.length(), duration);
 		t.setUpInitialHighlight();
 		m_tacticSettlingTasks.put(tacticName, t);
@@ -334,13 +341,12 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 	private void setUpStrategySettlingTimer(int loc, String highlight, long duration, String nodeLabel) {
 		StrategyDurationCountdownTask t;
 		if ((t = m_nodeSettlingTasks.remove(nodeLabel)) != null)
-			t.cancel();		
+			t.cancel();
 		t = new StrategyDurationCountdownTask(this, loc, loc + highlight.length(), duration);
 		t.setUpInitialHighlight();
 		m_nodeSettlingTasks.put(nodeLabel, t);
 		m_settlingTimer.scheduleAtFixedRate(t, 0, 1000);
 	}
-
 
 	protected void higlightLineOfLocation(final int location, Color highlightColor) throws BadLocationException {
 		int lineOfOffset = getLineOfOffset(location);
@@ -359,7 +365,7 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 	}
 
 	public synchronized void showStrategy(StrategyInstanceData sid) {
-		for (TimerTask t : m_nodeSettlingTasks.values()) 
+		for (TimerTask t : m_nodeSettlingTasks.values())
 			t.cancel();
 		for (TimerTask t : m_tacticSettlingTasks.values())
 			t.cancel();
