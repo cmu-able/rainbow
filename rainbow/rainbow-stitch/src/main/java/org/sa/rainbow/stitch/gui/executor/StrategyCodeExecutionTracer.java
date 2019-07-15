@@ -104,7 +104,7 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 			if (m_remainingTime <= 0) {
 				cancel();
 			} else {
-				synchronized (m_textArea) {
+//				synchronized (m_textArea) {
 					m_textArea.replaceRange(
 							m_textToHighlight + SETTLING_STRING
 									+ StringUtils.leftPad("" + m_remainingTime, m_digits - 1) + "s",
@@ -114,7 +114,7 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 					m_textArea.requestFocusInWindow();
 					m_textArea.setCaretPosition(m_startLocationInTextEditor);
 					m_textArea.moveCaretPosition(m_endLocationInTextEditor + SETTLING_STRING.length() + m_digits);
-				}
+//				}
 			}
 		}
 
