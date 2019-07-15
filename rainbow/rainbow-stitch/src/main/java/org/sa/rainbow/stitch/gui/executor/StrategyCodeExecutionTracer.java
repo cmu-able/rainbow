@@ -198,10 +198,12 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 	}
 
 	private Color m_defaultHighlightColor;
-	private Timer m_settlingTimer;
+	private Timer m_tacticSettlingTimer;
+	private Timer m_strategySettlingTimer;
 	private String m_stitchText;
 	private Object m_strategyName;
-	private DurationCountdownTask m_task;
+	private DurationCountdownTask m_tacticSettlingTask;
+	private StrategyDurationCountdownTask m_nodeSettlingTask;
 
 	public StrategyCodeExecutionTracer() {
 		super();
@@ -256,10 +258,8 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 						switch (trace.state) {
 						case NODE_EXECUTING:
 						case NODE_DONE:
-							if (m_settlingTimer != null) {
-								m_settlingTimer.cancel();
-								m_settlingTimer = null;
-							}
+							pullDownSettlingTimer();
+							pullDownStrategySettlingTimer();
 							higlightLineOfLocation(loc, EXECUTING_COLOR);
 							break;
 						case STRATEGY_EXECUTING:
@@ -272,7 +272,6 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 							pa = Pattern.compile("@\\[[^\\d]*(\\d*)[^\\d]*\\]");
 							ma = pa.matcher(m_stitchText);
 							if (ma.find(loc)) {
-								int realStart = ma.start();
 								setUpStrategySettlingTimer(ma.start(1), ma.group(1), Long.parseLong(ma.group(1)));
 							}
 						}
@@ -289,12 +288,13 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 							// If there is a duration and we're not already counting the settling then
 							// Set up the UI to display the settling dynamics
 							long duration = tactic.getDuration();
-							if (duration > 0 && m_settlingTimer == null) {
-								setUpSettlingTimer(loc, textToHighlight, duration);
+							if (duration > 0 && m_tacticSettlingTimer == null) {
+								setUpTacticSettlingTimer(loc, textToHighlight, duration);
 							}
 							break;
 						case TACTIC_DONE:
 							pullDownSettlingTimer();
+							break;
 						}
 					}
 
@@ -308,35 +308,46 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 	}
 
 	private void pullDownSettlingTimer() {
-		if (m_settlingTimer != null) {
-			if (m_task != null)
-				m_task.cancel();
-			m_settlingTimer.cancel();
-			m_settlingTimer = null;
+		if (m_tacticSettlingTask != null)
+			m_tacticSettlingTask.cancel();
+		if (m_tacticSettlingTimer != null) {
+			m_tacticSettlingTimer.cancel();			
+			m_tacticSettlingTask = null;
+		}
+	}
+	
+	private void pullDownStrategySettlingTimer() {
+		if (m_nodeSettlingTask != null) {
+			m_nodeSettlingTask.cancel();
+			m_nodeSettlingTask = null;
+		}
+		if (m_strategySettlingTimer != null) {
+			m_strategySettlingTimer.cancel();
+			m_strategySettlingTimer = null;
 		}
 	}
 
-	private void setUpSettlingTimer(int loc, String textToHighlight, long duration) {
-		setupNewSettlingTImer();
-		m_task = new DurationCountdownTask(this, loc, loc + textToHighlight.length(), duration);
-		m_task.setUpInitialHighlight();
-		m_settlingTimer.scheduleAtFixedRate(m_task, 0, 1000);
+	private void setUpTacticSettlingTimer(int loc, String textToHighlight, long duration) {
+		if (m_tacticSettlingTask != null)
+			m_tacticSettlingTask.cancel();
+		if (m_tacticSettlingTimer != null)
+			m_tacticSettlingTimer.cancel(); // can only be settling one at a time
+		m_tacticSettlingTimer = new Timer();		
+		m_tacticSettlingTask = new DurationCountdownTask(this, loc, loc + textToHighlight.length(), duration);
+		m_tacticSettlingTask.setUpInitialHighlight();
+		m_tacticSettlingTimer.scheduleAtFixedRate(m_tacticSettlingTask, 0, 1000);
 	}
 
 	private void setUpStrategySettlingTimer(int loc, String highlight, long duration) {
-		setupNewSettlingTImer();
-		m_task = new StrategyDurationCountdownTask(this, loc, loc + highlight.length(), duration);
-		m_task.setUpInitialHighlight();
-		m_settlingTimer.scheduleAtFixedRate(m_task, 0, 1000);
+		if (m_nodeSettlingTask != null)
+			m_nodeSettlingTask.cancel();
+		if (m_strategySettlingTimer != null)
+			m_strategySettlingTimer.cancel(); // can only be settling one at a time		
+		m_nodeSettlingTask = new StrategyDurationCountdownTask(this, loc, loc + highlight.length(), duration);
+		m_nodeSettlingTask.setUpInitialHighlight();
+		m_strategySettlingTimer.scheduleAtFixedRate(m_nodeSettlingTask, 0, 1000);
 	}
 
-	protected void setupNewSettlingTImer() {
-		if (m_task != null)
-			m_task.cancel();
-		if (m_settlingTimer != null)
-			m_settlingTimer.cancel(); // can only be settling one at a time
-		m_settlingTimer = new Timer();
-	}
 
 	protected void higlightLineOfLocation(final int location, Color highlightColor) throws BadLocationException {
 		int lineOfOffset = getLineOfOffset(location);
@@ -355,10 +366,10 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 	}
 
 	public void showStrategy(StrategyInstanceData sid) {
-		if (m_settlingTimer != null)
-			m_settlingTimer.cancel();
-		m_settlingTimer = null;
-
+		if (m_nodeSettlingTask != null) {m_nodeSettlingTask.cancel(); m_nodeSettlingTask = null;}
+		if (m_strategySettlingTimer != null) {m_strategySettlingTimer.cancel (); m_strategySettlingTimer = null; }
+		if (m_tacticSettlingTask != null) {m_tacticSettlingTask.cancel(); m_tacticSettlingTask = null;}
+		if (m_tacticSettlingTimer != null) {m_tacticSettlingTimer.cancel (); m_tacticSettlingTimer = null; }
 		String path = sid.strategyData.strategy.m_stitch.path;
 		m_stitchText = getStitchCodeText(path);
 		m_strategyName = sid.strategyData.name;
