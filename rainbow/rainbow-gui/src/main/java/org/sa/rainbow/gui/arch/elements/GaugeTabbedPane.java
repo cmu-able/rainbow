@@ -1,5 +1,6 @@
 package org.sa.rainbow.gui.arch.elements;
 
+import java.awt.EventQueue;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -53,7 +54,8 @@ public class GaugeTabbedPane extends JTabbedPane implements PropertyChangeListen
 		}
 		m_gaugeModel = model;
 //		clearTable((DefaultTableModel) m_publishedOperations.getModel());
-		m_publishedOperations.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "Operation", "Target", "Parameters" }));
+		m_publishedOperations.setModel(
+				new DefaultTableModel(new Object[][] {}, new String[] { "Operation", "Target", "Parameters" }));
 		m_gaugeDetailPanel.initDataBindings(model);
 		updateOperationTable(model);
 		m_gaugeModel.addPropertyChangeListener(this);
@@ -91,21 +93,23 @@ public class GaugeTabbedPane extends JTabbedPane implements PropertyChangeListen
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		switch (evt.getPropertyName()) {
-		case RainbowArchGaugeModel.GAUGEREPORT:
-			IRainbowOperation op = (IRainbowOperation) evt.getNewValue();
-			if (m_gaugeModel.getId().equals(op.getOrigin())) {
-				String[] operationData = getOperationData(op);
-				((DefaultTableModel) m_publishedOperations.getModel()).insertRow(0, operationData);
+		EventQueue.invokeLater(() -> {
+			switch (evt.getPropertyName()) {
+			case RainbowArchGaugeModel.GAUGEREPORT:
+				IRainbowOperation op = (IRainbowOperation) evt.getNewValue();
+				if (m_gaugeModel.getId().equals(op.getOrigin())) {
+					String[] operationData = getOperationData(op);
+					((DefaultTableModel) m_publishedOperations.getModel()).insertRow(0, operationData);
+				}
+				break;
+			case RainbowArchGaugeModel.GAUGEREPORTS:
+				List<IRainbowOperation> ops = (List) evt.getNewValue();
+				for (IRainbowOperation o : ops) {
+					if (m_gaugeModel.getId().equals(o.getOrigin()))
+						((DefaultTableModel) m_publishedOperations.getModel()).insertRow(0, getOperationData(o));
+				}
+				break;
 			}
-			break;
-		case RainbowArchGaugeModel.GAUGEREPORTS:
-			List<IRainbowOperation> ops = (List) evt.getNewValue();
-			for (IRainbowOperation o : ops) {
-				if (m_gaugeModel.getId().equals(o.getOrigin()))
-					((DefaultTableModel) m_publishedOperations.getModel()).insertRow(0, getOperationData(o));
-			}
-			break;
-		}
+		});
 	}
 }
