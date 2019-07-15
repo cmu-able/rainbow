@@ -289,11 +289,11 @@ public class StrategyCodeExecutionTracer extends RSyntaxTextArea {
 							// Set up the UI to display the settling dynamics
 							long duration = tactic.getDuration();
 							if (duration > 0 && m_tacticSettlingTasks.get(trace.label) == null) {
-								setUpTacticSettlingTimer(loc, textToHighlight, duration, trace.label);
+								setUpTacticSettlingTimer(loc, textToHighlight, duration, trace.label + loc);
 							}
 							break;
 						case TACTIC_DONE:
-							pullDownSettlingTimer(trace.label);
+							pullDownSettlingTimer(trace.label + loc);
 							break;
 						}
 					}
