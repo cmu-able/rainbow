@@ -10,7 +10,6 @@ import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.testing.prepare.RainbowMocker;
 import org.sa.rainbow.testing.prepare.utils.MockingUtil;
-import org.sa.rainbow.translator.probes.AbstractProbe;
 import org.sa.rainbow.translator.probes.IProbeIdentifier;
 import org.sa.rainbow.util.YamlUtil;
 
@@ -23,17 +22,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.sa.rainbow.testing.prepare.utils.GaugeTestingUtil.stubPortFactoryForGauge;
 import static org.sa.rainbow.testing.prepare.utils.GaugeTestingUtil.waitForNextOperation;
-import static org.sa.rainbow.testing.prepare.utils.ProbeTestingUtil.stubPortFactoryForProbe;
 
 public class BlackholeGaugeTest {
-
-    private class TestProbe extends AbstractProbe {
-
-        public TestProbe(String id, String type, Kind kind) {
-            super(id, type, kind);
-        }
-
-    }
 
     @Before
     public void setUp() {
