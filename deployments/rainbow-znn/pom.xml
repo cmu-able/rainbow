@@ -188,15 +188,15 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.12.4</version>
-				<configuration>
-					<argLine>-XX:-UseSplitVerifier</argLine>
-					<testFailureIgnore>true</testFailureIgnore>
-					<additionalClasspathElements>
-						<additionalClasspathElement>
-							${basedir}
-						</additionalClasspathElement>
-					</additionalClasspathElements>
-				</configuration>
+<!--				<configuration>-->
+<!--					<argLine>-XX:-UseSplitVerifier</argLine>-->
+<!--					<testFailureIgnore>true</testFailureIgnore>-->
+<!--					<additionalClasspathElements>-->
+<!--						<additionalClasspathElement>-->
+<!--							${basedir}-->
+<!--						</additionalClasspathElement>-->
+<!--					</additionalClasspathElements>-->
+<!--				</configuration>-->
 			</plugin>
 			
 
