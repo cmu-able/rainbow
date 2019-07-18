@@ -7,12 +7,9 @@ import org.acmestudio.standalone.resource.StandaloneResource;
 import org.acmestudio.standalone.resource.StandaloneResourceProvider;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConstants;
-import org.sa.rainbow.core.ports.eseb.RainbowESEBMessage;
 import org.sa.rainbow.model.acme.AcmeModelOperation;
 import org.sa.rainbow.model.acme.AcmeRainbowOperationEvent.CommandEventT;
 import org.sa.rainbow.model.acme.znn.ZNNModelUpdateOperatorsImpl;
@@ -20,8 +17,7 @@ import org.sa.rainbow.testing.prepare.RainbowMocker;
 
 import java.util.List;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.sa.rainbow.testing.prepare.utils.ExecutorTestingUtil.mockAnnouncePort;
 
 public class TestSetFidelityCmd extends DefaultTCase {
 
@@ -43,18 +39,7 @@ public class TestSetFidelityCmd extends DefaultTCase {
         AcmeModelOperation cns = znn.getCommandFactory().setFidelityCmd(server, 3);
 
         // Execute SetLoadCmd
-        IModelChangeBusPort announcePort = mock(IModelChangeBusPort.class);
-        when(announcePort.createMessage()).thenAnswer(new Answer<IRainbowMessage>() {
-            /**
-             * @param invocation the invocation on the mock.
-             * @return the value to be returned
-             * @throws Throwable the throwable to be thrown
-             */
-            @Override
-            public IRainbowMessage answer(InvocationOnMock invocation) throws Throwable {
-                return new RainbowESEBMessage();
-            }
-        });
+        IModelChangeBusPort announcePort = mockAnnouncePort();
         assertTrue(cns.canExecute());
         List<? extends IRainbowMessage> generatedEvents = cns.execute(znn, announcePort);
 
