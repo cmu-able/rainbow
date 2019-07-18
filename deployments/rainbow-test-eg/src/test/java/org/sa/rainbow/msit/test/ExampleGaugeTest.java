@@ -27,7 +27,7 @@ import org.sa.rainbow.translator.probes.AbstractProbe;
 import org.sa.rainbow.translator.probes.IProbe.Kind;
 import org.sa.rainbow.util.YamlUtil;
 
-class ExampleGaugeTest {
+public class ExampleGaugeTest {
 
 	private class TestProbe extends AbstractProbe {
 
@@ -121,7 +121,7 @@ class ExampleGaugeTest {
 	}
 
 	@Test
-	void testDoMatchDesired() throws Exception {
+	public void testDoMatchDesired() throws Exception {
 		String testInput = new String(Files.readAllBytes(Paths.get("src/test/resources/ExampleGaugeTest/input1.txt")), "UTF-8");
 				
 		// Setup probe for reporting the data
