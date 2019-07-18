@@ -38,8 +38,13 @@ public class ZNNStateAnalyzerTest {
         when(portFactory.createModelsManagerClientUSPort(analyzer)).thenReturn(mock(IModelUSBusPort.class));
     }
 
+    /**
+     * Test runAction() when AcmeException detected
+     * @throws Exception
+     */
     @Test
     public void runAction() throws Exception {
+        // initialize
         StandaloneResource resource = StandaloneResourceProvider.instance ().acmeResourceForString("src/test/resources/acme/znn.acme");
         IAcmeSystem sys = resource.getModel ().getSystems ().iterator ().next ();
         ZNNModelUpdateOperatorsImpl model = new ZNNModelUpdateOperatorsImpl(sys, "src/test/resources/acme/znn.acme");
@@ -162,13 +167,16 @@ public class ZNNStateAnalyzerTest {
 
             }
         };
+
+
         analyzer.initialize (port);
         for (IRainbowMessage msg : generatedEvents) {
             analyzer.onEvent(mr, msg);
         }
         analyzer.runAction();
+
+        // check port msg
         String msg = Whitebox.getInternalState(port, "msg");
         assertTrue(msg.equals("Failed to evaluate an expression"));
-
     }
 }
