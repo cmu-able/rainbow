@@ -21,8 +21,7 @@ import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class ZNNStateAnalyzerTest {
     List<? extends IRainbowMessage> generatedEvents;
@@ -84,91 +83,7 @@ public class ZNNStateAnalyzerTest {
         assertTrue (cns.canExecute ());
         generatedEvents = cns.execute (znn, announcePort);
         ModelReference mr = new ModelReference("ZNewsSys", "Acme");
-        IRainbowReportingPort port = new IRainbowReportingPort() {
-            String msg;
-
-            @Override
-            public void fatal(RainbowComponentT type, String msg, Throwable e, Logger logger) {
-
-            }
-
-            @Override
-            public void fatal(RainbowComponentT type, String msg, Logger logger) {
-
-            }
-
-            @Override
-            public void fatal(RainbowComponentT type, String msg, Throwable e) {
-
-            }
-
-            @Override
-            public void fatal(RainbowComponentT type, String msg) {
-
-            }
-
-            @Override
-            public void error(RainbowComponentT type, String msg, Throwable e, Logger logger) {
-                this.msg = msg;
-            }
-
-            @Override
-            public void error(RainbowComponentT type, String msg, Logger logger) {
-
-            }
-
-            @Override
-            public void error(RainbowComponentT type, String msg, Throwable e) {
-                this.msg = msg;
-            }
-
-            @Override
-            public void error(RainbowComponentT type, String msg) {
-
-            }
-
-            @Override
-            public void warn(RainbowComponentT type, String msg, Throwable e, Logger logger) {
-
-            }
-
-            @Override
-            public void warn(RainbowComponentT type, String msg, Logger logger) {
-
-            }
-
-            @Override
-            public void warn(RainbowComponentT type, String msg, Throwable e) {
-
-            }
-
-            @Override
-            public void warn(RainbowComponentT type, String msg) {
-
-            }
-
-            @Override
-            public void info(RainbowComponentT type, String msg, Logger logger) {
-
-            }
-
-            @Override
-            public void info(RainbowComponentT type, String msg) {
-
-            }
-
-            @Override
-            public void trace(RainbowComponentT type, String msg) {
-
-            }
-
-            @Override
-            public void dispose() {
-
-            }
-        };
-
-
+        IRainbowReportingPort port = spy(IRainbowReportingPort.class);
         analyzer.initialize (port);
         for (IRainbowMessage msg : generatedEvents) {
             analyzer.onEvent(mr, msg);
@@ -176,7 +91,6 @@ public class ZNNStateAnalyzerTest {
         analyzer.runAction();
 
         // check port msg
-        String msg = Whitebox.getInternalState(port, "msg");
-        assertTrue(msg.equals("Failed to evaluate an expression"));
+        verify(port).error(eq(RainbowComponentT.ANALYSIS), eq("Failed to evaluate an expression"), any(Throwable.class));
     }
 }
