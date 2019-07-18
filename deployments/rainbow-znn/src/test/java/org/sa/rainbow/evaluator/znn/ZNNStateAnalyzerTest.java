@@ -16,12 +16,14 @@ import org.sa.rainbow.core.ports.eseb.RainbowESEBMessage;
 import org.sa.rainbow.model.acme.AcmeModelOperation;
 import org.sa.rainbow.model.acme.znn.ZNNModelUpdateOperatorsImpl;
 import org.sa.rainbow.testing.prepare.RainbowMocker;
+import org.sa.rainbow.testing.prepare.utils.EffectorTestingUtil;
 
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
+import static org.sa.rainbow.testing.prepare.utils.EffectorTestingUtil.mockAnnouncePort;
 
 public class ZNNStateAnalyzerTest {
     List<? extends IRainbowMessage> generatedEvents;
@@ -55,31 +57,7 @@ public class ZNNStateAnalyzerTest {
         IAcmeComponent proxy = sys.getComponent ("lbproxy");
         AcmeModelOperation<IAcmeComponent> cns = znn.getCommandFactory ().connectNewServerCmd (proxy, "server",
                 "10.5.6.6", "1080");
-        IModelChangeBusPort announcePort = new IModelChangeBusPort () {
-
-            @Override
-            public IRainbowMessage createMessage () {
-                return new RainbowESEBMessage();
-            }
-
-            @Override
-            public void announce (List<? extends IRainbowMessage> event) {
-                // TODO Auto-generated method stub
-
-            }
-
-            @Override
-            public void announce (IRainbowMessage event) {
-                // TODO Auto-generated method stub
-
-            }
-
-            @Override
-            public void dispose () {
-                // TODO Auto-generated method stub
-
-            }
-        };
+        IModelChangeBusPort announcePort = mockAnnouncePort();
         assertTrue (cns.canExecute ());
         generatedEvents = cns.execute (znn, announcePort);
         ModelReference mr = new ModelReference("ZNewsSys", "Acme");
