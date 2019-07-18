@@ -9,7 +9,7 @@ import org.sa.rainbow.core.ports.eseb.RainbowESEBMessage;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class ExecutorTestingUtil {
+public class EffectorTestingUtil {
     /**
      * Creates a mocked announce port that can create RainbowESEBMessage.
      *

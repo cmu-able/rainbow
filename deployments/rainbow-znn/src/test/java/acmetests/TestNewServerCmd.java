@@ -15,7 +15,7 @@ import org.sa.rainbow.model.acme.znn.ZNNModelUpdateOperatorsImpl;
 
 import java.util.List;
 
-import static org.sa.rainbow.testing.prepare.utils.ExecutorTestingUtil.mockAnnouncePort;
+import static org.sa.rainbow.testing.prepare.utils.EffectorTestingUtil.mockAnnouncePort;
 
 
 public class TestNewServerCmd extends DefaultTCase {

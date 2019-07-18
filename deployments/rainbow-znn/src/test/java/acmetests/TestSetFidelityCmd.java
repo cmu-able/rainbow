@@ -17,7 +17,8 @@ import org.sa.rainbow.testing.prepare.RainbowMocker;
 
 import java.util.List;
 
-import static org.sa.rainbow.testing.prepare.utils.ExecutorTestingUtil.mockAnnouncePort;
+import static org.sa.rainbow.testing.prepare.utils.EffectorTestingUtil.mockAnnouncePort;
+
 
 public class TestSetFidelityCmd extends DefaultTCase {
 
