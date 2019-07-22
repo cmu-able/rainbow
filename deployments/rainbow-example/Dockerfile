@@ -99,7 +99,9 @@ COPY license.html .
 COPY --from=builder /root/rainbow/deployments/rainbow-example/target/lib/* lib/
 COPY --from=builder /root/rainbow/deployments/rainbow-example/target/*.jar lib/
 
+
 RUN echo "export SOCAT_PORT=4242" >> /headless/.bashrc
+RUN echo "export JAVA_FONTS=/usr/local/share/fonts/ms_fonts" >> /headless/.bashrc
 COPY deployments/rainbow-example/docker/rainbow.png /headless/
 COPY deployments/rainbow-example/docker/SWIM.png /headless/
 COPY deployments/rainbow-example/docker/Rainbow.desktop /headless/Desktop
@@ -111,4 +113,11 @@ RUN chmod +x /rainbow/swim-driver.sh
 RUN echo "BUILD_ENV=$BUILD_ENV"
 RUN if [ "$BUILD_ENV" != "debug" ]; then rm -f /headless/Desktop/Rainbow-debug.desktop; fi
 RUN chmod +x /headless/Desktop/*
+RUN mkdir /rainbow/logs
+
+# Add a test trace
+WORKDIR /headless/seams-swim/swim/simulations/swim
+COPY deployments/rainbow-example/docker/sudden-increase.delta traces
+RUN sed 's/delta",/delta", "traces\/sudden-increase.delta",/' < swim.ini > swim-new.ini && \
+    mv swim-new.ini swim.ini
 #ENTRYPOINT ["./rainbow-oracle.sh", "swim"]
