@@ -43,6 +43,7 @@ analyzers:
 managers:
   org.sa.rainbow.stitch.adaptation.AdaptationManager: org.sa.rainbow.stitch.gui.manager.ArchStitchAdapationManager
 executors:
-  org.sa.rainbow.stitch.adaptation.StitchExecutor: org.sa.rainbow.stitch.gui.executor.ArchStitchExecutorPanel
+  org.sa.rainbow.stitch.adaptation.StitchExecutor: org.sa.rainbow.stitch.gui.executor.EventBasedStitchExecutorPanel
 details:
   adaptationmanagers: org.sa.rainbow.stitch.gui.manager.StitchAdaptationManagerTabbedPane
+  executors: org.sa.rainbow.stitch.gui.executor.StitchExecutorTabbedPane
