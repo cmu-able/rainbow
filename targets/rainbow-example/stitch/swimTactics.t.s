@@ -47,7 +47,7 @@ tactic TAddServer() {
 	M.addServer(M.LB0, newServer);	
     }
     effect @[30000] {
-		unusedServers' == unusedServers-1;
+		unusedServers' == unusedServers - 1;
     }
 }
 
