@@ -42,6 +42,7 @@ import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.core.StitchScript;
 import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.core.Strategy.Outcome;
+import org.sa.rainbow.stitch.history.ExecutionHistoryCommandFactory;
 import org.sa.rainbow.stitch.history.ExecutionHistoryModelInstance;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData.ExecutionStateT;
 import org.sa.rainbow.stitch.visitor.Stitch;
@@ -363,6 +364,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 
 	@Override
 	public void onEvent(ModelReference reference, IRainbowMessage message) {
+		if (!ExecutionHistoryCommandFactory.STRATEGY_EXECUTION_STATE_CMD.equals(message.getProperty(IModelChangeBusPort.EVENT_TYPE_PROP))) return;
 		final ExecutionStateT eventType = ExecutionStateT
 				.valueOf((String) message.getProperty(IModelChangeBusPort.PARAMETER_PROP + "2"));
 		final String target = (String) message.getProperty(IModelChangeBusPort.TARGET_PROP);

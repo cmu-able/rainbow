@@ -37,6 +37,7 @@ import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.core.Strategy.ActionKind;
 import org.sa.rainbow.stitch.core.Strategy.ConditionKind;
 import org.sa.rainbow.stitch.core.StrategyNode;
+import org.sa.rainbow.stitch.history.ExecutionHistoryCommandFactory;
 import org.sa.rainbow.stitch.history.ExecutionHistoryModelInstance;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData.ExecutionStateT;
 
@@ -253,6 +254,8 @@ public class EventBasedStitchExecutorPanel extends JPanel implements IRainbowMod
 
 	@Override
 	public synchronized void onEvent(ModelReference reference, IRainbowMessage message) {
+		if (!ExecutionHistoryCommandFactory.STRATEGY_EXECUTION_STATE_CMD.equals(message.getProperty(IModelChangeBusPort.EVENT_TYPE_PROP))) return;
+
 		ExecutionStateT eventType = ExecutionStateT.valueOf((String) message.getProperty(IModelChangeBusPort.PARAMETER_PROP+"2"));
 		String target = (String) message.getProperty(IModelChangeBusPort.TARGET_PROP);
 		String[] targetConstituents = target.split("\\.");
