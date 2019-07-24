@@ -368,6 +368,7 @@ public class StrategyExecutionPanel extends JPanel implements IRainbowModelChang
 		final ExecutionStateT eventType = ExecutionStateT
 				.valueOf((String) message.getProperty(IModelChangeBusPort.PARAMETER_PROP + "2"));
 		final String target = (String) message.getProperty(IModelChangeBusPort.TARGET_PROP);
+		if (target == null) return; // No actual target
 		EventQueue.invokeLater(() -> {
 			String[] targetConstituents = target.split("\\.");
 			switch (eventType) {

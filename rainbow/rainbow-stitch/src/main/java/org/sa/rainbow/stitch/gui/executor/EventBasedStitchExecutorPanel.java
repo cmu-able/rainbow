@@ -258,6 +258,7 @@ public class EventBasedStitchExecutorPanel extends JPanel implements IRainbowMod
 
 		ExecutionStateT eventType = ExecutionStateT.valueOf((String) message.getProperty(IModelChangeBusPort.PARAMETER_PROP+"2"));
 		String target = (String) message.getProperty(IModelChangeBusPort.TARGET_PROP);
+		if (target == null) return;
 		String[] targetConstituents = target.split("\\.");
 		switch (eventType) {
 		case STRATEGY_EXECUTING:
