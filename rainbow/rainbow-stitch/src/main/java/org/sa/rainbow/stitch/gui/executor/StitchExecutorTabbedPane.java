@@ -16,6 +16,7 @@ public class StitchExecutorTabbedPane extends DefaultThreadInfoPane {
 
 		m_strategyExecutionPanel = new StrategyExecutionPanel();
 		addTab("Activity", m_strategyExecutionPanel);
+		setSelectedComponent(m_strategyExecutionPanel);
 	}
 	
 	@Override
