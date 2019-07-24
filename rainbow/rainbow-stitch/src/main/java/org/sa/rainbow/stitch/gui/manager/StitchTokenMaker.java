@@ -2,6 +2,7 @@ package org.sa.rainbow.stitch.gui.manager;
 
 import javax.swing.text.Segment;
 
+import org.acmestudio.armani.TokenOutputter;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMaker;
 import org.fife.ui.rsyntaxtextarea.RSyntaxUtilities;
 import org.fife.ui.rsyntaxtextarea.Token;
@@ -49,6 +50,7 @@ public class StitchTokenMaker extends AbstractTokenMaker {
 			new TokenInfo("<", Token.OPERATOR), new TokenInfo(">", Token.OPERATOR), new TokenInfo("+", Token.OPERATOR),
 			new TokenInfo("-", Token.OPERATOR), new TokenInfo("*", Token.OPERATOR), new TokenInfo("/", Token.OPERATOR),
 			new TokenInfo("'", Token.OPERATOR), new TokenInfo("...", Token.OPERATOR),
+			new TokenInfo("&&", Token.OPERATOR), new TokenInfo("||", Token.OPERATOR),
 			new TokenInfo("==", Token.OPERATOR), new TokenInfo("|", Token.OPERATOR), new TokenInfo("#", Token.OPERATOR),
 			new TokenInfo("=", Token.OPERATOR), new TokenInfo("+=", Token.OPERATOR),
 			new TokenInfo("-=", Token.OPERATOR), new TokenInfo("*=", Token.OPERATOR),
