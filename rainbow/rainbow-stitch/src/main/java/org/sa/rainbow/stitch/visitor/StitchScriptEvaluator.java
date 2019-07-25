@@ -1381,9 +1381,9 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 			} else if (o instanceof AcmeModelInstance) {
 				context = ((AcmeModelInstance) o).getModelInstance();
 			}
-		}
-		else {
-			Tool.error("Cannot call '" + name + "' because it should be preceded by a model reference.", null, stitchProblemHandler());
+		} else {
+			Tool.error("Cannot call '" + name + "' because it should be preceded by a model reference.", null,
+					stitchProblemHandler());
 			return rv;
 		}
 
@@ -1439,13 +1439,13 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 					s.setValues(((IAcmeSetValue) val).getValues());
 					lookup.put(formalParamName, s);
 					argList.add(s);
-				} if (val instanceof IAcmeSequenceValue) {
+				}
+				if (val instanceof IAcmeSequenceValue) {
 					AcmeSequence s = new AcmeSequence();
-					s.setValues(((IAcmeSequenceValue )val).getValues());
+					s.setValues(((IAcmeSequenceValue) val).getValues());
 					lookup.put(formalParamName, s);
 					argList.add(s);
-				}
-				else {
+				} else {
 					lookup.put(formalParamName, val);
 					argList.add(val);
 				}
@@ -1460,31 +1460,40 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 				IModelInstance inst = (IModelInstance) arg;
 				lookup.put(formalParamName, inst.getModelInstance());
 				argList.add(inst.getModelInstance());
-			} else if (arg instanceof List && AcmeTypeHelper.extractTypeStructure(formalParams.get(i).getType()) instanceof IAcmeSequenceType) {
-				AcmeSequence seq = new AcmeSequence();
-				seq.setValues((List )arg);
-				lookup.put(formalParamName, seq);
-				argList.add(seq);
+			} else if (arg instanceof List && AcmeTypeHelper
+					.extractTypeStructure(formalParams.get(i).getType()) instanceof IAcmeSequenceType) {
+
+				IAcmePropertyValue acmeSeq = PropertyHelper.toAcmeSeq(((List) arg).toArray());
+				lookup.put(formalParamName, acmeSeq);
+				argList.add(acmeSeq);
 			} else if (arg instanceof Set) {
 				AcmeSet set = new AcmeSet();
-				set.setValues((Set )arg);
+				Set values = new HashSet();
+				((Set) arg).forEach((v) -> {
+					try {
+						values.add(PropertyHelper.toAcmeVal(v));
+					} catch (Exception e) {
+						values.add(v);
+					}
+				});
+				set.setValues(values);
 				lookup.put(formalParamName, set);
 				argList.add(set);
 			} else {
 				try {
 					IAcmePropertyValue val = PropertyHelper.toAcmeVal(arg);
 					if (val instanceof IAcmeSetValue) {
-						AcmeSet s = new AcmeSet();
-						s.setValues(((IAcmeSetValue) val).getValues());
-						lookup.put(formalParamName, s);
-						argList.add(s);
-					} if (val instanceof IAcmeSequenceValue) {
-						AcmeSequence s = new AcmeSequence();
-						s.setValues(((IAcmeSequenceValue )val).getValues());
+						AcmeSet s = (AcmeSet) PropertyHelper.toAcmeSet(((IAcmeSetValue) val).getValues().toArray());
 						lookup.put(formalParamName, s);
 						argList.add(s);
 					}
-					else {
+					if (val instanceof IAcmeSequenceValue) {
+						AcmeSequence s = new AcmeSequence();
+						IAcmeSequenceValue seqVal = (IAcmeSequenceValue) PropertyHelper
+								.toAcmeSeq(((IAcmeSequenceValue) val).getValues().toArray());
+						lookup.put(formalParamName, seqVal);
+						argList.add(s);
+					} else {
 						lookup.put(formalParamName, val);
 						argList.add(val);
 					}
@@ -1609,7 +1618,7 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 			Set subset = new LinkedHashSet();
 			if (set.size() > 0) {
 				for (Object o : set) {
-					if (Tool.typeMatches(pathVariable.get(), o) && Tool.isArchEnabled(o)) {
+					if (Tool.typeMatches(pathVariable.get(), o) /* && Tool.isArchEnabled(o) */) {
 						// type matches AND this object in quantified set is arch
 						// enabled
 						subset.add(o);
@@ -1665,16 +1674,19 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 			return;
 		}
 		if (mustBeSet && !resultisSet) {
-			Tool.error("Sequence spreads (...) should only appear on the last continuance", null, stitchProblemHandler());
+			Tool.error("Sequence spreads (...) should only appear on the last continuance", null,
+					stitchProblemHandler());
 			return;
 		}
 		Expression cExpr = (Expression) scope();
 
 		Set set = (Set) pathVariable.get().getValue();
 		Collection resultSet;
-		
-		if (resultisSet) resultSet = new HashSet();
-		else resultSet = new ArrayList();
+
+		if (resultisSet)
+			resultSet = new HashSet();
+		else
+			resultSet = new ArrayList();
 		for (Object s : set) {
 			if (s instanceof IAcmeElement) {
 				final Object result = ((IAcmeElement) s).lookupName(setIdentifier.getText());

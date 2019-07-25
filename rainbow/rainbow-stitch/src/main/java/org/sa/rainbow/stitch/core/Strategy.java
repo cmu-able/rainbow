@@ -999,6 +999,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 				boolean allResults = resultMap.size() == childrenNodes.size();
 //				int count = 0;
 				do {
+					if (m_executor != null) 
 					m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory().strategyExecutionStateCommand(
 							m_executor.getManagedModel(), this.getQualifiedName() + "." + parentNode.label(),
 							ExecutionHistoryModelInstance.STRATEGY, ExecutionStateT.STRATEGY_SETTLING,
@@ -1044,6 +1045,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 						break;
 					}
 				}
+				if (m_executor != null)
 				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory().strategyExecutionStateCommand(
 						m_executor.getManagedModel(), this.getQualifiedName() + "." + parentNode.label(),
 						ExecutionHistoryModelInstance.STRATEGY, ExecutionStateT.NODE_DONE,
