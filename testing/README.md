@@ -35,7 +35,7 @@ Install the testing library to your local repository
 
 2. Go to the Java file you want to test
 
-3. In IntelliJ, On the class name you would test, click`⌥⏎ `, select **Create Test**
+3. On the class name you would test, click`⌥⏎ `, select **Create Test**
 
    <img width="1042" alt="https://user-images.githubusercontent.com/4093814/61955253-944d0780-af88-11e9-851d-5517d415e0ed.png">
 
