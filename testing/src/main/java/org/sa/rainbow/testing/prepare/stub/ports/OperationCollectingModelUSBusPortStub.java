@@ -13,6 +13,11 @@ public class OperationCollectingModelUSBusPortStub extends AbstractModelUSBusPor
 
     private BlockingQueue<IRainbowOperation> operations = new LinkedBlockingQueue<>();
 
+    /**
+     * Wait and retrieve the next action from the gauge.
+     *
+     * @return the next operation
+     */
     public IRainbowOperation takeOperation() {
         try {
             return operations.take();
