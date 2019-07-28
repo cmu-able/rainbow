@@ -5,7 +5,7 @@ Currently it only support Java type component.
 | Name         | Type   | Support | Description |
 | ------------ | ------ | ------- | ----------- |
 | **Gauge**    | Java   | Yes     |             |
-|              | Java   | Yes     |             |
+| **Probe**    | Java   | Yes     |             |
 | **Probe**    | Script | No      |             |
 | **Effector** | Java   | No      |             |
 | **Command**  | Java   | Yes     |             |
