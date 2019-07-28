@@ -39,7 +39,7 @@ Install the testing library to your local repository
 
 | Manual for Unit Test                          |
 | --------------------------------------------- |
-| **[How to write an Unit Test for Gauge](GauteTest.md)**   |
+| **[How to write an Unit Test for Gauge](GaugeTest.md)**   |
 | **[How to write an Unit Test for Probe](ProbeTest.md)**   |
 | **[How to write an Unit Test for Command](CommandTest.md)** |
 
