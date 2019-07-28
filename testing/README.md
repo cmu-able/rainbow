@@ -37,8 +37,9 @@ Install the testing library to your local repository
 2. Creat the test case for the component you want to test
 3. You can follow the folloing manual to create the unit test. 
 
-| [How to write an Unit Test for Gauge]()       |
+| Manual for Unit Test                          |
 | --------------------------------------------- |
+| **[How to write an Unit Test for Gauge]()**   |
 | **[How to write an Unit Test for Probe]()**   |
 | **[How to write an Unit Test for Command]()** |
 
