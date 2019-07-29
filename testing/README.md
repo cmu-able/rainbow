@@ -5,7 +5,7 @@ Currently it only support Java type component.
 | Name         | Type   | Support | Description |
 | ------------ | ------ | ------- | ----------- |
 | **Gauge**    | Java   | Yes     |             |
-|              | Java   | Yes     |             |
+| **Probe**    | Java   | Yes     |             |
 | **Probe**    | Script | No      |             |
 | **Effector** | Java   | No      |             |
 | **Command**  | Java   | Yes     |             |
@@ -37,10 +37,11 @@ Install the testing library to your local repository
 2. Creat the test case for the component you want to test
 3. You can follow the folloing manual to create the unit test. 
 
-| [How to write an Unit Test for Gauge]()       |
+| Manual for Unit Test                          |
 | --------------------------------------------- |
-| **[How to write an Unit Test for Probe]()**   |
-| **[How to write an Unit Test for Command]()** |
+| **[How to write an Unit Test for Gauge](GaugeTest.md)**   |
+| **[How to write an Unit Test for Probe](ProbeTest.md)**   |
+| **[How to write an Unit Test for Command](CommandTest.md)** |
 
 
 
