@@ -5,7 +5,8 @@
 ```java
 @Before
 public void setUp() {
-		RainbowMocker.injectRainbow();
+    /*Initialze the RainbowMocker we provide to mock the rainbow instance*/
+    RainbowMocker.injectRainbow();
 }
 ```
 
