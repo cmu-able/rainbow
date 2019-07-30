@@ -39,8 +39,6 @@ public void setUp() throws Exception {
    }
    ```
 
-   
-
 2. In your test method, you can new a gauge instance using the GaugeDescription loaded from the yaml file. 
 
    For example:
@@ -118,6 +116,14 @@ public void setUp() throws Exception {
 
    ```
    IRainbowOperation operation = GaugeTestingUtil.waitForNextOperation();
+   ```
+
+   Note: waitForNextOperation() is a blocked method. If you worried that there might be an infinite wait, you can add timeout to your test method. For example, 
+
+   ```java
+   @test(timeout=1000)
+   public void goodPath() throws Exception {
+   }
    ```
 
 7. You can now compare the output with your ideal output
