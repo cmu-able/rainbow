@@ -31,6 +31,35 @@ Install the testing library to your local repository
 ```
  mvn install:install-file -Dfile=<path-to-your-rainbow>/testing/target/rainbow-testing-1.0.0-SNAPSHOT.jar -DpomFile=<path-to-your-rainbow>/testing/pom.xml
 ```
+## Add dependency to the pom.xml of your project
+```xml
+		<dependency>
+			<groupId>rainbow</groupId>
+			<artifactId>rainbow-testing</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-module-junit4</artifactId>
+			<version>2.0.2</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.powermock/powermock-api-mockito2 -->
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-api-mockito2</artifactId>
+			<version>2.0.2</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>2.28.2</version>
+			<scope>test</scope>
+		</dependency>
+```
+
 
 ## Write unit test with Testing Library
 1. Go to your project's deployment directory. 
