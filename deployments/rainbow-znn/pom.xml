@@ -188,15 +188,15 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.12.4</version>
-				<configuration>
-					<argLine>-XX:-UseSplitVerifier</argLine>
-					<testFailureIgnore>true</testFailureIgnore>
-					<additionalClasspathElements>
-						<additionalClasspathElement>
-							${basedir}
-						</additionalClasspathElement>
-					</additionalClasspathElements>
-				</configuration>
+<!--				<configuration>-->
+<!--					<argLine>-XX:-UseSplitVerifier</argLine>-->
+<!--					<testFailureIgnore>true</testFailureIgnore>-->
+<!--					<additionalClasspathElements>-->
+<!--						<additionalClasspathElement>-->
+<!--							${basedir}-->
+<!--						</additionalClasspathElement>-->
+<!--					</additionalClasspathElements>-->
+<!--				</configuration>-->
 			</plugin>
 			
 
@@ -423,7 +423,7 @@
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-acme-model</artifactId>
-			<version>2.2-SNAPSHOT</version>
+			<version>2.1.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>auxtestlib</groupId>
