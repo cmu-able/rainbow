@@ -34,4 +34,13 @@ public class GaugeTestingUtil {
     public static IRainbowOperation waitForNextOperation() {
         return operationCollectingModelUSBusPortStub.takeOperation();
     }
+
+    /**
+     * Wait for the next operation from the gauge, with timeout
+     *
+     * @return the next operation, or null if timed-out
+     */
+    public static IRainbowOperation waitForNextOperation(long timeoutMilliseconds) {
+        return operationCollectingModelUSBusPortStub.takeOperation(timeoutMilliseconds);
+    }
 }

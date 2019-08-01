@@ -34,4 +34,13 @@ public class ProbeTestingUtil {
     public static String waitForOutput() {
         return probeReportingPort.takeOutput();
     }
+
+    /**
+     * Wait for the next output from the probe, with timeout.
+     *
+     * @return the next output, or null if timed-out
+     */
+    public static String waitForOutput(long timeoutMilliseconds) {
+        return probeReportingPort.takeOutput(timeoutMilliseconds);
+    }
 }
