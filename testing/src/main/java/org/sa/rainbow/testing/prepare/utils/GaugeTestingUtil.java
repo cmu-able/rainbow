@@ -1,11 +1,13 @@
 package org.sa.rainbow.testing.prepare.utils;
 
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
+import org.sa.rainbow.core.ports.IProbeReportSubscriberPort;
 import org.sa.rainbow.core.ports.IRainbowConnectionPortFactory;
 import org.sa.rainbow.testing.prepare.stub.ports.LoggerGaugeLifecycleBusPort;
 import org.sa.rainbow.testing.prepare.stub.ports.OperationCollectingModelUSBusPortStub;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class GaugeTestingUtil {
@@ -21,6 +23,7 @@ public class GaugeTestingUtil {
             operationCollectingModelUSBusPortStub = new OperationCollectingModelUSBusPortStub();
             when(mockedPortFactory.createModelsManagerClientUSPort(any())).thenReturn(operationCollectingModelUSBusPortStub);
             when(mockedPortFactory.createGaugeSideLifecyclePort()).thenReturn(new LoggerGaugeLifecycleBusPort());
+            when(mockedPortFactory.createProbeReportingPortSubscriber(any())).thenReturn(mock(IProbeReportSubscriberPort.class));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
