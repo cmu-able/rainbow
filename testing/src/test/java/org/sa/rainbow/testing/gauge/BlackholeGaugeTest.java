@@ -18,6 +18,7 @@ import java.io.File;
 import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.sa.rainbow.testing.prepare.RainbowMocker.mockConnectionPortFactory;
 import static org.sa.rainbow.testing.prepare.utils.GaugeTestingUtil.stubPortFactoryForGauge;
 import static org.sa.rainbow.testing.prepare.utils.MockingUtil.mockProbeIdentifier;
@@ -47,8 +48,10 @@ public class BlackholeGaugeTest {
         );
         gauge.initialize(new LoggerRainbowReportingPort());
         gauge.start();
+        IRainbowOperation operation = GaugeTestingUtil.waitForNextOperation(1000);
+        assertNull(operation);
         gauge.reportFromProbe(mockProbeIdentifier("mocked", "testing", "testing"), "1.1.1.1");
-        IRainbowOperation operation = GaugeTestingUtil.waitForNextOperation();
+        operation = GaugeTestingUtil.waitForNextOperation();
         assertEquals("setBlackholed", operation.getName());
         assertEquals("1.1.1.1", operation.getParameters()[0]);
     }

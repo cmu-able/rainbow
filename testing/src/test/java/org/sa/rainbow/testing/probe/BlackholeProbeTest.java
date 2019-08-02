@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.sa.rainbow.testing.prepare.RainbowMocker.mockConnectionPortFactory;
 import static org.sa.rainbow.testing.prepare.utils.ProbeTestingUtil.stubPortFactoryForProbe;
 import static org.sa.rainbow.testing.prepare.utils.ResourceUtil.extractResource;
@@ -35,6 +36,7 @@ public class BlackholeProbeTest {
     public void goodPath() {
         AbstractProbe probe = new BlackholeProbe("blackhole", 0L, new String[]{tempInput.toString()});
         probe.create();
+        assertNull(ProbeTestingUtil.waitForOutput(1000L));
         probe.activate();
         assertEquals("127.0.0.1, 1.0.0.1, 192.168.0.1", ProbeTestingUtil.waitForOutput());
     }
