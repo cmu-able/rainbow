@@ -5,6 +5,7 @@ import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This is stubbed AbstractModelUSBusPortStub that stores all operations from a gauge.
@@ -21,6 +22,20 @@ public class OperationCollectingModelUSBusPortStub extends AbstractModelUSBusPor
     public IRainbowOperation takeOperation() {
         try {
             return operations.take();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Wait and retrieve the next action from the gauge, with timeout.
+     *
+     * @param milliseconds timeout in millisecond
+     * @return the next operation, or null if timed-out
+     */
+    public IRainbowOperation takeOperation(long milliseconds) {
+        try {
+            return operations.poll(milliseconds, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
