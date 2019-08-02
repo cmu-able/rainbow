@@ -26,7 +26,7 @@ public class GuavaEventConnector {
 	private static final Map<ChannelT, EventBus> EVENT_BUSSES = new HashMap<>();
 	private static final LinkedBlockingQueue<GuavaRainbowMessage> REPLY_Q = new LinkedBlockingQueue<>();
 	private static final Map<String, IGuavaMessageListener> m_replyListeners = new HashMap<>();
-	private static final ExecutorService POOL = 		Executors.newCachedThreadPool();
+	private static final ExecutorService POOL = 		Executors.newFixedThreadPool(20);
 
 
 	private ChannelT m_channel;
