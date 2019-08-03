@@ -65,22 +65,14 @@ public class OptionParser {
     /**
      * Handler of the template flag.
      *
-     * @param cmd the commnd line input
+     * @param cmd the command line input
      * @return path to the directory containing templates
      */
     public Path handleTemplateOption(CommandLine cmd) throws InvalidPathException {
-        // if path cannot be instantiated into a Java Path object, print error and return
-        try {
-            Path file = Paths.get(cmd.getOptionValue("t"));
-        } catch (InvalidPathException e) {
-            System.out.println("Parse error: the input template path is invalid.");
-        }
-
         // if path does not point to a local file, print error and return
         Path file = Paths.get(cmd.getOptionValue("t"));
         if (!Files.isDirectory(file)) {
-            System.out.println("Parse error: the input template path does not point to a local directory.");
-            return file;
+            throw new IllegalArgumentException("the input template path does not point to a local directory.");
         }
 
         System.out.print("Valid template path: ");
@@ -99,8 +91,7 @@ public class OptionParser {
         // if path does not point to a local file, print error and return
         Path configPath = Paths.get(cmd.getOptionValue("c"));
         if (!Files.isRegularFile(configPath)) {
-            System.out.println("Parse error: the input configuration path does not point to a local file.");
-            return configPath;
+            throw new IllegalArgumentException("the input configuration path does not point to a local file.");
         }
 
         System.out.print("Valid config path: ");
