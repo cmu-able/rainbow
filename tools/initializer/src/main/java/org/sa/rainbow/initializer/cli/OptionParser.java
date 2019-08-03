@@ -5,7 +5,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
 import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -68,7 +67,7 @@ public class OptionParser {
      * @param cmd the command line input
      * @return path to the directory containing templates
      */
-    public Path handleTemplateOption(CommandLine cmd) throws InvalidPathException {
+    public Path handleTemplateOption(CommandLine cmd) {
         // if path does not point to a local file, print error and return
         Path file = Paths.get(cmd.getOptionValue("t"));
         if (!Files.isDirectory(file)) {
