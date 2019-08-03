@@ -30,7 +30,7 @@ public class UIConfigurationLoaderTest {
     }
 
     @Test
-    public void loadN() throws Exception, IOException {
+    public void loadN() throws Exception {
         String input = "no";
         InputStream in = new ByteArrayInputStream(input.getBytes());
         System.setIn(in);

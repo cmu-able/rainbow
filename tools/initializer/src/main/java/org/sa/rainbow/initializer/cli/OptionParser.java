@@ -19,7 +19,7 @@ public class OptionParser {
     /**
      * Constructor for an option cli that takes -t, -c and -h flags.
      */
-    public OptionParser () {
+    public OptionParser() {
         // initializer, as a command line tool, could take in three flags, -t for template,
         // -c for config, and -p for destination directory path
         options = new Options();
@@ -95,7 +95,7 @@ public class OptionParser {
      * @param cmd command line input
      * @return path to the file containing configurations
      */
-    public Path handleConfigOption(CommandLine cmd) throws InvalidPathException{
+    public Path handleConfigOption(CommandLine cmd) throws InvalidPathException {
         // if path cannot be instantiated into a Java Path object, print error and return
         try {
             Path file = Paths.get(cmd.getOptionValue("c"));

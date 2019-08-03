@@ -1,6 +1,9 @@
 package org.sa.rainbow.initializer.cli;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -8,7 +11,8 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
 
 public class OptionParserTest {
 

@@ -73,7 +73,7 @@ public class ScaffolderTest {
 
         assertSame(templateSet, scaffolder.getTemplateSet());
         assertSame(configuration, scaffolder.getConfiguration());
-        
+
         scaffolder.setTemplateSet(templateSet);
         scaffolder.setConfiguration(configuration);
 
