@@ -1,5 +1,6 @@
 package org.sa.rainbow.initializer;
 
+import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,6 +15,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.Map;
 
 import static org.junit.Assert.assertTrue;
@@ -21,6 +23,14 @@ import static org.junit.Assert.assertTrue;
 public class IntegrationTest {
 
     private Path tempDirectory;
+
+    @After
+    public void tearDown() throws Exception {
+        Files.walk(tempDirectory)
+                .sorted(Comparator.reverseOrder())
+                .map(Path::toFile)
+                .forEach(File::delete);
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -45,11 +55,25 @@ public class IntegrationTest {
 
     @Test
     public void invokeMainDefault() throws Exception {
+        // Print no templates provided
+        Main.main(new String[]{});
+        // Print help
         Main.main(new String[]{"-h"});
-        Path tempTarget = Files.createTempDirectory("testing-");
         ByteArrayInputStream ins = new ByteArrayInputStream("y\n".getBytes());
         System.setIn(ins);
-        Main.main(new String[]{"-t", "templates", "-p", tempTarget.toString()});
-        assertTrue(Files.isRegularFile(tempTarget.resolve("rainbow.properties.ftl")));
+        Main.main(new String[]{"-t", "templates", "-p", tempDirectory.toString()});
+        assertTrue(Files.isRegularFile(tempDirectory.resolve("rainbow.properties.ftl")));
+    }
+
+    @Test
+    public void invokeMainWithConfig() throws Exception {
+        File tempFile = File.createTempFile("integration", ".yml");
+        tempFile.deleteOnExit();
+        Files.write(tempFile.toPath(), new byte[]{});
+
+        ByteArrayInputStream ins = new ByteArrayInputStream("y\n".getBytes());
+        System.setIn(ins);
+        Main.main(new String[]{"-t", "templates", "-p", tempDirectory.toString(), "-c", tempFile.toString()});
+        assertTrue(Files.isRegularFile(tempDirectory.resolve("rainbow.properties.ftl")));
     }
 }
