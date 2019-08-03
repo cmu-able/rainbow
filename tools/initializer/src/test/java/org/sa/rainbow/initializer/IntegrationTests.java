@@ -9,13 +9,14 @@ import org.sa.rainbow.initializer.scaffolder.Scaffolder;
 import org.sa.rainbow.initializer.template.FileTemplateSetLoader;
 import org.sa.rainbow.initializer.template.TemplateSetLoader;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 public class IntegrationTests {
 
@@ -40,5 +41,15 @@ public class IntegrationTests {
         Scaffolder scaffolder = new Scaffolder(templateSet, configuration);
         scaffolder.setBaseDirectory(tempDirectory);
         scaffolder.scaffold();
+    }
+
+    @Test
+    public void invokeMainDefault() throws Exception {
+        Main.main(new String[]{"-h"});
+        Path tempTarget = Files.createTempDirectory("testing-");
+        ByteArrayInputStream ins = new ByteArrayInputStream("y\n".getBytes());
+        System.setIn(ins);
+        Main.main(new String[]{"-t", "templates", "-p", tempTarget.toString()});
+        assertTrue(Files.isRegularFile(tempTarget.resolve("rainbow.properties.ftl")));
     }
 }
