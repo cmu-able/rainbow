@@ -4,7 +4,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -69,15 +68,15 @@ public class OptionParser {
      */
     public Path handleTemplateOption(CommandLine cmd) {
         // if path does not point to a local file, print error and return
-        Path file = Paths.get(cmd.getOptionValue("t"));
-        if (!Files.isDirectory(file)) {
+        Path templatePath = Paths.get(cmd.getOptionValue("t"));
+        if (!templatePath.toFile().isDirectory()) {
             throw new IllegalArgumentException("the input template path does not point to a local directory.");
         }
 
         System.out.print("Valid template path: ");
         System.out.println(cmd.getOptionValue("t"));
 
-        return file;
+        return templatePath;
     }
 
     /**
@@ -89,7 +88,7 @@ public class OptionParser {
     public Path handleConfigOption(CommandLine cmd) {
         // if path does not point to a local file, print error and return
         Path configPath = Paths.get(cmd.getOptionValue("c"));
-        if (!Files.isRegularFile(configPath)) {
+        if (!configPath.toFile().isFile()) {
             throw new IllegalArgumentException("the input configuration path does not point to a local file.");
         }
 
