@@ -23,34 +23,34 @@ public class OptionParser {
         // initializer, as a command line tool, could take in three flags, -t for template,
         // -c for config, and -p for destination directory path
         options = new Options();
-        Option option_template = Option.builder("t")
+        Option templateOption = Option.builder("t")
                 .argName("path_to_template")
                 .hasArg()
                 .desc("(REQUIRED) load template from path to local directory")
                 .longOpt("template")
                 .build();
-        Option option_config = Option.builder("c")
+        Option configOption = Option.builder("c")
                 .argName("path_to_config")
                 .hasArg()
                 .desc("load configuration from path to local file")
                 .longOpt("config")
                 .build();
-        Option option_path = Option.builder("p")
+        Option pathOption = Option.builder("p")
                 .argName("path_to_new_target")
                 .hasArg()
                 .desc("desired directory of which new target will locate")
                 .longOpt("path")
                 .build();
-        options.addOption(option_template);
-        options.addOption(option_config);
-        options.addOption(option_path);
+        options.addOption(templateOption);
+        options.addOption(configOption);
+        options.addOption(pathOption);
 
         // help info can be displayed when using the -h or --help flag
-        Option option_help = Option.builder("h")
+        Option helpOption = Option.builder("h")
                 .longOpt("help")
                 .desc("help menu")
                 .build();
-        options.addOption(option_help);
+        options.addOption(helpOption);
     }
 
     /**
