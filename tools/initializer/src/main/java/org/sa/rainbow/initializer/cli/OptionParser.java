@@ -95,24 +95,17 @@ public class OptionParser {
      * @param cmd command line input
      * @return path to the file containing configurations
      */
-    public Path handleConfigOption(CommandLine cmd) throws InvalidPathException {
-        // if path cannot be instantiated into a Java Path object, print error and return
-        try {
-            Path file = Paths.get(cmd.getOptionValue("c"));
-        } catch (InvalidPathException e) {
-            System.out.println("Parse error: the input configuration path is invalid.");
-        }
-
+    public Path handleConfigOption(CommandLine cmd) {
         // if path does not point to a local file, print error and return
-        Path file = Paths.get(cmd.getOptionValue("c"));
-        if (!Files.isRegularFile(file)) {
+        Path configPath = Paths.get(cmd.getOptionValue("c"));
+        if (!Files.isRegularFile(configPath)) {
             System.out.println("Parse error: the input configuration path does not point to a local file.");
-            return file;
+            return configPath;
         }
 
         System.out.print("Valid config path: ");
         System.out.println(cmd.getOptionValue("c"));
 
-        return file;
+        return configPath;
     }
 }
