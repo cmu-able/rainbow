@@ -18,12 +18,8 @@ public class CollectingProbeReportingPort implements IProbeReportPort {
      *
      * @return the next output as a string
      */
-    public String takeOutput() {
-        try {
-            return reportedData.take();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+    public String takeOutput() throws InterruptedException {
+        return reportedData.take();
     }
 
     /**
@@ -32,12 +28,8 @@ public class CollectingProbeReportingPort implements IProbeReportPort {
      * @param milliseconds timeout in millisecond
      * @return the next output as a string
      */
-    public String takeOutput(long milliseconds) {
-        try {
-            return reportedData.poll(milliseconds, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+    public String takeOutput(long milliseconds) throws InterruptedException {
+        return reportedData.poll(milliseconds, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -45,6 +37,7 @@ public class CollectingProbeReportingPort implements IProbeReportPort {
         try {
             reportedData.put(data);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
     }

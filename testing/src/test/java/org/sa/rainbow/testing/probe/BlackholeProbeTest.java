@@ -33,7 +33,7 @@ public class BlackholeProbeTest {
     }
 
     @Test
-    public void goodPath() {
+    public void goodPath() throws Exception {
         AbstractProbe probe = new BlackholeProbe("blackhole", 0L, new String[]{tempInput.toString()});
         probe.create();
         assertNull(ProbeTestingUtil.waitForOutput(1000L));

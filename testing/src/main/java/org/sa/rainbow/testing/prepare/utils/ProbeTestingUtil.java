@@ -9,6 +9,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class ProbeTestingUtil {
+    private ProbeTestingUtil() {
+
+    }
+
     private static CollectingProbeReportingPort probeReportingPort;
 
     /**
@@ -19,10 +23,10 @@ public class ProbeTestingUtil {
     public static void stubPortFactoryForProbe(IRainbowConnectionPortFactory mockedPortFactory) {
         try {
             probeReportingPort = new CollectingProbeReportingPort();
+            IProbeLifecyclePort probeLifecyclePort = mock(IProbeLifecyclePort.class);
             when(mockedPortFactory.createProbeReportingPortSender(any())).thenReturn(probeReportingPort);
-            when(mockedPortFactory.createProbeManagementPort(any())).thenReturn(mock(IProbeLifecyclePort.class));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            when(mockedPortFactory.createProbeManagementPort(any())).thenReturn(probeLifecyclePort);
+        } catch (Exception ignored) {
         }
     }
 
@@ -31,7 +35,7 @@ public class ProbeTestingUtil {
      *
      * @return the next output
      */
-    public static String waitForOutput() {
+    public static String waitForOutput() throws InterruptedException {
         return probeReportingPort.takeOutput();
     }
 
@@ -40,7 +44,7 @@ public class ProbeTestingUtil {
      *
      * @return the next output, or null if timed-out
      */
-    public static String waitForOutput(long timeoutMilliseconds) {
+    public static String waitForOutput(long timeoutMilliseconds) throws InterruptedException {
         return probeReportingPort.takeOutput(timeoutMilliseconds);
     }
 }

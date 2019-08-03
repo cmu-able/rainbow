@@ -1,6 +1,9 @@
 package org.sa.rainbow.testing.prepare.stub.ports;
 
+import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
+import org.sa.rainbow.core.ports.IModelUSBusPort;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -10,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * This is stubbed AbstractModelUSBusPortStub that stores all operations from a gauge.
  */
-public class OperationCollectingModelUSBusPortStub extends AbstractModelUSBusPortStub {
+public class OperationCollectingModelUSBusPortStub implements IModelUSBusPort {
 
     private BlockingQueue<IRainbowOperation> operations = new LinkedBlockingQueue<>();
 
@@ -19,12 +22,8 @@ public class OperationCollectingModelUSBusPortStub extends AbstractModelUSBusPor
      *
      * @return the next operation
      */
-    public IRainbowOperation takeOperation() {
-        try {
-            return operations.take();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+    public IRainbowOperation takeOperation() throws InterruptedException {
+        return operations.take();
     }
 
     /**
@@ -33,12 +32,8 @@ public class OperationCollectingModelUSBusPortStub extends AbstractModelUSBusPor
      * @param milliseconds timeout in millisecond
      * @return the next operation, or null if timed-out
      */
-    public IRainbowOperation takeOperation(long milliseconds) {
-        try {
-            return operations.poll(milliseconds, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+    public IRainbowOperation takeOperation(long milliseconds) throws InterruptedException {
+        return operations.poll(milliseconds, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -53,7 +48,7 @@ public class OperationCollectingModelUSBusPortStub extends AbstractModelUSBusPor
         try {
             operations.put(command);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -69,5 +64,15 @@ public class OperationCollectingModelUSBusPortStub extends AbstractModelUSBusPor
         for (IRainbowOperation command : commands) {
             updateModel(command);
         }
+    }
+
+    @Override
+    public <T> IModelInstance<T> getModelInstance(ModelReference modelReference) {
+        return null;
+    }
+
+    @Override
+    public void dispose() {
+        // Do nothing
     }
 }
