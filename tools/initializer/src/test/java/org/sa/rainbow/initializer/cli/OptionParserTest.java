@@ -10,7 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import static org.junit.Assert.*;
 
-public class OptionParserTests {
+public class OptionParserTest {
 
     private Path templateDir;
     private Path configFile;
@@ -20,7 +20,7 @@ public class OptionParserTests {
     public void setUp() throws Exception {
         templateDir = Files.createTempDirectory("templates");
         configFile = Files.createTempFile("config", "yml");
-        String args[] = new String[]{"-t", templateDir.toString(), "-c", configFile.toString()};
+        String[] args = new String[]{"-t", templateDir.toString(), "-c", configFile.toString()};
         OptionParser optionParser = new OptionParser();
         Options options = optionParser.getOptions();
         CommandLineParser parser = new DefaultParser();
