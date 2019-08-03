@@ -18,7 +18,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertTrue;
 
-public class IntegrationTests {
+public class IntegrationTest {
 
     private Path tempDirectory;
 
