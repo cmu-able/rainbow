@@ -51,6 +51,8 @@ public class IntegrationTest {
         Scaffolder scaffolder = new Scaffolder(templateSet, configuration);
         scaffolder.setBaseDirectory(tempDirectory);
         scaffolder.scaffold();
+
+        assertTrue(Files.isRegularFile(tempDirectory.resolve("rainbow.properties.ftl")));
     }
 
     @Test
