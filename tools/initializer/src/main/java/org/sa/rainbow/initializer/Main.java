@@ -9,7 +9,6 @@ import org.sa.rainbow.initializer.scaffolder.Scaffolder;
 import org.sa.rainbow.initializer.template.FileTemplateSetLoader;
 import org.sa.rainbow.initializer.template.TemplateSetLoader;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -73,8 +72,8 @@ public class Main {
             Scaffolder scaffolder = new Scaffolder(templateSet, configuration);
 
             if (cmd.hasOption("p")) {
-                Path destination_path = Paths.get(cmd.getOptionValue("p"));
-                scaffolder.setBaseDirectory(destination_path);
+                Path destinationPath = Paths.get(cmd.getOptionValue("p"));
+                scaffolder.setBaseDirectory(destinationPath);
             } else {
                 scaffolder.setBaseDirectory(Paths.get("."));
             }

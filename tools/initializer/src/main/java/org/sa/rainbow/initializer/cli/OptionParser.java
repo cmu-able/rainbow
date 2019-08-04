@@ -4,8 +4,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
-import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -19,38 +17,38 @@ public class OptionParser {
     /**
      * Constructor for an option cli that takes -t, -c and -h flags.
      */
-    public OptionParser () {
+    public OptionParser() {
         // initializer, as a command line tool, could take in three flags, -t for template,
         // -c for config, and -p for destination directory path
         options = new Options();
-        Option option_template = Option.builder("t")
+        Option templateOption = Option.builder("t")
                 .argName("path_to_template")
                 .hasArg()
                 .desc("(REQUIRED) load template from path to local directory")
                 .longOpt("template")
                 .build();
-        Option option_config = Option.builder("c")
+        Option configOption = Option.builder("c")
                 .argName("path_to_config")
                 .hasArg()
                 .desc("load configuration from path to local file")
                 .longOpt("config")
                 .build();
-        Option option_path = Option.builder("p")
+        Option pathOption = Option.builder("p")
                 .argName("path_to_new_target")
                 .hasArg()
                 .desc("desired directory of which new target will locate")
                 .longOpt("path")
                 .build();
-        options.addOption(option_template);
-        options.addOption(option_config);
-        options.addOption(option_path);
+        options.addOption(templateOption);
+        options.addOption(configOption);
+        options.addOption(pathOption);
 
         // help info can be displayed when using the -h or --help flag
-        Option option_help = Option.builder("h")
+        Option helpOption = Option.builder("h")
                 .longOpt("help")
                 .desc("help menu")
                 .build();
-        options.addOption(option_help);
+        options.addOption(helpOption);
     }
 
     /**
@@ -65,28 +63,20 @@ public class OptionParser {
     /**
      * Handler of the template flag.
      *
-     * @param cmd the commnd line input
+     * @param cmd the command line input
      * @return path to the directory containing templates
      */
-    public Path handleTemplateOption(CommandLine cmd) throws InvalidPathException {
-        // if path cannot be instantiated into a Java Path object, print error and return
-        try {
-            Path file = Paths.get(cmd.getOptionValue("t"));
-        } catch (InvalidPathException e) {
-            System.out.println("Parse error: the input template path is invalid.");
-        }
-
+    public Path handleTemplateOption(CommandLine cmd) {
         // if path does not point to a local file, print error and return
-        Path file = Paths.get(cmd.getOptionValue("t"));
-        if (!Files.isDirectory(file)) {
-            System.out.println("Parse error: the input template path does not point to a local directory.");
-            return file;
+        Path templatePath = Paths.get(cmd.getOptionValue("t"));
+        if (!templatePath.toFile().isDirectory()) {
+            throw new IllegalArgumentException("the input template path does not point to a local directory.");
         }
 
         System.out.print("Valid template path: ");
         System.out.println(cmd.getOptionValue("t"));
 
-        return file;
+        return templatePath;
     }
 
     /**
@@ -95,24 +85,16 @@ public class OptionParser {
      * @param cmd command line input
      * @return path to the file containing configurations
      */
-    public Path handleConfigOption(CommandLine cmd) throws InvalidPathException{
-        // if path cannot be instantiated into a Java Path object, print error and return
-        try {
-            Path file = Paths.get(cmd.getOptionValue("c"));
-        } catch (InvalidPathException e) {
-            System.out.println("Parse error: the input configuration path is invalid.");
-        }
-
+    public Path handleConfigOption(CommandLine cmd) {
         // if path does not point to a local file, print error and return
-        Path file = Paths.get(cmd.getOptionValue("c"));
-        if (!Files.isRegularFile(file)) {
-            System.out.println("Parse error: the input configuration path does not point to a local file.");
-            return file;
+        Path configPath = Paths.get(cmd.getOptionValue("c"));
+        if (!configPath.toFile().isFile()) {
+            throw new IllegalArgumentException("the input configuration path does not point to a local file.");
         }
 
         System.out.print("Valid config path: ");
         System.out.println(cmd.getOptionValue("c"));
 
-        return file;
+        return configPath;
     }
 }

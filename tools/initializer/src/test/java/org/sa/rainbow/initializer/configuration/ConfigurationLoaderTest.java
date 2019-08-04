@@ -20,21 +20,23 @@ import static org.junit.Assert.*;
 public class ConfigurationLoaderTest {
     private Path tempPath;
     private File testYML;
-    private Map<String, String> createTestingProbe(String name, String description, String value){
+
+    private Map<String, String> createTestingProbe(String name, String description, String value) {
         Map<String, String> probe = new HashMap<>();
         probe.put("name", name);
-        probe.put("description",description);
+        probe.put("description", description);
         probe.put("value", value);
         return probe;
     }
-    private ArrayList<Map<String, String>> createTestingProbeList(){
+
+    private ArrayList<Map<String, String>> createTestingProbeList() {
         Map<String, String> probe1 = createTestingProbe("probe_1"
-                ,"the first probe in the system"
-                ,"default_probe_1");
+                , "the first probe in the system"
+                , "default_probe_1");
         Map<String, String> probe2 = createTestingProbe("probe_2"
-                ,"the second probe in the system"
-                ,"default_probe_2");
-        ArrayList<Map<String, String>> probeList=new ArrayList<>();
+                , "the second probe in the system"
+                , "default_probe_2");
+        ArrayList<Map<String, String>> probeList = new ArrayList<>();
         probeList.add(probe1);
         probeList.add(probe2);
         return probeList;
