@@ -1,14 +1,13 @@
 package org.sa.rainbow.initializer.configuration;
 
 import org.sa.rainbow.initializer.models.Variable;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-import java.util.Map.Entry;
-import org.yaml.snakeyaml.Yaml;
 
 
 /**
@@ -49,13 +48,15 @@ public class ConfigurationLoader {
         try (InputStream input = new FileInputStream(file)) {
             Yaml yaml = new Yaml();
             tmpConfig = yaml.load(input);
-            if(tmpConfig == null) return config;
-            for(Map.Entry element: tmpConfig.entrySet()){
+            if (tmpConfig == null) {
+                return config;
+            }
+            for (Map.Entry element : tmpConfig.entrySet()) {
                 String key = (String) element.getKey();
                 if (!variableNames.contains(key)) {
                     throw new InvalidVariableException("unknown variable: " + key);
-                }else {
-                    config.put(key,element.getValue());
+                } else {
+                    config.put(key, element.getValue());
                 }
             }
 

@@ -25,17 +25,6 @@ public class UIConfigurationLoader extends ConfigurationLoader {
     }
 
     /**
-     * Loads configuration setting from a Yaml file ( .yml file)
-     *
-     * @param file the properties file to load.
-     * @throws IOException if the file cannot be loaded as Yaml file.
-     */
-    @Override
-    public Map<String, Object> loadConfiguration(File file) throws IOException {
-        return super.loadConfiguration(file);
-    }
-
-    /**
      * Writes default values to a given configuration file, with descriptions as comments.
      *
      * @param configFile config file to write.

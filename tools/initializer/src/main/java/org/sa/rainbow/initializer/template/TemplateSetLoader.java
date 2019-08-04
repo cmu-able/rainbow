@@ -61,7 +61,7 @@ public abstract class TemplateSetLoader {
      * @param reader the reader to read metadata from.
      * @return the parsed metadata.
      */
-    protected Metadata loadMetadata(Reader reader) throws InvalidMetadataException {
+    protected Metadata loadMetadata(Reader reader) {
         Yaml yaml = new Yaml();
         Metadata metadata = yaml.loadAs(reader, Metadata.class);
         if (metadata.getVariables() == null) {
