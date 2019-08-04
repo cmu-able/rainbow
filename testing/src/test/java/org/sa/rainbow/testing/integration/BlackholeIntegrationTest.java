@@ -2,7 +2,6 @@ package org.sa.rainbow.testing.integration;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.sa.rainbow.core.gauges.GaugeDescription;
 import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
 import org.sa.rainbow.core.gauges.RegularPatternGauge;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
@@ -11,10 +10,8 @@ import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.testing.implementation.BlackholeGauge;
 import org.sa.rainbow.testing.implementation.BlackholeProbe;
 import org.sa.rainbow.testing.prepare.RainbowMocker;
-import org.sa.rainbow.testing.prepare.stub.ports.LoggerRainbowReportingPort;
 import org.sa.rainbow.testing.prepare.utils.GaugeTestingUtil;
 import org.sa.rainbow.translator.probes.AbstractProbe;
-import org.sa.rainbow.util.YamlUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,8 +19,10 @@ import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
 import static org.sa.rainbow.testing.prepare.RainbowMocker.mockConnectionPortFactory;
+import static org.sa.rainbow.testing.prepare.utils.GaugeTestingUtil.loadGaugeInstanceDescriptionFromResource;
 import static org.sa.rainbow.testing.prepare.utils.GaugeTestingUtil.stubPortFactoryForGauge;
 import static org.sa.rainbow.testing.prepare.utils.MockingUtil.mockProbeIdentifier;
+import static org.sa.rainbow.testing.prepare.utils.MockingUtil.mockReportPort;
 import static org.sa.rainbow.testing.prepare.utils.ProbeTestingUtil.stubPortFactoryForProbe;
 import static org.sa.rainbow.testing.prepare.utils.ProbeTestingUtil.waitForOutput;
 import static org.sa.rainbow.testing.prepare.utils.ResourceUtil.extractResource;
@@ -34,10 +33,7 @@ public class BlackholeIntegrationTest {
     private GaugeInstanceDescription gd;
 
     public BlackholeIntegrationTest() throws IOException {
-        File yamlFile = extractResource("/blackhole/gauges.yml");
-        GaugeDescription gdl = YamlUtil.loadGaugeSpecs(yamlFile);
-
-        gd = gdl.instDescList().get(0);
+        gd = loadGaugeInstanceDescriptionFromResource("/blackhole/gauges.yml");
     }
 
     @Before
@@ -58,11 +54,11 @@ public class BlackholeIntegrationTest {
                 gd.gaugeName(), 10000L, new TypedAttribute(gd.gaugeName(), gd.gaugeType()),
                 gd.modelDesc(), gd.setupParams(), new HashMap<>(gd.mappings())
         );
-        gauge.initialize(new LoggerRainbowReportingPort());
+        gauge.initialize(mockReportPort());
         gauge.start();
 
         String output = waitForOutput();
-        gauge.reportFromProbe(mockProbeIdentifier("mocked", "testing", "testing"), output);
+        gauge.reportFromProbe(mockProbeIdentifier("mocked", "testing"), output);
 
         IRainbowOperation operation = GaugeTestingUtil.waitForNextOperation();
         assertEquals("setBlackholed", operation.getName());

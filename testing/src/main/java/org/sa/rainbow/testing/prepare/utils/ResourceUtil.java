@@ -10,6 +10,10 @@ import java.nio.file.Path;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class ResourceUtil {
+    private ResourceUtil() {
+
+    }
+
     private static final String TEMP_FILE_PREFIX = "rainbow-testing-";
     private static final String TEMP_FILE_SUFFIX = ".tmp";
 
