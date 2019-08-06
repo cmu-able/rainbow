@@ -24,7 +24,9 @@
 package org.sa.rainbow.core;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.ServiceLoader;
 
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
@@ -34,6 +36,8 @@ import org.sa.rainbow.core.gauges.GaugeManager;
 import org.sa.rainbow.core.models.EffectorDescription;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.ProbeDescription;
+import org.sa.rainbow.core.ports.IRainbowReportingPort;
+import org.sa.rainbow.util.IRainbowConfigurationChecker;
 import org.sa.rainbow.util.RainbowConfigurationChecker;
 import org.sa.rainbow.util.RainbowConfigurationChecker.Problem;
 import org.sa.rainbow.util.YamlUtil;
@@ -68,8 +72,9 @@ public class CheckConfiguration {
 		System.out.flush();
 		final ModelsManager mm = new ModelsManager();
 		final GaugeManager gm = new GaugeManager(loadGaugeSpecs);
-
-		RainbowConfigurationChecker checker = new RainbowConfigurationChecker(new IRainbowMaster() {
+		
+		
+		IRainbowMaster master = new IRainbowMaster() {
 
 			@Override
 			public ProbeDescription probeDesc() {
@@ -118,18 +123,31 @@ public class CheckConfiguration {
 				// TODO Auto-generated method stub
 				return null;
 			}
-		});
-		mm.m_reportingPort = checker;
-		mm.initializeModels();
-		System.out.println("found " + mm.getRegisteredModelTypes() + " model *types*");
+		};
+		
+		ServiceLoader<IRainbowConfigurationChecker> checkerService = ServiceLoader.<IRainbowConfigurationChecker>load(IRainbowConfigurationChecker.class);
+		Iterator<IRainbowConfigurationChecker> checkers = checkerService.iterator();
 		System.out.println("Checking configuration consistency...");
-		checker.checkRainbowConfiguration();
-		if (checker.getProblems().size() > 0) {
-			System.out.println("Problems with the configuration were reported:");
-			for (Problem p : checker.getProblems()) {
-				System.out.println(p.problem.name() + ": " + p.msg);
+		boolean hasProblems = false;
+		while (checkers.hasNext()) {
+			IRainbowConfigurationChecker checker = checkers.next();
+			checker.setRainbowMaster(master);
+			if (mm.m_reportingPort == null && checker instanceof IRainbowReportingPort) {
+				mm.m_reportingPort = (IRainbowReportingPort )checker;
+				mm.initializeModels();
+				System.out.println("found " + mm.getRegisteredModelTypes() + " model *types*");
 			}
-		} else {
+			checker.checkRainbowConfiguration();
+			if (checker.getProblems().size() > 0) {
+				hasProblems = true;
+				System.out.println("Problems with the configuration were reported:");
+				for (Problem p : checker.getProblems()) {
+					System.out.println(p.problem.name() + ": " + p.msg);
+				}
+			}
+		}
+
+		if (!hasProblems) {
 			System.out.println("No problems were found with the configuration");
 		}
 		Rainbow.instance().signalTerminate();

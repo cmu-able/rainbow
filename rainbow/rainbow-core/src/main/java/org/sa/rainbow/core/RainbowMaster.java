@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.ServiceLoader;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -68,6 +69,7 @@ import org.sa.rainbow.gui.RainbowGUI;
 import org.sa.rainbow.translator.effectors.EffectorManager;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 import org.sa.rainbow.util.Beacon;
+import org.sa.rainbow.util.IRainbowConfigurationChecker;
 import org.sa.rainbow.util.RainbowConfigurationChecker;
 import org.sa.rainbow.util.RainbowConfigurationChecker.Problem;
 import org.sa.rainbow.util.RainbowConfigurationChecker.ProblemT;
@@ -128,9 +130,17 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 			initializeConnections();
 			super.initialize(m_reportingPort);
 			initializeRainbowComponents();
-			RainbowConfigurationChecker checker = new RainbowConfigurationChecker(this);
-			checker.checkRainbowConfiguration();
-			for (Problem p : checker.getProblems()) {
+			ServiceLoader<IRainbowConfigurationChecker> checkerService = ServiceLoader.<IRainbowConfigurationChecker>load(IRainbowConfigurationChecker.class);
+			Iterator<IRainbowConfigurationChecker> checkers = checkerService.iterator();
+			List<Problem> allProblems = new LinkedList<>();
+			while (checkers.hasNext()) {
+				IRainbowConfigurationChecker checker = checkers.next();
+				checker.setRainbowMaster(this);
+				checker.checkRainbowConfiguration();
+				allProblems.addAll(checker.getProblems());
+			}
+			
+			for (Problem p : allProblems) {
 				if (p.problem == ProblemT.ERROR) {
 					m_reportingPort.error(getComponentType(), p.msg);
 				} else {

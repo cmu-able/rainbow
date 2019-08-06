@@ -52,13 +52,13 @@ import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.*;
 
-public class RainbowConfigurationChecker implements IRainbowReportingPort {
+public class RainbowConfigurationChecker implements IRainbowReportingPort, IRainbowConfigurationChecker {
 
-    public enum ProblemT {
+    public static enum ProblemT {
         WARNING, ERROR
     }
 
-    public class Problem {
+    public static class Problem {
 
         public Problem (ProblemT p, String msg) {
             problem = p;
@@ -73,37 +73,23 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
     }
 
     final List<Problem> m_problems = new LinkedList<> ();
-    private final IRainbowMaster m_master;
+    private IRainbowMaster m_master;
     final Set<String> m_referredToProbes = new HashSet<> ();
 
-    public RainbowConfigurationChecker (IRainbowMaster master) {
-        m_master = master;
+    public RainbowConfigurationChecker () {
+        
+    }
+    
+    @Override
+	public void setRainbowMaster(IRainbowMaster master) {
+    	m_master = master;
     }
 
-    public void checkRainbowConfiguration () {
+    @Override
+	public void checkRainbowConfiguration () {
         checkGaugeConfiguration ();
         checkProbeConfiguration ();
         checkEffectorConfiguration ();
-//        checkPreferencesConfiguration ();
-    }
-
-    private void checkPreferencesConfiguration () {
-//        UtilityPreferenceDescription preferenceDesc = m_master.preferenceDesc ();
-//        Pattern p = Pattern.compile ("(?:\\[(.*)\\])?(.*)");
-//        for (Entry<String, UtilityAttributes> av : preferenceDesc.utilities.entrySet ()) {
-//            UtilityAttributes value = av.getValue ();
-//            Matcher matcher = p.matcher (value.mapping);
-//            if (matcher.matches ()) {
-//                String type = matcher.group (1);
-//                String expr = matcher.group (2);
-//                switch (type) {
-//                case "[EXPR]":
-//                    break;
-//                case 
-//                }
-//            }
-//
-//        }
     }
 
     private void checkEffectorConfiguration () {
@@ -476,7 +462,8 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
     }
 
 
-    public Collection<Problem> getProblems () {
+    @Override
+	public Collection<Problem> getProblems () {
         return m_problems;
     }
 
