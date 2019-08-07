@@ -20,6 +20,7 @@ import org.sa.rainbow.util.Util;
 public class RainbowAcmeModelConfigurationChecker implements IRainbowConfigurationChecker {
 
 	private LinkedList<Problem> m_problems = new LinkedList<>();
+	private IRainbowMaster m_master;
 
 	public RainbowAcmeModelConfigurationChecker() {
 		m_problems = new LinkedList<Problem>();
@@ -68,13 +69,12 @@ public class RainbowAcmeModelConfigurationChecker implements IRainbowConfigurati
 
 	@Override
 	public void setRainbowMaster(IRainbowMaster master) {
-
+		m_master = master;
 	}
 
 	@Override
 	public Collection<Problem> getProblems() {
-		// TODO Auto-generated method stub
-		return null;
+		return m_problems;
 	}
 
 }
