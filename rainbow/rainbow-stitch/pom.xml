@@ -506,10 +506,6 @@
 			<artifactId>rsyntaxtextarea</artifactId>
 			<version>3.0.3</version>
 		</dependency>
-		<dependency>
-			<groupId>javax.annotation</groupId>
-			<artifactId>javax.annotatoin-api</artifactId>
-			<version>1.2</version>
-		</dependency>
+		
 	</dependencies>
 </project>
