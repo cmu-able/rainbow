@@ -32,7 +32,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.annotation.Nonnull;
 
 import org.sa.rainbow.core.models.ModelReference;
 
@@ -105,7 +104,7 @@ public final class ExecutionHistoryData {
      *            initial maximum duration value read from storage
      */
     public ExecutionHistoryData (String iden, ModelReference modelRef, int sampleSize, double mean, double variance, long min, long max,
-            double numSuccesses,  List<ExecutionPoint> executions) {
+            double numSuccesses, List<ExecutionPoint> executions) {
         initData (modelRef, iden, sampleSize, mean, variance, min, max, numSuccesses, executions);
     }
 
