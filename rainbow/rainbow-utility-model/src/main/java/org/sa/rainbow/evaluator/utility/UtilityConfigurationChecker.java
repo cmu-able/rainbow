@@ -3,6 +3,7 @@ package org.sa.rainbow.evaluator.utility;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.HashSet;
@@ -13,10 +14,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.sa.rainbow.core.IRainbowMaster;
 import org.sa.rainbow.core.Rainbow;
-import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.UtilityPreferenceDescription;
@@ -25,12 +26,11 @@ import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.model.utility.UtilityModelInstance;
 import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.core.Tactic;
-import org.sa.rainbow.stitch.error.DummyStitchProblemHandler;
 import org.sa.rainbow.stitch.visitor.Stitch;
 import org.sa.rainbow.util.IRainbowConfigurationChecker;
-import org.sa.rainbow.util.Util;
 import org.sa.rainbow.util.RainbowConfigurationChecker.Problem;
 import org.sa.rainbow.util.RainbowConfigurationChecker.ProblemT;
+import org.sa.rainbow.util.Util;
 
 public class UtilityConfigurationChecker implements IRainbowConfigurationChecker {
 
@@ -52,36 +52,8 @@ public class UtilityConfigurationChecker implements IRainbowConfigurationChecker
 	}
 
 	private void checkImpactVectors() {
-		File stitchPath = Util.getRelativeToPath(Rainbow.instance().getTargetPath(),
-				Rainbow.instance().getProperty(RainbowConstants.PROPKEY_SCRIPT_PATH));
-		if (stitchPath == null) {
-			m_problems.add(new Problem(ProblemT.ERROR, "The Stitch path is not set!"));
-			return;
-		}
+		Set<String> tactics = fetchTacticNames();
 		
-		if (stitchPath.exists() && stitchPath.isDirectory()) {
-			FilenameFilter ff = new FilenameFilter() { // find only ".s" files
-				@Override
-				public boolean accept(File dir, String name) {
-					return name.endsWith(".s");
-				}
-			};
-			for (File f : stitchPath.listFiles(ff)) {
-				try {
-					// don't duplicate loading of script files
-					Stitch stitch = Ohana.instance().findStitch(f.getCanonicalPath());
-					if (stitch == null) {
-						DummyStitchProblemHandler stitchProblemHandler = new DummyStitchProblemHandler();
-						stitch = Stitch.newInstance(f.getCanonicalPath(), stitchProblemHandler);
-						Ohana.instance().parseFile(stitch);
-					}
-				} catch (IOException e) {
-					
-				}
-			}
-		}
-		
-		Set<String> tactics = new HashSet<>();
 		for (Stitch s : Ohana.instance().listStitches()) {
 			for (Tactic t : s.script.tactics) {
 				tactics.add(t.getName());
@@ -106,6 +78,38 @@ public class UtilityConfigurationChecker implements IRainbowConfigurationChecker
 		
 		Ohana.instance().dispose();
 		Ohana.cleanup();
+	}
+
+	static final Pattern TACTIC_PATTERN = Pattern.compile("tactic\\s*([^\\s]*)\\s*\\(");
+	
+	protected Set<String> fetchTacticNames() {
+		Set<String> tactics = new HashSet<>();
+		File stitchPath = Util.getRelativeToPath(Rainbow.instance().getTargetPath(),
+				Rainbow.instance().getProperty(RainbowConstants.PROPKEY_SCRIPT_PATH));
+		if (stitchPath == null) {
+			m_problems.add(new Problem(ProblemT.ERROR, "The Stitch path is not set!"));
+			return tactics;
+		}
+		if (stitchPath.exists() && stitchPath.isDirectory()) {
+			FilenameFilter ff = new FilenameFilter() { // find only ".s" files
+				@Override
+				public boolean accept(File dir, String name) {
+					return name.endsWith(".s");
+				}
+			};
+			for (File f : stitchPath.listFiles(ff)) {
+				StringBuilder contents = new StringBuilder();
+				try (Stream<String> stream = Files.lines(f.toPath())) {
+					stream.forEach(s -> contents.append(s).append("\n"));
+					Matcher m = TACTIC_PATTERN.matcher(contents.toString());
+					while (m.find()) {
+						tactics.add(m.group(1));
+					}
+				} catch (IOException e) {
+				} 
+			}
+		}
+		return tactics;
 	}
 
 	private void checkScenariosConfiguration() {
