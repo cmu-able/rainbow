@@ -27,7 +27,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.ServiceLoader;
+import java.util.Set;
 
+import org.reflections.Reflections;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.analysis.IRainbowAnalysis;
@@ -125,25 +127,29 @@ public class CheckConfiguration {
 			}
 		};
 		
-		ServiceLoader<IRainbowConfigurationChecker> checkerService = ServiceLoader.<IRainbowConfigurationChecker>load(IRainbowConfigurationChecker.class);
-		Iterator<IRainbowConfigurationChecker> checkers = checkerService.iterator();
+		Reflections reflections = new Reflections("org.sa.rainbow");
+		Set<Class<? extends IRainbowConfigurationChecker>> checkers = reflections.getSubTypesOf(IRainbowConfigurationChecker.class);
 		System.out.println("Checking configuration consistency...");
 		boolean hasProblems = false;
-		while (checkers.hasNext()) {
-			IRainbowConfigurationChecker checker = checkers.next();
-			checker.setRainbowMaster(master);
-			if (mm.m_reportingPort == null && checker instanceof IRainbowReportingPort) {
-				mm.m_reportingPort = (IRainbowReportingPort )checker;
-				mm.initializeModels();
-				System.out.println("found " + mm.getRegisteredModelTypes() + " model *types*");
-			}
-			checker.checkRainbowConfiguration();
-			if (checker.getProblems().size() > 0) {
-				hasProblems = true;
-				System.out.println("Problems with the configuration were reported:");
-				for (Problem p : checker.getProblems()) {
-					System.out.println(p.problem.name() + ": " + p.msg);
+		for (Class<? extends IRainbowConfigurationChecker> checkerClass : checkers) {
+			try {
+				IRainbowConfigurationChecker checker = checkerClass.newInstance();
+				checker.setRainbowMaster(master);
+				if (mm.m_reportingPort == null && checker instanceof IRainbowReportingPort) {
+					mm.m_reportingPort = (IRainbowReportingPort )checker;
+					mm.initializeModels();
+					System.out.println("found " + mm.getRegisteredModelTypes() + " model *types*");
 				}
+				checker.checkRainbowConfiguration();
+				if (checker.getProblems().size() > 0) {
+					hasProblems = true;
+					System.out.println("Problems with the configuration were reported:");
+					for (Problem p : checker.getProblems()) {
+						System.out.println(p.problem.name() + ": " + p.msg);
+					}
+				}
+			} catch (InstantiationException | IllegalAccessException e) {
+				System.out.println("Could not instantiate " + checkerClass);
 			}
 		}
 
