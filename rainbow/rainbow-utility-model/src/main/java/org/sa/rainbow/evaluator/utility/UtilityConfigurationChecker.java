@@ -37,6 +37,7 @@ public class UtilityConfigurationChecker implements IRainbowConfigurationChecker
 	private IRainbowMaster m_master;
 	private List<Problem> m_problems;
 	private Collection<UtilityModelInstance> m_utilityModels;
+	private Set<String> m_utilities = new HashSet<>();
 
 	public UtilityConfigurationChecker() {
 		m_problems = new LinkedList<Problem>();
@@ -54,11 +55,11 @@ public class UtilityConfigurationChecker implements IRainbowConfigurationChecker
 	private void checkImpactVectors() {
 		Set<String> tactics = fetchTacticNames();
 		
-		for (Stitch s : Ohana.instance().listStitches()) {
-			for (Tactic t : s.script.tactics) {
-				tactics.add(t.getName());
-			}
-		}
+//		for (Stitch s : Ohana.instance().listStitches()) {
+//			for (Tactic t : s.script.tactics) {
+//				tactics.add(t.getName());
+//			}
+//		}
 
 		for (UtilityModelInstance umi : m_utilityModels) {
 			UtilityPreferenceDescription preferenceDesc = umi.getModelInstance();
@@ -67,17 +68,27 @@ public class UtilityConfigurationChecker implements IRainbowConfigurationChecker
 					m_problems.add (new Problem(ProblemT.ERROR, 
 							MessageFormat.format("The tactic ''{0}'' in {1} does not exist.", av.getKey(), umi.getOriginalSource())));
 				}
+				Set<String> utilities = new HashSet<>(preferenceDesc.getUtilities().keySet());
 				for (String u : av.getValue().keySet()) {
+					utilities.remove(u);
 					if (!preferenceDesc.getUtilities().containsKey(u)) {
 						m_problems.add (new Problem(ProblemT.ERROR, 
 								MessageFormat.format("The utility ''{0}'' for impact vector for {2} is not defined in {1}.", u, umi.getOriginalSource(), av.getKey())) );
 					}
 				}
+				if (!utilities.isEmpty()) {
+					for (String u : utilities) {
+						m_problems.add (new Problem(ProblemT.ERROR, 
+								MessageFormat.format("The utility ''{0}'' for impact vector for {2} is not referenced but should be in {1}.", u, umi.getOriginalSource(), av.getKey())) );
+					}
+				}
 			}
 		}
 		
-		Ohana.instance().dispose();
-		Ohana.cleanup();
+		if (!tactics.isEmpty()) 
+			for (String t : tactics) {
+				m_problems.add(new Problem(ProblemT.ERROR, MessageFormat.format("The tactic ''{0}'' does not have an impact vector",t)));
+			}
 	}
 
 	static final Pattern TACTIC_PATTERN = Pattern.compile("tactic\\s*([^\\s]*)\\s*\\(");
@@ -138,6 +149,7 @@ public class UtilityConfigurationChecker implements IRainbowConfigurationChecker
 				AcmeModelInstance ami = (AcmeModelInstance) assocModel;
 				for (Entry<String, UtilityAttributes> av : preferenceDesc.getUtilities().entrySet()) {
 					UtilityAttributes value = av.getValue();
+					m_utilities.add(av.getKey());
 					Matcher matcher = p.matcher(value.mapping);
 					if (matcher.matches()) {
 						String type = matcher.group(1);
