@@ -26,11 +26,15 @@
  */
 package org.sa.rainbow.stitch.util;
 
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
 import javax.annotation.Nonnull;
 
 import org.sa.rainbow.core.models.ModelReference;
-
-import java.util.*;
 
 /**
  * Captures one data entry of execution history for the Strategy or Tactic (or any unit of adaptation execution as
@@ -101,7 +105,7 @@ public final class ExecutionHistoryData {
      *            initial maximum duration value read from storage
      */
     public ExecutionHistoryData (String iden, ModelReference modelRef, int sampleSize, double mean, double variance, long min, long max,
-            double numSuccesses, @Nonnull List<ExecutionPoint> executions) {
+            double numSuccesses,  List<ExecutionPoint> executions) {
         initData (modelRef, iden, sampleSize, mean, variance, min, max, numSuccesses, executions);
     }
 
