@@ -18,7 +18,7 @@ system/effectors/[=effector].sh: system/effectors/defaultEffector.sh.ftl
 [/#list]
 [/#if]
 
-[# if probes]
+[#if probes??]
 [#list probes as probe]
 system/probes/[=probe].sh: system/probes/defaultProbe.sh.ftl
 [/#list]
