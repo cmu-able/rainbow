@@ -24,13 +24,10 @@
 package org.sa.rainbow.core;
 
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.ServiceLoader;
-import java.util.Set;
 
 import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.analysis.IRainbowAnalysis;
@@ -128,8 +125,10 @@ public class CheckConfiguration {
 			}
 		};
 		
-		Reflections reflections = new Reflections("org.sa.rainbow", CheckConfiguration.class.getClassLoader());
-		Set<Class<? extends IRainbowConfigurationChecker>> checkers = reflections.getSubTypesOf(IRainbowConfigurationChecker.class);
+		Reflections reflections = new Reflections(CheckConfiguration.class.getClassLoader());
+		LinkedHashSet<Class<? extends IRainbowConfigurationChecker>> checkers = new LinkedHashSet<>();
+		checkers.add(RainbowConfigurationChecker.class);
+		checkers.addAll(reflections.getSubTypesOf(IRainbowConfigurationChecker.class));
 		System.out.println("Checking configuration consistency...");
 		boolean hasProblems = false;
 		for (Class<? extends IRainbowConfigurationChecker> checkerClass : checkers) {
