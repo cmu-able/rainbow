@@ -113,8 +113,8 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
             fis.close ();
         }
         catch (IOException e) {
-            LOGGER.warn (MessageFormat
-                    .format ("Could not find operator map ''{0}''. Adaptation of this model will fail.", opPath));
+//            LOGGER.warn (MessageFormat
+//                    .format ("Could not find operator map ''{0}''. Adaptation of this model will fail.", opPath));
         }
 
     }
@@ -377,8 +377,7 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
                 return any;
             }
             catch (AcmeException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace ();
+                LOGGER.error("COuld not evaluate as float", e);
             }
         }
         else {

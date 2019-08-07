@@ -57,12 +57,12 @@ public class UtilityConfigurationChecker implements IRainbowConfigurationChecker
 			for (Entry<String, Map<String, Object>> av : preferenceDesc.attributeVectors.entrySet()) {
 				if (!tactics.remove(av.getKey())) {
 					m_problems.add (new Problem(ProblemT.ERROR, 
-							MessageFormat.format("The tactic '{0}' in {1} does not exist.", av.getKey(), umi.getOriginalSource())));
+							MessageFormat.format("The tactic ''{0}'' in {1} does not exist.", av.getKey(), umi.getOriginalSource())));
 				}
 				for (String u : av.getValue().keySet()) {
 					if (!preferenceDesc.getUtilities().containsKey(u)) {
 						m_problems.add (new Problem(ProblemT.ERROR, 
-								MessageFormat.format("The utility '{0}' for impact vector for {2} is not defined in {1}.", u, umi.getOriginalSource(), av.getKey())) );
+								MessageFormat.format("The utility ''{0}'' for impact vector for {2} is not defined in {1}.", u, umi.getOriginalSource(), av.getKey())) );
 					}
 				}
 			}
@@ -107,7 +107,7 @@ public class UtilityConfigurationChecker implements IRainbowConfigurationChecker
 							if (property == null) {
 								m_problems.add(new Problem(ProblemT.ERROR,
 										MessageFormat.format(
-												"'{0}' cannot be resolved in the model {1}:{2} from utility model {3}",
+												"''{0}'' cannot be resolved in the model {1}:{2} from utility model {3}",
 												value.mapping, ami.getModelName(), ami.getModelType(),
 												umi.getOriginalSource())));
 							}
@@ -118,7 +118,7 @@ public class UtilityConfigurationChecker implements IRainbowConfigurationChecker
 						if (domain.doubleValue() > 1.0 || domain.doubleValue() < 0) {
 							m_problems.add(new Problem(ProblemT.ERROR,
 									MessageFormat.format(
-											"'{0}' must be in the range [0,1] in utility range for utility {1} from utility model {2}",
+											"''{0}'' must be in the range [0,1] in utility range for utility {1} from utility model {2}",
 											domain.doubleValue(), value.label,
 											umi.getOriginalSource())));
 						}
