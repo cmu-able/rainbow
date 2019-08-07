@@ -1,5 +1,8 @@
 package org.sa.rainbow.evaluator.utility;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.HashSet;
@@ -13,6 +16,8 @@ import java.util.regex.Pattern;
 
 import org.sa.rainbow.core.IRainbowMaster;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowComponentT;
+import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.UtilityPreferenceDescription;
 import org.sa.rainbow.core.models.UtilityPreferenceDescription.UtilityAttributes;
@@ -20,8 +25,10 @@ import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.model.utility.UtilityModelInstance;
 import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.core.Tactic;
+import org.sa.rainbow.stitch.error.DummyStitchProblemHandler;
 import org.sa.rainbow.stitch.visitor.Stitch;
 import org.sa.rainbow.util.IRainbowConfigurationChecker;
+import org.sa.rainbow.util.Util;
 import org.sa.rainbow.util.RainbowConfigurationChecker.Problem;
 import org.sa.rainbow.util.RainbowConfigurationChecker.ProblemT;
 
@@ -45,6 +52,35 @@ public class UtilityConfigurationChecker implements IRainbowConfigurationChecker
 	}
 
 	private void checkImpactVectors() {
+		File stitchPath = Util.getRelativeToPath(Rainbow.instance().getTargetPath(),
+				Rainbow.instance().getProperty(RainbowConstants.PROPKEY_SCRIPT_PATH));
+		if (stitchPath == null) {
+			m_problems.add(new Problem(ProblemT.ERROR, "The Stitch path is not set!"));
+			return;
+		}
+		
+		if (stitchPath.exists() && stitchPath.isDirectory()) {
+			FilenameFilter ff = new FilenameFilter() { // find only ".s" files
+				@Override
+				public boolean accept(File dir, String name) {
+					return name.endsWith(".s");
+				}
+			};
+			for (File f : stitchPath.listFiles(ff)) {
+				try {
+					// don't duplicate loading of script files
+					Stitch stitch = Ohana.instance().findStitch(f.getCanonicalPath());
+					if (stitch == null) {
+						DummyStitchProblemHandler stitchProblemHandler = new DummyStitchProblemHandler();
+						stitch = Stitch.newInstance(f.getCanonicalPath(), stitchProblemHandler);
+						Ohana.instance().parseFile(stitch);
+					}
+				} catch (IOException e) {
+					
+				}
+			}
+		}
+		
 		Set<String> tactics = new HashSet<>();
 		for (Stitch s : Ohana.instance().listStitches()) {
 			for (Tactic t : s.script.tactics) {
@@ -67,13 +103,16 @@ public class UtilityConfigurationChecker implements IRainbowConfigurationChecker
 				}
 			}
 		}
+		
+		Ohana.instance().dispose();
+		Ohana.cleanup();
 	}
 
 	private void checkScenariosConfiguration() {
 		for (UtilityModelInstance umi : m_utilityModels) {
 			UtilityPreferenceDescription preferenceDesc = umi.getModelInstance();
 			for (Entry<String, Map<String, Double>> scenario : preferenceDesc.weights.entrySet()) {
-				int sum = 0;
+				double sum = 0;
 				for (Double d : scenario.getValue().values()) {
 					sum += d;
 				}
