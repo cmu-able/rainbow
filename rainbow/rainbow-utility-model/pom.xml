@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>rainbow</groupId>
 	<artifactId>rainbow-utility-model</artifactId>
-	<version>2.0.1-SNAPSHOT</version>
+	<version>2.2-SNAPSHOT</version>
 	<name>Rainbow Utility Model</name>
 	<description>Rainbow Model of Utility</description>
 	<build>
