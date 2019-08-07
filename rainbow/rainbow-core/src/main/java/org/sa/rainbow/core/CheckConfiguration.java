@@ -70,8 +70,7 @@ public class CheckConfiguration {
 //        final UtilityPreferenceDescription loadUtilityPrefs = YamlUtil.loadUtilityPrefs ();
 //        System.out.println ("found " + loadUtilityPrefs.attributeVectors.size () + " attribute vectors, "
 //                + loadUtilityPrefs.utilities.size () + " utilities, " + loadUtilityPrefs.weights.size () + " weights");
-		System.out.print("Loading models...");
-		System.out.flush();
+		
 		final ModelsManager mm = new ModelsManager();
 		final GaugeManager gm = new GaugeManager(loadGaugeSpecs);
 		
@@ -137,6 +136,8 @@ public class CheckConfiguration {
 				checker.setRainbowMaster(master);
 				if (mm.m_reportingPort == null && checker instanceof IRainbowReportingPort) {
 					mm.m_reportingPort = (IRainbowReportingPort )checker;
+					System.out.print("Loading models...");
+					System.out.flush();
 					mm.initializeModels();
 					System.out.println("found " + mm.getRegisteredModelTypes() + " model *types*");
 				}
