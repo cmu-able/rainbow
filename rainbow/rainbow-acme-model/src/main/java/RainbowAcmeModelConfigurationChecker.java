@@ -19,7 +19,7 @@ import org.sa.rainbow.util.Util;
 
 public class RainbowAcmeModelConfigurationChecker implements IRainbowConfigurationChecker {
 
-	private LinkedList<Problem> m_problems;
+	private LinkedList<Problem> m_problems = new LinkedList<>();
 
 	public RainbowAcmeModelConfigurationChecker() {
 		m_problems = new LinkedList<Problem>();
