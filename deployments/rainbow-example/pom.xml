@@ -213,32 +213,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>copy</id>
-						<phase>install</phase>
-						<goals>
-							<goal>copy</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>pladapt</groupId>
-									<artifactId>libpladapt_wrap</artifactId>
-									<version>1.0.1</version>
-									<type>so</type>
-									<classifier>x86_64</classifier>
-									<outputDirectory>${project.build.directory}/lib</outputDirectory>
-									<destFileName>libpladapt_wrap.so</destFileName>
-								</artifactItem>
-							</artifactItems>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 
@@ -451,7 +425,7 @@
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-stitch</artifactId>
-			<version>2.2-SNAPSHOT</version>
+			<version>2.2.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>rainbow</groupId>
