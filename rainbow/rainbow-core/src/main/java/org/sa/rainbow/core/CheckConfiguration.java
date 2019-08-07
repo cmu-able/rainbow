@@ -38,6 +38,7 @@ import org.sa.rainbow.core.gauges.GaugeManager;
 import org.sa.rainbow.core.models.EffectorDescription;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.ProbeDescription;
+import org.sa.rainbow.core.ports.DisconnectedRainbowDelegateConnectionPort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.util.IRainbowConfigurationChecker;
 import org.sa.rainbow.util.RainbowConfigurationChecker;
@@ -134,7 +135,7 @@ public class CheckConfiguration {
 			try {
 				IRainbowConfigurationChecker checker = checkerClass.newInstance();
 				checker.setRainbowMaster(master);
-				if (mm.m_reportingPort == null && checker instanceof IRainbowReportingPort) {
+				if (mm.m_reportingPort instanceof DisconnectedRainbowDelegateConnectionPort && checker instanceof IRainbowReportingPort) {
 					mm.m_reportingPort = (IRainbowReportingPort )checker;
 					System.out.print("Loading models...");
 					System.out.flush();
