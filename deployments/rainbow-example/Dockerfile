@@ -20,20 +20,6 @@ ENV MAVEN_CONFIG "$USER_HOME_DIR/.m2"
 # speed up Maven JVM a bit
 ENV MAVEN_OPTS="-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
 
-# Install pladapt
-WORKDIR /root/
-RUN git clone https://github.com/cps-sei/pladapt.git
-
-WORKDIR /root/pladapt
-RUN reach/build.sh
-
-RUN autoreconf -fvi && \
-    mkdir build && \
-    cd build && \
-    ../configure && \
-    make
-
-WORKDIR /root/pladapt/java
 ### Bug fix to get around the fact that uname returns unknown for maven:3-jdk-8
 RUN sed 's/$(shell uname -i)/x86_64/' Makefile > Makefile-bugfix && \
     make -f Makefile-bugfix mvn-install
@@ -64,9 +50,9 @@ WORKDIR ../rainbow-gui
 RUN mvn -DskipTests install
 WORKDIR ../rainbow-acme-model
 RUN mvn -DskipTests install
-WORKDIR ../rainbow-utility-model
-RUN mvn -DskipTests install
 WORKDIR ../rainbow-stitch
+RUN mvn -DskipTests install
+WORKDIR ../rainbow-utility-model
 RUN mvn -DskipTests install
 
 WORKDIR ../rainbow-mem-comms
@@ -91,8 +77,6 @@ RUN \
 
 RUN mkdir /rainbow
 WORKDIR /rainbow
-COPY --from=builder /root/pladapt ./pladapt
-ENV PLADAPT /rainbow/pladapt
 COPY scripts/* ./
 COPY targets/rainbow-example targets/rainbow-example
 COPY license.html .
