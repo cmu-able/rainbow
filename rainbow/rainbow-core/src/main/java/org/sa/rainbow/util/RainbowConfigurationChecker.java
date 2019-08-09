@@ -73,6 +73,10 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort, IRain
 		public void setMessage(String string) {
 			msg = string;
 		}
+
+		public ProblemT getType() {
+			return problem;
+		}
     }
 
     final List<Problem> m_problems = new LinkedList<> ();
