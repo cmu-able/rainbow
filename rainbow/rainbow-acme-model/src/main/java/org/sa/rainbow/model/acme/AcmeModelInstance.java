@@ -371,7 +371,7 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
             try {
 
 //                Object any = RuleTypeChecker.evaluateAsAny ()
-                Object any = RuleTypeChecker.evaluateAsFloat (getModelInstance (), null, expr, new Stack<AcmeError> (),
+                Object any = RuleTypeChecker.evaluateAsAny (getModelInstance (), null, expr, new Stack<AcmeError> (),
                         new NodeScopeLookup ());
                 if (any instanceof IAcmePropertyValue) return PropertyHelper.toJavaVal ((IAcmePropertyValue )any);
                 return any;
