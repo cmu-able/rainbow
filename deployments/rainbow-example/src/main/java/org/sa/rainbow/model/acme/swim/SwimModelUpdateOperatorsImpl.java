@@ -169,7 +169,7 @@ public class SwimModelUpdateOperatorsImpl extends AcmeModelInstance {
 				String method = m.group(1);
 				String[] args = Arrays.stream(m.group(2).split(",")).map(String::trim).toArray(String[]::new);
 
-				int dotIdx = id.lastIndexOf(".");
+				int dotIdx = method.lastIndexOf(".");
 				String methodClass = null;
 				if (dotIdx > -1) {
 					methodClass = method.substring(0, dotIdx);
