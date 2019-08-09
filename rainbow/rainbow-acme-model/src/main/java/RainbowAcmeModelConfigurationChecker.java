@@ -25,9 +25,14 @@ public class RainbowAcmeModelConfigurationChecker implements IRainbowConfigurati
 	public RainbowAcmeModelConfigurationChecker() {
 		m_problems = new LinkedList<Problem>();
 	}
-	
+
 	@Override
 	public void checkRainbowConfiguration() {
+		String message = "Checking that Acme files parse...";
+		Problem p = new Problem(ProblemT.INFO, message);
+		m_problems.add(p);
+		int num = m_problems.size();
+
 		String numberOfModelsStr = Rainbow.instance().getProperty(RainbowConstants.PROPKEY_MODEL_NUMBER, "0");
 		int numberOfModels = Integer.parseInt(numberOfModelsStr);
 		for (int modelNum = 0; modelNum < numberOfModels; modelNum++) {
@@ -54,17 +59,20 @@ public class RainbowAcmeModelConfigurationChecker implements IRainbowConfigurati
 					IAcmeResource resource = StandaloneResourceProvider.instance().acmeResourceForObject(modelPath);
 				}
 			} catch (ClassNotFoundException e) {
-				m_problems.add (new Problem(ProblemT.ERROR, MessageFormat.format("Could not create the class {0} to load a model", factoryClassName)));
+				m_problems.add(new Problem(ProblemT.ERROR,
+						MessageFormat.format("Could not create the class {0} to load a model", factoryClassName)));
 			} catch (ParsingFailureException e) {
 				for (AcmeError err : e.getErrors()) {
-					m_problems.add(new Problem(ProblemT.ERROR, MessageFormat.format("{0}: Error in Acme: {1}", modelName, e.getMessage())));
+					m_problems.add(new Problem(ProblemT.ERROR,
+							MessageFormat.format("{0}: Error in Acme: {1}", modelName, e.getMessage())));
 				}
 			} catch (IOException e) {
-				m_problems.add(new Problem(ProblemT.ERROR, MessageFormat.format("Could not load the file {0}", modelPath.getAbsolutePath())));
+				m_problems.add(new Problem(ProblemT.ERROR,
+						MessageFormat.format("Could not load the file {0}", modelPath.getAbsolutePath())));
 			}
 
-			
 		}
+		if (num == m_problems.size()) p.setMessage(message + "ok");
 	}
 
 	@Override

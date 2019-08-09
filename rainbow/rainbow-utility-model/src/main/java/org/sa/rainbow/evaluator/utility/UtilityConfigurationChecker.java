@@ -60,7 +60,10 @@ public class UtilityConfigurationChecker implements IRainbowConfigurationChecker
 //				tactics.add(t.getName());
 //			}
 //		}
-
+		String message = "Checking that impact vectors in utility model...";
+		Problem p = new Problem(ProblemT.INFO, message);
+		m_problems.add(p);
+		int num = m_problems.size();
 		for (UtilityModelInstance umi : m_utilityModels) {
 			UtilityPreferenceDescription preferenceDesc = umi.getModelInstance();
 			for (Entry<String, Map<String, Object>> av : preferenceDesc.attributeVectors.entrySet()) {
@@ -89,6 +92,8 @@ public class UtilityConfigurationChecker implements IRainbowConfigurationChecker
 			for (String t : tactics) {
 				m_problems.add(new Problem(ProblemT.ERROR, MessageFormat.format("The tactic ''{0}'' does not have an impact vector",t)));
 			}
+		if (num == m_problems.size()) p.setMessage(message + "ok");
+
 	}
 
 	static final Pattern TACTIC_PATTERN = Pattern.compile("tactic\\s*([^\\s]*)\\s*\\(");
@@ -124,6 +129,10 @@ public class UtilityConfigurationChecker implements IRainbowConfigurationChecker
 	}
 
 	private void checkScenariosConfiguration() {
+		String message = "Checking that scenario configurations...";
+		Problem p = new Problem(ProblemT.INFO, message);
+		m_problems.add(p);
+		int num = m_problems.size();
 		for (UtilityModelInstance umi : m_utilityModels) {
 			UtilityPreferenceDescription preferenceDesc = umi.getModelInstance();
 			for (Entry<String, Map<String, Double>> scenario : preferenceDesc.weights.entrySet()) {
@@ -137,9 +146,15 @@ public class UtilityConfigurationChecker implements IRainbowConfigurationChecker
 				}
 			}
 		}
+		if (num == m_problems.size()) p.setMessage(message + "ok");
+
 	}
 
 	private void checkUtilityPreferencesConfiguration() {
+		String message = "Checking that utilities preference definitions...";
+		Problem problemp = new Problem(ProblemT.INFO, message);
+		m_problems.add(problemp);
+		int num = m_problems.size();
 		for (UtilityModelInstance umi : m_utilityModels) {
 			UtilityPreferenceDescription preferenceDesc = umi.getModelInstance();
 			Pattern p = Pattern.compile("(?:\\[(.*)\\])?(.*)");
@@ -186,6 +201,8 @@ public class UtilityConfigurationChecker implements IRainbowConfigurationChecker
 			}
 
 		}
+		if (num == m_problems.size()) problemp.setMessage(message + "ok");
+
 
 	}
 

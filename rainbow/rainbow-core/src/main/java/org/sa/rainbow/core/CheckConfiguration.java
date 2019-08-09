@@ -41,6 +41,7 @@ import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.util.IRainbowConfigurationChecker;
 import org.sa.rainbow.util.RainbowConfigurationChecker;
 import org.sa.rainbow.util.RainbowConfigurationChecker.Problem;
+import org.sa.rainbow.util.RainbowConfigurationChecker.ProblemT;
 import org.sa.rainbow.util.YamlUtil;
 
 public class CheckConfiguration {
@@ -144,9 +145,10 @@ public class CheckConfiguration {
 				}
 				checker.checkRainbowConfiguration();
 				if (checker.getProblems().size() > 0) {
-					hasProblems = true;
 					System.out.println("Problems with the configuration were reported:");
 					for (Problem p : checker.getProblems()) {
+						if (p.getType() == ProblemT.ERROR)
+							hasProblems = true;
 						System.out.println(p.problem.name() + ": " + p.msg);
 					}
 				}

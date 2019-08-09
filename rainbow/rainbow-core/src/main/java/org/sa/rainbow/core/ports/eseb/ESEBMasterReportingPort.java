@@ -24,6 +24,7 @@
 package org.sa.rainbow.core.ports.eseb;
 
 import org.apache.log4j.Logger;
+import org.sa.rainbow.core.IRainbowMaster;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
