@@ -169,7 +169,7 @@ public class SwimModelUpdateOperatorsImpl extends AcmeModelInstance {
 				String method = m.group(1);
 				String[] args = Arrays.stream(m.group(2).split(",")).map(String::trim).toArray(String[]::new);
 
-				int dotIdx = id.lastIndexOf(".");
+				int dotIdx = method.lastIndexOf(".");
 				String methodClass = null;
 				if (dotIdx > -1) {
 					methodClass = method.substring(0, dotIdx);
@@ -188,7 +188,10 @@ public class SwimModelUpdateOperatorsImpl extends AcmeModelInstance {
 					return null;
 				}
 				Object result = null;
-				Object[] argumentsJ = Arrays.stream(args).map(s -> getProperty(s)).toArray();
+				Object[] argumentsJ = new Object[args.length];
+				for (int i = 0; i < argumentsJ.length; i++) {
+					argumentsJ[i] = getProperty(args[i]);
+				}
 
 				for (Method mthd : clazz.getDeclaredMethods()) {
 					if (mthd.getName().equals(method) && Modifier.isStatic(mthd.getModifiers())
