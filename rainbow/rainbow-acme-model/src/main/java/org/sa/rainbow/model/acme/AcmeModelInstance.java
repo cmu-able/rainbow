@@ -382,7 +382,7 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
         }
         else {
             IAcmeModel model = getModelInstance ().getContext ().getModel ();
-            prop = model.lookupName(id);
+            prop = model.lookupName("[EXPR]" + id);
         }
         return prop;
     }
