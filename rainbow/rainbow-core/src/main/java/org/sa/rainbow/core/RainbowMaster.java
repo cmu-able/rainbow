@@ -32,6 +32,7 @@ import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,7 @@ import java.util.ServiceLoader;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.reflections.Reflections;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.adaptation.IEvaluable;
@@ -130,21 +132,30 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 			initializeConnections();
 			super.initialize(m_reportingPort);
 			initializeRainbowComponents();
-			ServiceLoader<IRainbowConfigurationChecker> checkerService = ServiceLoader.<IRainbowConfigurationChecker>load(IRainbowConfigurationChecker.class);
-			Iterator<IRainbowConfigurationChecker> checkers = checkerService.iterator();
+			Reflections reflections = new Reflections(CheckConfiguration.class.getClassLoader());
+			LinkedHashSet<Class<? extends IRainbowConfigurationChecker>> checkers = new LinkedHashSet<>();
+			checkers.add(RainbowConfigurationChecker.class);
+			checkers.addAll(reflections.getSubTypesOf(IRainbowConfigurationChecker.class));
 			List<Problem> allProblems = new LinkedList<>();
-			while (checkers.hasNext()) {
-				IRainbowConfigurationChecker checker = checkers.next();
-				checker.setRainbowMaster(this);
-				checker.checkRainbowConfiguration();
-				allProblems.addAll(checker.getProblems());
+			for (Class<? extends IRainbowConfigurationChecker> checkerClass : checkers) {
+				try {
+					IRainbowConfigurationChecker checker = checkerClass.newInstance();
+					checker.setRainbowMaster(this);				
+					checker.checkRainbowConfiguration();
+					allProblems.addAll(checker.getProblems());
+				} catch (InstantiationException | IllegalAccessException e) {
+					m_reportingPort.error(getComponentType(),"Could not instantiate " + checkerClass);
+				}
 			}
 			
 			for (Problem p : allProblems) {
 				if (p.problem == ProblemT.ERROR) {
 					m_reportingPort.error(getComponentType(), p.msg);
-				} else {
+				} else if (p.problem == ProblemT.WARNING){
 					m_reportingPort.warn(getComponentType(), p.msg);
+				}
+				else {
+					m_reportingPort.info(getComponentType(), p.msg);
 				}
 			}
 			m_initialized = true;

@@ -55,7 +55,7 @@ import java.util.*;
 public class RainbowConfigurationChecker implements IRainbowReportingPort, IRainbowConfigurationChecker {
 
     public static enum ProblemT {
-        WARNING, ERROR
+        WARNING, ERROR, INFO
     }
 
     public static class Problem {
@@ -70,6 +70,9 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort, IRain
 
         public ProblemT problem;
         public String   msg;
+		public void setMessage(String string) {
+			msg = string;
+		}
     }
 
     final List<Problem> m_problems = new LinkedList<> ();
@@ -93,10 +96,15 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort, IRain
     }
 
     private void checkEffectorConfiguration () {
+    	String message = "Checking effectors...";
+    	Problem p = new Problem(ProblemT.INFO, message);
+    	m_problems.add(p);
+    	int num = m_problems.size();
         EffectorDescription effectorDesc = m_master.effectorDesc ();
         for (EffectorAttributes effector : effectorDesc.effectors) {
             checkEffector (effector);
         }
+        if (m_problems.size() == num) p.setMessage (message + "ok");
     }
 
     private void checkEffector (EffectorAttributes effector) {
@@ -146,10 +154,16 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort, IRain
     }
 
     private void checkProbeConfiguration () {
+    	String message = "Checking probes...";
+    	Problem p = new Problem(ProblemT.INFO, message);
+    	m_problems.add(p);
+    	int num = m_problems.size();
         ProbeDescription probeDesc = m_master.probeDesc ();
         for (ProbeDescription.ProbeAttributes probe : probeDesc.probes) {
             checkProbe (probe);
         }
+        if (m_problems.size() == num) p.setMessage (message + "ok");
+
     }
 
     private void checkProbe (ProbeAttributes probe) {
@@ -203,6 +217,10 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort, IRain
     }
 
     protected void checkGaugeConfiguration () {
+    	String message = "Checking gauges...";
+    	Problem p = new Problem(ProblemT.INFO, message);
+    	m_problems.add(p);
+    	int num = m_problems.size();
         GaugeDescription gaugeDesc = m_master.gaugeDesc ();
         Collection<GaugeInstanceDescription> instSpecs = gaugeDesc.instSpec.values ();
 
@@ -213,6 +231,8 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort, IRain
         for (GaugeInstanceDescription gid : instSpecs) {
             checkGaugeConsistent (gid);
         }
+        if (m_problems.size() == num) p.setMessage (message + "ok");
+
     }
 
     private void checkGaugeType (GaugeTypeDescription gtd) {
