@@ -163,7 +163,7 @@ public class SwimModelUpdateOperatorsImpl extends AcmeModelInstance {
 		} else if (id.startsWith(CALL_KEY)) {
 			int idxStart = CALL_KEY.length();
 			String call = id.substring(idxStart);
-			Pattern methodRegex = Pattern.compile("([^[\\(]*)\\(([^\\)]*)\\)");
+			Pattern methodRegex = Pattern.compile("([^\\(]*)\\(([^\\)]*)\\)");
 			Matcher m = methodRegex.matcher(call);
 			if (m.matches()) {
 				String method = m.group(1);
