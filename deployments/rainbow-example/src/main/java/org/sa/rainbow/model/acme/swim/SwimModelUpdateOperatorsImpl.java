@@ -188,7 +188,10 @@ public class SwimModelUpdateOperatorsImpl extends AcmeModelInstance {
 					return null;
 				}
 				Object result = null;
-				Object[] argumentsJ = Arrays.stream(args).map(s -> getProperty(s)).toArray();
+				Object[] argumentsJ = new Object[args.length];
+				for (int i = 0; i < argumentsJ.length; i++) {
+					argumentsJ[i] = getProperty(args[i]);
+				}
 
 				for (Method mthd : clazz.getDeclaredMethods()) {
 					if (mthd.getName().equals(method) && Modifier.isStatic(mthd.getModifiers())
