@@ -29,6 +29,7 @@ import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.core.Tactic;
 import org.sa.rainbow.stitch.visitor.Stitch;
 import org.sa.rainbow.util.IRainbowConfigurationChecker;
+import org.sa.rainbow.util.RainbowConfigurationChecker;
 import org.sa.rainbow.util.RainbowConfigurationChecker.Problem;
 import org.sa.rainbow.util.RainbowConfigurationChecker.ProblemT;
 import org.sa.rainbow.util.Util;
@@ -226,7 +227,7 @@ public class UtilityConfigurationChecker implements IRainbowConfigurationChecker
 	
 	@Override
 	public Collection<Class> getMustBeExecutedAfter() {
-		return Collections.<Class>emptySet();
+		return Collections.<Class>singleton(RainbowConfigurationChecker.class);
 	}
 
 }

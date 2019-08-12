@@ -155,9 +155,9 @@ public class CheckConfiguration {
 			@Override
 			public int compare(IRainbowConfigurationChecker o1, IRainbowConfigurationChecker o2) {
 				if (o1.getMustBeExecutedAfter().contains(o2.getClass()))
-					return -1;
-				else if (o2.getMustBeExecutedAfter().contains(o1.getClass()))
 					return 1;
+				else if (o2.getMustBeExecutedAfter().contains(o1.getClass()))
+					return -1;
 				return 0;
 			}
 		});
