@@ -34,9 +34,9 @@ public interface IRainbowEnvironment extends RainbowConstants, IRainbowPropertyP
 
     File getTargetPath ();
 
-    void setMaster (RainbowMaster rainbowMaster);
+    void setMaster (IRainbowMaster rainbowMaster);
 
-    RainbowMaster getRainbowMaster ();
+    IRainbowMaster getRainbowMaster ();
 
     void registerGauge (IGauge gauge);
 

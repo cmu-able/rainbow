@@ -981,5 +981,10 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 	public Map<String, IAdaptationExecutor<?>> adaptationExecutors() {
 		return Collections.unmodifiableMap(m_adaptationExecutors);
 	}
+	
+	@Override
+	public IMasterCommandPort getCommandPort() {
+		return this;
+	}
 
 }

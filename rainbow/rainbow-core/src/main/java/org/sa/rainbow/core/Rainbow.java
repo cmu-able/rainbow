@@ -142,7 +142,7 @@ public class Rainbow implements IRainbowEnvironment {
 
     private final ThreadGroup m_threadGroup;
 
-    private RainbowMaster m_rainbowMaster;
+    private IRainbowMaster m_rainbowMaster;
 
     private Properties m_defaultProps;
 
@@ -520,12 +520,12 @@ public class Rainbow implements IRainbowEnvironment {
     }
 
     @Override
-    public void setMaster (RainbowMaster rainbowMaster) {
+    public void setMaster (IRainbowMaster rainbowMaster) {
         m_rainbowMaster = rainbowMaster;
     }
 
     @Override
-    public RainbowMaster getRainbowMaster () {
+    public IRainbowMaster getRainbowMaster () {
         return m_rainbowMaster;
     }
 
