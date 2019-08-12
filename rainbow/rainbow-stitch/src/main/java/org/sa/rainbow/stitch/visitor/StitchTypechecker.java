@@ -62,196 +62,210 @@ public class StitchTypechecker extends StitchScopeEstablisher {
 
 	@Override
 	public void doIdentifierExpression(ParserRuleContext idAST, Strategy.ExpressionKind kind) {
-		Expression expr = expr();
-		if (kind == Strategy.ExpressionKind.IDENTIFIER) {
-			// find identifier, lookup entire string first
-			String iden = idAST.getText();
-			Object o = null;
-			if (scope().lookup("__path_variable") != null) {
-				expr.setType(StitchTypes.UNKNOWN);
-				return;
-//				Object pv = scope().lookup("__path_variable");
-//				if (pv instanceof Var) {
-//					pv = ((Var) pv).getValue();
-//				}
-//				if (pv instanceof IAcmeElement) {
-//					o = ((IAcmeElement) pv).lookupName(iden);
-//				} else if (pv instanceof IAcmeRecordValue) {
-//					o = ((IAcmeRecordValue) pv).getField(iden);
-//					if (o instanceof IAcmePropertyValue) {
-//						o = ModelHelper.propertyValueToJava((IAcmePropertyValue) o);
+		storeExprTree(idAST);
+		Expression expr = (Expression) scope();
+		expr.setKind(translateExpressionKind(kind));
+		String id = idAST.getText();
+		expr.setName(id);
+		Object o = scope().lookup(id);
+		if (o != null && o instanceof Var) {
+			expr.addRefdVar((Var) o);
+		}
+		if (o == null) {
+			Tool.error("Unresolved reference '" + id + "'! Perhaps model not accessible?", idAST,
+					stitchProblemHandler());
+		}
+//		super.doIdentifierExpression(idAST, kind);
+//		Expression expr = expr();
+//		if (kind == Strategy.ExpressionKind.IDENTIFIER) {
+//			// find identifier, lookup entire string first
+//			String iden = idAST.getText();
+//			Object o = null;
+//			if (scope().lookup("__path_variable") != null) {
+//				expr.setType(StitchTypes.UNKNOWN);
+//				return;
+////				Object pv = scope().lookup("__path_variable");
+////				if (pv instanceof Var) {
+////					pv = ((Var) pv).getValue();
+////				}
+////				if (pv instanceof IAcmeElement) {
+////					o = ((IAcmeElement) pv).lookupName(iden);
+////				} else if (pv instanceof IAcmeRecordValue) {
+////					o = ((IAcmeRecordValue) pv).getField(iden);
+////					if (o instanceof IAcmePropertyValue) {
+////						o = ModelHelper.propertyValueToJava((IAcmePropertyValue) o);
+////					}
+////				}
+//			} else if (scope().lookup("__path_filter_type") != null) {
+//				expr.setType(StitchTypes.UNKNOWN);
+//				Var pv = (Var) scope().lookup("__path_filter_type");
+////				if (pv.typeObj != null) {
+////					Object o1 = pv.typeObj.lookupName(iden);
+////					if (o1 == null) {
+////						Tool.error("Unresolved reference '" + iden + "'! Perhaps model not accessible?", idAST,
+////								stitchProblemHandler());
+////					}
+////					return;
+////				}
+//				return;
+//
+//			}
+//			if (o == null)
+//				o = scope().lookup(iden);
+//			if (o == null) { // break up dot notation
+//				int dotIdx = iden.indexOf(".");
+//				if (dotIdx > -1) { // looking for v.something
+//					o = scope().lookup(iden.substring(0, dotIdx));
+//					if (o != null && o instanceof Var) {
+//						Var v = (Var) o;
+//						// find idx sub within object's scope
+//						o = v.scope.lookup(iden.substring(dotIdx + 1));
+//						if (o == null) {
+//							// treat var as model element and access rest as its
+//							// attribute
+//							String dotVal = iden.substring(dotIdx);
+//							Object val = v.getValue();
+//							if (val instanceof IAcmeElement) {
+//								IAcmeElement elem = (IAcmeElement) val;
+//								o = scope().lookup(elem.getQualifiedName() + dotVal);
+//								if (o == null) {
+//									// this may mean an invalid reference to
+//									// element attribute
+//									Tool.error("Invalid reference '" + iden + "' encountered!", idAST,
+//											stitchProblemHandler());
+//								}
+//							} else {
+//								o = scope().lookup(v.name + dotVal);
+//							}
+//							// if (o != null && o instanceof IAcmeProperty) {
+//							// get the Acme Property value
+//							// o = Tool.deriveValue(((IAcmeProperty
+//							// )o).getValue());
+//							// }
+//						}
 //					}
 //				}
-			} else if (scope().lookup("__path_filter_type") != null) {
-				expr.setType(StitchTypes.UNKNOWN);
-				Var pv = (Var) scope().lookup("__path_filter_type");
-//				if (pv.typeObj != null) {
-//					Object o1 = pv.typeObj.lookupName(iden);
-//					if (o1 == null) {
+//			}
+//			if (o == null) {
+//				int dotIdx = iden.lastIndexOf(".");
+//				String methodClass = null;
+//				if (dotIdx > -1) {
+//					methodClass = iden.substring(0, dotIdx);
+//					// mangle any method class renaming
+//					if (script().renames.containsKey(methodClass)) { // replace
+//						methodClass = script().renames.get(methodClass);
+//					}
+//					iden = iden.substring(dotIdx + 1);
+//				}
+//				int i;
+//
+//				// construct list of classes in which to search for method name,
+//				// look in imports
+//				List<Class> classesToSearch = new ArrayList<Class>();
+//				for (Class opClass : m_stitch./* stitch (). */script.ops) {
+//					// first, see if method class matches the imported method's
+//					// class
+//					if (methodClass != null) {
+//						if (!opClass.getName().endsWith(methodClass)) {
+//							// not a match, don't waste time searching its methods
+//							continue;
+//						}
+//					}
+//					// add to list to search
+//					classesToSearch.add(opClass);
+//				}
+//				if (classesToSearch.size() == 0 && methodClass != null) {
+//					// attempt to load the method class and search it
+//					try {
+//						classesToSearch.add(Class.forName(methodClass));
+//					} catch (ClassNotFoundException e) {
+//						if (Tool.logger().isInfoEnabled()) {
+//							Tool.logger().info("Attempt to load class " + methodClass
+//									+ " failed while executing method " + iden + "!", e);
+//						}
+//					}
+//				}
+//
+//				// find this name reference in reduced list of classes
+//				OUTER: for (Class fClass : classesToSearch) {
+//					for (Field f : fClass.getDeclaredFields()) {
+//						if (f.getName().equals(iden)) {
+//							if (Modifier.isStatic(f.getModifiers())) {
+//								o = f;
+//								break OUTER;
+//							} else {
+//								Tool.error("Reference field " + iden + " is not STATIC", null, stitchProblemHandler());
+//							}
+//						}
+//					}
+//				}
+//				// lookup of various combo failed, could indicate invalid
+//				// reference
+//				if (o == null)
+//					Tool.error("Unresolved reference '" + iden + "'!", idAST,
+//							stitchProblemHandler());
+//				else {
+//					if (o instanceof Field) {
+//						Field field = (Field) o;
+//						try {
+//							Object rv = field.getType();
+//							if (rv == Integer.class)
+//								expr.setType(StitchTypes.INTEGER);
+//							else if (rv == Long.class) 
+//								expr.setType(StitchTypes.LONG);
+//							else if (rv == Float.class || rv == Double.class) 
+//								expr.setType(StitchTypes.FLOAT);
+//							else 
+//								expr.setType(rv.getClass().getCanonicalName());
+//							
+//						} catch (IllegalArgumentException e) {
+//							Tool.error("Reference field " + iden + " is not STATIC", null, stitchProblemHandler());
+//						}
+//					} else
 //						Tool.error("Unresolved reference '" + iden + "'! Perhaps model not accessible?", idAST,
 //								stitchProblemHandler());
-//					}
-//					return;
+//
 //				}
-				return;
-
-			}
-			if (o == null)
-				o = scope().lookup(iden);
-			if (o == null) { // break up dot notation
-				int dotIdx = iden.indexOf(".");
-				if (dotIdx > -1) { // looking for v.something
-					o = scope().lookup(iden.substring(0, dotIdx));
-					if (o != null && o instanceof Var) {
-						Var v = (Var) o;
-						// find idx sub within object's scope
-						o = v.scope.lookup(iden.substring(dotIdx + 1));
-						if (o == null) {
-							// treat var as model element and access rest as its
-							// attribute
-							String dotVal = iden.substring(dotIdx);
-							Object val = v.getValue();
-							if (val instanceof IAcmeElement) {
-								IAcmeElement elem = (IAcmeElement) val;
-								o = scope().lookup(elem.getQualifiedName() + dotVal);
-								if (o == null) {
-									// this may mean an invalid reference to
-									// element attribute
-									Tool.error("Invalid reference '" + iden + "' encountered!", idAST,
-											stitchProblemHandler());
-								}
-							} else {
-								o = scope().lookup(v.name + dotVal);
-							}
-							// if (o != null && o instanceof IAcmeProperty) {
-							// get the Acme Property value
-							// o = Tool.deriveValue(((IAcmeProperty
-							// )o).getValue());
-							// }
-						}
-					}
-				}
-			}
-			if (o == null) {
-				int dotIdx = iden.lastIndexOf(".");
-				String methodClass = null;
-				if (dotIdx > -1) {
-					methodClass = iden.substring(0, dotIdx);
-					// mangle any method class renaming
-					if (script().renames.containsKey(methodClass)) { // replace
-						methodClass = script().renames.get(methodClass);
-					}
-					iden = iden.substring(dotIdx + 1);
-				}
-				int i;
-
-				// construct list of classes in which to search for method name,
-				// look in imports
-				List<Class> classesToSearch = new ArrayList<Class>();
-				for (Class opClass : m_stitch./* stitch (). */script.ops) {
-					// first, see if method class matches the imported method's
-					// class
-					if (methodClass != null) {
-						if (!opClass.getName().endsWith(methodClass)) {
-							// not a match, don't waste time searching its methods
-							continue;
-						}
-					}
-					// add to list to search
-					classesToSearch.add(opClass);
-				}
-				if (classesToSearch.size() == 0 && methodClass != null) {
-					// attempt to load the method class and search it
-					try {
-						classesToSearch.add(Class.forName(methodClass));
-					} catch (ClassNotFoundException e) {
-						if (Tool.logger().isInfoEnabled()) {
-							Tool.logger().info("Attempt to load class " + methodClass
-									+ " failed while executing method " + iden + "!", e);
-						}
-					}
-				}
-
-				// find this name reference in reduced list of classes
-				OUTER: for (Class fClass : classesToSearch) {
-					for (Field f : fClass.getDeclaredFields()) {
-						if (f.getName().equals(iden)) {
-							if (Modifier.isStatic(f.getModifiers())) {
-								o = f;
-								break OUTER;
-							} else {
-								Tool.error("Reference field " + iden + " is not STATIC", null, stitchProblemHandler());
-							}
-						}
-					}
-				}
-				// lookup of various combo failed, could indicate invalid
-				// reference
-				if (o == null)
-					Tool.error("Unresolved reference '" + iden + "'!", idAST,
-							stitchProblemHandler());
-				else {
-					if (o instanceof Field) {
-						Field field = (Field) o;
-						try {
-							Object rv = field.getType();
-							if (rv == Integer.class)
-								expr.setType(StitchTypes.INTEGER);
-							else if (rv == Long.class) 
-								expr.setType(StitchTypes.LONG);
-							else if (rv == Float.class || rv == Double.class) 
-								expr.setType(StitchTypes.FLOAT);
-							else 
-								expr.setType(rv.getClass().getCanonicalName());
-							
-						} catch (IllegalArgumentException e) {
-							Tool.error("Reference field " + iden + " is not STATIC", null, stitchProblemHandler());
-						}
-					} else
-						Tool.error("Unresolved reference '" + iden + "'! Perhaps model not accessible?", idAST,
-								stitchProblemHandler());
-
-				}
-			} else {
-				if (o instanceof Var) {
-					Var v = (Var) o;
-					expr.setType(((Var) o).getType());
-				} else if (o instanceof IAcmeProperty) {
-					IAcmeType pt = ((IAcmeProperty )o).getType();
-					IAcmeType t = AcmeTypeHelper.extractTypeStructure(pt);
-					if (t instanceof IAcmeIntType) 
-						expr.setType(StitchTypes.INTEGER);
-					else if (t instanceof IAcmeFloatType || t instanceof IAcmeDoubleType)
-						expr.setType(StitchTypes.FLOAT);
-					else if (t instanceof IAcmeBooleanType)
-						expr.setType(StitchTypes.BOOLEAN);
-					else if (t instanceof IAcmeSetType) {
-						expr.setType(StitchTypes.SET);
-					}
-					else if (t instanceof IAcmeSequenceType) {
-						expr.setType(StitchTypes.SEQ);
-					}
-					else expr.setType(pt.getName());;
-					
-				} else { // store the object directly
-					expr.setType(StitchTypes.UNKNOWN);
-				}
-			}
-		} else if (kind == Strategy.ExpressionKind.INTEGER) {
-			expr.setType(StitchTypes.INTEGER);
-		} else if (kind == Strategy.ExpressionKind.BOOLEAN) {
-			expr.setType(StitchTypes.BOOLEAN);
-
-		} else if (kind == Strategy.ExpressionKind.FLOAT) {
-			expr.setType(StitchTypes.FLOAT);
-		} else if (kind == Strategy.ExpressionKind.STRING) {
-			expr.setType(StitchTypes.STRING);
-		} else if (kind == Strategy.ExpressionKind.CHAR) {
-			// strip the single quotes, so char is at index 1
-			expr.setType(StitchTypes.CHAR);
-		} else if (kind == Strategy.ExpressionKind.NULL) {
-			expr.setType(StitchTypes.UNKNOWN);
-		}
+//			} else {
+//				if (o instanceof Var) {
+//					Var v = (Var) o;
+//					expr.setType(((Var) o).getType());
+//				} else if (o instanceof IAcmeProperty) {
+//					IAcmeType pt = ((IAcmeProperty )o).getType();
+//					IAcmeType t = AcmeTypeHelper.extractTypeStructure(pt);
+//					if (t instanceof IAcmeIntType) 
+//						expr.setType(StitchTypes.INTEGER);
+//					else if (t instanceof IAcmeFloatType || t instanceof IAcmeDoubleType)
+//						expr.setType(StitchTypes.FLOAT);
+//					else if (t instanceof IAcmeBooleanType)
+//						expr.setType(StitchTypes.BOOLEAN);
+//					else if (t instanceof IAcmeSetType) {
+//						expr.setType(StitchTypes.SET);
+//					}
+//					else if (t instanceof IAcmeSequenceType) {
+//						expr.setType(StitchTypes.SEQ);
+//					}
+//					else expr.setType(pt.getName());;
+//					
+//				} else { // store the object directly
+//					expr.setType(StitchTypes.UNKNOWN);
+//				}
+//			}
+//		} else if (kind == Strategy.ExpressionKind.INTEGER) {
+//			expr.setType(StitchTypes.INTEGER);
+//		} else if (kind == Strategy.ExpressionKind.BOOLEAN) {
+//			expr.setType(StitchTypes.BOOLEAN);
+//
+//		} else if (kind == Strategy.ExpressionKind.FLOAT) {
+//			expr.setType(StitchTypes.FLOAT);
+//		} else if (kind == Strategy.ExpressionKind.STRING) {
+//			expr.setType(StitchTypes.STRING);
+//		} else if (kind == Strategy.ExpressionKind.CHAR) {
+//			// strip the single quotes, so char is at index 1
+//			expr.setType(StitchTypes.CHAR);
+//		} else if (kind == Strategy.ExpressionKind.NULL) {
+//			expr.setType(StitchTypes.UNKNOWN);
+//		}
 	}
 
 	@Override
@@ -373,7 +387,7 @@ public class StitchTypechecker extends StitchScopeEstablisher {
 			}
 		}
 	}
-	
+
 	@Override
 	public void endExpression(ParserRuleContext ctx) {
 		Expression expr = expr();
@@ -394,21 +408,21 @@ public class StitchTypechecker extends StitchScopeEstablisher {
 
 		setExpression(null); // clear eval expression reference
 	}
-	
+
 	@Override
 	public void createVar(DataTypeContext type, TerminalNode id, ExpressionContext val, boolean isFunction) {
 	}
-	
+
 	@Override
 	public void doQuantifiedExpression(ExpressionKind type, QuantifiedExpressionContext ctx) {
 	}
-	
+
 	@Override
 	public void endQuantifiedExpression(ExpressionKind quant, QuantifiedExpressionContext quantifiedExpressionContext) {
 		Expression cExpr = doEndComplexExpr();
 		expr().setType(cExpr.getType());
 	}
-	
+
 	@Override
 	public void endSetExpression(SetExpressionContext setAST) {
 		Expression cExpr = doEndComplexExpr();
@@ -452,7 +466,7 @@ public class StitchTypechecker extends StitchScopeEstablisher {
 //	public void endSetExpression(StitchParser.SetExpressionContext setAST) {
 //		super.endSetExpression(setAST);
 //	}
-	
+
 	@Override
 	public void doExpression(ParserRuleContext exprAST) {
 		if (scope() instanceof Expression) {
@@ -465,11 +479,11 @@ public class StitchTypechecker extends StitchScopeEstablisher {
 			}
 		}
 	}
-	
+
 	@Override
 	public void doAssignExpression(ParserRuleContext identifier, ParserRuleContext expression) {
 	}
-	
+
 	@Override
 	public void doLogicalExpression(ExpressionKind opAST, ParserRuleContext ctx) {
 	}
@@ -477,42 +491,42 @@ public class StitchTypechecker extends StitchScopeEstablisher {
 	@Override
 	public void doRelationalExpression(ExpressionKind kind, ParserRuleContext opAST) {
 	}
-	
+
 	@Override
 	public void doArithmeticExpression(ExpressionKind kind, ParserRuleContext opAST) {
 	}
-	
+
 	@Override
 	public void doUnaryExpression(ExpressionKind kind, UnaryExpressionContext opAST) {
 	}
-	
+
 	private Expression doEndComplexExpr() {
 		Expression cExpr = (Expression) scope();
 		setExpression((Expression) cExpr.parent());
 		popScope();
 		return cExpr;
 	}
-	
+
 	@Override
 	public void setupPathFilter(TerminalNode identifier) {
 	}
-	
+
 	@Override
 	public void pathExpressionFilter(TypeFilterT filter, TerminalNode identifier, ExpressionContext expression) {
 	}
-	
+
 	@Override
 	public void continueExpressionFilter(TypeFilterT filter, TerminalNode setIdentifier, TerminalNode typeIdentifier,
 			ExpressionContext expression, boolean mustBeSet, boolean resultisSet) {
 	}
-	
+
 	final ThreadLocal<Var> pathVariable = new ThreadLocal<Var>() {
 		@Override
 		protected Var initialValue() {
 			return null;
 		}
 	};
-	
+
 	@Override
 	public void endPathExpression(PathExpressionContext ctx) {
 		pathVariable.set(null);

@@ -1060,7 +1060,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
         return expr;
     }
 
-    private void storeExprTree (ParseTree ast) {
+    protected void storeExprTree (ParseTree ast) {
         Expression expr = (Expression) scope ();
         if (expr.subLevel == 0 && expr.tree () == null) {
             // store if we're at the outermost expr of current subclause
