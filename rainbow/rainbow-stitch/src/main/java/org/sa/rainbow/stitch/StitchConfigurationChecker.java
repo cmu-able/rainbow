@@ -5,6 +5,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -20,9 +21,12 @@ import org.sa.rainbow.stitch.visitor.IStitchBehavior;
 import org.sa.rainbow.stitch.visitor.Stitch;
 import org.sa.rainbow.stitch.visitor.StitchBeginEndVisitor;
 import org.sa.rainbow.util.IRainbowConfigurationChecker;
+import org.sa.rainbow.util.RainbowConfigurationChecker;
 import org.sa.rainbow.util.RainbowConfigurationChecker.Problem;
 import org.sa.rainbow.util.RainbowConfigurationChecker.ProblemT;
 import org.sa.rainbow.util.Util;
+
+import com.google.common.collect.Lists;
 
 public class StitchConfigurationChecker implements IRainbowConfigurationChecker {
 
@@ -125,7 +129,7 @@ public class StitchConfigurationChecker implements IRainbowConfigurationChecker 
 	
 	@Override
 	public Collection<Class> getMustBeExecutedAfter() {
-		return Collections.<Class>singleton(RainbowAcmeModelConfigurationChecker.class);
+		Arrays.asList(RainbowConfigurationChecker.class, RainbowAcmeModelConfigurationChecker.class);
 	}
 
 }
