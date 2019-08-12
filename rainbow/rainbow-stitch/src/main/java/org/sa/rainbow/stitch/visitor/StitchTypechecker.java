@@ -46,7 +46,7 @@ import org.sa.rainbow.stitch.util.Tool;
 /**
  * Created by schmerl on 10/3/2016.
  */
-public class StitchTypechecker extends StitchScriptEvaluator {
+public class StitchTypechecker extends BaseStitchBehavior {
 
 	public Set<String> m_modelOperationsReferenced = new HashSet<>();
 	StitchBeginEndVisitor m_walker;
@@ -505,6 +505,13 @@ public class StitchTypechecker extends StitchScriptEvaluator {
 	public void continueExpressionFilter(TypeFilterT filter, TerminalNode setIdentifier, TerminalNode typeIdentifier,
 			ExpressionContext expression, boolean mustBeSet, boolean resultisSet) {
 	}
+	
+	final ThreadLocal<Var> pathVariable = new ThreadLocal<Var>() {
+		@Override
+		protected Var initialValue() {
+			return null;
+		}
+	};
 	
 	@Override
 	public void endPathExpression(PathExpressionContext ctx) {
