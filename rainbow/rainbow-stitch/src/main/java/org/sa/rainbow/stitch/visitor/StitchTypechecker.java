@@ -27,8 +27,10 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.core.Expression;
+import org.sa.rainbow.stitch.core.IScope;
 import org.sa.rainbow.stitch.core.MyDouble;
 import org.sa.rainbow.stitch.core.MyInteger;
+import org.sa.rainbow.stitch.core.Statement;
 import org.sa.rainbow.stitch.core.StitchTypes;
 import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.core.Var;
@@ -320,7 +322,174 @@ public class StitchTypechecker extends StitchScopeEstablisher {
 				+ identifier.getText() + " cannot be used in the effect.", identifier, stitchProblemHandler());
 	}
 
+
+
+
+
 	@Override
+	public void createVar(DataTypeContext type, TerminalNode id, ExpressionContext val, boolean isFunction) {
+		if (scope().expressions().size() > 0) {
+			Var v = scope().vars().get(id.getText());
+			if (v != null && v.valStmt != null) {
+				Expression e = scope().expressions().get(0);
+				// make sure expr assocaited with var has AST and no known
+				// result
+//				if (e.tree() != null && (e.getResult() == null || v.isFunction())) {
+//					e.evaluate(null, m_walker);
+//				}
+				v.setType(e.getType());
+			}
+		}
+	}
+	
+	@Override
+	public void lOp() {
+		expr().curOp.push(Expression.LOP);
+	}
+
+	@Override
+	public void rOp() {
+		Expression expr = expr();
+		expr.curOp.push(Expression.ROP);
+	}
+	
+	@Override
+	public void beginExpression() {
+		super.beginExpression();
+		if (expr() != null) {
+			expr().subLevel++;
+			return;
+		}
+		final IScope scope = scope();
+		if (scope instanceof Statement && scope.expressions().size() > ((Statement) scope).curExprIdx) {
+			setExpression(scope.expressions().get(((Statement) scope).curExprIdx++));
+			expr().curExprIdx = 0;
+		} else if (scope instanceof Expression) {
+			Expression expr = (Expression) scope;
+			if (expr.isComplex()) {
+				if (expr.expressions().size() > expr.curExprIdx) {
+					setExpression(expr.expressions().get(expr.curExprIdx++));
+					expr.subLevel = 0;
+				}
+			} else {
+				setExpression((Expression) scope);
+				expr().curExprIdx = 0;
+			}
+		}
+	}
+	
+	@Override
+	public void endExpression(ParserRuleContext ctx) {
+		super.endExpression(ctx);
+		Expression expr = expr();
+		if (expr.subLevel > 0) { // decr dept count first
+			expr.subLevel--;
+			return;
+		} else { // check quantified expression special case
+			if (expr.skipQuanPredicate) {
+				expr.skipQuanPredicate = false;
+			}
+		}
+
+		// transfer any child result
+		if (expr.getResult() == null && expr.expressions().size() > 0) {
+			// transfer children result up
+			Expression sub = expr.expressions().get(0);
+			expr.setResult(sub.getResult());
+		}
+
+		setExpression(null); // clear eval expression reference
+//		Expression expr = (Expression )scope();
+//		if (expr.subLevel > 0) { // decr dept count first
+//			expr.subLevel--;
+//		} else { // check quantified expression special case
+//			boolean addToParentList = false;
+//		}
+//		// transfer any child result
+//		if ((expr.getType() == StitchTypes.UNKNOWN || expr.getType() == null) && expr.expressions().size() > 0) {
+//			// transfer children result up
+//			Expression sub = expr.expressions().get(0);
+//			expr.setType(sub.getType());
+//		}
+//
+//		setExpression(null); // clear eval expression reference
+	}
+	
+	private void doBeginComplexExpr() {
+		// get the next expression in list, checking to see if it's complex.
+		// if it is, we're in a straight complex expression;
+		// if not, check current expr to see if it is complex, in which case,
+		// we're within a complex expression already...
+		Expression expr = expr();
+		if (expr == null && scope() instanceof Expression)
+			expr = (Expression) scope();
+		Expression cExpr = null;
+		if (expr.expressions().size() > 0) {
+			Expression nextExpr = expr.expressions().get(expr.curExprIdx++);
+			if (nextExpr.isComplex()) {
+				cExpr = nextExpr;
+			} else if (expr.isComplex()) {
+				cExpr = expr;
+			}
+		} else {
+			if (expr.isComplex()) {
+				// this SHOULD be the case, by nature of tree walk
+				cExpr = expr;
+			}
+		}
+
+		if (cExpr != null) {
+			// reset expr count for descending into element exprs
+			cExpr.curExprIdx = 0;
+			setExpression(null);
+			pushScope(cExpr);
+		}
+	}
+	
+	private Expression doEndComplexExprTC() {
+		Expression cExpr = (Expression) scope();
+		setExpression((Expression) cExpr.parent());
+		popScope();
+		return cExpr;
+	}
+
+	@Override
+	public void beginQuantifiedExpression() {
+		super.beginQuantifiedExpression();
+		doBeginComplexExpr();
+	}
+	
+	@Override
+	public void doQuantifiedExpression(ExpressionKind type, QuantifiedExpressionContext ctx) {
+		Expression cExpr = (Expression )scope();
+		if (cExpr.getKind() != Kind.QUANTIFIED) {
+			Tool.error("Error! Expected quantified expression not found!!", null, stitchProblemHandler());
+			return;
+		}
+		if (cExpr.vars().size() > 1) {
+			Tool.error("Sorry, only one quantified variable is currently supported! " + cExpr, null,
+					stitchProblemHandler());
+			return;
+		}
+		
+		Var v = (Var) cExpr.vars().values().toArray()[0];
+		// - the set expression should have values
+		String result = cExpr.expressions().get(0).getType();
+	}
+
+	@Override
+	public void endQuantifiedExpression(ExpressionKind quant, QuantifiedExpressionContext quantifiedExpressionContext) {
+		Expression cExpr = doEndComplexExprTC();
+		expr().setType(cExpr.getType());
+		super.endQuantifiedExpression(quant, quantifiedExpressionContext);
+	}
+	
+	@Override
+	public void beginMethodCallExpression() {
+		super.beginMethodCallExpression();
+		doBeginComplexExpr();
+	}
+	
 	public void endMethodCallExpression(TerminalNode mc, StitchParser.MethodCallContext id) {
 //		Expression cExpr = (Expression )scope ();
 //
@@ -425,46 +594,21 @@ public class StitchTypechecker extends StitchScopeEstablisher {
 				}
 			}
 		}
+		doEndComplexExprTC();
 	}
-
+	
 	@Override
-	public void endExpression(ParserRuleContext ctx) {
-		super.endExpression(ctx);
-//		Expression expr = (Expression )scope();
-//		if (expr.subLevel > 0) { // decr dept count first
-//			expr.subLevel--;
-//		} else { // check quantified expression special case
-//			boolean addToParentList = false;
-//		}
-//		// transfer any child result
-//		if ((expr.getType() == StitchTypes.UNKNOWN || expr.getType() == null) && expr.expressions().size() > 0) {
-//			// transfer children result up
-//			Expression sub = expr.expressions().get(0);
-//			expr.setType(sub.getType());
-//		}
-//
-//		setExpression(null); // clear eval expression reference
-	}
-
-	@Override
-	public void createVar(DataTypeContext type, TerminalNode id, ExpressionContext val, boolean isFunction) {
-	}
-
-	@Override
-	public void doQuantifiedExpression(ExpressionKind type, QuantifiedExpressionContext ctx) {
-	}
-
-	@Override
-	public void endQuantifiedExpression(ExpressionKind quant, QuantifiedExpressionContext quantifiedExpressionContext) {
-		Expression cExpr = doEndComplexExpr();
-		expr().setType(cExpr.getType());
+	public void beginSetExpression() {
+		super.beginSetExpression();
+		doBeginComplexExpr();
 	}
 
 	@Override
 	public void endSetExpression(SetExpressionContext setAST) {
-		Expression cExpr = doEndComplexExpr();
+		Expression cExpr = doEndComplexExprTC();
 		String settype = StitchTypes.SET;
 		cExpr.setType(settype);
+		super.endSetExpression(setAST);
 		return;
 //		// iterate through elements and make sure they are the same types
 //		// complain if NOT, or form the proper set if yes
@@ -515,12 +659,33 @@ public class StitchTypechecker extends StitchScopeEstablisher {
 					expr.setType(sub.getType());
 			}
 		}
-		super.storeExprTree(exprAST);
+		super.doExpression(exprAST);
 	}
 
 	@Override
 	public void doAssignExpression(ParserRuleContext identifier, ParserRuleContext expression) {
 		super.doAssignExpression(identifier, expression);
+		
+		Expression expr = expr();
+		Object rVal = expr.lrOps[Expression.ROP].pop();
+		// the lVal can only be an identifier, otherwise, won't make sense!
+		Object lObj = expr.lookup(identifier.getText());
+		if (lObj != null && lObj instanceof Var) {
+			Var v = (Var) lObj;
+			if (Tool.typeMatches(v, rVal)) {
+				v.setValue(rVal);
+				expr.setResult(rVal);
+			} else {
+				Tool.error("Assignment expression cannot be evaluated due to mismatched value types! " + v.getType()
+						+ " vs. " + rVal.getClass().getName(), expression, stitchProblemHandler());
+				return;
+			}
+		} else {
+			// can't find lvalue reference
+			Tool.error("Assignment expression cannot be evaluated because lvalue reference cannot be found! "
+					+ expression.getText(), expression, stitchProblemHandler());
+			return;
+		}
 	}
 
 //	private Expression doEndComplexExpr() {
@@ -564,7 +729,7 @@ public class StitchTypechecker extends StitchScopeEstablisher {
 		((Expression) scope()).setKind(Expression.Kind.RELATIONAL);
 		scope().setName(opAST.getText());
 
-		Expression expr = expr();
+		Expression expr = (Expression )scope();
 
 		if (expr.lrOps[Expression.LOP].isEmpty() || expr.lrOps[Expression.ROP].isEmpty()
 				|| expr.lrOps[Expression.LOP].peek() == null || expr.lrOps[Expression.ROP].peek() == null) {
