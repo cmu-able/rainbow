@@ -430,23 +430,21 @@ public class StitchTypechecker extends StitchScopeEstablisher {
 
 	@Override
 	public void endExpression(ParserRuleContext ctx) {
-		Expression expr = expr();
-		if (expr.subLevel > 0) { // decr dept count first
-			expr.subLevel--;
-			return;
-		} else { // check quantified expression special case
-			if (expr.skipQuanPredicate) {
-				expr.skipQuanPredicate = false;
-			}
-		}
-		// transfer any child result
-		if ((expr.getType() == StitchTypes.UNKNOWN || expr.getType() == null) && expr.expressions().size() > 0) {
-			// transfer children result up
-			Expression sub = expr.expressions().get(0);
-			expr.setType(sub.getType());
-		}
-
-		setExpression(null); // clear eval expression reference
+		super.endExpression(ctx);
+//		Expression expr = (Expression )scope();
+//		if (expr.subLevel > 0) { // decr dept count first
+//			expr.subLevel--;
+//		} else { // check quantified expression special case
+//			boolean addToParentList = false;
+//		}
+//		// transfer any child result
+//		if ((expr.getType() == StitchTypes.UNKNOWN || expr.getType() == null) && expr.expressions().size() > 0) {
+//			// transfer children result up
+//			Expression sub = expr.expressions().get(0);
+//			expr.setType(sub.getType());
+//		}
+//
+//		setExpression(null); // clear eval expression reference
 	}
 
 	@Override
