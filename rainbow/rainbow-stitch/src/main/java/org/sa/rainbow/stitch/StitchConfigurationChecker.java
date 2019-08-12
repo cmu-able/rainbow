@@ -74,7 +74,7 @@ public class StitchConfigurationChecker implements IRainbowConfigurationChecker 
 				}
 			}
 		}
-		Ohana.instance().dispose();
+		Ohana.instance().dispose();  
 	}
 
 	protected void checkStitchFile(File f) {

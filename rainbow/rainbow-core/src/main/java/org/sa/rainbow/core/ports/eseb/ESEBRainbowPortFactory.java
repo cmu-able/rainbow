@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.sa.rainbow.core.IRainbowMaster;
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.RainbowMaster;
@@ -475,7 +476,7 @@ public class ESEBRainbowPortFactory implements IRainbowConnectionPortFactory {
 
 
     @Override
-    public IMasterCommandPort createMasterCommandProviderPort (RainbowMaster rainbowMaster)
+    public IMasterCommandPort createMasterCommandProviderPort (IRainbowMaster rainbowMaster)
             throws RainbowConnectionException {
         try {
             return new ESEBMasterCommandProviderPort (rainbowMaster);

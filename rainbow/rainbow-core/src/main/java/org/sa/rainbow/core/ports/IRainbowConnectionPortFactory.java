@@ -25,6 +25,7 @@ package org.sa.rainbow.core.ports;
 
 import java.util.Properties;
 
+import org.sa.rainbow.core.IRainbowMaster;
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.RainbowMaster;
@@ -192,7 +193,7 @@ public interface IRainbowConnectionPortFactory {
     <S extends IEvaluable> IRainbowAdaptationDequeuePort<S>
     createAdaptationDequeuePort (ModelReference model);
 
-    IMasterCommandPort createMasterCommandProviderPort (RainbowMaster rainbowMaster)
+    IMasterCommandPort createMasterCommandProviderPort (IRainbowMaster rainbowMaster)
             throws RainbowConnectionException;
 
     IMasterCommandPort createMasterCommandRequirerPort () throws RainbowConnectionException;
