@@ -226,7 +226,7 @@ public class UtilityConfigurationChecker implements IRainbowConfigurationChecker
 	
 	@Override
 	public Collection<Class> getMustBeExecutedAfter() {
-		return Collections.<Class>singleton(RainbowConfigurationChecker.class);
+		return Collections.<Class>emptySet();
 	}
 
 }
