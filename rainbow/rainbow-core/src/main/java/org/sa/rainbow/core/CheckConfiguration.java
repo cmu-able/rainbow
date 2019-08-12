@@ -24,8 +24,11 @@
 package org.sa.rainbow.core;
 
 import java.util.Collection;
-import java.util.LinkedHashSet;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.reflections.Reflections;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
@@ -37,9 +40,9 @@ import org.sa.rainbow.core.models.EffectorDescription;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.ProbeDescription;
 import org.sa.rainbow.core.ports.DisconnectedRainbowDelegateConnectionPort;
+import org.sa.rainbow.core.ports.IMasterCommandPort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.util.IRainbowConfigurationChecker;
-import org.sa.rainbow.util.RainbowConfigurationChecker;
 import org.sa.rainbow.util.RainbowConfigurationChecker.Problem;
 import org.sa.rainbow.util.RainbowConfigurationChecker.ProblemT;
 import org.sa.rainbow.util.YamlUtil;
@@ -70,11 +73,10 @@ public class CheckConfiguration {
 //        final UtilityPreferenceDescription loadUtilityPrefs = YamlUtil.loadUtilityPrefs ();
 //        System.out.println ("found " + loadUtilityPrefs.attributeVectors.size () + " attribute vectors, "
 //                + loadUtilityPrefs.utilities.size () + " utilities, " + loadUtilityPrefs.weights.size () + " weights");
-		
+
 		final ModelsManager mm = new ModelsManager();
 		final GaugeManager gm = new GaugeManager(loadGaugeSpecs);
-		
-		
+
 		IRainbowMaster master = new IRainbowMaster() {
 
 			@Override
@@ -124,37 +126,63 @@ public class CheckConfiguration {
 				// TODO Auto-generated method stub
 				return null;
 			}
+
+			@Override
+			public IMasterCommandPort getCommandPort() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
 		};
-		
+
+		// Make Rainbow.instance().rainbowMaster() return this master
+		Rainbow.instance().setMaster(master);
+
 		Reflections reflections = new Reflections(CheckConfiguration.class.getClassLoader());
-		LinkedHashSet<Class<? extends IRainbowConfigurationChecker>> checkers = new LinkedHashSet<>();
-		checkers.add(RainbowConfigurationChecker.class);
-		checkers.addAll(reflections.getSubTypesOf(IRainbowConfigurationChecker.class));
+		List<IRainbowConfigurationChecker> checkers = new LinkedList<>();
+		Set<Class<? extends IRainbowConfigurationChecker>> checkerClasses = reflections
+				.getSubTypesOf(IRainbowConfigurationChecker.class);
+		for (Class<? extends IRainbowConfigurationChecker> cls : checkerClasses) {
+			try {
+
+				checkers.add(cls.newInstance());
+			} catch (InstantiationException | IllegalAccessException e) {
+				System.out.println("Could not instantiate " + cls);
+			}
+		}
+		checkers.sort(new Comparator<IRainbowConfigurationChecker>() {
+
+			@Override
+			public int compare(IRainbowConfigurationChecker o1, IRainbowConfigurationChecker o2) {
+				if (o1.getMustBeExecutedAfter().contains(o2.getClass()))
+					return -1;
+				else if (o2.getMustBeExecutedAfter().contains(o1.getClass()))
+					return 1;
+				return 0;
+			}
+		});
 		System.out.println("Checking configuration consistency...");
 		boolean hasProblems = false;
-		for (Class<? extends IRainbowConfigurationChecker> checkerClass : checkers) {
-			try {
-				IRainbowConfigurationChecker checker = checkerClass.newInstance();
-				checker.setRainbowMaster(master);
-				if (mm.m_reportingPort instanceof DisconnectedRainbowDelegateConnectionPort && checker instanceof IRainbowReportingPort) {
-					mm.m_reportingPort = (IRainbowReportingPort )checker;
-					System.out.print("Loading models...");
-					System.out.flush();
-					mm.initializeModels();
-					System.out.println("found " + mm.getRegisteredModelTypes() + " model *types*");
-				}
-				checker.checkRainbowConfiguration();
-				if (checker.getProblems().size() > 0) {
-//					System.out.println("Problems with the configuration were reported:");
-					for (Problem p : checker.getProblems()) {
-						if (p.getType() == ProblemT.ERROR)
-							hasProblems = true;
-						System.out.println(p.problem.name() + ": " + p.msg);
-					}
-				}
-			} catch (InstantiationException | IllegalAccessException e) {
-				System.out.println("Could not instantiate " + checkerClass);
+		for (IRainbowConfigurationChecker checker : checkers) {
+			checker.setRainbowMaster(master);
+			if (mm.m_reportingPort instanceof DisconnectedRainbowDelegateConnectionPort
+					&& checker instanceof IRainbowReportingPort) {
+				mm.m_reportingPort = (IRainbowReportingPort) checker;
+				System.out.print("Loading models...");
+				System.out.flush();
+				mm.initializeModels();
+				System.out.println("found " + mm.getRegisteredModelTypes() + " model *types*");
 			}
+			checker.checkRainbowConfiguration();
+			if (checker.getProblems().size() > 0) {
+//					System.out.println("Problems with the configuration were reported:");
+				for (Problem p : checker.getProblems()) {
+					if (p.getType() == ProblemT.ERROR)
+						hasProblems = true;
+					System.out.println(p.problem.name() + ": " + p.msg);
+				}
+			}
+
 		}
 
 		if (!hasProblems) {

@@ -1097,8 +1097,8 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 			} else if (n instanceof AcmeModelInstance) {
 
 				AcmeModelInstance ami = (AcmeModelInstance) n;
-				IAdaptationExecutor<Object> executor = Rainbow.instance().getRainbowMaster()
-						.strategyExecutor(Util.genModelRef(ami.getModelName(), ami.getModelType()));
+				IAdaptationExecutor<Object> executor = (IAdaptationExecutor<Object>) Rainbow.instance().getRainbowMaster()
+						.adaptationExecutors().get(Util.genModelRef(ami.getModelName(), ami.getModelType()).toString());
 				nameObj = ami.getModelInstance().lookupName(name.substring(dotIdx + 1), true);
 				if (nameObj == null) {
 					// Look for the <name>Cmd method in the Command Factory

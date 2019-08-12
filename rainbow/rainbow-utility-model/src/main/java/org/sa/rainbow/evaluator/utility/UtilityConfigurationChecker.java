@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -221,6 +222,11 @@ public class UtilityConfigurationChecker implements IRainbowConfigurationChecker
 	@Override
 	public Collection<Problem> getProblems() {
 		return m_problems;
+	}
+	
+	@Override
+	public Collection<Class> getMustBeExecutedAfter() {
+		return Collections.<Class>singleton(RainbowConfigurationChecker.class);
 	}
 
 }

@@ -191,6 +191,10 @@ public class Stitch {
      */
     public void dispose () {
         m_behaviors = null;
+        m_exprStack.set(null);
+        m_scopeStack.set(null);
+        expr.set(null);
+        
     }
 
     /**

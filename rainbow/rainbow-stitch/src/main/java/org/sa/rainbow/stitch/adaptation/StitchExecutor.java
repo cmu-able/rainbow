@@ -31,6 +31,7 @@ import org.acmestudio.acme.element.IAcmeSystem;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
+import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.adaptation.AdaptationTree;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
@@ -186,8 +187,8 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
 				m_modelUSBusPort.updateModel(
 						m_historyModel.getCommandFactory().strategyExecutionStateCommand(getManagedModel(), at.getId(),
 								ExecutionHistoryModelInstance.ADAPTATION_TREE, ExecutionStateT.ADAPTATION_DONE, null));
-                final IAdaptationManager<Strategy> adaptationManager = Rainbow.instance ()
-                        .getRainbowMaster ().adaptationManagerForModel (this.m_modelRef.toString ());
+                final IAdaptationManager<Strategy> adaptationManager = ((RainbowMaster )Rainbow.instance ()
+                        .getRainbowMaster ()).adaptationManagerForModel (this.m_modelRef.toString ());
                 if (adaptationManager != null) {
                     adaptationManager
                             .markStrategyExecuted (at);

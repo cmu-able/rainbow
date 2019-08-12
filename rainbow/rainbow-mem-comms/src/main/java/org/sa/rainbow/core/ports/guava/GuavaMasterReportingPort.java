@@ -5,6 +5,7 @@ import java.io.PrintStream;
 import java.text.MessageFormat;
 
 import org.apache.log4j.Logger;
+import org.sa.rainbow.core.IRainbowMaster;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.ports.eseb.ESEBConstants;

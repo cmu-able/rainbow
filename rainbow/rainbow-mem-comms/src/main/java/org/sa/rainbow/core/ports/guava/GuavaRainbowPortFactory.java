@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.sa.rainbow.core.IRainbowMaster;
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.RainbowDelegate;
 import org.sa.rainbow.core.RainbowMaster;
@@ -357,7 +358,7 @@ public class GuavaRainbowPortFactory implements IRainbowConnectionPortFactory {
 	// This needs to be thought about because by necessity, these commands can come from
 	// a separate process (e.g., the shell).
 	@Override
-	public IMasterCommandPort createMasterCommandProviderPort(RainbowMaster rainbowMaster)
+	public IMasterCommandPort createMasterCommandProviderPort(IRainbowMaster rainbowMaster)
 			throws RainbowConnectionException {
 		try {
 //			return new JSONRPCMasterCommandProvirerPort(rainbowMaster);

@@ -33,6 +33,8 @@ public interface IMasterCommandPort {
     void killProbes ();
 
     void enableAdaptation (boolean enabled);
+    
+    boolean isAdaptationEnabled();
 
     Outcome testEffector (String target, String effName, List<String> args);
 
