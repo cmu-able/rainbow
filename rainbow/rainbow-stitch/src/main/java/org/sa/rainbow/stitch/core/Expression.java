@@ -437,7 +437,7 @@ public class Expression extends ScopedEntity implements IEvaluableScope, StitchT
 		return type;
 	}
 
-	private String getTypeFromAcme(IAcmeProperty o) {
+	public String getTypeFromAcme(IAcmeProperty o) {
 		if (o.getType() instanceof IAcmeIntType || o.getValue() instanceof IAcmeIntValue) {
 			return INTEGER;
 		}
