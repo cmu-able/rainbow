@@ -145,7 +145,7 @@ public class CheckConfiguration {
 				}
 				checker.checkRainbowConfiguration();
 				if (checker.getProblems().size() > 0) {
-					System.out.println("Problems with the configuration were reported:");
+//					System.out.println("Problems with the configuration were reported:");
 					for (Problem p : checker.getProblems()) {
 						if (p.getType() == ProblemT.ERROR)
 							hasProblems = true;
