@@ -518,34 +518,22 @@ public class StitchTypechecker extends StitchScopeEstablisher {
 					expr.setType(sub.getType());
 			}
 		}
+		super.storeExprTree(exprAST);
 	}
 
 	@Override
 	public void doAssignExpression(ParserRuleContext identifier, ParserRuleContext expression) {
+		super.doAssignExpression(identifier, expression);
 	}
 
-	@Override
-	public void doLogicalExpression(ExpressionKind opAST, ParserRuleContext ctx) {
-	}
 
-	@Override
-	public void doRelationalExpression(ExpressionKind kind, ParserRuleContext opAST) {
-	}
-
-	@Override
-	public void doArithmeticExpression(ExpressionKind kind, ParserRuleContext opAST) {
-	}
-
-	@Override
-	public void doUnaryExpression(ExpressionKind kind, UnaryExpressionContext opAST) {
-	}
-
-	private Expression doEndComplexExpr() {
-		Expression cExpr = (Expression) scope();
-		setExpression((Expression) cExpr.parent());
-		popScope();
-		return cExpr;
-	}
+//	private Expression doEndComplexExpr() {
+//		Expression cExpr = (Expression) scope();
+//		if (expr.parent)
+//		setExpression((Expression) cExpr.parent());
+//		popScope();
+//		return cExpr;
+//	}
 
 	@Override
 	public void setupPathFilter(TerminalNode identifier) {
