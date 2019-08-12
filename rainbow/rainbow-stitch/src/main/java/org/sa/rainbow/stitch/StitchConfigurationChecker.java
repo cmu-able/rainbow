@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.sa.rainbow.checkers.acme.RainbowAcmeModelConfigurationChecker;
 import org.sa.rainbow.core.IRainbowMaster;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
