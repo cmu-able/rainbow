@@ -593,4 +593,9 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort, IRain
 
     }
 
+	@Override
+	public Collection<Class> getMustBeExecutedBefore() {
+		return Collections.<Class>emptySet();
+	}
+
 }

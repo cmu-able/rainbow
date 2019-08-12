@@ -12,4 +12,6 @@ public interface IRainbowConfigurationChecker {
 	void setRainbowMaster(IRainbowMaster master);
 
 	Collection<Problem> getProblems();
+	
+	Collection<Class> getMustBeExecutedAfter();
 }

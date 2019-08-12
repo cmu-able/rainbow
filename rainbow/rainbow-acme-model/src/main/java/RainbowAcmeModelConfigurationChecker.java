@@ -2,6 +2,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 
 import org.acmestudio.acme.core.resource.IAcmeResource;
@@ -83,6 +84,11 @@ public class RainbowAcmeModelConfigurationChecker implements IRainbowConfigurati
 	@Override
 	public Collection<Problem> getProblems() {
 		return m_problems;
+	}
+	
+	@Override
+	public Collection<Class> getMustBeExecutedAfter() {
+		return Collections.<Class>singleton(RainbowConfigurationChecker.class);
 	}
 
 }

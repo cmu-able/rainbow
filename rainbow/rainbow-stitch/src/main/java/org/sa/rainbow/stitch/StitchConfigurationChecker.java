@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -17,7 +18,6 @@ import org.sa.rainbow.stitch.error.IStitchProblem;
 import org.sa.rainbow.stitch.visitor.IStitchBehavior;
 import org.sa.rainbow.stitch.visitor.Stitch;
 import org.sa.rainbow.stitch.visitor.StitchBeginEndVisitor;
-import org.sa.rainbow.stitch.visitor.StitchScopeEstablisher;
 import org.sa.rainbow.util.IRainbowConfigurationChecker;
 import org.sa.rainbow.util.RainbowConfigurationChecker.Problem;
 import org.sa.rainbow.util.RainbowConfigurationChecker.ProblemT;
@@ -120,6 +120,11 @@ public class StitchConfigurationChecker implements IRainbowConfigurationChecker 
 	@Override
 	public Collection<Problem> getProblems() {
 		return m_problems;
+	}
+	
+	@Override
+	public Collection<Class> getMustBeExecutedAfter() {
+		return Collections.<Class>singleton(RainbowAcmeModelConfigurationChecker.class);
 	}
 
 }
