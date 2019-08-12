@@ -1,3 +1,4 @@
+
 import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
@@ -14,6 +15,7 @@ import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.model.acme.AcmeModelCommandFactory;
 import org.sa.rainbow.util.IRainbowConfigurationChecker;
+import org.sa.rainbow.util.RainbowConfigurationChecker;
 import org.sa.rainbow.util.RainbowConfigurationChecker.Problem;
 import org.sa.rainbow.util.RainbowConfigurationChecker.ProblemT;
 import org.sa.rainbow.util.Util;
@@ -83,7 +85,7 @@ public class RainbowAcmeModelConfigurationChecker implements IRainbowConfigurati
 
 	@Override
 	public Collection<Problem> getProblems() {
-		return m_problems;
+		return m_problems; 
 	}
 	
 	@Override
