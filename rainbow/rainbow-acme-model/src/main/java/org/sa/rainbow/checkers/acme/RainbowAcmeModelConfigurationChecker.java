@@ -1,3 +1,4 @@
+package org.sa.rainbow.checkers.acme;
 
 import java.io.File;
 import java.io.IOException;

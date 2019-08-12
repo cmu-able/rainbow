@@ -129,7 +129,7 @@ public class StitchConfigurationChecker implements IRainbowConfigurationChecker 
 	
 	@Override
 	public Collection<Class> getMustBeExecutedAfter() {
-		Arrays.asList(RainbowConfigurationChecker.class, RainbowAcmeModelConfigurationChecker.class);
+		return Arrays.<Class>asList(RainbowConfigurationChecker.class, RainbowAcmeModelConfigurationChecker.class);
 	}
 
 }
