@@ -1046,7 +1046,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
         return expr;
     }
 
-    private Expression doEndComplexExpr () {
+    protected Expression doEndComplexExpr () {
         Expression expr = (Expression) scope ();
         if (expr.parent () != null) {
             // store complex expr to the prev/parent expression's list
