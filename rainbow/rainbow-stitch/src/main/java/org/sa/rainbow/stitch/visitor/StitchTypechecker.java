@@ -74,6 +74,46 @@ public class StitchTypechecker extends StitchScopeEstablisher {
 		if (o == null) {
 			Tool.error("Unresolved reference '" + id + "'! Perhaps model not accessible?", idAST,
 					stitchProblemHandler());
+		} 
+		else {
+			switch (expr.getKind()) {
+			case ASSIGNMENT:
+				expr.setType("void");
+				break;
+			case BOOLEAN:
+			case LOGICAL:
+			case QUANTIFIED:
+			case RELATIONAL:
+				expr.setType(Expression.BOOLEAN);
+				break;
+			case CHAR:
+				expr.setType(Expression.CHAR);
+				break;
+			case STRING:
+				expr.setType(Expression.STRING);
+				break;
+			case FLOAT:
+				expr.setType(Expression.FLOAT);
+				break;
+			case INTEGER:
+				expr.setType(Expression.INTEGER);
+				break;
+			case ARITHMETIC:
+				expr.setType(Expression.UNKNOWN);
+				break;
+			case IDENTIFIER: {
+				if (o == null)
+					expr.setType(Expression.UNKNOWN);
+				else if (o instanceof Var) {
+					expr.setType(((Var) o).getType());
+				} else if (o instanceof IAcmeProperty) {
+					expr.setType(expr.getTypeFromAcme((IAcmeProperty) o));
+
+				} else
+					expr.setType(Expression.UNKNOWN);
+			}
+			}
+
 		}
 //		super.doIdentifierExpression(idAST, kind);
 //		Expression expr = expr();
