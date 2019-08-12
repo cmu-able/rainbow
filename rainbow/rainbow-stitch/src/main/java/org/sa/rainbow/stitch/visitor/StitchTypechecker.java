@@ -734,8 +734,7 @@ public class StitchTypechecker extends StitchScopeEstablisher {
 		if (expr.lrOps[Expression.LOP].isEmpty() || expr.lrOps[Expression.ROP].isEmpty()
 				|| expr.lrOps[Expression.LOP].peek() == null || expr.lrOps[Expression.ROP].peek() == null) {
 			// if either is NULL, result is NULL
-			final String msg = "One relational operand is NULL: " + expr.lrOps[Expression.LOP].pop() + ", "
-					+ expr.lrOps[Expression.ROP].pop() + " ... " + opAST.toStringTree();
+			final String msg = "One relational operand is NULL:  ... " + opAST.toStringTree();
 			Tool.warn(msg, opAST, stitchProblemHandler());
 //	            System.out.println (msg);
 			expr.setResult(null);
@@ -747,5 +746,14 @@ public class StitchTypechecker extends StitchScopeEstablisher {
 		Object rOp = expr.lrOps[Expression.ROP].pop();
 		
 
+	}
+	
+	@Override
+	public void doLogicalExpression(ExpressionKind opAST, ParserRuleContext ctx) {
+		super.doLogicalExpression(opAST, ctx);
+		
+		Expression expr = expr();
+		
+		
 	}
 }
