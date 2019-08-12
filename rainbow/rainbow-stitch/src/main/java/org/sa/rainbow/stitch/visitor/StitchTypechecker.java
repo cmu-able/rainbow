@@ -74,8 +74,7 @@ public class StitchTypechecker extends StitchScopeEstablisher {
 		if (o == null) {
 			Tool.error("Unresolved reference '" + id + "'! Perhaps model not accessible?", idAST,
 					stitchProblemHandler());
-		} 
-		else {
+		} else {
 			switch (expr.getKind()) {
 			case ASSIGNMENT:
 				expr.setType("void");
@@ -524,7 +523,6 @@ public class StitchTypechecker extends StitchScopeEstablisher {
 		super.doAssignExpression(identifier, expression);
 	}
 
-
 //	private Expression doEndComplexExpr() {
 //		Expression cExpr = (Expression) scope();
 //		if (expr.parent)
@@ -559,5 +557,30 @@ public class StitchTypechecker extends StitchScopeEstablisher {
 		scope().vars().remove("__path_filter_type");
 		Expression cExpr = doEndComplexExpr();
 		expr().setType(cExpr.getType());
+	}
+
+	@Override
+	public void doRelationalExpression(ExpressionKind kind, ParserRuleContext opAST) {
+		((Expression) scope()).setKind(Expression.Kind.RELATIONAL);
+		scope().setName(opAST.getText());
+
+		Expression expr = expr();
+
+		if (expr.lrOps[Expression.LOP].isEmpty() || expr.lrOps[Expression.ROP].isEmpty()
+				|| expr.lrOps[Expression.LOP].peek() == null || expr.lrOps[Expression.ROP].peek() == null) {
+			// if either is NULL, result is NULL
+			final String msg = "One relational operand is NULL: " + expr.lrOps[Expression.LOP].pop() + ", "
+					+ expr.lrOps[Expression.ROP].pop() + " ... " + opAST.toStringTree();
+			Tool.warn(msg, opAST, stitchProblemHandler());
+//	            System.out.println (msg);
+			expr.setResult(null);
+			expr.setType(Expression.BOOLEAN);
+			return;
+		}
+		
+		Object lOp = expr.lrOps[Expression.LOP].pop();
+		Object rOp = expr.lrOps[Expression.ROP].pop();
+		
+
 	}
 }
