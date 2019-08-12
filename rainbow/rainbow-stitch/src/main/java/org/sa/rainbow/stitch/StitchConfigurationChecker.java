@@ -7,7 +7,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -20,13 +19,12 @@ import org.sa.rainbow.stitch.error.IStitchProblem;
 import org.sa.rainbow.stitch.visitor.IStitchBehavior;
 import org.sa.rainbow.stitch.visitor.Stitch;
 import org.sa.rainbow.stitch.visitor.StitchBeginEndVisitor;
+import org.sa.rainbow.stitch.visitor.StitchTypechecker;
 import org.sa.rainbow.util.IRainbowConfigurationChecker;
 import org.sa.rainbow.util.RainbowConfigurationChecker;
 import org.sa.rainbow.util.RainbowConfigurationChecker.Problem;
 import org.sa.rainbow.util.RainbowConfigurationChecker.ProblemT;
 import org.sa.rainbow.util.Util;
-
-import com.google.common.collect.Lists;
 
 public class StitchConfigurationChecker implements IRainbowConfigurationChecker {
 
@@ -86,14 +84,15 @@ public class StitchConfigurationChecker implements IRainbowConfigurationChecker 
 		DummyStitchProblemHandler sph = new DummyStitchProblemHandler();
 		try {
 			Stitch stitch = Stitch.newInstance(f.getCanonicalPath(), sph);
+			stitch.setBehavior(Stitch.SCOPER_PASS, new StitchTypechecker(stitch));
 			ArrayList<ArrayList<ParseTree>> parsedFile = Ohana.instance().parseFile(stitch);
-			if (sph.getProblems().isEmpty()) {
-				// File parsed ok
-				IStitchBehavior tc = stitch.getBehavior(Stitch.TYPECHECKER_PASS);
-				StitchBeginEndVisitor walker = new StitchBeginEndVisitor(tc,
-						Ohana.instance().getRootScope());
-				walker.visit(parsedFile.get(0).get(0));
-			}
+//			if (sph.getProblems().isEmpty()) {
+//				// File parsed ok
+//				IStitchBehavior tc = stitch.getBehavior(Stitch.TYPECHECKER_PASS);
+//				StitchBeginEndVisitor walker = new StitchBeginEndVisitor(tc,
+//						Ohana.instance().getRootScope());
+//				walker.visit(parsedFile.get(0).get(0));
+//			}
 		} catch (IOException e) {
 			m_problems.add(new Problem(ProblemT.ERROR,
 					MessageFormat.format("There was an error opening ''{0}''", f.getAbsolutePath())));

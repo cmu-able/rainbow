@@ -46,12 +46,12 @@ import org.sa.rainbow.stitch.util.Tool;
 /**
  * Created by schmerl on 10/3/2016.
  */
-public class StitchTypechecker extends BaseStitchBehavior {
+public class StitchTypechecker extends StitchScopeEstablisher {
 
 	public Set<String> m_modelOperationsReferenced = new HashSet<>();
 	StitchBeginEndVisitor m_walker;
 
-	protected StitchTypechecker(Stitch/* State */ stitch) {
+	public StitchTypechecker(Stitch/* State */ stitch) {
 		super(stitch);
 	}
 
