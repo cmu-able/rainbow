@@ -60,7 +60,7 @@ public class UtilityConfigurationChecker implements IRainbowConfigurationChecker
 //				tactics.add(t.getName());
 //			}
 //		}
-		String message = "Checking that impact vectors in utility model...";
+		String message = "Checking impact vectors in utility model...";
 		Problem p = new Problem(ProblemT.INFO, message);
 		m_problems.add(p);
 		int num = m_problems.size();
@@ -129,7 +129,7 @@ public class UtilityConfigurationChecker implements IRainbowConfigurationChecker
 	}
 
 	private void checkScenariosConfiguration() {
-		String message = "Checking that scenario configurations...";
+		String message = "Checking scenario configurations...";
 		Problem p = new Problem(ProblemT.INFO, message);
 		m_problems.add(p);
 		int num = m_problems.size();
@@ -151,7 +151,7 @@ public class UtilityConfigurationChecker implements IRainbowConfigurationChecker
 	}
 
 	private void checkUtilityPreferencesConfiguration() {
-		String message = "Checking that utilities preference definitions...";
+		String message = "Checking utilities preference definitions...";
 		Problem problemp = new Problem(ProblemT.INFO, message);
 		m_problems.add(problemp);
 		int num = m_problems.size();
