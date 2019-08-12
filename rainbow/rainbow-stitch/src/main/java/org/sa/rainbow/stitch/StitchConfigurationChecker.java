@@ -63,26 +63,38 @@ public class StitchConfigurationChecker implements IRainbowConfigurationChecker 
 				if (num == m_problems.size())
 					p.setMessage(message + "ok");
 				for (File f : stitchFiles) {
-					DummyStitchProblemHandler sph = new DummyStitchProblemHandler();
-					try {
-						Stitch stitch = Stitch.newInstance(f.getCanonicalPath(), sph);
-						ArrayList<ArrayList<ParseTree>> parsedFile = Ohana.instance().parseFile(stitch);
-						if (sph.getProblems().isEmpty()) {
-							// File parsed ok
-							IStitchBehavior tc = stitch.getBehavior(Stitch.TYPECHECKER_PASS);
-							StitchBeginEndVisitor walker = new StitchBeginEndVisitor(tc,
-									Ohana.instance().getRootScope());
-							walker.visit(parsedFile.get(0).get(0));
-						}
-					} catch (IOException e) {
-						m_problems.add(new Problem(ProblemT.ERROR,
-								MessageFormat.format("There was an error opening ''{0}''", f.getAbsolutePath())));
-					}
-					for (IStitchProblem problem : sph.getProblems()) {
-						m_problems.add(new Problem(stitchProblemToProblem(problem), problem.getMessage()));
+					message = MessageFormat.format("Checking stitch file ''{0}''...", f.getAbsolutePath());
+					p = new Problem(ProblemT.INFO, message);
+					m_problems.add(p);
+					num = m_problems.size();
+					checkStitchFile(f);
+					if (num == m_problems.size()) {
+						p.msg = message + "ok";
 					}
 				}
 			}
+		}
+		Ohana.instance().dispose();
+	}
+
+	protected void checkStitchFile(File f) {
+		DummyStitchProblemHandler sph = new DummyStitchProblemHandler();
+		try {
+			Stitch stitch = Stitch.newInstance(f.getCanonicalPath(), sph);
+			ArrayList<ArrayList<ParseTree>> parsedFile = Ohana.instance().parseFile(stitch);
+			if (sph.getProblems().isEmpty()) {
+				// File parsed ok
+				IStitchBehavior tc = stitch.getBehavior(Stitch.TYPECHECKER_PASS);
+				StitchBeginEndVisitor walker = new StitchBeginEndVisitor(tc,
+						Ohana.instance().getRootScope());
+				walker.visit(parsedFile.get(0).get(0));
+			}
+		} catch (IOException e) {
+			m_problems.add(new Problem(ProblemT.ERROR,
+					MessageFormat.format("There was an error opening ''{0}''", f.getAbsolutePath())));
+		}
+		for (IStitchProblem problem : sph.getProblems()) {
+			m_problems.add(new Problem(stitchProblemToProblem(problem), problem.getMessage()));
 		}
 	}
 
