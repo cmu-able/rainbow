@@ -35,7 +35,7 @@ utilities:
       
   uA:
     label: "Average User Annoyance"
-    mapping: "[EXPR]SwimUtils.dinnerFactorToLevel(LB0.dimmer,DIMMER_LEVELS,DIMMER_MARGIN)"
+    mapping: "[CALL]org.sa.rainbow.stitch.lib.SwimUtils.dimmerFactorToLevel(LB0.dimmer,DIMMER_LEVELS,DIMMER_MARGIN)"
     description: "Client experienced annoyance level, should be defined as an int property 'ClientT.annoyance' in the architecture, with a range 0-100"
     utility:
       0: 0
