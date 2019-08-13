@@ -79,39 +79,39 @@ public class StitchTypechecker extends StitchScopeEstablisher {
 		} else {
 			switch (expr.getKind()) {
 			case ASSIGNMENT:
-				expr.setType("void");
+				setType(expr, "void");
 				break;
 			case BOOLEAN:
 			case LOGICAL:
 			case QUANTIFIED:
 			case RELATIONAL:
-				expr.setType(Expression.BOOLEAN);
+				setType(expr, Expression.BOOLEAN);
 				break;
 			case CHAR:
-				expr.setType(Expression.CHAR);
+				setType(expr, Expression.CHAR);
 				break;
 			case STRING:
-				expr.setType(Expression.STRING);
+				setType(expr, Expression.STRING);
 				break;
 			case FLOAT:
-				expr.setType(Expression.FLOAT);
+				setType(expr, Expression.FLOAT);
 				break;
 			case INTEGER:
-				expr.setType(Expression.INTEGER);
+				setType(expr,Expression.INTEGER);
 				break;
 			case ARITHMETIC:
-				expr.setType(Expression.UNKNOWN);
+				setType(expr, Expression.UNKNOWN);
 				break;
 			case IDENTIFIER: {
 				if (o == null)
-					expr.setType(Expression.UNKNOWN);
+					setType(expr, Expression.UNKNOWN);
 				else if (o instanceof Var) {
-					expr.setType(((Var) o).getType());
+					setType(expr, ((Var) o).getType());
 				} else if (o instanceof IAcmeProperty) {
-					expr.setType(expr.getTypeFromAcme((IAcmeProperty) o));
+					setType(expr, expr.getTypeFromAcme((IAcmeProperty) o));
 
 				} else
-					expr.setType(Expression.UNKNOWN);
+					setType(expr,Expression.UNKNOWN);
 			}
 			}
 
@@ -391,12 +391,10 @@ public class StitchTypechecker extends StitchScopeEstablisher {
 			}
 		}
 
-		// transfer any child result
-		if (expr.getResult() == null && expr.expressions().size() > 0) {
-			// transfer children result up
-			Expression sub = expr.expressions().get(0);
-			expr.setResult(sub.getResult());
+		if (expr.getType() == null && expr.expressions().size() > 0) {
+			setType(expr,expr.expressions().get(0).getType());
 		}
+		
 
 		setExpression(null); // clear eval expression reference
 //		Expression expr = (Expression )scope();
@@ -593,6 +591,7 @@ public class StitchTypechecker extends StitchScopeEstablisher {
 							stitchProblemHandler());
 				}
 			}
+			
 		}
 		doEndComplexExprTC();
 	}
@@ -607,7 +606,7 @@ public class StitchTypechecker extends StitchScopeEstablisher {
 	public void endSetExpression(SetExpressionContext setAST) {
 		Expression cExpr = doEndComplexExprTC();
 		String settype = StitchTypes.SET;
-		cExpr.setType(settype);
+		setType(cExpr, settype);
 		super.endSetExpression(setAST);
 		return;
 //		// iterate through elements and make sure they are the same types
@@ -745,15 +744,205 @@ public class StitchTypechecker extends StitchScopeEstablisher {
 		Object lOp = expr.lrOps[Expression.LOP].pop();
 		Object rOp = expr.lrOps[Expression.ROP].pop();
 		
+		if (!lOp.equals(rOp)) {
+			if (!lOp.equals(Expression.UNKNOWN) && !rOp.equals(Expression.UNKNOWN)) {
+				Tool.error(MessageFormat.format("Incompatibale types: {0} {1} {2}", lOp, kind.image(),rOp), opAST, stitchProblemHandler());
+			}
+		}
+		setType(expr, Expression.BOOLEAN);
 
 	}
 	
 	@Override
-	public void doLogicalExpression(ExpressionKind opAST, ParserRuleContext ctx) {
-		super.doLogicalExpression(opAST, ctx);
+	public void doUnaryExpression(ExpressionKind opAST, UnaryExpressionContext ctx) {
+		super.doUnaryExpression(opAST, ctx);
 		
 		Expression expr = expr();
+		Object pType = expr.lrOps[Expression.LOP].peek();
+		if (pType == null || Expression.UNKNOWN.equals(pType)) {
+			Tool.error("Unary operand is null: " + expr.lrOps[Expression.LOP].pop(), ctx, stitchProblemHandler());
+			expr.setType(opAST == Strategy.ExpressionKind.NOT?Expression.BOOLEAN:Expression.UNKNOWN);
+		}
+		String cType = (String) expr.lrOps[Expression.LOP].pop();
+		switch(opAST) {
+		case NOT: 
+			expr.lrOps[Expression.LOP].push(Expression.BOOLEAN);
+			break;
+		case DECR:
+		case INCR:
+		case UNARY_MINUS:
+		case UNARY_PLUS:
+			expr.lrOps[Expression.LOP].push(cType);
 		
+		default:
+			Tool.error("Unknown unary operand: " + opAST, ctx, stitchProblemHandler());
+			expr.lrOps[Expression.LOP].push(Expression.UNKNOWN);
+		}
+
+	}
+	
+	@Override
+	public void doArithmeticExpression(ExpressionKind kind, ParserRuleContext ctx) {
+		super.doArithmeticExpression(kind, ctx);
+		Expression expr = expr();
+		if (Expression.STRING.equals(expr.lrOps[Expression.LOP].peek()) && kind == ExpressionKind.PLUS) {
+			expr.lrOps[Expression.LOP].pop();
+			expr.lrOps[Expression.ROP].pop();
+			setType(expr,Expression.STRING);
+			return;
+		}
 		
+		String lOp = expr.lrOps[Expression.LOP].peek()!=null?(String) expr.lrOps[Expression.LOP].pop():Expression.UNKNOWN;
+		String rOp = expr.lrOps[Expression.ROP].peek()!=null?(String) expr.lrOps[Expression.ROP].pop():Expression.UNKNOWN;
+	
+		switch (lOp) {
+		case Expression.UNKNOWN:
+			switch (rOp) {
+			case Expression.UNKNOWN:
+				setType(expr, lOp);
+				break;
+			case Expression.FLOAT:
+			case Expression.LONG:
+			case Expression.INTEGER:
+				switch (kind) {
+				case PLUS:
+				case MINUS:
+				case MULTIPLY:
+					setType(expr, rOp);
+					break;
+				default: 
+					Tool.error(MessageFormat.format("Cannot deterimine type for operation: {0} {1} {2}", lOp, kind.image(), rOp), ctx, stitchProblemHandler());
+				}
+				break;
+			case Expression.STRING:
+				if (kind == ExpressionKind.PLUS)
+					setType(expr, Expression.STRING);
+				else {
+					Tool.error(MessageFormat.format("Cannot use string on right hand of ''{0}''", kind.image()), ctx, stitchProblemHandler());
+					setType(expr, Expression.UNKNOWN);
+				}
+			}
+			break;
+		case Expression.FLOAT:
+			switch (kind) {
+			case PLUS:
+			case MINUS:
+			case DIVIDE:
+			case MULTIPLY:
+			case MOD:
+				switch (rOp) {
+				case Expression.STRING:
+				case Expression.BOOLEAN:
+				case Expression.CHAR:
+				case Expression.SEQ:
+				case Expression.SET:{
+					Tool.error(MessageFormat.format("Cannot use {1} on right hand of ''{0}''", kind.image(), rOp), ctx, stitchProblemHandler());
+					setType(expr, Expression.UNKNOWN);
+					break;
+				}
+				default:
+					setType(expr, lOp);
+					
+				}
+			}
+			break;
+		case Expression.LONG:
+			switch (kind) {
+			case PLUS:
+			case MINUS:
+			case DIVIDE:
+			case MULTIPLY:
+			case MOD:
+				switch (rOp) {
+					case Expression.LONG:
+					case Expression.INTEGER:
+					case Expression.UNKNOWN:
+						setType(expr, Expression.LONG);
+						break;
+					case Expression.FLOAT:
+						setType(expr, Expression.FLOAT);
+						break;
+					default: 
+						Tool.error(MessageFormat.format("Cannot use {1} on right hand of ''{0}''", kind.image(), rOp), ctx, stitchProblemHandler());
+						setType(expr, Expression.UNKNOWN);
+						break;
+				}
+				break;
+			}
+			break;
+		case Expression.INTEGER:
+			switch(kind) {
+			case PLUS:
+			case MINUS:
+			case DIVIDE:
+			case MULTIPLY:
+			case MOD:
+				switch(rOp) {
+				case Expression.STRING:
+				case Expression.BOOLEAN:
+				case Expression.CHAR:
+				case Expression.SEQ:
+				case Expression.SET:
+					Tool.error(MessageFormat.format("Cannot use {1} on right hand of ''{0}''", kind.image(), rOp), ctx, stitchProblemHandler());
+					setType(expr, Expression.UNKNOWN);
+					break;
+				default:
+					setType(expr,rOp);
+				}
+				
+			}
+			break;
+		 default:
+			 Tool.error(MessageFormat.format("Cannot use {0} in an arithmetic expression: {0} {1} {2}" , lOp, kind.image(), rOp), ctx, stitchProblemHandler());
+			 setType(expr, Expression.UNKNOWN);
+		}		
+	}
+	
+	@Override
+	public void doLogicalExpression(ExpressionKind kind, ParserRuleContext ctx) {
+		super.doLogicalExpression(kind, ctx);
+		Expression expr = expr();
+		
+		String lOp = expr.lrOps[Expression.LOP].peek()!=null?(String) expr.lrOps[Expression.LOP].pop():Expression.UNKNOWN;
+		String rOp = expr.lrOps[Expression.ROP].peek()!=null?(String) expr.lrOps[Expression.ROP].pop():Expression.UNKNOWN;
+	
+		if (kind == ExpressionKind.EQ || kind == ExpressionKind.NE) {
+			if (lOp.equals(rOp)) {
+				setType(expr, Expression.BOOLEAN);
+			}
+			else if (isNumber(lOp) && isNumber(rOp)) {
+				setType(expr, Expression.BOOLEAN);
+			}
+			else {
+				Tool.error(MessageFormat.format("Cannot do compare the types in expression {0} {1} {2}", lOp, kind.image(), rOp), ctx, stitchProblemHandler());
+				setType(expr, Expression.BOOLEAN);
+			}
+		}
+		else if (isNumber(lOp) && isNumber(rOp)) {
+			setType(expr, Expression.BOOLEAN);
+		}
+		else {
+			Tool.error(MessageFormat.format("Cannot do compare the types in expression {0} {1} {2}", lOp, kind.image(), rOp), ctx, stitchProblemHandler());
+			setType(expr, Expression.BOOLEAN);
+		}
+		
+	}
+	
+	protected boolean isNumber(String type) {
+		switch (type) {
+			case Expression.FLOAT:
+			case Expression.LONG:
+			case Expression.INTEGER:
+				return true;
+		}
+		return false;
+					
+	}
+	
+	protected void setType(Expression expr, String type) {
+		if (expr.curOp.size() == 0)
+			expr.setType(type);
+		else
+			expr.lrOps[expr.curOp.pop().intValue()].push(type);
 	}
 }
