@@ -99,9 +99,23 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 	}
 
 	public enum ExpressionKind {
-		PLUS, MINUS, MULTIPLY, DIVIDE, MOD, IMPLIES, IFF, AND, OR, NE, EQ, LT, GE, LE, GT, INCR, DECR, UNARY_MINUS,
-		UNARY_PLUS, NOT, FORALL, EXISTS, EXISTS_UNIQUE, SELECT, IDENTIFIER, INTEGER, FLOAT, STRING, CHAR, BOOLEAN, NULL,
-		UNKNOWN
+		PLUS("+"), MINUS("-"), MULTIPLY("*"), DIVIDE("/"), MOD("%"), IMPLIES("->"), IFF("<->"), AND("&&"), OR("||"), NE("!="), EQ("=="), LT("<"), GE(">="), LE("<="), GT(">"), INCR("++"), DECR("--"), UNARY_MINUS("-"),
+		UNARY_PLUS("+"), NOT("!"), FORALL("forall"), EXISTS("exists"), EXISTS_UNIQUE("exists unique"), SELECT("select"), IDENTIFIER, INTEGER, FLOAT, STRING, CHAR, BOOLEAN, NULL,
+		UNKNOWN;
+		
+		final String image;
+		
+		ExpressionKind(String i) {
+			image = i;
+		}
+		
+		ExpressionKind() {
+			image = null;
+		}
+		
+		public String image() {
+			return image==null?toString():image;
+		}
 	}
 
 	public interface NodeAction {
