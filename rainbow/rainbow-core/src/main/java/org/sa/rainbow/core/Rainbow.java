@@ -306,8 +306,8 @@ public class Rainbow implements IRainbowEnvironment {
         }
 
         LOGGER.debug (MessageFormat.format ("Rainbow config path: {0}", m_targetPath.getAbsolutePath ()));
-
-        computeHostSpecificConfig ();
+        if (m_props.getProperty(PROPKEY_CONFIG_FILE) == null)
+        	computeHostSpecificConfig ();
         String cfgFile = m_props.getProperty (PROPKEY_CONFIG_FILE, DEFAULT_CONFIG_FILE);
         List<String> cfgFiles = new ArrayList<> ();
 //        if (!cfgFile.equals (DEFAULT_CONFIG_FILE)) { 
