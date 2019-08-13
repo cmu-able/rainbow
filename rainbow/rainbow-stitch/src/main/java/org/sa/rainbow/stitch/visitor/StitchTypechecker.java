@@ -650,15 +650,15 @@ public class StitchTypechecker extends StitchScopeEstablisher {
 	@Override
 	public void doExpression(ParserRuleContext exprAST) {
 		super.doExpression(exprAST);
-		if (scope() instanceof Expression) {
-			Expression expr = (Expression) scope();
-			if (expr.getType() == null && expr.expressions().size() > 0) {
-				// transfer children result up
-				Expression sub = expr.expressions().get(0);
-				if (sub.getType() != StitchTypes.UNKNOWN)
-					expr.setType(sub.getType());
-			}
-		}
+//		if (scope() instanceof Expression) {
+//			Expression expr = (Expression) scope();
+//			if (expr.getType() == null && expr.expressions().size() > 0) {
+//				// transfer children result up
+//				Expression sub = expr.expressions().get(0);
+//				if (sub.getType() != StitchTypes.UNKNOWN)
+//					expr.setType(sub.getType());
+//			}
+//		}
 	}
 
 	@Override
