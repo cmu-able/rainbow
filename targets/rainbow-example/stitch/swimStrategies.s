@@ -22,7 +22,7 @@ strategy LowerResponseTime1 [HighRT] {
 }
 
 strategy LowerResponseTime2 [HighRT] {
-	t1: (HighRT & ExtraServers) -> TAddServer() @[30000] {
+	t1: (HighRT && ExtraServers) -> TAddServer() @[30000] {
 	    t1b: (HighRT) -> TAddServer() @[30000] {
 	    	t1b1: (default) -> done;
 	    }
