@@ -1,0 +1,20 @@
+//**************************************************************
+// Strategy RestoreFullContent
+//**************************************************************
+formula leaf = (node=1);
+
+module Strategy
+	node : [0..1] init 0;
+
+	[MaxDimmer_start] (sys_go & node=0) -> 1: (node'=1); 
+
+	[tick]	(leaf) -> 1: true;	
+
+	// prevent all other tactics from executing
+	[AddServer_complete] false -> true;
+	[DecDimmer_start] false -> true;
+	[IncDimmer_start] false -> true;
+	[MinDimmer_start] false -> true;
+	[RemoveServer_start] false -> true;
+endmodule
+
