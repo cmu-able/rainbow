@@ -1,0 +1,414 @@
+configs: 
+- !reach.ConfigRubis
+   addServerProgress: 0
+   d: 2
+   s: 2
+- !reach.ConfigRubis
+   addServerProgress: 0
+   d: 3
+   s: 2
+- !reach.ConfigRubis
+   addServerProgress: 0
+   d: 1
+   s: 2
+- !reach.ConfigRubis
+   addServerProgress: 0
+   d: 4
+   s: 2
+- !reach.ConfigRubis
+   addServerProgress: 0
+   d: 0
+   s: 2
+- !reach.ConfigRubis
+   addServerProgress: 0
+   d: 3
+   s: 1
+- !reach.ConfigRubis
+   addServerProgress: 0
+   d: 0
+   s: 1
+- !reach.ConfigRubis
+   addServerProgress: 0
+   d: 4
+   s: 1
+- !reach.ConfigRubis
+   addServerProgress: 0
+   d: 2
+   s: 1
+- !reach.ConfigRubis
+   addServerProgress: 0
+   d: 1
+   s: 1
+- !reach.ConfigRubis
+   addServerProgress: 0
+   d: 0
+   s: 0
+- !reach.ConfigRubis
+   addServerProgress: 0
+   d: 4
+   s: 0
+- !reach.ConfigRubis
+   addServerProgress: 0
+   d: 3
+   s: 0
+- !reach.ConfigRubis
+   addServerProgress: 0
+   d: 2
+   s: 0
+- !reach.ConfigRubis
+   addServerProgress: 0
+   d: 1
+   s: 0
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 1
+   s: 0
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 4
+   s: 0
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 2
+   s: 1
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 0
+   s: 0
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 4
+   s: 1
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 3
+   s: 1
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 1
+   s: 1
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 0
+   s: 1
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 2
+   s: 0
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 3
+   s: 0
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 4
+   s: 2
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 2
+   s: 2
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 0
+   s: 2
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 1
+   s: 2
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 3
+   s: 2
+--- 
+0: 
+   0: []
+   1: 
+   - IncDimmer
+   2: 
+   - DecDimmer
+1: 
+   0: 
+   - DecDimmer
+   1: []
+   3: 
+   - IncDimmer
+2: 
+   0: 
+   - IncDimmer
+   2: []
+   4: 
+   - DecDimmer
+3: 
+   1: 
+   - DecDimmer
+   3: []
+4: 
+   2: 
+   - IncDimmer
+   4: []
+5: 
+   5: []
+   7: 
+   - IncDimmer
+   8: 
+   - DecDimmer
+6: 
+   6: []
+   9: 
+   - IncDimmer
+7: 
+   5: 
+   - DecDimmer
+   7: []
+8: 
+   5: 
+   - IncDimmer
+   8: []
+   9: 
+   - DecDimmer
+9: 
+   6: 
+   - DecDimmer
+   8: 
+   - IncDimmer
+   9: []
+10: 
+   10: []
+   14: 
+   - IncDimmer
+11: 
+   11: []
+   12: 
+   - DecDimmer
+12: 
+   11: 
+   - IncDimmer
+   12: []
+   13: 
+   - DecDimmer
+13: 
+   12: 
+   - IncDimmer
+   13: []
+   14: 
+   - DecDimmer
+14: 
+   10: 
+   - DecDimmer
+   13: 
+   - IncDimmer
+   14: []
+15: 
+   18: 
+   - DecDimmer
+   23: 
+   - IncDimmer
+   10: 
+   - AddServer
+   - DecDimmer
+   13: 
+   - AddServer
+   - IncDimmer
+   14: 
+   - AddServer
+   15: []
+16: 
+   16: []
+   24: 
+   - DecDimmer
+   11: 
+   - AddServer
+   12: 
+   - AddServer
+   - DecDimmer
+17: 
+   17: []
+   20: 
+   - IncDimmer
+   5: 
+   - AddServer
+   - IncDimmer
+   21: 
+   - DecDimmer
+   23: 
+   - RemoveServer
+   8: 
+   - AddServer
+   24: 
+   - IncDimmer
+   - RemoveServer
+   9: 
+   - AddServer
+   - DecDimmer
+   15: 
+   - DecDimmer
+   - RemoveServer
+18: 
+   18: []
+   10: 
+   - AddServer
+   14: 
+   - AddServer
+   - IncDimmer
+   15: 
+   - IncDimmer
+19: 
+   16: 
+   - RemoveServer
+   19: []
+   20: 
+   - DecDimmer
+   5: 
+   - AddServer
+   - DecDimmer
+   7: 
+   - AddServer
+   24: 
+   - DecDimmer
+   - RemoveServer
+20: 
+   16: 
+   - IncDimmer
+   - RemoveServer
+   17: 
+   - DecDimmer
+   19: 
+   - IncDimmer
+   20: []
+   5: 
+   - AddServer
+   7: 
+   - AddServer
+   - IncDimmer
+   23: 
+   - DecDimmer
+   - RemoveServer
+   8: 
+   - AddServer
+   - DecDimmer
+   24: 
+   - RemoveServer
+21: 
+   17: 
+   - IncDimmer
+   18: 
+   - DecDimmer
+   - RemoveServer
+   21: []
+   6: 
+   - AddServer
+   - DecDimmer
+   22: 
+   - DecDimmer
+   23: 
+   - IncDimmer
+   - RemoveServer
+   8: 
+   - AddServer
+   - IncDimmer
+   9: 
+   - AddServer
+   15: 
+   - RemoveServer
+22: 
+   18: 
+   - RemoveServer
+   21: 
+   - IncDimmer
+   6: 
+   - AddServer
+   22: []
+   9: 
+   - AddServer
+   - IncDimmer
+   15: 
+   - IncDimmer
+   - RemoveServer
+23: 
+   23: []
+   24: 
+   - IncDimmer
+   12: 
+   - AddServer
+   - IncDimmer
+   13: 
+   - AddServer
+   14: 
+   - AddServer
+   - DecDimmer
+   15: 
+   - DecDimmer
+24: 
+   16: 
+   - IncDimmer
+   23: 
+   - DecDimmer
+   24: []
+   11: 
+   - AddServer
+   - IncDimmer
+   12: 
+   - AddServer
+   13: 
+   - AddServer
+   - DecDimmer
+25: 
+   19: 
+   - RemoveServer
+   20: 
+   - DecDimmer
+   - RemoveServer
+   25: []
+   29: 
+   - DecDimmer
+26: 
+   17: 
+   - RemoveServer
+   20: 
+   - IncDimmer
+   - RemoveServer
+   21: 
+   - DecDimmer
+   - RemoveServer
+   26: []
+   28: 
+   - DecDimmer
+   29: 
+   - IncDimmer
+27: 
+   21: 
+   - IncDimmer
+   - RemoveServer
+   22: 
+   - RemoveServer
+   27: []
+   28: 
+   - IncDimmer
+28: 
+   17: 
+   - IncDimmer
+   - RemoveServer
+   21: 
+   - RemoveServer
+   22: 
+   - DecDimmer
+   - RemoveServer
+   26: 
+   - IncDimmer
+   27: 
+   - DecDimmer
+   28: []
+29: 
+   17: 
+   - DecDimmer
+   - RemoveServer
+   19: 
+   - IncDimmer
+   - RemoveServer
+   20: 
+   - RemoveServer
+   25: 
+   - IncDimmer
+   26: 
+   - DecDimmer
+   29: []

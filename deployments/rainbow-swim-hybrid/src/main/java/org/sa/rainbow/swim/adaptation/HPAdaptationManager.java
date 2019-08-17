@@ -118,7 +118,7 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
     private TimeSeriesPredictorModelInstance m_tspModel; 
     private PMCAdaptationManager m_adaptMgr;
     private PlanDB m_planDB;
-    private AdaptationPlanner m_adaptPlanner;
+    //private AdaptationPlanner m_adaptPlanner;
 
 
     private IRainbowChangeBusSubscription m_modelTypecheckingChanged = new IRainbowChangeBusSubscription () {
@@ -777,17 +777,16 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
         m_currentTime = 0;
         m_adaptMgr = new PMCAdaptationManager();
         m_planDB = PlanDB.get_instance();
-        m_adaptPlanner = new AdaptationPlanner();
-        m_adaptPlanner.setModelTemplatePath("/home/frank/Sandbox/plasasim/templates/final_ibl.prism");
+        
 
-        // log("begin testing...");
-        // StringVector sv = new StringVector();
-        // //sv = m_adaptPlanner.plan("foooo", "barrrr", "/home/frank/PrismDump", true);
-        // sv = m_adaptPlanner.plan(env_mod_r, init_state_r, "/home/frank/PrismDump", true);
-        // log("size: " + sv.size());
-        // for(int i = 0; i < sv.size(); ++i) {
-        // 	log("R" + i + ": " + sv.get(i));
-        // }
+        log("begin testing...");
+        StringVector sv = new StringVector();
+        //sv = m_adaptPlanner.plan("foooo", "barrrr", "/home/frank/PrismDump", true);
+        //sv = m_adaptPlanner.plan(env_mod_r, init_state_r, "/home/frank/PrismDump", true);
+        log("size: " + sv.size());
+        for(int i = 0; i < sv.size(); ++i) {
+        	log("R" + i + ": " + sv.get(i));
+        }
         // sv.clear();
         // sv = m_adaptPlanner.plan(env_mod_d, init_state_d, "/home/frank/PrismDump", false);
         // log("size: " + sv.size());
@@ -831,10 +830,199 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
     
     private String get_initial_state_str (SwimModelHelper swimModel, boolean fastPlanning) {
     	String res = "";
-    	
+    	res += "const double addServer_LATENCY = ";
+        res += swimModel.getAddServerLatencySec();
+        res += ";\n";
+
+        res += "const int HORIZON = ";
+        res += m_horizon;
+        res += ";\n";
+        
+        res += "const double PERIOD = ";
+        res += SLEEP_TIME / 1000; //evaluation period, in sec(?)
+        res += ";\n";
+        
+        res += "const int DIMMER_LEVELS = ";
+        res += swimModel.getDimmerLevels();
+        res += ";\n";
+        
+        res += "const int ini_dimmer = ";
+        // int discretizedBrownoutFactor = 1 + (hpModel.numberOfBrownoutLevels - 1) * (int)(hpModel.brownoutFactor);
+        int discretizedBrownoutFactor = 1 + (swimModel.getDimmerLevels() - 1) * (int)(swimModel.getCurrentDimmer());
+        res += discretizedBrownoutFactor;
+        res += ";\n";
+        
+        res += "const int MAX_SERVERS_A = ";
+        res += 1; //hardcoded
+        res += ";\n";
+        
+        res += "const int MAX_SERVERS_B = ";
+        res += 1; //hardcoded
+        res += ";\n";
+        
+        res += "const int MAX_SERVERS_C = ";
+        res += 1; //hardcoded
+        res += ";\n";
+        
+        res += "const int ini_servers_A = ";
+        res += getBoolVal(m_model.getModelInstance().getComponent("server1").getProperty("isActive")) ? 1 : 0;
+        res += ";\n";
+        
+        res += "const int ini_servers_B = ";
+        res += getBoolVal(m_model.getModelInstance().getComponent("server2").getProperty("isActive")) ? 1 : 0;
+        res += ";\n";
+        
+        res += "const int ini_servers_C = ";
+        res += getBoolVal(m_model.getModelInstance().getComponent("server3").getProperty("isActive")) ? 1 : 0;
+        res += ";\n";
+        
+        int addServerAState = 0;
+        int addServerBState = 0;
+        int addServerCState = 0;
+
+        int addServerState = swimModel.getAddServerTacticProgress();
+        int bootType = getBootType();
+        if(bootType == 1)
+            addServerAState = addServerState;
+        if(bootType == 2)
+            addServerBState = addServerState;
+        if(bootType == 3)
+            addServerCState = addServerState;
+
+        res += "const int ini_addServerA_state = ";
+        res += addServerAState;
+        res += ";\n";
+        
+        res += "const int ini_addServerB_state = ";
+        res += addServerBState;
+        res += ";\n";
+        
+        res += "const int ini_addServerC_state = ";
+        res += addServerCState;
+        res += ";\n";
+        
+        res += "const double SERVERA_COST_SEC = ";
+        res += getDoubleVal(m_model.getModelInstance().getComponent("server1").getProperty("cost"));
+        res += ";\n";
+        
+        res += "const double SERVERB_COST_SEC = ";
+        res += getDoubleVal(m_model.getModelInstance().getComponent("server2").getProperty("cost"));
+        res += ";\n";
+        
+        res += "const double SERVERC_COST_SEC = ";
+        res += getDoubleVal(m_model.getModelInstance().getComponent("server3").getProperty("cost"));
+        res += ";\n";
+        
+        res += "const double MAX_ARRIVALA_CAPACITY = ";
+        res += getIntVal(m_model.getModelInstance().getComponent("server1").getProperty("max_arrival_capacity"));
+        res += ";\n";
+        
+        res += "const double MAX_ARRIVALA_CAPACITY_LOW = ";
+        res += getIntVal(m_model.getModelInstance().getComponent("server1").getProperty("max_arrival_capacity_low"));
+        res += ";\n";
+        
+        res += "const double MAX_ARRIVALB_CAPACITY = ";
+        res += getIntVal(m_model.getModelInstance().getComponent("server2").getProperty("max_arrival_capacity"));
+        res += ";\n";
+        
+        res += "const double MAX_ARRIVALB_CAPACITY_LOW = ";
+        res += getIntVal(m_model.getModelInstance().getComponent("server2").getProperty("max_arrival_capacity_low"));
+        res += ";\n";
+        
+        res += "const double MAX_ARRIVALC_CAPACITY = ";
+        res += getIntVal(m_model.getModelInstance().getComponent("server3").getProperty("max_arrival_capacity"));
+        res += ";\n";
+        
+        res += "const double MAX_ARRIVALC_CAPACITY_LOW = ";
+        res += getIntVal(m_model.getModelInstance().getComponent("server3").getProperty("max_arrival_capacity_low"));
+        res += ";\n";
+        
+        res += "const double penalty = ";
+        res += -0.25; //TODO: hardcoded from swimExtention.ini
+        res += ";\n";
+        
+        res += "const int ini_traffic_A = ";
+        res += getDoubleVal(m_model.getModelInstance().getComponent("server1").getProperty("traffic"));
+        res += ";\n";
+        
+        res += "const int ini_traffic_B = ";
+        res += getDoubleVal(m_model.getModelInstance().getComponent("server2").getProperty("traffic"));
+        res += ";\n";
+        
+        res += "const int ini_traffic_C = ";
+        res += getDoubleVal(m_model.getModelInstance().getComponent("server3").getProperty("traffic"));
+        res += ";\n";
+        
+        //useInterArrivalScaleFactorForFast(Slow)Planning (?)
+        if(fastPlanning){
+            res += "const double interArrivalScaleFactorForDecision = 1;\n";
+        } else {
+            res += "const double interArrivalScaleFactorForDecision = 1;\n";
+        }
+
     	return res;
     }
     
+    protected SwimExtendedPlan parsePlan (String plan) {
+        SwimExtendedPlan res = null;
+        if(plan.equals("addServerA_start"))
+        	res = new AddServerPlan(m_model, "1");
+        else if(plan.equals("addServerB_start"))
+        	res = new AddServerPlan(m_model, "2");
+        else if(plan.equals("addServerC_start"))
+        	res = new AddServerPlan(m_model, "3");
+        else if(plan.equals("removeServerA_start"))
+        	res = new RemoveServerPlan(m_model, "1");
+        else if(plan.equals("removeServerB_start"))
+        	res = new RemoveServerPlan(m_model, "2");
+        else if(plan.equals("removeServerC_start"))
+        	res = new RemoveServerPlan(m_model, "3");
+        else if(plan.equals("increaseDimmer_start"))
+        	res = new IncDimmerPlan(m_model);
+        else if(plan.equals("decreaseDimmer_start"))
+        	res = new DecDimmerPlan(m_model);
+        else if(plan.equals("divert_100_0_0"))
+        	res = new DivertTrafficPlan(m_model, "divert_100_0_0");
+        else if(plan.equals("divert_75_25_0"))
+        	res = new DivertTrafficPlan(m_model, "divert_75_25_0");
+        else if(plan.equals("divert_75_0_25"))
+        	res = new DivertTrafficPlan(m_model, "divert_75_0_25");
+        else if(plan.equals("divert_50_50_0"))
+        	res = new DivertTrafficPlan(m_model, "divert_50_50_0");
+        else if(plan.equals("divert_50_0_50"))
+        	res = new DivertTrafficPlan(m_model, "divert_50_0_50");
+        else if(plan.equals("divert_50_25_25"))
+        	res = new DivertTrafficPlan(m_model, "divert_50_25_25");
+        else if(plan.equals("divert_25_75_0"))
+        	res = new DivertTrafficPlan(m_model, "divert_25_75_0");
+        else if(plan.equals("divert_25_0_75"))
+        	res = new DivertTrafficPlan(m_model, "divert_25_0_75");
+        else if(plan.equals("divert_25_50_25"))
+        	res = new DivertTrafficPlan(m_model, "divert_25_50_25");
+        else if(plan.equals("divert_25_25_50"))
+        	res = new DivertTrafficPlan(m_model, "divert_25_25_50");
+        else if(plan.equals("divert_0_100_0"))
+        	res = new DivertTrafficPlan(m_model, "divert_0_100_0");
+        else if(plan.equals("divert_0_0_100"))
+        	res = new DivertTrafficPlan(m_model, "divert_0_0_100");
+        else if(plan.equals("divert_0_75_25"))
+        	res = new DivertTrafficPlan(m_model, "divert_0_75_25");
+        else if(plan.equals("divert_0_25_75"))
+        	res = new DivertTrafficPlan(m_model, "divert_0_25_75");
+        else if(plan.equals("divert_0_50_50"))
+        	res = new DivertTrafficPlan(m_model, "divert_0_50_50");
+        
+        return res;
+    }
+
+    protected AdaptationTree<SwimExtendedPlan> parseActions (StringVector actions){
+        AdaptationTree<SwimExtendedPlan> at = new AdaptationTree<>(AdaptationExecutionOperatorT.PARALLEL);
+        for(int i = 0; i < actions.size(); ++i) {
+        	at.addLeaf(parsePlan(actions.get(i)));
+        }
+        return at;
+    }
+
 
 	@Override
 	public void dispose() {
@@ -964,6 +1152,74 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
     		return 0;
     }
     
+    //class that defines fast planning procedure
+	public class Reactive extends Thread {
+		public SwimModelHelper swimModel;
+		public boolean usePredictor;
+		public String initialState;
+		public String environmentModel;
+		public StringVector actions;
+		public String ret_path;
+		
+		Reactive(SwimModelHelper swimModel, boolean usePredictor){
+			this.swimModel = swimModel;
+			this.usePredictor = usePredictor;
+		}
+		
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			initialState = get_initial_state_str(swimModel, true);
+			if(usePredictor) {
+    			environmentModel = "formula stateValue = " + ";\n";
+    		} else {
+    			environmentModel = "formula stateValue = " + swimModel.getArrivalRate() + ";\n";
+    		}
+			log("fast planning triggered");
+            AdaptationPlanner m_adaptPlanner = new AdaptationPlanner();
+            m_adaptPlanner.setModelTemplatePath("/home/frank/Sandbox/plasasim/templates/final_ibl.prism");
+    		actions = m_adaptPlanner.plan(environmentModel, initialState, "", true);
+    		String ret_path = m_adaptPlanner.getPlanned_path();
+    		log("fast plan over, path = " + ret_path);
+		}
+		
+	}
+	
+    //class that defines slow planning procedure
+	public class Deliberative extends Thread {
+		public SwimModelHelper swimModel;
+		public boolean usePredictor;
+		public String initialState;
+		public String environmentModel;
+		public String ret_path;
+		
+		Deliberative(SwimModelHelper swimModel, boolean usePredictor){
+			this.swimModel = swimModel;
+			this.usePredictor = usePredictor;
+		}
+		
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+        	initialState = get_initial_state_str(swimModel, false);
+        	m_currentTime = 0; //reset current time for new plan
+        	if(usePredictor) {
+        		environmentModel = PMCAdaptationManager.generateEnvironmentDTMC(generateEnvironmentModel());
+        	} else {
+        		environmentModel = PMCAdaptationManager.generateEnvironmentDTMC(generateEnvironmentModel());
+        	}
+        	log("slow planning triggered");
+            AdaptationPlanner m_adaptPlanner = new AdaptationPlanner();
+            m_adaptPlanner.setModelTemplatePath("/home/frank/Sandbox/plasasim/templates/final_ibl.prism");
+        	m_adaptPlanner.plan(environmentModel, initialState, "", false);
+        	String ret_path = m_adaptPlanner.getPlanned_path();
+        	log("slow plan over, path = " + ret_path);
+        	m_planDB.clean_db();
+        	m_planDB.populate_db(ret_path);
+        	log("slow plan populate db over");
+		}
+	}
+	
 
     protected AdaptationTree<SwimExtendedPlan> checkAdaptationImpl(SwimModelHelper swimModel,
             EnvironmentDTMCPartitioned env){
@@ -984,65 +1240,55 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
              getBootType(),
              swimModel.getArrivalRate() //should be mean arrival rate, need fix
              );
+        
         //then we try to get plan
         StringVector actions = new StringVector();
-        if(!m_planDB.get_plan(actions)) {
+        if(!m_planDB.get_plan()) {
         	if(m_horizon > m_currentTime) {
         		log("Plan Failed");
         	} else {
         		log("Plan Over");
         	}
         	
-        	String initialState;
-        	String environmentModel;
         	boolean usePredictor = false;
-        	boolean slowPlanningDone = false;
         	
         	//Generate a new plan
         	boolean trigger_fast_planning = false;
         	//check if fast planning needed against threshold
-        	if(swimModel.getAverageResponseTime() > 0) {
+        	if(swimModel.getAverageResponseTime() >= 0) {
         		trigger_fast_planning = true;
-        	}
-        	//trigger fast planning
-        	if(trigger_fast_planning) {
-        		initialState = get_initial_state_str(swimModel, true); 
-        		if(usePredictor) {
-        			environmentModel = "formula stateValue = " + ";\n";
-        		} else {
-        			environmentModel = "formula stateValue = " + swimModel.getArrivalRate() + ";\n";
-        		}
-        		log("fast planning triggered");
-        		actions = m_adaptPlanner.plan(environmentModel, initialState, "", true);
-        		String ret_path = m_adaptPlanner.getPlanned_path();
-        		log("fast plan path = " + ret_path);
         	}
         	
         	//trigger slow planning
-        	initialState = get_initial_state_str(swimModel, false);
-        	m_currentTime = 0; //reset current time for new plan
-        	if(usePredictor) {
-        		environmentModel = PMCAdaptationManager.generateEnvironmentDTMC(generateEnvironmentModel());
-        	} else {
-        		environmentModel = PMCAdaptationManager.generateEnvironmentDTMC(generateEnvironmentModel());
-        	}
-        	log("slow planning triggered");
-        	m_adaptPlanner.plan(environmentModel, initialState, "", false);
-        	String ret_path = m_adaptPlanner.getPlanned_path();
-        	log("slow plan path = " + ret_path);
-        	m_planDB.clean_db();
-        	m_planDB.populate_db(ret_path);
-        } else {
+        	Deliberative runD = new Deliberative(swimModel, usePredictor);
+        	runD.start();
         	
+        	if(trigger_fast_planning) {
+        		//spawn a new reactive thread, trigger fast planning
+        		Reactive runR = new Reactive(swimModel, usePredictor);
+        		runR.start();
+        		try {
+					runR.join();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+        		actions = runR.actions;
+        	}
+
+        	
+        } else {
+        	actions = m_planDB.getActions();
         }
         
         //parse actions
+        AdaptationTree<SwimExtendedPlan> at = parseActions(actions);
         log("actions to take: " + actions.size());
         for(int i = 0; i < actions.size(); ++i) {
         	log("#" + i + ": " + actions.get(i));
+        	
         }
-        
-        return null;
+        return at;
     }
 
 
@@ -1106,7 +1352,16 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
         logInfo += "\nreqServiceRate: " + getDoubleVal(m_model.getModelInstance().getComponent("server3").getProperty("reqServiceRate"));
         logInfo += "\nbyteServiceRate: " + getDoubleVal(m_model.getModelInstance().getComponent("server3").getProperty("byteServiceRate"));
         logInfo += "\ncost: " + getDoubleVal(m_model.getModelInstance().getComponent("server3").getProperty("cost"));
-        log(logInfo);
+        //log(logInfo);
+        
+        //testing 2
+        SwimModelHelper swimModel = new SwimModelHelper(m_model);
+        if (!m_isInitialized) {
+            initializeAdaptationMgr(swimModel);
+        }
+        String environmentModel = PMCAdaptationManager.generateEnvironmentDTMC(generateEnvironmentModel());
+        log(get_initial_state_str(swimModel, true));
+        log(environmentModel);
 	}
 
     private void strategyLog (String logMessage) {
