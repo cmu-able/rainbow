@@ -124,13 +124,18 @@ public class SwimModelHelper {
     	return ((Double) PropertyHelper.toJavaVal(prop.getValue())).doubleValue();
     }
 	
-	public int getCurrentDimmerLevel() {
-    	double dimmer = getCurrentDimmer();
-    	int dimmerLevels = getDimmerLevels();
-    	double dimmerMargin = getDimmerMargin();
-        int level = SwimUtils.dimmerFactorToLevel(dimmer, dimmerLevels, dimmerMargin);
-        return level;
-    }
+	// public int getCurrentDimmerLevel() {
+ //    	double dimmer = getCurrentDimmer();
+ //    	int dimmerLevels = getDimmerLevels();
+ //    	double dimmerMargin = getDimmerMargin();
+ //        int level = SwimUtils.dimmerFactorToLevel(dimmer, dimmerLevels, dimmerMargin);
+ //        return level;
+ //    }
+
+  //new level calculation
+  public int getCurrentDimmerLevel() {
+    return (int) (1 + (getDimmerLevels() - 1) * getCurrentDimmer());
+  }
 	
 	public int getAddServerTacticProgress() {
 		
