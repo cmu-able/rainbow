@@ -187,10 +187,12 @@ public class Stitch {
 	 * shutdown, not during, for example, building (reconciling) cycles.
 	 */
 	public void dispose() {
-		m_behaviors = null;
-		m_exprStack.set(null);
-		m_scopeStack.set(null);
+		m_behaviors = new IStitchBehavior[NUM_PASS];
+		m_executing = new Stack<Boolean>();
+		m_scopeStack.set(new Stack<IScope>());
+		m_exprStack.set(new Stack<Expression>());
 		expr.set(null);
+		scope.set(null);
 
 	}
 
