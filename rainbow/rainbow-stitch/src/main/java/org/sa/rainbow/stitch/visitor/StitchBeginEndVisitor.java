@@ -20,7 +20,7 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
 
     IStitchBehavior beh;
     IScope          parentScope;
-    StitchVisitorData visitorData;
+//    StitchVisitorData visitorData;
     
     class VisitorState {
     	Expression expr = null;
