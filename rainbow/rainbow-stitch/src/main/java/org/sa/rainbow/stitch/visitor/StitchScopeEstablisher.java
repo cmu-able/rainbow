@@ -76,16 +76,11 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
 		}
 	}
 
-	StitchBeginEndVisitor m_walker;
 
     public StitchScopeEstablisher (Stitch/*State*/ stitch) {
         super (stitch);
     }
 
-    @Override
-    public void setWalker (StitchBeginEndVisitor walker) {
-        m_walker = walker;
-    }
 
     @Override
     public void beginScript (IScope scriptScope) {

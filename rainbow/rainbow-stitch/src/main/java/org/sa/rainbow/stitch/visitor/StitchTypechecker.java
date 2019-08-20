@@ -20,6 +20,7 @@ import org.acmestudio.acme.core.type.IAcmeSetType;
 import org.acmestudio.acme.core.type.IAcmeStringType;
 import org.acmestudio.acme.element.IAcmeElement;
 import org.acmestudio.acme.element.IAcmeElementType;
+import org.acmestudio.acme.element.IAcmeSystem;
 import org.acmestudio.acme.element.property.IAcmeProperty;
 import org.acmestudio.acme.model.DefaultAcmeModel;
 import org.acmestudio.acme.model.root.AcmeRootDesignAnalysis;
@@ -63,15 +64,9 @@ import org.sa.rainbow.stitch.util.Tool;
 public class StitchTypechecker extends BaseStitchBehavior {
 
 	public Set<String> m_modelOperationsReferenced = new HashSet<>();
-	StitchBeginEndVisitor m_walker;
 
 	public StitchTypechecker(Stitch/* State */ stitch) {
 		super(stitch);
-	}
-
-	@Override
-	public void setWalker(StitchBeginEndVisitor walker) {
-		m_walker = walker;
 	}
 
 	@Override
@@ -90,32 +85,32 @@ public class StitchTypechecker extends BaseStitchBehavior {
 
 	@Override
 	public void beginStrategy(TerminalNode nameAST) {
-			IScope scope = scope();
-			Strategy s = null;
-			if (scope.isRoot()) {
-				for (Strategy st : script().strategies) {
-					if (nameAST.getText().equals(st.getName())) {
-						if (s != null) {
-							String msg = MessageFormat.format("Strategy ''{0}'' has already been defined",
-									nameAST.getText());
-							Tool.error(msg, (ParserRuleContext) nameAST.getParent(), stitchProblemHandler());
-							break;
-						} else
-							s = st;
-					}
+		IScope scope = scope();
+		Strategy s = null;
+		if (scope.isRoot()) {
+			for (Strategy st : script().strategies) {
+				if (nameAST.getText().equals(st.getName())) {
+					if (s != null) {
+						String msg = MessageFormat.format("Strategy ''{0}'' has already been defined",
+								nameAST.getText());
+						Tool.error(msg, (ParserRuleContext) nameAST.getParent(), stitchProblemHandler());
+						break;
+					} else
+						s = st;
+				}
 
-				}
-				if (s == null) {
-					String msg = MessageFormat.format("Strategy ''{0}'' is not in scope", nameAST.getText());
-					Tool.error(msg, (ParserRuleContext) nameAST.getParent(), stitchProblemHandler());
-				} else {
-					setExpression(s.getRootNode().getCondExpr());
-				}
-				pushScope(s);
 			}
+			if (s == null) {
+				String msg = MessageFormat.format("Strategy ''{0}'' is not in scope", nameAST.getText());
+				Tool.error(msg, (ParserRuleContext) nameAST.getParent(), stitchProblemHandler());
+			} else {
+				setExpression(s.getRootNode().getCondExpr());
+			}
+			pushScope(s);
+		}
 
 	}
-	
+
 	@Override
 	public void beginTactic(TerminalNode nameAST) {
 		IScope scope = scope();
@@ -140,13 +135,12 @@ public class StitchTypechecker extends BaseStitchBehavior {
 			pushScope(tactic);
 		}
 	}
-	
+
 	@Override
 	public void endTactic(TerminalNode nameAST) {
 		popScope();
 		setExpression(null);
 	}
-	
 
 	@Override
 	public void endStrategy() {
@@ -258,16 +252,18 @@ public class StitchTypechecker extends BaseStitchBehavior {
 			if (expr.expressions().size() != tactic.args.size()) {
 				String msg = MessageFormat.format(
 						"Error in tactic reference: Expecting {0} argument{3} but got {1} for ''{2}''",
-						tactic.args.size(), expr.expressions().size(),
-						labelAST.getText(), tactic.args.size() == 1 ? "" : "s");
+						tactic.args.size(), expr.expressions().size(), labelAST.getText(),
+						tactic.args.size() == 1 ? "" : "s");
 				Tool.error(msg, (ParserRuleContext) labelAST.getParent(), stitchProblemHandler());
 			}
 			int i = 0;
 			for (Var p : tactic.args) {
 				String atype = expr.expressions().get(i).getType();
-				if ("int".equals(atype)) atype = Expression.INTEGER;
+				if ("int".equals(atype))
+					atype = Expression.INTEGER;
 				String fType = p.getType();
-				if ("int".equals(fType)) fType = Expression.INTEGER;
+				if ("int".equals(fType))
+					fType = Expression.INTEGER;
 				if (!fType.equals(atype)) {
 					String msg = MessageFormat.format(
 							"Incompatible types: Passing an expression of type ''{0}'' to argument {1}({2}) of {3}, expecting {4}",
@@ -278,9 +274,9 @@ public class StitchTypechecker extends BaseStitchBehavior {
 			}
 
 		}
-		setExpression(scope.expressions().size()>=3?scope.expressions().get(2):null);
+		setExpression(scope.expressions().size() >= 3 ? scope.expressions().get(2) : null);
 	}
-	
+
 	@Override
 	public void doStrategyDuration(ParserRuleContext ctx, TerminalNode labelAST) {
 		IScope scope = scope();
@@ -289,97 +285,111 @@ public class StitchTypechecker extends BaseStitchBehavior {
 		if (t instanceof Tactic) {
 			Tactic tactic = (Tactic) t;
 			if (!tactic.hasDuration()) {
-				String msg = MessageFormat.format("Warning: The strategy condition in branch {0} has a duration but the referenced tactic does not. This might indicate use of the old timing syntax", scope.getName());
+				String msg = MessageFormat.format(
+						"Warning: The strategy condition in branch {0} has a duration but the referenced tactic does not. This might indicate use of the old timing syntax",
+						scope.getName());
 				Tool.warn(msg, ctx, stitchProblemHandler());
 			}
-			if (!Expression.INTEGER.equals(expr.getType()) && !Expression.LONG.equals(expr.getType())) {	
-				String msg = MessageFormat.format("Error: The type of the duration in branch {0} must be an integer or long: {1}", scope.getName(), ParserUtils.formatTree(expr.tree()));
+			if (!Expression.INTEGER.equals(expr.getType()) && !Expression.LONG.equals(expr.getType())) {
+				String msg = MessageFormat.format(
+						"Error: The type of the duration in branch {0} must be an integer or long: {1}",
+						scope.getName(), ParserUtils.formatTree(expr.tree()));
 				Tool.error(msg, ctx, stitchProblemHandler());
 			}
 		}
 	}
-	
+
 	@Override
 	public void doStrategyLoop(Token vAST, Token iAST, Token labelAST) {
 		IScope scope = scope();
 		if (vAST != null) {
 			Object amount = scope.lookup(vAST.getText());
 			if (amount == null) {
-				String msg = MessageFormat.format("Error: ''{0}'' is undefined in branch {1}", vAST.getText(), scope.getName());
+				String msg = MessageFormat.format("Error: ''{0}'' is undefined in branch {1}", vAST.getText(),
+						scope.getName());
 				Tool.error(msg, null, stitchProblemHandler());
-				
-			}
-			else if (amount instanceof Var) {
-				if (!Expression.INTEGER.equals(((Var )amount).getType())) {
-					String msg = MessageFormat.format("Error: The loop variable ''{0}'' in branch {1} must be an integer", vAST.getText(), scope.getName());
+
+			} else if (amount instanceof Var) {
+				if (!Expression.INTEGER.equals(((Var) amount).getType())) {
+					String msg = MessageFormat.format(
+							"Error: The loop variable ''{0}'' in branch {1} must be an integer", vAST.getText(),
+							scope.getName());
 					Tool.error(msg, null, stitchProblemHandler());
 				}
 			}
 		}
 		Object lookup = scope.lookup(labelAST.getText());
 		if (lookup == null) {
-			String msg = MessageFormat.format("Error: The loop reference ''{0}'' in branch {1} is undefined", labelAST.getText(), scope.getName());
+			String msg = MessageFormat.format("Error: The loop reference ''{0}'' in branch {1} is undefined",
+					labelAST.getText(), scope.getName());
 			Tool.error(msg, null, stitchProblemHandler());
-		}
-		else if (!lookup.getClass().equals(ScopedEntity.class)){
-			String msg = MessageFormat.format("Error: The loop reference ''{0}'' in branch {1} does not seem to refer to a labeled branch", labelAST.getText(), scope.getName());
+		} else if (!lookup.getClass().equals(ScopedEntity.class)) {
+			String msg = MessageFormat.format(
+					"Error: The loop reference ''{0}'' in branch {1} does not seem to refer to a labeled branch",
+					labelAST.getText(), scope.getName());
 			Tool.error(msg, null, stitchProblemHandler());
 		}
 	}
-	
+
 	@Override
 	public void beginConditionBlock(ConditionContext nameAST) {
 		StitchParser.TacticContext p = (TacticContext) nameAST.getParent();
 		IScope scope = scope();
 	}
-	
+
 	@Override
 	public void beginCondition(int i) {
 		Tactic scope = (Tactic) scope();
 		setExpression(scope.conditions.get(i));
 	}
-	
+
 	@Override
 	public void endCondition(int i) {
 		setExpression(null);
 	}
-	
+
 	@Override
 	public void beginAction(int i) {
-		Tactic scope = (Tactic )scope();
+		Tactic scope = (Tactic) scope();
 		Statement statement = scope.actions.get(i);
 		pushScope(statement);
 	}
-	
+
 	@Override
 	public void endAction(int i) {
 		popScope();
 	}
-	
+
 	@Override
 	public void endEffectBlock(EffectContext nameAST) {
 		Tactic scope = (Tactic) scope();
-		for (Expression e :scope.effects) {
-			if (!Expression.BOOLEAN.equals(e.getType())) { 
-				Tool.error(MessageFormat.format("All tactic effects must be boolean: {0} in tactic ''{1}''", ParserUtils.formatTree(e.tree()), scope.getName()), null, stitchProblemHandler());
+		for (Expression e : scope.effects) {
+			if (e == scope.getDurationExpr())
+				continue;
+			if (!Expression.BOOLEAN.equals(e.getType())) {
+				Tool.error(MessageFormat.format("All tactic effects must be boolean: {0} in tactic ''{1}''",
+						ParserUtils.formatTree(e.tree()), scope.getName()), null, stitchProblemHandler());
 			}
 		}
 		if (scope.getDurationExpr() != null) {
 			String type = scope.getDurationExpr().getType();
 			if (!Expression.INTEGER.equals(type)) {
-				Tool.error(MessageFormat.format("Tactic duration must be an integer: {0} in tactic ''{1}'' is {2}", ParserUtils.formatTree(scope.getDurationExpr().tree()), scope.getName(), type), null, stitchProblemHandler());
+				Tool.error(
+						MessageFormat.format("Tactic duration must be an integer: {0} in tactic ''{1}'' is {2}",
+								ParserUtils.formatTree(scope.getDurationExpr().tree()), scope.getName(), type),
+						null, stitchProblemHandler());
 			}
 		}
 	}
-	
-	
+
 	@Override
 	public void endConditionBlock() {
 		Tactic scope = (Tactic) scope();
 		for (int i = 0; i < scope.conditions.size(); i++) {
 			Expression expr = scope.conditions.get(i);
-			if (!Expression.BOOLEAN.equals(expr.getType())) { 
-				Tool.error(MessageFormat.format("All tactic conditions must be boolean: {0} in tactic ''{1}''", ParserUtils.formatTree(expr.tree()), scope.getName()), null, stitchProblemHandler());
+			if (!Expression.BOOLEAN.equals(expr.getType())) {
+				Tool.error(MessageFormat.format("All tactic conditions must be boolean: {0} in tactic ''{1}''",
+						ParserUtils.formatTree(expr.tree()), scope.getName()), null, stitchProblemHandler());
 			}
 		}
 	}
@@ -419,9 +429,13 @@ public class StitchTypechecker extends BaseStitchBehavior {
 				setType(expr, expr.getTypeFromAcme((IAcmeProperty) o));
 			} else if (o instanceof Set) {
 				setType(expr, Expression.SET);
+			} else if (o instanceof AcmeModelInstance) {
+				setType(expr, o.getClass().getCanonicalName());
+			} else if (o != null) {
+				setType(expr, o.getClass().getCanonicalName());
 			} else // TODO: use components, connectors, ports, roles to set the type of the
 					// ___Path_Filter var that needs to be set up in being pathExpression
-				// Check Acme sets expressions
+					// Check Acme sets expressions
 				setType(expr, Expression.UNKNOWN);
 		} else {
 			switch (kind) {
@@ -463,9 +477,10 @@ public class StitchTypechecker extends BaseStitchBehavior {
 	}
 
 	@Override
-	public void createVar(DataTypeContext type, TerminalNode id, ExpressionContext val, boolean isFunction, boolean isFormalParam) {
+	public void createVar(DataTypeContext type, TerminalNode id, ExpressionContext val, boolean isFunction,
+			boolean isFormalParam) {
 		IScope scope = scope();
-		if (scope instanceof Expression && ((Expression )scope()).getKind() == Expression.Kind.QUANTIFIED) 
+		if (scope instanceof Expression && ((Expression) scope()).getKind() == Expression.Kind.QUANTIFIED)
 			return;
 		if (isFormalParam) {
 			String vType = type.getText();
@@ -482,22 +497,23 @@ public class StitchTypechecker extends BaseStitchBehavior {
 			default:
 				Object lookup = scope.lookup(vType);
 				if (lookup == null) {
-					Tool.error(MessageFormat.format("Undefined type ''{0}'' in defintion of parameter {1}", vType, id.getText()), type, stitchProblemHandler());
+					Tool.error(MessageFormat.format("Undefined type ''{0}'' in defintion of parameter {1}", vType,
+							id.getText()), type, stitchProblemHandler());
 				}
 			}
-		}
-		else 
+		} else
 //		else if (scope instanceof Tactic && ((Tactic )scope).)
 		if (scope.expressions().size() > 0) {
 			Expression e = scope.expressions().get(0);
 			e.processed = false;
 			String eType = e.getRawType();
 			String vType = type.getText();
-			if ("int".equals(vType)) vType = Expression.INTEGER;
-			if (!vType.equals(eType) && !Expression.UNKNOWN.equals(eType)) {
+			if ("int".equals(vType))
+				vType = Expression.INTEGER;
+			if (!vType.equals(eType) && !Expression.UNKNOWN.equals(eType) && !"object".equals(vType)) {
 				if (!(Expression.LONG.equals(vType) && Expression.INTEGER.equals(eType))) {
-					if (!(Expression.FLOAT.equals(vType) && (Expression.LONG.equals(eType)
-							|| Expression.INTEGER.equals(eType)))) {
+					if (!(Expression.FLOAT.equals(vType)
+							&& (Expression.LONG.equals(eType) || Expression.INTEGER.equals(eType)))) {
 						Tool.error(MessageFormat.format("Cannot assign {0} to a {1} when defining {2}", eType, vType,
 								id.getText()), val, stitchProblemHandler());
 					}
@@ -608,15 +624,17 @@ public class StitchTypechecker extends BaseStitchBehavior {
 		// - the set expression should have values
 		String result = cExpr.expressions().get(0).getRawType();
 		if (!Expression.SET.equals(result)) {
-			Tool.error(MessageFormat.format("Quantifiers must quantify over a set: {0}", ParserUtils.formatTree(cExpr.expressions().get(0).tree())), ctx, stitchProblemHandler());
+			Tool.error(MessageFormat.format("Quantifiers must quantify over a set: {0}",
+					ParserUtils.formatTree(cExpr.expressions().get(0).tree())), ctx, stitchProblemHandler());
 		}
 
 		result = cExpr.expressions().get(1).getType();
 		if (!Expression.BOOLEAN.equals(result)) {
-			Tool.error(MessageFormat.format("Expected a boolean expression, got a {0}: {1}", result, ParserUtils.formatTree(cExpr.expressions().get(1).tree())), ctx, stitchProblemHandler());
+			Tool.error(MessageFormat.format("Expected a boolean expression, got a {0}: {1}", result,
+					ParserUtils.formatTree(cExpr.expressions().get(1).tree())), ctx, stitchProblemHandler());
 		}
-		
-		setType(cExpr, ctx.SELECT() != null?Expression.SET:Expression.BOOLEAN);
+
+		setType(cExpr, ctx.SELECT() != null ? Expression.SET : Expression.BOOLEAN);
 	}
 
 	@Override
@@ -773,12 +791,26 @@ public class StitchTypechecker extends BaseStitchBehavior {
 							paramsOk &= c.equals(Set.class) || c.equals(Collection.class);
 							break;
 						case Expression.SEQ:
-							paramsOk &= c.equals(List.class)|| c.equals(Collection.class);
-							break; 
-						default:
+							paramsOk &= c.equals(List.class) || c.equals(Collection.class);
+							break;
+						case Expression.UNKNOWN:
 							Tool.warn(MessageFormat.format(
 									"Cannot check compatibility of non-basic types currently: Attempting to pass {0} to {1}",
 									args[i], c.getName()), mc, stitchProblemHandler());
+						default:
+							try {
+								Class<?> aClass = Class.forName(args[i]);
+								paramsOk &= c.isAssignableFrom(aClass);
+							} catch (ClassNotFoundException e) {
+								if (Expression.SET.equals(args[i]) && Set.class.isAssignableFrom(c)) {
+									paramsOk &= true;
+								} else if (Expression.SEQ.equals(args[i]) && List.class.isAssignableFrom(c)) {
+									paramsOk &= true;
+								} else
+									Tool.warn(MessageFormat.format(
+											"Cannot check compatibility of non-basic types currently: Attempting to pass {0} to {1}",
+											args[i], c.getName()), mc, stitchProblemHandler());
+							}
 						}
 						if (!paramsOk) {
 							String msg = MessageFormat.format(
@@ -826,6 +858,10 @@ public class StitchTypechecker extends BaseStitchBehavior {
 			return Expression.CHAR;
 		if (t.equals(void.class))
 			return "void";
+		if (t == Set.class || Set.class.isAssignableFrom(t))
+			return Expression.SET;
+		if (t == List.class || List.class.isAssignableFrom(t))
+			return Expression.SEQ;
 		return Expression.UNKNOWN;
 	}
 
@@ -908,8 +944,8 @@ public class StitchTypechecker extends BaseStitchBehavior {
 			Expression expr1 = expr();
 			IScope scope = scope();
 //			if (scope.parent() == stitch().script) {
-				popScope();
-				setExpression(null);
+			popScope();
+			setExpression(null);
 //			}
 //			else {
 //				int i = 0;

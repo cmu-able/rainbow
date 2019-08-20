@@ -24,9 +24,14 @@ import com.google.inject.Scope;
 public abstract class BaseStitchBehavior implements IStitchBehavior {
 
     protected final Stitch m_stitch;
+	protected StitchBeginEndVisitor m_walker;
 
     protected BaseStitchBehavior (Stitch/*State*/ stitch) {
         m_stitch = stitch;
+    }
+    
+    public void setWalker(StitchBeginEndVisitor walker) {
+    	m_walker = walker;
     }
 
     protected StitchScript script () {
@@ -39,6 +44,7 @@ public abstract class BaseStitchBehavior implements IStitchBehavior {
 
     protected IScope scope () {
         return m_stitch.scope ();
+//    	return wal
     }
 
     public Stitch/*State*/ stitch () {

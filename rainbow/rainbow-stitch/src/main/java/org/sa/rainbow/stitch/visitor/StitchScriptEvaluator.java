@@ -79,15 +79,11 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 	private static final int LOP = Expression.LOP;
 	private static final int ROP = Expression.ROP;
 
-	private StitchBeginEndVisitor m_walker;
 
 	public StitchScriptEvaluator(Stitch/* State */ stitchState) {
 		super(stitchState);
 	}
 
-	public void setWalker(StitchBeginEndVisitor walker) {
-		m_walker = walker;
-	}
 
 	@Override
 	public void createVar(StitchParser.DataTypeContext type, TerminalNode id, StitchParser.ExpressionContext val,
