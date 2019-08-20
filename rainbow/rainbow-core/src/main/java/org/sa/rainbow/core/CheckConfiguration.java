@@ -49,7 +49,7 @@ import org.sa.rainbow.util.YamlUtil;
 
 public class CheckConfiguration {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Throwable {
 		System.out.println("Reading configuration files");
 		Rainbow.instance();
 		System.out.println(
@@ -137,8 +137,8 @@ public class CheckConfiguration {
 
 		// Make Rainbow.instance().rainbowMaster() return this master
 		Rainbow.instance().setMaster(master);
-
-		Reflections reflections = new Reflections(CheckConfiguration.class.getClassLoader());
+		System.out.println("Locating configuration checkers in system...");
+		Reflections reflections = new Reflections("org.sa", CheckConfiguration.class.getClassLoader());
 		List<IRainbowConfigurationChecker> checkers = new LinkedList<>();
 		Set<Class<? extends IRainbowConfigurationChecker>> checkerClasses = reflections
 				.getSubTypesOf(IRainbowConfigurationChecker.class);
@@ -173,7 +173,13 @@ public class CheckConfiguration {
 				mm.initializeModels();
 				System.out.println("found " + mm.getRegisteredModelTypes() + " model *types*");
 			}
+			Throwable ex = null;
+			try {
 			checker.checkRainbowConfiguration();
+			}
+			catch (Throwable e) {
+				ex = e;
+			}
 			if (checker.getProblems().size() > 0) {
 //					System.out.println("Problems with the configuration were reported:");
 				for (Problem p : checker.getProblems()) {
@@ -182,6 +188,7 @@ public class CheckConfiguration {
 					System.out.println(p.problem.name() + ": " + p.msg);
 				}
 			}
+			if (ex!= null) throw ex;
 
 		}
 
