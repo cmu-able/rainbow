@@ -89,7 +89,7 @@ public class Ohana {
 	}
 
 	public static Ohana instance() {
-		if (m_instance == null)
+		if (m_instance == null) 
 			m_instance = new Ohana();
 		return m_instance;
 	}
@@ -113,6 +113,7 @@ public class Ohana {
 	private boolean m_typecheckStrategies = true;
 
 	private Ohana() {
+		m_isDisposed = false;
 		m_rootScope = new ScopedEntity(null, "Ohana2 Stitch Root Scope", Stitch.NULL_STITCH);
 		Stitch.NULL_STITCH.script = new StitchScript(m_rootScope, "Ohana Stitch Root Script", Stitch.NULL_STITCH);
 		m_stitches = new HashMap<>();
@@ -133,6 +134,7 @@ public class Ohana {
 		m_stitches.clear();
 		m_stitches = null;
 		Ohana.m_isDisposed = true;
+		m_instance = null;
 	}
 
 	public IScope getRootScope() {
