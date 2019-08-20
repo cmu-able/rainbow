@@ -77,7 +77,7 @@ public class StitchConfigurationChecker implements IRainbowConfigurationChecker 
 				}
 			}
 		}
-		Ohana.instance().dispose();  
+//		Ohana.instance().dispose();  
 	}
 
 	protected void checkStitchFile(File f) {
@@ -98,7 +98,7 @@ public class StitchConfigurationChecker implements IRainbowConfigurationChecker 
 					MessageFormat.format("There was an error opening ''{0}''", f.getAbsolutePath())));
 		}
 		for (IStitchProblem problem : sph.getProblems()) {
-			m_problems.add(new Problem(stitchProblemToProblem(problem), problem.getMessage()));
+			m_problems.add(new Problem(stitchProblemToProblem(problem), f.getName() + ": " + problem.getMessage()));
 		}
 	}
 
