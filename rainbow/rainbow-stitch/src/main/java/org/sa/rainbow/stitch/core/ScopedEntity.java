@@ -73,7 +73,7 @@ public class ScopedEntity implements IScope {
         m_stitch = stitch;
         m_parent = parent;
         m_children = Collections.synchronizedList (new ArrayList<IScope> ());
-        m_vars = new HashMap<String, Var> ();
+        m_vars = new LinkedHashMap<String, Var> ();
         m_expressions = new ArrayList<Expression> ();
         m_statements = new ArrayList<Statement> ();
 

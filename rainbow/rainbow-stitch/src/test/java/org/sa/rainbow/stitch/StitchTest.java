@@ -52,15 +52,18 @@ public class StitchTest {
 	public static class TestProblemHandler implements StitchProblemHandler {
 
 		List<IStitchProblem> problems = new LinkedList<>();
-		
+		boolean suppressAssertion = false;
 		@Override
 		public void setProblem(IStitchProblem problem) {
 			if (problem.getSeverity() == IStitchProblem.WARNING) {
 				System.out.println(problem.getMessage());
 				problems.add(problem);
-			} else {
+			} else if (suppressAssertion){
+				System.out.println(problem.getMessage());
+
+				problems.add(problem);
+			} else
 				throw new AssertionFailedError(problem.getMessage());
-			}
 		}
 
 		@Override
@@ -127,28 +130,26 @@ public class StitchTest {
 			System.out.println(err.getMessage());
 		}
 		assertTrue("Could not parse the script", problems.problems.isEmpty());
+		TestProblemHandler testProblemHandler = new TestProblemHandler();
+		stitch.stitchProblemHandler = testProblemHandler;
 
-		if (typecheck) {
-			IStitchBehavior sb = stitch.getBehavior(Stitch.SCOPER_PASS);
-			ScopedEntity tcscope = new ScopedEntity(null, "Ohana2 Stitch Root Scope", Stitch.NULL_STITCH);
-			sb.stitch().setScope(tcscope);
-			StitchBeginEndVisitor walker = new StitchBeginEndVisitor(sb, tcscope);
-			walker.visit(script);
-			IStitchBehavior tcb = stitch.getBehavior(Stitch.TYPECHECKER_PASS);
-			walker = new StitchBeginEndVisitor(tcb, tcscope);
-			walker.visit(script);
-		}
-
-		String tacticPath = "/script/tactic";
 		if (buildScope) {
-			final Collection<ParseTree> definedTactics = XPath.findAll(script, tacticPath, parser);
 			IStitchBehavior sb = stitch.getBehavior(Stitch.SCOPER_PASS);
 			sb.stitch().setScope(rootScope);
 			StitchBeginEndVisitor walker = new StitchBeginEndVisitor(sb, rootScope);
 			walker.visit(script);
 		}
+		if (typecheck) {
+			testProblemHandler.suppressAssertion = true;
+			IStitchBehavior tcb = stitch.getBehavior(Stitch.TYPECHECKER_PASS);
+			StitchBeginEndVisitor walker = new StitchBeginEndVisitor(tcb, rootScope);
+			walker.visit(script);
+		}
 
-		stitch.stitchProblemHandler = new TestProblemHandler();
+		String tacticPath = "/script/tactic";
+		final Collection<ParseTree> definedTactics = XPath.findAll(script, tacticPath, parser);
+
+
 		return stitch;
 	}
 

@@ -1,11 +1,17 @@
 package org.sa.rainbow.stitch.visitor;
 
+import java.text.MessageFormat;
+
 import org.antlr.v4.runtime.misc.NotNull;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.sa.rainbow.stitch.core.Expression;
 import org.sa.rainbow.stitch.core.IScope;
 import org.sa.rainbow.stitch.core.Import;
 import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.parser.StitchBaseVisitor;
 import org.sa.rainbow.stitch.parser.StitchParser;
+import org.sa.rainbow.stitch.parser.StitchParser.ExpressionsContext;
 
 /**
  * Created by schmerl on 9/30/2016.
@@ -14,6 +20,20 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
 
     IStitchBehavior beh;
     IScope          parentScope;
+    
+    class VisitorState {
+    	Expression expr = null;
+    	IScope scope = null;
+    	int exprLevel = -1;
+    	int scopeLevel = -1;
+    	
+    	VisitorState () {
+    		expr = beh.stitch().expr();
+    		scope = beh.stitch().scope();
+    		exprLevel = expr!=null?expr.subLevel:-1;
+    		scopeLevel = scope!=null?scope.getLevel():-1;
+    	}
+    }
 
     public StitchBeginEndVisitor (IStitchBehavior beh, IScope inScope) {
         this.beh = beh;
@@ -81,9 +101,9 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
 
     @Override
     public Boolean visitTactic (@NotNull StitchParser.TacticContext ctx) {
-        beh.beginTactic (ctx.id);
+        beh.beginTactic (ctx.IDENTIFIER());
         super.visitTactic (ctx);
-        beh.endTactic ();
+        beh.endTactic (ctx.IDENTIFIER());
         return true;
     }
 
@@ -98,7 +118,7 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
     @Override
     public Boolean visitTacticParam (@NotNull StitchParser.TacticParamContext ctx) {
         super.visitTacticParam (ctx);
-        beh.createVar (ctx.dataType (), ctx.IDENTIFIER (), null, false);
+        beh.createVar (ctx.dataType (), ctx.IDENTIFIER (), null, false, true);
         return true;
     }
 
@@ -116,21 +136,22 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
 
     @Override
     public Boolean visitVar (@NotNull StitchParser.VarContext ctx) {
-//        IScope preScope = beh.stitch().scope ();
+        VisitorState preState = new VisitorState();
         beh.beginStatement (Strategy.StatementKind.VAR_DEF, ctx);
-        super.visitVar (ctx);
-        beh.createVar (ctx.t, ctx.IDENTIFIER (), ctx.expression (), ctx.DEFINE () != null || ctx.FUNCTION () != null);
-        beh.endStatement ();
-        final IScope scope = beh.stitch ().scope ();
-//        if (preScope != scope) {
-//            System.out.println ("Scopes don't match: " + this.toString ());
-//        }
+        visitExpression(ctx.expression());
+        beh.createVar (ctx.t, ctx.IDENTIFIER (), ctx.expression (), ctx.DEFINE () != null || ctx.FUNCTION () != null, false);
+        beh.endStatement (Strategy.StatementKind.VAR_DEF, ctx);
+        checkPostState(preState);
         return true;
     }
+    
+    
 
     @Override
     public Boolean visitPathExpression (@NotNull StitchParser.PathExpressionContext ctx) {
-        beh.beginPathExpression ();
+    	VisitorState preState = new VisitorState();
+        beh.beginPathExpression (ctx);
+        VisitorState bpState = new VisitorState();
         visitNonLiteralIdExpression (ctx.nonLiteralIdExpression ());
         IStitchBehavior.TypeFilterT filter = IStitchBehavior.TypeFilterT.NONE;
         if (ctx.IDENTIFIER () != null) {
@@ -144,13 +165,19 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
 //            beh
         }
         if (filter != IStitchBehavior.TypeFilterT.NONE || hasExpr) {
-            beh.pathExpressionFilter (filter, ctx.IDENTIFIER (), ctx.expression ());
+            hasExpr = !beh.pathExpressionFilter (filter, ctx.IDENTIFIER (), ctx.expression ());
         }
-        if (hasExpr) visitExpression (ctx.expression ());
+        if (hasExpr) {
+        	VisitorState eState = new VisitorState();
+        	visitExpression (ctx.expression ());
+        	checkPostState(eState);
+        }
         if (ctx.pathExpressionContinuation () != null) {
             visitPathExpressionContinuation (ctx.pathExpressionContinuation ());
         }
+        checkPostState(bpState);
         beh.endPathExpression (ctx);
+        checkPostState(preState);
         return true;
     }
 
@@ -181,7 +208,9 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
     public Boolean visitCondition (@NotNull StitchParser.ConditionContext ctx) {
         beh.beginConditionBlock (ctx);
         for (int i = 0; i < ctx.expression ().size (); i++) {
+        	beh.beginCondition(i);
             visitExpression (ctx.expression (i));
+            beh.endCondition(i);
         }
         beh.endConditionBlock ();
         return true;
@@ -190,7 +219,11 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
     @Override
     public Boolean visitAction (@NotNull StitchParser.ActionContext ctx) {
         beh.beginActionBlock (ctx);
-        super.visitAction (ctx);
+        for (int i = 0; i < ctx.statement().size(); i++) {
+        	beh.beginAction(i);
+        	visitStatement(ctx.statement(i));
+        	beh.endAction (i);
+        }
         beh.endActionBlock ();
         return true;
     }
@@ -209,14 +242,15 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
             beh.doTacticDuration (ctx.expression (0));
         }
 //        super.visitEffect (ctx);
-        beh.endEffectBlock ();
+        beh.endEffectBlock (ctx);
         return true;
     }
 
     @Override
     public Boolean visitStrategy (@NotNull StitchParser.StrategyContext ctx) {
 //        IScope preScope = beh.stitch().scope ();
-        beh.beginStrategy (ctx.IDENTIFIER ());
+        TerminalNode identifier = ctx.IDENTIFIER ();
+		beh.beginStrategy (identifier);
         visitExpression (ctx.expression ());
         beh.doStrategyCondition (Strategy.ConditionKind.APPLICABILITY, ctx);
         visitFunctions (ctx.functions ());
@@ -234,7 +268,8 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
     public Boolean visitStrategyNode (@NotNull StitchParser.StrategyNodeContext ctx) {
 //        IScope preScope = beh.stitch().scope ();
         beh.beginStrategyNode (ctx.IDENTIFIER (), ctx);
-        super.visitStrategyNode (ctx);
+        visitStrategyCond(ctx.strategyCond());
+        visitTacticRef(ctx.tacticRef());
         beh.endStrategyNode ();
 //        if (preScope != beh.stitch().scope ()) {
 //            System.out.println ("Scopes don't match: " + this.toString ());
@@ -248,7 +283,7 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
         if (ctx.HASH () != null) {
             visitExpression (ctx.expression (0));
             exprIdx = 1;
-            beh.doStrategyProbability ();
+            beh.doStrategyProbability (ctx);
         }
         if (ctx.SUCCESS () != null) beh.doStrategyCondition (Strategy.ConditionKind.SUCCESS, ctx);
         if (ctx.FAILURE () != null) beh.doStrategyCondition (Strategy.ConditionKind.FAILURE, ctx);
@@ -274,10 +309,10 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
             for (int i = 0; i < exprEndIdx; i++) {
                 visitExpression (ctx.expression (i));
             }
-            beh.endReferencedTactic ();
+            beh.endReferencedTactic (ctx.IDENTIFIER (0));
             if (ctx.AT () != null) {
                 visitExpression (ctx.expression (exprEndIdx));
-                beh.doStrategyDuration (ctx.expression (exprEndIdx));
+                beh.doStrategyDuration (ctx.expression (exprEndIdx),ctx.IDENTIFIER(0));
             }
             if (!ctx.strategyBranch ().isEmpty ()) {
                 visitStrategyBranch (ctx.strategyBranch ());
@@ -297,7 +332,7 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
 
     @Override
     public Boolean visitStatement (@NotNull StitchParser.StatementContext ctx) {
-//        IScope preScope = beh.stitch().scope ();
+    	VisitorState preState = new VisitorState();
         if (!ctx.statement ().isEmpty ()) {
             beh.beginStatement (Strategy.StatementKind.STMT_LIST, ctx);
             for (int i = 0; i < ctx.statement ().size (); i++) {
@@ -306,11 +341,11 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
             if (ctx.errorHandler () != null) {
                 visitErrorHandler (ctx.errorHandler ());
             }
-            beh.endStatement ();
+            beh.endStatement (Strategy.StatementKind.STMT_LIST, ctx);
         } else if (ctx.expression () != null) {
             beh.beginStatement (Strategy.StatementKind.EXPRESSION, ctx);
             visitExpression (ctx.expression ());
-            beh.endStatement ();
+            beh.endStatement (Strategy.StatementKind.EXPRESSION, ctx);
         } else if (ctx.ifStmt () != null) {
             visitIfStmt (ctx.ifStmt ());
         } else if (ctx.whileStmt () != null) {
@@ -321,11 +356,9 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
             visitVar (ctx.var ());
         } else {
             beh.beginStatement (Strategy.StatementKind.EMPTY_STMT, ctx);
-            beh.endStatement ();
+            beh.endStatement (Strategy.StatementKind.EMPTY_STMT, ctx);
         }
-//        if (preScope != beh.stitch().scope ()) {
-//            System.out.println ("Scopes don't match: " + this.toString ());
-//        }
+        checkPostState(preState);
         return true;
     }
 
@@ -333,7 +366,7 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
     public Boolean visitErrorHandler (@NotNull StitchParser.ErrorHandlerContext ctx) {
         beh.beginStatement (Strategy.StatementKind.ERROR, ctx);
         super.visitErrorHandler (ctx);
-        beh.endStatement ();
+        beh.endStatement (Strategy.StatementKind.ERROR, ctx);
         return true;
     }
 
@@ -341,7 +374,7 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
     public Boolean visitIfStmt (@NotNull StitchParser.IfStmtContext ctx) {
         beh.beginStatement (Strategy.StatementKind.IF, ctx);
         super.visitIfStmt (ctx);
-        beh.endStatement ();
+        beh.endStatement (Strategy.StatementKind.IF, ctx);
         return true;
     }
 
@@ -349,7 +382,7 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
     public Boolean visitWhileStmt (@NotNull StitchParser.WhileStmtContext ctx) {
         beh.beginStatement (Strategy.StatementKind.WHILE, ctx);
         super.visitWhileStmt (ctx);
-        beh.endStatement ();
+        beh.endStatement (Strategy.StatementKind.WHILE, ctx);
         return true;
     }
 
@@ -367,18 +400,61 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
             visitExpression (ctx.expression ());
         }
         visitStatement (ctx.statement ());
-        beh.endStatement ();
+        beh.endStatement (Strategy.StatementKind.FOR, ctx);
         return true;
     }
 
     @Override
     public Boolean visitExpression (@NotNull StitchParser.ExpressionContext ctx) {
-        beh.beginExpression ();
-        super.visitExpression (ctx);
+    	VisitorState preState = new VisitorState();
+        boolean pushed = beh.beginExpression (ctx);
+        VisitorState state1 = new VisitorState();
+        visitAssignmentExpression(ctx.assignmentExpression());
+        checkPostState(state1);
         beh.doExpression (ctx);
-        beh.endExpression (ctx);
+        checkPostState(state1);
+        beh.endExpression (ctx, pushed);
+        checkPostState(preState);
         return true;
     }
+    
+    protected boolean checkPostState(VisitorState pre) {
+    	IScope scope = beh.stitch().scope();
+    	Expression expr = beh.stitch().expr();
+    	boolean ret = true;
+    	if (pre.scope != scope) {
+    		ret =  false;
+    	}
+    	else if (pre.expr != expr) {
+    		ret =  false;
+    	}
+    	else if (scope != null && pre.scopeLevel != scope.getLevel()) {
+    		ret =  false;
+    	}
+    	else if (expr != null && pre.expr != null && pre.exprLevel != expr.subLevel) {
+    		ret =  false;
+    	}
+    	if (!ret) {
+    		String msg = MessageFormat.format("PreExpr=''{2}'', current=''{3}''", pre.scope.toStringTree(), scope.toStringTree(), ParserUtils.formatTree(pre.expr!=null?pre.expr.tree():null), ParserUtils.formatTree(expr!=null?expr.tree():null));
+//    		System.out.println(msg);
+    	}
+    	return ret;
+    }
+
+//	protected void checkScopeMatch(IScope preScope, int level) {
+//		IScope scope = beh.stitch().scope ();
+//		if (preScope != scope) {
+//            System.out.println ("Scopes don't match: " + this.toString ());
+//        }
+//		else {
+//			if (preScope instanceof Expression) {
+//				Expression postExpression = (Expression )scope;
+//				if (postExpression.subLevel != level) {
+//					System.out.println("sublevels don't match");
+//				}
+//			}
+//		}
+//	}
 
 
     //    @Override
@@ -438,13 +514,13 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
     @Override
     public Boolean visitAssignmentExpression (@NotNull StitchParser.AssignmentExpressionContext ctx) {
         if (ctx.assignmentExpression () != null) {
-            beh.beginExpression ();
+            boolean pushed = beh.beginExpression (ctx);
             beh.lOp ();
             visitBooleanExpression (ctx.booleanExpression ());
             beh.rOp ();
             visitAssignmentExpression (ctx.assignmentExpression ());
             beh.doAssignExpression (ctx.booleanExpression (), ctx.assignmentExpression ());
-            beh.endExpression (ctx);
+            beh.endExpression (ctx, pushed);
         } else {
             visitBooleanExpression (ctx.booleanExpression ());
         }
@@ -454,22 +530,28 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
 
     @Override
     public Boolean visitBooleanExpression (@NotNull StitchParser.BooleanExpressionContext ctx) {
-        beh.beginExpression ();
-        super.visitBooleanExpression (ctx);
-        beh.endExpression (ctx);
+    	VisitorState preState = new VisitorState();
+
+        boolean pushed = beh.beginExpression (ctx);
+        if (ctx.impliesExpression() != null)
+        	visitImpliesExpression(ctx.impliesExpression());
+        else 
+        	visitQuantifiedExpression(ctx.quantifiedExpression());
+        beh.endExpression (ctx, pushed);
+        checkPostState(preState);
         return true;
     }
 
     @Override
     public Boolean visitImpliesExpression (@NotNull StitchParser.ImpliesExpressionContext ctx) {
         if (ctx.impliesExpression () != null) {
-            beh.beginExpression ();
+            boolean pushed = beh.beginExpression (ctx);
             beh.lOp ();
             visitIffExpression (ctx.iffExpression ());
             beh.rOp ();
             visitImpliesExpression (ctx.impliesExpression ());
             beh.doLogicalExpression (Strategy.ExpressionKind.IMPLIES, ctx);
-            beh.endExpression (ctx);
+            beh.endExpression (ctx, pushed);
         } else {
             visitIffExpression (ctx.iffExpression ());
         }
@@ -479,15 +561,15 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
     @Override
     public Boolean visitIffExpression (@NotNull StitchParser.IffExpressionContext ctx) {
         if (ctx.iffExpression () != null) {
-            beh.beginExpression ();
+            boolean pushed = beh.beginExpression (ctx);
             beh.lOp ();
             visitLogicalOrExpression (ctx.logicalOrExpression ());
             beh.rOp ();
             visitIffExpression (ctx.iffExpression ());
             beh.doLogicalExpression (Strategy.ExpressionKind.IFF, ctx);
-            beh.endExpression (ctx);
+            beh.endExpression (ctx, pushed);
         } else {
-            super.visitIffExpression (ctx);
+        	visitLogicalOrExpression(ctx.logicalOrExpression());
         }
         return true;
     }
@@ -495,48 +577,63 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
     @Override
     public Boolean visitLogicalOrExpression (@NotNull StitchParser.LogicalOrExpressionContext ctx) {
         if (ctx.logicalOrExpression () != null) {
-            beh.beginExpression ();
+
+        	VisitorState preState = new VisitorState();
+            boolean pushed = beh.beginExpression (ctx);
             beh.lOp ();
             visitLogicalAndExpression (ctx.logicalAndExpression ());
             beh.rOp ();
             visitLogicalOrExpression (ctx.logicalOrExpression ());
             beh.doLogicalExpression (Strategy.ExpressionKind.OR, ctx);
-            beh.endExpression (ctx);
+            beh.endExpression (ctx, pushed);
+            checkPostState(preState);
         } else {
-            super.visitLogicalOrExpression (ctx);
+        	visitLogicalAndExpression(ctx.logicalAndExpression());
         }
         return true;
     }
 
     @Override
     public Boolean visitLogicalAndExpression (@NotNull StitchParser.LogicalAndExpressionContext ctx) {
+    	try {
         if (ctx.logicalAndExpression () == null) {
-            super.visitLogicalAndExpression (ctx);
+        	visitEqualityExpression(ctx.equalityExpression());
         } else {
-            beh.beginExpression ();
+        	VisitorState preState = new VisitorState();
+
+            boolean pushed = beh.beginExpression (ctx);
             beh.lOp ();
             visitEqualityExpression (ctx.equalityExpression ());
             beh.rOp ();
             visitLogicalAndExpression (ctx.logicalAndExpression ());
             beh.doLogicalExpression (Strategy.ExpressionKind.AND, ctx);
-            beh.endExpression (ctx);
+            beh.endExpression (ctx,pushed);
+            checkPostState(preState);
         }
         return true;
+    	}
+    	catch (Throwable t) {
+    		System.out.println("Throwing exception for " + ParserUtils.formatTree(ctx));
+    		throw t;
+    	}
     }
 
     @Override
     public Boolean visitEqualityExpression (@NotNull StitchParser.EqualityExpressionContext ctx) {
         if (ctx.equalityExpression () == null) {
-            super.visitEqualityExpression (ctx);
+        	visitRelationalExpression(ctx.relationalExpression());
         } else {
-            beh.beginExpression ();
+        	VisitorState pre = new VisitorState();
+
+            boolean pushed = beh.beginExpression (ctx);
             beh.lOp ();
             visitRelationalExpression (ctx.relationalExpression ());
             beh.rOp ();
             visitEqualityExpression (ctx.equalityExpression ());
             beh.doRelationalExpression (ctx.EQ () != null ? Strategy.ExpressionKind.EQ : Strategy.ExpressionKind.NE,
                                         ctx);
-            beh.endExpression (ctx);
+            beh.endExpression (ctx, pushed);
+            checkPostState(pre);
         }
         return true;
     }
@@ -544,15 +641,21 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
     @Override
     public Boolean visitRelationalExpression (@NotNull StitchParser.RelationalExpressionContext ctx) {
         if (ctx.relationalExpression () == null)
-            super.visitRelationalExpression (ctx);
+        	visitAdditiveExpression(ctx.additiveExpression());
         else {
-            beh.beginExpression ();
+        	VisitorState pre = new VisitorState();
+            boolean pushed = beh.beginExpression (ctx);
             beh.lOp ();
+            VisitorState lState = new VisitorState();
             visitAdditiveExpression (ctx.additiveExpression ());
+            checkPostState(lState);
             beh.rOp ();
+            VisitorState rState = new VisitorState();
             visitRelationalExpression (ctx.relationalExpression ());
+            checkPostState(rState);
             beh.doRelationalExpression (getExpressionKind (ctx), ctx);
-            beh.endExpression (ctx);
+            beh.endExpression (ctx, pushed);
+            checkPostState(pre);
         }
         return true;
     }
@@ -568,16 +671,16 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
     @Override
     public Boolean visitAdditiveExpression (@NotNull StitchParser.AdditiveExpressionContext ctx) {
         if (ctx.additiveExpression () == null)
-            return super.visitAdditiveExpression (ctx);
+            return visitMultiplicativeExpression(ctx.multiplicativeExpression());
         else {
-            beh.beginExpression ();
+            boolean pushed = beh.beginExpression (ctx);
             beh.lOp ();
             visitMultiplicativeExpression (ctx.multiplicativeExpression ());
             beh.rOp ();
             visitAdditiveExpression (ctx.additiveExpression ());
             beh.doArithmeticExpression (ctx.MINUS () == null ? Strategy.ExpressionKind.PLUS : Strategy.ExpressionKind
                     .MINUS, ctx);
-            beh.endExpression (ctx);
+            beh.endExpression (ctx, pushed);
         }
         return true;
     }
@@ -585,15 +688,15 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
     @Override
     public Boolean visitMultiplicativeExpression (@NotNull StitchParser.MultiplicativeExpressionContext ctx) {
         if (ctx.multiplicativeExpression () == null) {
-            super.visitMultiplicativeExpression (ctx);
+        	visitUnaryExpression(ctx.unaryExpression());
         } else {
-            beh.beginExpression ();
+            boolean pushed = beh.beginExpression (ctx);
             beh.lOp ();
             visitUnaryExpression (ctx.unaryExpression ());
             beh.rOp ();
             visitMultiplicativeExpression (ctx.multiplicativeExpression ());
             beh.doArithmeticExpression (getExpressionKind (ctx), ctx);
-            beh.endExpression (ctx);
+            beh.endExpression (ctx, pushed);
         }
         return true;
     }
@@ -608,13 +711,14 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
     @Override
     public Boolean visitUnaryExpression (@NotNull StitchParser.UnaryExpressionContext ctx) {
         if (ctx.unaryExpression () != null) {
-            beh.beginExpression ();
+        	
+            boolean pushed = beh.beginExpression (ctx);
             beh.lOp ();
             visitUnaryExpression (ctx.unaryExpression ());
             beh.doUnaryExpression (getUnaryExpressionKind (ctx), ctx);
-            beh.endExpression (ctx);
+            beh.endExpression (ctx, pushed);
         } else
-            super.visitUnaryExpression (ctx);
+        	visitPrimaryExpression(ctx.primaryExpression());
         return true;
     }
 
@@ -645,53 +749,59 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
 
     @Override
     public Boolean visitQuantifiedExpression (@NotNull StitchParser.QuantifiedExpressionContext ctx) {
-//        IScope preScope = beh.stitch().scope ();
-        beh.beginQuantifiedExpression ();
+    	VisitorState pre = new VisitorState();
+        beh.beginQuantifiedExpression (ctx);
         visitParams (ctx.params ());
         if (ctx.setExpression () != null) {
-            beh.beginExpression ();
+            boolean pushed = beh.beginExpression (ctx.setExpression());
             visitSetExpression (ctx.setExpression ());
-            beh.endExpression (ctx);
+            beh.endExpression (ctx, pushed);
         } else if (ctx.idExpression () != null) {
-            beh.beginExpression ();
+            boolean pushed = beh.beginExpression (ctx.idExpression());
             visitIdExpression (ctx.idExpression ());
-            beh.endExpression (ctx);
+            beh.endExpression (ctx, pushed);
         }
         beh.doQuantifiedExpression (getQuantifierKind (ctx), ctx);
         visitExpression (ctx.expression ());
         beh.endQuantifiedExpression (getQuantifierKind (ctx), ctx);
-//        if (preScope != beh.stitch().scope ()) {
-//            System.out.println ("visitQuantifiedExpression: Scopes don't match: " + this.toString ());
-//        }
+        checkPostState(pre);
         return true;
     }
 
     @Override
     public Boolean visitPrimaryExpression (@NotNull StitchParser.PrimaryExpressionContext ctx) {
         if (ctx.setExpression () != null)
-            super.visitPrimaryExpression (ctx);
+        	visitSetExpression(ctx.setExpression());
         else if (ctx.assignmentExpression () != null) {
-            beh.beginExpression ();
+            boolean pushed = beh.beginExpression (ctx.assignmentExpression());
             visitAssignmentExpression (ctx.assignmentExpression ());
-            beh.endExpression (ctx);
+            beh.endExpression (ctx, pushed);
         } else {
-            beh.beginExpression ();
-            super.visitPrimaryExpression (ctx);
+        	VisitorState pre = new VisitorState();
+            boolean pushed = beh.beginExpression (ctx);
+            VisitorState p = new VisitorState();
+            if (ctx.idExpression() != null)
+            	visitIdExpression(ctx.idExpression());
+            else if (ctx.postIdExpression() != null)
+            	visitPostIdExpression(ctx.postIdExpression());
+            else if (ctx.pathExpression() != null)
+            	visitPathExpression(ctx.pathExpression());
+            checkPostState(p);
             beh.doExpression (ctx);
-            beh.endExpression (ctx);
+            beh.endExpression (ctx,pushed);
+            checkPostState(pre);
         }
         return true;
     }
 
     @Override
     public Boolean visitSetExpression (@NotNull StitchParser.SetExpressionContext ctx) {
-//        IScope preScope = beh.stitch().scope ();
-        beh.beginSetExpression ();
-        super.visitSetExpression (ctx);
+    	VisitorState pre = new VisitorState();
+
+        beh.beginSetExpression (ctx);
+        visitLiteralSet(ctx.literalSet());
         beh.endSetExpression (ctx);
-//        if (preScope != beh.stitch().scope ()) {
-//            System.out.println ("visitSetExpression: Scopes don't match: " + this.toString ());
-//        }
+        checkPostState(pre);
         return true;
     }
 
@@ -700,24 +810,23 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
         if (ctx.methodCall () != null) {
             visitMethodCall (ctx.methodCall ());
         } else {
-            beh.beginExpression ();
+            boolean pushed = beh.beginExpression (ctx);
             beh.doIdentifierExpression (ctx, Strategy.ExpressionKind.IDENTIFIER);
-            beh.endExpression (ctx);
+            beh.endExpression (ctx, pushed);
         }
         return true;
     }
 
     @Override
     public Boolean visitIdExpression (@NotNull StitchParser.IdExpressionContext ctx) {
-        IScope preScope = beh.stitch().scope ();
+    	VisitorState pre = new VisitorState();
+
         if (ctx.methodCall () != null) {
             visitMethodCall (ctx.methodCall ());
         } else {
             beh.doIdentifierExpression (ctx, getIdExpressionKind (ctx));
         }
-        if (preScope != beh.stitch().scope ()) {
-            System.out.println ("visitIdExpression: Scopes don't match: " + this.toString ());
-        }
+        checkPostState(pre);
         return true;
     }
 
@@ -729,14 +838,24 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
 
     @Override
     public Boolean visitMethodCall (@NotNull StitchParser.MethodCallContext ctx) {
-//        IScope preScope = beh.stitch().scope ();
-        beh.beginMethodCallExpression ();
-        if (ctx.expressions() != null) 
-        	this.visitExpressions (ctx.expressions ());
+    	VisitorState pre = new VisitorState();
+    	ExpressionsContext expr = ctx.expressions();
+        beh.beginMethodCallExpression (ctx);
+        if (ctx.expressions() != null)  {
+        	for (ParseTree e : expr.children) {
+        		if (e instanceof StitchParser.ExpressionContext) {
+        			VisitorState eState = new VisitorState();
+        			this.visitExpression ((StitchParser.ExpressionContext )e);
+        			checkPostState(eState);
+        			beh.processParameter();
+        		}
+        		else if (!(e instanceof TerminalNode)) {
+        			throw new NullPointerException();
+        		}
+        	}
+        }
         beh.endMethodCallExpression (ctx.IDENTIFIER (), ctx);
-//        if (preScope != beh.stitch().scope ()) {
-//            System.out.println ("visitMethodCall: Scopes don't match: " + this.toString ());
-//        }
+        checkPostState(pre);
         return true;
     }
 
@@ -756,7 +875,7 @@ public class StitchBeginEndVisitor extends StitchBaseVisitor<Boolean> {
     public Boolean visitParam (@NotNull StitchParser.ParamContext ctx) {
 //        IScope preScope = beh.stitch().scope ();
         super.visitParam (ctx);
-        beh.createVar (ctx.dataType (), ctx.IDENTIFIER (), null, false);
+        beh.createVar (ctx.dataType (), ctx.IDENTIFIER (), null, false, false);
 //        if (preScope != beh.stitch().scope ()) {
 //            System.out.println ("visitParam: Scopes don't match: " + this.toString ());
 //        }

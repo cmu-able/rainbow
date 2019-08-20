@@ -354,7 +354,7 @@ public class Stitch {
 		return this.executor.get();
 	}
 
-	public void setBehavior(int scoperPass, StitchTypechecker behavior) {
+	public void setBehavior(int scoperPass, StitchScopeEstablisher behavior) {
 		m_behaviors[scoperPass] = behavior;
 	}
 }

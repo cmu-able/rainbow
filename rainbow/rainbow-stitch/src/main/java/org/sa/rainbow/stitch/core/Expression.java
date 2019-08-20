@@ -23,6 +23,7 @@
  */
 package org.sa.rainbow.stitch.core;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -49,6 +50,7 @@ import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.parser.StitchParser;
 import org.sa.rainbow.stitch.util.Tool;
 import org.sa.rainbow.stitch.visitor.IStitchBehavior;
+import org.sa.rainbow.stitch.visitor.ParserUtils;
 import org.sa.rainbow.stitch.visitor.Stitch;
 import org.sa.rainbow.stitch.visitor.StitchBeginEndVisitor;
 
@@ -153,7 +155,7 @@ public class Expression extends ScopedEntity implements IEvaluableScope, StitchT
 	 */
 	public Stack<Integer> curOp = null;
 
-	protected AST m_ast = null;
+//	protected AST m_ast = null;
 	protected ParseTree m_tree = null;
 	/**
 	 * Flag indicating whether to invert this expression, ONLY applicable if
@@ -162,6 +164,7 @@ public class Expression extends ScopedEntity implements IEvaluableScope, StitchT
 	protected boolean m_inverted = false;
 	protected Object m_result = Strategy.Outcome.UNKNOWN;
 	protected List<Var> m_refdVars = null;
+	public boolean processed = false;
 
 	/**
 	 * Main Constructor for a new Expression object.
@@ -200,7 +203,6 @@ public class Expression extends ScopedEntity implements IEvaluableScope, StitchT
 		target.skipQuanPredicate = skipQuanPredicate;
 		target.lrOps = lrOps.clone();
 		target.curOp = (Stack<Integer>) curOp.clone();
-		target.m_ast = m_ast;
 		target.m_tree = m_tree;
 		target.m_inverted = m_inverted;
 		target.m_result = m_result;
@@ -214,11 +216,14 @@ public class Expression extends ScopedEntity implements IEvaluableScope, StitchT
 	 */
 	@Override
 	public String toString() {
-		String invStr = m_inverted ? "!" : "";
-		return "expression " + m_name + ": "
-				+ (m_result != null ? m_result
-						: m_ast != null ? invStr + m_ast.toStringTree()
-								: m_tree != null ? invStr + m_tree.toStringTree() : "don't " + "know");
+		return MessageFormat.format("{0}expression {1}: {2}", m_inverted ? "!" : "", m_name,
+				ParserUtils.formatTree(m_tree));
+
+//		String invStr = m_inverted ? "!" : "";
+//		return "expression " + m_name + ": "
+//				+ (m_result != null ? m_result
+//						: m_ast != null ? invStr + m_ast.toStringTree()
+//								: m_tree != null ? invStr + m_tree.toStringTree() : "don't " + "know");
 	}
 
 	public ParseTree tree() {
@@ -267,6 +272,7 @@ public class Expression extends ScopedEntity implements IEvaluableScope, StitchT
 
 		if (tree() != null) {
 			resetResult();
+			clearState();
 			// proceed with evaluation
 			m_stitch.pushScope(this);
 			m_stitch.pushExpression();
@@ -276,9 +282,9 @@ public class Expression extends ScopedEntity implements IEvaluableScope, StitchT
 				walker.getBehavior().stitch().setScope(this);
 				if (!(tree() instanceof StitchParser.ExpressionContext) || (((StitchParser.ExpressionContext) tree())
 						.getParent()) instanceof StitchParser.ExpressionContext) {
-					walker.getBehavior().beginExpression();
+					boolean pushed =  walker.getBehavior().beginExpression((ParserRuleContext) tree());
 					walker.visit(tree());
-					walker.getBehavior().endExpression((ParserRuleContext) tree());
+					walker.getBehavior().endExpression((ParserRuleContext) tree(), pushed);
 				} else {
 					walker.visit(tree());
 				}
@@ -294,7 +300,7 @@ public class Expression extends ScopedEntity implements IEvaluableScope, StitchT
 
 					}
 				}
-				
+
 			} catch (Exception e) {
 				Tool.logger().error("Unexpected Recognition Error evaluating Expression!\n", e);
 			}
@@ -349,11 +355,16 @@ public class Expression extends ScopedEntity implements IEvaluableScope, StitchT
 	 * @return the result
 	 */
 	public Object getResult() {
-		return m_result;
+		if (curOp.size() == 0) 
+			return m_result;
+		else {
+			Stack stack = lrOps[curOp.peek().intValue()];
+			return stack.isEmpty()?null:stack.peek();
+		}
 	}
 
 	public void resetResult() {
-		if (m_ast != null || m_tree != null/* && m_expressions.size() > 0 */) {
+		if (m_tree != null/* && m_expressions.size() > 0 */) {
 			m_result = null;
 		}
 		// reset expression index
@@ -369,6 +380,7 @@ public class Expression extends ScopedEntity implements IEvaluableScope, StitchT
 	 */
 	public void clearState() {
 		// if identifier, clear state of this var in ancestor
+		processed = false;
 		if (getKind() == Kind.IDENTIFIER) {
 			Object o = lookup(getName());
 			if (o instanceof Var) {
@@ -390,6 +402,10 @@ public class Expression extends ScopedEntity implements IEvaluableScope, StitchT
 
 	public void addRefdVar(Var v) {
 		m_refdVars.add(v);
+	}
+	
+	public String getRawType() {
+		return type;
 	}
 
 	public String getType() {
@@ -420,7 +436,7 @@ public class Expression extends ScopedEntity implements IEvaluableScope, StitchT
 				type = UNKNOWN;
 				break;
 			case IDENTIFIER: {
-				Object o = lookup(tree().getText());
+				Object o = lookup(m_name);
 				if (o == null)
 					type = UNKNOWN;
 				else if (o instanceof Var) {

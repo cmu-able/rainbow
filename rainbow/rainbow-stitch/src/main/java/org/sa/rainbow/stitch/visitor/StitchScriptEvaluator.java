@@ -57,6 +57,7 @@ import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.core.Expression;
 import org.sa.rainbow.stitch.core.Expression.Kind;
+import org.sa.rainbow.stitch.core.Strategy.StatementKind;
 import org.sa.rainbow.stitch.core.IScope;
 import org.sa.rainbow.stitch.core.MyDouble;
 import org.sa.rainbow.stitch.core.MyInteger;
@@ -90,7 +91,7 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 
 	@Override
 	public void createVar(StitchParser.DataTypeContext type, TerminalNode id, StitchParser.ExpressionContext val,
-			boolean isFunction) {
+			boolean isFunction, boolean isFormalParam) {
 		// see if a value was assigned at var creation
 		if (scope().expressions().size() > 0) {
 			Var v = scope().vars().get(id.getText());
@@ -102,8 +103,14 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 //					e.evaluate(null, m_walker);
 //				}
 				v.setValue(e.getResult());
+				e.processed = false;
 			}
 		}
+	}
+	
+	@Override
+	public void beginStatement(StatementKind stmtAST, ParserRuleContext ctx) {
+		super.beginStatement(stmtAST, ctx);
 	}
 
 	@Override
@@ -122,11 +129,12 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 	}
 
 	@Override
-	public void beginExpression() {
-		if (expr() != null) {
+	public boolean beginExpression(ParserRuleContext ctx) {
+		Expression expr1 = expr();
+		if (expr1 != null) {
 			// don't subExpr anymore, just keep depth count
 			expr().subLevel++;
-			return;
+			return true;
 		}
 
 		final IScope scope = scope();
@@ -136,8 +144,10 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 		} else if (scope instanceof Expression) {
 			Expression expr = (Expression) scope;
 			if (expr.isComplex()) {
-				if (expr.expressions().size() > expr.curExprIdx) {
-					setExpression(expr.expressions().get(expr.curExprIdx++));
+				int curExprIdx = expr.curExprIdx;
+				if (expr.expressions().size() > curExprIdx) {
+					Expression expr2 = expr.expressions().get(expr.curExprIdx++);
+					setExpression(expr2);
 					expr.subLevel = 0;
 				}
 			} else {
@@ -145,14 +155,29 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 				expr().curExprIdx = 0;
 			}
 		}
+		return false;
+	}
+	
+	@Override
+	public void processParameter() {
+		Expression e = expr();
+		if (e.parent() instanceof Expression) {
+			Expression parent = (Expression) e.parent();
+			if (parent.isComplex()) {
+				if (parent.expressions().size() > parent.curExprIdx) {
+					setExpression(parent.expressions().get(parent.curExprIdx++));
+				}
+				else setExpression(parent);
+			}
+		}
+		
 	}
 
 	@Override
-	public void endExpression(ParserRuleContext ctx) {
+	public void endExpression(ParserRuleContext ctx, boolean pushed) {
 		Expression expr = expr();
 		if (expr.subLevel > 0) { // decr dept count first
-			expr.subLevel--;
-			return;
+				expr.subLevel--;
 		} else { // check quantified expression special case
 			if (expr.skipQuanPredicate) {
 				expr.skipQuanPredicate = false;
@@ -163,14 +188,22 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 		if (expr.getResult() == null && expr.expressions().size() > 0) {
 			// transfer children result up
 			Expression sub = expr.expressions().get(0);
+			if (!sub.processed) {
 			expr.setResult(sub.getResult());
+			sub.processed = true;
+			}
 		}
-
-		setExpression(null); // clear eval expression reference
+//		if (expr.parent() instanceof Expression) {
+//			Expression parent = (Expression) expr.parent();
+//			if (parent.getKind().equals(Expression.Kind.LIST))
+//				setExpression(null);
+//			
+//		}
+//		setExpression(null); // clear eval expression reference
 	}
 
 	@Override
-	public void beginQuantifiedExpression() {
+	public void beginQuantifiedExpression(ParserRuleContext ctx) {
 		if (checkSkipEval())
 			return;
 
@@ -300,7 +333,7 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 	}
 
 	@Override
-	public void beginMethodCallExpression() {
+	public void beginMethodCallExpression(ParserRuleContext ctx) {
 		if (checkSkipEval())
 			return;
 
@@ -322,31 +355,31 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 			args[i++] = e.getResult();
 		}
 		Object rv = executeMethod(mc.getText(), args);
-//        cExpr.setResult (rv);
+        cExpr.setResult (rv);
 		if (rv instanceof Integer) {
 			MyInteger result = new MyInteger((Integer) rv);
-//			cExpr.setResult(result);
-			expr().setResult(result);
+			cExpr.setResult(result);
+//			expr().setResult(result);
 		} else if (rv instanceof Long) {
 			MyInteger result = new MyInteger((Long) rv);
-//			cExpr.setResult(result);
-			expr().setResult(result);
+			cExpr.setResult(result);
+//			expr().setResult(result);
 		} else if (rv instanceof Float) {
 			MyDouble result = new MyDouble(((Float) rv).doubleValue());
-//			cExpr.setResult(result);
-			expr().setResult(result);
+			cExpr.setResult(result);
+//			expr().setResult(result);
 		} else if (rv instanceof Double) {
 			MyDouble result = new MyDouble((Double) rv);
-//			cExpr.setResult(result);
-			expr().setResult(result);
+			cExpr.setResult(result);
+//			expr().setResult(result);
 		} else {
-//			cExpr.setResult(rv);
-			expr().setResult(rv);
+			cExpr.setResult(rv);
+//			expr().setResult(rv);
 		}
 	}
 
 	@Override
-	public void beginSetExpression() {
+	public void beginSetExpression(ParserRuleContext ctx) {
 		if (checkSkipEval())
 			return;
 
@@ -398,15 +431,15 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 		if (checkSkipEval())
 			return;
 
-		if (scope() instanceof Expression) {
-			Expression expr = (Expression) scope();
-			if (expr.getResult() == null && expr.expressions().size() > 0) {
-				// transfer children result up
-				Expression sub = expr.expressions().get(0);
-				if (sub.getResult() != Strategy.Outcome.UNKNOWN)
-					expr.setResult(sub.getResult());
-			}
-		}
+//		if (scope() instanceof Expression) {
+//			Expression expr = (Expression) scope();
+//			if (expr.getResult() == null && expr.expressions().size() > 0) {
+//				// transfer children result up
+//				Expression sub = expr.expressions().get(0);
+//				if (sub.getResult() != Strategy.Outcome.UNKNOWN)
+//					expr.setResult(sub.getResult());
+//			}
+//		}
 	}
 
 	@Override
@@ -525,8 +558,7 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 		if (expr.lrOps[LOP].isEmpty() || expr.lrOps[ROP].isEmpty() || expr.lrOps[LOP].peek() == null
 				|| expr.lrOps[ROP].peek() == null) {
 			// if either is NULL, result is NULL
-			final String msg = "One relational operand is NULL: " + expr.lrOps[LOP].pop() + ", " + expr.lrOps[ROP].pop()
-					+ " ... " + opAST.toStringTree();
+			final String msg = MessageFormat.format("One relational operand is NULL: {0}, {1} ... {2}", expr.lrOps[LOP].isEmpty()?"<null>":expr.lrOps[LOP].pop(), expr.lrOps[ROP].isEmpty()?"<null>":expr.lrOps[ROP].pop(), ParserUtils.formatTree(opAST));
 			Tool.warn(msg, opAST, stitchProblemHandler());
 //            System.out.println (msg);
 			expr.setResult(null);
@@ -1547,7 +1579,7 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 	}
 
 	@Override
-	public void beginPathExpression() {
+	public void beginPathExpression(ParserRuleContext ctx) {
 		if (checkSkipEval())
 			return;
 		doBeginComplexExpr();
@@ -1568,8 +1600,8 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 
 	@Override
 	public void setupPathFilter(TerminalNode identifier) {
-//		Expression expr = (Expression )scope();
-//		expr.skipQuanPredicate = true;
+		Expression expr = expr();
+		IScope scope = scope();
 		if (identifier != null) {
 			Var v = new Var();
 			v.name = "__path_filter_type";
@@ -1581,15 +1613,15 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 	}
 
 	@Override
-	public void pathExpressionFilter(TypeFilterT filter, TerminalNode identifier,
+	public boolean pathExpressionFilter(TypeFilterT filter, TerminalNode identifier,
 			StitchParser.ExpressionContext expression) {
 		if (checkSkipEval())
-			return;
+			return false;
 
 		Expression cExpr = (Expression) scope();
 		if (cExpr.getKind() != Kind.PATH) {
 			Tool.error("Error! Expected path expression not found!", null, stitchProblemHandler());
-			return;
+			return false;
 		}
 
 		List<Expression> expressions = cExpr.expressions();
@@ -1663,7 +1695,9 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 			expr.skipQuanPredicate = true;
 
 			scope().vars().remove(__path_element.name);
+			return true;
 		}
+		return false;
 	}
 
 	@Override
