@@ -63,7 +63,7 @@ public class CheckConfiguration {
 
 	public static void main(String[] args) throws Throwable {
 		ArgumentParser parser = ArgumentParsers.newFor("CheckConfiguration").build().description("Checks a particular rainbow configuration");
-		parser.addArgument("--output").dest("output").type(String.class).help("The output file to write problems");
+		parser.addArgument("-o", "--output").dest("output").type(String.class).help("The output file to write problems");
 		Namespace res = parser.parseArgs(args);
 		List<Problem> problems = checkConfiguration(System.out);
 		Rainbow.instance().signalTerminate();
