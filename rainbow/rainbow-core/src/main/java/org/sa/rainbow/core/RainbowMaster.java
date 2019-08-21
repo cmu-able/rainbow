@@ -23,6 +23,8 @@
  */
 package org.sa.rainbow.core;
 
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
@@ -32,17 +34,14 @@ import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.ServiceLoader;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.reflections.Reflections;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.adaptation.IEvaluable;
@@ -71,8 +70,6 @@ import org.sa.rainbow.gui.RainbowGUI;
 import org.sa.rainbow.translator.effectors.EffectorManager;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 import org.sa.rainbow.util.Beacon;
-import org.sa.rainbow.util.IRainbowConfigurationChecker;
-import org.sa.rainbow.util.RainbowConfigurationChecker;
 import org.sa.rainbow.util.RainbowConfigurationChecker.Problem;
 import org.sa.rainbow.util.RainbowConfigurationChecker.ProblemT;
 import org.sa.rainbow.util.Util;
@@ -787,24 +784,19 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 		}
 		master.m_autoStart = autoStart;
 		
-		Reflections reflections = new Reflections(CheckConfiguration.class.getClassLoader());
-		LinkedHashSet<Class<? extends IRainbowConfigurationChecker>> checkers = new LinkedHashSet<>();
-		checkers.add(RainbowConfigurationChecker.class);
-		checkers.addAll(reflections.getSubTypesOf(IRainbowConfigurationChecker.class));
-		List<Problem> allProblems = new LinkedList<>();
-		for (Class<? extends IRainbowConfigurationChecker> checkerClass : checkers) {
-			try {
-				IRainbowConfigurationChecker checker = checkerClass.newInstance();
-				checker.setRainbowMaster(master);				
-				checker.checkRainbowConfiguration();
-				allProblems.addAll(checker.getProblems());
-			} catch (InstantiationException | IllegalAccessException e) {
-				allProblems.add(new Problem(ProblemT.ERROR, "Could not instantiate " + checkerClass));
-//				master.m_reportingPort.error(master.getComponentType(),"Could not instantiate " + checkerClass);
-			}
+		List<Problem> allProblems = Collections.<Problem>emptyList();
+		try {
+			CheckConfiguration.checkConfiguration(new PrintStream (new OutputStream () {
+				public void write(int b) {
+					//  Do nothing;
+				}
+			}));
+		} catch (Throwable e) {
+			String msg = "Could not check configuration: " + e.getMessage();
+			allProblems.add(new Problem(ProblemT.ERROR, msg));
+			e.printStackTrace();
+			LOGGER.error(msg, e);
 		}
-		
-
 		
 		
 		master.initialize();

@@ -23,6 +23,8 @@
  */
 package org.sa.rainbow.core;
 
+import java.io.PrintStream;
+import java.security.AllPermission;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -48,30 +50,41 @@ import org.sa.rainbow.util.RainbowConfigurationChecker.ProblemT;
 import org.sa.rainbow.util.YamlUtil;
 
 public class CheckConfiguration {
+	
+	public static interface IReporter {
+		public void report (String s);
+	}
 
 	public static void main(String[] args) throws Throwable {
-		System.out.println("Reading configuration files");
+		checkConfiguration(System.out);
+		Rainbow.instance().signalTerminate();
+		System.exit(0);
+
+	}
+
+	public static List<Problem> checkConfiguration(PrintStream out) throws Throwable {
+		out.println("Reading configuration files");
 		Rainbow.instance();
-		System.out.println(
+		out.println(
 				"Loading YAMLs for target: " + Rainbow.instance().getProperty(RainbowConstants.PROPKEY_TARGET_NAME));
-		System.out.print("Loading probes...");
-		System.out.flush();
+		out.print("Loading probes...");
+		out.flush();
 		final ProbeDescription loadProbeDesc = YamlUtil.loadProbeDesc();
-		System.out.println("found " + loadProbeDesc.probes.size() + " probes");
-		System.out.print("Loading effecors...");
-		System.out.flush();
+		out.println("found " + loadProbeDesc.probes.size() + " probes");
+		out.print("Loading effecors...");
+		out.flush();
 		final EffectorDescription loadEffectorDesc = YamlUtil.loadEffectorDesc();
-		System.out.println("found " + loadEffectorDesc.effectorTypes.size() + " effector types, "
+		out.println("found " + loadEffectorDesc.effectorTypes.size() + " effector types, "
 				+ loadEffectorDesc.effectors.size() + " effectors");
-		System.out.print("Loading gauges...");
-		System.out.flush();
+		out.print("Loading gauges...");
+		out.flush();
 		final GaugeDescription loadGaugeSpecs = YamlUtil.loadGaugeSpecs();
-		System.out.println(
+		out.println(
 				"found " + loadGaugeSpecs.typeSpec.size() + " types, " + loadGaugeSpecs.instSpec.size() + " instances");
-//        System.out.print ("Loading preferences...");
-//        System.out.flush ();
+//        out.print ("Loading preferences...");
+//        out.flush ();
 //        final UtilityPreferenceDescription loadUtilityPrefs = YamlUtil.loadUtilityPrefs ();
-//        System.out.println ("found " + loadUtilityPrefs.attributeVectors.size () + " attribute vectors, "
+//        out.println ("found " + loadUtilityPrefs.attributeVectors.size () + " attribute vectors, "
 //                + loadUtilityPrefs.utilities.size () + " utilities, " + loadUtilityPrefs.weights.size () + " weights");
 
 		final ModelsManager mm = new ModelsManager();
@@ -137,7 +150,7 @@ public class CheckConfiguration {
 
 		// Make Rainbow.instance().rainbowMaster() return this master
 		Rainbow.instance().setMaster(master);
-		System.out.println("Locating configuration checkers in system...");
+		out.println("Locating configuration checkers in system...");
 		Reflections reflections = new Reflections("org.sa", CheckConfiguration.class.getClassLoader());
 		List<IRainbowConfigurationChecker> checkers = new LinkedList<>();
 		Set<Class<? extends IRainbowConfigurationChecker>> checkerClasses = reflections
@@ -147,7 +160,7 @@ public class CheckConfiguration {
 
 				checkers.add(cls.newInstance());
 			} catch (InstantiationException | IllegalAccessException e) {
-				System.out.println("Could not instantiate " + cls);
+				out.println("Could not instantiate " + cls);
 			}
 		}
 		checkers.sort(new Comparator<IRainbowConfigurationChecker>() {
@@ -161,17 +174,18 @@ public class CheckConfiguration {
 				return 0;
 			}
 		});
-		System.out.println("Checking configuration consistency...");
+		out.println("Checking configuration consistency...");
+		List<Problem> problems = new LinkedList<>();
 		boolean hasProblems = false;
 		for (IRainbowConfigurationChecker checker : checkers) {
 			checker.setRainbowMaster(master);
 			if (mm.m_reportingPort instanceof DisconnectedRainbowDelegateConnectionPort
 					&& checker instanceof IRainbowReportingPort) {
 				mm.m_reportingPort = (IRainbowReportingPort) checker;
-				System.out.print("Loading models...");
-				System.out.flush();
+				out.print("Loading models...");
+				out.flush();
 				mm.initializeModels();
-				System.out.println("found " + mm.getRegisteredModelTypes() + " model *types*");
+				out.println("found " + mm.getRegisteredModelTypes() + " model *types*");
 			}
 			Throwable ex = null;
 			try {
@@ -180,12 +194,13 @@ public class CheckConfiguration {
 			catch (Throwable e) {
 				ex = e;
 			}
+			problems.addAll(checker.getProblems());
 			if (checker.getProblems().size() > 0) {
-//					System.out.println("Problems with the configuration were reported:");
+//					out.println("Problems with the configuration were reported:");
 				for (Problem p : checker.getProblems()) {
 					if (p.getType() == ProblemT.ERROR)
 						hasProblems = true;
-					System.out.println(p.problem.name() + ": " + p.msg);
+					out.println(p.problem.name() + ": " + p.msg);
 				}
 			}
 			if (ex!= null) throw ex;
@@ -193,11 +208,10 @@ public class CheckConfiguration {
 		}
 
 		if (!hasProblems) {
-			System.out.println("No problems were found with the configuration");
+			out.println("No problems were found with the configuration");
 		}
-		Rainbow.instance().signalTerminate();
-		System.exit(0);
-
+		
+		
 	}
 
 }
