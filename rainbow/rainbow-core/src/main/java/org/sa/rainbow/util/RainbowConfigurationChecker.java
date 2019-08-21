@@ -47,6 +47,7 @@ import org.sa.rainbow.translator.probes.IProbe.Kind;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
@@ -58,9 +59,13 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort, IRain
         WARNING, ERROR, INFO
     }
 
-    public static class Problem {
+    public static class Problem implements Serializable{
 
-        public Problem (ProblemT p, String msg) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -4323498028203837123L;
+		public Problem (ProblemT p, String msg) {
             problem = p;
             this.msg = msg;
         }
