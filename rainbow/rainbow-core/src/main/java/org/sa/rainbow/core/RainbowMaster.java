@@ -23,8 +23,11 @@
  */
 package org.sa.rainbow.core;
 
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
@@ -723,6 +726,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 		boolean showHelp = false;
 		boolean showGui = true;
 		boolean autoStart = false;
+		String checkFile = null;
 		int lastIdx = args.length - 1;
 		for (int i = 0; i <= lastIdx; i++) {
 			switch (args[i]) {
@@ -734,6 +738,9 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 				break;
 			case "-autostart":
 				autoStart = true;
+				break;
+			case "-check-config":
+				checkFile = args[++i];
 				break;
 			default:
 				System.err.println("Unrecognized or incomplete argument " + args[i]);
@@ -784,22 +791,29 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 		}
 		master.m_autoStart = autoStart;
 		
-		List<Problem> allProblems = Collections.<Problem>emptyList();
-		try {
-			CheckConfiguration.checkConfiguration(new PrintStream (new OutputStream () {
-				public void write(int b) {
-					//  Do nothing;
-				}
-			}));
-		} catch (Throwable e) {
-			String msg = "Could not check configuration: " + e.getMessage();
-			allProblems.add(new Problem(ProblemT.ERROR, msg));
-			e.printStackTrace();
-			LOGGER.error(msg, e);
-		}
+		
 		
 		
 		master.initialize();
+		
+		// This is a bit of a hack because the typechecker seems to be destructive
+		// and the technical debt from 2006 of the excessive use of singletons is
+		// hampering evolution.
+		List<Problem> allProblems = Collections.<Problem>emptyList();
+		if (checkFile != null) {
+			try (ObjectInputStream is = new ObjectInputStream(new FileInputStream(new File(checkFile)))) {
+				allProblems = (List<Problem>) is.readObject();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		for (Problem p : allProblems) {
 			if (p.problem == ProblemT.ERROR) {
 				master.m_reportingPort.error(master.getComponentType(), p.msg);

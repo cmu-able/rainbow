@@ -23,8 +23,10 @@
  */
 package org.sa.rainbow.core;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintStream;
-import java.security.AllPermission;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -49,6 +51,10 @@ import org.sa.rainbow.util.RainbowConfigurationChecker.Problem;
 import org.sa.rainbow.util.RainbowConfigurationChecker.ProblemT;
 import org.sa.rainbow.util.YamlUtil;
 
+import net.sourceforge.argparse4j.ArgumentParsers;
+import net.sourceforge.argparse4j.inf.ArgumentParser;
+import net.sourceforge.argparse4j.inf.Namespace;
+
 public class CheckConfiguration {
 	
 	public static interface IReporter {
@@ -56,8 +62,16 @@ public class CheckConfiguration {
 	}
 
 	public static void main(String[] args) throws Throwable {
-		checkConfiguration(System.out);
+		ArgumentParser parser = ArgumentParsers.newFor("CheckConfiguration").build().description("Checks a particular rainbow configuration");
+		parser.addArgument("--output").dest("output").type(String.class).help("The output file to write problems");
+		Namespace res = parser.parseArgs(args);
+		List<Problem> problems = checkConfiguration(System.out);
 		Rainbow.instance().signalTerminate();
+		if (res.getString("output") != null) {
+			try (ObjectOutputStream o = new ObjectOutputStream(new FileOutputStream (new File(res.getString("output"))))) {
+				o.writeObject(problems);
+			}
+		}
 		System.exit(0);
 
 	}
