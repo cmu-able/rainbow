@@ -786,37 +786,42 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 			Rainbow.instance().setProperty(Rainbow.PROPKEY_SHOW_GUI, false);
 		}
 		master.m_autoStart = autoStart;
-		master.initialize();
+		
+		Reflections reflections = new Reflections(CheckConfiguration.class.getClassLoader());
+		LinkedHashSet<Class<? extends IRainbowConfigurationChecker>> checkers = new LinkedHashSet<>();
+		checkers.add(RainbowConfigurationChecker.class);
+		checkers.addAll(reflections.getSubTypesOf(IRainbowConfigurationChecker.class));
+		List<Problem> allProblems = new LinkedList<>();
+		for (Class<? extends IRainbowConfigurationChecker> checkerClass : checkers) {
+			try {
+				IRainbowConfigurationChecker checker = checkerClass.newInstance();
+				checker.setRainbowMaster(master);				
+				checker.checkRainbowConfiguration();
+				allProblems.addAll(checker.getProblems());
+			} catch (InstantiationException | IllegalAccessException e) {
+				allProblems.add(new Problem(ProblemT.ERROR, "Could not instantiate " + checkerClass));
+//				master.m_reportingPort.error(master.getComponentType(),"Could not instantiate " + checkerClass);
+			}
+		}
+		
 
+		
+		
+		master.initialize();
+		for (Problem p : allProblems) {
+			if (p.problem == ProblemT.ERROR) {
+				master.m_reportingPort.error(master.getComponentType(), p.msg);
+			} else if (p.problem == ProblemT.WARNING){
+				master.m_reportingPort.warn(master.getComponentType(), p.msg);
+			}
+			else {
+				master.m_reportingPort.info(master.getComponentType(), p.msg);
+			}
+		}
 		RainbowDelegate localDelegate = new RainbowDelegate();
 		localDelegate.initialize();
 		
-//		Reflections reflections = new Reflections(CheckConfiguration.class.getClassLoader());
-//		LinkedHashSet<Class<? extends IRainbowConfigurationChecker>> checkers = new LinkedHashSet<>();
-//		checkers.add(RainbowConfigurationChecker.class);
-//		checkers.addAll(reflections.getSubTypesOf(IRainbowConfigurationChecker.class));
-//		List<Problem> allProblems = new LinkedList<>();
-//		for (Class<? extends IRainbowConfigurationChecker> checkerClass : checkers) {
-//			try {
-//				IRainbowConfigurationChecker checker = checkerClass.newInstance();
-//				checker.setRainbowMaster(master);				
-//				checker.checkRainbowConfiguration();
-//				allProblems.addAll(checker.getProblems());
-//			} catch (InstantiationException | IllegalAccessException e) {
-//				master.m_reportingPort.error(master.getComponentType(),"Could not instantiate " + checkerClass);
-//			}
-//		}
-//		
-//		for (Problem p : allProblems) {
-//			if (p.problem == ProblemT.ERROR) {
-//				master.m_reportingPort.error(master.getComponentType(), p.msg);
-//			} else if (p.problem == ProblemT.WARNING){
-//				master.m_reportingPort.warn(master.getComponentType(), p.msg);
-//			}
-//			else {
-//				master.m_reportingPort.info(master.getComponentType(), p.msg);
-//			}
-//		}
+
 
 		master.start();
 		localDelegate.start();
