@@ -70,6 +70,7 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:lib
 
 echo "java -classpath .${delim}lib/*  -Drainbow.target=$TARGET -Djava.rmi.server.hostname=$ADDR $PROP $DEBUG $* org.sa.rainbow.core.RainbowMaster"
 
-java -classpath ".${delim}lib/*"  -Drainbow.target=$TARGET -Djava.rmi.server.hostname=$ADDR $PROP $DEBUG $* org.sa.rainbow.core.RainbowMaster $GUI $AUTOSTART
+java -classpath ".${delim}lib/*"  -Drainbow.target=$TARGET -Djava.rmi.server.hostname=$ADDR $PROP org.sa.rainbow.core.CheckConfiguration -o targets/$TARGET/config-check.bin
+java -classpath ".${delim}lib/*"  -Drainbow.target=$TARGET -Djava.rmi.server.hostname=$ADDR $PROP $DEBUG $* org.sa.rainbow.core.RainbowMaster $GUI $AUTOSTART -check-config targets/$TARGET/config-check.bin
 
  
