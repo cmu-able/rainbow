@@ -82,6 +82,10 @@ public class Rainbow implements IRainbowEnvironment {
         }
         return _instance;
     }
+    
+    public static void uninstantiate() {
+    	_instance = null;
+    }
 
     /**
      * Returns whether the Rainbow runtime infrastructure should terminate.
