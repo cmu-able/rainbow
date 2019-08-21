@@ -210,7 +210,7 @@ public class CheckConfiguration {
 		if (!hasProblems) {
 			out.println("No problems were found with the configuration");
 		}
-		
+		return problems;
 		
 	}
 
