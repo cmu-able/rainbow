@@ -9,7 +9,7 @@ import org.acmestudio.acme.element.property.IAcmePropertyValue;
 import org.acmestudio.acme.model.DefaultAcmeModel;
 
 public abstract class SwimUtils {
-	
+
 	public static int dimmerFactorToLevel(double dimmer, int dimmerLevels, double dimmerMargin) {
 		int level = 1 + (int) Math.round((dimmer - dimmerMargin) * (dimmerLevels - 1) / (1.0 - 2 * dimmerMargin));
 		return level;
@@ -19,13 +19,14 @@ public abstract class SwimUtils {
 		double factor = dimmerMargin + (1.0 - 2 * dimmerMargin) * (level - 1.0) / (dimmerLevels - 1.0);
 		return factor;
 	}
-	
+
 	/**
 	 * Find the element with the minimum value of the property "property"
+	 * 
 	 * @param set
 	 * @return element
 	 */
-	public static <E> double minOverProperty(String property, java.util.Set<E> set) {
+	private static <E> double minOverProperty(String property, java.util.Set<E> set) {
 		double minValue = Double.MAX_VALUE;
 
 		for (E e : set) {
@@ -50,10 +51,12 @@ public abstract class SwimUtils {
 
 	/**
 	 * Find the element with the maximum value of the property "property"
+	 * 
 	 * @param set
 	 * @return element
 	 */
-	public static <E> double maxOverProperty(String property, java.util.Set<E> set) {
+	private static <E> E maxOverProperty(String property, java.util.Set<E> set) {
+		E max = null;
 		double maxValue = -Double.MAX_VALUE;
 
 		for (E e : set) {
@@ -69,10 +72,25 @@ public abstract class SwimUtils {
 			} else if (type == DefaultAcmeModel.defaultFloatType()) {
 				value = ((IAcmeFloatingPointValue) val).getDoubleValue();
 			}
-			if (value > maxValue) {
+			if (max == null || value > maxValue) {
+				max = e;
 				maxValue = value;
 			}
 		}
-		return maxValue;
+		return max;
+	}
+
+	public static Object maxOverProperty(String property, java.util.Set set, String type) {
+		if ("int".equals(type) || "long".equals(type)) {
+			return SwimUtils.<Integer>maxOverProperty(property, set);
+		} else
+			return SwimUtils.<Double>maxOverProperty(property, set);
+	}
+
+	public static Object minOverProperty(String property, java.util.Set set, String type) {
+		if ("int".equals(type) || "long".equals(type)) {
+			return SwimUtils.<Integer>minOverProperty(property, set);
+		} else
+			return SwimUtils.<Double>minOverProperty(property, set);
 	}
 }
