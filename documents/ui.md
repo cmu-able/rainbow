@@ -59,11 +59,9 @@ section).
 | Icon | Meaning   | Type in specification   |
 | --- | --- | --- |
 | ![](imgs/gauge.png) | Default Image | No specification |
-| ![](imgs/gauge_gauge.png) | Meterl | `dial` |
-| ![](imgs/gauge_timeseries.png) | Time Series | `timeseries` - shows the values 
-over time |
-| ![](imgs/gauge_binary.png) | Binary | `onoff` - Shows a value that toggles between 
-true and false
+| ![](imgs/gauge_gauge.png) | Meter | `dial` |
+| ![](imgs/gauge_timeseries.png) | Time Series | `timeseries` - shows the values over time |
+| ![](imgs/gauge_binary.png) | Binary | `onoff` - Shows a value that toggles between true and false
 
 When selecting a gauge, the _Details_ tab contains two parts:
 
