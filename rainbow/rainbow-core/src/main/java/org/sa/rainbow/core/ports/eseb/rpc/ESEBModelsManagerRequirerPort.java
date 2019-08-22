@@ -56,5 +56,10 @@ IESEBModeslManagerRemoteInterface {
     public IModelInstance getModelInstance (ModelReference modelRef) {
         return m_stub.getModelInstance (modelRef);
     }
+    
+    @Override
+    public boolean isModelLocked(ModelReference modelRef) {
+    	return m_stub.isModelLocked(modelRef);
+    }
 
 }

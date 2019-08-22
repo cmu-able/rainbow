@@ -2,12 +2,17 @@ package org.sa.rainbow.stitch.visitor;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.acmestudio.acme.core.resource.IAcmeResource;
+import org.acmestudio.acme.core.resource.ParsingFailureException;
+import org.acmestudio.acme.element.IAcmeSystem;
+import org.acmestudio.standalone.resource.StandaloneResourceProvider;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -20,6 +25,7 @@ import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.models.ModelReference;
+import org.sa.rainbow.model.acme.AcmeModelCommandFactory;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.core.Expression;
@@ -29,6 +35,7 @@ import org.sa.rainbow.stitch.core.PostVar;
 import org.sa.rainbow.stitch.core.ScopedEntity;
 import org.sa.rainbow.stitch.core.Statement;
 import org.sa.rainbow.stitch.core.StitchScript;
+import org.sa.rainbow.stitch.core.StitchTypes;
 import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.core.Strategy.ActionKind;
 import org.sa.rainbow.stitch.core.Strategy.ConditionKind;
@@ -47,16 +54,33 @@ import org.sa.rainbow.util.Util;
  */
 public class StitchScopeEstablisher extends BaseStitchBehavior {
 
-    StitchBeginEndVisitor m_walker;
+    public final class StitchImportedDirectAcmeModelInstance extends AcmeModelInstance {
+		protected StitchImportedDirectAcmeModelInstance(IAcmeSystem system, String source) {
+			super(system, source);
+		}
+
+		@Override
+		public AcmeModelCommandFactory getCommandFactory() {
+			return null;
+		}
+
+		@Override
+		protected AcmeModelInstance generateInstance(IAcmeSystem sys) {
+			try {
+				return this.getClass().getConstructor(IAcmeSystem.class).newInstance(sys);
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+	}
+
 
     public StitchScopeEstablisher (Stitch/*State*/ stitch) {
         super (stitch);
     }
 
-    @Override
-    public void setWalker (StitchBeginEndVisitor walker) {
-        m_walker = walker;
-    }
 
     @Override
     public void beginScript (IScope scriptScope) {
@@ -96,6 +120,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
         if (ctx.MODEL () != null) type = Import.Kind.MODEL;
         else if (ctx.LIB () != null) type = Import.Kind.LIB;
         else if (ctx.OP () != null) type = Import.Kind.OP;
+        else if (ctx.ACME () != null) type = Import.Kind.ACME;
         String target = path.getText ();
 
         Import imp = new Import ();
@@ -200,7 +225,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
 
     @Override
     public void createVar (StitchParser.DataTypeContext type, TerminalNode id, StitchParser.ExpressionContext val,
-                           boolean isFunction) {
+                           boolean isFunction, boolean isFormalParam) {
         Var var = new Var ();
         var.scope = scope (); // var is declared in current scope
         var.setType (type.getText ());
@@ -259,7 +284,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
     }
 
     @Override
-    public void beginExpression () {
+    public boolean beginExpression (ParserRuleContext ctx) {
         /*
          * Expression IR-construction design intent: - Expressions are held as
          * needed for evaluation to compute results. - Construct expression
@@ -290,6 +315,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
                 newExprScope = true;
             } else { // increment depth count
                 expr.subLevel++;
+                return true;
             }
         } else {
             newExprScope = true;
@@ -297,15 +323,21 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
 
         if (newExprScope) {
             Expression expr = new Expression (scope (), "[expression]", m_stitch);
+            expr.setTree(ctx);
             debug ("#> Begin expression");
             pushScope (expr);
         }
+        return true;
 
     }
 
     @Override
-    public void endExpression (ParserRuleContext ctx) {
-        Expression expr = (Expression) scope ();
+    public void endExpression (ParserRuleContext ctx, boolean pushed) {
+        IScope scope = scope ();
+        if (!(scope instanceof Expression)) {
+        	debug("Woah");
+        }
+		Expression expr = (Expression) scope;
         if (expr.subLevel > 0) {
             expr.subLevel--;
         } else { // we're at a top-level expression
@@ -350,16 +382,16 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
     }
 
     @Override
-    public void beginQuantifiedExpression () {
+    public void beginQuantifiedExpression (ParserRuleContext ctx) {
         debug ("#Q> Begin quantified expression");
         // true on distinct scope to make sure vars are declared in this scope
-        doBeginComplexExpr (null, Expression.Kind.QUANTIFIED, true);
+        doBeginComplexExpr (null, Expression.Kind.QUANTIFIED, true, ctx);
     }
 
     @Override
-    public void beginPathExpression () {
+    public void beginPathExpression (ParserRuleContext ctx) {
         debug ("#P> Begin path expression");
-        doBeginComplexExpr (null, Expression.Kind.PATH, true);
+        doBeginComplexExpr (null, Expression.Kind.PATH, true, ctx);
 
     }
 
@@ -384,9 +416,9 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
     }
 
     @Override
-    public void beginMethodCallExpression () {
+    public void beginMethodCallExpression (ParserRuleContext ctx) {
         debug ("=> begin method call expression");
-        doBeginComplexExpr (null, Expression.Kind.LIST, false);
+        doBeginComplexExpr (null, Expression.Kind.LIST, false, ctx);
     }
 
     @Override
@@ -399,9 +431,9 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
     }
 
     @Override
-    public void beginSetExpression () {
+    public void beginSetExpression (ParserRuleContext ctx) {
         debug ("=> begin set expression");
-        doBeginComplexExpr ("set", Expression.Kind.LIST, false);
+        doBeginComplexExpr ("set", Expression.Kind.LIST, false, ctx);
     }
 
     @Override
@@ -597,7 +629,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
     }
 
     @Override
-    public void endStatement () {
+    public void endStatement (StatementKind stmtAST, ParserRuleContext ctx) {
         IScope prevScope = scope ();
         // had new scope, so move scope up one level
         popScope ();
@@ -609,7 +641,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
     }
 
     @Override
-    public void beginTactic (Token nameAST) {
+    public void beginTactic (TerminalNode nameAST) {
         String name = nameAST.getText ();
         Tactic tactic = new Tactic (scope (), name, m_stitch);
         script ().tactics.add (tactic);
@@ -619,7 +651,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
     }
 
     @Override
-    public void endTactic () {
+    public void endTactic (TerminalNode nameAST) {
         if (scope () instanceof Tactic) {
             ((Tactic) scope ()).state = Tactic.ParseState.PARSED;
         }
@@ -655,7 +687,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
     @Override
     public void endActionBlock () {
         if (scope ().parent () instanceof Tactic) {
-            endStatement ();
+            endStatement (Strategy.StatementKind.ACTION, null);
             debug ("--- End ACTION ---");
         }
     }
@@ -669,7 +701,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
     }
 
     @Override
-    public void endEffectBlock () {
+    public void endEffectBlock (StitchParser.EffectContext nameAST) {
         if (scope () instanceof Tactic) {
             debug ("--- End EFFECT ---");
         }
@@ -749,7 +781,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
                         stitchProblemHandler ());
             return;
         }
-
+        curNode.get().scope = scope();
         curNode.set (null);
         String name = scope ().getName ();
         popScope ();
@@ -757,7 +789,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
     }
 
     @Override
-    public void doStrategyProbability () {
+    public void doStrategyProbability (StitchParser.StrategyCondContext ctx) {
         if (curNode.get () == null) {
             Tool.error (
                     "Expected to be processing condition part of a strategy tree node, but null curNode encountered!!",
@@ -844,7 +876,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
     }
 
     @Override
-    public void doStrategyDuration (ParserRuleContext ctx) {
+    public void doStrategyDuration (ParserRuleContext ctx, TerminalNode labelAST) {
         if (curNode.get () == null) {
             Tool.error (
                     "Expected to be processing condition part of a strategy tree node, but null curNode encountered!!",
@@ -863,6 +895,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
                        + ", expr == " + curNode.get ().getDurationExpr ().tree ().toStringTree ());
     }
 
+    @Override
     public void doTacticDuration (ParserRuleContext ctx) {
         if (!(scope () instanceof Tactic)) {
             Tool.error ("Unexpectedly processing tactic duration outside of a tactic", null, stitchProblemHandler ());
@@ -872,7 +905,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
         Tactic tactic = (Tactic) scope ();
         tactic.setHasDuration (true);
         // retrieve the first expression from the current scoep
-        Expression expr = tactic.expressions ().get (0);
+        Expression expr = tactic.expressions ().get (tactic.expressions().size()-1);
         expr.setTree (ctx);
         tactic.setDurationExpr (expr);
         debug ("* Duration gathered: has it? " + tactic.hasDuration () + ", expr = " + tactic.getDurationExpr ().tree
@@ -901,11 +934,11 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
         }
         debug ("*> Begin Tactic reference:  " + tacticName);
         // start a complex expression to group argument expressions together
-        doBeginComplexExpr (null, Expression.Kind.LIST, false);
+        doBeginComplexExpr (null, Expression.Kind.LIST, false, labelAST);
     }
 
     @Override
-    public void endReferencedTactic () {
+    public void endReferencedTactic (TerminalNode labelAST) {
         if (curNode == null) {
             Tool.error (
                     "Processing tactic reference in a strategy tree node, but null curNode encountered!!",
@@ -1006,16 +1039,17 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
 
 
     private Expression doBeginComplexExpr (String name, Expression.Kind kind,
-                                           boolean distinctScope) {
+                                           boolean distinctScope, ParseTree ctx) {
         Expression expr = new Expression (scope (), name, m_stitch);
         expr.setKind (kind);
         expr.setDistinctScope (distinctScope);
+        expr.setTree(ctx);
         pushScope (expr);
 
         return expr;
     }
 
-    private Expression doEndComplexExpr () {
+    protected Expression doEndComplexExpr () {
         Expression expr = (Expression) scope ();
         if (expr.parent () != null) {
             // store complex expr to the prev/parent expression's list
@@ -1029,15 +1063,14 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
         return expr;
     }
 
-    private void storeExprTree (ParseTree ast) {
+    protected void storeExprTree (ParseTree ast) {
         Expression expr = (Expression) scope ();
         if (expr.subLevel == 0 && expr.tree () == null) {
             // store if we're at the outermost expr of current subclause
             expr.setTree (ast);
-            debug (" * stored [" + expr.subLevel + "]: " + ast.toStringTree ());
+            debug (" * stored [" + expr.subLevel + "]: " + ParserUtils.formatTree(ast));
         }
     }
-
     /**
      * Resolve all the imports that have been created, by iterating through the
      * list and seeking out the import targets. For each import, depennding on
@@ -1084,6 +1117,14 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
                                         + "' to import!", e, null, stitchProblemHandler ());
                     e.printStackTrace ();
                 }
+            } else if (imp.type == Import.Kind.ACME) {
+            	try {
+					IAcmeResource resource = StandaloneResourceProvider.instance().acmeResourceForString(imp.path);
+					AcmeModelInstance m = new StitchImportedDirectAcmeModelInstance(resource.getModel().getSystems().iterator().next(), imp.path);
+					m_stitch.script.models.add(m);
+				} catch (ParsingFailureException | IOException e) {
+					Tool.error("Could not import Acme from " + imp.path, null, stitchProblemHandler());
+				}
             } else if (imp.type == Import.Kind.MODEL) {
                 if (Rainbow.instance ().getRainbowMaster ().modelsManager () != null) {
                     ModelReference model = Util.decomposeModelReference (imp.path);
@@ -1198,7 +1239,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
         }
     }
 
-    private File determinePath (String path) {
+    protected File determinePath (String path) {
         File f = new File (path);
         if (!f.exists ()) {
             // search in path of current script

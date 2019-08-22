@@ -328,7 +328,7 @@ system Turtlebot : BrassTurtlebotFam = new BrassTurtlebotFam extended with {
       };
       property name = "map_server";
       property category = MapServer;
-      property enablement = INACTIVE;
+      property enablement = ACTIVE;
    };
    
    component map_server_obs : EnableableTurtlebotNodeCompT = new EnableableTurtlebotNodeCompT extended with {
@@ -402,13 +402,13 @@ system Turtlebot : BrassTurtlebotFam = new BrassTurtlebotFam extended with {
          property msg_type = "DepthImageRGB";
       };
       property name = "laserScan_nodelet";
-      property enablement = INACTIVE;
+      property enablement = ACTIVE;
    };
    component TurtleBot : ROSNodeCompT = new ROSNodeCompT extended with {
       port TopicAdvertisePortT0 : TopicAdvertisePortT, EnablementT = new TopicAdvertisePortT, EnablementT extended with {
          property msg_type = "DepthImageRGB";
          property topic = "/mobile_base/camera/depth_image";
-         property enablement = INACTIVE;
+         property enablement = ACTIVE;
       };
       port TopicAdvertisePortT1 : TopicAdvertisePortT, EnablementT = new TopicAdvertisePortT, EnablementT extended with {
          property msg_type = "LaserScan";
@@ -472,7 +472,7 @@ system Turtlebot : BrassTurtlebotFam = new BrassTurtlebotFam extended with {
       };
       property name = "amcl";
       property category = Localization;
-      property enablement = INACTIVE;
+      property enablement = ACTIVE;
    };
    connector ActionServerConnT0 : ActionServerConnT = new ActionServerConnT extended with {
       role ROSActionCallerRoleT0 : ROSActionCallerRoleT = new ROSActionCallerRoleT;
@@ -499,7 +499,7 @@ system Turtlebot : BrassTurtlebotFam = new BrassTurtlebotFam extended with {
       role subsriber : ROSTopicSubscriberRoleT = new ROSTopicSubscriberRoleT;
       property topic = "/mobile_base/camera/depth_image";
       property msg_type = "DepthImageRGB";
-      property enablement = INACTIVE;
+      property enablement = ACTIVE;
    };
    connector depth_image0 : TopicConnectorT, EnablementT = new TopicConnectorT, EnablementT extended with {
       role advertiser : ROSTopicAdvertiserRoleT = new ROSTopicAdvertiserRoleT extended with {

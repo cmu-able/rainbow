@@ -1,5 +1,6 @@
 package org.sa.rainbow.core.adaptation;
 
+import org.sa.rainbow.core.error.RainbowException;
 
 public interface IEvaluable {
     /**
@@ -9,7 +10,7 @@ public interface IEvaluable {
      *            arguments
      * @return <code>Object</code> if evaluation has result, null otherwise
      */
-    Object evaluate (Object[] argsIn);
+    Object evaluate (Object[] argsIn) throws RainbowException;
 
     /**
      * Calculates the estimated average time duration required to perform this evaluable construct.

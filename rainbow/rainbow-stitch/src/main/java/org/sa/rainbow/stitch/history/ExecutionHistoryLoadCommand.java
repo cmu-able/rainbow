@@ -69,7 +69,7 @@ public class ExecutionHistoryLoadCommand extends AbstractLoadModelCmd<Map<String
     protected void subExecute () throws RainbowException {
         Map<String, ExecutionHistoryData> map = new HashMap<> ();
         BufferedReader br = new BufferedReader (new InputStreamReader (m_inputStream));
-        Pattern p = Pattern.compile ("^(\\S+)\\s+(\\d+)\\s+(\\S+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+(\\S+)$");
+        Pattern p = Pattern.compile ("^(\\S+)\\s+(\\S+)\\s+(\\d+)\\s+(\\S+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+(\\S+)$");
         String line = null;
         try {
             while ((line = br.readLine ()) != null) {
@@ -77,9 +77,10 @@ public class ExecutionHistoryLoadCommand extends AbstractLoadModelCmd<Map<String
                 if (m.matches ()) {
                     try {
                         String iden = m.group (1);
-                        ExecutionHistoryData datum = new ExecutionHistoryData (iden, Integer.parseInt (m.group (2)),
-                                Double.parseDouble (m.group (3)), Double.parseDouble (m.group (4)), Long.parseLong (m
-                                        .group (5)), Long.parseLong (m.group (6)), Double.parseDouble (m.group (7)),
+                        ModelReference ref = ModelReference.fromString(m.group(2));
+                        ExecutionHistoryData datum = new ExecutionHistoryData (iden, ref, Integer.parseInt (m.group (3)),
+                                Double.parseDouble (m.group (4)), Double.parseDouble (m.group (5)), Long.parseLong (m
+                                        .group (6)), Long.parseLong (m.group (7)), Double.parseDouble (m.group (8)),
                                         Collections.<ExecutionPoint> emptyList ());
                         map.put (iden, datum);
                     }

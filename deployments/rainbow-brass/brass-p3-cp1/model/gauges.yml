@@ -1,0 +1,196 @@
+gauge-types:
+  InstructionGraphProgressGaugeT:
+    commands:
+      current-instruction: "IG.setExecutingInstruction(String,String)"
+      current-failed: "IG.setExecutionFailed(String)"
+      new-ig: "IG.setInstructions(String)"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.brass.gauges.InstructionGraphGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+
+  MissionStateGaugeT:
+    commands:
+      location: "MS.setCurrentLocation(double,double,double)"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.brass.p3_cp1.gauges.MissionStateGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+        
+  RobotStateGaugeT:
+    commands:
+      speed: "RS.setSpeed(double)"
+      charge: "RS.setBatteryCharge(double)"
+      config: "RS.setConfig(string)"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.brass.p3_cp1.gauges.RobotStateGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~    
+      rainbowAdapting:
+        type: boolean
+        default: false 
+        
+  ClockGaugeT:
+    commands:
+      clock: "C.setCurrentTime(double)"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.brass.gauges.p2_cp3.ClockGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+      rainbowAdapting:
+        type: boolean
+        default: false
+    
+        
+  BRASSTargetWaypointGaugeT:
+    commands:
+      target: "MS.setTargetWaypoint(String)"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.brass.gauges.TargetWaypointGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+        
+  BRASSPowerModelGaugeT:
+    commands:
+      update: "PM.updatePowerModel(String)"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.brass.p3_cp1.gauges.PowerModelChangeGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+      reportinPerio:
+        type: long
+        default: 2000
+
+gauge-instances:
+  IGG1:
+    type: InstructionGraphProgressGaugeT
+    model: "ExecutingInstructionGraph:InstructionGraphProgress"
+    commands:
+      current-instruction: "cig.setExecutingInstruction($<node>,$<state>)"
+      current-failed: "cig.setExecutionFailed($<node>)"
+      new-ig: "igs.setInstructions($<ig>)"
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      reportingPeriod: 1000
+      targetProbeType: rostopicprobe
+  
+  RSG1:
+    type: RobotStateGaugeT
+    model: Robot:RobotState
+    commands:
+      speed: "rs.setSpeed($<s>)"
+      charge: "rs.setBatteryCharge($<c>)"
+      config: "rs.setConfig($<c>)"
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      reportingPeriod: 1000
+      targetProbeType: 
+        - rostopicprobe
+        - cp1configprobe
+
+  Clock1:
+    type: ClockGaugeT
+    model: Clock:Clock
+    commands:
+      clock: "c.setCurrentTime($<c>)"
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      reportingPeriod: 1000
+      targetProbeType: rostopicprobe
+
+  MSG1:
+    type: MissionStateGaugeT
+    model: MissionState:MissionState
+    commands:
+      location: "ms.setCurrentLocation($<x>,$<y>,$<w>)"
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      reportingPeriod: 1000
+      targetProbeType: rostopicprobe
+      
+  TWG1:
+    type: BRASSTargetWaypointGaugeT
+    model: MissionState:MissionState
+    commands:
+      target: "ms.setTargetWaypoint($<w>)"
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      reportingPeriod: 2000
+      targetProbeType: targetwaypointprobe
+
+  PMG1:
+    type: BRASSPowerModelGaugeT
+    model: Power:PowerModel
+    commands:
+      update: "pm.updatePowerModel($<pmfile>)"
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      reportingPeriod: 2000
+      targetProbeType: powermodelupdateprobe
+      

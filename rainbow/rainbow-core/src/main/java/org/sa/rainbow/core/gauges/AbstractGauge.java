@@ -486,4 +486,9 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
         m_commands = commands;
     }
 
+    @Override
+    public Set<? extends String> commandKeys() {
+    	return m_commands.keySet();
+    }
+    
 }

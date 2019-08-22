@@ -1,0 +1,189 @@
+Family EnvType = {
+
+    Property Type ResourceStatePropT = Record [unit : string; total : float; available : float; used : float; ];
+    Port Type PartPortT = {
+
+    }
+    Port Type NetworkPortT = {
+
+    }
+    Port Type ArchPortT = {
+
+        Property isArchEnabled : boolean <<  default : boolean = true; >> ;
+
+    }
+    Port Type ContainmentPortT = {
+
+    }
+    Component Type ArchElementT = {
+
+        Property isArchEnabled : boolean <<  default : boolean = true; >> ;
+
+    }
+    Component Type NodeT = {
+
+        Property cpuOverall : ResourceStatePropT;
+
+        Property memoryMain : ResourceStatePropT;
+
+        Property storageLocal : ResourceStatePropT;
+
+        Property socketPool : ResourceStatePropT;
+
+        Property batteryOverall : ResourceStatePropT;
+
+    }
+    Role Type ArchRoleT = {
+
+        Property isArchEnabled : boolean <<  default : boolean = true; >> ;
+
+    }
+    Role Type NetworkRoleT = {
+
+    }
+    Role Type PartRoleT = {
+
+    }
+    Role Type ContainerRoleT = {
+
+    }
+    Connector Type MappingT = {
+
+    }
+    Connector Type EdgeT = {
+
+        Property bandwidthAvg : ResourceStatePropT;
+
+        Property capacity : ResourceStatePropT;
+
+    }
+    Connector Type ArchConnT = {
+
+        Property isArchEnabled : boolean <<  default : boolean = true; >> ;
+
+    }
+}
+
+Family SwimFam extends EnvType with {
+
+    analysis Average(s : set{float}):float =
+      sum(s) / size(s);
+
+    Port Type HttpPortT extends ArchPortT with {
+
+    }
+    Port Type ProxyForwardPortT extends ArchPortT with {
+
+    }
+    Port Type HttpReqPortT extends ArchPortT with {
+
+    }
+    Component Type LoadBalancerT extends ArchElementT with {
+
+        Property deploymentLocation : string <<  default : string = "localhost"; >> ;
+
+        Property dimmer : float <<  default : float = 1.0; >> ;
+
+        Property arrivalRate : float <<  default : float = 0.0; >> ;
+
+        Property basicResponseTime : float <<  default : float = 0.0; >> ;
+        Property optResponseTime : float <<  default : float = 0.0; >> ;
+        Property basicThroughput : float <<  default : float = 0.0; >> ;
+        Property optThroughput : float <<  default : float = 0.0; >> ;
+        Property basicServiceTime : float <<  default : float = 0.0; >> ;
+        Property optServiceTime : float <<  default : float = 0.0; >> ;
+    }
+    Component Type ServerT extends ArchElementT with {
+        Port http0 : HttpPortT = new HttpPortT extended with {
+
+            Property isArchEnabled = true;
+
+        }
+        Property deploymentLocation : string <<  default : string = "localhost"; >> ;
+
+        Property load : float <<  default : float = 0.0; >> ;
+
+	Property index : int; 
+
+	Property isActive : boolean <<  default : boolean = true; >> ;
+
+	Property expectedActivationTime : int <<  default : int = 0; >> ;
+
+        Property reqServiceRate : float <<  default : float = 0.0; >> ;
+
+        Property byteServiceRate : float <<  default : float = 0.0; >> ;
+
+        Property cost : float <<  default : float = 1.0; >> ;
+
+    }
+    Role Type ReceiverRoleT extends ArchRoleT with {
+
+    }
+    Role Type RequestorRoleT extends ArchRoleT with {
+
+    }
+    Connector Type ProxyConnT extends ArchConnT with {
+        Role req : RequestorRoleT = new RequestorRoleT extended with {
+
+        }
+        Role rec : ReceiverRoleT = new ReceiverRoleT extended with {
+
+        }
+
+    }
+
+
+    Property DIMMER_LEVELS : int <<  default : int = 5; >>; 
+    Property DIMMER_MARGIN : float <<  default : float = 0.1; >>;
+    Property ADD_SERVER_LATENCY_SEC : int;
+    Property THREADS_PER_SERVER : int  <<  default : int = 100; >>;
+    Property MAX_ARRIVAL_CAPACITY : float;
+    Property RT_THRESHOLD : float;
+}
+
+System SwimSys : SwimFam = new SwimFam extended with {
+
+    Component server1 : ServerT = new ServerT extended with {
+        Property deploymentLocation = "${customize.system.target.web0}";
+	Property index = 1;
+    }
+    Component server2 : ServerT = new ServerT extended with {
+        Property deploymentLocation = "${customize.system.target.web1}";
+	Property index = 2;
+    }
+    Component server3 : ServerT = new ServerT extended with {
+        Property deploymentLocation = "${customize.system.target.web2}";
+	Property index = 3;
+	Property isArchEnabled = true;
+    }
+
+    Component LB0 : LoadBalancerT = new LoadBalancerT extended with {
+        Port fwd1 : ProxyForwardPortT = new ProxyForwardPortT;
+        Port fwd2 : ProxyForwardPortT = new ProxyForwardPortT;
+        Port fwd3 : ProxyForwardPortT = new ProxyForwardPortT;
+
+        Property deploymentLocation = "${customize.system.target.lb}";
+
+        Property isArchEnabled = true;
+    }
+    Connector proxyConn_1_0 : ProxyConnT = new ProxyConnT;
+    Connector proxyConn_2_0 : ProxyConnT = new ProxyConnT;
+    Connector proxyConn_3_0 : ProxyConnT = new ProxyConnT;
+    
+    Attachment server1.http0 to proxyConn_1_0.rec;
+    Attachment server2.http0 to proxyConn_2_0.rec;
+    Attachment server3.http0 to proxyConn_3_0.rec;
+    Attachment LB0.fwd1 to proxyConn_1_0.req;
+    Attachment LB0.fwd2 to proxyConn_2_0.req;
+    Attachment LB0.fwd3 to proxyConn_3_0.req;
+
+    Property DIMMER_LEVELS = 5;
+    Property MAX_ARRIVAL_CAPACITY = 22.458;
+    Property RT_THRESHOLD = 0.75;
+    Property ADD_SERVER_LATENCY_SEC = 120;
+    
+    rule GoodResponseTime = invariant LB0.basicResponseTime <= RT_THRESHOLD and LB0.optResponseTime <= RT_THRESHOLD;
+    rule NoOverloadedServer = invariant ! exists s :! ServerT in self.components | (s.isArchEnabled and s.load > 1); 
+    rule SystemUtilized = invariant size(/self/components:!ServerT[isArchEnabled==true]) == 1 or !seqAverage(/self/components:!ServerT[isArchEnabled==true]/...load) < 0.3; 
+}
+

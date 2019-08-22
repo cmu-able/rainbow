@@ -1,0 +1,81 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>rainbow</groupId>
+	<artifactId>rainbow-mem-comms</artifactId>
+	<version>3.0</version>
+	<build>
+		<!-- Build process extensions. -->
+		<extensions>
+			<!-- The wagon extension allows webdav access. This plugin is required 
+				to deploy to the repository. -->
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-webdav</artifactId>
+				<version>1.0-beta-2</version>
+			</extension>
+		</extensions>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.7.0</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<repositories>
+		<!-- We define a single repository which is accessible through web-dav. 
+			The format (for webdav repositories) is dav:http://[<username>[:<password>]]@<host>[:<port>]/<path> -->
+		<repository>
+			<id>able.maven.repository</id>
+			<url>
+				dav:http://acme.able.cs.cmu.edu/maven-repository
+			</url>
+		</repository>
+	</repositories>
+	<distributionManagement>
+		<!-- Website location. Do not forget it should start with scp: and not 
+			http. The user/password used for authentication should also be added. -->
+		<!-- <site> <id>website</id> <url>scp://automatik:automatik@localhost:/home/pasc/mse/studio/mvnroot</url> 
+			</site> -->
+
+		<!-- Location of the repository where the jars should be added. It should 
+			have the following format: dav:http://<user>:<pass>@<host>[:<port>]/<path> -->
+		<repository>
+			<id>able.maven.repository</id>
+			<name>ABLE maven repository</name>
+			<url>
+				dav:http://acme.able.cs.cmu.edu/maven-repository
+			</url>
+		</repository>
+	</distributionManagement>
+	
+	<dependencies>
+		<dependency>
+			<groupId>rainbow</groupId>
+			<artifactId>rainbow-core</artifactId>
+			<version>3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>27.0-jre</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- <dependency> <groupId>com.github.briandilley.jsonrpc4j</groupId> <artifactId>jsonrpc4j</artifactId> 
+			<version>1.5.3</version> </dependency> <dependency> <groupId>javax.servlet</groupId> 
+			<artifactId>servlet-api</artifactId> <version>2.5</version> </dependency> 
+			<dependency> <groupId>javax.portlet</groupId> <artifactId>portlet-api</artifactId> 
+			<version>2.0</version> </dependency> -->
+	</dependencies>
+</project>

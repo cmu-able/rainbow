@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.sa.rainbow.core.IRainbowMaster;
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowDelegate;
@@ -375,14 +376,14 @@ public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
     }
 
     @Override
-    public IMasterCommandPort createMasterCommandProviderPort (RainbowMaster rainbowMaster)
+    public IMasterCommandPort createMasterCommandProviderPort (IRainbowMaster rainbowMaster)
             throws RainbowConnectionException {
-        return rainbowMaster;
+        return rainbowMaster.getCommandPort();
     }
 
     @Override
     public IMasterCommandPort createMasterCommandRequirerPort () throws RainbowConnectionException {
-        return Rainbow.instance ().getRainbowMaster ();
+        return Rainbow.instance ().getRainbowMaster ().getCommandPort();
     }
 
 }

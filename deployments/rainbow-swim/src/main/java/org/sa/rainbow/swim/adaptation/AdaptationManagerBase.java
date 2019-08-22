@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -120,7 +121,7 @@ public abstract class AdaptationManagerBase extends AbstractRainbowRunnable
     private IRainbowAdaptationEnqueuePort<Strategy> m_enqueuePort          = null;
     private IModelChangeBusSubscriberPort           m_modelChangePort      = null;
     private IModelsManagerPort                      m_modelsManagerPort    = null;
-    private String m_modelRef;
+    private ModelReference m_modelRef;
     private FileChannel                   m_strategyLog              = null;
     private IRainbowChangeBusSubscription m_modelTypecheckingChanged = new IRainbowChangeBusSubscription () {
 
@@ -133,7 +134,7 @@ public abstract class AdaptationManagerBase extends AbstractRainbowRunnable
                 CommandEventT ct = CommandEventT.valueOf (type);
                 return (ct.isEnd ()
                         && "setTypecheckResult".equals (message.getProperty (IModelChangeBusPort.COMMAND_PROP))
-                        && m_modelRef.equals (Util.genModelRef (modelName, modelType)));
+                        && m_modelRef.toString().equals (Util.genModelRef (modelName, modelType)));
             } catch (Exception e) {
                 return false;
             }
@@ -186,7 +187,7 @@ public abstract class AdaptationManagerBase extends AbstractRainbowRunnable
 
     @Override
     public void setModelToManage (ModelReference model) {
-        m_modelRef = model.getModelName () + ":" + model.getModelType ();
+        m_modelRef = model;
         try {
             m_strategyLog = new FileOutputStream (new File (new File (Rainbow.instance ().getTargetPath (), "log"),
                                                             model.getModelName () + "-adaptation.log")).getChannel ();
@@ -221,6 +222,11 @@ public abstract class AdaptationManagerBase extends AbstractRainbowRunnable
         if (!m_isInitialized) {
         	initializeAdaptationMgr(swimModel);
         }
+    }
+    
+    @Override
+    public ModelReference getManagedModel() {
+    	return m_modelRef;
     }
 
     /*
@@ -326,7 +332,10 @@ public abstract class AdaptationManagerBase extends AbstractRainbowRunnable
             
             StrategyAdaptationResultsVisitor resultCollector = new StrategyAdaptationResultsVisitor
                     (strategy, strategiesExecuted);
-            strategy.visit (resultCollector);
+            try {
+				strategy.visit (resultCollector);
+			} catch (RainbowException e) {
+			}
             
             for (Strategy str : strategiesExecuted) {
                 String s = str.getName () + ";" + str.outcome ();
@@ -583,6 +592,7 @@ public abstract class AdaptationManagerBase extends AbstractRainbowRunnable
         }
 
         at = new AdaptationTree<Strategy>(getStrategy("AddServer"));
+        at.setId(UUID.randomUUID().toString());
 //        StringVector tactics = new StringVector();
 //        tactics.add("IncDimmer");
 //        tactics.add("AddServer");

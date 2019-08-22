@@ -1,4 +1,4 @@
-# Rainbow Self-Adaptive Framework
+# Rainbow Self-Adaptive Framework (Version Yellow - 3)
 
 This repository contains the source code for the Rainbow self-adaptive framework, which is a research project within the Institute for Software Research, Carnegie Mellon University, Pittsburgh, PA, USA.
 
@@ -21,7 +21,7 @@ Rainbow is built using Maven, and you will need to have access to the Maven repo
 The Dockerfile in the root directory can be used for building Rainbow. It installs the necessary packages (java, maven, etc.) and uses `build.sh` to construct a .tgz file containing the directory that will be deployed when using Rainbow. To build the _Docker container_:
 
 ```
-> docker built -t rainbow-build .
+> docker build -t rainbow-build .
 ```
 
 To run the build, the directory containing the source needs to be mounted to the container, and the appropriate parameters that are passed on to the build script. The parameters are:
@@ -46,5 +46,7 @@ Note, building this way will not cache any libraries that maven may download, an
 
 `> docker run -v /home/YOU/.m2:/root/.m2 -v "$PWD":/root/rainbow -it rainbow-build -p /root/rainbow -d rainbow-znn -t znews-ss -s install`
 
+# New and Noteworthy
 
+A summary of the changes that have been made in this version can be found at [New and Noteworthy](NewAndNoteworthy.md)
 

@@ -29,81 +29,93 @@ import java.util.Map.Entry;
 
 import org.sa.rainbow.core.error.RainbowCopyException;
 import org.sa.rainbow.core.error.RainbowException;
+import org.sa.rainbow.core.models.IAdaptationModel;
 import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData;
+import org.sa.rainbow.stitch.util.ExecutionHistoryData.ExecutionStateT;
 
-public class ExecutionHistoryModelInstance implements IModelInstance<Map<String, ExecutionHistoryData>> {
+public class ExecutionHistoryModelInstance implements IAdaptationModel<Map<String, ExecutionHistoryData>> {
 
-    public static final String        EXECUTION_HISTORY_TYPE = "ExecutionHistory";
-    public static final String        TACTIC                 = "Tactic";
-    public static final String        STRATEGY               = "Strategy";
+	public static final String EXECUTION_HISTORY_TYPE = "ExecutionHistory";
+	public static final String TACTIC = "Tactic";
+	public static final String STRATEGY = "Strategy";
+	public static final String ADAPTATION_TREE = "AdapttionTree";
 
-    Map<String, ExecutionHistoryData> m_tacticHistoryMap;
-    private String                    m_name;
-    private String                    m_source;
+	Map<String, ExecutionHistoryData> m_tacticHistoryMap;
+	private String m_name;
+	private String m_source;
 
-    @Override
-    public String getOriginalSource () {
-        return m_source;
-    }
+	@Override
+	public String getOriginalSource() {
+		return m_source;
+	}
 
-    public ExecutionHistoryModelInstance (Map<String, ExecutionHistoryData> map, String name, String source) {
-        m_name = name;
-        m_source = source;
-        m_tacticHistoryMap = map;
-    }
+	public ExecutionHistoryModelInstance(Map<String, ExecutionHistoryData> map, String name, String source) {
+		m_name = name;
+		m_source = source;
+		m_tacticHistoryMap = map;
+	}
 
-    @Override
-    public Map<String, ExecutionHistoryData> getModelInstance () {
-        return m_tacticHistoryMap;
-    }
+	@Override
+	public Map<String, ExecutionHistoryData> getModelInstance() {
+		return m_tacticHistoryMap;
+	}
 
-    @Override
-    public void setModelInstance (Map<String, ExecutionHistoryData> model) {
-        m_tacticHistoryMap = model;
-    }
+	@Override
+	public void setModelInstance(Map<String, ExecutionHistoryData> model) {
+		m_tacticHistoryMap = model;
+	}
 
-    @Override
-    public IModelInstance<Map<String, ExecutionHistoryData>> copyModelInstance (String newName)
-            throws RainbowCopyException {
-        Map<String, ExecutionHistoryData> n = new HashMap<> ();
-        for (Entry<String, ExecutionHistoryData> e : m_tacticHistoryMap.entrySet ()) {
-            n.put (e.getKey (), new ExecutionHistoryData (e.getValue ()));
-        }
-        return new ExecutionHistoryModelInstance (n, newName, null);
-    }
+	@Override
+	public IModelInstance<Map<String, ExecutionHistoryData>> copyModelInstance(String newName)
+			throws RainbowCopyException {
+		Map<String, ExecutionHistoryData> n = new HashMap<>();
+		for (Entry<String, ExecutionHistoryData> e : m_tacticHistoryMap.entrySet()) {
+			n.put(e.getKey(), new ExecutionHistoryData(e.getValue()));
+		}
+		return new ExecutionHistoryModelInstance(n, newName, null);
+	}
 
-    @Override
-    public String getModelType () {
-        return EXECUTION_HISTORY_TYPE;
-    }
+	@Override
+	public String getModelType() {
+		return EXECUTION_HISTORY_TYPE;
+	}
 
-    @Override
-    public String getModelName () {
-        return m_name;
-    }
+	@Override
+	public String getModelName() {
+		return m_name;
+	}
 
-    public void setModelName (String name) {
-        m_name = name;
-    }
+	public void setModelName(String name) {
+		m_name = name;
+	}
 
-    @Override
-    public ExecutionHistoryCommandFactory getCommandFactory () {
-        return new ExecutionHistoryCommandFactory (this);
-    }
+	@Override
+	public ExecutionHistoryCommandFactory getCommandFactory() {
+		return new ExecutionHistoryCommandFactory(this);
+	}
 
-    @Override
-    public void setOriginalSource (String source) {
-        m_source = source;
-    }
+	@Override
+	public void setOriginalSource(String source) {
+		m_source = source;
+	}
 
-    @Override
-    public void dispose () throws RainbowException {
-    }
+	@Override
+	public void dispose() throws RainbowException {
+	}
 
-    public void markDisruption (double level) {
+	public void markDisruption(double level) {
 
-    }
+	}
 
+	@Override
+	public boolean isAdaptationOccuring(ModelReference model) {
+		for (ExecutionHistoryData e : m_tacticHistoryMap.values()) {
+			if (e.getCurrentExecutionState() != ExecutionStateT.NOT_EXECUTING && e.getModelReference().equals(model))
+				return true;
+		}
+		return false;
+	}
 
 }

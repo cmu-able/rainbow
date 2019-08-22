@@ -1,7 +1,8 @@
 package org.sa.rainbow.brass.confsynthesis;
 
+import java.io.FileNotFoundException;
 import java.io.FileReader;
-
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.util.LinkedList;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.sa.rainbow.brass.confsynthesis.PropertiesSimpleConfigurationStore;
 import org.sa.rainbow.core.ConfigHelper;
 
@@ -44,18 +46,12 @@ public class SimpleConfigurationStore implements ConfigurationProvider {
 		return (m_configuration_objects.containsKey(id));
 	}
 
-	private synchronized void loadFromFile(String confFile) {
+	public synchronized void reloadFromFile(String confFile) throws FileNotFoundException, IOException, ParseException {
 		JSONParser parser = new JSONParser();
 		Object obj = null;
 
-		try {
-			obj = parser.parse(new FileReader(confFile));
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			System.out.println("Could not load Configuration File: " + confFile);
-			e.printStackTrace();
-		}
-
+		obj = parser.parse(new FileReader(confFile));
+		m_configuration_objects.clear();
 		JSONObject jsonObject = (JSONObject) obj;
 		JSONArray nodes = (JSONArray) jsonObject.get("configurations");
 
@@ -79,6 +75,16 @@ public class SimpleConfigurationStore implements ConfigurationProvider {
 					+ " - Discharge rate: "
 					+ String.valueOf(m_configuration_objects.get(m_conf_prefix + c_id).getEnergyDischargeRate())
 					+ " Speed: " + String.valueOf(m_configuration_objects.get(m_conf_prefix + c_id).getSpeed()));
+		}
+	}
+
+	private synchronized void loadFromFile(String confFile) {
+		try {
+			reloadFromFile(confFile);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			System.out.println("Could not load Configuration File: " + confFile);
+			e.printStackTrace();
 		}
 	}
 
@@ -129,6 +135,13 @@ public class SimpleConfigurationStore implements ConfigurationProvider {
 		SimpleConfigurationStore cs = new SimpleConfigurationStore();
 		cs.populate();
 		System.out.println(cs.getLegalReconfigurationsFrom("sol_432"));
+	}
+
+	public SimpleConfigurationStore copy() {
+		SimpleConfigurationStore cp = new SimpleConfigurationStore();
+		cp.m_configuration_objects.clear();
+		cp.m_configuration_objects.putAll(m_configuration_objects);
+		return cp;
 	}
 
 }

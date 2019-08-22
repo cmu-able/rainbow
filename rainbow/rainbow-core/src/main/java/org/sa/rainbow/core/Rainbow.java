@@ -62,6 +62,7 @@ public class Rainbow implements IRainbowEnvironment {
 
     private static final String PROPKEY_PROPFILENAME = "rainbow.properties";
 
+
 	/**
      * Exit status that Rainbow would report when it exits, default to sleeping.
      */
@@ -80,6 +81,10 @@ public class Rainbow implements IRainbowEnvironment {
             _instance = new Rainbow ();
         }
         return _instance;
+    }
+    
+    public static void uninstantiate() {
+    	_instance = null;
     }
 
     /**
@@ -141,7 +146,7 @@ public class Rainbow implements IRainbowEnvironment {
 
     private final ThreadGroup m_threadGroup;
 
-    private RainbowMaster m_rainbowMaster;
+    private IRainbowMaster m_rainbowMaster;
 
     private Properties m_defaultProps;
 
@@ -305,8 +310,8 @@ public class Rainbow implements IRainbowEnvironment {
         }
 
         LOGGER.debug (MessageFormat.format ("Rainbow config path: {0}", m_targetPath.getAbsolutePath ()));
-
-        computeHostSpecificConfig ();
+        if (m_props.getProperty(PROPKEY_CONFIG_FILE) == null)
+        	computeHostSpecificConfig ();
         String cfgFile = m_props.getProperty (PROPKEY_CONFIG_FILE, DEFAULT_CONFIG_FILE);
         List<String> cfgFiles = new ArrayList<> ();
 //        if (!cfgFile.equals (DEFAULT_CONFIG_FILE)) { 
@@ -519,12 +524,12 @@ public class Rainbow implements IRainbowEnvironment {
     }
 
     @Override
-    public void setMaster (RainbowMaster rainbowMaster) {
+    public void setMaster (IRainbowMaster rainbowMaster) {
         m_rainbowMaster = rainbowMaster;
     }
 
     @Override
-    public RainbowMaster getRainbowMaster () {
+    public IRainbowMaster getRainbowMaster () {
         return m_rainbowMaster;
     }
 

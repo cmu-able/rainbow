@@ -1,0 +1,80 @@
+# Created October 22nd, 2013 (Javier Camara)
+#
+# Utility curves, defined as X:Y pairs, where X is value of the dimension and Y
+# is the utility in the range [0,1]
+#
+# History:
+# - [JC 2013.10.22] Created file, defined utilities for Dos Attack Demo.
+# - [JC 2013.11.1] Added user annoyance to the utility profile.
+model:
+  name: SwimSys
+  type: Acme
+utilities:
+  uR:
+    label: "Average Response Time"
+    mapping: "[EXPR]LB0.optResponseTime"
+    description: "Client experienced response time in milliseconds, R, defined as a float property 'ClientT.experRespTime' in the architecture"
+    utility:
+      0: 1.00
+      0.100: 1.00
+      0.200: 0.99
+      0.500: 0.90
+      1.000: 0.75
+      1.500: 0.50
+      2.000: 0.25
+      4.000: 0.00
+  uC:
+    label: "Average Server Cost"
+    mapping: "[EXPR]size(/self/components:ServerT[isArchEnabled])"
+    description: "Server cost in unit/hr, C, averaged from a float property 'ServerT.cost' in the architecture, and captures average cost across all servers. Adapted to a 3-server configuration."
+    utility:
+      0: 1.00
+      1: 0.90
+      2: 0.30
+      3: 0.10
+      
+  uA:
+    label: "Average User Annoyance"
+    mapping: "[CALL]org.sa.rainbow.stitch.lib.SwimUtils.dimmerFactorToLevel(LB0.dimmer,DIMMER_LEVELS,DIMMER_MARGIN)"
+    description: "Client experienced annoyance level, should be defined as an int property 'ClientT.annoyance' in the architecture, with a range 0-100"
+    utility:
+      0: 0
+      5: 1
+
+# Weighted utility preferences, each set should sum to 1.
+# Three scenarios:
+#   1.) Priority is given to fixing response time.
+#  Note: Original Weight of uR is now split 50/50% among uR and uA in every scenario. 
+weights:
+  scenario 1:
+    uR: 0.6
+    uC: 0.2
+    uA: 0.2
+  
+# Tactic quality attribute vectors
+#
+vectors:
+# Utility: [^] R; [<>] M; [v] C; [<>]A
+# assume each server will drop response time by 1000 ms and increase cost by 1 unit
+  TAddServer:
+    uR: -1.000
+    uC: +1.00
+    uA: 0
+    
+  TRemoveServer:
+    uR: +1.000
+    uC: -1
+    uA: 0
+
+# Utility: [^] R; [<>] M; [^] C; [v]A
+# assume each level of fidelity reduces response time by 500 ms, and reduce cost by 10% of unit, increases annoyance of users 5% for low-quality service
+  TIncDimmer:
+    uR: -0.500
+    uC: -0.10
+    uA: +5
+    
+  TDecDimmer:
+    uR: -0.500
+    uC: 0.1
+    uA: -5
+

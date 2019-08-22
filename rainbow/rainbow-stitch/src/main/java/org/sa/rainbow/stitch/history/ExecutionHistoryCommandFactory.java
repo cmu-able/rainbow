@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.util.Map;
 
 import org.sa.rainbow.core.error.RainbowModelException;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd;
 import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation;
@@ -57,11 +58,11 @@ public class ExecutionHistoryCommandFactory extends ModelCommandFactory<Map<Stri
                 Boolean.toString (successful));
     }
 
-    public StrategyExecutionStateCommand strategyExecutionStateCommand (String qualifiedName,
+    public StrategyExecutionStateCommand strategyExecutionStateCommand (ModelReference ref, String qualifiedName,
             String type,
             ExecutionStateT newState,
             String data) {
-        return new StrategyExecutionStateCommand (STRATEGY_EXECUTION_STATE_CMD, m_modelInstance, qualifiedName, type,
+        return new StrategyExecutionStateCommand (STRATEGY_EXECUTION_STATE_CMD, m_modelInstance, qualifiedName, ref.toString(), type,
                 newState.toString (), data == null ? "" : data);
     }
 
@@ -71,7 +72,7 @@ public class ExecutionHistoryCommandFactory extends ModelCommandFactory<Map<Stri
         case "recordTacticDuration":
             return new TacticDurationCommand (commandName, m_modelInstance, args[0], args[1], args[2]);
         case STRATEGY_EXECUTION_STATE_CMD:
-            return new StrategyExecutionStateCommand (commandName, m_modelInstance, args[0], args[1], args[2], args[3]);
+            return new StrategyExecutionStateCommand (commandName, m_modelInstance, args[0], args[1], args[2], args[3], args[4]);
         }
         throw new RainbowModelException ("Cannot create a command for the operation: " + commandName);
     }

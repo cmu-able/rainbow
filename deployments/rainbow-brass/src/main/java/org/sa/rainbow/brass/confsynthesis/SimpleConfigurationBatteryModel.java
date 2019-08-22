@@ -64,13 +64,12 @@ public class SimpleConfigurationBatteryModel {
 	            e.printStackTrace();
 	        }
 
-	        JSONObject jsonObject = (JSONObject) obj;
-
-	        m_battery_capacity = Double.parseDouble(String.valueOf(((JSONObject)obj).get("battery_capacity")));
+	        JSONObject jsonObject = (JSONObject)obj;
+			m_battery_capacity = Double.parseDouble(String.valueOf(jsonObject.get("battery_capacity")));
 	        System.out.println("Battery capacity in prism is not set to: " + m_battery_capacity);
-	        m_charging_rate = Double.parseDouble(String.valueOf(((JSONObject)obj).get("charging_rate")));
+	        m_charging_rate = Double.parseDouble(String.valueOf(jsonObject.get("charging_rate")));
 	        
-	        JSONObject uobj = (JSONObject) ((JSONObject)obj).get("utility");
+	        JSONObject uobj = (JSONObject) jsonObject.get("utility");
             m_energy_weight = Double.parseDouble(String.valueOf(uobj.get("energy")));
             m_timeliness_weight = Double.parseDouble(String.valueOf(uobj.get("timeliness")));
 

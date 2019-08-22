@@ -27,6 +27,7 @@
 package org.sa.rainbow.stitch.core;
 
 import org.acmestudio.acme.element.IAcmeElement;
+import org.antlr.v4.parse.ANTLRParser.labeledAlt_return;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation;
@@ -35,10 +36,12 @@ import org.sa.rainbow.stitch.adaptation.StitchExecutor;
 import org.sa.rainbow.stitch.error.ArgumentMismatchException;
 import org.sa.rainbow.stitch.history.ExecutionHistoryModelInstance;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData;
+import org.sa.rainbow.stitch.util.ExecutionHistoryData.ExecutionStateT;
 import org.sa.rainbow.stitch.util.Tool;
 import org.sa.rainbow.stitch.visitor.Stitch;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.*;
 
 /**
@@ -68,16 +71,20 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 	 */
 	public enum ConditionKind {
 		UNKNOWN, APPLICABILITY /* a strategy applicability condition */, EXPRESSION /* a full expression */, SUCCESS
-        /* "success", meaning effect of parent tactic true */, FAILURE /* "failure", meaning parent tactic didn't
-        complete execution */, DEFAULT /* "default" match, when no other ones match */
+		/* "success", meaning effect of parent tactic true */,
+		FAILURE /*
+				 * "failure", meaning parent tactic didn't complete execution
+				 */, DEFAULT /* "default" match, when no other ones match */
 	}
 
 	/**
 	 * Enumerates the kinds of actions that a StrategyNode can have.
 	 */
 	public enum ActionKind {
-        UNKNOWN, TACTIC /* a Tactic */, DOLOOP /* a do loop */, DONE /* "done" action, terminating Strategy with
-        success */, NULL /* no-op, a null tactic */
+		UNKNOWN, TACTIC /* a Tactic */, DOLOOP /* a do loop */,
+		DONE /*
+				 * "done" action, terminating Strategy with success
+				 */, NULL /* no-op, a null tactic */
 	}
 
 	/**
@@ -92,9 +99,23 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 	}
 
 	public enum ExpressionKind {
-		PLUS, MINUS, MULTIPLY, DIVIDE, MOD, IMPLIES, IFF, AND, OR, NE, EQ, LT, GE, LE, GT, INCR, DECR, UNARY_MINUS,
-		UNARY_PLUS, NOT, FORALL, EXISTS, EXISTS_UNIQUE, SELECT, IDENTIFIER, INTEGER, FLOAT, STRING, CHAR, BOOLEAN, NULL,
-		UNKNOWN
+		PLUS("+"), MINUS("-"), MULTIPLY("*"), DIVIDE("/"), MOD("%"), IMPLIES("->"), IFF("<->"), AND("&&"), OR("||"), NE("!="), EQ("=="), LT("<"), GE(">="), LE("<="), GT(">"), INCR("++"), DECR("--"), UNARY_MINUS("-"),
+		UNARY_PLUS("+"), NOT("!"), FORALL("forall"), EXISTS("exists"), EXISTS_UNIQUE("exists unique"), SELECT("select"), IDENTIFIER, INTEGER, FLOAT, STRING, CHAR, BOOLEAN, NULL,
+		UNKNOWN;
+		
+		final String image;
+		
+		ExpressionKind(String i) {
+			image = i;
+		}
+		
+		ExpressionKind() {
+			image = null;
+		}
+		
+		public String image() {
+			return image==null?toString():image;
+		}
 	}
 
 	public interface NodeAction {
@@ -660,9 +681,10 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 	 * @param argsIn the input arguments; there should be NONE
 	 * @return one of the <code>Strategy.Outcome</code> enum values:
 	 *         <code>SUCCESS</code>, <code>FAILURE</code>, <code>STATUSQUO</code>.
+	 * @throws StitchExecutionException
 	 */
 	@Override
-	public Object evaluate(Object[] argsIn) {
+	public Object evaluate(Object[] argsIn) throws StitchExecutionException {
 		if (argsIn != null && argsIn.length > 0)
 			throw new ArgumentMismatchException("Strategy should have NO argument!");
 
@@ -682,6 +704,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 			if (!ok) {
 				break;
 			}
+
 		}
 		if (Tool.logger().isInfoEnabled()) {
 			Tool.logger().info("Strategy execution trail: " + m_nodeStack.toString());
@@ -739,8 +762,9 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 	 * @param argsIn the input arguments; there should be NONE
 	 * @return one of the <code>Strategy.Outcome</code> enum values:
 	 *         <code>SUCCESS</code>, <code>FAILURE</code>, <code>STATUSQUO</code>.
+	 * @throws StitchExecutionException
 	 */
-	public Object resumeEvaluate(Object[] argsIn) {
+	public Object resumeEvaluate(Object[] argsIn) throws StitchExecutionException {
 		if (m_lastNode == null)
 			return evaluate(argsIn);
 		else {
@@ -952,12 +976,21 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 				// for every condition, register a timed condition to be evaluated in timing
 				// thread
 				for (final StrategyNode node : childrenNodes) {
-					final Expression expr = node.getCondExpr();
+					Expression expr = node.getCondExpr();
+					List<Expression> conditions = new LinkedList<>();
 					expr.clearState(); // make sure we're really reevaluating, not using cached value
 					// register a condition. Should only process this for the node duration that is
 					// dates back to when this method is called, otherwise the time will be @[x] +
 					// the time taken to get to here, not @[x]
-					ConditionTimer.instance().registerCondition(Collections.singletonList(expr),
+					conditions.add(expr);
+					if (node.getActionFlag() == ActionKind.TACTIC) {
+						String tactic = node.getTactic();
+						Tactic t = stitchState().findTactic(tactic);
+						if (t != null) {
+							conditions.addAll(t.conditions);
+						}
+					}
+					ConditionTimer.instance().registerCondition(conditions,
 							branchWait - (System.currentTimeMillis() - start), new Observer() {
 
 								@Override
@@ -976,11 +1009,20 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 				// Wait for a condition to succeed, or until timeout
 				boolean nodeTrue;
 				long allottedTime = start + branchWait;
+				boolean timeOut = System.currentTimeMillis() < allottedTime;
+				boolean allResults = resultMap.size() == childrenNodes.size();
+//				int count = 0;
 				do {
+					if (m_executor != null) 
+					m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory().strategyExecutionStateCommand(
+							m_executor.getManagedModel(), this.getQualifiedName() + "." + parentNode.label(),
+							ExecutionHistoryModelInstance.STRATEGY, ExecutionStateT.STRATEGY_SETTLING,
+							Long.toString(branchWait)));
 					// Problem here is that we will always wait at lease SLEEP_TIME_LONG (100ms) for
 					// a condition to evaluate. Probably ok.
 					try {
-						Thread.sleep(ConditionTimer.SLEEP_TIME_LONG);
+//						count++;
+						Thread.sleep(branchWait - (System.currentTimeMillis() - start));
 					} catch (InterruptedException e) {
 					}
 					// Need to synchronize because the timer thread will also
@@ -990,10 +1032,12 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 					}
 					// while no condition is true, the stitch evaluation hasn't been cancelled,
 					// and we haven't waited past the time it takes to evaluated,
-				} while (!nodeTrue && !m_stitch.isCanceled() && System.currentTimeMillis() < allottedTime
+					timeOut = System.currentTimeMillis() < allottedTime;
+					allResults = resultMap.size() == childrenNodes.size();
+				} while (!nodeTrue && !m_stitch.isCanceled() && timeOut
 				// (and each condition has been evaluated at least once?)
-						&& resultMap.size() == childrenNodes.size());
-
+						&& !allResults);
+//				System.out.println("count=" + count + ", branchWait=" + branchWait + ", nodeTrue=" + nodeTrue + ", timeout=" + timeOut + ", allResults=" + allResults);
 				if (m_nodeTrue) {
 					List<StrategyNode> matchingNodes = new ArrayList<>();
 					for (Map.Entry<StrategyNode, Boolean> e : resultMap.entrySet()) {
@@ -1015,6 +1059,11 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 						break;
 					}
 				}
+				if (m_executor != null)
+				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory().strategyExecutionStateCommand(
+						m_executor.getManagedModel(), this.getQualifiedName() + "." + parentNode.label(),
+						ExecutionHistoryModelInstance.STRATEGY, ExecutionStateT.NODE_DONE,
+						selected == null && defaultNode == null?Outcome.FAILURE.toString():Outcome.SUCCESS.toString()));
 				if (selected != null)
 					return selected;
 				if (defaultNode != null) {
@@ -1026,11 +1075,12 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 			}
 		} finally {
 			// make sure to reset the node true flag
+				
 			m_nodeTrue = new Boolean(false);
 		}
 	}
 
-	private boolean evaluateFromNode(StrategyNode curNode) {
+	private boolean evaluateFromNode(StrategyNode curNode) throws StitchExecutionException {
 		StrategyNode selected = null;
 		if (!curNode.hasDuration()) {
 			selected = chooseNodeWithoutTimes(curNode);
@@ -1050,23 +1100,59 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 		// do action on the selected node
 		switch (selected.getActionFlag()) {
 		case DONE:
+			if (m_executor != null) {
+				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+						.strategyExecutionStateCommand(m_executor.getManagedModel(),
+								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+								ExecutionHistoryData.ExecutionStateT.NODE_EXECUTING, null));
+			}
 			if (Tool.logger().isInfoEnabled()) {
 				Tool.logger().info("DONE action!");
 			}
 			// a success branch, terminate successfully
 			setOutcome(Outcome.SUCCESS);
+			if (m_executor != null) {
+				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+						.strategyExecutionStateCommand(m_executor.getManagedModel(),
+								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+								ExecutionHistoryData.ExecutionStateT.NODE_DONE, Outcome.SUCCESS.toString()));
+				m_executor.getReportingPort().info(m_executor.getComponentType(),
+						MessageFormat.format("[[{0}]]: Finished executing node {1}:{2}->{3}", m_executor.id(),
+								curNode.label(), "done", Outcome.SUCCESS));
+			}
 			break;
 		case NULL:
+			if (m_executor != null) {
+				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+						.strategyExecutionStateCommand(m_executor.getManagedModel(),
+								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+								ExecutionHistoryData.ExecutionStateT.NODE_EXECUTING, null));
+			}
 			if (Tool.logger().isInfoEnabled()) {
 				Tool.logger().info("NULL action!");
 			}
 			// null action, so consider terminated with status quo
 			setOutcome(Outcome.STATUSQUO);
+			if (m_executor != null) {
+				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+						.strategyExecutionStateCommand(m_executor.getManagedModel(),
+								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+								ExecutionHistoryData.ExecutionStateT.NODE_DONE, Outcome.STATUSQUO.toString()));
+				m_executor.getReportingPort().info(m_executor.getComponentType(),
+						MessageFormat.format("[[{0}]]: Finished executing node {1}:{2}->{3}", m_executor.id(),
+								curNode.label(), "done", Outcome.STATUSQUO));
+			}
 			break;
 		case TACTIC:
 			doTactic(curNode);
 			break;
 		case DOLOOP:
+			if (m_executor != null) {
+				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+						.strategyExecutionStateCommand(m_executor.getManagedModel(),
+								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+								ExecutionHistoryData.ExecutionStateT.NODE_EXECUTING, null));
+			}
 			// LOOP! treat the target node as child node and proceed
 			if (Tool.logger().isInfoEnabled()) {
 				Tool.logger().info("LOOP action! " + curNode.label());
@@ -1093,13 +1179,34 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 				// consider Strategy failed
 				setOutcome(Outcome.FAILURE);
 			}
+			if (m_executor != null)
+				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+						.strategyExecutionStateCommand(m_executor.getManagedModel(),
+								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+								ExecutionHistoryData.ExecutionStateT.NODE_DONE, getOutcome().toString()));
+
 			break;
 		default: // serious error?
+			if (m_executor != null) {
+				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+						.strategyExecutionStateCommand(m_executor.getManagedModel(),
+								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+								ExecutionHistoryData.ExecutionStateT.NODE_EXECUTING, null));
+			}
 			Tool.error("Selected node " + selected.label() + "has unknown action kind! " + selected.getActionFlag(),
 					null, stitchState().stitchProblemHandler);
 //                System.out.println ("Selected node " + selected.label () + "has unknown action kind! " + selected
 //                        .getActionFlag ());
 			setOutcome(Outcome.FAILURE);
+			if (m_executor != null) {
+				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+						.strategyExecutionStateCommand(m_executor.getManagedModel(),
+								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+								ExecutionHistoryData.ExecutionStateT.NODE_DONE, Outcome.FAILURE.toString()));
+				m_executor.getReportingPort().info(m_executor.getComponentType(),
+						MessageFormat.format("[[{0}]]: Finished executing node {1}:{2}->{3}", m_executor.id(),
+								curNode.label(), "done", Outcome.FAILURE));
+			}
 			break;
 		}
 		// at this point, evaluation occurred normally
@@ -1127,6 +1234,10 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 				rv = true;
 			}
 		}
+		if (child.getActionFlag() == ActionKind.TACTIC) {
+			Tactic t = stitchState().findTactic(child.getTactic());
+			rv = rv && t.checkCondition();
+		}
 		return rv;
 	}
 
@@ -1134,8 +1245,9 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 	 * Evaluates tactic action of the given node.
 	 *
 	 * @param curNode the strategy node whose tactic action to evaluate.
+	 * @throws StitchExecutionException
 	 */
-	private void doTactic(StrategyNode curNode) {
+	private void doTactic(StrategyNode curNode) throws StitchExecutionException {
 		if (Tool.logger().isInfoEnabled()) {
 			Tool.logger().info("Tactic action! " + curNode.getTactic());
 		}
@@ -1148,35 +1260,63 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 				tactic = stitch.findTactic(curNode.getTactic());
 			} catch (IOException e) {
 				m_executor.getReportingPort().error(m_executor.getComponentType(),
-						"Could not execute " + tactic.getName());
+						"Could not execute " + curNode.getTactic());
 				setOutcome(Outcome.STATUSQUO);
+				m_executor.getHistoryModelUSPort()
+						.updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+								.strategyExecutionStateCommand(m_executor.getManagedModel(), this.getQualifiedName(),
+										ExecutionHistoryModelInstance.STRATEGY,
+										ExecutionHistoryData.ExecutionStateT.TACTIC_ERROR,
+										"Could not execute " + curNode.getTactic()));
+				return;
 			}
 		}
 //        if (tactic.isExecuting ()) {
 //
 //        }
+		boolean effectGood = false;
 		tactic.markExecuting(true);
 		try {
 			if (m_executor != null) {
-				tactic.setHistoryModel(m_executor.getExecutionHistoryModel());
 				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
-						.strategyExecutionStateCommand(tactic.getQualifiedName(), ExecutionHistoryModelInstance.TACTIC,
-								ExecutionHistoryData.ExecutionStateT.STARTED, null));
+						.strategyExecutionStateCommand(m_executor.getManagedModel(),
+								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+								ExecutionHistoryData.ExecutionStateT.NODE_EXECUTING, null));
+
+				m_executor.getReportingPort().info(m_executor.getComponentType(), MessageFormat
+						.format("[[{0}]]: Executing node {1}:{2}", m_executor.id(), curNode.label(), tactic.getName()));
+				tactic.setHistoryModel(m_executor.getExecutionHistoryModel());
+				m_executor.getHistoryModelUSPort()
+						.updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+								.strategyExecutionStateCommand(m_executor.getManagedModel(), tactic.getQualifiedName(),
+										ExecutionHistoryModelInstance.TACTIC,
+										ExecutionHistoryData.ExecutionStateT.TACTIC_EXECUTING,
+										"Called by " + this.getQualifiedName()));
 			}
 			long start = new Date().getTime();
+			tactic.stitchState().setExecutor(m_executor);
+			
 			tactic.evaluate(args);
-			if (m_executor != null)
-				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
-						.strategyExecutionStateCommand(tactic.getQualifiedName(), ExecutionHistoryModelInstance.TACTIC,
-								ExecutionHistoryData.ExecutionStateT.WAITING, Long.toString(tactic.getDuration())));
-			// TODO: calculated settling based on Tactic effect settling
-			boolean effectGood = tactic.awaitSettling();
+			if (m_executor != null) {
+				m_executor.getHistoryModelUSPort()
+						.updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+								.strategyExecutionStateCommand(m_executor.getManagedModel(), tactic.getQualifiedName(),
+										ExecutionHistoryModelInstance.TACTIC,
+										ExecutionHistoryData.ExecutionStateT.TACTIC_SETTLING,
+										Long.toString(tactic.getDuration())));
+				// TODO: calculated settling based on Tactic effect settling
+				m_executor.getReportingPort().info(m_executor.getComponentType(),
+						MessageFormat.format("[[{0}]]: Settling node {1}:{2}@{3}", m_executor.id(), curNode.label(),
+								tactic.getName(), tactic.getDuration()));
+			}
+			effectGood = tactic.awaitSettling();
 			long end = new Date().getTime();
 			// TODO: then await condition stuff
 			if (m_executor != null) {
 				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
-						.strategyExecutionStateCommand(tactic.getQualifiedName(), ExecutionHistoryModelInstance.TACTIC,
-								ExecutionHistoryData.ExecutionStateT.FINISHED, null));
+						.strategyExecutionStateCommand(m_executor.getManagedModel(), tactic.getQualifiedName(),
+								ExecutionHistoryModelInstance.TACTIC, ExecutionHistoryData.ExecutionStateT.TACTIC_DONE,
+								Boolean.toString(effectGood)));
 				AbstractRainbowModelOperation recordTacticDurationCmd = m_executor.getExecutionHistoryModel()
 						.getCommandFactory()
 						.recordTacticDurationCmd(tactic.getQualifiedName(), end - start, effectGood);
@@ -1197,6 +1337,16 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 			}
 		} finally {
 			tactic.markExecuting(false);
+			if (m_executor != null) {
+				String msg = tactic.hasError() ? "Error" : (effectGood ? "SUCCESS" : "FAIL");
+				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+						.strategyExecutionStateCommand(m_executor.getManagedModel(),
+								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+								ExecutionHistoryData.ExecutionStateT.NODE_DONE, msg));
+				m_executor.getReportingPort().info(m_executor.getComponentType(),
+						MessageFormat.format("[[{0}]]: Finished executing node {1}:{2}->{3}", m_executor.id(),
+								curNode.label(), tactic.getName(), msg));
+			}
 		}
 	}
 
@@ -1234,7 +1384,7 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 		}
 	}
 
-	private List<StrategyNode> gatherChildrenNodes(StrategyNode node) {
+	public List<StrategyNode> gatherChildrenNodes(StrategyNode node) {
 		List<StrategyNode> children = new ArrayList<StrategyNode>();
 		for (String label : node.getChildren()) {
 			children.add(nodes.get(label));

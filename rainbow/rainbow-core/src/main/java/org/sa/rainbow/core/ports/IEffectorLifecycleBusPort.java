@@ -35,5 +35,7 @@ public interface IEffectorLifecycleBusPort extends IDisposablePort {
     void reportDeleted (IEffectorIdentifier effector);
 
     void reportExecuted (IEffectorIdentifier effector, Outcome outcome, List<String> args);
+    
+    void reportExecuting(IEffectorIdentifier effector, List<String> args);
 
 }

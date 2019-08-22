@@ -258,6 +258,13 @@ public class RainbowPortFactory {
                 public IModelInstance getModelInstance (ModelReference modelRef) {
                     return mm.getModelInstance (modelRef);
                 }
+
+				@Override
+				public boolean isModelLocked(ModelReference modelRef) {
+					return mm.isModelLocked(modelRef);
+				}
+                
+                
             };
         }
         return getFactory ().createModeslManagerRequirerPort ();

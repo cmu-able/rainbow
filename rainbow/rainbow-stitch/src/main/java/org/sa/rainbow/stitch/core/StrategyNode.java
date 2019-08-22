@@ -121,6 +121,8 @@ public class StrategyNode {
      */
     private List<String> m_children = null;
     private StrategyNode m_parent   = null;
+    
+    public IScope scope = null;
 
     public StrategyNode (Stitch/*State*/ stitch, String label) {
 

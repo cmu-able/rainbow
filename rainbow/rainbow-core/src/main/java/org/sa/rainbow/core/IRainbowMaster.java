@@ -23,11 +23,18 @@
  */
 package org.sa.rainbow.core;
 
+import java.util.Collection;
+import java.util.Map;
+
+import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
+import org.sa.rainbow.core.adaptation.IAdaptationManager;
+import org.sa.rainbow.core.analysis.IRainbowAnalysis;
 import org.sa.rainbow.core.gauges.GaugeDescription;
 import org.sa.rainbow.core.gauges.GaugeManager;
 import org.sa.rainbow.core.models.EffectorDescription;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.ProbeDescription;
+import org.sa.rainbow.core.ports.IMasterCommandPort;
 
 public interface IRainbowMaster {
 
@@ -42,6 +49,14 @@ public interface IRainbowMaster {
     ModelsManager modelsManager ();
     
     GaugeManager gaugeManager ();
+
+	Map<String, IAdaptationExecutor<?>> adaptationExecutors();
+
+	Map<String,IAdaptationManager<?>> adaptationManagers();
+
+	Collection<IRainbowAnalysis> analyzers();
+	
+	IMasterCommandPort getCommandPort();
     
 
 }

@@ -20,16 +20,31 @@ import org.sa.rainbow.core.ports.IModelUSBusPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 
 public class GaugePanel extends JPanel implements IModelUpdater{
-	private JTable m_table;
-	private IModelUSBusPort m_usPort;
-	private String m_gaugeId;
-	private ArrayList<Runnable> updaters = new ArrayList<>(1);
+	
+	public static interface IGaugeReportUpdate {
+		void update(IRainbowOperation o);
+	}
+	
+	public JTable m_table;
+	protected IModelUSBusPort m_usPort;
+	protected String m_gaugeId;
+	protected ArrayList<Runnable> updaters = new ArrayList<>(1);
+	protected ArrayList<IGaugeReportUpdate> reporters = new ArrayList<>(1);
 
 	/**
 	 * Create the panel.
 	 */
 	public GaugePanel(String gaugeId) {
 		m_gaugeId = gaugeId;
+		try {
+//			m_usPort = RainbowPortFactory.createModelsManagerUSPort(this);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public void createContent() {
 		setLayout(new BorderLayout(0, 0));
 		
 		JScrollPane scrollPane = new JScrollPane();
@@ -43,16 +58,14 @@ public class GaugePanel extends JPanel implements IModelUpdater{
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		m_table.setAutoscrolls(true);
 		m_table.addComponentListener(new JTableCellDisplayer(m_table));
-		try {
-			m_usPort = RainbowPortFactory.createModelsManagerUSPort(this);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	public void addUpdateListener(Runnable r) {
 		updaters.add(r);
+	}
+	
+	public void addGaugeReportListener(IGaugeReportUpdate r) {
+		reporters.add(r);
 	}
 	
 	@Override
@@ -62,9 +75,12 @@ public class GaugePanel extends JPanel implements IModelUpdater{
 		for (Runnable runnable : updaters) {
 			runnable.run();
 		}
+		for (IGaugeReportUpdate r : reporters) {
+			r.update(command);
+		}
 	}
 	
-	private String[] getTableData(IRainbowOperation command) {
+	protected String[] getTableData(IRainbowOperation command) {
 		String[] data = new String[4];
 		data[0] = command.getName();
 		data[1] = command.getTarget();
@@ -86,6 +102,9 @@ public class GaugePanel extends JPanel implements IModelUpdater{
 			if (!command.getOrigin().equals(m_gaugeId)) return;
 			String[] data = getTableData(command);
 			tableModel.addRow(data);
+			for (IGaugeReportUpdate r : reporters) {
+				r.update(command);
+			}
 		}
 		m_table.setModel(tableModel);
 		tableModel.fireTableDataChanged();		

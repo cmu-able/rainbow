@@ -1,0 +1,71 @@
+vars:
+  _probes.commonPath: "${rainbow.path}/system/probes"
+
+probes:
+  DimmerProbe:
+    alias: dimmer
+    location: "${customize.system.target.lb}"
+    type: script
+    scriptInfo:
+      mode: continual
+      path    : "${_probes.commonPath}/genericProbe.pl"
+      argument: "get_dimmer"
+  ServersProbe:
+    alias: servers
+    location: "${customize.system.target.lb}"
+    type: script
+    scriptInfo:
+      mode: continual
+      path    : "${_probes.commonPath}/genericProbe.pl"
+      argument: "get_servers"
+  ActiveServersProbe:
+    alias: activeServers
+    location: "${customize.system.target.lb}"
+    type: script
+    scriptInfo:
+      mode: continual
+      path    : "${_probes.commonPath}/genericProbe.pl"
+      argument: "get_active_servers"
+  LoadProbe1:
+    alias: load1
+    location: "${customize.system.target.lb}"
+    type: script
+    scriptInfo:
+      mode: continual
+      path    : "${_probes.commonPath}/genericProbe.pl"
+      argument: "-d 5000 get_utilization server1"
+  LoadProbe2:
+    alias: load2
+    location: "${customize.system.target.lb}"
+    type: script
+    scriptInfo:
+      mode: continual
+      path    : "${_probes.commonPath}/genericProbe.pl"
+      argument: "-d 5000 get_utilization server2"
+  LoadProbe3:
+    alias: load3
+    location: "${customize.system.target.lb}"
+    type: script
+    scriptInfo:
+      mode: continual
+      path    : "${_probes.commonPath}/genericProbe.pl"
+      argument: "-d 5000 get_utilization server3"
+  BasicResponseTimeProbe:
+    alias: basicResponseTime
+    location: "${customize.system.target.lb}"
+    type: script
+    scriptInfo:
+      mode: continual
+      path    : "${_probes.commonPath}/genericProbe.pl"
+      argument: "get_basic_rt"
+  OptResponseTimeProbe:
+    alias: optResponseTime
+    location: "${customize.system.target.lb}"
+    type: script
+    scriptInfo:
+      mode: continual
+      path    : "${_probes.commonPath}/genericProbe.pl"
+      argument: "get_opt_rt"
+unused-probes:
+
+
