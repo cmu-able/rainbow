@@ -52,9 +52,9 @@
 	<!-- Organization which has owns the software. -->
 	<organization>
 		<!-- Organization name. -->
-		<name>We</name>
+		<name>Carnegie Mellon University ABLE Group</name>
 		<!-- Organization URL. -->
-		<url>http://www.we.com</url>
+		<url>http://www.cs.cmu.edu/~able</url>
 	</organization>
 
 	<!-- List of application developers. -->
@@ -62,7 +62,7 @@
 		<!-- One block per developer. -->
 		<developer>
 			<!-- Unique ID for the developer. This ID is referenced in the changelog. -->
-			<id>schemerl</id>
+			<id>schmerl</id>
 			<!-- Developer name. -->
 			<name>Bradley Schmerl</name>
 			<!-- Developer e-mail address. -->
@@ -186,32 +186,7 @@
 			<!-- Plugin that creates the jar. We configure the plugin to place the 
 				build number in the jar's manifest. The goal 'test-jar' allows creating a 
 				jar file with test code. -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.4</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>test-jar</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<archive>
-						<manifest>
-							<addDefaultImplementationEntries>
-								true
-							</addDefaultImplementationEntries>
-						</manifest>
-						<manifestEntries>
-							<Implementation-Build>
-								${buildNumber}
-							</Implementation-Build>
-						</manifestEntries>
-					</archive>
-				</configuration>
-			</plugin>
+
 
 			<!-- Configure the surefire plugin (which runs unit tests). We change 
 				the default configuration in order not to stop the builds if unit tests fail. 
