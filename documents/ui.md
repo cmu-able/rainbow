@@ -6,7 +6,7 @@ of this GUI is to:
 - provide information about the connectedness between certain components in Rainbow 
   (e.g., which probes are sending information to which gauges).
 - display information about how each component was configured in Rainbow.
-- show dynamically what is happening in Rainbow as adaptations are occuring
+- show dynamically what is happening in Rainbow as adaptations are occurring
 
 The GUI is also customizable to different instantiations of Rainbow.
 
