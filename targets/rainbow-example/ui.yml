@@ -45,5 +45,5 @@ managers:
 executors:
   org.sa.rainbow.stitch.adaptation.StitchExecutor: org.sa.rainbow.stitch.gui.executor.EventBasedStitchExecutorPanel
 details:
-  adaptationmanagers: org.sa.rainbow.stitch.gui.manager.StitchAdaptationManagerTabbedPane
+  managers: org.sa.rainbow.stitch.gui.manager.StitchAdaptationManagerTabbedPane
   executors: org.sa.rainbow.stitch.gui.executor.StitchExecutorTabbedPane
