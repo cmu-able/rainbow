@@ -26,7 +26,7 @@ public abstract class SwimUtils {
 	 * @param set
 	 * @return element
 	 */
-	private static IAcmeElementInstance minOverProperty(String property, java.util.Set<IAcmeElementInstance> set) {
+	public static IAcmeElementInstance minOverProperty(String property, java.util.Set<IAcmeElementInstance> set) {
 		double minValue = Double.MAX_VALUE;
 		IAcmeElementInstance min = null;
 		for (IAcmeElementInstance e : set) {
@@ -56,7 +56,7 @@ public abstract class SwimUtils {
 	 * @param set
 	 * @return element
 	 */
-	private static IAcmeElementInstance maxOverProperty(String property, java.util.Set<IAcmeElementInstance> set) {
+	public static IAcmeElementInstance maxOverProperty(String property, java.util.Set<IAcmeElementInstance> set) {
 		IAcmeElementInstance max = null;
 		double maxValue = -Double.MAX_VALUE;
 
