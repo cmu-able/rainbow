@@ -48,7 +48,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.log4j.Logger;
-import org.hibernate.id.CompositeNestedGeneratedValueGenerator.GenerationContextLocator;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
@@ -109,6 +108,8 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
 	protected final Map<ModelReference, File> m_modelsToSave = new HashMap<>();
 
 	protected final Map<ModelReference, FileChannel> m_modelLogs = new HashMap<>();
+
+	private Map<String, IAdaptationModel<?>> m_adaptationModels = new HashMap<>();
 
 	public ModelsManager() {
 		super("Models Manager");
@@ -485,6 +486,37 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
 	@Override
 	protected void log(String txt) {
 
+	}
+	
+	@Override
+	public boolean isModelLocked(ModelReference modelRef) {
+		if (m_adaptationModels.get(modelRef.toString()) != null) 
+				return m_adaptationModels.get(modelRef.toString()).isAdaptationOccuring(modelRef);
+		else {
+			IAdaptationModel<?> am = 
+					findAssociatedAdapttionModel(modelRef);
+			if (am != null) {
+				m_adaptationModels.put(modelRef.toString(), am);
+				return am.isAdaptationOccuring(modelRef);
+			}
+		}
+		return false;
+						
+		
+		
+	}
+
+	protected IAdaptationModel<?> findAssociatedAdapttionModel(ModelReference modelRef) {
+		IAdaptationModel<?> am;
+		for (Map<String, IModelInstance<?>> e : m_modelMap.values()) {
+			for (IModelInstance<?> m : e.values()) {
+				if (m instanceof IAdaptationModel && m.getModelName().contains(modelRef.toString())) {
+					am = (IAdaptationModel<?>) m;
+					return am;
+				}
+			}
+		}
+		return null;
 	}
 
 	@Override

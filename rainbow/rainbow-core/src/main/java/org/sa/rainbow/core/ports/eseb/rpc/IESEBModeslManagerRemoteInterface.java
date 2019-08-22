@@ -45,5 +45,10 @@ public interface IESEBModeslManagerRemoteInterface extends IModelsManagerPort {
     @ReturnTypeMapping ("rainbow_model")
     @ParametersTypeMapping ({ "model_reference" })
     <T> IModelInstance<T> getModelInstance (ModelReference modelRef);
+    
+    @Override
+    @ReturnTypeMapping("boolean")
+    @ParametersTypeMapping({ "model_reference"})
+    boolean isModelLocked(ModelReference modelRef);
 
 }

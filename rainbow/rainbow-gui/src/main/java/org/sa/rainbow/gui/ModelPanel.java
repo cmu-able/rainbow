@@ -247,4 +247,10 @@ public class ModelPanel extends JPanel implements IModelsManager, IRainbowModelC
 		m_updaters.add(listener);
 	}
 
+	@Override
+	public boolean isModelLocked(ModelReference modelRef) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

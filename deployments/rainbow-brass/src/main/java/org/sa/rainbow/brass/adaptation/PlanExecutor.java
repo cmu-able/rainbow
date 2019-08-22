@@ -137,4 +137,9 @@ public class PlanExecutor extends AbstractRainbowRunnable implements IAdaptation
     public RainbowComponentT getComponentType () {
         return RainbowComponentT.EXECUTOR;
     }
+
+	@Override
+	public ModelReference getManagedModel() {
+		return m_modelRef;
+	}
 }

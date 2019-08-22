@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=SWIM
+Comment=The SWIM Rubis Simulator
+Exec="./swim-driver.sh"
+Icon=/headless/SWIM.png
+Path=/rainbow
+Terminal=false
+StartupNotify=false

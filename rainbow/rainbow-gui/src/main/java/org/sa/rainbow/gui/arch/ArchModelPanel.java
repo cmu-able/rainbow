@@ -2,6 +2,7 @@ package org.sa.rainbow.gui.arch;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,14 +36,14 @@ import org.sa.rainbow.gui.arch.elements.IUIUpdater;
 import org.sa.rainbow.gui.widgets.ModelErrorRenderer;
 import org.sa.rainbow.gui.widgets.TableColumnAdjuster;
 
-public class ArchModelPanel extends JPanel implements IUIUpdater, IUIReporter, IModelsManager, IRainbowModelChangeCallback{
+public class ArchModelPanel extends JPanel
+		implements IUIUpdater, IUIReporter, IModelsManager, IRainbowModelChangeCallback {
 	public JTable m_table;
 	private IModelChangeBusSubscriberPort m_modelChangePort;
 	private ModelReference m_ref;
-	private ArrayList<Runnable> m_updaters = new ArrayList<> (1);
+	private ArrayList<Runnable> m_updaters = new ArrayList<>(1);
 	private HashMap<String, Integer> m_op2row = new HashMap<>();
 
-	
 	public ArchModelPanel(ModelReference ref) {
 		m_ref = ref;
 		setLayout(new BorderLayout(0, 0));
@@ -50,7 +51,8 @@ public class ArchModelPanel extends JPanel implements IUIUpdater, IUIReporter, I
 		Object[] colNames = { "Operation", "Target", "Parameters", "Origin", "State" };
 		m_table = new JTable(new DefaultTableModel(data, colNames));
 		m_table.removeColumn(m_table.getColumnModel().getColumn(4));
-		m_table.setDefaultRenderer(Object.class, new ModelErrorRenderer((tm,row) -> "true".equals(tm.getValueAt(row, 4))));
+		m_table.setDefaultRenderer(Object.class,
+				new ModelErrorRenderer((tm, row) -> "true".equals(tm.getValueAt(row, 4))));
 		JScrollPane p = new JScrollPane(m_table);
 		p.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		p.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -59,23 +61,21 @@ public class ArchModelPanel extends JPanel implements IUIUpdater, IUIReporter, I
 //		m_table.setAutoscrolls(true);
 		m_table.addComponentListener(new JTableCellDisplayer(m_table));
 
-		
 		IModelInstance<Object> mi = Rainbow.instance().getRainbowMaster().modelsManager().getModelInstance(ref);
 		m_table.setPreferredScrollableViewportSize(new Dimension(200, 120));
 		m_table.setFont(new Font(m_table.getFont().getFontName(), m_table.getFont().getStyle(), 8));
-		m_table.getTableHeader().setFont(new Font(m_table.getTableHeader().getFont().getFontName(), m_table.getFont().getStyle(), 8));
+		m_table.getTableHeader()
+				.setFont(new Font(m_table.getTableHeader().getFont().getFontName(), m_table.getFont().getStyle(), 8));
 
 		TableColumnAdjuster tca = new TableColumnAdjuster(m_table);
 		tca.setDynamicAdjustment(true);
-		
-	}
 
+	}
 
 	@Override
 	public void requestModelUpdate(IRainbowOperation command) throws IllegalStateException, RainbowException {
 		addOperation(command, false, false);
 	}
-
 
 	@Override
 	public void requestModelUpdate(List<IRainbowOperation> commands, boolean transaction)
@@ -84,7 +84,6 @@ public class ArchModelPanel extends JPanel implements IUIUpdater, IUIReporter, I
 			addOperation(op, false, true);
 		}
 	}
-
 
 	@Override
 	public <T> IModelInstance<T> getModelInstance(ModelReference modelRef) {
@@ -109,17 +108,20 @@ public class ArchModelPanel extends JPanel implements IUIUpdater, IUIReporter, I
 				params.toArray(new String[0]));
 		return rep;
 	}
+
 	@Override
 	public void onEvent(ModelReference reference, IRainbowMessage message) {
-		if (message.getProperty(IModelChangeBusPort.PARENT_ID_PROP) != null)
-			return;
-		IRainbowOperation op = msgToOperation(message);
-		addOperation(op, false, false);
-		for (Runnable runnable : m_updaters) {
-			runnable.run();
-		}
+		EventQueue.invokeLater(() -> {
+			if (message.getProperty(IModelChangeBusPort.PARENT_ID_PROP) != null)
+				return;
+			IRainbowOperation op = msgToOperation(message);
+			addOperation(op, false, false);
+			for (Runnable runnable : m_updaters) {
+				runnable.run();
+			}
+		});
 	}
-	
+
 	private String[] getTableData(IRainbowOperation command, boolean inerror) {
 		String[] data = new String[5];
 		data[0] = command.getName();
@@ -135,32 +137,29 @@ public class ArchModelPanel extends JPanel implements IUIUpdater, IUIReporter, I
 		return data;
 	}
 
-
 	public void addOperation(IRainbowOperation op, boolean error, boolean extend) {
 		DefaultTableModel tableModel = (DefaultTableModel) m_table.getModel();
 		String[] data = getTableData(op, error);
 		Integer row = m_op2row.get(op.getName() + op.getTarget());
 		if (row == null) {
 			row = m_op2row.size();
-			m_op2row.put(op.getName()+ op.getTarget(), row);
+			m_op2row.put(op.getName() + op.getTarget(), row);
 			tableModel.addRow(data);
-		}
-		else {
+		} else {
 			tableModel.setValueAt(data[1], row, 1);
 			tableModel.setValueAt(data[2], row, 2);
 			tableModel.setValueAt(data[3], row, 3);
 			tableModel.setValueAt(data[4], row, 4);
 		}
-		if (!error) m_table.changeSelection(row, 0, false, extend);
+		if (!error)
+			m_table.changeSelection(row, 0, false, extend);
 	}
-
 
 	@Override
 	public void registerModelType(String typeName) {
 		// TODO Auto-generated method stub
-		
-	}
 
+	}
 
 	@Override
 	public Collection<? extends String> getRegisteredModelTypes() {
@@ -168,20 +167,17 @@ public class ArchModelPanel extends JPanel implements IUIUpdater, IUIReporter, I
 		return null;
 	}
 
-
 	@Override
 	public Collection<? extends IModelInstance<?>> getModelsOfType(String modelType) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-
 	@Override
 	public void registerModel(ModelReference modelRef, IModelInstance<?> model) throws RainbowModelException {
 		// TODO Auto-generated method stub
-		
-	}
 
+	}
 
 	@Override
 	public <T> IModelInstance<T> copyInstance(ModelReference modelRef, String copyName) throws RainbowModelException {
@@ -189,20 +185,18 @@ public class ArchModelPanel extends JPanel implements IUIUpdater, IUIReporter, I
 		return null;
 	}
 
-
 	@Override
 	public void unregisterModel(IModelInstance<?> model) throws RainbowModelException {
 		// TODO Auto-generated method stub
-		
-	}
 
+	}
 
 	@Override
 	public <T> IModelInstance<T> getModelInstanceByResource(String resource) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 	public void processReport(ReportType type, String message) {
 		if (type == ReportType.ERROR || type == ReportType.FATAL) {
 			// if (message.startsWith("Error executing command") ||
@@ -213,12 +207,18 @@ public class ArchModelPanel extends JPanel implements IUIUpdater, IUIReporter, I
 					addOperation(op, type == ReportType.ERROR || type == ReportType.FATAL, false);
 			} catch (Throwable t) {
 			}
-		 }
+		}
 	}
 
 	@Override
 	public void addUpdateListener(Runnable listener) {
 		m_updaters.add(listener);
+	}
+
+	@Override
+	public boolean isModelLocked(ModelReference modelRef) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

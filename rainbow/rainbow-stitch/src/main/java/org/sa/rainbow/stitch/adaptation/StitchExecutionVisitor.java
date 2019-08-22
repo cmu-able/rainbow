@@ -70,7 +70,8 @@ public class StitchExecutionVisitor extends DefaultAdaptationExecutorVisitor<Str
 				actualExecutedAdaptation.markExecuting(true);
 				actualExecutedAdaptation.setExecutor(m_executor);
 			}
-			m_executor.log(MessageFormat.format("[[{0}]]: Executing Strategy {1}", m_executor.id(), actualExecutedAdaptation.getName()));
+			m_executor.log(MessageFormat.format("[[{0}]]: Executing Strategy {1}", m_executor.id(),
+					actualExecutedAdaptation.getName()));
 			Strategy.Outcome o = null;
 			// provide var fo _dur_
 			Var v = new Var();
@@ -80,25 +81,29 @@ public class StitchExecutionVisitor extends DefaultAdaptationExecutorVisitor<Str
 			v.setValue(0L);
 			actualExecutedAdaptation.stitchState()./* stitch(). */script.addVar(v.name, v);
 			m_executor.getHistoryModelUSPort()
-					.updateModel(m_historyFactory.strategyExecutionStateCommand(adaptation.getQualifiedName(),
-							ExecutionHistoryModelInstance.STRATEGY, ExecutionHistoryData.ExecutionStateT.STARTED,
-							null));
+					.updateModel(m_historyFactory.strategyExecutionStateCommand(m_executor.getManagedModel(),
+							adaptation.getQualifiedName(),
+							ExecutionHistoryModelInstance.STRATEGY,
+							ExecutionHistoryData.ExecutionStateT.STRATEGY_EXECUTING, null));
 			o = (Strategy.Outcome) actualExecutedAdaptation.evaluate(null);
 			actualExecutedAdaptation.stitchState()/* .stitch() */.script.vars().remove(v.name);
 
-			m_executor.log(MessageFormat.format("[[{0}]]: Outcome({1}): {2}", m_executor.id(),actualExecutedAdaptation.getName(), o));
+			m_executor.log(MessageFormat.format("[[{0}]]: Outcome({1}): {2}", m_executor.id(),
+					actualExecutedAdaptation.getName(), o));
 			m_executor.getHistoryModelUSPort()
-					.updateModel(m_historyFactory.strategyExecutionStateCommand(adaptation.getQualifiedName(),
-							ExecutionHistoryModelInstance.STRATEGY, ExecutionHistoryData.ExecutionStateT.FINISHED,
+					.updateModel(m_historyFactory.strategyExecutionStateCommand(m_executor.getManagedModel(),
+							adaptation.getQualifiedName(),
+							ExecutionHistoryModelInstance.STRATEGY, ExecutionHistoryData.ExecutionStateT.STRATEGY_DONE,
 							o.toString()));
 			adaptation.setOutcome(o);
 			return o == Strategy.Outcome.SUCCESS;
 		} catch (IOException e) {
 			m_executor.getReportingPort().error(m_executor.getComponentType(),
-					MessageFormat.format("[[{0}]]: Failed to parse the stitchState file",m_executor.id()), e);
+					MessageFormat.format("[[{0}]]: Failed to parse the stitchState file", m_executor.id()), e);
 			adaptation.setOutcome(Outcome.FAILURE);
 		} catch (StitchExecutionException e) {
-			m_executor.getReportingPort().error(m_executor.getComponentType(), MessageFormat.format("[[{0}]]: Failed to execute the strategy: {1}", m_executor.id(), adaptation.getName()), e);
+			m_executor.getReportingPort().error(m_executor.getComponentType(), MessageFormat
+					.format("[[{0}]]: Failed to execute the strategy: {1}", m_executor.id(), adaptation.getName()), e);
 			adaptation.setOutcome(Outcome.FAILURE);
 		} finally {
 			actualExecutedAdaptation.markExecuting(false);

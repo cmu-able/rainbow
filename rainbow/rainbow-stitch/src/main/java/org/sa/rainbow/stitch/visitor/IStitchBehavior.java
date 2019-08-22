@@ -28,7 +28,7 @@ public interface IStitchBehavior {
     void doImports ();
 
     void createVar (StitchParser.DataTypeContext type, TerminalNode id, StitchParser.ExpressionContext val, boolean
-            isFunction);
+            isFunction, boolean isFormalParam);
 
     void beginVarList ();
 
@@ -42,22 +42,22 @@ public interface IStitchBehavior {
 
     void rOp ();
 
-    void beginExpression ();
+    boolean beginExpression (ParserRuleContext ctx);
 
-    void endExpression (ParserRuleContext ctx);
+    void endExpression (ParserRuleContext ctx, boolean pushed);
 
-    void beginQuantifiedExpression ();
+    void beginQuantifiedExpression (ParserRuleContext ctx);
 
     void doQuantifiedExpression (Strategy.ExpressionKind quantifierKind, StitchParser.QuantifiedExpressionContext ctx);
 
     void endQuantifiedExpression (Strategy.ExpressionKind quant, StitchParser.QuantifiedExpressionContext
             quantifiedExpressionContext);
 
-    void beginMethodCallExpression ();
+    void beginMethodCallExpression (ParserRuleContext ctx);
 
     void endMethodCallExpression (TerminalNode mc, StitchParser.MethodCallContext id);
 
-    void beginSetExpression ();
+    void beginSetExpression (ParserRuleContext ctx);
 
     void endSetExpression (StitchParser.SetExpressionContext setAST);
 
@@ -89,15 +89,15 @@ public interface IStitchBehavior {
      */
     void beginStatement (Strategy.StatementKind stmtAST, ParserRuleContext ctx);
 
+    void endStatement (Strategy.StatementKind stmtAST, ParserRuleContext ctx);
     void markForCondition ();
 
     void markForEach ();
 
-    void endStatement ();
 
-    void beginTactic (Token nameAST);
+    void beginTactic (TerminalNode nameAST);
 
-    void endTactic ();
+    void endTactic (TerminalNode nameAST);
 
     void beginConditionBlock (StitchParser.ConditionContext nameAST);
 
@@ -109,7 +109,7 @@ public interface IStitchBehavior {
 
     void beginEffectBlock (StitchParser.EffectContext nameAST);
 
-    void endEffectBlock ();
+    void endEffectBlock (StitchParser.EffectContext nameAST);
 
     void beginStrategy (TerminalNode nameAST);
 
@@ -123,15 +123,15 @@ public interface IStitchBehavior {
 
     void endStrategyNode ();
 
-    void doStrategyProbability (/*AST p1AST, AST p2AST, AST pLitAST*/);
+    void doStrategyProbability (StitchParser.StrategyCondContext ctx);
 
     void doStrategyCondition (Strategy.ConditionKind type, ParserRuleContext ctx);
 
-    void doStrategyDuration (ParserRuleContext ctx);
+    void doStrategyDuration (ParserRuleContext ctx, TerminalNode labelAST);
 
     void beginReferencedTactic (TerminalNode labelAST);
 
-    void endReferencedTactic ();
+    void endReferencedTactic (TerminalNode labelAST);
 
     void doStrategyAction (Strategy.ActionKind type);
 
@@ -140,9 +140,9 @@ public interface IStitchBehavior {
 
     void setWalker (StitchBeginEndVisitor walker);
 
-    void beginPathExpression ();
+    void beginPathExpression (ParserRuleContext ctx);
 
-    void pathExpressionFilter (TypeFilterT filter, TerminalNode identifier, StitchParser.ExpressionContext expression);
+    boolean pathExpressionFilter (TypeFilterT filter, TerminalNode identifier, StitchParser.ExpressionContext expression);
 
     void endPathExpression (StitchParser.PathExpressionContext ctx);
 
@@ -160,4 +160,15 @@ public interface IStitchBehavior {
     enum TypeFilterT {
         NONE, SATISFIES, DECLARES
     }
+
+	void processParameter();
+
+	void beginCondition(int i);
+
+	void endCondition(int i);
+
+	void beginAction(int i);
+
+	void endAction(int i);
+
 }

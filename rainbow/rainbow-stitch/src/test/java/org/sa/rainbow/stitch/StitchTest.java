@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -50,13 +51,19 @@ public class StitchTest {
 
 	public static class TestProblemHandler implements StitchProblemHandler {
 
+		List<IStitchProblem> problems = new LinkedList<>();
+		boolean suppressAssertion = false;
 		@Override
 		public void setProblem(IStitchProblem problem) {
 			if (problem.getSeverity() == IStitchProblem.WARNING) {
 				System.out.println(problem.getMessage());
-			} else {
+				problems.add(problem);
+			} else if (suppressAssertion){
+				System.out.println(problem.getMessage());
+
+				problems.add(problem);
+			} else
 				throw new AssertionFailedError(problem.getMessage());
-			}
 		}
 
 		@Override
@@ -64,6 +71,7 @@ public class StitchTest {
 			boolean notWarning = false;
 			for (IStitchProblem p : problems) {
 				System.out.println(p.getMessage());
+				problems.add(p);
 				if (p.getSeverity() != IStitchProblem.WARNING) {
 					notWarning = true;
 				}
@@ -74,7 +82,7 @@ public class StitchTest {
 
 		@Override
 		public Collection<IStitchProblem> unreportedProblems() {
-			return Collections.<IStitchProblem>emptyList();
+			return problems;
 		}
 
 		@Override
@@ -85,15 +93,15 @@ public class StitchTest {
 
 		@Override
 		public void clearProblems() {
-			// TODO Auto-generated method stub
-
+			problems.clear();
 		}
 
 	}
 
 	protected static String s_executed;
 
-	protected Stitch loadScript(String pathname, boolean buildScope, boolean typecheck) throws IOException, FileNotFoundException {
+	protected Stitch loadScript(String pathname, boolean buildScope, boolean typecheck)
+			throws IOException, FileNotFoundException {
 		File f = new File(pathname);
 		ScopedEntity rootScope = new ScopedEntity(null, "Ohana2 Stitch Root Scope", Stitch.NULL_STITCH);
 
@@ -122,41 +130,58 @@ public class StitchTest {
 			System.out.println(err.getMessage());
 		}
 		assertTrue("Could not parse the script", problems.problems.isEmpty());
-		
-		if (typecheck) {
-			IStitchBehavior sb = stitch.getBehavior(Stitch.SCOPER_PASS);
-			ScopedEntity tcscope = new ScopedEntity(null, "Ohana2 Stitch Root Scope", Stitch.NULL_STITCH);
-			sb.stitch().setScope(tcscope);
-			StitchBeginEndVisitor walker = new StitchBeginEndVisitor(sb, tcscope);
-			walker.visit(script);
-			IStitchBehavior tcb = stitch.getBehavior(Stitch.TYPECHECKER_PASS);
-			walker = new StitchBeginEndVisitor(tcb, tcscope);
-			walker.visit(script);
-		}
-		
-		
-		String tacticPath = "/script/tactic";
+		TestProblemHandler testProblemHandler = new TestProblemHandler();
+		stitch.stitchProblemHandler = testProblemHandler;
+
 		if (buildScope) {
-			final Collection<ParseTree> definedTactics = XPath.findAll(script, tacticPath, parser);
 			IStitchBehavior sb = stitch.getBehavior(Stitch.SCOPER_PASS);
 			sb.stitch().setScope(rootScope);
 			StitchBeginEndVisitor walker = new StitchBeginEndVisitor(sb, rootScope);
 			walker.visit(script);
 		}
+		if (typecheck) {
+			testProblemHandler.suppressAssertion = true;
+			IStitchBehavior tcb = stitch.getBehavior(Stitch.TYPECHECKER_PASS);
+			StitchBeginEndVisitor walker = new StitchBeginEndVisitor(tcb, rootScope);
+			walker.visit(script);
+		}
 
-		stitch.stitchProblemHandler = new TestProblemHandler();
+		String tacticPath = "/script/tactic";
+		final Collection<ParseTree> definedTactics = XPath.findAll(script, tacticPath, parser);
+
+
 		return stitch;
 	}
 
 	protected Stitch loadScript(String pathname) throws FileNotFoundException, IOException {
 		return loadScript(pathname, true, false);
 	}
-	
+
+	protected static Long s_executionDelay = null;
+
 	public static void markExecuted(String s) {
-		s_executed = s;
+		if (s_executionDelay == null)
+			s_executed = s;
+		else {
+			if (timer != null) timer.cancel();
+
+			timer = new Timer();
+			timer.schedule(new TimerTask() {
+
+				@Override
+				public void run() {
+					s_executed = s;
+				}
+			}, s_executionDelay);
+		}
+	}
+	
+	public static boolean executedValue() {
+		return s_executed!=null;
 	}
 
 	protected static IAcmeSystem s_system;
+	private static Timer timer;
 
 	public static void removeComponent(IAcmeSystem system, String componentName) {
 		s_system = system;
@@ -169,18 +194,18 @@ public class StitchTest {
 		}
 		assertTrue(system.getComponent(componentName) == null);
 	}
-	
+
 	public static void delayedRemoveComponent(final IAcmeSystem system, final String componentName, int delay) {
 		Timer t = new Timer();
 		t.schedule(new TimerTask() {
-			
+
 			@Override
 			public void run() {
-				removeComponent(system,componentName);
+				removeComponent(system, componentName);
 			}
 		}, delay);
 	}
-	
+
 	public static final int availableComponents(IAcmeSystem system) {
 		s_system = system;
 		return system.getComponents().size();

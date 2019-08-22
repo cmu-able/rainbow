@@ -528,7 +528,11 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
 		
 		for (Expression expr : effectsToCheck) {
 			expr.clearState();
-			effMet &= (Boolean) expr.evaluate(null);
+			Object evaluate = expr.evaluate(null);
+			if (evaluate instanceof Boolean)
+				effMet &= (Boolean) evaluate;	
+			else
+				effMet = false;
 			if (!stitchState().stitchProblemHandler.unreportedProblems().isEmpty())
 				return false;
 		}

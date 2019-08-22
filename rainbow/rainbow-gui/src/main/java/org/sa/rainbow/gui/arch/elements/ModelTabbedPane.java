@@ -1,5 +1,6 @@
 package org.sa.rainbow.gui.arch.elements;
 
+import java.awt.EventQueue;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collections;
@@ -50,7 +51,7 @@ public class ModelTabbedPane extends JTabbedPane implements PropertyChangeListen
 		scrollPane.setViewportView(m_table);
 		TableColumnAdjuster tca = new TableColumnAdjuster(m_table);
 		tca.setDynamicAdjustment(true);
-		
+
 		m_modelInfo = new ModelInfoPanel();
 		addTab("Specification", m_modelInfo);
 	}
@@ -61,7 +62,8 @@ public class ModelTabbedPane extends JTabbedPane implements PropertyChangeListen
 		if (m_model != null)
 			m_model.removePropertyChangeListener(this);
 		m_model = model;
-		if (model == null) return;
+		if (model == null)
+			return;
 		m_modelInfo.initDataBinding(model);
 		List<OperationData> collection = m_model.getReports().stream()
 				.map(p -> new OperationData(p.secondValue(), p.firstValue(), false)).collect(Collectors.toList());
@@ -103,16 +105,18 @@ public class ModelTabbedPane extends JTabbedPane implements PropertyChangeListen
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		switch (evt.getPropertyName()) {
-		case RainbowArchModelModel.OPERATION_PROP:
-			String[] row = getTableData((IRainbowOperation )evt.getNewValue(), false);
-			((DefaultTableModel) m_table.getModel()).insertRow(0,row);
-			break;
-		case RainbowArchModelModel.OPERATION__ERROR_PROP:
-			row = getTableData((IRainbowOperation )evt.getNewValue(), true);
-			((DefaultTableModel) m_table.getModel()).insertRow(0,row);
-			break;
+		EventQueue.invokeLater(() -> {
+			switch (evt.getPropertyName()) {
+			case RainbowArchModelModel.OPERATION_PROP:
+				String[] row = getTableData((IRainbowOperation) evt.getNewValue(), false);
+				((DefaultTableModel) m_table.getModel()).insertRow(0, row);
+				break;
+			case RainbowArchModelModel.OPERATION__ERROR_PROP:
+				row = getTableData((IRainbowOperation) evt.getNewValue(), true);
+				((DefaultTableModel) m_table.getModel()).insertRow(0, row);
+				break;
 
-		}
+			}
+		});
 	}
 }

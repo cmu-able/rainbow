@@ -360,7 +360,7 @@ public class RainbowWindoe extends RainbowWindow
 	@Override
 	protected void createAdaptationManagerUI() {
 		if (m_uidb.containsKey("details")) {
-			String className = ((Map<String, String>) m_uidb.get("details")).get("adaptationmanagers");
+			String className = ((Map<String, String>) m_uidb.get("details")).get("managers");
 			if (className != null) {
 				try {
 					Class<?> clazz = this.getClass().forName(className);
@@ -399,7 +399,7 @@ public class RainbowWindoe extends RainbowWindow
 			if (className != null) {
 				try {
 					Class<?> clazz = this.getClass().forName(className);
-					m_amPanel = (AdaptationManagerTabbedPane) clazz.newInstance();
+					m_exPanel = (DefaultThreadInfoPane) clazz.newInstance();
 
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block
@@ -550,7 +550,14 @@ public class RainbowWindoe extends RainbowWindow
 					Map<String, Object> setupParams = toMap(gInfo.getGaugeDesc().setupParams());
 					if (configParams.get("targetProbeType") instanceof String) {
 						String tpt = (String) configParams.get("targetProbeType");
-						processProbeIntoGauge(gInfo.getId(), gInfo, setupParams, tpt);
+						if (tpt.contains(",")) {
+							for (String probeId : tpt.split(",")) {
+								probeId = probeId.trim();
+								processProbeIntoGauge(gInfo.getId(), gInfo, setupParams, probeId);
+							}
+						}
+						else 
+							processProbeIntoGauge(gInfo.getId(), gInfo, setupParams, tpt);
 					}
 					if (configParams.get("targetProbeList") instanceof String) {
 						String probeIds = (String) configParams.get("targetProbeList");
@@ -804,6 +811,7 @@ public class RainbowWindoe extends RainbowWindow
 			model.addPropertyChangeListener(locationChange);
 
 			RainbowExecutorController ctrl = new RainbowExecutorController(model, m_selectionManager, m_uidb);
+			ctrl.getModel().addPropertyChangeListener(locationChange);
 			ctrl.createView(m_desktopPane);
 			m_rainbowModel.addExecutor(model);
 		}

@@ -109,7 +109,7 @@ public interface RainbowConstants {
     /** Hostname of the location of the Master Rainbow component */
     String PROPKEY_MASTER_LOCATION = "rainbow.master.location.host";
     /** Rainbow service port */
-    String PROPKEY_SERVICE_PORT = "rainbow.service.port";
+//    String PROPKEY_SERVICE_PORT = "rainbow.service.port";
     /** RMI port of the location of the Master Rainbow component, only useful if RMI event is used */
     String PROPKEY_MASTER_LOCATION_PORT = "rainbow.master.location.port";
 //    /** Deployment {@link org.sa.rainbow.core.Rainbow.Environment <code>Environment</code>} */

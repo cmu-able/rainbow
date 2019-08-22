@@ -4,7 +4,8 @@ import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.log4j.Logger;
@@ -25,6 +26,8 @@ public class GuavaEventConnector {
 	private static final Map<ChannelT, EventBus> EVENT_BUSSES = new HashMap<>();
 	private static final LinkedBlockingQueue<GuavaRainbowMessage> REPLY_Q = new LinkedBlockingQueue<>();
 	private static final Map<String, IGuavaMessageListener> m_replyListeners = new HashMap<>();
+	private static final ExecutorService POOL = 		Executors.newFixedThreadPool(20);
+
 
 	private ChannelT m_channel;
 	private static Thread REPLY_THREAD = null;
@@ -90,7 +93,7 @@ public class GuavaEventConnector {
 	}
 
 	public void publish(GuavaRainbowMessage msg) {
-		EVENT_BUSSES.get(m_channel).post(msg);
+		POOL.execute(() -> EVENT_BUSSES.get(m_channel).post(msg));
 	}
 
 	public void sendAndReceive(GuavaRainbowMessage msg, final IGuavaMessageListener receiveListener) {

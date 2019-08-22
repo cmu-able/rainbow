@@ -113,8 +113,8 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
             fis.close ();
         }
         catch (IOException e) {
-            LOGGER.warn (MessageFormat
-                    .format ("Could not find operator map ''{0}''. Adaptation of this model will fail.", opPath));
+//            LOGGER.warn (MessageFormat
+//                    .format ("Could not find operator map ''{0}''. Adaptation of this model will fail.", opPath));
         }
 
     }
@@ -371,19 +371,19 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
             try {
 
 //                Object any = RuleTypeChecker.evaluateAsAny ()
-                Object any = RuleTypeChecker.evaluateAsFloat (getModelInstance (), null, expr, new Stack<AcmeError> (),
+                Object any = RuleTypeChecker.evaluateAsAny (getModelInstance (), null, expr, new Stack<AcmeError> (),
                         new NodeScopeLookup ());
                 if (any instanceof IAcmePropertyValue) return PropertyHelper.toJavaVal ((IAcmePropertyValue )any);
+                if (any instanceof IAcmeProperty) return PropertyHelper.toJavaVal(((IAcmeProperty )any).getValue());
                 return any;
             }
             catch (AcmeException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace ();
+                LOGGER.error("COuld not evaluate as float", e);
             }
         }
         else {
             IAcmeModel model = getModelInstance ().getContext ().getModel ();
-            prop = model.findNamedObject (model, id);
+            prop = internalGetProperty("[EXPR]" + id, 0);
         }
         return prop;
     }

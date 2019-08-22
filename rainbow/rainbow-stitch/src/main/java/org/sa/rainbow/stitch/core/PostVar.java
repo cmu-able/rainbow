@@ -14,9 +14,11 @@ public class PostVar extends Var {
 
     public void computeAndSetValue () {
         // Always recompute the value
-    	Object o = preVar.valStmt.expressions().get(0).evaluate(null);
+    	Expression expression = preVar.valStmt.expressions().get(0);
+    	expression.clearState();
+		Object o = expression.evaluate(null);
         //preVar.computeValue ();
-        Expression e = preVar.valStmt.expressions ().get (0);
+        Expression e = expression;
         this.setValue (e.getResult ());
     }
 }
