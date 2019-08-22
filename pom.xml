@@ -1,0 +1,27 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                          https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>rainbow</groupId>
+  <artifactId>rainbow-parent</artifactId>
+  <version>3.0</version>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>libs/auxtestlib</module>
+    <module>libs/incubator</module>
+    <module>libs/parsec</module>
+    <module>libs/typelib</module>
+    <module>libs/eseblib</module>
+
+    <module>rainbow/rainbow-core</module>
+    <module>testing</module>
+    <module>rainbow/rainbow-gui</module>
+    <module>rainbow/rainbow-acme-model</module>
+    <module>rainbow/rainbow-utility-model</module>
+    <module>rainbow/rainbow-stitch</module>
+    <module>deployments/rainbow-znn</module>
+    <module>deployments/rainbow-example</module>
+  </modules>
+</project>
