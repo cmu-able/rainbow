@@ -1335,6 +1335,7 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 		int i;
 		boolean allParamClassOk = true;
 		i = 0; // track param index for positional comparison
+		if (params.length != args.length)return false; 
 		for (Class c : m.getParameterTypes()) {
 			boolean matchPrimitive = true;
 			if (c.isAssignableFrom(params[i])) { // good!
