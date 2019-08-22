@@ -20,7 +20,7 @@
 	<packaging>jar</packaging>
 	<!-- Version. This should *always* be a snapshot version by convention. 
 		Name should be <version-number>-SNAPSHOT. -->
-	<version>2.2-SNAPSHOT</version>
+	<version>3.0</version>
 	<!-- User readable name of the pom. -->
 	<name>Rainbow Core</name>
 	<!-- URL for the project site. -->
@@ -99,21 +99,6 @@
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 		- - - SOURCE CONTROL VERSION CONFIGURATION - - - - - - - - - - - - - - - 
 		- - - - - - - - - - - - - - - - - - - - -->
-
-	<!-- Please note that the URL of the projects will have automatically the 
-		artifact name of the super-pom added to the end. -->
-	<scm>
-		<!-- Source control version, should have the format: scm:svn:http://<host>[:<port>]/<path>. -->
-		<connection>
-			scm:svn:svn://acme.able.cs.cmu.edu/rainbow/v2/trunk
-		</connection>
-		<!-- Source control version, should have the format: scm:svn:http://<host>[:<port>]/<path>. -->
-		<developerConnection>
-			scm:svn:svn://acme.able.cs.cmu.edu/rainbow/v2/trunk
-		</developerConnection>
-		<!-- URL for the source control. -->
-		<url>svn://acme.able.cs.cmu.edu/rainbow/v2/trunk</url>
-	</scm>
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 		- - - BUILD CONFIGURATION - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -509,23 +494,6 @@
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
 			<version>0.9.11</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.inject</groupId>
-			<artifactId>guice</artifactId>
-			<version>4.1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-api</artifactId>
-			<version>5.2.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
-			<version>5.2.0</version>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.vintage</groupId>

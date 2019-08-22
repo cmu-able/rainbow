@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>rainbow</groupId>
 	<artifactId>rainbow-utility-model</artifactId>
-	<version>2.2-SNAPSHOT</version>
+	<version>3.0</version>
 	<name>Rainbow Utility Model</name>
 	<description>Rainbow Model of Utility</description>
 	<build>
@@ -25,21 +25,23 @@
 			</plugin>
 		</plugins>
 	</build>
+	
+	
 	<dependencies>
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-core</artifactId>
-			<version>2.2-SNAPSHOT</version>
+			<version>3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-acme-model</artifactId>
-			<version>2.2-SNAPSHOT</version>
+			<version>3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-stitch</artifactId>
-			<version>2.2.2-SNAPSHOT</version>
+			<version>3.0</version>
 		</dependency>
 	</dependencies>
 	<repositories>

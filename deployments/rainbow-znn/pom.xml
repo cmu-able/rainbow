@@ -4,7 +4,7 @@
 	<groupId>rainbow</groupId>
 	<artifactId>rainbow-znn</artifactId>
 	<packaging>jar</packaging>
-	<version>2.1-SNAPSHOT</version>
+	<version>3.0</version>
 	<properties>
 		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
 	</properties>
@@ -75,20 +75,7 @@
 		- - - SOURCE CONTROL VERSION CONFIGURATION - - - - - - - - - - - - - - - 
 		- - - - - - - - - - - - - - - - - - - - -->
 
-	<!-- Please note that the URL of the projects will have automatically the 
-		artifact name of the super-pom added to the end. -->
-	<scm>
-		<!-- Source control version, should have the format: scm:svn:http://<host>[:<port>]/<path>. -->
-		<connection>
-			scm:svn:svn://acme.able.cs.cmu.edu/rainbow/v2/trunk
-		</connection>
-		<!-- Source control version, should have the format: scm:svn:http://<host>[:<port>]/<path>. -->
-		<developerConnection>
-			scm:svn:svn://acme.able.cs.cmu.edu/rainbow/v2/trunk
-		</developerConnection>
-		<!-- URL for the source control. -->
-		<url>svn://acme.able.cs.cmu.edu/rainbow/v2/trunk</url>
-	</scm>
+
 	<build>
 			<extensions>
 			<!-- The wagon extension allows webdav access. This plugin is required 
@@ -418,12 +405,12 @@
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-core</artifactId>
-			<version>2.2-SNAPSHOT</version>
+			<version>3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-acme-model</artifactId>
-			<version>2.2-SNAPSHOT</version>
+			<version>3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>auxtestlib</groupId>
@@ -439,12 +426,12 @@
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-stitch</artifactId>
-			<version>2.2.2-SNAPSHOT</version>
+			<version>3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-utility-model</artifactId>
-			<version>2.2-SNAPSHOT</version>
+			<version>3.0</version>
 		</dependency>
 	</dependencies>
 </project>

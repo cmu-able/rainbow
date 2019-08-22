@@ -5,7 +5,7 @@
 	<groupId>rainbow</groupId>
 	<artifactId>rainbow-stitch</artifactId>
 	<packaging>jar</packaging>
-	<version>2.2.2-SNAPSHOT</version>
+	<version>3.0</version>
 	<name>Rainbow Stitch Language Parser</name>
 
 	<properties>
@@ -78,20 +78,7 @@
 		- - - SOURCE CONTROL VERSION CONFIGURATION - - - - - - - - - - - - - - - 
 		- - - - - - - - - - - - - - - - - - - - -->
 
-	<!-- Please note that the URL of the projects will have automatically the 
-		artifact name of the super-pom added to the end. -->
-	<scm>
-		<!-- Source control version, should have the format: scm:svn:http://<host>[:<port>]/<path>. -->
-		<connection>
-			scm:svn:svn://acme.able.cs.cmu.edu/rainbow/v2/trunk
-		</connection>
-		<!-- Source control version, should have the format: scm:svn:http://<host>[:<port>]/<path>. -->
-		<developerConnection>
-			scm:svn:svn://acme.able.cs.cmu.edu/rainbow/v2/trunk
-		</developerConnection>
-		<!-- URL for the source control. -->
-		<url>svn://acme.able.cs.cmu.edu/rainbow/v2/trunk</url>
-	</scm>
+	
 
 	<build>
 		<extensions>
@@ -140,51 +127,9 @@
 					</tagBase>
 				</configuration>
 			</plugin>
+			
 
-			<!-- Plugin which defines the build number. -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>buildnumber-maven-plugin</artifactId>
-				<version>1.1</version>
-				<executions>
-					<execution>
-						<phase>validate</phase>
-						<goals>
-							<goal>create</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-			<!-- Plugin that creates the jar. We configure the plugin to place the 
-				build number in the jar's manifest. The goal 'test-jar' allows creating a 
-				jar file with test code. -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.4</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>test-jar</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<archive>
-						<manifest>
-							<addDefaultImplementationEntries>
-								true
-							</addDefaultImplementationEntries>
-						</manifest>
-						<manifestEntries>
-							<Implementation-Build>
-								${buildNumber}
-							</Implementation-Build>
-						</manifestEntries>
-					</archive>
-				</configuration>
-			</plugin>
+			
 
 			<!-- Configure the surefire plugin (which runs unit tests). We change 
 				the default configuration in order not to stop the builds if unit tests fail. 
@@ -455,12 +400,12 @@
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-core</artifactId>
-			<version>2.2-SNAPSHOT</version>
+			<version>3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-acme-model</artifactId>
-			<version>2.2-SNAPSHOT</version>
+			<version>3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.antlr</groupId>
@@ -476,30 +421,12 @@
 		<dependency>
 			<groupId>org.acmestudio</groupId>
 			<artifactId>acme-lib</artifactId>
-			<version>3.5.13-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-api</artifactId>
-			<version>5.2.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
-			<version>5.2.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.vintage</groupId>
-			<artifactId>junit-vintage-engine</artifactId>
-			<version>5.1.0</version>
-			<scope>test</scope>
+			<version>3.5.14</version>
 		</dependency>
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-gui</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<version>3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fifesoft</groupId>

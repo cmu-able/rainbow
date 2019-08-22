@@ -4,9 +4,19 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>rainbow</groupId>
 	<artifactId>rainbow-gui</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>3.0</version>
 	<name>Rainbow Desktop GUI</name>
 	<build>
+			<!-- Build process extensions. -->
+		<extensions>
+			<!-- The wagon extension allows webdav access. This plugin is required 
+				to deploy to the repository. -->
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-webdav</artifactId>
+				<version>1.0-beta-2</version>
+			</extension>
+		</extensions>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
 			<plugin>
@@ -17,7 +27,7 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-			
+
 			<!-- <plugin> <groupId>de.jflex</groupId> <artifactId>jflex-maven-plugin</artifactId> 
 				<version>1.6.1</version> <executions> <execution> <goals> <goal>generate</goal> 
 				</goals> <configuration> <outputDirectory>target/generated-sources/jflex</outputDirectory> 
@@ -41,11 +51,28 @@
 			<url>https://repository.mulesoft.org/nexus/content/repositories/public/</url>
 		</repository>
 	</repositories>
+
+	<distributionManagement>
+		<!-- Website location. Do not forget it should start with scp: and not 
+			http. The user/password used for authentication should also be added. -->
+		<!-- <site> <id>website</id> <url>scp://automatik:automatik@localhost:/home/pasc/mse/studio/mvnroot</url> 
+			</site> -->
+
+		<!-- Location of the repository where the jars should be added. It should 
+			have the following format: dav:http://<user>:<pass>@<host>[:<port>]/<path> -->
+		<repository>
+			<id>able.maven.repository</id>
+			<name>ABLE maven repository</name>
+			<url>
+				dav:http://acme.able.cs.cmu.edu/maven-repository
+			</url>
+		</repository>
+	</distributionManagement>
 	<dependencies>
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-core</artifactId>
-			<version>2.2-SNAPSHOT</version>
+			<version>3.0</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.jfree/jfreechart -->
 		<dependency>
@@ -69,15 +96,15 @@
 			<artifactId>gs-core</artifactId>
 			<version>1.3</version>
 		</dependency>
-		
+
 		<!-- https://mvnrepository.com/artifact/org.jdesktop/beansbinding -->
 		<dependency>
 			<groupId>org.jdesktop</groupId>
 			<artifactId>beansbinding</artifactId>
 			<version>1.2.1</version>
 		</dependency>
-	
-		
+
+
 
 
 
