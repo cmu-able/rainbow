@@ -53,8 +53,7 @@ public abstract class SwimUtils {
 	 * @param set
 	 * @return element
 	 */
-	public static <E> E maxOverProperty(String property, java.util.Set<E> set) {
-		E max = null;
+	public static <E> double maxOverProperty(String property, java.util.Set<E> set) {
 		double maxValue = -Double.MAX_VALUE;
 
 		for (E e : set) {
@@ -70,11 +69,10 @@ public abstract class SwimUtils {
 			} else if (type == DefaultAcmeModel.defaultFloatType()) {
 				value = ((IAcmeFloatingPointValue) val).getDoubleValue();
 			}
-			if (max == null || value < maxValue) {
-				max = e;
+			if (value > maxValue) {
 				maxValue = value;
 			}
 		}
-		return max;
+		return maxValue;
 	}
 }

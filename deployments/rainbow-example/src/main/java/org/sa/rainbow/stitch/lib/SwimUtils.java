@@ -69,7 +69,7 @@ public abstract class SwimUtils {
 			} else if (type == DefaultAcmeModel.defaultFloatType()) {
 				value = ((IAcmeFloatingPointValue) val).getDoubleValue();
 			}
-			if (value < maxValue) {
+			if (value > maxValue) {
 				maxValue = value;
 			}
 		}
