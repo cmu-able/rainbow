@@ -26,10 +26,10 @@ public abstract class SwimUtils {
 	 * @param set
 	 * @return element
 	 */
-	private static <E> double minOverProperty(String property, java.util.Set<E> set) {
+	private static IAcmeElementInstance minOverProperty(String property, java.util.Set<IAcmeElementInstance> set) {
 		double minValue = Double.MAX_VALUE;
-
-		for (E e : set) {
+		IAcmeElementInstance min = null;
+		for (IAcmeElementInstance e : set) {
 			if (!(e instanceof IAcmeElementInstance<?, ?>)) {
 				continue;
 			}
@@ -44,9 +44,10 @@ public abstract class SwimUtils {
 			}
 			if (value < minValue) {
 				minValue = value;
+				min = e;
 			}
 		}
-		return minValue;
+		return min;
 	}
 
 	/**
@@ -55,11 +56,11 @@ public abstract class SwimUtils {
 	 * @param set
 	 * @return element
 	 */
-	private static <E> E maxOverProperty(String property, java.util.Set<E> set) {
-		E max = null;
+	private static IAcmeElementInstance maxOverProperty(String property, java.util.Set<IAcmeElementInstance> set) {
+		IAcmeElementInstance max = null;
 		double maxValue = -Double.MAX_VALUE;
 
-		for (E e : set) {
+		for (IAcmeElementInstance e : set) {
 			if (!(e instanceof IAcmeElementInstance<?, ?>)) {
 				continue;
 			}
@@ -80,19 +81,5 @@ public abstract class SwimUtils {
 		return max;
 	}
 
-	public static Object maxOverProperty(String property, java.util.Set set, String type) {
-		if ("int".equals(type) || "long".equals(type)) {
-			return SwimUtils.<Integer>maxOverProperty(property, set);
-		}
-		else
-			return SwimUtils.<Double>maxOverProperty(property, set);
-	}
-	
-	public static Object minOverProperty(String property, java.util.Set set, String type) {
-		if ("int".equals(type) || "long".equals(type)) {
-			return SwimUtils.<Integer>minOverProperty(property, set);
-		}
-		else
-			return SwimUtils.<Double>minOverProperty(property, set);
-	}
+
 }
