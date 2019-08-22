@@ -38,6 +38,7 @@ import org.sa.rainbow.stitch.history.ExecutionHistoryModelInstance;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData;
 import org.sa.rainbow.stitch.util.Tool;
 import org.sa.rainbow.stitch.visitor.IStitchBehavior;
+import org.sa.rainbow.stitch.visitor.ParserUtils;
 import org.sa.rainbow.stitch.visitor.Stitch;
 import org.sa.rainbow.stitch.visitor.StitchBeginEndVisitor;
 
@@ -429,7 +430,7 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
 				// check and abort if failure occurred
 				if (stmt.hasError()) {
 					m_hasError = true;
-					Tool.error("Statement failed to evaluate! " + stmt.toString(), null,
+					Tool.error("Statement failed to evaluate! " + ParserUtils.formatTree(stmt.tree()), null,
 							stitchState().stitchProblemHandler);
 					throw new StitchExecutionException ("Statement failed to evaluate! " + stmt.toString());
 					// TODO: keep running, or break?
