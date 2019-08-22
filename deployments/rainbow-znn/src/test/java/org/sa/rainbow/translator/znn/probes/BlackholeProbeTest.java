@@ -31,7 +31,7 @@ public class BlackholeProbeTest {
     }
 
     @Test
-    public void goodPath() {
+    public void goodPath() throws InterruptedException {
         AbstractProbe probe = new BlackholeProbe("blackhole", 0L, new String[]{tempInput.toString()});
         probe.create();
         probe.activate();
