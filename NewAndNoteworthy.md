@@ -1,12 +1,24 @@
-# What's new in Rainbow 2.3
+# What's new in Rainbow Yellow (v3.0)
 
 ## Rainbow Simple Example
 
+A new simplified and containerized example of how Rainbow works is provided with this 
+release. The example uses the SWIM simulation for a prototype web site called RuBIS. 
+The containerization is implemented using Docker, and the image can be built as part 
+of this release or downloaded on DockerHub as `cmuable/rainbow-swim:2.3`. See [Docker 
+instruction](deployments/rainbow-example/docker/INSTUCTIONS.md) for 
+instructions on how to build this.
+
 ## Rainbow User Interface
 
-### Completely reengineered
+A completely revamped user interface has been engineered, and is currently in prototype 
+form. The user interface shows more architectural information about the interaction 
+between components in Rainbow (for example, it is easier to see which probes are giving 
+information to which gauges). In addition, there is a details pane that shows information 
+like how an element is specified, what activities it has performed, etc. More details 
+can be found at [UI Documentation](documents/ui.md). The UI is also very customizable.
 
-### Customizable
+![Main Window](documents/imgs/Main_Window.PNG)
 
 ## Stitch Language Changes
 
@@ -89,6 +101,18 @@ Means that in calculating the effect we recalculate the value of  `unusedServers
 
 ## Rainbow Framework Changes
 
+### Rainbow Target Checking
+
+There is a new Rainbow Target configuration checking that can be called standalone but is also included when Rainbow starts up. Among other things, the configuration checker checks:
+
+1.  **Gauges**: Are referenced gauge types defined? Are instances consistent with the type definition? Are referenced probes defined? Are referenced models defined in the configuration? Is the gauge implementation defined on the classpath? Do commands exist in the referenced models?
+2. **Probes**: Are defined probes consumed by gauges? Do implementations exist?
+3. **Effectors**: Do effectors have mandatory fields defined? Do implementations exist?
+4. **Acme models:** Do the Acme files parse without error?
+5. **Stitch scripts**: Do the scripts parse? Do they typecheck?
+
+The configuration checking is extensible by implementing the `org.rainbow.util.IRainbowConfigurationChecker` interface.
+
 ### Prototype Testing Infrastructure
 
 ### `rainbow-mem-comms` Project for In memory communication
@@ -100,5 +124,4 @@ To use this, you must specify its use in the `rainbow.properties` file:
 rainbow.deployment.factory.class = org.sa.rainbow.core.ports.guava.GuavaRainbowPortFactory
 ```
 For this to work, you should also ensure that `rainbow-mem-comms` is built and in the classpath of the target.
-### 
-> Written with [StackEdit](https://stackedit.io/).
+
