@@ -6,7 +6,7 @@ A new simplified and containerized example of how Rainbow works is provided with
 release. The example uses the SWIM simulation for a prototype web site called RuBIS. 
 The containerization is implemented using Docker, and the image can be built as part 
 of this release or downloaded on DockerHub as `cmuable/rainbow-swim:2.3`. See [Docker 
-instruction](deployments/rainbow-example/docker/INSTUCTIONS.md) for 
+instruction](deployments/rainbow-example/docker/INSTRUCTIONS.md) for 
 instructions on how to build this.
 
 ## Rainbow User Interface
