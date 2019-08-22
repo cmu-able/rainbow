@@ -1,4 +1,4 @@
-# Rainbow Self-Adaptive Framework
+# Rainbow Self-Adaptive Framework (Version Yellow - 3)
 
 This repository contains the source code for the Rainbow self-adaptive framework, which is a research project within the Institute for Software Research, Carnegie Mellon University, Pittsburgh, PA, USA.
 
@@ -46,5 +46,7 @@ Note, building this way will not cache any libraries that maven may download, an
 
 `> docker run -v /home/YOU/.m2:/root/.m2 -v "$PWD":/root/rainbow -it rainbow-build -p /root/rainbow -d rainbow-znn -t znews-ss -s install`
 
+# New and Noteworthy
 
+A summary of the changes that have been made in this version can be found at [New and Noteworthy](NewAndNoteworthy.md)
 
