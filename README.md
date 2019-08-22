@@ -21,7 +21,7 @@ Rainbow is built using Maven, and you will need to have access to the Maven repo
 The Dockerfile in the root directory can be used for building Rainbow. It installs the necessary packages (java, maven, etc.) and uses `build.sh` to construct a .tgz file containing the directory that will be deployed when using Rainbow. To build the _Docker container_:
 
 ```
-> docker built -t rainbow-build .
+> docker build -t rainbow-build .
 ```
 
 To run the build, the directory containing the source needs to be mounted to the container, and the appropriate parameters that are passed on to the build script. The parameters are:

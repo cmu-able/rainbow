@@ -1,12 +1,11 @@
-# What's new in Rainbow Yellow (v3.0)
+# What's new in Rainbow 2.3
 
 ## Rainbow Simple Example
 
 A new simplified and containerized example of how Rainbow works is provided with this 
 release. The example uses the SWIM simulation for a prototype web site called RuBIS. 
 The containerization is implemented using Docker, and the image can be built as part 
-of this release or downloaded on DockerHub as `cmuable/rainbow-swim:2.3`. See [Docker 
-instruction](deployments/rainbow-example/docker/INSTRUCTIONS.md) for 
+of this release or downloaded on DockerHub as `cmuable/rainbow-swim:2.3`. See XXX for 
 instructions on how to build this.
 
 ## Rainbow User Interface
@@ -16,9 +15,9 @@ form. The user interface shows more architectural information about the interact
 between components in Rainbow (for example, it is easier to see which probes are giving 
 information to which gauges). In addition, there is a details pane that shows information 
 like how an element is specified, what activities it has performed, etc. More details 
-can be found at [UI Documentation](documents/ui.md). The UI is also very customizable.
+can be found at XXX. The UI is also very customizable.
 
-![Main Window](documents/imgs/Main_Window.PNG)
+![Main Window](imgs/Main_Window.PNG)
 
 ## Stitch Language Changes
 

@@ -25,8 +25,7 @@ public abstract class SwimUtils {
 	 * @param set
 	 * @return element
 	 */
-	public static <E> E minOverProperty(String property, java.util.Set<E> set) {
-		E min = null;
+	public static <E> double minOverProperty(String property, java.util.Set<E> set) {
 		double minValue = Double.MAX_VALUE;
 
 		for (E e : set) {
@@ -42,12 +41,11 @@ public abstract class SwimUtils {
 			} else if (type == DefaultAcmeModel.defaultFloatType()) {
 				value = ((IAcmeFloatingPointValue) val).getDoubleValue();
 			}
-			if (min == null || value < minValue) {
-				min = e;
+			if (value < minValue) {
 				minValue = value;
 			}
 		}
-		return min;
+		return minValue;
 	}
 
 	/**
