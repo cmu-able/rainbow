@@ -6,6 +6,13 @@ Rainbow uses model-based self-adaptation, primarly focussing on software archite
 
 Research into Rainbow at CMU can be found in quite a few papers, detailed on the (Rainbow Project Site)[http://www.cs.cmu.edu/~able/self-adaptation.html#rainbow].
 
+## Table of Contents
+
+- [Repository Organization](#repository-organization)
+- [Building from Source](#building)
+- [New and Noteworthy in Rainbow Yellow](NewAndNoteworthy.md)
+- [Rainbow Simple Example Setup](deployments/rainbow-example/docker/INSTRUCTIONS.md)
+
 ## Repository organization
 This repository is organized into the following folders:
 
