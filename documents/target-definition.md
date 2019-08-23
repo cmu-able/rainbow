@@ -189,7 +189,7 @@ Note that there is a prototype form of typing effectors. Effector types can be d
 
 ### Adding Stitch
 
-For Rainbow instantiations that use Acme models and Stitch-based adaptation, the scripts should be defined in the `stitch` directory of targets. All files with the extension `.s` will be loaded. Unfortunately, there is little documentation on the syntax of Stitch. There are a number of examples in the `targets` directory of this repository, and the paper [Stitch: A Language for Architecture-Based Self-Adaptation](http://acme.able.cs.cmu.edu/pubs/show.php?id=341) provides illustrations of the syntax. However, a number of things have changed since the paper was published. For example, Stitch can now refer to [Acme paths](paths.md) to query Acme models, and there are some new things that are described in [New and Noteworthy](../NewAndNoteworthy.md) 
+For Rainbow instantiations that use Acme models and Stitch-based adaptation, the scripts should be defined in the `stitch` directory of targets. All files with the extension `.s` will be loaded. Unfortunately, there is little documentation on the syntax of Stitch. There are a number of examples in the `targets` directory of this repository, and the paper [Stitch: A Language for Architecture-Based Self-Adaptation](http://acme.able.cs.cmu.edu/pubs/show.php?id=341) provides illustrations of the syntax. However, a number of things have changed since the paper was published. For example, Stitch can now refer to [Acme paths](paths.md) to query Acme models, and there are some new things that are described in [New and Noteworthy](../NewAndNoteworthy.md#stitch-language-changes) 
 
 
 
