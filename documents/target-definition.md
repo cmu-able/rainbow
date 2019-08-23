@@ -89,7 +89,7 @@ These framework classes are related as below.
 Probes are instruments in the running system. There are two types of probes supported by Rainbow: script based probes and Java probes. In both cases, the `probes.yml` file needs to be updated with the new probe information. This file usually lives in the `system` directory of a target. The probe information consists of the following fields:
 
 | YAML Spec | Description |
-|:----------|:------------|
+| :-------- | :---------- |
 | `probes:` |  |
 | &nbsp; `NewProbe:`                      | The name of the probe. |
 | &nbsp; &nbsp; `alias: xxx`              | The name that the probe as seen by the gauge. Gauges will put this in the `targetProbeType` field |
