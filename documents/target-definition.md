@@ -115,7 +115,7 @@ In all cases, gauges must be specified in the gauges.yml file located in the mod
 The format of the gauge-type portion of the gauges.yml spec are:
 
 | YAML field | Description |
-|:-----------|:------------|
+| :---------- | :---------- |
 | `gauge-type:` |   |
 | &nbsp; `NewGaugeT:`                           | The name of the gauge type |
 | &nbsp; &nbsp; `commands:`                     | The command names and command signature that will be reported by the gauge. |
@@ -143,7 +143,7 @@ The format of the gauge-type portion of the gauges.yml spec are:
 The instance specification for a gauge specifies its type, the model it is attached to, the mappings of values to properties on the model, and the values for any setup and configuration parameters.
 
 | YAML field | Description |
-|:-----------|:------------|
+| :--------- | :---------- |
 | `gauge-instances:`                             |   |
 | &nbsp; `<GaugeName>:`                            | The name that the gauge will have |
 | &nbsp; &nbsp; `type: <GaugeType>`                | Which gauge type (defiend above) this gauge is an instance of |
@@ -169,7 +169,7 @@ Gauges are only implemented using Java in the current framework. The `javaClass`
 Effectors are scripts or code that are run on the target system to make a change to the system (e.g., to add a server or to blacklist a client). Effectors map commands that are issued by the executor (that are expressed as model commands) and call the code when the model commands are matched. Effectors are system-specific and so are usuall defined in the `effectors.yml` file in the `system` directory of the target. The effector specification as the following format:
 
 | YAML field | Description |
-|:-----------|:------------|
+| :--------- | :---------- |
 |`effectors:` |             |
 | &nbsp; `<Name>:`                         | The (user-defined) name of the effector |
 | &nbsp; &nbsp; `location: <loc>`          | The location where this effector will be run |
