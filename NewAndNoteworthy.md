@@ -113,7 +113,17 @@ There is a new Rainbow Target configuration checking that can be called standalo
 
 The configuration checking is extensible by implementing the `org.rainbow.util.IRainbowConfigurationChecker` interface.
 
+Once a Rainbow deployment has been built, the configuration can be checked by executing:
+
+```
+./check-config.sh [-p properties-file] target
+```
+
+Where `target` is the target directory containing the configuration.
+
 ### Prototype Testing Infrastructure
+
+In previous versions, doing standalone unit and integration testing was difficult without requiring a full Rainbow target. We have done some work on this, and the results are described in [Rainbow Testing Framework](testing/README.md). This allows writing of unit tests for gauges, probes, and model commands, as well as doing some integration testing between them. 
 
 ### `rainbow-mem-comms` Project for In memory communication
 Rainbow was originally designed to manage distributed systems, and therefore the communication infrastructure was implemented to work over a network. However, a number of deployments of Rainbow have all components running on a single machine, and so we developed an in-memory communication infrastructure on top of the Guava event bus. 
