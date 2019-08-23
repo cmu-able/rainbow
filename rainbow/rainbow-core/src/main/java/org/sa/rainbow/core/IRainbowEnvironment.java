@@ -1,6 +1,7 @@
 package org.sa.rainbow.core;
 
 import java.io.File;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.gauges.IGauge;
@@ -33,13 +34,17 @@ public interface IRainbowEnvironment extends RainbowConstants, IRainbowPropertyP
 
     File getTargetPath ();
 
-    void setMaster (RainbowMaster rainbowMaster);
+    void setMaster (IRainbowMaster rainbowMaster);
 
-    RainbowMaster getRainbowMaster ();
+    IRainbowMaster getRainbowMaster ();
 
     void registerGauge (IGauge gauge);
 
     IGauge lookupGauge (String id);
 
     Environment environment ();
+
+	void registerRainbowThread(Thread thread, RainbowComponentT componentType);
+
+	Map<RainbowComponentT, Map<String,Thread>> getRegisteredThreads();
 }

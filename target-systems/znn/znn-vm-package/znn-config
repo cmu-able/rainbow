@@ -1,0 +1,51 @@
+# znn installation directory in the machines. In each machine this will be
+# modified to reflect the actual znn installation directory. There is no 
+# point in editing this property directly
+ZNN_USER=ec2-user
+ZNN_HOME=~ec2-user
+
+#
+# MySQL properties
+#
+# Root user/password for MySQL
+ZNN_MYSQL_ROOT_USERNAME=root
+ZNN_MYSQL_ROOT_PASSWORD=root
+
+# znn user/password for MySQL and database name
+ZNN_MYSQL_USERNAME=my_znn
+ZNN_MYSQL_PASSWORD=my_znn_pass
+ZNN_MYSQL_DB_NAME=znn_data
+
+# znn building and configuration information
+ZNN_MYSQL_VERSION=5.5.25
+ZNN_MYSQL="$ZNN_HOME/sw-bin/mysql-$ZNN_MYSQL_VERSION"
+ZNN_MYSQL_LOCAL_PORT=3306
+
+#
+# HTTPD properties
+#
+# znn HTTPD building and configuration information
+ZNN_PCRE_VERSION=8.20
+ZNN_HTTPD_VERSION=2.4.2
+ZNN_APR_UTIL_VERSION=1.4.1
+ZNN_APR_VERSION=1.4.6
+ZNN_MODSECURITY_VERSION=2.7.5
+ZNN_MODSECURITY="$ZNN_HOME/sw-bin/modsecurity-apache_$ZNN_MODSECURITY_VERSION"
+ZNN_LIBXML2_SO=/usr/lib/i386-linux-gnu/libxml2.so
+
+#
+# WEB Server and PHP Properties
+#
+ZNN_FREETYPE_VERSION=2.4.0
+ZNN_LIBZ_VERSION=1.2.3.4
+ZNN_LIBPNG_VERSION=1.6.6
+ZNN_LIBGD_VERSION=2.1.0
+ZNN_PERL_VERSION=5.20.2
+ZNN_LIBXML2_VERSION=2.9.2
+ZNN_PHP_VERSION=5.6.2
+
+#
+# Utilities
+#
+ZNN_SEDRE="sed -re"
+ZNN_SEDNRE="sed -nre"

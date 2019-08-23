@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=SWIM
+Comment=The SWIM Rubis Simulator
+Exec=xterm -e "./run.sh sim 1 | tee swim-console.out"
+Icon=/headless/SWIM.png
+Path=/headless/seams-swim/swim/simulations/swim
+Terminal=false
+StartupNotify=false

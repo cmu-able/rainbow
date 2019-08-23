@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import org.sa.rainbow.brass.PropertiesConnector;
 import org.sa.rainbow.brass.model.map.dijkstra.Dijkstra;
 import org.sa.rainbow.brass.model.map.dijkstra.Edge;
 import org.sa.rainbow.brass.model.map.dijkstra.Graph;
@@ -64,7 +65,7 @@ public class MapTranslator {
     public static final String TARGET_ROBOT_LOCATION_CONST = "TARGET_LOCATION";
     public static final String ROBOT_BATTERY_VAR = "b";
     public static final String ROBOT_BATTERY_RANGE_MIN = "0";
-    public static final String ROBOT_BATTERY_RANGE_MAX = "32560";
+    public static final long ROBOT_BATTERY_RANGE_MAX = 32560;
     public static final String ROBOT_BATTERY_RANGE_MAX_CONST = "MAX_BATTERY";
     public static final String INITIAL_ROBOT_BATTERY_CONST = "INITIAL_BATTERY";
     public static final String ROBOT_BATTERY_DELTA = "10"; // Constant for the time being, this should be transition+context dependent
@@ -72,9 +73,9 @@ public class MapTranslator {
     public static final String BATTERY_UPDATE_STR = ROBOT_BATTERY_VAR+UPDATE_POSTFIX;
     public static final float ROBOT_CHARGING_TIME = 15.0f;
 
-    public static final float ROBOT_FULL_SPEED_VALUE = 0.68f; // m/s
-    public static final float ROBOT_HALF_SPEED_VALUE = 0.35f;
-    public static final float ROBOT_DR_SPEED_VALUE = 0.25f; // Dead reckoning speed value .. this is implicit in ROBOT_LOC_MODE_LO
+    public static final double ROBOT_FULL_SPEED_VALUE = 0.68; // m/s
+    public static final double ROBOT_HALF_SPEED_VALUE = 0.35;
+    public static final double ROBOT_DR_SPEED_VALUE = 0.25; // Dead reckoning speed value .. this is implicit in ROBOT_LOC_MODE_LO
     public static final String ROBOT_FULL_SPEED_CONST = "FULL_SPEED"; // These are just symbolic constants for PRISM
     public static final String ROBOT_HALF_SPEED_CONST = "HALF_SPEED";
     public static final String ROBOT_DR_SPEED_CONST = "DR_SPEED";
@@ -112,7 +113,6 @@ public class MapTranslator {
     public static final String GOAL_PRED_DEF=GOAL_PRED+" = "+ROBOT_LOCATION_VAR+"="+TARGET_ROBOT_LOCATION_CONST+";";
 
     public static final String	STOP_PRED = "stop"; // Stop condition predicate (currently target location reached of insufficient battery to move to a nearby location)
-    public static final String	STOP_PRED_DEF = STOP_PRED + " = "+GOAL_PRED+" | "+ROBOT_BATTERY_VAR+"<"+ROBOT_BATTERY_DELTA+";";
     public static final String	STOP_GUARD_STR = "& (!"+STOP_PRED+")";
 
     public static final double MAX_DISTANCE = 999.0; // Distance assigned to disabled edges (for distance reward computation)
@@ -155,7 +155,7 @@ public class MapTranslator {
     public static LinkedList<String> generateMoveCommandStrs(){
         synchronized (m_map) {
             LinkedList<String> res = new LinkedList<String> ();
-            LinkedList<EnvMapArc> arcs = m_map.getArcs();
+            LinkedList<? extends EnvMapArc> arcs = m_map.getArcs();
             for (int i=0; i<arcs.size(); i++){
                 res.add(arcs.get(i).getSource()+MOVE_CMD_STR+arcs.get(i).getTarget());
             }
@@ -176,6 +176,9 @@ public class MapTranslator {
         }
         return buf+"\n";
     }
+    
+    static public boolean considerBattery = true;
+    
 
     /**
      * Generates labels for map locations
@@ -186,7 +189,7 @@ public class MapTranslator {
         buf+="const "+INITIAL_ROBOT_LOCATION_CONST+";\n";
         buf+="const "+TARGET_ROBOT_LOCATION_CONST+";\n\n";
         buf+="formula "+GOAL_PRED_DEF+"\n\n";
-        buf+="formula "+STOP_PRED_DEF+"\n\n";
+        buf+="formula "+STOP_PRED + " = "+GOAL_PRED+(considerBattery?" | "+ROBOT_BATTERY_VAR+"<"+ROBOT_BATTERY_DELTA:"")+";"+"\n\n";
         for (Map.Entry<String,EnvMapNode> entry : m_map.getNodes().entrySet() ){
             buf+="const "+entry.getKey()+"="+String.valueOf(entry.getValue().getId())+";\n";
         }
@@ -299,7 +302,10 @@ public class MapTranslator {
                     if (a.getDistance() > MAXIMUM_KINECT_OFF_DISTANCE_VAL) {
                         kGuard ="& ("+ROBOT_LOC_MODE_VAR+"!="+ROBOT_LOC_MODE_LO_CONST+") ";
                     }
-                    buf+="\t ["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] ("+ROBOT_LOCATION_VAR+"="+a.getSource()+") "+kGuard+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) -> ("+ROBOT_LOCATION_VAR+"'="+a.getTarget()+") "+" & ("+ROBOT_BATTERY_VAR+"'="+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+")"+ " & ("+ROBOT_HEADING_VAR+"'="+HEADING_CONST_PREFIX + findArcHeading(a).name() + ") & (robot_done'=true);\n";                	
+                    buf+="\t ["+a.getSource()+MOVE_CMD_STR+a.getTarget()+"] ("+ROBOT_LOCATION_VAR+"="+a.getSource()+") "+
+                    		kGuard+STOP_GUARD_STR+" "+ROBOT_GUARD_STR+" & (!robot_done) -> ("+ROBOT_LOCATION_VAR+"'="+a.getTarget()+") "+
+                    		" & ("+ROBOT_BATTERY_VAR+"'="+BATTERY_UPDATE_STR+"_"+a.getSource()+"_"+a.getTarget()+")"+
+                    		" & ("+ROBOT_HEADING_VAR+"'="+HEADING_CONST_PREFIX + findArcHeading(a).name() + ") & (robot_done'=true);\n";                	
                 }
             }
             return buf+"\n";		
@@ -351,8 +357,9 @@ public class MapTranslator {
         String guard_can_charge=" & (false";
         synchronized(m_map){
             for (Map.Entry<String, EnvMapNode> e: m_map.getNodes().entrySet()){
-                if (e.getValue().isChargingStation()){
-                    guard_can_charge +="|"+ROBOT_LOCATION_VAR+"="+e.getValue().getId();
+                EnvMapNode n = e.getValue();
+				if (n.getProperty(Phase1MapPropertyKeys.CHARGING_STATION) != null && ((Boolean )n.getProperty(Phase1MapPropertyKeys.CHARGING_STATION))){
+                    guard_can_charge +="|"+ROBOT_LOCATION_VAR+"="+e.getValue().getLabel();
 
                 }	
             }
@@ -459,12 +466,12 @@ public class MapTranslator {
     /**
      * Returns the rotation time in seconds from a given robot orientation to the right angle before it
      * starts moving towards a given location (target of arc a)
-     * @param robotOrientation orientation of the robot (angle in Radians)
+     * @param robotOrientation orientation of the robot (angle in Radians, from 0 to 2pi)
      * @param a Map arc 
      * @return Rotation time in seconds
      */
     public static double getRotationTime(double robotOrientation, EnvMapArc a){    	
-        double theta = Math.abs(robotOrientation-findArcOrientation(a));
+        double theta = Math.abs(robotOrientation-findArcOrientation(a)); // subtracting [0, 2pi) from [0, 2pi)
         double min_theta = (theta > Math.PI) ? 2*Math.PI - theta : theta;
         return (min_theta/ROBOT_ROTATIONAL_SPEED_VALUE); 
     }
@@ -475,7 +482,7 @@ public class MapTranslator {
      * as the reference of coordinates in the plane. Used to determine the part of the time reward structure 
      * associated with in-node robot rotations.
      * @param a Map arc
-     * @return angle in radians between a.m_source and a.m_target
+     * @return angle in radians between a.m_source and a.m_target, in the [0, 2pi) interval
      */
     public static double findArcOrientation(EnvMapArc a){
         synchronized (m_map) {
@@ -488,9 +495,18 @@ public class MapTranslator {
         }
     }
 
-
+    /**
+     * Determines the angle (in Radians) of a vector (source, target), taking the source
+     * as the reference of coordinates in the plane.
+     * @return angle in radians, ranging from -pi to pi
+     */
     public static double findArcOrientation(double src_x, double src_y, double tgt_x, double tgt_y){
-        return Math.atan2( tgt_y - src_y, tgt_x - src_x);
+    	double angle = Math.atan2( tgt_y - src_y, tgt_x - src_x); // from -pi to pi
+    	
+    	if (angle < 0) // convert to [0, 2pi)
+    		angle += 2*Math.PI;
+    	
+        return angle;
     }
 
 
@@ -785,7 +801,7 @@ public class MapTranslator {
             out.close();
         }
         catch (IOException e){
-            System.out.println("Error exporting PRISM map translation");
+            System.out.println("Error exporting PRISM map translation:\n" + e);
         }
     }
 
@@ -819,12 +835,14 @@ public class MapTranslator {
      * @param args
      */
     public static void main(String[] args) {
-        EnvMap dummyMap = new EnvMap (null, null);
+        EnvMap dummyMap = new EnvMap (null, null); 
+
         //dummyMap.insertNode("newnode", "l1", "l2", 17.0, 69.0);
         setMap(dummyMap);
         System.out.println(getMapTranslation()); // Class test
-        //System.out.println();
-        exportMapTranslation("/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/prismtmp-simple.prism", false);
+        exportMapTranslation(PropertiesConnector.DEFAULT.getProperty(PropertiesConnector.PRISM_OUTPUT_DIR_PROPKEY) + 
+        		"prismtmp.prism", false);
+        
         // String export_path="/Users/jcamara/Dropbox/Documents/Work/Projects/BRASS/rainbow-prototype/trunk/rainbow-brass/prismtmp/";
 
         // Map<List, String> specifications = exportConstrainedTranslationsBetween (export_path, "ls", "l1");

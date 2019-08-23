@@ -24,6 +24,12 @@
 package org.sa.rainbow.core.ports.local;
 
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+import org.sa.rainbow.core.IRainbowMaster;
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowDelegate;
@@ -32,19 +38,38 @@ import org.sa.rainbow.core.adaptation.IEvaluable;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
+import org.sa.rainbow.core.models.IModelUpdater;
 import org.sa.rainbow.core.models.IModelsManager;
 import org.sa.rainbow.core.models.ModelReference;
-import org.sa.rainbow.core.ports.*;
+import org.sa.rainbow.core.ports.AbstractDelegateConnectionPort;
+import org.sa.rainbow.core.ports.IDelegateConfigurationPort;
+import org.sa.rainbow.core.ports.IDelegateManagementPort;
+import org.sa.rainbow.core.ports.IEffectorLifecycleBusPort;
+import org.sa.rainbow.core.ports.IGaugeConfigurationPort;
+import org.sa.rainbow.core.ports.IGaugeLifecycleBusPort;
+import org.sa.rainbow.core.ports.IGaugeQueryPort;
+import org.sa.rainbow.core.ports.IMasterCommandPort;
+import org.sa.rainbow.core.ports.IMasterConnectionPort;
+import org.sa.rainbow.core.ports.IModelChangeBusPort;
+import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
+import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
+import org.sa.rainbow.core.ports.IModelDSBusSubscriberPort;
+import org.sa.rainbow.core.ports.IModelUSBusPort;
+import org.sa.rainbow.core.ports.IModelsManagerPort;
+import org.sa.rainbow.core.ports.IProbeConfigurationPort;
+import org.sa.rainbow.core.ports.IProbeLifecyclePort;
+import org.sa.rainbow.core.ports.IProbeReportPort;
+import org.sa.rainbow.core.ports.IProbeReportSubscriberPort;
+import org.sa.rainbow.core.ports.IRainbowAdaptationDequeuePort;
+import org.sa.rainbow.core.ports.IRainbowAdaptationEnqueuePort;
+import org.sa.rainbow.core.ports.IRainbowConnectionPortFactory;
+import org.sa.rainbow.core.ports.IRainbowReportingPort;
+import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort;
 import org.sa.rainbow.core.ports.IRainbowReportingSubscriberPort.IRainbowReportingSubscriberCallback;
 import org.sa.rainbow.translator.effectors.IEffector;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort;
 import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
 import org.sa.rainbow.translator.probes.IProbe;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
 
 public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
 
@@ -139,7 +164,7 @@ public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
     }
 
     @Override
-    public IModelUSBusPort createModelsManagerUSPort (IModelsManager m) throws RainbowConnectionException {
+    public IModelUSBusPort createModelsManagerUSPort (IModelUpdater m) throws RainbowConnectionException {
         if (m_localModelsManagerUSPort == null) {
             m_localModelsManagerUSPort = new LocalModelsManagerUSPort (m);
             for (LocalModelsManagerClientUSPort p : m_mmClientUSPorts.values ()) {
@@ -351,14 +376,14 @@ public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
     }
 
     @Override
-    public IMasterCommandPort createMasterCommandProviderPort (RainbowMaster rainbowMaster)
+    public IMasterCommandPort createMasterCommandProviderPort (IRainbowMaster rainbowMaster)
             throws RainbowConnectionException {
-        return rainbowMaster;
+        return rainbowMaster.getCommandPort();
     }
 
     @Override
     public IMasterCommandPort createMasterCommandRequirerPort () throws RainbowConnectionException {
-        return Rainbow.instance ().getRainbowMaster ();
+        return Rainbow.instance ().getRainbowMaster ().getCommandPort();
     }
 
 }

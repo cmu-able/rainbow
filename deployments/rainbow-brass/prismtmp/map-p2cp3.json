@@ -1,0 +1,7121 @@
+{
+    "hitrate": [
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l3",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l1",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l2",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l1",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l45",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l44",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l39",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l14",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l51",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l27",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l18",
+            "prob": 0.02127659574468085,
+            "mrpt-kinect": {
+                "hitrate": 0.07692307692307693
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l17",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l39",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l13",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l47",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l46",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l27",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l26",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l45",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l12",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l50",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l26",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l53",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l52",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l43",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l42",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l43",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l40",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l26",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l25",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l38",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l5",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.2
+            },
+            "to": "l6",
+            "prob": 0.041666666666666664,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l4",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l33",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l32",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l48",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l47",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l39",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l4",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l57",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l40",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l35",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l34",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l59",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l2",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l54",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l53",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l46",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l45",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l56",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l2",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l50",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l49",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l10",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l9",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l54",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l46",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l15",
+            "prob": 0.045454545454545456,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l14",
+            "amcl-lidar": {
+                "hitrate": 0.16666666666666666
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.2
+            },
+            "to": "l24",
+            "prob": 0.043478260869565216,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l23",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l55",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l48",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l25",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l10",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l34",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l8",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l58",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l57",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l17",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l16",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l32",
+            "prob": 0.0,
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l31",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.2222222222222222
+            },
+            "to": "l12",
+            "prob": 0.1111111111111111,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l11",
+            "amcl-lidar": {
+                "hitrate": 0.25
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l49",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l48",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l23",
+            "prob": 0.04,
+            "mrpt-kinect": {
+                "hitrate": 0.14285714285714285
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l22",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l8",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l3",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l36",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l28",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l40",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l39",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l44",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l42",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l27",
+            "prob": 0.02127659574468085,
+            "mrpt-kinect": {
+                "hitrate": 0.07692307692307693
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l11",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l35",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l10",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.1111111111111111
+            },
+            "to": "l19",
+            "prob": 0.1111111111111111,
+            "mrpt-kinect": {
+                "hitrate": 0.3333333333333333
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l13",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l29",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l28",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l30",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l29",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l7",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l6",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l55",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l25",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.25
+            },
+            "to": "l56",
+            "prob": 0.043478260869565216,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l55",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l31",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l30",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l22",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l21",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l16",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l15",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l34",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l33",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.8
+            },
+            "to": "l38",
+            "prob": 0.16,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l24",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l52",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l51",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l21",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l15",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l56",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l9",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.8
+            },
+            "to": "l8",
+            "prob": 0.3404255319148936,
+            "mrpt-kinect": {
+                "hitrate": 0.16666666666666666
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l6",
+            "amcl-lidar": {
+                "hitrate": 0.46153846153846156
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l19",
+            "prob": 0.04,
+            "mrpt-kinect": {
+                "hitrate": 0.15384615384615385
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l18",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l36",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l5",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l28",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l7",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l59",
+            "prob": 0.0,
+            "mrpt-kinect": {
+                "hitrate": 0.0
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l58",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        },
+        {
+            "aruco": {
+                "hitrate": 0.0
+            },
+            "to": "l9",
+            "prob": 0.020833333333333332,
+            "mrpt-kinect": {
+                "hitrate": 0.08333333333333333
+            },
+            "amcl-kinect": {
+                "hitrate": 0.0
+            },
+            "from": "l8",
+            "amcl-lidar": {
+                "hitrate": 0.0
+            }
+        }
+    ],
+    "min_illuminance": [
+        {
+            "stdev": 53.00891432562756,
+            "mean": 142.32638888877793,
+            "from": "l1",
+            "to": "l3"
+        },
+        {
+            "stdev": 27.061702389352906,
+            "mean": 179.045138888875,
+            "from": "l1",
+            "to": "l2"
+        },
+        {
+            "stdev": 23.390369278740646,
+            "mean": 181.49999999992,
+            "from": "l44",
+            "to": "l45"
+        },
+        {
+            "stdev": 36.88950934561141,
+            "mean": 145.72916666673748,
+            "from": "l14",
+            "to": "l39"
+        },
+        {
+            "stdev": 19.11667992052924,
+            "mean": 132.14930555543333,
+            "from": "l27",
+            "to": "l51"
+        },
+        {
+            "stdev": 14566.118792337464,
+            "mean": 2264.721631205721,
+            "from": "l17",
+            "to": "l18"
+        },
+        {
+            "stdev": 37.7085213067998,
+            "mean": 129.81028368793193,
+            "from": "l13",
+            "to": "l39"
+        },
+        {
+            "stdev": 33.359483904860895,
+            "mean": 173.37318840581958,
+            "from": "l46",
+            "to": "l47"
+        },
+        {
+            "stdev": 16.36144277202008,
+            "mean": 108.49305555559583,
+            "from": "l26",
+            "to": "l27"
+        },
+        {
+            "stdev": 42.84988044892648,
+            "mean": 136.2074074074,
+            "from": "l12",
+            "to": "l45"
+        },
+        {
+            "stdev": 38.69584939052417,
+            "mean": 208.77777777754167,
+            "from": "l26",
+            "to": "l50"
+        },
+        {
+            "stdev": 23.942886840549445,
+            "mean": 203.19927536234783,
+            "from": "l52",
+            "to": "l53"
+        },
+        {
+            "stdev": 29.44038146468102,
+            "mean": 148.88194444444582,
+            "from": "l42",
+            "to": "l43"
+        },
+        {
+            "stdev": 15.543991485336802,
+            "mean": 92.886666666664,
+            "from": "l40",
+            "to": "l43"
+        },
+        {
+            "stdev": 29.776853473145717,
+            "mean": 133.00694444444375,
+            "from": "l25",
+            "to": "l26"
+        },
+        {
+            "stdev": 6.287144053883205,
+            "mean": 57.069444444445836,
+            "from": "l5",
+            "to": "l38"
+        },
+        {
+            "stdev": 3.549511771557503,
+            "mean": 1.6666666666669583,
+            "from": "l4",
+            "to": "l6"
+        },
+        {
+            "stdev": 34.27719543978566,
+            "mean": 139.47222222228748,
+            "from": "l32",
+            "to": "l33"
+        },
+        {
+            "stdev": 10.960774656538609,
+            "mean": 193.42013888883332,
+            "from": "l47",
+            "to": "l48"
+        },
+        {
+            "stdev": 1.5484419188124299,
+            "mean": 2.923913043479,
+            "from": "l4",
+            "to": "l39"
+        },
+        {
+            "stdev": 37.85436070079651,
+            "mean": 192.48188405798695,
+            "from": "l40",
+            "to": "l57"
+        },
+        {
+            "stdev": 29.11208143639248,
+            "mean": 94.87152777782708,
+            "from": "l34",
+            "to": "l35"
+        },
+        {
+            "stdev": 22.838583588031483,
+            "mean": 95.46376811594348,
+            "from": "l2",
+            "to": "l59"
+        },
+        {
+            "stdev": 39.40813998495684,
+            "mean": 213.99652777783334,
+            "from": "l53",
+            "to": "l54"
+        },
+        {
+            "stdev": 19.24447102756683,
+            "mean": 166.12318840573914,
+            "from": "l45",
+            "to": "l46"
+        },
+        {
+            "stdev": 22.127119876923963,
+            "mean": 163.6088435374898,
+            "from": "l2",
+            "to": "l56"
+        },
+        {
+            "stdev": 27.458840519938928,
+            "mean": 217.66666666637502,
+            "from": "l49",
+            "to": "l50"
+        },
+        {
+            "stdev": 15.667090249571139,
+            "mean": 126.23263888884583,
+            "from": "l9",
+            "to": "l10"
+        },
+        {
+            "stdev": 42.60890101043036,
+            "mean": 179.97826086955217,
+            "from": "l46",
+            "to": "l54"
+        },
+        {
+            "stdev": 47.141053607114166,
+            "mean": 137.54166666671364,
+            "from": "l14",
+            "to": "l15"
+        },
+        {
+            "stdev": 30.173963569782185,
+            "mean": 145.55797101436087,
+            "from": "l23",
+            "to": "l24"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 203.666666667,
+            "from": "l48",
+            "to": "l55"
+        },
+        {
+            "stdev": 7.588563917827031,
+            "mean": 73.63194444444167,
+            "from": "l10",
+            "to": "l25"
+        },
+        {
+            "stdev": 31.00604455121554,
+            "mean": 155.84722222227916,
+            "from": "l8",
+            "to": "l34"
+        },
+        {
+            "stdev": 35.90352951923979,
+            "mean": 147.65909090915,
+            "from": "l57",
+            "to": "l58"
+        },
+        {
+            "stdev": 29.55642312963737,
+            "mean": 202.51215277785417,
+            "from": "l16",
+            "to": "l17"
+        },
+        {
+            "stdev": 27.480428974137038,
+            "mean": 206.74561403494738,
+            "from": "l31",
+            "to": "l32"
+        },
+        {
+            "stdev": 8.97869602576619,
+            "mean": 3.8999999999985997,
+            "from": "l11",
+            "to": "l12"
+        },
+        {
+            "stdev": 4.237374436067481,
+            "mean": 186.4128787878182,
+            "from": "l48",
+            "to": "l49"
+        },
+        {
+            "stdev": 50.49288889241113,
+            "mean": 123.1666666666572,
+            "from": "l22",
+            "to": "l23"
+        },
+        {
+            "stdev": 11.977421853604458,
+            "mean": 52.440000000004,
+            "from": "l3",
+            "to": "l8"
+        },
+        {
+            "stdev": 23.71252021907398,
+            "mean": 148.43055555554167,
+            "from": "l28",
+            "to": "l36"
+        },
+        {
+            "stdev": 31.086877070156355,
+            "mean": 167.5884353741959,
+            "from": "l39",
+            "to": "l40"
+        },
+        {
+            "stdev": 30.543663968462464,
+            "mean": 169.79861111107084,
+            "from": "l42",
+            "to": "l44"
+        },
+        {
+            "stdev": 1.231802998367706,
+            "mean": 1.9698581560294681,
+            "from": "l11",
+            "to": "l27"
+        },
+        {
+            "stdev": 16.638709545167167,
+            "mean": 102.53333333342201,
+            "from": "l10",
+            "to": "l35"
+        },
+        {
+            "stdev": 15.299881164127909,
+            "mean": 6.538888888889556,
+            "from": "l13",
+            "to": "l19"
+        },
+        {
+            "stdev": 16.184956721377688,
+            "mean": 119.66999999992,
+            "from": "l28",
+            "to": "l29"
+        },
+        {
+            "stdev": 9.93802297315284,
+            "mean": 84.93115942029566,
+            "from": "l29",
+            "to": "l30"
+        },
+        {
+            "stdev": 33.16298391146966,
+            "mean": 192.67013888890418,
+            "from": "l6",
+            "to": "l7"
+        },
+        {
+            "stdev": 31.61775268434642,
+            "mean": 129.2826086956348,
+            "from": "l25",
+            "to": "l55"
+        },
+        {
+            "stdev": 9.587525576718003,
+            "mean": 84.59420289855652,
+            "from": "l55",
+            "to": "l56"
+        },
+        {
+            "stdev": 40.38210148527531,
+            "mean": 177.466666666656,
+            "from": "l30",
+            "to": "l31"
+        },
+        {
+            "stdev": 50.18089847681578,
+            "mean": 226.54513888866668,
+            "from": "l21",
+            "to": "l22"
+        },
+        {
+            "stdev": 37.394816342940764,
+            "mean": 234.52898550719564,
+            "from": "l15",
+            "to": "l16"
+        },
+        {
+            "stdev": 30.24715500619514,
+            "mean": 140.89236111107084,
+            "from": "l33",
+            "to": "l34"
+        },
+        {
+            "stdev": 18.721784325581424,
+            "mean": 82.633333333344,
+            "from": "l24",
+            "to": "l38"
+        },
+        {
+            "stdev": 9.704563453492376,
+            "mean": 216.11956521747825,
+            "from": "l51",
+            "to": "l52"
+        },
+        {
+            "stdev": 35.96720374687523,
+            "mean": 191.253333333376,
+            "from": "l15",
+            "to": "l21"
+        },
+        {
+            "stdev": 11.89661616377594,
+            "mean": 130.46875,
+            "from": "l9",
+            "to": "l56"
+        },
+        {
+            "stdev": 42.87952687355706,
+            "mean": 136.14539007092128,
+            "from": "l6",
+            "to": "l8"
+        },
+        {
+            "stdev": 1.6493006832481487,
+            "mean": 3.2433333333332,
+            "from": "l18",
+            "to": "l19"
+        },
+        {
+            "stdev": 47.25909104393004,
+            "mean": 190.01041666672083,
+            "from": "l5",
+            "to": "l36"
+        },
+        {
+            "stdev": 55.55030495062172,
+            "mean": 212.6195652173913,
+            "from": "l7",
+            "to": "l28"
+        },
+        {
+            "stdev": 35.26406790306491,
+            "mean": 160.34420289850868,
+            "from": "l58",
+            "to": "l59"
+        },
+        {
+            "stdev": 37.460910806554146,
+            "mean": 122.48611111114583,
+            "from": "l8",
+            "to": "l9"
+        }
+    ],
+    "map": [
+        {
+            "coords": {
+                "x": 0,
+                "y": 0
+            },
+            "connected-to": [
+                "l3",
+                "l39",
+                "l2"
+            ],
+            "node-id": "l1"
+        },
+        {
+            "coords": {
+                "x": 3.514,
+                "y": 0
+            },
+            "connected-to": [
+                "l1",
+                "l56",
+                "l59"
+            ],
+            "node-id": "l2"
+        },
+        {
+            "coords": {
+                "x": -6.216,
+                "y": 0
+            },
+            "connected-to": [
+                "l4",
+                "l1",
+                "l8"
+            ],
+            "node-id": "l3"
+        },
+        {
+            "coords": {
+                "x": -28.865,
+                "y": 0
+            },
+            "connected-to": [
+                "l5",
+                "l37",
+                "l3",
+                "l6"
+            ],
+            "node-id": "l4"
+        },
+        {
+            "coords": {
+                "x": -47.027,
+                "y": 0
+            },
+            "connected-to": [
+                "l38",
+                "l36",
+                "l4"
+            ],
+            "node-id": "l5"
+        },
+        {
+            "coords": {
+                "x": -28.865,
+                "y": 10.27
+            },
+            "connected-to": [
+                "l8",
+                "l7",
+                "l4"
+            ],
+            "node-id": "l6"
+        },
+        {
+            "coords": {
+                "x": -33.027,
+                "y": 10.27
+            },
+            "connected-to": [
+                "l6",
+                "l28"
+            ],
+            "node-id": "l7"
+        },
+        {
+            "coords": {
+                "x": -6.216,
+                "y": 10.27
+            },
+            "connected-to": [
+                "l9",
+                "l6",
+                "l3",
+                "l34"
+            ],
+            "node-id": "l8"
+        },
+        {
+            "coords": {
+                "x": 3.514,
+                "y": 10.27
+            },
+            "connected-to": [
+                "l56",
+                "l8",
+                "l10"
+            ],
+            "node-id": "l9"
+        },
+        {
+            "coords": {
+                "x": 3.514,
+                "y": 16.973
+            },
+            "connected-to": [
+                "l35",
+                "l25",
+                "l9"
+            ],
+            "node-id": "l10"
+        },
+        {
+            "coords": {
+                "x": 51.892,
+                "y": 16.973
+            },
+            "connected-to": [
+                "l27",
+                "l12"
+            ],
+            "node-id": "l11"
+        },
+        {
+            "coords": {
+                "x": 51.892,
+                "y": 0
+            },
+            "connected-to": [
+                "l11",
+                "l45"
+            ],
+            "node-id": "l12"
+        },
+        {
+            "coords": {
+                "x": 0,
+                "y": -20.973
+            },
+            "connected-to": [
+                "l14",
+                "l39",
+                "l19"
+            ],
+            "node-id": "l13"
+        },
+        {
+            "coords": {
+                "x": -2.432,
+                "y": -20.973
+            },
+            "connected-to": [
+                "l13",
+                "l37",
+                "l15"
+            ],
+            "node-id": "l14"
+        },
+        {
+            "coords": {
+                "x": -2.432,
+                "y": -40.811
+            },
+            "connected-to": [
+                "l16",
+                "l21",
+                "l14"
+            ],
+            "node-id": "l15"
+        },
+        {
+            "coords": {
+                "x": 1.892,
+                "y": -40.811
+            },
+            "connected-to": [
+                "l17",
+                "l15"
+            ],
+            "node-id": "l16"
+        },
+        {
+            "coords": {
+                "x": 1.892,
+                "y": -34.973
+            },
+            "connected-to": [
+                "l18",
+                "l16"
+            ],
+            "node-id": "l17"
+        },
+        {
+            "coords": {
+                "x": 4.973,
+                "y": -34.973
+            },
+            "connected-to": [
+                "l19",
+                "l17"
+            ],
+            "node-id": "l18"
+        },
+        {
+            "coords": {
+                "x": 4.973,
+                "y": -20.811
+            },
+            "connected-to": [
+                "l18",
+                "l13"
+            ],
+            "node-id": "l19"
+        },
+        {
+            "coords": {
+                "x": -2.432,
+                "y": -52.216
+            },
+            "connected-to": [
+                "l15",
+                "l22"
+            ],
+            "node-id": "l21"
+        },
+        {
+            "coords": {
+                "x": -0.27,
+                "y": -52.216
+            },
+            "connected-to": [
+                "l21",
+                "l23"
+            ],
+            "node-id": "l22"
+        },
+        {
+            "coords": {
+                "x": -0.27,
+                "y": -57.568
+            },
+            "connected-to": [
+                "l22",
+                "l24"
+            ],
+            "node-id": "l23"
+        },
+        {
+            "coords": {
+                "x": -3.243,
+                "y": -57.568
+            },
+            "connected-to": [
+                "l23",
+                "l38"
+            ],
+            "node-id": "l24"
+        },
+        {
+            "coords": {
+                "x": 16.757,
+                "y": 16.973
+            },
+            "connected-to": [
+                "l10",
+                "l26",
+                "l55"
+            ],
+            "node-id": "l25"
+        },
+        {
+            "coords": {
+                "x": 28,
+                "y": 16.973
+            },
+            "connected-to": [
+                "l25",
+                "l27",
+                "l50"
+            ],
+            "node-id": "l26"
+        },
+        {
+            "coords": {
+                "x": 40.541,
+                "y": 16.973
+            },
+            "connected-to": [
+                "l26",
+                "l11",
+                "l51"
+            ],
+            "node-id": "l27"
+        },
+        {
+            "coords": {
+                "x": -33.027,
+                "y": 12.162
+            },
+            "connected-to": [
+                "l36",
+                "l29",
+                "l7"
+            ],
+            "node-id": "l28"
+        },
+        {
+            "coords": {
+                "x": -33.027,
+                "y": 23.027
+            },
+            "connected-to": [
+                "l28",
+                "l30"
+            ],
+            "node-id": "l29"
+        },
+        {
+            "coords": {
+                "x": -21.081,
+                "y": 23.027
+            },
+            "connected-to": [
+                "l29",
+                "l31"
+            ],
+            "node-id": "l30"
+        },
+        {
+            "coords": {
+                "x": -21.081,
+                "y": 16.486
+            },
+            "connected-to": [
+                "l30",
+                "l32"
+            ],
+            "node-id": "l31"
+        },
+        {
+            "coords": {
+                "x": -14.324,
+                "y": 16.486
+            },
+            "connected-to": [
+                "l31",
+                "l33"
+            ],
+            "node-id": "l32"
+        },
+        {
+            "coords": {
+                "x": -14.324,
+                "y": 20
+            },
+            "connected-to": [
+                "l32",
+                "l34"
+            ],
+            "node-id": "l33"
+        },
+        {
+            "coords": {
+                "x": -6.216,
+                "y": 20
+            },
+            "connected-to": [
+                "l33",
+                "l35",
+                "l8"
+            ],
+            "node-id": "l34"
+        },
+        {
+            "coords": {
+                "x": 3.514,
+                "y": 20
+            },
+            "connected-to": [
+                "l34",
+                "l10"
+            ],
+            "node-id": "l35"
+        },
+        {
+            "coords": {
+                "x": -47.243,
+                "y": 12.108
+            },
+            "connected-to": [
+                "l28",
+                "l5"
+            ],
+            "node-id": "l36"
+        },
+        {
+            "coords": {
+                "x": -28.865,
+                "y": -20.973
+            },
+            "connected-to": [
+                "l4",
+                "l14"
+            ],
+            "node-id": "l37"
+        },
+        {
+            "coords": {
+                "x": -47.027,
+                "y": -57.568
+            },
+            "connected-to": [
+                "l24",
+                "l5"
+            ],
+            "node-id": "l38"
+        },
+        {
+            "coords": {
+                "x": 0,
+                "y": -14.865
+            },
+            "connected-to": [
+                "l40",
+                "l1",
+                "l13"
+            ],
+            "node-id": "l39"
+        },
+        {
+            "coords": {
+                "x": 24.973,
+                "y": -14.865
+            },
+            "connected-to": [
+                "l43",
+                "l39",
+                "l57"
+            ],
+            "node-id": "l40"
+        },
+        {
+            "coords": {
+                "x": 25.189,
+                "y": -14.865
+            },
+            "connected-to": [],
+            "node-id": "l41"
+        },
+        {
+            "coords": {
+                "x": 39.243,
+                "y": -4.108
+            },
+            "connected-to": [
+                "l44",
+                "l43"
+            ],
+            "node-id": "l42"
+        },
+        {
+            "coords": {
+                "x": 39.243,
+                "y": -14.865
+            },
+            "connected-to": [
+                "l42",
+                "l40"
+            ],
+            "node-id": "l43"
+        },
+        {
+            "coords": {
+                "x": 47.838,
+                "y": -4.108
+            },
+            "connected-to": [
+                "l45",
+                "l42"
+            ],
+            "node-id": "l44"
+        },
+        {
+            "coords": {
+                "x": 47.838,
+                "y": 0
+            },
+            "connected-to": [
+                "l12",
+                "l44",
+                "l46"
+            ],
+            "node-id": "l45"
+        },
+        {
+            "coords": {
+                "x": 36.27,
+                "y": 0
+            },
+            "connected-to": [
+                "l47",
+                "l45",
+                "l54"
+            ],
+            "node-id": "l46"
+        },
+        {
+            "coords": {
+                "x": 22.703,
+                "y": 0
+            },
+            "connected-to": [
+                "l48",
+                "l46"
+            ],
+            "node-id": "l47"
+        },
+        {
+            "coords": {
+                "x": 22.703,
+                "y": 6.486
+            },
+            "connected-to": [
+                "l55",
+                "l49",
+                "l47"
+            ],
+            "node-id": "l48"
+        },
+        {
+            "coords": {
+                "x": 22.703,
+                "y": 10.757
+            },
+            "connected-to": [
+                "l48",
+                "l50"
+            ],
+            "node-id": "l49"
+        },
+        {
+            "coords": {
+                "x": 28,
+                "y": 10.757
+            },
+            "connected-to": [
+                "l49",
+                "l26"
+            ],
+            "node-id": "l50"
+        },
+        {
+            "coords": {
+                "x": 40.541,
+                "y": 12.919
+            },
+            "connected-to": [
+                "l52",
+                "l27"
+            ],
+            "node-id": "l51"
+        },
+        {
+            "coords": {
+                "x": 38.973,
+                "y": 12.919
+            },
+            "connected-to": [
+                "l53",
+                "l51"
+            ],
+            "node-id": "l52"
+        },
+        {
+            "coords": {
+                "x": 38.973,
+                "y": 8.378
+            },
+            "connected-to": [
+                "l54",
+                "l52"
+            ],
+            "node-id": "l53"
+        },
+        {
+            "coords": {
+                "x": 36.27,
+                "y": 8.378
+            },
+            "connected-to": [
+                "l46",
+                "l53"
+            ],
+            "node-id": "l54"
+        },
+        {
+            "coords": {
+                "x": 16.757,
+                "y": 6.486
+            },
+            "connected-to": [
+                "l56",
+                "l25",
+                "l48"
+            ],
+            "node-id": "l55"
+        },
+        {
+            "coords": {
+                "x": 3.514,
+                "y": 6.486
+            },
+            "connected-to": [
+                "l2",
+                "l9",
+                "l55"
+            ],
+            "node-id": "l56"
+        },
+        {
+            "coords": {
+                "x": 24.973,
+                "y": -7.838
+            },
+            "connected-to": [
+                "l58",
+                "l40"
+            ],
+            "node-id": "l57"
+        },
+        {
+            "coords": {
+                "x": 14.865,
+                "y": -7.838
+            },
+            "connected-to": [
+                "l59",
+                "l57"
+            ],
+            "node-id": "l58"
+        },
+        {
+            "coords": {
+                "x": 14.865,
+                "y": 0
+            },
+            "connected-to": [
+                "l2",
+                "l58"
+            ],
+            "node-id": "l59"
+        }
+    ],
+    "max_illuminance": [
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l1",
+            "to": "l3"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l1",
+            "to": "l2"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l44",
+            "to": "l45"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l14",
+            "to": "l39"
+        },
+        {
+            "stdev": 3.5329638741350635,
+            "mean": 253.326388888875,
+            "from": "l27",
+            "to": "l51"
+        },
+        {
+            "stdev": 1495.8454878109087,
+            "mean": 36.808510638297875,
+            "from": "l17",
+            "to": "l18"
+        },
+        {
+            "stdev": 5.9199268551790665,
+            "mean": 251.20390070921277,
+            "from": "l13",
+            "to": "l39"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l46",
+            "to": "l47"
+        },
+        {
+            "stdev": 4.386241882989848,
+            "mean": 240.04513888908332,
+            "from": "l26",
+            "to": "l27"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l12",
+            "to": "l45"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l26",
+            "to": "l50"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l52",
+            "to": "l53"
+        },
+        {
+            "stdev": 6.592101686830345,
+            "mean": 236.69791666675,
+            "from": "l42",
+            "to": "l43"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l40",
+            "to": "l43"
+        },
+        {
+            "stdev": 10.663170207696114,
+            "mean": 246.3645833333125,
+            "from": "l25",
+            "to": "l26"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l5",
+            "to": "l38"
+        },
+        {
+            "stdev": 7.884500346323888,
+            "mean": 251.552083333375,
+            "from": "l4",
+            "to": "l6"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l32",
+            "to": "l33"
+        },
+        {
+            "stdev": 2.41388065949427,
+            "mean": 254.50347222222916,
+            "from": "l47",
+            "to": "l48"
+        },
+        {
+            "stdev": 67.64223615780406,
+            "mean": 224.70289855072608,
+            "from": "l4",
+            "to": "l39"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l40",
+            "to": "l57"
+        },
+        {
+            "stdev": 23.46961996584899,
+            "mean": 230.85243055558334,
+            "from": "l34",
+            "to": "l35"
+        },
+        {
+            "stdev": 2.462548863241989,
+            "mean": 254.1376811593913,
+            "from": "l2",
+            "to": "l59"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l53",
+            "to": "l54"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l45",
+            "to": "l46"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l2",
+            "to": "l56"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l49",
+            "to": "l50"
+        },
+        {
+            "stdev": 8.836098714919059,
+            "mean": 232.03472222225,
+            "from": "l9",
+            "to": "l10"
+        },
+        {
+            "stdev": 0.10425720702853739,
+            "mean": 254.97826086956522,
+            "from": "l46",
+            "to": "l54"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l14",
+            "to": "l15"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l23",
+            "to": "l24"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l48",
+            "to": "l55"
+        },
+        {
+            "stdev": 4.217872254647796,
+            "mean": 227.18402777779167,
+            "from": "l10",
+            "to": "l25"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l8",
+            "to": "l34"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l57",
+            "to": "l58"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l16",
+            "to": "l17"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l31",
+            "to": "l32"
+        },
+        {
+            "stdev": 62.31476292768027,
+            "mean": 222.22407407406445,
+            "from": "l11",
+            "to": "l12"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l48",
+            "to": "l49"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l22",
+            "to": "l23"
+        },
+        {
+            "stdev": 7.183898856380822,
+            "mean": 247.6766666666,
+            "from": "l3",
+            "to": "l8"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l28",
+            "to": "l36"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l39",
+            "to": "l40"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l42",
+            "to": "l44"
+        },
+        {
+            "stdev": 50.72293355355684,
+            "mean": 208.44858156026172,
+            "from": "l11",
+            "to": "l27"
+        },
+        {
+            "stdev": 18.41902892165724,
+            "mean": 239.75166666666001,
+            "from": "l10",
+            "to": "l35"
+        },
+        {
+            "stdev": 26.547675783510314,
+            "mean": 237.39629629626666,
+            "from": "l13",
+            "to": "l19"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l28",
+            "to": "l29"
+        },
+        {
+            "stdev": 0.5285024957414496,
+            "mean": 252.8079710144348,
+            "from": "l29",
+            "to": "l30"
+        },
+        {
+            "stdev": 1.2357887817905087,
+            "mean": 245.87500000004167,
+            "from": "l6",
+            "to": "l7"
+        },
+        {
+            "stdev": 0.33892704455428446,
+            "mean": 254.85144927534782,
+            "from": "l25",
+            "to": "l55"
+        },
+        {
+            "stdev": 0.5560384375550348,
+            "mean": 254.884057971,
+            "from": "l55",
+            "to": "l56"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l30",
+            "to": "l31"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l21",
+            "to": "l22"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l15",
+            "to": "l16"
+        },
+        {
+            "stdev": 3.265986323710904,
+            "mean": 254.33333333333334,
+            "from": "l33",
+            "to": "l34"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l24",
+            "to": "l38"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l51",
+            "to": "l52"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l15",
+            "to": "l21"
+        },
+        {
+            "stdev": 21.700340506147008,
+            "mean": 229.65625,
+            "from": "l9",
+            "to": "l56"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l6",
+            "to": "l8"
+        },
+        {
+            "stdev": 35.081803657242915,
+            "mean": 224.00666666668,
+            "from": "l18",
+            "to": "l19"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l5",
+            "to": "l36"
+        },
+        {
+            "stdev": 0.0,
+            "mean": 255.0,
+            "from": "l7",
+            "to": "l28"
+        },
+        {
+            "stdev": 5.712793257895674,
+            "mean": 246.2246376811739,
+            "from": "l58",
+            "to": "l59"
+        },
+        {
+            "stdev": 3.8976415191691935,
+            "mean": 253.83854166666666,
+            "from": "l8",
+            "to": "l9"
+        }
+    ],
+    "walls": [
+        {
+            "p1": {
+                "x": -34.054,
+                "y": 11.351
+            },
+            "p2": {
+                "x": -34.054,
+                "y": 9.189
+            }
+        },
+        {
+            "p1": {
+                "x": -29.459,
+                "y": 9.189
+            },
+            "p2": {
+                "x": -29.459,
+                "y": 1.081
+            }
+        },
+        {
+            "p1": {
+                "x": -46,
+                "y": 1.081
+            },
+            "p2": {
+                "x": -29.459,
+                "y": 1.081
+            }
+        },
+        {
+            "p1": {
+                "x": -29.459,
+                "y": 9.189
+            },
+            "p2": {
+                "x": -34.054,
+                "y": 9.189
+            }
+        },
+        {
+            "p1": {
+                "x": -28,
+                "y": 9.189
+            },
+            "p2": {
+                "x": -28,
+                "y": 1.081
+            }
+        },
+        {
+            "p1": {
+                "x": -7.297,
+                "y": 1.081
+            },
+            "p2": {
+                "x": -28,
+                "y": 1.081
+            }
+        },
+        {
+            "p1": {
+                "x": -7.297,
+                "y": 1.081
+            },
+            "p2": {
+                "x": -7.297,
+                "y": 9.189
+            }
+        },
+        {
+            "p1": {
+                "x": -7.297,
+                "y": 9.189
+            },
+            "p2": {
+                "x": -28,
+                "y": 9.189
+            }
+        },
+        {
+            "p1": {
+                "x": -32.162,
+                "y": 11.351
+            },
+            "p2": {
+                "x": -7.027,
+                "y": 11.351
+            }
+        },
+        {
+            "p1": {
+                "x": -7.297,
+                "y": 19.027
+            },
+            "p2": {
+                "x": -7.297,
+                "y": 11.351
+            }
+        },
+        {
+            "p1": {
+                "x": -13.243,
+                "y": 19.027
+            },
+            "p2": {
+                "x": -7.297,
+                "y": 19.027
+            }
+        },
+        {
+            "p1": {
+                "x": -13.243,
+                "y": 19.027
+            },
+            "p2": {
+                "x": -13.243,
+                "y": 15.405
+            }
+        },
+        {
+            "p1": {
+                "x": -13.243,
+                "y": 15.405
+            },
+            "p2": {
+                "x": -22.162,
+                "y": 15.405
+            }
+        },
+        {
+            "p1": {
+                "x": -22.162,
+                "y": 15.405
+            },
+            "p2": {
+                "x": -22.162,
+                "y": 22.162
+            }
+        },
+        {
+            "p1": {
+                "x": -32,
+                "y": 22.162
+            },
+            "p2": {
+                "x": -22.162,
+                "y": 22.162
+            }
+        },
+        {
+            "p1": {
+                "x": -32.162,
+                "y": 22.162
+            },
+            "p2": {
+                "x": -32.162,
+                "y": 11.351
+            }
+        },
+        {
+            "p1": {
+                "x": -32.162,
+                "y": 22.162
+            },
+            "p2": {
+                "x": -31.351,
+                "y": 22.162
+            }
+        },
+        {
+            "p1": {
+                "x": -34.054,
+                "y": 11.351
+            },
+            "p2": {
+                "x": -46,
+                "y": 11.351
+            }
+        },
+        {
+            "p1": {
+                "x": -46,
+                "y": 11.351
+            },
+            "p2": {
+                "x": -46,
+                "y": 1.081
+            }
+        },
+        {
+            "p1": {
+                "x": -34.324,
+                "y": 13.243
+            },
+            "p2": {
+                "x": -34.324,
+                "y": 24
+            }
+        },
+        {
+            "p1": {
+                "x": -34.324,
+                "y": 24
+            },
+            "p2": {
+                "x": -20,
+                "y": 24
+            }
+        },
+        {
+            "p1": {
+                "x": -20,
+                "y": 24
+            },
+            "p2": {
+                "x": -20,
+                "y": 17.297
+            }
+        },
+        {
+            "p1": {
+                "x": -20,
+                "y": 17.297
+            },
+            "p2": {
+                "x": -15.405,
+                "y": 17.297
+            }
+        },
+        {
+            "p1": {
+                "x": -15.405,
+                "y": 17.297
+            },
+            "p2": {
+                "x": -15.405,
+                "y": 21.027
+            }
+        },
+        {
+            "p1": {
+                "x": 4.595,
+                "y": 21.081
+            },
+            "p2": {
+                "x": -15.405,
+                "y": 21.027
+            }
+        },
+        {
+            "p1": {
+                "x": -5.027,
+                "y": 19.027
+            },
+            "p2": {
+                "x": -5.027,
+                "y": 11.351
+            }
+        },
+        {
+            "p1": {
+                "x": -5.027,
+                "y": 11.351
+            },
+            "p2": {
+                "x": 2.216,
+                "y": 11.351
+            }
+        },
+        {
+            "p1": {
+                "x": 2.216,
+                "y": 11.351
+            },
+            "p2": {
+                "x": 2.216,
+                "y": 19.027
+            }
+        },
+        {
+            "p1": {
+                "x": 2.216,
+                "y": 19.027
+            },
+            "p2": {
+                "x": -5.027,
+                "y": 19.027
+            }
+        },
+        {
+            "p1": {
+                "x": 4.595,
+                "y": 21.081
+            },
+            "p2": {
+                "x": 4.595,
+                "y": 18
+            }
+        },
+        {
+            "p1": {
+                "x": 4.595,
+                "y": 18
+            },
+            "p2": {
+                "x": 52.973,
+                "y": 18
+            }
+        },
+        {
+            "p1": {
+                "x": 52.973,
+                "y": 18
+            },
+            "p2": {
+                "x": 52.973,
+                "y": -5.189
+            }
+        },
+        {
+            "p1": {
+                "x": 52.973,
+                "y": -2.973
+            },
+            "p2": {
+                "x": 51.135,
+                "y": -2.973
+            }
+        },
+        {
+            "p1": {
+                "x": 52.973,
+                "y": -0.973
+            },
+            "p2": {
+                "x": 51.622,
+                "y": -0.973
+            }
+        },
+        {
+            "p1": {
+                "x": 52.973,
+                "y": -5.189
+            },
+            "p2": {
+                "x": 40.811,
+                "y": -5.189
+            }
+        },
+        {
+            "p1": {
+                "x": 45.189,
+                "y": -2.973
+            },
+            "p2": {
+                "x": 40.811,
+                "y": -2.973
+            }
+        },
+        {
+            "p1": {
+                "x": 45.189,
+                "y": -0.973
+            },
+            "p2": {
+                "x": 45.189,
+                "y": -2.973
+            }
+        },
+        {
+            "p1": {
+                "x": 45.189,
+                "y": -0.973
+            },
+            "p2": {
+                "x": 40.811,
+                "y": -0.973
+            }
+        },
+        {
+            "p1": {
+                "x": 45.189,
+                "y": 1.081
+            },
+            "p2": {
+                "x": 40.811,
+                "y": 1.081
+            }
+        },
+        {
+            "p1": {
+                "x": 45.189,
+                "y": 1.081
+            },
+            "p2": {
+                "x": 50.811,
+                "y": 1.081
+            }
+        },
+        {
+            "p1": {
+                "x": 50.811,
+                "y": 1.081
+            },
+            "p2": {
+                "x": 50.811,
+                "y": 15.892
+            }
+        },
+        {
+            "p1": {
+                "x": 50.811,
+                "y": 15.892
+            },
+            "p2": {
+                "x": 41.135,
+                "y": 15.892
+            }
+        },
+        {
+            "p1": {
+                "x": 39.243,
+                "y": 15.892
+            },
+            "p2": {
+                "x": 28.973,
+                "y": 15.892
+            }
+        },
+        {
+            "p1": {
+                "x": 27.081,
+                "y": 15.892
+            },
+            "p2": {
+                "x": 17.838,
+                "y": 15.892
+            }
+        },
+        {
+            "p1": {
+                "x": 45.676,
+                "y": 15.892
+            },
+            "p2": {
+                "x": 45.676,
+                "y": 9.459
+            }
+        },
+        {
+            "p1": {
+                "x": 45.676,
+                "y": 9.459
+            },
+            "p2": {
+                "x": 40.054,
+                "y": 9.459
+            }
+        },
+        {
+            "p1": {
+                "x": 40.054,
+                "y": 9.459
+            },
+            "p2": {
+                "x": 40.054,
+                "y": 7.297
+            }
+        },
+        {
+            "p1": {
+                "x": 40,
+                "y": 7.297
+            },
+            "p2": {
+                "x": 37.838,
+                "y": 7.297
+            }
+        },
+        {
+            "p1": {
+                "x": 37.838,
+                "y": 7.297
+            },
+            "p2": {
+                "x": 37.838,
+                "y": 1.081
+            }
+        },
+        {
+            "p1": {
+                "x": 37.838,
+                "y": 1.081
+            },
+            "p2": {
+                "x": 40.811,
+                "y": 1.081
+            }
+        },
+        {
+            "p1": {
+                "x": 40.811,
+                "y": -0.973
+            },
+            "p2": {
+                "x": 35.676,
+                "y": -0.973
+            }
+        },
+        {
+            "p1": {
+                "x": 34.973,
+                "y": 1.081
+            },
+            "p2": {
+                "x": 34.973,
+                "y": 10
+            }
+        },
+        {
+            "p1": {
+                "x": 34.973,
+                "y": 10
+            },
+            "p2": {
+                "x": 37.838,
+                "y": 10
+            }
+        },
+        {
+            "p1": {
+                "x": 34.973,
+                "y": 10
+            },
+            "p2": {
+                "x": 34.973,
+                "y": 15.892
+            }
+        },
+        {
+            "p1": {
+                "x": 40.811,
+                "y": -5.189
+            },
+            "p2": {
+                "x": 40.811,
+                "y": -15.946
+            }
+        },
+        {
+            "p1": {
+                "x": 0.973,
+                "y": -15.946
+            },
+            "p2": {
+                "x": 40.811,
+                "y": -15.946
+            }
+        },
+        {
+            "p1": {
+                "x": 4.865,
+                "y": 15.892
+            },
+            "p2": {
+                "x": 4.865,
+                "y": 11.351
+            }
+        },
+        {
+            "p1": {
+                "x": 24.973,
+                "y": 15.892
+            },
+            "p2": {
+                "x": 24.973,
+                "y": 15.892
+            }
+        },
+        {
+            "p1": {
+                "x": 24.973,
+                "y": 15.892
+            },
+            "p2": {
+                "x": 24.973,
+                "y": 11.351
+            }
+        },
+        {
+            "p1": {
+                "x": 30.541,
+                "y": 15.892
+            },
+            "p2": {
+                "x": 30.541,
+                "y": 9.459
+            }
+        },
+        {
+            "p1": {
+                "x": 30.541,
+                "y": 9.459
+            },
+            "p2": {
+                "x": 24.973,
+                "y": 9.459
+            }
+        },
+        {
+            "p1": {
+                "x": 24.973,
+                "y": 9.459
+            },
+            "p2": {
+                "x": 24.973,
+                "y": 7.297
+            }
+        },
+        {
+            "p1": {
+                "x": 20,
+                "y": 15.892
+            },
+            "p2": {
+                "x": 20,
+                "y": 7.784
+            }
+        },
+        {
+            "p1": {
+                "x": 12.216,
+                "y": 15.892
+            },
+            "p2": {
+                "x": 12.216,
+                "y": 9.459
+            }
+        },
+        {
+            "p1": {
+                "x": 12.216,
+                "y": 9.459
+            },
+            "p2": {
+                "x": 14.973,
+                "y": 9.459
+            }
+        },
+        {
+            "p1": {
+                "x": 14.973,
+                "y": 9.459
+            },
+            "p2": {
+                "x": 14.973,
+                "y": 7.784
+            }
+        },
+        {
+            "p1": {
+                "x": 4.865,
+                "y": 7.784
+            },
+            "p2": {
+                "x": 14.973,
+                "y": 7.784
+            }
+        },
+        {
+            "p1": {
+                "x": 4.865,
+                "y": 11.351
+            },
+            "p2": {
+                "x": 4.865,
+                "y": 7.784
+            }
+        },
+        {
+            "p1": {
+                "x": 24.973,
+                "y": 7.297
+            },
+            "p2": {
+                "x": 24.973,
+                "y": 1.351
+            }
+        },
+        {
+            "p1": {
+                "x": 24.973,
+                "y": 1.351
+            },
+            "p2": {
+                "x": 34.973,
+                "y": 1.351
+            }
+        },
+        {
+            "p1": {
+                "x": 20,
+                "y": 5.405
+            },
+            "p2": {
+                "x": 4.865,
+                "y": 5.405
+            }
+        },
+        {
+            "p1": {
+                "x": 20,
+                "y": -0.973
+            },
+            "p2": {
+                "x": 35.676,
+                "y": -0.973
+            }
+        },
+        {
+            "p1": {
+                "x": 20,
+                "y": 5.405
+            },
+            "p2": {
+                "x": 20,
+                "y": -0.973
+            }
+        },
+        {
+            "p1": {
+                "x": 40.811,
+                "y": -2.973
+            },
+            "p2": {
+                "x": 38,
+                "y": -2.973
+            }
+        },
+        {
+            "p1": {
+                "x": 38,
+                "y": -13.027
+            },
+            "p2": {
+                "x": 38,
+                "y": -2.973
+            }
+        },
+        {
+            "p1": {
+                "x": 38,
+                "y": -13.027
+            },
+            "p2": {
+                "x": 26.27,
+                "y": -13.027
+            }
+        },
+        {
+            "p1": {
+                "x": 26.27,
+                "y": -13.027
+            },
+            "p2": {
+                "x": 26.27,
+                "y": -6.27
+            }
+        },
+        {
+            "p1": {
+                "x": 16.27,
+                "y": -6.27
+            },
+            "p2": {
+                "x": 26.27,
+                "y": -6.27
+            }
+        },
+        {
+            "p1": {
+                "x": 16.27,
+                "y": -6.27
+            },
+            "p2": {
+                "x": 16.27,
+                "y": 1.027
+            }
+        },
+        {
+            "p1": {
+                "x": 4.865,
+                "y": 1.027
+            },
+            "p2": {
+                "x": 16.27,
+                "y": 1.027
+            }
+        },
+        {
+            "p1": {
+                "x": 4.865,
+                "y": 5.405
+            },
+            "p2": {
+                "x": 4.865,
+                "y": 1.027
+            }
+        },
+        {
+            "p1": {
+                "x": 4.595,
+                "y": -13.514
+            },
+            "p2": {
+                "x": 0.973,
+                "y": -13.514
+            }
+        },
+        {
+            "p1": {
+                "x": 0.973,
+                "y": -0.973
+            },
+            "p2": {
+                "x": 13.784,
+                "y": -0.973
+            }
+        },
+        {
+            "p1": {
+                "x": 13.784,
+                "y": -0.973
+            },
+            "p2": {
+                "x": 13.784,
+                "y": -8.919
+            }
+        },
+        {
+            "p1": {
+                "x": 24,
+                "y": -8.919
+            },
+            "p2": {
+                "x": 13.784,
+                "y": -8.919
+            }
+        },
+        {
+            "p1": {
+                "x": 24,
+                "y": -13.027
+            },
+            "p2": {
+                "x": 24,
+                "y": -8.919
+            }
+        },
+        {
+            "p1": {
+                "x": 4.595,
+                "y": -13.514
+            },
+            "p2": {
+                "x": 24,
+                "y": -13.514
+            }
+        },
+        {
+            "p1": {
+                "x": 24,
+                "y": -13.514
+            },
+            "p2": {
+                "x": 24,
+                "y": -13.027
+            }
+        },
+        {
+            "p1": {
+                "x": -34.324,
+                "y": 13.243
+            },
+            "p2": {
+                "x": -48.378,
+                "y": 13.243
+            }
+        },
+        {
+            "p1": {
+                "x": -1.081,
+                "y": -1.135
+            },
+            "p2": {
+                "x": -1.081,
+                "y": -20
+            }
+        },
+        {
+            "p1": {
+                "x": -1.081,
+                "y": -1.135
+            },
+            "p2": {
+                "x": -28,
+                "y": -0.973
+            }
+        },
+        {
+            "p1": {
+                "x": -30,
+                "y": -0.973
+            },
+            "p2": {
+                "x": -45.892,
+                "y": -0.973
+            }
+        },
+        {
+            "p1": {
+                "x": -1.081,
+                "y": -20
+            },
+            "p2": {
+                "x": -5.027,
+                "y": -20
+            }
+        },
+        {
+            "p1": {
+                "x": -5.027,
+                "y": -21.892
+            },
+            "p2": {
+                "x": -3.243,
+                "y": -21.892
+            }
+        },
+        {
+            "p1": {
+                "x": -3.243,
+                "y": -21.892
+            },
+            "p2": {
+                "x": -3.243,
+                "y": -53.027
+            }
+        },
+        {
+            "p1": {
+                "x": -3.243,
+                "y": -53.027
+            },
+            "p2": {
+                "x": -1.081,
+                "y": -53.027
+            }
+        },
+        {
+            "p1": {
+                "x": -1.081,
+                "y": -53.027
+            },
+            "p2": {
+                "x": -1.081,
+                "y": -56.757
+            }
+        },
+        {
+            "p1": {
+                "x": -4.324,
+                "y": -58.162
+            },
+            "p2": {
+                "x": 0.541,
+                "y": -58.162
+            }
+        },
+        {
+            "p1": {
+                "x": 0.541,
+                "y": -58.162
+            },
+            "p2": {
+                "x": 0.541,
+                "y": -51.622
+            }
+        },
+        {
+            "p1": {
+                "x": 0.541,
+                "y": -51.622
+            },
+            "p2": {
+                "x": -1.351,
+                "y": -51.622
+            }
+        },
+        {
+            "p1": {
+                "x": -1.351,
+                "y": -51.622
+            },
+            "p2": {
+                "x": -1.351,
+                "y": -41.892
+            }
+        },
+        {
+            "p1": {
+                "x": -1.351,
+                "y": -41.892
+            },
+            "p2": {
+                "x": 2.973,
+                "y": -41.892
+            }
+        },
+        {
+            "p1": {
+                "x": 2.973,
+                "y": -41.892
+            },
+            "p2": {
+                "x": 2.973,
+                "y": -35.946
+            }
+        },
+        {
+            "p1": {
+                "x": 2.973,
+                "y": -35.946
+            },
+            "p2": {
+                "x": 5.946,
+                "y": -35.946
+            }
+        },
+        {
+            "p1": {
+                "x": 5.946,
+                "y": -35.946
+            },
+            "p2": {
+                "x": 5.946,
+                "y": -20
+            }
+        },
+        {
+            "p1": {
+                "x": 2,
+                "y": -20
+            },
+            "p2": {
+                "x": 5.946,
+                "y": -20
+            }
+        },
+        {
+            "p1": {
+                "x": 2,
+                "y": -20
+            },
+            "p2": {
+                "x": 2,
+                "y": -19.243
+            }
+        },
+        {
+            "p1": {
+                "x": 2,
+                "y": -19.243
+            },
+            "p2": {
+                "x": 0.973,
+                "y": -19.243
+            }
+        },
+        {
+            "p1": {
+                "x": 0.973,
+                "y": -19.243
+            },
+            "p2": {
+                "x": 0.973,
+                "y": -15.946
+            }
+        },
+        {
+            "p1": {
+                "x": 0.973,
+                "y": -21.135
+            },
+            "p2": {
+                "x": 0.973,
+                "y": -21.892
+            }
+        },
+        {
+            "p1": {
+                "x": 0.973,
+                "y": -21.892
+            },
+            "p2": {
+                "x": -1.351,
+                "y": -21.892
+            }
+        },
+        {
+            "p1": {
+                "x": -1.351,
+                "y": -21.892
+            },
+            "p2": {
+                "x": -1.351,
+                "y": -39.243
+            }
+        },
+        {
+            "p1": {
+                "x": -1.351,
+                "y": -39.243
+            },
+            "p2": {
+                "x": 0.973,
+                "y": -39.243
+            }
+        },
+        {
+            "p1": {
+                "x": 0.973,
+                "y": -39.243
+            },
+            "p2": {
+                "x": 0.973,
+                "y": -34.108
+            }
+        },
+        {
+            "p1": {
+                "x": 0.973,
+                "y": -34.108
+            },
+            "p2": {
+                "x": 4,
+                "y": -34.108
+            }
+        },
+        {
+            "p1": {
+                "x": 4,
+                "y": -34.108
+            },
+            "p2": {
+                "x": 4,
+                "y": -21.135
+            }
+        },
+        {
+            "p1": {
+                "x": 4,
+                "y": -21.135
+            },
+            "p2": {
+                "x": 0.973,
+                "y": -21.135
+            }
+        },
+        {
+            "p1": {
+                "x": -4.324,
+                "y": -58.162
+            },
+            "p2": {
+                "x": -48.108,
+                "y": -58.162
+            }
+        },
+        {
+            "p1": {
+                "x": -45.892,
+                "y": -0.973
+            },
+            "p2": {
+                "x": -46,
+                "y": -56.27
+            }
+        },
+        {
+            "p1": {
+                "x": -5.027,
+                "y": -20
+            },
+            "p2": {
+                "x": -28,
+                "y": -20
+            }
+        },
+        {
+            "p1": {
+                "x": -28,
+                "y": -20
+            },
+            "p2": {
+                "x": -28,
+                "y": -0.973
+            }
+        },
+        {
+            "p1": {
+                "x": -5.027,
+                "y": -21.892
+            },
+            "p2": {
+                "x": -30,
+                "y": -21.892
+            }
+        },
+        {
+            "p1": {
+                "x": -30,
+                "y": -21.892
+            },
+            "p2": {
+                "x": -30,
+                "y": -0.973
+            }
+        },
+        {
+            "p1": {
+                "x": -5.027,
+                "y": 9.189
+            },
+            "p2": {
+                "x": -5.027,
+                "y": 2.432
+            }
+        },
+        {
+            "p1": {
+                "x": -5.027,
+                "y": 2.432
+            },
+            "p2": {
+                "x": 2.216,
+                "y": 2.432
+            }
+        },
+        {
+            "p1": {
+                "x": 2.216,
+                "y": 2.432
+            },
+            "p2": {
+                "x": 2.216,
+                "y": 9.189
+            }
+        },
+        {
+            "p1": {
+                "x": 2.216,
+                "y": 9.189
+            },
+            "p2": {
+                "x": -5.027,
+                "y": 9.189
+            }
+        },
+        {
+            "p1": {
+                "x": 0.973,
+                "y": -0.865
+            },
+            "p2": {
+                "x": 0.973,
+                "y": -13.568
+            }
+        },
+        {
+            "p1": {
+                "x": 15.568,
+                "y": 15.946
+            },
+            "p2": {
+                "x": 4.757,
+                "y": 15.946
+            }
+        },
+        {
+            "p1": {
+                "x": -48.216,
+                "y": -58.108
+            },
+            "p2": {
+                "x": -48.216,
+                "y": 13.189
+            }
+        },
+        {
+            "p1": {
+                "x": -1.135,
+                "y": -56.811
+            },
+            "p2": {
+                "x": -46,
+                "y": -56.811
+            }
+        },
+        {
+            "p1": {
+                "x": -46,
+                "y": -56.27
+            },
+            "p2": {
+                "x": -46,
+                "y": -56.811
+            }
+        }
+    ],
+    "mpr": 18.5,
+    "time": [
+        {
+            "aruco": {
+                "stdev": 1.9379222120611554,
+                "mean": 31.964
+            },
+            "stdev": 8.289193328766478,
+            "to": "l3",
+            "mrpt-kinect": {
+                "stdev": 4.643952544772098,
+                "mean": 17.224285714285713
+            },
+            "mean": 17.586041666666667,
+            "amcl-kinect": {
+                "stdev": 0.22069020518968818,
+                "mean": 11.815833333333334
+            },
+            "from": "l1",
+            "amcl-lidar": {
+                "stdev": 0.23053560824017363,
+                "mean": 11.796666666666667
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 0.6708576600144027,
+                "mean": 9.255
+            },
+            "stdev": 1.183677639234259,
+            "to": "l2",
+            "mrpt-kinect": {
+                "stdev": 0.5989379489284898,
+                "mean": 10.211666666666666
+            },
+            "mean": 8.680833333333334,
+            "amcl-kinect": {
+                "stdev": 0.3077800699014986,
+                "mean": 7.6657142857142855
+            },
+            "from": "l1",
+            "amcl-lidar": {
+                "stdev": 0.4597544634548608,
+                "mean": 7.855833333333334
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 13.780917240880592,
+                "mean": 34.209
+            },
+            "stdev": 12.768577762747633,
+            "to": "l45",
+            "mrpt-kinect": {
+                "stdev": 10.346364297020797,
+                "mean": 22.765833333333333
+            },
+            "mean": 17.2402,
+            "amcl-kinect": {
+                "stdev": 0.12360651855210299,
+                "mean": 8.830714285714286
+            },
+            "from": "l44",
+            "amcl-lidar": {
+                "stdev": 0.2766594950304004,
+                "mean": 8.792857142857143
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 6.235825760608349,
+                "mean": 50.71875
+            },
+            "stdev": 14.231019203254762,
+            "to": "l39",
+            "mrpt-kinect": {
+                "stdev": 13.732842455397275,
+                "mean": 37.58428571428571
+            },
+            "mean": 30.270208333333333,
+            "amcl-kinect": {
+                "stdev": 0.29538715515162584,
+                "mean": 20.304285714285715
+            },
+            "from": "l14",
+            "amcl-lidar": {
+                "stdev": 0.35609923710486463,
+                "mean": 19.731666666666666
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 6.062989499138743,
+                "mean": 16.8525
+            },
+            "stdev": 19.83080069842314,
+            "to": "l51",
+            "mrpt-kinect": {
+                "stdev": 15.803650007875667,
+                "mean": 49.089285714285715
+            },
+            "mean": 22.007916666666667,
+            "amcl-kinect": {
+                "stdev": 0.23926972228010795,
+                "mean": 9.035
+            },
+            "from": "l27",
+            "amcl-lidar": {
+                "stdev": 0.14611231817957554,
+                "mean": 8.992142857142857
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 7.6268664837606215,
+                "mean": 21.608888888888888
+            },
+            "stdev": 9.935775463343111,
+            "to": "l18",
+            "mrpt-kinect": {
+                "stdev": 13.834512272129158,
+                "mean": 17.908846153846152
+            },
+            "mean": 13.302173913043479,
+            "amcl-kinect": {
+                "stdev": 1.0264135670411128,
+                "mean": 7.692916666666667
+            },
+            "from": "l17",
+            "amcl-lidar": {
+                "stdev": 1.22155421368423,
+                "mean": 7.690833333333334
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 13.686821850273027,
+                "mean": 37.39388888888889
+            },
+            "stdev": 15.980712121124089,
+            "to": "l39",
+            "mrpt-kinect": {
+                "stdev": 22.29149137852351,
+                "mean": 27.378333333333334
+            },
+            "mean": 21.07659574468085,
+            "amcl-kinect": {
+                "stdev": 0.5016084020538224,
+                "mean": 12.805714285714286
+            },
+            "from": "l13",
+            "amcl-lidar": {
+                "stdev": 0.25446132944284133,
+                "mean": 12.18625
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 10.9904856377492,
+                "mean": 31.069375
+            },
+            "stdev": 12.412420157514275,
+            "to": "l47",
+            "mrpt-kinect": {
+                "stdev": 18.940305282770538,
+                "mean": 39.213750000000005
+            },
+            "mean": 28.8475,
+            "amcl-kinect": {
+                "stdev": 1.2789006446844722,
+                "mean": 23.43423076923077
+            },
+            "from": "l46",
+            "amcl-lidar": {
+                "stdev": 1.1306514743325005,
+                "mean": 23.324615384615385
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 1.0313922629145513,
+                "mean": 22.512999999999998
+            },
+            "stdev": 0.9930441960770519,
+            "to": "l27",
+            "mrpt-kinect": {
+                "stdev": 0.9194492399050123,
+                "mean": 22.280714285714286
+            },
+            "mean": 21.65041666666667,
+            "amcl-kinect": {
+                "stdev": 0.21866450710315724,
+                "mean": 20.990833333333335
+            },
+            "from": "l26",
+            "amcl-lidar": {
+                "stdev": 0.2073744600153702,
+                "mean": 20.855833333333333
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 10.895503596030387,
+                "mean": 18.85611111111111
+            },
+            "stdev": 12.647111103634566,
+            "to": "l45",
+            "mrpt-kinect": {
+                "stdev": 19.608941432186214,
+                "mean": 24.3775
+            },
+            "mean": 15.539777777777777,
+            "amcl-kinect": {
+                "stdev": 1.6603036870805694,
+                "mean": 10.104166666666666
+            },
+            "from": "l12",
+            "amcl-lidar": {
+                "stdev": 1.3858841259665473,
+                "mean": 9.650416666666667
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 25.39160897324154,
+                "mean": 37.38875
+            },
+            "stdev": 16.064564833729595,
+            "to": "l50",
+            "mrpt-kinect": {
+                "stdev": 18.66294762803204,
+                "mean": 26.305833333333332
+            },
+            "mean": 20.035416666666666,
+            "amcl-kinect": {
+                "stdev": 0.3619490887640729,
+                "mean": 12.512142857142857
+            },
+            "from": "l26",
+            "amcl-lidar": {
+                "stdev": 0.12661809845809122,
+                "mean": 12.267857142857142
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 72.61414214588872,
+                "mean": 107.12125
+            },
+            "stdev": 47.300172469163876,
+            "to": "l53",
+            "mrpt-kinect": {
+                "stdev": 29.651691590306726,
+                "mean": 36.784166666666664
+            },
+            "mean": 33.80239130434783,
+            "amcl-kinect": {
+                "stdev": 0.4750517515667811,
+                "mean": 10.114166666666666
+            },
+            "from": "l52",
+            "amcl-lidar": {
+                "stdev": 0.25185029566901773,
+                "mean": 9.654285714285715
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 2.590112449296362,
+                "mean": 24.892
+            },
+            "stdev": 6.58277886125851,
+            "to": "l43",
+            "mrpt-kinect": {
+                "stdev": 9.078903246905249,
+                "mean": 30.484166666666667
+            },
+            "mean": 23.123333333333335,
+            "amcl-kinect": {
+                "stdev": 0.20299835795723448,
+                "mean": 19.075
+            },
+            "from": "l42",
+            "amcl-lidar": {
+                "stdev": 0.33290639324991456,
+                "mean": 19.011666666666667
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 20.128572167443966,
+                "mean": 49.596
+            },
+            "stdev": 16.752396801154553,
+            "to": "l43",
+            "mrpt-kinect": {
+                "stdev": 16.845902038068207,
+                "mean": 47.457857142857144
+            },
+            "mean": 36.2144,
+            "amcl-kinect": {
+                "stdev": 0.2201684960812217,
+                "mean": 25.010833333333334
+            },
+            "from": "l40",
+            "amcl-lidar": {
+                "stdev": 0.31724633661437,
+                "mean": 25.015714285714285
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 27.60363766788718,
+                "mean": 38.653333333333336
+            },
+            "stdev": 34.49878736626707,
+            "to": "l26",
+            "mrpt-kinect": {
+                "stdev": 51.3242202851518,
+                "mean": 70.13333333333334
+            },
+            "mean": 36.118541666666665,
+            "amcl-kinect": {
+                "stdev": 1.3935668357280269,
+                "mean": 20.30423076923077
+            },
+            "from": "l25",
+            "amcl-lidar": {
+                "stdev": 1.2620764440197159,
+                "mean": 20.018214285714286
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 2.6790170772132096,
+                "mean": 92.742
+            },
+            "stdev": 2.779882105400791,
+            "to": "l38",
+            "mrpt-kinect": {
+                "stdev": 2.450379222351783,
+                "mean": 91.8
+            },
+            "mean": 90.06479166666666,
+            "amcl-kinect": {
+                "stdev": 0.4935053191202685,
+                "mean": 87.8625
+            },
+            "from": "l5",
+            "amcl-lidar": {
+                "stdev": 0.30963957542062576,
+                "mean": 88.01166666666667
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 0.0,
+                "mean": 0.0
+            },
+            "stdev": 18.6098662953126,
+            "to": "l6",
+            "mrpt-kinect": {
+                "stdev": 29.239987417347955,
+                "mean": 37.729166666666664
+            },
+            "mean": 24.346666666666668,
+            "amcl-kinect": {
+                "stdev": 0.35761711368445415,
+                "mean": 17.744999999999997
+            },
+            "from": "l4",
+            "amcl-lidar": {
+                "stdev": 0.15444794160708816,
+                "mean": 17.565833333333334
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 34.44839854768288,
+                "mean": 76.345
+            },
+            "stdev": 31.21909351590321,
+            "to": "l33",
+            "mrpt-kinect": {
+                "stdev": 3.5241533262142086,
+                "mean": 12.626666666666667
+            },
+            "mean": 23.652291666666667,
+            "amcl-kinect": {
+                "stdev": 0.2601396145296192,
+                "mean": 8.46642857142857
+            },
+            "from": "l32",
+            "amcl-lidar": {
+                "stdev": 0.33444605942762523,
+                "mean": 8.484166666666667
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 16.866806145609527,
+                "mean": 26.268124999999998
+            },
+            "stdev": 14.469608842056164,
+            "to": "l48",
+            "mrpt-kinect": {
+                "stdev": 18.8710565526175,
+                "mean": 30.511785714285715
+            },
+            "mean": 20.194479166666667,
+            "amcl-kinect": {
+                "stdev": 0.17552589740360425,
+                "mean": 12.718571428571428
+            },
+            "from": "l47",
+            "amcl-lidar": {
+                "stdev": 0.20384328130535292,
+                "mean": 12.830416666666666
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 0.0,
+                "mean": 0.0
+            },
+            "stdev": 3.6181244737574114,
+            "to": "l39",
+            "mrpt-kinect": {
+                "stdev": 3.3690632971198395,
+                "mean": 79.9675
+            },
+            "mean": 75.55447368421052,
+            "amcl-kinect": {
+                "stdev": 0.7474281300056967,
+                "mean": 73.38785714285714
+            },
+            "from": "l4",
+            "amcl-lidar": {
+                "stdev": 0.9481899422935594,
+                "mean": 73.66916666666667
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 2.0550486612243515,
+                "mean": 19.2225
+            },
+            "stdev": 12.678321691339548,
+            "to": "l57",
+            "mrpt-kinect": {
+                "stdev": 18.974313865504246,
+                "mean": 33.98833333333333
+            },
+            "mean": 19.85,
+            "amcl-kinect": {
+                "stdev": 0.30389828342171765,
+                "mean": 13.549166666666666
+            },
+            "from": "l40",
+            "amcl-lidar": {
+                "stdev": 0.366440406380862,
+                "mean": 13.490714285714287
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 6.397289790736908,
+                "mean": 24.04
+            },
+            "stdev": 4.16395760158547,
+            "to": "l35",
+            "mrpt-kinect": {
+                "stdev": 3.4827350271346758,
+                "mean": 20.82846153846154
+            },
+            "mean": 19.984166666666667,
+            "amcl-kinect": {
+                "stdev": 1.1355544788159548,
+                "mean": 17.938846153846153
+            },
+            "from": "l34",
+            "amcl-lidar": {
+                "stdev": 0.7105742182889617,
+                "mean": 17.905416666666667
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 13.188274068909346,
+                "mean": 62.708749999999995
+            },
+            "stdev": 32.552570346533436,
+            "to": "l59",
+            "mrpt-kinect": {
+                "stdev": 39.6780902868261,
+                "mean": 66.31714285714285
+            },
+            "mean": 45.50043478260869,
+            "amcl-kinect": {
+                "stdev": 31.278340016162407,
+                "mean": 33.384166666666665
+            },
+            "from": "l2",
+            "amcl-lidar": {
+                "stdev": 0.39938285725186956,
+                "mean": 21.858333333333334
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 9.570553362615282,
+                "mean": 22.1725
+            },
+            "stdev": 16.65179464231356,
+            "to": "l54",
+            "mrpt-kinect": {
+                "stdev": 19.06910496501256,
+                "mean": 40.329166666666666
+            },
+            "mean": 18.801875,
+            "amcl-kinect": {
+                "stdev": 0.7044957669952928,
+                "mean": 8.813571428571429
+            },
+            "from": "l53",
+            "amcl-lidar": {
+                "stdev": 0.5155163846640983,
+                "mean": 8.412142857142857
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 20.307291383474393,
+                "mean": 30.869999999999997
+            },
+            "stdev": 8.642215819381898,
+            "to": "l46",
+            "mrpt-kinect": {
+                "stdev": 0.383505758322696,
+                "mean": 20.686666666666667
+            },
+            "mean": 21.800217391304347,
+            "amcl-kinect": {
+                "stdev": 0.1841583169837447,
+                "mean": 19.361428571428572
+            },
+            "from": "l45",
+            "amcl-lidar": {
+                "stdev": 0.39180033180179985,
+                "mean": 19.7125
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 2.2192366054819646,
+                "mean": 17.56111111111111
+            },
+            "stdev": 16.497900950668278,
+            "to": "l56",
+            "mrpt-kinect": {
+                "stdev": 26.897680799979437,
+                "mean": 32.78642857142857
+            },
+            "mean": 19.474183673469387,
+            "amcl-kinect": {
+                "stdev": 0.5433389092727211,
+                "mean": 13.179642857142857
+            },
+            "from": "l2",
+            "amcl-lidar": {
+                "stdev": 0.1687969912125933,
+                "mean": 12.721666666666668
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 16.312030006000686,
+                "mean": 35.20875
+            },
+            "stdev": 11.039455849902954,
+            "to": "l50",
+            "mrpt-kinect": {
+                "stdev": 0.328141229757351,
+                "mean": 12.496666666666666
+            },
+            "mean": 14.899375,
+            "amcl-kinect": {
+                "stdev": 0.20422326717870046,
+                "mean": 10.137142857142857
+            },
+            "from": "l49",
+            "amcl-lidar": {
+                "stdev": 0.29101014546215537,
+                "mean": 10.115714285714287
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 3.758799010322314,
+                "mean": 21.122
+            },
+            "stdev": 3.640226044104118,
+            "to": "l10",
+            "mrpt-kinect": {
+                "stdev": 1.4756770036317635,
+                "mean": 16.35142857142857
+            },
+            "mean": 15.690000000000001,
+            "amcl-kinect": {
+                "stdev": 0.18486256156038394,
+                "mean": 13.044166666666667
+            },
+            "from": "l9",
+            "amcl-lidar": {
+                "stdev": 0.20740660548786788,
+                "mean": 13.0375
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 5.289449207305677,
+                "mean": 29.12125
+            },
+            "stdev": 11.714641171907966,
+            "to": "l54",
+            "mrpt-kinect": {
+                "stdev": 13.748633395290428,
+                "mean": 34.50928571428571
+            },
+            "mean": 23.502173913043478,
+            "amcl-kinect": {
+                "stdev": 0.3625660859300917,
+                "mean": 15.070833333333333
+            },
+            "from": "l46",
+            "amcl-lidar": {
+                "stdev": 0.24834284098130682,
+                "mean": 15.345833333333333
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 18.711004059554543,
+                "mean": 61.19625
+            },
+            "stdev": 26.696126901624122,
+            "to": "l15",
+            "mrpt-kinect": {
+                "stdev": 1.8232683565509504,
+                "mean": 35.912
+            },
+            "mean": 43.99738095238095,
+            "amcl-kinect": {
+                "stdev": 0.289102058104053,
+                "mean": 32.29
+            },
+            "from": "l14",
+            "amcl-lidar": {
+                "stdev": 45.96723438131412,
+                "mean": 50.97666666666667
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 36.52181283151207,
+                "mean": 55.165
+            },
+            "stdev": 25.613924206202896,
+            "to": "l24",
+            "mrpt-kinect": {
+                "stdev": 16.487083858786754,
+                "mean": 28.809166666666666
+            },
+            "mean": 24.14217391304348,
+            "amcl-kinect": {
+                "stdev": 0.4135305309164004,
+                "mean": 8.5775
+            },
+            "from": "l23",
+            "amcl-lidar": {
+                "stdev": 0.13478686879663032,
+                "mean": 9.1875
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 3.1543211102655144,
+                "mean": 13.6775
+            },
+            "stdev": 1.8895922558268046,
+            "to": "l55",
+            "mrpt-kinect": {
+                "stdev": 0.38938412910646525,
+                "mean": 14.26
+            },
+            "mean": 12.409565217391304,
+            "amcl-kinect": {
+                "stdev": 0.33380205140743124,
+                "mean": 11.177857142857142
+            },
+            "from": "l48",
+            "amcl-lidar": {
+                "stdev": 0.1870672784499378,
+                "mean": 11.150833333333333
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 9.998483384993946,
+                "mean": 31.607
+            },
+            "stdev": 5.777815879774962,
+            "to": "l25",
+            "mrpt-kinect": {
+                "stdev": 0.2159750867466846,
+                "mean": 22.080714285714286
+            },
+            "mean": 23.985416666666666,
+            "amcl-kinect": {
+                "stdev": 0.2149418526020468,
+                "mean": 21.99
+            },
+            "from": "l10",
+            "amcl-lidar": {
+                "stdev": 0.2748393470132444,
+                "mean": 21.851666666666667
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 4.945624328636376,
+                "mean": 27.795
+            },
+            "stdev": 16.99052797580873,
+            "to": "l34",
+            "mrpt-kinect": {
+                "stdev": 23.136063736904237,
+                "mean": 45.380714285714284
+            },
+            "mean": 28.001875,
+            "amcl-kinect": {
+                "stdev": 0.5283031011329261,
+                "mean": 18.125833333333333
+            },
+            "from": "l8",
+            "amcl-lidar": {
+                "stdev": 0.5593835893195297,
+                "mean": 17.775
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 17.05064563782459,
+                "mean": 41.92
+            },
+            "stdev": 23.969052739555682,
+            "to": "l58",
+            "mrpt-kinect": {
+                "stdev": 35.92347984489624,
+                "mean": 52.72083333333333
+            },
+            "mean": 32.90477272727273,
+            "amcl-kinect": {
+                "stdev": 0.3456937469302369,
+                "mean": 19.019166666666667
+            },
+            "from": "l57",
+            "amcl-lidar": {
+                "stdev": 3.0360688672470313,
+                "mean": 20.964166666666667
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 9.882572975248456,
+                "mean": 22.593888888888888
+            },
+            "stdev": 10.565799585344196,
+            "to": "l17",
+            "mrpt-kinect": {
+                "stdev": 14.603559332995081,
+                "mean": 25.52576923076923
+            },
+            "mean": 17.560625,
+            "amcl-kinect": {
+                "stdev": 0.31897723172504705,
+                "mean": 11.846153846153847
+            },
+            "from": "l16",
+            "amcl-lidar": {
+                "stdev": 0.15593082785941703,
+                "mean": 11.825384615384616
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 0.4762089877354268,
+                "mean": 12.8
+            },
+            "stdev": 0.7748123711753161,
+            "to": "l32",
+            "amcl-kinect": {
+                "stdev": 0.03535533905932788,
+                "mean": 12.26
+            },
+            "mean": 13.002894736842105,
+            "mrpt-kinect": {
+                "stdev": 0.5892424515143716,
+                "mean": 13.908333333333333
+            },
+            "from": "l31",
+            "amcl-lidar": {
+                "stdev": 0.31621854257248555,
+                "mean": 12.514166666666666
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 0.0,
+                "mean": 0.0
+            },
+            "stdev": 8.710745081615805,
+            "to": "l12",
+            "mrpt-kinect": {
+                "stdev": 9.604334633382992,
+                "mean": 39.345
+            },
+            "mean": 32.73742424242424,
+            "amcl-kinect": {
+                "stdev": 2.257131962683994,
+                "mean": 28.859166666666667
+            },
+            "from": "l11",
+            "amcl-lidar": {
+                "stdev": 9.754804410694716,
+                "mean": 31.66
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 3.1811826286251885,
+                "mean": 16.48875
+            },
+            "stdev": 3.442813740273565,
+            "to": "l49",
+            "mrpt-kinect": {
+                "stdev": 2.74120897902124,
+                "mean": 13.956666666666667
+            },
+            "mean": 11.970454545454546,
+            "amcl-kinect": {
+                "stdev": 0.2458810688117323,
+                "mean": 9.3125
+            },
+            "from": "l48",
+            "amcl-lidar": {
+                "stdev": 0.13725887949418777,
+                "mean": 9.629999999999999
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 30.240192955733598,
+                "mean": 32.812
+            },
+            "stdev": 21.107304902568682,
+            "to": "l23",
+            "mrpt-kinect": {
+                "stdev": 21.084630630142037,
+                "mean": 40.25785714285714
+            },
+            "mean": 23.6566,
+            "amcl-kinect": {
+                "stdev": 0.18381376444651806,
+                "mean": 11.3475
+            },
+            "from": "l22",
+            "amcl-lidar": {
+                "stdev": 0.07559289460184525,
+                "mean": 11.066428571428572
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 1.4225786445747035,
+                "mean": 23.339
+            },
+            "stdev": 6.267916772474462,
+            "to": "l8",
+            "mrpt-kinect": {
+                "stdev": 9.701384351386835,
+                "mean": 26.785
+            },
+            "mean": 21.5516,
+            "amcl-kinect": {
+                "stdev": 0.5286744429861036,
+                "mean": 18.273333333333333
+            },
+            "from": "l3",
+            "amcl-lidar": {
+                "stdev": 0.3353569526851735,
+                "mean": 17.85142857142857
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 4.506132765465305,
+                "mean": 44.833
+            },
+            "stdev": 8.953682726956545,
+            "to": "l36",
+            "mrpt-kinect": {
+                "stdev": 0.8882646940336346,
+                "mean": 24.829166666666666
+            },
+            "mean": 28.196875,
+            "amcl-kinect": {
+                "stdev": 0.5172270386627231,
+                "mean": 23.337142857142858
+            },
+            "from": "l28",
+            "amcl-lidar": {
+                "stdev": 0.19378897457457833,
+                "mean": 23.370833333333334
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 11.43312879433175,
+                "mean": 57.779444444444444
+            },
+            "stdev": 42.315104387085775,
+            "to": "l40",
+            "mrpt-kinect": {
+                "stdev": 73.24368088202799,
+                "mean": 80.35107142857143
+            },
+            "mean": 54.637959183673466,
+            "amcl-kinect": {
+                "stdev": 0.7779385881737054,
+                "mean": 39.77708333333334
+            },
+            "from": "l39",
+            "amcl-lidar": {
+                "stdev": 0.9422101822165406,
+                "mean": 39.643214285714286
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 8.413583511203772,
+                "mean": 31.419999999999998
+            },
+            "stdev": 24.93678498666206,
+            "to": "l44",
+            "mrpt-kinect": {
+                "stdev": 31.071570285391115,
+                "mean": 64.44
+            },
+            "mean": 31.937083333333334,
+            "amcl-kinect": {
+                "stdev": 0.400111591577007,
+                "mean": 16.876428571428573
+            },
+            "from": "l42",
+            "amcl-lidar": {
+                "stdev": 0.5679737376557709,
+                "mean": 17.435833333333335
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 29.397964427830715,
+                "mean": 59.2275
+            },
+            "stdev": 38.37717630678489,
+            "to": "l27",
+            "mrpt-kinect": {
+                "stdev": 51.488471344663715,
+                "mean": 72.95692307692308
+            },
+            "mean": 39.2395,
+            "amcl-kinect": {
+                "stdev": 1.1398513825242411,
+                "mean": 20.249583333333334
+            },
+            "from": "l11",
+            "amcl-lidar": {
+                "stdev": 1.2428565113046273,
+                "mean": 19.976153846153846
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 6.69628232263578,
+                "mean": 15.6145
+            },
+            "stdev": 9.13947540192811,
+            "to": "l35",
+            "mrpt-kinect": {
+                "stdev": 13.713441457291605,
+                "mean": 19.91846153846154
+            },
+            "mean": 12.4747,
+            "amcl-kinect": {
+                "stdev": 0.5350053917772879,
+                "mean": 7.601538461538461
+            },
+            "from": "l10",
+            "amcl-lidar": {
+                "stdev": 0.3471144790101121,
+                "mean": 7.845
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 30.845547321831287,
+                "mean": 33.683749999999996
+            },
+            "stdev": 29.080217288384944,
+            "to": "l19",
+            "mrpt-kinect": {
+                "stdev": 46.731288190912764,
+                "mean": 54.704375
+            },
+            "mean": 24.058055555555555,
+            "amcl-kinect": {
+                "stdev": 2.6658998423978666,
+                "mean": 12.040833333333333
+            },
+            "from": "l13",
+            "amcl-lidar": {
+                "stdev": 3.5775225260286523,
+                "mean": 12.435833333333333
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 2.5717319067118942,
+                "mean": 27.629
+            },
+            "stdev": 3.492379239143424,
+            "to": "l29",
+            "mrpt-kinect": {
+                "stdev": 1.0263597252982435,
+                "mean": 21.97642857142857
+            },
+            "mean": 21.6474,
+            "amcl-kinect": {
+                "stdev": 0.26112576791015196,
+                "mean": 19.246666666666666
+            },
+            "from": "l28",
+            "amcl-lidar": {
+                "stdev": 0.1083095211925179,
+                "mean": 19.103571428571428
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 1.1835085551021585,
+                "mean": 22.016000000000002
+            },
+            "stdev": 1.1458660014507074,
+            "to": "l30",
+            "mrpt-kinect": {
+                "stdev": 0.9195673801667099,
+                "mean": 20.855833333333333
+            },
+            "mean": 20.610434782608696,
+            "amcl-kinect": {
+                "stdev": 0.7291821903109443,
+                "mean": 19.923333333333332
+            },
+            "from": "l29",
+            "amcl-lidar": {
+                "stdev": 0.16181522384085759,
+                "mean": 19.880833333333335
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 2.8844137185917007,
+                "mean": 10.779
+            },
+            "stdev": 1.701387527851176,
+            "to": "l7",
+            "mrpt-kinect": {
+                "stdev": 0.6863672486358888,
+                "mean": 10.805
+            },
+            "mean": 9.678958333333334,
+            "amcl-kinect": {
+                "stdev": 0.2698456348853296,
+                "mean": 8.671666666666667
+            },
+            "from": "l6",
+            "amcl-lidar": {
+                "stdev": 0.1537665980200729,
+                "mean": 8.455833333333333
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 10.36978664197099,
+                "mean": 34.1275
+            },
+            "stdev": 29.995271009029707,
+            "to": "l55",
+            "mrpt-kinect": {
+                "stdev": 42.19151265361316,
+                "mean": 69.21
+            },
+            "mean": 34.430217391304346,
+            "amcl-kinect": {
+                "stdev": 0.3173044954883918,
+                "mean": 18.682142857142857
+            },
+            "from": "l25",
+            "amcl-lidar": {
+                "stdev": 0.14449913494550734,
+                "mean": 18.225
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 8.081078207764108,
+                "mean": 33.6675
+            },
+            "stdev": 5.358577006038475,
+            "to": "l56",
+            "mrpt-kinect": {
+                "stdev": 1.639087144317429,
+                "mean": 24.016666666666666
+            },
+            "mean": 24.529565217391305,
+            "amcl-kinect": {
+                "stdev": 0.21751299906420454,
+                "mean": 22.030714285714286
+            },
+            "from": "l55",
+            "amcl-lidar": {
+                "stdev": 0.20922276804082926,
+                "mean": 21.865833333333335
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 13.943302872705592,
+                "mean": 22.268
+            },
+            "stdev": 19.319001759925378,
+            "to": "l31",
+            "mrpt-kinect": {
+                "stdev": 24.865445185753547,
+                "mean": 43.67642857142857
+            },
+            "mean": 23.1046,
+            "amcl-kinect": {
+                "stdev": 0.08798674142543664,
+                "mean": 12.325000000000001
+            },
+            "from": "l30",
+            "amcl-lidar": {
+                "stdev": 0.1987900902962718,
+                "mean": 12.3775
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 5.745104002539902,
+                "mean": 14.018
+            },
+            "stdev": 4.132323012333483,
+            "to": "l22",
+            "mrpt-kinect": {
+                "stdev": 2.8708738507058555,
+                "mean": 9.443333333333333
+            },
+            "mean": 8.84,
+            "amcl-kinect": {
+                "stdev": 1.3511749736891259,
+                "mean": 7.117142857142857
+            },
+            "from": "l21",
+            "amcl-lidar": {
+                "stdev": 0.3977645869942001,
+                "mean": 5.931666666666667
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 19.49422747536078,
+                "mean": 26.88611111111111
+            },
+            "stdev": 11.747916600165514,
+            "to": "l16",
+            "mrpt-kinect": {
+                "stdev": 10.122831267920448,
+                "mean": 16.215833333333332
+            },
+            "mean": 14.69,
+            "amcl-kinect": {
+                "stdev": 0.8378706604182675,
+                "mean": 9.543076923076923
+            },
+            "from": "l15",
+            "amcl-lidar": {
+                "stdev": 1.0448672345703967,
+                "mean": 9.592916666666667
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 1.9680720261209959,
+                "mean": 34.883
+            },
+            "stdev": 8.45809795488872,
+            "to": "l34",
+            "mrpt-kinect": {
+                "stdev": 0.17910890541790503,
+                "mean": 14.965
+            },
+            "mean": 18.831666666666667,
+            "amcl-kinect": {
+                "stdev": 0.368166628942204,
+                "mean": 14.358333333333334
+            },
+            "from": "l33",
+            "amcl-lidar": {
+                "stdev": 0.3272613634390713,
+                "mean": 14.515
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 16.130874743794894,
+                "mean": 99.697
+            },
+            "stdev": 14.025821003896112,
+            "to": "l38",
+            "mrpt-kinect": {
+                "stdev": 4.558862640114149,
+                "mean": 78.25928571428571
+            },
+            "mean": 77.3956,
+            "amcl-kinect": {
+                "stdev": 0.27303388068149975,
+                "mean": 68.2375
+            },
+            "from": "l24",
+            "amcl-lidar": {
+                "stdev": 0.24782146031059374,
+                "mean": 68.45214285714286
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 4.1838708154052755,
+                "mean": 16.4825
+            },
+            "stdev": 10.158340728861006,
+            "to": "l52",
+            "mrpt-kinect": {
+                "stdev": 3.9650869053107365,
+                "mean": 29.645833333333336
+            },
+            "mean": 14.53,
+            "amcl-kinect": {
+                "stdev": 0.6454488102604782,
+                "mean": 7.114166666666667
+            },
+            "from": "l51",
+            "amcl-lidar": {
+                "stdev": 0.8308450947249864,
+                "mean": 6.814285714285714
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 3.5332891899758216,
+                "mean": 25.378
+            },
+            "stdev": 35.15780164723993,
+            "to": "l21",
+            "mrpt-kinect": {
+                "stdev": 53.44433708697926,
+                "mean": 77.16666666666667
+            },
+            "mean": 35.354166666666664,
+            "amcl-kinect": {
+                "stdev": 0.44035686285859854,
+                "mean": 20.174166666666668
+            },
+            "from": "l15",
+            "amcl-lidar": {
+                "stdev": 0.4901943249268362,
+                "mean": 19.65214285714286
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 8.814145874672146,
+                "mean": 20.006
+            },
+            "stdev": 10.237250445986001,
+            "to": "l56",
+            "mrpt-kinect": {
+                "stdev": 13.322858757646218,
+                "mean": 23.092142857142857
+            },
+            "mean": 15.331458333333334,
+            "amcl-kinect": {
+                "stdev": 0.33314661437071,
+                "mean": 8.783333333333333
+            },
+            "from": "l9",
+            "amcl-lidar": {
+                "stdev": 0.16303373883954264,
+                "mean": 8.93
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 41.66043610749492,
+                "mean": 93.20333333333333
+            },
+            "stdev": 28.46800896160118,
+            "to": "l8",
+            "mrpt-kinect": {
+                "stdev": 25.18560867024875,
+                "mean": 64.3175
+            },
+            "mean": 55.26536585365854,
+            "amcl-kinect": {
+                "stdev": 1.9849621685578942,
+                "mean": 37.497083333333336
+            },
+            "from": "l6",
+            "amcl-lidar": {
+                "stdev": 13.909134670162889,
+                "mean": 44.08045454545454
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 0.0,
+                "mean": 0.0
+            },
+            "stdev": 11.751579444960559,
+            "to": "l19",
+            "mrpt-kinect": {
+                "stdev": 17.87598250841127,
+                "mean": 37.918846153846154
+            },
+            "mean": 28.509268292682926,
+            "amcl-kinect": {
+                "stdev": 0.30032034178907585,
+                "mean": 23.995
+            },
+            "from": "l18",
+            "amcl-lidar": {
+                "stdev": 0.4099820754591621,
+                "mean": 24.28607142857143
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 10.12671195403523,
+                "mean": 33.613
+            },
+            "stdev": 7.185767623614036,
+            "to": "l36",
+            "mrpt-kinect": {
+                "stdev": 6.737581663079614,
+                "mean": 26.661666666666665
+            },
+            "mean": 25.285416666666666,
+            "amcl-kinect": {
+                "stdev": 0.303358973275337,
+                "mean": 21.606666666666666
+            },
+            "from": "l5",
+            "amcl-lidar": {
+                "stdev": 0.1154133358639208,
+                "mean": 21.310714285714287
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 7.877401538578568,
+                "mean": 16.354
+            },
+            "stdev": 9.03096213451805,
+            "to": "l28",
+            "mrpt-kinect": {
+                "stdev": 9.550899128703364,
+                "mean": 21.184166666666666
+            },
+            "mean": 12.015434782608695,
+            "amcl-kinect": {
+                "stdev": 0.21869499308397528,
+                "mean": 5.7425
+            },
+            "from": "l7",
+            "amcl-lidar": {
+                "stdev": 0.3855439879788902,
+                "mean": 5.504166666666666
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 13.43184183200502,
+                "mean": 30.5775
+            },
+            "stdev": 25.316592484762356,
+            "to": "l59",
+            "mrpt-kinect": {
+                "stdev": 28.98724399258602,
+                "mean": 58.54357142857143
+            },
+            "mean": 30.781304347826087,
+            "amcl-kinect": {
+                "stdev": 0.15897851007814456,
+                "mean": 14.900833333333333
+            },
+            "from": "l58",
+            "amcl-lidar": {
+                "stdev": 0.33874277360065796,
+                "mean": 14.408333333333333
+            }
+        },
+        {
+            "aruco": {
+                "stdev": 15.174625576563294,
+                "mean": 31.118499999999997
+            },
+            "stdev": 21.749441860247117,
+            "to": "l9",
+            "mrpt-kinect": {
+                "stdev": 35.11833822030964,
+                "mean": 45.572916666666664
+            },
+            "mean": 27.441458333333333,
+            "amcl-kinect": {
+                "stdev": 0.9125921098576069,
+                "mean": 17.56576923076923
+            },
+            "from": "l8",
+            "amcl-lidar": {
+                "stdev": 1.1360999414325645,
+                "mean": 17.751923076923077
+            }
+        }
+    ],
+    "obstacles": [
+        {
+            "id": "difficult",
+            "from": "l6",
+            "to": "l8"
+        },
+        {
+            "id": "difficult",
+            "from": "l8",
+            "to": "l6"
+        },
+        {
+            "id": "medium",
+            "from": "l56",
+            "to": "l55"
+        },
+        {
+            "id": "medium",
+            "from": "l55",
+            "to": "l56"
+        },
+        {
+            "id": "medium",
+            "from": "l12",
+            "to": "l11"
+        },
+        {
+            "id": "medium",
+            "from": "l11",
+            "to": "l12"
+        },
+        {
+            "id": "easy",
+            "from": "l14",
+            "to": "l15"
+        },
+        {
+            "id": "easy",
+            "from": "l15",
+            "to": "l14"
+        }
+    ],
+    "lights": [
+        {
+            "coord": {
+                "x": 0,
+                "y": 0
+            },
+            "light-id": "light0"
+        },
+        {
+            "coord": {
+                "x": 3.514,
+                "y": 0
+            },
+            "light-id": "light1"
+        },
+        {
+            "coord": {
+                "x": -6.216,
+                "y": 0
+            },
+            "light-id": "light2"
+        },
+        {
+            "coord": {
+                "x": -28.865,
+                "y": 0
+            },
+            "light-id": "light3"
+        },
+        {
+            "coord": {
+                "x": -47.027,
+                "y": 0
+            },
+            "light-id": "light4"
+        },
+        {
+            "coord": {
+                "x": -28.865,
+                "y": 10.27
+            },
+            "light-id": "light5"
+        },
+        {
+            "coord": {
+                "x": -6.216,
+                "y": 10.27
+            },
+            "light-id": "light7"
+        },
+        {
+            "coord": {
+                "x": 3.514,
+                "y": 16.973
+            },
+            "light-id": "light9"
+        },
+        {
+            "coord": {
+                "x": 51.892,
+                "y": 16.973
+            },
+            "light-id": "light10"
+        },
+        {
+            "coord": {
+                "x": 51.892,
+                "y": 0
+            },
+            "light-id": "light11"
+        },
+        {
+            "coord": {
+                "x": -2.432,
+                "y": -20.973
+            },
+            "light-id": "light13"
+        },
+        {
+            "coord": {
+                "x": -2.432,
+                "y": -40.811
+            },
+            "light-id": "light14"
+        },
+        {
+            "coord": {
+                "x": 1.892,
+                "y": -40.811
+            },
+            "light-id": "light15"
+        },
+        {
+            "coord": {
+                "x": 1.892,
+                "y": -34.973
+            },
+            "light-id": "light16"
+        },
+        {
+            "coord": {
+                "x": 4.973,
+                "y": -20.811
+            },
+            "light-id": "light18"
+        },
+        {
+            "coord": {
+                "x": -2.432,
+                "y": -52.216
+            },
+            "light-id": "light20"
+        },
+        {
+            "coord": {
+                "x": -0.27,
+                "y": -57.568
+            },
+            "light-id": "light22"
+        },
+        {
+            "coord": {
+                "x": -8,
+                "y": -57.568
+            },
+            "light-id": "light23"
+        },
+        {
+            "coord": {
+                "x": 16.757,
+                "y": 16.973
+            },
+            "light-id": "light24"
+        },
+        {
+            "coord": {
+                "x": 28,
+                "y": 16.973
+            },
+            "light-id": "light25"
+        },
+        {
+            "coord": {
+                "x": 40.541,
+                "y": 16.973
+            },
+            "light-id": "light26"
+        },
+        {
+            "coord": {
+                "x": -33.027,
+                "y": 12.162
+            },
+            "light-id": "light27"
+        },
+        {
+            "coord": {
+                "x": -33.027,
+                "y": 23.027
+            },
+            "light-id": "light28"
+        },
+        {
+            "coord": {
+                "x": -21.081,
+                "y": 23.027
+            },
+            "light-id": "light29"
+        },
+        {
+            "coord": {
+                "x": -21.081,
+                "y": 16.486
+            },
+            "light-id": "light30"
+        },
+        {
+            "coord": {
+                "x": -14.324,
+                "y": 16.486
+            },
+            "light-id": "light31"
+        },
+        {
+            "coord": {
+                "x": -6.216,
+                "y": 20
+            },
+            "light-id": "light33"
+        },
+        {
+            "coord": {
+                "x": -47.297,
+                "y": 12.162
+            },
+            "light-id": "light35"
+        },
+        {
+            "coord": {
+                "x": -28.865,
+                "y": -20.973
+            },
+            "light-id": "light36"
+        },
+        {
+            "coord": {
+                "x": -47.027,
+                "y": -57.568
+            },
+            "light-id": "light37"
+        },
+        {
+            "coord": {
+                "x": 0,
+                "y": -14.865
+            },
+            "light-id": "light38"
+        },
+        {
+            "coord": {
+                "x": 24.973,
+                "y": -14.865
+            },
+            "light-id": "light39"
+        },
+        {
+            "coord": {
+                "x": 25.189,
+                "y": -14.865
+            },
+            "light-id": "light40"
+        },
+        {
+            "coord": {
+                "x": 39.243,
+                "y": -4.108
+            },
+            "light-id": "light41"
+        },
+        {
+            "coord": {
+                "x": 39.243,
+                "y": -14.865
+            },
+            "light-id": "light42"
+        },
+        {
+            "coord": {
+                "x": 47.838,
+                "y": -4.108
+            },
+            "light-id": "light43"
+        },
+        {
+            "coord": {
+                "x": 47.838,
+                "y": 0
+            },
+            "light-id": "light44"
+        },
+        {
+            "coord": {
+                "x": 36.27,
+                "y": 0
+            },
+            "light-id": "light45"
+        },
+        {
+            "coord": {
+                "x": 22.703,
+                "y": 0
+            },
+            "light-id": "light46"
+        },
+        {
+            "coord": {
+                "x": 22.703,
+                "y": 6.486
+            },
+            "light-id": "light47"
+        },
+        {
+            "coord": {
+                "x": 22.703,
+                "y": 10.757
+            },
+            "light-id": "light48"
+        },
+        {
+            "coord": {
+                "x": 28,
+                "y": 10.757
+            },
+            "light-id": "light49"
+        },
+        {
+            "coord": {
+                "x": 38.973,
+                "y": 12.919
+            },
+            "light-id": "light51"
+        },
+        {
+            "coord": {
+                "x": 36.27,
+                "y": 8.378
+            },
+            "light-id": "light53"
+        },
+        {
+            "coord": {
+                "x": 16.757,
+                "y": 6.486
+            },
+            "light-id": "light54"
+        },
+        {
+            "coord": {
+                "x": 3.514,
+                "y": 6.486
+            },
+            "light-id": "light55"
+        },
+        {
+            "coord": {
+                "x": 24.973,
+                "y": -7.838
+            },
+            "light-id": "light56"
+        },
+        {
+            "coord": {
+                "x": 14.865,
+                "y": -7.838
+            },
+            "light-id": "light57"
+        },
+        {
+            "coord": {
+                "x": 14.865,
+                "y": 0
+            },
+            "light-id": "light58"
+        },
+        {
+            "coord": {
+                "x": -6.162,
+                "y": 15.081
+            },
+            "light-id": "light59"
+        },
+        {
+            "coord": {
+                "x": -20.919,
+                "y": 10.216
+            },
+            "light-id": "light60"
+        },
+        {
+            "coord": {
+                "x": -13.459,
+                "y": 10.216
+            },
+            "light-id": "light61"
+        },
+        {
+            "coord": {
+                "x": -13.027,
+                "y": 0
+            },
+            "light-id": "light62"
+        },
+        {
+            "coord": {
+                "x": -20.919,
+                "y": 0
+            },
+            "light-id": "light63"
+        },
+        {
+            "coord": {
+                "x": -47.243,
+                "y": 5.081
+            },
+            "light-id": "light65"
+        },
+        {
+            "coord": {
+                "x": -39.405,
+                "y": 12.108
+            },
+            "light-id": "light66"
+        },
+        {
+            "coord": {
+                "x": -38.324,
+                "y": 0
+            },
+            "light-id": "light67"
+        },
+        {
+            "coord": {
+                "x": -29.027,
+                "y": -14.216
+            },
+            "light-id": "light69"
+        },
+        {
+            "coord": {
+                "x": -21.297,
+                "y": -20.973
+            },
+            "light-id": "light70"
+        },
+        {
+            "coord": {
+                "x": -10.486,
+                "y": -20.973
+            },
+            "light-id": "light71"
+        },
+        {
+            "coord": {
+                "x": 5.027,
+                "y": -28.703
+            },
+            "light-id": "light72"
+        },
+        {
+            "coord": {
+                "x": -2.378,
+                "y": -28.973
+            },
+            "light-id": "light73"
+        },
+        {
+            "coord": {
+                "x": -2.378,
+                "y": -35.297
+            },
+            "light-id": "light74"
+        },
+        {
+            "coord": {
+                "x": -2.378,
+                "y": -46.973
+            },
+            "light-id": "light75"
+        },
+        {
+            "coord": {
+                "x": -13.459,
+                "y": -57.622
+            },
+            "light-id": "light76"
+        },
+        {
+            "coord": {
+                "x": -22.351,
+                "y": -57.622
+            },
+            "light-id": "light77"
+        },
+        {
+            "coord": {
+                "x": -30.351,
+                "y": -57.622
+            },
+            "light-id": "light78"
+        },
+        {
+            "coord": {
+                "x": -40.027,
+                "y": -57.622
+            },
+            "light-id": "light79"
+        },
+        {
+            "coord": {
+                "x": -47.027,
+                "y": -42.784
+            },
+            "light-id": "light80"
+        },
+        {
+            "coord": {
+                "x": -47.027,
+                "y": -28.703
+            },
+            "light-id": "light81"
+        },
+        {
+            "coord": {
+                "x": -47.027,
+                "y": -20.865
+            },
+            "light-id": "light82"
+        },
+        {
+            "coord": {
+                "x": -47.027,
+                "y": -14.919
+            },
+            "light-id": "light83"
+        },
+        {
+            "coord": {
+                "x": -47.027,
+                "y": -6.541
+            },
+            "light-id": "light84"
+        },
+        {
+            "coord": {
+                "x": 7.622,
+                "y": -14.919
+            },
+            "light-id": "light85"
+        },
+        {
+            "coord": {
+                "x": 16.811,
+                "y": -14.919
+            },
+            "light-id": "light86"
+        },
+        {
+            "coord": {
+                "x": 29.514,
+                "y": 0
+            },
+            "light-id": "light87"
+        },
+        {
+            "coord": {
+                "x": 51.946,
+                "y": 7.676
+            },
+            "light-id": "light88"
+        }
+    ],
+    "origin": {
+        "x": 48.162,
+        "y": 26.973
+    },
+    "initial-points": [],
+    "unsafe-rects": [],
+    "worldobstacles": [
+        {
+            "x": -18.3,
+            "y": 9.85
+        },
+        {
+            "x": -21.65,
+            "y": 11.0
+        },
+        {
+            "x": -24.5,
+            "y": 9.85
+        },
+        {
+            "x": -27,
+            "y": 9.85
+        },
+        {
+            "x": -11,
+            "y": 11
+        },
+        {
+            "x": -8.7,
+            "y": 9.85
+        },
+        {
+            "x": 7.2,
+            "y": 5.9
+        },
+        {
+            "x": 10.925,
+            "y": 7.2
+        },
+        {
+            "x": 52.5,
+            "y": 13.8
+        },
+        {
+            "x": 51.4,
+            "y": 2.0
+        },
+        {
+            "x": -3,
+            "y": -33.0
+        }
+    ],
+    "successrate": [
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l3",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l1",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l2",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l1",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l45",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l44",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l39",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l14",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l51",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l27",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l18",
+            "prob": 0.9787234042553191,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l17",
+            "amcl-lidar": {
+                "successrate": 0.9230769230769231
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l39",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l13",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l47",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l46",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l27",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l26",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l45",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l12",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l50",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l26",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l53",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l52",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l43",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l42",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l43",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l40",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l26",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l25",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l38",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l5",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 0.2
+            },
+            "to": "l6",
+            "prob": 0.7916666666666666,
+            "mrpt-kinect": {
+                "successrate": 0.8571428571428571
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l4",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l33",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l32",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l48",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l47",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 0.0
+            },
+            "to": "l39",
+            "prob": 0.8260869565217391,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l4",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l57",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l40",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l35",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l34",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l59",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l2",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l54",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l53",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l46",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l45",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l56",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l2",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l50",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l49",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l10",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l9",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l54",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l46",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l15",
+            "prob": 0.9545454545454546,
+            "mrpt-kinect": {
+                "successrate": 0.8333333333333334
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l14",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l24",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l23",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l55",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l48",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l25",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l10",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l34",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l8",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l58",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l57",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l17",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l16",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l32",
+            "prob": 1.0,
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l31",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 0.0
+            },
+            "to": "l12",
+            "prob": 0.7333333333333333,
+            "mrpt-kinect": {
+                "successrate": 0.75
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l11",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l49",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l48",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l23",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l22",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l8",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l3",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l36",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l28",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l40",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l39",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l44",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l42",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 0.2222222222222222
+            },
+            "to": "l27",
+            "prob": 0.851063829787234,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l11",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l35",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l10",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 0.4444444444444444
+            },
+            "to": "l19",
+            "prob": 0.8,
+            "mrpt-kinect": {
+                "successrate": 0.6666666666666666
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l13",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l29",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l28",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l30",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l29",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l7",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l6",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l55",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l25",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l56",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l55",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l31",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l30",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l22",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l21",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l16",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l15",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l34",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l33",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l38",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l24",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l52",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l51",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l21",
+            "prob": 0.96,
+            "mrpt-kinect": {
+                "successrate": 0.8571428571428571
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l15",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l56",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l9",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 0.6
+            },
+            "to": "l8",
+            "prob": 0.8723404255319149,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l6",
+            "amcl-lidar": {
+                "successrate": 0.8461538461538461
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 0.0
+            },
+            "to": "l19",
+            "prob": 0.82,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l18",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l36",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l5",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l28",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l7",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l59",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l58",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        },
+        {
+            "aruco": {
+                "successrate": 1.0
+            },
+            "to": "l9",
+            "prob": 1.0,
+            "mrpt-kinect": {
+                "successrate": 1.0
+            },
+            "amcl-kinect": {
+                "successrate": 1.0
+            },
+            "from": "l8",
+            "amcl-lidar": {
+                "successrate": 1.0
+            }
+        }
+    ]
+}

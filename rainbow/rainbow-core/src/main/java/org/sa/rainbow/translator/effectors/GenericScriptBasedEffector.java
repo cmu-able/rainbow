@@ -93,6 +93,7 @@ public class GenericScriptBasedEffector extends AbstractEffector implements IBas
 
     @Override
     public Outcome execute (List<String> args) {
+    	reportExecuting(args);
         Outcome r;
         String[] cmds = new String[3];
 

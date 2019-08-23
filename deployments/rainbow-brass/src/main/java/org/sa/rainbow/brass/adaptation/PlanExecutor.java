@@ -6,11 +6,13 @@ import java.util.concurrent.TimeUnit;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
+import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.adaptation.AdaptationTree;
 import org.sa.rainbow.core.adaptation.DefaultAdaptationExecutorVisitor;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
 import org.sa.rainbow.core.ports.IRainbowAdaptationDequeuePort;
@@ -103,6 +105,7 @@ public class PlanExecutor extends AbstractRainbowRunnable implements IAdaptation
     @Override
     protected void runAction () {
         if (m_adaptationDQPort != null && !m_adaptationDQPort.isEmpty ()) {
+//        	Rainbow.instance().getRainbowMaster().gaugeManager().configureAllGaugews(IGauge.RAINBOW_ADAPTING, "boolean", "true");
             AdaptationTree<BrassPlan> at = m_adaptationDQPort.dequeue ();
             log ("Got a new plan -- executing");
             CountDownLatch latch = new CountDownLatch (1);
@@ -125,6 +128,7 @@ public class PlanExecutor extends AbstractRainbowRunnable implements IAdaptation
                     adaptationManager.markStrategyExecuted (at);
                 }
             }
+//            Rainbow.instance().getRainbowMaster().gaugeManager().configureAllGaugews(IGauge.RAINBOW_ADAPTING, "boolean", "false");
         }
 
     }
@@ -133,4 +137,9 @@ public class PlanExecutor extends AbstractRainbowRunnable implements IAdaptation
     public RainbowComponentT getComponentType () {
         return RainbowComponentT.EXECUTOR;
     }
+
+	@Override
+	public ModelReference getManagedModel() {
+		return m_modelRef;
+	}
 }

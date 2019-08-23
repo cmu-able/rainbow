@@ -1,3 +1,0 @@
-setFidelity: changeState
-activateServer: start
-deactivateServer: stop

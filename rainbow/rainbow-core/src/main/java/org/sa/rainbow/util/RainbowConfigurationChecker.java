@@ -47,20 +47,25 @@ import org.sa.rainbow.translator.probes.IProbe.Kind;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.*;
 
-public class RainbowConfigurationChecker implements IRainbowReportingPort {
+public class RainbowConfigurationChecker implements IRainbowReportingPort, IRainbowConfigurationChecker {
 
-    public enum ProblemT {
-        WARNING, ERROR
+    public static enum ProblemT {
+        WARNING, ERROR, INFO
     }
 
-    public class Problem {
+    public static class Problem implements Serializable{
 
-        public Problem (ProblemT p, String msg) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -4323498028203837123L;
+		public Problem (ProblemT p, String msg) {
             problem = p;
             this.msg = msg;
         }
@@ -70,47 +75,45 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
 
         public ProblemT problem;
         public String   msg;
+		public void setMessage(String string) {
+			msg = string;
+		}
+
+		public ProblemT getType() {
+			return problem;
+		}
     }
 
     final List<Problem> m_problems = new LinkedList<> ();
-    private final IRainbowMaster m_master;
+    private IRainbowMaster m_master;
     final Set<String> m_referredToProbes = new HashSet<> ();
 
-    public RainbowConfigurationChecker (IRainbowMaster master) {
-        m_master = master;
+    public RainbowConfigurationChecker () {
+        
+    }
+    
+    @Override
+	public void setRainbowMaster(IRainbowMaster master) {
+    	m_master = master;
     }
 
-    public void checkRainbowConfiguration () {
+    @Override
+	public void checkRainbowConfiguration () {
         checkGaugeConfiguration ();
         checkProbeConfiguration ();
         checkEffectorConfiguration ();
-//        checkPreferencesConfiguration ();
-    }
-
-    private void checkPreferencesConfiguration () {
-//        UtilityPreferenceDescription preferenceDesc = m_master.preferenceDesc ();
-//        Pattern p = Pattern.compile ("(?:\\[(.*)\\])?(.*)");
-//        for (Entry<String, UtilityAttributes> av : preferenceDesc.utilities.entrySet ()) {
-//            UtilityAttributes value = av.getValue ();
-//            Matcher matcher = p.matcher (value.mapping);
-//            if (matcher.matches ()) {
-//                String type = matcher.group (1);
-//                String expr = matcher.group (2);
-//                switch (type) {
-//                case "[EXPR]":
-//                    break;
-//                case 
-//                }
-//            }
-//
-//        }
     }
 
     private void checkEffectorConfiguration () {
+    	String message = "Checking effectors...";
+    	Problem p = new Problem(ProblemT.INFO, message);
+    	m_problems.add(p);
+    	int num = m_problems.size();
         EffectorDescription effectorDesc = m_master.effectorDesc ();
         for (EffectorAttributes effector : effectorDesc.effectors) {
             checkEffector (effector);
         }
+        if (m_problems.size() == num) p.setMessage (message + "ok");
     }
 
     private void checkEffector (EffectorAttributes effector) {
@@ -160,10 +163,16 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
     }
 
     private void checkProbeConfiguration () {
+    	String message = "Checking probes...";
+    	Problem p = new Problem(ProblemT.INFO, message);
+    	m_problems.add(p);
+    	int num = m_problems.size();
         ProbeDescription probeDesc = m_master.probeDesc ();
         for (ProbeDescription.ProbeAttributes probe : probeDesc.probes) {
             checkProbe (probe);
         }
+        if (m_problems.size() == num) p.setMessage (message + "ok");
+
     }
 
     private void checkProbe (ProbeAttributes probe) {
@@ -217,6 +226,10 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
     }
 
     protected void checkGaugeConfiguration () {
+    	String message = "Checking gauges...";
+    	Problem p = new Problem(ProblemT.INFO, message);
+    	m_problems.add(p);
+    	int num = m_problems.size();
         GaugeDescription gaugeDesc = m_master.gaugeDesc ();
         Collection<GaugeInstanceDescription> instSpecs = gaugeDesc.instSpec.values ();
 
@@ -227,6 +240,8 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
         for (GaugeInstanceDescription gid : instSpecs) {
             checkGaugeConsistent (gid);
         }
+        if (m_problems.size() == num) p.setMessage (message + "ok");
+
     }
 
     private void checkGaugeType (GaugeTypeDescription gtd) {
@@ -364,9 +379,24 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
 
         // Check if probe exists in probe desc
         TypedAttributeWithValue probe;
-        if ((probe = gid.findConfigParam ("targetProbeType")) != null
-                || (probe = gid.findConfigParam ("targetProbeList")) != null) {
-            String[] probes = ((String )probe.getValue ()).split (",");
+        probe = gid.findConfigParam("targetProbeType");
+//        if (probe == null) probe = gid.findConfigParam("targetProbeList");
+        if (probe != null) {
+        	String[] probes = null;
+        	if (probe.getValue() instanceof String) {
+        		probes = ((String )probe.getValue ()).split (",");
+        	}
+        	else if (probe.getValue() instanceof String[]) {
+        		probes = (String[]) probe.getValue();
+        	}
+        	else if (probe.getValue() instanceof ArrayList) {
+        		ArrayList value = (ArrayList )probe.getValue();
+				probes = (String[]) value.toArray(new String[0]);
+				String csv = String.join(",", value);
+				probe.setValue(csv);
+        		
+        	}
+//            String[] probes = ((String )probe.getValue ()).split (",");
             for (String probe2 : probes) {
                 probe2 = Util.decomposeID (probe2).firstValue ();
                 m_referredToProbes.add (probe2);
@@ -461,7 +491,8 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
     }
 
 
-    public Collection<Problem> getProblems () {
+    @Override
+	public Collection<Problem> getProblems () {
         return m_problems;
     }
 
@@ -566,5 +597,10 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort {
         // TODO Auto-generated method stub
 
     }
+
+	@Override
+	public Collection<Class> getMustBeExecutedAfter() {
+		return Collections.<Class>emptySet();
+	}
 
 }

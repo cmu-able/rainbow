@@ -22,7 +22,6 @@ import com.google.common.base.Objects;
  *
  */
 public class DecisionEngine {
-
     public static String m_export_path;
     public static MapTranslator m_mt;
     public static String m_origin;
@@ -31,7 +30,7 @@ public class DecisionEngine {
     public static Map<List, Double > m_scoreboard;
     public static double m_selected_candidate_time;
     public static PrismPolicy m_plan;
-
+  
     public static final double INFINITY = 999999.0;
 
     /**
@@ -42,7 +41,7 @@ public class DecisionEngine {
         if (props == null) {
             props = PropertiesConnector.DEFAULT;
         }
-        m_export_path = props.getProperty (PropertiesConnector.PRISM_OUTPUT_DIR);
+        m_export_path = props.getProperty (PropertiesConnector.PRISM_OUTPUT_DIR_PROPKEY);
         m_export_path = m_export_path.replaceAll ("\\\"", "");
         m_mt = new MapTranslator ();
         new PrismConnectorAPI (); // PRISM invoked via API
@@ -88,16 +87,16 @@ public class DecisionEngine {
      *            String robot Heading (needs to be converted to an String encoding an int from MissionState.Heading)
      * @throws Exception
      */
-    public static void scoreCandidates (EnvMap map, String batteryLevel, String robotHeading) throws Exception {
-        m_scoreboard.clear();
+    public static void scoreCandidates (EnvMap map, long batteryLevel, int robotHeading) throws Exception {
+        m_scoreboard.clear(); 
         synchronized (map){
             String m_consts = MapTranslator.INITIAL_ROBOT_LOCATION_CONST+"="+String.valueOf(map.getNodeId(m_origin)) +","+ MapTranslator.TARGET_ROBOT_LOCATION_CONST 
-                    + "="+String.valueOf(map.getNodeId(m_destination))+ "," + MapTranslator.INITIAL_ROBOT_BATTERY_CONST+"="+batteryLevel+","+MapTranslator.INITIAL_ROBOT_HEADING_CONST+"="+robotHeading;
+                    + "="+String.valueOf(map.getNodeId(m_destination))+ "," + MapTranslator.INITIAL_ROBOT_BATTERY_CONST+"="+Long.toString(batteryLevel)+","+MapTranslator.INITIAL_ROBOT_HEADING_CONST+"="+Integer.toString(robotHeading);
 
             System.out.println(m_consts);
             String result;
             for (List candidate_key : m_candidates.keySet() ){                           	
-                result = PrismConnectorAPI.modelCheckFromFileS (m_candidates.get (candidate_key), m_export_path + "/mapbot.props",
+                result = PrismConnectorAPI.instance().modelCheckFromFileS (m_candidates.get (candidate_key), m_export_path + "/mapbot.props",
                         m_candidates.get (candidate_key), 0, m_consts);
                 if (!Objects.equal(result, "Infinity")) {
                     m_scoreboard.put(candidate_key, Double.valueOf(result));
@@ -145,7 +144,7 @@ public class DecisionEngine {
         setMap(dummyMap);
         for (int i=15000; i< 15500; i+=500){
             generateCandidates("l5", "l1");
-            scoreCandidates(dummyMap, String.valueOf(i), "1");
+            scoreCandidates(dummyMap, i, 1);
             System.out.println(String.valueOf(m_scoreboard));	        
             pp = new PrismPolicy(selectPolicy());
             pp.readPolicy();  

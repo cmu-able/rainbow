@@ -1,0 +1,49 @@
+gauges:
+  LoadGaugeT:
+    builtin:
+      category: meter
+      command: ServerT.setLoad($<load>)
+      value: $<load>
+      upper: 1.0
+      lower: 0.0
+      threshold: 0.9
+  DimmerGaugeT:
+    builtin:
+      category: meter
+      command: ServerT.setDimmer($<dimmer>)
+      value: $<dimmer>
+      upper: 1.0
+      lower: 0.0
+  BasicResponseTimeT:
+    builtin:
+      category: timeseries
+      command: LoadBalancer.setBasicResponseTime($<rt>)
+      value: $<rt>
+      upper: 10.0
+      lower: 0.0
+  OptResponseTimeT:
+    builtin:
+      category: timeseries
+      command: LoadBalaner.setOptResponseTime($<rt>)
+      value: $<rt>
+      upper: 10.0
+      lower: 0.0
+  ServerEnablementGaugeT:
+    builtin:
+      category: onoff
+      command: ServerT.enableServer($<enabled>)
+      value: $<enabled>
+  ServerActivationGaugeT:
+    builtin:
+      category: onoff
+      command: ServerT.activateServer($<active>)
+      value: $<active>
+analyzers:
+  org.sa.rainbow.evaluator.acme.ArchEvaluator: org.sa.rainbow.evaluator.acme.gui.ArchAnalyzerGUI
+managers:
+  org.sa.rainbow.stitch.adaptation.AdaptationManager: org.sa.rainbow.stitch.gui.manager.ArchStitchAdapationManager
+executors:
+  org.sa.rainbow.stitch.adaptation.StitchExecutor: org.sa.rainbow.stitch.gui.executor.EventBasedStitchExecutorPanel
+details:
+  managers: org.sa.rainbow.stitch.gui.manager.StitchAdaptationManagerTabbedPane
+  executors: org.sa.rainbow.stitch.gui.executor.StitchExecutorTabbedPane

@@ -49,7 +49,7 @@ public class ChargeInstruction implements IInstruction {
 	}
 	
 	private void parseFidelityLevel() {
-		Pattern chargePattern = Pattern.compile ("Charge\\(([0-9.]+)\\)");
+		Pattern chargePattern = Pattern.compile ("Charge\\s*\\(\\s*([0-9.]+)\\s*\\)");
         Matcher m = chargePattern.matcher (m_instruction);
         if (m.matches ()) {
             m_chargingTime = Double.parseDouble(m.group (1));

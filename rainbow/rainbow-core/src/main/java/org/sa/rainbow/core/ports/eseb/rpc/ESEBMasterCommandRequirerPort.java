@@ -37,6 +37,11 @@ implements IESEBMasterCommandPortRemoteInterface {
     public void enableAdaptation (boolean enabled) {
         m_stub.enableAdaptation (enabled);
     }
+    
+    @Override
+    public boolean isAdaptationEnabled() {
+    	return m_stub.isAdaptationEnabled();
+    }
 
     @Override
     public Outcome testEffector (String target, String effName, List<String> args) {
@@ -81,5 +86,10 @@ implements IESEBMasterCommandPortRemoteInterface {
     @Override
     public boolean allDelegatesOK () {
         return m_stub.allDelegatesOK ();
+    }
+    
+    @Override
+    public boolean autoStartProbes() {
+    	return m_stub.autoStartProbes();
     }
 }

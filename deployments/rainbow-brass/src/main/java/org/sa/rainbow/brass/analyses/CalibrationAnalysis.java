@@ -5,7 +5,8 @@ import java.util.List;
 import java.util.Vector;
 
 import org.sa.rainbow.brass.das.BRASSHttpConnector;
-import org.sa.rainbow.brass.das.IBRASSConnector.DASStatusT;
+import org.sa.rainbow.brass.das.IBRASSConnector.DASPhase1StatusT;
+import org.sa.rainbow.brass.das.IBRASSConnector.Phases;
 import org.sa.rainbow.brass.model.instructions.IInstruction;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
@@ -133,7 +134,7 @@ public class CalibrationAnalysis extends AbstractRainbowRunnable implements IRai
             List<GroundPlaneError> gpes = missionState.getGroundPlaneSample (5);
             List<CalibrationError> ces = missionState.getCallibrationErrorSample (2);
             if (igProgress.getInstructionGraphState () == IGExecutionStateT.FINISHED_SUCCESS) {
-                BRASSHttpConnector.instance ().reportDone (false, "Successfully reached the goal");
+                BRASSHttpConnector.instance (Phases.Phase1).reportDone (false, "Successfully reached the goal");
                 m_rainbowEnvironment.signalTerminate ();
                 return;
             }
@@ -162,7 +163,7 @@ public class CalibrationAnalysis extends AbstractRainbowRunnable implements IRai
                         (groundPlaneApplicable (missionState, envModel) && badGroundPlaneError (gpes))
                         || newerbadCalibrationError (missionState)) {
 
-                    BRASSHttpConnector.instance ().reportStatus (DASStatusT.PERTURBATION_DETECTED,
+                    BRASSHttpConnector.instance (Phases.Phase1).reportStatus (DASPhase1StatusT.PERTURBATION_DETECTED.name(),
                             "Detected a calibration error");
                     log ("Detected a calibration error");
                     insertCurrentLocationInMap (missionStateModel, igModel, envModel, igProgress, missionState);
@@ -182,7 +183,7 @@ public class CalibrationAnalysis extends AbstractRainbowRunnable implements IRai
                     m_wasBad = true;
                 }
                 else if ((!igProgress.getInstructions ().isEmpty () && !igProgress.getCurrentOK ())) {
-                    BRASSHttpConnector.instance ().reportStatus (DASStatusT.PERTURBATION_DETECTED,
+                    BRASSHttpConnector.instance (Phases.Phase1).reportStatus (DASPhase1StatusT.PERTURBATION_DETECTED.name(),
                             "Could not continue path");
                     m_reportingPort.info (getComponentType (), "Instruction graph failed...updating map model");
                     insertCurrentLocationInMap (missionStateModel, igModel, envModel, igProgress, missionState);

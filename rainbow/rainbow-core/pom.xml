@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -19,7 +20,7 @@
 	<packaging>jar</packaging>
 	<!-- Version. This should *always* be a snapshot version by convention. 
 		Name should be <version-number>-SNAPSHOT. -->
-	<version>2.1.1-SNAPSHOT</version>
+	<version>3.0</version>
 	<!-- User readable name of the pom. -->
 	<name>Rainbow Core</name>
 	<!-- URL for the project site. -->
@@ -51,9 +52,9 @@
 	<!-- Organization which has owns the software. -->
 	<organization>
 		<!-- Organization name. -->
-		<name>We</name>
+		<name>Carnegie Mellon University ABLE Group</name>
 		<!-- Organization URL. -->
-		<url>http://www.we.com</url>
+		<url>http://www.cs.cmu.edu/~able</url>
 	</organization>
 
 	<!-- List of application developers. -->
@@ -61,7 +62,7 @@
 		<!-- One block per developer. -->
 		<developer>
 			<!-- Unique ID for the developer. This ID is referenced in the changelog. -->
-			<id>schemerl</id>
+			<id>schmerl</id>
 			<!-- Developer name. -->
 			<name>Bradley Schmerl</name>
 			<!-- Developer e-mail address. -->
@@ -99,21 +100,6 @@
 		- - - SOURCE CONTROL VERSION CONFIGURATION - - - - - - - - - - - - - - - 
 		- - - - - - - - - - - - - - - - - - - - -->
 
-	<!-- Please note that the URL of the projects will have automatically the 
-		artifact name of the super-pom added to the end. -->
-	<scm>
-		<!-- Source control version, should have the format: scm:svn:http://<host>[:<port>]/<path>. -->
-		<connection>
-			scm:svn:svn://acme.able.cs.cmu.edu/rainbow/v2/trunk
-		</connection>
-		<!-- Source control version, should have the format: scm:svn:http://<host>[:<port>]/<path>. -->
-		<developerConnection>
-			scm:svn:svn://acme.able.cs.cmu.edu/rainbow/v2/trunk
-		</developerConnection>
-		<!-- URL for the source control. -->
-		<url>svn://acme.able.cs.cmu.edu/rainbow/v2/trunk</url>
-	</scm>
-
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 		- - - BUILD CONFIGURATION - - - - - - - - - - - - - - - - - - - - - - - - 
 		- - - - - - - - - - - -->
@@ -150,25 +136,25 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.0</version>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>1.8</source>
+					<target>1.8</target>
 					<encoding>iso8859-1</encoding>
 				</configuration>
 			</plugin>
-<plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>install</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/lib</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<!-- Configure the release plugin to set the place where tags should be 
 				done. -->
 			<plugin>
@@ -182,50 +168,6 @@
 				</configuration>
 			</plugin>
 
-			<!-- Plugin which defines the build number. -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>buildnumber-maven-plugin</artifactId>
-				<version>1.1</version>
-				<executions>
-					<execution>
-						<phase>validate</phase>
-						<goals>
-							<goal>create</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-			<!-- Plugin that creates the jar. We configure the plugin to place the 
-				build number in the jar's manifest. The goal 'test-jar' allows creating a 
-				jar file with test code. -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.4</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>test-jar</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<archive>
-						<manifest>
-							<addDefaultImplementationEntries>
-								true
-							</addDefaultImplementationEntries>
-						</manifest>
-						<manifestEntries>
-							<Implementation-Build>
-								${buildNumber}
-							</Implementation-Build>
-						</manifestEntries>
-					</archive>
-				</configuration>
-			</plugin>
 
 			<!-- Configure the surefire plugin (which runs unit tests). We change 
 				the default configuration in order not to stop the builds if unit tests fail. 
@@ -245,7 +187,7 @@
 				</configuration>
 			</plugin>
 
-			
+
 		</plugins>
 	</build>
 
@@ -472,11 +414,7 @@
 			<version>1.2.17</version>
 			<type>jar</type>
 		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.11</version>
-		</dependency>
+
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-io</artifactId>
@@ -511,12 +449,18 @@
 		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
-			<version>0.9.9-RC1</version>
+			<version>0.9.11</version>
 		</dependency>
 		<dependency>
-			<groupId>com.google.inject</groupId>
-			<artifactId>guice</artifactId>
-			<version>4.0</version>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
+			<version>5.1.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.argparse4j</groupId>
+			<artifactId>argparse4j</artifactId>
+			<version>0.8.1</version>
 		</dependency>
 	</dependencies>
 </project>

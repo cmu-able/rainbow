@@ -32,6 +32,7 @@ import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.model.acme.AcmeModelCommandFactory;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.stitch.visitor.Stitch;
+import org.sa.rainbow.stitch.visitor.StitchScopeEstablisher.StitchImportedDirectAcmeModelInstance;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -94,6 +95,14 @@ public class StitchScript extends ScopedEntity implements IScope {
                 }
             }
         }
+        if (obj == null) { // try list of Strategies
+        	for (Strategy s : strategies) {
+        		if (name.equals(s.getName())) {
+        			obj = s;
+        			break;
+        		}
+        	}
+        }
         // TODO: search root scope for tactic!
         if (obj == null) {  // try looking up model reference
             List<AcmeModelInstance> lookupModels = null;
@@ -120,7 +129,11 @@ public class StitchScript extends ScopedEntity implements IScope {
                 } else {// substitute
                     name = rootName + (dotIdx > -1 ? name.substring (dotIdx) : "");
                     if (model.getModelName ().equals (name)) {
-                        obj = model;
+                    	if (model instanceof StitchImportedDirectAcmeModelInstance) {
+                    		obj = model.getModelInstance();
+                    	}
+                    	else 
+                    		obj = model/*.getModelInstance()*/;
                     } else {
                         obj = model.getModelInstance ().lookupName (name, true);
                     }

@@ -84,7 +84,7 @@ public class MissionStateGauge extends RegularPatternGauge {
             restGroup = 7;
 
             String w = yawFromQuarternion (a, b, c, d);
-
+            log("Setting location to " + x + ", " + y);
             if (locationDifferent (x, y, w)) {
                 IRainbowOperation op = m_commands.get ("location");
                 Map<String, String> pMap = new HashMap<> ();

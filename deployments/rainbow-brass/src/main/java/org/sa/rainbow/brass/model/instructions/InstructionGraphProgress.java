@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -33,9 +34,10 @@ public class InstructionGraphProgress {
     public static List<IInstruction> parseFromString (String igStr) {
         List<IInstruction> instructions = new LinkedList<IInstruction> ();
         igStr = igStr.replace ("\n", "").replace ("\r", "");
+        igStr = igStr.replace("\\", "");
         igStr = igStr.substring (2); // Remove P(
         String[] is = igStr.split ("V");
-        Pattern instructionPattern = Pattern.compile ("\\((.*), do (.*) then (.*)\\).*");
+        Pattern instructionPattern = Pattern.compile ("\\((.*),.*do\\s+(.*) then (.*)\\).*");
 
         for (String i : is) {
             Matcher m = instructionPattern.matcher (i);
@@ -57,10 +59,28 @@ public class InstructionGraphProgress {
                 }
                 else if (instruction.startsWith (SetLocalizationFidelityInstruction.COMMAND_NAME)) {
                     inst2 = new SetLocalizationFidelityInstruction (label, instruction, nextLabel);
-                } else {
+                }
+                else if (instruction.startsWith(SetSensorInstruction.COMMAND_NAME)) {
+                	inst2 = new SetSensorInstruction(label, instruction, nextLabel);
+                }
+                else if (instruction.startsWith(StartNodesInstruction.COMMAND_NAME)) {
+                	inst2 = new StartNodesInstruction(label, instruction, nextLabel);
+                }
+                else if (instruction.startsWith(KillNodesInstruction.COMMAND_NAME)) {
+                	inst2 = new KillNodesInstruction(label, instruction, nextLabel);
+                } 
+                else if (instruction.startsWith(SetConfigInstruction.COMMAND_NAME)) {
+                	inst2 = new SetConfigInstruction(label, instruction, nextLabel);
+                }
+                else if (instruction.startsWith(SetReconfiguringInstruction.COMMAND_NAME)) {
+                	inst2 = new SetReconfiguringInstruction(label, instruction, nextLabel);
+                }
+                else {
                     //TODO
                     // Other ignorable instructions
                     inst2 = null;
+                    System.out.print("IGERROR: " + label + ":" + instruction + ":" + nextLabel);
+                    
 //                    inst2 = new MoveAbsHInstruction(label, instruction, nextLabel);
                 }
 
@@ -68,11 +88,14 @@ public class InstructionGraphProgress {
                     instructions.add(inst2);
                 }
             }
+            else {
+            	System.out.println("IGERROR: " + i);
+            }
         }
         return instructions;
     }
 
-    public Collection<? extends IInstruction> getInstructions () {
+    public List<? extends IInstruction> getInstructions () {
         return m_instructionList;
     }
 
@@ -80,12 +103,12 @@ public class InstructionGraphProgress {
      * 
      * @return The remaining instructions, excluding the current instruction, to be executed
      */
-    public Collection<? extends IInstruction> getRemainingInstructions () {
+    public List<? extends IInstruction> getRemainingInstructions () {
         List<IInstruction> remainingInstructions = new LinkedList<>();
         IInstruction instPtr = getCurrentInstruction();
 
-        while (instPtr != null && m_instructions.containsKey(instPtr.getNextInstructionLabel())) {
-            String nextLabel = instPtr.getNextInstructionLabel();
+        while (instPtr != null && m_instructions.containsKey(instPtr.getNextInstructionLabel().trim())) {
+            String nextLabel = instPtr.getNextInstructionLabel().trim();
             IInstruction nextInstruction = m_instructions.get(nextLabel);
             remainingInstructions.add(nextInstruction);
             instPtr = m_instructions.get(nextLabel);
@@ -105,7 +128,7 @@ public class InstructionGraphProgress {
     }
 
     public boolean getCurrentOK () {
-        return m_currentOK;
+        return isCurrentOK();
     }
 
     public IInstruction getCurrentInstruction () {
@@ -153,15 +176,16 @@ public class InstructionGraphProgress {
         for (IInstruction i : instructions) {
             m_instructions.put (i.getInstructionLabel(), i);
         }
-        m_instructionGraphState = IGExecutionStateT.NONE;
+        setInstructionGraphState(IGExecutionStateT.NONE);
+        setCurrentOK(true);
     }
 
     public void setExecutingInstruction (String instLabel, String state) {
 //    	if (m_instructions.containsKey (instLabel)) {
         m_currentNode = instLabel;
-        if (!m_currentOK)
+        if (!isCurrentOK())
         {
-            m_currentOK = true;
+            setCurrentOK(true);
 //        }
 //        ExecutionObservation observation = new ExecutionObservation ();
 //        observation.startTime = new Date().getTime ();
@@ -198,6 +222,26 @@ public class InstructionGraphProgress {
     public void setInstructionGraphState (IGExecutionStateT instructionGraphState) {
         m_instructionGraphState = instructionGraphState;
     }
+    
+    public static List<List<? extends IInstruction>> segmentByInstructionType(List<? extends IInstruction> instructions, Class clz) {
+    	List<List<? extends IInstruction>> segments = new LinkedList<> ();
+    	List<IInstruction> currentSegment = new LinkedList<>();
+    	Iterator<? extends IInstruction> it = instructions.iterator();
+    	while (it.hasNext()) {
+    		IInstruction next = it.next();
+    		if (clz.isInstance(next)) {
+    			if (!currentSegment.isEmpty()) {
+    				if (!currentSegment.isEmpty()) segments.add(currentSegment);
+    				currentSegment = new LinkedList<> ();
+    			}
+    		}
+    		else {
+    			currentSegment.add(next);
+    		}
+    	}
+    	if (!currentSegment.isEmpty()) segments.add(currentSegment);
+    	return segments;
+    }
 
     // Note: this assumes sequential instructions
     @Override
@@ -232,9 +276,18 @@ public class InstructionGraphProgress {
 
     public static void main (String[] args) {
         InstructionGraphProgress ip = parseFromString (new ModelReference ("test", "test"),
-                "[P(V(1, do Deadline(143) then 2),V(2, do MoveAbsH(52.20, 69.00, 0.68, 3.1416) then 3)::V(3, do MoveAbsH(42.50, 69.00, 0.68, -1.5708) then 4)::V(4, do MoveAbsH(42.50, 65.00, 0.68, -1.5708) then 5)::V(5, do MoveAbsH(42.50, 58.80, 0.68, 0.0000) then 6)::V(6, end)::nil)");
+                "[P(V(1, do SetReconfiguring(1) then 2),V(2, do KillNodes(%mapServer%)\\\r\n" + 
+                "  \\ then 3)::V(3, do KillNodes(%laserscanNodelet%) then 4)::V(4, do KillNodes(%amcl%)\\\r\n" + 
+                "  \\ then 5)::V(5, do SetSensor (%CAMERA%, %on%) then 6)::V(6, do StartNodes(%aruco%)\\\r\n" + 
+                "  \\ then 7)::V(7, do StartNodes(%mapServerObs%) then 8)::V(8, do SetReconfiguring(0)\\\r\n" + 
+                "  \\ then 9)::V(9, do MoveAbsH(-6.22, 0.00, 0.25, 1.5708) then 10)::V(10, do MoveAbsH(-6.22,\\\r\n" + 
+                "  \\ 10.27, 0.25, 1.5708) then 11)::V(11, end)::nil)");
         IInstruction instruction = ip.getInstruction ("5");
         System.out.println ();
     }
+
+	private boolean isCurrentOK() {
+		return m_currentOK;
+	}
 
 }

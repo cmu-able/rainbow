@@ -26,8 +26,14 @@
  */
 package org.sa.rainbow.stitch.util;
 
-import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
+
+import org.sa.rainbow.core.models.ModelReference;
 
 /**
  * Captures one data entry of execution history for the Strategy or Tactic (or any unit of adaptation execution as
@@ -40,7 +46,7 @@ import java.util.*;
 public final class ExecutionHistoryData {
 
     public enum ExecutionStateT {
-        NOT_EXECUTING, STARTED, EXECUTING, WAITING, FINISHED
+        NOT_EXECUTING, ADAPTATION_QUEUED, ADAPTATION_EXECUTING, STRATEGY_EXECUTING, NODE_EXECUTING, TACTIC_EXECUTING, TACTIC_SETTLING, TACTIC_DONE, NODE_DONE, STRATEGY_SETTLING, STRATEGY_DONE, ADAPTATION_DONE, TACTIC_ERROR
     }
 
     public static class ExecutionPoint {
@@ -69,6 +75,7 @@ public final class ExecutionHistoryData {
     private long                       m_min           = Long.MAX_VALUE;
     private long                       m_max           = Long.MIN_VALUE;
     private double                     m_numSuccesses  = 0;
+    private ModelReference			   m_targetedModel = null;
 
     private LinkedList<ExecutionPoint> m_executions    = new LinkedList<> ();
 
@@ -96,13 +103,13 @@ public final class ExecutionHistoryData {
      * @param max
      *            initial maximum duration value read from storage
      */
-    public ExecutionHistoryData (String iden, int sampleSize, double mean, double variance, long min, long max,
-            double numSuccesses, @Nonnull List<ExecutionPoint> executions) {
-        initData (iden, sampleSize, mean, variance, min, max, numSuccesses, executions);
+    public ExecutionHistoryData (String iden, ModelReference modelRef, int sampleSize, double mean, double variance, long min, long max,
+            double numSuccesses, List<ExecutionPoint> executions) {
+        initData (modelRef, iden, sampleSize, mean, variance, min, max, numSuccesses, executions);
     }
 
     public ExecutionHistoryData (ExecutionHistoryData ed) {
-        this (ed.m_qualifiedIden, ed.m_sampleSize, ed.m_mean, ed.m_variance, ed.m_min, ed.m_max, ed.m_numSuccesses,
+        this ( ed.m_qualifiedIden, ed.m_targetedModel,ed.m_sampleSize, ed.m_mean, ed.m_variance, ed.m_min, ed.m_max, ed.m_numSuccesses,
                 ed.m_executions);
     }
 
@@ -110,6 +117,7 @@ public final class ExecutionHistoryData {
      * Initializes the data items for this history data entry, called only once. With the exception of the identifier,
      * no other set method is provided to convey the semantic that updates to data values occur internally when a new
      * sample measurement is supplied via {@link #addDurationSample(long)}.
+     * @param modelRef 
      * 
      * @param iden
      *            fully-qualified string identifier for this data
@@ -124,7 +132,7 @@ public final class ExecutionHistoryData {
      * @param max
      *            initial maximum duration value read from storage
      */
-    public void initData (String iden,
+    public void initData (ModelReference modelRef, String iden,
             int sampleSize,
             double mean,
             double variance,
@@ -134,7 +142,7 @@ public final class ExecutionHistoryData {
             List<ExecutionPoint> executions) {
 
         if (m_qualifiedIden != null) return;
-
+        m_targetedModel = modelRef;
         m_qualifiedIden = iden;
         m_sampleSize = sampleSize;
         m_mean = mean;
@@ -150,6 +158,10 @@ public final class ExecutionHistoryData {
      */
     public String getIdentifier () {
         return m_qualifiedIden;
+    }
+    
+    public ModelReference getModelReference() {
+    	return m_targetedModel;
     }
 
     /**
@@ -211,7 +223,7 @@ public final class ExecutionHistoryData {
     }
 
     public ExecutionStateT getCurrentExecutionState () {
-        return m_executions.getLast ().m_state;
+        return m_executions.isEmpty()?ExecutionStateT.NOT_EXECUTING:m_executions.getLast ().m_state;
     }
 
     public String getLastExecutionResult () {
@@ -219,7 +231,7 @@ public final class ExecutionHistoryData {
         String data = null;
         while (i.hasNext () && data == null) {
             ExecutionPoint point = i.next ();
-            if (point.m_state == ExecutionStateT.FINISHED) {
+            if (point.m_state == ExecutionStateT.ADAPTATION_DONE) {
                 data = point.m_data;
             }
         }
@@ -263,12 +275,12 @@ public final class ExecutionHistoryData {
         m_executions.add (p);
 
         switch (newState) {
-        case STARTED:
-            addExecutionTransition (type, ExecutionStateT.EXECUTING, null);
-            break;
-        case FINISHED:
+        case ADAPTATION_DONE:
             addExecutionTransition (type, ExecutionStateT.NOT_EXECUTING, null);
             break;
+//        case FINISHED:
+//            addExecutionTransition (type, ExecutionStateT.NOT_EXECUTING, null);
+//            break;
         default:
         }
     }
@@ -279,9 +291,13 @@ public final class ExecutionHistoryData {
     @Override
     public String toString () {
         StringBuffer sb = new StringBuffer (m_qualifiedIden);
-        sb.append ("\t").append (m_sampleSize).append ("\t").append (m_mean).append ("\t").append (m_variance)
+        sb.append("\t").append(m_targetedModel.toString()).append ("\t").append (m_sampleSize).append ("\t").append (m_mean).append ("\t").append (m_variance)
         .append ("\t").append (m_min).append ("\t").append (m_max).append ("\t").append (getSuccessRate ());
         return sb.toString ();
     }
+
+	public void setModel(ModelReference modelReference) {
+		m_targetedModel = modelReference;
+	}
 
 }

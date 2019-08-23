@@ -56,7 +56,7 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
 
     protected IRainbowMessageFactory      m_messageFactory;
 
-    protected IModelInstance<Model>       m_modelContext;
+    protected IModelInstance<? extends Model>       m_modelContext;
 
     private final String m_target;
 
@@ -66,7 +66,7 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
 
     private String                          m_origin;
 
-    public AbstractRainbowModelOperation (String commandName, IModelInstance<Model> model, String target,
+    public AbstractRainbowModelOperation (String commandName, IModelInstance<? extends Model> model, String target,
             String... parameters) {
         m_target = target;
         m_parameters = parameters;
@@ -216,7 +216,7 @@ public abstract class AbstractRainbowModelOperation<Type, Model> implements IRai
                         : ("<" + m_origin));
     }
 
-    protected IModelInstance<Model> getModelContext () {
+    protected IModelInstance<? extends Model> getModelContext () {
         return m_modelContext;
     }
 

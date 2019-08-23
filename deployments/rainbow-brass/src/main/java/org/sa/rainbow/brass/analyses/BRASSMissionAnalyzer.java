@@ -1,7 +1,8 @@
 package org.sa.rainbow.brass.analyses;
 
 import org.sa.rainbow.brass.das.BRASSHttpConnector;
-import org.sa.rainbow.brass.das.IBRASSConnector.DASStatusT;
+import org.sa.rainbow.brass.das.IBRASSConnector.DASPhase1StatusT;
+import org.sa.rainbow.brass.das.IBRASSConnector.Phases;
 import org.sa.rainbow.brass.model.instructions.IInstruction;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
@@ -128,7 +129,7 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
 //            log ("Empty instructions?" + emptyInstructions (igProgress));
 //            log ("Robot obstructed known? " + missionState.isRobotObstructed ());
             if (igProgress.getInstructionGraphState () == IGExecutionStateT.FINISHED_SUCCESS) {
-                BRASSHttpConnector.instance ().reportDone (false, "Finished all the instructions in the task");
+                BRASSHttpConnector.instance (Phases.Phase1).reportDone (false, "Finished all the instructions in the task");
                 Rainbow.instance ().signalTerminate ();
                 return;
 
@@ -138,14 +139,14 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
             }
             else if (missionState.getCurrentPose () != null && m_awaitingPose) {
                 m_awaitingPose = false;
-                BRASSHttpConnector.instance ().reportReady (true);
+                BRASSHttpConnector.instance (Phases.Phase1).reportReady (true);
 
             }
             else if (!currentOK && igProgress.getExecutingInstruction () != null && !m_awaitingNewIG
                     /*&& igProgress.getInstructionGraphState () == IGExecutionStateT.FINISHED_FAILED*/) {
                 // Current IG failed
                 m_reportingPort.info (getComponentType (), "Instruction graph failed...updating map model");
-                BRASSHttpConnector.instance ().reportStatus (DASStatusT.PERTURBATION_DETECTED,
+                BRASSHttpConnector.instance (Phases.Phase1).reportStatus (DASPhase1StatusT.PERTURBATION_DETECTED.name(),
                         "Obstruction to path detected");
                 // Get current robot position
                 LocationRecording pose = missionState.getCurrentPose ();

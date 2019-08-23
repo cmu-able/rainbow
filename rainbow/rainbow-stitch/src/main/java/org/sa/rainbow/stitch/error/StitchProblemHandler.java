@@ -43,6 +43,7 @@ import java.util.Collection;
 public interface StitchProblemHandler {
     void setProblem(IStitchProblem problem);
     void addAll (Collection<IStitchProblem> problems);
+    void clearProblems();
     Collection<IStitchProblem> unreportedProblems();
     StitchProblemHandler clone ();
 }

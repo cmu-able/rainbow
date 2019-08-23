@@ -1,33 +1,45 @@
 package org.sa.rainbow.brass.model.map;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class EnvMapNode {
     public String m_label;
     public double m_x, m_y;
     public int m_id;
-    public boolean m_charging; // Is this location a charging station?
+    private final Map<String,Object> m_properties;
 
-    public EnvMapNode (String m_label, double m_x, double m_y, int node_id) {
-        super();
-        this.m_label = m_label;
-        this.m_x = m_x;
-        this.m_y = m_y;
-        this.m_id = node_id;
-        this.m_charging = false;
-    }
-
-    public EnvMapNode (String m_label, double m_x, double m_y, int node_id, boolean charging) {
+    public EnvMapNode (String m_label, double x, double y, int node_id, boolean charging) {
     	super();
         this.m_label = m_label;
-        this.m_x = m_x;
-        this.m_y = m_y;
+        this.m_x = x;
+        this.m_y = y;
         this.m_id = node_id;
-    	this.m_charging = charging;
+        
+        m_properties = new HashMap<> ();
+        m_properties.put(Phase1MapPropertyKeys.CHARGING_STATION, (boolean)charging);	
     }
     
-    public boolean isChargingStation(){
-    	return m_charging;
+    public EnvMapNode (String m_label, double x, double y, int node_id) {
+        super();
+        this.m_label = m_label;
+        this.m_x = x;
+        this.m_y = y;
+        this.m_id = node_id;
+        
+        m_properties = new HashMap<> ();
+        m_properties.put(Phase1MapPropertyKeys.CHARGING_STATION, false);	
+
+    }
+   
+    public void setProperty(String key, Object value) {
+    	m_properties.put(key, value);
     }
     
+    public Object getProperty(String key) {
+    	return m_properties.get(key);
+    }
+        
     public String getLabel() {
         return m_label;
     }
@@ -55,4 +67,9 @@ public class EnvMapNode {
     public int getId() {
         return m_id;
     }
+    
+    public boolean isChargingStation(){
+    	return (boolean) m_properties.get(Phase1MapPropertyKeys.CHARGING_STATION);
+    }
+    
 }

@@ -6,7 +6,8 @@ import java.util.List;
 
 import org.sa.rainbow.brass.PropertiesConnector;
 import org.sa.rainbow.brass.das.BRASSHttpConnector;
-import org.sa.rainbow.brass.das.IBRASSConnector.DASStatusT;
+import org.sa.rainbow.brass.das.IBRASSConnector.DASPhase1StatusT;
+import org.sa.rainbow.brass.das.IBRASSConnector.Phases;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphModelInstance;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
 import org.sa.rainbow.brass.model.map.EnvMap;
@@ -24,6 +25,7 @@ import org.sa.rainbow.core.adaptation.AdaptationTree;
 import org.sa.rainbow.core.adaptation.DefaultAdaptationTreeWalker;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
@@ -142,13 +144,18 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
         // (b) start listening to model events to generate new plans again
 
         AdaptationResultsVisitor v = new AdaptationResultsVisitor (plan);
-        plan.visit (v);
+        try {
+			plan.visit (v);
+		} catch (RainbowException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
         if (v.m_allOk) {
-            BRASSHttpConnector.instance ().reportStatus (DASStatusT.ADAPTATION_COMPLETED,
+            BRASSHttpConnector.instance (Phases.Phase1).reportStatus (DASPhase1StatusT.ADAPTATION_COMPLETED.name(),
                     "Finished adapting the system");
         }
         else {
-            BRASSHttpConnector.instance ().reportStatus (DASStatusT.TEST_ERROR,
+            BRASSHttpConnector.instance (Phases.Phase1).reportStatus (DASPhase1StatusT.TEST_ERROR.name(),
                     "Something in the adaptation plan failed to execute.");
         }
         try {
@@ -230,7 +237,7 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
                                     .getLabel ();
 
                             DecisionEngine.generateCandidates (label, ms.getTargetWaypoint (), true); // Generate candidate solutions to go from current waypoint to target one (inhibited tactics, just move commands)
-                            DecisionEngine.scoreCandidates (map, MapTranslator.ROBOT_BATTERY_RANGE_MAX, "2"); // Property 1 in file deals with time subject to target reachability (R{"time"}min=? [ F goal ])
+                            DecisionEngine.scoreCandidates (map, MapTranslator.ROBOT_BATTERY_RANGE_MAX, 2); // Property 1 in file deals with time subject to target reachability (R{"time"}min=? [ F goal ])
 
                             PrismPolicy prismPolicy = new PrismPolicy (DecisionEngine.selectPolicy ());
                             prismPolicy.readPolicy ();
@@ -244,7 +251,7 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
                                     m_currentPlan = new ArrayList<> (prismPolicy.getPlan ());
                                     AdaptationTree<BrassPlan> at = new AdaptationTree<> (nig);
 //                            at.addLeaf (nig);
-                                    BRASSHttpConnector.instance ().reportStatus (DASStatusT.ADAPTATION_INITIATED,
+                                    BRASSHttpConnector.instance (Phases.Phase1).reportStatus (DASPhase1StatusT.ADAPTATION_INITIATED.name(),
                                             "Enqueuing a new plan");
                                     m_adaptationEnqueuePort.offerAdaptation (at, new Object[0]);
 
@@ -276,8 +283,8 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
                             String label = node.getLabel ();
 
                             DecisionEngine.generateCandidates (label, ms.getTargetWaypoint ()); // Generate candidate solutions to go from current waypoint to target one
-                            DecisionEngine.scoreCandidates (map, String.valueOf (Math.round (ms.getBatteryCharge ())),
-                                    "1"); // Property 1 in file deals with time subject to target reachability (R{"time"}min=? [ F goal ])
+                            DecisionEngine.scoreCandidates (map, Math.round (ms.getBatteryCharge ()),
+                                    1); // Property 1 in file deals with time subject to target reachability (R{"time"}min=? [ F goal ])
 
                             // Translate model to the IG
                             // Create a NewInstrcutionGraph object and enqueue it on the adaptation port, set new deadline
@@ -292,7 +299,7 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
 
                                 MapTranslator.exportMapTranslation (
                                         Rainbow.instance ().getProperty (PropertiesConnector.PRISM_MODEL_PROPKEY));
-                                PrismConnectorAPI.loadModel (
+                                PrismConnectorAPI.instance().loadModel (
                                         Rainbow.instance ().getProperty (PropertiesConnector.PRISM_MODEL_PROPKEY));
                                 String m_consts = MapTranslator.INITIAL_ROBOT_LOCATION_CONST + "="
                                         + String.valueOf (map.getNodeId (label)) + ","
@@ -304,7 +311,7 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
 
                                 System.out.println ("Generating last resort plan for " + m_consts);
                                 String result;
-                                result = PrismConnectorAPI.modelCheckFromFileS (
+                                result = PrismConnectorAPI.instance().modelCheckFromFileS (
                                         Rainbow.instance ().getProperty (PropertiesConnector.PRISM_MODEL_PROPKEY),
                                         Rainbow.instance ().getProperty (PropertiesConnector.PRISM_PROPERTIES_PROPKEY),
                                         /*Rainbow.instance ().getProperty (PropertiesConnector.PRISM_ADV_EXPORT_PROPKEY)*/"lastResortPolicy",
@@ -341,7 +348,7 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
 //                    AdaptationTree<BrassPlan> at = new AdaptationTree<BrassPlan> (nig);
                                 m_reportingPort.info (getComponentType (), "New adaptation found - enqueuing it");
                                 m_executingPlan = true;
-                                BRASSHttpConnector.instance ().reportStatus (DASStatusT.ADAPTATION_INITIATED,
+                                BRASSHttpConnector.instance (Phases.Phase1).reportStatus (DASPhase1StatusT.ADAPTATION_INITIATED.name(),
                                         "Enqueuing a new plan");
 
                                 m_adaptationEnqueuePort.offerAdaptation (at, new Object[] {});
@@ -380,5 +387,10 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
         }
 
     }
+
+	@Override
+	public ModelReference getManagedModel() {
+		return m_modelRef;
+	}
 
 }

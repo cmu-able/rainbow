@@ -48,7 +48,8 @@ import java.util.Map.Entry;
  * @author Bradley Schmerl (schmerl@cs.cmu.edu)
  */
 public abstract class AbstractGauge extends AbstractRainbowRunnable implements IGauge {
-    private final String m_id;
+
+	private final String m_id;
 
     /**
      * The ports through which the gauge interacts with the outside world
@@ -79,6 +80,8 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
     protected Map<String, IRainbowOperation> m_commands = null;
 
     private Map<String, IRainbowOperation> m_lastCommands = null;
+    
+    private Boolean m_adapting = false;
 
     /**
      * Main Constructor for the Gauge.
@@ -238,11 +241,27 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
      * @param triple a triple of name, type, value.
      */
     protected void handleConfigParam (TypedAttributeWithValue triple) {
-        if (triple.getName ().equals (CONFIG_SAMPLING_FREQUENCY)) {
+        Object value = triple.getValue();
+		if (triple.getName ().equals (CONFIG_SAMPLING_FREQUENCY)) {
             // set the runner timer directly
-            setSleepTime ((Long) triple.getValue ());
+            setSleepTime ((Long) value);
+        }
+        else if (triple.getName().equals(RAINBOW_ADAPTING)) {
+        	synchronized (this) {
+        		if (value instanceof Boolean) {
+        			m_adapting = (Boolean )value;
+        		}
+        		else if (value instanceof String) {
+        			m_adapting = Boolean.valueOf((String )value);
+        		}
+        	}
         }
     }
+    
+    protected synchronized boolean isRainbowAdapting() {
+    	return m_adapting;
+    }
+    
 
     /* (non-Javadoc)
      * @see org.sa.rainbow.translator.gauges.IGauge#reconfigureGauge()
@@ -467,4 +486,9 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
         m_commands = commands;
     }
 
+    @Override
+    public Set<? extends String> commandKeys() {
+    	return m_commands.keySet();
+    }
+    
 }

@@ -14,7 +14,9 @@ public class MoveAbsHInstruction implements IInstruction {
     private double m_targetY;
     private double m_targetW;
     private double m_speed;
-
+    private String m_srcWaypoint;
+    private String m_tgtWaypoint;
+    
     public MoveAbsHInstruction (String label, String instruction, String nextLabel) {
         m_label = label;
         m_instruction = instruction;
@@ -44,6 +46,22 @@ public class MoveAbsHInstruction implements IInstruction {
     public double getTargetY () {
         return m_targetY;
     }
+    
+    public String getTargetWaypoint() {
+    	return m_tgtWaypoint;
+    }
+    
+    public String getSourceWaypoint() {
+    	return m_srcWaypoint;
+    }
+    
+    public void setTargetWaypoint(String wp) {
+    	m_tgtWaypoint = wp;
+    }
+    
+    public void setSourceWaypoint(String wp) {
+    	m_srcWaypoint = wp;
+    }
 
     public double getSpeed () {
         return m_speed;
@@ -69,8 +87,8 @@ public class MoveAbsHInstruction implements IInstruction {
 
     private void parseMoveAbsHTargetPose () {
         Pattern moveAbsHPattern = Pattern
-                .compile ("MoveAbsH\\(([\\-0-9.]+), ?([\\-0-9.]+), ?([\\-0-9.]+), ?([\\-0-9.]+)\\)");
-        Matcher m = moveAbsHPattern.matcher (m_instruction);
+                .compile ("MoveAbsH\\(([\\-0-9.]+),\\s*([\\-0-9.]+),\\s*([\\-0-9.]+),\\s*([\\-0-9.]+)\\)");
+        Matcher m = moveAbsHPattern.matcher (m_instruction.trim());
         if (m.matches ()) {
             m_targetX = Double.parseDouble (m.group (1));
             m_targetY = Double.parseDouble (m.group (2));

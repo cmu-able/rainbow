@@ -35,8 +35,11 @@ import java.net.UnknownHostException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -59,7 +62,8 @@ public class Rainbow implements IRainbowEnvironment {
 
     private static final String PROPKEY_PROPFILENAME = "rainbow.properties";
 
-    /**
+
+	/**
      * Exit status that Rainbow would report when it exits, default to sleeping.
      */
     private static ExitState m_exitState = ExitState.SLEEP;
@@ -70,13 +74,17 @@ public class Rainbow implements IRainbowEnvironment {
 
     private boolean m_shouldTerminate = false;
 
-    private static Rainbow _instance = null;
+    private static IRainbowEnvironment _instance = null;
 
-    public static synchronized Rainbow instance () {
+    public static synchronized IRainbowEnvironment instance () {
         if (_instance == null) {
             _instance = new Rainbow ();
         }
         return _instance;
+    }
+    
+    public static void uninstantiate() {
+    	_instance = null;
     }
 
     /**
@@ -138,7 +146,7 @@ public class Rainbow implements IRainbowEnvironment {
 
     private final ThreadGroup m_threadGroup;
 
-    private RainbowMaster m_rainbowMaster;
+    private IRainbowMaster m_rainbowMaster;
 
     private Properties m_defaultProps;
 
@@ -302,8 +310,8 @@ public class Rainbow implements IRainbowEnvironment {
         }
 
         LOGGER.debug (MessageFormat.format ("Rainbow config path: {0}", m_targetPath.getAbsolutePath ()));
-
-        computeHostSpecificConfig ();
+        if (m_props.getProperty(PROPKEY_CONFIG_FILE) == null)
+        	computeHostSpecificConfig ();
         String cfgFile = m_props.getProperty (PROPKEY_CONFIG_FILE, DEFAULT_CONFIG_FILE);
         List<String> cfgFiles = new ArrayList<> ();
 //        if (!cfgFile.equals (DEFAULT_CONFIG_FILE)) { 
@@ -365,7 +373,14 @@ public class Rainbow implements IRainbowEnvironment {
             String val = m_props.getProperty (key);
             while (val.contains (Util.TOKEN_BEGIN)) {
                 m_props.setProperty (key, Util.evalTokens (val, m_props));
-                val = m_props.getProperty (key);
+                String val2 = m_props.getProperty (key);
+                if (val.equals(val2)) {
+                	System.err.print("The property '" + val + "' seems to have an undefined variable");
+                	break;
+                }
+                else {
+                	val = val2;
+                }
             }
         }
     }
@@ -509,12 +524,12 @@ public class Rainbow implements IRainbowEnvironment {
     }
 
     @Override
-    public void setMaster (RainbowMaster rainbowMaster) {
+    public void setMaster (IRainbowMaster rainbowMaster) {
         m_rainbowMaster = rainbowMaster;
     }
 
     @Override
-    public RainbowMaster getRainbowMaster () {
+    public IRainbowMaster getRainbowMaster () {
         return m_rainbowMaster;
     }
 
@@ -539,8 +554,26 @@ public class Rainbow implements IRainbowEnvironment {
         return Rainbow.m_env;
     }
 
+    
+    protected Map<RainbowComponentT, Map<String,Thread>> m_rainbowThreads = new HashMap<>();
+    
+	@Override
+	public void registerRainbowThread(Thread thread, RainbowComponentT componentType) {
+		Map<String, Thread> threads = m_rainbowThreads.get(componentType);
+		if (threads == null) {
+			threads = new HashMap<> ();
+			m_rainbowThreads.put(componentType, threads);
+		}
+		threads.put(thread.getName(), thread);
+	}
+	
+	
+	@Override
+	public Map<RainbowComponentT, Map<String,Thread>> getRegisteredThreads() {
+		return Collections.unmodifiableMap(m_rainbowThreads);
+	}
 
-
+    
 
 
 }

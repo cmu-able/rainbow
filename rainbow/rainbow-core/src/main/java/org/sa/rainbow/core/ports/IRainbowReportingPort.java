@@ -24,6 +24,7 @@
 package org.sa.rainbow.core.ports;
 
 import org.apache.log4j.Logger;
+import org.sa.rainbow.core.IRainbowMaster;
 import org.sa.rainbow.core.RainbowComponentT;
 
 public interface IRainbowReportingPort extends IDisposablePort {
@@ -57,6 +58,7 @@ public interface IRainbowReportingPort extends IDisposablePort {
     void info (RainbowComponentT type, String msg);
 
     void trace (RainbowComponentT type, String msg);
+
 
 
 }

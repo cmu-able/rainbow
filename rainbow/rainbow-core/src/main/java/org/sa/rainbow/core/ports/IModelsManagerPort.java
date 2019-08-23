@@ -34,5 +34,6 @@ public interface IModelsManagerPort extends IModelInstanceProvider {
 
     @Override
     <T> IModelInstance<T> getModelInstance (ModelReference modelRef);
+    boolean isModelLocked(ModelReference modelRef);
 
 }

@@ -41,6 +41,7 @@ import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.core.gauges.IGaugeIdentifier;
 import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.IModelUpdater;
 import org.sa.rainbow.core.models.IModelsManager;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.ModelsManager;
@@ -122,7 +123,7 @@ public class RainbowPortFactory {
         return getFactory ().createDelegateConfigurationPort (rainbowDelegate);
     }
 
-    public static IModelUSBusPort createModelsManagerUSPort (IModelsManager m) throws RainbowConnectionException {
+    public static IModelUSBusPort createModelsManagerUSPort (IModelUpdater m) throws RainbowConnectionException {
         return getFactory ().createModelsManagerUSPort (m);
     }
 
@@ -257,6 +258,13 @@ public class RainbowPortFactory {
                 public IModelInstance getModelInstance (ModelReference modelRef) {
                     return mm.getModelInstance (modelRef);
                 }
+
+				@Override
+				public boolean isModelLocked(ModelReference modelRef) {
+					return mm.isModelLocked(modelRef);
+				}
+                
+                
             };
         }
         return getFactory ().createModeslManagerRequirerPort ();

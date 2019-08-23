@@ -1,0 +1,212 @@
+gauge-types:
+  InstructionGraphProgressGaugeT:
+    commands:
+      current-instruction: "IG.setExecutingInstruction(String,String)"
+      current-failed: "IG.setExecutionFailed(String)"
+      new-ig: "IG.setInstructions(String)"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.brass.gauges.InstructionGraphGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+
+  MissionStateGaugeT:
+    commands:
+      location: "MS.setCurrentLocation(double,double,double)"
+      deadline: "MS.setDeadline(long)"
+      reconfiguring: "MS.setReconfiguring(boolean)" 
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.brass.gauges.p2_cp3.MissionStateGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+        
+  RobotStateGaugeT:
+    commands:
+      speed: "RS.setSpeed(double)"
+      charge: "RS.setBatteryCharge(double)"
+      bump: "RS.setBumped(boolean)"
+      sensor: "RS.setSensor(String, boolean)"
+      sensor-failed: "RS.setSensorFailed(String)"
+      lighting: "RS.setLighting(double)"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.brass.gauges.p2_cp3.RobotStateGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~    
+      rainbowAdapting:
+        type: boolean
+        default: false 
+        
+  ClockGaugeT:
+    commands:
+      clock: "C.setCurrentTime(double)"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.brass.gauges.p2_cp3.ClockGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+      rainbowAdapting:
+        type: boolean
+        default: false
+      
+  ArchEnablementGaugeT:
+    commands: 
+      set-active: "C.setAcive(String)"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.brass.gauges.p2_cp3.ArchitectureGauge"
+      mapping:
+        type: String
+        default: ~
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+      rainbowAdapting:
+        type: boolean
+        default: false
+    
+        
+  BRASSTargetWaypointGaugeT:
+    commands:
+      target: "MS.setTargetWaypoint(String)"
+      preference: "MS.setUtilityPreference(String)"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.brass.gauges.TargetWaypointGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+        
+
+gauge-instances:
+  IGG1:
+    type: InstructionGraphProgressGaugeT
+    model: "ExecutingInstructionGraph:InstructionGraphProgress"
+    commands:
+      current-instruction: "cig.setExecutingInstruction($<node>,$<state>)"
+      current-failed: "cig.setExecutionFailed($<node>)"
+      new-ig: "igs.setInstructions($<ig>)"
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      reportingPeriod: 1000
+      targetProbeType: rostopicprobe
+  
+  RSG1:
+    type: RobotStateGaugeT
+    model: Robot:RobotState
+    commands:
+      speed: "rs.setSpeed($<s>)"
+      charge: "rs.setBatteryCharge($<c>)"
+      sensor: "rs.setSensor($<s>,$<v>)"
+      bump: "rs.setBumped($<b>)"
+      lighting: "rs.setLighting($<l>)"
+      sensor-failed: "rs.setSensorFailed($<s>)"
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      reportingPeriod: 1000
+      targetProbeType: rostopicprobe
+
+  Clock1:
+    type: ClockGaugeT
+    model: Clock:Clock
+    commands:
+      clock: "c.setCurrentTime($<c>)"
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      reportingPeriod: 1000
+      targetProbeType: rostopicprobe
+
+  TurtlebotArchitectureGauge:
+    type: ArchEnablementGaugeT
+    model: Turtlebot:Acme
+    commands:
+      set-active: "c.setActive($<a>)"
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+      mapping: "/amcl=amcl,/laserscan_nodelet_manager=laserScan_nodelet,/map_server=map_server,/map_server_obs=map_server_obs,/ig_interpreter=ig_interpreter,/move_base=move_base,/mrpt_localization_node=mrpt,/aruco_marker_publisher_front=aruco_marker_publisher_front,/aruco_marker_publisher_back=aruco_marker_publisher_back,/marker_pose_publisher=marker_pose_publisher"
+    configValues:
+      reportinPeriod: 1000
+      targetProbeType: rosnodeprobe
+
+  MSG1:
+    type: MissionStateGaugeT
+    model: MissionState:MissionState
+    commands:
+      location: "ms.setCurrentLocation($<x>,$<y>,$<w>)"
+      deadline: "ms.setDeadline($<d>)"
+      reconfiguring: "ms.setReconfiguring($<r>)"
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      reportingPeriod: 1000
+      targetProbeType: rostopicprobe
+        #- roslocationprobe
+  TWG1:
+    type: BRASSTargetWaypointGaugeT
+    model: MissionState:MissionState
+    commands:
+      target: "ms.setTargetWaypoint($<w>)"
+      preference: "ms.setUtilityPreference($<p>)"
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      reportingPeriod: 2000
+      targetProbeType: 
+        - brasstargetprobe
+        - brasspreferenceprobe

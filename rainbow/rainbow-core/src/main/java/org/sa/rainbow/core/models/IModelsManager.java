@@ -88,4 +88,6 @@ public interface IModelsManager extends IModelUpdater, IModelInstanceProvider {
     void unregisterModel (IModelInstance<?> model) throws RainbowModelException;
 
     <T> IModelInstance<T> getModelInstanceByResource (String resource);
+    
+    boolean isModelLocked(ModelReference modelRef);
 }

@@ -32,6 +32,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -68,6 +69,10 @@ public abstract class ModelCommandFactory<T> {
         fillInCommandMap ();
 
     }
+    
+    public Map<String, Class<? extends AbstractRainbowModelOperation<?, T>>> getCommands() {
+    	return Collections.unmodifiableMap(m_commandMap);
+    }
 
     protected abstract void fillInCommandMap ();
 
@@ -102,12 +107,25 @@ public abstract class ModelCommandFactory<T> {
             for (Constructor<? extends AbstractRainbowModelOperation<?, T>> c : constructors) {
                 Class<?>[] parameterTypes = c.getParameterTypes ();
                 final Class<?>[] a2 = Arrays.copyOfRange (parameterTypes, 0, 2);
+                
+                
+                
                 if (Arrays.equals (new Class<?>[]{m_instanceClass, String.class},
-                                   a2))
+                                   a2)) {
                     if (parameterTypes.length == 1 + args.length) {
                         constructor = c;
                         break;
                     }
+                }
+                else {
+                	// Check instance class assignable
+                	if (a2[0].isAssignableFrom(m_instanceClass) && a2[1] == String.class) {
+                		if (parameterTypes.length == 1 + args.length) {
+                			constructor = c;
+                			break;
+                		}
+                	}
+                }
             }
             if (constructor == null) throw new NoSuchMethodException ("Could not find a constructor for " + cmdClass
                     .getName () + " (" + m_instanceClass.getName () + ", String, String ...)");

@@ -48,5 +48,6 @@ public interface IEffectorProtocol {
     String KIND = "kind";
     String EFFECTOR_DELETED = "effectorDeleted";
     String EFFECTOR_EXECUTED = "effectorExecuted";
+    String EFFECTOR_EXECUTING = "effectorExecuting";
 
 }

@@ -112,7 +112,7 @@ public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
      */
     @Override
     public void reportFromProbe (IProbeIdentifier probe, String data) {
-        if (m_lines == null) return;
+        if (m_lines == null || !shouldProcess()) return;
         synchronized (m_lines) {
             // Only offer if we have a match
             for (Map.Entry<String,Pattern> e : m_patternMap.entrySet()) {
@@ -126,6 +126,10 @@ public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
 
         super.reportFromProbe (probe, data);
     }
+    
+    protected boolean shouldProcess() {
+    	return true;
+    }
 
     /* (non-Javadoc)
      * @see org.sa.rainbow.translator.gauges.AbstractGauge#runAction()
@@ -133,6 +137,10 @@ public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
     @Override
     protected void runAction() {
         // Pull probe values off the queue and process them
+    	if (!shouldProcess()) {
+    		super.runAction();
+    		return;
+    	}
         Matcher m = null;
         String name = null;
         int cnt = Math.min (MAX_UPDATES_PER_SLEEP, m_updatesPerCycle);

@@ -54,7 +54,7 @@ import java.util.List;
  * 
  * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
  */
-public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallback {
+public class RainbowGUI implements IRainbowGUI, IDisposable, IRainbowReportingSubscriberCallback {
     // Index values
     public static final int ID_MODEL_MANAGER      = 0;
     public static final int ID_ARCH_EVALUATOR     = 1;
@@ -103,7 +103,7 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
             System.exit (RainbowConstants.EXIT_VALUE_ABORT);
         }
 
-        RainbowGUI gui = new RainbowGUI (null);
+        IRainbowGUI gui = new RainbowGUI ();
         gui.display ();
     }
 
@@ -136,7 +136,12 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
     private IEffectorLifecycleBusPort m_effectorListener;
     private IEffectorLifecycleBusPort m_effectorLifecyclePort;
 
-    public RainbowGUI (IMasterCommandPort master) {
+    public RainbowGUI () {
+ 
+    }
+    
+    @Override
+	public void setMaster(IMasterCommandPort master) {
         m_master = master;
         try {
             if (m_master == null) {
@@ -203,7 +208,8 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         }
     }
 
-    public void display () {
+    @Override
+	public void display () {
         if (m_frame != null) return;
 
         //Schedule a job for the event-dispatching thread:
@@ -420,8 +426,8 @@ public class RainbowGUI implements IDisposable, IRainbowReportingSubscriberCallb
         item.addActionListener (new ActionListener () {
             @Override
             public void actionPerformed (ActionEvent e) {
-                boolean b = Rainbow.instance ().getRainbowMaster ().isAdaptationEnabled ();
-                Rainbow.instance ().getRainbowMaster ().enableAdaptation (!b);
+                boolean b = Rainbow.instance ().getRainbowMaster ().getCommandPort().isAdaptationEnabled ();
+                Rainbow.instance ().getRainbowMaster ().getCommandPort().enableAdaptation (!b);
 
                 //        		boolean b = !((AdaptationManager )Oracle.instance().adaptationManager())
                 // .adaptationEnabled();

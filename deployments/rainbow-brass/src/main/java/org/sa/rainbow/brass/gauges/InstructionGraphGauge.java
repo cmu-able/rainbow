@@ -21,10 +21,10 @@ public class InstructionGraphGauge extends RegularPatternGauge {
     protected static final String NEWIG = "NewIG";
     private static final String   FINISHEDIG = "IGFinished";
 
-    protected static final String INSTRUCTION_PATTERN = "topic: /ig_action_server/feedback/feedback/sequence.*(\\d+)\\.\\d+:([^:]*):(.*)";
+    protected static final String INSTRUCTION_PATTERN = "topic: /ig_action_server/feedback/feedback/sequence[^\\d]*(\\d+)\\.\\d+:([^:]*):(.*)\\\".*";
     protected static final String NEWIG_PATTERN = "topic: /ig_action_server/feedback/feedback/sequence.*Received new " +
             "valid IG: (.*)";
-    protected static final String FINISHIG_PATTERN    = "topic: /ig_action_server/feedback/feedback/sequence.*completed successfully.*";
+    protected static final String FINISHIG_PATTERN    = "topic: /ig_action_server/feedback/feedback/sequence.*Finished!.*";
 
 
     /**
@@ -43,7 +43,7 @@ public class InstructionGraphGauge extends RegularPatternGauge {
         super (NAME, id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
         addPattern (IG, Pattern.compile (INSTRUCTION_PATTERN, Pattern.DOTALL));
         addPattern (NEWIG, Pattern.compile (NEWIG_PATTERN, Pattern.DOTALL));
-        addPattern (FINISHEDIG, Pattern.compile (FINISHIG_PATTERN, Pattern.DOTALL));
+//        addPattern (FINISHEDIG, Pattern.compile (FINISHIG_PATTERN, Pattern.DOTALL));
     }
 
     @Override
@@ -51,6 +51,7 @@ public class InstructionGraphGauge extends RegularPatternGauge {
         if (IG.equals (matchName)) {
             String node = m.group (1).split ("\\.")[0];
             String status = m.group (3).trim();
+            System.out.println("Reporting " + m.group(2) + ": " + status);
 
             if ("START".equals (status)) {
                 IRainbowOperation operation = m_commands.get ("current-instruction");
@@ -82,6 +83,7 @@ public class InstructionGraphGauge extends RegularPatternGauge {
             }
         }
         else if (NEWIG.equals (matchName)) {
+        	System.out.println("Reporting new IG " + m.group(1).trim());
             String ig = m.group(1).trim ();
             IRainbowOperation op = m_commands.get ("new-ig");
             Map<String, String> pMap = new HashMap<> ();
@@ -89,6 +91,7 @@ public class InstructionGraphGauge extends RegularPatternGauge {
             issueCommand(op, pMap);
         }
         else if (FINISHEDIG.equals (matchName)) {
+        	System.out.println("Reporting finisehd instruction graph");
             IRainbowOperation op = m_commands.get ("finished-ig");
             Map<String, String> pMap = new HashMap<> ();
             pMap.put (op.getParameters ()[0], "true");

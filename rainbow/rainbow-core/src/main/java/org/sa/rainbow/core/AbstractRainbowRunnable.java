@@ -63,8 +63,15 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
      */
     public AbstractRainbowRunnable (String name) {
         m_name = name;
+        m_rainbowEnvironment = Rainbow.instance();
+    	init();
+    }
 
-        m_thread = new Thread(m_rainbowEnvironment.getThreadGroup(), this, m_name);
+
+	private void init() {
+		m_thread = new Thread(m_rainbowEnvironment.getThreadGroup(), this, m_name);
+		m_rainbowEnvironment.registerRainbowThread(m_thread, getComponentType());
+//        m_thread = new Thread(m_rainbowEnvironment.getThreadGroup(), this, m_name);
         try {
             m_reportingPort = new DisconnectedRainbowDelegateConnectionPort ();
         }
@@ -72,9 +79,16 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
             // Should never happen
             e.printStackTrace ();
         }
+	}
+    
+    public AbstractRainbowRunnable(String name, IRainbowEnvironment env) {
+    	m_name = name;
+    	m_rainbowEnvironment = env;
+    	init();
     }
 
     public void initialize (IRainbowReportingPort port) throws RainbowConnectionException {
+
         m_reportingPort = port;
     }
 
@@ -238,7 +252,7 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
             	nextRelease += m_sleepTime;
             }
             if (m_threadState == State.STARTED) {  // only process if started
-                if (shouldTerminate()) {
+                if (shouldTerminate() || Rainbow.instance().shouldTerminate()) {
                     // time to stop RainbowRunnable as well
                     doTerminate();
                 } else if (!isTaskBehind && !interrupted) {
@@ -248,8 +262,8 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
                         if (errorCount < 3) {
                             // Change this so that the error is reported, but the thread doesn't terminate
                             String errMsg = MessageFormat
-                                    .format("Runtime error in {0}! ... Continuing for {1} more attempts.",
-                                            m_name, (3 - ++errorCount));
+                                    .format("[[{2}]]: Runtime error in {0}! ... Continuing for {1} more attempts.",
+                                            m_name, (3 - ++errorCount), id());
                             m_reportingPort.error (getComponentType (), errMsg, t);
                             t.printStackTrace ();
                         }

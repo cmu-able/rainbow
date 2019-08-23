@@ -23,6 +23,8 @@
  */
 package org.sa.rainbow.core.gauges;
 
+import java.util.Set;
+
 import org.sa.rainbow.core.ports.IGaugeConfigurationPort;
 import org.sa.rainbow.core.ports.IGaugeQueryPort;
 
@@ -41,6 +43,8 @@ public interface IGauge extends IGaugeIdentifier, IGaugeConfigurationPort, IGaug
     String CONFIG_PROBE_MAPPING = "targetProbeType";
     String CONFIG_PROBE_MAPPING_LIST = "targetProbeList";
     String CONFIG_SAMPLING_FREQUENCY = "samplingFrequency";
+    String RAINBOW_ADAPTING = "rainbowAdapting";
+
     /** Determines the max number of updates to do per instance of sleep, to
      *  prevent one Gauge from hogging CPU in case of massive updates. */
     int MAX_UPDATES_PER_SLEEP = 100;
@@ -52,6 +56,8 @@ public interface IGauge extends IGaugeIdentifier, IGaugeConfigurationPort, IGaug
      * @return int  the beacon period in milliseconds
      */
     long beaconPeriod ();
+    
+    Set<? extends String> commandKeys();
 
 
 
