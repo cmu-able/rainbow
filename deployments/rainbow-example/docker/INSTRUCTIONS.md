@@ -13,7 +13,7 @@ This demonstration uses the SWIM simulator with Rainbow as the Self-Adaptive Pla
 In the root Rainbow directory (i.e., the one that contains `deployments`, `libs`, `rainbow` etc., build the docker image using the following command:
 
 ```
-> docker build -t cmuable/rainbow-example -f deploymens/rainbow-example/Dockerfile .
+> docker build -t cmuable/rainbow-example -f deployments/rainbow-example/Dockerfile .
 ```
 
 This is a multi-stage docker build file that will first build a Rainbow release targeted for SWIM.
@@ -28,30 +28,30 @@ This is a multi-stage docker build file that will first build a Rainbow release 
 
    ![Rainbow SWIM desktop](images/swim-login-screen.png)
 
-3. To start SWIM, double-click the SWIM logo: ![SWIM](SWIM.png). This starts the web simulation running with three initial servers responding to the Trace 1.
+3. To start SWIM, double-click the SWIM logo: ![SWIM](SWIM.png). This launches a GUI 
+interface from which the candidate arrival traffic profile for SWIM can be selected.
+
+   ![SWIM Traffic Selection](images/swim-traffic-screen.png)
+
+   Double-clicking on one of the profiles will launch SWIM with that profile, starting 
+   with three initial servers all serving optional content. 
+
 
 4. To start Rainbow, double-click on the Rainbow logo: ![Rainbow](rainbow.png). This will bring up the Rainbow UI, which should look like:
 
    ![Rainbow UI](images/rainbow-ui-1.png)
 
-   To get more details on each element (probes, models, gauges, etc.) you need to select `Rainbow>Populate Panels`:
+5. Rainbow should start automatically - you will see the model being updated via operations:
 
-   ![Populatae Panels](images/rainbow-ui-2.png)
+   ![Model updates](images/rainbow-ui-2.png)
 
-   The Rainbow UI window is divided into eight separate panels. These panels are enumerated below:
+6. Eventually, Rainbow will detect that there are too many servers for the current traffic 
+and attempt an adaptation. You should see something like:
 
-   ![Rainbow Panels](images/rainbow-ui-3.png)
+   ![Rainbow adaptation](images/rainbow-ui-3.png)
+   This shows that a server has been removed (the two red gauge lights indicating deactivation 
+   and removal). Note that the `Stitch AM` window shoes that a strategy was queued (and 
+   is currently exectuing), and the `Rainbow Strategy Executor` is showing details of 
+   what strategy is being executed.
 
-   1. **Probe Panel**: This panel displays probe data from each probe in the system. Each probe has its own tab; the _All_ tab prints the log information from every probe.
-   2. **Gauge Panel**: Gauges in Rainbow take system information emitted from probes, and converts them into model information in the form of operations on those models. The _All_ panel displays log information. Each other tab represents the operations that are emitted from the gauge and sent to the Models Manager.
-   3. **Models Manager**: The Models Manager manages operations on the models represented in Rainbow, that are used to reason about adaptations on the system. Each tab is a separate model, organzed as a table of model operations that have been executed.
-   4. **Analyzers**: Represents the elements that analyze the model and synthesize them to either detect errors or opportunities for adaptation. The log information from each analyzer is organized as a tab. (In this demo, the analyzer and adaptation manager are fused, and so Rainbow does not have any analyzer.)
-   5. **Adaptation Managers**: This panel shows all the elements that make the decision about what adaptation to do. If there is only one adaptation manager (the norm), then all the information will be displayed in the _All_ tab.
-   6. **Executors**: This panel has output from components that manage the execution of adaptations strategies that are chosen by an adaptation manager.
-   7. **Effectors**: This panel displays output from effectors.
-   8. **Rainbow Master**: This panel displays health and output about Rainbow generally. In this demo, the output is about heartbeat information from Rainbow to the manager.
-
-5. To start Rainbow adaptation, you must start the probes manually so that Rainbow starts receiving information. To do this, click on `Delegates>Start Probes`. You will start seeing information appearing in all tabs except the Rainbow Master and Analyzers.
-
-There is not much feedback from SWIM about what it is doing, but you should see probes, gauges, and the model changing. Initially, the adaptation manager will decide that there are too many servers given the current predicted load, and so will scale back by removing servers. You should see the removeServer effector firing eventually.
-
+7. More details about the Rainbow UI can be found in [Rainbow UI Documentation](../../../documents/ui.md) 
