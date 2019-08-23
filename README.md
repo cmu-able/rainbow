@@ -6,6 +6,13 @@ Rainbow uses model-based self-adaptation, primarly focussing on software archite
 
 Research into Rainbow at CMU can be found in quite a few papers, detailed on the (Rainbow Project Site)[http://www.cs.cmu.edu/~able/self-adaptation.html#rainbow].
 
+## Table of Contents
+
+- [Repository Organization](#repository-organization)
+- [Building from Source](#building)
+- [New and Noteworthy in Rainbow Yellow](NewAndNoteworthy.md)
+- [Rainbow Simple Example Setup](deployments/rainbow-example/docker/INSTRUCTIONS.md)
+
 ## Repository organization
 This repository is organized into the following folders:
 
@@ -13,6 +20,12 @@ This repository is organized into the following folders:
 - **rainbow**: Contains Rainbow framework code, including definition of general Acme models for use inside the Models Manager, and the source for the adaptation language *Stitch*.
 - **deployments**: Contains code to implement various specializations of Rainbow used in research projects
 - **ide**: Contains code to implement specialized UIs, IDE integration, etc. that are probably not of general interest but are here for completeness.
+- **documents**: Contains various documentation associated with using Rainbow
+- **scripts**: Contains the scripts that are placed in the deployment that is constructed when building Rainbow
+- **target-system/znn**: Contains the code for implementing one of the benchmark systems described in papers, ZNN.
+- **testing**: Contains the testing library for easier standalone testing, see [Testing Documentation](testing/README.md) for more details.
+- **tools**: Contains various tools that are not yet of general interest.
+- **targets**: Contains example target defintions that we have used in papers over the years
 
 # Building
 Rainbow is built using Maven, and you will need to have access to the Maven repository that contains some dependencies. Please contact the owner of this repository for details on how to set this up. 
