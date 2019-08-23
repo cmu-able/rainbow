@@ -8,6 +8,7 @@ PROP=""
 AUTOSTART=""
 
 while getopts :dhar:w:p: opt; do
+
   case $opt in
     d)
 	  DEBUG="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=1044"
@@ -27,6 +28,7 @@ while getopts :dhar:w:p: opt; do
       p)
 	  PROP="-Drainbow.propfile=$OPTARG"
 	  ;;
+
    esac
 done
 shift $((OPTIND-1))
@@ -72,5 +74,6 @@ echo "java -classpath .${delim}lib/*  -Drainbow.target=$TARGET -Djava.rmi.server
 
 java -classpath ".${delim}lib/*"  -Drainbow.target=$TARGET -Djava.rmi.server.hostname=$ADDR $PROP org.sa.rainbow.core.CheckConfiguration -o targets/$TARGET/config-check.bin
 java -classpath ".${delim}lib/*"  -Drainbow.target=$TARGET -Djava.rmi.server.hostname=$ADDR $PROP $DEBUG $* org.sa.rainbow.core.RainbowMaster $GUI $AUTOSTART -check-config targets/$TARGET/config-check.bin
+
 
  

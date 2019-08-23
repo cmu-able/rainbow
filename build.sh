@@ -181,11 +181,6 @@ elif [[ "$target" == "clean" ]]; then
   rm -rf Rainbow-$VERSION
   rm Rainbow-$VERSION.tgz
   echo "Build is in Rainbow-$VERSION and Rainbow-$VERSION.zip"
+
 fi
 
-
-
-
-
-
-  
