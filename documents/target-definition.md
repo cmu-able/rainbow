@@ -1,6 +1,6 @@
-Rainbow Yellow Specification and Deployment Guide.
+#Rainbow Yellow Specification and Deployment Guide.
 
-# Introduction
+## Introduction
 
 Rainbow is a self-adaptive framework that can be used to provide self-adaptation capabilities to an existing system. Rainbow adds a closed control loop on top of a system, and then monitors and effects changes on the system based on observations. 
 
@@ -20,9 +20,9 @@ To place Rainbow on top of a system requires customizing it with information abo
 
 This document describes how to define and install these elements.
 
-# Customizing Rainbow to a New System
+## Customizing Rainbow to a New System
 
-## Defining a target
+### Defining a target
 
 To customize Rainbow to work on a particular system, a target needs to be defined and placed in the targets directory of Rainbow. The structure of a target is as follows:
 
@@ -50,7 +50,7 @@ To customize Rainbow to work on a particular system, a target needs to be define
 </table>
 
 
-## Adding a model
+### Adding a model
 
 Rainbow can manage multiple models, including models of the utilities, models of the system, and models of the environment. Rainbow models are specified in the `rainbow.properties` file, with the following applicable properties:
 
@@ -84,9 +84,9 @@ These framework classes are related as below.
 
 ![image alt text](imgs/image_0.png)
 
-## Adding a new probe
+### Adding a new probe
 
-Probes are instruments in the running system. There are two types of probes supported by Rainbow: script based probes and Java probes. In both cases, the probes.yml file needs to be updated with the new probe information. This file usually lives in the `system` directory of a target. The probe information consists of the following fields:
+Probes are instruments in the running system. There are two types of probes supported by Rainbow: script based probes and Java probes. In both cases, the `probes.yml` file needs to be updated with the new probe information. This file usually lives in the `system` directory of a target. The probe information consists of the following fields:
 
 | YAML Spec | Description |
 |-----------|-------------|
@@ -106,7 +106,7 @@ Probes are instruments in the running system. There are two types of probes supp
 
 For Java-based probes, the java class should be on the classpath. This means creating a JAR and placing it on the classpath. **The JAR file can be placed in the target’s lib directory. For script-based probes, the path needs to exist on the machine. **
 
-**Adding a new Gauge**
+### Adding a new Gauge
 
 While probes provide information about the system, the intent of gauges is to abstract this system information into architectural information, in the form of commands against the model. There are three kinds of gauges in the Rainbow system: gauges that receive information from probes; gauges that receive information from other gauges; and gauges that generate information without either of these (for example, time-based gauges or diagnostic gauges). 
 
@@ -156,21 +156,40 @@ The instance specification for a gauge specifies its type, the model it is attac
 | &nbsp; &nbsp; &nbsp; `<configParam>: <value>`    |   Like the setup values, a value is specified for each config value in the type, otherwise the default value is used. |
 
 
-Gauges are only implemented using Java in the current framework. The javaClass specified in the type must be on the classpath for the target system. To implement the gauge, the following class hierarchy is provided by the Rainbow Infrastructure:
+Gauges are only implemented using Java in the current framework. The `javaClass` specified in the type must be on the classpath for the target system. To implement the gauge, the following class hierarchy is provided by the Rainbow Infrastructure:
 
-AbstractGauge: Implements basic Gauge management, such as heartbeat, configuration, setting up, etc. Gauges that do not listen to any probes should implement this class
+`AbstractGauge`: Implements basic Gauge management, such as heartbeat, configuration, setting up, etc. Gauges that do not listen to any probes should implement this class
 
-AbstractGaugeWithProbes extends AbstractGauge: A gauge that handles the targetProbeType and targetProbeList configuration parameters. 
+`AbstractGaugeWithProbes extends AbstractGauge`: A gauge that handles the targetProbeType and targetProbeList configuration parameters. 
 
-RegularExpressionGauge extends AbstractGaugeWithProbes: A gauge that processes probe reports that match one or more regular expressions. The constructor for the gauge should specify the regular expression patterns that are to be matched, and the gauge provides a default runAction that calls "doMatch" when a one of the expressions is matched. Extenders must implement this doMatch method to report the value.
+`RegularExpressionGauge extends AbstractGaugeWithProbes:` A gauge that processes probe reports that match one or more regular expressions. The constructor for the gauge should specify the regular expression patterns that are to be matched, and the gauge provides a default runAction that calls "doMatch" when a one of the expressions is matched. Extenders must implement this doMatch method to report the value.
 
-**Adding a new Effector**
+### Adding a new Effector
 
-**Adding Stitch**
+Effectors are scripts or code that are run on the target system to make a change to the system (e.g., to add a server or to blacklist a client). Effectors map commands that are issued by the executor (that are expressed as model commands) and call the code when the model commands are matched. Effectors are system-specific and so are usuall defined in the `effectors.yml` file in the `system` directory of the target. The effector specification as the following format:
 
-The little tricks necessary to do so, and the location of the reference documentation to create the stitch queries 
+| YAML field | Description |
+|------------|-------------|
+|`effectors:` |             |
+| &nbsp; `<Name>:`                         | The (user-defined) name of the effector |
+| &nbsp; &nbsp; `location: <loc>`          | The location where this effector will be run |
+| &nbsp;&nbsp;&nbsp;&nbsp;`command:`&nbsp;&quot;`<pattern>"`        | The model command that the effector will match on. The pattern is usually of the form `<location>.commandName(<arg1>, <arg2>, ...)`. If location is omitted, then this matches any published operation sent to the `location`. If it is `*` then it matches any command sent to any location. If `<argN>` is of the form `$<..>`, then the effector matches the command argument matching any value. If the argument is a value, the effector will only fire if the argument in the published command matches exactly. For example, `"Comp.operation ($<val>, true)"`  will match any `operation` sent to `Comp` where the second argument is `true`. THe first argument is stored in `$<val>`, which may be used later in the specification |
+| &nbsp; &nbsp; `type: <type>`                | The type of the effector, either `script` or `java` |
+| &nbsp; &nbsp; `scriptInfo:`                 | If the type is `script` then this element is used |
+| &nbsp; &nbsp; &nbsp; `path: <path>`         | The path on the target location to find the script to run |
+| &nbsp; &nbsp; &nbsp; `argument: "<arg>"`      | The argument to pass to the script. If the argument contains `$<..>` then this is replaced by the corresponding argument in the command. If the argument is of the form `{N}` then it will be replaced with the Nth argument in the matched commandName. |
+| &nbsp; &nbsp; `javaInfo:`                   | If the type is `java` then this block is used |
+| &nbsp; &nbsp; &nbsp; `class: <cls>`         | The java class used to implement the effector, which runs in the Rainbow delegate on the location |
+| &nbsp; &nbsp; &nbsp; `args.length: <num>`   | THe number of commands that are to be passed to the constructor of the class |
+| &nbsp; &nbsp; &nbsp; `args.<N>: <val>`       | The argument value to pass as the Nth paramter to the constructor |
 
-**Adding a new Architecture Evaluation**
+Note that there is a prototype form of typing effectors. Effector types can be defined in the the `effector-types:` block of the file (similar to `gauge-types`). Effector types have the same form as effectors - the values from the type are copied into the instance. An effector instance can refer to a type via the `effector-type:` attribute which should be at the same level as `location` attribute in the effector block.
 
-This is new... 
+
+
+### Adding Stitch
+
+For Rainbow instantiations that use Acme models and Stitch-based adaptation, the scripts should be defined in the `stitch` directory of targets. All files with the extension `.s` will be loaded. Unfortunately, there is little documentation on the syntax of Stitch. There are a number of examples in the `targets` directory of this repository, and the paper [Stitch: A Language for Architecture-Based Self-Adaptation](http://acme.able.cs.cmu.edu/pubs/show.php?id=341) provides illustrations of the syntax. However, a number of things have changed since the paper was published. For example, Stitch can now refer to [Acme paths](paths.md) to query Acme models, and there are some new things that are described in [New and Noteworthy](../NewAndNoteworthy.md) 
+
+
 
