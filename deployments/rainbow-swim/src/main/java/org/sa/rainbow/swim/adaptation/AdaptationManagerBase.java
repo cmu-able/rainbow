@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -331,7 +332,10 @@ public abstract class AdaptationManagerBase extends AbstractRainbowRunnable
             
             StrategyAdaptationResultsVisitor resultCollector = new StrategyAdaptationResultsVisitor
                     (strategy, strategiesExecuted);
-            strategy.visit (resultCollector);
+            try {
+				strategy.visit (resultCollector);
+			} catch (RainbowException e) {
+			}
             
             for (Strategy str : strategiesExecuted) {
                 String s = str.getName () + ";" + str.outcome ();
@@ -588,6 +592,7 @@ public abstract class AdaptationManagerBase extends AbstractRainbowRunnable
         }
 
         at = new AdaptationTree<Strategy>(getStrategy("AddServer"));
+        at.setId(UUID.randomUUID().toString());
 //        StringVector tactics = new StringVector();
 //        tactics.add("IncDimmer");
 //        tactics.add("AddServer");

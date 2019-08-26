@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
@@ -168,6 +169,7 @@ public class AdaptationManagerStrategyBased extends AdaptationManagerBase {
 		Strategy selectedStrategy = applicableStrategies.get(bestStrategy);
 		if (selectedStrategy != null) { // it's not NoOp
 			at = new AdaptationTree<Strategy> (selectedStrategy);
+			at.setId(UUID.randomUUID().toString());
 		}
 		
 		return at;

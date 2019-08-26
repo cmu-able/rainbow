@@ -3,7 +3,12 @@ package org.sa.rainbow.stitch.visitor;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.sa.rainbow.stitch.core.*;
+import org.sa.rainbow.stitch.core.Expression;
+import org.sa.rainbow.stitch.core.IScope;
+import org.sa.rainbow.stitch.core.Import;
+import org.sa.rainbow.stitch.core.StitchScript;
+import org.sa.rainbow.stitch.core.Strategy;
+import org.sa.rainbow.stitch.core.StrategyNode;
 import org.sa.rainbow.stitch.error.IStitchProblem;
 import org.sa.rainbow.stitch.error.RecognitionException;
 import org.sa.rainbow.stitch.error.StitchProblem;
@@ -11,15 +16,22 @@ import org.sa.rainbow.stitch.error.StitchProblemHandler;
 import org.sa.rainbow.stitch.parser.StitchParser;
 import org.sa.rainbow.stitch.util.Tool;
 
+import com.google.inject.Scope;
+
 /**
  * Created by schmerl on 9/28/2016.
  */
 public abstract class BaseStitchBehavior implements IStitchBehavior {
 
     protected final Stitch m_stitch;
+	protected StitchBeginEndVisitor m_walker;
 
     protected BaseStitchBehavior (Stitch/*State*/ stitch) {
         m_stitch = stitch;
+    }
+    
+    public void setWalker(StitchBeginEndVisitor walker) {
+    	m_walker = walker;
     }
 
     protected StitchScript script () {
@@ -32,6 +44,7 @@ public abstract class BaseStitchBehavior implements IStitchBehavior {
 
     protected IScope scope () {
         return m_stitch.scope ();
+//    	return wal
     }
 
     public Stitch/*State*/ stitch () {
@@ -107,7 +120,7 @@ public abstract class BaseStitchBehavior implements IStitchBehavior {
 
     @Override
     public void createVar (StitchParser.DataTypeContext type, TerminalNode id, StitchParser.ExpressionContext val,
-                           boolean isFunction) {
+                           boolean isFunction, boolean isFormalParam) {
 
     }
 
@@ -142,17 +155,17 @@ public abstract class BaseStitchBehavior implements IStitchBehavior {
     }
 
     @Override
-    public void beginExpression () {
+    public boolean beginExpression (ParserRuleContext ctx) {
+    	return true;
+    }
+
+    @Override
+    public void endExpression (ParserRuleContext ctx, boolean pushed) {
 
     }
 
     @Override
-    public void endExpression (ParserRuleContext ctx) {
-
-    }
-
-    @Override
-    public void beginQuantifiedExpression () {
+    public void beginQuantifiedExpression (ParserRuleContext ctx) {
 
     }
 
@@ -169,7 +182,7 @@ public abstract class BaseStitchBehavior implements IStitchBehavior {
     }
 
     @Override
-    public void beginMethodCallExpression () {
+    public void beginMethodCallExpression (ParserRuleContext ctx) {
 
     }
 
@@ -179,7 +192,7 @@ public abstract class BaseStitchBehavior implements IStitchBehavior {
     }
 
     @Override
-    public void beginSetExpression () {
+    public void beginSetExpression (ParserRuleContext ctx) {
 
     }
 
@@ -244,17 +257,17 @@ public abstract class BaseStitchBehavior implements IStitchBehavior {
     }
 
     @Override
-    public void endStatement () {
+    public void endStatement (Strategy.StatementKind stmtAST, ParserRuleContext ctx) {
 
     }
 
     @Override
-    public void beginTactic (Token nameAST) {
+    public void beginTactic (TerminalNode nameAST) {
 
     }
 
     @Override
-    public void endTactic () {
+    public void endTactic (TerminalNode nameAST) {
 
     }
 
@@ -262,6 +275,7 @@ public abstract class BaseStitchBehavior implements IStitchBehavior {
     public void beginConditionBlock (StitchParser.ConditionContext nameAST) {
 
     }
+    
 
     @Override
     public void endConditionBlock () {
@@ -284,7 +298,7 @@ public abstract class BaseStitchBehavior implements IStitchBehavior {
     }
 
     @Override
-    public void endEffectBlock () {
+    public void endEffectBlock (StitchParser.EffectContext nameAST) {
 
     }
 
@@ -310,7 +324,7 @@ public abstract class BaseStitchBehavior implements IStitchBehavior {
 
     @Override
     public void beginStrategyNode (TerminalNode identifier, ParserRuleContext ctx) {
-
+    
     }
 
     @Override
@@ -319,7 +333,7 @@ public abstract class BaseStitchBehavior implements IStitchBehavior {
     }
 
     @Override
-    public void doStrategyProbability () {
+    public void doStrategyProbability (StitchParser.StrategyCondContext ctx) {
 
     }
 
@@ -329,7 +343,7 @@ public abstract class BaseStitchBehavior implements IStitchBehavior {
     }
 
     @Override
-    public void doStrategyDuration (ParserRuleContext ctx) {
+    public void doStrategyDuration (ParserRuleContext ctx, TerminalNode labelAST) {
 
     }
 
@@ -339,7 +353,7 @@ public abstract class BaseStitchBehavior implements IStitchBehavior {
     }
 
     @Override
-    public void endReferencedTactic () {
+    public void endReferencedTactic (TerminalNode labelAST) {
 
     }
 
@@ -354,7 +368,7 @@ public abstract class BaseStitchBehavior implements IStitchBehavior {
     }
 
     @Override
-    public void beginPathExpression () {
+    public void beginPathExpression (ParserRuleContext ctx) {
 
     }
 
@@ -364,9 +378,9 @@ public abstract class BaseStitchBehavior implements IStitchBehavior {
     }
 
     @Override
-    public void pathExpressionFilter (TypeFilterT filter, TerminalNode identifier, StitchParser.ExpressionContext
+    public boolean pathExpressionFilter (TypeFilterT filter, TerminalNode identifier, StitchParser.ExpressionContext
             expression) {
-
+    	return false;
     }
 
     @Override
@@ -383,5 +397,25 @@ public abstract class BaseStitchBehavior implements IStitchBehavior {
     @Override
     public void doTacticDuration (ParserRuleContext ctx) {
 
+    }
+    
+    @Override
+    public void processParameter() {
+    	// TODO Auto-generated method stub
+    	
+    }
+    
+    @Override
+    public void beginCondition(int i) {
+    }
+    
+    public void endCondition(int i) {}; 
+    
+    @Override
+    public void beginAction(int i) {
+    }
+    
+    @Override
+    public void endAction(int i) {
     }
 }

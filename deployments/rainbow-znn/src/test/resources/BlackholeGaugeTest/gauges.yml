@@ -1,0 +1,33 @@
+gauge-types:
+
+  BlackHoleGaugeT:
+    commands:
+      blockedIPs: "BlackholerT.setBlackholed({String})"
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.translator.znn.gauges.BlackholeGauge"
+    configParams:
+      targetProbeType:
+        type: String
+        default: ~
+
+gauge-instances:
+
+  ESG1:
+    type: BlackHoleGaugeT
+    model: "ZNewsSys:Acme"
+    commands:
+      "blockedIPs": LB0.setBlackholed ($<blockedIPs>)
+    setupValues:
+      targetIP: "${customize.system.target.master}"
+    configValues:
+      reportingPeriod: 1000
+      targetProbeType: rostopicprobe
+      #- roslocationprobe

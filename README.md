@@ -1,10 +1,17 @@
-# Rainbow Self-Adaptive Framework
+# Rainbow Self-Adaptive Framework (Version Yellow - 3)
 
 This repository contains the source code for the Rainbow self-adaptive framework, which is a research project within the Institute for Software Research, Carnegie Mellon University, Pittsburgh, PA, USA.
 
 Rainbow uses model-based self-adaptation, primarly focussing on software architecture models, to help diagnose and localize problems and select adaptations that based on how they fix or improve architectural issues.
 
 Research into Rainbow at CMU can be found in quite a few papers, detailed on the (Rainbow Project Site)[http://www.cs.cmu.edu/~able/self-adaptation.html#rainbow].
+
+## Table of Contents
+
+- [Repository Organization](#repository-organization)
+- [Building from Source](#building)
+- [New and Noteworthy in Rainbow Yellow](NewAndNoteworthy.md)
+- [Rainbow Simple Example Setup](deployments/rainbow-example/docker/INSTRUCTIONS.md)
 
 ## Repository organization
 This repository is organized into the following folders:
@@ -13,6 +20,12 @@ This repository is organized into the following folders:
 - **rainbow**: Contains Rainbow framework code, including definition of general Acme models for use inside the Models Manager, and the source for the adaptation language *Stitch*.
 - **deployments**: Contains code to implement various specializations of Rainbow used in research projects
 - **ide**: Contains code to implement specialized UIs, IDE integration, etc. that are probably not of general interest but are here for completeness.
+- **documents**: Contains various documentation associated with using Rainbow
+- **scripts**: Contains the scripts that are placed in the deployment that is constructed when building Rainbow
+- **target-system/znn**: Contains the code for implementing one of the benchmark systems described in papers, ZNN.
+- **testing**: Contains the testing library for easier standalone testing, see [Testing Documentation](testing/README.md) for more details.
+- **tools**: Contains various tools that are not yet of general interest.
+- **targets**: Contains example target defintions that we have used in papers over the years
 
 # Building
 Rainbow is built using Maven, and you will need to have access to the Maven repository that contains some dependencies. Please contact the owner of this repository for details on how to set this up. 
@@ -21,7 +34,7 @@ Rainbow is built using Maven, and you will need to have access to the Maven repo
 The Dockerfile in the root directory can be used for building Rainbow. It installs the necessary packages (java, maven, etc.) and uses `build.sh` to construct a .tgz file containing the directory that will be deployed when using Rainbow. To build the _Docker container_:
 
 ```
-> docker built -t rainbow-build .
+> docker build -t rainbow-build .
 ```
 
 To run the build, the directory containing the source needs to be mounted to the container, and the appropriate parameters that are passed on to the build script. The parameters are:
@@ -46,5 +59,7 @@ Note, building this way will not cache any libraries that maven may download, an
 
 `> docker run -v /home/YOU/.m2:/root/.m2 -v "$PWD":/root/rainbow -it rainbow-build -p /root/rainbow -d rainbow-znn -t znews-ss -s install`
 
+# New and Noteworthy
 
+A summary of the changes that have been made in this version can be found at [New and Noteworthy](NewAndNoteworthy.md)
 

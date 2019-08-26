@@ -8,8 +8,8 @@ public interface StitchTypes {
 	String STRING = "string";
 	String CHAR = "char";
 	String BOOLEAN = "boolean";
-	String SET = "Set";
-	String SEQ = "List";
+	String SET = "set";
+	String SEQ = "list";
 	String LONG = "long";
 
 }

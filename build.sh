@@ -126,6 +126,10 @@ echo "Doing $target for rainbow-core"
 cd rainbow-core
 mvn -DskipTests $target || exit 1
 
+echo "Doing $target for rainbow-gui"
+cd ../rainbow-gui
+mvn -DskipTests $target || exit 1
+
 echo "Doing $target for rainbow-acme-model"
 cd ../rainbow-acme-model
 mvn -DskipTests $target || exit 1
@@ -177,11 +181,6 @@ elif [[ "$target" == "clean" ]]; then
   rm -rf Rainbow-$VERSION
   rm Rainbow-$VERSION.tgz
   echo "Build is in Rainbow-$VERSION and Rainbow-$VERSION.zip"
+
 fi
 
-
-
-
-
-
-  

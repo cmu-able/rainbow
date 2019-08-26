@@ -1,0 +1,9 @@
+model:
+  name: 
+  type: 
+utilities:
+  [=utilName]:
+    label:
+    mapping:
+    description:
+    utility:

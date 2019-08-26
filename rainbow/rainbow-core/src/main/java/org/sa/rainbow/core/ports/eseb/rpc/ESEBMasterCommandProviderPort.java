@@ -3,6 +3,7 @@ package org.sa.rainbow.core.ports.eseb.rpc;
 import java.io.IOException;
 import java.util.List;
 
+import org.sa.rainbow.core.IRainbowMaster;
 import org.sa.rainbow.core.globals.ExitState;
 import org.sa.rainbow.core.ports.IMasterCommandPort;
 import org.sa.rainbow.core.ports.eseb.ESEBProvider;
@@ -15,10 +16,10 @@ implements IESEBMasterCommandPortRemoteInterface {
 
     private IMasterCommandPort m_delegate;
 
-    public ESEBMasterCommandProviderPort (IMasterCommandPort delegate) throws IOException, ParticipantException {
+    public ESEBMasterCommandProviderPort (IRainbowMaster rainbowMaster) throws IOException, ParticipantException {
         super (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (),
                 IESEBMasterCommandPortRemoteInterface.class.getSimpleName ());
-        m_delegate = delegate;
+        m_delegate = rainbowMaster.getCommandPort();
         getConnectionRole ().createRegistryWrapper (IESEBMasterCommandPortRemoteInterface.class, this,
                 "gui" + IESEBMasterCommandPortRemoteInterface.class.getSimpleName ());
     }
@@ -36,6 +37,11 @@ implements IESEBMasterCommandPortRemoteInterface {
     @Override
     public void enableAdaptation (boolean enabled) {
         m_delegate.enableAdaptation (enabled);
+    }
+    
+    @Override
+    public boolean isAdaptationEnabled() {
+    	return m_delegate.isAdaptationEnabled();
     }
 
     @Override

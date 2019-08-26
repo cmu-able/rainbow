@@ -37,7 +37,7 @@ public class EffectOp {
         Map<String, String> pairs = new HashMap<> ();
         pairs.put("client", client);
         IGenericArchOperators opProvider = (IGenericArchOperators )Rainbow.instance ().getRainbowMaster ()
-                .strategyExecutor (ModelHelper.getAcmeSystem (((IAcmeElement )lb)).getName () + ":Acme");
+                .adaptationExecutors().get (ModelHelper.getAcmeSystem (((IAcmeElement )lb)).getName () + ":Acme");
         opProvider.changeState ("blackhole", lb, pairs);
     }
 }

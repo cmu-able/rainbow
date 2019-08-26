@@ -1,9 +1,13 @@
 package org.sa.rainbow.stitch.adaptation;
 
+import java.util.HashMap;
+import java.util.concurrent.CountDownLatch;
+
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
+import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.adaptation.AdaptationTree;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
@@ -12,14 +16,15 @@ import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.ModelsManager;
-import org.sa.rainbow.core.ports.*;
+import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
+import org.sa.rainbow.core.ports.IModelUSBusPort;
+import org.sa.rainbow.core.ports.IRainbowAdaptationDequeuePort;
+import org.sa.rainbow.core.ports.IRainbowReportingPort;
+import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.stitch.core.Tactic;
 import org.sa.rainbow.stitch.history.ExecutionHistoryModelInstance;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData;
-
-import java.util.HashMap;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * Created by schmerl on 6/16/2016.
@@ -86,7 +91,7 @@ public class TacticExecutor extends AbstractRainbowRunnable implements IAdaptati
         } else if (m_done != null) { // We have a tactic that is executing
             if (m_done.getCount () == 0) {
                 if (!Rainbow.instance ().shouldTerminate ()) {
-                    final IAdaptationManager<Tactic> adaptationManager = Rainbow.instance ().getRainbowMaster ()
+                    final IAdaptationManager<Tactic> adaptationManager = ((RainbowMaster )Rainbow.instance ().getRainbowMaster ())
                             .adaptationManagerForModel (this.m_modelRef.toString ());
                     if (adaptationManager != null) {
                         adaptationManager.markStrategyExecuted (m_adaptationTreeExecuting);

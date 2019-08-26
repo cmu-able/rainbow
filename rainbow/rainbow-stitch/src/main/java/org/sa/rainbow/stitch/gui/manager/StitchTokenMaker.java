@@ -2,6 +2,7 @@ package org.sa.rainbow.stitch.gui.manager;
 
 import javax.swing.text.Segment;
 
+import org.acmestudio.armani.TokenOutputter;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMaker;
 import org.fife.ui.rsyntaxtextarea.RSyntaxUtilities;
 import org.fife.ui.rsyntaxtextarea.Token;
@@ -49,7 +50,8 @@ public class StitchTokenMaker extends AbstractTokenMaker {
 			new TokenInfo("<", Token.OPERATOR), new TokenInfo(">", Token.OPERATOR), new TokenInfo("+", Token.OPERATOR),
 			new TokenInfo("-", Token.OPERATOR), new TokenInfo("*", Token.OPERATOR), new TokenInfo("/", Token.OPERATOR),
 			new TokenInfo("'", Token.OPERATOR), new TokenInfo("...", Token.OPERATOR),
-			new TokenInfo("==", Token.OPERATOR), new TokenInfo("|", Token.OPERATOR), new TokenInfo("#", Token.OPERATOR),
+			new TokenInfo("&&", Token.OPERATOR), new TokenInfo("||", Token.OPERATOR),
+			new TokenInfo("==", Token.OPERATOR), new TokenInfo("&", Token.OPERATOR), new TokenInfo("|", Token.OPERATOR), new TokenInfo("#", Token.OPERATOR),
 			new TokenInfo("=", Token.OPERATOR), new TokenInfo("+=", Token.OPERATOR),
 			new TokenInfo("-=", Token.OPERATOR), new TokenInfo("*=", Token.OPERATOR),
 			new TokenInfo("/=", Token.OPERATOR), new TokenInfo("%=", Token.OPERATOR),
@@ -123,6 +125,7 @@ public class StitchTokenMaker extends AbstractTokenMaker {
 				}
 			} else {
 				char ch = array[i];
+				int ntt;
 				if (ch == ' ' || ch == '\t') {
 					newTokenType = Token.WHITESPACE;
 				} else if (ch == '"') {
@@ -155,8 +158,8 @@ public class StitchTokenMaker extends AbstractTokenMaker {
 						if ('*' == array[i+1]) newTokenType = Token.COMMENT_MULTILINE;
 						else if ('/' == array[i+1]) newTokenType = Token.COMMENT_EOL;
 					}
-				} else if ((newTokenType = wordsToHighlight.get(array, i, i)) != -1) {
-
+				} else if ((ntt = wordsToHighlight.get(array, i, i)) != -1) {
+					newTokenType = ntt;
 				}
 			}
 			if (newTokenType == Token.NULL || newTokenType == -1) {

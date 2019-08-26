@@ -23,6 +23,11 @@
  */
 package org.sa.rainbow.core;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
@@ -68,7 +73,6 @@ import org.sa.rainbow.gui.RainbowGUI;
 import org.sa.rainbow.translator.effectors.EffectorManager;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort.Outcome;
 import org.sa.rainbow.util.Beacon;
-import org.sa.rainbow.util.RainbowConfigurationChecker;
 import org.sa.rainbow.util.RainbowConfigurationChecker.Problem;
 import org.sa.rainbow.util.RainbowConfigurationChecker.ProblemT;
 import org.sa.rainbow.util.Util;
@@ -128,15 +132,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 			initializeConnections();
 			super.initialize(m_reportingPort);
 			initializeRainbowComponents();
-			RainbowConfigurationChecker checker = new RainbowConfigurationChecker(this);
-			checker.checkRainbowConfiguration();
-			for (Problem p : checker.getProblems()) {
-				if (p.problem == ProblemT.ERROR) {
-					m_reportingPort.error(getComponentType(), p.msg);
-				} else {
-					m_reportingPort.warn(getComponentType(), p.msg);
-				}
-			}
+
 			m_initialized = true;
 		}
 	}
@@ -730,6 +726,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 		boolean showHelp = false;
 		boolean showGui = true;
 		boolean autoStart = false;
+		String checkFile = null;
 		int lastIdx = args.length - 1;
 		for (int i = 0; i <= lastIdx; i++) {
 			switch (args[i]) {
@@ -741,6 +738,9 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 				break;
 			case "-autostart":
 				autoStart = true;
+				break;
+			case "-check-config":
+				checkFile = args[++i];
 				break;
 			default:
 				System.err.println("Unrecognized or incomplete argument " + args[i]);
@@ -790,10 +790,44 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 			Rainbow.instance().setProperty(Rainbow.PROPKEY_SHOW_GUI, false);
 		}
 		master.m_autoStart = autoStart;
+		
+		
+		
+		
 		master.initialize();
-
+		
+		// This is a bit of a hack because the typechecker seems to be destructive
+		// and the technical debt from 2006 of the excessive use of singletons is
+		// hampering evolution.
+		List<Problem> allProblems = Collections.<Problem>emptyList();
+		if (checkFile != null) {
+			try (ObjectInputStream is = new ObjectInputStream(new FileInputStream(new File(checkFile)))) {
+				allProblems = (List<Problem>) is.readObject();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		for (Problem p : allProblems) {
+			if (p.problem == ProblemT.ERROR) {
+				master.m_reportingPort.error(master.getComponentType(), p.msg);
+			} else if (p.problem == ProblemT.WARNING){
+				master.m_reportingPort.warn(master.getComponentType(), p.msg);
+			}
+			else {
+				master.m_reportingPort.info(master.getComponentType(), p.msg);
+			}
+		}
 		RainbowDelegate localDelegate = new RainbowDelegate();
 		localDelegate.initialize();
+		
+
 
 		master.start();
 		localDelegate.start();
@@ -959,6 +993,11 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 	@Override
 	public Map<String, IAdaptationExecutor<?>> adaptationExecutors() {
 		return Collections.unmodifiableMap(m_adaptationExecutors);
+	}
+	
+	@Override
+	public IMasterCommandPort getCommandPort() {
+		return this;
 	}
 
 }

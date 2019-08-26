@@ -9,7 +9,7 @@ import org.acmestudio.acme.element.property.IAcmePropertyValue;
 import org.acmestudio.acme.model.DefaultAcmeModel;
 
 public abstract class SwimUtils {
-	
+
 	public static int dimmerFactorToLevel(double dimmer, int dimmerLevels, double dimmerMargin) {
 		int level = 1 + (int) Math.round((dimmer - dimmerMargin) * (dimmerLevels - 1) / (1.0 - 2 * dimmerMargin));
 		return level;
@@ -19,17 +19,17 @@ public abstract class SwimUtils {
 		double factor = dimmerMargin + (1.0 - 2 * dimmerMargin) * (level - 1.0) / (dimmerLevels - 1.0);
 		return factor;
 	}
-	
+
 	/**
 	 * Find the element with the minimum value of the property "property"
+	 * 
 	 * @param set
 	 * @return element
 	 */
-	public static <E> E minOverProperty(String property, java.util.Set<E> set) {
-		E min = null;
+	public static IAcmeElementInstance minOverProperty(String property, java.util.Set<IAcmeElementInstance> set) {
 		double minValue = Double.MAX_VALUE;
-
-		for (E e : set) {
+		IAcmeElementInstance min = null;
+		for (IAcmeElementInstance e : set) {
 			if (!(e instanceof IAcmeElementInstance<?, ?>)) {
 				continue;
 			}
@@ -42,9 +42,9 @@ public abstract class SwimUtils {
 			} else if (type == DefaultAcmeModel.defaultFloatType()) {
 				value = ((IAcmeFloatingPointValue) val).getDoubleValue();
 			}
-			if (min == null || value < minValue) {
-				min = e;
+			if (value < minValue) {
 				minValue = value;
+				min = e;
 			}
 		}
 		return min;
@@ -52,14 +52,15 @@ public abstract class SwimUtils {
 
 	/**
 	 * Find the element with the maximum value of the property "property"
+	 * 
 	 * @param set
 	 * @return element
 	 */
-	public static <E> E maxOverProperty(String property, java.util.Set<E> set) {
-		E max = null;
+	public static IAcmeElementInstance maxOverProperty(String property, java.util.Set<IAcmeElementInstance> set) {
+		IAcmeElementInstance max = null;
 		double maxValue = -Double.MAX_VALUE;
 
-		for (E e : set) {
+		for (IAcmeElementInstance e : set) {
 			if (!(e instanceof IAcmeElementInstance<?, ?>)) {
 				continue;
 			}
@@ -72,11 +73,13 @@ public abstract class SwimUtils {
 			} else if (type == DefaultAcmeModel.defaultFloatType()) {
 				value = ((IAcmeFloatingPointValue) val).getDoubleValue();
 			}
-			if (max == null || value < maxValue) {
+			if (max == null || value > maxValue) {
 				max = e;
 				maxValue = value;
 			}
 		}
 		return max;
 	}
+
+
 }

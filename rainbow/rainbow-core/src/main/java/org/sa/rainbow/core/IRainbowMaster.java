@@ -34,6 +34,7 @@ import org.sa.rainbow.core.gauges.GaugeManager;
 import org.sa.rainbow.core.models.EffectorDescription;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.ProbeDescription;
+import org.sa.rainbow.core.ports.IMasterCommandPort;
 
 public interface IRainbowMaster {
 
@@ -54,6 +55,8 @@ public interface IRainbowMaster {
 	Map<String,IAdaptationManager<?>> adaptationManagers();
 
 	Collection<IRainbowAnalysis> analyzers();
+	
+	IMasterCommandPort getCommandPort();
     
 
 }

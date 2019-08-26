@@ -426,8 +426,8 @@ public class RainbowGUI implements IRainbowGUI, IDisposable, IRainbowReportingSu
         item.addActionListener (new ActionListener () {
             @Override
             public void actionPerformed (ActionEvent e) {
-                boolean b = Rainbow.instance ().getRainbowMaster ().isAdaptationEnabled ();
-                Rainbow.instance ().getRainbowMaster ().enableAdaptation (!b);
+                boolean b = Rainbow.instance ().getRainbowMaster ().getCommandPort().isAdaptationEnabled ();
+                Rainbow.instance ().getRainbowMaster ().getCommandPort().enableAdaptation (!b);
 
                 //        		boolean b = !((AdaptationManager )Oracle.instance().adaptationManager())
                 // .adaptationEnabled();

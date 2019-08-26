@@ -34,5 +34,10 @@ public class GuavaModelsManagerProviderPort implements IModelsManagerPort {
 		m_modelsManager = modelsManager;
 		
 	}
+	
+	@Override
+	public boolean isModelLocked(ModelReference modelRef) {
+		return m_modelsManager.isModelLocked(modelRef);
+	}
 
 }

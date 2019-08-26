@@ -184,6 +184,6 @@ System SwimSys : SwimFam = new SwimFam extended with {
     
     rule GoodResponseTime = invariant LB0.basicResponseTime <= RT_THRESHOLD and LB0.optResponseTime <= RT_THRESHOLD;
     rule NoOverloadedServer = invariant ! exists s :! ServerT in self.components | (s.isArchEnabled and s.load > 1); 
-    rule SystemUtilized = invariant !Average(/self/components:!ServerT[isArchEnabled==true]/load) < 0.3; 
+    rule SystemUtilized = invariant size(/self/components:!ServerT[isArchEnabled==true]) == 1 or !seqAverage(/self/components:!ServerT[isArchEnabled==true]/...load) < 0.3; 
 }
 

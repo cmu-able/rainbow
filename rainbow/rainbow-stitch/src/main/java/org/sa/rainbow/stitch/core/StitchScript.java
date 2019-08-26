@@ -95,6 +95,14 @@ public class StitchScript extends ScopedEntity implements IScope {
                 }
             }
         }
+        if (obj == null) { // try list of Strategies
+        	for (Strategy s : strategies) {
+        		if (name.equals(s.getName())) {
+        			obj = s;
+        			break;
+        		}
+        	}
+        }
         // TODO: search root scope for tactic!
         if (obj == null) {  // try looking up model reference
             List<AcmeModelInstance> lookupModels = null;
