@@ -433,6 +433,12 @@
 			<artifactId>rainbow-utility-model</artifactId>
 			<version>3.0</version>
 		</dependency>
+		<dependency>
+			<groupId>rainbow</groupId>
+			<artifactId>rainbow-testing</artifactId>
+			<version>3.0</version>
+			<scope>test</scope>
+		</dependency>
     	<!-- https://mvnrepository.com/artifact/org.powermock/powermock-api-mockito2 -->
 		<dependency>
 			<groupId>org.powermock</groupId>
