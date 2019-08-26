@@ -1,9 +1,15 @@
 gauge-types:
   InstructionGraphProgressGaugeT:
     commands:
-      current-instruction: "IG.setExecutingInstruction(String,String)"
-      current-failed: "IG.setExecutionFailed(String)"
-      new-ig: "IG.setInstructions(String)"
+      current-instruction: 
+        regexp: ~
+        command: "IG.setExecutingInstruction(String,String)"
+      current-failed: 
+        regexp: ~
+        command: "IG.setExecutionFailed(String)"
+      new-ig:
+        regexp: ~
+        command:  "IG.setInstructions(String)"
     setupParams:
       targetIP:
         type: String
@@ -126,9 +132,15 @@ gauge-instances:
     type: InstructionGraphProgressGaugeT
     model: "ExecutingInstructionGraph:InstructionGraphProgress"
     commands:
-      current-instruction: "cig.setExecutingInstruction($<node>,$<state>)"
+      current-instruction: 
+        regexp: "cig.setExecutingInstruction($<node>,$<state>)"
       current-failed: "cig.setExecutionFailed($<node>)"
-      new-ig: "igs.setInstructions($<ig>)"
+      new-ig: 
+        regexp: "topic: /ig_action_server/feedback/feedback/sequence.*Received new valid IG: (.*)"
+        command: "igs.setInstructions($1)"
+      finished-ig:
+        regexp: "topic: /ig_action_server/feedback/feedback/sequence.*Finished!.*"
+        command: "igs.finishInstructions(true)"
     setupValues:
       targetIP: "${customize.system.target.master}"
     configValues:
@@ -165,7 +177,9 @@ gauge-instances:
     type: MissionStateGaugeT
     model: MissionState:MissionState
     commands:
-      location: "ms.setCurrentLocation($<x>,$<y>,$<w>)"
+      location: 
+        regexp: "topic: /amcl_pose/pose/pose.*position.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z.*\\norientation.*\\n.*x: (.*)\\n.*y: (.*)\\n.*z: (.*)\\n.*w: (.*)(.*)"
+        command: "ms.setCurrentLocation($<1>,$<2>,$<3>)"
     setupValues:
       targetIP: "${customize.system.target.master}"
     configValues:
@@ -176,7 +190,9 @@ gauge-instances:
     type: BRASSTargetWaypointGaugeT
     model: MissionState:MissionState
     commands:
-      target: "ms.setTargetWaypoint($<w>)"
+      target: 
+        regexp: ".*target.*:.*[\\\"']([^\\\"']*)[\\\"'].*"
+        command: "ms.setTargetWaypoint($1)"
     setupValues:
       targetIP: "${customize.system.target.master}"
     configValues:
