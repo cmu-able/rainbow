@@ -34,7 +34,7 @@ import java.io.IOException;
 import java.util.Collection;
 
 public class ESEBModelsManagerProviderPort extends AbstractESEBDisposableRPCPort implements
-IESEBModeslManagerRemoteInterface {
+IESEBModelsManagerRemoteInterface {
 
     static Logger          LOGGER = Logger.getLogger (ESEBModelsManagerProviderPort.class);
     private IModelsManager m_modelsManager;
@@ -43,8 +43,8 @@ IESEBModeslManagerRemoteInterface {
         super (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (), DEFAULT_ESEB_RPCNAME);
         m_modelsManager = mm;
         setupModelConverters (MODEL_CONVERTER_CLASS);
-        getConnectionRole ().createRegistryWrapper (IESEBModeslManagerRemoteInterface.class, this,
-                IESEBModeslManagerRemoteInterface.class.getSimpleName ());
+        getConnectionRole ().createRegistryWrapper (IESEBModelsManagerRemoteInterface.class, this,
+                IESEBModelsManagerRemoteInterface.class.getSimpleName ());
 
     }
 

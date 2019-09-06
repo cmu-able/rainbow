@@ -32,9 +32,9 @@ import java.io.IOException;
 import java.util.Collection;
 
 public class ESEBModelsManagerRequirerPort extends AbstractESEBDisposableRPCPort implements
-IESEBModeslManagerRemoteInterface {
+IESEBModelsManagerRemoteInterface {
 
-    private IESEBModeslManagerRemoteInterface m_stub;
+    private IESEBModelsManagerRemoteInterface m_stub;
 
     public ESEBModelsManagerRequirerPort () throws IOException, ParticipantException {
         this (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort ());
@@ -43,8 +43,8 @@ IESEBModeslManagerRemoteInterface {
     private ESEBModelsManagerRequirerPort (String host, short port) throws IOException, ParticipantException {
         super (host, port, DEFAULT_ESEB_RPCNAME);
         setupModelConverters (MODEL_CONVERTER_CLASS);
-        m_stub = getConnectionRole ().createRemoteStub (IESEBModeslManagerRemoteInterface.class,
-                IESEBModeslManagerRemoteInterface.class.getSimpleName ());
+        m_stub = getConnectionRole ().createRemoteStub (IESEBModelsManagerRemoteInterface.class,
+                IESEBModelsManagerRemoteInterface.class.getSimpleName ());
     }
 
     @Override
