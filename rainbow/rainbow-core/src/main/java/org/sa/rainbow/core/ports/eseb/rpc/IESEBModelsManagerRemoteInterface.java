@@ -32,7 +32,7 @@ import org.sa.rainbow.core.ports.IModelsManagerPort;
 
 import java.util.Collection;
 
-public interface IESEBModeslManagerRemoteInterface extends IModelsManagerPort {
+public interface IESEBModelsManagerRemoteInterface extends IModelsManagerPort {
 
     String DEFAULT_ESEB_RPCNAME = "rainbow_models_manager";
     String MODEL_CONVERTER_CLASS = "org.sa.rainbow.model.converter.eseb.class";
@@ -47,7 +47,7 @@ public interface IESEBModeslManagerRemoteInterface extends IModelsManagerPort {
     <T> IModelInstance<T> getModelInstance (ModelReference modelRef);
     
     @Override
-    @ReturnTypeMapping("boolean")
+    @ReturnTypeMapping("bool")
     @ParametersTypeMapping({ "model_reference"})
     boolean isModelLocked(ModelReference modelRef);
 
