@@ -96,7 +96,7 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
     private static final String TSP_MODEL = "ArrivalRate";
 
     // The thread "sleep" time. runAction will be called every 60 seconds in this case
-    public static final int SLEEP_TIME = 30000 /*ms*/;
+    public static final int SLEEP_TIME = 60000 /*ms*/;
 
     // Port to query with any models in models manager
     private IModelsManagerPort                       m_modelsManagerPort;
@@ -185,6 +185,7 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
         }        
     }
 
+    //Debugging use only
     String init_state_r = "const double addServer_LATENCY = 120;\n" + 
     		"const int HORIZON = 5;\n" + 
     		"const double PERIOD = 60;\n" + 
@@ -780,44 +781,44 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
         
 
         log("begin testing...");
-        StringVector sv = new StringVector();
-        m_tspModel.getModelInstance().observe(0.00727339);
-        m_tspModel.getModelInstance().observe(0.00688481);
-        m_tspModel.getModelInstance().observe(0.00626385);
-        m_tspModel.getModelInstance().observe(0.00603236);
-        m_tspModel.getModelInstance().observe(0.00655949);
-        log("after observations");
-        generateEnvironmentModel(); generateEnvironmentModel();
-        log("after generations");
-        AdaptationPlanner m_adaptPlanner = new AdaptationPlanner();
-        m_adaptPlanner.setModelTemplatePath("/home/frank/Sandbox/plasasim/templates/final_ibl.prism");
+        //StringVector sv = new StringVector();
+        //m_tspModel.getModelInstance().observe(0.00727339);
+        //m_tspModel.getModelInstance().observe(0.00688481);
+        //m_tspModel.getModelInstance().observe(0.00626385);
+        //m_tspModel.getModelInstance().observe(0.00603236);
+        //m_tspModel.getModelInstance().observe(0.00655949);
+        //log("after observations");
+        //generateEnvironmentModel(); generateEnvironmentModel();
+        //log("after generations");
+        //AdaptationPlanner m_adaptPlanner = new AdaptationPlanner();
+        //m_adaptPlanner.setModelTemplatePath("/home/frank/Sandbox/plasasim/templates/final_ibl.prism");
         //sv = m_adaptPlanner.plan("foooo", "barrrr", "/home/frank/PrismDump", true);
         //sv = m_adaptPlanner.plan(env_mod_r, init_state_r, "/home/frank/PrismDump", true);
-        log("size: " + sv.size());
-        for(int i = 0; i < sv.size(); ++i) {
-        	log("R" + i + ": " + sv.get(i));
-        }
+        //log("size: " + sv.size());
+        //for(int i = 0; i < sv.size(); ++i) {
+        //	log("R" + i + ": " + sv.get(i));
+        //}
         // sv.clear();
-        sv = m_adaptPlanner.plan(env_mod_d, init_state_d, "/home/frank/PrismDump", false);
-        log("size: " + sv.size());
-        for(int i = 0; i < sv.size(); ++i) {
-        	log("D" + i + ": " + sv.get(i));
-        }
-        m_planDB.update_val(5, m_currentTime, 1, 0, 0, 1, 4, 0, 0, 0, 60, 60, 0, 0.03);
-        log("updated");
-        String path = m_adaptPlanner.getPlanned_path();
-        log("path is: " + path);
-        if(m_planDB.populate_db(path)) {
-        	log("success!");
-        } else {
-        	log("fail!");
-        }
-        m_planDB.get_plan();
-        sv = m_planDB.getActions();
-        log("size: " + sv.size());
-        for(int i = 0; i < sv.size(); ++i) {
-            log("D" + i + ": " + sv.get(i));
-        }
+        //sv = m_adaptPlanner.plan(env_mod_d, init_state_d, "/home/frank/PrismDump", false);
+        //log("size: " + sv.size());
+        //for(int i = 0; i < sv.size(); ++i) {
+        //  log("D" + i + ": " + sv.get(i));
+        //}
+        //m_planDB.update_val(5, m_currentTime, 1, 0, 0, 1, 4, 0, 0, 0, 60, 60, 0, 0.03);
+        //log("updated");
+        //String path = m_adaptPlanner.getPlanned_path();
+        //log("path is: " + path);
+        //if(m_planDB.populate_db(path)) {
+        //	log("success!");
+        //} else {
+        //	log("fail!");
+        //}
+        //m_planDB.get_plan();
+        //sv = m_planDB.getActions();
+        //log("size: " + sv.size());
+        //for(int i = 0; i < sv.size(); ++i) {
+        //    log("D" + i + ": " + sv.get(i));
+        //}
 
         m_isInitialized = true;
         log("m_isInitialized set to true, finished initialization");

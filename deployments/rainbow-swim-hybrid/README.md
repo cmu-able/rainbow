@@ -1,3 +1,23 @@
+Commands for both acme model update (rainbow side) and effector (swim) are both inside model/acme/swim/commands
+model/acme/swim/SwimModelHelper.java implements a helper class that queries the acme model. Some calculations might need to be changed, such as dimmer leve, expected activation time, etc.
+model/acme/swim/SwimCommandFactory.java defines how commands are constructed, server activation commands needs to be changed (for rainbow side) that directly adds to a server type.
+AddServerWithTypeCmd, Dec(Inc)DimmerCmd, DivertTrafficCmd, RemoveServerWithTypeCmd are the ones used for swim effectors, the rest are for acme models.
+
+swim/adaptation/ folder has classes that define the hybrid planning algorithm
+AdaptationManagerDummy.java is a dummy manager that only increases and decreases server every period without doing planning
+HPAdaptationManager.java is the implemented planning class. Important functions include:
+initializeAdaptationMgr: executed at init, can put test code here for testing that is executed once at the start
+computeDecisionHorizon: the way horizon calculation might needs to be modified, which is done here
+EnvironmentDTMCPartitioned: defines the parameters that generates the DTMC
+get_initial_state_str: some minor details regarding initial state string
+checkAdaptationImpl: the function that implements the HP algorithm, which uses the two classes Reactive and Deliberative, which can be called on separate threads. 
+runAction: the function that gets called each period. calls checkAdaptationImpl
+
+SwimExtendedPlan: defines a plan class that gets extended
+The plan classes are in this folder as well
+
+
+
 # PLA Adaptation Manager for Rainbow
 This adaptation manager for Rainbow has two variants of Proactive Latency-Aware (PLA) adaptation managers: PLA-SDP, PLA-SB, described in
 
