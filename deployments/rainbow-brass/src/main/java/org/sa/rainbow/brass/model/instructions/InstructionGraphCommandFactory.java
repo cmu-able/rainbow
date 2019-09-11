@@ -28,6 +28,7 @@ public class InstructionGraphCommandFactory extends ModelCommandFactory<Instruct
         m_commandMap.put ("setInstructions".toLowerCase (), SetInstructionsCmd.class);
         m_commandMap.put ("setExecutingInstruction".toLowerCase (), SetExecutingInstructionCmd.class);
         m_commandMap.put ("setExecutionFailed".toLowerCase (), SetExecutionFailedCmd.class);
+        m_commandMap.put("cancelInstructions".toLowerCase(), CancelInstructionsCmd.class);
 
     }
 
@@ -43,6 +44,10 @@ public class InstructionGraphCommandFactory extends ModelCommandFactory<Instruct
 
     public SetInstructionsCmd setInstructionsCmd (String instructionGraphCode) {
         return new SetInstructionsCmd ((InstructionGraphModelInstance )m_modelInstance, "", instructionGraphCode);
+    }
+    
+    public CancelInstructionsCmd cancelInstructionsCmd() {
+    	return new CancelInstructionsCmd((InstructionGraphModelInstance )m_modelInstance, "");
     }
 
     public SetExecutingInstructionCmd setExecutingInstructionCmd (String instructionLabel, String state) {
