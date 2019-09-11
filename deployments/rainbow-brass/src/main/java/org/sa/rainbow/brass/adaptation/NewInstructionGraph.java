@@ -45,7 +45,7 @@ public class NewInstructionGraph extends BrassPlan {
 //                .strategyExecutor (m_reference.getModelInstance ().getModelReference ().toString ());
 //        InstructionGraphCommandFactory cf = m_reference.getCommandFactory ();
 //        SetInstructionsCmd cmd = cf.setInstructionsCmd (m_instructionGraph);
-    	IAdaptationExecutor<BrassPlan> executor = Rainbow.instance().getRainbowMaster().strategyExecutor(m_models.getRainbowStateModel().getModelInstance().getModelReference().toString());
+    	IAdaptationExecutor<BrassPlan> executor = (IAdaptationExecutor<BrassPlan>) Rainbow.instance().getRainbowMaster().adaptationExecutors().get(m_models.getRainbowStateModel().getModelInstance().getModelReference().toString());
     	InstructionGraphCommandFactory cf = m_models.getInstructionGraphModel().getCommandFactory();
     	SetInstructionsCmd cmd = cf.setInstructionsCmd(m_instructionGraph);
         System.out.println ("Changing Instructions");

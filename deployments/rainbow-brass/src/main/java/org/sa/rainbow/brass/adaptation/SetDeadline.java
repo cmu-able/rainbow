@@ -25,8 +25,8 @@ public class SetDeadline extends BrassPlan {
 
     @Override
     public Object evaluate (Object[] argsIn) {
-        IAdaptationExecutor<BrassPlan> executor = Rainbow.instance ().getRainbowMaster ()
-                .strategyExecutor (m_executorModel.getModelInstance ().getModelReference ().toString ());
+        IAdaptationExecutor<BrassPlan> executor = (IAdaptationExecutor<BrassPlan>) Rainbow.instance ().getRainbowMaster ()
+                .adaptationExecutors().get (m_executorModel.getModelInstance ().getModelReference ().toString ());
         MissionCommandFactory cf = m_reference.getCommandFactory ();
         SetDeadlineCmd cmd = cf.setDeadlineCmd (m_deadline);
         System.out.println ("Setting deadline to " + m_deadline);

@@ -122,8 +122,8 @@ public class PlanExecutor extends AbstractRainbowRunnable implements IAdaptation
             }
 
             if (!Rainbow.instance ().shouldTerminate ()) {
-                final IAdaptationManager<BrassPlan> adaptationManager = Rainbow.instance ().getRainbowMaster ()
-                        .adaptationManagerForModel (this.m_modelRef.toString ());
+                final IAdaptationManager<BrassPlan> adaptationManager = (IAdaptationManager<BrassPlan>) Rainbow.instance ().getRainbowMaster ()
+                        .adaptationManagers().get (this.m_modelRef.toString ());
                 if (adaptationManager != null) {
                     adaptationManager.markStrategyExecuted (at);
                 }
