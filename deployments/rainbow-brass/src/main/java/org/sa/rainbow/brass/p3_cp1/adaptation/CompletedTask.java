@@ -25,7 +25,7 @@ public class CompletedTask extends BrassPlan {
 
 	@Override
 	public Object evaluate(Object[] argsIn) {
-		IAdaptationExecutor<BrassPlan> executor = Rainbow.instance().getRainbowMaster().strategyExecutor(m_models.getRainbowStateModel().getModelInstance().getModelReference().toString());
+		IAdaptationExecutor<BrassPlan> executor = (IAdaptationExecutor<BrassPlan>) Rainbow.instance().getRainbowMaster().adaptationExecutors().get(m_models.getRainbowStateModel().getModelInstance().getModelReference().toString());
 		IRainbowOperation op = null;
 		if (m_successOrOtherwise) {
 			op = m_models.getRainbowStateModel().getCommandFactory().removeModelProblem(CP3ModelState.INSTRUCTION_GRAPH_FAILED);

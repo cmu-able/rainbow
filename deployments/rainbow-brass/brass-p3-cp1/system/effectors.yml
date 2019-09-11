@@ -22,7 +22,7 @@ effector-types:
     scriptInfo:
       path: "${_effectors.path}/current-task-finished.sh"
       argument: 1
-
+      
 effectors:
   
   changeInstructionGraph:
@@ -36,6 +36,13 @@ effectors:
   taskSucceeded:
     effector-type: completedTaskSuccessT
     location: "${customize.system.target.master}"
+    
+  cancelInstructions:
+    command: cancelInstructions()
+    type: script
+    scriptInfo:
+      path: "${_effectors.path}/cancelInstructions.sh"
+      argument: ~
     
 #  changeDeadline:
 #    effector-type: changeDeadlineT

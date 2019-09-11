@@ -175,7 +175,7 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 			if (reallyHasError()) {
 				BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(),
 						"Detected a problem");
-
+				cancelInstructions();
 				m_errorDetected = false;
 				m_reportingPort.info(getComponentType(), "Determining an appropriate adaptation");
 				// DecisionEngineCP3.setMap(m_models.getEnvMapModel().getModelInstance());
@@ -314,6 +314,13 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 
 		}
 
+	}
+
+	protected void cancelInstructions() {
+		m_reportingPort.info(getComponentType(), "Canceling the current set of instructions.");
+		CancelInstructionsTask cancelTask = new CancelInstructionsTask(m_models);
+		AdaptationTree<BrassPlan> at = new AdaptationTree<>(cancelTask);
+		m_adaptationEnqueuePort.offerAdaptation(at, new Object[0]);
 	}
 
 	private boolean reallyHasError() {
