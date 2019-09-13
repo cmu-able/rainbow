@@ -39,10 +39,11 @@ effectors:
     
   cancelInstructions:
     command: cancelInstructions()
+    location: "${customize.system.target.master}"
     type: script
     scriptInfo:
-      path: "${_effectors.path}/cancelInstructions.sh"
-      argument: ~
+      path: "${_effectors.path}/setInstructionFile.sh"
+      argument: ~"NONE"
     
 #  changeDeadline:
 #    effector-type: changeDeadlineT
