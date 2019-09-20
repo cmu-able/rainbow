@@ -315,23 +315,23 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 					m_reportingPort.info(getComponentType(), "Planner chooses the plan " + plan);
 					PolicyToIGCP1 translator = new PolicyToIGCP1(pp, envMap);
 					
-					ArrayList<String> planArray = pp.getPlan();
-					ArrayList<String> planToTA = new ArrayList<String>(planArray.size());
-					ArrayList<String> planToReport = new ArrayList<>(planArray.size());
-					for (String cmd : planArray) {
-						if (cmd.contains("_to_")) {
-							Pattern p = Pattern.compile("([^_]*)_to_(.*)");
-							Matcher m = p.matcher(cmd);
-							if (m.matches()) {
-								planToTA.add(m.group(2));
-								planToReport.add(m.group(2));
-							}
-
-						} else {
-							planToReport.add(cmd);
-						}
-					}
-					BRASSHttpConnector.instance(Phases.Phase2).reportNewPlan(planToTA);
+//					ArrayList<String> planArray = pp.getPlan();
+//					ArrayList<String> planToTA = new ArrayList<String>(planArray.size());
+//					ArrayList<String> planToReport = new ArrayList<>(planArray.size());
+//					for (String cmd : planArray) {
+//						if (cmd.contains("_to_")) {
+//							Pattern p = Pattern.compile("([^_]*)_to_(.*)");
+//							Matcher m = p.matcher(cmd);
+//							if (m.matches()) {
+//								planToTA.add(m.group(2));
+//								planToReport.add(m.group(2));
+//							}
+//
+//						} else {
+//							planToReport.add(cmd);
+//						}
+//					}
+//					BRASSHttpConnector.instance(Phases.Phase2).reportNewPlan(planToTA);
 					
 					String translate = translator.translate(m_configurationStore);
 
