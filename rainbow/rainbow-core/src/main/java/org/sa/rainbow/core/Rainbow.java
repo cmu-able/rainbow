@@ -122,6 +122,7 @@ public class Rainbow implements IRainbowEnvironment {
 			public void run() {
 				try {
 					Thread.sleep(10000);
+					System.out.print("Quitting Rainbow forcefully");
 					System.exit(0);
 				} catch (InterruptedException e) {
 				}
