@@ -87,10 +87,12 @@ public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
      */
     @Override
     public void dispose () {
-        synchronized (m_lines) {
-            m_lines.clear ();
-        }
-        m_patternMap.clear();
+    	if (m_lines != null)
+	        synchronized (m_lines) {
+	            m_lines.clear ();
+	        }
+    	if (m_patternMap != null)
+    		m_patternMap.clear();
 
         // null-out data members
         m_lines = null;
