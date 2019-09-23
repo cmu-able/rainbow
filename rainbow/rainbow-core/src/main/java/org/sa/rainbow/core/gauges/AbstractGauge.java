@@ -171,7 +171,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
 
     @Override
     public void dispose () {
-        m_gaugeManagementPort.reportDeleted (this);
+//        m_gaugeManagementPort.reportDeleted (this);
 
 //        Rainbow.eventService().unlisten(m_gaugeEventHandler);
 
