@@ -32,7 +32,7 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
 	public static final MediaType     JSON               = MediaType.parse ("application/json");
     public static final OkHttpClient  CLIENT             = new OkHttpClient ();
     public static final String        STATUS_SERVER      = "http://localhost:5000";
-	public static final String LEARN_ENDPOINT = "/start-online-learning";
+	public static final String LEARN_ENDPOINT = "/internal-status";
     private static BRASSHttpConnector s_instance;
     public Queue<Request>             m_requestQ         = new SynchronousQueue<> ();
     private Callback                  m_responseCallback = new Callback () {
@@ -177,6 +177,7 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
     public boolean requestOnlineLearning() {
     	final Object lock = new Object();
     	JsonObject json = getTimeJSON();
+    	addFieldsToStatus("learning-requested", "requesting online learning", json);
     	RequestBody body = RequestBody.create(JSON, m_gsonPP.toJson(json));
     	Request request = new Request.Builder().url(STATUS_SERVER + LEARN_ENDPOINT).post(body).build();
     	
@@ -185,10 +186,11 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
 			
 			@Override
 			public void onResponse(Call call, Response response) throws IOException {
+	        	System.out.println("Received response from shim: " + response.body().string());
 				boolean wait = false;
 				try {
 					JsonObject j = new JsonParser().parse(response.body().string()).getAsJsonObject();
-					wait = j.get("learning-allowed").getAsBoolean();
+					wait = j.get("success").getAsBoolean();
 				} catch (JsonSyntaxException e) {
 					e.printStackTrace();
 				}

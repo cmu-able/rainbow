@@ -195,6 +195,7 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 	}
 	
 	protected void triggerOnlineLearning() {
+		log("Triggering online learning");
 		boolean learningHasStarted = BRASSHttpConnector.instance(Phases.Phase2).requestOnlineLearning();
 		if (learningHasStarted)
 			waitForPowerModel();
@@ -212,7 +213,7 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 				cancelInstructions();
 				
 				// Trigger online learning and wait for the model to be updated
-//				triggerOnlineLearning();
+				triggerOnlineLearning();
 				m_errorDetected = false;
 				m_reportingPort.info(getComponentType(), "Determining an appropriate adaptation");
 				// DecisionEngineCP3.setMap(m_models.getEnvMapModel().getModelInstance());
