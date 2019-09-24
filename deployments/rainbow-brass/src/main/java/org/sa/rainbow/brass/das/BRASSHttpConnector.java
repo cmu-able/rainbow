@@ -186,10 +186,11 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
 			
 			@Override
 			public void onResponse(Call call, Response response) throws IOException {
-	        	System.out.println("Received response from shim: " + response.body().string());
+	        	String responseString = response.body().string();
+				System.out.println("Received response from shim: " + responseString);
 				boolean wait = false;
 				try {
-					JsonObject j = new JsonParser().parse(response.body().string()).getAsJsonObject();
+					JsonObject j = new JsonParser().parse(responseString).getAsJsonObject();
 					wait = j.get("success").getAsBoolean();
 				} catch (JsonSyntaxException e) {
 					e.printStackTrace();
