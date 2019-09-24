@@ -197,8 +197,13 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 	protected void triggerOnlineLearning() {
 		log("Triggering online learning");
 		boolean learningHasStarted = BRASSHttpConnector.instance(Phases.Phase2).requestOnlineLearning();
-		if (learningHasStarted)
+		if (learningHasStarted) {
+			log("Waiting for new power model");
 			waitForPowerModel();
+		}
+		else {
+			log("NOT waiting for new power model");
+		}
 	}
 
 	@Override
