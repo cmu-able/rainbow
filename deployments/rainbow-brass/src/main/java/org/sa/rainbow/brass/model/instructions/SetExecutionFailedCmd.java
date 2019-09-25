@@ -11,12 +11,13 @@ import java.util.List;
  * Created by schmerl on 12/9/2016.
  */
 public class SetExecutionFailedCmd extends AbstractRainbowModelOperation<Boolean, InstructionGraphProgress> {
-    private Boolean m_result;
+    public static final String COMMAND_NAME = "setExecutionFailed";
+	private Boolean m_result;
     private boolean m_old;
 
 
     public SetExecutionFailedCmd (InstructionGraphModelInstance modelInstance, String target, String instructionLabel) {
-        super ("setExecutionFailed", modelInstance, target, instructionLabel);
+        super (COMMAND_NAME, modelInstance, target, instructionLabel);
     }
 
     @Override
@@ -26,7 +27,7 @@ public class SetExecutionFailedCmd extends AbstractRainbowModelOperation<Boolean
 
     @Override
     protected List<? extends IRainbowMessage> getGeneratedEvents (IRainbowMessageFactory messageFactory) {
-        return generateEvents (messageFactory, "setExecutionFailed");
+        return generateEvents (messageFactory, COMMAND_NAME);
     }
 
     @Override
