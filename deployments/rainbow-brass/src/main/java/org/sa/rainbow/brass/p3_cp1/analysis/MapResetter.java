@@ -46,13 +46,9 @@ public class MapResetter extends P2CP1Analyzer {
 		if (state == IGExecutionStateT.FINISHED_SUCCESS && !m_isReset) {
 			log("Resetting map because it is the end of a task");
 			try {
-				EnvMapLoadCmd reload = getModels().getEnvMapModel().getCommandFactory().loadCommand(
-						Rainbow.instance().getRainbowMaster().modelsManager(),
-						getModels().getInstructionGraphModel().getModelName(), new FileInputStream(m_modelPath),
-						m_modelPath.getAbsolutePath());
-				reload.execute(null, (IRainbowMessageFactory) m_modelChangePort);
+				getModels().getEnvMapModel().getModelInstance().reload();
 				log("Map reloaded");
-			} catch (IllegalStateException | RainbowException | FileNotFoundException e) {
+			} catch (IllegalStateException e) {
 				m_reportingPort.error(getComponentType(), "Failed to reload environment", e);
 				e.printStackTrace();
 			}
