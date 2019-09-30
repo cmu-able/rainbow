@@ -1,5 +1,6 @@
 package org.sa.rainbow.brass.model.instructions;
 
+import java.text.MessageFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -98,6 +99,11 @@ public class MoveAbsHInstruction implements IInstruction {
         else {
             System.out.println ("Error matching instruction: " + m_instruction);
         }
+    }
+    
+    @Override
+    public String toString() {
+    	return MessageFormat.format("{0} -> MoveAbsH({1},{2},{3}) {4}->{5}", m_instruction.trim(), m_targetX, m_targetY, m_speed, m_srcWaypoint==null?"?":m_srcWaypoint,m_tgtWaypoint==null?"?":m_tgtWaypoint);
     }
 
     @Override

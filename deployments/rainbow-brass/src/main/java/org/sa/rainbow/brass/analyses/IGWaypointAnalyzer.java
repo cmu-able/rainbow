@@ -105,6 +105,7 @@ public class IGWaypointAnalyzer extends P2Analyzer implements IRainbowModelChang
 				String currentSrc = srcNode == null ? null : srcNode.getLabel();
 				Collection<? extends IInstruction> instructions = getModels().getInstructionGraphModel()
 						.getModelInstance().getInstructions();
+				log("Current instructions are:");
 				for (IInstruction i : instructions) {
 					if (i instanceof MoveAbsHInstruction) {
 						MoveAbsHInstruction mai = (MoveAbsHInstruction) i;
@@ -122,6 +123,7 @@ public class IGWaypointAnalyzer extends P2Analyzer implements IRainbowModelChang
 									+ " does not exist in envmap in instruction " + mai.getInstruction());
 						}
 					}
+					log(i.toString());
 				}
 
 				log("Received and processed a new IG");

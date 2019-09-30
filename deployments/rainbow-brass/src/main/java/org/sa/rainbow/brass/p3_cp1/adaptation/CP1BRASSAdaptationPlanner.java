@@ -1,5 +1,6 @@
 package org.sa.rainbow.brass.p3_cp1.adaptation;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Iterator;
@@ -235,6 +236,7 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 					srcLabel = envMap.getNextNodeId();
 					boolean obstructed = m_models.getRainbowStateModel().getModelInstance().getProblems()
 							.contains(CP3ModelState.IS_OBSTRUCTED);
+					m_reportingPort.info(getComponentType(), MessageFormat.format("Inserting obstruction btw {0} and {0}", mi.getSourceWaypoint(), mi.getTargetWaypoint()));
 					srcLabel = envMap.insertNode(srcLabel, mi.getSourceWaypoint(), mi.getTargetWaypoint(), cp.getX(),
 							cp.getY(), obstructed);
 					tgtLabel = mi.getTargetWaypoint();
