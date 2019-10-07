@@ -202,6 +202,7 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 		if (learningHasStarted) {
 			log("Waiting for new power model");
 			waitForPowerModel();
+			log("Received new power model");
 		}
 		else {
 			log("NOT waiting for new power model");
