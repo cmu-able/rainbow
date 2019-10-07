@@ -107,7 +107,7 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 		m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort();
 		m_modelChangePort.subscribe((message) -> {
 			String operation = (String )message.getProperty(IModelChangeBusPort.COMMAND_PROP);
-			return (SetExecutionFailedCmd.COMMAND_NAME.equals(operation));
+			return (UpdatePowerModelCmd.NAME.equals(operation));
 		}, (model, message) -> {
 			synchronized(CP1BRASSAdaptationPlanner.this) {
 				this.notifyAll();
