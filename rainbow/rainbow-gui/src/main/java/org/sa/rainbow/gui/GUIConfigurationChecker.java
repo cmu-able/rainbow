@@ -48,8 +48,10 @@ public class GUIConfigurationChecker implements IRainbowConfigurationChecker {
 
 	@Override
 	public void checkRainbowConfiguration() {
+		String property = Rainbow.instance().getProperty("rainbow.gui.specs", null);
+		if (property == null) return;
 		File specs = Util.getRelativeToPath(Rainbow.instance().getTargetPath(),
-				Rainbow.instance().getProperty("rainbow.gui.specs"));
+				property);
 		if (specs != null) {
 			try {
 				Problem p = new Problem(ProblemT.INFO, "Checking GUI configuration...");

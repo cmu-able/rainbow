@@ -156,6 +156,7 @@ public class DecisionEngine {
                 // We generate the policy for the priority QA
 				BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(), "Model checking path " + candidate_key.toString());
 				// Get the configuration tht is most likely to be successful on this path
+				log("Checking " + candidate_key.toString() + " for properties in " + m_properties_file);
             	result = PrismConnectorAPI.instance().modelCheckFromFileS (m_candidates.get(candidate_key), m_properties_file, m_candidates.get (candidate_key), m_priority_index, m_consts);
 				BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(), "  Finished first model check");
 

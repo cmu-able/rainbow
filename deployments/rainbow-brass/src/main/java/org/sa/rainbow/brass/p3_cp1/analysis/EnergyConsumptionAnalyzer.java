@@ -62,6 +62,7 @@ public class EnergyConsumptionAnalyzer extends P2CP1Analyzer {
 			return;
 
 		if (!(currentInstruction instanceof ChargeInstruction)) {
+			log("Analyzing energy consumption");
 			List<? extends IInstruction> remainingInstructions = igModel.getRemainingInstructions();
 			double batteryCharge = -1;
 			try {

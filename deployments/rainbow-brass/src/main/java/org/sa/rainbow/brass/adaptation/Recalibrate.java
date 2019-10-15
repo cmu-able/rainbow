@@ -21,8 +21,8 @@ public class Recalibrate extends BrassPlan {
 
     @Override
     public Object evaluate (Object[] argsIn) {
-        IAdaptationExecutor<BrassPlan> executor = Rainbow.instance ().getRainbowMaster ()
-                .strategyExecutor (m_executorModel.getModelInstance ().getModelReference ().toString ());
+        IAdaptationExecutor<BrassPlan> executor = (IAdaptationExecutor<BrassPlan>) Rainbow.instance ().getRainbowMaster ()
+                .adaptationExecutors().get (m_executorModel.getModelInstance ().getModelReference ().toString ());
         MissionCommandFactory cf = m_reference.getCommandFactory ();
         RecalibrateCmd cmd = cf.recalibrate (false);
         OperationResult result = executor.getOperationPublishingPort ().publishOperation (cmd);

@@ -1,8 +1,12 @@
 package org.sa.rainbow.brass.p3_cp1.adaptation;
 
+import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.sa.rainbow.brass.PropertiesConnector;
 import org.sa.rainbow.brass.adaptation.BrassPlan;
@@ -17,8 +21,10 @@ import org.sa.rainbow.brass.model.instructions.IInstruction;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress;
 import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress.IGExecutionStateT;
 import org.sa.rainbow.brass.model.instructions.MoveAbsHInstruction;
+import org.sa.rainbow.brass.model.instructions.SetExecutionFailedCmd;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.p3_cp1.model.CP1ModelAccessor;
+import org.sa.rainbow.brass.p3_cp1.model.power.UpdatePowerModelCmd;
 import org.sa.rainbow.brass.model.p2_cp3.mission.MissionState.Heading;
 import org.sa.rainbow.brass.model.p2_cp3.mission.MissionState.LocationRecording;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowState.CP3ModelState;
@@ -34,8 +40,12 @@ import org.sa.rainbow.core.adaptation.DefaultAdaptationTreeWalker;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
+import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.ModelReference;
+import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
+import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowChangeBusSubscription;
+import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowModelChangeCallback;
 import org.sa.rainbow.core.ports.IModelsManagerPort;
 import org.sa.rainbow.core.ports.IRainbowAdaptationEnqueuePort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
@@ -58,6 +68,8 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 	private boolean m_errorDetected = false;
 	private boolean m_inLastResort = false;
 	private boolean m_reportAdapted;
+	
+	
 
 	/**
 	 * Default Constructor with name for the thread.
@@ -93,6 +105,14 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 		// Create port to query models manager
 		m_modelsManagerPort = RainbowPortFactory.createModelsManagerRequirerPort();
 		m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort();
+		m_modelChangePort.subscribe((message) -> {
+			String operation = (String )message.getProperty(IModelChangeBusPort.COMMAND_PROP);
+			return (UpdatePowerModelCmd.NAME.equals(operation));
+		}, (model, message) -> {
+			synchronized(CP1BRASSAdaptationPlanner.this) {
+				this.notifyAll();
+			}
+		});
 		m_models = new CP1ModelAccessor(m_modelsManagerPort);
 		// If you want to listen to changes, then you need to create a modelChangePort
 		// and write a subscriber to it.
@@ -165,6 +185,29 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 		m_reportingPort.info(RainbowComponentT.ADAPTATION_MANAGER, txt);
 
 	}
+	
+	protected void waitForPowerModel() {
+		// Be careful with this -- stops the thread entirely
+		synchronized (this) {
+			try {
+				this.wait();
+			} catch (InterruptedException e) {
+			}
+		}
+	}
+	
+	protected void triggerOnlineLearning() {
+		log("Triggering online learning");
+		boolean learningHasStarted = BRASSHttpConnector.instance(Phases.Phase2).requestOnlineLearning();
+		if (learningHasStarted) {
+			log("Waiting for new power model");
+			waitForPowerModel();
+			log("Received new power model");
+		}
+		else {
+			log("NOT waiting for new power model");
+		}
+	}
 
 	@Override
 	protected void runAction() {
@@ -175,7 +218,10 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 			if (reallyHasError()) {
 				BRASSHttpConnector.instance(Phases.Phase2).reportStatus(DASPhase2StatusT.ADAPTING.name(),
 						"Detected a problem");
-
+				cancelInstructions();
+				
+				// Trigger online learning and wait for the model to be updated
+				triggerOnlineLearning();
 				m_errorDetected = false;
 				m_reportingPort.info(getComponentType(), "Determining an appropriate adaptation");
 				// DecisionEngineCP3.setMap(m_models.getEnvMapModel().getModelInstance());
@@ -191,14 +237,15 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 					srcLabel = envMap.getNextNodeId();
 					boolean obstructed = m_models.getRainbowStateModel().getModelInstance().getProblems()
 							.contains(CP3ModelState.IS_OBSTRUCTED);
+					m_reportingPort.info(getComponentType(), MessageFormat.format("Inserting obstruction btw {0} and {0}", mi.getSourceWaypoint(), mi.getTargetWaypoint()));
 					srcLabel = envMap.insertNode(srcLabel, mi.getSourceWaypoint(), mi.getTargetWaypoint(), cp.getX(),
 							cp.getY(), obstructed);
 					tgtLabel = mi.getTargetWaypoint();
 				} else {
 					List<? extends IInstruction> remainingInstructions = igModel.getRemainingInstructions();
-					for (Iterator iterator = remainingInstructions.iterator(); iterator.hasNext()
+					for (Iterator<? extends IInstruction> iterator = remainingInstructions.iterator(); iterator.hasNext()
 							&& !(ci instanceof MoveAbsHInstruction);) {
-						ci = (IInstruction) iterator.next();
+						ci = iterator.next();
 					}
 					if (ci != null) {
 						MoveAbsHInstruction mi = (MoveAbsHInstruction) ci;
@@ -277,6 +324,25 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 					String plan = pp.getPlan().toString();
 					m_reportingPort.info(getComponentType(), "Planner chooses the plan " + plan);
 					PolicyToIGCP1 translator = new PolicyToIGCP1(pp, envMap);
+					
+					ArrayList<String> planArray = pp.getPlan();
+					ArrayList<String> planToTA = new ArrayList<String>(planArray.size());
+					ArrayList<String> planToReport = new ArrayList<>(planArray.size());
+					for (String cmd : planArray) {
+						if (cmd.contains("_to_")) {
+							Pattern p = Pattern.compile("([^_]*)_to_(.*)");
+							Matcher m = p.matcher(cmd);
+							if (m.matches()) {
+								planToTA.add(m.group(2));
+								planToReport.add(m.group(2));
+							}
+
+						} else {
+							planToReport.add(cmd);
+						}
+					}
+					BRASSHttpConnector.instance(Phases.Phase2).reportNewPlan(planToTA);
+					
 					String translate = translator.translate(m_configurationStore);
 
 					BrassPlan nig = new NewInstructionGraph(m_models, translate);
@@ -314,6 +380,13 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 
 		}
 
+	}
+
+	protected void cancelInstructions() {
+		m_reportingPort.info(getComponentType(), "Canceling the current set of instructions.");
+		CancelInstructionsTask cancelTask = new CancelInstructionsTask(m_models);
+		AdaptationTree<BrassPlan> at = new AdaptationTree<>(cancelTask);
+		m_adaptationEnqueuePort.offerAdaptation(at, new Object[0]);
 	}
 
 	private boolean reallyHasError() {
