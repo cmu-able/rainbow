@@ -128,7 +128,6 @@ Family SwimFam extends EnvType with {
 
     }
 
-
     Property DIMMER_LEVELS : int <<  default : int = 3; >>; 
     Property ADD_SERVER_LATENCY_SEC : int;
     Property THREADS_PER_SERVER : int  <<  default : int = 100; >>;
@@ -143,6 +142,9 @@ System SwimSys : SwimFam = new SwimFam extended with {
         Property max_arrival_capacity_low = 400;
         Property cost = 1.0;
     	Property index = 1;
+        Property traffic = 4;
+	    Property isArchEnabled = true;
+	    Property isActive = true;
     }
     Component server2 : ServerT = new ServerT extended with {
         Property deploymentLocation = "${customize.system.target.web1}";
@@ -150,6 +152,9 @@ System SwimSys : SwimFam = new SwimFam extended with {
         Property max_arrival_capacity_low = 280;
         Property cost = 0.7;
     	Property index = 2;
+        Property traffic = 0;
+	    Property isArchEnabled = false;
+	    Property isActive = false;
     }
     Component server3 : ServerT = new ServerT extended with {
         Property deploymentLocation = "${customize.system.target.web2}";
@@ -157,7 +162,9 @@ System SwimSys : SwimFam = new SwimFam extended with {
         Property max_arrival_capacity_low = 200;
         Property cost = 0.5;
     	Property index = 3;
-	    Property isArchEnabled = true;
+        Property traffic = 0;
+	    Property isArchEnabled = false;
+	    Property isActive = false;
     }
 
     Component LB0 : LoadBalancerT = new LoadBalancerT extended with {
