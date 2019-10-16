@@ -19,7 +19,7 @@ $(TARGETLIB): $(OBJS)
 	$(CXX) -shared $(OBJS) $(LDFLAGS) $(LDLIBS) -o $@
 
 $(WRAPPERNAME).cpp: $(BASENAME).i $(JAVATARGETDIR)
-	/home/frank/swig-3.0.12/swig -c++ -cppext cpp -java -package $(BASENAME) -outdir src/$(BASENAME) $(INCLUDEDIRS) $<
+	/usr/bin/swig -c++ -cppext cpp -java -package $(BASENAME) -outdir src/$(BASENAME) $(INCLUDEDIRS) $<
 
 .PHONY: classfiles
 
