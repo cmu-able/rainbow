@@ -1270,9 +1270,8 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
 
 			log("fast planning triggered");
             AdaptationPlanner m_adaptPlanner = new AdaptationPlanner();
-            String sysEnvStr = System.getenv("PLADAPT");
-            //m_adaptPlanner.setModelTemplatePath("/home/ashutosp/Sandbox/plasasim/templates/final_ibl.prism");
-            m_adaptPlanner.setModelTemplatePath(sysEnvStr + "/templates/final_ibl.prism");
+            String sysEnvStr = System.getenv("RAINBOW");
+            m_adaptPlanner.setModelTemplatePath(sysEnvStr + "/pladapt/templates/final_ibl.prism");
     		actions = m_adaptPlanner.plan(environmentModel, initialState, "", true);
     		String ret_path = m_adaptPlanner.getPlanned_path();
     		log("fast plan over, path = " + ret_path);
@@ -1307,9 +1306,8 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
         	
         	log("slow planning triggered");
             AdaptationPlanner m_adaptPlanner = new AdaptationPlanner();
-            String sysEnvStr = System.getenv("PLADAPT");
-            //m_adaptPlanner.setModelTemplatePath("/home/ashutosp/Sandbox/plasasim/templates/final_ibl.prism");
-            m_adaptPlanner.setModelTemplatePath(sysEnvStr + "/templates/final_ibl.prism");
+            String sysEnvStr = System.getenv("RAINBOW");
+            m_adaptPlanner.setModelTemplatePath(sysEnvStr + "/pladapt/templates/final_ibl.prism");
         	m_adaptPlanner.plan(environmentModel, initialState, "", false);
         	String ret_path = m_adaptPlanner.getPlanned_path();
         	log("slow plan over, path = " + ret_path);
