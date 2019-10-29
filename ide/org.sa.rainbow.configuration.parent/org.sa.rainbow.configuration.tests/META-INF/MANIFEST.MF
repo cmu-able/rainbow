@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: org.sa.rainbow.configuration.tests
+Bundle-ManifestVersion: 2
+Bundle-Name: org.sa.rainbow.configuration.tests
+Bundle-Vendor: My Company
+Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: org.sa.rainbow.configuration.tests; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.sa.rainbow.configuration,
+ org.junit.jupiter.api;bundle-version="[5.0.0,6.0.0)",
+ org.eclipse.xtext.testing,
+ org.eclipse.xtext.xbase.testing,
+ org.eclipse.xtext.xbase.lib;bundle-version="2.14.0",
+ org.objectweb.asm;bundle-version="[7.1.0,7.2.0)";resolution:=optional
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: org.sa.rainbow.configuration.tests;x-internal=true
