@@ -3,10 +3,499 @@
  */
 package org.sa.rainbow.configuration.ui.contentassist
 
+import com.google.common.base.Predicate
+import com.google.common.collect.Sets
+import com.google.inject.Inject
+import com.google.inject.name.Named
+import java.util.HashSet
+import java.util.List
+import java.util.Set
+import java.util.stream.Collectors
+import javax.swing.text.BadLocationException
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.jface.viewers.StyledString
+import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.xtext.RuleCall
+import org.eclipse.xtext.common.types.access.IJvmTypeProvider
+import org.eclipse.xtext.common.types.xtext.ui.ITypesProposalProvider
+import org.eclipse.xtext.common.types.xtext.ui.TypeMatchFilters
+import org.eclipse.xtext.resource.IEObjectDescription
+import org.eclipse.xtext.ui.editor.contentassist.ConfigurableCompletionProposal
+import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
+import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor
+import org.sa.rainbow.configuration.ConfigAttributeConstants
+import org.sa.rainbow.configuration.configModel.Array
+import org.sa.rainbow.configuration.configModel.Assignment
+import org.sa.rainbow.configuration.configModel.BooleanLiteral
+import org.sa.rainbow.configuration.configModel.Component
+import org.sa.rainbow.configuration.configModel.ComponentType
+import org.sa.rainbow.configuration.configModel.ConfigModelPackage
+import org.sa.rainbow.configuration.configModel.DeclaredProperty
+import org.sa.rainbow.configuration.configModel.DoubleLiteral
+import org.sa.rainbow.configuration.configModel.Effector
+import org.sa.rainbow.configuration.configModel.Gauge
+import org.sa.rainbow.configuration.configModel.GaugeType
+import org.sa.rainbow.configuration.configModel.IPLiteral
+import org.sa.rainbow.configuration.configModel.IntegerLiteral
+import org.sa.rainbow.configuration.configModel.Probe
+import org.sa.rainbow.configuration.configModel.ProbeReference
+import org.sa.rainbow.configuration.configModel.PropertyReference
+import org.sa.rainbow.configuration.configModel.StringLiteral
+import org.sa.rainbow.core.gauges.AbstractGauge
+import org.sa.rainbow.core.models.commands.ModelCommandFactory
+import org.sa.rainbow.translator.probes.AbstractProbe
+import org.sa.rainbow.configuration.services.ConfigModelGrammarAccess.EffectorTypeElements
 
 /**
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#content-assist
  * on how to customize the content assistant.
  */
 class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
+
+	override complete_RICH_TEXT_DQ(EObject model, RuleCall ruleCall, ContentAssistContext context,
+		ICompletionProposalAcceptor acceptor) {
+		completeInRichString(model, ruleCall, context, acceptor, "\"")
+	}
+
+	override complete_RICH_TEXT_START_DQ(EObject model, RuleCall ruleCall, ContentAssistContext context,
+		ICompletionProposalAcceptor acceptor) {
+		completeInRichString(model, ruleCall, context, acceptor, "\"")
+	}
+
+	override complete_RICH_TEXT_END_DQ(EObject model, RuleCall ruleCall, ContentAssistContext context,
+		ICompletionProposalAcceptor acceptor) {
+		completeInRichString(model, ruleCall, context, acceptor, "\"")
+	}
+
+	override complete_RICH_TEXT_INBETWEEN_DQ(EObject model, RuleCall ruleCall, ContentAssistContext context,
+		ICompletionProposalAcceptor acceptor) {
+		completeInRichString(model, ruleCall, context, acceptor, "\"")
+	}
+
+//	override complete_RICH_TEXT_SQ(EObject model, RuleCall ruleCall, ContentAssistContext context,
+//		ICompletionProposalAcceptor acceptor) {
+//		completeInRichString(model, ruleCall, context, acceptor, "'")
+//	}
+//
+//	override complete_RICH_TEXT_START_SQ(EObject model, RuleCall ruleCall, ContentAssistContext context,
+//		ICompletionProposalAcceptor acceptor) {
+//		completeInRichString(model, ruleCall, context, acceptor, "'")
+//	}
+//
+//	override complete_RICH_TEXT_END_SQ(EObject model, RuleCall ruleCall, ContentAssistContext context,
+//		ICompletionProposalAcceptor acceptor) {
+//		completeInRichString(model, ruleCall, context, acceptor,"'")
+//	}
+//
+//	override complete_RICH_TEXT_INBETWEEN_SQ(EObject model, RuleCall ruleCall, ContentAssistContext context,
+//		ICompletionProposalAcceptor acceptor) {
+//		completeInRichString(model, ruleCall, context, acceptor, "'")
+//	}
+	def completeInRichString(EObject object, RuleCall call, ContentAssistContext context,
+		ICompletionProposalAcceptor acceptor, String delimiter) {
+		val node = context.getCurrentNode();
+		val textRegion = node.textRegion;
+		val offset = textRegion.offset
+		val length = textRegion.length
+		val currentNodeText = node.text
+		if (currentNodeText.startsWith("\u00BB") && offset + 1 <= context.offset ||
+			currentNodeText.startsWith(delimiter) && offset + delimiter.length <= context.offset) {
+			if (context.offset > offset && context.offset < offset + length) {
+				addGuillemotsProposal(context, acceptor)
+			}
+		} else if (currentNodeText.startsWith("\u00AB\u00AB")) {
+			try {
+				val document = context.viewer.document
+				val nodeLine = document.getLineOffset(offset)
+				val completionLine = document.getLineOffset(context.offset)
+				if (completionLine > nodeLine) {
+					addGuillemotsProposal(context, acceptor)
+				}
+			} catch (BadLocationException e) {
+			}
+		}
+	}
+
+	def addGuillemotsProposal(ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		acceptor.accept(
+			new ConfigurableCompletionProposal("\u00AB\u00BB", context.getOffset(), context.getSelectedText().length(),
+				1));
+	}
+
+	override complete_PropertyReference(EObject model, RuleCall ruleCall, ContentAssistContext context,
+		ICompletionProposalAcceptor acceptor) {
+		super.complete_PropertyReference(model, ruleCall, context, acceptor)
+		val proposal = new ConfigurableCompletionProposal("\u00AB\u00AB\u00BB\u00BB", context.getOffset(),
+			context.getSelectedText().length(), 2)
+		proposal.priority = 1
+		acceptor.accept(proposal)
+	}
+
+	override complete_Assignment(EObject model, RuleCall ruleCall, ContentAssistContext context,
+		ICompletionProposalAcceptor acceptor) {
+
+		// Check Gauge attributes
+		var parent = model
+		var assignmentContext = null as Assignment
+		while (parent !== null &&
+			(!(parent instanceof Gauge) && !(parent instanceof Probe) && !(parent instanceof GaugeType) &&
+				!(parent instanceof Effector))) {
+			parent = parent.eContainer
+			if (parent instanceof Assignment) {
+				assignmentContext = parent as Assignment
+			}
+		}
+
+		val allPossibleFields = new HashSet<String>()
+		if (parent instanceof Gauge || parent instanceof GaugeType) {
+			if (assignmentContext === null) {
+				allPossibleFields.addAll(ConfigAttributeConstants.ALL_OFREQUIRED_GAUGE_SUBFILEDS.keySet)
+				allPossibleFields.addAll(ConfigAttributeConstants.OPTIONAL_GUAGE_FIELDS)
+				if (parent instanceof Gauge) {
+					allPossibleFields.removeAll((parent as Gauge).body.assignment.map[it.name])
+				} else {
+					allPossibleFields.removeAll((parent as GaugeType).body.assignment.map[it.name])
+				}
+			} else {
+				var subfields = ConfigAttributeConstants.ALL_OFREQUIRED_GAUGE_SUBFILEDS.get(assignmentContext.name)
+				if (subfields !== null) {
+					allPossibleFields.addAll(subfields)
+				}
+				subfields = ConfigAttributeConstants.OPTIONAL_GAUGE_SUBFIELDS.get(assignmentContext.name)
+				if (subfields !== null) {
+					allPossibleFields.addAll(subfields)
+				}
+				allPossibleFields.removeAll((assignmentContext.value.value as Component).assignment.map[it.name])
+			}
+		} else if (parent instanceof Probe) {
+			if (assignmentContext === null) {
+				allPossibleFields.addAll(ConfigAttributeConstants.ALL_OFREQUIRED_PROBE_FIELDS)
+				allPossibleFields.addAll(ConfigAttributeConstants.ONE_OFREQUIRED_PROBE_FIELDS);
+				allPossibleFields.removeAll((parent as Probe).properties.assignment.map[it.name])
+			} else {
+				var subfields = ConfigAttributeConstants.ALL_OFREQUIRED_PROBE_SUBFIELDS.get(assignmentContext.name)
+				if (subfields !== null) {
+					allPossibleFields.addAll(subfields)
+				}
+				subfields = ConfigAttributeConstants.OPTIONAL_PROBE_SUBFIELDS.get(assignmentContext.name)
+				if (subfields !== null) {
+					allPossibleFields.addAll(subfields)
+				}
+				allPossibleFields.removeAll((assignmentContext.value.value as Component).assignment.map[it.name])
+			}
+		} else if (parent instanceof Effector) {
+			if (assignmentContext === null) {
+				allPossibleFields.addAll(ConfigAttributeConstants.ALL_OFREQUIRED_EFFECTOR_FIELDS)
+				allPossibleFields.addAll(ConfigAttributeConstants.ONE_OFREQUIRED_EFFECTOR_FIELDS)
+				allPossibleFields.removeAll((parent as Effector).body.assignment.map[it.name])
+			} else {
+				var subfields = ConfigAttributeConstants.ALL_OFREQUIRED_EFFECTOR_SUBFIELDS.get(assignmentContext.name)
+				if (subfields !== null) {
+					allPossibleFields.addAll(subfields)
+				}
+				subfields = ConfigAttributeConstants.OPTIONAL_EFFECTOR_SUBFIELDS.get(assignmentContext.name)
+				if (subfields !== null) {
+					allPossibleFields.addAll(subfields)
+				}
+				allPossibleFields.removeAll((assignmentContext.value.value as Component).assignment.map[it.name])
+			}
+		}
+		var suggestions = allPossibleFields.stream.filter[it.startsWith(context.prefix)].collect(Collectors.toSet)
+		suggestions.forEach [
+			{
+				val proposal = new ConfigurableCompletionProposal(it + " = ", context.replaceRegion.offset,
+					context.replaceRegion.length, it.length + 3)
+				proposal.displayString = it
+				proposal.priority = 1
+				acceptor.accept(proposal)
+			}
+		]
+		if (suggestions.empty) {
+			super.complete_Assignment(model, ruleCall, context, acceptor)
+			
+		}
+	}
+
+	@Inject
+	@Named(value="jvmtypes")
+	private IJvmTypeProvider.Factory jvmTypeProviderFactory;
+	@Inject
+	@Named(value="jvmtypes")
+	private ITypesProposalProvider typeProposalProvider;
+
+	override completeGaugeTypeBody_Mcf(EObject model, org.eclipse.xtext.Assignment assignment,
+		ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+
+		val jvmTypeProvider = jvmTypeProviderFactory.createTypeProvider(model.eResource.resourceSet)
+		val subclass = jvmTypeProvider.findTypeByName(ModelCommandFactory.name)
+		typeProposalProvider.createSubTypeProposals(subclass, this, context,
+			ConfigModelPackage.Literals.GAUGE_TYPE_BODY__MCF, TypeMatchFilters.canInstantiate, acceptor);
+
+	}
+	
+	override completeEffectorBody_Ref(EObject model, org.eclipse.xtext.Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		val v = model.eResource.resourceSet.resources
+		val models = new HashSet<String>();
+		for (r : v) {
+			val res = r.allContents
+			res.forEach [
+				if (it instanceof DeclaredProperty && (it as DeclaredProperty).component == ComponentType.MODEL) {
+					models.add((it as DeclaredProperty).name)
+				}
+			]
+		}
+		if (!models.empty) {
+			models.forEach [
+				acceptor.accept(
+					new ConfigurableCompletionProposal("\u00AB\u00AB" + it + "\u00BB\u00BB", context.replaceRegion.offset, context.replaceRegion.length,
+						it.length+4, null, new StyledString(it), null, null))
+			]
+			acceptor.accept(
+			new ConfigurableCompletionProposal("\u00AB\u00AB\u00BB\u00BB", context.getOffset(), context.getSelectedText().length(),
+				2));
+		}
+	}
+
+	override completeGaugeBody_Ref(EObject model, org.eclipse.xtext.Assignment assignment, ContentAssistContext context,
+		ICompletionProposalAcceptor acceptor) {
+		val v = model.eResource.resourceSet.resources
+		val models = new HashSet<String>();
+		for (r : v) {
+			val res = r.allContents
+			res.forEach [
+				if (it instanceof DeclaredProperty && (it as DeclaredProperty).component == ComponentType.MODEL) {
+					models.add((it as DeclaredProperty).name)
+				}
+			]
+		}
+		if (!models.empty) {
+			models.forEach [
+				acceptor.accept(
+					new ConfigurableCompletionProposal("\u00AB\u00AB" + it + "\u00BB\u00BB", context.replaceRegion.offset, context.replaceRegion.length,
+						it.length+4, null, new StyledString(it), null, null))
+			]
+			acceptor.accept(
+			new ConfigurableCompletionProposal("\u00AB\u00AB\u00BB\u00BB", context.getOffset(), context.getSelectedText().length(),
+				2));
+		}
+	}
+
+	override completeDeclaredProperty_Default(EObject model, org.eclipse.xtext.Assignment assignment,
+		ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		val ass = EcoreUtil2.getContainerOfType(model, DeclaredProperty)
+		if (ass.name.matches(".*class_[0-9]+$")) {
+			val checkName = ass.name.substring(0, ass.name.lastIndexOf('_')) + "*"
+			val subclass = ConfigAttributeConstants.PROPERTY_VALUE_CLASSES.get(checkName)
+			if (subclass !== null) {
+				val jvmTypeProvider = jvmTypeProviderFactory.createTypeProvider(model.eResource.resourceSet)
+				val sc = jvmTypeProvider.findTypeByName(subclass)
+				if (sc !== null) {
+					typeProposalProvider.createSubTypeProposals(sc, this, context,
+						ConfigModelPackage.Literals.DECLARED_PROPERTY__DEFAULT, TypeMatchFilters.canInstantiate,
+						acceptor);
+					pauseAssisting(acceptor);
+					return
+				}
+			}
+		}
+
+		super.completeReference_Referable(model, assignment, context, acceptor)
+	}
+
+
+	override completeAssignment_Value(EObject model, org.eclipse.xtext.Assignment assignment,
+		ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		val ass = EcoreUtil2.getContainerOfType(model, Assignment)
+		if (ass.name == "javaClass") {
+			val gtc = EcoreUtil2.getContainerOfType(ass, GaugeType)
+			val gc = EcoreUtil2.getContainerOfType(ass, Gauge)
+			if (gtc !== null || gc !== null) {
+				val jvmTypeProvider = jvmTypeProviderFactory.createTypeProvider(model.eResource.resourceSet)
+				val subclass = jvmTypeProvider.findTypeByName(AbstractGauge.name)
+				if (subclass != null) {
+					typeProposalProvider.createSubTypeProposals(subclass, this, context,
+						ConfigModelPackage.Literals.ASSIGNMENT__VALUE, TypeMatchFilters.canInstantiate, acceptor);
+					pauseAssisting(acceptor);
+					return
+
+				}
+			}
+			val pc = EcoreUtil2.getContainerOfType(ass, Probe);
+			if (pc !== null) {
+				val jvmTypeProvider = jvmTypeProviderFactory.createTypeProvider(model.eResource.resourceSet)
+				val subclass = jvmTypeProvider.findTypeByName(AbstractProbe.name)
+				if (subclass !== null) {
+					typeProposalProvider.createSubTypeProposals(subclass, this, context,
+						ConfigModelPackage.Literals.ASSIGNMENT__VALUE, TypeMatchFilters.canInstantiate, acceptor);
+					pauseAssisting(acceptor);
+					return
+				}
+
+			}
+		}
+		val parentProp = EcoreUtil2.getContainerOfType(ass, DeclaredProperty)
+		if (parentProp?.component !== null) {
+			val extends = ConfigAttributeConstants.COMPONENT_PROPERTY_TYPES.get(parentProp.component)?.get(ass.name)?.
+				get('extends') as List<Class>
+			processPropertySuggestionsBasedOnClass(extends, model, context, acceptor)
+			return
+		}
+		val probe = EcoreUtil2.getContainerOfType(model, Probe)
+		if (probe !== null) {
+			val parent = EcoreUtil2.getContainerOfType(model.eContainer, Assignment)
+			var name = ass.name
+			if (parent !== null) {
+				name = parent.name + ":" + ass.name
+			}
+			val extends = ConfigAttributeConstants.PROBE_PROPERTY_TYPES.get(name)?.get('extends') as List<Class>
+			processPropertySuggestionsBasedOnClass(extends, model, context, acceptor)
+			return
+		}
+		val gauge = EcoreUtil2.getContainerOfType(model, Gauge)
+		val gaugeType = EcoreUtil2.getContainerOfType(model, GaugeType)
+		if (gauge !== null || gaugeType !== null) {
+			val parent = EcoreUtil2.getContainerOfType(model.eContainer, Assignment)
+			var name = ass.name
+			if (parent !== null) {
+				name = parent.name + ":" + ass.name
+			}
+			val extends = ConfigAttributeConstants.GAUGE_PROPERTY_TYPES.get(name)?.get('extends') as List<Class>
+			processPropertySuggestionsBasedOnClass(extends, model, context, acceptor)
+			return
+		}
+		val effector = EcoreUtil2.getContainerOfType(model, Effector)
+		if (effector !== null) {
+			val parent = EcoreUtil2.getContainerOfType(model.eContainer, Assignment);
+			var name = ass.name
+			if (parent !== null) {
+				name = parent.name + ":" + ass.name
+			}
+			val extends = ConfigAttributeConstants.EFFECTOR_PROPERTY_TYPES.get(name)?.get('extends') as List<Class>
+			processPropertySuggestionsBasedOnClass(extends, model, context, acceptor)
+			return
+		}
+		super.completeAssignment_Value(model, assignment, context, acceptor)
+	}
+		
+		def processPropertySuggestionsBasedOnClass(List<Class> ext, EObject model, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+			if (ext !== null) {
+				val jvmTypeProvider = jvmTypeProviderFactory.createTypeProvider(model.eResource.resourceSet)
+				for (class : ext) {
+					if (class == StringLiteral) {
+						acceptor.accept(
+							new ConfigurableCompletionProposal('""', context.replaceRegion.offset,
+								context.replaceRegion.length, 1))
+					} else if (class == BooleanLiteral) {
+						acceptor.accept(
+							new ConfigurableCompletionProposal('true', context.replaceRegion.offset,
+								context.replaceRegion.length, 4))
+						acceptor.accept(
+							new ConfigurableCompletionProposal('false', context.replaceRegion.offset,
+								context.replaceRegion.length, 4))
+					} else if (class == PropertyReference) {
+						acceptor.accept(
+							new ConfigurableCompletionProposal("\u00AB\u00AB\u00BB\u00BB", context.getOffset(), context.getSelectedText().length(),
+							2));
+					} else if (class == ProbeReference) {
+						acceptor.accept(
+							new ConfigurableCompletionProposal("probe ", context.getOffset(), context.getSelectedText().length(),
+							6));
+					} else if (class == Array) {
+						acceptor.accept(
+							new ConfigurableCompletionProposal("[]", context.getOffset(), context.getSelectedText().length(),
+							1));
+					} else if (class == Component) {
+						acceptor.accept(
+							new ConfigurableCompletionProposal("{}", context.getOffset(), context.getSelectedText().length(),
+							1));
+					} else if (class == DoubleLiteral || class == IntegerLiteral || class==IPLiteral) {
+					} else {
+						val sc = jvmTypeProvider.findTypeByName(class.name)
+						if (sc !== null) {
+							typeProposalProvider.createSubTypeProposals(sc, this, context,
+								ConfigModelPackage.Literals.DECLARED_PROPERTY__DEFAULT, TypeMatchFilters.canInstantiate,
+								acceptor);
+						}
+					}
+
+				}
+				pauseAssisting(acceptor);
+				return
+			}
+		}
+		
+		
+	
+
+//	override completeGaugeBody_Ref(EObject model, org.eclipse.xtext.Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+//		super.completeGaugeBody_Ref(model, assignment, context, acceptor)
+//	}
+	override completePropertyReference_Referable(EObject model, org.eclipse.xtext.Assignment assignment,
+		ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		val parentProp = EcoreUtil2.getContainerOfType(model, DeclaredProperty)
+		var myProp = EcoreUtil2.getContainerOfType(model, Assignment)
+		if ('model' == myProp.name  &&
+			(parentProp.component === ComponentType.EXECUTOR || parentProp.component === ComponentType.MANAGER)) {
+			val v = model.eResource.resourceSet.resources
+			val models = new HashSet<String>();
+			for (r : v) {
+				val res = r.allContents
+				res.forEach [
+					if (it instanceof DeclaredProperty && (it as DeclaredProperty).component == ComponentType.MODEL) {
+						models.add((it as DeclaredProperty).name)
+					}
+				]
+			}
+			if (!models.empty) {
+				models.forEach [
+					acceptor.accept(
+						new ConfigurableCompletionProposal(it, context.replaceRegion.offset,
+							context.replaceRegion.length, it.length))
+				]
+			}
+			return;
+		}
+		super.completePropertyReference_Referable(model, assignment, context, acceptor)
+	}
+
+	def pauseAssisting(ICompletionProposalAcceptor acceptor) {
+		if (acceptor instanceof NonContinuingAcceptor) {
+			(acceptor as NonContinuingAcceptor).acceptMoreProposals = false
+		}
+	}
+
+//	override completeReference_Referable(EObject model, org.eclipse.xtext.Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+//		val ass = EcoreUtil2.getContainerOfType(model, Assignment)
+//		if (ass.name != "javaClass")
+//			super.completeReference_Referable(model, assignment, context,acceptor);
+//	}
+	def Predicate<IEObjectDescription> subclassFilter(Class superclass) {
+		return new Predicate<IEObjectDescription>() {
+
+			override apply(IEObjectDescription subclass) {
+				return true;
+			}
+
+		}
+	}
+
+	private Set<List<?>> handledArguments;
+
+	override createProposals(ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		try {
+			handledArguments = Sets.newHashSet();
+			val myAcceptor = new NonContinuingAcceptor(acceptor);
+			val selector = createSelector(context, myAcceptor)
+			context.firstSetGrammarElements.takeWhile[myAcceptor.canAcceptMoreProposals].forEach[selector.accept(it)]
+
+		} finally {
+			handledArguments = null
+		}
+
+	}
+
+	override protected announceProcessing(List<?> key) {
+		return handledArguments.add(key);
+	}
+
 }

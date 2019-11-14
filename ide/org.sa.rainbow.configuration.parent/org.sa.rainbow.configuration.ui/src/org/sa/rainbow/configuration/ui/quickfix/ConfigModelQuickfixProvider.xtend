@@ -3,11 +3,33 @@
  */
 package org.sa.rainbow.configuration.ui.quickfix
 
+import java.util.ArrayList
+import java.util.LinkedList
+import java.util.regex.Pattern
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.xtext.nodemodel.ICompositeNode
+import org.eclipse.xtext.nodemodel.ILeafNode
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils
+import org.eclipse.xtext.ui.editor.model.IXtextDocument
+import org.eclipse.xtext.ui.editor.model.edit.IModificationContext
+import org.eclipse.xtext.ui.editor.model.edit.ISemanticModification
 import org.eclipse.xtext.ui.editor.quickfix.DefaultQuickfixProvider
+import org.eclipse.xtext.ui.editor.quickfix.Fix
+import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor
+import org.eclipse.xtext.validation.Issue
+import org.sa.rainbow.configuration.configModel.Assignment
+import org.sa.rainbow.configuration.configModel.Component
+import org.sa.rainbow.configuration.configModel.ConfigModelPackage
+import org.sa.rainbow.configuration.configModel.Effector
+import org.sa.rainbow.configuration.configModel.EffectorBody
+import org.sa.rainbow.configuration.configModel.Gauge
+import org.sa.rainbow.configuration.configModel.GaugeBody
+import org.sa.rainbow.configuration.configModel.Probe
+import org.sa.rainbow.configuration.validation.ConfigModelValidator
 
 /**
  * Custom quickfixes.
- *
+ * 
  * See https://www.eclipse.org/Xtext/documentation/310_eclipse_support.html#quick-fixes
  */
 class ConfigModelQuickfixProvider extends DefaultQuickfixProvider {
@@ -21,4 +43,162 @@ class ConfigModelQuickfixProvider extends DefaultQuickfixProvider {
 //			xtextDocument.replace(issue.offset, 1, firstLetter.toUpperCase)
 //		]
 //	}
+//	@Fix(ConfigModelValidator.MUST_SUBCLASS)
+//	def chooseSubclass(Issue issue, IssueResolutionAcceptor acceptor) {
+//		if (issue.data?.length != 1) return
+//		val subclasses = new LinkedList<String> ();
+//		if (!issue.data.get(0).contains(",")) {
+//			subclasses.add(issue.data.get(0));
+//		}
+//		else {
+//			for (sc : issue.data.get(0).split(",")) {
+//				subclasses.add(sc);
+//			}
+//		}
+//		for (sc : subclasses) {
+//			
+//		}
+//	}
+//	@Inject
+//	private ReplacingAppendable.Factory appendableFactory;
+	@Fix(ConfigModelValidator.MISSING_PROPERTY)
+	def addMissingProperty(Issue issue, IssueResolutionAcceptor acceptor) {
+		if (issue.data?.length === 0) {
+			return;
+		}
+		val possibleProperties = new LinkedList<String>()
+		for (prop : issue.data.get(0).split(",")) {
+			possibleProperties.add(prop);
+		}
+		for (prop : possibleProperties) {
+			acceptor.accept(
+				issue,
+				"Add '" + prop + '"',
+				"Add '" + prop + '"',
+				null,
+				new ISemanticModification() {
+
+					override apply(EObject element, IModificationContext context) throws Exception {
+						val document = context.xtextDocument
+						if (element instanceof Gauge) {
+							val gb = (element as Gauge).body
+							val insertOffset = getInsertOffset(gb)
+							val indent = getIndent(element as Gauge, insertOffset)
+							var t = "\n" + indent +  prop + " = "
+							if (issue.data.length == 2 && issue.data.get(1) == Component.name) {
+								t = t + "{\n" + indent + "\t\n" + indent + "}" 
+								
+							}
+							document.replace(insertOffset, 0, t);
+						}
+						else if (element instanceof Assignment && (element as Assignment).value.value instanceof Component) {
+							insertProperty((element as Assignment).value.value as Component, element, prop, document)
+							
+						}
+						else if (element instanceof Probe) {
+							insertProperty((element as Probe).properties, element, prop, document)
+						}
+						else if (element instanceof Effector) {
+							val eb = (element as Effector).body
+							val insertOffset = getInsertOffset(eb)
+							val indent = getIndent(element, insertOffset)
+							var t = "\n" + indent +  prop + " = "
+							if (issue.data.length == 2 && issue.data.get(1) == Component.name) {
+								t = t + "{\n" + indent + "\t\n" + indent + "}" 
+								
+							}
+							document.replace(insertOffset, 0, t);
+						}
+					}
+					
+					 def insertProperty (Component into, EObject element, String prop, IXtextDocument document) {
+					 	val insertOffset = getInsertOffset(into)
+							val indent = getIndent(element, insertOffset)
+							var t = "\n" + indent + (into.assignment.empty?"\t":"") + prop + " = "
+							document.replace(insertOffset, 0, t)
+					 }
+
+					def getIndent(EObject g, int insertOffset) {
+						val root = NodeModelUtils.findActualNodeFor(g)
+						val r = determineOffset(root, insertOffset)
+
+						// go backwards until first linewrap
+						val p = Pattern.compile("(\\n|\\r)([ \\t]*)");
+						for (var i = r.size() - 1; i >= 0; i--) {
+							val m = p.matcher(r.get(i).getText());
+							if (m.find()) {
+								var ind = m.group(2);
+								while (m.find())
+									ind = m.group(2);
+								return ind;
+							}
+						}
+						return "";
+
+					}
+
+					def determineOffset(ICompositeNode root, int fromOffset) {
+						val r = new ArrayList<ILeafNode>();
+						// add all nodes until fromOffset
+						for (l : root.getLeafNodes()) {
+							if (l.getOffset() >= fromOffset) {
+								return r;
+
+							} else {
+								r.add(l);
+							}
+						}
+					}
+					
+					def getInsertOffset(Component c) {
+						if (c.assignment.empty) {
+							val node = NodeModelUtils.findActualNodeFor(c)
+							val openingBraceNode = node.leafNodes.findFirst[text == "{"]
+							if (openingBraceNode !== null) {
+								openingBraceNode.offset + 1
+							} else
+								node.offset
+						}
+						else {
+							NodeModelUtils.findActualNodeFor(c.assignment.last).endOffset
+						}
+					}
+					
+					def getInsertOffset(EffectorBody gb) {
+						if (gb.assignment.empty) {
+							val node = NodeModelUtils.findActualNodeFor(gb)
+							val openingBraceNode = node.leafNodes.findFirst[text == "{"]
+							if (openingBraceNode !== null) {
+								openingBraceNode.offset + 1
+							} else
+								node.offset
+						}
+						else {
+							NodeModelUtils.findActualNodeFor(gb.command).endOffset
+						}
+					}
+
+					def getInsertOffset(GaugeBody gb) {
+						if (gb.assignment.empty) {
+							val node = NodeModelUtils.findActualNodeFor(gb)
+							val openingBraceNode = node.leafNodes.findFirst[text == "{"]
+							if (openingBraceNode !== null) {
+								openingBraceNode.offset + 1
+							} else
+								node.offset
+						} else if (!gb.commands.empty) {
+							NodeModelUtils.findActualNodeFor(gb.commands.last).endOffset
+						} else if (gb.modeltype !== null) {
+							NodeModelUtils.findNodesForFeature(gb, ConfigModelPackage.Literals.GAUGE_BODY__MODELTYPE).
+								last.endOffset
+						}
+						return NodeModelUtils.findNodesForFeature(gb, ConfigModelPackage.Literals.GAUGE_BODY__REF).last.
+							endOffset
+
+					}
+
+				}
+			)
+		}
+	}
 }

@@ -6,11 +6,15 @@ package org.sa.rainbow.configuration.ui
 import com.google.inject.Binder
 import com.google.inject.name.Names
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
-import org.eclipse.xtext.common.types.access.CachingClasspathTypeProviderFactory
 import org.eclipse.xtext.common.types.access.IJvmTypeProvider
-import org.eclipse.xtext.common.types.xtext.AbstractTypeScopeProvider
-import org.eclipse.xtext.common.types.xtext.ui.JdtBasedSimpleTypeScopeProvider
 import org.eclipse.xtext.common.types.access.jdt.JdtTypeProviderFactory
+import org.eclipse.xtext.common.types.xtext.AbstractTypeScopeProvider
+import org.eclipse.xtext.common.types.xtext.ui.ITypesProposalProvider
+import org.eclipse.xtext.common.types.xtext.ui.JdtBasedSimpleTypeScopeProvider
+import org.eclipse.xtext.ide.editor.syntaxcoloring.DefaultSemanticHighlightingCalculator
+import org.eclipse.xtext.ui.editor.syntaxcoloring.DefaultHighlightingConfiguration
+import org.sa.rainbow.configuration.ui.contentassist.RainbowJdtTypesProposalProvider
+import org.sa.rainbow.configuration.ui.contentassist.RainbowTemplateProposalProvider
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.
@@ -21,11 +25,26 @@ class ConfigModelUiModule extends AbstractConfigModelUiModule {
 		return ConfigModelHyperlinkDetector
 	}
 	
+	override bindITemplateProposalProvider() {
+		return RainbowTemplateProposalProvider;
+	}
+	
 	def configureJvmTypeProvider(Binder binder) {
 		binder.bind(AbstractTypeScopeProvider).annotatedWith(Names.named("jvmtypes")).to(JdtBasedSimpleTypeScopeProvider)
 		binder.bind(IJvmTypeProvider.Factory).annotatedWith(Names.named("jvmtypes")).to(JdtTypeProviderFactory)
+		binder.bind(ITypesProposalProvider).annotatedWith(Names.named("jvmtypes")).to(RainbowJdtTypesProposalProvider)
 		
 	}
+	
+	override configure(Binder binder) {
+		super.configure(binder)
+		binder.bind(DefaultSemanticHighlightingCalculator).to(ConfigModelHighlighter)
+		binder.bind(DefaultHighlightingConfiguration).to(ConfigModelHighlightingConfiguration)
+	}
+	
+	
+	
+	
 //	override configureHighlightingLexer(Binder binder) {
 //		binder.bind(org.eclipse.xtext.parser.antlr.Lexer)
 //			.annotatedWith(Names.named(LexerIdeBindings.HIGHLIGHTING))

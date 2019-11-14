@@ -3,13 +3,21 @@
  */
 package org.sa.rainbow.configuration
 
-import org.eclipse.xtext.scoping.impl.ImportUriGlobalScopeProvider
+import com.google.inject.Binder
+import javax.inject.Singleton
+import org.eclipse.xtext.generator.IOutputConfigurationProvider
 import org.sa.rainbow.configuration.scoping.ConfigModelGlobalScopeProvider
+import org.sa.rainbow.configuration.scoping.QualifiedNameProvider
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
  */
 class ConfigModelRuntimeModule extends AbstractConfigModelRuntimeModule {
+	
+	override configure(Binder binder) {
+		super.configure(binder)
+		binder.bind(IOutputConfigurationProvider).to(RainbowOutputConfigurationProvider).in(Singleton)
+	}
 	
 	override bindIValueConverterService() {
 		return ConfigModelValueConverter;
@@ -35,8 +43,8 @@ class ConfigModelRuntimeModule extends AbstractConfigModelRuntimeModule {
 //		
 //	}
 	
-//	override bindIQualifiedNameProvider() {
-//		return ConfigModelQualifiedNameProvider;
-//	}
+	override bindIQualifiedNameProvider() {
+		return QualifiedNameProvider;
+	}
 	
 }

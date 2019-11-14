@@ -3,27 +3,44 @@
  */
 package org.sa.rainbow.configuration.generator
 
+import com.google.inject.Inject
+import com.google.inject.name.Named
+import java.util.Arrays
 import java.util.HashMap
 import org.eclipse.emf.common.util.EList
+import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.xtext.common.types.JvmType
+import org.eclipse.xtext.common.types.access.IJvmTypeProvider
 import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
+import org.sa.rainbow.configuration.RainbowOutputConfigurationProvider
+import org.sa.rainbow.configuration.configModel.Actual
 import org.sa.rainbow.configuration.configModel.Assignment
 import org.sa.rainbow.configuration.configModel.BooleanLiteral
+import org.sa.rainbow.configuration.configModel.CommandCall
 import org.sa.rainbow.configuration.configModel.Component
+import org.sa.rainbow.configuration.configModel.ComponentType
 import org.sa.rainbow.configuration.configModel.ConfigurationModel
 import org.sa.rainbow.configuration.configModel.DeclaredProperty
 import org.sa.rainbow.configuration.configModel.DoubleLiteral
+import org.sa.rainbow.configuration.configModel.Effector
 import org.sa.rainbow.configuration.configModel.Gauge
+import org.sa.rainbow.configuration.configModel.GaugeType
 import org.sa.rainbow.configuration.configModel.IPLiteral
 import org.sa.rainbow.configuration.configModel.IntegerLiteral
 import org.sa.rainbow.configuration.configModel.LogLiteral
 import org.sa.rainbow.configuration.configModel.Probe
+import org.sa.rainbow.configuration.configModel.ProbeReference
 import org.sa.rainbow.configuration.configModel.PropertyReference
 import org.sa.rainbow.configuration.configModel.Reference
+import org.sa.rainbow.configuration.configModel.RichString
+import org.sa.rainbow.configuration.configModel.RichStringLiteral
+import org.sa.rainbow.configuration.configModel.RichStringPart
 import org.sa.rainbow.configuration.configModel.StringLiteral
 import org.sa.rainbow.configuration.configModel.Value
+import java.util.Date
 
 /**
  * Generates code from your model files on save.
@@ -33,158 +50,556 @@ import org.sa.rainbow.configuration.configModel.Value
 class ConfigModelGenerator extends AbstractGenerator {
 
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
-		val model = resource.contents.head as ConfigurationModel 
-		var filename = model?.export.filename
-		if (filename == null) filename=("generated-unnamed");
-		if (model.probes !== null) {
-			fsa.generateFile(filename, outputProbeSpec(model.probes, model.delcaredProperties))
+		val model = resource.contents.head as ConfigurationModel
+		var filename = '''«model.targetName»/«model.export.filename»'''
+		if(filename === null) filename = ("generated-unnamed");
+		if (model.probes !== null || !model.probes.isEmpty) {
+			fsa.generateFile(filename, RainbowOutputConfigurationProvider::RAINBOW_TARGET_PROPERTIES_OUTPUT,
+				outputProbeSpec(model.probes, model.delcaredProperties))
 		}
-		if (model.gauges !== null) {
-			fsa.generateFile(filename, outputGuageSpec(model.gauges, model.delcaredProperties))
+		if ((model.gauges !== null || model.gaugeTypes !== null) &&
+			(!model.gauges.isEmpty || !model.gaugeTypes.isEmpty)) {
+			fsa.generateFile(filename, RainbowOutputConfigurationProvider::RAINBOW_TARGET_PROPERTIES_OUTPUT,
+				outputGuageSpec(model.gauges, model.gaugeTypes, model.delcaredProperties))
 		}
-		if (filename.endsWith("properties") || (model.gauges == null && model.probes == null && model.delcaredProperties != null)) {
+		if ((model.effectors !== null || model.effectorTypes !== null) &&
+			(!model.effectors.isEmpty || !model.effectorTypes.isEmpty)) {
+			fsa.generateFile(filename, RainbowOutputConfigurationProvider::RAINBOW_TARGET_PROPERTIES_OUTPUT,
+				outputEffectorSpec(model.effectors, model.effectorTypes, model.delcaredProperties))
+		}
+
+		if (filename.endsWith("properties") ||
+			(model.gauges == null && model.probes == null && model.delcaredProperties != null)) {
 			var output = outputPropertiesSpec(model.delcaredProperties)
-			output = "# Generated from RBW file so don't edit directly\n" + output
-			fsa.generateFile(filename, output);
+			fsa.generateFile(filename, RainbowOutputConfigurationProvider::RAINBOW_TARGET_PROPERTIES_OUTPUT, output);
 		}
-		
+
 //		fsa.generateFile('greetings.txt', 'People to greet: ' + 
 //			resource.allContents
 //				.filter(Greeting)
 //				.map[name]
 //				.join(', '))
 	}
-		
-		def outputPropertiesSpec(EList<DeclaredProperty> vars) '''
-		  «FOR v : vars»
-		  «v.name» = «stringValue(v.^default,false)»
-		  «ENDFOR»
+
+	def outputPropertiesSpec(EList<DeclaredProperty> vars) {
+		val models = vars.filter[it?.component === ComponentType.MODEL]
+		val analysis = vars.filter[it?.component === ComponentType.ANALYSIS]
+		val executors = vars.filter[it?.component === ComponentType.EXECUTOR]
+		val gui = vars.filter[it?.component === ComponentType.GUI]
+		val manager = vars.filter[it?.component === ComponentType.MANAGER]
+		val effectors = vars.filter[it?.component == ComponentType.EFFECTORMANAGER]
+		var properties = vars.filter[
+			it?.component === ComponentType.PROPERTY
+		]
 		'''
-		
-		def outputGuageSpec(EList<Gauge> gauges, EList<DeclaredProperty> vars) '''
-		vars:
-		  «FOR v : vars»
-		  «IF v.^default !== null»
-		    «v.name»: «stringValue(v.^default, false)»
-		  «ENDIF»
-		  «ENDFOR»
-		gauges:
-		  «FOR gauge : gauges»
-«««		    «outputGauge(gauge)»
-		  «ENDFOR»
-		  
+		#############################################################
+		# Generated by Rainbow XText Configuration DSL -- DO NOT EDIT
+		#############################################################
+
+		«FOR v : properties»
+			«IF v.^default !== null»
+				«v.name» = «stringValue(v.^default,false,false)»
+			«ENDIF»
+		«ENDFOR»
+		«outputModels(models)»
+		«outputAnalyses(analysis)»
+		«outputManagers(manager)»
+		«outputExecutors(executors)»
+		«outputEffectorManagers(effectors)»
+		«outputGUI(gui)»
 		'''
+	}
 		
-		def outputProbeSpec(EList<Probe> probes, EList<DeclaredProperty> vars) '''
-		vars:
-		  «FOR v : vars»
-		  «IF v.^default !== null»
-		    «v.name» : «stringValue(v.^default, false)»
-		  «ENDIF»
-		  «ENDFOR»
-		probes:
-		  «FOR probe : probes »
-		    «outputProbe(probe)»
-		  «ENDFOR»
-		'''
-		
-		def outputProbe(Probe probe) {
-			val attsST = getAssignmentsMap(probe?.superType?.properties?.assignment)
-			val atts = getAssignmentsMap(probe?.properties?.assignment)
-			return '''
-			«probe.name»:
-			  «FOR entry : attsST.entrySet()»
-			  «IF !atts.containsKey(entry.getKey())»
-			    «IF entry.getKey() == "script"»
-			      type: script
-			      scriptInfo: «stringValue(entry.getValue().value, true, null)»
-			    «ELSEIF entry.getKey() == "java"»
-			      type: java
-			      javaInfo: «stringValue(entry.getValue().value, true, null)»
-			    «ELSE»
-			      «entry.getKey()» : «stringValue(entry.getValue().value, true)»
-			    «ENDIF»
-			  «ENDIF»
-			  «ENDFOR»
-			  «FOR entry : atts.entrySet()»
-			    «IF entry.getKey() == "script"»
-			      type: script
-			      scriptInfo: «stringValue(entry.getValue().value, true, attsST.get(entry.getKey())?.value)»
-			    «ELSEIF entry.getKey() == "java"»
-			      type: java
-			      javaInfo: «stringValue(entry.getValue().value, true, attsST.get(entry.getKey())?.value)»
-			    «ELSE»
-			      «entry.getKey()» : «stringValue(entry.getValue().value, true, attsST.get(entry.getKey())?.value)»
-			    «ENDIF»
-			  «ENDFOR»
-			'''
+		def outputGUI(Iterable<DeclaredProperty> properties) {
+	''''''
 		}
 		
-		def getAssignmentsMap(EList<Assignment> assignments) {
-			val map = new HashMap<String,Assignment> ()
+		def outputEffectorManagers(Iterable<DeclaredProperty> ems) {
+			if (ems === null || ems.empty) return ""
+			var i = 0
+			var sb = new StringBuffer('''rainbow.effector.manager.size=«ems.size»
+			''')
+			for (e : ems) {
+				val ass = e.^default.value as Component
+				val class = ass.assignment.findFirst[it.name == "class"]
+				sb.append('''rainbow.effector.manager.class_«i»=«(class.value.value as Reference).referable.qualifiedName»
+			''')
+			}
+			sb.toString
+		}
+		
+		def outputAnalyses(Iterable<DeclaredProperty> analyses) {
+			if (analyses === null || analyses.empty) return ""
+			var i = 0
+			var sb = new StringBuffer('''rainbow.analyses.size=«analyses.size»
+			''')
+			for (a : analyses) {
+				val ass = a.^default.value as Component
+				val class = ass.assignment.findFirst[it.name == "class"]
+				sb.append('''rainbow.analyses.class_«i»=«(class.value.value as Reference).referable.qualifiedName»
+			''')
+			}
+			sb.toString
+		}
+
+	def outputExecutors(Iterable<DeclaredProperty> executors) {
+		if(executors === null || executors.empty) return ""
+		var i = 0
+		var sb = new StringBuffer('''rainbow.adaptation.executor.size=«executors.size»
+		''')
+		for (e : executors) {
+			val ass = e.^default.value as Component
+			val class = ass.assignment.findFirst[it.name == "class"]
+			val model = ass.assignment.findFirst[it.name == "model"]
+			sb.append('''rainbow.adaptation.executor.class_«i»=«(class.value.value as Reference).referable.qualifiedName»
+			''')
+			sb.append('''rainbow.adaptation.executor.model_«i»=''')
+			val theModel = (model.value.value as PropertyReference).referable
+			val component = theModel.^default.value  as Component
+			val name = stringValue((component).assignment.findFirst[it.name == "name"]?.value) ?:
+				theModel.name
+			var type = stringValue(component.assignment.findFirst[it.name == "type"]?.value)
+			if (type === null) {
+				type = getModelTypeFromClass(
+					((component.assignment.findFirst[it.name == "factory"]?.value.value) as Reference).
+						referable, "MODELTYPE")
+				if (type === null) {
+					type = "???"
+				}
+			}
+			sb.append('''"«name»:«type»"
+			''')
+			i = i + 1
+		}
+		sb.toString
+	}
+
+	def outputManagers(Iterable<DeclaredProperty> managers) {
+		if(managers === null || managers.empty) return ""
+		var i = 0
+		var sb = new StringBuffer('''rainbow.adaptation.manager.size=«managers.size»
+		''')
+		for (m : managers) {
+			val ass = m.^default.value as Component
+			val class = ass.assignment.findFirst[it.name == "class"]
+			val model = ass.assignment.findFirst[it.name == "model"]
+			sb.append('''rainbow.adaptation.manager.class_«i»=«(class.value.value as Reference).referable.qualifiedName»
+			''')
+			sb.append('''rainbow.adaptation.manager.model_«i»=''')
+			val theModel = (model.value.value as PropertyReference).referable
+			val component = theModel.^default.value  as Component
+			val name = stringValue((component).assignment.findFirst[it.name == "name"]?.value) ?:
+				theModel.name
+			var type = stringValue(component.assignment.findFirst[it.name == "type"]?.value)
+			if (type === null) {
+				type = getModelTypeFromClass(
+					((component.assignment.findFirst[it.name == "factory"]?.value.value) as Reference).
+						referable, "MODELTYPE")
+				if (type === null) {
+					type = "???"
+				}
+			}
+			sb.append('''"«name»:«type»"
+			''')
+			i = i + 1
+		}
+		sb.toString
+	}
+
+	def getModelTypeFromClass(JvmType type, String stringConstant) {
+		// val tp = jvmTypeProviderFactory.createTypeProvider
+		val class = this.class.classLoader.loadClass(type.qualifiedName)
+		val typeField = class.getDeclaredField(stringConstant)
+		if (typeField === null) {
+			return null
+		}
+		val value = typeField.get(null)
+		return value as String
+	}
+
+	def outputModels(Iterable<DeclaredProperty> models) {
+		if(models === null || models.empty) return ""
+		var i = 0
+		val sb = new StringBuffer('''rainbow.model.number = «models.size»
+		''')
+		for (m : models) {
+			val ass = m.^default.value as Component
+			val loadclass = ass.assignment.findFirst[it.name == "factory"]
+			val path = ass.assignment.findFirst[it.name == "path"]
+			val saveOnClose = ass.assignment.findFirst[it.name == "saveOnClose"]
+			val saveLocation = ass.assignment.findFirst[it.name == "saveLocation"]
+			val name = stringValue(ass.assignment.findFirst[it.name == "name"]?.value) ?: m.name
+			sb.append('''rainbow.model.name_«i»="«name»"
+			''')
+			sb.append('''rainbow.model.load.class_«i»=«(loadclass.value.value as Reference).referable.qualifiedName»
+			''')
+			if (path !== null) {
+				sb.append('''rainbow.model.path_«i»=«stringValue(path.value, false, true)»
+				''')
+			}
+			if (saveOnClose !== null) {
+				sb.append('''rainbow.model.saveOnClose_«i»=«stringValue(saveOnClose.value, false, false)»
+				''')
+			}
+			if (saveLocation !== null) {
+				sb.append('''rainbow.model.saveLocation_«i»=«stringValue(saveLocation.value, false, false)»
+				''')
+			}
+			i = i + 1
+		}
+
+		sb.toString
+	}
+
+	def outputGuageSpec(EList<Gauge> gauges, EList<GaugeType> gaugeTypes, EList<DeclaredProperty> vars) '''
+		#############################################################
+		# Generated by Rainbow XText Configuration DSL -- DO NOT EDIT
+		#############################################################
+		«IF !vars.empty»
+			vars:
+			  «FOR v : vars»
+			  	«IF v.^default !== null»
+			  		«v.name»: «stringValue(v.^default, false,true)»
+			  	«ENDIF»
+			  «ENDFOR»
+		«ENDIF»
+		gauge-types:
+		  «FOR type : gaugeTypes»
+		  	«outputGaugeType(type)»
+		  «ENDFOR»
+		gauge-instances:
+		  «FOR gauge : gauges»
+		  	«outputGauge(gauge)»
+		  «ENDFOR»
+		  
+	'''
+
+	def outputProbeSpec(EList<Probe> probes, EList<DeclaredProperty> vars) '''
+		#############################################################
+		# Generated by Rainbow XText Configuration DSL -- DO NOT EDIT
+		#############################################################
+		«IF !vars.empty»
+			vars:
+			  «FOR v : vars»
+			  	«IF v.^default !== null»
+			  		«v.name» : «stringValue(v.^default, false,true)»
+				«ENDIF»
+			«ENDFOR»
+		«ENDIF»
+		probes:
+		  «FOR probe : probes»
+		  	«outputProbe(probe)»
+		  «ENDFOR»
+	'''
+
+	def outputEffectorSpec(EList<Effector> effectors, EList<Effector> effectorTypes, EList<DeclaredProperty> vars) '''
+		#############################################################
+		# Generated by Rainbow XText Configuration DSL -- DO NOT EDIT
+		#############################################################
+		«IF !vars.empty»
+			vars:
+			  «FOR v : vars»
+			  	«IF v.^default !== null»
+			  		«v.name» : «stringValue(v.^default, false, true)»
+			  	«ENDIF»
+			  «ENDFOR»
+		«ENDIF»
+		effector-types:
+		  «FOR type : effectorTypes»
+		  	«outputEffector(type)»
+		  «ENDFOR»
+		effectors:
+		  «FOR eff : effectors»
+		  	«outputEffector(eff)»
+		  «ENDFOR»
+	'''
+
+	def outputGauge(Gauge gauge) {
+		val setup = gauge.body.assignment.stream.filter[it.name == "setup"].findAny
+		val config = gauge.body.assignment.stream.filter[it.name == "config"].findAny
+		var CharSequence modelName = '''«gauge.body.modelName»:«gauge.body.modeltype»'''
+		if (gauge.body.ref !== null) {
+			var CharSequence internalName = gauge.body.ref.referable.name
+			var CharSequence type = ""
+			if (gauge.body.ref.referable?.^default.value instanceof Component) {
+				val comp = gauge.body.ref.referable?.^default.value as Component
+				type = stringValue(comp.assignment.findFirst[it.name=="type"].value)
+				val n = comp.assignment.findFirst[it.name=="name"]
+				if (n !== null) {
+					internalName = stringValue(n.value)
+				}
+			}
+			modelName = '''«internalName»:«type»'''
+		}
+		'''
+			«gauge.name»:
+			  «IF gauge.superType !== null»
+			  	type: «gauge.superType.name»
+			  «ENDIF»
+			  model: "«modelName»"
+			  commands:
+			    «FOR command : gauge.body.commands»
+			    	«command.name»: «outputCall(command)»
+			  «ENDFOR»
+			  «IF setup.present && setup.get.value.value instanceof Component»
+			  	setupParams:
+			  	  «FOR p : (setup.get.value.value as Component).assignment»
+			  	  	«p.name»: «stringValue(p.value,false,true)»
+			  	  «ENDFOR»
+			  «ENDIF»
+			  «IF config.present && config.get.value.value instanceof Component»
+			  	configParams:
+			  	  «FOR p : (config.get.value.value as Component).assignment»
+			  	  	«p.name»: «stringValue(p.value,false, true)»
+			  	  «ENDFOR»
+			  «ENDIF»
+		'''
+	}
+
+	def outputCall(CommandCall call) {
+		var ret = new StringBuilder("\"")
+		if (call.target !== null) {
+			ret.append(call.target).append(".")
+		} else if (call.ref != null) {
+			ret.append("${").append(call.ref.referable.name).append("}.")
+		}
+		ret.append(call.command)
+		val params = '''(«call.actual.map[actual(it)].join(", ")»)'''
+		ret.append(params).append("\"")
+		ret
+	}
+
+	def actual(Actual p) {
+		if (p.id === null && p.pr === null)
+			stringValue(p.value)
+		else if (p.pr !== null)
+			'''${«p.pr.referable.name»}'''
+		else if (p.ref && p.id !== null) '''$<«p.id»>''' else '''«p.id»'''
+	}
+
+	def outputGaugeType(GaugeType type) {
+		val setup = type.body.assignment.stream.filter[it.name == "setup"].findAny
+		val config = type.body.assignment.stream.filter[it.name == "config"].findAny
+		'''
+			«type.name»:
+			  commands:
+			    «FOR command : type.body.commands»
+			    	«command.name»: «IF command.target !== null»«command.target».«ENDIF»«command.command»«FOR p : command.formal BEFORE '(' SEPARATOR ', ' AFTER ')'»«p.simpleName»«ENDFOR»
+			    «ENDFOR»
+			  «IF setup.present && setup.get.value.value instanceof Component»
+			  	setupParams:
+			  	  «FOR p : (setup.get.value.value as Component).assignment»
+			  	  	«p.name»: 
+			  	  	  type: «typeValue(p.value)»
+			  	  	  default: «stringValue(p.value, false, true)»
+			  	  «ENDFOR»
+			  «ENDIF»
+			  «IF config.present && config.get.value.value instanceof Component»
+			  	configParams:
+			  	  «FOR p : (config.get.value.value as Component).assignment»
+			  	    «IF p.name != "targetProbe"»
+			  	      «p.name»:
+			  	        «IF p.value?.value instanceof Reference»
+			  	          type: «(p.value.value as Reference).referable.simpleName»
+			  	          default: ~
+			  	        «ELSE»
+			  	          type: «typeValue(p.value)»
+			  	          default: «stringValue(p.value,false,true)»
+			  	        «ENDIF»
+			  	 	«ENDIF»
+			  	 «ENDFOR»
+			  «ENDIF»
+		'''
+
+	}
+
+	def outputEffector(Effector effector) {
+		val attsST = getAssignmentsMap(effector?.superType?.body?.assignment)
+		val atts = getAssignmentsMap(effector?.body?.assignment)
+		val command = if (effector.body.command !== null) {
+				effector.body.command
+			} else if (effector?.superType?.body?.command !== null) {
+				effector.superType.body.command
+			}
+		return '''
+			«effector.name»:
+			  «IF command !== null»
+			  	command: «outputCall(command)»
+			  «ENDIF»
+			  «FOR entry : attsST.entrySet()»
+			  	«IF !atts.containsKey(entry.getKey())»
+			  		«IF entry.getKey() == "script"»
+			  			type: script
+			  			scriptInfo: «stringValue(entry.getValue().value, true, null)»
+			  		«ELSEIF entry.getKey() == "java"»
+			  			type: java
+			  			javaInfo: «stringValue(entry.getValue().value, true, null)»
+			  		«ELSE»
+			  			«entry.getKey()»: «stringValue(entry.getValue().value, true, true)»
+			  		«ENDIF»
+			  	«ENDIF»
+			  «ENDFOR»
+			  «FOR entry : atts.entrySet()»
+			  	«IF entry.getKey() == "script"»
+			  		type: script
+			  		scriptInfo: «stringValue(entry.getValue().value, true, null)»
+			  	«ELSEIF entry.getKey() == "java"»
+			  		type: java
+			  		javaInfo: «stringValue(entry.getValue().value, true, null)»
+			  	«ELSE»
+			  		«entry.getKey()»: «stringValue(entry.getValue().value, true, true)»
+			  	«ENDIF»
+			  «ENDFOR»
+		'''
+	}
+
+	def outputProbe(Probe probe) {
+		val attsST = getAssignmentsMap(probe?.superType?.properties?.assignment)
+		val atts = getAssignmentsMap(probe?.properties?.assignment)
+		return '''
+			«probe.name»:
+			  «FOR entry : attsST.entrySet()»
+			  	«IF !atts.containsKey(entry.getKey())»
+			  		«IF entry.getKey() == "script"»
+			  			type: script
+			  			scriptInfo: «stringValue(entry.getValue().value, true, null)»
+			  		«ELSEIF entry.getKey() == "java"»
+			  			type: java
+			  			javaInfo: «stringValue(entry.getValue().value, true, null)»
+			  		«ELSE»
+			  			«entry.getKey()» : «stringValue(entry.getValue().value, true,true)»
+			  		«ENDIF»
+			  	«ENDIF»
+			  «ENDFOR»
+			  «FOR entry : atts.entrySet()»
+			  	«IF entry.getKey() == "script"»
+			  		type: script
+			  		scriptInfo: «stringValue(entry.getValue().value, true, attsST.get(entry.getKey())?.value)»
+			  	«ELSEIF entry.getKey() == "java"»
+			  		type: java
+			  		javaInfo: «stringValue(entry.getValue().value, true, attsST.get(entry.getKey())?.value)»
+			  	«ELSE»
+			  		«entry.getKey()» : «stringValue(entry.getValue().value, true, attsST.get(entry.getKey())?.value)»
+			  	«ENDIF»
+			  «ENDFOR»
+		'''
+	}
+
+	def getAssignmentsMap(EList<Assignment> assignments) {
+		val map = new HashMap<String, Assignment>()
+		if (assignments !== null) {
 			for (assignment : assignments) {
 				map.put(assignment.name, assignment)
 			}
-			return map
+		}
+		return map
+	}
+
+	def String stringValue(EObject value) {
+		switch value {
+			StringLiteral:
+				unpackString(value, true)
+			IntegerLiteral: '''«value.value»'''
+			DoubleLiteral: '''«value.value»'''
+			BooleanLiteral: '''«value.isTrue»'''
+			Value: stringValue(value.value)
 		}
 		
-		def stringValue(Value value, boolean allowComponent, Value mergeComponentWith) {
-			if (value.value instanceof Component && allowComponent) {
-				var comp = value.value as Component
-				val atts = getAssignmentsMap(comp.assignment)
-				val attsST = getAssignmentsMap((mergeComponentWith.value as Component).assignment)
-				return '''
+	}
+
+	def stringValue(Value value, boolean allowComponent, Value mergeComponentWith) {
+		if (value.value instanceof Component && allowComponent) {
+			var comp = value.value as Component
+			val atts = getAssignmentsMap(comp.assignment)
+			val attsST = getAssignmentsMap((mergeComponentWith?.value as Component)?.assignment)
+			return '''
 				
 				  «FOR entry : attsST.entrySet()»
-				    «IF !atts.containsKey(entry.getKey())»
-				      «entry.getKey()»: «stringValue(entry.getValue().value, true)»
-				    «ENDIF»
+				  	«IF !atts.containsKey(entry.getKey())»
+				  		«entry.getKey()»: «stringValue(entry.getValue().value, true, false)»
+				  	«ENDIF»
 				  «ENDFOR»
 				  «FOR entry : atts.entrySet()»
-				    «entry.getKey()»: «stringValue(entry.getValue().value, true)»
+				  	«entry.getKey()»: «stringValue(entry.getValue().value, true, false)»
 				  «ENDFOR»
-				'''
+			'''
+		}
+		else {
+			stringValue(value.value)
+		}
+	}
+
+	def typeValue(Value value) {
+		val v = value.value
+		switch v {
+			StringLiteral: "String"
+			BooleanLiteral: "Boolean"
+			IntegerLiteral: "Integer"
+			DoubleLiteral: "Double"
+			Reference: "String"
+			PropertyReference: "String"
+			default: '''unknown'''
+		}
+
+	}
+
+	def CharSequence stringValue(Value value, boolean allowComposite, boolean asString) {
+		var v = value.value
+		switch v {
+			StringLiteral: '''"«unpackString(v,true)»"'''
+			BooleanLiteral:
+				surroundString('''«v.isTrue»''', asString)
+			IntegerLiteral: '''«v.value»'''
+			DoubleLiteral: '''«v.value»'''
+			LogLiteral:
+				surroundString('''«v.value»''', asString)
+			IPLiteral:
+				surroundString('''«v.value»''', asString)
+			Reference:
+				surroundString('''«v.referable.qualifiedName»''', asString)
+			PropertyReference:
+				surroundString('''${«v.referable.name»}''', asString)
+			ProbeReference: {
+				val alias = v.referable.properties.assignment.stream.filter([it.name == "alias"]).findAny
+				var CharSequence st = "unknown"
+				if(alias.present) st = stringValue(alias.get.value, false, true)
+				st
+			}
+			Component case allowComposite: '''"Not implemented yet"'''
+			default: '''"Not implemented yet"'''
+		}
+
+	}
+
+	def surroundString(String string, boolean b) {
+		if (b) '''"«string»"''' else string
+	}
+
+	def unpackString(StringLiteral literal, boolean strip) {
+//			if (literal instanceof SimpleStringLiteral) {
+//				val value=(literal as SimpleStringLiteral).value
+//				return value
+//			}
+//			else {
+		val rich = literal as RichString
+		var str = new StringBuilder();
+		for (expr : rich.expressions) {
+			if (expr instanceof RichStringLiteral) {
+				str.append((expr as RichStringLiteral).value.replaceAll("«", "\\${").replaceAll("»", "}"))
+			} else if (expr instanceof RichStringPart) {
+				str.append((expr as RichStringPart).referable.name)
 			}
 		}
-		
-		def stringValue(Value value, boolean allowComposite) {
-			if (value.value instanceof StringLiteral) {
-				var st = value.value as StringLiteral 
-				return '''"«st.value»"'''
+		if (strip) {
+			var s = str.toString()
+			s = s.trim()
+			if ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'"))) {
+				s = s.substring(1, s.length - 1)
 			}
-			if (value.value instanceof BooleanLiteral) {
-				var b = value.value as BooleanLiteral
-				return '''«b.isTrue»'''
-			}
-			if (value.value instanceof IntegerLiteral) {
-				var i = value.value as IntegerLiteral
-				return '''«i.value»'''
-			}
-			if (value.value instanceof DoubleLiteral) {
-				var d = value.value as DoubleLiteral
-				return '''«d.value»'''
-			}
-			if (value.value instanceof Reference) {
-				var r = value.value as Reference
-				return '''«r.referable»'''
-			}
-			if (value.value instanceof IPLiteral) {
-				var ip = value.value as IPLiteral
-				return '''«ip.value»'''
-			}
-			if (value.value instanceof LogLiteral) {
-				var ll = value.value as LogLiteral
-				return '''«ll.value»'''
-			}
-			if (value.value instanceof PropertyReference) {
-				var pr = value.value as PropertyReference
-				return '''"${«pr.referable.name»}"'''
-			}
-			if (value.value instanceof Component && allowComposite) {
-				return '''"Not implemented yet"'''
-			}
+			return s
 		}
-		
-		
-	
+		return str.toString
+	}
+
+//			}
 }

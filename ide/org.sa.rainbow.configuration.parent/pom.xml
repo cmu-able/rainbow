@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.sa.rainbow.configuration</groupId>
@@ -29,6 +30,7 @@
 		<module>org.sa.rainbow.configuration.tests</module>
 		<module>org.sa.rainbow.configuration.ui.tests</module>
 	</modules>
+	
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -252,10 +254,7 @@
 					</configuration>
 				</plugin>
 				<plugin>
-					<!-- 
-						Can be removed after first generator execution
-						https://bugs.eclipse.org/bugs/show_bug.cgi?id=480097
-					-->
+					<!-- Can be removed after first generator execution https://bugs.eclipse.org/bugs/show_bug.cgi?id=480097 -->
 					<groupId>org.eclipse.tycho</groupId>
 					<artifactId>tycho-compiler-plugin</artifactId>
 					<version>${tycho-version}</version>
@@ -264,17 +263,17 @@
 						<useProjectSettings>false</useProjectSettings>
 					</configuration>
 				</plugin>
-				<!-- to skip running (and compiling) tests use commandline flag: -Dmaven.test.skip
-					To skip tests, but still compile them, use: -DskipTests
-					To allow all tests in a pom to pass/fail, use commandline flag: -fae (fail
-					at end) -->
+				<!-- to skip running (and compiling) tests use commandline flag: -Dmaven.test.skip 
+					To skip tests, but still compile them, use: -DskipTests To allow all tests 
+					in a pom to pass/fail, use commandline flag: -fae (fail at end) -->
 				<plugin>
 					<groupId>org.eclipse.tycho</groupId>
 					<artifactId>tycho-surefire-plugin</artifactId>
 					<version>${tycho-version}</version>
 					<configuration>
 						<!-- THE FOLLOWING LINE MUST NOT BE BROKEN BY AUTOFORMATTING -->
-						<argLine>${platformSystemProperties} ${systemProperties} ${moduleProperties} ${additionalTestArguments}</argLine>
+						<argLine>${platformSystemProperties} ${systemProperties}
+							${moduleProperties} ${additionalTestArguments}</argLine>
 						<failIfNoTests>false</failIfNoTests>
 						<useUIHarness>false</useUIHarness>
 					</configuration>
@@ -293,6 +292,14 @@
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
+		</repository>
+		<!-- We define a single repository which is accessible through web-dav. 
+			The format (for webdav repositories) is dav:http://[<username>[:<password>]]@<host>[:<port>]/<path> -->
+		<repository>
+			<id>able.maven.repository</id>
+			<url>
+				dav:http://acme.able.cs.cmu.edu/maven-repository
+			</url>
 		</repository>
 	</repositories>
 	<pluginRepositories>

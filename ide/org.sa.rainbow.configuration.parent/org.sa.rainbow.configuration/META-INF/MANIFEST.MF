@@ -16,17 +16,23 @@ Require-Bundle: org.eclipse.xtext,
  org.eclipse.xtend.lib;bundle-version="2.14.0",
  org.antlr.runtime;bundle-version="[3.2.0,3.2.1)",
  org.objectweb.asm;bundle-version="[7.1.0,7.2.0)";resolution:=optional,
- org.eclipse.xtext.common.types
+ org.eclipse.xtext.common.types,
+ rainbow-acme-model;bundle-version="3.0.0",
+ rainbow-core;bundle-version="3.0.0",
+ rainbow-gui;bundle-version="3.0.0",
+ rainbow-mem-comms;bundle-version="3.0.0",
+ rainbow-stitch;bundle-version="3.0.0",
+ rainbow-utility-model;bundle-version="3.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Export-Package: org.sa.rainbow.configuration.generator,
- org.sa.rainbow.configuration.configModel.util,
- org.sa.rainbow.configuration.serializer,
- org.sa.rainbow.configuration.validation,
+Export-Package: org.sa.rainbow.configuration,
  org.sa.rainbow.configuration.configModel,
- org.sa.rainbow.configuration,
- org.sa.rainbow.configuration.services,
  org.sa.rainbow.configuration.configModel.impl,
- org.sa.rainbow.configuration.scoping,
+ org.sa.rainbow.configuration.configModel.util,
+ org.sa.rainbow.configuration.generator,
+ org.sa.rainbow.configuration.parser.antlr,
  org.sa.rainbow.configuration.parser.antlr.internal,
- org.sa.rainbow.configuration.parser.antlr
+ org.sa.rainbow.configuration.scoping,
+ org.sa.rainbow.configuration.serializer,
+ org.sa.rainbow.configuration.services,
+ org.sa.rainbow.configuration.validation
 Import-Package: org.apache.log4j

@@ -9,10 +9,12 @@ import org.eclipse.xtext.conversion.IValueConverter;
 import org.eclipse.xtext.conversion.ValueConverter;
 import org.eclipse.xtext.conversion.ValueConverterException;
 import org.eclipse.xtext.conversion.impl.AbstractNullSafeConverter;
+import org.eclipse.xtext.conversion.impl.STRINGValueConverter;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.util.Strings;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Inject;
 
 public class ConfigModelValueConverter extends DefaultTerminalConverters {
 	
@@ -92,5 +94,18 @@ public class ConfigModelValueConverter extends DefaultTerminalConverters {
 				return result;
 			}
 		};
+	}
+	
+	@Inject 
+	STRINGValueConverter stringValueConverter;
+	
+	@ValueConverter(rule="RICH_TEXT_DQ")
+	public IValueConverter<String> RICH_TEXT_DQ() {
+		return stringValueConverter;
+	}
+	
+	@ValueConverter(rule="RICH_TEXT_SQ")
+	public IValueConverter<String> RICH_TEXT_SQ() {
+		return stringValueConverter;
 	}
 }

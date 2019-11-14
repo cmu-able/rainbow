@@ -19,13 +19,17 @@ ConfigurationModel:
 		(gauges+=Gauge)*
 		
 	)
+	(
+		(effectorTypes+=EffectorType)*
+		(effectors+=Effector)*
+	)
 //	exports+=Export*
 	export=Export?
 ;
 
 ModelType:
 	'model' 'type' name=ID ('->' superType=[ModelType])? '=' '{' properties=Component '}'
-	('commands' '=' '{' (commands+=CommandSignature)+ '}') 'generate' filename=STRING
+	('commands' '=' '{' (commands+=CommandSignature)+ '}') 'generate' filename=StringLiteral
 ;
 
 CommandSignature:
@@ -33,7 +37,7 @@ CommandSignature:
 ;
 
 Export:
-	'export' references=References 'to' filename=STRING
+	'export' references=References 'to' filename=(RICH_TEXT_DQ)
 ;
 
 References:
@@ -42,40 +46,90 @@ References:
 ;
 
 Ref:
-	DeclaredProperty | Probe | Gauge
+	DeclaredProperty | Probe | Gauge | Effector
+;
+
+enum ComponentType:
+	PROPERTY |
+	ANALYSIS='analysis' |
+	EXECUTOR='executor' |
+	EFFECTORMANAGER= 'effector-manager' |
+	GUI='gui' |
+	MANAGER='adaptation-manager' |
+	MODEL='model'
+	
 ;
 
 DeclaredProperty:
-	'def' (type=[types::JvmType|FQN])? name=FQN('=' default=Value)? 
+	'def' component=(ComponentType)? (type=[types::JvmType|FQN])? name=FQN('=' default=Value)? 
 ;
 
 ProbeType returns Probe:
 	'probe' type?='type' name=ID '=' properties=Component
 ;
 
+EffectorType returns Effector:
+	'effector' type?='type' name=ID '=' body=EffectorBody
+;
+
+Effector returns Effector:
+	'effector' name=ID ('->' superType=[Effector])? ('=' body=EffectorBody)
+;
+
+EffectorBody:
+	'{'
+	('model' ((modelName=ID '::' modeltype=ID) | ref=PropertyReference))?
+	command=CommandCall
+	(assignment+=Assignment)*
+	'}'
+;
+
 Probe returns Probe:
 	'probe' name=ID ('->' superType=[Probe])? ('=' properties=Component)?
 ;
 
-GaugeType returns Gauge:
+GaugeType:
 	'gauge' type?='type' name=ID '=' body=GaugeTypeBody
 ;
 
 Gauge returns Gauge:
-	'gauge' name=ID ('->' superType=[Gauge])? /*('=' properties=Component)?*/ ('=' body=Component)?
+	'gauge' name=ID ('->' superType=[GaugeType])? /*('=' properties=Component)?*/ ('=' body=GaugeBody)?
+;
+
+
+GaugeBody:
+	'{'
+		'model' ((modelName=ID '::' modeltype=ID) | ref=PropertyReference) 
+		(commands+=CommandCall)*
+		(assignment+=Assignment)*
+	'}'
 ;
 
 GaugeTypeBody:
 	'{'
-	    'model' 'factory' (name=FQN)?'::' modeltype=ID '=' mcf=[types::JvmType|FQN]
+	    ('model' 'factory'  mcf=[types::JvmType|FQN])?
 	    (commands+=CommandReference)+
-		(assignments+=Assignment)*
+		(assignment+=Assignment)*
 		
 	'}'
 ;
 
 CommandReference:
-	'command' name=ID '=' (target=ID '.')? command=ID '(' (formal+=[types::JvmType|FQN] (',' formal+=[types::JvmType|FQN])*)? ')'
+	'command' name=ID '=' (target=ID'.')? command=ID '(' (formal+=[types::JvmType|FQN] (',' formal+=[types::JvmType|FQN])*)? ')'
+;
+
+CommandCall:
+	'command' (name=ID '=')? ((target=ID | ref=PropertyReference) '.')? command=ID '(' (actual+=Actual (',' actual+=Actual)*)? ')'
+;
+
+Actual:
+	ref?='$<' id=ID '>' |
+	id=ID |
+	pr=PropertyReference |
+	value=StringLiteral |
+	value=IntegerLiteral |
+	value=BooleanLiteral |
+	value=DoubleLiteral
 ;
 
 FormalParam:
@@ -90,7 +144,7 @@ enum ImportType:
 
 Import:
 //	'import' importedNamespace=ImportedFQN
-'import' type=ImportType importURI=STRING 
+'import' type=ImportType importURI=(RICH_TEXT_DQ) 
 ;
 
 ImportedFQN:
@@ -122,7 +176,12 @@ Value:
 	value=IPLiteral |
 	value=LogLiteral |
 	value=PropertyReference |
-	value=ProbeReference
+	value=ProbeReference |
+	value=Array
+;
+
+Array:
+	{Array} '[' (values+=Value (',' values+=Value)*)? ']'
 ;
 
 LogLiteral:
@@ -166,7 +225,7 @@ Reference:
 ;
 
 PropertyReference:
-	'${'(referable=[DeclaredProperty|FQN])'}'
+	'««' referable=[DeclaredProperty|FQN] '»»'
 ;
 
 ProbeReference:
@@ -178,8 +237,80 @@ FQN:
 ;
 
 StringLiteral:
-	value=STRING
+//	SimpleStringLiteral | 
+	RichStringDQ
 ;
+
+//SimpleStringLiteral:
+//	value=STRING
+//;
+
+//RichStringSQ:
+//	{RichString} (
+//		expressions+=RichStringLiteralSQ |
+//		expressions+=RichStringLiteralStartSQ expressions+=RichStringPart?
+//		(expressions+=RichStringLiteralInbetweenSQ expression+=RichStringPart?)*
+//		expressions+=RichStringLiteralEndSQ
+//	)
+//;
+//
+//RichStringLiteralSQ:
+//	{RichStringLiteral} value=RICH_TEXT_SQ 
+//;
+//
+//RichStringLiteralStartSQ:
+//	{RichStringLiteral}
+//	value=RICH_TEXT_START_SQ
+//;
+//
+//RichStringLiteralInbetweenSQ:
+//	{RichStringLiteral}
+//	(value=RICH_TEXT_INBETWEEN_SQ)
+//;
+//
+//RichStringLiteralEndSQ:
+//	{RichStringLiteral}
+//	(value=RICH_TEXT_END_SQ)
+//;
+
+RichStringDQ:
+	{RichString} (
+		expressions+=RichStringLiteralDQ |
+		expressions+=RichStringLiteralStartDQ expressions+=RichStringPart?
+		(expressions+=RichStringLiteralInbetweenDQ expression+=RichStringPart?)*
+		expressions+=RichStringLiteralEndDQ
+	)
+;
+
+RichStringLiteralDQ:
+	{RichStringLiteral} value=RICH_TEXT_DQ 
+;
+
+RichStringLiteralStartDQ:
+	{RichStringLiteral}
+	value=RICH_TEXT_START_DQ
+;
+
+RichStringLiteralInbetweenDQ:
+	{RichStringLiteral}
+	(value=RICH_TEXT_INBETWEEN_DQ)
+;
+
+RichStringLiteralEndDQ:
+	{RichStringLiteral}
+	(value=RICH_TEXT_END_DQ)
+;
+
+//InteralRichStringSQ:
+//	{RichString} (
+//		expressions+=RichStringLiteralInbetweenSQ (expressions+=RichStringPart? expressions+=RichStringLiteralInbetweenSQ)*
+//	)
+//;
+
+RichStringPart:
+	referable=[DeclaredProperty|FQN]
+;
+
 //
 //PropertyRef:
 //	referable=[Model|STRING]
@@ -244,10 +375,90 @@ terminal INT returns ecore::EInt:
 	('0'..'9')+
 ;
 
-terminal STRING returns ecore::EString:
-	'"' ( '\\' . /* 'b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\' */ | !('\\'|'"') )* '"' |
-	"'" ( '\\' . /* 'b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\' */ | !('\\'|"'") )* "'"
+//terminal STRING returns ecore::EString:
+//	'"' ( '\\' . /* 'b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\' */ | !('\\'|'"') )* '"' |
+//	"'" ( '\\' . /* 'b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\' */ | !('\\'|"'") )* "'"
+//;
+
+//
+//terminal RICH_TEXT : "'''" IN_RICH_STRING* ("'''"| ("'" "'"?)? EOF);
+//terminal RICH_TEXT_START : "'''" IN_RICH_STRING* ("'" "'"?)? '«';
+//terminal RICH_TEXT_END : '»' IN_RICH_STRING* ("'''"| ("'" "'"?)? EOF) ;
+//terminal RICH_TEXT_INBETWEEN : '»' IN_RICH_STRING* ("'" "'"?)? '«';
+//terminal COMMENT_RICH_TEXT_INBETWEEN: "««" !('\n'|'\r')* ('\r'? '\n' IN_RICH_STRING* ("'" "'"?)? '«')?;
+//terminal COMMENT_RICH_TEXT_END: "««" !('\n'|'\r')* (('\r'? '\n' IN_RICH_STRING* ("'''"| ("'" "'"?)? EOF)) | EOF);
+//
+//terminal fragment IN_RICH_STRING :
+//	  "''" !('«'|"'")
+//	| "'" !('«'|"'")
+//	| !('«'|"'");
+
+//terminal RICH_TEXT_SQ returns ecore::EString:
+//	"'" IN_RICH_STRING_SQ* "'"
+//;
+//
+//terminal RICH_TEXT_START_SQ:
+//	"'" IN_RICH_STRING_SQ* '«'
+//;
+//
+//terminal RICH_TEXT_END_SQ:
+//	'»' IN_RICH_STRING_SQ* "'"
+//;
+//
+//terminal RICH_TEXT_INBETWEEN_SQ:
+//	'»' IN_RICH_STRING_SQ* '«'
+//;
+
+terminal RICH_TEXT_DQ returns ecore::EString:
+	'"' IN_RICH_STRING_DQ* '"'
 ;
+
+terminal RICH_TEXT_START_DQ:
+	'"' IN_RICH_STRING_DQ* '«'
+;
+
+terminal RICH_TEXT_END_DQ:
+	'»' IN_RICH_STRING_DQ* '"'
+;
+
+terminal RICH_TEXT_INBETWEEN_DQ:
+	'»' IN_RICH_STRING_DQ* '«'
+;
+
+
+//terminal RICH_TEXT : 
+//	"'" IN_RICH_STRING_SQ* ("'"? EOF) |
+//	'"' IN_RICH_STRING_DQ* ('"'? EOF)
+//;
+//
+//terminal RICH_TEXT_START:
+//	"'" IN_RICH_STRING_SQ* '«' |
+//	'"' IN_RICH_STRING_DQ* '«'
+//;
+//
+//terminal RICH_TEXT_END: 
+//	'»' IN_RICH_STRING_SQ* ("'")? EOF |
+//	'»' IN_RICH_STRING_DQ* ("'")? EOF
+//	;
+//
+//terminal RICH_TEXT_INBETWEEN:
+//	
+//;
+//terminal RICH_TEXT_START : "'''" IN_RICH_STRING* ("'" "'"?)? '«';
+//terminal RICH_TEXT_END : '»' IN_RICH_STRING* ("'''"| ("'" "'"?)? EOF) ;
+//terminal RICH_TEXT_INBETWEEN : '»' IN_RICH_STRING* ("'" "'"?)? '«';
+//terminal COMMENT_RICH_TEXT_INBETWEEN: "««" !('\n'|'\r')* ('\r'? '\n' IN_RICH_STRING* ("'" "'"?)? '«')?;
+//terminal COMMENT_RICH_TEXT_END: "««" !('\n'|'\r')* (('\r'? '\n' IN_RICH_STRING* ("'''"| ("'" "'"?)? EOF)) | EOF);
+
+//terminal fragment IN_RICH_STRING_SQ :
+//	  !('«'|"'"|"\n"|"\r");
+	  
+terminal fragment IN_RICH_STRING_DQ:
+	!('«'|'"'|'»'|"\n"|"\r")
+;
+
+
+
 
 terminal ML_COMMENT:
   '/*'->'*/';
