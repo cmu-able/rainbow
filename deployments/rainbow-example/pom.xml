@@ -213,6 +213,85 @@
 					</execution>
 				</executions>
 			</plugin>
+			
+			<plugin>
+				<groupId>org.eclipse.xtext</groupId>
+				<artifactId>xtext-maven-plugin</artifactId>
+				<version>2.19.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+					<languages>
+						<language>
+							<setup>org.sa.rainbow.configuration.ConfigModelStandaloneSetup</setup>
+							<outputConfigurations>
+								<outputConfiguration>
+									<outputDirectory>src-gen/main/java/</outputDirectory>
+								</outputConfiguration>
+								<outputConfigration>
+									<outputDirectory>tgt-gen</outputDirectory>
+									<createOutputDirectory>true</createOutputDirectory>
+									<overrideExistingResources>true</overrideExistingResources>
+									<cleanUpDerivedResources>true</cleanUpDerivedResources>
+								</outputConfigration>
+							</outputConfigurations>
+						</language>
+					</languages>
+					<sourceRoots>
+						<root>src/main/resources/rbw</root>
+					</sourceRoots>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.sa.rainbow.configuration</groupId>
+						<artifactId>org.sa.rainbow.configuration</artifactId>
+						<version>1.0.0-SNAPSHOT</version>
+					</dependency>
+					<dependency>
+						<groupId>org.eclipse.emf</groupId>
+						<artifactId>org.eclipse.emf.mwe2.launch</artifactId>
+						<version>2.11.0</version>
+					</dependency>
+					<dependency>
+						<groupId>org.eclipse.xtext</groupId>
+						<artifactId>org.eclipse.xtext.common.types</artifactId>
+						<version>2.19.0</version>
+					</dependency>
+					<dependency>
+						<groupId>org.eclipse.xtext</groupId>
+						<artifactId>org.eclipse.xtext.xtext.generator</artifactId>
+						<version>2.19.0</version>
+					</dependency>
+					<dependency>
+						<groupId>org.eclipse.xtext</groupId>
+						<artifactId>org.eclipse.xtext.xbase</artifactId>
+						<version>2.19.0</version>
+					</dependency>
+					<dependency>
+						<groupId>org.eclipse.xtext</groupId>
+						<artifactId>xtext-antlr-generator</artifactId>
+						<version>2.1.1</version>
+					</dependency>
+					<!-- https://mvnrepository.com/artifact/io.typefox.xtext/jflex-fragment -->
+					<dependency>
+						<groupId>io.typefox.xtext</groupId>
+						<artifactId>jflex-fragment</artifactId>
+						<version>0.2.1</version>
+					</dependency>
+					<dependency>
+						<groupId>org.eclipse.xtext</groupId>
+						<artifactId>org.eclipse.xtext.xbase.lib</artifactId>
+						<version>2.18.0</version>
+					</dependency>
+				</dependencies>
+			</plugin>
 		</plugins>
 	</build>
 
