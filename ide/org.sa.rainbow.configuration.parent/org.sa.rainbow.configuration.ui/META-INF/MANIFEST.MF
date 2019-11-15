@@ -22,7 +22,8 @@ Require-Bundle: org.sa.rainbow.configuration,
  org.eclipse.xtext.common.types.ui
 Import-Package: org.apache.log4j
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Export-Package: org.sa.rainbow.configuration.ui.quickfix,
+Export-Package: org.sa.rainbow.configuration.ui,
  org.sa.rainbow.configuration.ui.contentassist,
- org.sa.rainbow.configuration.ui.internal
+ org.sa.rainbow.configuration.ui.internal,
+ org.sa.rainbow.configuration.ui.quickfix
 Bundle-Activator: org.sa.rainbow.configuration.ui.internal.ConfigurationActivator

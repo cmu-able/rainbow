@@ -3,12 +3,7 @@
  */
 package org.sa.rainbow.configuration
 
-import com.google.inject.Binder
-import com.google.inject.name.Names
-import org.eclipse.xtext.common.types.access.CachingClasspathTypeProviderFactory
-import org.eclipse.xtext.common.types.access.IJvmTypeProvider
-import org.eclipse.xtext.common.types.xtext.AbstractTypeScopeProvider
-import org.eclipse.xtext.common.types.xtext.ClasspathBasedTypeScopeProvider
+import com.google.inject.Guice
 
 /**
  * Initialization support for running Xtext languages without Equinox extension registry.
@@ -16,11 +11,12 @@ import org.eclipse.xtext.common.types.xtext.ClasspathBasedTypeScopeProvider
 class ConfigModelStandaloneSetup extends ConfigModelStandaloneSetupGenerated {
 
 	def static void doSetup() {
-		new ConfigModelStandaloneSetup().createInjectorAndDoEMFRegistration()
+		 new ConfigModelStandaloneSetup().createInjectorAndDoEMFRegistration()
 	}
 	
-	def configureJvmTypeProvider(Binder binder) {
-		binder.bind(AbstractTypeScopeProvider).annotatedWith(Names.named("jvmtypes")).to(ClasspathBasedTypeScopeProvider)
-		binder.bind(IJvmTypeProvider.Factory).annotatedWith(Names.named("jvmtypes")).to(CachingClasspathTypeProviderFactory)
+	override createInjector() {
+		return Guice.createInjector(new ConfigModelRuntimeStandaloneModule());
 	}
+	
+	
 }

@@ -11,7 +11,61 @@
 	<packaging>eclipse-plugin</packaging>
 
 	<build>
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-webdav</artifactId>
+				<version>1.0-beta-2</version>
+			</extension>
+		</extensions>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-libraries</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>rainbow</groupId>
+									<artifactId>rainbow-core</artifactId>
+									<version>3.0</version>
+									<outputDirectory>lib</outputDirectory>
+								</artifactItem>
+								<artifactItem>
+									<groupId>rainbow</groupId>
+									<artifactId>rainbow-utility-model</artifactId>
+									<version>3.0</version>
+									<outputDirectory>lib</outputDirectory>
+								</artifactItem>
+								<artifactItem>
+									<groupId>rainbow</groupId>
+									<artifactId>rainbow-gui</artifactId>
+									<version>3.0</version>
+									<outputDirectory>lib</outputDirectory>
+								</artifactItem>
+								<artifactItem>
+									<groupId>rainbow</groupId>
+									<artifactId>rainbow-acme-model</artifactId>
+									<version>3.0</version>
+									<outputDirectory>lib</outputDirectory>
+								</artifactItem>
+								<artifactItem>
+									<groupId>rainbow</groupId>
+									<artifactId>rainbow-stitch</artifactId>
+									<version>3.0</version>
+									<outputDirectory>lib</outputDirectory>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
@@ -159,6 +213,26 @@
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-core</artifactId>
+			<version>3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>rainbow</groupId>
+			<artifactId>rainbow-utility-model</artifactId>
+			<version>3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>rainbow</groupId>
+			<artifactId>rainbow-gui</artifactId>
+			<version>3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>rainbow</groupId>
+			<artifactId>rainbow-acme-model</artifactId>
+			<version>3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>rainbow</groupId>
+			<artifactId>rainbow-stitch</artifactId>
 			<version>3.0</version>
 		</dependency>
 	</dependencies>
