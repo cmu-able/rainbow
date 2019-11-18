@@ -45,6 +45,8 @@ import org.sa.rainbow.core.gauges.AbstractGauge
 import org.sa.rainbow.core.models.commands.ModelCommandFactory
 import org.sa.rainbow.translator.probes.AbstractProbe
 import org.sa.rainbow.configuration.services.ConfigModelGrammarAccess.EffectorTypeElements
+import org.eclipse.emf.ecore.util.EcoreUtil
+import javax.security.auth.login.Configuration
 
 /**
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#content-assist
@@ -200,6 +202,35 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 				allPossibleFields.removeAll((assignmentContext.value.value as Component).assignment.map[it.name])
 			}
 		}
+		else {
+			parent = EcoreUtil2.getContainerOfType(model, DeclaredProperty)
+			if ((parent as DeclaredProperty)?.component  == ComponentType.UTILITY) {
+				val sb = new StringBuffer()
+				var eContainer = model
+				while (eContainer != parent) {
+					eContainer = eContainer.eContainer
+					if (eContainer instanceof Assignment) {
+						sb.insert(0, ':')
+						val par = (eContainer as Assignment)
+						if (ConfigAttributeConstants.UTILITY_PROPERTY_TYPES.containsKey(par.name)) {
+							sb.insert(0, par.name)
+						}
+					}
+				}
+				val container = sb.toString
+				for (key : ConfigAttributeConstants.UTILITY_PROPERTY_TYPES.keySet) {
+					if (key.startsWith(container)) {
+						if (container.contains(':'))  {
+							val split = key.split(':') 
+							allPossibleFields.add(split.get(split.length-1))
+						}
+						else {
+							allPossibleFields.add(key)
+						}
+					}
+				}
+			}
+		}
 		var suggestions = allPossibleFields.stream.filter[it.startsWith(context.prefix)].collect(Collectors.toSet)
 		suggestions.forEach [
 			{
@@ -212,7 +243,7 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 		]
 		if (suggestions.empty) {
 			super.complete_Assignment(model, ruleCall, context, acceptor)
-			
+
 		}
 	}
 
@@ -232,8 +263,9 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 			ConfigModelPackage.Literals.GAUGE_TYPE_BODY__MCF, TypeMatchFilters.canInstantiate, acceptor);
 
 	}
-	
-	override completeEffectorBody_Ref(EObject model, org.eclipse.xtext.Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+
+	override completeEffectorBody_Ref(EObject model, org.eclipse.xtext.Assignment assignment,
+		ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
 		val v = model.eResource.resourceSet.resources
 		val models = new HashSet<String>();
 		for (r : v) {
@@ -247,12 +279,13 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 		if (!models.empty) {
 			models.forEach [
 				acceptor.accept(
-					new ConfigurableCompletionProposal("\u00AB\u00AB" + it + "\u00BB\u00BB", context.replaceRegion.offset, context.replaceRegion.length,
-						it.length+4, null, new StyledString(it), null, null))
+					new ConfigurableCompletionProposal("\u00AB\u00AB" + it + "\u00BB\u00BB",
+						context.replaceRegion.offset, context.replaceRegion.length, it.length + 4, null,
+						new StyledString(it), null, null))
 			]
 			acceptor.accept(
-			new ConfigurableCompletionProposal("\u00AB\u00AB\u00BB\u00BB", context.getOffset(), context.getSelectedText().length(),
-				2));
+				new ConfigurableCompletionProposal("\u00AB\u00AB\u00BB\u00BB", context.getOffset(),
+					context.getSelectedText().length(), 2));
 		}
 	}
 
@@ -271,12 +304,13 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 		if (!models.empty) {
 			models.forEach [
 				acceptor.accept(
-					new ConfigurableCompletionProposal("\u00AB\u00AB" + it + "\u00BB\u00BB", context.replaceRegion.offset, context.replaceRegion.length,
-						it.length+4, null, new StyledString(it), null, null))
+					new ConfigurableCompletionProposal("\u00AB\u00AB" + it + "\u00BB\u00BB",
+						context.replaceRegion.offset, context.replaceRegion.length, it.length + 4, null,
+						new StyledString(it), null, null))
 			]
 			acceptor.accept(
-			new ConfigurableCompletionProposal("\u00AB\u00AB\u00BB\u00BB", context.getOffset(), context.getSelectedText().length(),
-				2));
+				new ConfigurableCompletionProposal("\u00AB\u00AB\u00BB\u00BB", context.getOffset(),
+					context.getSelectedText().length(), 2));
 		}
 	}
 
@@ -301,7 +335,6 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 
 		super.completeReference_Referable(model, assignment, context, acceptor)
 	}
-
 
 	override completeAssignment_Value(EObject model, org.eclipse.xtext.Assignment assignment,
 		ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
@@ -335,9 +368,26 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 		}
 		val parentProp = EcoreUtil2.getContainerOfType(ass, DeclaredProperty)
 		if (parentProp?.component !== null) {
-			val extends = ConfigAttributeConstants.COMPONENT_PROPERTY_TYPES.get(parentProp.component)?.get(ass.name)?.
+			var extends = ConfigAttributeConstants.COMPONENT_PROPERTY_TYPES.get(parentProp.component)?.get(ass.name)?.
 				get('extends') as List<Class>
-			processPropertySuggestionsBasedOnClass(extends, model, context, acceptor)
+			if (extends != null) {
+				processPropertySuggestionsBasedOnClass(extends, model, context, acceptor)
+			} else if (parentProp.component === ComponentType.UTILITY) {
+				val sb = new StringBuffer(ass.name)
+				var eContainer = ass as EObject
+				while (eContainer !== null) {
+					eContainer = eContainer.eContainer
+					if (eContainer instanceof Assignment) {
+						sb.insert(0, ':')
+						val par = (eContainer as Assignment)
+						if (ConfigAttributeConstants.UTILITY_PROPERTY_TYPES.containsKey(par.name)) {
+							sb.insert(0, par.name)
+						}
+					}
+				}
+				extends = ConfigAttributeConstants.UTILITY_PROPERTY_TYPES.containsKey(sb.toString)?ConfigAttributeConstants.UTILITY_PROPERTY_TYPES.get(sb.toString).get("extends") as List<Class>:null
+				processPropertySuggestionsBasedOnClass(extends, model, context, acceptor)
+			}
 			return
 		}
 		val probe = EcoreUtil2.getContainerOfType(model, Probe)
@@ -374,58 +424,57 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 			processPropertySuggestionsBasedOnClass(extends, model, context, acceptor)
 			return
 		}
+
 		super.completeAssignment_Value(model, assignment, context, acceptor)
 	}
-		
-		def processPropertySuggestionsBasedOnClass(List<Class> ext, EObject model, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
-			if (ext !== null) {
-				val jvmTypeProvider = jvmTypeProviderFactory.createTypeProvider(model.eResource.resourceSet)
-				for (class : ext) {
-					if (class == StringLiteral) {
-						acceptor.accept(
-							new ConfigurableCompletionProposal('""', context.replaceRegion.offset,
-								context.replaceRegion.length, 1))
-					} else if (class == BooleanLiteral) {
-						acceptor.accept(
-							new ConfigurableCompletionProposal('true', context.replaceRegion.offset,
-								context.replaceRegion.length, 4))
-						acceptor.accept(
-							new ConfigurableCompletionProposal('false', context.replaceRegion.offset,
-								context.replaceRegion.length, 4))
-					} else if (class == PropertyReference) {
-						acceptor.accept(
-							new ConfigurableCompletionProposal("\u00AB\u00AB\u00BB\u00BB", context.getOffset(), context.getSelectedText().length(),
-							2));
-					} else if (class == ProbeReference) {
-						acceptor.accept(
-							new ConfigurableCompletionProposal("probe ", context.getOffset(), context.getSelectedText().length(),
-							6));
-					} else if (class == Array) {
-						acceptor.accept(
-							new ConfigurableCompletionProposal("[]", context.getOffset(), context.getSelectedText().length(),
-							1));
-					} else if (class == Component) {
-						acceptor.accept(
-							new ConfigurableCompletionProposal("{}", context.getOffset(), context.getSelectedText().length(),
-							1));
-					} else if (class == DoubleLiteral || class == IntegerLiteral || class==IPLiteral) {
-					} else {
-						val sc = jvmTypeProvider.findTypeByName(class.name)
-						if (sc !== null) {
-							typeProposalProvider.createSubTypeProposals(sc, this, context,
-								ConfigModelPackage.Literals.DECLARED_PROPERTY__DEFAULT, TypeMatchFilters.canInstantiate,
-								acceptor);
-						}
-					}
 
+	def processPropertySuggestionsBasedOnClass(List<Class> ext, EObject model, ContentAssistContext context,
+		ICompletionProposalAcceptor acceptor) {
+		if (ext !== null) {
+			val jvmTypeProvider = jvmTypeProviderFactory.createTypeProvider(model.eResource.resourceSet)
+			for (class : ext) {
+				if (class == StringLiteral) {
+					acceptor.accept(
+						new ConfigurableCompletionProposal('""', context.replaceRegion.offset,
+							context.replaceRegion.length, 1))
+				} else if (class == BooleanLiteral) {
+					acceptor.accept(
+						new ConfigurableCompletionProposal('true', context.replaceRegion.offset,
+							context.replaceRegion.length, 4))
+					acceptor.accept(
+						new ConfigurableCompletionProposal('false', context.replaceRegion.offset,
+							context.replaceRegion.length, 4))
+				} else if (class == PropertyReference) {
+					acceptor.accept(
+						new ConfigurableCompletionProposal("\u00AB\u00AB\u00BB\u00BB", context.getOffset(),
+							context.getSelectedText().length(), 2));
+				} else if (class == ProbeReference) {
+					acceptor.accept(
+						new ConfigurableCompletionProposal("probe ", context.getOffset(),
+							context.getSelectedText().length(), 6));
+				} else if (class == Array) {
+					acceptor.accept(
+						new ConfigurableCompletionProposal("[]", context.getOffset(),
+							context.getSelectedText().length(), 1));
+				} else if (class == Component) {
+					acceptor.accept(
+						new ConfigurableCompletionProposal("{}", context.getOffset(),
+							context.getSelectedText().length(), 1));
+				} else if (class == DoubleLiteral || class == IntegerLiteral || class == IPLiteral) {
+				} else {
+					val sc = jvmTypeProvider.findTypeByName(class.name)
+					if (sc !== null) {
+						typeProposalProvider.createSubTypeProposals(sc, this, context,
+							ConfigModelPackage.Literals.DECLARED_PROPERTY__DEFAULT, TypeMatchFilters.canInstantiate,
+							acceptor);
+					}
 				}
-				pauseAssisting(acceptor);
-				return
+
 			}
+			pauseAssisting(acceptor);
+			return
 		}
-		
-		
-	
+	}
 
 //	override completeGaugeBody_Ref(EObject model, org.eclipse.xtext.Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
 //		super.completeGaugeBody_Ref(model, assignment, context, acceptor)
@@ -434,7 +483,7 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 		ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
 		val parentProp = EcoreUtil2.getContainerOfType(model, DeclaredProperty)
 		var myProp = EcoreUtil2.getContainerOfType(model, Assignment)
-		if ('model' == myProp.name  &&
+		if ('model' == myProp.name &&
 			(parentProp.component === ComponentType.EXECUTOR || parentProp.component === ComponentType.MANAGER)) {
 			val v = model.eResource.resourceSet.resources
 			val models = new HashSet<String>();

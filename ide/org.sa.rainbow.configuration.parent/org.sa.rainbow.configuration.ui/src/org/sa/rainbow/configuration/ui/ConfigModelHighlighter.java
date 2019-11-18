@@ -105,6 +105,8 @@ public class ConfigModelHighlighter extends DefaultSemanticHighlightingCalculato
 					case MODEL:
 						kw = ConfigAttributeConstants.MODEL_KEYWORDS;
 						break;
+					case UTILITY:
+						kw = ConfigAttributeConstants.UTILITY_KEYWORDS;
 					case PROPERTY:
 						break;
 					default:

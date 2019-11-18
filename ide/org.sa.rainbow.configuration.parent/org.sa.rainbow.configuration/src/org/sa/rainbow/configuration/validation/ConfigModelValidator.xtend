@@ -6,20 +6,27 @@ package org.sa.rainbow.configuration.validation
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import java.util.HashSet
+import java.util.LinkedList
 import java.util.List
 import java.util.Map
 import java.util.Set
 import java.util.stream.Collectors
 import org.eclipse.emf.common.util.EList
+import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
+import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.common.types.JvmDeclaredType
 import org.eclipse.xtext.common.types.JvmOperation
 import org.eclipse.xtext.common.types.access.IJvmTypeProvider
 import org.eclipse.xtext.common.types.util.Primitives
 import org.eclipse.xtext.common.types.util.RawSuperTypes
+import org.eclipse.xtext.util.Triple
+import org.eclipse.xtext.util.Tuples
 import org.eclipse.xtext.validation.Check
+import org.eclipse.xtext.xbase.lib.Functions.Function1
 import org.sa.rainbow.configuration.ConfigAttributeConstants
+import org.sa.rainbow.configuration.Utils
 import org.sa.rainbow.configuration.configModel.Array
 import org.sa.rainbow.configuration.configModel.Assignment
 import org.sa.rainbow.configuration.configModel.BooleanLiteral
@@ -42,6 +49,7 @@ import org.sa.rainbow.configuration.configModel.PropertyReference
 import org.sa.rainbow.configuration.configModel.Reference
 import org.sa.rainbow.configuration.configModel.StringLiteral
 import org.sa.rainbow.configuration.configModel.Value
+import org.sa.rainbow.configuration.configModel.ImpactVector
 
 /**
  * This class contains custom validation rules. 
@@ -164,6 +172,27 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			)
 		}
 	}
+	
+	@Check
+	def checkUtilityAssignment(Assignment ass) {
+		val dp = EcoreUtil2.getContainerOfType(ass, DeclaredProperty)
+		if (dp.component === ComponentType.UTILITY) {
+			val sb = new StringBuffer()
+			var eContainer = ass as EObject
+			while (eContainer !== null) {
+				eContainer = eContainer.eContainer
+				if (eContainer instanceof Assignment) {
+					sb.insert(0,':')
+					val par = (eContainer as Assignment)
+					if (ConfigAttributeConstants.UTILITY_PROPERTY_TYPES.containsKey(par.name)) {
+						sb.insert(0,par.name)
+					}
+				}
+			}
+			checkTypeRule(ConfigAttributeConstants.UTILITY_PROPERTY_TYPES,ass,sb.toString)
+		}
+	}
+	
 
 	@Check
 	def checkAttributes(EList<Assignment> list, EList<Assignment> superlist, Set<String> requiredfields,
@@ -509,6 +538,9 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 				}
 				case PROPERTY: {
 				}
+				case UTILITY: {
+					checkAttributes((dp.^default.value as Component).assignment, null, ConfigAttributeConstants.ALL_OFREQUIRED_UTILITY_FIELDS, #{}, ConfigModelPackage.Literals.DECLARED_PROPERTY__DEFAULT)
+				}
 			}
 		}
 	}
@@ -525,6 +557,12 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 	def void checkTypeRule(Map<String, Map<String, Object>> rule, Assignment dp) {
 		checkTypeRule(rule, dp, "")
 	}
+	
+	
+	
+	
+	
+	
 	
 	protected def void checkTypeRule(Map<String, Map<String, Object>> rule, Assignment dp, String prefix) {
 		if (rule !== null) {
@@ -554,6 +592,12 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 							extends.map[it.name].join(",")
 						)
 					}
+					if (extends.contains(Array) && dp.value.value instanceof Array) {
+						val furtherCheck = fieldRule.get('checkEach') as Function1<Array, LinkedList<Triple<String, EObject, EStructuralFeature>>>
+						for (e : furtherCheck.apply(dp.value.value as Array)) {
+							error(e.first, e.second, e.third)
+						}
+					}
 				}
 			}
 		
@@ -572,4 +616,97 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 		if (clazz == Array) return dp.value.value instanceof Array
 		ConfigAttributeConstants.subclasses(dp.value, clazz.name)
 	}
+	
+	public static val CHECK_UTILITY_MONOTONIC = [Array a | {
+		val errors = new LinkedList<Triple<String,EObject,EStructuralFeature>>()
+		var first = true
+		var double lastVal = 0.0
+		var goingUp = false
+		var goingDown = false
+		for (v : a.values) {
+			if (!(v.value instanceof Array)) {
+				errors.add(Tuples.create('''Array value needs to be an array of two numbers''', v, ConfigModelPackage.Literals.VALUE__VALUE))
+			}
+			else {
+				val pair = v.value as Array
+				if (pair.values.size != 2) {
+					errors.add(Tuples.create('''Array value needs to be an array of two numbers''', v, ConfigModelPackage.Literals.VALUE__VALUE))
+				}
+				else {
+					val thisVal = getNumber(pair.values.get(1))
+					if (!first) {
+						if (lastVal < thisVal) {
+							goingUp = true
+						}
+						else if (lastVal > thisVal) {
+							goingDown = true
+						}
+					} else {
+						first = false
+					}
+					lastVal = thisVal
+				}
+				
+			}
+		}
+		if (goingUp && goingDown) {
+			errors.add(Tuples.create('''Utilities need to be monotonic''', a, ConfigModelPackage.Literals.ARRAY__VALUES))
+		}
+		errors
+		
+	}]
+	
+	
+		
+	public static val CHECK_EACH_SCENARIO = [Array a | {
+		val errors = new LinkedList<Triple<String,EObject,EStructuralFeature>>()
+		val dp = Utils.getContainerOfType(a, Component, [EObject v | v instanceof Component && (v as Component).assignment.exists[it.name == "utilities"]])
+		var definedUtilities = (dp.assignment.findFirst[it.name=="utilities"]?.value.value as Component).assignment.map[it.name]
+		for (v : a.values) {
+			if (!(v.value instanceof Component)) {
+				errors.add(Tuples.create('''Scenario should only contain composites''', a, ConfigModelPackage.Literals.ARRAY__VALUES))
+			} else {
+				var sum = 0.0
+				val scenario = v.value as Component
+				for (ass : scenario.assignment) {
+					if (ass.name != 'name') {
+						sum += getNumber(ass.value)
+						if (!definedUtilities.contains(ass.name)) {
+							errors.add(Tuples.create('''«ass.name» must refer to a utility defined in utilities''', ass, ConfigModelPackage.Literals.ASSIGNMENT__NAME))
+						}
+					}
+				}
+				if (sum != 1.0) {
+					errors.add(Tuples.create('''The utilities in a scenario must sum to 1''', scenario, ConfigModelPackage.Literals.COMPONENT__ASSIGNMENT))
+				}
+			}
+		}
+		errors
+	}]
+		
+	def static getNumber(Value value) {
+		val v = value.value
+		switch v {
+			IntegerLiteral: Double.valueOf(v.value)
+			DoubleLiteral: Double.valueOf(v.value)
+			default: 0.0
+		}
+	}
+	
+	@Check
+	def checkImpact(ImpactVector iv) {
+		if (iv.utilityModel.referable?.component !== ComponentType.UTILITY) {
+			error('''Impact vector referring to non-utility model «iv.utilityModel.referable?.name»''',
+				iv.utilityModel, ConfigModelPackage.Literals.IMPACT_VECTOR__UTILITY_MODEL
+			)
+			return
+		}
+		var definedUtilities = ((iv.utilityModel.referable.^default.value as Component).assignment.findFirst[it.name=="utilities"]?.value.value as Component).assignment.map[it.name]
+		for (ass : iv.component.assignment) {
+			if (!definedUtilities.contains(ass.name)) {
+				error('''Undefined utility «ass.name»''', ass, ConfigModelPackage.Literals.ASSIGNMENT__NAME)
+			}
+		}
+	}
+		
 }

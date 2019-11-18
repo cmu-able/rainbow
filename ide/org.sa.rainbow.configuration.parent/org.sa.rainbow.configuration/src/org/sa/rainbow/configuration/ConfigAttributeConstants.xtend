@@ -24,6 +24,8 @@ import org.sa.rainbow.core.gauges.AbstractGauge
 import org.sa.rainbow.core.models.commands.ModelCommandFactory
 import org.sa.rainbow.translator.effectors.EffectorManager
 import org.sa.rainbow.translator.probes.AbstractProbe
+import org.sa.rainbow.configuration.configModel.Array
+import org.sa.rainbow.configuration.validation.ConfigModelValidator
 
 class ConfigAttributeConstants {
 	public static val ALL_OFREQUIRED_PROBE_FIELDS = #{"alias", "location"};
@@ -101,6 +103,7 @@ class ConfigAttributeConstants {
 		set
 	}
 	
+	
     public static val PROPERTY_VALUE_CLASSES=#{
     	"rainbow.deployment.factory.class" -> "org.sa.rainbow.core.ports.IRainbowConnectionPortFactory",
     	"rainbow.model.load.class*" -> "org.sa.rainbow.core.models.commands.ModelCommandFactory",
@@ -110,6 +113,7 @@ class ConfigAttributeConstants {
     	"rainbow.effector.manager.class*" -> "org.sa.rainbow.translator.effectors.EffectorManager",
     	"rainbow.gui" -> "org.sa.rainbow.gui.IRainbowGUI"
     }
+    
     
     
     static val MODEL_TYPES = 
@@ -151,35 +155,65 @@ class ConfigAttributeConstants {
     		
     }
     
+    static val IS_STRING =  #{'extends' -> #[StringLiteral], 'msg' -> 'must be a string'}
+    static val IS_NUMBER = #{'extends' -> #[IntegerLiteral], 'msg' -> 'must be a number'}
+    static val IS_COMPONENT = #{'extends' -> #[Component], 'msg' -> 'must be a composite'}
+    
     public static val PROBE_PROPERTY_TYPES = #{
     	'location' -> #{'extends' -> #[StringLiteral,PropertyReference,IPLiteral], 'msg' -> 'must be a string, property reference, or IP'},
-    	'alias' -> #{'extends' -> #[StringLiteral], 'msg' -> 'must be a string'},
-    	'script' -> #{'extends' -> #[Component], 'msg' -> 'must be a composite'},
-    	'java' -> #{'extends' -> #[Component], 'msg' -> 'must be a composite'},
-    	'script:mode' -> #{'extends' -> #[StringLiteral], 'msg' -> 'must be a string'},
-    	'script:path' -> #{'extends' -> #[StringLiteral], 'msg' -> 'must be a string'},
-    	'script:argument' -> #{'extends' -> #[StringLiteral], 'msg' -> 'must be a string'},
-    	'java:args' -> #{'extends' -> #[StringLiteral], 'msg' -> 'must be a string'},
-    	'java:period' -> #{'extends' -> #[IntegerLiteral], 'msg' -> 'must be a number'},
+    	'alias' -> IS_STRING,
+    	'script' -> IS_COMPONENT,
+    	'java' -> IS_COMPONENT,
+    	'script:mode' -> IS_STRING,
+    	'script:path' -> IS_STRING,
+    	'script:argument' -> IS_STRING,
+    	'java:args' -> IS_STRING,
+    	'java:period' -> IS_NUMBER,
     	'java:class' -> #{'extends' -> #[AbstractProbe], 'msg' -> 'must extend AbstractProbe'}
     }
     
     public static val GAUGE_PROPERTY_TYPES = #{
-    	'setup' -> #{'extends' -> #[Component], 'msg' -> 'must be a composite value'},
-    	'config' -> #{'extends' -> #[Component], 'msg' -> 'must be a composite value'},
+    	'setup' -> IS_COMPONENT,
+    	'config' -> IS_COMPONENT,
     	'setup:targetIP' -> #{'extends' -> #[StringLiteral,PropertyReference,IPLiteral], 'msg' -> 'must be a string, property reference, or IP'},
-    	'setup:beaconPeriod' -> #{'extends' -> #[IntegerLiteral], 'msg' -> 'must be a number'},
+    	'setup:beaconPeriod' -> IS_NUMBER,
     	'setup:javaClass' -> #{'extends' -> #[AbstractGauge], 'msg' -> 'must extend AbstractGauge'},
-    	'config:samplingFrequency' -> #{'extends' -> #[IntegerLiteral], 'msg' -> 'must be a number'},
+    	'config:samplingFrequency' -> IS_NUMBER,
     	'config:targetProbe' -> #{'extends' -> #[ProbeReference], 'msg' -> 'must refer to a probe'}
     }
 	
 	
 	public static val EFFECTOR_PROPERTY_TYPES = #{
 		'location' -> #{'extends' -> #[StringLiteral,PropertyReference,IPLiteral], 'msg' -> 'must be a string, property reference, or IP'},
-    	'script' -> #{'extends' -> #[Component], 'msg' -> 'must be a composite'},
-	  	'script:path' -> #{'extends' -> #[StringLiteral], 'msg' -> 'must be a string'},
-    	'script:argument' -> #{'extends' -> #[StringLiteral], 'msg' -> 'must be a string'}
+    	'script' -> IS_COMPONENT,
+	  	'script:path' -> IS_STRING,
+    	'script:argument' -> IS_STRING
+	}
+	
+	
+	
+	public static val UTILITY_PROPERTY_TYPES =#{
+		'model' -> #{'func' -> [Value v | (v.value instanceof PropertyReference && (v.value as PropertyReference).referable.component==ComponentType.MODEL)],
+			         'extends' -> #[PropertyReference], 'msg' -> 'must refer to a model property'},
+		'utilities' -> IS_COMPONENT,
+		'scenarios' -> #{'extends' -> #[Array], 'msg' -> 'must be an array', 'checkEach' -> ConfigModelValidator.CHECK_EACH_SCENARIO},
+		'utilities::label' -> IS_STRING,
+		'utilities::mapping' -> IS_STRING,
+		'utilities::description' -> IS_STRING,
+		'utilities::utility' -> #{'extends' -> #[Array], 'msg' -> 'must be a two dimensionsal array', 'checkEach' -> ConfigModelValidator.CHECK_UTILITY_MONOTONIC}
+	}
+	
+	public static val ALL_OFREQUIRED_UTILITY_FIELDS = #{'model', 'utilities', 'scenarios'}
+	public static val REQUIRED_UTILITY_SUBFILEDS = #{'utilities:' -> #{'label', 'mapping', 'utility'}}
+	public static val OPTIONAL_UTILITY_SUBFIELDS =#{'utilities:' -> #{'description'}}
+	
+	public static val UTILITY_KEYWORDS = {
+		val set = new HashSet<String>()
+		for (key : UTILITY_PROPERTY_TYPES.keySet) {
+			val kw = key.split(':')
+			set.add(kw.get(kw.length-1))
+		}
+		set
 	}
 	
 	@Inject

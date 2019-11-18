@@ -23,8 +23,23 @@ ConfigurationModel:
 		(effectorTypes+=EffectorType)*
 		(effectors+=Effector)*
 	)
+	(
+		(tactics+=Tactic)*
+	)
+	(
+		(impacts+=ImpactVector)*
+	)
 //	exports+=Export*
 	export=Export?
+;
+
+// This is really a proxy for the real Stitch language that might come later
+Tactic:
+	{Tactic}'tactic' name=ID
+;
+
+ImpactVector:
+	'impact' utilityModel=PropertyReference tactic=[Tactic] '=' component=Component
 ;
 
 ModelType:
@@ -56,7 +71,8 @@ enum ComponentType:
 	EFFECTORMANAGER= 'effector-manager' |
 	GUI='gui' |
 	MANAGER='adaptation-manager' |
-	MODEL='model'
+	MODEL='model' |
+	UTILITY='utility'
 	
 ;
 
