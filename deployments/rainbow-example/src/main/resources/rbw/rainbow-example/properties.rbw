@@ -45,8 +45,6 @@ def rainbow.deployment.^factory.class = org.sa.rainbow.core.ports.guava.GuavaRai
 
 ### Rainbow models
 
-def rainbow.^model.number=2
-
 # Rainbow Acme model of SWIM
 def model SwimSys= {
 	^type="Acme" 
@@ -61,7 +59,7 @@ def model USwimSys = {
 	name="SwimSys"
 	//^type="Utility"
 	path="stitch/utilities.yml" 
-	^factory=org.sa.rainbow.^model.utility.UtilityCommandFactory    
+	^factory=org.sa.rainbow.^model.^utility.UtilityCommandFactory    
 }
 
 ### Rainbow analyses
@@ -105,10 +103,10 @@ def customize.effectors.path = "system/effectors.yml"
 #- Directory of Stitch adaptation script
 def customize.scripts.path = "stitch"
 #- Utilities description file, Strategy evaluation config, and minimum score threshold
-def customize.utility.path = "stitch/utilities.yml"
-def customize.utility.trackStrategy = "uC"
-def customize.utility.score.minimum.threshold = 0.033
-def customize.utility.scenario = "scenario 1"
+def customize.^utility.path = "stitch/utilities.yml"
+def customize.^utility.trackStrategy = "uC"
+def customize.^utility.score.minimum.threshold = 0.033
+def customize.^utility.scenario = "scenario 1"
 #- Whether to enable prediction, ONLY enable if system has predictor probes! 
 #customize.prediction.enable = false
 
@@ -121,4 +119,4 @@ def customize.utility.scenario = "scenario 1"
 def customize.system.^target.master = ««rainbow.deployment.location»»
 def customize.system.^target.lb = ««rainbow.deployment.location»»
 
-export * to "rainbow.properties" 
+export * to "rainbow-gui.properties" 
