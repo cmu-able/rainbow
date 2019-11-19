@@ -47,6 +47,10 @@ RUN mvn -DskipTests install
 WORKDIR ../rainbow-mem-comms
 RUN mvn -DskipTests install
 
+ADD ide/org.sa.rainbow.configuration.parent /root/rainbow/org.sa.rainbow.configuration.parent
+WORKDIR /root/rainbow/org.sa.rainbow.configuration.parent
+RUN mvn -DskipTests install
+
 ADD deployments /root/rainbow/deployments
 WORKDIR /root/rainbow/deployments/rainbow-example
 RUN mvn -DskipTests install
@@ -71,7 +75,7 @@ COPY targets/rainbow-example targets/rainbow-example
 COPY license.html .
 COPY --from=builder /root/rainbow/deployments/rainbow-example/target/lib/* lib/
 COPY --from=builder /root/rainbow/deployments/rainbow-example/target/*.jar lib/
-
+COPY --from=builder /root/rainbow/deployments/rainbow-example/tgt-gen/rainbow-example/* targets/rainbow-example
 
 RUN echo "export SOCAT_PORT=4242" >> /headless/.bashrc
 RUN echo "export JAVA_FONTS=/usr/local/share/fonts/ms_fonts" >> /headless/.bashrc
