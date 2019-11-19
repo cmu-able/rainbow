@@ -1200,7 +1200,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
                     List<ClassLoader> classLoaderList = new LinkedList<ClassLoader> ();
                     classLoaderList.add (ClasspathHelper.contextClassLoader ());
                     classLoaderList.add (ClasspathHelper.staticClassLoader ());
-                    Reflections reflections = new Reflections(new ConfigurationBuilder ()
+                    Reflections reflections = new ReflectionsExtension(new ConfigurationBuilder ()
                                                                        .setScanners (new SubTypesScanner (false), new
                                                                                ResourcesScanner ())
                                                                        .setUrls (ClasspathHelper.forClassLoader
