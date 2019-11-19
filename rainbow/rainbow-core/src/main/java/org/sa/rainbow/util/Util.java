@@ -499,7 +499,7 @@ public class Util {
         classLoaderList.add (ClasspathHelper.contextClassLoader ());
         classLoaderList.add (ClasspathHelper.staticClassLoader ());
 
-        Reflections reflections = new Reflections (new ConfigurationBuilder ()
+        Reflections reflections = new ReflectionsExtension(new ConfigurationBuilder ()
         .setScanners (new SubTypesScanner (false /* don't exclude Object.class */), new ResourcesScanner ())
                 .setUrls (ClasspathHelper.forClassLoader (classLoaderList.toArray (new ClassLoader[classLoaderList.size ()])))
         .filterInputsBy (new FilterBuilder ().include (FilterBuilder.prefix (pkgname))));
