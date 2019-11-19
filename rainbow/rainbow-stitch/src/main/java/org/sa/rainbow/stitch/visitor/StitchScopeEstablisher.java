@@ -35,7 +35,6 @@ import org.sa.rainbow.stitch.core.PostVar;
 import org.sa.rainbow.stitch.core.ScopedEntity;
 import org.sa.rainbow.stitch.core.Statement;
 import org.sa.rainbow.stitch.core.StitchScript;
-import org.sa.rainbow.stitch.core.StitchTypes;
 import org.sa.rainbow.stitch.core.Strategy;
 import org.sa.rainbow.stitch.core.Strategy.ActionKind;
 import org.sa.rainbow.stitch.core.Strategy.ConditionKind;
@@ -47,6 +46,7 @@ import org.sa.rainbow.stitch.core.Tactic;
 import org.sa.rainbow.stitch.core.Var;
 import org.sa.rainbow.stitch.parser.StitchParser;
 import org.sa.rainbow.stitch.util.Tool;
+import org.sa.rainbow.util.ReflectionsExtension;
 import org.sa.rainbow.util.Util;
 
 /**
@@ -1200,7 +1200,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
                     List<ClassLoader> classLoaderList = new LinkedList<ClassLoader> ();
                     classLoaderList.add (ClasspathHelper.contextClassLoader ());
                     classLoaderList.add (ClasspathHelper.staticClassLoader ());
-                    Reflections reflections = new Reflections (new ConfigurationBuilder ()
+                    Reflections reflections = new Reflections(new ConfigurationBuilder ()
                                                                        .setScanners (new SubTypesScanner (false), new
                                                                                ResourcesScanner ())
                                                                        .setUrls (ClasspathHelper.forClassLoader
