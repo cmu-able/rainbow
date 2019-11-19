@@ -29,12 +29,15 @@ import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.reflections.ReflectionUtils;
 import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.analysis.IRainbowAnalysis;
@@ -51,12 +54,48 @@ import org.sa.rainbow.util.RainbowConfigurationChecker.Problem;
 import org.sa.rainbow.util.RainbowConfigurationChecker.ProblemT;
 import org.sa.rainbow.util.YamlUtil;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.Namespace;
 
 public class CheckConfiguration {
 	
+	private static final class ReflectionsExtension extends Reflections {
+		private ReflectionsExtension(Object[] params) {
+			super(params);
+		}
+
+		@Override
+		public void expandSuperTypes() {
+			if (store.keySet().contains(SubTypesScanner.class.getSimpleName())) {
+				Multimap<String, String> mmap = store.get(SubTypesScanner.class.getSimpleName());
+				Set<String> keys = new HashSet<>(mmap.keySet());
+				keys.removeAll(mmap.values());
+				Multimap<String,String> expand = HashMultimap.create();
+				for (String key : keys) {
+					final Class<?> type = ReflectionUtils.forName(key);
+					if (type != null) {
+						lexpandSupertypes(expand, key, type);
+					}
+				}
+				mmap.putAll(expand);
+				
+			}
+		}
+
+		private void lexpandSupertypes(Multimap<String, String> mmap, String key, Class<?> type) {
+			for (Class<?> supertype : ReflectionUtils.getSuperTypes(type)) {
+		        if (mmap.put(supertype.getName(), key)) {
+		            //if (log != null) log.debug("expanded subtype {} -> {}", supertype.getName(), key);
+		            lexpandSupertypes(mmap, supertype.getName(), supertype);
+		        }
+		    }
+		}
+	}
+
 	public static interface IReporter {
 		public void report (String s);
 	}
@@ -165,7 +204,7 @@ public class CheckConfiguration {
 		// Make Rainbow.instance().rainbowMaster() return this master
 		Rainbow.instance().setMaster(master);
 		out.println("Locating configuration checkers in system...");
-		Reflections reflections = new Reflections("org.sa", CheckConfiguration.class.getClassLoader());
+		Reflections reflections = new ReflectionsExtension(new Object[] { "org.sa", CheckConfiguration.class.getClassLoader() });
 		List<IRainbowConfigurationChecker> checkers = new LinkedList<>();
 		Set<Class<? extends IRainbowConfigurationChecker>> checkerClasses = reflections
 				.getSubTypesOf(IRainbowConfigurationChecker.class);
