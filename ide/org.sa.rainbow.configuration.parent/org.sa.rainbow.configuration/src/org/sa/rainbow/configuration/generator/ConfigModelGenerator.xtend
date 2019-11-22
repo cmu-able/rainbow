@@ -40,12 +40,10 @@ import org.sa.rainbow.configuration.configModel.RichStringLiteral
 import org.sa.rainbow.configuration.configModel.RichStringPart
 import org.sa.rainbow.configuration.configModel.StringLiteral
 import org.sa.rainbow.configuration.configModel.Value
-import java.util.Date
 import org.eclipse.xtext.EcoreUtil2
 import org.sa.rainbow.configuration.configModel.ImpactVector
 import org.sa.rainbow.configuration.configModel.Array
 import org.sa.rainbow.configuration.validation.ConfigModelValidator
-import javafx.scene.input.ScrollEvent.VerticalTextScrollUnits
 
 /**
  * Generates code from your model files on save.

@@ -12,6 +12,7 @@ Workflow {
 //		registerGenModelFile = "platform:/resource/org.sa.rainbow.configuration/model/ConfigModel.ecore"
 //	}
 	
+		
 	component = XtextGenerator {
 		configuration = {
 			project = StandardProjectConfig {
@@ -38,6 +39,8 @@ Workflow {
 			name = "org.sa.rainbow.configuration.ConfigModel"
 			fileExtensions = "rbw"
 
+			referencedResource="platform:/resource/org.sa.rainbow.stitch/model/generated/Stitch.genmodel"
+			//referencedResource="platform:/resource/org.acme.xtext/model/generated/Acme.genmodel"
 			serializer = {
 				generateStub = false
 			}

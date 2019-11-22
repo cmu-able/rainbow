@@ -1,6 +1,6 @@
 target rainbow-example
 import properties "../properties.rbw"
-
+import stitch "swimTactics.t.s"
 def utility utilityModel = {
 	^model = ««SwimSys»»
 	utilities = {
@@ -50,10 +50,6 @@ def utility utilityModel = {
 	]
 }
 
-tactic TAddServer
-tactic TRemoveServer
-tactic TIncDimmer
-tactic TDecDimmer
 
 impact  ««utilityModel»» TAddServer = {  
 	uR = -1.00

@@ -1,4 +1,4 @@
-module org.sa.rainbow.stitch.GenerateStitch
+module org.acme.GenerateAcme
 
 import org.eclipse.xtext.xtext.generator.*
 import org.eclipse.xtext.xtext.generator.model.project.*
@@ -10,21 +10,9 @@ Workflow {
 	component = XtextGenerator {
 		configuration = {
 			project = StandardProjectConfig {
-				baseName = "org.sa.rainbow.stitch"
+				baseName = "org.acme.xtext"
 				rootPath = rootPath
-				runtimeTest = {
-					enabled = true
-				}
-				eclipsePlugin = {
-					enabled = true
-				}
-				eclipsePluginTest = {
-					enabled = true
-				}
-				web = {
-					enabled = true
-				}
-				createEclipseMetaData = true
+				mavenLayout = true
 			}
 			code = {
 				encoding = "UTF-8"
@@ -33,8 +21,8 @@ Workflow {
 			}
 		}
 		language = StandardLanguage {
-			name = "org.sa.rainbow.stitch.Stitch"
-			fileExtensions = "s"
+			name = "org.acme.Acme"
+			fileExtensions = "acme"
 
 			serializer = {
 				generateStub = false
@@ -46,12 +34,6 @@ Workflow {
 			}
 			junitSupport = {
 				junitVersion = "5"
-			}
-			parserGenerator ={
-				options ={
-					backtrack = true
-					memoize = true  
-				}
 			}
 		}
 	}
