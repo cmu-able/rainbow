@@ -148,6 +148,9 @@ echo "Doing $target for rainbow-gui"
 cd ../rainbow-gui
 mvn $SKIPTESTS $target || exit 1
 
+cd ../../ide/org.sa.rainbow.stitch.parent
+mvn $SKIPTESTS $target || exit 1
+
 cd ../../ide/org.sa.rainbow.configuration.parent
 mvn $SKIPTESTS $target || exit 1
 
