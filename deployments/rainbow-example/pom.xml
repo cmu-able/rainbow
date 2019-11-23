@@ -243,6 +243,17 @@
 								</outputConfigration>
 							</outputConfigurations>
 						</language>
+						<language>
+							<setup>org.sa.rainbow.stitch.StitchStandaloneSetup</setup>
+							<outputConfigurations>
+								<outputConfiguration>
+									<outputDirectory>tgt-gen</outputDirectory>
+									<createOutputDirectory>true</createOutputDirectory>
+									<overrideExistingResources>true</overrideExistingResources>
+									<cleanUpDerivedResources>true</cleanUpDerivedResources>
+								</outputConfiguration>
+							</outputConfigurations>
+						</language>
 					</languages>
 					<sourceRoots>
 						<root>src/main/resources/rbw</root>
@@ -252,6 +263,11 @@
 					<dependency>
 						<groupId>org.sa.rainbow.configuration</groupId>
 						<artifactId>org.sa.rainbow.configuration</artifactId>
+						<version>1.0.0-SNAPSHOT</version>
+					</dependency>
+					<dependency>
+						<groupId>org.sa.rainbow.stitch</groupId>
+						<artifactId>org.sa.rainbow.stitch</artifactId>
 						<version>1.0.0-SNAPSHOT</version>
 					</dependency>
 					<dependency>
