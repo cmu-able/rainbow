@@ -4,6 +4,12 @@
 package org.sa.rainbow.configuration
 
 import com.google.inject.Guice
+import com.google.inject.Injector
+import org.eclipse.emf.ecore.EPackage
+import org.eclipse.xtext.resource.IResourceFactory
+import org.eclipse.xtext.resource.IResourceServiceProvider
+import org.sa.rainbow.stitch.stitch.StitchPackage
+import org.eclipse.emf.ecore.resource.Resource
 
 /**
  * Initialization support for running Xtext languages without Equinox extension registry.
@@ -18,5 +24,15 @@ class ConfigModelStandaloneSetup extends ConfigModelStandaloneSetupGenerated {
 		return Guice.createInjector(new ConfigModelRuntimeStandaloneModule());
 	}
 	
+	override register(Injector injector) {
+		super.register(injector)
+		if (!EPackage.Registry.INSTANCE.containsKey("http://www.sa.org/rainbow/stitch/Stitch")) {
+			EPackage.Registry.INSTANCE.put("http://www.sa.org/rainbow/stitch/Stitch", StitchPackage.eINSTANCE)
+		}
+		val resourceFactory = injector.getInstance(IResourceFactory)
+		val serviceProvider = injector.getInstance(IResourceServiceProvider)
+		Resource.Factory.Registry.INSTANCE.extensionToFactoryMap.put("s", resourceFactory)
+		IResourceServiceProvider.Registry.INSTANCE.extensionToFactoryMap.put("s", serviceProvider)
+	}
 	
 }
