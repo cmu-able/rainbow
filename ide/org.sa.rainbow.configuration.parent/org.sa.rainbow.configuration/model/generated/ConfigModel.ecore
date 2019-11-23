@@ -13,10 +13,23 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="probes" upperBound="-1"
         eType="#//Probe" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="gaugeTypes" upperBound="-1"
-        eType="#//Gauge" containment="true"/>
+        eType="#//GaugeType" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="gauges" upperBound="-1"
         eType="#//Gauge" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="effectorTypes" upperBound="-1"
+        eType="#//Effector" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="effectors" upperBound="-1"
+        eType="#//Effector" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="impacts" upperBound="-1"
+        eType="#//ImpactVector" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="export" eType="#//Export"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ImpactVector">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="utilityModel" eType="#//PropertyReference"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="tactic" eType="ecore:EClass platform:/resource/org.sa.rainbow.stitch/model/generated/Stitch.ecore#//tactic"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="component" eType="#//Component"
         containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ModelType">
@@ -26,7 +39,8 @@
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commands" unique="false"
         upperBound="-1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="filename" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="filename" eType="#//StringLiteral"
+        containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Export">
     <eStructuralFeatures xsi:type="ecore:EReference" name="references" eType="#//References"
@@ -41,7 +55,18 @@
   <eClassifiers xsi:type="ecore:EClass" name="Ref">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="ComponentType">
+    <eLiterals name="PROPERTY" literal="PROPERTY"/>
+    <eLiterals name="ANALYSIS" value="1" literal="analysis"/>
+    <eLiterals name="EXECUTOR" value="2" literal="executor"/>
+    <eLiterals name="EFFECTORMANAGER" value="3" literal="effector-manager"/>
+    <eLiterals name="GUI" value="4" literal="gui"/>
+    <eLiterals name="MANAGER" value="5" literal="adaptation-manager"/>
+    <eLiterals name="MODEL" value="6" literal="model"/>
+    <eLiterals name="UTILITY" value="7" literal="utility"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DeclaredProperty" eSuperTypes="#//Ref">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="component" eType="#//ComponentType"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="ecore:EClass platform:/resource/org.eclipse.xtext.common.types/model/JavaVMTypes.ecore#//JvmType"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="default" eType="#//Value"
         containment="true"/>
@@ -52,19 +77,48 @@
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="superType" eType="#//Probe"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Gauge" eSuperTypes="#//Ref">
+  <eClassifiers xsi:type="ecore:EClass" name="Effector" eSuperTypes="#//Ref">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="body" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="body" eType="#//EffectorBody"
         containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="superType" eType="#//Gauge"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="superType" eType="#//Effector"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EffectorBody">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="modelName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="modeltype" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ref" eType="#//PropertyReference"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="command" eType="#//CommandCall"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="assignment" upperBound="-1"
+        eType="#//Assignment" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="GaugeType">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="body" eType="#//GaugeTypeBody"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Gauge" eSuperTypes="#//Ref">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="superType" eType="#//GaugeType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="body" eType="#//GaugeBody"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="GaugeBody">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="modelName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="modeltype" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ref" eType="#//PropertyReference"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="commands" upperBound="-1"
+        eType="#//CommandCall" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="assignment" upperBound="-1"
+        eType="#//Assignment" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="GaugeTypeBody">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="modeltype" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="mcf" eType="ecore:EClass platform:/resource/org.eclipse.xtext.common.types/model/JavaVMTypes.ecore#//JvmType"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="commands" upperBound="-1"
         eType="#//CommandReference" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="assignments" upperBound="-1"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="assignment" upperBound="-1"
         eType="#//Assignment" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="CommandReference">
@@ -74,10 +128,28 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="formal" unique="false"
         upperBound="-1" eType="ecore:EClass platform:/resource/org.eclipse.xtext.common.types/model/JavaVMTypes.ecore#//JvmType"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="CommandCall">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="target" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ref" eType="#//PropertyReference"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="command" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="actual" upperBound="-1"
+        eType="#//Actual" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Actual">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="ref" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="id" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="pr" eType="#//PropertyReference"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="value" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject"
+        containment="true"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="FormalParam"/>
   <eClassifiers xsi:type="ecore:EEnum" name="ImportType">
     <eLiterals name="CONFIG" literal="configuration"/>
     <eLiterals name="PROPS" value="1" literal="properties"/>
+    <eLiterals name="STITCH" value="2" literal="stitch"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Import">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="#//ImportType"/>
@@ -95,6 +167,10 @@
   <eClassifiers xsi:type="ecore:EClass" name="Value">
     <eStructuralFeatures xsi:type="ecore:EReference" name="value" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject"
         containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Array">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="values" upperBound="-1"
+        eType="#//Value" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="LogLiteral">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="#//LOGLEVEL"/>
@@ -130,7 +206,22 @@
   <eClassifiers xsi:type="ecore:EClass" name="ProbeReference">
     <eStructuralFeatures xsi:type="ecore:EReference" name="referable" eType="#//Probe"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="StringLiteral">
+  <eClassifiers xsi:type="ecore:EClass" name="StringLiteral"/>
+  <eClassifiers xsi:type="ecore:EClass" name="RichStringDQ" eSuperTypes="#//StringLiteral"/>
+  <eClassifiers xsi:type="ecore:EClass" name="RichStringLiteralDQ"/>
+  <eClassifiers xsi:type="ecore:EClass" name="RichStringLiteralStartDQ"/>
+  <eClassifiers xsi:type="ecore:EClass" name="RichStringLiteralInbetweenDQ"/>
+  <eClassifiers xsi:type="ecore:EClass" name="RichStringLiteralEndDQ"/>
+  <eClassifiers xsi:type="ecore:EClass" name="RichStringPart">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="referable" eType="#//DeclaredProperty"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RichString" eSuperTypes="#//RichStringDQ">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="expressions" upperBound="-1"
+        eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="expression" upperBound="-1"
+        eType="#//RichStringPart" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RichStringLiteral" eSuperTypes="#//RichStringLiteralDQ #//RichStringLiteralStartDQ #//RichStringLiteralInbetweenDQ #//RichStringLiteralEndDQ">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
 </ecore:EPackage>

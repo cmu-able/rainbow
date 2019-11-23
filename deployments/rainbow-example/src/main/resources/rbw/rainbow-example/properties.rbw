@@ -70,12 +70,12 @@ def analysis ArchEvaluator = {
 
 def adaptation-manager AdaptationManager = {
 	^model=««SwimSys»»
-	class=org.sa.rainbow.stitch.adaptation.AdaptationManager
+	class=org.sa.rainbow.^stitch.adaptation.AdaptationManager
 }
 
 def executor StitchExecutor = {
 	^model=««SwimSys»»
-	class=org.sa.rainbow.stitch.adaptation.StitchExecutor
+	class=org.sa.rainbow.^stitch.adaptation.StitchExecutor
 }
 
 def effector-manager AcmeEffectorManager = {
