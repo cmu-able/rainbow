@@ -12,8 +12,8 @@ public class SetGroundPlaneErrorCmd extends AbstractRainbowModelOperation<Ground
 
     private GroundPlaneError m_error;
 
-    public SetGroundPlaneErrorCmd (MissionStateModelInstance model, String target, String t, String r) {
-        super ("setGroundPlaneError", model, target, t, r);
+    public SetGroundPlaneErrorCmd (String commandName, MissionStateModelInstance model, String target, String t, String r) {
+        super (commandName, model, target, t, r);
         m_error = new GroundPlaneError ();
         m_error.translational_error = Double.parseDouble (t);
         m_error.rotational_error = Double.parseDouble (r);
@@ -26,7 +26,7 @@ public class SetGroundPlaneErrorCmd extends AbstractRainbowModelOperation<Ground
 
     @Override
     protected List<? extends IRainbowMessage> getGeneratedEvents (IRainbowMessageFactory messageFactory) {
-        return generateEvents (messageFactory, "setGroundPlaneError");
+        return generateEvents (messageFactory, getName());
     }
 
     @Override

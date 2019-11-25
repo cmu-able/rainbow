@@ -38,6 +38,7 @@ import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.analysis.IRainbowAnalysis;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.UtilityFunction;
@@ -162,16 +163,21 @@ public class UtilityEvaluator extends AbstractRainbowRunnable implements IRainbo
                                 UtilityHistoryModelInstance.UTILITY_HISTORY_TYPE));
                 List<IRainbowOperation> cmds = new ArrayList<> (utilities.size ());
 
-                AddUtilityMeasureCmd command = historyModel.getCommandFactory ().addUtilityMeasureCmd (
-                        OVERALL_UTILITY_KEY, utilities.get (OVERALL_UTILITY_KEY));
-                cmds.add (command);
-                for (Entry<String, Double> e : utilities.entrySet ()) {
-                    if (OVERALL_UTILITY_KEY.equals (e.getKey ())) {
-                        continue;
-                    }
-                    cmds.add (historyModel.getCommandFactory ().addUtilityMeasureCmd (e.getKey (), e.getValue ()));
-                }
-                m_modelUpstreamPort.updateModel (cmds, true);
+                try {
+					AddUtilityMeasureCmd command = historyModel.getCommandFactory ().addUtilityMeasureCmd (
+					        OVERALL_UTILITY_KEY, utilities.get (OVERALL_UTILITY_KEY));
+					cmds.add (command);
+					for (Entry<String, Double> e : utilities.entrySet ()) {
+					    if (OVERALL_UTILITY_KEY.equals (e.getKey ())) {
+					        continue;
+					    }
+					    cmds.add (historyModel.getCommandFactory ().addUtilityMeasureCmd (e.getKey (), e.getValue ()));
+					}
+					m_modelUpstreamPort.updateModel (cmds, true);
+				} catch (RainbowException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
             }
         }
     }

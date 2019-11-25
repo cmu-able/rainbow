@@ -34,6 +34,7 @@ import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotState.Sensors;
 import org.sa.rainbow.core.IRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.error.RainbowException;
 
 public class ConfigurationAnalyzer extends P2CP3Analyzer {
 
@@ -62,7 +63,7 @@ public class ConfigurationAnalyzer extends P2CP3Analyzer {
 	}
 
 	@Override
-	protected void runAction() {
+	protected void runAction() throws RainbowException {
 		CP3RobotState rs = getModels().getRobotStateModel().getModelInstance();
 		MissionState ms = getModels().getMissionStateModel().getModelInstance();
 		TurtlebotModelInstance tb = getModels().getTurtlebotModel();
@@ -101,7 +102,7 @@ public class ConfigurationAnalyzer extends P2CP3Analyzer {
 		}
 	}
 
-	private void checkConfigurationConsistentWithIG(InstructionGraphModelInstance ig, CP3RobotState rs, TurtlebotModelInstance tb) {
+	private void checkConfigurationConsistentWithIG(InstructionGraphModelInstance ig, CP3RobotState rs, TurtlebotModelInstance tb) throws RainbowException {
 		Collection<? extends IInstruction> instructions = ig.getModelInstance().getInstructions();
 		IInstruction currentInst = ig.getModelInstance().getCurrentInstruction();
 
@@ -192,7 +193,7 @@ public class ConfigurationAnalyzer extends P2CP3Analyzer {
 		return sb.toString();
 	}
 
-	private void checkAcmeRules(TurtlebotModelInstance tb) {
+	private void checkAcmeRules(TurtlebotModelInstance tb) throws RainbowException {
 		IAcmeSystem tbs = tb.getModelInstance();
 		IAcmeDesignRule localization = tbs.getDesignRule("atLeastOneActiveLocalization");
 		IAcmeDesignRule navigation = tbs.getDesignRule("atLeastOneActiveNavigation");

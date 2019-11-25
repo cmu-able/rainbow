@@ -268,7 +268,7 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
     protected abstract AcmeModelInstance generateInstance (IAcmeSystem sys);
 
     @Override
-    public abstract AcmeModelCommandFactory getCommandFactory ();
+    public abstract AcmeModelCommandFactory getCommandFactory () throws RainbowException;
 
     /////////////////////////////////////////////////////////////////////////////////////
     // Convenience functions for getting various Acme properties

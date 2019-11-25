@@ -27,6 +27,7 @@ import java.io.InputStream;
 
 import org.acmestudio.acme.ModelHelper;
 import org.acmestudio.acme.element.IAcmeComponent;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.model.acme.AcmeModelCommandFactory;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
@@ -43,126 +44,131 @@ public class SwimCommandFactory extends AcmeModelCommandFactory {
         return new SwimLoadModelCommand (modelName, modelsManager, stream, source);
     }
 
-    public SwimCommandFactory (AcmeModelInstance modelInstance) {
+    public SwimCommandFactory (AcmeModelInstance modelInstance) throws RainbowException {
         super (modelInstance);
     }
 
-    @Override
-    protected void fillInCommandMap () {
-        super.fillInCommandMap ();
-        m_commandMap.put("SetDimmer".toLowerCase (), SetDimmerCmd.class);
-        m_commandMap.put("SetLoad".toLowerCase (), SetLoadCmd.class);
-        m_commandMap.put("SetArrivalRate".toLowerCase (), SetArrivalRateCmd.class);
-        m_commandMap.put("SetBasicResponseTime".toLowerCase (), SetBasicResponseTimeCmd.class);
-        m_commandMap.put("SetOptResponseTime".toLowerCase (), SetOptResponseTimeCmd.class);
-        m_commandMap.put("SetBasicThroughput".toLowerCase (), SetBasicThroughputCmd.class);
-        m_commandMap.put("SetOptThroughput".toLowerCase (), SetOptThroughputCmd.class);
-        m_commandMap.put("SetOptThroughput".toLowerCase (), SetOptThroughputCmd.class);
-        m_commandMap.put("EnableServer".toLowerCase (), EnableServerCmd.class);
-        m_commandMap.put("ActivateServer".toLowerCase (), ActivateServerCmd.class);
-        m_commandMap.put("AddServer".toLowerCase (), AddServerCmd.class);
-        m_commandMap.put("RemoveServer".toLowerCase (), RemoveServerCmd.class);
-    }
-
-
+    public static final String SET_DIMMER_CMD = "SetDimmer";
+    public static final String SET_LOAD_CMD = "SetLoad";
+    public static final String SET_ARRIVAL_RATE_CMD = "SetArrivalRate";
+    public static final String SET_BASIC_RESPONSE_TIME_CMD = "SetBasicResponseTime";
+    public static final String SET_OPT_RESPONSE_TYPE_CMD = "SetOptResponseTime";
+    public static final String SET_BASIC_THROUGHPUT_CMD = "SetBasicThroughput";
+    public static final String SET_OPT_THROUGHPUT_CMD = "SetOptThroughput";
+    public static final String ENABLE_SERVER_CMD = "EnableServer";
+    public static final String ACTIVATE_SERVER_CMD = "ActivateServer";
+    public static final String ADD_SERVER_CMD = "AddServer";
+    public static final String REMOVE_SERVER_CMD = "RemoveServer";
+    
+    @Operation(name=SET_DIMMER_CMD)
     public SetDimmerCmd setDimmerCmd (IAcmeComponent loadBalancer, double dimmer) {
         Ensure.is_true (loadBalancer.declaresType ("LoadBalancerT"));
         if (ModelHelper.getAcmeSystem (loadBalancer) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new SetDimmerCmd ((AcmeModelInstance) m_modelInstance, loadBalancer.getQualifiedName (),
+        return new SetDimmerCmd (SET_DIMMER_CMD, (AcmeModelInstance) m_modelInstance, loadBalancer.getQualifiedName (),
                                    Double.toString (dimmer));
     }
-
+    
+    @Operation(name = SET_LOAD_CMD)
     public SetLoadCmd setLoadCmd (IAcmeComponent server, double value) {
         Ensure.is_true (server.declaresType ("ServerT"));
         if (ModelHelper.getAcmeSystem (server) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new SetLoadCmd ((AcmeModelInstance) m_modelInstance, server.getQualifiedName (),
+        return new SetLoadCmd (SET_LOAD_CMD, (AcmeModelInstance) m_modelInstance, server.getQualifiedName (),
                                    Double.toString (value));
     }
 
+    @Operation(name = SET_ARRIVAL_RATE_CMD)
     public SetArrivalRateCmd setArrivalRateCmd (IAcmeComponent loadBalancer, double value) {
         Ensure.is_true (loadBalancer.declaresType ("LoadBalancerT"));
         if (ModelHelper.getAcmeSystem (loadBalancer) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new SetArrivalRateCmd ((AcmeModelInstance) m_modelInstance, loadBalancer.getQualifiedName (),
+        return new SetArrivalRateCmd (SET_ARRIVAL_RATE_CMD, (AcmeModelInstance) m_modelInstance, loadBalancer.getQualifiedName (),
                                    Double.toString (value));
     }
 
+    @Operation(name = SET_BASIC_RESPONSE_TIME_CMD)
     public SetBasicResponseTimeCmd setBasicResponseTimeCmd (IAcmeComponent loadBalancer, double value) {
         Ensure.is_true (loadBalancer.declaresType ("LoadBalancerT"));
         if (ModelHelper.getAcmeSystem (loadBalancer) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new SetBasicResponseTimeCmd ((AcmeModelInstance) m_modelInstance, loadBalancer.getQualifiedName (),
+        return new SetBasicResponseTimeCmd (SET_BASIC_RESPONSE_TIME_CMD, (AcmeModelInstance) m_modelInstance, loadBalancer.getQualifiedName (),
                                    Double.toString (value));
     }
-
+    
+    @Operation(name=SET_OPT_RESPONSE_TYPE_CMD)
     public SetOptResponseTimeCmd setOptResponseTimeCmd (IAcmeComponent loadBalancer, double value) {
         Ensure.is_true (loadBalancer.declaresType ("LoadBalancerT"));
         if (ModelHelper.getAcmeSystem (loadBalancer) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new SetOptResponseTimeCmd ((AcmeModelInstance) m_modelInstance, loadBalancer.getQualifiedName (),
+        return new SetOptResponseTimeCmd (SET_OPT_RESPONSE_TYPE_CMD, (AcmeModelInstance) m_modelInstance, loadBalancer.getQualifiedName (),
                                    Double.toString (value));
     }
 
+    @Operation(name=SET_BASIC_THROUGHPUT_CMD)
     public SetBasicThroughputCmd setBasicThroughputCmd (IAcmeComponent loadBalancer, double value) {
         Ensure.is_true (loadBalancer.declaresType ("LoadBalancerT"));
         if (ModelHelper.getAcmeSystem (loadBalancer) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new SetBasicThroughputCmd ((AcmeModelInstance) m_modelInstance, loadBalancer.getQualifiedName (),
+        return new SetBasicThroughputCmd (SET_BASIC_THROUGHPUT_CMD, (AcmeModelInstance) m_modelInstance, loadBalancer.getQualifiedName (),
                                    Double.toString (value));
     }
 
+    @Operation(name=SET_OPT_THROUGHPUT_CMD)
     public SetOptThroughputCmd setOptThroughputCmd (IAcmeComponent loadBalancer, double value) {
         Ensure.is_true (loadBalancer.declaresType ("LoadBalancerT"));
         if (ModelHelper.getAcmeSystem (loadBalancer) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new SetOptThroughputCmd ((AcmeModelInstance) m_modelInstance, loadBalancer.getQualifiedName (),
+        return new SetOptThroughputCmd (SET_OPT_THROUGHPUT_CMD, (AcmeModelInstance) m_modelInstance, loadBalancer.getQualifiedName (),
                                    Double.toString (value));
     }
 
+    @Operation(name=ENABLE_SERVER_CMD)
     public EnableServerCmd enableServerCmd (IAcmeComponent server, boolean enabled) {
         Ensure.is_true (server.declaresType ("ServerT"));
         if (ModelHelper.getAcmeSystem (server) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new EnableServerCmd ((AcmeModelInstance) m_modelInstance, server.getQualifiedName (),
+        return new EnableServerCmd (ENABLE_SERVER_CMD,(AcmeModelInstance) m_modelInstance, server.getQualifiedName (),
                                     Boolean.toString (enabled));
     }
 
+    @Operation(name=ACTIVATE_SERVER_CMD)
     public ActivateServerCmd activateServerCmd (IAcmeComponent server, boolean enabled) {
         Ensure.is_true (server.declaresType ("ServerT"));
         if (ModelHelper.getAcmeSystem (server) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new ActivateServerCmd ((AcmeModelInstance) m_modelInstance, server.getQualifiedName (),
+        return new ActivateServerCmd (ACTIVATE_SERVER_CMD, (AcmeModelInstance) m_modelInstance, server.getQualifiedName (),
                                     Boolean.toString (enabled));
     }
 
+    @Operation(name=ADD_SERVER_CMD)
     public AddServerCmd addServerCmd (IAcmeComponent loadBalancer, IAcmeComponent server) {
         Ensure.is_true (loadBalancer.declaresType ("LoadBalancerT"));
         Ensure.is_true (server.declaresType ("ServerT"));
         if (ModelHelper.getAcmeSystem (loadBalancer) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new AddServerCmd ((AcmeModelInstance) m_modelInstance, loadBalancer.getQualifiedName (),
+        return new AddServerCmd (ADD_SERVER_CMD, (AcmeModelInstance) m_modelInstance, loadBalancer.getQualifiedName (),
         		server.getQualifiedName());
     }
 
+    @Operation(name=REMOVE_SERVER_CMD)
     public RemoveServerCmd removeServerCmd (IAcmeComponent loadBalancer, IAcmeComponent server) {
         Ensure.is_true (loadBalancer.declaresType ("LoadBalancerT"));
         Ensure.is_true (server.declaresType ("ServerT"));
         if (ModelHelper.getAcmeSystem (loadBalancer) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException (
                     "Cannot create a command for a component that is not part of the system");
-        return new RemoveServerCmd ((AcmeModelInstance) m_modelInstance, loadBalancer.getQualifiedName (),
+        return new RemoveServerCmd (REMOVE_SERVER_CMD, (AcmeModelInstance) m_modelInstance, loadBalancer.getQualifiedName (),
         		server.getQualifiedName());
     }
 

@@ -46,7 +46,7 @@ public class CP1PowerModelInstance implements IModelInstance<SimpleConfiguration
 	}
 
 	@Override
-	public ModelCommandFactory<SimpleConfigurationStore> getCommandFactory() {
+	public ModelCommandFactory<SimpleConfigurationStore> getCommandFactory() throws RainbowException {
 		if (m_commandFactory == null) 
 			m_commandFactory = new PowerModelCommandFactory(this);
 		return m_commandFactory;

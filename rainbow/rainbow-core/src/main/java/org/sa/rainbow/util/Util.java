@@ -24,6 +24,28 @@
 
 package org.sa.rainbow.util;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.reflections.Reflections;
@@ -39,18 +61,6 @@ import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.translator.probes.IBashBasedScript;
-
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Util {
 
@@ -606,5 +616,18 @@ public class Util {
 
     public static boolean safeEquals (Object a, Object b) {
         return a != null ? a.equals (b) : b == null;
+    }
+    
+    public static List<Method> getMethodsAnnotatedWith(final Class<?> type, final Class<? extends Annotation> annotation) {
+    	final List<Method> methods = new ArrayList<>();
+    	Class<?> clazz = type;
+    	while (clazz != Object.class) {
+    		List<Method> collect = Arrays.asList(clazz.getDeclaredMethods()).stream().filter(m -> {
+    			return m.isAnnotationPresent(annotation);
+    		}).collect(Collectors.toList());
+    		methods.addAll(collect);
+    		clazz = clazz.getSuperclass();
+    	}
+    	return methods;
     }
 }

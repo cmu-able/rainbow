@@ -17,8 +17,8 @@ public class SetClientRequestRateCmd extends ZNNAcmeModelCommand<IAcmeProperty> 
     private String m_client;
     private Float  m_reqRate;
 
-    public SetClientRequestRateCmd (AcmeModelInstance model, String client, String reqRate) {
-        super ("setClientRequestRate", model, client, reqRate);
+    public SetClientRequestRateCmd (String c, AcmeModelInstance model, String client, String reqRate) {
+        super (c, model, client, reqRate);
         m_client = client;
         m_reqRate = Float.valueOf (reqRate);
     }

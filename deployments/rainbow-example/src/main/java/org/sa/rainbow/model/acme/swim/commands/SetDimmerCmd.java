@@ -26,11 +26,10 @@ package org.sa.rainbow.model.acme.swim.commands;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 
 public class SetDimmerCmd extends SetDoubleCmd {
-	private final static String COMMAND = "setDimmer";
 	private final static String PROPERTY = "dimmer";
 	
-	public SetDimmerCmd(AcmeModelInstance model, String component, String value) {
-		super(COMMAND, PROPERTY, model, component, value);
+	public SetDimmerCmd(String commandName, AcmeModelInstance model, String component, String value) {
+		super(commandName, PROPERTY, model, component, value);
 	}
 	
 }

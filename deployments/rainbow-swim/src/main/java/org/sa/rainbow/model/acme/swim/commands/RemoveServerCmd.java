@@ -50,8 +50,8 @@ public class RemoveServerCmd extends SwimAcmeModelCommand<IAcmeProperty> {
 	 *  
 	 *  The target is the load balancer, and the server is the server to be removed
 	 */
-    public RemoveServerCmd (AcmeModelInstance model, String target, String server) {
-        super ("removeServer", model, target, server);
+    public RemoveServerCmd (String c, AcmeModelInstance model, String target, String server) {
+        super (c, model, target, server);
     }
 
     /**

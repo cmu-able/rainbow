@@ -28,6 +28,7 @@ package org.sa.rainbow.stitch.core;
 
 import org.acmestudio.acme.model.IAcmeModel;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.model.acme.AcmeModelCommandFactory;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
@@ -124,8 +125,13 @@ public class StitchScript extends ScopedEntity implements IScope {
                     rootName = renames.get (rootName);
                 }
                 if ("getCommandFactory".equals (rootName)) {
-                    AcmeModelCommandFactory commandFactory = model.getCommandFactory ();
-                    obj = commandFactory;
+                    try {
+						AcmeModelCommandFactory commandFactory = model.getCommandFactory ();
+						obj = commandFactory;
+					} catch (RainbowException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
                 } else {// substitute
                     name = rootName + (dotIdx > -1 ? name.substring (dotIdx) : "");
                     if (model.getModelName ().equals (name)) {

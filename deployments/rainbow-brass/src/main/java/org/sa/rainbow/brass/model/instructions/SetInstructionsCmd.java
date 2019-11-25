@@ -17,8 +17,8 @@ public class SetInstructionsCmd extends AbstractRainbowModelOperation<List<IInst
     private List<IInstruction> m_result;
     private List<IInstruction> m_oldInstructions;
 
-    public SetInstructionsCmd (InstructionGraphModelInstance modelInstance, String target, String instructionGraphCode) {
-        super ("setInstructions", modelInstance, target, instructionGraphCode);
+    public SetInstructionsCmd (String commandName, InstructionGraphModelInstance modelInstance, String target, String instructionGraphCode) {
+        super (commandName, modelInstance, target, instructionGraphCode);
         m_instructionsStr = instructionGraphCode;
 
     }

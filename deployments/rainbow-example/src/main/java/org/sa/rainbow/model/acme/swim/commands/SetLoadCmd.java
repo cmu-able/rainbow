@@ -27,11 +27,10 @@ import org.sa.rainbow.model.acme.AcmeModelInstance;
 
 public class SetLoadCmd extends SetDoubleCmd {
 
-	private final static String COMMAND = "setLoad";
 	private final static String PROPERTY = "load";
 	
-	public SetLoadCmd(AcmeModelInstance model, String component, String value) {
-		super(COMMAND, PROPERTY, model, component, value);
+	public SetLoadCmd(String commandName, AcmeModelInstance model, String component, String value) {
+		super(commandName, PROPERTY, model, component, value);
 	}
 
     public double processValue(double value) {

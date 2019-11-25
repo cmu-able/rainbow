@@ -13,8 +13,8 @@ public class SetSensorFailedCmd extends AbstractRainbowModelOperation<Boolean, R
 
 	private Sensors m_sensor;
 
-	public SetSensorFailedCmd(CP3RobotStateModelInstance model, String target, String param) {
-		super("setSensorFailed", model, target, param);
+	public SetSensorFailedCmd(String commandName, CP3RobotStateModelInstance model, String target, String param) {
+		super(commandName, model, target, param);
 		m_sensor = Sensors.valueOf(param);
 	}
 
@@ -25,7 +25,7 @@ public class SetSensorFailedCmd extends AbstractRainbowModelOperation<Boolean, R
 
 	@Override
 	protected List<? extends IRainbowMessage> getGeneratedEvents(IRainbowMessageFactory messageFactory) {
-		return generateEvents(messageFactory, "setSensorFailed");
+		return generateEvents(messageFactory, getName());
 	}
 
 	@Override

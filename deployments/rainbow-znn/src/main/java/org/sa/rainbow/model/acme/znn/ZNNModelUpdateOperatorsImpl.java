@@ -24,6 +24,7 @@ oftware"), to deal
 package org.sa.rainbow.model.acme.znn;
 
 import org.acmestudio.acme.element.IAcmeSystem;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.model.acme.znn.commands.ZNNCommandFactory;
 
@@ -43,7 +44,7 @@ public class ZNNModelUpdateOperatorsImpl extends AcmeModelInstance {
     }
 
     @Override
-    public ZNNCommandFactory getCommandFactory () {
+    public ZNNCommandFactory getCommandFactory () throws RainbowException {
         if (m_commandFactory == null) {
             m_commandFactory = new ZNNCommandFactory (this);
         }

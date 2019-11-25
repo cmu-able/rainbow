@@ -12,9 +12,9 @@ public class SetModelProblemCmd extends AbstractSimpleRainbowModelOperation<Enum
 
 	private CP3ModelState m_problem;
 
-	public SetModelProblemCmd(RainbowStateModelInstance model, String target,
+	public SetModelProblemCmd(String commandName, RainbowStateModelInstance model, String target,
 			String problem) {
-		super("setModelProblem", "setModelProblem", model, target, problem);
+		super(commandName, "setModelProblem", model, target, problem);
 		m_problem = CP3ModelState.valueOf(problem);
 	}
 

@@ -8,9 +8,9 @@ public class SetUtilityPreferenceCmd extends AbstractSimpleRainbowModelOperation
 
 	private UtilityPreference m_preference;
 
-	public SetUtilityPreferenceCmd(MissionStateModelInstance model,
+	public SetUtilityPreferenceCmd(String commandName, MissionStateModelInstance model,
 			String target, String preference) {
-		super("setUtilityPreference", "setUtilityPreference", model, target, preference);
+		super(commandName, "setUtilityPreference", model, target, preference);
 		m_preference = UtilityPreference.getValue(preference);
 		if (m_preference == null)
 			m_preference = UtilityPreference.valueOf(preference);

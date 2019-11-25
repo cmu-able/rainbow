@@ -15,9 +15,9 @@ public abstract class SetClockModelCmd<T extends ClockedModel> extends AbstractR
 
 	private String m_clockReference;
 
-	public SetClockModelCmd(IModelInstance<T> model, String target,
+	public SetClockModelCmd(String commandName, IModelInstance<T> model, String target,
 			String clockReference) {
-		super("setClockModel", model, target, clockReference);
+		super(commandName, model, target, clockReference);
 		m_clockReference = clockReference;
 	}
 

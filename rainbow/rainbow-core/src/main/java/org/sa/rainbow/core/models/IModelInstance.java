@@ -74,7 +74,7 @@ public interface IModelInstance<T> {
 
     String getModelName ();
 
-    ModelCommandFactory<T> getCommandFactory ();
+    ModelCommandFactory<T> getCommandFactory () throws RainbowException;
 
     void setOriginalSource (String source);
 

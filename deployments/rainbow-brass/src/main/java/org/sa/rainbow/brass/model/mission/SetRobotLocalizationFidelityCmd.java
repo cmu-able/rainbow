@@ -11,8 +11,8 @@ import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 public class SetRobotLocalizationFidelityCmd extends AbstractRainbowModelOperation<LocalizationFidelity, MissionState> {
 	private LocalizationFidelity m_fidelity;
 
-	public SetRobotLocalizationFidelityCmd(MissionStateModelInstance model, String target, String fidelity) {
-		super("setRobotLocalizationFidelity", model, target, fidelity);
+	public SetRobotLocalizationFidelityCmd(String commandName, MissionStateModelInstance model, String target, String fidelity) {
+		super(commandName, model, target, fidelity);
 		m_fidelity = LocalizationFidelity.valueOf(fidelity);
 	}
 
@@ -28,7 +28,7 @@ public class SetRobotLocalizationFidelityCmd extends AbstractRainbowModelOperati
 
 	@Override
 	protected List<? extends IRainbowMessage> getGeneratedEvents(IRainbowMessageFactory messageFactory) {
-		return generateEvents(messageFactory, "setRobotLocalizationFidelity");
+		return generateEvents(messageFactory, getName());
 	}
 
 	@Override

@@ -23,6 +23,7 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
@@ -54,12 +55,16 @@ IModelChangeBusSubscriberPort {
                 if (msg.getProperty (ESEBConstants.MSG_CHANNEL_KEY).equals (ChannelT.MODEL_CHANGE.name ())) {
                     synchronized (m_subscribers) {
                         for (Pair<IRainbowChangeBusSubscription, IRainbowModelChangeCallback> pair : m_subscribers) {
-                            if (pair.firstValue ().matches (msg)) {
-                                ModelReference mr = new ModelReference ((String )msg
-                                        .getProperty (IModelChangeBusPort.MODEL_NAME_PROP), (String )msg
-                                        .getProperty (IModelChangeBusPort.MODEL_TYPE_PROP));
-                                pair.secondValue ().onEvent (mr, msg);
-                            }
+                            try {
+								if (pair.firstValue ().matches (msg)) {
+								    ModelReference mr = new ModelReference ((String )msg
+								            .getProperty (IModelChangeBusPort.MODEL_NAME_PROP), (String )msg
+								            .getProperty (IModelChangeBusPort.MODEL_TYPE_PROP));
+								    pair.secondValue ().onEvent (mr, msg);
+								}
+							} catch (RainbowException e) {
+								e.printStackTrace();
+							}
                         }
                     }
                 }

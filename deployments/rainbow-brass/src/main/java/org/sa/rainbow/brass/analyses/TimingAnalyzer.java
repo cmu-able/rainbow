@@ -28,6 +28,7 @@ import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.analysis.IRainbowAnalysis;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
@@ -145,7 +146,7 @@ public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowA
     }
 
     @Override
-    public void onEvent (ModelReference mr, IRainbowMessage message) {
+    public void onEvent (ModelReference mr, IRainbowMessage message) throws RainbowException {
         synchronized (this) {
             // Either a new deadline or a new IG has been set (or both)
             // Timing analyzer can resume periodic analysis
@@ -170,7 +171,7 @@ public class TimingAnalyzer extends AbstractRainbowRunnable implements IRainbowA
     }
 
     @Override
-    protected void runAction () {
+    protected void runAction () throws RainbowException {
         // If adaptation planning is in progress, wait for it to finish before performing analysis
         if (!m_waitForPlanner) {
             // Do the periodic analysis on the models of interest

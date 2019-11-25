@@ -46,6 +46,7 @@ import org.acmestudio.acme.model.DefaultAcmeModel;
 import org.acmestudio.acme.type.AcmeTypeHelper;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.model.acme.swim.commands.SwimCommandFactory;
 
@@ -73,7 +74,7 @@ public class SwimModelUpdateOperatorsImpl extends AcmeModelInstance {
 	}
 
 	@Override
-	public SwimCommandFactory getCommandFactory() {
+	public SwimCommandFactory getCommandFactory() throws RainbowException {
 		if (m_commandFactory == null) {
 			m_commandFactory = new SwimCommandFactory(this);
 		}

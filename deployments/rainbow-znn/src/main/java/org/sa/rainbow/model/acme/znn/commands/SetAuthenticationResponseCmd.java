@@ -43,8 +43,8 @@ import java.util.List;
  */
 public class SetAuthenticationResponseCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
 
-    public SetAuthenticationResponseCmd (AcmeModelInstance modelInstance, String client, String response) {
-        super ("setAuthenticationResponse", modelInstance, client, response);
+    public SetAuthenticationResponseCmd (String c, AcmeModelInstance modelInstance, String client, String response) {
+        super (c, modelInstance, client, response);
     }
 
     @Override

@@ -30,6 +30,7 @@ import org.acmestudio.acme.element.IAcmeElement;
 import org.antlr.v4.parse.ANTLRParser.labeledAlt_return;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation;
 import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.adaptation.StitchExecutor;
@@ -1013,11 +1014,16 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 				boolean allResults = resultMap.size() == childrenNodes.size();
 //				int count = 0;
 				do {
-					if (m_executor != null) 
-					m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory().strategyExecutionStateCommand(
-							m_executor.getManagedModel(), this.getQualifiedName() + "." + parentNode.label(),
-							ExecutionHistoryModelInstance.STRATEGY, ExecutionStateT.STRATEGY_SETTLING,
-							Long.toString(branchWait)));
+					if (m_executor != null)
+						try {
+							m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory().strategyExecutionStateCommand(
+									m_executor.getManagedModel(), this.getQualifiedName() + "." + parentNode.label(),
+									ExecutionHistoryModelInstance.STRATEGY, ExecutionStateT.STRATEGY_SETTLING,
+									Long.toString(branchWait)));
+						} catch (RainbowException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
 					// Problem here is that we will always wait at lease SLEEP_TIME_LONG (100ms) for
 					// a condition to evaluate. Probably ok.
 					try {
@@ -1060,10 +1066,15 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 					}
 				}
 				if (m_executor != null)
-				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory().strategyExecutionStateCommand(
-						m_executor.getManagedModel(), this.getQualifiedName() + "." + parentNode.label(),
-						ExecutionHistoryModelInstance.STRATEGY, ExecutionStateT.NODE_DONE,
-						selected == null && defaultNode == null?Outcome.FAILURE.toString():Outcome.SUCCESS.toString()));
+					try {
+						m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory().strategyExecutionStateCommand(
+								m_executor.getManagedModel(), this.getQualifiedName() + "." + parentNode.label(),
+								ExecutionHistoryModelInstance.STRATEGY, ExecutionStateT.NODE_DONE,
+								selected == null && defaultNode == null?Outcome.FAILURE.toString():Outcome.SUCCESS.toString()));
+					} catch (RainbowException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				if (selected != null)
 					return selected;
 				if (defaultNode != null) {
@@ -1101,10 +1112,15 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 		switch (selected.getActionFlag()) {
 		case DONE:
 			if (m_executor != null) {
-				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
-						.strategyExecutionStateCommand(m_executor.getManagedModel(),
-								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
-								ExecutionHistoryData.ExecutionStateT.NODE_EXECUTING, null));
+				try {
+					m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+							.strategyExecutionStateCommand(m_executor.getManagedModel(),
+									this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+									ExecutionHistoryData.ExecutionStateT.NODE_EXECUTING, null));
+				} catch (RainbowException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			if (Tool.logger().isInfoEnabled()) {
 				Tool.logger().info("DONE action!");
@@ -1112,10 +1128,15 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 			// a success branch, terminate successfully
 			setOutcome(Outcome.SUCCESS);
 			if (m_executor != null) {
-				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
-						.strategyExecutionStateCommand(m_executor.getManagedModel(),
-								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
-								ExecutionHistoryData.ExecutionStateT.NODE_DONE, Outcome.SUCCESS.toString()));
+				try {
+					m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+							.strategyExecutionStateCommand(m_executor.getManagedModel(),
+									this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+									ExecutionHistoryData.ExecutionStateT.NODE_DONE, Outcome.SUCCESS.toString()));
+				} catch (RainbowException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				m_executor.getReportingPort().info(m_executor.getComponentType(),
 						MessageFormat.format("[[{0}]]: Finished executing node {1}:{2}->{3}", m_executor.id(),
 								curNode.label(), "done", Outcome.SUCCESS));
@@ -1123,10 +1144,15 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 			break;
 		case NULL:
 			if (m_executor != null) {
-				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
-						.strategyExecutionStateCommand(m_executor.getManagedModel(),
-								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
-								ExecutionHistoryData.ExecutionStateT.NODE_EXECUTING, null));
+				try {
+					m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+							.strategyExecutionStateCommand(m_executor.getManagedModel(),
+									this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+									ExecutionHistoryData.ExecutionStateT.NODE_EXECUTING, null));
+				} catch (RainbowException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			if (Tool.logger().isInfoEnabled()) {
 				Tool.logger().info("NULL action!");
@@ -1134,13 +1160,18 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 			// null action, so consider terminated with status quo
 			setOutcome(Outcome.STATUSQUO);
 			if (m_executor != null) {
-				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
-						.strategyExecutionStateCommand(m_executor.getManagedModel(),
-								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
-								ExecutionHistoryData.ExecutionStateT.NODE_DONE, Outcome.STATUSQUO.toString()));
-				m_executor.getReportingPort().info(m_executor.getComponentType(),
-						MessageFormat.format("[[{0}]]: Finished executing node {1}:{2}->{3}", m_executor.id(),
-								curNode.label(), "done", Outcome.STATUSQUO));
+				try {
+					m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+							.strategyExecutionStateCommand(m_executor.getManagedModel(),
+									this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+									ExecutionHistoryData.ExecutionStateT.NODE_DONE, Outcome.STATUSQUO.toString()));
+					m_executor.getReportingPort().info(m_executor.getComponentType(),
+							MessageFormat.format("[[{0}]]: Finished executing node {1}:{2}->{3}", m_executor.id(),
+									curNode.label(), "done", Outcome.STATUSQUO));
+				} catch (RainbowException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			break;
 		case TACTIC:
@@ -1148,10 +1179,15 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 			break;
 		case DOLOOP:
 			if (m_executor != null) {
-				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
-						.strategyExecutionStateCommand(m_executor.getManagedModel(),
-								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
-								ExecutionHistoryData.ExecutionStateT.NODE_EXECUTING, null));
+				try {
+					m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+							.strategyExecutionStateCommand(m_executor.getManagedModel(),
+									this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+									ExecutionHistoryData.ExecutionStateT.NODE_EXECUTING, null));
+				} catch (RainbowException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			// LOOP! treat the target node as child node and proceed
 			if (Tool.logger().isInfoEnabled()) {
@@ -1180,18 +1216,28 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 				setOutcome(Outcome.FAILURE);
 			}
 			if (m_executor != null)
-				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
-						.strategyExecutionStateCommand(m_executor.getManagedModel(),
-								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
-								ExecutionHistoryData.ExecutionStateT.NODE_DONE, getOutcome().toString()));
+				try {
+					m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+							.strategyExecutionStateCommand(m_executor.getManagedModel(),
+									this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+									ExecutionHistoryData.ExecutionStateT.NODE_DONE, getOutcome().toString()));
+				} catch (RainbowException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 
 			break;
 		default: // serious error?
 			if (m_executor != null) {
-				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
-						.strategyExecutionStateCommand(m_executor.getManagedModel(),
-								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
-								ExecutionHistoryData.ExecutionStateT.NODE_EXECUTING, null));
+				try {
+					m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+							.strategyExecutionStateCommand(m_executor.getManagedModel(),
+									this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+									ExecutionHistoryData.ExecutionStateT.NODE_EXECUTING, null));
+				} catch (RainbowException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			Tool.error("Selected node " + selected.label() + "has unknown action kind! " + selected.getActionFlag(),
 					null, stitchState().stitchProblemHandler);
@@ -1199,10 +1245,15 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 //                        .getActionFlag ());
 			setOutcome(Outcome.FAILURE);
 			if (m_executor != null) {
-				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
-						.strategyExecutionStateCommand(m_executor.getManagedModel(),
-								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
-								ExecutionHistoryData.ExecutionStateT.NODE_DONE, Outcome.FAILURE.toString()));
+				try {
+					m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+							.strategyExecutionStateCommand(m_executor.getManagedModel(),
+									this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+									ExecutionHistoryData.ExecutionStateT.NODE_DONE, Outcome.FAILURE.toString()));
+				} catch (RainbowException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				m_executor.getReportingPort().info(m_executor.getComponentType(),
 						MessageFormat.format("[[{0}]]: Finished executing node {1}:{2}->{3}", m_executor.id(),
 								curNode.label(), "done", Outcome.FAILURE));
@@ -1262,12 +1313,17 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 				m_executor.getReportingPort().error(m_executor.getComponentType(),
 						"Could not execute " + curNode.getTactic());
 				setOutcome(Outcome.STATUSQUO);
-				m_executor.getHistoryModelUSPort()
-						.updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
-								.strategyExecutionStateCommand(m_executor.getManagedModel(), this.getQualifiedName(),
-										ExecutionHistoryModelInstance.STRATEGY,
-										ExecutionHistoryData.ExecutionStateT.TACTIC_ERROR,
-										"Could not execute " + curNode.getTactic()));
+				try {
+					m_executor.getHistoryModelUSPort()
+							.updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+									.strategyExecutionStateCommand(m_executor.getManagedModel(), this.getQualifiedName(),
+											ExecutionHistoryModelInstance.STRATEGY,
+											ExecutionHistoryData.ExecutionStateT.TACTIC_ERROR,
+											"Could not execute " + curNode.getTactic()));
+				} catch (RainbowException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				return;
 			}
 		}
@@ -1278,10 +1334,15 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 		tactic.markExecuting(true);
 		try {
 			if (m_executor != null) {
-				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
-						.strategyExecutionStateCommand(m_executor.getManagedModel(),
-								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
-								ExecutionHistoryData.ExecutionStateT.NODE_EXECUTING, null));
+				try {
+					m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+							.strategyExecutionStateCommand(m_executor.getManagedModel(),
+									this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+									ExecutionHistoryData.ExecutionStateT.NODE_EXECUTING, null));
+				} catch (RainbowException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 
 				m_executor.getReportingPort().info(m_executor.getComponentType(), MessageFormat
 						.format("[[{0}]]: Executing node {1}:{2}", m_executor.id(), curNode.label(), tactic.getName()));
@@ -1313,14 +1374,19 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 			long end = new Date().getTime();
 			// TODO: then await condition stuff
 			if (m_executor != null) {
-				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
-						.strategyExecutionStateCommand(m_executor.getManagedModel(), tactic.getQualifiedName(),
-								ExecutionHistoryModelInstance.TACTIC, ExecutionHistoryData.ExecutionStateT.TACTIC_DONE,
-								Boolean.toString(effectGood)));
-				AbstractRainbowModelOperation recordTacticDurationCmd = m_executor.getExecutionHistoryModel()
-						.getCommandFactory()
-						.recordTacticDurationCmd(tactic.getQualifiedName(), end - start, effectGood);
-				m_executor.getHistoryModelUSPort().updateModel(recordTacticDurationCmd);
+				try {
+					m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+							.strategyExecutionStateCommand(m_executor.getManagedModel(), tactic.getQualifiedName(),
+									ExecutionHistoryModelInstance.TACTIC, ExecutionHistoryData.ExecutionStateT.TACTIC_DONE,
+									Boolean.toString(effectGood)));
+					AbstractRainbowModelOperation recordTacticDurationCmd = m_executor.getExecutionHistoryModel()
+							.getCommandFactory()
+							.recordTacticDurationCmd(tactic.getQualifiedName(), end - start, effectGood);
+					m_executor.getHistoryModelUSPort().updateModel(recordTacticDurationCmd);
+				} catch (RainbowException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			// proceed with any branching
 			if (curNode.getChildren().size() == 0) {
@@ -1335,14 +1401,22 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 					setOutcome(Outcome.FAILURE);
 				}
 			}
+		} catch (RainbowException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} finally {
 			tactic.markExecuting(false);
 			if (m_executor != null) {
 				String msg = tactic.hasError() ? "Error" : (effectGood ? "SUCCESS" : "FAIL");
-				m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
-						.strategyExecutionStateCommand(m_executor.getManagedModel(),
-								this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
-								ExecutionHistoryData.ExecutionStateT.NODE_DONE, msg));
+				try {
+					m_executor.getHistoryModelUSPort().updateModel(m_executor.getExecutionHistoryModel().getCommandFactory()
+							.strategyExecutionStateCommand(m_executor.getManagedModel(),
+									this.getQualifiedName() + "." + curNode.label(), ExecutionHistoryModelInstance.STRATEGY,
+									ExecutionHistoryData.ExecutionStateT.NODE_DONE, msg));
+				} catch (RainbowException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				m_executor.getReportingPort().info(m_executor.getComponentType(),
 						MessageFormat.format("[[{0}]]: Finished executing node {1}:{2}->{3}", m_executor.id(),
 								curNode.label(), tactic.getName(), msg));

@@ -46,8 +46,8 @@ import java.util.List;
 public class EnableServerCmd extends SwimAcmeModelCommand<IAcmeProperty> {
 
     // Target is the server to enable, enable is whether to set it as enabled or not "true" or "false"
-    public EnableServerCmd (AcmeModelInstance model, String target, String enable) {
-        super ("enableServer", model, target, enable);
+    public EnableServerCmd (String commandName, AcmeModelInstance model, String target, String enable) {
+        super (commandName, model, target, enable);
     }
 
     /**
