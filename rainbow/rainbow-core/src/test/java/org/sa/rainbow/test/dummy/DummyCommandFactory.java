@@ -19,7 +19,7 @@ import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 
 public class DummyCommandFactory extends ModelCommandFactory<Integer> {
-    public DummyCommandFactory () {
+    public DummyCommandFactory () throws RainbowException {
         super (null, null);
         // TODO Auto-generated constructor stub
     }
