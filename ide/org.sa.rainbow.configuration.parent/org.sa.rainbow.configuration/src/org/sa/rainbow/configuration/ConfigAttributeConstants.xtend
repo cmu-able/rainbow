@@ -4,9 +4,11 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import java.util.Collections
 import java.util.HashSet
+import java.util.Map
 import java.util.Set
 import org.eclipse.xtext.common.types.access.IJvmTypeProvider
 import org.eclipse.xtext.common.types.util.RawSuperTypes
+import org.sa.rainbow.configuration.configModel.Array
 import org.sa.rainbow.configuration.configModel.BooleanLiteral
 import org.sa.rainbow.configuration.configModel.Component
 import org.sa.rainbow.configuration.configModel.ComponentType
@@ -17,6 +19,7 @@ import org.sa.rainbow.configuration.configModel.PropertyReference
 import org.sa.rainbow.configuration.configModel.Reference
 import org.sa.rainbow.configuration.configModel.StringLiteral
 import org.sa.rainbow.configuration.configModel.Value
+import org.sa.rainbow.configuration.validation.ConfigModelValidator
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor
 import org.sa.rainbow.core.adaptation.IAdaptationManager
 import org.sa.rainbow.core.analysis.IRainbowAnalysis
@@ -24,8 +27,6 @@ import org.sa.rainbow.core.gauges.AbstractGauge
 import org.sa.rainbow.core.models.commands.ModelCommandFactory
 import org.sa.rainbow.translator.effectors.EffectorManager
 import org.sa.rainbow.translator.probes.AbstractProbe
-import org.sa.rainbow.configuration.configModel.Array
-import org.sa.rainbow.configuration.validation.ConfigModelValidator
 
 class ConfigAttributeConstants {
 	public static val ALL_OFREQUIRED_PROBE_FIELDS = #{"alias", "location"};
@@ -192,7 +193,7 @@ class ConfigAttributeConstants {
 	
 	
 	
-	public static val UTILITY_PROPERTY_TYPES =#{
+	public static val Map<String, Map<String,Object>> UTILITY_PROPERTY_TYPES =#{
 		'model' -> #{'func' -> [Value v | (v.value instanceof PropertyReference && (v.value as PropertyReference).referable.component==ComponentType.MODEL)],
 			         'extends' -> #[PropertyReference], 'msg' -> 'must refer to a model property'},
 		'utilities' -> IS_COMPONENT,

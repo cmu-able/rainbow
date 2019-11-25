@@ -35,6 +35,11 @@ public class AddUtilityMeasureCmd extends AbstractRainbowModelOperation<Double, 
     private Double                      m_utility;
     private long   m_timestampRecorded;
 
+    public AddUtilityMeasureCmd(String name, UtilityHistoryModelInstance modelInstance, String target, double utility) {
+    	this(name, modelInstance, target, Double.toString(utility));
+    }
+    
+    
     public AddUtilityMeasureCmd (String name, UtilityHistoryModelInstance modelInstance, String target, String utility) {
         super (name, modelInstance, target, utility);
         m_utility = Double.valueOf (utility);

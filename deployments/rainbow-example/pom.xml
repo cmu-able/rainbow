@@ -254,6 +254,17 @@
 								</outputConfiguration>
 							</outputConfigurations>
 						</language>
+						<language>
+						<setup>org.acme.xtext.AcmeStandaloneSetup</setup>
+							<outputConfigurations>
+								<outputConfiguration>
+									<outputDirectory>tgt-gen</outputDirectory>
+									<createOutputDirectory>true</createOutputDirectory>
+									<overrideExistingResources>true</overrideExistingResources>
+									<cleanUpDerivedResources>true</cleanUpDerivedResources>
+								</outputConfiguration>
+							</outputConfigurations>
+						</language>
 					</languages>
 					<sourceRoots>
 						<root>src/main/resources/rbw</root>
@@ -268,6 +279,11 @@
 					<dependency>
 						<groupId>org.sa.rainbow.stitch</groupId>
 						<artifactId>org.sa.rainbow.stitch</artifactId>
+						<version>1.0.0-SNAPSHOT</version>
+					</dependency>
+					<dependency>
+						<groupId>org.sa.acme.xtext</groupId>
+						<artifactId>org.sa.acme.xtext</artifactId>
 						<version>1.0.0-SNAPSHOT</version>
 					</dependency>
 					<dependency>

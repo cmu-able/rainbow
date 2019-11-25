@@ -21,7 +21,7 @@ class StitchParsingTest {
 	@Test
 	def void loadModel() {
 		val result = parseHelper.parse('''
-			Hello Xtext!
+			module foo.bar;
 		''')
 		Assertions.assertNotNull(result)
 		val errors = result.eResource.errors

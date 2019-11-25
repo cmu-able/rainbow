@@ -3,6 +3,7 @@ package org.sa.rainbow.model.acme.znn.commands;
 import org.acmestudio.acme.ModelHelper;
 import org.acmestudio.acme.core.type.IAcmeStringValue;
 import org.acmestudio.acme.element.IAcmeComponent;
+import org.acmestudio.acme.element.IAcmeSystem;
 import org.acmestudio.acme.element.property.IAcmeProperty;
 import org.acmestudio.acme.model.IAcmeCommandFactory;
 import org.acmestudio.acme.model.command.*;
@@ -42,6 +43,10 @@ public class AddClientCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
         super ("addClient", model, sys, lb, clientIP);
         m_lb = lb;
         m_clientIP = clientIP;
+    }
+    
+    public AddClientCmd(AcmeModelInstance model, IAcmeSystem sys, IAcmeComponent lb, String clientIP) {
+    	this(model, sys.getQualifiedName(), lb.getQualifiedName(), clientIP);
     }
 
     @Override

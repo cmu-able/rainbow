@@ -35,6 +35,12 @@ Workflow {
 			junitSupport = {
 				junitVersion = "5"
 			}
+			
+			parserGenerator = {
+				options = {
+					ignoreCase = true
+				}
+			}
 		}
 	}
 }
