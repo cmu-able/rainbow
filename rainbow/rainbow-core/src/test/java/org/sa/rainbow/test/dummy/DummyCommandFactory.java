@@ -208,10 +208,6 @@ public class DummyCommandFactory extends ModelCommandFactory<Integer> {
         return null;
     }
 
-    @Override
-    protected void fillInCommandMap () {
-        // TODO Auto-generated method stub
-
-    }
+   
 
 }

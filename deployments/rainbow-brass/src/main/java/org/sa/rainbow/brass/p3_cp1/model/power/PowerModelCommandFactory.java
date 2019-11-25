@@ -11,7 +11,7 @@ import org.sa.rainbow.core.models.commands.ModelCommandFactory;
 
 public class PowerModelCommandFactory extends ModelCommandFactory<SimpleConfigurationStore> {
 
-	private static final String UPDATE_POWER_MODEL_CMD = "updatePowerModel";
+	public static final String UPDATE_POWER_MODEL_CMD = "updatePowerModel";
 
 	@LoadOperation
 	public static LoadPowerModelCmd loadCommand(ModelsManager mm,

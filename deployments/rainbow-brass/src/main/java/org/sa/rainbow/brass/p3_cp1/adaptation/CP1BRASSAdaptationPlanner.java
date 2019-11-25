@@ -24,6 +24,7 @@ import org.sa.rainbow.brass.model.instructions.MoveAbsHInstruction;
 import org.sa.rainbow.brass.model.instructions.SetExecutionFailedCmd;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.p3_cp1.model.CP1ModelAccessor;
+import org.sa.rainbow.brass.p3_cp1.model.power.PowerModelCommandFactory;
 import org.sa.rainbow.brass.p3_cp1.model.power.UpdatePowerModelCmd;
 import org.sa.rainbow.brass.model.p2_cp3.mission.MissionState.Heading;
 import org.sa.rainbow.brass.model.p2_cp3.mission.MissionState.LocationRecording;
@@ -107,7 +108,7 @@ public class CP1BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 		m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort();
 		m_modelChangePort.subscribe((message) -> {
 			String operation = (String )message.getProperty(IModelChangeBusPort.COMMAND_PROP);
-			return (UpdatePowerModelCmd.NAME.equals(operation));
+			return (PowerModelCommandFactory.UPDATE_POWER_MODEL_CMD.equals(operation));
 		}, (model, message) -> {
 			synchronized(CP1BRASSAdaptationPlanner.this) {
 				this.notifyAll();
