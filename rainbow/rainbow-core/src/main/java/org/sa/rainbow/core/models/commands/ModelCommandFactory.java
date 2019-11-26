@@ -170,7 +170,7 @@ public abstract class ModelCommandFactory<T> {
 					final Class<?>[] a2 = Arrays.copyOfRange(parameterTypes, 0, 3);
 
 					if (Arrays.equals(new Class<?>[] { String.class, m_instanceClass, String.class }, a2)) {
-						if (parameterTypes.length == 1 + args.length) {
+						if (parameterTypes.length == 2 + args.length) {
 							constructor = c;
 							break;
 						}
