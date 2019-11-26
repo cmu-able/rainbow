@@ -99,13 +99,13 @@ public abstract class ModelCommandFactory<T> {
 
 	private void fillInCommandMap() throws RainbowException {
 		List<Method> cmds = Util.getMethodsAnnotatedWith(this.getClass(), Operation.class);
-		Type t = ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+//		Type t = ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
 		cmds.forEach(m -> {
 			Class<?> returnType = m.getReturnType();
 			if (AbstractRainbowModelOperation.class.isAssignableFrom(returnType)) {
-				Type sct = returnType.getGenericSuperclass();
-				if (ParameterizedType.class.isAssignableFrom(sct.getClass())
-						&& ((ParameterizedType) sct).getActualTypeArguments()[1] == t)
+//				Type sct = returnType.getGenericSuperclass();
+//				if (ParameterizedType.class.isAssignableFrom(sct.getClass())
+//				/* && ((ParameterizedType) sct).getActualTypeArguments()[1] == t */)
 					m_commandMap.put(m.getAnnotation(Operation.class).name().toLowerCase(),
 							(Class<? extends AbstractRainbowModelOperation<?, T>>) returnType);
 
