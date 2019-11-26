@@ -255,7 +255,7 @@
 							</outputConfigurations>
 						</language>
 						<language>
-						<setup>org.acme.xtext.AcmeStandaloneSetup</setup>
+						<setup>org.acme.AcmeStandaloneSetup</setup>
 							<outputConfigurations>
 								<outputConfiguration>
 									<outputDirectory>tgt-gen</outputDirectory>
