@@ -40,8 +40,8 @@ public class SetLatencyCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
     private String m_httpConn;
     private double m_latency;
 
-    public SetLatencyCmd (AcmeModelInstance model, String conn, String latency) {
-        super ("setLatency", model, conn, latency);
+    public SetLatencyCmd (String c, AcmeModelInstance model, String conn, String latency) {
+        super (c, model, conn, latency);
         m_httpConn = conn;
         m_latency = Double.valueOf (latency);
     }

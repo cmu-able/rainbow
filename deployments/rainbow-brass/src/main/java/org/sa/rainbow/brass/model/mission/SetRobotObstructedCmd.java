@@ -10,8 +10,8 @@ import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 public class SetRobotObstructedCmd extends AbstractRainbowModelOperation<Boolean, MissionState> {
 	private boolean m_robotObstructed;
 
-	public SetRobotObstructedCmd (MissionStateModelInstance model, String target, String robotObstructed) {
-        super ("setRobotObstructed", model, target, robotObstructed);
+	public SetRobotObstructedCmd (String commandName, MissionStateModelInstance model, String target, String robotObstructed) {
+        super (commandName, model, target, robotObstructed);
         m_robotObstructed = Boolean.parseBoolean(robotObstructed);
     }
 
@@ -22,7 +22,7 @@ public class SetRobotObstructedCmd extends AbstractRainbowModelOperation<Boolean
 
 	@Override
 	protected List<? extends IRainbowMessage> getGeneratedEvents(IRainbowMessageFactory messageFactory) {
-		return generateEvents(messageFactory, "setRobotObstructed");
+		return generateEvents(messageFactory, getName());
 	}
 
 	@Override

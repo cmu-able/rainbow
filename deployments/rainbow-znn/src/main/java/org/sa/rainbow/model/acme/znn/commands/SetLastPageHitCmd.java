@@ -40,8 +40,8 @@ public class SetLastPageHitCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
     private String m_server;
     private String m_page;
 
-    public SetLastPageHitCmd (AcmeModelInstance model, String target, String page) {
-        super ("setLastPageHit", model, target, page);
+    public SetLastPageHitCmd (String c, AcmeModelInstance model, String target, String page) {
+        super (c, model, target, page);
         m_server = target;
         m_page = page;
 

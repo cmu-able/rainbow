@@ -17,8 +17,8 @@ public class SetSystemCommand extends RosAcmeModelCommand<IAcmeSystem> {
     private IAcmeSystem m_system;
     private String      m_systemAsString;
 
-    public SetSystemCommand (AcmeModelInstance model, String target, String newSystem) {
-        super ("setSystem", model, target, newSystem);
+    public SetSystemCommand (String commandName, AcmeModelInstance model, String target, String newSystem) {
+        super (commandName, model, target, newSystem);
         m_systemAsString = newSystem;
     }
 

@@ -26,11 +26,10 @@ package org.sa.rainbow.model.acme.swim.commands;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 
 public class SetOptThroughputCmd extends SetDoubleCmd {
-	private final static String COMMAND = "setOptThroughput";
 	private final static String PROPERTY = "optThroughput";
 	
-	public SetOptThroughputCmd(AcmeModelInstance model, String component, String value) {
-		super(COMMAND, PROPERTY, model, component, value);
+	public SetOptThroughputCmd(String c, AcmeModelInstance model, String component, String value) {
+		super(c, PROPERTY, model, component, value);
 	}
 	
 }

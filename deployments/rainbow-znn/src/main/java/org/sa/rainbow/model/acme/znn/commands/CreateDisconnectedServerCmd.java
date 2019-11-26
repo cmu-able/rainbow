@@ -17,8 +17,8 @@ public class CreateDisconnectedServerCmd extends ZNNAcmeModelCommand<IAcmeCompon
     private String                      m_newName;
     private IAcmeComponentCreateCommand m_cmd;
 
-    public CreateDisconnectedServerCmd (AcmeModelInstance model, String system, String newName) {
-        super ("createDisconnectedServer", model, system, newName);
+    public CreateDisconnectedServerCmd (String c, AcmeModelInstance model, String system, String newName) {
+        super (c, model, system, newName);
         m_newName = newName;
     }
 

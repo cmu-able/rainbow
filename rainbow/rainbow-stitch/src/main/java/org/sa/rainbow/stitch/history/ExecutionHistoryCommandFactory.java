@@ -26,6 +26,7 @@ package org.sa.rainbow.stitch.history;
 import java.io.InputStream;
 import java.util.Map;
 
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.ModelsManager;
@@ -41,6 +42,7 @@ public class ExecutionHistoryCommandFactory extends ModelCommandFactory<Map<Stri
 
     public static final String STRATEGY_EXECUTION_STATE_CMD = "strategyExecutionState";
 
+    @LoadOperation
     public static AbstractLoadModelCmd<Map<String, ExecutionHistoryData>> loadCOmmand (ModelsManager modelsManager,
             String modelName,
             InputStream stream,
@@ -48,7 +50,7 @@ public class ExecutionHistoryCommandFactory extends ModelCommandFactory<Map<Stri
         return new ExecutionHistoryLoadCommand (modelsManager, modelName, stream, source);
     }
 
-    public ExecutionHistoryCommandFactory (ExecutionHistoryModelInstance model) {
+    public ExecutionHistoryCommandFactory (ExecutionHistoryModelInstance model) throws RainbowException {
         super (ExecutionHistoryModelInstance.class, model);
     }
 
@@ -58,6 +60,7 @@ public class ExecutionHistoryCommandFactory extends ModelCommandFactory<Map<Stri
                 Boolean.toString (successful));
     }
 
+    @Operation(name=STRATEGY_EXECUTION_STATE_CMD)
     public StrategyExecutionStateCommand strategyExecutionStateCommand (ModelReference ref, String qualifiedName,
             String type,
             ExecutionStateT newState,
@@ -83,8 +86,5 @@ public class ExecutionHistoryCommandFactory extends ModelCommandFactory<Map<Stri
         return null;
     }
 
-    @Override
-    protected void fillInCommandMap () {
-    }
 
 }

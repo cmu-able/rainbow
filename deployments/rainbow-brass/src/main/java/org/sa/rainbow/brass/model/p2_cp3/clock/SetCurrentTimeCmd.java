@@ -14,8 +14,8 @@ public class SetCurrentTimeCmd extends AbstractRainbowModelOperation<Double, Clo
 
     private double m_time;
 
-    public SetCurrentTimeCmd (ClockModelInstance model, String target, String wp) {
-        super ("setCurrentTime", model, target, wp);
+    public SetCurrentTimeCmd (String commandName, ClockModelInstance model, String target, String wp) {
+        super (commandName, model, target, wp);
         m_time = Double.parseDouble (wp);
     }
 

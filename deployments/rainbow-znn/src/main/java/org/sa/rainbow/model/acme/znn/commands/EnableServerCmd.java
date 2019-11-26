@@ -46,8 +46,8 @@ import java.util.List;
 public class EnableServerCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
 
     // Target is the server to enable, enable is whether to set it as enabled or not "true" or "false"
-    public EnableServerCmd (AcmeModelInstance model, String target, String enable) {
-        super ("enableServer", model, target, enable);
+    public EnableServerCmd (String c, AcmeModelInstance model, String target, String enable) {
+        super (c, model, target, enable);
     }
 
     /**

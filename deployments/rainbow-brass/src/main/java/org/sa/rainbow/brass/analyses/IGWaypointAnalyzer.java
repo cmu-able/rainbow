@@ -12,6 +12,7 @@ import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.map.EnvMapNode;
 import org.sa.rainbow.brass.model.p2_cp3.mission.MissionState.LocationRecording;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowChangeBusSubscription;
@@ -66,7 +67,7 @@ public class IGWaypointAnalyzer extends P2Analyzer implements IRainbowModelChang
 	}
 
 	@Override
-	protected void runAction() {
+	protected void runAction() throws RainbowException {
 		boolean go = false;
 		synchronized (this) {
 			if (m_newIG)

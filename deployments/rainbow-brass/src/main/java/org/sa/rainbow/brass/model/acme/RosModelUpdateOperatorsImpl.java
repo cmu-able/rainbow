@@ -1,6 +1,7 @@
 package org.sa.rainbow.brass.model.acme;
 
 import org.acmestudio.acme.element.IAcmeSystem;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 
 public class RosModelUpdateOperatorsImpl extends AcmeModelInstance {
@@ -19,7 +20,11 @@ public class RosModelUpdateOperatorsImpl extends AcmeModelInstance {
     @Override
     public RosModelCommandFactory getCommandFactory () {
         if (m_commandFactory == null) {
-            m_commandFactory = new RosModelCommandFactory (this);
+            try {
+				m_commandFactory = new RosModelCommandFactory (this);
+			} catch (RainbowException e) {
+				e.printStackTrace();
+			}
         }
         return m_commandFactory;
     }

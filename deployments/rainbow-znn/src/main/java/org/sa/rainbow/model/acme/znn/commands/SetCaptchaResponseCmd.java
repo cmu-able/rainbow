@@ -38,8 +38,8 @@ import java.util.List;
 
 public class SetCaptchaResponseCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
 
-    public SetCaptchaResponseCmd (AcmeModelInstance modelInstance, String client, String response) {
-        super ("setCaptchaResponse", modelInstance, client, response);
+    public SetCaptchaResponseCmd (String c, AcmeModelInstance modelInstance, String client, String response) {
+        super (c, modelInstance, client, response);
     }
 
     @Override

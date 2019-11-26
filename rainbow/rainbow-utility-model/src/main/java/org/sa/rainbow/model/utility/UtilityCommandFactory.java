@@ -25,6 +25,7 @@ package org.sa.rainbow.model.utility;
 
 import java.io.InputStream;
 
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.UtilityPreferenceDescription;
@@ -44,7 +45,7 @@ public class UtilityCommandFactory extends ModelCommandFactory<UtilityPreference
     }
 
 
-    public UtilityCommandFactory (UtilityModelInstance utilityModelInstance) {
+    public UtilityCommandFactory (UtilityModelInstance utilityModelInstance) throws RainbowException {
         super (utilityModelInstance.getClass (), utilityModelInstance);
     }
 
@@ -61,10 +62,6 @@ public class UtilityCommandFactory extends ModelCommandFactory<UtilityPreference
         return null;
     }
 
-    @Override
-    protected void fillInCommandMap () {
-        // TODO Auto-generated method stub
-
-    }
+  
 
 }

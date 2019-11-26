@@ -39,8 +39,8 @@ public class AddClientCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
      *            The load balancer that the client will be attached to
      * @param clientIP
      */
-    public AddClientCmd (AcmeModelInstance model, String sys, String lb, String clientIP) {
-        super ("addClient", model, sys, lb, clientIP);
+    public AddClientCmd (String c, AcmeModelInstance model, String sys, String lb, String clientIP) {
+        super (c, model, sys, lb, clientIP);
         m_lb = lb;
         m_clientIP = clientIP;
     }

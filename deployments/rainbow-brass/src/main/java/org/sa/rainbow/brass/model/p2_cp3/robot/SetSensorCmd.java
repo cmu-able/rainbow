@@ -16,8 +16,8 @@ public class SetSensorCmd extends AbstractRainbowModelOperation<EnumSet<Sensors>
 	private Boolean m_on;
 	private Sensors m_sensor;
 
-	public SetSensorCmd(CP3RobotStateModelInstance model, String target, String sensor, String on) {
-		super("setSensor", model, target, sensor, on);
+	public SetSensorCmd(String commandName, CP3RobotStateModelInstance model, String target, String sensor, String on) {
+		super(commandName, model, target, sensor, on);
 		m_sensor = Sensors.valueOf(sensor);
 		m_on = Boolean.valueOf(on);
 	}
@@ -29,7 +29,7 @@ public class SetSensorCmd extends AbstractRainbowModelOperation<EnumSet<Sensors>
 
 	@Override
 	protected List<? extends IRainbowMessage> getGeneratedEvents(IRainbowMessageFactory messageFactory) {
-		return generateEvents(messageFactory, "setSensor");
+		return generateEvents(messageFactory, getName());
 	}
 
 	@Override

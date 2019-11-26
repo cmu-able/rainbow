@@ -16,9 +16,9 @@ public class SetExecutingInstructionCmd extends AbstractRainbowModelOperation<St
     private String m_state;
     private String m_oldState;
 
-    public SetExecutingInstructionCmd (InstructionGraphModelInstance modelInstance, String target,
+    public SetExecutingInstructionCmd (String commandName, InstructionGraphModelInstance modelInstance, String target,
             String instructionLabel, String state) {
-        super ("setExecutingInstruction", modelInstance, "", instructionLabel, state);
+        super (commandName, modelInstance, "", instructionLabel, state);
         m_instructionLabel = instructionLabel;
         m_state = state;
     }

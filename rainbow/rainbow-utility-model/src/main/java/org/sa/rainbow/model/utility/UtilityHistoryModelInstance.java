@@ -65,7 +65,7 @@ public class UtilityHistoryModelInstance implements IModelInstance<UtilityHistor
     }
 
     @Override
-    public UtilityHistoryCommandFactory getCommandFactory () {
+    public UtilityHistoryCommandFactory getCommandFactory () throws RainbowException {
         if (m_commandFactory == null) {
             m_commandFactory = new UtilityHistoryCommandFactory (this);
         }

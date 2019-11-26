@@ -17,8 +17,8 @@ public class CreateActionPortCommand extends RosAcmeModelCommand<IAcmePort> {
     private String                 m_portType;
     private IAcmePortCreateCommand m_portCreateCommand;
 
-    public CreateActionPortCommand (AcmeModelInstance model, String comp, String portName, String portType) {
-        super ("createActionPort", model, comp, portName, portType);
+    public CreateActionPortCommand (String commandName, AcmeModelInstance model, String comp, String portName, String portType) {
+        super (commandName, model, comp, portName, portType);
         m_comp = comp;
         m_portName = portName;
         m_portType = portType;

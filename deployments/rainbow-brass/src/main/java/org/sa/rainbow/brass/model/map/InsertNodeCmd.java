@@ -16,9 +16,9 @@ public class InsertNodeCmd extends AbstractRainbowModelOperation<EnvMap.NodeInse
     private final float m_y;
     private boolean      m_blocked;
 
-    public InsertNodeCmd (EnvMapModelInstance model, String target, String n, String na, String nb, String x, String y,
+    public InsertNodeCmd (String commandName, EnvMapModelInstance model, String target, String n, String na, String nb, String x, String y,
             String blocked) {
-        super ("insertNode", model, target, n, na, nb, x, y, blocked);
+        super (commandName, model, target, n, na, nb, x, y, blocked);
         m_n = n;
         m_na = na;
         m_nb = nb;
@@ -34,7 +34,7 @@ public class InsertNodeCmd extends AbstractRainbowModelOperation<EnvMap.NodeInse
 
     @Override
     protected List<? extends IRainbowMessage> getGeneratedEvents (IRainbowMessageFactory messageFactory) {
-        return generateEvents (messageFactory, "insertNode");
+        return generateEvents (messageFactory, getName());
     }
 
     @Override

@@ -28,6 +28,7 @@ import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowState.CP3ModelState
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.util.Pair;
@@ -49,7 +50,7 @@ public class EnergyConsumptionAnalyzer extends P2CP1Analyzer {
 	}
 
 	@Override
-	protected void runAction() {
+	protected void runAction() throws RainbowException {
 		if (getModels().getInstructionGraphModel() == null)
 			return;
 		// Need to work out how to wait for planner in CP1 -- is it

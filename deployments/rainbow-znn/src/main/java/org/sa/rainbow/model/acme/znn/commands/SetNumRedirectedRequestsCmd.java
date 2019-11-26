@@ -42,9 +42,9 @@ public class SetNumRedirectedRequestsCmd extends ZNNAcmeModelCommand<IAcmeProper
     private String m_server;
     private float          m_requests;
 
-    public SetNumRedirectedRequestsCmd (AcmeModelInstance model, String server,
+    public SetNumRedirectedRequestsCmd (String c, AcmeModelInstance model, String server,
                                         String requests) {
-        super ("setNumRedirectedRequests", model, server, requests);
+        super (c, model, server, requests);
         m_server = server;
         m_requests = Integer.valueOf (requests);
     }

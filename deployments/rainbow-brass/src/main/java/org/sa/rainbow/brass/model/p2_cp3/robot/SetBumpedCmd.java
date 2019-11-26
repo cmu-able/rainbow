@@ -20,8 +20,8 @@ public class SetBumpedCmd extends AbstractRainbowModelOperation<Boolean, RobotSt
 
 	private boolean m_bumped;
 
-	public SetBumpedCmd(CP3RobotStateModelInstance model, String target, String bumped) {
-		super("setBumped", model, target, bumped);
+	public SetBumpedCmd(String commandName, CP3RobotStateModelInstance model, String target, String bumped) {
+		super(commandName, model, target, bumped);
 		m_bumped = Boolean.getBoolean(bumped);
 	}
 
@@ -32,7 +32,7 @@ public class SetBumpedCmd extends AbstractRainbowModelOperation<Boolean, RobotSt
 
 	@Override
 	protected List<? extends IRainbowMessage> getGeneratedEvents(IRainbowMessageFactory messageFactory) {
-		return generateEvents(messageFactory, "setBumped");
+		return generateEvents(messageFactory, getName());
 	}
 
 	@Override

@@ -42,9 +42,9 @@ public class SetNumRequestsClientErrorCmd extends ZNNAcmeModelCommand<IAcmePrope
     private String m_server;
     private float          m_requests;
 
-    public SetNumRequestsClientErrorCmd (AcmeModelInstance model, String server,
+    public SetNumRequestsClientErrorCmd (String c, AcmeModelInstance model, String server,
                                          String requests) {
-        super ("setNumRequestsClientError", model, server, requests);
+        super (c, model, server, requests);
         m_server = server;
         m_requests = Integer.valueOf (requests);
     }

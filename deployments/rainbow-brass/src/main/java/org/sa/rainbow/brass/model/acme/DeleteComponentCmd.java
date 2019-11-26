@@ -16,8 +16,8 @@ public class DeleteComponentCmd extends AcmeModelOperation<IAcmeComponent> {
     private String                      m_component;
     private IAcmeComponentDeleteCommand m_deleteComponentCmd;
 
-    public DeleteComponentCmd (AcmeModelInstance model, String system, String component) {
-        super ("deleteComponent", model, system, component);
+    public DeleteComponentCmd (String commandName, AcmeModelInstance model, String system, String component) {
+        super (commandName, model, system, component);
         m_component = component;
 
     }

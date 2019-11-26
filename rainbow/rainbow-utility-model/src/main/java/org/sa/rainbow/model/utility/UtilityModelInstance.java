@@ -97,7 +97,7 @@ public class UtilityModelInstance implements IModelInstance<UtilityPreferenceDes
     }
 
     @Override
-    public ModelCommandFactory<UtilityPreferenceDescription> getCommandFactory () {
+    public ModelCommandFactory<UtilityPreferenceDescription> getCommandFactory () throws RainbowException {
         if (m_commandFactory == null) {
             m_commandFactory = new UtilityCommandFactory (this);
         }

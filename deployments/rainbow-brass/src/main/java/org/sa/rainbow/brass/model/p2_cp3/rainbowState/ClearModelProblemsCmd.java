@@ -7,9 +7,9 @@ import org.sa.rainbow.core.models.IModelInstance;
 public class ClearModelProblemsCmd
 		extends AbstractSimpleRainbowModelOperation<Boolean, RainbowState> {
 
-	public ClearModelProblemsCmd(RainbowStateModelInstance model,
+	public ClearModelProblemsCmd(String commandName, RainbowStateModelInstance model,
 			String target, String empty) {
-		super("clearModelProblems", "clearModelProblems", model, target, empty);
+		super(commandName, "clearModelProblems", model, target, empty);
 	}
 
 	@Override

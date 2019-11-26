@@ -92,7 +92,7 @@ public class ExecutionHistoryModelInstance implements IAdaptationModel<Map<Strin
 	}
 
 	@Override
-	public ExecutionHistoryCommandFactory getCommandFactory() {
+	public ExecutionHistoryCommandFactory getCommandFactory() throws RainbowException {
 		return new ExecutionHistoryCommandFactory(this);
 	}
 

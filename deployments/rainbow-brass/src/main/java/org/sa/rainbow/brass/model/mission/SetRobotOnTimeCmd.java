@@ -10,8 +10,8 @@ import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 public class SetRobotOnTimeCmd extends AbstractRainbowModelOperation<Boolean, MissionState> {
 	private boolean m_robotOnTime;
 
-	public SetRobotOnTimeCmd (MissionStateModelInstance model, String target, String robotOnTime) {
-        super ("setRobotOnTime", model, target, robotOnTime);
+	public SetRobotOnTimeCmd (String commandName, MissionStateModelInstance model, String target, String robotOnTime) {
+        super (commandName, model, target, robotOnTime);
         m_robotOnTime = Boolean.parseBoolean(robotOnTime);
     }
 
@@ -27,7 +27,7 @@ public class SetRobotOnTimeCmd extends AbstractRainbowModelOperation<Boolean, Mi
 
 	@Override
 	protected List<? extends IRainbowMessage> getGeneratedEvents(IRainbowMessageFactory messageFactory) {
-		return generateEvents(messageFactory, "setRobotOnTime");
+		return generateEvents(messageFactory, getName());
 	}
 
 	@Override

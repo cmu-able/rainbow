@@ -12,9 +12,9 @@ public class SetCalibrationErrorCmd extends AbstractRainbowModelOperation<Calibr
 
     private CalibrationError m_error;
 
-    public SetCalibrationErrorCmd (MissionStateModelInstance model, String target, String r, String r_scale, String t,
+    public SetCalibrationErrorCmd (String commandName, MissionStateModelInstance model, String target, String r, String r_scale, String t,
             String t_scale, String rv, String tv) {
-        super ("setCalibrationError", model, target, r, r_scale, t, t_scale, rv, tv);
+        super (commandName, model, target, r, r_scale, t, t_scale, rv, tv);
         m_error = new CalibrationError ();
         m_error.translational_error = Double.parseDouble (t);
         m_error.translational_scale = Double.parseDouble (t_scale);
@@ -31,7 +31,7 @@ public class SetCalibrationErrorCmd extends AbstractRainbowModelOperation<Calibr
 
     @Override
     protected List<? extends IRainbowMessage> getGeneratedEvents (IRainbowMessageFactory messageFactory) {
-        return generateEvents (messageFactory, "setCalibrationError");
+        return generateEvents (messageFactory, getName());
     }
 
     @Override

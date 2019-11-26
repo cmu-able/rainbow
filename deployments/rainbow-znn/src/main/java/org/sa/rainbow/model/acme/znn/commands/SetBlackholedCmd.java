@@ -53,8 +53,8 @@ public class SetBlackholedCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
      *            the load balancer
      * @param ipSet
      */
-    public SetBlackholedCmd (AcmeModelInstance model, String target, String ipSet) {
-        super ("setBlackholed", model, target, ipSet);
+    public SetBlackholedCmd (String c, AcmeModelInstance model, String target, String ipSet) {
+        super (c, model, target, ipSet);
     }
 
     @Override

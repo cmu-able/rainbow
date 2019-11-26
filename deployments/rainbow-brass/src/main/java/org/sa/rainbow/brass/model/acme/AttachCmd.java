@@ -19,8 +19,8 @@ public class AttachCmd extends AcmeModelOperation<IAcmeAttachment> {
     private String                 m_role;
     private IAcmeAttachmentCommand m_attachCmd;
 
-    public AttachCmd (AcmeModelInstance model, String system, String port, String role) {
-        super ("attach", model, system, port, role);
+    public AttachCmd (String commandName, AcmeModelInstance model, String system, String port, String role) {
+        super (commandName, model, system, port, role);
         // TODO Auto-generated constructor stub
         m_port = port;
         m_role = role;
