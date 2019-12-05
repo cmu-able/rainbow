@@ -13,6 +13,10 @@ public class PropertiesConnector {
     public static final String PRISM_OUTPUT_DIR_PROPKEY         = "prism.tmpdir";
     public static final String CP1_CONFIG_FILE_PROPKEY = "cp1.config";
 
+    // HAIQ
+    public static final String CP3_HAIQ_TEMPLATE_PROPKEY = "template.haiq";
+    public static final String CP3_HAIQ_MODEL_PROPKEY = "model.haiq";
+    
     public static final Properties DEFAULT = new Properties ();
 
     static {
@@ -34,6 +38,10 @@ public class PropertiesConnector {
         DEFAULT.setProperty (PRISM_ADV_EXPORT_PROPKEY, prismOutDir + "botpolicy.adv");
         DEFAULT.setProperty (MAP_PROPKEY, prismOutDir + "map-p2cp3.json");
         DEFAULT.setProperty(CP1_CONFIG_FILE_PROPKEY, "~/cp1/plugins_config.json");
+        
+        // HAIQ
+        DEFAULT.setProperty(CP3_HAIQ_TEMPLATE_PROPKEY, prismOutDir+"haiqtemplates/mobot.ht");
+        DEFAULT.setProperty(CP3_HAIQ_MODEL_PROPKEY, prismOutDir+"mobot-generated.haiq");
     }
 
 

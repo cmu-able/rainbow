@@ -1,0 +1,219 @@
+// ----------------------------------------------------------------------------
+// Mobile Robotics Simple Scenario HaiQ model 
+// (c) 2019 Javier Camara 
+// Email: jvcamm@gmail.com
+// Web: http://www.javicamara.com
+// ----------------------------------------------------------------------------
+
+ModelType: mdp
+
+// ----------------------------------------------------------------------------
+// Software architecture
+// ----------------------------------------------------------------------------
+
+const DISABLED=0;
+const ENABLED=1;
+
+// Components
+abstract sig component {}
+</
+  formula INIT=0;
+  var status:[DISABLED..ENABLED] init INIT;
+  var done : bool init false;
+  [this:enable] (done=false) & (status=DISABLED) -> (status'=ENABLED) & (done'=true);
+  [this:disable] (done=false) & (status=ENABLED) -> (status'=DISABLED) & (done'=true);
+/>
+
+abstract sig sensing extends component {}
+</
+/>
+
+abstract sig localization extends component {}
+</
+/>
+
+
+lone sig kinect extends sensing {}
+</
+/>
+
+lone sig lidar extends sensing {}
+</
+/>
+
+lone sig camera extends sensing {} // Simplified front-and back to just one type (always go together)
+</
+/>
+
+lone sig amcl extends localization {}
+</
+/>
+
+lone sig mrpt extends localization {}
+</
+/>
+
+lone sig markerLocalization extends localization{}
+</
+/>
+
+lone sig laserscanNodelet extends component {}
+</
+/>
+
+lone sig markerRecognizer extends component {} // Simplified to just one type (like cameras)
+</
+/>
+
+lone sig headlamp extends component {}
+</
+/>
+
+abstract sig mapServer extends component{}
+</
+/>
+
+lone sig mapServerObs extends mapServer{}
+</
+/>
+
+lone sig mapServerStd extends mapServer{}
+</
+/>
+
+// Options
+abstract sig option {}
+</
+  formula INIT=0;
+  var status:[DISABLED..ENABLED] init INIT;
+  var done : bool init false;
+  [this:enable] (done=false) & (status=DISABLED) -> (status'=ENABLED) & (done'=true);
+  [this:disable] (done=false) & (status=ENABLED) -> (status'=DISABLED) & (done'=true);
+/>
+
+abstract sig speedSetting extends option {}
+</
+/>
+
+lone sig halfSpeedSetting extends speedSetting {}
+</
+/>
+
+lone sig fullSpeedSetting extends speedSetting {}
+</
+/>
+
+lone sig safeSpeedSetting extends speedSetting {}
+</
+/>
+
+// Constraints
+pred config{
+  some kinect <=> some laserscanNodelet
+  some camera <=> some markerLocalization
+  some camera <=> some markerRecognizer
+  some camera <=> some mapServerObs
+  some headlamp => some camera
+  one sensing
+  one localization
+  one speedSetting
+  one mapServer
+}
+
+label aruco [some camera:status=ENABLED]
+label amcl [some amcl:status=ENABLED]
+label mrpt [some mrpt:status=ENABLED]
+label kinect [some kinect:status=ENABLED]
+label lidar [some lidar:status=ENABLED]
+label headlamp [some headlamp:status=ENABLED]
+label half_speed [some halfSpeedSetting:status=ENABLED]
+label full_speed [some fullSpeedSetting:status=ENABLED]
+label safe_speed [some safeSpeedSetting:status=ENABLED]
+
+## formula amcl_kinect = amcl & kinect;
+## formula mrpt_kinect = mrpt & kinect;
+## formula mrpt_lidar = mrpt & lidar;
+## formula amcl_lidar = amcl & lidar;
+
+## formula amcl_lidar_24 = amcl_lidar & safe_speed;
+## formula amcl_lidar_35 = amcl_lidar & half_speed;
+## formula amcl_lidar_68 = amcl_lidar & full_speed;
+
+## formula mrpt_lidar_24 = mrpt_lidar & safe_speed;
+## formula mrpt_lidar_35 = mrpt_lidar & half_speed;
+## formula mrpt_lidar_68 = mrpt_lidar & full_speed;
+
+## formula amcl_kinect_24 = amcl_kinect & safe_speed;
+## formula amcl_kinect_35 = amcl_kinect & half_speed;
+## formula amcl_kinect_68 = amcl_kinect & full_speed;
+
+## formula mrpt_kinect_24 = mrpt_kinect & safe_speed;
+## formula mrpt_kinect_35 = mrpt_kinect & half_speed;
+## formula mrpt_kinect_68 = mrpt_kinect & full_speed;
+
+## formula aruco_camera_24 = aruco & safe_speed;
+## formula aruco_camera_35 = aruco & half_speed;
+## formula aruco_camera_68 = aruco & full_speed;
+
+## formula aruco_camera_headlamp_24 = aruco & headlamp & safe_speed;
+## formula aruco_camera_headlamp_35 = aruco & headlamp & half_speed;
+## formula aruco_camera_headlamp_68 = aruco & headlamp & full_speed;
+
+
+// ----------------------------------------------------------------------------
+// Mission
+// ----------------------------------------------------------------------------
+
+
+abstract sig s { c : set s }
+</ 
+  var robotIn: bool init false;
+  var collided: bool init false;
+  formula hitrate= 0; // To be defined by inheriting sigs
+  formula energy = 0;
+  formula time = 0;
+
+  [c:moveTo] (reconfDone) & (robotIn) -> (robotIn'=robotIn);
+  [c:moveTo] (reconfDone) & (!robotIn) & (c.robotIn) -> 1-hitrate : (robotIn'=true) + hitrate : (robotIn'=true & collided'=true);
+
+  reward energy [c:moveTo] robotIn=true :  energy;
+  reward time [c:moveTo] robotIn=true : time;
+/>
+
+
+abstract sig ss extends s {}
+</
+  var robotIn: bool init true;
+/>
+
+abstract sig es extends s {}
+</
+  var robotIn: bool init false;
+/>
+
+pred path {
+  disj[ss,es]
+  c=~c
+  all x:s | disj[x,x.c]
+  all x:s-(ss+es) | #x.c = 2
+  all x:ss+es | #x.c = 1
+  all x:s | s in x.^c + x.^~c
+  one ss and one es
+}
+
+
+label robotInStart [some ss:robotIn=true]      
+label robotInTarget [some es:robotIn=true]
+label reconfDone [all component:done=true] 
+label hasCollided [some s:collided=true]
+
+property minRmin{energy} [F (robotInTarget & reconfDone)] as energy;
+property minRmin{time} [F (robotInTarget & reconfDone)] as time;
+property maxPmax [F (robotInTarget & reconfDone & !hasCollided)] as safety;
+
+pred scenario{path and config}
+
+run scenario for 7 s, 7 component
+
+//------------------------------------- end of reusable template ----------------------
+
