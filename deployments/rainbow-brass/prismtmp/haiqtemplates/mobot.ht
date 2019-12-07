@@ -165,11 +165,23 @@ label safe_speed [some safeSpeedSetting:status=ENABLED]
 // ----------------------------------------------------------------------------
 
 
+// Robot heading/orientation constants
+
+const H_NORTH=0;
+const H_NORTHEAST=1;
+const H_EAST=2;
+const H_SOUTHEAST=3;
+const H_SOUTH=4;
+const H_SOUTHWEST=5;
+const H_WEST=6;
+const H_NORTHWEST=7;
+
+
 abstract sig s { c : set s }
 </ 
   var robotIn: bool init false;
   var collided: bool init false;
-  formula hitrate= 0; // To be defined by inheriting sigs
+  formula hitrate = 0; // To be defined by inheriting sigs
   formula energy = 0;
   formula time = 0;
 

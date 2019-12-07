@@ -1,24 +1,42 @@
 package org.sa.rainbow.brass.plan.p2_cp3;
 
 import java.awt.geom.Point2D;
+import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 
+import org.sa.rainbow.brass.model.map.MapTranslatorHAIQ;
+import org.jcm.haiq.analyzer.*;
+
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+
 import org.sa.rainbow.brass.PropertiesConnector;
 import org.sa.rainbow.brass.adaptation.PrismPolicy;
 import org.sa.rainbow.brass.confsynthesis.ConfigurationSynthesizer;
+import org.sa.rainbow.brass.confsynthesis.DetailedConfigurationBatteryModel;
+import org.sa.rainbow.brass.confsynthesis.PropertiesConfigurationSynthesizer;
 import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.map.EnvMapPath;
 import org.sa.rainbow.brass.plan.p2.DecisionEngine;
 import org.sa.rainbow.brass.plan.p2.MapTranslator;
 import org.sa.rainbow.core.Rainbow;
+
 
 public class DecisionEngineCP3HAIQ extends DecisionEngine {
 
@@ -36,7 +54,7 @@ public class DecisionEngineCP3HAIQ extends DecisionEngine {
 	public static void init(Properties props) throws Exception {
 		s_properties = props;
 		DecisionEngine.init(props);
-		MapTranslator.ROBOT_BATTERY_RANGE_MAX = 180000;
+		MapTranslatorHAIQ.ROBOT_BATTERY_RANGE_MAX = 180000.0;
 		MapTranslator.CONSIDER_RECONFIGURATION_COST = Boolean
 				.parseBoolean(props.getProperty("rainbow.consider_cost", "false"));
 		MapTranslator.ROBOT_MAX_RECONF_VAL = props.getProperty("rainbow.max_reconfs", "1");
@@ -168,12 +186,14 @@ public class DecisionEngineCP3HAIQ extends DecisionEngine {
 		m_selected_candidate_energy = maxEntry.getValue().get(ENERGY_INDEX);
 		m_selected_candidate_score = maxScore;
 
-		String balancedCandidate = m_candidates.get(maxEntry.getKey());
+//		String balancedCandidate = m_candidates.get(maxEntry.getKey());
+		String balancedCandidate = maxEntry.getKey().toString();
 		log("Balanced candidate policy: " + balancedCandidate);
 		log("Score: " + String.valueOf(m_selected_candidate_score) + " Safety: "
 				+ String.valueOf(m_selected_candidate_safety) + " Time: " + String.valueOf(m_selected_candidate_time)
 				+ " Energy: " + String.valueOf(m_selected_candidate_energy));
-		String singleCriterionCandidate = m_candidates.get(maxSingleEntry.getKey());
+//		String singleCriterionCandidate = m_candidates.get(maxSingleEntry.getKey());
+		String singleCriterionCandidate = maxSingleEntry.getKey().toString();
 		log("Single Criterion selected, based on really preferring one quality: " + singleCriterionCandidate);
 		if (!Objects.equals(maxSingleEntry.getKey(), maxEntry.getKey())) {
 			log("THESE PLANS ARE DIFFERENT");
@@ -344,6 +364,69 @@ public class DecisionEngineCP3HAIQ extends DecisionEngine {
 				"Candidate Path distance : " + String.valueOf(epath.getDistance()) + " " + String.valueOf(path));
 		m_candidates = specifications;
 	}
+	
+	
+	public static void readScoreBoard(String filename) {
+    	
+        
+        Properties props = PropertiesConnector.DEFAULT;
+
+        JSONParser parser = new JSONParser();
+
+        try (Reader reader = new FileReader(filename)) {
+
+            JSONArray jsonArray = (JSONArray) parser.parse(reader);            
+            
+            for (int i=0; i<jsonArray.size(); i++) {
+            	JSONObject o = (JSONObject) jsonArray.get(i);
+            	ArrayList<Double> resItem = new ArrayList<Double>();
+            	String policyContent="";
+           	 		
+            	Double energy=0.0, time=0.0, safety=0.0; 
+            	
+            	for (Object key: o.keySet()) {
+                	String sk = (String) key;
+                	
+                	try (BufferedReader br = new BufferedReader(new FileReader(props.getProperty(PropertiesConnector.PRISM_OUTPUT_DIR_PROPKEY)+"/haiqadv/"+key+"-adv.txt"))){
+           	 			policyContent = br.readLine();
+           	 		} catch (IOException e) {
+           	 			e.printStackTrace();
+           	 		}
+                	
+            
+                	JSONArray itemlist = (JSONArray) o.get(sk);
+                	
+                	for (int j=0;j<itemlist.size();j++) {
+	                	JSONObject item = (JSONObject) itemlist.get(j);
+	                	if (item.containsKey("energy"))
+	                		energy = MapTranslatorHAIQ.ROBOT_BATTERY_RANGE_MAX - Double.parseDouble((String)item.get("energy"));
+	
+	                	if (item.containsKey("time"))
+	                		time = Double.parseDouble((String)item.get("time"));
+	
+	                	if (item.containsKey("safety"))
+	                		safety = Double.parseDouble((String)item.get("safety"));
+	                	
+                	}
+
+                }
+            	resItem.add(energy);
+            	resItem.add(time);
+            	resItem.add(safety);
+                 	           
+            	List<String> policy = Arrays.asList(policyContent.replace("[","").replace("]","").split(","));       	
+            	m_scoreboard.put(policy, resItem);
+
+            }
+           
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+	}
+	
 
 	/**
 	 * Class test
@@ -351,44 +434,39 @@ public class DecisionEngineCP3HAIQ extends DecisionEngine {
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
-		init(PropertiesConnector.DEFAULT);
+		 init(PropertiesConnector.DEFAULT);
 
-		List<Point2D> coordinates = new ArrayList<Point2D>();
-		PrismPolicy pp = null;
+		 ConfigurationSynthesizer cs = new ConfigurationSynthesizer();
+		 MapTranslatorHAIQ.m_battery_model = new DetailedConfigurationBatteryModel(PropertiesConfigurationSynthesizer.DEFAULT);
+		 cs.generateConfigurations();
+		 cs.populate();
+    	 EnvMap dummyMap = new EnvMap (null, null); 
+         MapTranslatorHAIQ.setMap(dummyMap);
+         MapTranslatorHAIQ.setConfigurationProvider(cs);
+         Properties props = PropertiesConnector.DEFAULT;
+         MapTranslatorHAIQ.exportTranslation(props.getProperty(PropertiesConnector.CP3_HAIQ_MODEL_PROPKEY), MapTranslatorHAIQ.getJHAIQTranslation("l32","l36"));
+ //         -properties[0,1,2] -exportModels  -setMaxConfigs[100] -exportPolicies[./adv/] -showScoreboard -exportScoreboardJSON[./scores.json]
 
-		EnvMap dummyMap = new EnvMap(null, null);
-		System.out.println("Loading Map: " + PropertiesConnector.DEFAULT.getProperty(PropertiesConnector.MAP_PROPKEY));
-		dummyMap.loadFromFile(PropertiesConnector.DEFAULT.getProperty(PropertiesConnector.MAP_PROPKEY));
-		System.out.println("Setting map...");
-		setMap(dummyMap);
+         String[] HQArgs =  {"-model["+props.getProperty(PropertiesConnector.CP3_HAIQ_MODEL_PROPKEY)+"]",
+        		 			 "-properties[0,1,2]", "-setMaxConfigs[10]", "-showScoreboard", 
+        		 			 "-exportPolicies["+props.getProperty(PropertiesConnector.PRISM_OUTPUT_DIR_PROPKEY)+"/haiqadv/]",
+        		 			 "-exportScoreboardJSON["+props.getProperty(PropertiesConnector.PRISM_OUTPUT_DIR_PROPKEY)+"/haiqadv/scores]",
+        		 			 "-exportModels"};
+         HaiQ.main(HQArgs);
+         readScoreBoard(props.getProperty(PropertiesConnector.PRISM_OUTPUT_DIR_PROPKEY)+"/haiqadv/scores.json");
+         System.out.println(m_scoreboard);
+        String policyContent = selectPolicy();
+        System.out.println(policyContent);
+     	ArrayList<String> policy = new ArrayList<String>();
+     	policy.addAll(Arrays.asList(policyContent.replace("[","").replace("].adv","").split(",")));
+     	System.out.println (policy.toString());
+     	BRASSRobotPolicyFilter f = new BRASSRobotPolicyFilter(policy);
+     	ArrayList<String> myPlan = f.getPlan("l32", "l36");
+     	System.out.println("PLAN TRANSLATED: "+myPlan); 
+		PolicyToIGCP3 translator = new PolicyToIGCP3(null, dummyMap);
+		System.out.println(translator.translatePlan(myPlan));
 
-		ConfigurationSynthesizer cs = new ConfigurationSynthesizer();
-		System.out.println("Populating configuration list..");
-		cs.populate();
-		System.out.println("Setting configuration provider...");
-		setConfigurationProvider(cs);
-
-		// String
-		// currentConfStr="mapServerStd0_INIT=0,mapServerObs0_INIT=0,safeSpeedSetting0_INIT=0,markerLocalization0_INIT=0,markerRecognizer0_INIT=0,amcl0_INIT=1,laserscanNodelet0_INIT=1,mrpt0_INIT=2,camera0_INIT=1,lidar0_INIT=1,headlamp0_INIT=0,kinect0_INIT=2,fullSpeedSetting0_INIT=0,halfSpeedSetting0_INIT=1";
-		String currentConfStr = "laserscanNodelet0_INIT=0,amcl0_INIT=0,markerLocalization0_INIT=0,mapServerObs0_INIT=0,markerRecognizer0_INIT=0,mapServerStd0_INIT=1,mrpt0_INIT=2,kinect0_INIT=0,camera0_INIT=0,headlamp0_INIT=0,lidar0_INIT=2,fullSpeedSetting0_INIT=0,halfSpeedSetting0_INIT=1,safeSpeedSetting0_INIT=0";
-		cs.generateReconfigurationsFrom(currentConfStr);
-
-		setTimelinessPreference();
-		for (int i = 180000; i < 180500; i += 500) {
-			System.out.println("Generating candidates for l1-l4...");
-			generateCandidates("l32", "l36", true);
-			System.out.println("Scoring candidates...");
-			scoreCandidates(dummyMap, i, 1, "-1");
-			System.out.println(String.valueOf(m_scoreboard));
-			pp = new PrismPolicy(selectPolicy());
-			pp.readPolicy();
-			String plan = pp.getPlan(cs, currentConfStr).toString();
-			System.out.println("Selected Plan: " + plan);
-			PolicyToIGCP3 translator = new PolicyToIGCP3(pp, dummyMap);
-			System.out.println(translator.translate(cs, currentConfStr));
-		}
-		//System.out.println(export(dummyMap));
-
+		
 	}
 
 }

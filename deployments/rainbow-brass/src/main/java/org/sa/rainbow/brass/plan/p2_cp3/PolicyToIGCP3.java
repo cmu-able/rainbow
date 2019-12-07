@@ -292,7 +292,7 @@ public class PolicyToIGCP3 {
 		return translatePlan(plan, includeTactics);
 	}
 	
-	private String translatePlan(ArrayList<String> plan){
+	public String translatePlan(ArrayList<String> plan){
 		return translatePlan(plan, true);
 	}
 	
