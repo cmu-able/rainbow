@@ -42,11 +42,11 @@ import org.sa.rainbow.configuration.configModel.ProbeReference
 import org.sa.rainbow.configuration.configModel.PropertyReference
 import org.sa.rainbow.configuration.configModel.StringLiteral
 import org.sa.rainbow.core.gauges.AbstractGauge
+import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd
 import org.sa.rainbow.core.models.commands.ModelCommandFactory
 import org.sa.rainbow.translator.probes.AbstractProbe
-import org.sa.rainbow.configuration.services.ConfigModelGrammarAccess.EffectorTypeElements
-import org.eclipse.emf.ecore.util.EcoreUtil
-import javax.security.auth.login.Configuration
+import org.sa.rainbow.core.models.commands.AbstractSaveModelCmd
+import org.sa.rainbow.core.models.IModelInstance
 
 /**
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#content-assist
@@ -201,10 +201,9 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 				}
 				allPossibleFields.removeAll((assignmentContext.value.value as Component).assignment.map[it.name])
 			}
-		}
-		else {
+		} else {
 			parent = EcoreUtil2.getContainerOfType(model, DeclaredProperty)
-			if ((parent as DeclaredProperty)?.component  == ComponentType.UTILITY) {
+			if ((parent as DeclaredProperty)?.component == ComponentType.UTILITY) {
 				val sb = new StringBuffer()
 				var eContainer = model
 				while (eContainer != parent) {
@@ -220,11 +219,10 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 				val container = sb.toString
 				for (key : ConfigAttributeConstants.UTILITY_PROPERTY_TYPES.keySet) {
 					if (key.startsWith(container)) {
-						if (container.contains(':'))  {
-							val split = key.split(':') 
-							allPossibleFields.add(split.get(split.length-1))
-						}
-						else {
+						if (container.contains(':')) {
+							val split = key.split(':')
+							allPossibleFields.add(split.get(split.length - 1))
+						} else {
 							allPossibleFields.add(key)
 						}
 					}
@@ -263,6 +261,41 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 			ConfigModelPackage.Literals.GAUGE_TYPE_BODY__MCF, TypeMatchFilters.canInstantiate, acceptor);
 
 	}
+
+	override completeFactoryDefinition_LoadCmd(EObject model, org.eclipse.xtext.Assignment assignment,
+		ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		val jvmTypeProvider = jvmTypeProviderFactory.createTypeProvider(model.eResource.resourceSet)
+		val subclass = jvmTypeProvider.findTypeByName(AbstractLoadModelCmd.name)
+		typeProposalProvider.createSubTypeProposals(subclass, this, context,
+			ConfigModelPackage.Literals.FACTORY_DEFINITION__LOAD_CMD, TypeMatchFilters.canInstantiate, acceptor);
+
+	}
+
+	override completeFactoryDefinition_SaveCmd(EObject model, org.eclipse.xtext.Assignment assignment,
+		ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		val jvmTypeProvider = jvmTypeProviderFactory.createTypeProvider(model.eResource.resourceSet)
+		val subclass = jvmTypeProvider.findTypeByName(AbstractSaveModelCmd.name)
+		typeProposalProvider.createSubTypeProposals(subclass, this, context,
+			ConfigModelPackage.Literals.FACTORY_DEFINITION__SAVE_CMD, TypeMatchFilters.canInstantiate, acceptor);
+
+	}
+
+	override completeFactoryDefinition_Extends(EObject model, org.eclipse.xtext.Assignment assignment,
+		ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		val jvmTypeProvider = jvmTypeProviderFactory.createTypeProvider(model.eResource.resourceSet)
+		val subclass = jvmTypeProvider.findTypeByName(ModelCommandFactory.name)
+		typeProposalProvider.createSubTypeProposals(subclass, this, context,
+			ConfigModelPackage.Literals.FACTORY_DEFINITION__EXTENDS, TypeMatchFilters.canInstantiate, acceptor);
+	}
+	
+	override completeFactoryDefinition_ModelClass(EObject model, org.eclipse.xtext.Assignment assignment,
+		ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		val jvmTypeProvider = jvmTypeProviderFactory.createTypeProvider(model.eResource.resourceSet)
+		val subclass = jvmTypeProvider.findTypeByName(IModelInstance.name)
+		typeProposalProvider.createSubTypeProposals(subclass, this, context,
+			ConfigModelPackage.Literals.FACTORY_DEFINITION__MODEL_CLASS, TypeMatchFilters.canInstantiate, acceptor);
+		
+    }	
 
 	override completeEffectorBody_Ref(EObject model, org.eclipse.xtext.Assignment assignment,
 		ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
@@ -385,7 +418,9 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 						}
 					}
 				}
-				extends = ConfigAttributeConstants.UTILITY_PROPERTY_TYPES.containsKey(sb.toString)?ConfigAttributeConstants.UTILITY_PROPERTY_TYPES.get(sb.toString).get("extends") as List<Class>:null
+				extends = ConfigAttributeConstants.UTILITY_PROPERTY_TYPES.containsKey(
+					sb.toString) ? ConfigAttributeConstants.UTILITY_PROPERTY_TYPES.get(sb.toString).get(
+					"extends") as List<Class> : null
 				processPropertySuggestionsBasedOnClass(extends, model, context, acceptor)
 			}
 			return

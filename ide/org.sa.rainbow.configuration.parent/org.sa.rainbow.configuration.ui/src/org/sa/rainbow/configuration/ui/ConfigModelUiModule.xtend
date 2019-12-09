@@ -13,6 +13,7 @@ import org.eclipse.xtext.common.types.xtext.ui.ITypesProposalProvider
 import org.eclipse.xtext.common.types.xtext.ui.JdtBasedSimpleTypeScopeProvider
 import org.eclipse.xtext.ide.editor.syntaxcoloring.DefaultSemanticHighlightingCalculator
 import org.eclipse.xtext.ui.editor.syntaxcoloring.DefaultHighlightingConfiguration
+import org.sa.rainbow.configuration.ConfigAttributeConstants
 import org.sa.rainbow.configuration.ui.contentassist.RainbowJdtTypesProposalProvider
 import org.sa.rainbow.configuration.ui.contentassist.RainbowTemplateProposalProvider
 
@@ -30,6 +31,7 @@ class ConfigModelUiModule extends AbstractConfigModelUiModule {
 	}
 	
 	def configureJvmTypeProvider(Binder binder) {
+		binder.requestStaticInjection(ConfigAttributeConstants)
 		binder.bind(AbstractTypeScopeProvider).annotatedWith(Names.named("jvmtypes")).to(JdtBasedSimpleTypeScopeProvider)
 		binder.bind(IJvmTypeProvider.Factory).annotatedWith(Names.named("jvmtypes")).to(JdtTypeProviderFactory)
 		binder.bind(ITypesProposalProvider).annotatedWith(Names.named("jvmtypes")).to(RainbowJdtTypesProposalProvider)
