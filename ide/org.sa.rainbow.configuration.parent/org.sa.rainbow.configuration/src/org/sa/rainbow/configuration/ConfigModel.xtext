@@ -4,6 +4,8 @@ import "http://www.eclipse.org/emf/2002/Ecore" as ecore
 //import "platform:/resource/org.sa.rainbow.configuration/model/ConfigModel.ecore"
 import "http://www.eclipse.org/xtext/common/JavaVMTypes" as types
 import "http://www.sa.org/rainbow/stitch/Stitch" as stitch
+import "http://www.acme.org/Acme" as acme
+
 generate configModel "http://www.sa.org/rainbow/configuration/ConfigModel"
 
 ConfigurationModel:
@@ -27,11 +29,57 @@ ConfigurationModel:
 	(
 		(impacts+=ImpactVector)*
 	)
+	(
+		factories+=Factory*
+	)
+	
 //	exports+=Export*
 	export=Export?
 ;
 
+Factory:
+	'model' 'factory' name=ID 'yields' clazz=FQN defn=FactoryDefinition
+;
 
+FactoryDefinition:
+	{FactoryDefinition} 
+	'{'
+		('extends' extends=[types::JvmType|FQN])?
+		'for' modelClass=[types::JvmType|FQN] ';'?
+		'command' 'load' 'is' loadCmd=[types::JvmType|FQN] ';'?
+		('command' 'save' 'is' saveCmd=[types::JvmType|FQN] ';'?)?
+		commands+=CommandDefinition*
+	
+	'}'
+;
+
+CommandDefinition:
+	'command' name=ID '(' (formal+=FormalParam (',' formal+=FormalParam)*)?')' 'is' cmd=[types::JvmType|FQN] ';'?
+;
+
+FormalParam:
+	type=Type name=(ID | 'target')
+;
+
+
+Type:
+	 /*{Type} 'int' |  {Type} 'boolean' | {Type} 'double' | {Type} 'String' | */base=BaseType | java=JavaReference | 'acme''::'acme=AcmeReference
+;
+
+AcmeReference:
+	referable=[acme::AnyTypeRef|FQN]
+;
+
+enum BaseType:
+	COMPONENT="component" | COMPONENT="Component" |
+	CONNECTOR="connector" | CONNECTOR="Connector" |
+	PORT="port" | PORT="Port" |
+	ROLE="role" | ROLE="Role"
+;
+
+JavaReference:
+	referable=[types::JvmType|FQN]
+;
 
 ImpactVector:
 	'impact' utilityModel=PropertyReference tactic=[stitch::tactic] '=' component=Component
@@ -143,14 +191,12 @@ Actual:
 	value=DoubleLiteral
 ;
 
-FormalParam:
-	{FormalParam} 'int' | {FormalParam} 'boolean' | {FormalParam} 'double' | {FormalParam} 'String' | Reference //| {FormalParam} ID 
-;
 
 enum ImportType:
 	CONFIG='configuration' |
 	PROPS='properties'  |
-	STITCH="stitch"
+	STITCH="stitch" |
+	ACME="acme"
 ;
 
 

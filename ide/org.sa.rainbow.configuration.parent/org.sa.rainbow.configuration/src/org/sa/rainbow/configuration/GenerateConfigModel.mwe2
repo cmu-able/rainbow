@@ -40,7 +40,7 @@ Workflow {
 			fileExtensions = "rbw"
 
 			referencedResource="platform:/resource/org.sa.rainbow.stitch/model/generated/Stitch.genmodel"
-			//referencedResource="platform:/resource/org.acme.xtext/model/generated/Acme.genmodel"
+			referencedResource="platform:/resource/org.acme.xtext/model/generated/Acme.genmodel"
 			serializer = {
 				generateStub = false
 			}

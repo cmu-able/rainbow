@@ -43,6 +43,7 @@ public class ConfigModelGlobalScopeProvider extends ImportUriGlobalScopeProvider
 	 */
 	@Inject
 	@Named("jvmtypes")private AbstractTypeScopeProvider typeScopeProvider;
+	
 
 	@Override
 	public IScope getScope(Resource resource, EReference reference, Predicate<IEObjectDescription> filter) {

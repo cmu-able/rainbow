@@ -11,6 +11,12 @@ import java.util.List
 import java.util.Map
 import java.util.Set
 import java.util.stream.Collectors
+import org.acme.acme.AcmeComponentTypeDeclaration
+import org.acme.acme.AcmeConnectorTypeDeclaration
+import org.acme.acme.AcmeElementTypeDeclaration
+import org.acme.acme.AcmeGroupTypeDeclaration
+import org.acme.acme.AcmePortTypeDeclaration
+import org.acme.acme.AcmeRoleTypeDeclaration
 import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
@@ -31,6 +37,7 @@ import org.sa.rainbow.configuration.configModel.Array
 import org.sa.rainbow.configuration.configModel.Assignment
 import org.sa.rainbow.configuration.configModel.BooleanLiteral
 import org.sa.rainbow.configuration.configModel.CommandCall
+import org.sa.rainbow.configuration.configModel.CommandDefinition
 import org.sa.rainbow.configuration.configModel.CommandReference
 import org.sa.rainbow.configuration.configModel.Component
 import org.sa.rainbow.configuration.configModel.ComponentType
@@ -38,10 +45,13 @@ import org.sa.rainbow.configuration.configModel.ConfigModelPackage
 import org.sa.rainbow.configuration.configModel.DeclaredProperty
 import org.sa.rainbow.configuration.configModel.DoubleLiteral
 import org.sa.rainbow.configuration.configModel.Effector
+import org.sa.rainbow.configuration.configModel.FactoryDefinition
+import org.sa.rainbow.configuration.configModel.FormalParam
 import org.sa.rainbow.configuration.configModel.Gauge
 import org.sa.rainbow.configuration.configModel.GaugeBody
 import org.sa.rainbow.configuration.configModel.GaugeTypeBody
 import org.sa.rainbow.configuration.configModel.IPLiteral
+import org.sa.rainbow.configuration.configModel.ImpactVector
 import org.sa.rainbow.configuration.configModel.IntegerLiteral
 import org.sa.rainbow.configuration.configModel.Probe
 import org.sa.rainbow.configuration.configModel.ProbeReference
@@ -49,7 +59,11 @@ import org.sa.rainbow.configuration.configModel.PropertyReference
 import org.sa.rainbow.configuration.configModel.Reference
 import org.sa.rainbow.configuration.configModel.StringLiteral
 import org.sa.rainbow.configuration.configModel.Value
-import org.sa.rainbow.configuration.configModel.ImpactVector
+import org.sa.rainbow.core.models.IModelInstance
+import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd
+import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation
+import org.sa.rainbow.core.models.commands.AbstractSaveModelCmd
+import org.sa.rainbow.core.models.commands.ModelCommandFactory
 
 /**
  * This class contains custom validation rules. 
@@ -91,17 +105,16 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 		}
 		for (Assignment a : probe.properties?.assignment) {
 			checkAssignmentType(a, ConfigAttributeConstants.PROBE_PROPERTY_TYPES, "")
-			
+
 		}
 	}
-	
+
 	def void checkAssignmentType(Assignment a, Map<String, Map<String, Object>> types, String prefix) {
 		if (a.value?.value instanceof Component) {
 			for (ass : (a.value?.value as Component).assignment) {
 				checkAssignmentType(ass, types, a.name + ":")
 			}
-		}
-		else {
+		} else {
 			checkTypeRule(types, a, prefix)
 		}
 	}
@@ -133,7 +146,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 		}
 		for (Assignment a : effector.body?.assignment) {
 			checkAssignmentType(a, ConfigAttributeConstants.EFFECTOR_PROPERTY_TYPES, "")
-			
+
 		}
 	}
 
@@ -155,7 +168,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 		)
 		for (Assignment a : gauge.body?.assignment) {
 			checkAssignmentType(a, ConfigAttributeConstants.GAUGE_PROPERTY_TYPES, "")
-			
+
 		}
 	}
 
@@ -172,7 +185,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			)
 		}
 	}
-	
+
 	@Check
 	def checkUtilityAssignment(Assignment ass) {
 		val dp = EcoreUtil2.getContainerOfType(ass, DeclaredProperty)
@@ -182,17 +195,16 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			while (eContainer !== null) {
 				eContainer = eContainer.eContainer
 				if (eContainer instanceof Assignment) {
-					sb.insert(0,':')
+					sb.insert(0, ':')
 					val par = (eContainer as Assignment)
 					if (ConfigAttributeConstants.UTILITY_PROPERTY_TYPES.containsKey(par.name)) {
-						sb.insert(0,par.name)
+						sb.insert(0, par.name)
 					}
 				}
 			}
-			checkTypeRule(ConfigAttributeConstants.UTILITY_PROPERTY_TYPES,ass,sb.toString)
+			checkTypeRule(ConfigAttributeConstants.UTILITY_PROPERTY_TYPES, ass, sb.toString)
 		}
 	}
-	
 
 	@Check
 	def checkAttributes(EList<Assignment> list, EList<Assignment> superlist, Set<String> requiredfields,
@@ -228,7 +240,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 				warning(
 					'''Expecting one of field «fields»''',
 					reference,
-					MISSING_PROPERTY, 
+					MISSING_PROPERTY,
 					optionalFields.map[it].join(",")
 				)
 			}
@@ -239,7 +251,9 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 	def checkSubAttributes(EList<Assignment> list, EList<Assignment> superlist, Map<String, Set<String>> allOfSubfields,
 		Map<String, Set<String>> oneOfSubfields, EReference reference) {
 		for (String key : allOfSubfields.keySet) {
-			val compoundElement = list.findFirst[it.name == key && it?.value !== null && it.value.value instanceof Component]
+			val compoundElement = list.findFirst [
+				it.name == key && it?.value !== null && it.value.value instanceof Component
+			]
 			var hasCompoundReq = compoundElement !== null
 			if (!hasCompoundReq && superlist !== null) {
 				hasCompoundReq = superlist.exists [
@@ -269,11 +283,14 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 						Collectors.toList)
 					var fs = fields.map([return "\"" + it + "\""]).join(", ")
 					if (compoundElement != null) {
-						warning('''"«key»" is missing the required fields «fs».''', compoundElement,
-							ConfigModelPackage.Literals.ASSIGNMENT__VALUE, MISSING_PROPERTY, fields.map[it].join(",")
+						warning(
+							'''"«key»" is missing the required fields «fs».''',
+							compoundElement,
+							ConfigModelPackage.Literals.ASSIGNMENT__VALUE,
+							MISSING_PROPERTY,
+							fields.map[it].join(",")
 						)
-					}
-					else {
+					} else {
 						warning(
 							'''"«key»" is missing the required fields «fs».''',
 							reference,
@@ -298,48 +315,50 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 		var model = gaugeType.mcf
 		if (model != null) {
 			var jvmTypeProvider = jvmTypeProviderFactory.createTypeProvider(gaugeType.eResource.resourceSet);
-			var I2I = jvmTypeProvider.findTypeByName("org.sa.rainbow.core.models.commands.ModelCommandFactory");
+			var I2I = jvmTypeProvider.findTypeByName(MODEL_COMMAND_FACTORY_SUPERCLASS);
 			var sts = superTypeCollector.collect(model);
 			if (!sts.contains(I2I)) {
 				error(
-					'''«model.identifier» does not extend ModelCommandFactory''',
+					'''«model.identifier» does not extend  «MODEL_COMMAND_FACTORY_SUPERCLASS»''',
 					ConfigModelPackage.Literals.GAUGE_TYPE_BODY__MCF,
-					ConfigModelValidator.MUST_SUBCLASS, 
-					"org.sa.rainbow.core.models.commands.ModelCommandFactory"
+					ConfigModelValidator.MUST_SUBCLASS,
+					MODEL_COMMAND_FACTORY_SUPERCLASS
 				)
 			}
 
 		}
 	}
-	
+
 	@Check
 	def checkCommandCall(CommandCall cc) {
 		val gb = EcoreUtil2.getContainerOfType(cc, GaugeBody)
 		if (gb !== null) {
 			val g = EcoreUtil2.getContainerOfType(gb, Gauge)
 			var JvmDeclaredType modelFactory = null
-			if (gb.ref?.referable?.component == ComponentType.MODEL && gb.ref?.referable?.^default.value instanceof Component) {
-				val factory = (gb.ref.referable.^default.value as Component).assignment.findFirst[it.name=="factory"]
+			if (gb.ref?.referable?.component == ComponentType.MODEL &&
+				gb.ref?.referable?.^default.value instanceof Component) {
+				val factory = (gb.ref.referable.^default.value as Component).assignment.findFirst[it.name == "factory"]
 				if (factory?.value?.value instanceof Reference) {
 					modelFactory = (factory.value.value as Reference).referable as JvmDeclaredType
 				}
-			}
-			else {
+			} else {
 				if (g.superType !== null) {
 					modelFactory = g.superType.body.mcf as JvmDeclaredType
 				}
 			}
 			if (modelFactory === null) {
-				warning('''Cannot check "«cc.command»" because no referenced model''',
+				warning(
+					'''Cannot check "«cc.command»" because no referenced model''',
 					ConfigModelPackage.Literals.COMMAND_CALL__COMMAND,
 					"cannotCheckCommand"
 				)
 			}
 			if (g.superType !== null) {
-				if (g.superType.body.commands.findFirst[
+				if (g.superType.body.commands.findFirst [
 					it.name == cc.name
 				] === null) {
-					error('''The command "«cc.name»" does not exists in «g.superType.name»''',
+					error(
+						'''The command "«cc.name»" does not exists in «g.superType.name»''',
 						ConfigModelPackage.Literals.COMMAND_CALL__NAME,
 						"nocommand"
 					)
@@ -347,20 +366,22 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			}
 			checkCommandCallElements(cc, modelFactory)
 			return
-				
+
 		}
 		val ef = EcoreUtil2.getContainerOfType(cc, Effector)
 		if (ef !== null) {
 			var JvmDeclaredType modelFactory = null
-			if (gb.ref?.referable?.component == ComponentType.MODEL && gb.ref?.referable?.^default.value instanceof Component) {
-				val factory = (gb.ref.referable.^default.value as Component).assignment.findFirst[it.name=="factory"]
+			if (gb.ref?.referable?.component == ComponentType.MODEL &&
+				gb.ref?.referable?.^default.value instanceof Component) {
+				val factory = (gb.ref.referable.^default.value as Component).assignment.findFirst[it.name == "factory"]
 				if (factory?.value?.value instanceof Reference) {
 					modelFactory = (factory.value.value as Reference).referable as JvmDeclaredType
 				}
 			}
-			
+
 			if (modelFactory === null) {
-				warning('''Cannot check "«cc.command»" because no referenced model''',
+				warning(
+					'''Cannot check "«cc.command»" because no referenced model''',
 					ConfigModelPackage.Literals.COMMAND_CALL__COMMAND,
 					"cannotCheckCommand"
 				)
@@ -369,33 +390,33 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			return
 		}
 	}
-	
+
 	def checkCommandCallElements(CommandCall cc, JvmDeclaredType modelFactory) {
 		val command = cc.command
-			var commandMethod = modelFactory.members.filter[it instanceof JvmOperation].filter [
-				it.simpleName.equalsIgnoreCase(command) || it.simpleName.equalsIgnoreCase(command + "cmd")
-			]
+		var commandMethod = modelFactory.members.filter[it instanceof JvmOperation].filter [
+			it.simpleName.equalsIgnoreCase(command) || it.simpleName.equalsIgnoreCase(command + "cmd")
+		]
 
-			if (commandMethod.empty) {
-				error(
-					'''"«command»" is not a valid command in «modelFactory.identifier» ''',
-					ConfigModelPackage.Literals.COMMAND_CALL__COMMAND,
-					"nocommand"
-				)
-			} else {
-				var method = commandMethod.get(0) as JvmOperation
-				if (method.parameters.size != cc.actual.size + (cc.target != null ? 1 : 0)) {
-					if (cc.actual == null && method.parameters.size > 0) {
-					} else {
-						error(
-							'''"«command»" wrong number of parameters defined. Expecting «method.parameters.size-(cc.target!=null?1:0)» got «cc.actual.size»''',
-							ConfigModelPackage.Literals.COMMAND_CALL__ACTUAL,
-							"wrongparamnumbers"
-						)
-						
-					}
+		if (commandMethod.empty) {
+			error(
+				'''"«command»" is not a valid command in «modelFactory.identifier» ''',
+				ConfigModelPackage.Literals.COMMAND_CALL__COMMAND,
+				"nocommand"
+			)
+		} else {
+			var method = commandMethod.get(0) as JvmOperation
+			if (method.parameters.size != cc.actual.size + (cc.target != null ? 1 : 0)) {
+				if (cc.actual == null && method.parameters.size > 0) {
+				} else {
+					error(
+						'''"«command»" wrong number of parameters defined. Expecting «method.parameters.size-(cc.target!=null?1:0)» got «cc.actual.size»''',
+						ConfigModelPackage.Literals.COMMAND_CALL__ACTUAL,
+						"wrongparamnumbers"
+					)
+
 				}
 			}
+		}
 	}
 
 	@Check
@@ -404,7 +425,8 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			var gaugeType = cr.eContainer as GaugeTypeBody
 			var type = gaugeType.mcf as JvmDeclaredType
 			if (type === null) {
-				warning('''"«cr.command» cannot be checked because there is no model defined"''',
+				warning(
+					'''"«cr.command» cannot be checked because there is no model defined"''',
 					ConfigModelPackage.Literals.COMMAND_REFERENCE__COMMAND,
 					"cannotCheckCommand"
 				)
@@ -463,7 +485,6 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 //			while (method == null)
 		}
 	}
-	
 
 	@Check
 	def checkClassAssignments(DeclaredProperty assignment) {
@@ -539,7 +560,9 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 				case PROPERTY: {
 				}
 				case UTILITY: {
-					checkAttributes((dp.^default.value as Component).assignment, null, ConfigAttributeConstants.ALL_OFREQUIRED_UTILITY_FIELDS, #{}, ConfigModelPackage.Literals.DECLARED_PROPERTY__DEFAULT)
+					checkAttributes((dp.^default.value as Component).assignment, null,
+						ConfigAttributeConstants.ALL_OFREQUIRED_UTILITY_FIELDS, #{},
+						ConfigModelPackage.Literals.DECLARED_PROPERTY__DEFAULT)
 				}
 			}
 		}
@@ -553,20 +576,14 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			checkTypeRule(rule, dp)
 		}
 	}
-	
+
 	def void checkTypeRule(Map<String, Map<String, Object>> rule, Assignment dp) {
 		checkTypeRule(rule, dp, "")
 	}
-	
-	
-	
-	
-	
-	
-	
+
 	protected def void checkTypeRule(Map<String, Map<String, Object>> rule, Assignment dp, String prefix) {
 		if (rule !== null) {
-			val lookupName = prefix==""?dp.name:(prefix + dp.name)
+			val lookupName = prefix == "" ? dp.name : (prefix + dp.name)
 			val fieldRule = rule.get(lookupName) as Map<String, Object>
 			if (fieldRule !== null) {
 				val (Value)=>boolean func = fieldRule.get('func') as (Value)=>boolean
@@ -587,103 +604,118 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 					if (!ok) {
 						error(
 							'''«dp.name» «fieldRule.get('msg')»''',
+							dp,
 							ConfigModelPackage.Literals.ASSIGNMENT__VALUE,
 							MUST_SUBCLASS,
 							extends.map[it.name].join(",")
 						)
 					}
 					if (extends.contains(Array) && dp.value.value instanceof Array) {
-						val furtherCheck = fieldRule.get('checkEach') as Function1<Array, LinkedList<Triple<String, EObject, EStructuralFeature>>>
+						val furtherCheck = fieldRule.get(
+							'checkEach') as Function1<Array, LinkedList<Triple<String, EObject, EStructuralFeature>>>
 						for (e : furtherCheck.apply(dp.value.value as Array)) {
 							error(e.first, e.second, e.third)
 						}
 					}
 				}
 			}
-		
+
 		}
 	}
-	
+
 	protected def boolean checkClass(Assignment dp, Class clazz) {
-		if (clazz == StringLiteral) return dp.value.value instanceof StringLiteral
-		if (clazz == BooleanLiteral) return dp.value.value instanceof BooleanLiteral
-		if (clazz == IntegerLiteral) return dp.value.value instanceof IntegerLiteral
-		if (clazz == DoubleLiteral) return dp.value.value instanceof DoubleLiteral
-		if (clazz == Component) return dp.value.value instanceof Component
-		if (clazz == IPLiteral) return dp.value.value instanceof IPLiteral
-		if (clazz == PropertyReference) return dp.value.value instanceof PropertyReference
-		if (clazz == ProbeReference) return dp.value.value instanceof ProbeReference
-		if (clazz == Array) return dp.value.value instanceof Array
+		if(clazz == StringLiteral) return dp.value.value instanceof StringLiteral
+		if(clazz == BooleanLiteral) return dp.value.value instanceof BooleanLiteral
+		if(clazz == IntegerLiteral) return dp.value.value instanceof IntegerLiteral
+		if(clazz == DoubleLiteral) return dp.value.value instanceof DoubleLiteral
+		if(clazz == Component) return dp.value.value instanceof Component
+		if(clazz == IPLiteral) return dp.value.value instanceof IPLiteral
+		if(clazz == PropertyReference) return dp.value.value instanceof PropertyReference
+		if(clazz == ProbeReference) return dp.value.value instanceof ProbeReference
+		if(clazz == Array) return dp.value.value instanceof Array
 		ConfigAttributeConstants.subclasses(dp.value, clazz.name)
 	}
-	
-	public static val CHECK_UTILITY_MONOTONIC = [Array a | {
-		val errors = new LinkedList<Triple<String,EObject,EStructuralFeature>>()
-		var first = true
-		var double lastVal = 0.0
-		var goingUp = false
-		var goingDown = false
-		for (v : a.values) {
-			if (!(v.value instanceof Array)) {
-				errors.add(Tuples.create('''Array value needs to be an array of two numbers''', v, ConfigModelPackage.Literals.VALUE__VALUE))
-			}
-			else {
-				val pair = v.value as Array
-				if (pair.values.size != 2) {
-					errors.add(Tuples.create('''Array value needs to be an array of two numbers''', v, ConfigModelPackage.Literals.VALUE__VALUE))
-				}
-				else {
-					val thisVal = getNumber(pair.values.get(1))
-					if (!first) {
-						if (lastVal < thisVal) {
-							goingUp = true
-						}
-						else if (lastVal > thisVal) {
-							goingDown = true
-						}
+
+	public static val CHECK_UTILITY_MONOTONIC = [ Array a |
+		{
+			val errors = new LinkedList<Triple<String, EObject, EStructuralFeature>>()
+			var first = true
+			var double lastVal = 0.0
+			var goingUp = false
+			var goingDown = false
+			for (v : a.values) {
+				if (!(v.value instanceof Array)) {
+					errors.add(
+						Tuples.create('''Array value needs to be an array of two numbers''', v,
+							ConfigModelPackage.Literals.VALUE__VALUE))
+				} else {
+					val pair = v.value as Array
+					if (pair.values.size != 2) {
+						errors.add(
+							Tuples.create('''Array value needs to be an array of two numbers''', v,
+								ConfigModelPackage.Literals.VALUE__VALUE))
 					} else {
-						first = false
+						val thisVal = getNumber(pair.values.get(1))
+						if (!first) {
+							if (lastVal < thisVal) {
+								goingUp = true
+							} else if (lastVal > thisVal) {
+								goingDown = true
+							}
+						} else {
+							first = false
+						}
+						lastVal = thisVal
 					}
-					lastVal = thisVal
+
 				}
-				
 			}
+			if (goingUp && goingDown) {
+				errors.add(
+					Tuples.create('''Utilities need to be monotonic''', a, ConfigModelPackage.Literals.ARRAY__VALUES))
+			}
+			errors
+
 		}
-		if (goingUp && goingDown) {
-			errors.add(Tuples.create('''Utilities need to be monotonic''', a, ConfigModelPackage.Literals.ARRAY__VALUES))
-		}
-		errors
-		
-	}]
-	
-	
-		
-	public static val CHECK_EACH_SCENARIO = [Array a | {
-		val errors = new LinkedList<Triple<String,EObject,EStructuralFeature>>()
-		val dp = Utils.getContainerOfType(a, Component, [EObject v | v instanceof Component && (v as Component).assignment.exists[it.name == "utilities"]])
-		var definedUtilities = (dp.assignment.findFirst[it.name=="utilities"]?.value.value as Component).assignment.map[it.name]
-		for (v : a.values) {
-			if (!(v.value instanceof Component)) {
-				errors.add(Tuples.create('''Scenario should only contain composites''', a, ConfigModelPackage.Literals.ARRAY__VALUES))
-			} else {
-				var sum = 0.0
-				val scenario = v.value as Component
-				for (ass : scenario.assignment) {
-					if (ass.name != 'name') {
-						sum += getNumber(ass.value)
-						if (!definedUtilities.contains(ass.name)) {
-							errors.add(Tuples.create('''«ass.name» must refer to a utility defined in utilities''', ass, ConfigModelPackage.Literals.ASSIGNMENT__NAME))
+	]
+
+	public static val CHECK_EACH_SCENARIO = [ Array a |
+		{
+			val errors = new LinkedList<Triple<String, EObject, EStructuralFeature>>()
+			val dp = Utils.getContainerOfType(a, Component, [ EObject v |
+				v instanceof Component && (v as Component).assignment.exists[it.name == "utilities"]
+			])
+			var definedUtilities = (dp.assignment.findFirst[it.name == "utilities"]?.value.value as Component).
+				assignment.map[it.name]
+			for (v : a.values) {
+				if (!(v.value instanceof Component)) {
+					errors.add(
+						Tuples.create('''Scenario should only contain composites''', a,
+							ConfigModelPackage.Literals.ARRAY__VALUES))
+				} else {
+					var sum = 0.0
+					val scenario = v.value as Component
+					for (ass : scenario.assignment) {
+						if (ass.name != 'name') {
+							sum += getNumber(ass.value)
+							if (!definedUtilities.contains(ass.name)) {
+								errors.add(
+									Tuples.create('''«ass.name» must refer to a utility defined in utilities''', ass,
+										ConfigModelPackage.Literals.ASSIGNMENT__NAME))
+							}
 						}
 					}
-				}
-				if (sum != 1.0) {
-					errors.add(Tuples.create('''The utilities in a scenario must sum to 1''', scenario, ConfigModelPackage.Literals.COMPONENT__ASSIGNMENT))
+					if (sum != 1.0) {
+						errors.add(
+							Tuples.create('''The utilities in a scenario must sum to 1''', scenario,
+								ConfigModelPackage.Literals.COMPONENT__ASSIGNMENT))
+					}
 				}
 			}
+			errors
 		}
-		errors
-	}]
-		
+	]
+
 	def static getNumber(Value value) {
 		val v = value.value
 		switch v {
@@ -692,21 +724,159 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			default: 0.0
 		}
 	}
-	
+
 	@Check
 	def checkImpact(ImpactVector iv) {
 		if (iv.utilityModel.referable?.component !== ComponentType.UTILITY) {
-			error('''Impact vector referring to non-utility model «iv.utilityModel.referable?.name»''',
-				iv.utilityModel, ConfigModelPackage.Literals.IMPACT_VECTOR__UTILITY_MODEL
+			error(
+				'''Impact vector referring to non-utility model «iv.utilityModel.referable?.name»''',
+				iv.utilityModel,
+				ConfigModelPackage.Literals.IMPACT_VECTOR__UTILITY_MODEL
 			)
 			return
 		}
-		var definedUtilities = ((iv.utilityModel.referable.^default.value as Component).assignment.findFirst[it.name=="utilities"]?.value.value as Component).assignment.map[it.name]
+		var definedUtilities = ((iv.utilityModel.referable.^default.value as Component).assignment.findFirst [
+			it.name == "utilities"
+		]?.value.value as Component).assignment.map[it.name]
 		for (ass : iv.component.assignment) {
 			if (!definedUtilities.contains(ass.name)) {
 				error('''Undefined utility «ass.name»''', ass, ConfigModelPackage.Literals.ASSIGNMENT__NAME)
 			}
 		}
 	}
-		
+
+	static val LOAD_MODEL_CMD_SUPERCLASS = typeof(AbstractLoadModelCmd).name
+	static val SAVE_MODEL_CMD_SUPERCLASS = typeof(AbstractSaveModelCmd).name
+	static val MODEL_COMMAND_FACTORY_SUPERCLASS = typeof(ModelCommandFactory).name
+	static val RAINBOW_OPERATION_SUPERCLASS = typeof(AbstractRainbowModelOperation).name
+	static val MODEL_SUPERCLASS = typeof(IModelInstance).name
+
+	@Check
+	def checkFactoryDefinition(FactoryDefinition factory) {
+		if (!ConfigAttributeConstants.subclasses(factory.loadCmd, ConfigModelValidator.LOAD_MODEL_CMD_SUPERCLASS,
+			factory.eResource)) {
+			error(
+				'''«factory.loadCmd.qualifiedName» must subclass «ConfigModelValidator.LOAD_MODEL_CMD_SUPERCLASS»''',
+				factory,
+				ConfigModelPackage.Literals.FACTORY_DEFINITION__LOAD_CMD,
+				MUST_SUBCLASS,
+				ConfigModelValidator.LOAD_MODEL_CMD_SUPERCLASS
+			)
+		}
+		if (factory.saveCmd !== null &&
+			!ConfigAttributeConstants.subclasses(factory.saveCmd, SAVE_MODEL_CMD_SUPERCLASS, factory.eResource)) {
+			error(
+				'''«factory.saveCmd.qualifiedName» must subclass «SAVE_MODEL_CMD_SUPERCLASS»''',
+				factory,
+				ConfigModelPackage.Literals.FACTORY_DEFINITION__SAVE_CMD,
+				MUST_SUBCLASS,
+				SAVE_MODEL_CMD_SUPERCLASS
+			)
+		}
+		if (factory.extends !== null &&
+			!ConfigAttributeConstants.subclasses(factory.extends, MODEL_COMMAND_FACTORY_SUPERCLASS,
+				factory.eResource)) {
+			error(
+				'''«factory.saveCmd.qualifiedName» must subclass «MODEL_COMMAND_FACTORY_SUPERCLASS»''',
+				factory,
+				ConfigModelPackage.Literals.FACTORY_DEFINITION__EXTENDS,
+				MUST_SUBCLASS,
+				MODEL_COMMAND_FACTORY_SUPERCLASS
+			)
+		}
+		if (!ConfigAttributeConstants.subclasses(factory.modelClass, MODEL_SUPERCLASS, factory.eResource)) {
+			error(
+				'''«factory.modelClass.qualifiedName» must subclass «MODEL_SUPERCLASS»''',
+				factory,
+				ConfigModelPackage.Literals.FACTORY_DEFINITION__MODEL_CLASS,
+				MUST_SUBCLASS,
+				MODEL_SUPERCLASS
+			)
+		}
+	}
+
+	@Check
+	def checkCommandDefinition(CommandDefinition cmd) {
+		if (!ConfigAttributeConstants.subclasses(cmd.cmd, RAINBOW_OPERATION_SUPERCLASS, cmd.eResource)) {
+			error(
+				'''«cmd.cmd.qualifiedName» must extend «RAINBOW_OPERATION_SUPERCLASS»''',
+				cmd,
+				ConfigModelPackage.Literals.COMMAND_DEFINITION__CMD,
+				MUST_SUBCLASS,
+				RAINBOW_OPERATION_SUPERCLASS
+			)
+		}
+
+		val factory = EcoreUtil2.getContainerOfType(cmd, FactoryDefinition)
+
+		val cmdClass = cmd.cmd as JvmDeclaredType
+		var compatibleConstructors = cmdClass.declaredConstructors.filter([
+			if (it.parameters.size == cmd.formal.size + 2) {
+				val firstString = it.parameters.get(0).parameterType.qualifiedName == "java.lang.String"
+				val secondModel = it.parameters.get(1).parameterType.qualifiedName == factory.modelClass.qualifiedName
+				return firstString && secondModel
+			}
+			false
+		])
+		if (compatibleConstructors.nullOrEmpty) {
+			var myParams = cmd.formal.map [
+				formalTypeName(it, true)
+			].join(", ")
+			error(
+				'''«cmdClass.simpleName» must have constructor with parameters String, «factory.modelClass.simpleName», «myParams»''',
+				cmd,
+				ConfigModelPackage.Literals.COMMAND_DEFINITION__CMD,
+				"ConstructurIncompatible"
+			)
+		} else {
+			val cstr = compatibleConstructors.get(0)
+			for (var i = 0; i < cmd.formal.size; i++) {
+				if (cstr.parameters.get(i + 2).parameterType.simpleName != "String") {
+					val cstrType = cstr.parameters.get(i + 2).parameterType
+					val formalType = cmd.formal.get(i)
+					if(cstrType.qualifiedName != formalTypeName(formalType,false)) {
+						error('''Found «formalTypeName(formalType,false)», expecting «cstr.simpleName»''',
+							formalType, ConfigModelPackage.Literals.FORMAL_PARAM__TYPE,
+							"incorrectType"
+						)
+					}
+				}
+			}
+		}
+		if (cmd.formal.drop(1).exists[it.name == "target"]) {
+			warning(
+				'''Only the first argument of a command can be 'target''',
+				cmd,
+				ConfigModelPackage.Literals.COMMAND_DEFINITION__FORMAL,
+				"badTarget"
+			)
+		} else
+		if (cmd.formal.get(0).name != "target") {
+			warning(
+				'''The first argument of a command should be 'target''',
+				cmd,
+				ConfigModelPackage.Literals.COMMAND_DEFINITION__FORMAL,
+				"badTarget"
+			)
+		}
+
+	}
+
+	def formalTypeName(FormalParam fp, boolean keepSimple) {
+		if (fp.type.java !== null)
+			keepSimple?fp.type.java.referable.simpleName:fp.type.java.referable.qualifiedName
+		else if (fp.type.acme !== null) {
+			switch fp.type.acme.referable {
+				AcmeComponentTypeDeclaration: return keepSimple?"IAcmeComponent":"org.acmestudio.acme.element.IAcmeComponent"
+				AcmeConnectorTypeDeclaration: return keepSimple?"IAcmeConnector":"org.acmestudio.acme.element.IAcmeConnector"
+				AcmePortTypeDeclaration: return keepSimple?"IAcmePort":"org.acmestudio.acme.element.IAcmePort"
+				AcmeRoleTypeDeclaration: return keepSimple?"IAcmeRole":"org.acmestudio.acme.element.IAcmeRole"
+				AcmeElementTypeDeclaration: return keepSimple?"IAcmeElement":"org.acmestudio.acme.element.IAcmeElement"
+				AcmeGroupTypeDeclaration: return keepSimple?"IAcmeGroup":"org.acmestudio.acme.element.IAcmeGroup"
+				default: return keepSimple?"IAcmeElement":"org.acmestudio.acme.element.IAcmeElement"
+			}
+		} 
+		else if(fp.type.base !== null) fp.type.base.name()
+	}
+
 }
