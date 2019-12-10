@@ -47,6 +47,7 @@ import org.sa.rainbow.core.models.commands.ModelCommandFactory
 import org.sa.rainbow.translator.probes.AbstractProbe
 import org.sa.rainbow.core.models.commands.AbstractSaveModelCmd
 import org.sa.rainbow.core.models.IModelInstance
+import org.sa.rainbow.model.acme.AcmeModelOperation
 
 /**
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#content-assist
@@ -510,6 +511,20 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 			return
 		}
 	}
+	
+	override completeCommandDefinition_Cmd(EObject model, org.eclipse.xtext.Assignment assignment, 
+		ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		val jvmTypeProvider = jvmTypeProviderFactory.createTypeProvider(model.eResource.resourceSet)
+		val sc = jvmTypeProvider.findTypeByName(typeof(AcmeModelOperation).name)
+		if (sc !== null) {
+			typeProposalProvider.createSubTypeProposals(sc, this, context,
+							ConfigModelPackage.Literals.COMMAND_DEFINITION__CMD, TypeMatchFilters.canInstantiate,
+							acceptor);
+		}
+		pauseAssisting(acceptor)
+		
+	}
+	
 
 //	override completeGaugeBody_Ref(EObject model, org.eclipse.xtext.Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
 //		super.completeGaugeBody_Ref(model, assignment, context, acceptor)

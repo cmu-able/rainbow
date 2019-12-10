@@ -11,13 +11,13 @@ import org.eclipse.xtext.generator.OutputConfiguration;
 public class RainbowOutputConfigurationProvider implements IOutputConfigurationProvider {
 
 	public static final String RAINBOW_TARGET_PROPERTIES_OUTPUT="rainbow-target-properties";
-	
+	public static final String RAINBOW_GENERRATED_SOURCE_OUTPUT="rainbow-generated-source";
 	
 	@Override
 	public Set<OutputConfiguration> getOutputConfigurations() {
-		OutputConfiguration defaultOutput = new OutputConfiguration(IFileSystemAccess.DEFAULT_OUTPUT);
+		OutputConfiguration defaultOutput = new OutputConfiguration(RAINBOW_GENERRATED_SOURCE_OUTPUT);
 	    defaultOutput.setDescription("Output Folder");
-	    defaultOutput.setOutputDirectory("./src-gen");
+	    defaultOutput.setOutputDirectory("./src-gen/main/java");
 	    defaultOutput.setOverrideExistingResources(true);
 	    defaultOutput.setCreateOutputDirectory(true);
 	    defaultOutput.setCleanUpDerivedResources(true);
@@ -28,7 +28,7 @@ public class RainbowOutputConfigurationProvider implements IOutputConfigurationP
 	    propertyOutput.setOutputDirectory("./tgt-gen");
 	    propertyOutput.setOverrideExistingResources(true);
 	    propertyOutput.setCreateOutputDirectory(true);
-	    propertyOutput.setCleanUpDerivedResources(false);
+	    propertyOutput.setCleanUpDerivedResources(true);
 	    propertyOutput.setSetDerivedProperty(true);
 	    
 	    return new HashSet<>(Arrays.asList(new OutputConfiguration []{defaultOutput, propertyOutput}));

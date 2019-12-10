@@ -9,7 +9,7 @@ import "http://www.acme.org/Acme" as acme
 generate configModel "http://www.sa.org/rainbow/configuration/ConfigModel"
 
 ConfigurationModel:
-	'target' targetName=FQN 
+	('target' targetName=FQN 
 	imports+=Import*
 	(delcaredProperties+=DeclaredProperty)*
 	(
@@ -29,12 +29,15 @@ ConfigurationModel:
 	(
 		(impacts+=ImpactVector)*
 	)
-	(
-		factories+=Factory*
-	)
+	
 	
 //	exports+=Export*
 	export=Export?
+	) |
+	(
+		imports+=Import*
+		factories+=Factory*
+	)
 ;
 
 Factory:

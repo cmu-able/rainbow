@@ -11,12 +11,6 @@ import java.util.List
 import java.util.Map
 import java.util.Set
 import java.util.stream.Collectors
-import org.acme.acme.AcmeComponentTypeDeclaration
-import org.acme.acme.AcmeConnectorTypeDeclaration
-import org.acme.acme.AcmeElementTypeDeclaration
-import org.acme.acme.AcmeGroupTypeDeclaration
-import org.acme.acme.AcmePortTypeDeclaration
-import org.acme.acme.AcmeRoleTypeDeclaration
 import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
@@ -33,6 +27,7 @@ import org.eclipse.xtext.validation.Check
 import org.eclipse.xtext.xbase.lib.Functions.Function1
 import org.sa.rainbow.configuration.ConfigAttributeConstants
 import org.sa.rainbow.configuration.Utils
+import org.sa.rainbow.configuration.XtendUtils
 import org.sa.rainbow.configuration.configModel.Array
 import org.sa.rainbow.configuration.configModel.Assignment
 import org.sa.rainbow.configuration.configModel.BooleanLiteral
@@ -46,7 +41,6 @@ import org.sa.rainbow.configuration.configModel.DeclaredProperty
 import org.sa.rainbow.configuration.configModel.DoubleLiteral
 import org.sa.rainbow.configuration.configModel.Effector
 import org.sa.rainbow.configuration.configModel.FactoryDefinition
-import org.sa.rainbow.configuration.configModel.FormalParam
 import org.sa.rainbow.configuration.configModel.Gauge
 import org.sa.rainbow.configuration.configModel.GaugeBody
 import org.sa.rainbow.configuration.configModel.GaugeTypeBody
@@ -808,7 +802,9 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 		}
 
 		val factory = EcoreUtil2.getContainerOfType(cmd, FactoryDefinition)
-
+		if (!(cmd.cmd instanceof JvmDeclaredType)) {
+			return
+		}
 		val cmdClass = cmd.cmd as JvmDeclaredType
 		var compatibleConstructors = cmdClass.declaredConstructors.filter([
 			if (it.parameters.size == cmd.formal.size + 2) {
@@ -820,7 +816,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 		])
 		if (compatibleConstructors.nullOrEmpty) {
 			var myParams = cmd.formal.map [
-				formalTypeName(it, true)
+				XtendUtils.formalTypeName(it, true)
 			].join(", ")
 			error(
 				'''«cmdClass.simpleName» must have constructor with parameters String, «factory.modelClass.simpleName», «myParams»''',
@@ -834,8 +830,8 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 				if (cstr.parameters.get(i + 2).parameterType.simpleName != "String") {
 					val cstrType = cstr.parameters.get(i + 2).parameterType
 					val formalType = cmd.formal.get(i)
-					if(cstrType.qualifiedName != formalTypeName(formalType,false)) {
-						error('''Found «formalTypeName(formalType,false)», expecting «cstr.simpleName»''',
+					if(cstrType.qualifiedName != XtendUtils.formalTypeName(formalType,false)) {
+						error('''Found «XtendUtils.formalTypeName(formalType,false)», expecting «cstr.simpleName»''',
 							formalType, ConfigModelPackage.Literals.FORMAL_PARAM__TYPE,
 							"incorrectType"
 						)
@@ -862,21 +858,6 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 
 	}
 
-	def formalTypeName(FormalParam fp, boolean keepSimple) {
-		if (fp.type.java !== null)
-			keepSimple?fp.type.java.referable.simpleName:fp.type.java.referable.qualifiedName
-		else if (fp.type.acme !== null) {
-			switch fp.type.acme.referable {
-				AcmeComponentTypeDeclaration: return keepSimple?"IAcmeComponent":"org.acmestudio.acme.element.IAcmeComponent"
-				AcmeConnectorTypeDeclaration: return keepSimple?"IAcmeConnector":"org.acmestudio.acme.element.IAcmeConnector"
-				AcmePortTypeDeclaration: return keepSimple?"IAcmePort":"org.acmestudio.acme.element.IAcmePort"
-				AcmeRoleTypeDeclaration: return keepSimple?"IAcmeRole":"org.acmestudio.acme.element.IAcmeRole"
-				AcmeElementTypeDeclaration: return keepSimple?"IAcmeElement":"org.acmestudio.acme.element.IAcmeElement"
-				AcmeGroupTypeDeclaration: return keepSimple?"IAcmeGroup":"org.acmestudio.acme.element.IAcmeGroup"
-				default: return keepSimple?"IAcmeElement":"org.acmestudio.acme.element.IAcmeElement"
-			}
-		} 
-		else if(fp.type.base !== null) fp.type.base.name()
-	}
+
 
 }
