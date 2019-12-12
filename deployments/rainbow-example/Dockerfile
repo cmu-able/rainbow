@@ -57,6 +57,8 @@ WORKDIR ../rainbow-mem-comms
 RUN mvn -DskipTests install
 
 ADD ide /root/rainbow/ide
+WORKDIR /root/rainbow/ide/org.acme.xtext.parent
+RUN mvn -DskiptTests install
 WORKDIR /root/rainbow/ide/org.sa.rainbow.stitch.parent
 RUN mvn -DskipTests install
 WORKDIR /root/rainbow/ide/org.sa.rainbow.configuration.parent
