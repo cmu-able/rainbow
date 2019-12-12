@@ -3,20 +3,19 @@
  */
 package org.sa.rainbow.configuration.generator
 
-import com.google.inject.Inject
-import com.google.inject.name.Named
-import java.util.Arrays
 import java.util.HashMap
 import org.eclipse.emf.common.util.EList
+import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.common.types.JvmType
-import org.eclipse.xtext.common.types.access.IJvmTypeProvider
 import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
 import org.sa.rainbow.configuration.RainbowOutputConfigurationProvider
 import org.sa.rainbow.configuration.configModel.Actual
+import org.sa.rainbow.configuration.configModel.Array
 import org.sa.rainbow.configuration.configModel.Assignment
 import org.sa.rainbow.configuration.configModel.BooleanLiteral
 import org.sa.rainbow.configuration.configModel.CommandCall
@@ -29,6 +28,7 @@ import org.sa.rainbow.configuration.configModel.Effector
 import org.sa.rainbow.configuration.configModel.Gauge
 import org.sa.rainbow.configuration.configModel.GaugeType
 import org.sa.rainbow.configuration.configModel.IPLiteral
+import org.sa.rainbow.configuration.configModel.ImpactVector
 import org.sa.rainbow.configuration.configModel.IntegerLiteral
 import org.sa.rainbow.configuration.configModel.LogLiteral
 import org.sa.rainbow.configuration.configModel.Probe
@@ -40,10 +40,10 @@ import org.sa.rainbow.configuration.configModel.RichStringLiteral
 import org.sa.rainbow.configuration.configModel.RichStringPart
 import org.sa.rainbow.configuration.configModel.StringLiteral
 import org.sa.rainbow.configuration.configModel.Value
-import org.eclipse.xtext.EcoreUtil2
-import org.sa.rainbow.configuration.configModel.ImpactVector
-import org.sa.rainbow.configuration.configModel.Array
 import org.sa.rainbow.configuration.validation.ConfigModelValidator
+import org.sa.rainbow.configuration.configModel.Factory
+import org.eclipse.xtext.generator.IFileSystemAccess
+import org.sa.rainbow.configuration.XtendUtils
 
 /**
  * Generates code from your model files on save.
@@ -54,32 +54,41 @@ class ConfigModelGenerator extends AbstractGenerator {
 
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
 		val model = resource.contents.head as ConfigurationModel
-		var filename = '''«model.targetName»/«model.export.filename»'''
-		if(filename === null) filename = ("generated-unnamed");
-		if (model.probes !== null || !model.probes.isEmpty) {
+		var String filename = null
+		if (model.export !== null) { 
+			filename='''«model.targetName»/«model.export.filename»'''	
+		}
+		if(filename === null) 
+			filename = ("generated-unnamed");
+		if (model.probes !== null && !model.probes.isEmpty) {
 			fsa.generateFile(filename, RainbowOutputConfigurationProvider::RAINBOW_TARGET_PROPERTIES_OUTPUT,
-				outputProbeSpec(model.probes, model.delcaredProperties))
+				outputProbeSpec(resource.URI, model.probes, model.delcaredProperties))
 		}
 		if ((model.gauges !== null || model.gaugeTypes !== null) &&
 			(!model.gauges.isEmpty || !model.gaugeTypes.isEmpty)) {
 			fsa.generateFile(filename, RainbowOutputConfigurationProvider::RAINBOW_TARGET_PROPERTIES_OUTPUT,
-				outputGuageSpec(model.gauges, model.gaugeTypes, model.delcaredProperties))
+				outputGuageSpec(resource.URI, model.gauges, model.gaugeTypes, model.delcaredProperties))
 		}
 		if ((model.effectors !== null || model.effectorTypes !== null) &&
 			(!model.effectors.isEmpty || !model.effectorTypes.isEmpty)) {
 			fsa.generateFile(filename, RainbowOutputConfigurationProvider::RAINBOW_TARGET_PROPERTIES_OUTPUT,
-				outputEffectorSpec(model.effectors, model.effectorTypes, model.delcaredProperties))
+				outputEffectorSpec(resource.URI, model.effectors, model.effectorTypes, model.delcaredProperties))
 		}
 		val utilities = EcoreUtil2.getAllContentsOfType(model, DeclaredProperty).filter[it.component == ComponentType.UTILITY]
-		if (!utilities.empty || !model.impacts.empty) {
-			val output = outputUtilityModel(utilities, model.impacts)
+		if (!utilities.empty && !model.impacts.empty) {
+			val output = outputUtilityModel(resource.URI,utilities, model.impacts)
 			fsa.generateFile(filename, RainbowOutputConfigurationProvider.RAINBOW_TARGET_PROPERTIES_OUTPUT, output)
 		}
 
 		if (filename.endsWith("properties") ||
 			(model.gauges == null && model.probes == null && model.delcaredProperties != null)) {
-			var output = outputPropertiesSpec(model.delcaredProperties)
+			var output = outputPropertiesSpec(resource.URI, model.delcaredProperties)
 			fsa.generateFile(filename, RainbowOutputConfigurationProvider::RAINBOW_TARGET_PROPERTIES_OUTPUT, output);
+		}
+		if (model.factories !== null && !model.factories.empty) {
+			for (f : model.factories) {
+				outputCommandFactory(resource, fsa, f)
+			}
 		}
 
 //		fsa.generateFile('greetings.txt', 'People to greet: ' + 
@@ -88,8 +97,84 @@ class ConfigModelGenerator extends AbstractGenerator {
 //				.map[name]
 //				.join(', '))
 	}
+	
+	def outputCommandFactory(Resource resource, IFileSystemAccess2 fsa, Factory factory) {
+		var filename = factory.clazz
+		filename = filename.replaceAll("\\.", "/") + ".java"
+		fsa.generateFile(filename, RainbowOutputConfigurationProvider::RAINBOW_GENERRATED_SOURCE_OUTPUT, toJavaCode(resource.URI, factory));
+	}
+	
+	def toJavaCode(URI uri, Factory factory) '''
+		// This file was generated by the Rainbow configuration generator
+		// Sourcee: «uri.toString»
+		package «factory.clazz.substring(0, factory.clazz.lastIndexOf("."))»;
+		import java.io.InputStream;
+		import org.acmestudio.acme.element.*;
+		import org.sa.rainbow.core.error.RainbowException;
+		import org.sa.rainbow.core.models.ModelsManager;
 		
-	def outputUtilityModel(Iterable<DeclaredProperty> properties, EList<ImpactVector> list) {
+		import «factory.defn.modelClass.qualifiedName»;
+		«IF factory.defn.extends !== null»
+			import «factory.defn.extends.qualifiedName»;
+		«ENDIF»
+		import «factory.defn.loadCmd.qualifiedName»;
+		«IF factory.defn.saveCmd !== null»
+			import «factory.defn.saveCmd.qualifiedName»;
+		«ENDIF»
+		
+		import incubator.pval.Ensure;
+		
+		«FOR cmd : factory.defn.commands»
+			import «cmd.cmd.qualifiedName»;
+		«ENDFOR»
+		
+		public class «factory.clazz.substring(factory.clazz.lastIndexOf(".")+1)»
+		  «IF factory.defn.extends !== null»
+		  	extends «factory.defn.extends.simpleName»
+		  «ENDIF»
+		{
+			public static «factory.defn.loadCmd.simpleName» loadCommand (ModelsManager modelsManager,
+					String modelName,
+			        InputStream stream,
+			        String source) {
+			  	return new «factory.defn.loadCmd.simpleName» (modelName, modelsManager, stream, source);
+			}
+			
+			public «classFor(factory.clazz)» («factory.defn.modelClass.simpleName» model) throws RainbowException {
+				super(model);	
+			}
+			
+			«FOR cmd : factory.defn.commands»
+				public static final String «constantName(cmd.name)» = "«cmd.name»";
+			«ENDFOR»
+			
+			«FOR cmd : factory.defn.commands»
+				@Operation(name=«constantName(cmd.name)»)
+				public «cmd.cmd.simpleName» «cmd.name»Cmd «FOR p : cmd.formal BEFORE '(' SEPARATOR ',' AFTER ')'»«XtendUtils.formalTypeName(p, false)» «p.name»	«ENDFOR»
+				{
+					«FOR p : cmd.formal»
+					  «IF p.type.acme !== null»
+					    Ensure.is_true(«p.name».declaresType("«XtendUtils.getAcmeTypeName(p.type.acme.referable)»"));
+					  «ENDIF»
+					«ENDFOR»
+					return new «cmd.cmd.simpleName» («constantName(cmd.name)», («factory.defn.modelClass.simpleName» )m_modelInstance, «IF cmd.formal.get(0).name != "target"»"", «ENDIF»«FOR p : cmd.formal SEPARATOR ', '»«XtendUtils.convertToString(p)»«ENDFOR»);
+				}
+				
+			«ENDFOR»
+		}
+		
+	'''
+	
+	def constantName(String string) {
+		string.replaceAll('([A-Z])', '_$1').toUpperCase + "_CMD"
+	}
+	
+	def classFor(String name) {
+		if (name.contains(".")) return name.substring(name.lastIndexOf(".")+1)
+		else return name
+	}
+		
+	def outputUtilityModel(URI uri, Iterable<DeclaredProperty> properties, EList<ImpactVector> list) {
 		var model = ""
 		var utilities = ""
 		var scenarios = ""
@@ -153,6 +238,7 @@ class ConfigModelGenerator extends AbstractGenerator {
 		'''
 		#############################################################
 		# Generated by Rainbow XText Configuration DSL -- DO NOT EDIT
+		# Source: «uri.toString»
 		#############################################################
 		«model»
 		«utilities»
@@ -162,7 +248,7 @@ class ConfigModelGenerator extends AbstractGenerator {
 
 	}
 
-	def outputPropertiesSpec(EList<DeclaredProperty> vars) {
+	def outputPropertiesSpec(URI uri, EList<DeclaredProperty> vars) {
 		val models = vars.filter[it?.component === ComponentType.MODEL]
 		val analysis = vars.filter[it?.component === ComponentType.ANALYSIS]
 		val executors = vars.filter[it?.component === ComponentType.EXECUTOR]
@@ -175,6 +261,7 @@ class ConfigModelGenerator extends AbstractGenerator {
 		'''
 		#############################################################
 		# Generated by Rainbow XText Configuration DSL -- DO NOT EDIT
+		# Source: «uri.toString»
 		#############################################################
 
 		«FOR v : properties»
@@ -332,9 +419,10 @@ class ConfigModelGenerator extends AbstractGenerator {
 		sb.toString
 	}
 
-	def outputGuageSpec(EList<Gauge> gauges, EList<GaugeType> gaugeTypes, EList<DeclaredProperty> vars) '''
+	def outputGuageSpec(URI uri, EList<Gauge> gauges, EList<GaugeType> gaugeTypes, EList<DeclaredProperty> vars) '''
 		#############################################################
 		# Generated by Rainbow XText Configuration DSL -- DO NOT EDIT
+		# Source: «uri.toString»
 		#############################################################
 		«IF !vars.empty»
 			vars:
@@ -355,9 +443,10 @@ class ConfigModelGenerator extends AbstractGenerator {
 		  
 	'''
 
-	def outputProbeSpec(EList<Probe> probes, EList<DeclaredProperty> vars) '''
+	def outputProbeSpec(URI uri, EList<Probe> probes, EList<DeclaredProperty> vars) '''
 		#############################################################
 		# Generated by Rainbow XText Configuration DSL -- DO NOT EDIT
+		# Source: «uri.toString»
 		#############################################################
 		«IF !vars.empty»
 			vars:
@@ -373,9 +462,10 @@ class ConfigModelGenerator extends AbstractGenerator {
 		  «ENDFOR»
 	'''
 
-	def outputEffectorSpec(EList<Effector> effectors, EList<Effector> effectorTypes, EList<DeclaredProperty> vars) '''
+	def outputEffectorSpec(URI uri, EList<Effector> effectors, EList<Effector> effectorTypes, EList<DeclaredProperty> vars) '''
 		#############################################################
 		# Generated by Rainbow XText Configuration DSL -- DO NOT EDIT
+		# Source: «uri.toString»
 		#############################################################
 		«IF !vars.empty»
 			vars:
