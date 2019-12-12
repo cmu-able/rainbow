@@ -3,8 +3,8 @@ import properties "../properties.rbw"
 import configuration "../system/probes.rbw"
 
 gauge type LoadGaugeT = {
-	model factory org.sa.rainbow.^model.acme.swim.^commands.SwimCommandFactory
-	command load = ServerT.setLoad(double)    
+	model factory org.sa.rainbow.^model.^acme.swim.^commands.SwimCommandFactory
+	command ^load = ServerT.setLoad(double)    
 	setup = {
 		targetIP = "localhost"
 		beaconPeriod = 20000
@@ -18,7 +18,7 @@ gauge type LoadGaugeT = {
 }
 
 gauge type DimmerGaugeT = {
-	model factory org.sa.rainbow.^model.acme.swim.^commands.SwimCommandFactory
+	model factory org.sa.rainbow.^model.^acme.swim.^commands.SwimCommandFactory
 	command dimmer = ServerT.setDimmer(double)
 	setup = {
 		targetIP = "localhost"
@@ -32,7 +32,7 @@ gauge type DimmerGaugeT = {
 }
 
 gauge type ServerEnablementGaugeT = {
-	model factory org.sa.rainbow.^model.acme.swim.^commands.SwimCommandFactory
+	model factory org.sa.rainbow.^model.^acme.swim.^commands.SwimCommandFactory
 	command serverEnabled = ServerT.enableServer(boolean)
 	setup = {
 		targetIP = "localhost"
@@ -46,7 +46,7 @@ gauge type ServerEnablementGaugeT = {
 }
 
 gauge type ServerActivationGaugeT = {   
-	model factory org.sa.rainbow.^model.acme.swim.^commands.SwimCommandFactory
+	model factory org.sa.rainbow.^model.^acme.swim.^commands.SwimCommandFactory
 	command activateServer = ServerT.activateServer(boolean)
 	setup = {
 		targetIP = "localhost"
@@ -174,7 +174,7 @@ gauge OptResponseTimeG0 = {
 
 gauge LoadG1 -> LoadGaugeT= {
 	model SwimSys::Acme
-	command load = server1.setLoad($<load>)   
+	command ^load = server1.setLoad($<^load>)   
 	setup = {
 		targetIP = ««customize.system.^target.lb»»
 	} 
@@ -185,7 +185,7 @@ gauge LoadG1 -> LoadGaugeT= {
 
 gauge LoadG2 -> LoadGaugeT= {
 	model SwimSys::Acme
-	command load = server2.setLoad($<load>)   
+	command ^load = server2.setLoad($<^load>)   
 	setup = {
 		targetIP = ««customize.system.^target.lb»»
 	} 
@@ -196,7 +196,7 @@ gauge LoadG2 -> LoadGaugeT= {
 
 gauge LoadG3 -> LoadGaugeT= {
 	model SwimSys::Acme
-	command load = server3.setLoad($<load>)   
+	command ^load = server3.setLoad($<^load>)   
 	setup = {
 		targetIP = ««customize.system.^target.lb»»
 	} 
