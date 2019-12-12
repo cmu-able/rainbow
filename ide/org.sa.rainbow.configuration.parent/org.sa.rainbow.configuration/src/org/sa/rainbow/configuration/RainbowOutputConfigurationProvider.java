@@ -17,7 +17,7 @@ public class RainbowOutputConfigurationProvider implements IOutputConfigurationP
 	public Set<OutputConfiguration> getOutputConfigurations() {
 		OutputConfiguration defaultOutput = new OutputConfiguration(RAINBOW_GENERRATED_SOURCE_OUTPUT);
 	    defaultOutput.setDescription("Output Folder");
-	    defaultOutput.setOutputDirectory("./src-gen/main/java");
+	    defaultOutput.setOutputDirectory("./src/main/generated");
 	    defaultOutput.setOverrideExistingResources(true);
 	    defaultOutput.setCreateOutputDirectory(true);
 	    defaultOutput.setCleanUpDerivedResources(true);
@@ -25,7 +25,7 @@ public class RainbowOutputConfigurationProvider implements IOutputConfigurationP
 	    
 	    OutputConfiguration propertyOutput = new OutputConfiguration(RAINBOW_TARGET_PROPERTIES_OUTPUT);
 	    propertyOutput.setDescription("Rainbow target property output folder");
-	    propertyOutput.setOutputDirectory("./tgt-gen");
+	    propertyOutput.setOutputDirectory("./src/main/resources/generated");
 	    propertyOutput.setOverrideExistingResources(true);
 	    propertyOutput.setCreateOutputDirectory(true);
 	    propertyOutput.setCleanUpDerivedResources(true);

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature id="org.acme.xtext.feature.source" version="1.0.0.201912112147" label="Acme Feature  Developer Resources">
+  <includes id="org.acme.xtext.feature" version="1.0.0.201912112147"/>
+  <plugin id="org.acme.xtext.source" version="1.0.0.201912112147" download-size="0" install-size="0" unpack="false"/>
+  <plugin id="org.acme.xtext.ide.source" version="1.0.0.201912112147" download-size="0" install-size="0" unpack="false"/>
+  <plugin id="org.acme.xtext.ui.source" version="1.0.0.201912112147" download-size="0" install-size="0" unpack="false"/>
+</feature>

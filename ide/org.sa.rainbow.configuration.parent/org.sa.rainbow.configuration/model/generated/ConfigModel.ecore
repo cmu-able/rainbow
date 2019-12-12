@@ -24,6 +24,51 @@
         eType="#//ImpactVector" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="export" eType="#//Export"
         containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="factories" upperBound="-1"
+        eType="#//Factory" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Factory">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="clazz" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="defn" eType="#//FactoryDefinition"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FactoryDefinition">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="extends" eType="ecore:EClass platform:/resource/org.eclipse.xtext.common.types/model/JavaVMTypes.ecore#//JvmType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="modelClass" eType="ecore:EClass platform:/resource/org.eclipse.xtext.common.types/model/JavaVMTypes.ecore#//JvmType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="loadCmd" eType="ecore:EClass platform:/resource/org.eclipse.xtext.common.types/model/JavaVMTypes.ecore#//JvmType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="saveCmd" eType="ecore:EClass platform:/resource/org.eclipse.xtext.common.types/model/JavaVMTypes.ecore#//JvmType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="commands" upperBound="-1"
+        eType="#//CommandDefinition" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="CommandDefinition">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="formal" upperBound="-1"
+        eType="#//FormalParam" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="cmd" eType="ecore:EClass platform:/resource/org.eclipse.xtext.common.types/model/JavaVMTypes.ecore#//JvmType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FormalParam">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//Type" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Type">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="base" eType="#//BaseType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="java" eType="#//JavaReference"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="acme" eType="#//AcmeReference"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AcmeReference">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="referable" eType="ecore:EClass platform:/resource/org.acme.xtext/model/generated/Acme.ecore#//AnyTypeRef"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="BaseType">
+    <eLiterals name="COMPONENT" literal="component"/>
+    <eLiterals name="CONNECTOR" value="1" literal="connector"/>
+    <eLiterals name="PORT" value="2" literal="port"/>
+    <eLiterals name="ROLE" value="3" literal="role"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="JavaReference">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="referable" eType="ecore:EClass platform:/resource/org.eclipse.xtext.common.types/model/JavaVMTypes.ecore#//JvmType"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ImpactVector">
     <eStructuralFeatures xsi:type="ecore:EReference" name="utilityModel" eType="#//PropertyReference"
@@ -145,11 +190,11 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="value" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject"
         containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="FormalParam"/>
   <eClassifiers xsi:type="ecore:EEnum" name="ImportType">
     <eLiterals name="CONFIG" literal="configuration"/>
     <eLiterals name="PROPS" value="1" literal="properties"/>
     <eLiterals name="STITCH" value="2" literal="stitch"/>
+    <eLiterals name="ACME" value="3" literal="acme"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Import">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="#//ImportType"/>
@@ -197,7 +242,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="BooleanLiteral">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="isTrue" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Reference" eSuperTypes="#//FormalParam">
+  <eClassifiers xsi:type="ecore:EClass" name="Reference">
     <eStructuralFeatures xsi:type="ecore:EReference" name="referable" eType="ecore:EClass platform:/resource/org.eclipse.xtext.common.types/model/JavaVMTypes.ecore#//JvmType"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PropertyReference">

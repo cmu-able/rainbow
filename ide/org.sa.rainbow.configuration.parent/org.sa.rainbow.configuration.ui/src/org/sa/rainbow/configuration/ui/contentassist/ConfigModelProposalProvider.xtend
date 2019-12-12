@@ -15,6 +15,8 @@ import javax.swing.text.BadLocationException
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.jface.viewers.StyledString
 import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.xtext.Group
+import org.eclipse.xtext.Keyword
 import org.eclipse.xtext.RuleCall
 import org.eclipse.xtext.common.types.access.IJvmTypeProvider
 import org.eclipse.xtext.common.types.xtext.ui.ITypesProposalProvider
@@ -41,13 +43,14 @@ import org.sa.rainbow.configuration.configModel.Probe
 import org.sa.rainbow.configuration.configModel.ProbeReference
 import org.sa.rainbow.configuration.configModel.PropertyReference
 import org.sa.rainbow.configuration.configModel.StringLiteral
+import org.sa.rainbow.configuration.services.ConfigModelGrammarAccess
 import org.sa.rainbow.core.gauges.AbstractGauge
-import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd
-import org.sa.rainbow.core.models.commands.ModelCommandFactory
-import org.sa.rainbow.translator.probes.AbstractProbe
-import org.sa.rainbow.core.models.commands.AbstractSaveModelCmd
 import org.sa.rainbow.core.models.IModelInstance
+import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd
+import org.sa.rainbow.core.models.commands.AbstractSaveModelCmd
+import org.sa.rainbow.core.models.commands.ModelCommandFactory
 import org.sa.rainbow.model.acme.AcmeModelOperation
+import org.sa.rainbow.translator.probes.AbstractProbe
 
 /**
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#content-assist
@@ -595,6 +598,32 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 
 	override protected announceProcessing(List<?> key) {
 		return handledArguments.add(key);
+	}
+	
+	// Keyword group stuff
+	@Inject extension ConfigModelGrammarAccess
+	override complete_ModelFactory(EObject model, RuleCall ruleCall, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		modelFactoryAccess.group.createKeywordProposal(context, acceptor)
+	}
+	
+	override complete_CommandLoad(EObject model, RuleCall ruleCall, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		commandLoadAccess.group.createKeywordProposal(context, acceptor)
+	}
+	
+	override complete_CommandSave(EObject model, RuleCall ruleCall, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		commandSaveAccess.group.createKeywordProposal(context, acceptor)
+	}
+	
+	override complete_ModelTypeKW(EObject model, RuleCall ruleCall, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		modelTypeKWAccess.group.createKeywordProposal(context, acceptor)
+	}
+	
+	def createKeywordProposal(Group group, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		if (group === null) {
+			return null
+		}
+		val proposalString = group.elements.filter(Keyword).map[value].join(" ") + " "
+		acceptor.accept(createCompletionProposal(proposalString, proposalString, null, context))
 	}
 
 }

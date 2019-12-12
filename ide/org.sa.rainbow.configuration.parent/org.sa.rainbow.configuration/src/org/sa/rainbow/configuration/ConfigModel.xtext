@@ -41,7 +41,11 @@ ConfigurationModel:
 ;
 
 Factory:
-	'model' 'factory' name=ID 'yields' clazz=FQN defn=FactoryDefinition
+	ModelFactory name=ID 'yields' clazz=FQN defn=FactoryDefinition
+;
+
+ModelFactory:
+	'model' 'factory'
 ;
 
 FactoryDefinition:
@@ -49,11 +53,19 @@ FactoryDefinition:
 	'{'
 		('extends' extends=[types::JvmType|FQN])?
 		'for' modelClass=[types::JvmType|FQN] ';'?
-		'command' 'load' 'is' loadCmd=[types::JvmType|FQN] ';'?
-		('command' 'save' 'is' saveCmd=[types::JvmType|FQN] ';'?)?
+		CommandLoad loadCmd=[types::JvmType|FQN] ';'?
+		(CommandSave saveCmd=[types::JvmType|FQN] ';'?)?
 		commands+=CommandDefinition*
 	
 	'}'
+;
+
+CommandLoad:
+	'command' 'load' 'is'
+;
+
+CommandSave:
+	'command' 'save' 'is' 
 ;
 
 CommandDefinition:
@@ -89,8 +101,12 @@ ImpactVector:
 ;
 
 ModelType:
-	'model' 'type' name=ID ('->' superType=[ModelType])? '=' '{' properties=Component '}'
+	ModelTypeKW name=ID ('->' superType=[ModelType])? '=' '{' properties=Component '}'
 	('commands' '=' '{' (commands+=CommandSignature)+ '}') 'generate' filename=StringLiteral
+;
+
+ModelTypeKW:
+	'model' 'type'
 ;
 
 CommandSignature:
@@ -169,7 +185,7 @@ GaugeBody:
 
 GaugeTypeBody:
 	'{'
-	    ('model' 'factory'  mcf=[types::JvmType|FQN])?
+	    (ModelFactory  mcf=[types::JvmType|FQN])?
 	    (commands+=CommandReference)+
 		(assignment+=Assignment)*
 		
