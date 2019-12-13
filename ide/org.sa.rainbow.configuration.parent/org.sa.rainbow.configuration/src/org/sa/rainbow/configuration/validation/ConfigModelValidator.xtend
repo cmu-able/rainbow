@@ -332,12 +332,13 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			if (gb.ref?.referable?.component == ComponentType.MODEL &&
 				gb.ref?.referable?.^default.value instanceof Component) {
 				val factory = (gb.ref.referable.^default.value as Component).assignment.findFirst[it.name == "factory"]
-				if (factory?.value?.value instanceof Reference) {
+				if (factory?.value?.value instanceof Reference && (factory.value.value as Reference).referable instanceof JvmDeclaredType) {
 					modelFactory = (factory.value.value as Reference).referable as JvmDeclaredType
 				}
 			} else {
 				if (g.superType !== null) {
-					modelFactory = g.superType.body.mcf as JvmDeclaredType
+					if (g.superType.body.mcf instanceof JvmDeclaredType)
+						modelFactory = g.superType.body.mcf as JvmDeclaredType
 				}
 			}
 			if (modelFactory === null) {
