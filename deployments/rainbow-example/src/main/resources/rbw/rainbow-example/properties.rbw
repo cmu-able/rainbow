@@ -1,5 +1,5 @@
 target rainbow-example
- 
+import acme "model/swim.acme" 
 ################################################################################
 # Purpose:  Common configuration file for the Rainbow infrastructure.
 #           Properties are loaded by class org.sa.rainbow.Rainbow .
@@ -35,7 +35,7 @@ def rainbow.master.location.host = "rainbow-example"
 #- Location information of the deployed delegate
 def rainbow.deployment.location = "rainbow-example"
 #- default registry port; change if port-tunneling
-def rainbow.master.location.port = 1100
+def rainbow.master.location.^port = 1100
 #- OS platform, supported modes are:  cygwin | linux
 #  Use "cygwin" for Windows, "linux" for MacOSX
 def rainbow.deployment.environment = "linux"
@@ -45,11 +45,14 @@ def rainbow.deployment.^factory.class = org.sa.rainbow.core.ports.guava.GuavaRai
 
 ### Rainbow models
 
+
+
+
 # Rainbow Acme model of SWIM
 def model SwimSys= {
 	^type="Acme" 
 	path="model/swim.acme"
-	^factory=org.sa.rainbow.^model.acme.swim.commands.SwimCommandFactory
+	^factory=org.sa.rainbow.^model.^acme.swim.commands.SwimCommandFactory
 	saveOnClose = true
 	saveLocation="model/swim-post.acme"
 }
@@ -64,7 +67,7 @@ def model USwimSys = {
 
 ### Rainbow analyses
 def analysis ArchEvaluator = {
-	class = org.sa.rainbow.evaluator.acme.ArchEvaluator
+	class = org.sa.rainbow.evaluator.^acme.ArchEvaluator
 }
 
 
@@ -79,7 +82,7 @@ def executor StitchExecutor = {
 }
 
 def effector-manager AcmeEffectorManager = {
-	class = org.sa.rainbow.effectors.acme.AcmeEffectorManager
+	class = org.sa.rainbow.effectors.^acme.AcmeEffectorManager
 }
 
 
