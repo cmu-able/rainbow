@@ -74,7 +74,7 @@ public class SwimModelUpdateOperatorsImpl extends AcmeModelInstance {
 	}
 
 	@Override
-	public SwimCommandFactory getCommandFactory() throws RainbowException {
+	public SwimCommandFactory getCommandFactory() throws RainbowException { 
 		if (m_commandFactory == null) {
 			m_commandFactory = new SwimCommandFactory(this);
 		}
