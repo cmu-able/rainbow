@@ -149,7 +149,25 @@
                                         </execution>
                                 </executions>
                         </plugin>
-
+						<plugin>
+							<groupId>org.codehaus.mojo</groupId>
+							<artifactId>build-helper-maven-plugin</artifactId>
+							<version>3.0.0</version>
+							<executions>
+								<execution>
+									<id>add-source</id>
+									<phase>generate-sources</phase>
+									<goals>
+										<goal>add-source</goal>
+									</goals>
+									<configuration>
+										<sources>
+											<source>src/main/java-gen</source>
+										</sources>
+									</configuration>
+								</execution>
+							</executions>
+						</plugin>
                         <!-- Plugin that creates the jar. We configure the plugin to place the 
                                 build number in the jar's manifest. The goal 'test-jar' allows creating a 
                                 jar file with test code. -->
@@ -233,10 +251,10 @@
                                                         <setup>org.sa.rainbow.configuration.ConfigModelStandaloneSetup</setup>
                                                         <outputConfigurations>
                                                                 <outputConfiguration>
-                                                                        <outputDirectory>src-gen/main/java/</outputDirectory>
+                                                                        <outputDirectory>src/main/java-gen</outputDirectory>
                                                                 </outputConfiguration>
                                                                 <outputConfigration>
-                                                                        <outputDirectory>tgt-gen</outputDirectory>
+                                                                        <outputDirectory>src/main/resources/generated</outputDirectory>
                                                                           <createOutputDirectory>true</createOutputDirectory>
                                                                         <overrideExistingResources>true</overrideExistingResources>
                                                                         <cleanUpDerivedResources>true</cleanUpDerivedResources>
@@ -247,7 +265,7 @@
                                                         <setup>org.sa.rainbow.stitch.StitchStandaloneSetup</setup>
                                                         <outputConfigurations>
                                                                 <outputConfiguration>
-                                                                        <outputDirectory>tgt-gen</outputDirectory>
+                                                                        <outputDirectory>src/main/resources/generated</outputDirectory>
                                                                         <createOutputDirectory>true</createOutputDirectory>
                                                                         <overrideExistingResources>true</overrideExistingResources>
                                                                         <cleanUpDerivedResources>true</cleanUpDerivedResources>
@@ -258,7 +276,7 @@
                                                 <setup>org.acme.AcmeStandaloneSetup</setup>
                                                         <outputConfigurations>
                                                                 <outputConfiguration>
-                                                                        <outputDirectory>tgt-gen</outputDirectory>
+                                                                        <outputDirectory>src/main/resources/generated</outputDirectory>
                                                                         <createOutputDirectory>true</createOutputDirectory>
                                                                         <overrideExistingResources>true</overrideExistingResources>
                                                                         <cleanUpDerivedResources>true</cleanUpDerivedResources>
