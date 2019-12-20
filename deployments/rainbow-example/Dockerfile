@@ -67,7 +67,7 @@ RUN mvn -DskipTests install
 ADD deployments /root/rainbow/deployments
 WORKDIR /root/rainbow/deployments/rainbow-example
 RUN mvn -DskipTests install
-RUN ls /root/rainbow/deployments/rainbow-example
+RUN ls /root/rainbow/deployments/rainbow-example/src/main/resources/generated/rainbow-example/*
 CMD [/bin/bash]
 
 
