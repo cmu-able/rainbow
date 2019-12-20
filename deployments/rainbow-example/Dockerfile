@@ -93,7 +93,7 @@ COPY targets/rainbow-example targets/rainbow-example
 COPY license.html .
 COPY --from=builder /root/rainbow/deployments/rainbow-example/target/lib/* lib/
 COPY --from=builder /root/rainbow/deployments/rainbow-example/target/*.jar lib/
-COPY --from=builder /root/rainbow/deployments/rainbow-example/tgt-gen/rainbow-example/* targets/rainbow-example/
+COPY --from=builder /root/rainbow/deployments/rainbow-example/src/main/resources/generated/rainbow-example/* targets/rainbow-example/
 
 RUN echo "export SOCAT_PORT=4242" >> /headless/.bashrc
 RUN echo "export JAVA_FONTS=/usr/local/share/fonts/ms_fonts" >> /headless/.bashrc
