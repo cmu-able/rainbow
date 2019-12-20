@@ -83,7 +83,7 @@ public class DummyCommandFactory extends ModelCommandFactory<Integer> {
                     }
 
                     @Override
-                    public ModelCommandFactory<Integer> getCommandFactory () {
+                    public ModelCommandFactory<Integer> getCommandFactory () throws RainbowException {
                         return new DummyCommandFactory ();
                     }
 
