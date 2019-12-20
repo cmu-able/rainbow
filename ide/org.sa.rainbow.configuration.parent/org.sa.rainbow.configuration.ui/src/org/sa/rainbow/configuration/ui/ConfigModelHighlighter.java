@@ -13,6 +13,7 @@ import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.ui.editor.syntaxcoloring.DefaultHighlightingConfiguration;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.sa.rainbow.configuration.ConfigAttributeConstants;
+import org.sa.rainbow.configuration.XtendUtils;
 import org.sa.rainbow.configuration.configModel.Assignment;
 import org.sa.rainbow.configuration.configModel.Component;
 import org.sa.rainbow.configuration.configModel.ConfigModelPackage;
@@ -90,38 +91,52 @@ public class ConfigModelHighlighter extends DefaultSemanticHighlightingCalculato
 					switch (p.getComponent()) {
 					case ANALYSIS:
 						kw = ConfigAttributeConstants.ANALYSIS_KEYWORDS;
+						highlightSoftKeyword(acceptor, a, kw);
 						break;
 					case EFFECTORMANAGER:
 						kw = ConfigAttributeConstants.EFFECTOR_MANAGER_KEYWORDS;
+						highlightSoftKeyword(acceptor, a, kw);
 						break;
 					case EXECUTOR:
 						kw = ConfigAttributeConstants.EXECUTOR_KEYWORDS;
+						highlightSoftKeyword(acceptor, a, kw);
 						break;
 					case GUI:
+						if (XtendUtils.isKeyProperty(ConfigAttributeConstants.GUI_PROPERTY_TUPES, a)) {
+							for (INode node : NodeModelUtils.findNodesForFeature(a, ConfigModelPackage.Literals.ASSIGNMENT__NAME)) {
+								acceptor.addPosition(node.getOffset(), node.getLength(), ConfigModelHighlightingConfiguration.SOFT_KEYWORD_ID);
+							}
+						}
 						break;
 					case MANAGER:
 						kw = ConfigAttributeConstants.MANAGER_KEYWORDS;
+						highlightSoftKeyword(acceptor, a, kw);
 						break;
 					case MODEL:
 						kw = ConfigAttributeConstants.MODEL_KEYWORDS;
+						highlightSoftKeyword(acceptor, a, kw);
 						break;
 					case UTILITY:
 						kw = ConfigAttributeConstants.UTILITY_KEYWORDS;
+						highlightSoftKeyword(acceptor, a, kw);
 					case PROPERTY:
 						break;
 					default:
-						break;
+						;
 					
-					}
-					if (kw.contains(a.getName())) {
-						for (INode node : NodeModelUtils.findNodesForFeature(a, ConfigModelPackage.Literals.ASSIGNMENT__NAME)) {
-							acceptor.addPosition(node.getOffset(), node.getLength(), ConfigModelHighlightingConfiguration.SOFT_KEYWORD_ID);
-						}
 					}
 				}
 			}
 			
 		}
 		super.doProvideHighlightingFor(resource, acceptor, cancelIndicator);
+	}
+
+	protected void highlightSoftKeyword(IHighlightedPositionAcceptor acceptor, Assignment a, Set<String> kw) {
+		if (kw.contains(a.getName())) {
+			for (INode node : NodeModelUtils.findNodesForFeature(a, ConfigModelPackage.Literals.ASSIGNMENT__NAME)) {
+				acceptor.addPosition(node.getOffset(), node.getLength(), ConfigModelHighlightingConfiguration.SOFT_KEYWORD_ID);
+			}
+		}
 	}
 }

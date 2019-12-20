@@ -403,9 +403,14 @@
 			<version>3.0</version>
 		</dependency>
 		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>27.0-jre</version>
+		</dependency>
+		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-acme-model</artifactId>
-			<version>3.0</version>
+			<version>3.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.antlr</groupId>

@@ -185,23 +185,29 @@ GaugeBody:
 
 GaugeTypeBody:
 	'{'
-	    (ModelFactory  mcf=[types::JvmType|FQN])?
+	    (ModelFactory  mcf=PropertyReference)?
 	    (commands+=CommandReference)+
 		(assignment+=Assignment)*
 		
 	'}'
 ;
 
+JavaClassOrFactory:
+	
+	java=JavaReference | factory=PropertyReference
+;
+
+
 CommandReference:
 	'command' name=ID '=' (target=ID'.')? command=ID '(' (formal+=[types::JvmType|FQN] (',' formal+=[types::JvmType|FQN])*)? ')'
 ;
 
 CommandCall:
-	'command' (name=ID '=')? ((target=ID | ref=PropertyReference) '.')? command=ID '(' (actual+=Actual (',' actual+=Actual)*)? ')'
+	'command' (name=ID '=')? (regexp=StringLiteral '->' )? ((target=ID | ref=PropertyReference) '.')? command=ID '(' (actual+=Actual (',' actual+=Actual)*)? ')'
 ;
 
 Actual:
-	ref?='$<' id=ID '>' |
+	ref?='$<' (ng=ID | ag=INT) '>' |
 	id=ID |
 	pr=PropertyReference |
 	value=StringLiteral |
@@ -215,7 +221,8 @@ enum ImportType:
 	CONFIG='configuration' |
 	PROPS='properties'  |
 	STITCH="stitch" |
-	ACME="acme"
+	ACME="acme" |
+	FACTORY="factory"
 ;
 
 
@@ -253,9 +260,16 @@ Value:
 	value=IPLiteral |
 	value=LogLiteral |
 	value=PropertyReference |
-	value=ProbeReference |
-	value=Array
+//	value=ProbeReference |
+	value=Array // |
+//	value=ModelFactoryReference
 ;
+
+
+AnyRef:
+	Factory | DeclaredProperty | Gauge | GaugeType | Probe | ProbeType | Effector | EffectorType 
+;
+
 
 Array:
 	{Array} '[' (values+=Value (',' values+=Value)*)? ']'
@@ -302,11 +316,15 @@ Reference:
 ;
 
 PropertyReference:
-	'««' referable=[DeclaredProperty|FQN] '»»'
+	'««' referable=[AnyRef|FQN] '»»'
 ;
 
-ProbeReference:
-	'probe' referable=[Probe|FQN]
+//ProbeReference:
+//	'probe' referable=[Probe|FQN]
+//;
+//
+ModelFactoryReference:
+	referable=[Factory|ID]
 ;
 	
 FQN:

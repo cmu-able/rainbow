@@ -3,8 +3,9 @@
  */
 package org.sa.rainbow.configuration.ui.outline
 
-import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.swt.graphics.Image
+import org.eclipse.xtext.common.types.JvmType
 import org.eclipse.xtext.ui.editor.outline.IOutlineNode
 import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider
 import org.sa.rainbow.configuration.configModel.Assignment
@@ -12,12 +13,11 @@ import org.sa.rainbow.configuration.configModel.CommandCall
 import org.sa.rainbow.configuration.configModel.CommandReference
 import org.sa.rainbow.configuration.configModel.Component
 import org.sa.rainbow.configuration.configModel.ConfigModelPackage
-import org.sa.rainbow.configuration.configModel.Effector
+import org.sa.rainbow.configuration.configModel.EffectorBody
+import org.sa.rainbow.configuration.configModel.Factory
 import org.sa.rainbow.configuration.configModel.GaugeBody
 import org.sa.rainbow.configuration.configModel.GaugeTypeBody
 import org.sa.rainbow.configuration.configModel.Probe
-import org.eclipse.emf.ecore.EStructuralFeature
-import org.sa.rainbow.configuration.configModel.EffectorBody
 
 /**
  * Customization of the default outline structure.
@@ -48,11 +48,15 @@ class ConfigModelOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	def _createNode(IOutlineNode parentNode, GaugeTypeBody gtb) {
 
 		var model = ""
-		if (gtb.mcf != null ) {
-			model = '''...«gtb.mcf.simpleName»'''
+	if (gtb.mcf.referable instanceof JvmType) {
+			model = '''...«(gtb.mcf.referable as JvmType).simpleName»'''
 		}
-
-		createEStructuralFeatureNode(parentNode, gtb.eContainer, ConfigModelPackage.Literals.GAUGE_TYPE__NAME,
+		else if (gtb.mcf.referable instanceof Factory) {
+			model = '''...«(gtb.mcf.referable as Factory).name»'''
+		}
+		
+		
+		createEObjectNode(parentNode, gtb.eContainer,
 			nullImage(), model, true)
 		for (cmd : gtb.commands) {
 			super._createNode(parentNode, cmd)
@@ -64,7 +68,7 @@ class ConfigModelOutlineTreeProvider extends DefaultOutlineTreeProvider {
 
 	def _CreateNode(IOutlineNode parentNode, GaugeBody gtb) {
 		var model = ""
-		var EStructuralFeature ref = ConfigModelPackage.Literals.GAUGE_TYPE__NAME
+		var EStructuralFeature ref = null
 		if (gtb.modelName != null || gtb.modeltype != null) {
 			model = '''«gtb.modelName===null?"":gtb.modelName»::«gtb.modeltype!=null?"":gtb.modeltype»'''
 			ref = ConfigModelPackage.Literals.GAUGE_BODY__MODEL_NAME
@@ -72,8 +76,13 @@ class ConfigModelOutlineTreeProvider extends DefaultOutlineTreeProvider {
 			model = '''«gtb.ref.referable.name»'''
 			ref = ConfigModelPackage.Literals.GAUGE_BODY__REF
 		}
-		createEStructuralFeatureNode(parentNode, gtb.eContainer, ref,
+		if (ref !== null) {
+			createEStructuralFeatureNode(parentNode, gtb.eContainer, ref,
 			nullImage(), model, true)
+		}
+		else {
+			createEObjectNode(parentNode, gtb.eContainer, nullImage, model, true)
+		}
 		for (cmd : gtb.commands) {
 			super._createNode(parentNode, cmd)
 		}
@@ -90,7 +99,7 @@ class ConfigModelOutlineTreeProvider extends DefaultOutlineTreeProvider {
 
 	def _createNode(IOutlineNode parentNode, EffectorBody body) {
 		var model = ""
-		var EStructuralFeature ref = ConfigModelPackage.Literals.GAUGE_TYPE__NAME
+		var EStructuralFeature ref = null
 		if (body.modelName != null || body.modeltype != null) {
 			model = '''«body.modelName===null?"":body.modelName»::«body.modeltype!=null?"":body.modeltype»'''
 			ref = ConfigModelPackage.Literals.EFFECTOR_BODY__MODEL_NAME
@@ -98,8 +107,11 @@ class ConfigModelOutlineTreeProvider extends DefaultOutlineTreeProvider {
 			model = '''«body.ref.referable.name»'''
 			ref = ConfigModelPackage.Literals.EFFECTOR_BODY__REF
 		}
-		createEStructuralFeatureNode(parentNode, body, ref,
-			nullImage(), model, true)
+		if (ref !== null)
+			createEStructuralFeatureNode(parentNode, body, ref,
+				nullImage(), model, true)
+		else 
+			createEObjectNode(parentNode, body.eContainer, nullImage, model, true)
 		for (ass : body.assignment) {
 			super._createNode(parentNode, ass)
 		}

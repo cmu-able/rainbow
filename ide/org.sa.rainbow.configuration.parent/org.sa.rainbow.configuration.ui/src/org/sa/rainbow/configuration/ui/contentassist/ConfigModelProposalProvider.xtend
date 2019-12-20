@@ -7,6 +7,7 @@ import com.google.common.base.Predicate
 import com.google.common.collect.Sets
 import com.google.inject.Inject
 import com.google.inject.name.Named
+import java.util.Collection
 import java.util.HashSet
 import java.util.List
 import java.util.Set
@@ -14,7 +15,10 @@ import java.util.stream.Collectors
 import javax.swing.text.BadLocationException
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.jface.viewers.StyledString
+import org.eclipse.xtext.CrossReference
 import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.xtext.Grammar
+import org.eclipse.xtext.GrammarUtil
 import org.eclipse.xtext.Group
 import org.eclipse.xtext.Keyword
 import org.eclipse.xtext.RuleCall
@@ -25,7 +29,9 @@ import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.ui.editor.contentassist.ConfigurableCompletionProposal
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
 import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor
+import org.eclipse.xtext.xbase.lib.Functions.Function1
 import org.sa.rainbow.configuration.ConfigAttributeConstants
+import org.sa.rainbow.configuration.XtendUtils
 import org.sa.rainbow.configuration.configModel.Array
 import org.sa.rainbow.configuration.configModel.Assignment
 import org.sa.rainbow.configuration.configModel.BooleanLiteral
@@ -35,12 +41,12 @@ import org.sa.rainbow.configuration.configModel.ConfigModelPackage
 import org.sa.rainbow.configuration.configModel.DeclaredProperty
 import org.sa.rainbow.configuration.configModel.DoubleLiteral
 import org.sa.rainbow.configuration.configModel.Effector
+import org.sa.rainbow.configuration.configModel.Factory
 import org.sa.rainbow.configuration.configModel.Gauge
 import org.sa.rainbow.configuration.configModel.GaugeType
 import org.sa.rainbow.configuration.configModel.IPLiteral
 import org.sa.rainbow.configuration.configModel.IntegerLiteral
 import org.sa.rainbow.configuration.configModel.Probe
-import org.sa.rainbow.configuration.configModel.ProbeReference
 import org.sa.rainbow.configuration.configModel.PropertyReference
 import org.sa.rainbow.configuration.configModel.StringLiteral
 import org.sa.rainbow.configuration.services.ConfigModelGrammarAccess
@@ -57,6 +63,23 @@ import org.sa.rainbow.translator.probes.AbstractProbe
  * on how to customize the content assistant.
  */
 class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
+	
+	@Inject
+	ConfigModelGrammarAccess cfGrammar
+	
+	static var Set<String> KEYWORDS = null
+	def isKeyword(String s) {
+		if (KEYWORDS === null) {
+			KEYWORDS = newHashSet
+			val Set<Grammar> grammars = newHashSet
+			grammars.add(cfGrammar.grammar)
+			grammars.addAll(GrammarUtil.allUsedGrammars(cfGrammar.grammar));
+			for (g : grammars) {
+				KEYWORDS.addAll(GrammarUtil.getAllKeywords(g))
+			}
+		}
+		return KEYWORDS.contains(s)
+	}
 
 	override complete_RICH_TEXT_DQ(EObject model, RuleCall ruleCall, ContentAssistContext context,
 		ICompletionProposalAcceptor acceptor) {
@@ -232,11 +255,16 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 					}
 				}
 			}
+			else if ((parent as DeclaredProperty)?.component == ComponentType.GUI) {
+				var m = model;
+				if (m instanceof Assignment && m.eContainer instanceof Component) m = m.eContainer
+				allPossibleFields.addAll(XtendUtils.getPropertySuggestions(ConfigAttributeConstants.GUI_PROPERTY_TUPES, m))
+			}
 		}
 		var suggestions = allPossibleFields.stream.filter[it.startsWith(context.prefix)].collect(Collectors.toSet)
 		suggestions.forEach [
 			{
-				val proposal = new ConfigurableCompletionProposal(it + " = ", context.replaceRegion.offset,
+				val proposal = new ConfigurableCompletionProposal((isKeyword(it)?'''^«it»''':it) + " = ", context.replaceRegion.offset,
 					context.replaceRegion.length, it.length + 3)
 				proposal.displayString = it
 				proposal.priority = 1
@@ -263,6 +291,17 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 		val subclass = jvmTypeProvider.findTypeByName(ModelCommandFactory.name)
 		typeProposalProvider.createSubTypeProposals(subclass, this, context,
 			ConfigModelPackage.Literals.GAUGE_TYPE_BODY__MCF, TypeMatchFilters.canInstantiate, acceptor);
+		val v = model.eResource.resourceSet.resources
+		val models = new HashSet<String>();
+		for (r : v) {
+			val res = r.allContents
+			res.forEach [
+				if (it instanceof Factory) {
+					models.add((it as Factory).name)
+				}
+			]
+		}
+		fillInProposals(models, acceptor, context)
 
 	}
 
@@ -338,8 +377,12 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 				}
 			]
 		}
-		if (!models.empty) {
-			models.forEach [
+		fillInProposals(models, acceptor, context)
+	}
+	
+	protected def void fillInProposals(HashSet<String> names, ICompletionProposalAcceptor acceptor, ContentAssistContext context) {
+		if (!names.empty) {
+			names.forEach [
 				acceptor.accept(
 					new ConfigurableCompletionProposal("\u00AB\u00AB" + it + "\u00BB\u00BB",
 						context.replaceRegion.offset, context.replaceRegion.length, it.length + 4, null,
@@ -404,7 +447,30 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 			}
 		}
 		val parentProp = EcoreUtil2.getContainerOfType(ass, DeclaredProperty)
-		if (parentProp?.component !== null) {
+		if (parentProp.component == ComponentType.GUI) {
+			var parent = EcoreUtil2.getContainerOfType(model.eContainer, Assignment);
+			var name = ass.name
+			while (parent !== null) {
+				name = parent.name + ":" + name
+				parent = EcoreUtil2.getContainerOfType(parent.eContainer, Assignment);
+			}
+			val valVunc = ConfigAttributeConstants.GUI_PROPERTY_TUPES.get(name)?.get('values') as Function1<Assignment,Collection<String>>
+			if (valVunc !== null) {
+				val values = (valVunc).apply(ass)
+				if (values !== null) {
+					values.forEach[
+						acceptor.accept(
+							new ConfigurableCompletionProposal(it, context.replaceRegion.offset,
+								context.replaceRegion.length, it.length))
+					]
+				}
+			
+			} 
+			
+			val extends = ConfigAttributeConstants.GUI_PROPERTY_TUPES.get(name)?.get('extends') as List<Class>
+			processPropertySuggestionsBasedOnClass(extends, model, context, acceptor)
+		}
+		else if (parentProp?.component !== null) {
 			var extends = ConfigAttributeConstants.COMPONENT_PROPERTY_TYPES.get(parentProp.component)?.get(ass.name)?.
 				get('extends') as List<Class>
 			if (extends != null) {
@@ -463,6 +529,7 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 			processPropertySuggestionsBasedOnClass(extends, model, context, acceptor)
 			return
 		}
+		
 
 		super.completeAssignment_Value(model, assignment, context, acceptor)
 	}
@@ -487,11 +554,49 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 					acceptor.accept(
 						new ConfigurableCompletionProposal("\u00AB\u00AB\u00BB\u00BB", context.getOffset(),
 							context.getSelectedText().length(), 2));
-				} else if (class == ProbeReference) {
+				} else if (class == Probe) {
+						val v = model.eResource.resourceSet.resources
+						val probes = newHashSet
+						for (r : v) {
+							val res = r.allContents
+							res.forEach [
+								if (it instanceof Probe) {
+									probes.add((it as Probe).name)
+								}
+							]
+							
+						}
+						fillInProposals(probes, acceptor, context)
+				}
+				else if (class == Factory) {
+					val names = newHashSet
+					val v = model.eResource.resourceSet.resources
+					for (r : v) {
+						val res = r.allContents
+						res.forEach[
+							if (it instanceof Factory) {
+								names.add((it as Factory).name)
+							}
+						]
+					}
+					fillInProposals(names, acceptor, context)
+				} else if (class==GaugeType) {
+					val names = newHashSet
+					val v = model.eResource.resourceSet.resources
+					for (r : v) {
+						val res = r.allContents
+						res.forEach[
+							if (it instanceof GaugeType) {
+								names.add((it as GaugeType).name)
+							}
+						]
+					}
+					fillInProposals(names, acceptor, context)
+/*				} else if (class == ProbeReference) {
 					acceptor.accept(
 						new ConfigurableCompletionProposal("probe ", context.getOffset(),
 							context.getSelectedText().length(), 6));
-				} else if (class == Array) {
+				*/} else if (class == Array) {
 					acceptor.accept(
 						new ConfigurableCompletionProposal("[]", context.getOffset(),
 							context.getSelectedText().length(), 1));
@@ -557,6 +662,25 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 			}
 			return;
 		}
+		val ass = EcoreUtil2.getContainerOfType(model, Assignment)
+		val gauge = EcoreUtil2.getContainerOfType(model, Gauge)
+		val gaugeType = EcoreUtil2.getContainerOfType(model, GaugeType)
+		if (gauge !== null || gaugeType !== null) {
+			val parent = EcoreUtil2.getContainerOfType(model.eContainer, Assignment)
+			var name = ass.name
+			if (parent !== null) {
+				name = parent.name + ":" + ass.name
+			}
+			val extends = ConfigAttributeConstants.GAUGE_PROPERTY_TYPES.get(name)?.get('extends') as List<Class>
+			for (class : extends) {
+				lookupCrossReference(assignment.getTerminal() as CrossReference, context, acceptor, 
+					[IEObjectDescription e | 
+						true
+					]
+				)
+			}
+			return
+		}
 		super.completePropertyReference_Referable(model, assignment, context, acceptor)
 	}
 
@@ -602,6 +726,8 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 	
 	// Keyword group stuff
 	@Inject extension ConfigModelGrammarAccess
+	
+
 	override complete_ModelFactory(EObject model, RuleCall ruleCall, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
 		modelFactoryAccess.group.createKeywordProposal(context, acceptor)
 	}

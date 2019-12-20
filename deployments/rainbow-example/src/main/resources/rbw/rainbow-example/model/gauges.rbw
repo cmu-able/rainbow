@@ -1,10 +1,11 @@
 target rainbow-example
 import properties "../properties.rbw"
 import configuration "../system/probes.rbw"
+import factory "../../SwimModelFactory.rbw"
 
 gauge type LoadGaugeT = {
-	model factory org.sa.rainbow.^model.^acme.swim.^commands.SwimCommandFactory
-	command ^load = ServerT.setLoad(double)    
+	model factory ««SWIM»»
+	command ^load = ServerT.setLoad(double)     
 	setup = {
 		targetIP = "localhost"
 		beaconPeriod = 20000
@@ -12,14 +13,14 @@ gauge type LoadGaugeT = {
 	}
 	config = {
 		samplingFrequency = 5000 
-		targetProbe = probe GenericProbeT    
+		targetProbe = ««GenericProbeT»»   
 	}
 	comment = "LoadGaugeT measures and reports CPU load for the target host"
 }
 
 gauge type DimmerGaugeT = {
-	model factory org.sa.rainbow.^model.^acme.swim.^commands.SwimCommandFactory
-	command dimmer = ServerT.setDimmer(double)
+	model factory ««SWIM»»
+	command dimmer = LoadBalancerT.setDimmer(int)
 	setup = {
 		targetIP = "localhost"
 		beaconPeriod = 30000
@@ -32,7 +33,7 @@ gauge type DimmerGaugeT = {
 }
 
 gauge type ServerEnablementGaugeT = {
-	model factory org.sa.rainbow.^model.^acme.swim.^commands.SwimCommandFactory
+	model factory ««SWIM»»
 	command serverEnabled = ServerT.enableServer(boolean)
 	setup = {
 		targetIP = "localhost"
@@ -46,7 +47,7 @@ gauge type ServerEnablementGaugeT = {
 }
 
 gauge type ServerActivationGaugeT = {   
-	model factory org.sa.rainbow.^model.^acme.swim.^commands.SwimCommandFactory
+	model factory ««SWIM»»
 	command activateServer = ServerT.activateServer(boolean)
 	setup = {
 		targetIP = "localhost"
@@ -60,14 +61,24 @@ gauge type ServerActivationGaugeT = {
 	comment = "ServerActivationGaugeT reports if a server is active or not. serverNum is the server number (e.g., 1, 2 3), so that if there are N active servers, this server is active if N >= serverNum"
 }
 
+gauge type BasicResponseTimeT = {
+	model factory ««SWIM»»
+	command basicResponseTime = LoadBalancerT.setBasicResponseTime(double)
+}
+
+gauge type OptResponseTimeT = {
+	model factory ««SWIM»»
+	command optResponseTime = LoadBalancerT.setOptResponseTime(double)
+}
+
 gauge DimmerG0 -> DimmerGaugeT = {
 	model ««SwimSys»»
-	command dimmer = LB0.setDimmer($<dimmer>)
+	command dimmer = "(?<dimmer>.*)" -> LB0.setDimmer($<dimmmmer>)
 	setup = {
 		targetIP = ««customize.system.^target.lb»»
 	}
 	config = {
-		targetProbe = probe DimmerProbe
+		targetProbe = ««DimmerProbe»»
 	}
 	comment = "DimmerG0 is associated with the component LB0 of the System, SwimSys, defined as an Acme model"
 }
@@ -79,7 +90,7 @@ gauge ServerEnabledG1 -> ServerEnablementGaugeT = {
 		targetIP = ««customize.system.^target.lb»»
 	}
 	config = {
-		targetProbe = probe ServersProbe
+		targetProbe = ««ServersProbe»»
 		serverNum = 1
 	}
 }
@@ -91,7 +102,7 @@ gauge ServerEnabledG2 -> ServerEnablementGaugeT = {
 		targetIP = ««customize.system.^target.lb»»
 	}
 	config = {
-		targetProbe = probe ServersProbe
+		targetProbe = ««ServersProbe»»
 		serverNum = 2
 	}
 }
@@ -103,7 +114,7 @@ gauge ServerEnabledG3 -> ServerEnablementGaugeT = {
 		targetIP = ««customize.system.^target.lb»»
 	}
 	config = {
-		targetProbe = probe ServersProbe
+		targetProbe = ««ServersProbe»»
 		serverNum = 3
 	}
 }
@@ -115,7 +126,7 @@ gauge ServerActiveG1 -> ServerActivationGaugeT = {
 		targetIP = ««customize.system.^target.lb»»
 	}
 	config = {
-		targetProbe = probe ActivateServersProbe
+		targetProbe = ««ServersProbe»»
 		serverNum = 1
 	}
 }
@@ -127,7 +138,7 @@ gauge ServerActiveG2 -> ServerActivationGaugeT = {
 		targetIP = ««customize.system.^target.lb»»
 	}
 	config = {
-		targetProbe = probe ActivateServersProbe
+		targetProbe = ««ActivateServersProbe»»
 		serverNum = 2
 	}
 }
@@ -139,12 +150,12 @@ gauge ServerActiveG3 -> ServerActivationGaugeT = {
 		targetIP = ««customize.system.^target.lb»»
 	}
 	config = {
-		targetProbe = probe ActivateServersProbe
+		targetProbe = ««ActivateServersProbe»»
 		serverNum = 3
 	}
 }
 
-gauge BasicResponseTimeG0 = {
+gauge BasicResponseTimeG0 -> BasicResponseTimeT = {
 	model ««SwimSys»»
 	command basicResponseTime = LB0.setBasicResponseTime($<basicResponseTime>)
 	setup = {
@@ -153,12 +164,12 @@ gauge BasicResponseTimeG0 = {
 		javaClass = org.sa.rainbow.translator.swim.gauges.SimpleGauge
 	}
 	config = {
-		targetProbe = probe BasicResponseTimeProbe
+		targetProbe = ««BasicResponseTimeProbe»»
 		samplingFrequency = 15000
 	}
 } 
 
-gauge OptResponseTimeG0 = {
+gauge OptResponseTimeG0 -> OptResponseTimeT = {
 	model ««SwimSys»»
 	command optResponseTime = LB0.setOptResponseTime($<optResponseTime>) 
 	setup = {
@@ -167,7 +178,7 @@ gauge OptResponseTimeG0 = {
 		javaClass = org.sa.rainbow.translator.swim.gauges.SimpleGauge 
 	}
 	config = { 
-		targetProbe = probe OptResponseTimeProbe
+		targetProbe = ««OptResponseTimeProbe»»
 		samplingFrequency = 15000
 	}
 }
@@ -179,7 +190,7 @@ gauge LoadG1 -> LoadGaugeT= {
 		targetIP = ««customize.system.^target.lb»»
 	} 
 	config = {
-		targetProbe = probe LoadProbe1
+		targetProbe = ««LoadProbe1»»
 	} 
 }
 
@@ -190,7 +201,7 @@ gauge LoadG2 -> LoadGaugeT= {
 		targetIP = ««customize.system.^target.lb»»
 	} 
 	config = {
-		targetProbe = probe LoadProbe2
+		targetProbe = ««LoadProbe2»»
 	} 
 }
 
@@ -201,7 +212,7 @@ gauge LoadG3 -> LoadGaugeT= {
 		targetIP = ««customize.system.^target.lb»»
 	} 
 	config = {
-		targetProbe = probe LoadProbe3
+		targetProbe = ««LoadProbe3»»
 	} 
 }
 

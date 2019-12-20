@@ -1,5 +1,7 @@
 target rainbow-example
 import acme "model/swim.acme" 
+import factory "../SwimModelFactory.rbw"
+import properties "model/gauges.rbw"
 ################################################################################
 # Purpose:  Common configuration file for the Rainbow infrastructure.
 #           Properties are loaded by class org.sa.rainbow.Rainbow .
@@ -45,14 +47,11 @@ def rainbow.deployment.^factory.class = org.sa.rainbow.core.ports.guava.GuavaRai
 
 ### Rainbow models
 
-
-
-
 # Rainbow Acme model of SWIM
 def model SwimSys= {
 	^type="Acme" 
 	path="model/swim.acme"
-	^factory=org.sa.rainbow.^model.^acme.swim.commands.SwimCommandFactory
+	^factory=««SWIM»»
 	saveOnClose = true
 	saveLocation="model/swim-post.acme"
 }
@@ -85,6 +84,80 @@ def effector-manager AcmeEffectorManager = {
 	class = org.sa.rainbow.effectors.^acme.AcmeEffectorManager
 }
 
+def gui rainbow.^gui = {
+	class = org.sa.rainbow.^gui.RainbowWindoe
+	specs = {
+		gauges = {
+			^gauge = {
+				^type = ««LoadGaugeT»»
+				^command = "load"  
+				value.parameter = 1
+				upper = 1.0
+				lower = 0.0
+				category = "meter"
+				
+			}
+			^gauge = {
+				^type = ««DimmerGaugeT»»
+				^command = "dimmer"
+				value.parameter = 1
+				upper = 1.0
+				lower = 0.0
+				category = "meter"
+			}
+			^gauge = {
+				^type = ««BasicResponseTimeT»»
+				category = "timeseries"
+				^command = "basicResponseTime"
+				upper = 10.0
+				lower = 0.0 
+				value.parameter = 1
+			}
+			^gauge = {
+				^type = ««OptResponseTimeT»»
+				^command = "optResponseTime"
+				category = "timeseries"
+				upper = 10.0
+				lower = 0.0 
+				value.parameter = 1
+			}
+			^gauge = {
+				^type =««ServerEnablementGaugeT»»
+				^command = "serverEnabled"
+				category = "onoff"
+				value.parameter = 1  
+			}
+			^gauge = {
+				^type = ««ServerActivationGaugeT»»
+				^command = "activateServer"
+				category = "onoff"
+				value.parameter = 1  
+			}
+		}
+		analyzers = {
+			analyzer = {
+				^for =  ««ArchEvaluator»»
+				class = org.sa.rainbow.evaluator.^acme.^gui.ArchAnalyzerGUI
+			}
+		}
+		managers = {
+			manager = {
+				^for = ««AdaptationManager»»
+				class = org.sa.rainbow.^stitch.^gui.manager.ArchStitchAdapationManager 
+			}
+		}
+		executors = {
+			^executor = {
+				^for = ««StitchExecutor»»
+				class = org.sa.rainbow.^stitch.^gui.^executor.EventBasedStitchExecutorPanel 
+			} 
+		}
+		details = {
+			managers = org.sa.rainbow.^stitch.^gui.manager.StitchAdaptationManagerTabbedPane
+			executors = org.sa.rainbow.^stitch.^gui.^executor.StitchExecutorTabbedPane
+		}
+	}
+}
 
 def rainbow.^gui=org.sa.rainbow.^gui.RainbowWindoe
 def rainbow.^gui.specs = "ui.yml"

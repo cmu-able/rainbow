@@ -201,11 +201,16 @@ public class ArchGuagePanel extends GaugePanel {
 	protected <T> ICommandProcessor<T> createOperationProcessor(String command, final String value, IConverter<T> cvt) {
 		final OperationRepresentation rep = OperationRepresentation.parseCommandSignature(command);
 		int param = 0;
-		String[] parameters = rep.getParameters();
-		for (String p : parameters) {
-			if (value.equals(p))
-				break;
-			param++;
+		try {
+			param = Integer.parseInt(value)-1;
+		}
+		catch (NumberFormatException e) {
+			String[] parameters = rep.getParameters();
+			for (String p : parameters) {
+				if (value.equals(p))
+					break;
+				param++;
+			}
 		}
 		final int theParam = param;
 		ICommandProcessor<T> processor = (op) -> {

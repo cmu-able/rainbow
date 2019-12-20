@@ -3,22 +3,32 @@ package org.sa.rainbow.configuration
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import java.util.Collections
+import java.util.HashMap
 import java.util.HashSet
 import java.util.Map
 import java.util.Set
+import javax.swing.JPanel
+import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.common.types.JvmType
 import org.eclipse.xtext.common.types.access.IJvmTypeProvider
 import org.eclipse.xtext.common.types.util.RawSuperTypes
 import org.sa.rainbow.configuration.configModel.Array
+import org.sa.rainbow.configuration.configModel.Assignment
 import org.sa.rainbow.configuration.configModel.BooleanLiteral
 import org.sa.rainbow.configuration.configModel.Component
 import org.sa.rainbow.configuration.configModel.ComponentType
+import org.sa.rainbow.configuration.configModel.DeclaredProperty
+import org.sa.rainbow.configuration.configModel.DoubleLiteral
+import org.sa.rainbow.configuration.configModel.Factory
+import org.sa.rainbow.configuration.configModel.GaugeType
 import org.sa.rainbow.configuration.configModel.IPLiteral
 import org.sa.rainbow.configuration.configModel.IntegerLiteral
-import org.sa.rainbow.configuration.configModel.ProbeReference
+import org.sa.rainbow.configuration.configModel.Probe
 import org.sa.rainbow.configuration.configModel.PropertyReference
 import org.sa.rainbow.configuration.configModel.Reference
+import org.sa.rainbow.configuration.configModel.RichString
 import org.sa.rainbow.configuration.configModel.StringLiteral
 import org.sa.rainbow.configuration.configModel.Value
 import org.sa.rainbow.configuration.validation.ConfigModelValidator
@@ -27,8 +37,11 @@ import org.sa.rainbow.core.adaptation.IAdaptationManager
 import org.sa.rainbow.core.analysis.IRainbowAnalysis
 import org.sa.rainbow.core.gauges.AbstractGauge
 import org.sa.rainbow.core.models.commands.ModelCommandFactory
+import org.sa.rainbow.gui.IRainbowGUI
 import org.sa.rainbow.translator.effectors.EffectorManager
 import org.sa.rainbow.translator.probes.AbstractProbe
+import org.sa.rainbow.gui.arch.elements.DefaultThreadInfoPane
+import javax.swing.JTabbedPane
 
 class ConfigAttributeConstants {
 	public static val ALL_OFREQUIRED_PROBE_FIELDS = #{"alias", "location"};
@@ -126,18 +139,20 @@ class ConfigAttributeConstants {
 		'saveLocation' ->
 			#{'func' -> [Value v|v.value instanceof StringLiteral], 'msg' -> 'must be a String',
 				'extends' -> #[StringLiteral]},
-		'factory' ->
-			#{'extends' -> #[ModelCommandFactory],
-				'msg' -> 'must subclass org.sa.rainbow.core.models.commands.ModelCommandFactory'}
+		'factory' -> #{'func' -> [ Value v |
+			(v.value instanceof PropertyReference && (v.value as PropertyReference).referable instanceof Factory) ||
+				(v.value instanceof Reference && subclasses(v, ModelCommandFactory.name))
+		], 'extends' -> #[Factory, ModelCommandFactory],
+			'msg' -> 'must be a model factory or subclass org.sa.rainbow.core.models.commands.ModelCommandFactory'}
 	}
 	static val MANAGER_TYPES = #{
-		'model' ->
-			#{'func' -> [ Value v |
-				v.value instanceof StringLiteral ||
-					(v.value instanceof PropertyReference &&
-						(v.value as PropertyReference).referable.component == ComponentType.MODEL)
-			], 'msg' -> 'must be a string or refer to a valid "def model" property',
-				'extends' -> #[StringLiteral, PropertyReference]},
+		'model' -> #{'func' -> [ Value v |
+			v.value instanceof StringLiteral ||
+				(v.value instanceof PropertyReference &&
+					(v.value as PropertyReference).referable instanceof DeclaredProperty &&
+					((v.value as PropertyReference).referable as DeclaredProperty).component == ComponentType.MODEL)
+		], 'msg' -> 'must be a string or refer to a valid "def model" property',
+			'extends' -> #[StringLiteral, PropertyReference]},
 		'class' ->
 			#{'extends' -> #[IAdaptationManager],
 				'msg' -> 'must subclass org.sa.rainbow.core.adaptation.IAdaptationManager'}
@@ -146,7 +161,8 @@ class ConfigAttributeConstants {
 		'model' -> #{'func' -> [ Value v |
 			v.value instanceof StringLiteral ||
 				(v.value instanceof PropertyReference &&
-					(v.value as PropertyReference).referable.component == ComponentType.MODEL)
+					(v.value as PropertyReference).referable instanceof DeclaredProperty &&
+					((v.value as PropertyReference).referable as DeclaredProperty).component == ComponentType.MODEL)
 		], 'msg' -> 'must be a string or refer to a valid "def model" property'},
 		'class' ->
 			#{'extends' -> #[IAdaptationExecutor],
@@ -156,6 +172,7 @@ class ConfigAttributeConstants {
 		ComponentType.MODEL -> MODEL_TYPES,
 		ComponentType.MANAGER -> MANAGER_TYPES,
 		ComponentType.EXECUTOR -> EXECUTOR_TYPES,
+		ComponentType.GUI -> new HashMap<String, Map<String, Object>>(),
 		ComponentType.ANALYSIS -> #{
 			'class' ->
 				#{'extends' -> #[IRainbowAnalysis],
@@ -196,7 +213,10 @@ class ConfigAttributeConstants {
 		'setup:beaconPeriod' -> IS_NUMBER,
 		'setup:javaClass' -> #{'extends' -> #[AbstractGauge], 'msg' -> 'must extend AbstractGauge'},
 		'config:samplingFrequency' -> IS_NUMBER,
-		'config:targetProbe' -> #{'extends' -> #[ProbeReference], 'msg' -> 'must refer to a probe'}
+		'config:targetProbe' -> #{'func' -> [ Value v |
+			(v.value instanceof PropertyReference && (v.value as PropertyReference).referable instanceof Probe)
+		], 'extends' -> #[Probe], 'msg' -> 'must refer to a probe'},
+		'generateClass' -> #{'extends' -> #[BooleanLiteral], 'msg' -> 'must be true or false'}
 	}
 
 	public static val EFFECTOR_PROPERTY_TYPES = #{
@@ -208,10 +228,165 @@ class ConfigAttributeConstants {
 		'script:argument' -> IS_STRING
 	}
 
+	static val isValidCommand = [ Value v |
+		var ass = EcoreUtil2.getContainerOfType(EcoreUtil2.getContainerOfType(v, Assignment).eContainer, Component)
+		if (ass !== null) {
+			val type = ass.assignment.findFirst[it.name == 'type']
+			var String s = null
+			if (v.value instanceof StringLiteral)
+				s = XtendUtils.unpackString(v.value as StringLiteral, true)
+			val ts = s
+			if (type != null && type.value.value instanceof PropertyReference &&
+				(type.value.value as PropertyReference).referable instanceof GaugeType) {
+				return ((type.value.value as PropertyReference).referable as GaugeType).body.commands.exists [
+					it.name == ts
+				]
+			}
+		}
+		false
+	]
+
+	static val validCommands = [ Assignment v |
+		var ass = EcoreUtil2.getContainerOfType(EcoreUtil2.getContainerOfType(v, Assignment).eContainer, Component)
+		val Set<String> commands = newHashSet
+		if (ass !== null) {
+			val type = ass.assignment.findFirst[it.name == 'type'].value
+			if (type != null && type.value instanceof PropertyReference &&
+				(type.value as PropertyReference).referable instanceof GaugeType) {
+				return ((type.value as PropertyReference).referable as GaugeType).body.commands.map [
+					"\"" + it.name + "\""
+				]
+			}
+		}
+		return commands
+	]
+
+	enum GUICategory {
+		meter,
+		timeseries,
+		onoff
+	}
+
+	static val validCategories = [ Assignment v |
+		newArrayList(GUICategory.values).map['''"«it.name»"''']
+	]
+
+	public static val GUI_PROPERTY_TUPES = #{
+		'class' -> #{'extends' -> #[IRainbowGUI], 'msg' -> 'must implement IRainbowGUI'},
+		'specs:gauges:gauge:type' -> #{'extends' -> #[GaugeType], 'func' -> [ Value v |
+			(v.value instanceof PropertyReference && (v.value as PropertyReference).referable instanceof GaugeType)
+		], 'msg' -> 'must refer to a GaugeType'},
+		'specs:gauges:gauge:command' -> #{
+			'func' -> isValidCommand,
+			'values' -> validCommands,
+			'extends' -> #[StringLiteral],
+			'msg' -> 'must be a string containing a command name'
+		},
+		'specs:gauges:gauge:value.parameter' -> #{
+			'extends' -> #[IntegerLiteral],
+			'msg' -> 'must be an integer'
+		},
+		'specs:gauges:gauge:upper' -> #{
+			'extends' -> #[IntegerLiteral, DoubleLiteral],
+			'msg' -> 'must be a number'
+		},
+		'specs:gauges:gauge:lower' -> #{
+			'extends' -> #[IntegerLiteral, DoubleLiteral],
+			'msg' -> 'must be a number'
+		},
+		'specs:gauges:gauge:category' -> #{
+			'extends' -> #[StringLiteral],
+			'msg' -> '''must be one of «validCategories.apply(null).map['''"«it»"'''].join(', ')»''',
+			'values' -> validCategories,
+			'func' -> [ Value v |
+				v.value instanceof RichString &&
+					validCategories.apply(null).contains(
+						"\"" + XtendUtils.unpackString(v.value as RichString, true) + "\"")
+			]
+		},
+		'specs:analyzers:analyzer:for' -> #{
+			'extends' -> #[DeclaredProperty],
+			'msg' -> 'must refer to an analysis',
+			'func' -> [ Value v |
+				v.value instanceof PropertyReference &&
+					(v.value as PropertyReference).referable instanceof DeclaredProperty &&
+					((v.value as PropertyReference).referable as DeclaredProperty).component == ComponentType.ANALYSIS
+			],
+			'values' -> [ Assignment a |
+				getAllNamesFor(a, [ EObject o |
+					o instanceof DeclaredProperty && (o as DeclaredProperty).component == ComponentType.ANALYSIS
+				], [EObject o|('««' + (o as DeclaredProperty).name + '»»')])
+			]
+		},
+		'specs:analyzers:analyzer:class' -> #{
+			'extends' -> #[JPanel],
+			'msg' -> 'must subclass JPanel'
+		},
+		'specs:managers:manager:for' -> #{
+			'extends' -> #[DeclaredProperty],
+			'msg' -> 'must refer to an analysis',
+			'func' -> [ Value v |
+				v.value instanceof PropertyReference &&
+					(v.value as PropertyReference).referable instanceof DeclaredProperty &&
+					((v.value as PropertyReference).referable as DeclaredProperty).component == ComponentType.MANAGER
+			],
+			'values' -> [ Assignment a |
+				getAllNamesFor(a, [ EObject o |
+					o instanceof DeclaredProperty && (o as DeclaredProperty).component == ComponentType.MANAGER
+				], [EObject o|('««' + (o as DeclaredProperty).name + '»»')])
+			]
+		},
+		'specs:managers:manager:class' -> #{
+			'extends' -> #[JPanel],
+			'msg' -> 'must subclass JPanel'
+		},
+		'specs:executors:executor:for' -> #{
+			'extends' -> #[DeclaredProperty],
+			'msg' -> 'must refer to an analysis',
+			'func' -> [ Value v |
+				v.value instanceof PropertyReference &&
+					(v.value as PropertyReference).referable instanceof DeclaredProperty &&
+					((v.value as PropertyReference).referable as DeclaredProperty).component == ComponentType.EXECUTOR
+			],
+			'values' -> [ Assignment a |
+				getAllNamesFor(a, [ EObject o |
+					o instanceof DeclaredProperty && (o as DeclaredProperty).component == ComponentType.EXECUTOR
+				], [EObject o|('««' + (o as DeclaredProperty).name + '»»')])
+			]
+		},
+		'specs:executors:executor:class' -> #{
+			'extends' -> #[JPanel],
+			'msg' -> 'must subclass JPanel'
+		},
+		'specs:details:managers' -> #{
+			'extends' -> #[JTabbedPane],
+			'msg' -> 'must extend JTabbedPane'
+		},
+		'specs:details:executors' -> #{
+			'extends' -> #[JTabbedPane],
+			'msg' -> 'must extend JTabbedPane'
+		}
+	}
+
+	def static getAllNamesFor(Assignment assignment, (EObject)=>boolean discriminator, (EObject)=>String name) {
+		val names = newHashSet
+		val v = assignment.eResource.resourceSet.resources
+		for (r : v) {
+			val res = r.allContents
+			res.forEach [
+				if (discriminator.apply(it)) {
+					names.add(name.apply(it))
+				}
+			]
+		}
+		names
+	}
+
 	public static val Map<String, Map<String, Object>> UTILITY_PROPERTY_TYPES = #{
 		'model' -> #{'func' -> [ Value v |
 			(v.value instanceof PropertyReference &&
-				(v.value as PropertyReference).referable.component == ComponentType.MODEL)
+				(v.value as PropertyReference).referable instanceof DeclaredProperty &&
+				((v.value as PropertyReference).referable as DeclaredProperty).component == ComponentType.MODEL)
 		], 'extends' -> #[PropertyReference], 'msg' -> 'must refer to a model property'},
 		'utilities' -> IS_COMPONENT,
 		'scenarios' ->
@@ -257,7 +432,7 @@ class ConfigAttributeConstants {
 		val eResource = ref.eResource
 		subclasses(referable, superclass, eResource)
 	}
-	
+
 	public static def subclasses(JvmType referable, String superclass, Resource eResource) {
 		val jtp = jvmTypeProviderFactory.createTypeProvider(eResource.resourceSet)
 		val sc = jtp.findTypeByName(superclass)

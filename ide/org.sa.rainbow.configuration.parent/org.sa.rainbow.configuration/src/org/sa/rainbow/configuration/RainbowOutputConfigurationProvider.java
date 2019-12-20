@@ -17,11 +17,19 @@ public class RainbowOutputConfigurationProvider implements IOutputConfigurationP
 	public Set<OutputConfiguration> getOutputConfigurations() {
 		OutputConfiguration defaultOutput = new OutputConfiguration(RAINBOW_GENERRATED_SOURCE_OUTPUT);
 	    defaultOutput.setDescription("Output Folder");
-	    defaultOutput.setOutputDirectory("./src/main/java/generated");
+	    defaultOutput.setOutputDirectory("./src/main/java-gen");
 	    defaultOutput.setOverrideExistingResources(true);
 	    defaultOutput.setCreateOutputDirectory(true);
 	    defaultOutput.setCleanUpDerivedResources(true);
 	    defaultOutput.setSetDerivedProperty(true);
+	    
+	    OutputConfiguration doc = new OutputConfiguration(IFileSystemAccess.DEFAULT_OUTPUT);
+	    doc.setDescription("Output Folder");
+	    doc.setOutputDirectory("./src/main/java-gen");
+	    doc.setOverrideExistingResources(true);
+	    doc.setCreateOutputDirectory(true);
+	    doc.setCleanUpDerivedResources(true);
+	    doc.setSetDerivedProperty(true);
 	    
 	    OutputConfiguration propertyOutput = new OutputConfiguration(RAINBOW_TARGET_PROPERTIES_OUTPUT);
 	    propertyOutput.setDescription("Rainbow target property output folder");
