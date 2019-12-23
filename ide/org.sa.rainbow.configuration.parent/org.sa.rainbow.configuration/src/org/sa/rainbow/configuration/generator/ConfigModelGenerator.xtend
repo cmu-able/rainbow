@@ -582,13 +582,13 @@ class ConfigModelGenerator extends AbstractGenerator {
 			    	«command.name»: «outputCall(command)»
 			  «ENDFOR»
 			  «IF setup.present && setup.get.value.value instanceof Component»
-			  	setupParams:
+			  	setupValues:
 			  	  «FOR p : (setup.get.value.value as Component).assignment»
 			  	  	«p.name»: «stringValue(p.value,false,true)»
 			  	  «ENDFOR»
 			  «ENDIF»
 			  «IF config.present && config.get.value.value instanceof Component»
-			  	configParams:
+			  	configValues:
 			  	  «FOR p : (config.get.value.value as Component).assignment»
 			  	  	«p.name»: «stringValue(p.value,false, true)»
 			  	  «ENDFOR»
