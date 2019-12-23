@@ -409,7 +409,7 @@ public class Rainbow implements IRainbowEnvironment {
     }
 
     private void canonicalizeHost2IP (String string, String masterLoc, String key) {
-        masterLoc = Util.evalTokens (masterLoc, m_props);
+        masterLoc = Util.evalTokens (masterLoc, m_props).replaceAll("\"", "");
         try {
             masterLoc = InetAddress.getByName (masterLoc).getHostAddress ();
             m_props.setProperty (key, masterLoc);
