@@ -610,11 +610,14 @@ class ConfigModelGenerator extends AbstractGenerator {
 	}
 
 	def actual(Actual p) {
-		if (p.id === null && p.pr === null)
+		if (p.id === null && p.pr === null && p.ng === null && p.value !== null)
 			stringValue(p.value)
 		else if (p.pr !== null)
 			'''${«p.pr.referable.name»}'''
-		else if (p.ref && p.id !== null) '''$<«p.id»>''' else '''«p.id»'''
+		else if (p.ref && p.id !== null) '''$<«p.id»>''' 
+		else if (p.ref && p.ng !== null)  '''$<«p.ng»>'''
+		else if (p.ref )  '''$<«p.ag»>'''
+		else '''«p.id»'''
 	}
 
 	def outputGaugeType(GaugeType type) {
