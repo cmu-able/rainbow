@@ -64,16 +64,33 @@ gauge type ServerActivationGaugeT = {
 gauge type BasicResponseTimeT = {
 	model factory ««SWIM»»
 	command basicResponseTime = LoadBalancerT.setBasicResponseTime(double)
+	command activateServer = ServerT.activateServer(boolean)
+	setup = {
+		targetIP = "localhost"
+		beaconPeriod = 30000
+		javaClass = org.sa.rainbow.translator.swim.gauges.ServerActiveGauge
+	}
+	config = {
+		samplingFrequency = 10000
+	}
 }
 
 gauge type OptResponseTimeT = {
 	model factory ««SWIM»»
 	command optResponseTime = LoadBalancerT.setOptResponseTime(double)
+	setup = {
+		targetIP = "localhost"
+		beaconPeriod = 30000
+		javaClass = org.sa.rainbow.translator.swim.gauges.ServerActiveGauge
+	}
+	config = {
+		samplingFrequency = 10000
+	}
 }
 
 gauge DimmerG0 -> DimmerGaugeT = {
 	model ««SwimSys»»
-	command dimmer = "(?<dimmer>.*)" -> LB0.setDimmer($<dimmmmer>)
+	command dimmer = "(?<dimmer>.*)" -> LB0.setDimmer($<dimmer>)
 	setup = {
 		targetIP = ««customize.system.^target.lb»»
 	}
