@@ -205,7 +205,7 @@ public abstract class YamlUtil {
                         Map<String, Object> paramAttr = param.getValue ();
                         String ptype = (String) paramAttr.get ("type");
                         Object pdefault = paramAttr.get ("default");
-                        if (!ptype.equals ("String")) {
+                        if (!ptype.equals ("String") && pdefault != null) {
                             pdefault = Util.parseObject (pdefault.toString (), ptype);
                         }
                         if (pdefault != null && pdefault instanceof String) {
