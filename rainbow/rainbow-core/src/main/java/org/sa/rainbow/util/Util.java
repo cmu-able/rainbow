@@ -117,10 +117,14 @@ public class Util {
         }
         return basePath;
     }
+    
+    public static String makeValidPath(String path) {
+    	return path.replaceAll("\"", "");
+    }
 
     public static File getRelativeToPath (File parent, String relPath) {
         try {
-            return new File (parent, relPath).getCanonicalFile ();
+            return new File (parent, makeValidPath(relPath)).getCanonicalFile ();
         }
         catch (IOException e) {
             LOGGER.error (MessageFormat.format ("Failed to get relative to path {0}{2}{1}", parent.getAbsolutePath (),
