@@ -194,5 +194,13 @@ def customize.^utility.scenario = "scenario 1"
 # among other things
 def customize.system.^target.master = ««rainbow.deployment.location»»
 def customize.system.^target.lb = ««rainbow.deployment.location»»
+def customize.system.^target.lb.httpPort = 1081
+def customize.system.^target.web0 = 1
+def customize.system.^target.web0.httpPort = 1080
+def customize.system.^target.web1 = 2
+def customize.system.^target.web1.httpPort = 1080
+def customize.system.^target.db = 10.0.0.21
+def customize.system.^target.web2 = 3
+def customize.system.^target.web2.httpPort=1080
 
 export * to "rainbow-gui.properties" 
