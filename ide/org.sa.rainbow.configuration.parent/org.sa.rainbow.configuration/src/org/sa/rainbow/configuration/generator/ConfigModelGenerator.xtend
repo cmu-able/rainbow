@@ -465,8 +465,11 @@ class ConfigModelGenerator extends AbstractGenerator {
 				sb.append('''rainbow.model.load.class_«i»=«(loadclass.value.value as Reference).referable.qualifiedName»
 				''')
 			}
-			else if (loadclass.value.value instanceof ModelFactoryReference) {
-				sb.append('''rainbow.model.load.class_«i»=«(loadclass.value.value as ModelFactoryReference).referable.clazz»
+			else if (loadclass.value.value instanceof PropertyReference &&
+					(loadclass.value.value as PropertyReference).referable instanceof Factory
+			) {
+				val factory = (loadclass.value.value as PropertyReference).referable as Factory
+				sb.append('''rainbow.model.load.class_«i»=«factory.clazz»
 				''')
 			}
 			if (path !== null) {
