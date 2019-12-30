@@ -685,7 +685,7 @@ class ConfigModelGenerator extends AbstractGenerator {
 		return '''
 			«effector.name»:
 			  «IF command !== null»
-			  	command: «outputCall(command)»
+			  	command: "«outputCall(command)»"
 			  «ENDIF»
 			  «FOR entry : attsST.entrySet()»
 			  	«IF !atts.containsKey(entry.getKey())»
