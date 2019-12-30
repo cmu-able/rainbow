@@ -15,6 +15,13 @@ public class Utils {
 		return null;
 	}
 	
-	
+	public static String removeQuotes(CharSequence cs) {
+		String s = cs.toString();
+		s = s.trim();
+		if (s.startsWith("\"") && s.endsWith("\"")) {
+			return s.replaceAll("\"", "");
+		}
+		return s;
+	}
 
 }
