@@ -590,10 +590,26 @@ class ConfigModelGenerator extends AbstractGenerator {
 			  «IF config.present && config.get.value.value instanceof Component»
 			  	configValues:
 			  	  «FOR p : (config.get.value.value as Component).assignment»
-			  	  	«p.name»: «stringValue(p.value,false, true)»
+			  	  	«IF p.name == 'targetProbe'»
+			  	  	  «IF p.value.value instanceof Array»
+			  	  	    targetProbeList: «extractProbeAliases(p.value.value as Array)»
+			  	  	  «ELSEIF p.value.value instanceof PropertyReference && (p.value.value as PropertyReference).referable instanceof Probe»
+			  	  	    targetProbe: «extractProbeAlias((p.value.value as PropertyReference).referable as Probe)»
+			  	  	  «ENDIF»
+			  	  	«ELSE»
+			  	  	  «p.name»: «stringValue(p.value,false, true)»
+			  	  	«ENDIF»
 			  	  «ENDFOR»
 			  «ENDIF»
 		'''
+	}
+	
+	def extractProbeAliases(Array array) {
+		array.values.filter[it.value instanceof PropertyReference && (it.value as PropertyReference).referable instanceof Probe].map[extractProbeAlias((it.value as PropertyReference).referable as Probe)].join(", ")
+	}
+	
+	def extractProbeAlias(Probe probe) {
+		'''«stringValue(probe.properties.assignment.findFirst[name=='alias']?.value)»'''
 	}
 
 	def outputCall(CommandCall call) {
@@ -801,7 +817,12 @@ class ConfigModelGenerator extends AbstractGenerator {
 			Reference:
 				surroundString('''«v.referable.qualifiedName»''', asString)
 			PropertyReference:
-				surroundString('''${«v.referable.name»}''', asString)
+				if (v.referable instanceof DeclaredProperty) {
+					surroundString('''${«v.referable.name»}''', asString)					
+				}
+				else {
+					v.referable.name
+				}
 			
 			Component case allowComposite: '''"Not implemented yet"'''
 			default: '''"Not implemented yet"'''

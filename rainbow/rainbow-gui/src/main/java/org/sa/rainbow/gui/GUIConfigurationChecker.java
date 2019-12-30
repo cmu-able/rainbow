@@ -147,17 +147,28 @@ public class GUIConfigurationChecker implements IRainbowConfigurationChecker {
 									MessageFormat.format("The specified command ''{0}'' is not a valid command for {1}",
 											command, entry.getKey())));
 						} else {
-							String param = (String) fields.get("value");
-							if (param == null) {
-								m_problems.add(new Problem(ProblemT.ERROR, MessageFormat
-										.format("{0} must specify a value to display", command, entry.getKey())));
-							} else {
-								if (!Arrays.asList(op.getParameters()).contains(param)) {
-									m_problems.add(new Problem(ProblemT.ERROR, MessageFormat.format(
-											"The specified command ''{0}'' does not have a parameter called ''{2}'' in {1}",
-											command, entry.getKey(), param)));
+							Object param = fields.get("value");
+							if (param instanceof String) {
+								param = (String) fields.get("value");
+								if (param == null) {
+									m_problems.add(new Problem(ProblemT.ERROR, MessageFormat
+											.format("{0} must specify a value to display", command, entry.getKey())));
+								} else {
+									if (!Arrays.asList(op.getParameters()).contains(param)) {
+										m_problems.add(new Problem(ProblemT.ERROR, MessageFormat.format(
+												"The specified command ''{0}'' does not have a parameter called ''{2}'' in {1}",
+												command, entry.getKey(), param)));
+									}
 								}
 							}
+							else if (param instanceof Integer) {
+								int paramNo = (Integer ) param;
+								if (op.getParameters().length <= paramNo)
+									param = op.getParameters()[paramNo-1];
+								else 
+									m_problems.add(new Problem(ProblemT.ERROR, MessageFormat.format("The specified command ''{0}'' does not have''{1}'' parameters", command, paramNo)));
+							}
+							
 						}
 						Collection<String> validFields = getValidFields(category);
 						for (String key : fields.keySet()) {
