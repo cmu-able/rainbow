@@ -4,7 +4,6 @@
 package org.sa.rainbow.configuration.generator
 
 import java.util.HashMap
-import org.acme.acme.FloatLiteral
 import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
@@ -15,6 +14,7 @@ import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
 import org.sa.rainbow.configuration.RainbowOutputConfigurationProvider
+import org.sa.rainbow.configuration.Utils
 import org.sa.rainbow.configuration.XtendUtils
 import org.sa.rainbow.configuration.configModel.Actual
 import org.sa.rainbow.configuration.configModel.Array
@@ -34,7 +34,6 @@ import org.sa.rainbow.configuration.configModel.IPLiteral
 import org.sa.rainbow.configuration.configModel.ImpactVector
 import org.sa.rainbow.configuration.configModel.IntegerLiteral
 import org.sa.rainbow.configuration.configModel.LogLiteral
-import org.sa.rainbow.configuration.configModel.ModelFactoryReference
 import org.sa.rainbow.configuration.configModel.Probe
 import org.sa.rainbow.configuration.configModel.PropertyReference
 import org.sa.rainbow.configuration.configModel.Reference
@@ -324,7 +323,7 @@ class ConfigModelGenerator extends AbstractGenerator {
 
 		«FOR v : properties»
 			«IF v.^default !== null»
-				«v.name» = «stringValue(v.^default,false,false)»
+				«v.name» = «Utils.removeQuotes(stringValue(v.^default,false,false))»
 			«ENDIF»
 		«ENDFOR»
 		«outputModels(models)»
@@ -397,7 +396,7 @@ class ConfigModelGenerator extends AbstractGenerator {
 					type = "???"
 				}
 			}
-			sb.append('''"«name»:«type»"
+			sb.append('''«name»:«type»
 			''')
 			i = i + 1
 		}
@@ -429,7 +428,7 @@ class ConfigModelGenerator extends AbstractGenerator {
 					type = "???"
 				}
 			}
-			sb.append('''"«name»:«type»"
+			sb.append('''«name»:«type»
 			''')
 			i = i + 1
 		}
@@ -458,7 +457,7 @@ class ConfigModelGenerator extends AbstractGenerator {
 			val path = ass.assignment.findFirst[it.name == "path"]
 			val saveOnClose = ass.assignment.findFirst[it.name == "saveOnClose"]
 			val saveLocation = ass.assignment.findFirst[it.name == "saveLocation"]
-			val name = stringValue(ass.assignment.findFirst[it.name == "name"]?.value) ?: m.name
+			val name = Utils.removeQuotes(stringValue(ass.assignment.findFirst[it.name == "name"]?.value)) ?: m.name
 			sb.append('''rainbow.model.name_«i»="«name»"
 			''')
 			if (loadclass.value.value instanceof Reference) {
@@ -473,15 +472,15 @@ class ConfigModelGenerator extends AbstractGenerator {
 				''')
 			}
 			if (path !== null) {
-				sb.append('''rainbow.model.path_«i»=«stringValue(path.value, false, true)»
+				sb.append('''rainbow.model.path_«i»=«Utils.removeQuotes(stringValue(path.value, false, true))»
 				''')
 			}
 			if (saveOnClose !== null) {
-				sb.append('''rainbow.model.saveOnClose_«i»=«stringValue(saveOnClose.value, false, false)»
+				sb.append('''rainbow.model.saveOnClose_«i»=«Utils.removeQuotes(stringValue(saveOnClose.value, false, false))»
 				''')
 			}
 			if (saveLocation !== null) {
-				sb.append('''rainbow.model.saveLocation_«i»=«stringValue(saveLocation.value, false, false)»
+				sb.append('''rainbow.model.saveLocation_«i»=«Utils.removeQuotes(stringValue(saveLocation.value, false, false))»
 				''')
 			}
 			i = i + 1
@@ -616,7 +615,7 @@ class ConfigModelGenerator extends AbstractGenerator {
 	}
 
 	def outputCall(CommandCall call) {
-		var ret = new StringBuilder("\"")
+		var ret = new StringBuilder()
 		if (call.target !== null) {
 			ret.append(call.target).append(".")
 		} else if (call.ref != null) {
@@ -624,7 +623,7 @@ class ConfigModelGenerator extends AbstractGenerator {
 		}
 		ret.append(call.command)
 		val params = '''(«call.actual.map[actual(it)].join(", ")»)'''
-		ret.append(params).append("\"")
+		ret.append(params)//.append("\"")
 		ret
 	}
 
@@ -740,6 +739,8 @@ class ConfigModelGenerator extends AbstractGenerator {
 			  	«ELSEIF entry.getKey() == "java"»
 			  		type: java
 			  		javaInfo: «stringValue(entry.getValue().value, true, attsST.get(entry.getKey())?.value)»
+			  	«ELSEIF entry.getKey() == "mode"»
+			  		mode: «Utils.removeQuotes(stringValue(entry.getValue().value, true, attsST.get(entry.getKey())?.value))»
 			  	«ELSE»
 			  		«entry.getKey()» : «stringValue(entry.getValue().value, true, attsST.get(entry.getKey())?.value)»
 			  	«ENDIF»
