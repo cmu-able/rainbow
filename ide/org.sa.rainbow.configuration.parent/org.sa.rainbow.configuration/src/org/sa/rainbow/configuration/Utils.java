@@ -16,7 +16,7 @@ public class Utils {
 	}
 	
 	public static String removeQuotes(CharSequence cs) {
-		if (cs == null) return "";
+		if (cs == null) return null;
 		String s = cs.toString();
 		s = s.trim();
 		if (s.startsWith("\"") && s.endsWith("\"")) {

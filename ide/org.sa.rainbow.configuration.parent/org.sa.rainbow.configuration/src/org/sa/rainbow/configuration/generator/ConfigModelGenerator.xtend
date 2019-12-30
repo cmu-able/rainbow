@@ -458,7 +458,7 @@ class ConfigModelGenerator extends AbstractGenerator {
 			val saveOnClose = ass.assignment.findFirst[it.name == "saveOnClose"]
 			val saveLocation = ass.assignment.findFirst[it.name == "saveLocation"]
 			val name = Utils.removeQuotes(stringValue(ass.assignment.findFirst[it.name == "name"]?.value)) ?: m.name
-			sb.append('''rainbow.model.name_«i»="«name»"
+			sb.append('''rainbow.model.name_«i»=«name»
 			''')
 			if (loadclass.value.value instanceof Reference) {
 				sb.append('''rainbow.model.load.class_«i»=«(loadclass.value.value as Reference).referable.qualifiedName»
