@@ -127,15 +127,15 @@ class ConfigModelGenerator extends AbstractGenerator {
 		  «ENDFOR»
 		analyzers:
 		  «FOR a : analyzers»
-		    «(((a.value.value as Component).assignment.findFirst[it.name=='for'].value.value as PropertyReference).referable as DeclaredProperty).name»: «((a.value.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»
+		    «(((((a.value.value as Component).assignment.findFirst[it.name=='for'].value.value as PropertyReference).referable as DeclaredProperty).^default.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»: «((a.value.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»
 		  «ENDFOR»
 		managers:
 		  «FOR a : managers»
-		    «(((a.value.value as Component).assignment.findFirst[it.name=='for'].value.value as PropertyReference).referable as DeclaredProperty).name»: «((a.value.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»
+		    «(((((a.value.value as Component).assignment.findFirst[it.name=='for'].value.value as PropertyReference).referable as DeclaredProperty).^default.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»: «((a.value.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»
 		  «ENDFOR»
 		executors:
 		  «FOR a : executors»
-		    «(((a.value.value as Component).assignment.findFirst[it.name=='for'].value.value as PropertyReference).referable as DeclaredProperty).name»: «((a.value.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»
+		    «(((((a.value.value as Component).assignment.findFirst[it.name=='for'].value.value as PropertyReference).referable as DeclaredProperty).^default.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»: «((a.value.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»
 		  «ENDFOR»
 		details:
 		  «FOR d : details»
