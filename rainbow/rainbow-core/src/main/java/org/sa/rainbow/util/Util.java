@@ -208,6 +208,11 @@ public class Util {
         m_primName2Class.put ("boolean", Boolean.class);
         m_primName2Class.put ("byte", Byte.class);
         m_primName2Class.put ("char", Character.class);
+        m_primName2Class.put ("Integer", Integer.class);
+        m_primName2Class.put("Long", Long.class);
+        m_primName2Class.put("Float", Float.class);
+        m_primName2Class.put("Double", Double.class);
+        m_primName2Class.put("Boolean", Boolean.class);
         // Map of primitive type class to Java Class
         m_primClass2Class = new HashMap<> ();
         m_primClass2Class.put (int.class, Integer.class);
