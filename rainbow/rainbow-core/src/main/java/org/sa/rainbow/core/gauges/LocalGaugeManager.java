@@ -70,7 +70,7 @@ public class LocalGaugeManager {
                         instDesc.gaugeType ()));
                 continue;
             }
-            long gaugeBeaconPeriod = (Long) beaconPeriod.getValue ();
+            long gaugeBeaconPeriod = beaconPeriod.getValue() instanceof Integer?(Integer )beaconPeriod.getValue():(Long) beaconPeriod.getValue ();
             TypedAttributeWithValue javaClassAttr = instDesc.findSetupParam (IGauge.SETUP_JAVA_CLASS);
             if (javaClassAttr == null) {
                 m_reportingPort.error (RainbowComponentT.GAUGE_MANAGER, MessageFormat.format (
