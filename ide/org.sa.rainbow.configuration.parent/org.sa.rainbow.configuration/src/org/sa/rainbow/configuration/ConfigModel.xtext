@@ -6,9 +6,9 @@ import "http://www.eclipse.org/xtext/common/JavaVMTypes" as types
 import "http://www.sa.org/rainbow/stitch/Stitch" as stitch
 import "http://www.acme.org/Acme" as acme
 
-generate configModel "http://www.sa.org/rainbow/configuration/ConfigModel"
+generate configModel "http://www.sa.org/rainbow/configuration/RainbowConfiguration"
 
-ConfigurationModel:
+RainbowConfiguration:
 	('target' targetName=FQN 
 	imports+=Import*
 	(delcaredProperties+=DeclaredProperty)*
