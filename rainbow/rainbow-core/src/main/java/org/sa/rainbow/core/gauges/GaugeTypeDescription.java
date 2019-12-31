@@ -136,7 +136,19 @@ public class GaugeTypeDescription {
     }
 
     public TypedAttributeWithValue findConfigParam (String name) {
-        return m_configParams.get(name);
+    	TypedAttributeWithValue tav = m_configParams.get(name);
+    	// Handle targetProbeType and targetProbeList as special cases
+    	if (tav == null) {
+	    	if (IGauge.CONFIG_PROBE_MAPPING.equals(name)) {
+	    		tav = new TypedAttributeWithValue(IGauge.CONFIG_PROBE_MAPPING, "String", null);
+	    		addConfigParam(tav);
+	    	}
+	    	else if (IGauge.CONFIG_PROBE_MAPPING_LIST.equals(name)) {
+	    		tav = new TypedAttributeWithValue(IGauge.CONFIG_PROBE_MAPPING_LIST, "String", null);
+	    		addConfigParam(tav);
+	    	}
+    	}
+		return tav;
     }
 
 
