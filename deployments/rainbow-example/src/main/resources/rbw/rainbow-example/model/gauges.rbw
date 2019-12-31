@@ -64,7 +64,6 @@ gauge type ServerActivationGaugeT = {
 gauge type BasicResponseTimeT = {
 	model factory ««SWIM»»
 	command basicResponseTime = LoadBalancerT.setBasicResponseTime(double)
-	command activateServer = ServerT.activateServer(boolean)
 	setup = {
 		targetIP = "localhost"
 		beaconPeriod = 30000

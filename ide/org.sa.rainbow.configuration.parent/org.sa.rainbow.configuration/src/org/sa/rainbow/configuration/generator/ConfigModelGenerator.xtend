@@ -596,7 +596,7 @@ class ConfigModelGenerator extends AbstractGenerator {
 			  	  	  «IF p.value.value instanceof Array»
 			  	  	    targetProbeList: «extractProbeAliases(p.value.value as Array)»
 			  	  	  «ELSEIF p.value.value instanceof PropertyReference && (p.value.value as PropertyReference).referable instanceof Probe»
-			  	  	    targetProbe: «extractProbeAlias((p.value.value as PropertyReference).referable as Probe)»
+			  	  	    targetProbeType: «extractProbeAlias((p.value.value as PropertyReference).referable as Probe)»
 			  	  	  «ENDIF»
 			  	  	«ELSE»
 			  	  	  «p.name»: «stringValue(p.value,false, true)»
