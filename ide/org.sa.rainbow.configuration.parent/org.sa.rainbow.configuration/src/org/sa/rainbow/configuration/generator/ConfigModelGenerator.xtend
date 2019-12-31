@@ -666,7 +666,7 @@ class ConfigModelGenerator extends AbstractGenerator {
 			  	        «ELSE»
 			  	          type: «typeValue(p.value)»
 			  	          default: «stringValue(p.value,false,true)»
-			  	        «ENDIF»
+			  	        «ENDIF»			  	     	
 			  	 	«ENDIF»
 			  	 «ENDFOR»
 			  «ENDIF»
