@@ -23,7 +23,6 @@ import org.sa.rainbow.configuration.configModel.BooleanLiteral
 import org.sa.rainbow.configuration.configModel.CommandCall
 import org.sa.rainbow.configuration.configModel.Component
 import org.sa.rainbow.configuration.configModel.ComponentType
-import org.sa.rainbow.configuration.configModel.ConfigurationModel
 import org.sa.rainbow.configuration.configModel.DeclaredProperty
 import org.sa.rainbow.configuration.configModel.DoubleLiteral
 import org.sa.rainbow.configuration.configModel.Effector
@@ -40,6 +39,7 @@ import org.sa.rainbow.configuration.configModel.Reference
 import org.sa.rainbow.configuration.configModel.StringLiteral
 import org.sa.rainbow.configuration.configModel.Value
 import org.sa.rainbow.configuration.validation.ConfigModelValidator
+import org.sa.rainbow.configuration.configModel.RainbowConfiguration
 
 /**
  * Generates code from your model files on save.
@@ -49,7 +49,7 @@ import org.sa.rainbow.configuration.validation.ConfigModelValidator
 class ConfigModelGenerator extends AbstractGenerator {
 
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
-		val model = resource.contents.head as ConfigurationModel
+		val model = resource.contents.head as RainbowConfiguration
 		var String filename = null
 		if (model.export !== null) { 
 			filename='''«model.targetName»/«model.export.filename»'''	

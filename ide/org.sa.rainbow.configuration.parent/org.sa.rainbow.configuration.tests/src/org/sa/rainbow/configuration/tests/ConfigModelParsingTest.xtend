@@ -10,13 +10,13 @@ import org.eclipse.xtext.testing.util.ParseHelper
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.^extension.ExtendWith
-import org.sa.rainbow.configuration.configModel.ConfigurationModel
+import org.sa.rainbow.configuration.configModel.RainbowConfiguration
 
 @ExtendWith(InjectionExtension)
 @InjectWith(ConfigModelInjectorProvider)
 class ConfigModelParsingTest {
 	@Inject
-	ParseHelper<ConfigurationModel> parseHelper
+	ParseHelper<RainbowConfiguration> parseHelper
 	
 	@Test
 	def void loadModel() {
