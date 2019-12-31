@@ -365,7 +365,7 @@ class ConfigModelGenerator extends AbstractGenerator {
 			for (a : analyses) {
 				val ass = a.^default.value as Component
 				val class = ass.assignment.findFirst[it.name == "class"]
-				sb.append('''rainbow.analyses.class_«i»=«(class.value.value as Reference).referable.qualifiedName»
+				sb.append('''rainbow.analyses_«i»=«(class.value.value as Reference).referable.qualifiedName»
 			''')
 			}
 			sb.toString
