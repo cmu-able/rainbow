@@ -20,7 +20,7 @@ probe DimmerProbe -> GenericProbeT = {
 probe ServersProbe -> GenericProbeT = {
 	alias = "servers"
 	script = {
-		argument = "servers"
+		argument = "get_servers"
 	}	
 }
 
