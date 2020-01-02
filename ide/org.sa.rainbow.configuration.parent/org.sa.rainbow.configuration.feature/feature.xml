@@ -8,6 +8,14 @@
       The configuration DSL for Rainbow as an Eclipse Plugin.
    </description>
 
+   <includes
+         id="org.acme.xtext.feature"
+         version="1.0.0.qualifier"/>
+
+   <includes
+         id="org.sa.rainbow.stitch.feature"
+         version="1.0.0.qualifier"/>
+
    <plugin
          id="org.sa.rainbow.configuration"
          download-size="0"
@@ -24,48 +32,6 @@
 
    <plugin
          id="org.sa.rainbow.configuration.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.sa.rainbow.stitch"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.sa.rainbow.stitch.ide"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.sa.rainbow.stitch.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.acme.xtext"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.acme.xtext.ide"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.acme.xtext.ui"
          download-size="0"
          install-size="0"
          version="0.0.0"
