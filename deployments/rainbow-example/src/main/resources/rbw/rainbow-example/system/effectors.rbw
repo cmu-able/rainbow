@@ -1,6 +1,6 @@
 target rainbow-example
 import properties "../properties.rbw"  
-def effectors.commonPath = "«rainbow.path»/system/probes"
+def effectors.commonPath = "«rainbow.path»/system/effectors"
 
 effector setDimmer = { 
 	model ««SwimSys»»
