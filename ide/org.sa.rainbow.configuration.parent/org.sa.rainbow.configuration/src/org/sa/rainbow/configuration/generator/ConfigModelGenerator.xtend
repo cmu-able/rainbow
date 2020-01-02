@@ -275,8 +275,8 @@ class ConfigModelGenerator extends AbstractGenerator {
 			scenarios = '''
 			weights:
 			  «FOR scenario : scs.values»
-			  «(scenario.value as Component).assignment.findFirst[it.name=="name"].name»:
-			    «FOR u : (scenario.value as Component).assignment.filter[it != "name"]»
+			  «XtendUtils.unpackString((scenario.value as Component).assignment.findFirst[it.name=="name"].value.value as StringLiteral, true)»:
+			    «FOR u : (scenario.value as Component).assignment.filter[it.name != "name"]»
 			      «u.name»: «ConfigModelValidator.getNumber(u.value)»
 			    «ENDFOR»
 			  «ENDFOR»
