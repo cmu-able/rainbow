@@ -165,9 +165,9 @@ public class ArchGuagePanel extends GaugePanel {
 					} else if ("meter".equals(category)) {
 						String command = SafeGet.asString(builtin.get("command"));
 						final String value = SafeGet.asString(builtin.get("value"));
-						Double upper = SafeGet.asDouble( builtin.get("upper")).doubleValue();
-						Double lower = SafeGet.asDouble(builtin.get("lower")).doubleValue();
-						Double threshold = SafeGet.asDouble(builtin.get("threshold")).doubleValue();
+						Double upper = SafeGet.asDouble( builtin.get("upper"));
+						Double lower = SafeGet.asDouble(builtin.get("lower"));
+						Double threshold = SafeGet.asDouble(builtin.get("threshold"));
 						if (command != null && value != null) {
 							ICommandProcessor<Double> processor = createOperationProcessor(command, value, s -> {
 								return Double.parseDouble(s);
