@@ -27,6 +27,7 @@ import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.gui.GaugePanel;
 import org.sa.rainbow.gui.arch.model.RainbowArchGaugeModel;
+import org.sa.rainbow.gui.utils.SafeGet;
 import org.sa.rainbow.gui.widgets.BooleanPanel;
 import org.sa.rainbow.gui.widgets.ICommandUpdate;
 import org.sa.rainbow.gui.widgets.MeterPanel;
@@ -145,14 +146,14 @@ public class ArchGuagePanel extends GaugePanel {
 			if (ui != null) {
 				Map<String, Object> builtin;
 				if ((builtin = (Map<String, Object>) ui.get("builtin")) != null) {
-					String category = (String) builtin.get("category");
+					String category = SafeGet.asString( builtin.get("category"));
 					if ("timeseries".equals(category)) {
-						String xLabel = (String) builtin.get("xlabel");
-						String yLabel = (String) builtin.get("ylabel");
-						String command = (String) builtin.get("command");
-						Double upper = ((Number) builtin.get("upper")).doubleValue();
-						Double lower = ((Number) builtin.get("lower")).doubleValue();
-						final String value = builtin.get("value").toString();
+						String xLabel = SafeGet.asString(builtin.get("xlabel"));
+						String yLabel = SafeGet.asString(builtin.get("ylabel"));
+						String command = SafeGet.asString(builtin.get("command"));
+						Double upper = SafeGet.asDouble(builtin.get("upper"));
+						Double lower = SafeGet.asDouble(builtin.get("lower"));
+						final String value = SafeGet.asString(builtin.get("value"));
 						if (command != null && value != null) {
 							ICommandProcessor<Double> processor = createOperationProcessor(command, value, s -> {
 								return Double.parseDouble(s);
@@ -162,11 +163,11 @@ public class ArchGuagePanel extends GaugePanel {
 							return new DynamicDesktopIconUI(ts);
 						}
 					} else if ("meter".equals(category)) {
-						String command = (String) builtin.get("command");
-						final String value = builtin.get("value").toString();
-						Double upper = ((Number) builtin.get("upper")).doubleValue();
-						Double lower = ((Number) builtin.get("lower")).doubleValue();
-						Double threshold = ((Number) builtin.get("threshold")).doubleValue();
+						String command = SafeGet.asString(builtin.get("command"));
+						final String value = SafeGet.asString(builtin.get("value"));
+						Double upper = SafeGet.asDouble( builtin.get("upper")).doubleValue();
+						Double lower = SafeGet.asDouble(builtin.get("lower")).doubleValue();
+						Double threshold = SafeGet.asDouble(builtin.get("threshold")).doubleValue();
 						if (command != null && value != null) {
 							ICommandProcessor<Double> processor = createOperationProcessor(command, value, s -> {
 								return Double.parseDouble(s);
@@ -175,10 +176,10 @@ public class ArchGuagePanel extends GaugePanel {
 							return new DynamicDesktopIconUI(meter);
 						}
 					} else if ("onoff".equals(category)) {
-						String command = (String) builtin.get("command");
-						final String value = builtin.get("value").toString();
-						final String onColor = builtin.get("oncolor").toString();
-						final String offColor = builtin.get("offcolor").toString();
+						String command = SafeGet.asString(builtin.get("command"));
+						final String value = SafeGet.asString(builtin.get("value"));
+						final String onColor =SafeGet.asString( builtin.get("oncolor"));
+						final String offColor = SafeGet.asString(builtin.get("offcolor"));
 						if (command != null && value != null) {
 							ICommandProcessor<Boolean> processor = createOperationProcessor(command, value, s -> {
 								return Boolean.parseBoolean(s);
