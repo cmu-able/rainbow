@@ -150,9 +150,9 @@ public class ArchGuagePanel extends GaugePanel {
 						String xLabel = (String) builtin.get("xlabel");
 						String yLabel = (String) builtin.get("ylabel");
 						String command = (String) builtin.get("command");
-						Double upper = (Double) builtin.get("upper");
-						Double lower = (Double) builtin.get("lower");
-						final String value = (String) builtin.get("value");
+						Double upper = ((Number) builtin.get("upper")).doubleValue();
+						Double lower = ((Number) builtin.get("lower")).doubleValue();
+						final String value = builtin.get("value").toString();
 						if (command != null && value != null) {
 							ICommandProcessor<Double> processor = createOperationProcessor(command, value, s -> {
 								return Double.parseDouble(s);
@@ -163,10 +163,10 @@ public class ArchGuagePanel extends GaugePanel {
 						}
 					} else if ("meter".equals(category)) {
 						String command = (String) builtin.get("command");
-						final String value = (String) builtin.get("value");
-						Double upper = (Double) builtin.get("upper");
-						Double lower = (Double) builtin.get("lower");
-						Double threshold = (Double) builtin.get("threshold");
+						final String value = builtin.get("value").toString();
+						Double upper = ((Number) builtin.get("upper")).doubleValue();
+						Double lower = ((Number) builtin.get("lower")).doubleValue();
+						Double threshold = ((Number) builtin.get("threshold")).doubleValue();
 						if (command != null && value != null) {
 							ICommandProcessor<Double> processor = createOperationProcessor(command, value, s -> {
 								return Double.parseDouble(s);
@@ -176,9 +176,9 @@ public class ArchGuagePanel extends GaugePanel {
 						}
 					} else if ("onoff".equals(category)) {
 						String command = (String) builtin.get("command");
-						final String value = (String) builtin.get("value");
-						final String onColor = (String) builtin.get("oncolor");
-						final String offColor = (String) builtin.get("offcolor");
+						final String value = builtin.get("value").toString();
+						final String onColor = builtin.get("oncolor").toString();
+						final String offColor = builtin.get("offcolor").toString();
 						if (command != null && value != null) {
 							ICommandProcessor<Boolean> processor = createOperationProcessor(command, value, s -> {
 								return Boolean.parseBoolean(s);
