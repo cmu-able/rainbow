@@ -244,7 +244,9 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
         Object value = triple.getValue();
 		if (triple.getName ().equals (CONFIG_SAMPLING_FREQUENCY)) {
             // set the runner timer directly
-            setSleepTime ((Long) value);
+			if (value instanceof Number) {
+				setSleepTime (((Number) value).longValue());
+			}
         }
         else if (triple.getName().equals(RAINBOW_ADAPTING)) {
         	synchronized (this) {
