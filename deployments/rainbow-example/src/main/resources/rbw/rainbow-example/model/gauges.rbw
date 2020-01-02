@@ -142,7 +142,7 @@ gauge ServerActiveG1 -> ServerActivationGaugeT = {
 		targetIP = ««customize.system.^target.lb»»
 	}
 	config = {
-		targetProbe = ««ServersProbe»»
+		targetProbe = ««ActivateServersProbe»»
 		serverNum = 1
 	}
 }
