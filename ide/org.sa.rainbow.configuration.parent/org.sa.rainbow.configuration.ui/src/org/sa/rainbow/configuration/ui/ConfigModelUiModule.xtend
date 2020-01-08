@@ -11,11 +11,14 @@ import org.eclipse.xtext.common.types.access.jdt.JdtTypeProviderFactory
 import org.eclipse.xtext.common.types.xtext.AbstractTypeScopeProvider
 import org.eclipse.xtext.common.types.xtext.ui.ITypesProposalProvider
 import org.eclipse.xtext.common.types.xtext.ui.JdtBasedSimpleTypeScopeProvider
+import org.eclipse.xtext.ide.editor.bracketmatching.IBracePairProvider
 import org.eclipse.xtext.ide.editor.syntaxcoloring.DefaultSemanticHighlightingCalculator
+import org.eclipse.xtext.service.SingletonBinding
 import org.eclipse.xtext.ui.editor.syntaxcoloring.DefaultHighlightingConfiguration
 import org.sa.rainbow.configuration.ConfigAttributeConstants
 import org.sa.rainbow.configuration.ui.contentassist.RainbowJdtTypesProposalProvider
 import org.sa.rainbow.configuration.ui.contentassist.RainbowTemplateProposalProvider
+import org.sa.rainbow.configuration.ui.contentassist.RainbowBracePairProvider
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.
@@ -44,7 +47,9 @@ class ConfigModelUiModule extends AbstractConfigModelUiModule {
 		binder.bind(DefaultHighlightingConfiguration).to(ConfigModelHighlightingConfiguration)
 	}
 	
-	
+	@SingletonBinding override Class<? extends IBracePairProvider> bindIBracePairProvider() {
+		return RainbowBracePairProvider
+	}
 	
 	
 //	override configureHighlightingLexer(Binder binder) {

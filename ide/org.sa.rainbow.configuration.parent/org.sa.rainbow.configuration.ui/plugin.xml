@@ -53,28 +53,6 @@
 			</activeWhen>
 		</handler>
 	</extension>
-	<extension point="org.eclipse.core.expressions.definitions">
-		<definition id="org.sa.rainbow.configuration.ConfigModel.Editor.opened">
-			<and>
-				<reference definitionId="isActiveEditorAnInstanceOfXtextEditor"/>
-				<with variable="activeEditor">
-					<test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName"
-						value="org.sa.rainbow.configuration.ConfigModel"
-						forcePluginActivation="true"/>
-				</with>
-			</and>
-		</definition>
-		<definition id="org.sa.rainbow.configuration.ConfigModel.XtextEditor.opened">
-			<and>
-				<reference definitionId="isXtextEditorActive"/>
-				<with variable="activeEditor">
-					<test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName"
-						value="org.sa.rainbow.configuration.ConfigModel"
-						forcePluginActivation="true"/>
-				</with>
-			</and>
-		</definition>
-	</extension>
 	<extension
 			point="org.eclipse.ui.preferencePages">
 		<page
@@ -326,6 +304,16 @@
 			id="org.eclipse.xtext.ui.editor.outline.QuickOutline"
 			name="Quick Outline">
 		</command>
+  <command
+        id="org.sa.rainbow.configuration.ui.insertLeftGuillemet"
+        name="Insert left guillemet"
+        description="Inserts an opening french quote">
+  </command>
+  <command
+        id="org.sa.rainbow.configuration.ui.insertRightGuillemet"
+        name="Insert right gulliment."
+        description="Inserts a closing french quote">
+  </command>
 	</extension>
 	<extension point="org.eclipse.ui.menus">
 		<menuContribution
@@ -431,4 +419,62 @@
 			type="text">
 		</fileTypes>
 	</extension>
+	   <extension point="org.eclipse.core.expressions.definitions">
+        <definition id="org.sa.rainbow.configuration.Editor.opened">
+            <and>
+                <reference definitionId="isActiveEditorAnInstanceOfXtextEditor"/>
+                <with variable="activeEditor">
+                    <test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName" 
+                        value="org.sa.rainbow.configuration.ConfigModel" 
+                        forcePluginActivation="true"/>
+                </with>        
+            </and>
+        </definition>
+     </extension>
+	<extension
+         point="org.eclipse.ui.contexts">
+      <context
+            description="Rainbow Configuration Editor"
+            id="org.sa.rainbow.configuration.ide.RCLEditorScope"
+            name="RCLContext"
+            parentId="org.eclipse.xtext.ui.XtextEditorScope">
+      </context>
+   </extension>
+ <extension
+       point="org.eclipse.ui.bindings">
+       
+     <key
+          commandId="org.sa.rainbow.configuration.ui.insertLeftGuillemet"
+          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+          sequence="&lt;">
+    </key>
+    <key
+          commandId="org.sa.rainbow.configuration.ui.insertRightGuillemet"
+          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+          sequence="M1+">
+    </key>
+ </extension>
+ <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.sa.rainbow.configuration.ui.commands.InsertStringHandler$LeftGuillemet"
+            commandId="org.eclipse.xtend.ide.insertLeftGuillemet">
+            <!--
+            <activeWhen>
+				<reference
+					definitionId="org.eclipse.xtend.core.Xtend.Editor.opened">
+				</reference>
+			</activeWhen>
+			-->
+      </handler>
+      <handler
+            class="org.sa.rainbow.configuration.ui.commands.InsertStringHandler$RightGuillemet"
+            commandId="org.eclipse.xtend.ide.insertRightGuillemet">
+           	<activeWhen>
+				<reference
+					definitionId="org.sa.rainbow.configuration.ConfigModel.Editor.opened">
+				</reference>
+			</activeWhen>
+      </handler>
+   </extension>
 </plugin>

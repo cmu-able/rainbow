@@ -633,6 +633,10 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 		
 	}
 	
+	override completeCommandReference_Command(EObject model, org.eclipse.xtext.Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		super.completeCommandReference_Command(model, assignment, context, acceptor)
+	}
+	
 
 //	override completeGaugeBody_Ref(EObject model, org.eclipse.xtext.Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
 //		super.completeGaugeBody_Ref(model, assignment, context, acceptor)
