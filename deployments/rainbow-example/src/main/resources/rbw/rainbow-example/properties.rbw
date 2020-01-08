@@ -1,7 +1,7 @@
 target rainbow-example
+import properties "model/gauges.rbw"
 import acme "model/swim.acme" 
 import factory "../SwimModelFactory.rbw"
-import properties "model/gauges.rbw"
 ################################################################################
 # Purpose:  Common configuration file for the Rainbow infrastructure.
 #           Properties are loaded by class org.sa.rainbow.Rainbow .
@@ -171,8 +171,6 @@ def customize.^model.timeseriespredictor.traininglength=15
 def customize.gauges.path = "model/gauges.yml"
 #- Probe spec
 def customize.probes.path = "system/probes.yml"
-#- Operator spec as mapping to effector
-def customize.archop.map.path = "model/op.map"
 #- Effector spec
 def customize.effectors.path = "system/effectors.yml"
 ## Adaptation Manager
@@ -199,7 +197,6 @@ def customize.system.^target.web0 = 1
 def customize.system.^target.web0.httpPort = 1080
 def customize.system.^target.web1 = 2
 def customize.system.^target.web1.httpPort = 1080
-def customize.system.^target.db = 10.0.0.21
 def customize.system.^target.web2 = 3
 def customize.system.^target.web2.httpPort=1080
 
