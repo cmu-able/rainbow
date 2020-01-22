@@ -144,16 +144,17 @@ Properties may be referenced inside strings and on their own. To reference a pro
 
 ```
 def event.log.path = "log"
-def logging.path = "Â«event.log.pathÂ»/rainbow.out"
+def logging.path = "«event.log.path»/rainbow.out"
 ```
 
-When referencing it outside a string, use double `Â«Â«...Â»Â»`, e.g.,
+When referencing it outside a string, use double `««...»»`, e.g.,
 
 ```
-def customize.system.^target.master = Â«Â«rainbow.deployment.locationÂ»Â»
+def customize.system.^target.master = ««rainbow.deployment.location»»
 ```
 
-To insert `Â«` type Ctrl-Shift-<, `Â»` with Ctrl-Shift-> (Cmd-Shift on MacOS). 
+To insert `«` type Ctrl-Shift-<, `»` with Ctrl-Shift-> (Cmd-Shift on MacOS). Also autocomplete 
+will give these proposals.
 
 ### Acme and Stitch
 
@@ -275,15 +276,29 @@ associated with Rubis example.
 
 ### Models
 
-Models in Rainbow capture information about the state of the system being managed and (potentially) the environment. Rainbow needs to know how to load, save, and manipulate models. Thus, a model is now
-a compound properties with several required attributes. Let's look at the model for SwimSys, and Acme model of a web system with a load balancer and three servers, that is used in the example.
+Models are used in Rainbow to specify information that is kept by Rainbow about the 
+managed (target) system and its environment. Models are updated by gauges using most 
+often using information from probes and translating them into changes on models. Analyses 
+can also update models. The adaptation manager can also query model information to help 
+decide what adaptations to perform.
+
+Models in Rainbow have two kinds of interface: a query interface that is used to read 
+information from a model, and an operation interface that is used to update models. 
+Operations on models are produced with command factories, specified by the rainbow configuration, 
+and are managed by Rainbow. Rainbow publishes operations when models are updated so 
+that interested components  can be notified about changes to models. Operations can also 
+be undone by Rainbow so that if an operation fails, the model can be rolled back to 
+the previous version.
+
+To specify a model in RCL, you define a _model_ property, which may be referred to by 
+other components such as gauges and effectors.
 
 ```
 # Rainbow Acme model of SWIM
 def model SwimSys= {
     ^type="Acme" 
     path="model/swim.acme"
-    ^factory=Â«Â«SWIMÂ»Â»
+    ^factory=««SWIM»»
     saveOnClose = true
     saveLocation="model/swim-post.acme" 
 }
@@ -298,12 +313,12 @@ If you want the model to be saved when Rainbow quits, you should specify this by
 
 ### Other components
 
-The other types of components are also specified by defining typed properteies. For evaluators and effector managers, only the class needs to be specified. For adaptation managers and exectors, the model on which they operate
+The other types of components are also specified by defining typed properties. For evaluators and effector managers, only the class needs to be specified. For adaptation managers and executors, the model on which they operate
 also needs to specified, through reference to a model property. For example, 
 
 ```
 def adaptation-manager AdaptationManager = {
-    ^model=Â«Â«SwimSysÂ»Â»
+    ^model=««SwimSys»»
     class=org.sa.rainbow.^stitch.adaptation.AdaptationManager
 }
 ```
@@ -312,12 +327,91 @@ Specifies to start an Adaptation Manager with the name `AdaptationManager` using
 class `org.sa.rainbow.stitch.adaptation.AdaptationManager` and which is associated with the model
 called `SwimSys`.
 
+Similarly:
 
-## Model Command Factory
+```
+def executor StitchExecutor = {
+    ^model=««SwimSys»»
+    class=org.sa.rainbow.^stitch.adaptation.StitchExecutor
+}
+```
+
+## Model Command Factories  
+Model command factories are classes in Rainbow that are used to implement possible operations 
+on models. They are used by gauges to update models, and they are used in executors 
+to specify how to change the system - in this last case they are not performed directly 
+on the model but are intercepted by effectors and translated into operations on the 
+managed system. So, specifying a model command factory involves implementing/specifying 
+two things: operations and command factories to create the operations.
 
 ### Implementing Rainbow Operations in Java
 
+Operations in Rainbow need to implement the interface 
+(org.sa.rainbow.core.models.commands.IRainbowModelOperation)[../rainbow/rainbow-core/src/main/java/org/sa/rainbow/core/models/commands/IRainbowOperation.java]. 
+In practice, there are two possible classes that you will extend. 
+
+1. If you are dealing with Acme models, you will extend 
+   (org.sa.rainbow.model.acme.AcmeModelOpetation)[../rainbow/rainbow-acme-model/src/main/java/org/sa/rainbow/model/acme/AcmeModelOperation.java], 
+   which is a generic class where you specify the result of the operation. You will 
+   need to specify doConstructCommand, which returns the Acme command (IAcmeCommand) 
+   that will operate on the Acme model.
+
+2. If you are defining your own model class, you will extend 
+   (org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation)[../rainbow/rainbow-core/src/main/java/org/sa/rainbow/core/models/commands/AbstractRainbowModelOperation.java].
+   This is a generic class that takes two parameters: the class of the model object 
+   managed by Rainbow and the type of the result of the operation. In most cases, you will need to specify methods for executing, redoing, and undoing 
+the operations, as well as a method to ensure that the operation is valid on the model. 
+
+For an example of an Acme operation, look at (org.sa.rainbow.model.acme.swim.commands.ActivateServerCmd)[]. 
+For an example of a non-Acme operation, check out the operations in the _rainbow-utility-model_ 
+project. 
+
 ### Specifying Command Factories
+
+In prior versions of Rainbow, these classes had to be handwritten, which was often tedious
+and error prone. With RCL, command factories can be specified and the Java class generated. 
+If the model uses an existing command factory, then it should specify that class in 
+the **factory** property. Otherwise the factory property will be a reference to a command 
+factory specified in RCL.
+
+```
+model factory SWIM yields org.sa.rainbow.^model.^acme.swim.commands.SwimCommandFactory {
+    extends org.sa.rainbow.^model.^acme.AcmeModelCommandFactory
+    for org.sa.rainbow.^model.^acme.AcmeModelInstance
+    
+    command load is org.sa.rainbow.^model.^acme.swim.commands.SwimLoadModelCommand
+    command setDimmer(acme::SwimFam.LoadBalancerT target, int dimmer) 
+        is org.sa.rainbow.^model.^acme.swim.commands.SetDimmerCmd;
+    ...
+}
+```
+
+Above is a fragment of a command factory specified in a RCL. The name **SWIM** specified 
+the name that will be used to refer to the factory in other RCL configuration file. 
+The class after **yields** specifies what Java class will be generated (by default in 
+the _src/main/java-gen_ directory) and what superclass it will have (optional). It also 
+specifies the class that implements the model that this factory is **for**.
+
+Following the **extends** and **for** specifications, two optional standard operations 
+are specified. The **load** command is used by Rainbow at start up to initialize the 
+model. The class that is specified must extend _org.sa.rainbow.core.models.commands.AbstractLoadModelCmd_. 
+It is also possible to specify an operation to save a model when Rainbow is finished 
+(using the **save** keyword instead of **load**). This operation must extend _org.sa.rainbow.core.models.commands.AbstractSaveoModelCmd_.
+
+After this comes the list of operations that the model can produce, e.g.:
+
+```
+    command setDimmer(acme::SwimFam.LoadBalancerT target, int dimmer) 
+        is org.sa.rainbow.^model.^acme.swim.commands.SetDimmerCmd;
+```
+
+The first part is the name of the operation (which may be referred to by gauges and 
+effectors), e.g., _setDimmer_. Following this are the parameters for the operation. 
+The first argument may be a **target** which specifies the kind of model element that 
+the operation is defined on. The following list of arguments specify the operation paramters. 
+Operation argument types can refer to Acme types (by prefixing the type name with **acme::*, 
+Java types, or builtin types like **int**, **String**, etc.). Finally, the operation 
+specifies the implementing class for the operation.
 
 ## Probe Specifications
 
