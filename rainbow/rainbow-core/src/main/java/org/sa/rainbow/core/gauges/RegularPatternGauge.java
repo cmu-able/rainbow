@@ -188,6 +188,10 @@ public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
     protected void addPattern (String matchName, Pattern p) {
         m_patternMap.put(matchName.intern(), p);
     }
+    
+    protected Set<String> getPatternKeys() {
+    	return m_patternMap.keySet();
+    }
 
     protected abstract void doMatch (String matchName, Matcher m);
 
