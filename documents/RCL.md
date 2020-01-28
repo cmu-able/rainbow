@@ -109,7 +109,7 @@ be generated here.)
 A configuration file for the most part follows the conventions laid down by previous 
 versions of Rainbow. Each file begins with a target name (specifying the name of the target 
 it belongs to) and a set of import statements,  and ending with an export statement saying which file is generated as a result.
-For exam[ple, the file [properties.rbw](../deployments/rainbow-example/src/main/resources/rbw/rainbow-example/properties.rbw)
+For example, the file [properties.rbw](../deployments/rainbow-example/src/main/resources/rbw/rainbow-example/properties.rbw)
  
 ```
 target rainbow-example
@@ -144,16 +144,16 @@ Properties may be referenced inside strings and on their own. To reference a pro
 
 ```
 def event.log.path = "log"
-def logging.path = "�event.log.path�/rainbow.out"
+def logging.path = "«event.log.path»/rainbow.out"
 ```
 
-When referencing it outside a string, use double `��...��`, e.g.,
+When referencing it outside a string, use double `««...»»`, e.g.,
 
 ```
-def customize.system.^target.master = ��rainbow.deployment.location��
+def customize.system.^target.master = ««rainbow.deployment.location»»
 ```
 
-To insert `�` type Ctrl-Shift-<, `�` with Ctrl-Shift-> (Cmd-Shift on MacOS). Also autocomplete 
+To insert `«` type Ctrl-Shift-<, `»` with Ctrl-Shift-> (Cmd-Shift on MacOS). Also autocomplete 
 will give these proposals.
 
 ### Acme and Stitch
@@ -298,7 +298,7 @@ other components such as gauges and effectors.
 def model SwimSys= {
     ^type="Acme" 
     path="model/swim.acme"
-    ^factory=��SWIM��
+    ^factory=««SWIM»»
     saveOnClose = true
     saveLocation="model/swim-post.acme" 
 }
@@ -318,7 +318,7 @@ also needs to specified, through reference to a model property. For example,
 
 ```
 def adaptation-manager AdaptationManager = {
-    ^model=��SwimSys��
+    ^model=««SwimSys»»
     class=org.sa.rainbow.^stitch.adaptation.AdaptationManager
 }
 ```
@@ -331,7 +331,7 @@ Similarly:
 
 ```
 def executor StitchExecutor = {
-    ^model=��SwimSys��
+    ^model=««SwimSys»»
     class=org.sa.rainbow.^stitch.adaptation.StitchExecutor
 }
 ```
@@ -347,22 +347,22 @@ two things: operations and command factories to create the operations.
 ### Implementing Rainbow Operations in Java
 
 Operations in Rainbow need to implement the interface 
-(org.sa.rainbow.core.models.commands.IRainbowModelOperation)[../rainbow/rainbow-core/src/main/java/org/sa/rainbow/core/models/commands/IRainbowOperation.java]. 
+[org.sa.rainbow.core.models.commands.IRainbowModelOperation](../rainbow/rainbow-core/src/main/java/org/sa/rainbow/core/models/commands/IRainbowOperation.java). 
 In practice, there are two possible classes that you will extend. 
 
 1. If you are dealing with Acme models, you will extend 
-   (org.sa.rainbow.model.acme.AcmeModelOpetation)[../rainbow/rainbow-acme-model/src/main/java/org/sa/rainbow/model/acme/AcmeModelOperation.java], 
+   [org.sa.rainbow.model.acme.AcmeModelOpetation](../rainbow/rainbow-acme-model/src/main/java/org/sa/rainbow/model/acme/AcmeModelOperation.java), 
    which is a generic class where you specify the result of the operation. You will 
    need to specify doConstructCommand, which returns the Acme command (IAcmeCommand) 
    that will operate on the Acme model.
 
 2. If you are defining your own model class, you will extend 
-   (org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation)[../rainbow/rainbow-core/src/main/java/org/sa/rainbow/core/models/commands/AbstractRainbowModelOperation.java].
+   [org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation](../rainbow/rainbow-core/src/main/java/org/sa/rainbow/core/models/commands/AbstractRainbowModelOperation.java).
    This is a generic class that takes two parameters: the class of the model object 
    managed by Rainbow and the type of the result of the operation. In most cases, you will need to specify methods for executing, redoing, and undoing 
 the operations, as well as a method to ensure that the operation is valid on the model. 
 
-For an example of an Acme operation, look at (org.sa.rainbow.model.acme.swim.commands.ActivateServerCmd)[]. 
+For an example of an Acme operation, look at [org.sa.rainbow.model.acme.swim.commands.ActivateServerCmd](). 
 For an example of a non-Acme operation, check out the operations in the _rainbow-utility-model_ 
 project. 
 
@@ -415,21 +415,392 @@ specifies the implementing class for the operation.
 
 ## Probe Specifications
 
+Probes are instruments in the running system that provide system-specific information 
+to Rainbow. Such information is converted to model information by _gauges_. There are 
+two types of probes supported by Rainbow: script based probes and Java probes. 
+In both cases, the `probes.rbw` file needs to be updated with the new probe information. 
+This file usually lives in the `system` directory of a target. See [Required Probe Fields](#required_probe_fields) 
+for a list of all the properties for a probe.
+
 ### Probe Types
+
+Probe types specify information about probes that instances inherit (and can change 
+in the instance). For example, 
+
+```
+probe type GenericProbeT = {  
+    location = ««customize.system.^target.lb»»
+    script = {
+        mode = "continual" 
+        path = "«probes.commonPath»/genericProbe.pl"
+    }
+} 
+```
+
+This defines a probe type called `GenericProbeT`. Instances of this probe type will 
+by default define a `location` and a `script` property. The `script` property will define 
+`mode` as `continual` and `path`.
 
 ### Probe Instances
 
-### Required Fields
+Probe instances may indicate the probe type they are instances of. Otherwise, probes 
+are defined similarly to probe types. For example, 
+
+```
+probe DimmerProbe -> GenericProbeT = {
+    alias = "dimmer"
+    script = {
+        argument = "get_dimmer"
+    }
+}
+```
+
+This states that the `DimmerProbe` instance will get all the properties defined in `GenericProbeT` 
+in addition to the once defined in `GenericProbeT`. To define the same probe instance 
+without the probe type, you would need to specify:
+
+```
+probe DimmerProbe = {
+    location = ««customize.system.^target.lb»»
+    alias = "dimmer"
+    script = {
+        mode = "continual" 
+        path = "«probes.commonPath»/genericProbe.pl"
+        argument = "get_dimmer"
+    }
+}
+
+```
+
+### Required Probe Fields
+
+| Property | Description |
+| :-------- | :---------- |
+| `alias`              | The name that the probe as seen by the gauge. Gauges will put this in the `targetProbeType` field |
+| `location`          | The location where the probe is deployed (usually a property specified in `properties.rbw`) |
+| `java = {...}`      | Indicates the probe is implemented by Java class |
+| &nbsp; &nbsp;`class`     | The class of the probe, implementing `org.sa.rainbow.translator.IProbe` or one of its subclasses. |
+| &nbsp; &nbsp;`period`    | The reporting period of the probe (in ms)|
+| &nbsp;&nbsp;`args` | The arguments that will be passed to the constructor of the probe, 
+in an array |
+| `script = {...}`             | Indicates the probe is implemented by a script |
+| &nbsp; &nbsp; `path`         | The path of the script, which should exist on `location` |
+| &nbsp; &nbsp; `argument`     | The argument(s) to pass to the script |
+
+For Java-based probes, the java class should be on the classpath.
 
 ## Gauge Specification
 
+While probes provide information about the system, the intent of gauges is to abstract 
+this system information into model information, in the form of commands against the model 
+in Rainbow. There are three kinds of gauges in the Rainbow system: gauges that receive 
+information from probes; gauges that receive information from other gauges; and gauges 
+that generate information without either of these (for example, time-based gauges or 
+diagnostic gauges). 
+
+In all cases, gauges must be specified in the `gauges.rbw` file located in the models 
+directory. This file contains both gauge types and gauge instances. Instances in Rainbow should create, 
+how they are attached to the model, and what (if any) probes they listen to. 
+For example, a gauge type could be defined for reporting the processing time property 
+for servers. The type would define what values (e.g., processing-time) are reported 
+by the gauge, how to set up the gauge initially (e.g., the period of reporting), and 
+how to configure the gauge when it is running (e.g., by changing the reporting units 
+from seconds to milliseconds). The instance specification specifies where a 
+particular gauge instance runs, what part of the model it is attached to, what probes 
+it is listening to, etc.
+
+Gauge specifications (types or instances) contain three main sections:
+
+1. Command and Model Information. This section specifies the model/model factory that 
+the gauge is associated with, and the commands that the gauge is intended to produce. 
+Gauges must produce at least one kind of command.
+
+2. Setup parameters. This sections defines the parameters that are used when constructing 
+the gauge, and are not intended to change after the gauge is created. This typically 
+includes information like the location of where the gauge is to be run, the class that 
+implements it, how often it should send a beacon to the master.
+
+3. Configuration Parameters: This section specifies attributes about the gauge that 
+may be changed later on through configuring the gauge. This might include information 
+like the probe being listened to, the sampling frequency, or any other information that 
+you may want to configure the gauge with.
+
+Gauges are only implemented using Java in the current framework. The `javaClass` specified 
+in the type must be on the classpath for the target system. To implement the gauge, 
+the following class hierarchy is provided by the Rainbow Infrastructure:
+
+  - `AbstractGauge`: Implements basic Gauge management, such as heartbeat, 
+     configuration, setting up, etc. Gauges that do not listen to any probes 
+     should implement this class
+
+  - `AbstractGaugeWithProbes extends AbstractGauge`: A gauge that handles the 
+     targetProbeType and targetProbeList configuration parameters. 
+
+  - `RegularExpressionGauge extends AbstractGaugeWithProbes:` A gauge that processes 
+    probe reports that match one or more regular expressions. The constructor for the 
+    gauge should specify the regular expression patterns that are to be matched, and 
+    the gauge provides a default runAction that calls "doMatch" when a one of the 
+    expressions is matched. Extenders must implement this doMatch method to report the 
+    value.
+
 ### Gauge Types
+
+Gauge types specify 
+
+1.the model factory that can be used to derive commands (specified 
+as either a RCL model factory imported into the file or as a Java class on the classpath). 
+2. The list of commands that instances will produce. In the type, these are given a 
+name that can be referred to in the gauge implementation, and a signature (which must 
+match the signature of the operation in the factory), with the target before the operation 
+name (if it exists). Consider the example:
+
+```
+gauge type DimmerGaugeT = {
+    model factory ««SWIM»»
+    command ^dimmer = LoadBalancerT.setDimmer(int)
+    setup = {
+        targetIP = "localhost"
+        beaconPeriod = 30000
+        javaClass = org.sa.rainbow.translator.swim.gauges.SimpleGauge
+    }
+    config = {
+        samplingFrequency = 1500
+    }
+    comment = "DimmerGaugeT measures and reports the dimmer value of the system"    
+}
+```
+
+This says that `DimmerGaugeT` is associated with the model factory `SWIM` and has one 
+command called `dimmer`. Notice that the command signature matches that in the factory:
+
+```
+   command setDimmer(acme::SwimFam.LoadBalancerT target, int dimmer)
+```
+
+as the signature: `LoadBalancerT.setDimmer(int)`.
+
+There are then sections for setup and config that define possible parameters. These 
+are described in [Required Gauge Fields](#required_gauge_fileds)
+ 
 
 ### Gauge Instances
 
+Like probes, gauge instances may refer to their type definitions. In this case, they 
+must specify a particular model (that has the same factory as declared in the type), 
+and list commands that are in the type. An error will be given if the instance does 
+not specity all commands or the signatures do not match. Consider the gauge:
+
+```
+gauge DimmerG0 -> DimmerGaugeT = {
+    model ««SwimSys»»
+    command dimmer = LB0.setDimmer($<dimmer>)
+    setup = {
+        targetIP = ««customize.system.^target.lb»»
+    }
+    config = {
+        targetProbe = ««DimmerProbe»»
+    }
+    comment = "DimmerG0 is associated with the component LB0 of the System, SwimSys, defined as an Acme model"
+}
+```
+
+This gauge declares the type `DimmerGaugeT` and that it refers to the model instance 
+`SwimSys`. Note that this model instance has the factory `SWIM`. 
+
+The command part refers to the command `dimmer` and has the definition of `LB0.setDimmer($<dimmer>)`.
+`LB0` is defined in SwimSys as a component that has the type `LoadBalancerT`. In this 
+signature, real values can also be included (e.g., `LB0.setDimmer(1)` means the command 
+always sends the value `1` for the dimmer value). If a parameter is preceded is surround 
+by `$<...>` (as is the case here), this means that the gauge implementation is intended 
+to fill in this value - the type of this kind of parameter is not checked against the signature 
+until run time.
+
+
 ### Regular Expression Gauges
 
-### Required Fields
+To come.
+
+### Required Gauge Fields
+
+The format of the gauge-type portion of the `gauges.rbw` spec are:
+
+| YAML field | Description |
+| :---------- | :---------- |
+| `setup`                   | The parameters used when the gauge is constructed. It is possible to define your own setup parameters, giving values in the instance, but the required ones are: |
+| &nbsp; &nbsp; `targetIP`               | Where a gauge instance will be run. Here the default is localhost. This 
+should be a String|
+| &nbsp; &nbsp; `beaconPeriod:`           | How often the gauge will send a report of its liveness to rainbow, in ms |
+| &nbsp; &nbsp; `javaClass:`              | The javaClass that implements the gauge. | 
+| `config`                  |  The parameters used to configure the gauge, with values given in the instance. Gauges are configured in Rainbow when all the expected target locations have been created. It is possible to define your own parameters, but Rainbow understands the ones below: |
+| &nbsp; &nbsp; `targetProbe:`        | The probe _type_ that the gauge will listen to. |
+| &nbsp; &nbsp; `samplingFrequency:`         | How often, in ms, the gauge will report a value. |
+
+
+Gauge instances should give values only for those properties defined in the type.
+
+## Gauge Implementation
+
+Gauges are implemented as separate thread extending [`AbstractGauge`](../rainbow/rainbow-core/src/main/java/org/sa/rainbow/core/gauges/AbstractGauge.java), 
+[`AbstractGaugeWithProbe`](../rainbow/rainbow-core/src/main/java/org/sa/rainbow/core/gauges/AbstractGauge.java)  
+or the commonly [`RegularPatternGauge`](../rainbow/rainbow-core/src/main/java/org/sa/rainbow/core/gauges/RegualrPatternGauge.java).
+In the first two cases the `runAction` method should be implemented. We will go through 
+a set of simple implementations for each kind of gauge. 
+
+Let's consider a gauge that reports the time to a model. The gauge has the following 
+type specification:
+
+```
+gauge type TimeGaugeT = {
+    model factory ««Time»»
+    command setTime = ClockComponent.setTime(long)
+    ...
+}
+``` 
+
+In this first example, we can assume that the gauge just generates the time by using 
+Java's `Date` without involving any probes, and we will report the time every 10 seconds. 
+
+The aim of `runAction` is to work out a value and issue a command using the build in 
+`issueCommand` method of the gauge (or `issueCommands` if the gauge wants to transactionally 
+execute multiple models). The signatures for these methods are:
+
+```java
+  public void issueCommand (IRainbowOperation cmd, Map<String, String> parameters) ...
+  public void issueCommands ((List<IRainbowOperation> operations, List<Map<String, String>> parameters) ...
+```
+
+Let's look at the implementation of this gauge:
+
+```java
+public class TimeGauge extends AbstractGauge {
+
+    public TimeGauge(String id, long beaconPeriod, TypedAttribute gaugeDesc,
+            TypedAttribute modelDesc, List<TypedAttributeWithValue> setupParams,
+            Map<String, IRainbowOperation> mappings) throws RainbowException {
+        super("TimeGauge", id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
+    }
+    
+    // Stores the last reported time
+    protected long lastReportedTime = -1;
+    
+    @Override
+    protected void runAction() {
+        super.runAction();
+        long currentTime = new Date().getTime();
+        // We don't block the thread so that the gauge can send 
+        // beacons as appropriate. So check if it has been
+        // 10 seconds or so before sending
+        if (currentTime - lastReportedTime > 10000) {
+            // Get the set time operation defined in the gauges.rbw
+            IRainbowOperation command = getCommand("setTime");
+            // Get the list of parameters that we need to fill in
+            Map<String,String> parameters = getParameters(command);
+            // Fill in the first parameter with with the time
+            parameters.put(command.getParameters()[0], Long.toString(currentTime));
+            // Issue the command to Rainbow
+            issueCommand(command, parameters);
+            // Remember that we recorded this time
+            lastReportedTime = currentTime;
+        }
+    }
+
+}
+
+```
+
+This method gets the operation named `setTime` as defined in the gauge definition and 
+fills in the time parameter for that command (the target is fixed as `ClockComponent` 
+by the specification). Within rainbow, all parameters and targets are passed as Strings, 
+which is why we convert the time to a string with `Long.toString(currentTime)`.
+
+Now, let us consider that we have a probe that just reports the time. To keep it simple, 
+we can assume that the probe just prints the long value of time that is needed for the 
+model. In this case we need to extend `AbstractGaugeWithProbe`. In this case, we need 
+to implement two methods: `reportFromProbe` and `runAction`. Because probes report 
+in a different thread to the gauge, you should store the probe value in a data structure 
+that can be read by the gauge. You may choose to just keep the latest value, or keep 
+all values of the probe to do some averaging or filtering.
+
+```java
+public class TimeGaugeWithProbe extends AbstractGaugeWithProbes {
+
+    protected TimeGaugeWithProbe(String id, long beaconPeriod, TypedAttribute gaugeDesc,
+            TypedAttribute modelDesc, List<TypedAttributeWithValue> setupParams,
+            Map<String, IRainbowOperation> mappings) throws RainbowException {
+        super("TimeGauge", id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
+    }
+
+    private long lastTimeFromProbe = -1;
+    private long lastReportedTime = -1;
+    
+    @Override
+    public void reportFromProbe(IProbeIdentifier probe, String data) {
+        super.reportFromProbe(probe, data);
+        synchronized (this) {
+            try {
+                lastTimeFromProbe = Long.valueOf(data);
+            } catch (NumberFormatException e) {
+                // Report an error or ignore
+            }
+        }
+    }
+    
+    @Override
+    protected void runAction() {
+        super.runAction();
+        long currentTime = -1;
+        syncrhonized(this) {
+            currentTime = lastTimeFromProbe;
+        }
+        // the rest of the code is the same as for TimeGauge
+        ...
+    }
+    
+}
+```
+In this case `reportFromProbe` places the probe reported value into a field of the gauge 
+(after converting it to a long). And `runAction` then just retrieves this value and 
+sees if it should be reported. Be careful with synchronization here because we are dealing 
+with different threads accessing the probe value.
+
+Now let us assume that the probe reports the time value as a string that we need to 
+patch some value (e.g., ROS publishes the clock as an event where the milliseconds are 
+buried in the event). In such a case, we can use a regular expression to pull out the 
+right value. To write this kind of gauge we need to:
+
+1. Extend `RegularPatternGauge`
+2. Register the regular expression, usually in the constructor
+3. Override the `doMatch` method
+
+This is a common kind of gauge in Rainbow and so probe data is handled automatically 
+in the super class.
+
+```java
+public class TimeGaugeRegexp extends RegularPatternGauge {
+
+    protected static final String CLOCK = "Clock";
+    protected static final String CLOCK_PATTERN = "topic: /clock .*secs: ([0-9]*)";
+
+    public TimeGaugeRegexp(String id, long beaconPeriod, TypedAttribute gaugeDesc, TypedAttribute modelDesc,
+            List<TypedAttributeWithValue> setupParams, Map<String, IRainbowOperation> mappings)
+            throws RainbowException {
+        super("TimeGauge", id, beaconPeriod, gaugeDesc, modelDesc, setupParams, mappings);
+        // Register the pattern (It has one group that is a number)
+        addPattern(CLOCK, Pattern.compile(CLOCK_PATTERN));
+    }
+    
+    private long lastReportedTime = -1;
+
+    @Override
+    protected void doMatch(String matchName, Matcher m) {
+        if (CLOCK.equals(matchName)) {
+            long currentTime = Long.valueOf(m.group(1));
+            // The rest is the same as the other gauges
+        }
+    }
+
+}
+```
 
 ## Effector Specifications
 
