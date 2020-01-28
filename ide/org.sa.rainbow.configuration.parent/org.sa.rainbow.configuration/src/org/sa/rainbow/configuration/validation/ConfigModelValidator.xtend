@@ -336,6 +336,25 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 
 		}
 	}
+	
+	@Check
+	def checkGaugeBody(GaugeBody gb) {
+		var Boolean hasRegExpCommand = null;
+		for (cmd : gb.commands) {
+			if (hasRegExpCommand === null) {
+				hasRegExpCommand = cmd.regexp === null
+			}
+			else {
+				if (hasRegExpCommand != (cmd.regexp === null)) {
+					error('''Mixing commands with and without regular expression is not supported.''',
+						cmd,
+						ConfigModelPackage.Literals.COMMAND_CALL__NAME,
+						"mixedcommands"
+					)
+				}
+			}
+		}
+	}
 
 	@Check
 	def checkCommandCall(CommandCall cc) {
@@ -422,6 +441,12 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			try {
 				Pattern.compile(regexp)
 				XtendUtils.fillNamedGroups(regexp, namedGroups)
+				if (namedGroups.empty) {
+					warning('''""«regexp»" should contain at least one captured group''',
+						ConfigModelPackage.Literals.COMMAND_CALL__REGEXP,
+						"badregexp"
+					)
+				}
 			}
 			catch (PatternSyntaxException e) {
 				error ('''«e.message»''',
