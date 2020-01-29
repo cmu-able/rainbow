@@ -177,6 +177,7 @@ class ConfigModelGenerator extends AbstractGenerator {
 		import java.util.List;
 		import java.util.Map;
 		import java.util.regex.Matcher;
+		import java.util.regex.Pattern;
 		
 		import org.sa.rainbow.core.error.RainbowException;
 		import org.sa.rainbow.core.models.commands.IRainbowOperation;
@@ -206,7 +207,7 @@ class ConfigModelGenerator extends AbstractGenerator {
 			@Override
 			protected void loadPatterns () {
 				«FOR cmd : gt.body.commands»
-					addPattern(«cmd.command.toUpperCase.replaceAll("[\\-.]","_")», «cmd.command.toUpperCase.replaceAll("[\\-.]","_")»_PATTERN);
+					addPattern(«cmd.command.toUpperCase.replaceAll("[\\-.]","_")», Pattern.compile(«cmd.command.toUpperCase.replaceAll("[\\-.]","_")»_PATTERN));
 				«ENDFOR»
 			}
 			

@@ -58,7 +58,7 @@ def model SwimSys= {
 
 # Rainbow Utility Model
 def model USwimSys = {
-	name="SwimSys"
+	name="SwimSys" 
 	//^type="Utility"
 	path="stitch/utilities.yml" 
 	^factory=org.sa.rainbow.^model.^utility.UtilityCommandFactory    
@@ -70,13 +70,13 @@ def analysis ArchEvaluator = {
 }
 
 
-def adaptation-manager AdaptationManager = {
+def adaptation-manager AdaptationManager = { 
 	^model=««SwimSys»»
 	class=org.sa.rainbow.^stitch.adaptation.AdaptationManager
 }
 
 def executor StitchExecutor = {
-	^model=««SwimSys»»
+	^model=««SwimSys»» 
 	class=org.sa.rainbow.^stitch.adaptation.StitchExecutor
 }
 
