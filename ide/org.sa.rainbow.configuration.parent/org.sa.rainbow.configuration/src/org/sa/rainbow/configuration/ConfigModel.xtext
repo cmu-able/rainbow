@@ -199,11 +199,11 @@ JavaClassOrFactory:
 
 
 CommandReference:
-	'command' name=ID '=' (target=ID'.')? command=ID '(' (formal+=[types::JvmType|FQN] (',' formal+=[types::JvmType|FQN])*)? ')'
+	'command' name=ID '=' (regexp=StringLiteral '->' )? (target=ID'.')? command=ID '(' (formal+=[types::JvmType|FQN] (',' formal+=[types::JvmType|FQN])*)? ')'
 ;
 
 CommandCall:
-	'command' (name=ID '=')? (regexp=StringLiteral '->' )? ((target=ID | ref=PropertyReference) '.')? command=ID '(' (actual+=Actual (',' actual+=Actual)*)? ')'
+	'command' (name=ID '=')?  ((target=ID | ref=PropertyReference) '.')? command=ID '(' (actual+=Actual (',' actual+=Actual)*)? ')'
 ;
 
 Actual:

@@ -15,7 +15,13 @@ import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.common.types.JvmDeclaredType
 import org.eclipse.xtext.common.types.JvmPrimitiveType
 import org.sa.rainbow.configuration.configModel.Assignment
+import org.sa.rainbow.configuration.configModel.BooleanLiteral
+import org.sa.rainbow.configuration.configModel.DoubleLiteral
 import org.sa.rainbow.configuration.configModel.FormalParam
+import org.sa.rainbow.configuration.configModel.IPLiteral
+import org.sa.rainbow.configuration.configModel.IntegerLiteral
+import org.sa.rainbow.configuration.configModel.LogLiteral
+import org.sa.rainbow.configuration.configModel.Reference
 import org.sa.rainbow.configuration.configModel.RichString
 import org.sa.rainbow.configuration.configModel.RichStringLiteral
 import org.sa.rainbow.configuration.configModel.RichStringPart
@@ -74,6 +80,44 @@ class XtendUtils {
 		}
 		else {
 			throw new IllegalArgumentException ("Don't know how to convert parameter " + p.name)
+		}
+	}
+	
+	static def String unpackString(StringLiteral literal, boolean strip, boolean completeProperties) {
+		if (!completeProperties) {
+			unpackString(literal, strip)
+		}
+		else { 
+			val rich = literal as RichString
+			var str = new StringBuilder()
+			for (expr : rich.expressions) {
+				if (expr instanceof RichStringLiteral) {
+					str.append((expr as RichStringLiteral).value.replaceAll("«", "").replaceAll("»", ""))
+				} else if (expr instanceof RichStringPart) {
+					val value = (expr as RichStringPart).referable.^default.value
+					val sv = switch value {
+						StringLiteral : unpackString(value, true, true)
+						BooleanLiteral: Boolean.toString(value.isTrue) 
+						IntegerLiteral : Integer.toString(value.value)
+						DoubleLiteral: Double.toString(value.value)
+						IPLiteral: value.value
+						LogLiteral: value.value.getName
+						Reference: value.referable.qualifiedName
+						default: '''${«(expr as RichStringPart).referable.name»}'''
+						
+					}
+					str.append(sv)
+				}
+			}
+			if (strip) {
+				var s = str.toString()
+				s = s.trim()
+				if ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'"))) {
+					s = s.substring(1, s.length - 1)
+				}
+				return s
+			}
+			return str.toString
 		}
 	}
 	

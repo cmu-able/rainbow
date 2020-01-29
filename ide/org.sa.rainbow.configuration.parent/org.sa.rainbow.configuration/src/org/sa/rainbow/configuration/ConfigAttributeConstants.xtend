@@ -50,8 +50,9 @@ class ConfigAttributeConstants {
 	public static val OPTIONAL_PROBE_SUBFIELDS = #{"script" -> #{"mode", "argument"}, "java" -> #{"args", "period"}}
 
 	public static val ALL_OFREQUIRED_GAUGE_FIELDS = new HashSet<String>()
-	public static val ALL_OFREQUIRED_GAUGE_SUBFILEDS = #{'setup' -> #{"targetIP", "beaconPeriod", "javaClass"},
+	public static val ALL_OFREQUIRED_GAUGE_SUBFILEDS = #{'setup' -> #{"targetIP", "beaconPeriod"},
 		'config' -> #{"targetProbe", "samplingFrequency"}}
+	public static val ONE_OFREQUIRED_GAUGE_SUBFILEDS = #{'setup' -> #{"javaClass", "generatedClass"}}
 	public static val Set<String> OPTIONAL_GUAGE_FIELDS = #{}
 
 	public static val OPTIONAL_GAUGE_SUBFIELDS = Collections.<String, Set<String>>emptyMap
@@ -87,6 +88,9 @@ class ConfigAttributeConstants {
 		set.addAll(ALL_OFREQUIRED_GAUGE_SUBFILEDS.keySet)
 		for (e : ALL_OFREQUIRED_GAUGE_SUBFILEDS.values) {
 			set.addAll(e);
+		}
+		for (e : ONE_OFREQUIRED_GAUGE_SUBFILEDS.values) {
+			set.addAll(e)
 		}
 		set
 	}
@@ -212,6 +216,7 @@ class ConfigAttributeConstants {
 				'msg' -> 'must be a string, property reference, or IP'},
 		'setup:beaconPeriod' -> IS_NUMBER,
 		'setup:javaClass' -> #{'extends' -> #[AbstractGauge], 'msg' -> 'must extend AbstractGauge'},
+		'setup:generatedClass' -> IS_STRING,
 		'config:samplingFrequency' -> IS_NUMBER,
 		'config:targetProbe' -> #{'func' -> [ Value v |
 			(v.value instanceof PropertyReference && (v.value as PropertyReference).referable instanceof Probe)

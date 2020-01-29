@@ -10,6 +10,8 @@ import java.util.LinkedList
 import java.util.List
 import java.util.Map
 import java.util.Set
+import java.util.regex.Pattern
+import java.util.regex.PatternSyntaxException
 import java.util.stream.Collectors
 import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.ecore.EObject
@@ -18,6 +20,7 @@ import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.common.types.JvmDeclaredType
 import org.eclipse.xtext.common.types.JvmOperation
+import org.eclipse.xtext.common.types.JvmType
 import org.eclipse.xtext.common.types.access.IJvmTypeProvider
 import org.eclipse.xtext.common.types.util.Primitives
 import org.eclipse.xtext.common.types.util.RawSuperTypes
@@ -49,6 +52,7 @@ import org.sa.rainbow.configuration.configModel.GaugeTypeBody
 import org.sa.rainbow.configuration.configModel.IPLiteral
 import org.sa.rainbow.configuration.configModel.ImpactVector
 import org.sa.rainbow.configuration.configModel.IntegerLiteral
+import org.sa.rainbow.configuration.configModel.JavaClassOrFactory
 import org.sa.rainbow.configuration.configModel.ModelFactoryReference
 import org.sa.rainbow.configuration.configModel.Probe
 import org.sa.rainbow.configuration.configModel.PropertyReference
@@ -60,11 +64,6 @@ import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd
 import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation
 import org.sa.rainbow.core.models.commands.AbstractSaveModelCmd
 import org.sa.rainbow.core.models.commands.ModelCommandFactory
-import org.eclipse.xtext.conversion.impl.STRINGValueConverter
-import java.util.regex.Pattern
-import java.util.regex.PatternSyntaxException
-import org.sa.rainbow.configuration.configModel.JavaClassOrFactory
-import org.eclipse.xtext.common.types.JvmType
 
 /**
  * This class contains custom validation rules. 
@@ -164,7 +163,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			gauge?.body?.assignment,
 			gauge?.superType?.body?.assignment,
 			ConfigAttributeConstants.ALL_OFREQUIRED_GAUGE_SUBFILEDS,
-			ConfigAttributeConstants.OPTIONAL_GAUGE_SUBFIELDS,
+			ConfigAttributeConstants.ONE_OFREQUIRED_GAUGE_SUBFILEDS,
 			ConfigModelPackage.Literals.GAUGE__BODY
 		)
 		for (Assignment a : gauge.body?.assignment) {
@@ -301,8 +300,25 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 						)
 					}
 				}
+				val oneof = oneOfSubfields.get(key)
+				if (oneof !== null) {
+					var hasOneOf = false
+					for (sk : oneof) {
+						hasOneOf = hasOneOf || allKeys.contains(sk)
+					}
+					if (!hasOneOf) {
+						warning(
+							'''"«key»" should have one of «oneof.map["'" + key + "'"].join(", ")».''',
+							reference,
+							MISSING_PROPERTY,
+							oneof.map[it].join(","),
+							key
+						)
+					}
+				}
 			}
 		}
+		
 	}
 
 	@Inject
@@ -338,11 +354,11 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 	}
 	
 	@Check
-	def checkGaugeBody(GaugeBody gb) {
+	def checkGaugeBody(GaugeTypeBody gb) {
 		var Boolean hasRegExpCommand = null;
 		for (cmd : gb.commands) {
 			if (hasRegExpCommand === null) {
-				hasRegExpCommand = cmd.regexp === null
+				hasRegExpCommand = cmd.regexp !== null
 			}
 			else {
 				if (hasRegExpCommand != (cmd.regexp === null)) {
@@ -352,6 +368,54 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 						"mixedcommands"
 					)
 				}
+			}
+		}
+		if (hasRegExpCommand) {
+			var noGeneratedClass = true
+			var additional = ""
+			val setupProp = gb.assignment.findFirst[it.name=="setup"]
+			val setup = setupProp?.value.value
+			if (setup instanceof Component) {
+				val gcProp = (setup as Component).assignment.findFirst[it.name=="generatedClass"]
+				if (gcProp == null) {
+					if ((setup as Component).assignment.findFirst[it.name=="javaClass"] !== null) {
+						additional = " Perhaps change javaClass to generatedClass?"
+					}
+					error('''Gauge has regular expression, so "generatedClass" should be specified.«additional»''',
+						setupProp,
+						ConfigModelPackage.Literals.ASSIGNMENT__VALUE,
+						"noGeneratedClass"
+					)
+				}
+				else {
+					val gc = gcProp?.value.value
+					if (gc instanceof StringLiteral) {
+						noGeneratedClass = false;
+						try {
+							val className = XtendUtils.unpackString(gc as StringLiteral, true, true)
+							val clazz = Class.forName(className)
+							warning('''"«className»" already exists''',
+								gcProp,
+								ConfigModelPackage.Literals.ASSIGNMENT__VALUE,
+								"badclass"
+							)
+						} catch(Exception e) {}
+					}
+					else {
+						error('''Value should be a string''',
+							gcProp,
+							ConfigModelPackage.Literals.ASSIGNMENT__VALUE,
+							"badclass"
+						)
+					}
+				}
+			}
+			else {
+				error('''Gauge has regular expression, so "generatedClass" should be specified in setup''',
+						setup,
+						ConfigModelPackage.Literals.ASSIGNMENT__VALUE,
+						"noGeneratedClass"
+					)
 			}
 		}
 	}
@@ -421,8 +485,47 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 		}
 	}
 	
+	@Check
+	def checkGaugeTypeCommandReferenceRegexp(CommandReference cr) {
+		if (cr.regexp !== null) {
+			val regexp = XtendUtils.unpackString(cr.regexp, true, true)
+			val Set<String> namedGroups = newHashSet
+			
+			try {
+				Pattern.compile(regexp)
+				XtendUtils.fillNamedGroups(regexp, namedGroups)
+				if (namedGroups.empty) {
+					warning('''""«regexp»" should contain at least one captured group''',
+						ConfigModelPackage.Literals.COMMAND_REFERENCE__REGEXP,
+						"badregexp"
+					)
+				}
+			}
+			catch (PatternSyntaxException e) {
+				error ('''«e.message»''',
+					ConfigModelPackage.Literals.COMMAND_REFERENCE__REGEXP,
+					"badregexp"
+				)
+			}
+		}
+	}
 	
 	
+	
+	@Check
+	def checkGaugeCommands(Gauge g) {
+		if (g.superType !== null) {
+			val typeCommands = g.superType.body.commands
+			for (cmd : g.body.commands) {
+				val tcmd = typeCommands.findFirst[it.name == cmd.name]
+				if (tcmd.regexp !== null) {
+					val Set<String> namedGroups = newHashSet
+					val regexp = XtendUtils.unpackString(tcmd.regexp, true)
+					XtendUtils.fillNamedGroups(regexp, namedGroups)
+				}
+			}
+		}
+	}
 
 	def checkCommandCallElements(CommandCall cc, Object modelFactory) {
 		var Object cmf = null
@@ -436,24 +539,17 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 		}
 		val command = cc.command
 		val Set<String> namedGroups = newHashSet
-		if (cc.regexp !== null) {
-			val regexp = XtendUtils.unpackString(cc.regexp, true)
+		
+		val re = EcoreUtil2.getContainerOfType(cc, Gauge).superType?.body.commands.findFirst[it.name == cc.name].regexp
+		if (re !== null) {
+			val regexp = XtendUtils.unpackString(re, true, true)
+			
 			try {
-				Pattern.compile(regexp)
 				XtendUtils.fillNamedGroups(regexp, namedGroups)
-				if (namedGroups.empty) {
-					warning('''""«regexp»" should contain at least one captured group''',
-						ConfigModelPackage.Literals.COMMAND_CALL__REGEXP,
-						"badregexp"
-					)
-				}
 			}
 			catch (PatternSyntaxException e) {
-				error ('''«e.message»''',
-					ConfigModelPackage.Literals.COMMAND_CALL__REGEXP,
-					"badregexp"
-				)
-			}
+				// Handled in checkGaugeType
+			} 
 		}
 		
 		
@@ -510,7 +606,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 				}
 				else {
 					for (actual : cc.actual) {
-						if (actual.ref && cc.regexp !== null) {
+						if (actual.ref && re !== null) {
 							var name = actual.ng
 							var lit = ConfigModelPackage.Literals.ACTUAL__NG
 							if (name === null) {
@@ -518,7 +614,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 								lit = ConfigModelPackage.Literals.ACTUAL__AG
 							} 
 							if (!namedGroups.contains(name)) {
-								warning('''«name» should be a valid group from «XtendUtils.unpackString(cc.regexp, true)»''',
+								warning('''«name» should be a valid group from «XtendUtils.unpackString(re, true)»''',
 									actual,
 									lit,
 									"badregexpreference"
@@ -802,11 +898,11 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 	def checkComponentPropertyFieldTypes(Assignment dp) {
 		val parent = EcoreUtil2.getContainerOfType(dp, DeclaredProperty)
 		if (parent?.component !== null && parent?.component == ComponentType.GUI) {
-			var rent = EcoreUtil2.getContainerOfType(dp.eContainer, org.sa.rainbow.configuration.configModel.Assignment);
+			var rent = EcoreUtil2.getContainerOfType(dp.eContainer, Assignment);
 			var name = ""
 			while (rent !== null) {
 				name = rent.name + ":" + name
-				rent = EcoreUtil2.getContainerOfType(rent.eContainer, org.sa.rainbow.configuration.configModel.Assignment);
+				rent = EcoreUtil2.getContainerOfType(rent.eContainer, Assignment);
 			}
 			checkTypeRule(ConfigAttributeConstants.GUI_PROPERTY_TUPES, dp, name)
 		}
