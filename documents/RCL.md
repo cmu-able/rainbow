@@ -842,9 +842,41 @@ type and specifying:
 
 ## Effector Specifications
 
+Effectors are scripts or code that are run on the target system to make a change
+to the system (e.g., to add a server or to blacklist a client). Effectors map 
+commands that are issued by the executor (that are expressed as model commands) and 
+call the code when the model commands are matched. Effectors are system-specific and 
+so are usually defined in the `effectors.rbw` file in the `system` directory of the 
+target. Effectors are associated with models, and are listen to model commands issused 
+by the executor that matche some pattern.
+
 ### Effector Instances
 
+Consider the example effector specification:
+
+```
+effector setDimmer = { 
+    model ««SwimSys»»
+    command ««customize.system.^target.lb»».setDimmer($<dimmer>)  
+    location = ««customize.system.^target.lb»» 
+    script = {
+        path = "«effectors.commonPath»/setDimmer.sh" 
+        argument = "{0}"
+    }
+}
+```
+
+It is associated with executor commands intended to act on `SwimSys`. It listens for commands 
+on the component indicated by the property `customize.system.^target.lb` which is converted 
+from the `LB0` component in SwimSys through a property specifying the location. If `setDimmer` 
+with any value for the first argument is sent, then this effector will fire. It will 
+execute the command `"«effectors.commonPath»/setDimmer.sh {0}"` on the location machine, 
+replacing {0} in this case with the first argument of the command.
+
+
 ### Required Fields
+
+All of the fields in the example above are required.
 
 ## Stitch and Utility Preferences
 
