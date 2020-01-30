@@ -4,12 +4,13 @@
 	<extension
 		point="org.eclipse.ui.editors">
 		<editor
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.ui.editor.XtextEditor"
-			contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
-			default="true"
-			extensions="rbw"
-			id="org.sa.rainbow.configuration.ConfigModel"
-			name="ConfigModel Editor">
+        class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.ui.editor.XtextEditor"
+        contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
+        default="true"
+        extensions="rbw"
+        id="org.sa.rainbow.configuration.ConfigModel"
+        icon="icons/rbw.png"
+        name="ConfigModel Editor">
 		</editor>
 	</extension>
 	<extension
