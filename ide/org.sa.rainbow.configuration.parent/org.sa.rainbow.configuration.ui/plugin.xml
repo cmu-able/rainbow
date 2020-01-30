@@ -477,4 +477,33 @@
 			</activeWhen>
       </handler>
    </extension>
+   	<extension
+		point="org.eclipse.ui.newWizards">
+		<category id="org.sa.rainbow.configuration.ui.category" name="Rainbow">
+		</category>
+		<wizard
+			category="org.sa.rainbow.configuration.ui.category"
+			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.ui.wizard.template.TemplateNewProjectWizard"
+			id="org.sa.rainbow.configuration.ui.wizard.ConfigModelNewProjectWizard"
+			name="Rainbow Project"
+			icon="icons/rainbow_project.gif"
+			project="true">
+		</wizard>
+	</extension>
+	<extension
+		point="org.eclipse.xtext.ui.projectTemplate">
+		<projectTemplateProvider
+			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.sa.rainbow.configuration.ui.wizard.ConfigModelProjectTemplateProvider"
+			grammarName="org.sa.rainbow.configuration.ConfigModel">
+		</projectTemplateProvider>
+	</extension>
+	<extension
+		point="org.eclipse.ui.perspectiveExtensions">
+		<perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
+			<newWizardShortcut id="org.sa.rainbow.configuration.ui.wizard.ConfigModelNewProjectWizard"/>
+		</perspectiveExtension>
+		<perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
+			<newWizardShortcut id="org.sa.rainbow.configuration.ui.wizard.ConfigModelNewProjectWizard"/>
+		</perspectiveExtension>
+	</extension>
 </plugin>

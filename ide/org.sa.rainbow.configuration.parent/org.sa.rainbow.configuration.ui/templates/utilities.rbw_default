@@ -1,0 +1,29 @@
+target <<rainbow-target>>
+import properties "../properties.rbw"
+import stitch "stitch.s"
+
+# Define the utility model
+def utility utilityodel = {
+	^model =
+	utilities = {
+		utility1 = {
+			label = "some label"
+			mapping = "how do derive this from the Acme model"
+			description = "some description"
+			^utility = [ [0, 0] ... ]
+		}
+	}
+	scenarios = [
+		{
+		  name= "scenario 1",
+		  utility1= 1.0
+		}
+	]
+}
+
+# For each tactic defined in "stitch.s", define an impact
+impact ««utilityModel»» tactic1 = {
+	utility1 = -1
+}
+
+export * to "stitch/utilities.yml"
