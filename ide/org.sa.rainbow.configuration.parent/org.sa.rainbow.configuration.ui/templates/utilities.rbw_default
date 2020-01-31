@@ -3,7 +3,7 @@ import properties "../properties.rbw"
 import stitch "stitch.s"
 
 # Define the utility model
-def utility utilityodel = {
+def utility utilityModel = {
 	^model =
 	utilities = {
 		utility1 = {

@@ -11,6 +11,10 @@ public class Messages extends NLS {
 	public static String RainbowProject_Description;
 	public static String RainbowProjectWithTargetDefinition_Label;
 	public static String RainbowProjectWithTargetDefinition_Description;
+	public static String HelloWorldFile_Label;
+	public static String HelloWorldFile_Description;
+	public static String RainbowTarget_Label;
+	public static String RainbowTarget_Description;
 	
 	static {
 	// initialize resource bundle

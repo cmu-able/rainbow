@@ -88,121 +88,38 @@ public class RainbowProject {
 			new Status(ERROR, "Wizard", '''Path '«rbwSrc»' is not a valid package name''')
 	}
 	
-	var HashMap<String,String> replacements = newLinkedHashMap()
-		
-	var Pattern pattern = null
-	
-	def generateReplacements() {
-		replacements = newLinkedHashMap(
-			'rainbow-target' -> projectInfo.projectName,
-			'rainbowVersion' -> '3.0',
-			'gauges.rbw' -> "model/gauges.rbw",
-			'deploymentFactory' -> (deploymentType.value=="Single Machine"?"org.sa.rainbow.core.ports.guava.GuavaRainbowPortFactory":(deploymentType.value=="Multiple Machines"?"org.sa.rainbow.core.ports.eseb.ESEBRainbowPortFactory":customDeployment.value)),
-			'AnalysisName' -> "anAnalysis",
-			'AnalysisClass' -> 'org.sa.rainbow.core.analysis.IRainbowAnalysis # Change this to a real class',
-			'AdaptationManagerName' -> 'anAdaptationManager',
-			'AdaptationClass' -> 'org.sa.rainbow.core.adaptation.org.sa.rainbow.core.adaptation # Change this to a real class',
-			'ExecutorName' -> 'anExecutor',
-			'ExectorClass' -> 'org.sa.rainbow.core.adaptation.IAdaptationExecutor # Change this to a real class',
-			'EffectorManagerName' -> 'anEffectorManager',
-			'EffectorManagerClass' -> 'org.sa.rainbow.translator.effectors.EffectorManager # Change this to a real class',
-			'GUISpecs' -> '',
-			'factoryName' -> modelFactoryName.value,
-			'srcGenPackage' -> srcGenPackage.value,
-			'rbwGen.value' -> rbwGen.value,
-			'rbwSrc.value' -> rbwSrc.value
-		)
-		if (useAcmeAndStitch.value) {
-			val AandSDefaults = newLinkedHashMap(
-				'AnalysisName' -> "ArchEvaluator",
-				'AnalysisClass' -> 'org.sa.rainbow.evaluator.^acme.ArchEvaluator',
-				'AdaptationManagerName' -> 'AdaptationManager',
-				'AdaptationManagerClass' -> 'org.sa.rainbow.^stitch.adaptation.AdaptationManager',
-				'ExecutorName' -> 'StitchExecutor',
-				'ExectorClass' -> 'org.sa.rainbow.^stitch.adaptation.StitchExecutor',
-				'EffectorManagerName' -> 'AcmeEffectorManager',
-				'EffectorManagerClass' -> 'org.sa.rainbow.effectors.^acme.AcmeEffectorManager',
-				'GUISpecs' -> "
-		analyzers = {
-			analyzer = {
-				^for =  ««ArchEvaluator»»
-				class = org.sa.rainbow.evaluator.^acme.^gui.ArchAnalyzerGUI
-			}
-		}
-		managers = {
-			manager = {
-				^for = ««AdaptationManager»»
-				class = org.sa.rainbow.^stitch.^gui.manager.ArchStitchAdapationManager 
-			}
-		}
-		executors = {
-			^executor = {
-				^for = ««StitchExecutor»»
-				class = org.sa.rainbow.^stitch.^gui.^executor.EventBasedStitchExecutorPanel 
-			} 
-		}
-		details = {
-			managers = org.sa.rainbow.^stitch.^gui.manager.StitchAdaptationManagerTabbedPane
-			executors = org.sa.rainbow.^stitch.^gui.^executor.StitchExecutorTabbedPane
-		}"
-			)
-			replacements.putAll(AandSDefaults)
 
-		}
-		val patternString = "<<(" + replacements.keySet.join("|") + ")>>"
- 		pattern = Pattern.compile(patternString);	
-	} 
 	
 	def addProjectFiles(JavaProjectFactory tgt) {
 		
-		generateReplacements()
+		val replacements = ProjectHelper.generateReplacements(projectInfo.projectName, deploymentType.value, customDeployment.value, modelFactoryName.value,
+			srcGenPackage.value, rbwGen.value, rbwSrc.value, useAcmeAndStitch.value
+		)
 		
-		tgt.addFile("pom.xml", readFile("templates/pom.xml_default"))
+		val pattern = ProjectHelper.generatePattern(replacements)
+		tgt.addFile("pom.xml", ProjectHelper.readFile("templates/pom.xml_default", replacements, pattern))
 		if (createRCLFiles.value) {
-			val tgtLoc = rbwSrc + "/" + projectInfo.projectName
+			val tgtLoc = rbwSrc.value + "/" + projectInfo.projectName
 			tgt.addFile(
 				tgtLoc + "/properties.rbw", 
-				readFile("templates/properties.rbw_template")
+				ProjectHelper.readFile("templates/properties.rbw_template", replacements, pattern)
 			)
-			tgt.addFile(tgtLoc + "/model/gauges.rbw", readFile("templates/gauges.rbw_default"))
-			tgt.addFile(tgtLoc + "/system/probes.rbw", readFile("templates/probes.rbw_default"))
-			tgt.addFile(tgtLoc + "/system/effectors.rbw", readFile("templates/effectors.rbw_default"))
+			tgt.addFile(tgtLoc + "/model/gauges.rbw", ProjectHelper.readFile("templates/gauges.rbw_default", replacements, pattern))
+			tgt.addFile(tgtLoc + "/system/probes.rbw", ProjectHelper.readFile("templates/probes.rbw_default", replacements, pattern))
+			tgt.addFile(tgtLoc + "/system/effectors.rbw", ProjectHelper.readFile("templates/effectors.rbw_default", replacements, pattern))
 			
 			if (useAcmeAndStitch.value) {
 				tgt.addFile(tgtLoc + "/stitch/stitch.s", "// Edit to add StitchsStrategies and tactics")
 				tgt.addFile(tgtLoc + "/model/model.acme", "// Edit to add Acme model")
-				tgt.addFile(tgtLoc + "/stitch/utilities.rbw", readFile('templates/utilities.rbw_default'))
+				tgt.addFile(tgtLoc + "/stitch/utilities.rbw", ProjectHelper.readFile('templates/utilities.rbw_default', replacements, pattern))
 			}
 			if (generateRCLModelFactory.value) {
-				tgt.addFile(rbwSrc + "/" + modelFactoryName.value + ".rbw", readFile("templates/modelfactory.rbw_default"))
+				tgt.addFile(rbwSrc + "/" + modelFactoryName.value + ".rbw", ProjectHelper.readFile("templates/modelfactory.rbw_default", replacements, pattern))
 			}
 		}
 	}
 	
-	def readFile(String fileName) {
-		var sb = new StringBuffer
- 		try (val in = new BufferedReader(new InputStreamReader(new URL("platform:/plugin/org.sa.rainbow.configuration.ui/" + fileName).openConnection.inputStream))) {
- 			var inputLine = ""
- 			while ((inputLine = in.readLine) !== null) {
- 				sb.append(inputLine)
- 				sb.append("\n")	
- 			}
- 		}
- 		catch (IOException e) {}
- 		var ret = sb.toString
- 		
- 		val matcher = pattern.matcher(ret)
- 		sb = new StringBuffer(ret.length << 1)
- 		while (matcher.find()) {
- 			matcher.appendReplacement(sb, replacements.get(matcher.group(1)));
- 		}
- 		matcher.appendTail(sb)
- 		
- 		
- 		sb.toString
- 		
-		
-	}
+
 	
 	override generateProjects(IProjectGenerator generator) {
 		generator.generate(new JavaProjectFactory => [

@@ -3,7 +3,7 @@ Automatic-Module-Name: org.sa.rainbow.configuration.ui
 Bundle-ManifestVersion: 2
 Bundle-Name: org.sa.rainbow.configuration.ui
 Bundle-Vendor: My Company
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.0.1.qualifier
 Bundle-SymbolicName: org.sa.rainbow.configuration.ui; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.sa.rainbow.configuration,

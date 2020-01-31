@@ -507,4 +507,32 @@
 			<newWizardShortcut id="org.sa.rainbow.configuration.ui.wizard.ConfigModelNewProjectWizard"/>
 		</perspectiveExtension>
 	</extension>
+	<extension
+		point="org.eclipse.ui.newWizards">
+		<category id="org.sa.rainbow.configuration.ui.category" name="Rainbow">
+		</category>
+		<wizard
+			category="org.sa.rainbow.configuration.ui.category"
+			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.sa.rainbow.configuration.ui.wizard.TemplateNewTargetWizard"
+			id="org.sa.rainbow.configuration.ui.wizard.ConfigModelNewFileWizard"
+			name="Rainbow Target Directory"
+			icon="icons/new_ConfigModel_file.png">
+		</wizard>
+	</extension>
+	<extension
+		point="org.eclipse.xtext.ui.fileTemplate">
+		<fileTemplateProvider
+			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.sa.rainbow.configuration.ui.wizard.ConfigModelFileTemplateProvider"
+			grammarName="org.sa.rainbow.configuration.ConfigModel">
+		</fileTemplateProvider>
+	</extension>
+	<extension
+		point="org.eclipse.ui.perspectiveExtensions">
+		<perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
+			<newWizardShortcut id="org.sa.rainbow.configuration.ui.wizard.ConfigModelNewFileWizard"/>
+		</perspectiveExtension>
+		<perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
+			<newWizardShortcut id="org.sa.rainbow.configuration.ui.wizard.ConfigModelNewFileWizard"/>
+		</perspectiveExtension>
+	</extension>
 </plugin>
