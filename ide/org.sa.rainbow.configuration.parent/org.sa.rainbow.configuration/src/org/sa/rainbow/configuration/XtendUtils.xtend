@@ -14,18 +14,18 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.common.types.JvmDeclaredType
 import org.eclipse.xtext.common.types.JvmPrimitiveType
-import org.sa.rainbow.configuration.configModel.Assignment
-import org.sa.rainbow.configuration.configModel.BooleanLiteral
-import org.sa.rainbow.configuration.configModel.DoubleLiteral
-import org.sa.rainbow.configuration.configModel.FormalParam
-import org.sa.rainbow.configuration.configModel.IPLiteral
-import org.sa.rainbow.configuration.configModel.IntegerLiteral
-import org.sa.rainbow.configuration.configModel.LogLiteral
-import org.sa.rainbow.configuration.configModel.Reference
-import org.sa.rainbow.configuration.configModel.RichString
-import org.sa.rainbow.configuration.configModel.RichStringLiteral
-import org.sa.rainbow.configuration.configModel.RichStringPart
-import org.sa.rainbow.configuration.configModel.StringLiteral
+import org.sa.rainbow.configuration.rcl.Assignment
+import org.sa.rainbow.configuration.rcl.BooleanLiteral
+import org.sa.rainbow.configuration.rcl.DoubleLiteral
+import org.sa.rainbow.configuration.rcl.FormalParam
+import org.sa.rainbow.configuration.rcl.IPLiteral
+import org.sa.rainbow.configuration.rcl.IntegerLiteral
+import org.sa.rainbow.configuration.rcl.LogLiteral
+import org.sa.rainbow.configuration.rcl.Reference
+import org.sa.rainbow.configuration.rcl.RichString
+import org.sa.rainbow.configuration.rcl.RichStringLiteral
+import org.sa.rainbow.configuration.rcl.RichStringPart
+import org.sa.rainbow.configuration.rcl.StringLiteral
 
 class XtendUtils {
 		static def formalTypeName(FormalParam fp, boolean keepSimple) {

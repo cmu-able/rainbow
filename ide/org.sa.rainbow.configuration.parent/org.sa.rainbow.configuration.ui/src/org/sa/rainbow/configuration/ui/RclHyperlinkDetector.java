@@ -13,7 +13,7 @@ import org.eclipse.xtext.util.concurrent.IUnitOfWork;
 
 import com.google.inject.Inject;
 
-public class ConfigModelHyperlinkDetector implements IHyperlinkDetector {
+public class RclHyperlinkDetector implements IHyperlinkDetector {
 	@Inject
 	private IHyperlinkHelper helper;
 	
@@ -23,7 +23,7 @@ public class ConfigModelHyperlinkDetector implements IHyperlinkDetector {
 	@Inject
 	private XtextDocumentUtil xtextDocumentUtil;
 
-	public ConfigModelHyperlinkDetector() {
+	public RclHyperlinkDetector() {
 		System.out.println(helper);
 	}
 	

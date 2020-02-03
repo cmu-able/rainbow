@@ -10,18 +10,18 @@ import org.eclipse.xtext.testing.util.ParseHelper
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.^extension.ExtendWith
-import org.sa.rainbow.configuration.configModel.RainbowConfiguration
+import org.sa.rainbow.configuration.rcl.RainbowConfiguration
 
 @ExtendWith(InjectionExtension)
-@InjectWith(ConfigModelInjectorProvider)
-class ConfigModelParsingTest {
+@InjectWith(RclInjectorProvider)
+class RclParsingTest {
 	@Inject
 	ParseHelper<RainbowConfiguration> parseHelper
 	
 	@Test
 	def void loadModel() {
 		val result = parseHelper.parse('''
-			Hello Xtext!
+			target test
 		''')
 		Assertions.assertNotNull(result)
 		val errors = result.eResource.errors

@@ -24,7 +24,7 @@ import static org.eclipse.core.runtime.IStatus.*
  * 
  * Each template is able to generate one or more projects. Each project can be configured such that any number of files are included.
  */
-class ConfigModelProjectTemplateProvider implements IProjectTemplateProvider {
+class RclProjectTemplateProvider implements IProjectTemplateProvider {
 	override getProjectTemplates() {
 		#[new RainbowProject]
 	}

@@ -6,7 +6,7 @@ package org.sa.rainbow.configuration.ide
 /**
  * Use this class to register ide components.
  */
-class ConfigModelIdeModule extends AbstractConfigModelIdeModule {
+class RclIdeModule extends AbstractRclIdeModule {
 	
 //	override configure(Binder binder) {
 //		super.configure(binder)

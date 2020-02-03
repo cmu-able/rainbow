@@ -29,7 +29,7 @@ import com.google.inject.name.Named;
  *
  */
 @SuppressWarnings("restriction")
-public class ConfigModelGlobalScopeProvider extends ImportUriGlobalScopeProvider {
+public class RclGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 
 	/*
 	 * AbstractTypeScopeProvider is bound to

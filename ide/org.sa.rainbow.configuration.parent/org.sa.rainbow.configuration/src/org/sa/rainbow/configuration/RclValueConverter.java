@@ -16,7 +16,7 @@ import org.eclipse.xtext.util.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 
-public class ConfigModelValueConverter extends DefaultTerminalConverters {
+public class RclValueConverter extends DefaultTerminalConverters {
 	
 	public class FQNConverter extends AbstractNullSafeConverter<String> {
 		private Set<String> allKeywords = ImmutableSet.copyOf(GrammarUtil.getAllKeywords(getGrammar()));

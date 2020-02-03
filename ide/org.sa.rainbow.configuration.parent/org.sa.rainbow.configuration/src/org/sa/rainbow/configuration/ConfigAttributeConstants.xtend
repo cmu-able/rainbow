@@ -8,30 +8,30 @@ import java.util.HashSet
 import java.util.Map
 import java.util.Set
 import javax.swing.JPanel
+import javax.swing.JTabbedPane
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.common.types.JvmType
 import org.eclipse.xtext.common.types.access.IJvmTypeProvider
 import org.eclipse.xtext.common.types.util.RawSuperTypes
-import org.sa.rainbow.configuration.configModel.Array
-import org.sa.rainbow.configuration.configModel.Assignment
-import org.sa.rainbow.configuration.configModel.BooleanLiteral
-import org.sa.rainbow.configuration.configModel.Component
-import org.sa.rainbow.configuration.configModel.ComponentType
-import org.sa.rainbow.configuration.configModel.DeclaredProperty
-import org.sa.rainbow.configuration.configModel.DoubleLiteral
-import org.sa.rainbow.configuration.configModel.Factory
-import org.sa.rainbow.configuration.configModel.GaugeType
-import org.sa.rainbow.configuration.configModel.IPLiteral
-import org.sa.rainbow.configuration.configModel.IntegerLiteral
-import org.sa.rainbow.configuration.configModel.Probe
-import org.sa.rainbow.configuration.configModel.PropertyReference
-import org.sa.rainbow.configuration.configModel.Reference
-import org.sa.rainbow.configuration.configModel.RichString
-import org.sa.rainbow.configuration.configModel.StringLiteral
-import org.sa.rainbow.configuration.configModel.Value
-import org.sa.rainbow.configuration.validation.ConfigModelValidator
+import org.sa.rainbow.configuration.rcl.Array
+import org.sa.rainbow.configuration.rcl.Assignment
+import org.sa.rainbow.configuration.rcl.BooleanLiteral
+import org.sa.rainbow.configuration.rcl.Component
+import org.sa.rainbow.configuration.rcl.ComponentType
+import org.sa.rainbow.configuration.rcl.DeclaredProperty
+import org.sa.rainbow.configuration.rcl.DoubleLiteral
+import org.sa.rainbow.configuration.rcl.Factory
+import org.sa.rainbow.configuration.rcl.GaugeType
+import org.sa.rainbow.configuration.rcl.IPLiteral
+import org.sa.rainbow.configuration.rcl.IntegerLiteral
+import org.sa.rainbow.configuration.rcl.Probe
+import org.sa.rainbow.configuration.rcl.PropertyReference
+import org.sa.rainbow.configuration.rcl.Reference
+import org.sa.rainbow.configuration.rcl.RichString
+import org.sa.rainbow.configuration.rcl.StringLiteral
+import org.sa.rainbow.configuration.rcl.Value
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor
 import org.sa.rainbow.core.adaptation.IAdaptationManager
 import org.sa.rainbow.core.analysis.IRainbowAnalysis
@@ -40,8 +40,7 @@ import org.sa.rainbow.core.models.commands.ModelCommandFactory
 import org.sa.rainbow.gui.IRainbowGUI
 import org.sa.rainbow.translator.effectors.EffectorManager
 import org.sa.rainbow.translator.probes.AbstractProbe
-import org.sa.rainbow.gui.arch.elements.DefaultThreadInfoPane
-import javax.swing.JTabbedPane
+import org.sa.rainbow.configuration.validation.RclValidator
 
 class ConfigAttributeConstants {
 	public static val ALL_OFREQUIRED_PROBE_FIELDS = #{"alias", "location"};
@@ -396,13 +395,13 @@ class ConfigAttributeConstants {
 		'utilities' -> IS_COMPONENT,
 		'scenarios' ->
 			#{'extends' -> #[Array], 'msg' -> 'must be an array',
-				'checkEach' -> ConfigModelValidator.CHECK_EACH_SCENARIO},
+				'checkEach' -> RclValidator.CHECK_EACH_SCENARIO},
 		'utilities::label' -> IS_STRING,
 		'utilities::mapping' -> IS_STRING,
 		'utilities::description' -> IS_STRING,
 		'utilities::utility' ->
 			#{'extends' -> #[Array], 'msg' -> 'must be a two dimensionsal array',
-				'checkEach' -> ConfigModelValidator.CHECK_UTILITY_MONOTONIC}
+				'checkEach' -> RclValidator.CHECK_UTILITY_MONOTONIC}
 	}
 
 	public static val ALL_OFREQUIRED_UTILITY_FIELDS = #{'model', 'utilities', 'scenarios'}

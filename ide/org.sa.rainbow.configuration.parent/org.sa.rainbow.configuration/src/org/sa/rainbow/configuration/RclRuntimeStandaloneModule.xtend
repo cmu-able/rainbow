@@ -9,8 +9,7 @@ import org.eclipse.xtext.common.types.xtext.AbstractTypeScopeProvider
 import org.eclipse.xtext.common.types.xtext.ClasspathBasedTypeScopeProvider
 import org.sa.rainbow.stitch.stitch.StitchPackage
 
-class ConfigModelRuntimeStandaloneModule extends ConfigModelRuntimeModule {
-	
+class RclRuntimeStandaloneModule extends RclRuntimeModule {
 	override configure(Binder binder) {
 		super.configure(binder)
 		configureJvmTypeProvider(binder)

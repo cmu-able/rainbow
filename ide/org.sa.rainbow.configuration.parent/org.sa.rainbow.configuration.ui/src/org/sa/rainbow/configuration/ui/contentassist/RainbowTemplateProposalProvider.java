@@ -9,7 +9,7 @@ import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext;
 import org.eclipse.xtext.ui.editor.contentassist.ITemplateAcceptor;
 import org.eclipse.xtext.ui.editor.templates.ContextTypeIdHelper;
 import org.eclipse.xtext.ui.editor.templates.DefaultTemplateProposalProvider;
-import org.sa.rainbow.configuration.services.ConfigModelGrammarAccess;
+import org.sa.rainbow.configuration.services.RclGrammarAccess;
 
 import com.google.inject.Inject;
 
@@ -25,14 +25,14 @@ public class RainbowTemplateProposalProvider extends DefaultTemplateProposalProv
 	}
 	
 	@Inject
-	ConfigModelGrammarAccess ga;
+	RclGrammarAccess ga;
 	
 	@Override
 	protected void createTemplates(TemplateContext templateContext, ContentAssistContext context,
 			ITemplateAcceptor acceptor) {
 		super.createTemplates(templateContext, context, acceptor);
 		
-		if (templateContext.getContextType().getId().equals("org.sa.rainbow.configuration.ConfigModel.PropertyReference")) {
+		if (templateContext.getContextType().getId().equals("org.sa.rainbow.configuration.rcl.PropertyReference")) {
 			Template template = new Template("name::type",
 					"Old style model reference",
 					"modeelRefNameAndType",

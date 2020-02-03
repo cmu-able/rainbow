@@ -14,39 +14,39 @@ import org.eclipse.xtext.ui.editor.syntaxcoloring.DefaultHighlightingConfigurati
 import org.eclipse.xtext.util.CancelIndicator;
 import org.sa.rainbow.configuration.ConfigAttributeConstants;
 import org.sa.rainbow.configuration.XtendUtils;
-import org.sa.rainbow.configuration.configModel.Assignment;
-import org.sa.rainbow.configuration.configModel.Component;
-import org.sa.rainbow.configuration.configModel.ConfigModelPackage;
-import org.sa.rainbow.configuration.configModel.DeclaredProperty;
-import org.sa.rainbow.configuration.configModel.Effector;
-import org.sa.rainbow.configuration.configModel.Gauge;
-import org.sa.rainbow.configuration.configModel.GaugeTypeBody;
-import org.sa.rainbow.configuration.configModel.Probe;
-import org.sa.rainbow.configuration.configModel.RichStringLiteral;
-import org.sa.rainbow.configuration.configModel.RichStringPart;
+import org.sa.rainbow.configuration.rcl.Assignment;
+import org.sa.rainbow.configuration.rcl.Component;
+import org.sa.rainbow.configuration.rcl.DeclaredProperty;
+import org.sa.rainbow.configuration.rcl.Effector;
+import org.sa.rainbow.configuration.rcl.Gauge;
+import org.sa.rainbow.configuration.rcl.GaugeTypeBody;
+import org.sa.rainbow.configuration.rcl.Probe;
+import org.sa.rainbow.configuration.rcl.RclPackage;
+import org.sa.rainbow.configuration.rcl.RichStringLiteral;
+import org.sa.rainbow.configuration.rcl.RichStringPart;
 
-public class ConfigModelHighlighter extends DefaultSemanticHighlightingCalculator {
+public class RclHighlighter extends DefaultSemanticHighlightingCalculator {
 	@Override
 	protected void doProvideHighlightingFor(XtextResource resource, IHighlightedPositionAcceptor acceptor,
 			CancelIndicator cancelIndicator) {
 		EObject rootObject = resource.getParseResult().getRootASTElement();
 		
 		for (RichStringLiteral rs : EcoreUtil2.getAllContentsOfType(rootObject, RichStringLiteral.class)) {
-			for (INode node : NodeModelUtils.findNodesForFeature(rs, ConfigModelPackage.Literals.RICH_STRING_LITERAL__VALUE)) {
+			for (INode node : NodeModelUtils.findNodesForFeature(rs, RclPackage.Literals.RICH_STRING_LITERAL__VALUE)) {
 				acceptor.addPosition(node.getOffset(), node.getLength(), DefaultHighlightingConfiguration.STRING_ID);
 			}
 		}
 		for (RichStringPart rs : EcoreUtil2.getAllContentsOfType(rootObject,RichStringPart.class)) {
-			for (INode node : NodeModelUtils.findNodesForFeature(rs,  ConfigModelPackage.Literals.RICH_STRING_PART__REFERABLE)) {
-				acceptor.addPosition(node.getOffset(), node.getLength(), ConfigModelHighlightingConfiguration.PROPERTY_REFERENCE_ID);
+			for (INode node : NodeModelUtils.findNodesForFeature(rs,  RclPackage.Literals.RICH_STRING_PART__REFERABLE)) {
+				acceptor.addPosition(node.getOffset(), node.getLength(), RclHighlightingConfiguration.PROPERTY_REFERENCE_ID);
 			}
 		}
 		for (Gauge g : EcoreUtil2.getAllContentsOfType(rootObject, Gauge.class)) {
 			for (Assignment a : EcoreUtil2.getAllContentsOfType(g, Assignment.class)) {
 //				if (a.eContainer().eContainer() instanceof Gauge) {
 					if (ConfigAttributeConstants.GAUGE_KEYWORDS.contains(a.getName())) {
-						for (INode node : NodeModelUtils.findNodesForFeature(a, ConfigModelPackage.Literals.ASSIGNMENT__NAME)) {
-							acceptor.addPosition(node.getOffset(), node.getLength(), ConfigModelHighlightingConfiguration.SOFT_KEYWORD_ID);
+						for (INode node : NodeModelUtils.findNodesForFeature(a, RclPackage.Literals.ASSIGNMENT__NAME)) {
+							acceptor.addPosition(node.getOffset(), node.getLength(), RclHighlightingConfiguration.SOFT_KEYWORD_ID);
 						}
 					}
 //				}
@@ -56,8 +56,8 @@ public class ConfigModelHighlighter extends DefaultSemanticHighlightingCalculato
 			for (Assignment a : EcoreUtil2.getAllContentsOfType(g, Assignment.class)) {
 //				if (a.eContainer().eContainer() instanceof Gauge) {
 					if (ConfigAttributeConstants.GAUGE_KEYWORDS.contains(a.getName())) {
-						for (INode node : NodeModelUtils.findNodesForFeature(a, ConfigModelPackage.Literals.ASSIGNMENT__NAME)) {
-							acceptor.addPosition(node.getOffset(), node.getLength(), ConfigModelHighlightingConfiguration.SOFT_KEYWORD_ID);
+						for (INode node : NodeModelUtils.findNodesForFeature(a, RclPackage.Literals.ASSIGNMENT__NAME)) {
+							acceptor.addPosition(node.getOffset(), node.getLength(), RclHighlightingConfiguration.SOFT_KEYWORD_ID);
 						}
 					}
 //				}
@@ -67,8 +67,8 @@ public class ConfigModelHighlighter extends DefaultSemanticHighlightingCalculato
 			for (Assignment a : EcoreUtil2.getAllContentsOfType(g, Assignment.class)) {
 //				if (a.eContainer().eContainer() instanceof Gauge) {
 					if (ConfigAttributeConstants.PROBE_KEYWORDS.contains(a.getName())) {
-						for (INode node : NodeModelUtils.findNodesForFeature(a, ConfigModelPackage.Literals.ASSIGNMENT__NAME)) {
-							acceptor.addPosition(node.getOffset(), node.getLength(), ConfigModelHighlightingConfiguration.SOFT_KEYWORD_ID);
+						for (INode node : NodeModelUtils.findNodesForFeature(a, RclPackage.Literals.ASSIGNMENT__NAME)) {
+							acceptor.addPosition(node.getOffset(), node.getLength(), RclHighlightingConfiguration.SOFT_KEYWORD_ID);
 						}
 					}
 //				}
@@ -77,8 +77,8 @@ public class ConfigModelHighlighter extends DefaultSemanticHighlightingCalculato
 		for (Effector e : EcoreUtil2.getAllContentsOfType(rootObject, Effector.class)) {
 			for (Assignment a : EcoreUtil2.getAllContentsOfType(e, Assignment.class)) {
 				if (ConfigAttributeConstants.EFFECTOR_KEYOWRDS.contains(a.getName())) {
-					for (INode node : NodeModelUtils.findNodesForFeature(a, ConfigModelPackage.Literals.ASSIGNMENT__NAME)) {
-						acceptor.addPosition(node.getOffset(), node.getLength(), ConfigModelHighlightingConfiguration.SOFT_KEYWORD_ID);
+					for (INode node : NodeModelUtils.findNodesForFeature(a, RclPackage.Literals.ASSIGNMENT__NAME)) {
+						acceptor.addPosition(node.getOffset(), node.getLength(), RclHighlightingConfiguration.SOFT_KEYWORD_ID);
 					}
 				}
 			}
@@ -103,8 +103,8 @@ public class ConfigModelHighlighter extends DefaultSemanticHighlightingCalculato
 						break;
 					case GUI:
 						if (XtendUtils.isKeyProperty(ConfigAttributeConstants.GUI_PROPERTY_TUPES, a)) {
-							for (INode node : NodeModelUtils.findNodesForFeature(a, ConfigModelPackage.Literals.ASSIGNMENT__NAME)) {
-								acceptor.addPosition(node.getOffset(), node.getLength(), ConfigModelHighlightingConfiguration.SOFT_KEYWORD_ID);
+							for (INode node : NodeModelUtils.findNodesForFeature(a, RclPackage.Literals.ASSIGNMENT__NAME)) {
+								acceptor.addPosition(node.getOffset(), node.getLength(), RclHighlightingConfiguration.SOFT_KEYWORD_ID);
 							}
 						}
 						break;
@@ -134,8 +134,8 @@ public class ConfigModelHighlighter extends DefaultSemanticHighlightingCalculato
 
 	protected void highlightSoftKeyword(IHighlightedPositionAcceptor acceptor, Assignment a, Set<String> kw) {
 		if (kw.contains(a.getName())) {
-			for (INode node : NodeModelUtils.findNodesForFeature(a, ConfigModelPackage.Literals.ASSIGNMENT__NAME)) {
-				acceptor.addPosition(node.getOffset(), node.getLength(), ConfigModelHighlightingConfiguration.SOFT_KEYWORD_ID);
+			for (INode node : NodeModelUtils.findNodesForFeature(a, RclPackage.Literals.ASSIGNMENT__NAME)) {
+				acceptor.addPosition(node.getOffset(), node.getLength(), RclHighlightingConfiguration.SOFT_KEYWORD_ID);
 			}
 		}
 	}

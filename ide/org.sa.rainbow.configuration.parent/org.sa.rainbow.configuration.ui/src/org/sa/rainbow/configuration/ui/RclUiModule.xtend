@@ -24,9 +24,9 @@ import org.sa.rainbow.configuration.ui.contentassist.RainbowBracePairProvider
  * Use this class to register components to be used within the Eclipse IDE.
  */
 @FinalFieldsConstructor
-class ConfigModelUiModule extends AbstractConfigModelUiModule {
+class RclUiModule extends AbstractRclUiModule {
 	override bindIHyperlinkDetector() {
-		return ConfigModelHyperlinkDetector
+		return RclHyperlinkDetector
 	}
 	
 	override bindITemplateProposalProvider() {
@@ -43,8 +43,8 @@ class ConfigModelUiModule extends AbstractConfigModelUiModule {
 	
 	override configure(Binder binder) {
 		super.configure(binder)
-		binder.bind(DefaultSemanticHighlightingCalculator).to(ConfigModelHighlighter)
-		binder.bind(DefaultHighlightingConfiguration).to(ConfigModelHighlightingConfiguration)
+		binder.bind(DefaultSemanticHighlightingCalculator).to(RclHighlighter)
+		binder.bind(DefaultHighlightingConfiguration).to(RclHighlightingConfiguration)
 	}
 	
 	@SingletonBinding override Class<? extends IBracePairProvider> bindIBracePairProvider() {

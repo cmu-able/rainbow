@@ -13,7 +13,7 @@ import org.eclipse.xtext.ui.wizard.template.IFileTemplateProvider
  * 
  * Each template is able to generate one or more files.
  */
-class ConfigModelFileTemplateProvider implements IFileTemplateProvider {
+class RclFileTemplateProvider implements IFileTemplateProvider {
 	override getFileTemplates() {
 		#[new RainbowTarget]
 	}

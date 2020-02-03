@@ -31,34 +31,34 @@ import org.eclipse.xtext.xbase.lib.Functions.Function1
 import org.sa.rainbow.configuration.ConfigAttributeConstants
 import org.sa.rainbow.configuration.Utils
 import org.sa.rainbow.configuration.XtendUtils
-import org.sa.rainbow.configuration.configModel.Array
-import org.sa.rainbow.configuration.configModel.Assignment
-import org.sa.rainbow.configuration.configModel.BooleanLiteral
-import org.sa.rainbow.configuration.configModel.CommandCall
-import org.sa.rainbow.configuration.configModel.CommandDefinition
-import org.sa.rainbow.configuration.configModel.CommandReference
-import org.sa.rainbow.configuration.configModel.Component
-import org.sa.rainbow.configuration.configModel.ComponentType
-import org.sa.rainbow.configuration.configModel.ConfigModelPackage
-import org.sa.rainbow.configuration.configModel.DeclaredProperty
-import org.sa.rainbow.configuration.configModel.DoubleLiteral
-import org.sa.rainbow.configuration.configModel.Effector
-import org.sa.rainbow.configuration.configModel.Factory
-import org.sa.rainbow.configuration.configModel.FactoryDefinition
-import org.sa.rainbow.configuration.configModel.FormalParam
-import org.sa.rainbow.configuration.configModel.Gauge
-import org.sa.rainbow.configuration.configModel.GaugeBody
-import org.sa.rainbow.configuration.configModel.GaugeTypeBody
-import org.sa.rainbow.configuration.configModel.IPLiteral
-import org.sa.rainbow.configuration.configModel.ImpactVector
-import org.sa.rainbow.configuration.configModel.IntegerLiteral
-import org.sa.rainbow.configuration.configModel.JavaClassOrFactory
-import org.sa.rainbow.configuration.configModel.ModelFactoryReference
-import org.sa.rainbow.configuration.configModel.Probe
-import org.sa.rainbow.configuration.configModel.PropertyReference
-import org.sa.rainbow.configuration.configModel.Reference
-import org.sa.rainbow.configuration.configModel.StringLiteral
-import org.sa.rainbow.configuration.configModel.Value
+import org.sa.rainbow.configuration.rcl.Array
+import org.sa.rainbow.configuration.rcl.Assignment
+import org.sa.rainbow.configuration.rcl.BooleanLiteral
+import org.sa.rainbow.configuration.rcl.CommandCall
+import org.sa.rainbow.configuration.rcl.CommandDefinition
+import org.sa.rainbow.configuration.rcl.CommandReference
+import org.sa.rainbow.configuration.rcl.Component
+import org.sa.rainbow.configuration.rcl.ComponentType
+import org.sa.rainbow.configuration.rcl.DeclaredProperty
+import org.sa.rainbow.configuration.rcl.DoubleLiteral
+import org.sa.rainbow.configuration.rcl.Effector
+import org.sa.rainbow.configuration.rcl.Factory
+import org.sa.rainbow.configuration.rcl.FactoryDefinition
+import org.sa.rainbow.configuration.rcl.FormalParam
+import org.sa.rainbow.configuration.rcl.Gauge
+import org.sa.rainbow.configuration.rcl.GaugeBody
+import org.sa.rainbow.configuration.rcl.GaugeTypeBody
+import org.sa.rainbow.configuration.rcl.IPLiteral
+import org.sa.rainbow.configuration.rcl.ImpactVector
+import org.sa.rainbow.configuration.rcl.IntegerLiteral
+import org.sa.rainbow.configuration.rcl.JavaClassOrFactory
+import org.sa.rainbow.configuration.rcl.ModelFactoryReference
+import org.sa.rainbow.configuration.rcl.Probe
+import org.sa.rainbow.configuration.rcl.PropertyReference
+import org.sa.rainbow.configuration.rcl.RclPackage
+import org.sa.rainbow.configuration.rcl.Reference
+import org.sa.rainbow.configuration.rcl.StringLiteral
+import org.sa.rainbow.configuration.rcl.Value
 import org.sa.rainbow.core.models.IModelInstance
 import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd
 import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation
@@ -70,7 +70,7 @@ import org.sa.rainbow.core.models.commands.ModelCommandFactory
  * 
  * See https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#validation
  */
-class ConfigModelValidator extends AbstractConfigModelValidator {
+class RclValidator extends AbstractRclValidator {
 
 	public static val ONLY_EXTEND_PROBE_TYPES_MSG = "A probe can only extend a probe type"
 	public static val ONLY_EXTEND_PROBE_TYPES = "invalidProbeType"
@@ -84,7 +84,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			if (!st.type) {
 				error(
 					ONLY_EXTEND_PROBE_TYPES_MSG,
-					ConfigModelPackage.Literals.PROBE__SUPER_TYPE,
+					RclPackage.Literals.PROBE__SUPER_TYPE,
 					ONLY_EXTEND_PROBE_TYPES
 				)
 			}
@@ -100,7 +100,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 				probe.superType?.properties?.assignment,
 				ConfigAttributeConstants.ALL_OFREQUIRED_PROBE_FIELDS,
 				ConfigAttributeConstants.ONE_OFREQUIRED_PROBE_FIELDS,
-				ConfigModelPackage.Literals.PROBE__PROPERTIES
+				RclPackage.Literals.PROBE__PROPERTIES
 			);
 		}
 		for (Assignment a : probe.properties?.assignment) {
@@ -126,7 +126,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			if (!st.type) {
 				error(
 					"An effector can only extend an effector type",
-					ConfigModelPackage.Literals.EFFECTOR__SUPER_TYPE,
+					RclPackage.Literals.EFFECTOR__SUPER_TYPE,
 					"invalidEffectorType"
 				)
 			}
@@ -141,7 +141,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 				effector?.superType?.body?.assignment,
 				ConfigAttributeConstants.ALL_OFREQUIRED_EFFECTOR_FIELDS,
 				ConfigAttributeConstants.ONE_OFREQUIRED_EFFECTOR_FIELDS,
-				ConfigModelPackage.Literals.EFFECTOR__BODY
+				RclPackage.Literals.EFFECTOR__BODY
 			)
 		}
 		for (Assignment a : effector.body?.assignment) {
@@ -157,14 +157,14 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			gauge?.superType?.body?.assignment,
 			ConfigAttributeConstants.ALL_OFREQUIRED_GAUGE_FIELDS,
 			ConfigAttributeConstants.OPTIONAL_GUAGE_FIELDS,
-			ConfigModelPackage.Literals.GAUGE__BODY
+			RclPackage.Literals.GAUGE__BODY
 		)
 		checkSubAttributes(
 			gauge?.body?.assignment,
 			gauge?.superType?.body?.assignment,
 			ConfigAttributeConstants.ALL_OFREQUIRED_GAUGE_SUBFILEDS,
 			ConfigAttributeConstants.ONE_OFREQUIRED_GAUGE_SUBFILEDS,
-			ConfigModelPackage.Literals.GAUGE__BODY
+			RclPackage.Literals.GAUGE__BODY
 		)
 		for (Assignment a : gauge.body?.assignment) {
 			checkAssignmentType(a, ConfigAttributeConstants.GAUGE_PROPERTY_TYPES, "")
@@ -180,7 +180,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 //		if (p != null) {
 //			error(
 //				"A probe cannot refer to another probe",
-//				ConfigModelPackage.Literals.PROBE_REFERENCE__REFERABLE,
+//				RclPackage.Literals.PROBE_REFERENCE__REFERABLE,
 //				"noProbeReferencesInProbe"
 //			)
 //		}
@@ -286,7 +286,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 						warning(
 							'''"«key»" is missing the required fields «fs».''',
 							compoundElement,
-							ConfigModelPackage.Literals.ASSIGNMENT__VALUE,
+							RclPackage.Literals.ASSIGNMENT__VALUE,
 							MISSING_PROPERTY,
 							fields.map[it].join(",")
 						)
@@ -343,8 +343,8 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 				if (!sts.contains(I2I)) {
 					error(
 						'''«java.identifier» does not extend  «MODEL_COMMAND_FACTORY_SUPERCLASS»''',
-						ConfigModelPackage.Literals.GAUGE_TYPE_BODY__MCF,
-						ConfigModelValidator.MUST_SUBCLASS,
+						RclPackage.Literals.GAUGE_TYPE_BODY__MCF,
+						RclValidator.MUST_SUBCLASS,
 						MODEL_COMMAND_FACTORY_SUPERCLASS
 					)
 				}
@@ -364,7 +364,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 				if (hasRegExpCommand != (cmd.regexp === null)) {
 					error('''Mixing commands with and without regular expression is not supported.''',
 						cmd,
-						ConfigModelPackage.Literals.COMMAND_CALL__NAME,
+						RclPackage.Literals.COMMAND_CALL__NAME,
 						"mixedcommands"
 					)
 				}
@@ -383,7 +383,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 					}
 					error('''Gauge has regular expression, so "generatedClass" should be specified.«additional»''',
 						setupProp,
-						ConfigModelPackage.Literals.ASSIGNMENT__VALUE,
+						RclPackage.Literals.ASSIGNMENT__VALUE,
 						"noGeneratedClass"
 					)
 				}
@@ -396,7 +396,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 							val clazz = Class.forName(className)
 							warning('''"«className»" already exists''',
 								gcProp,
-								ConfigModelPackage.Literals.ASSIGNMENT__VALUE,
+								RclPackage.Literals.ASSIGNMENT__VALUE,
 								"badclass"
 							)
 						} catch(Exception e) {}
@@ -404,7 +404,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 					else {
 						error('''Value should be a string''',
 							gcProp,
-							ConfigModelPackage.Literals.ASSIGNMENT__VALUE,
+							RclPackage.Literals.ASSIGNMENT__VALUE,
 							"badclass"
 						)
 					}
@@ -413,7 +413,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			else {
 				error('''Gauge has regular expression, so "generatedClass" should be specified in setup''',
 						setup,
-						ConfigModelPackage.Literals.ASSIGNMENT__VALUE,
+						RclPackage.Literals.ASSIGNMENT__VALUE,
 						"noGeneratedClass"
 					)
 			}
@@ -443,7 +443,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			if (modelFactory === null) {
 				warning(
 					'''Cannot check "«cc.command»" because no referenced model''',
-					ConfigModelPackage.Literals.COMMAND_CALL__COMMAND,
+					RclPackage.Literals.COMMAND_CALL__COMMAND,
 					"cannotCheckCommand"
 				)
 			}
@@ -453,7 +453,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 				] === null) {
 					error(
 						'''The command "«cc.name»" does not exists in «g.superType.name»''',
-						ConfigModelPackage.Literals.COMMAND_CALL__NAME,
+						RclPackage.Literals.COMMAND_CALL__NAME,
 						"nocommand"
 					)
 				}
@@ -476,7 +476,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			if (modelFactory === null) {
 				warning(
 					'''Cannot check "«cc.command»" because no referenced model''',
-					ConfigModelPackage.Literals.COMMAND_CALL__COMMAND,
+					RclPackage.Literals.COMMAND_CALL__COMMAND,
 					"cannotCheckCommand"
 				)
 			}
@@ -496,14 +496,14 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 				XtendUtils.fillNamedGroups(regexp, namedGroups)
 				if (namedGroups.empty) {
 					warning('''""«regexp»" should contain at least one captured group''',
-						ConfigModelPackage.Literals.COMMAND_REFERENCE__REGEXP,
+						RclPackage.Literals.COMMAND_REFERENCE__REGEXP,
 						"badregexp"
 					)
 				}
 			}
 			catch (PatternSyntaxException e) {
 				error ('''«e.message»''',
-					ConfigModelPackage.Literals.COMMAND_REFERENCE__REGEXP,
+					RclPackage.Literals.COMMAND_REFERENCE__REGEXP,
 					"badregexp"
 				)
 			}
@@ -562,7 +562,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			if (commandMethod.empty) {
 				error(
 					'''"«command»" is not a valid command in «mf.identifier» ''',
-					ConfigModelPackage.Literals.COMMAND_CALL__COMMAND,
+					RclPackage.Literals.COMMAND_CALL__COMMAND,
 					"nocommand"
 				)
 			} else {
@@ -572,7 +572,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 					} else {
 						error(
 							'''"«command»" wrong number of parameters defined. Expecting «method.parameters.size-(cc.target!=null?1:0)» got «cc.actual.size»''',
-							ConfigModelPackage.Literals.COMMAND_CALL__ACTUAL,
+							RclPackage.Literals.COMMAND_CALL__ACTUAL,
 							"wrongparamnumbers"
 						)
 	
@@ -587,7 +587,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			if (commandMethod.empty) {
 				error(
 					'''"«command»" is not a valid command in «(cmf as ModelFactoryReference).referable.name» ''',
-					ConfigModelPackage.Literals.COMMAND_CALL__COMMAND,
+					RclPackage.Literals.COMMAND_CALL__COMMAND,
 					"nocommand"
 				)
 			} else {
@@ -598,7 +598,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 					} else {
 						error(
 							'''"«command»" wrong number of parameters defined. Expecting «factoryCommand.formal.size-(cc.target!=null?1:0)» got «cc.actual.size»''',
-							ConfigModelPackage.Literals.COMMAND_CALL__ACTUAL,
+							RclPackage.Literals.COMMAND_CALL__ACTUAL,
 							"wrongparamnumbers"
 						)
 	
@@ -608,10 +608,10 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 					for (actual : cc.actual) {
 						if (actual.ref && re !== null) {
 							var name = actual.ng
-							var lit = ConfigModelPackage.Literals.ACTUAL__NG
+							var lit = RclPackage.Literals.ACTUAL__NG
 							if (name === null) {
 								name = Integer.toString(actual.ag)
-								lit = ConfigModelPackage.Literals.ACTUAL__AG
+								lit = RclPackage.Literals.ACTUAL__AG
 							} 
 							if (!namedGroups.contains(name)) {
 								warning('''«name» should be a valid group from «XtendUtils.unpackString(re, true)»''',
@@ -631,7 +631,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 //							if (paramTypeName != cc.actual.get(i).) {
 //								error(
 //										'''Parameter «i» expecting «paramTypeName», received «cr.formal.get(i).simpleName».''',
-//										ConfigModelPackage.Literals.COMMAND_REFERENCE__FORMAL,
+//										RclPackage.Literals.COMMAND_REFERENCE__FORMAL,
 //										"wrongType"
 //									)
 //							}
@@ -642,7 +642,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 //							if (paramTypeName != cr.target) {
 //								error(
 //										'''Target type expecting «paramTypeName», received «cr.target».''',
-//										ConfigModelPackage.Literals.COMMAND_REFERENCE__TARGET,
+//										RclPackage.Literals.COMMAND_REFERENCE__TARGET,
 //										"wrongType"
 //									)
 //							}
@@ -655,14 +655,14 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 
 	@Check
 	def checkCommandSignature(CommandReference cr) {
-		if (cr.eContainer.eClass == ConfigModelPackage.Literals.GAUGE_TYPE_BODY) {
+		if (cr.eContainer.eClass == RclPackage.Literals.GAUGE_TYPE_BODY) {
 			var gaugeType = cr.eContainer as GaugeTypeBody
 			if (gaugeType === null) {
 				if (gaugeType.mcf === null) {
 					if (gaugeType.mcf !== null && !(gaugeType.mcf.referable instanceof JvmDeclaredType || gaugeType.mcf.referable instanceof Factory)) {
 						warning(
 							'''"«cr.command» cannot be checked because there is no model defined"''',
-							ConfigModelPackage.Literals.COMMAND_REFERENCE__COMMAND,
+							RclPackage.Literals.COMMAND_REFERENCE__COMMAND,
 							"cannotCheckCommand"
 						)
 						return 
@@ -685,7 +685,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 				if (commandMethod.empty) {
 					error(
 						'''"«command»" is not a valid command in «type.identifier» ''',
-						ConfigModelPackage.Literals.COMMAND_REFERENCE__COMMAND,
+						RclPackage.Literals.COMMAND_REFERENCE__COMMAND,
 						"nocommand"
 					)
 				} else {
@@ -695,7 +695,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 						} else {
 							error(
 								'''"«cr.command»" wrong number of parameters defined. Expecting «method.parameters.size-(cr.target!=null?1:0)» got «cr.formal.size»''',
-								ConfigModelPackage.Literals.COMMAND_REFERENCE__FORMAL,
+								RclPackage.Literals.COMMAND_REFERENCE__FORMAL,
 								"wrongparamnumbers"
 							)
 							return
@@ -709,7 +709,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 							if (prim.isPrimitive(param.parameterType)) {
 								warning(
 									'''«type.simpleName».«method.simpleName» may need a target''',
-									ConfigModelPackage.Literals.COMMAND_REFERENCE__COMMAND,
+									RclPackage.Literals.COMMAND_REFERENCE__COMMAND,
 									"mayNeedTarget"
 								)
 							}
@@ -717,7 +717,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 							if (param.parameterType.simpleName != cr.formal.get(i).simpleName) {
 								error(
 									'''Parameter «i» expecing «param.parameterType.simpleName», received «cr.formal.get(i).simpleName».''',
-									ConfigModelPackage.Literals.COMMAND_REFERENCE__FORMAL,
+									RclPackage.Literals.COMMAND_REFERENCE__FORMAL,
 									"wrongType"
 								)
 							}
@@ -734,7 +734,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 				if (factoryCommands.empty) {
 					error(
 						'''"«command»" is not a valid command in «factory.name» ''',
-						ConfigModelPackage.Literals.COMMAND_REFERENCE__COMMAND,
+						RclPackage.Literals.COMMAND_REFERENCE__COMMAND,
 						"nocommand"
 					)
 				}
@@ -746,7 +746,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 						} else {
 							error(
 								'''"«cr.command»" wrong number of parameters defined. Expecting «factoryCommand.formal.size-(cr.target!=null?1:0)» got «cr.formal.size»''',
-								ConfigModelPackage.Literals.COMMAND_REFERENCE__FORMAL,
+								RclPackage.Literals.COMMAND_REFERENCE__FORMAL,
 								"wrongparamnumbers"
 							)
 							return
@@ -756,14 +756,14 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 					if (factoryCommand.formal.findFirst[it.name=="target"] !== null && cr.target === null) {
 						error(
 								'''"«cr.command»" does not specify a needed target''',
-								ConfigModelPackage.Literals.COMMAND_REFERENCE__FORMAL,
+								RclPackage.Literals.COMMAND_REFERENCE__FORMAL,
 								"wrongparamnumbers"
 							)
 							return
 					}
 					if (cr.target !== null && factoryCommand.formal.findFirst[it.name=="target"] === null) {
 						error ('''«cr.command» specifies a target not in the factory: «cr.target»''',
-							ConfigModelPackage.Literals.COMMAND_REFERENCE__TARGET,
+							RclPackage.Literals.COMMAND_REFERENCE__TARGET,
 							"unknowntarget"
 						)
 					}
@@ -774,7 +774,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 							if (paramTypeName != cr.formal.get(i).simpleName) {
 								error(
 										'''Parameter «i» expecting «paramTypeName», received «cr.formal.get(i).simpleName».''',
-										ConfigModelPackage.Literals.COMMAND_REFERENCE__FORMAL,
+										RclPackage.Literals.COMMAND_REFERENCE__FORMAL,
 										"wrongType"
 									)
 							}
@@ -785,7 +785,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 							if (paramTypeName != cr.target) {
 								error(
 										'''Target type expecting «paramTypeName», received «cr.target».''',
-										ConfigModelPackage.Literals.COMMAND_REFERENCE__TARGET,
+										RclPackage.Literals.COMMAND_REFERENCE__TARGET,
 										"wrongType"
 									)
 							}
@@ -826,8 +826,8 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 					if (!sts.contains(superType)) {
 						error(
 							'''«subType.simpleName» is not a subclass of «superClass»''',
-							ConfigModelPackage.Literals.DECLARED_PROPERTY__DEFAULT,
-							ConfigModelValidator.MUST_SUBCLASS,
+							RclPackage.Literals.DECLARED_PROPERTY__DEFAULT,
+							RclValidator.MUST_SUBCLASS,
 							superClass
 						)
 					}
@@ -842,7 +842,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			if (!(dp.^default.value instanceof Component)) {
 				error(
 					'''Values for «dp.component» must be compound values''',
-					ConfigModelPackage.Literals.DECLARED_PROPERTY__DEFAULT,
+					RclPackage.Literals.DECLARED_PROPERTY__DEFAULT,
 					"incorrectValue"
 				)
 			}
@@ -856,39 +856,39 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 				case ANALYSIS: {
 					checkAttributes((dp.^default.value as Component).assignment, null,
 						ConfigAttributeConstants.ALL_OFREQUIRED_ANALYSIS_FIELDS, #{},
-						ConfigModelPackage.Literals.DECLARED_PROPERTY__DEFAULT)
+						RclPackage.Literals.DECLARED_PROPERTY__DEFAULT)
 
 				}
 				case EFFECTORMANAGER: {
 					checkAttributes((dp.^default.value as Component).assignment, null,
 						ConfigAttributeConstants.ALL_OFREQUIRED_EFFECTOR_MANAGER_FIELDS, #{},
-						ConfigModelPackage.Literals.DECLARED_PROPERTY__DEFAULT)
+						RclPackage.Literals.DECLARED_PROPERTY__DEFAULT)
 
 				}
 				case EXECUTOR: {
 					checkAttributes((dp.^default.value as Component).assignment, null,
 						ConfigAttributeConstants.ALL_OFREQUIRED_EXECUTOR_FIELDS, #{},
-						ConfigModelPackage.Literals.DECLARED_PROPERTY__DEFAULT)
+						RclPackage.Literals.DECLARED_PROPERTY__DEFAULT)
 				}
 				case GUI: {
 				}
 				case MANAGER: {
 					checkAttributes((dp.^default.value as Component).assignment, null,
 						ConfigAttributeConstants.ALL_OFREQUIRED_MANANGER_FIELDS, #{},
-						ConfigModelPackage.Literals.DECLARED_PROPERTY__DEFAULT)
+						RclPackage.Literals.DECLARED_PROPERTY__DEFAULT)
 
 				}
 				case MODEL: {
 					checkAttributes((dp.^default.value as Component).assignment, null,
 						ConfigAttributeConstants.ALL_OFREQUIRED_MODEL_FIELDS, #{},
-						ConfigModelPackage.Literals.DECLARED_PROPERTY__DEFAULT)
+						RclPackage.Literals.DECLARED_PROPERTY__DEFAULT)
 				}
 				case PROPERTY: {
 				}
 				case UTILITY: {
 					checkAttributes((dp.^default.value as Component).assignment, null,
 						ConfigAttributeConstants.ALL_OFREQUIRED_UTILITY_FIELDS, #{},
-						ConfigModelPackage.Literals.DECLARED_PROPERTY__DEFAULT)
+						RclPackage.Literals.DECLARED_PROPERTY__DEFAULT)
 				}
 			}
 		}
@@ -927,7 +927,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 						error(
 							'''«dp.name» «fieldRule.get('msg')»''',
 							dp,
-							ConfigModelPackage.Literals.ASSIGNMENT__VALUE,
+							RclPackage.Literals.ASSIGNMENT__VALUE,
 							"invalidType"
 						)
 					}
@@ -941,7 +941,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 						error(
 							'''«dp.name» «fieldRule.get('msg')»''',
 							dp,
-							ConfigModelPackage.Literals.ASSIGNMENT__VALUE,
+							RclPackage.Literals.ASSIGNMENT__VALUE,
 							MUST_SUBCLASS,
 							extends.map[it.name].join(",")
 						)
@@ -984,13 +984,13 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 				if (!(v.value instanceof Array)) {
 					errors.add(
 						Tuples.create('''Array value needs to be an array of two numbers''', v,
-							ConfigModelPackage.Literals.VALUE__VALUE))
+							RclPackage.Literals.VALUE__VALUE))
 				} else {
 					val pair = v.value as Array
 					if (pair.values.size != 2) {
 						errors.add(
 							Tuples.create('''Array value needs to be an array of two numbers''', v,
-								ConfigModelPackage.Literals.VALUE__VALUE))
+								RclPackage.Literals.VALUE__VALUE))
 					} else {
 						val thisVal = getNumber(pair.values.get(1))
 						if (!first) {
@@ -1009,7 +1009,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			}
 			if (goingUp && goingDown) {
 				errors.add(
-					Tuples.create('''Utilities need to be monotonic''', a, ConfigModelPackage.Literals.ARRAY__VALUES))
+					Tuples.create('''Utilities need to be monotonic''', a, RclPackage.Literals.ARRAY__VALUES))
 			}
 			errors
 
@@ -1028,7 +1028,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 				if (!(v.value instanceof Component)) {
 					errors.add(
 						Tuples.create('''Scenario should only contain composites''', a,
-							ConfigModelPackage.Literals.ARRAY__VALUES))
+							RclPackage.Literals.ARRAY__VALUES))
 				} else {
 					var sum = 0.0
 					val scenario = v.value as Component
@@ -1038,14 +1038,14 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 							if (!definedUtilities.contains(ass.name)) {
 								errors.add(
 									Tuples.create('''«ass.name» must refer to a utility defined in utilities''', ass,
-										ConfigModelPackage.Literals.ASSIGNMENT__NAME))
+										RclPackage.Literals.ASSIGNMENT__NAME))
 							}
 						}
 					}
 					if (sum != 1.0) {
 						errors.add(
 							Tuples.create('''The utilities in a scenario must sum to 1''', scenario,
-								ConfigModelPackage.Literals.COMPONENT__ASSIGNMENT))
+								RclPackage.Literals.COMPONENT__ASSIGNMENT))
 					}
 				}
 			}
@@ -1068,7 +1068,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			error(
 				'''Impact vector referring to non-utility model «iv.utilityModel.referable?.name»''',
 				iv.utilityModel,
-				ConfigModelPackage.Literals.IMPACT_VECTOR__UTILITY_MODEL
+				RclPackage.Literals.IMPACT_VECTOR__UTILITY_MODEL
 			)
 			return
 		}
@@ -1077,7 +1077,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 		]?.value.value as Component).assignment.map[it.name]
 		for (ass : iv.component.assignment) {
 			if (!definedUtilities.contains(ass.name)) {
-				error('''Undefined utility «ass.name»''', ass, ConfigModelPackage.Literals.ASSIGNMENT__NAME)
+				error('''Undefined utility «ass.name»''', ass, RclPackage.Literals.ASSIGNMENT__NAME)
 			}
 		}
 	}
@@ -1090,14 +1090,14 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 
 	@Check
 	def checkFactoryDefinition(FactoryDefinition factory) {
-		if (!ConfigAttributeConstants.subclasses(factory.loadCmd, ConfigModelValidator.LOAD_MODEL_CMD_SUPERCLASS,
+		if (!ConfigAttributeConstants.subclasses(factory.loadCmd, RclValidator.LOAD_MODEL_CMD_SUPERCLASS,
 			factory.eResource)) {
 			error(
-				'''«factory.loadCmd.qualifiedName» must subclass «ConfigModelValidator.LOAD_MODEL_CMD_SUPERCLASS»''',
+				'''«factory.loadCmd.qualifiedName» must subclass «RclValidator.LOAD_MODEL_CMD_SUPERCLASS»''',
 				factory,
-				ConfigModelPackage.Literals.FACTORY_DEFINITION__LOAD_CMD,
+				RclPackage.Literals.FACTORY_DEFINITION__LOAD_CMD,
 				MUST_SUBCLASS,
-				ConfigModelValidator.LOAD_MODEL_CMD_SUPERCLASS
+				RclValidator.LOAD_MODEL_CMD_SUPERCLASS
 			)
 		}
 		if (factory.saveCmd !== null &&
@@ -1105,7 +1105,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			error(
 				'''«factory.saveCmd.qualifiedName» must subclass «SAVE_MODEL_CMD_SUPERCLASS»''',
 				factory,
-				ConfigModelPackage.Literals.FACTORY_DEFINITION__SAVE_CMD,
+				RclPackage.Literals.FACTORY_DEFINITION__SAVE_CMD,
 				MUST_SUBCLASS,
 				SAVE_MODEL_CMD_SUPERCLASS
 			)
@@ -1116,7 +1116,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			error(
 				'''«factory.saveCmd.qualifiedName» must subclass «MODEL_COMMAND_FACTORY_SUPERCLASS»''',
 				factory,
-				ConfigModelPackage.Literals.FACTORY_DEFINITION__EXTENDS,
+				RclPackage.Literals.FACTORY_DEFINITION__EXTENDS,
 				MUST_SUBCLASS,
 				MODEL_COMMAND_FACTORY_SUPERCLASS
 			)
@@ -1125,7 +1125,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			error(
 				'''«factory.modelClass.qualifiedName» must subclass «MODEL_SUPERCLASS»''',
 				factory,
-				ConfigModelPackage.Literals.FACTORY_DEFINITION__MODEL_CLASS,
+				RclPackage.Literals.FACTORY_DEFINITION__MODEL_CLASS,
 				MUST_SUBCLASS,
 				MODEL_SUPERCLASS
 			)
@@ -1138,7 +1138,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			error(
 				'''«cmd.cmd.qualifiedName» must extend «RAINBOW_OPERATION_SUPERCLASS»''',
 				cmd,
-				ConfigModelPackage.Literals.COMMAND_DEFINITION__CMD,
+				RclPackage.Literals.COMMAND_DEFINITION__CMD,
 				MUST_SUBCLASS,
 				RAINBOW_OPERATION_SUPERCLASS
 			)
@@ -1164,7 +1164,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			error(
 				'''«cmdClass.simpleName» must have constructor with parameters String, «factory.modelClass.simpleName», «myParams»''',
 				cmd,
-				ConfigModelPackage.Literals.COMMAND_DEFINITION__CMD,
+				RclPackage.Literals.COMMAND_DEFINITION__CMD,
 				"ConstructurIncompatible"
 			)
 		} else {
@@ -1175,7 +1175,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 					val formalType = cmd.formal.get(i)
 					if(cstrType.qualifiedName != XtendUtils.formalTypeName(formalType,false)) {
 						error('''Found «XtendUtils.formalTypeName(formalType,false)», expecting «cstr.simpleName»''',
-							formalType, ConfigModelPackage.Literals.FORMAL_PARAM__TYPE,
+							formalType, RclPackage.Literals.FORMAL_PARAM__TYPE,
 							"incorrectType"
 						)
 					}
@@ -1186,7 +1186,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			warning(
 				'''Only the first argument of a command can be 'target''',
 				cmd,
-				ConfigModelPackage.Literals.COMMAND_DEFINITION__FORMAL,
+				RclPackage.Literals.COMMAND_DEFINITION__FORMAL,
 				"badTarget"
 			)
 		} else
@@ -1194,7 +1194,7 @@ class ConfigModelValidator extends AbstractConfigModelValidator {
 			warning(
 				'''The first argument of a command should be 'target''',
 				cmd,
-				ConfigModelPackage.Literals.COMMAND_DEFINITION__FORMAL,
+				RclPackage.Literals.COMMAND_DEFINITION__FORMAL,
 				"badTarget"
 			)
 		}

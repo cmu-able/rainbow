@@ -7,6 +7,7 @@ import com.google.common.base.Predicate
 import com.google.common.collect.Sets
 import com.google.inject.Inject
 import com.google.inject.name.Named
+import com.sun.javafx.property.PropertyReference
 import java.util.Collection
 import java.util.HashSet
 import java.util.List
@@ -32,24 +33,23 @@ import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor
 import org.eclipse.xtext.xbase.lib.Functions.Function1
 import org.sa.rainbow.configuration.ConfigAttributeConstants
 import org.sa.rainbow.configuration.XtendUtils
-import org.sa.rainbow.configuration.configModel.Array
-import org.sa.rainbow.configuration.configModel.Assignment
-import org.sa.rainbow.configuration.configModel.BooleanLiteral
-import org.sa.rainbow.configuration.configModel.Component
-import org.sa.rainbow.configuration.configModel.ComponentType
-import org.sa.rainbow.configuration.configModel.ConfigModelPackage
-import org.sa.rainbow.configuration.configModel.DeclaredProperty
-import org.sa.rainbow.configuration.configModel.DoubleLiteral
-import org.sa.rainbow.configuration.configModel.Effector
-import org.sa.rainbow.configuration.configModel.Factory
-import org.sa.rainbow.configuration.configModel.Gauge
-import org.sa.rainbow.configuration.configModel.GaugeType
-import org.sa.rainbow.configuration.configModel.IPLiteral
-import org.sa.rainbow.configuration.configModel.IntegerLiteral
-import org.sa.rainbow.configuration.configModel.Probe
-import org.sa.rainbow.configuration.configModel.PropertyReference
-import org.sa.rainbow.configuration.configModel.StringLiteral
-import org.sa.rainbow.configuration.services.ConfigModelGrammarAccess
+import org.sa.rainbow.configuration.rcl.Array
+import org.sa.rainbow.configuration.rcl.Assignment
+import org.sa.rainbow.configuration.rcl.BooleanLiteral
+import org.sa.rainbow.configuration.rcl.Component
+import org.sa.rainbow.configuration.rcl.ComponentType
+import org.sa.rainbow.configuration.rcl.DeclaredProperty
+import org.sa.rainbow.configuration.rcl.DoubleLiteral
+import org.sa.rainbow.configuration.rcl.Effector
+import org.sa.rainbow.configuration.rcl.Factory
+import org.sa.rainbow.configuration.rcl.Gauge
+import org.sa.rainbow.configuration.rcl.GaugeType
+import org.sa.rainbow.configuration.rcl.IPLiteral
+import org.sa.rainbow.configuration.rcl.IntegerLiteral
+import org.sa.rainbow.configuration.rcl.Probe
+import org.sa.rainbow.configuration.rcl.RclPackage
+import org.sa.rainbow.configuration.rcl.StringLiteral
+import org.sa.rainbow.configuration.services.RclGrammarAccess
 import org.sa.rainbow.core.gauges.AbstractGauge
 import org.sa.rainbow.core.models.IModelInstance
 import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd
@@ -62,10 +62,10 @@ import org.sa.rainbow.translator.probes.AbstractProbe
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#content-assist
  * on how to customize the content assistant.
  */
-class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
+class RclProposalProvider extends AbstractRclProposalProvider {
 	
 	@Inject
-	ConfigModelGrammarAccess cfGrammar
+	RclGrammarAccess cfGrammar
 	
 	static var Set<String> KEYWORDS = null
 	def isKeyword(String s) {
@@ -290,7 +290,7 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 		val jvmTypeProvider = jvmTypeProviderFactory.createTypeProvider(model.eResource.resourceSet)
 		val subclass = jvmTypeProvider.findTypeByName(ModelCommandFactory.name)
 		typeProposalProvider.createSubTypeProposals(subclass, this, context,
-			ConfigModelPackage.Literals.GAUGE_TYPE_BODY__MCF, TypeMatchFilters.canInstantiate, acceptor);
+			RclPackage.Literals.GAUGE_TYPE_BODY__MCF, TypeMatchFilters.canInstantiate, acceptor);
 		val v = model.eResource.resourceSet.resources
 		val models = new HashSet<String>();
 		for (r : v) {
@@ -310,7 +310,7 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 		val jvmTypeProvider = jvmTypeProviderFactory.createTypeProvider(model.eResource.resourceSet)
 		val subclass = jvmTypeProvider.findTypeByName(AbstractLoadModelCmd.name)
 		typeProposalProvider.createSubTypeProposals(subclass, this, context,
-			ConfigModelPackage.Literals.FACTORY_DEFINITION__LOAD_CMD, TypeMatchFilters.canInstantiate, acceptor);
+			RclPackage.Literals.FACTORY_DEFINITION__LOAD_CMD, TypeMatchFilters.canInstantiate, acceptor);
 
 	}
 
@@ -319,7 +319,7 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 		val jvmTypeProvider = jvmTypeProviderFactory.createTypeProvider(model.eResource.resourceSet)
 		val subclass = jvmTypeProvider.findTypeByName(AbstractSaveModelCmd.name)
 		typeProposalProvider.createSubTypeProposals(subclass, this, context,
-			ConfigModelPackage.Literals.FACTORY_DEFINITION__SAVE_CMD, TypeMatchFilters.canInstantiate, acceptor);
+			RclPackage.Literals.FACTORY_DEFINITION__SAVE_CMD, TypeMatchFilters.canInstantiate, acceptor);
 
 	}
 
@@ -328,7 +328,7 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 		val jvmTypeProvider = jvmTypeProviderFactory.createTypeProvider(model.eResource.resourceSet)
 		val subclass = jvmTypeProvider.findTypeByName(ModelCommandFactory.name)
 		typeProposalProvider.createSubTypeProposals(subclass, this, context,
-			ConfigModelPackage.Literals.FACTORY_DEFINITION__EXTENDS, TypeMatchFilters.canInstantiate, acceptor);
+			RclPackage.Literals.FACTORY_DEFINITION__EXTENDS, TypeMatchFilters.canInstantiate, acceptor);
 	}
 	
 	override completeFactoryDefinition_ModelClass(EObject model, org.eclipse.xtext.Assignment assignment,
@@ -336,7 +336,7 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 		val jvmTypeProvider = jvmTypeProviderFactory.createTypeProvider(model.eResource.resourceSet)
 		val subclass = jvmTypeProvider.findTypeByName(IModelInstance.name)
 		typeProposalProvider.createSubTypeProposals(subclass, this, context,
-			ConfigModelPackage.Literals.FACTORY_DEFINITION__MODEL_CLASS, TypeMatchFilters.canInstantiate, acceptor);
+			RclPackage.Literals.FACTORY_DEFINITION__MODEL_CLASS, TypeMatchFilters.canInstantiate, acceptor);
 		
     }	
 
@@ -405,7 +405,7 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 				val sc = jvmTypeProvider.findTypeByName(subclass)
 				if (sc !== null) {
 					typeProposalProvider.createSubTypeProposals(sc, this, context,
-						ConfigModelPackage.Literals.DECLARED_PROPERTY__DEFAULT, TypeMatchFilters.canInstantiate,
+						RclPackage.Literals.DECLARED_PROPERTY__DEFAULT, TypeMatchFilters.canInstantiate,
 						acceptor);
 					pauseAssisting(acceptor);
 					return
@@ -427,7 +427,7 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 				val subclass = jvmTypeProvider.findTypeByName(AbstractGauge.name)
 				if (subclass != null) {
 					typeProposalProvider.createSubTypeProposals(subclass, this, context,
-						ConfigModelPackage.Literals.ASSIGNMENT__VALUE, TypeMatchFilters.canInstantiate, acceptor);
+						RclPackage.Literals.ASSIGNMENT__VALUE, TypeMatchFilters.canInstantiate, acceptor);
 					pauseAssisting(acceptor);
 					return
 
@@ -439,7 +439,7 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 				val subclass = jvmTypeProvider.findTypeByName(AbstractProbe.name)
 				if (subclass !== null) {
 					typeProposalProvider.createSubTypeProposals(subclass, this, context,
-						ConfigModelPackage.Literals.ASSIGNMENT__VALUE, TypeMatchFilters.canInstantiate, acceptor);
+						RclPackage.Literals.ASSIGNMENT__VALUE, TypeMatchFilters.canInstantiate, acceptor);
 					pauseAssisting(acceptor);
 					return
 				}
@@ -609,7 +609,7 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 					val sc = jvmTypeProvider.findTypeByName(class.name)
 					if (sc !== null) {
 						typeProposalProvider.createSubTypeProposals(sc, this, context,
-							ConfigModelPackage.Literals.DECLARED_PROPERTY__DEFAULT, TypeMatchFilters.canInstantiate,
+							RclPackage.Literals.DECLARED_PROPERTY__DEFAULT, TypeMatchFilters.canInstantiate,
 							acceptor);
 					}
 				}
@@ -626,7 +626,7 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 		val sc = jvmTypeProvider.findTypeByName(typeof(AcmeModelOperation).name)
 		if (sc !== null) {
 			typeProposalProvider.createSubTypeProposals(sc, this, context,
-							ConfigModelPackage.Literals.COMMAND_DEFINITION__CMD, TypeMatchFilters.canInstantiate,
+							RclPackage.Literals.COMMAND_DEFINITION__CMD, TypeMatchFilters.canInstantiate,
 							acceptor);
 		}
 		pauseAssisting(acceptor)
@@ -729,7 +729,7 @@ class ConfigModelProposalProvider extends AbstractConfigModelProposalProvider {
 	}
 	
 	// Keyword group stuff
-	@Inject extension ConfigModelGrammarAccess
+	@Inject extension RclGrammarAccess
 	
 
 	override complete_ModelFactory(EObject model, RuleCall ruleCall, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {

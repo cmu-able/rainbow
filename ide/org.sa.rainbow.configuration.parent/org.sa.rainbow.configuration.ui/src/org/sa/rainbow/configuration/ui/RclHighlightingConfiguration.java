@@ -5,7 +5,7 @@ import org.eclipse.xtext.ui.editor.syntaxcoloring.DefaultHighlightingConfigurati
 import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfigurationAcceptor;
 import org.eclipse.xtext.ui.editor.utils.TextStyle;
 
-public class ConfigModelHighlightingConfiguration extends DefaultHighlightingConfiguration {
+public class RclHighlightingConfiguration extends DefaultHighlightingConfiguration {
 	public static final String SOFT_KEYWORD_ID = "SoftKeyword";
 	public static final String PROPERTY_REFERENCE_ID = "PropertyReference";
 

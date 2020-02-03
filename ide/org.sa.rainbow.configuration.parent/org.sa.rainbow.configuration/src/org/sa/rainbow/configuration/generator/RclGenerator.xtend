@@ -16,37 +16,37 @@ import org.eclipse.xtext.generator.IGeneratorContext
 import org.sa.rainbow.configuration.RainbowOutputConfigurationProvider
 import org.sa.rainbow.configuration.Utils
 import org.sa.rainbow.configuration.XtendUtils
-import org.sa.rainbow.configuration.configModel.Actual
-import org.sa.rainbow.configuration.configModel.Array
-import org.sa.rainbow.configuration.configModel.Assignment
-import org.sa.rainbow.configuration.configModel.BooleanLiteral
-import org.sa.rainbow.configuration.configModel.CommandCall
-import org.sa.rainbow.configuration.configModel.Component
-import org.sa.rainbow.configuration.configModel.ComponentType
-import org.sa.rainbow.configuration.configModel.DeclaredProperty
-import org.sa.rainbow.configuration.configModel.DoubleLiteral
-import org.sa.rainbow.configuration.configModel.Effector
-import org.sa.rainbow.configuration.configModel.Factory
-import org.sa.rainbow.configuration.configModel.Gauge
-import org.sa.rainbow.configuration.configModel.GaugeType
-import org.sa.rainbow.configuration.configModel.IPLiteral
-import org.sa.rainbow.configuration.configModel.ImpactVector
-import org.sa.rainbow.configuration.configModel.IntegerLiteral
-import org.sa.rainbow.configuration.configModel.LogLiteral
-import org.sa.rainbow.configuration.configModel.Probe
-import org.sa.rainbow.configuration.configModel.PropertyReference
-import org.sa.rainbow.configuration.configModel.RainbowConfiguration
-import org.sa.rainbow.configuration.configModel.Reference
-import org.sa.rainbow.configuration.configModel.StringLiteral
-import org.sa.rainbow.configuration.configModel.Value
-import org.sa.rainbow.configuration.validation.ConfigModelValidator
+import org.sa.rainbow.configuration.rcl.Actual
+import org.sa.rainbow.configuration.rcl.Array
+import org.sa.rainbow.configuration.rcl.Assignment
+import org.sa.rainbow.configuration.rcl.BooleanLiteral
+import org.sa.rainbow.configuration.rcl.CommandCall
+import org.sa.rainbow.configuration.rcl.Component
+import org.sa.rainbow.configuration.rcl.ComponentType
+import org.sa.rainbow.configuration.rcl.DeclaredProperty
+import org.sa.rainbow.configuration.rcl.DoubleLiteral
+import org.sa.rainbow.configuration.rcl.Effector
+import org.sa.rainbow.configuration.rcl.Factory
+import org.sa.rainbow.configuration.rcl.Gauge
+import org.sa.rainbow.configuration.rcl.GaugeType
+import org.sa.rainbow.configuration.rcl.IPLiteral
+import org.sa.rainbow.configuration.rcl.ImpactVector
+import org.sa.rainbow.configuration.rcl.IntegerLiteral
+import org.sa.rainbow.configuration.rcl.LogLiteral
+import org.sa.rainbow.configuration.rcl.Probe
+import org.sa.rainbow.configuration.rcl.PropertyReference
+import org.sa.rainbow.configuration.rcl.RainbowConfiguration
+import org.sa.rainbow.configuration.rcl.Reference
+import org.sa.rainbow.configuration.rcl.StringLiteral
+import org.sa.rainbow.configuration.rcl.Value
+import org.sa.rainbow.configuration.validation.RclValidator
 
 /**
  * Generates code from your model files on save.
  * 
  * See https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#code-generation
  */
-class ConfigModelGenerator extends AbstractGenerator {
+class RclGenerator extends AbstractGenerator {
 
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
 		val model = resource.contents.head as RainbowConfiguration
@@ -321,7 +321,7 @@ class ConfigModelGenerator extends AbstractGenerator {
 			      description: «surroundString(XtendUtils.unpackString((u.value.value as Component).assignment.findFirst[it.name=='description']?.value.value as StringLiteral, false), true)»
 			      utility:
 			        «FOR uv : ((u.value.value as Component).assignment.findFirst[it.name=='utility']?.value.value as Array).values»
-			          «ConfigModelValidator.getNumber((uv.value as Array).values.get(0))»: «ConfigModelValidator.getNumber((uv.value as Array).values.get(1))»
+			          «RclValidator.getNumber((uv.value as Array).values.get(0))»: «RclValidator.getNumber((uv.value as Array).values.get(1))»
 			        «ENDFOR»
 			  «ENDFOR»
 			  '''
@@ -331,7 +331,7 @@ class ConfigModelGenerator extends AbstractGenerator {
 			  «FOR scenario : scs.values»
 			  «XtendUtils.unpackString((scenario.value as Component).assignment.findFirst[it.name=="name"].value.value as StringLiteral, true)»:
 			    «FOR u : (scenario.value as Component).assignment.filter[it.name != "name"]»
-			      «u.name»: «ConfigModelValidator.getNumber(u.value)»
+			      «u.name»: «RclValidator.getNumber(u.value)»
 			    «ENDFOR»
 			  «ENDFOR»
 			'''
@@ -342,7 +342,7 @@ class ConfigModelGenerator extends AbstractGenerator {
 		  «FOR iv : list»
 		    «iv.tactic.name»:
 		      «FOR u : (iv.component.assignment)»
-		        «u.name»: «ConfigModelValidator.getNumber(u.value)»
+		        «u.name»: «RclValidator.getNumber(u.value)»
 		      «ENDFOR»
 		  «ENDFOR»
 		'''
@@ -393,7 +393,13 @@ class ConfigModelGenerator extends AbstractGenerator {
 		if (properties.empty) ''''''
 		else {
 			val gui = (properties.get(0).^default.value as Component).assignment.findFirst[it.name=='class']
-			'''rainbow.gui=«(gui.value.value as Reference).referable.qualifiedName»'''
+			var p = '''rainbow.gui=«(gui.value.value as Reference).referable.qualifiedName»'''
+			val guispecs = (properties.get(0).^default.value as Component).assignment.findFirst[it.name=='specs']
+			if (guispecs !== null) {
+				p = p +'''
+				rainbow.gui.specs=ui.yml'''
+			}
+			p
 		}
 	}
 		

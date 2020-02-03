@@ -8,23 +8,23 @@ import org.eclipse.swt.graphics.Image
 import org.eclipse.xtext.common.types.JvmType
 import org.eclipse.xtext.ui.editor.outline.IOutlineNode
 import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider
-import org.sa.rainbow.configuration.configModel.Assignment
-import org.sa.rainbow.configuration.configModel.CommandCall
-import org.sa.rainbow.configuration.configModel.CommandReference
-import org.sa.rainbow.configuration.configModel.Component
-import org.sa.rainbow.configuration.configModel.ConfigModelPackage
-import org.sa.rainbow.configuration.configModel.EffectorBody
-import org.sa.rainbow.configuration.configModel.Factory
-import org.sa.rainbow.configuration.configModel.GaugeBody
-import org.sa.rainbow.configuration.configModel.GaugeTypeBody
-import org.sa.rainbow.configuration.configModel.Probe
+import org.sa.rainbow.configuration.rcl.Assignment
+import org.sa.rainbow.configuration.rcl.CommandCall
+import org.sa.rainbow.configuration.rcl.CommandReference
+import org.sa.rainbow.configuration.rcl.Component
+import org.sa.rainbow.configuration.rcl.EffectorBody
+import org.sa.rainbow.configuration.rcl.Factory
+import org.sa.rainbow.configuration.rcl.GaugeBody
+import org.sa.rainbow.configuration.rcl.GaugeTypeBody
+import org.sa.rainbow.configuration.rcl.Probe
+import org.sa.rainbow.configuration.rcl.RclPackage
 
 /**
  * Customization of the default outline structure.
  * 
  * See https://www.eclipse.org/Xtext/documentation/310_eclipse_support.html#outline
  */
-class ConfigModelOutlineTreeProvider extends DefaultOutlineTreeProvider {
+class RclOutlineTreeProvider extends DefaultOutlineTreeProvider {
 
 	def Image nullImage() {
 		return null;
@@ -71,10 +71,10 @@ class ConfigModelOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		var EStructuralFeature ref = null
 		if (gtb.modelName != null || gtb.modeltype != null) {
 			model = '''«gtb.modelName===null?"":gtb.modelName»::«gtb.modeltype!=null?"":gtb.modeltype»'''
-			ref = ConfigModelPackage.Literals.GAUGE_BODY__MODEL_NAME
+			ref = RclPackage.Literals.GAUGE_BODY__MODEL_NAME
 		} else if (gtb.ref?.referable != null) {
 			model = '''«gtb.ref.referable.name»'''
-			ref = ConfigModelPackage.Literals.GAUGE_BODY__REF
+			ref = RclPackage.Literals.GAUGE_BODY__REF
 		}
 		if (ref !== null) {
 			createEStructuralFeatureNode(parentNode, gtb.eContainer, ref,
@@ -102,10 +102,10 @@ class ConfigModelOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		var EStructuralFeature ref = null
 		if (body.modelName != null || body.modeltype != null) {
 			model = '''«body.modelName===null?"":body.modelName»::«body.modeltype!=null?"":body.modeltype»'''
-			ref = ConfigModelPackage.Literals.EFFECTOR_BODY__MODEL_NAME
+			ref = RclPackage.Literals.EFFECTOR_BODY__MODEL_NAME
 		} else if (body.ref?.referable != null) {
 			model = '''«body.ref.referable.name»'''
-			ref = ConfigModelPackage.Literals.EFFECTOR_BODY__REF
+			ref = RclPackage.Literals.EFFECTOR_BODY__REF
 		}
 		if (ref !== null)
 			createEStructuralFeatureNode(parentNode, body, ref,
@@ -118,12 +118,12 @@ class ConfigModelOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	}
 
 	def _createNode(IOutlineNode parentNode, CommandReference cr) {
-		createEStructuralFeatureNode(parentNode, cr, ConfigModelPackage.Literals.COMMAND_REFERENCE__NAME, nullImage(),
+		createEStructuralFeatureNode(parentNode, cr, RclPackage.Literals.COMMAND_REFERENCE__NAME, nullImage(),
 			cr.name, true)
 	}
 
 	def _createNode(IOutlineNode parentNode, CommandCall cr) {
-		createEStructuralFeatureNode(parentNode, cr, ConfigModelPackage.Literals.COMMAND_CALL__NAME, nullImage(),
+		createEStructuralFeatureNode(parentNode, cr, RclPackage.Literals.COMMAND_CALL__NAME, nullImage(),
 			cr.name, true)
 	}
 
@@ -132,7 +132,7 @@ class ConfigModelOutlineTreeProvider extends DefaultOutlineTreeProvider {
 			super._createNode(parentNode, ass);
 
 		} else {
-			createEStructuralFeatureNode(parentNode, ass, ConfigModelPackage.Literals.ASSIGNMENT__NAME, nullImage(),
+			createEStructuralFeatureNode(parentNode, ass, RclPackage.Literals.ASSIGNMENT__NAME, nullImage(),
 				ass.name, true);
 		}
 	}

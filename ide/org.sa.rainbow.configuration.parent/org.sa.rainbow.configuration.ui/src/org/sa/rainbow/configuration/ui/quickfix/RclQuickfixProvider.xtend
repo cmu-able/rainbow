@@ -17,24 +17,24 @@ import org.eclipse.xtext.ui.editor.quickfix.DefaultQuickfixProvider
 import org.eclipse.xtext.ui.editor.quickfix.Fix
 import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor
 import org.eclipse.xtext.validation.Issue
-import org.sa.rainbow.configuration.configModel.Assignment
-import org.sa.rainbow.configuration.configModel.Component
-import org.sa.rainbow.configuration.configModel.ConfigModelPackage
-import org.sa.rainbow.configuration.configModel.Effector
-import org.sa.rainbow.configuration.configModel.EffectorBody
-import org.sa.rainbow.configuration.configModel.Gauge
-import org.sa.rainbow.configuration.configModel.GaugeBody
-import org.sa.rainbow.configuration.configModel.Probe
-import org.sa.rainbow.configuration.validation.ConfigModelValidator
+import org.sa.rainbow.configuration.rcl.Assignment
+import org.sa.rainbow.configuration.rcl.Component
+import org.sa.rainbow.configuration.rcl.Effector
+import org.sa.rainbow.configuration.rcl.EffectorBody
+import org.sa.rainbow.configuration.rcl.Gauge
+import org.sa.rainbow.configuration.rcl.GaugeBody
+import org.sa.rainbow.configuration.rcl.Probe
+import org.sa.rainbow.configuration.rcl.RclPackage
+import org.sa.rainbow.configuration.validation.RclValidator
 
 /**
  * Custom quickfixes.
  * 
  * See https://www.eclipse.org/Xtext/documentation/310_eclipse_support.html#quick-fixes
  */
-class ConfigModelQuickfixProvider extends DefaultQuickfixProvider {
+class RclQuickfixProvider extends DefaultQuickfixProvider {
 
-//	@Fix(ConfigModelValidator.INVALID_NAME)
+//	@Fix(RclValidator.INVALID_NAME)
 //	def capitalizeName(Issue issue, IssueResolutionAcceptor acceptor) {
 //		acceptor.accept(issue, 'Capitalize name', 'Capitalize the name.', 'upcase.png') [
 //			context |
@@ -43,7 +43,7 @@ class ConfigModelQuickfixProvider extends DefaultQuickfixProvider {
 //			xtextDocument.replace(issue.offset, 1, firstLetter.toUpperCase)
 //		]
 //	}
-//	@Fix(ConfigModelValidator.MUST_SUBCLASS)
+//	@Fix(RclValidator.MUST_SUBCLASS)
 //	def chooseSubclass(Issue issue, IssueResolutionAcceptor acceptor) {
 //		if (issue.data?.length != 1) return
 //		val subclasses = new LinkedList<String> ();
@@ -61,7 +61,7 @@ class ConfigModelQuickfixProvider extends DefaultQuickfixProvider {
 //	}
 //	@Inject
 //	private ReplacingAppendable.Factory appendableFactory;
-	@Fix(ConfigModelValidator.MISSING_PROPERTY)
+	@Fix(RclValidator.MISSING_PROPERTY)
 	def addMissingProperty(Issue issue, IssueResolutionAcceptor acceptor) {
 		if (issue.data?.length === 0) {
 			return;
@@ -189,10 +189,10 @@ class ConfigModelQuickfixProvider extends DefaultQuickfixProvider {
 						} else if (!gb.commands.empty) {
 							NodeModelUtils.findActualNodeFor(gb.commands.last).endOffset
 						} else if (gb.modeltype !== null) {
-							NodeModelUtils.findNodesForFeature(gb, ConfigModelPackage.Literals.GAUGE_BODY__MODELTYPE).
+							NodeModelUtils.findNodesForFeature(gb, RclPackage.Literals.GAUGE_BODY__MODELTYPE).
 								last.endOffset
 						}
-						return NodeModelUtils.findNodesForFeature(gb, ConfigModelPackage.Literals.GAUGE_BODY__REF).last.
+						return NodeModelUtils.findNodesForFeature(gb, RclPackage.Literals.GAUGE_BODY__REF).last.
 							endOffset
 
 					}

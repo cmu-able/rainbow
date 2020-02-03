@@ -2,7 +2,6 @@ package org.sa.rainbow.configuration;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
-import org.sa.rainbow.configuration.configModel.Value;
 
 public class Utils {
 
