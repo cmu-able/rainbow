@@ -889,4 +889,78 @@ All of the fields in the example above are required.
 
 ## Installing
 
+RCL is implemented as an Eclipse feature for Eclipse 4.1 onwards. The plugin provides 
+support for specification and code generation for RCL, and has minimal support for Acme 
+and Stitch. (Minimal means here that there is syntax highlighting and checking, but 
+no extensive typechecking -- the support simply pulls out names so that they can be 
+referred to in RCL files.) To install the feature, go to `Help>Install new software...` 
+and add the update site: `http://acme.able.cs.cmu.edu/public/rainbow/ide/updates` to 
+Eclipse. The Eclipse installation should also have Xtext and Java development environment 
+installed, as well as m2e for Maven support. 
+
+Once the feature is installed, to start a new target from scratch in a new Java project (that will contain code for 
+interacting with a new target system), the new Rainbow project should be used. This 
+is accessed through the `File>New Project...Rainbow/Rainbow Project` menu. This will 
+open a wizard that has the following pages:
+
+![New RCL page 1](imgs/new-rcl-1.png)
+
+![New RCL page 2](imgs/new-rcl-2.png)
+
+![New RCL page 3](imgs/new-rcl-3.png)
+
+The last page allows the project to be configured. The first (disabled) group specifies 
+teh directories used for various aspects of the deployment. Although these can be changed, 
+it is recommended to stay with the default layout.
+
+The second group specifies options for a new target definition within the deployment. For 
+`Deployment style` you can choose from `Single Machine`, which uses internal communication 
+for sending events etc. between Rainbow components. This can be chosen if Rainbow and 
+the target system will be running entirely on _one_ machine. Choose `Multiple Machines` 
+if the target system is distributed or will run on a different machine to Rainbow. This 
+creates a networked communication infrastructure. `Custom Deployment` will be chosen 
+only in the extremely rare circumstance that you have your own Port factory implemented.
+
+This will instruct the plugin to generate a new target definition with the target structure:
+
+```
++- <name>/
+ - properties.rbw 
+ -+- model/
+   - gauges.rbw
+ -+- system/
+   - probes.rbw
+   - effectors.rbw
+# These are generated if Use Acme and Stitch and 
+# Generate RCL Model Factory are selected
+ -+- stitch/
+   - stitch.s
+   - utilities.rbw
+- DefaultModelFactory.rbw  
+```
+
+Most of the generated files will have some pre-filled in content, but they will need 
+to be filled after the project is created. The `DefaultModelFactory` class should be 
+updated to something more meaningful. After creating, the project should look something 
+like:
+
+![Default project structure](imgs/example-project-stucture.png)
+
+Once the project is created, the Maven build paths should be set up. THis can be done 
+by right-clicking the project name, and running `Maven>Update Project` (or Alt-F5) in the 
+context menu.
+
+By default, the project is set up to depend on various Rainbow dependencies. Other dependencies 
+may be added by editing `pom.xml` (see [Maven Documentation](http://maven.apache.org/guides/index.html) 
+for more details about Maven).
+
+There is also a wizard for adding a new target definition to an existing deployment. 
+This can be accessed through `New>Other...Rainbow/Rainbow Target Directory`, which has 
+similar fields to the project wizard. The folder `src/main/resources/rbw` should be 
+chosen as the folder and the target given some name.
+
 ## Building Targets with Maven
+
+Rainbow deployments can be built outside of Eclipse with Maven. The generated `pom.xml` 
+file contains the necessary instructions for building the RCL files using Xtext, as 
+well as any Java classes that are created or generated.
