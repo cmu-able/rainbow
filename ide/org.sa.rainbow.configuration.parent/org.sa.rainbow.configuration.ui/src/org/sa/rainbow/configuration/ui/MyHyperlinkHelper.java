@@ -7,7 +7,6 @@ import org.eclipse.xtext.ui.editor.hyperlinking.HyperlinkHelper;
 public class MyHyperlinkHelper extends HyperlinkHelper {
 	@Override
 	public IHyperlink[] createHyperlinksByOffset(XtextResource resource, int offset, boolean createMultipleHyperlinks) {
-		System.out.println("here");
 		return super.createHyperlinksByOffset(resource, offset, createMultipleHyperlinks);
 	}
 }
