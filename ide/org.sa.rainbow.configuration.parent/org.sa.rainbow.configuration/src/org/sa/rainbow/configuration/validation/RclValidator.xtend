@@ -1085,7 +1085,7 @@ class RclValidator extends AbstractRclValidator {
 		if (!(iv.utilityModel.referable instanceof DeclaredProperty) || (iv.utilityModel.referable as DeclaredProperty)?.component !== ComponentType.UTILITY) {
 			error(
 				'''Impact vector referring to non-utility model «iv.utilityModel.referable?.name»''',
-				iv.utilityModel,
+				iv,
 				RclPackage.Literals.IMPACT_VECTOR__UTILITY_MODEL
 			)
 			return
