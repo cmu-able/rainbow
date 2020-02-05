@@ -34,6 +34,7 @@ import org.eclipse.xtext.ui.editor.syntaxcoloring.DefaultHighlightingConfigurati
 import org.sa.rainbow.configuration.ConfigAttributeConstants
 import org.sa.rainbow.configuration.ui.contentassist.RainbowJdtTypesProposalProvider
 import org.sa.rainbow.configuration.ui.contentassist.RainbowTemplateProposalProvider
+import org.eclipse.xtext.ui.editor.hyperlinking.HyperlinkHelper
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.
@@ -44,10 +45,11 @@ class RclUiModule extends AbstractRclUiModule {
 		return RclHyperlinkDetector
 	}
 	
+	
 	override bindITemplateProposalProvider() {
 		return RainbowTemplateProposalProvider;
 	}
-	
+		
 	def configureJvmTypeProvider(Binder binder) {
 		binder.requestStaticInjection(ConfigAttributeConstants)
 		binder.bind(AbstractTypeScopeProvider).annotatedWith(Names.named("jvmtypes")).to(JdtBasedSimpleTypeScopeProvider)
@@ -60,6 +62,7 @@ class RclUiModule extends AbstractRclUiModule {
 		super.configure(binder)
 		binder.bind(DefaultSemanticHighlightingCalculator).to(RclHighlighter)
 		binder.bind(DefaultHighlightingConfiguration).to(RclHighlightingConfiguration)
+		binder.bind(HyperlinkHelper).to(RclHyperlinkHelper)
 	}
 	
 //	@SingletonBinding override Class<? extends IBracePairProvider> bindIBracePairProvider() {
