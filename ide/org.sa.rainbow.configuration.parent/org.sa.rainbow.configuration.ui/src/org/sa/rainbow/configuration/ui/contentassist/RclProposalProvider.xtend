@@ -21,11 +21,11 @@ FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TOR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
 DEALINGS IN THE SOFTWARE.
  */
+
 import com.google.common.base.Predicate
 import com.google.common.collect.Sets
 import com.google.inject.Inject
 import com.google.inject.name.Named
-import com.sun.javafx.property.PropertyReference
 import java.util.Collection
 import java.util.HashSet
 import java.util.List
@@ -65,6 +65,7 @@ import org.sa.rainbow.configuration.rcl.GaugeType
 import org.sa.rainbow.configuration.rcl.IPLiteral
 import org.sa.rainbow.configuration.rcl.IntegerLiteral
 import org.sa.rainbow.configuration.rcl.Probe
+import org.sa.rainbow.configuration.rcl.PropertyReference
 import org.sa.rainbow.configuration.rcl.RclPackage
 import org.sa.rainbow.configuration.rcl.StringLiteral
 import org.sa.rainbow.configuration.services.RclGrammarAccess
