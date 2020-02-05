@@ -69,6 +69,11 @@ Workflow {
 				generate = true
 			}
 			
+			fragment = ui.codemining.CodeMiningFragment {
+				generateStub = true
+				generateXtendStub = false
+			}
+			
 
 		}
 	}

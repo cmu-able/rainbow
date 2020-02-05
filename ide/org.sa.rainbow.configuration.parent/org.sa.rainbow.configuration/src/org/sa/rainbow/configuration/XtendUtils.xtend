@@ -18,6 +18,7 @@ FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TOR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
 DEALINGS IN THE SOFTWARE.
  */
+
 import java.util.Map
 import java.util.Set
 import java.util.regex.Pattern
@@ -34,11 +35,13 @@ import org.eclipse.xtext.common.types.JvmDeclaredType
 import org.eclipse.xtext.common.types.JvmPrimitiveType
 import org.sa.rainbow.configuration.rcl.Assignment
 import org.sa.rainbow.configuration.rcl.BooleanLiteral
+import org.sa.rainbow.configuration.rcl.DeclaredProperty
 import org.sa.rainbow.configuration.rcl.DoubleLiteral
 import org.sa.rainbow.configuration.rcl.FormalParam
 import org.sa.rainbow.configuration.rcl.IPLiteral
 import org.sa.rainbow.configuration.rcl.IntegerLiteral
 import org.sa.rainbow.configuration.rcl.LogLiteral
+import org.sa.rainbow.configuration.rcl.PropertyReference
 import org.sa.rainbow.configuration.rcl.Reference
 import org.sa.rainbow.configuration.rcl.RichString
 import org.sa.rainbow.configuration.rcl.RichStringLiteral
@@ -101,6 +104,33 @@ class XtendUtils {
 		}
 	}
 	
+	
+	static def boolean isSimpleDeclaredProperty(DeclaredProperty p) {
+		val value = p?.^default?.value
+		val simple = switch value {
+			Reference | StringLiteral | BooleanLiteral | IntegerLiteral | DoubleLiteral | IPLiteral | LogLiteral : true
+			PropertyReference case value.referable instanceof DeclaredProperty: isSimpleDeclaredProperty(value.referable as DeclaredProperty)
+			default: false
+		}
+		simple
+	}
+	
+	
+	static def String valueOfSimpleDeclaredProperty(DeclaredProperty p) {
+		val value = p?.^default?.value
+		val sv = switch value {
+			StringLiteral : unpackString(value, false, true)
+			BooleanLiteral : Boolean.toString(value.isTrue)
+			IntegerLiteral : Integer.toString(value.value)
+			DoubleLiteral : Double.toString(value.value)
+			PropertyReference case value.referable instanceof DeclaredProperty: valueOfSimpleDeclaredProperty(value.referable as DeclaredProperty)
+			IPLiteral: value.value
+			LogLiteral: value.value.getName
+			Reference: value.referable.qualifiedName
+			default: ""
+		}
+		sv
+	}
 	static def String unpackString(StringLiteral literal, boolean strip, boolean completeProperties) {
 		if (!completeProperties) {
 			unpackString(literal, strip)
@@ -112,7 +142,7 @@ class XtendUtils {
 				if (expr instanceof RichStringLiteral) {
 					str.append((expr as RichStringLiteral).value.replaceAll("«", "").replaceAll("»", ""))
 				} else if (expr instanceof RichStringPart) {
-					val value = (expr as RichStringPart).referable.^default.value
+					val value = (expr as RichStringPart)?.referable?.^default?.value
 					val sv = switch value {
 						StringLiteral : unpackString(value, true, true)
 						BooleanLiteral: Boolean.toString(value.isTrue) 
