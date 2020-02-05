@@ -296,6 +296,13 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
                                                                                      .getName (), Arrays.toString
                         (actualCmd.getParameters ())));
     }
+    
+    protected Map<String,String> getParameters(IRainbowOperation operation) {
+    	Map<String,String> parameters = new HashMap<>();
+    	parameters.put(operation.getTarget(), operation.getTarget());
+    	Arrays.asList(operation.getParameters()).forEach(s -> parameters.put(s, s));
+    	return parameters;
+    }
 
     private OperationRepresentation formOperation (IRainbowOperation cmd,
                                                    Map<String, String> parameters,

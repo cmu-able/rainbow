@@ -4,48 +4,49 @@
 	<extension
 		point="org.eclipse.ui.editors">
 		<editor
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.ui.editor.XtextEditor"
-			contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
-			default="true"
-			extensions="rbw"
-			id="org.sa.rainbow.configuration.ConfigModel"
-			name="ConfigModel Editor">
+        class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.ui.editor.XtextEditor"
+        contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
+        default="true"
+        extensions="rbw"
+        id="org.sa.rainbow.configuration.Rcl"
+        icon="icons/rbw.png"
+        name="Rainbow Editor">
 		</editor>
 	</extension>
 	<extension
 		point="org.eclipse.ui.handlers">
 		<handler
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.ui.editor.hyperlinking.OpenDeclarationHandler"
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.ui.editor.hyperlinking.OpenDeclarationHandler"
 			commandId="org.eclipse.xtext.ui.editor.hyperlinking.OpenDeclaration">
 			<activeWhen>
 				<reference
-					definitionId="org.sa.rainbow.configuration.ConfigModel.Editor.opened">
+					definitionId="org.sa.rainbow.configuration.Rcl.Editor.opened">
 				</reference>
 			</activeWhen>
 		</handler>
 		<handler
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.ui.editor.handler.ValidateActionHandler"
-			commandId="org.sa.rainbow.configuration.ConfigModel.validate">
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.ui.editor.handler.ValidateActionHandler"
+			commandId="org.sa.rainbow.configuration.Rcp.validate">
 		<activeWhen>
 			<reference
-					definitionId="org.sa.rainbow.configuration.ConfigModel.Editor.opened">
+					definitionId="org.sa.rainbow.configuration.Rcl.Editor.opened">
 			</reference>
 		</activeWhen>
 		</handler>
 		<!-- copy qualified name -->
 		<handler
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedNameHandler"
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedNameHandler"
 			commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName">
 			<activeWhen>
-				<reference definitionId="org.sa.rainbow.configuration.ConfigModel.Editor.opened" />
+				<reference definitionId="org.sa.rainbow.configuration.Rcl.Editor.opened" />
 			</activeWhen>
 		</handler>
 		<handler
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.ui.editor.copyqualifiedname.OutlineCopyQualifiedNameHandler"
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.ui.editor.copyqualifiedname.OutlineCopyQualifiedNameHandler"
 			commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.OutlineCopyQualifiedName">
 			<activeWhen>
 				<and>
-					<reference definitionId="org.sa.rainbow.configuration.ConfigModel.XtextEditor.opened" />
+					<reference definitionId="org.sa.rainbow.configuration.Rcl.XtextEditor.opened" />
 					<iterate>
 						<adapt type="org.eclipse.xtext.ui.editor.outline.IOutlineNode" />
 					</iterate>
@@ -53,58 +54,36 @@
 			</activeWhen>
 		</handler>
 	</extension>
-	<extension point="org.eclipse.core.expressions.definitions">
-		<definition id="org.sa.rainbow.configuration.ConfigModel.Editor.opened">
-			<and>
-				<reference definitionId="isActiveEditorAnInstanceOfXtextEditor"/>
-				<with variable="activeEditor">
-					<test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName"
-						value="org.sa.rainbow.configuration.ConfigModel"
-						forcePluginActivation="true"/>
-				</with>
-			</and>
-		</definition>
-		<definition id="org.sa.rainbow.configuration.ConfigModel.XtextEditor.opened">
-			<and>
-				<reference definitionId="isXtextEditorActive"/>
-				<with variable="activeEditor">
-					<test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName"
-						value="org.sa.rainbow.configuration.ConfigModel"
-						forcePluginActivation="true"/>
-				</with>
-			</and>
-		</definition>
-	</extension>
 	<extension
 			point="org.eclipse.ui.preferencePages">
 		<page
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage"
-			id="org.sa.rainbow.configuration.ConfigModel"
-			name="ConfigModel">
-			<keywordReference id="org.sa.rainbow.configuration.ui.keyword_ConfigModel"/>
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage"
+			id="org.sa.rainbow.configuration.Rcl"
+			name="Rainbow RCL">
+			<keywordReference id="org.sa.rainbow.configuration.ui.keyword_Rcl"/>
 		</page>
 		<page
-			category="org.sa.rainbow.configuration.ConfigModel"
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.ui.editor.syntaxcoloring.SyntaxColoringPreferencePage"
-			id="org.sa.rainbow.configuration.ConfigModel.coloring"
+			category="org.sa.rainbow.configuration.Rcl"
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.ui.editor.syntaxcoloring.SyntaxColoringPreferencePage"
+			id="org.sa.rainbow.configuration.Rcl.coloring"
 			name="Syntax Coloring">
-			<keywordReference id="org.sa.rainbow.configuration.ui.keyword_ConfigModel"/>
+			<keywordReference id="org.sa.rainbow.configuration.ui.keyword_Rcl"/>
 		</page>
 		<page
-			category="org.sa.rainbow.configuration.ConfigModel"
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.ui.editor.templates.XtextTemplatePreferencePage"
-			id="org.sa.rainbow.configuration.ConfigModel.templates"
+			category="org.sa.rainbow.configuration.Rcl"
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.ui.editor.templates.XtextTemplatePreferencePage"
+			id="org.sa.rainbow.configuration.Rcl.templates"
 			name="Templates">
-			<keywordReference id="org.sa.rainbow.configuration.ui.keyword_ConfigModel"/>
+			<keywordReference id="org.sa.rainbow.configuration.ui.keyword_Rcl"/>
 		</page>
 	</extension>
 	<extension
 			point="org.eclipse.ui.propertyPages">
 		<page
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage"
-			id="org.sa.rainbow.configuration.ConfigModel"
-			name="ConfigModel">
-			<keywordReference id="org.sa.rainbow.configuration.ui.keyword_ConfigModel"/>
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage"
+			id="org.sa.rainbow.configuration.Rcl"
+			name="Rainbow RCL">
+			<keywordReference id="org.sa.rainbow.configuration.ui.keyword_Rcl"/>
 			<enabledWhen>
 				<adapt type="org.eclipse.core.resources.IProject"/>
 			</enabledWhen>
@@ -114,14 +93,14 @@
 	<extension
 		point="org.eclipse.ui.keywords">
 		<keyword
-			id="org.sa.rainbow.configuration.ui.keyword_ConfigModel"
-			label="ConfigModel"/>
+			id="org.sa.rainbow.configuration.ui.keyword_Rcl"
+			label="Rainbow RCL"/>
 	</extension>
 	<extension
 		point="org.eclipse.ui.commands">
 	<command
 			description="Trigger expensive validation"
-			id="org.sa.rainbow.configuration.ConfigModel.validate"
+			id="org.sa.rainbow.configuration.Rcl.validate"
 			name="Validate">
 	</command>
 	<!-- copy qualified name -->
@@ -142,12 +121,12 @@
 		<menuContribution
 			locationURI="popup:#TextEditorContext?after=group.edit">
 			 <command
-				 commandId="org.sa.rainbow.configuration.ConfigModel.validate"
+				 commandId="org.sa.rainbow.configuration.Rcl.validate"
 				 style="push"
 				 tooltip="Trigger expensive validation">
 			<visibleWhen checkEnabled="false">
 				<reference
-					definitionId="org.sa.rainbow.configuration.ConfigModel.Editor.opened">
+					definitionId="org.sa.rainbow.configuration.Rcl.Editor.opened">
 				</reference>
 			</visibleWhen>
 		</command>
@@ -157,7 +136,7 @@
 			<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName"
 				style="push" tooltip="Copy Qualified Name">
 				<visibleWhen checkEnabled="false">
-					<reference definitionId="org.sa.rainbow.configuration.ConfigModel.Editor.opened" />
+					<reference definitionId="org.sa.rainbow.configuration.Rcl.Editor.opened" />
 				</visibleWhen>
 			</command>
 		</menuContribution>
@@ -165,7 +144,7 @@
 			<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName"
 				style="push" tooltip="Copy Qualified Name">
 				<visibleWhen checkEnabled="false">
-					<reference definitionId="org.sa.rainbow.configuration.ConfigModel.Editor.opened" />
+					<reference definitionId="org.sa.rainbow.configuration.Rcl.Editor.opened" />
 				</visibleWhen>
 			</command>
 		</menuContribution>
@@ -174,7 +153,7 @@
 				style="push" tooltip="Copy Qualified Name">
 				<visibleWhen checkEnabled="false">
 					<and>
-						<reference definitionId="org.sa.rainbow.configuration.ConfigModel.XtextEditor.opened" />
+						<reference definitionId="org.sa.rainbow.configuration.Rcl.XtextEditor.opened" />
 						<iterate>
 							<adapt type="org.eclipse.xtext.ui.editor.outline.IOutlineNode" />
 						</iterate>
@@ -187,7 +166,7 @@
 		<menuContribution locationURI="popup:#TextEditorContext?endof=group.find">
 			<command commandId="org.eclipse.xtext.ui.editor.FindReferences">
 				<visibleWhen checkEnabled="false">
-					<reference definitionId="org.sa.rainbow.configuration.ConfigModel.Editor.opened">
+					<reference definitionId="org.sa.rainbow.configuration.Rcl.Editor.opened">
 					</reference>
 				</visibleWhen>
 			</command>
@@ -195,11 +174,11 @@
 	</extension>
 	<extension point="org.eclipse.ui.handlers">
 		<handler
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.ui.editor.findrefs.FindReferencesHandler"
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.ui.editor.findrefs.FindReferencesHandler"
 			commandId="org.eclipse.xtext.ui.editor.FindReferences">
 			<activeWhen>
 				<reference
-					definitionId="org.sa.rainbow.configuration.ConfigModel.Editor.opened">
+					definitionId="org.sa.rainbow.configuration.Rcl.Editor.opened">
 				</reference>
 			</activeWhen>
 		</handler>
@@ -208,8 +187,8 @@
 		<content-type
 			base-type="org.eclipse.core.runtime.text"
 			file-extensions="rbw"
-			id="org.sa.rainbow.configuration.ConfigModel.contenttype"
-			name="ConfigModel File"
+			id="org.sa.rainbow.configuration.Rcl.contenttype"
+			name="Rainbow RCL File"
 			priority="normal">
 		</content-type>
 	</extension>
@@ -217,68 +196,68 @@
 	<extension
 		point="org.eclipse.emf.ecore.extension_parser">
 		<parser
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
 			type="rbw">
 		</parser>
 	</extension>
 	<extension point="org.eclipse.xtext.extension_resourceServiceProvider">
 		<resourceServiceProvider
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
 			uriExtension="rbw">
 		</resourceServiceProvider>
 	</extension>
-	<!-- marker definitions for org.sa.rainbow.configuration.ConfigModel -->
+	<!-- marker definitions for org.sa.rainbow.configuration.Rcl -->
 	<extension
 			id="configmodel.check.fast"
-			name="ConfigModel Problem"
+			name="Rainbow RCL Problem"
 			point="org.eclipse.core.resources.markers">
 		<super type="org.eclipse.xtext.ui.check.fast"/>
 		<persistent value="true"/>
 	</extension>
 	<extension
 			id="configmodel.check.normal"
-			name="ConfigModel Problem"
+			name="Rainbow RCL Problem"
 			point="org.eclipse.core.resources.markers">
 		<super type="org.eclipse.xtext.ui.check.normal"/>
 		<persistent value="true"/>
 	</extension>
 	<extension
 			id="configmodel.check.expensive"
-			name="ConfigModel Problem"
+			name="Rainbow RCL Problem"
 			point="org.eclipse.core.resources.markers">
 		<super type="org.eclipse.xtext.ui.check.expensive"/>
 		<persistent value="true"/>
 	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
 		<page
-			category="org.sa.rainbow.configuration.ConfigModel"
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.ui.validation.ValidatorPreferencePage"
-			id="org.sa.rainbow.configuration.ConfigModel.validator.preferencePage"
+			category="org.sa.rainbow.configuration.Rcl"
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.ui.validation.ValidatorPreferencePage"
+			id="org.sa.rainbow.configuration.Rcl.validator.preferencePage"
 			name="Errors/Warnings">
-			<keywordReference id="org.sa.rainbow.configuration.ui.keyword_ConfigModel"/>
+			<keywordReference id="org.sa.rainbow.configuration.ui.keyword_Rcl"/>
 		</page>
 	</extension>
 	<extension point="org.eclipse.xtext.builder.participant">
 		<participant
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.builder.IXtextBuilderParticipant"
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.builder.IXtextBuilderParticipant"
 			fileExtensions="rbw"/>
 	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
 		<page
-			category="org.sa.rainbow.configuration.ConfigModel"
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.builder.preferences.BuilderPreferencePage"
-			id="org.sa.rainbow.configuration.ConfigModel.compiler.preferencePage"
+			category="org.sa.rainbow.configuration.Rcl"
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.builder.preferences.BuilderPreferencePage"
+			id="org.sa.rainbow.configuration.Rcl.compiler.preferencePage"
 			name="Compiler">
-			<keywordReference id="org.sa.rainbow.configuration.ui.keyword_ConfigModel"/>
+			<keywordReference id="org.sa.rainbow.configuration.ui.keyword_Rcl"/>
 		</page>
 	</extension>
 	<extension point="org.eclipse.ui.propertyPages">
 		<page
-			category="org.sa.rainbow.configuration.ConfigModel"
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.builder.preferences.BuilderPreferencePage"
-			id="org.sa.rainbow.configuration.ConfigModel.compiler.propertyPage"
+			category="org.sa.rainbow.configuration.Rcl"
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.builder.preferences.BuilderPreferencePage"
+			id="org.sa.rainbow.configuration.Rcl.compiler.propertyPage"
 			name="Compiler">
-			<keywordReference id="org.sa.rainbow.configuration.ui.keyword_ConfigModel"/>
+			<keywordReference id="org.sa.rainbow.configuration.ui.keyword_Rcl"/>
 			<enabledWhen>
 				<adapt type="org.eclipse.core.resources.IProject"/>
 			</enabledWhen>
@@ -289,20 +268,20 @@
 		<menuContribution locationURI="popup:#TextEditorContext?after=xtext.ui.openDeclaration">
 			<command
 				commandId="org.eclipse.xtext.ui.OpenGeneratedFileCommand"
-				id="org.sa.rainbow.configuration.ConfigModel.OpenGeneratedCode"
+				id="org.sa.rainbow.configuration.Rcl.OpenGeneratedCode"
 				style="push">
 				<visibleWhen checkEnabled="false">
-					<reference definitionId="org.sa.rainbow.configuration.ConfigModel.Editor.opened" />
+					<reference definitionId="org.sa.rainbow.configuration.Rcl.Editor.opened" />
 				</visibleWhen>
 			</command>
 		</menuContribution>
 	</extension>
 	<extension point="org.eclipse.ui.handlers">
 		<handler
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.ui.generator.trace.OpenGeneratedFileHandler"
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.ui.generator.trace.OpenGeneratedFileHandler"
 			commandId="org.eclipse.xtext.ui.OpenGeneratedFileCommand">
 			<activeWhen>
-				<reference definitionId="org.sa.rainbow.configuration.ConfigModel.Editor.opened" />
+				<reference definitionId="org.sa.rainbow.configuration.Rcl.Editor.opened" />
 			</activeWhen>
 		</handler>
 	</extension>
@@ -310,11 +289,11 @@
 	<extension
 		point="org.eclipse.ui.handlers">
 		<handler 
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.ui.editor.outline.quickoutline.ShowQuickOutlineActionHandler"
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.ui.editor.outline.quickoutline.ShowQuickOutlineActionHandler"
 			commandId="org.eclipse.xtext.ui.editor.outline.QuickOutline">
 			<activeWhen>
 				<reference
-					definitionId="org.sa.rainbow.configuration.ConfigModel.Editor.opened">
+					definitionId="org.sa.rainbow.configuration.Rcl.Editor.opened">
 				</reference>
 			</activeWhen>
 		</handler>
@@ -326,6 +305,16 @@
 			id="org.eclipse.xtext.ui.editor.outline.QuickOutline"
 			name="Quick Outline">
 		</command>
+  <command
+        id="org.sa.rainbow.configuration.ui.insertLeftGuillemet"
+        name="Insert left guillemet"
+        description="Inserts an opening french quote">
+  </command>
+  <command
+        id="org.sa.rainbow.configuration.ui.insertRightGuillemet"
+        name="Insert right gulliment."
+        description="Inserts a closing french quote">
+  </command>
 	</extension>
 	<extension point="org.eclipse.ui.menus">
 		<menuContribution
@@ -334,16 +323,16 @@
 				style="push"
 				tooltip="Open Quick Outline">
 				<visibleWhen checkEnabled="false">
-					<reference definitionId="org.sa.rainbow.configuration.ConfigModel.Editor.opened"/>
+					<reference definitionId="org.sa.rainbow.configuration.Rcl.Editor.opened"/>
 				</visibleWhen>
 			</command>
 		</menuContribution>
 	</extension>
-	<!-- quickfix marker resolution generator for org.sa.rainbow.configuration.ConfigModel -->
+	<!-- quickfix marker resolution generator for org.sa.rainbow.configuration.Rcl -->
 	<extension
 			point="org.eclipse.ui.ide.markerResolution">
 		<markerResolutionGenerator
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
 			markerType="org.sa.rainbow.configuration.ui.configmodel.check.fast">
 			<attribute
 				name="FIXABLE_KEY"
@@ -351,7 +340,7 @@
 			</attribute>
 		</markerResolutionGenerator>
 		<markerResolutionGenerator
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
 			markerType="org.sa.rainbow.configuration.ui.configmodel.check.normal">
 			<attribute
 				name="FIXABLE_KEY"
@@ -359,7 +348,7 @@
 			</attribute>
 		</markerResolutionGenerator>
 		<markerResolutionGenerator
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
 			markerType="org.sa.rainbow.configuration.ui.configmodel.check.expensive">
 			<attribute
 				name="FIXABLE_KEY"
@@ -370,11 +359,11 @@
 	<!-- Rename Refactoring -->
 	<extension point="org.eclipse.ui.handlers">
 		<handler 
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.ui.refactoring.ui.DefaultRenameElementHandler"
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.ui.refactoring.ui.DefaultRenameElementHandler"
 			commandId="org.eclipse.xtext.ui.refactoring.RenameElement">
 			<activeWhen>
 				<reference
-					definitionId="org.sa.rainbow.configuration.ConfigModel.Editor.opened">
+					definitionId="org.sa.rainbow.configuration.Rcl.Editor.opened">
 				</reference>
 			</activeWhen>
 		</handler>
@@ -386,7 +375,7 @@
 				style="push">
 				<visibleWhen checkEnabled="false">
 					<reference
-						definitionId="org.sa.rainbow.configuration.ConfigModel.Editor.opened">
+						definitionId="org.sa.rainbow.configuration.Rcl.Editor.opened">
 					</reference>
 				</visibleWhen>
 			</command>
@@ -394,34 +383,34 @@
 	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
 		<page
-			category="org.sa.rainbow.configuration.ConfigModel"
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.ui.refactoring.ui.RefactoringPreferencePage"
-			id="org.sa.rainbow.configuration.ConfigModel.refactoring"
+			category="org.sa.rainbow.configuration.Rcl"
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.ui.refactoring.ui.RefactoringPreferencePage"
+			id="org.sa.rainbow.configuration.Rcl.refactoring"
 			name="Refactoring">
-			<keywordReference id="org.sa.rainbow.configuration.ui.keyword_ConfigModel"/>
+			<keywordReference id="org.sa.rainbow.configuration.ui.keyword_Rcl"/>
 		</page>
 	</extension>
 	<extension point="org.eclipse.compare.contentViewers">
-		<viewer id="org.sa.rainbow.configuration.ConfigModel.compare.contentViewers"
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
+		<viewer id="org.sa.rainbow.configuration.Rcl.compare.contentViewers"
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
 			extensions="rbw">
 		</viewer>
 		<contentTypeBinding
-			contentTypeId="org.sa.rainbow.configuration.ConfigModel.contenttype"
-			contentViewerId="org.sa.rainbow.configuration.ConfigModel.compare.contentViewers" />
+			contentTypeId="org.sa.rainbow.configuration.Rcl.contenttype"
+			contentViewerId="org.sa.rainbow.configuration.Rcl.compare.contentViewers" />
 	</extension>
 	<extension point="org.eclipse.compare.contentMergeViewers">
-		<viewer id="org.sa.rainbow.configuration.ConfigModel.compare.contentMergeViewers"
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
-			extensions="rbw" label="ConfigModel Compare">
+		<viewer id="org.sa.rainbow.configuration.Rcl.compare.contentMergeViewers"
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
+			extensions="rbw" label="Rcl Compare">
 		</viewer>
 		<contentTypeBinding
-			contentTypeId="org.sa.rainbow.configuration.ConfigModel.contenttype"
-			contentMergeViewerId="org.sa.rainbow.configuration.ConfigModel.compare.contentMergeViewers" />
+			contentTypeId="org.sa.rainbow.configuration.Rcl.contenttype"
+			contentMergeViewerId="org.sa.rainbow.configuration.Rcl.compare.contentMergeViewers" />
 	</extension>
 	<extension point="org.eclipse.ui.editors.documentProviders">
-		<provider id="org.sa.rainbow.configuration.ConfigModel.editors.documentProviders"
-			class="org.sa.rainbow.configuration.ui.ConfigModelExecutableExtensionFactory:org.eclipse.xtext.ui.editor.model.XtextDocumentProvider"
+		<provider id="org.sa.rainbow.configuration.Rcl.editors.documentProviders"
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.ui.editor.model.XtextDocumentProvider"
 			extensions="rbw">
 		</provider>
 	</extension>
@@ -430,5 +419,166 @@
 			extension="rbw"
 			type="text">
 		</fileTypes>
+	</extension>
+	   <extension point="org.eclipse.core.expressions.definitions">
+        <definition id="org.sa.rainbow.configuration.Rcl.Editor.opened">
+			<and>
+				<reference definitionId="isActiveEditorAnInstanceOfXtextEditor"/>
+				<with variable="activeEditor">
+					<test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName"
+						value="org.sa.rainbow.configuration.Rcl"
+						forcePluginActivation="true"/>
+				</with>
+			</and>
+		</definition>
+		<definition id="org.sa.rainbow.configuration.Rcl.XtextEditor.opened">
+			<and>
+				<reference definitionId="isXtextEditorActive"/>
+				<with variable="activeEditor">
+					<test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName"
+						value="org.sa.rainbow.configuration.Rcl"
+						forcePluginActivation="true"/>
+				</with>
+			</and>
+		</definition>
+     </extension>
+	<extension
+         point="org.eclipse.ui.contexts">
+      <context
+            description="Rainbow Configuration Editor"
+            id="org.sa.rainbow.configuration.ide.RCLEditorScope"
+            name="RCLContext"
+            parentId="org.eclipse.xtext.ui.XtextEditorScope">
+      </context>
+   </extension>
+ <extension
+       point="org.eclipse.ui.bindings">
+       
+     <key
+     	  contextId="org.sa.rainbow.configuration.ide.RCLEditorScope"
+          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+          sequence="M1+&lt;"
+          commandId="org.sa.rainbow.configuration.ui.insertLeftGuillemet"
+          >
+    </key>
+    <key
+          contextId="org.sa.rainbow.configuration.ide.RCLEditorScope"
+          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+          sequence="M1+&gt;"
+          commandId="org.sa.rainbow.configuration.ui.insertRightGuillemet"
+          >
+    </key>
+     <key
+     	  contextId="org.sa.rainbow.configuration.ide.RCLEditorScope"
+          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+          sequence="M4+&lt;"
+          commandId="org.sa.rainbow.configuration.ui.insertLeftGuillemet"
+          >
+    </key>
+    <key
+          contextId="org.sa.rainbow.configuration.ide.RCLEditorScope"
+          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+          sequence="M4+&gt;"
+          commandId="org.sa.rainbow.configuration.ui.insertRightGuillemet"
+          >
+    </key>
+ </extension>
+ <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.sa.rainbow.configuration.ui.commands.InsertStringHandler$LeftGuillemet"
+            commandId="org.sa.rainbow.configuration.ui.insertRightGuillemet">
+            <!--
+            <activeWhen>
+				<reference
+					definitionId="org.eclipse.xtend.core.Xtend.Editor.opened">
+				</reference>
+			</activeWhen>
+			-->
+      </handler>
+      <handler
+            class="org.sa.rainbow.configuration.ui.commands.InsertStringHandler$RightGuillemet"
+            commandId="org.sa.rainbow.configuration.ui.insertLeftGuillemet">
+           	<activeWhen>
+				<reference
+					definitionId="org.sa.rainbow.configuration.Rcl.Editor.opened">
+				</reference>
+			</activeWhen>
+      </handler>
+   </extension>
+   	<extension
+		point="org.eclipse.ui.newWizards">
+		<category id="org.sa.rainbow.configuration.ui.category" name="Rainbow">
+		</category>
+		<wizard
+			category="org.sa.rainbow.configuration.ui.category"
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.xtext.ui.wizard.template.TemplateNewProjectWizard"
+			id="org.sa.rainbow.configuration.ui.wizard.RclNewProjectWizard"
+			name="Rainbow Project"
+			icon="icons/rainbow_project.gif"
+			project="true">
+		</wizard>
+	</extension>
+	<extension
+		point="org.eclipse.xtext.ui.projectTemplate">
+		<projectTemplateProvider
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.sa.rainbow.configuration.ui.wizard.RclProjectTemplateProvider"
+			grammarName="org.sa.rainbow.configuration.Rcl">
+		</projectTemplateProvider>
+	</extension>
+	<extension
+		point="org.eclipse.ui.perspectiveExtensions">
+		<perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
+			<newWizardShortcut id="org.sa.rainbow.configuration.ui.wizard.RclNewProjectWizard"/>
+		</perspectiveExtension>
+		<perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
+			<newWizardShortcut id="org.sa.rainbow.configuration.ui.wizard.RclNewProjectWizard"/>
+		</perspectiveExtension>
+	</extension>
+	<extension
+		point="org.eclipse.ui.newWizards">
+		<category id="org.sa.rainbow.configuration.ui.category" name="Rainbow">
+		</category>
+		<wizard
+			category="org.sa.rainbow.configuration.ui.category"
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.sa.rainbow.configuration.ui.wizard.TemplateNewTargetWizard"
+			id="org.sa.rainbow.configuration.ui.wizard.ConfigModelNewFileWizard"
+			name="Rainbow Target Directory"
+			icon="icons/new_ConfigModel_file.png">
+		</wizard>
+	</extension>
+	<extension
+		point="org.eclipse.xtext.ui.fileTemplate">
+		<fileTemplateProvider
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.sa.rainbow.configuration.ui.wizard.RclFileTemplateProvider"
+			grammarName="org.sa.rainbow.configuration.Rcl">
+		</fileTemplateProvider>
+	</extension>
+	<extension
+		point="org.eclipse.ui.perspectiveExtensions">
+		<perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
+			<newWizardShortcut id="org.sa.rainbow.configuration.ui.wizard.RclNewFileWizard"/>
+		</perspectiveExtension>
+		<perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
+			<newWizardShortcut id="org.sa.rainbow.configuration.ui.wizard.RclNewFileWizard"/>
+		</perspectiveExtension>
+	</extension>
+	<!-- code mining -->
+	<extension point="org.eclipse.ui.workbench.texteditor.codeMiningProviders">
+		<codeMiningProvider
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.jface.text.codemining.ICodeMiningProvider"
+			id="org.sa.rainbow.configuration.Rcl.CodeMiningProvider"
+			label="Rcl Codemining">
+			<enabledWhen>
+				<with variable="editorInput">
+					<adapt type="org.eclipse.core.resources.IFile">
+						<test
+							property="org.eclipse.core.resources.contentTypeId"
+							value="org.sa.rainbow.configuration.Rcl.contenttype">
+						</test>
+					</adapt>
+				</with>
+			</enabledWhen>
+		</codeMiningProvider>
 	</extension>
 </plugin>

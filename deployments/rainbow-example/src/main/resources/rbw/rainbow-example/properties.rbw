@@ -1,7 +1,7 @@
 target rainbow-example
+import properties "model/gauges.rbw"
 import acme "model/swim.acme" 
 import factory "../SwimModelFactory.rbw"
-import properties "model/gauges.rbw"
 ################################################################################
 # Purpose:  Common configuration file for the Rainbow infrastructure.
 #           Properties are loaded by class org.sa.rainbow.Rainbow .
@@ -26,9 +26,9 @@ def event.log.path = "log"
 def logging.path = "«event.log.path»/rainbow.out" 
 def monitoring.log.path = "«event.log.path»/rainbow-data.log"
 # (default)
-#logging.pattern = "%d{ISO8601/yyyy-MM-dd HH:mm:ss.SSS} [%t] %p %c %x - %m%n"
-#logging.max.size = 1024
-#logging.max.backups = 5
+#def logging.pattern = "%d{ISO8601/yyyy-MM-dd HH:mm:ss.SSS} [%t] %p %c %x - %m%n"
+#def logging.max.size = 1024
+#def logging.max.backups = 5
 
 ### Rainbow component customization
 ## Rainbow host info and communication infrastructure
@@ -58,7 +58,7 @@ def model SwimSys= {
 
 # Rainbow Utility Model
 def model USwimSys = {
-	name="SwimSys"
+	name="SwimSys" 
 	//^type="Utility"
 	path="stitch/utilities.yml" 
 	^factory=org.sa.rainbow.^model.^utility.UtilityCommandFactory    
@@ -70,13 +70,13 @@ def analysis ArchEvaluator = {
 }
 
 
-def adaptation-manager AdaptationManager = {
+def adaptation-manager AdaptationManager = { 
 	^model=««SwimSys»»
 	class=org.sa.rainbow.^stitch.adaptation.AdaptationManager
 }
 
 def executor StitchExecutor = {
-	^model=««SwimSys»»
+	^model=««SwimSys»» 
 	class=org.sa.rainbow.^stitch.adaptation.StitchExecutor
 }
 
@@ -159,8 +159,6 @@ def gui rainbow.^gui = {
 	}
 }
 
-def rainbow.^gui=org.sa.rainbow.^gui.RainbowWindoe
-def rainbow.^gui.specs = "ui.yml"
 
 def customize.^model.evaluate.period = 60000
 def customize.^model.timeseriespredictor.args="LES 0.8 0.15"
@@ -171,8 +169,6 @@ def customize.^model.timeseriespredictor.traininglength=15
 def customize.gauges.path = "model/gauges.yml"
 #- Probe spec
 def customize.probes.path = "system/probes.yml"
-#- Operator spec as mapping to effector
-def customize.archop.map.path = "model/op.map"
 #- Effector spec
 def customize.effectors.path = "system/effectors.yml"
 ## Adaptation Manager
@@ -184,7 +180,7 @@ def customize.^utility.trackStrategy = "uC"
 def customize.^utility.score.minimum.threshold = 0.033
 def customize.^utility.scenario = "scenario 1"
 #- Whether to enable prediction, ONLY enable if system has predictor probes! 
-#customize.prediction.enable = false
+#def customize.prediction.enable = false
 
 ## System configuration information 
 # These properties may be referred to in various files
@@ -199,7 +195,6 @@ def customize.system.^target.web0 = 1
 def customize.system.^target.web0.httpPort = 1080
 def customize.system.^target.web1 = 2
 def customize.system.^target.web1.httpPort = 1080
-def customize.system.^target.db = 10.0.0.21
 def customize.system.^target.web2 = 3
 def customize.system.^target.web2.httpPort=1080
 

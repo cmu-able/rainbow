@@ -12,6 +12,7 @@ Research into Rainbow at CMU can be found in quite a few papers, detailed on the
 - [Building from Source](#building)
 - [New and Noteworthy in Rainbow Yellow](NewAndNoteworthy.md)
 - [Rainbow Simple Example Setup](deployments/rainbow-example/docker/INSTRUCTIONS.md)
+- [Rainbow Configuration IDE with Eclipse and XText](documents/RCL.md)
 
 ## Repository organization
 This repository is organized into the following folders:
@@ -19,7 +20,7 @@ This repository is organized into the following folders:
 - **libs**: Contains the source of some in-house libraries used by Rainbow for distributed communication.
 - **rainbow**: Contains Rainbow framework code, including definition of general Acme models for use inside the Models Manager, and the source for the adaptation language *Stitch*.
 - **deployments**: Contains code to implement various specializations of Rainbow used in research projects
-- **ide**: Contains code to implement specialized UIs, IDE integration, etc. that are probably not of general interest but are here for completeness.
+- **ide**: Contains code to implement specialized UIs, IDE integration, etc. The Eclipse Rainbow configuration plugins live here, as well as some redundant and old code.
 - **documents**: Contains various documentation associated with using Rainbow
 - **scripts**: Contains the scripts that are placed in the deployment that is constructed when building Rainbow
 - **target-system/znn**: Contains the code for implementing one of the benchmark systems described in papers, ZNN.

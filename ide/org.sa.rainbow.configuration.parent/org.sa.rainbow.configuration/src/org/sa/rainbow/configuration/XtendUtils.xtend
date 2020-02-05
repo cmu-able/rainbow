@@ -1,4 +1,23 @@
 package org.sa.rainbow.configuration
+/*
+Copyright 2020 Carnegie Mellon University
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this 
+software and associated documentation files (the "Software"), to deal in the Software 
+without restriction, including without limitation the rights to use, copy, modify, merge,
+ publish, distribute, sublicense, and/or sell copies of the Software, and to permit 
+ persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all 
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
+PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
+FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+DEALINGS IN THE SOFTWARE.
+ */
 
 import java.util.Map
 import java.util.Set
@@ -14,12 +33,20 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.common.types.JvmDeclaredType
 import org.eclipse.xtext.common.types.JvmPrimitiveType
-import org.sa.rainbow.configuration.configModel.Assignment
-import org.sa.rainbow.configuration.configModel.FormalParam
-import org.sa.rainbow.configuration.configModel.RichString
-import org.sa.rainbow.configuration.configModel.RichStringLiteral
-import org.sa.rainbow.configuration.configModel.RichStringPart
-import org.sa.rainbow.configuration.configModel.StringLiteral
+import org.sa.rainbow.configuration.rcl.Assignment
+import org.sa.rainbow.configuration.rcl.BooleanLiteral
+import org.sa.rainbow.configuration.rcl.DeclaredProperty
+import org.sa.rainbow.configuration.rcl.DoubleLiteral
+import org.sa.rainbow.configuration.rcl.FormalParam
+import org.sa.rainbow.configuration.rcl.IPLiteral
+import org.sa.rainbow.configuration.rcl.IntegerLiteral
+import org.sa.rainbow.configuration.rcl.LogLiteral
+import org.sa.rainbow.configuration.rcl.PropertyReference
+import org.sa.rainbow.configuration.rcl.Reference
+import org.sa.rainbow.configuration.rcl.RichString
+import org.sa.rainbow.configuration.rcl.RichStringLiteral
+import org.sa.rainbow.configuration.rcl.RichStringPart
+import org.sa.rainbow.configuration.rcl.StringLiteral
 
 class XtendUtils {
 		static def formalTypeName(FormalParam fp, boolean keepSimple) {
@@ -74,6 +101,71 @@ class XtendUtils {
 		}
 		else {
 			throw new IllegalArgumentException ("Don't know how to convert parameter " + p.name)
+		}
+	}
+	
+	
+	static def boolean isSimpleDeclaredProperty(DeclaredProperty p) {
+		val value = p?.^default?.value
+		val simple = switch value {
+			Reference | StringLiteral | BooleanLiteral | IntegerLiteral | DoubleLiteral | IPLiteral | LogLiteral : true
+			PropertyReference case value.referable instanceof DeclaredProperty: isSimpleDeclaredProperty(value.referable as DeclaredProperty)
+			default: false
+		}
+		simple
+	}
+	
+	
+	static def String valueOfSimpleDeclaredProperty(DeclaredProperty p) {
+		val value = p?.^default?.value
+		val sv = switch value {
+			StringLiteral : unpackString(value, false, true)
+			BooleanLiteral : Boolean.toString(value.isTrue)
+			IntegerLiteral : Integer.toString(value.value)
+			DoubleLiteral : Double.toString(value.value)
+			PropertyReference case value.referable instanceof DeclaredProperty: valueOfSimpleDeclaredProperty(value.referable as DeclaredProperty)
+			IPLiteral: value.value
+			LogLiteral: value.value.getName
+			Reference: value.referable.qualifiedName
+			default: ""
+		}
+		sv
+	}
+	static def String unpackString(StringLiteral literal, boolean strip, boolean completeProperties) {
+		if (!completeProperties) {
+			unpackString(literal, strip)
+		}
+		else { 
+			val rich = literal as RichString
+			var str = new StringBuilder()
+			for (expr : rich.expressions) {
+				if (expr instanceof RichStringLiteral) {
+					str.append((expr as RichStringLiteral).value.replaceAll("«", "").replaceAll("»", ""))
+				} else if (expr instanceof RichStringPart) {
+					val value = (expr as RichStringPart)?.referable?.^default?.value
+					val sv = switch value {
+						StringLiteral : unpackString(value, true, true)
+						BooleanLiteral: Boolean.toString(value.isTrue) 
+						IntegerLiteral : Integer.toString(value.value)
+						DoubleLiteral: Double.toString(value.value)
+						IPLiteral: value.value
+						LogLiteral: value.value.getName
+						Reference: value.referable.qualifiedName
+						default: '''${«(expr as RichStringPart).referable.name»}'''
+						
+					}
+					str.append(sv)
+				}
+			}
+			if (strip) {
+				var s = str.toString()
+				s = s.trim()
+				if ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'"))) {
+					s = s.substring(1, s.length - 1)
+				}
+				return s
+			}
+			return str.toString
 		}
 	}
 	

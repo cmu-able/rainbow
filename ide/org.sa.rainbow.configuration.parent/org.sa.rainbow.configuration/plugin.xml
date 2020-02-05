@@ -3,8 +3,8 @@
 <plugin>
 	<extension point="org.eclipse.emf.ecore.generated_package">
 		<package 
-			uri = "http://www.sa.org/rainbow/configuration/ConfigModel"
-			class = "org.sa.rainbow.configuration.configModel.ConfigModelPackage"
-			genModel = "model/generated/ConfigModel.genmodel" />
+			uri = "http://www.sa.org/rainbow/configuration/RCL"
+			class = "org.sa.rainbow.configuration.rcl.RclPackage"
+			genModel = "model/generated/Rcl.genmodel" />
 	</extension>
 </plugin>

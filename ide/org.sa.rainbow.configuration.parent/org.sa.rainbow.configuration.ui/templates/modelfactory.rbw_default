@@ -1,0 +1,5 @@
+
+model factory <<factoryName>> yields AFactoryClass {
+
+	command load is ...
+}

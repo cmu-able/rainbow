@@ -25,6 +25,7 @@
 		<module>org.sa.rainbow.stitch.ui</module>
 		<module>org.sa.rainbow.stitch.web</module>
 		<module>org.sa.rainbow.stitch.target</module>
+		<module>org.sa.rainbow.stitch.feature</module>
 		<module>org.sa.rainbow.stitch.tests</module>
 		<module>org.sa.rainbow.stitch.ui.tests</module>
 	</modules>
@@ -46,6 +47,47 @@
 				<artifactId>tycho-maven-plugin</artifactId>
 				<version>${tycho-version}</version>
 				<extensions>true</extensions>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-source-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<executions>
+					<execution>
+						<id>plugin-source</id>
+						<goals>
+							<goal>plugin-source</goal>
+						</goals>
+					</execution>
+				</executions>	
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho.extras</groupId>
+				<artifactId>tycho-source-feature-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<executions>
+					<execution>
+						<id>source-feature</id>
+						<phase>package</phase>
+						<goals>
+							<goal>source-feature</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-p2-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<executions>
+					<execution>
+						<id>attach-p2-metadata</id>
+						<phase>package</phase>
+						<goals>
+							<goal>p2-metadata</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
@@ -251,6 +293,14 @@
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
+		</repository>
+		<!-- We define a single repository which is accessible through web-dav. 
+			The format (for webdav repositories) is dav:http://[<username>[:<password>]]@<host>[:<port>]/<path> -->
+		<repository>
+			<id>able.maven.repository</id>
+			<url>
+				dav:http://acme.able.cs.cmu.edu/maven-repository
+			</url>
 		</repository>
 	</repositories>
 	<pluginRepositories>

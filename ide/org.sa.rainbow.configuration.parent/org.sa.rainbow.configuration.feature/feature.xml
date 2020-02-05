@@ -1,23 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<feature id="org.sa.rainbow.configuration.feature"
-	label="ConfigModel Feature "
-	version="1.0.0.qualifier">
-	<plugin
-			id="org.sa.rainbow.configuration"
-			download-size="0"
-			install-size="0"
-			version="0.0.0"
-			unpack="false"/>
-	<plugin
-			id="org.sa.rainbow.configuration.ide"
-			download-size="0"
-			install-size="0"
-			version="0.0.0"
-			unpack="false"/>
-	<plugin
-			id="org.sa.rainbow.configuration.ui"
-			download-size="0"
-			install-size="0"
-			version="0.0.0"
-			unpack="false"/>
+<feature
+      id="org.sa.rainbow.configuration.feature"
+      label="ConfigModel Feature "
+      version="1.0.0.qualifier">
+
+   <description>
+      The configuration DSL for Rainbow as an Eclipse Plugin.
+   </description>
+
+   <includes
+         id="org.acme.xtext.feature"
+         version="1.0.0.qualifier"/>
+
+   <includes
+         id="org.sa.rainbow.stitch.feature"
+         version="1.0.0.qualifier"/>
+
+   <plugin
+         id="org.sa.rainbow.configuration"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.sa.rainbow.configuration.ide"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.sa.rainbow.configuration.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
 </feature>

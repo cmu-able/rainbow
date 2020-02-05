@@ -1,5 +1,23 @@
 package org.sa.rainbow.configuration
+/*
+Copyright 2020 Carnegie Mellon University
 
+Permission is hereby granted, free of charge, to any person obtaining a copy of this 
+software and associated documentation files (the "Software"), to deal in the Software 
+without restriction, including without limitation the rights to use, copy, modify, merge,
+ publish, distribute, sublicense, and/or sell copies of the Software, and to permit 
+ persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all 
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
+PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
+FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+DEALINGS IN THE SOFTWARE.
+ */
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import java.util.Collections
@@ -8,30 +26,30 @@ import java.util.HashSet
 import java.util.Map
 import java.util.Set
 import javax.swing.JPanel
+import javax.swing.JTabbedPane
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.common.types.JvmType
 import org.eclipse.xtext.common.types.access.IJvmTypeProvider
 import org.eclipse.xtext.common.types.util.RawSuperTypes
-import org.sa.rainbow.configuration.configModel.Array
-import org.sa.rainbow.configuration.configModel.Assignment
-import org.sa.rainbow.configuration.configModel.BooleanLiteral
-import org.sa.rainbow.configuration.configModel.Component
-import org.sa.rainbow.configuration.configModel.ComponentType
-import org.sa.rainbow.configuration.configModel.DeclaredProperty
-import org.sa.rainbow.configuration.configModel.DoubleLiteral
-import org.sa.rainbow.configuration.configModel.Factory
-import org.sa.rainbow.configuration.configModel.GaugeType
-import org.sa.rainbow.configuration.configModel.IPLiteral
-import org.sa.rainbow.configuration.configModel.IntegerLiteral
-import org.sa.rainbow.configuration.configModel.Probe
-import org.sa.rainbow.configuration.configModel.PropertyReference
-import org.sa.rainbow.configuration.configModel.Reference
-import org.sa.rainbow.configuration.configModel.RichString
-import org.sa.rainbow.configuration.configModel.StringLiteral
-import org.sa.rainbow.configuration.configModel.Value
-import org.sa.rainbow.configuration.validation.ConfigModelValidator
+import org.sa.rainbow.configuration.rcl.Array
+import org.sa.rainbow.configuration.rcl.Assignment
+import org.sa.rainbow.configuration.rcl.BooleanLiteral
+import org.sa.rainbow.configuration.rcl.Component
+import org.sa.rainbow.configuration.rcl.ComponentType
+import org.sa.rainbow.configuration.rcl.DeclaredProperty
+import org.sa.rainbow.configuration.rcl.DoubleLiteral
+import org.sa.rainbow.configuration.rcl.Factory
+import org.sa.rainbow.configuration.rcl.GaugeType
+import org.sa.rainbow.configuration.rcl.IPLiteral
+import org.sa.rainbow.configuration.rcl.IntegerLiteral
+import org.sa.rainbow.configuration.rcl.Probe
+import org.sa.rainbow.configuration.rcl.PropertyReference
+import org.sa.rainbow.configuration.rcl.Reference
+import org.sa.rainbow.configuration.rcl.RichString
+import org.sa.rainbow.configuration.rcl.StringLiteral
+import org.sa.rainbow.configuration.rcl.Value
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor
 import org.sa.rainbow.core.adaptation.IAdaptationManager
 import org.sa.rainbow.core.analysis.IRainbowAnalysis
@@ -40,8 +58,7 @@ import org.sa.rainbow.core.models.commands.ModelCommandFactory
 import org.sa.rainbow.gui.IRainbowGUI
 import org.sa.rainbow.translator.effectors.EffectorManager
 import org.sa.rainbow.translator.probes.AbstractProbe
-import org.sa.rainbow.gui.arch.elements.DefaultThreadInfoPane
-import javax.swing.JTabbedPane
+import org.sa.rainbow.configuration.validation.RclValidator
 
 class ConfigAttributeConstants {
 	public static val ALL_OFREQUIRED_PROBE_FIELDS = #{"alias", "location"};
@@ -50,8 +67,9 @@ class ConfigAttributeConstants {
 	public static val OPTIONAL_PROBE_SUBFIELDS = #{"script" -> #{"mode", "argument"}, "java" -> #{"args", "period"}}
 
 	public static val ALL_OFREQUIRED_GAUGE_FIELDS = new HashSet<String>()
-	public static val ALL_OFREQUIRED_GAUGE_SUBFILEDS = #{'setup' -> #{"targetIP", "beaconPeriod", "javaClass"},
+	public static val ALL_OFREQUIRED_GAUGE_SUBFILEDS = #{'setup' -> #{"targetIP", "beaconPeriod"},
 		'config' -> #{"targetProbe", "samplingFrequency"}}
+	public static val ONE_OFREQUIRED_GAUGE_SUBFILEDS = #{'setup' -> #{"javaClass", "generatedClass"}}
 	public static val Set<String> OPTIONAL_GUAGE_FIELDS = #{}
 
 	public static val OPTIONAL_GAUGE_SUBFIELDS = Collections.<String, Set<String>>emptyMap
@@ -87,6 +105,9 @@ class ConfigAttributeConstants {
 		set.addAll(ALL_OFREQUIRED_GAUGE_SUBFILEDS.keySet)
 		for (e : ALL_OFREQUIRED_GAUGE_SUBFILEDS.values) {
 			set.addAll(e);
+		}
+		for (e : ONE_OFREQUIRED_GAUGE_SUBFILEDS.values) {
+			set.addAll(e)
 		}
 		set
 	}
@@ -212,6 +233,7 @@ class ConfigAttributeConstants {
 				'msg' -> 'must be a string, property reference, or IP'},
 		'setup:beaconPeriod' -> IS_NUMBER,
 		'setup:javaClass' -> #{'extends' -> #[AbstractGauge], 'msg' -> 'must extend AbstractGauge'},
+		'setup:generatedClass' -> IS_STRING,
 		'config:samplingFrequency' -> IS_NUMBER,
 		'config:targetProbe' -> #{'func' -> [ Value v |
 			(v.value instanceof PropertyReference && (v.value as PropertyReference).referable instanceof Probe)
@@ -391,13 +413,13 @@ class ConfigAttributeConstants {
 		'utilities' -> IS_COMPONENT,
 		'scenarios' ->
 			#{'extends' -> #[Array], 'msg' -> 'must be an array',
-				'checkEach' -> ConfigModelValidator.CHECK_EACH_SCENARIO},
+				'checkEach' -> RclValidator.CHECK_EACH_SCENARIO},
 		'utilities::label' -> IS_STRING,
 		'utilities::mapping' -> IS_STRING,
 		'utilities::description' -> IS_STRING,
 		'utilities::utility' ->
 			#{'extends' -> #[Array], 'msg' -> 'must be a two dimensionsal array',
-				'checkEach' -> ConfigModelValidator.CHECK_UTILITY_MONOTONIC}
+				'checkEach' -> RclValidator.CHECK_UTILITY_MONOTONIC}
 	}
 
 	public static val ALL_OFREQUIRED_UTILITY_FIELDS = #{'model', 'utilities', 'scenarios'}
