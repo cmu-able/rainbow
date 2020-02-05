@@ -8,7 +8,7 @@
         contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
         default="true"
         extensions="rbw"
-        id="org.sa.rainbow.configuration.rcl"
+        id="org.sa.rainbow.configuration.Rcl"
         icon="icons/rbw.png"
         name="Rainbow Editor">
 		</editor>
@@ -20,7 +20,7 @@
 			commandId="org.eclipse.xtext.ui.editor.hyperlinking.OpenDeclaration">
 			<activeWhen>
 				<reference
-					definitionId="org.sa.rainbow.configuration.Rcp.Editor.opened">
+					definitionId="org.sa.rainbow.configuration.Rcl.Editor.opened">
 				</reference>
 			</activeWhen>
 		</handler>
@@ -421,16 +421,26 @@
 		</fileTypes>
 	</extension>
 	   <extension point="org.eclipse.core.expressions.definitions">
-        <definition id="org.sa.rainbow.configuration.Editor.opened">
-            <and>
-                <reference definitionId="isActiveEditorAnInstanceOfXtextEditor"/>
-                <with variable="activeEditor">
-                    <test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName" 
-                        value="org.sa.rainbow.configuration.Rcl" 
-                        forcePluginActivation="true"/>
-                </with>        
-            </and>
-        </definition>
+        <definition id="org.sa.rainbow.configuration.Rcl.Editor.opened">
+			<and>
+				<reference definitionId="isActiveEditorAnInstanceOfXtextEditor"/>
+				<with variable="activeEditor">
+					<test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName"
+						value="org.sa.rainbow.configuration.Rcl"
+						forcePluginActivation="true"/>
+				</with>
+			</and>
+		</definition>
+		<definition id="org.sa.rainbow.configuration.Rcl.XtextEditor.opened">
+			<and>
+				<reference definitionId="isXtextEditorActive"/>
+				<with variable="activeEditor">
+					<test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName"
+						value="org.sa.rainbow.configuration.Rcl"
+						forcePluginActivation="true"/>
+				</with>
+			</and>
+		</definition>
      </extension>
 	<extension
          point="org.eclipse.ui.contexts">
@@ -445,21 +455,39 @@
        point="org.eclipse.ui.bindings">
        
      <key
-          commandId="org.sa.rainbow.configuration.ui.insertLeftGuillemet"
+     	  contextId="org.sa.rainbow.configuration.ide.RCLEditorScope"
           schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-          sequence="&lt;">
+          sequence="M1+&lt;"
+          commandId="org.sa.rainbow.configuration.ui.insertLeftGuillemet"
+          >
     </key>
     <key
-          commandId="org.sa.rainbow.configuration.ui.insertRightGuillemet"
+          contextId="org.sa.rainbow.configuration.ide.RCLEditorScope"
           schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-          sequence="M1+">
+          sequence="M1+&gt;"
+          commandId="org.sa.rainbow.configuration.ui.insertRightGuillemet"
+          >
+    </key>
+     <key
+     	  contextId="org.sa.rainbow.configuration.ide.RCLEditorScope"
+          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+          sequence="M4+&lt;"
+          commandId="org.sa.rainbow.configuration.ui.insertLeftGuillemet"
+          >
+    </key>
+    <key
+          contextId="org.sa.rainbow.configuration.ide.RCLEditorScope"
+          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+          sequence="M4+&gt;"
+          commandId="org.sa.rainbow.configuration.ui.insertRightGuillemet"
+          >
     </key>
  </extension>
  <extension
          point="org.eclipse.ui.handlers">
       <handler
             class="org.sa.rainbow.configuration.ui.commands.InsertStringHandler$LeftGuillemet"
-            commandId="org.eclipse.xtend.ide.insertLeftGuillemet">
+            commandId="org.sa.rainbow.configuration.ui.insertRightGuillemet">
             <!--
             <activeWhen>
 				<reference
@@ -470,7 +498,7 @@
       </handler>
       <handler
             class="org.sa.rainbow.configuration.ui.commands.InsertStringHandler$RightGuillemet"
-            commandId="org.eclipse.xtend.ide.insertRightGuillemet">
+            commandId="org.sa.rainbow.configuration.ui.insertLeftGuillemet">
            	<activeWhen>
 				<reference
 					definitionId="org.sa.rainbow.configuration.Rcl.Editor.opened">
@@ -494,7 +522,7 @@
 	<extension
 		point="org.eclipse.xtext.ui.projectTemplate">
 		<projectTemplateProvider
-			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.sa.rainbow.configuration.ui.wizard.ConfigModelProjectTemplateProvider"
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.sa.rainbow.configuration.ui.wizard.RclProjectTemplateProvider"
 			grammarName="org.sa.rainbow.configuration.Rcl">
 		</projectTemplateProvider>
 	</extension>
@@ -534,5 +562,23 @@
 		<perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
 			<newWizardShortcut id="org.sa.rainbow.configuration.ui.wizard.RclNewFileWizard"/>
 		</perspectiveExtension>
+	</extension>
+	<!-- code mining -->
+	<extension point="org.eclipse.ui.workbench.texteditor.codeMiningProviders">
+		<codeMiningProvider
+			class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.eclipse.jface.text.codemining.ICodeMiningProvider"
+			id="org.sa.rainbow.configuration.Rcl.CodeMiningProvider"
+			label="Rcl Codemining">
+			<enabledWhen>
+				<with variable="editorInput">
+					<adapt type="org.eclipse.core.resources.IFile">
+						<test
+							property="org.eclipse.core.resources.contentTypeId"
+							value="org.sa.rainbow.configuration.Rcl.contenttype">
+						</test>
+					</adapt>
+				</with>
+			</enabledWhen>
+		</codeMiningProvider>
 	</extension>
 </plugin>

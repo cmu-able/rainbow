@@ -24,8 +24,10 @@ Require-Bundle: org.sa.rainbow.configuration,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.ui.forms,
+ org.eclipse.jdt.core,
  org.acme.xtext;bundle-version="1.0.0"
-Import-Package: org.apache.log4j
+Import-Package: org.apache.log4j,
+ org.eclipse.xtext.ui.codemining;resolution:=optional
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: org.sa.rainbow.configuration.ui;uses:="com.google.inject,com.google.inject.binder,org.eclipse.ui.plugin",
  org.sa.rainbow.configuration.ui.commands;uses:="org.eclipse.core.commands",
@@ -36,6 +38,8 @@ Export-Package: org.sa.rainbow.configuration.ui;uses:="com.google.inject,com.goo
    org.eclipse.xtext.ui.editor.contentassist,
    org.eclipse.xtext",
  org.sa.rainbow.configuration.ui.internal;uses:="org.osgi.framework,com.google.inject,org.eclipse.ui.plugin",
+ org.sa.rainbow.configuration.ui.labeling,
+ org.sa.rainbow.configuration.ui.outline,
  org.sa.rainbow.configuration.ui.quickfix;uses:="org.eclipse.xtext.validation,org.eclipse.xtext.ui.editor.quickfix",
  org.sa.rainbow.configuration.ui.wizard;uses:="org.eclipse.core.runtime,org.eclipse.xtext.ui.wizard.template"
 Bundle-Activator: org.sa.rainbow.configuration.ui.ConfigurationActivator
