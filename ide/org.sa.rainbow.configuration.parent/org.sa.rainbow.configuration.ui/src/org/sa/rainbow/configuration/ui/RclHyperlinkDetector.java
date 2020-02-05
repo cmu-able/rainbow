@@ -42,7 +42,6 @@ public class RclHyperlinkDetector implements IHyperlinkDetector {
 	private XtextDocumentUtil xtextDocumentUtil;
 
 	public RclHyperlinkDetector() {
-		System.out.println(helper);
 	}
 	
 	@Override
