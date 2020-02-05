@@ -26,9 +26,9 @@ def event.log.path = "log"
 def logging.path = "«event.log.path»/rainbow.out" 
 def monitoring.log.path = "«event.log.path»/rainbow-data.log"
 # (default)
-#logging.pattern = "%d{ISO8601/yyyy-MM-dd HH:mm:ss.SSS} [%t] %p %c %x - %m%n"
-#logging.max.size = 1024
-#logging.max.backups = 5
+#def logging.pattern = "%d{ISO8601/yyyy-MM-dd HH:mm:ss.SSS} [%t] %p %c %x - %m%n"
+#def logging.max.size = 1024
+#def logging.max.backups = 5
 
 ### Rainbow component customization
 ## Rainbow host info and communication infrastructure
@@ -159,8 +159,6 @@ def gui rainbow.^gui = {
 	}
 }
 
-def rainbow.^gui=org.sa.rainbow.^gui.RainbowWindoe
-def rainbow.^gui.specs = "ui.yml"
 
 def customize.^model.evaluate.period = 60000
 def customize.^model.timeseriespredictor.args="LES 0.8 0.15"
@@ -182,7 +180,7 @@ def customize.^utility.trackStrategy = "uC"
 def customize.^utility.score.minimum.threshold = 0.033
 def customize.^utility.scenario = "scenario 1"
 #- Whether to enable prediction, ONLY enable if system has predictor probes! 
-#customize.prediction.enable = false
+#def customize.prediction.enable = false
 
 ## System configuration information 
 # These properties may be referred to in various files
