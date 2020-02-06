@@ -3,7 +3,7 @@ Automatic-Module-Name: org.sa.rainbow.configuration.tests
 Bundle-ManifestVersion: 2
 Bundle-Name: org.sa.rainbow.configuration.tests
 Bundle-Vendor: My Company
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.0.1.qualifier
 Bundle-SymbolicName: org.sa.rainbow.configuration.tests; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.sa.rainbow.configuration,
