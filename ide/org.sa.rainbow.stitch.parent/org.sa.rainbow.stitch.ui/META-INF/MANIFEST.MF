@@ -3,7 +3,7 @@ Automatic-Module-Name: org.sa.rainbow.stitch.ui
 Bundle-ManifestVersion: 2
 Bundle-Name: org.sa.rainbow.stitch.ui
 Bundle-Vendor: My Company
-Bundle-Version: 1.0.1.qualifier
+Bundle-Version: 1.0.0.qualifier
 Bundle-SymbolicName: org.sa.rainbow.stitch.ui; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.sa.rainbow.stitch,
