@@ -18,8 +18,8 @@
 #include <iostream>
 
 //using namespace std;
-
-const char* PRISM = "/home/frank/Prism/prism/bin/prism";
+const char* PRISM = std::getenv("PRISM");
+//const char* PRISM = "/home/ashutosp/Prism/prism/bin/prism";
 //const char* PRISM_PROPERTY = "\"Rmax=? [ F \\\"final\\\" ]\"";
 const char* PRISM_PROPERTY = "Rmax=? [ F \"final\" ]";
 const char* PRISM_PROPERTY_RT = "Rmax=? [ F end ]";
@@ -88,8 +88,8 @@ bool runPrism(const char* modelPath, const char* adversaryPath, const char* stat
     //assert(res!=-1);
     //return true;*/
     //char command[40960];
-    //sprintf( command, "%s %s -pctl %s -exportadv %s -exportstates %s -exportlabels %s",
-     //           PRISM, modelPath, PRISM_PROPERTY, adversaryPath, statesPath, labelsPath);
+   // sprintf( command, "%s %s -pctl %s -exportadv %s -exportstates %s -exportlabels %s",
+    //           PRISM, modelPath, PRISM_PROPERTY, adversaryPath, statesPath, labelsPath);
     //printf("%s\n", command);
 
 	pid_t pid = fork();
@@ -150,7 +150,7 @@ std::set<int> getNowStates(const char* statesPath) {
 	std::set<int> states;
 	std::ifstream fin(statesPath);
 	if (!fin) {
-		std::cout << "Could not read input file " << statesPath << std::endl;
+		std::cout << "Could not read Prism generated input file " << statesPath << std::endl;
 		return states;
 	}
 
@@ -323,14 +323,15 @@ bool AdaptationPlanner::generateModel(std::string environmentModel, std::string 
 	const std::string INIT_TAG = "//#init";
 
 	std::ofstream fout(modelPath);
-  std::cout << "model path is " << modelPath << std::endl;
-	if (!fout) {
+    //std::cout << "model path is " << modelPath << std::endl;
+	
+    if (!fout) {
 		std::cout << "Could not write output file " << modelPath << std::endl;
 		return false;
 	}
 
 	std::string spec_file = modelTemplatePath;
-  std::cout << "modelTemplatePath is " << modelTemplatePath << std::endl;
+    //std::cout << "modelTemplatePath is " << modelTemplatePath << std::endl;
 
 	// TODO HACK Ashutosh
 	// This is done to provide more flexibility in
@@ -339,15 +340,18 @@ bool AdaptationPlanner::generateModel(std::string environmentModel, std::string 
 	    spec_file = modelTemplatePath + "_fast";
 	}
 
+    //std::cout << "spec_file = " << spec_file << std::endl;
 	std::ifstream fin(spec_file.c_str());
 
 	if (!fin) {
-		std::cout << "Could not read input file " << get_current_dir_name() << '/' << modelTemplatePath << std::endl;
+		std::cout << "Could not read template file " << modelTemplatePath << std::endl;
+		//std::cout << "Could not read input file " << get_current_dir_name() << '/' << modelTemplatePath << std::endl;
 		std::cout << "Error is: " << strerror(errno) << std::endl;
 		std::cout << "Retrying..." << std::endl;
 	    fin.open(modelTemplatePath.c_str(), std::ifstream::in);
 	    if (!fin) {
-	        std::cout << "Could not read input file " << get_current_dir_name() << '/' << modelTemplatePath << std::endl;
+		    std::cout << "Could not read template file " << modelTemplatePath << std::endl;
+	        //std::cout << "Could not read input file " << get_current_dir_name() << '/' << modelTemplatePath << std::endl;
 	        std::cout << "Error is: " << strerror(errno) << std::endl;
 	        return false;
 	    }
@@ -371,22 +375,20 @@ bool AdaptationPlanner::generateModel(std::string environmentModel, std::string 
 }
 
 std::vector<std::string> AdaptationPlanner::plan(std::string environmentModel, std::string initialState, std::string path, bool returnPlan) {
-	const char* modelPath = "ttimemodel.prism";
-	const char* adversaryPath = "result.adv";
-	const char* statesPath = "result.sta";
-	const char* labelsPath = "result.lab";
     //checkPwd();
 
 	// create temp directory
 	char tempDirTemplate[] = "modelXXXXXX";
-	char* tempDir = mkdtemp(tempDirTemplate);
-	if (!tempDir) {
+	char* dir = mkdtemp(tempDirTemplate);
+	if (!dir) {
 	//	// TODO improve error handling
 		throw std::runtime_error("error AdaptationPlanner::plan mkdtemp");
 	}
 
+    std::string tempDir = dir;
+    tempDir += "/";
   	//char* tempDir = "modelReact";
-  	std::cout << "tempDir is " << tempDir << "\n";
+  	//std::cout << "tempDir is " << tempDir << "\n";
 
   	
   	//initialize temp as empty string
@@ -399,22 +401,45 @@ std::vector<std::string> AdaptationPlanner::plan(std::string environmentModel, s
   	
 	
 	// save current dir and chdir into the temp
-	int currentDir = open(".", O_RDONLY);
-	if (currentDir == -1) {
-		throw std::runtime_error("error AdaptationPlanner::plan chdir");
-	}
-	
-	printf("%s\n", tempDir);
+	//int currentDir = open(".", O_RDONLY);
+	//if (currentDir == -1) {
+	//	throw std::runtime_error("error AdaptationPlanner::plan chdir");
+	//}
+    
+    char cwd[2048];
 
-	if (chdir(tempDir) != 0) {
+    if (getcwd(cwd, sizeof(cwd)) == NULL) { 
+        assert(false);
+    }
+	
+    //printf("Current Directory = %s\n", cwd);
+    tempDir = std::string(cwd) + "/" + tempDir;
+  	//std::cout << "Absolute path for tempDir is " << tempDir << "\n";
+	
+    /*const char* modelPath = std::string(tempDir + "ttimemodel.prism").c_str();
+	const char* adversaryPath = std::string(tempDir + std::string("result.adv")).c_str();
+	const char* statesPath = std::string(tempDir +  std::string("result.sta")).c_str();
+	const char* labelsPath = std::string(tempDir +  std::string("result.lab")).c_str();*/
+
+    std::string modelPath = tempDir + "ttimemodel.prism";
+    std::string adversaryPath = tempDir + "result.adv";
+    std::string statesPath = tempDir + "result.sta";
+    std::string labelsPath = tempDir + "result.lab";
+
+    //std::cout << "modelPath = " << modelPath << std::endl;
+    //std::cout << "adversaryPath = " << adversaryPath << std::endl;
+    //std::cout << "statesPath = " << statesPath << std::endl;
+    //std::cout << "labelsPath = " << labelsPath << std::endl;
+
+	//if (chdir(tempDir) != 0) {
 		// TODO improve error handling
-		close(currentDir);
-		throw std::runtime_error("error AdaptationPlanner::plan chdir");
-	}
+	//	close(currentDir);
+	//	throw std::runtime_error("error AdaptationPlanner::plan chdir");
+	//}
 	std::vector<std::string> actions;
 
-	printf("before new try\n");
-	printf("Sleep for 11\n");
+//	printf("before new try\n");
+	//printf("Sleep for 11\n");
   	//sleep(11);
 	try {
 
@@ -432,19 +457,20 @@ std::vector<std::string> AdaptationPlanner::plan(std::string environmentModel, s
          */
 	    //checkPwd();
 	    //static int i = 1;
-        if (generateModel(environmentModel, initialState, modelPath, returnPlan)) {
-            if (runPrism(modelPath, adversaryPath, statesPath, labelsPath, returnPlan)) { // #TODO Ashutosh uncomment the code
+        if (generateModel(environmentModel, initialState, modelPath.c_str(), returnPlan)) {
+            if (runPrism(modelPath.c_str(), adversaryPath.c_str(), statesPath.c_str(),
+                    labelsPath.c_str(), returnPlan)) { // #TODO Ashutosh uncomment the code
                 if (returnPlan) {
-                    std::set<int> states = getNowStates(statesPath);
+                    std::set<int> states = getNowStates(statesPath.c_str());
                     //printf("State Size %u\n", states.size());
-                    actions = getActions(adversaryPath, labelsPath, states);
+                    actions = getActions(adversaryPath.c_str(), labelsPath.c_str(), states);
                     //printf("Actions in the plan = %u\n", actions.size());
                     for (std::vector<std::string>::iterator it = actions.begin();
                             it != actions.end(); it++) {
-                        printf("%s\n", it->c_str());
+                        //printf("%s\n", it->c_str());
                     }
                     if (actions.size() == 0) {
-                        printf("Hi\n");
+                        //printf("Hi\n");
                     }
                 }
             } else {
@@ -456,8 +482,8 @@ std::vector<std::string> AdaptationPlanner::plan(std::string environmentModel, s
             throw std::runtime_error("error AdaptationPlanner::plan generateModel");
         }
         
-        printf("After generate model\n");
-        printf("Sleep for 12\n");
+        //printf("After generate model\n");
+        //printf("Sleep for 12\n");
   		//sleep(12);
 
         planned_path = tempDir;
@@ -472,22 +498,22 @@ std::vector<std::string> AdaptationPlanner::plan(std::string environmentModel, s
         //     //remove(labelsPath);
         // }
 
-        fchdir(currentDir);
-        close(currentDir);
+        //fchdir(currentDir);
+        //close(currentDir);
 
         // if (!path) {
         //     //rmdir(tempDir);
         // }
 	} catch(...) {
-	    fchdir(currentDir);
-	    close(currentDir);
+	    //fchdir(currentDir);
+	    //close(currentDir);
 	    throw;
 	}
 
 	//get_absolute_path(*path);
 
-	printf("Before return\n");
-	printf("Sleep for 13\n");
+	//printf("Before return\n");
+	//printf("Sleep for 13\n");
   	//sleep(13);
 
 	return actions;

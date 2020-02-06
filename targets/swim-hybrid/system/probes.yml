@@ -9,7 +9,7 @@ probes:
     scriptInfo:
       mode: continual
       path    : "${_probes.commonPath}/genericProbe.pl"
-      argument: "get_dimmer"
+      argument: "-d 2000 get_dimmer"
   
   # New
   ServerProbe1:
@@ -19,7 +19,7 @@ probes:
     scriptInfo:
       mode: continual
       path    : "${_probes.commonPath}/genericProbe.pl"
-      argument: "get_servers 1"
+      argument: "-d 2000 get_servers 1"
   ServerProbe2:
     alias: server2
     location: "${customize.system.target.lb}"
@@ -27,7 +27,7 @@ probes:
     scriptInfo:
       mode: continual
       path    : "${_probes.commonPath}/genericProbe.pl"
-      argument: "get_servers 2"
+      argument: "-d 2000 get_servers 2"
   ServerProbe3:
     alias: server3
     location: "${customize.system.target.lb}"
@@ -35,7 +35,7 @@ probes:
     scriptInfo:
       mode: continual
       path    : "${_probes.commonPath}/genericProbe.pl"
-      argument: "get_servers 3"
+      argument: "-d 2000 get_servers 3"
   # End
 
   # New
@@ -46,7 +46,7 @@ probes:
     scriptInfo:
       mode: continual
       path    : "${_probes.commonPath}/genericProbe.pl"
-      argument: "get_active_servers 1"
+      argument: "-d 2000 get_active_servers 1"
   ActiveServerProbe2:
     alias: activeServer2
     location: "${customize.system.target.lb}"
@@ -54,7 +54,7 @@ probes:
     scriptInfo:
       mode: continual
       path    : "${_probes.commonPath}/genericProbe.pl"
-      argument: "get_active_servers 2"
+      argument: "-d 2000 get_active_servers 2"
   ActiveServerProbe3:
     alias: activeServer3
     location: "${customize.system.target.lb}"
@@ -62,7 +62,7 @@ probes:
     scriptInfo:
       mode: continual
       path    : "${_probes.commonPath}/genericProbe.pl"
-      argument: "get_active_servers 3"
+      argument: "-d 2000 get_active_servers 3"
   # End
 
   TrafficProbe1:
@@ -72,7 +72,7 @@ probes:
     scriptInfo:
       mode: continual
       path    : "${_probes.commonPath}/genericProbe.pl"
-      argument: "-d 5000 get_traffic 1"
+      argument: "-d 2000 get_traffic 1"
   TrafficProbe2:
     alias: traffic2
     location: "${customize.system.target.lb}"
@@ -80,7 +80,7 @@ probes:
     scriptInfo:
       mode: continual
       path    : "${_probes.commonPath}/genericProbe.pl"
-      argument: "-d 5000 get_traffic 2"
+      argument: "-d 2000 get_traffic 2"
   TrafficProbe3:
     alias: traffic3
     location: "${customize.system.target.lb}"
@@ -88,7 +88,7 @@ probes:
     scriptInfo:
       mode: continual
       path    : "${_probes.commonPath}/genericProbe.pl"
-      argument: "-d 5000 get_traffic 3"
+      argument: "-d 2000 get_traffic 3"
   
 
   ArrivalRateProbe:

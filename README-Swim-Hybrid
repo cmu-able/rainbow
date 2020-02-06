@@ -1,0 +1,10 @@
+Use ./compile.sh to build Rainbow.
+Set the following environment variables
+
+(1) RAINBOW - should point to the Rainbow directory. This path is used to location final_ibl.prism file used to generate Pism specification. The path to this file should be $RAINBOW/pladapt/templates/final_ibl.prism
+(2) PRISM -  should point to the directory where Prism is installed.
+
+Other potential settings that might need a change.
+
+Path to SWIG installation might depend on a specific machine. SWIG is used to compile pladapt project. Refer to the compilation instruction for pladapt project.
+

@@ -72,12 +72,16 @@ public class ServerEnabledGauge extends RegularPatternGauge {
      */
     @Override
     protected void doMatch (String matchName, Matcher m) {
+    	//System.out.println(" Inside ServerEnabledGauge::doMatch");
+
         if (matchName == DEFAULT) {
             int numServers = Integer.parseInt(m.group(0));
             int thisServer = (int) m_configParams.get("serverNum").getValue();
             
-            boolean serverEnabled = numServers >= thisServer;
+            //boolean serverEnabled = numServers >= thisServer;
+            boolean serverEnabled = (numServers == 1) ? true : false;
 
+            //System.out.println("Server " + thisServer + ": Updating server enablement to " + serverEnabled);
             m_reportingPort.trace (getComponentType (), "Updating server enablement to " + serverEnabled);
             if (m_commands.containsKey (valueNames[0])) {
                 IRainbowOperation cmd = getCommand (valueNames[0]);

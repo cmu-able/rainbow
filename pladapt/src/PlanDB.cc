@@ -428,7 +428,7 @@ string PlanDB::get_tactic_str(TacticEnum tactic) {
 }
 
 bool PlanDB::populate_state_obj(State& state) {
-    cout << "inside populate_state_obj\n";
+    //cout << "inside populate_state_obj\n";
     bool valid_state = false;
 
     state.m_s = UINT_MAX;
@@ -439,7 +439,7 @@ bool PlanDB::populate_state_obj(State& state) {
                     1 / arrival_mean, current_time);
     } 
 
-    cout << "yayeet\n";
+    //cout << "yayeet\n";
     if (state.m_s != UINT_MAX) {
         state.m_time = current_time;
         state.m_readyToTick = true;
@@ -466,23 +466,29 @@ bool PlanDB::populate_state_obj(State& state) {
                     bootPeriods - boot_remain,
                     bootPeriods);
 
-            int bootType =
-                    boot_type;
+            /*std::cout << "boot_remain = " << boot_remain << std::endl;
+            std::cout << "boot_delay = " << boot_delay << std::endl;
+            std::cout << "bootPeriods = " << bootPeriods << std::endl;
+            std::cout << "evaluation_period = " << evaluation_period << std::endl;
+            std::cout << "addServerState = " << addServerState << std::endl;
+            std::cout << "boot_type = " << boot_type << std::endl;*/
 
+            int bootType = boot_type;
 
-            switch (bootType) {
-            case 1:
-                state.m_addServerA_state = addServerState;
-                break;
-            case 2:
-                state.m_addServerB_state = addServerState;
-                break;
-            case 3:
-                state.m_addServerC_state = addServerState;
-                break;
-            case 0:
-                assert(false);
-                break;
+            if (addServerState != 0) {
+                switch (bootType) {
+                case 1:
+                    state.m_addServerA_state = addServerState;
+                    break;
+                case 2:
+                    state.m_addServerB_state = addServerState;
+                    break;
+                case 3:
+                    state.m_addServerC_state = addServerState;
+                    break;
+                default:
+                    assert(false);
+                }
             }
         }
 
@@ -517,7 +523,7 @@ unsigned long PlanDB::get_state(State& state) {
 }
 
 bool PlanDB::get_plan() {
-    cout << "inside get_plan\n";
+    //cout << "inside get_plan\n";
     PlanDB::Plan plan;
     bool plan_found = false;
 
@@ -526,11 +532,11 @@ bool PlanDB::get_plan() {
     if (m_adversary_map.size() != 0 && (horizon > current_time)
             && populate_state_obj(state_obj)) {
 
-        cout << "inside if\n";
+        //cout << "inside if\n";
         unsigned long state = get_state(state_obj);
-        cout << "after get_state\n";
+       // cout << "after get_state\n";
 
-        if (true) {
+        if (debug) {
             cout << "state hash = " << state << endl;
         }
         if (state != ULONG_MAX) {

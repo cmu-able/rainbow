@@ -49,7 +49,7 @@ public class ServerActiveGauge extends RegularPatternGauge {
 
     /** List of values reported by this Gauge */
     private static final String[] valueNames = {
-            "activateServer"
+            "serverActivated"
     };
     private static final String DEFAULT = "DEFAULT";
 
@@ -73,11 +73,15 @@ public class ServerActiveGauge extends RegularPatternGauge {
      */
     @Override
     protected void doMatch (String matchName, Matcher m) {
+    	//System.out.println(" Inside ServerActiveGauge::doMatch");
+    	
         if (matchName == DEFAULT) {
             int numServers = Integer.parseInt(m.group(0));
             int thisServer = (int) m_configParams.get("serverNum").getValue();
             
-            boolean serverActive = numServers >= thisServer;
+            //boolean serverActive = numServers >= thisServer;
+            boolean serverActive = (numServers == 1) ? true : false;
+            //System.out.println("Server " + thisServer + ": Updating server active to " + serverActive);
 
             m_reportingPort.trace (getComponentType (), "Updating server active condition to " + serverActive);
             if (m_commands.containsKey (valueNames[0])) {
