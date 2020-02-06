@@ -21,8 +21,10 @@ FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TOR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
 DEALINGS IN THE SOFTWARE.
  */
+
 import com.google.inject.Inject
 import com.google.inject.name.Named
+import java.io.File
 import java.util.HashSet
 import java.util.LinkedList
 import java.util.List
@@ -68,6 +70,7 @@ import org.sa.rainbow.configuration.rcl.GaugeBody
 import org.sa.rainbow.configuration.rcl.GaugeTypeBody
 import org.sa.rainbow.configuration.rcl.IPLiteral
 import org.sa.rainbow.configuration.rcl.ImpactVector
+import org.sa.rainbow.configuration.rcl.Import
 import org.sa.rainbow.configuration.rcl.IntegerLiteral
 import org.sa.rainbow.configuration.rcl.JavaClassOrFactory
 import org.sa.rainbow.configuration.rcl.ModelFactoryReference
@@ -1219,6 +1222,20 @@ class RclValidator extends AbstractRclValidator {
 
 	}
 
+	@Check
+	def checkImport(Import import_) {
+		var uri = import_.eResource.URI
+		uri = uri.trimSegments(1)
+//		uri = uri.appendSegment("/")
+		uri = uri.appendSegments(import_.importURI.split("/"))
+		if (!import_.eResource.resourceSet.URIConverter.exists(uri, null)) {
+			error ('''File '«import_.importURI»' not found''',
+				import_,
+				RclPackage.Literals.IMPORT__IMPORT_URI,
+				"badFile"
+			)
+		}
+	}
 
 
 }
