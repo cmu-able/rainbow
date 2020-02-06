@@ -3,7 +3,7 @@ Automatic-Module-Name: org.sa.rainbow.configuration
 Bundle-ManifestVersion: 2
 Bundle-Name: org.sa.rainbow.configuration
 Bundle-Vendor: My Company
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.0.1.qualifier
 Bundle-SymbolicName: org.sa.rainbow.configuration; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.xtext,
@@ -28,18 +28,13 @@ Bundle-ClassPath: lib/rainbow-acme-model-3.0.jar,
  lib/rainbow-utility-model-3.0.jar,
  .
 Export-Package: org.sa.rainbow.configuration,
- org.sa.rainbow.configuration,
- org.sa.rainbow.configuration,
- org.sa.rainbow.configuration.configModel,
- org.sa.rainbow.configuration.configModel.impl,
- org.sa.rainbow.configuration.configModel.util,
+ org.sa.rainbow.configuration.rcl,
+ org.sa.rainbow.configuration.rcl.impl,
+ org.sa.rainbow.configuration.rcl.util,
  org.sa.rainbow.configuration.generator,
  org.sa.rainbow.configuration.parser.antlr,
  org.sa.rainbow.configuration.parser.antlr.internal,
  org.sa.rainbow.configuration.scoping,
- org.sa.rainbow.configuration.scoping,
- org.sa.rainbow.configuration.scoping,
  org.sa.rainbow.configuration.serializer,
  org.sa.rainbow.configuration.services,
- org.sa.rainbow.configuration.validation,
  org.sa.rainbow.configuration.validation
