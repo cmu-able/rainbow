@@ -1,0 +1,4 @@
+import "families/f1.acme";
+system s : f1 = new f1 extended with {
+  component c : CT = new CT;
+}

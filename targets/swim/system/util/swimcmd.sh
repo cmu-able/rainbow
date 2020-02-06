@@ -2,7 +2,7 @@
 # sends a command to the SWIM waits for a
 # single-line response
 if [ -z "$SOCAT_PORT" ]; then
-  SOCAT_PORT=4243
+  SOCAT_PORT=4242
 fi
 CMDHELPER=`dirname $0`/cmdhelper.sh
 HOST=`hostname`

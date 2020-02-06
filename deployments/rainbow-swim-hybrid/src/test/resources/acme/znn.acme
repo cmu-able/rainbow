@@ -1,0 +1,270 @@
+Family ZNewsFam = {
+
+    Port Type HttpPortT = {
+
+    }
+    Role Type RequestorRoleT = {
+
+    }
+    Component Type ProxyT = {
+
+        Property deploymentLocation : string <<  default : string = "localhost"; >> ;
+
+        Property load : float <<  default : float = 0.0; >> ;
+
+    }
+    Port Type ProxyForwardPortT = {
+
+    }
+    Component Type ServerT = {
+
+        Property deploymentLocation : string <<  default : string = "localhost"; >> ;
+
+        Property load : float <<  default : float = 0.0; >> ;
+
+        Property reqServiceRate : float <<  default : float = 0.0; >> ;
+
+        Property byteServiceRate : float <<  default : float = 0.0; >> ;
+
+        Property fidelity : int <<  HIGH : int = 5; LOW : int = 1; default : int = 5; >> ;
+
+        Property cost : float <<  default : float = 1.0; >> ;
+        rule anotherConstraint = invariant self.load <= MAX_UTIL;
+
+    }
+    Role Type ReceiverRoleT = {
+
+    }
+    Connector Type ProxyConnT = {
+        Role req : RequestorRoleT = new RequestorRoleT extended with {
+
+        }
+        Role rec : ReceiverRoleT = new ReceiverRoleT extended with {
+
+        }
+
+    }
+    Component Type ClientT = {
+
+        Property deploymentLocation : string <<  default : string = "localhost"; >> ;
+
+        Property experRespTime : float <<  default : float = 0.0; >> ;
+
+        Property reqRate : float <<  default : float = 0.0; >> ;
+        rule primaryConstraint = invariant self.experRespTime <= MAX_RESPTIME;
+
+    }
+    Port Type HttpReqPortT = {
+
+    }
+    Connector Type HttpConnT = {
+
+        Property bandwidth : float <<  default : float = 0.0; >> ;
+
+        Property latency : float <<  default : float = 0.0; >> ;
+
+        Property numReqsSuccess : int <<  default : int = 0; >> ;
+
+        Property numReqsRedirect : int <<  default : int = 0; >> ;
+
+        Property numReqsClientError : int <<  default : int = 0; >> ;
+
+        Property numReqsServerError : int <<  default : int = 0; >> ;
+        Role req : RequestorRoleT = new RequestorRoleT extended with {
+
+        }
+        Role rec : ReceiverRoleT = new ReceiverRoleT extended with {
+
+        }
+
+    }
+
+    Property MIN_RESPTIME : float;
+
+    Property MAX_RESPTIME : float;
+
+    Property TOLERABLE_PERCENT_UNHAPPY : float;
+
+    Property UNHAPPY_GRADIENT_1 : float;
+
+    Property UNHAPPY_GRADIENT_2 : float;
+
+    Property UNHAPPY_GRADIENT_3 : float;
+
+    Property FRACTION_GRADIENT_1 : float;
+
+    Property FRACTION_GRADIENT_2 : float;
+
+    Property FRACTION_GRADIENT_3 : float;
+
+    Property MIN_UTIL : float;
+
+    Property MAX_UTIL : float;
+
+    Property MAX_FIDELITY_LEVEL : int;
+
+    Property THRESHOLD_FIDELITY : int;
+
+    Property THRESHOLD_COST : float;
+}
+
+System ZNewsSys : ZNewsFam = {
+
+
+    Property MIN_RESPTIME : float = 100;
+
+    Property MAX_RESPTIME : float = 2000;
+
+    Property UNHAPPY_GRADIENT_1 : float = 0.1;
+
+    Property UNHAPPY_GRADIENT_2 : float = 0.2;
+
+    Property UNHAPPY_GRADIENT_3 : float = 0.5;
+
+    Property FRACTION_GRADIENT_1 : float = 0.2;
+
+    Property FRACTION_GRADIENT_2 : float = 0.4;
+
+    Property FRACTION_GRADIENT_3 : float = 1.0;
+
+    Property TOLERABLE_PERCENT_UNHAPPY : float = 0.25;
+
+    Property MIN_UTIL : float = 0.1;
+
+    Property MAX_UTIL : float = 0.75;
+
+    Property MAX_FIDELITY_LEVEL : int = 5;
+
+    Property THRESHOLD_FIDELITY : int = 2;
+
+    Property THRESHOLD_COST : float = 6.0;
+    Component s1 : ServerT = new ServerT extended with {
+
+        Property deploymentLocation = "127.0.0.2";
+        Port http0 : HttpPortT = new HttpPortT extended with {
+
+        }
+
+    }
+    Component lbproxy : ProxyT = new ProxyT extended with {
+
+        Property deploymentLocation = "127.0.0.1";
+        Port fwd0 : ProxyForwardPortT = new ProxyForwardPortT extended with {
+
+        }
+        Port fwd1 : ProxyForwardPortT = new ProxyForwardPortT extended with {
+
+        }
+        Port fwd2 : ProxyForwardPortT = new ProxyForwardPortT extended with {
+
+        }
+        Port fwd3 : ProxyForwardPortT = new ProxyForwardPortT extended with {
+
+        }
+        Port http0 : HttpPortT = new HttpPortT extended with {
+
+        }
+        Port http1 : HttpPortT = new HttpPortT extended with {
+
+        }
+        Port http2 : HttpPortT = new HttpPortT extended with {
+
+        }
+
+    }
+    Component s2 : ServerT = new ServerT extended with {
+
+        Property deploymentLocation = "127.0.0.3";
+        Port http0 : HttpPortT = new HttpPortT extended with {
+
+        }
+
+    }
+    Component s3 : ServerT = new ServerT extended with {
+
+        Property deploymentLocation = "127.0.0.4";
+        Port http0 : HttpPortT = new HttpPortT extended with {
+
+        }
+
+    }
+    Component s0 : ServerT = new ServerT extended with {
+
+        Property deploymentLocation = "127.0.0.1";
+
+        Property cost = 1.0;
+
+        Property fidelity = 5;
+
+        Property load = 0.0;
+        Port http0 : HttpPortT = new HttpPortT extended with {
+
+        }
+
+    }
+    Component c0 : ClientT = new ClientT extended with {
+
+        Property deploymentLocation = "127.0.0.1";
+
+        Property experRespTime : float = 50.0;
+        Port p0 : HttpReqPortT = new HttpReqPortT extended with {
+
+        }
+
+    }
+    Component c1 : ClientT = new ClientT extended with {
+
+        Property deploymentLocation = "127.0.0.1";
+
+        Property experRespTime : float = 50;
+        Port p0 : HttpReqPortT = new HttpReqPortT extended with {
+
+        }
+
+    }
+    Component c2 : ClientT = new ClientT extended with {
+
+        Property deploymentLocation = "127.0.0.1";
+
+        Property experRespTime : float = 50;
+        Port p0 : HttpReqPortT = new HttpReqPortT extended with {
+
+        }
+
+    }
+    Connector conn0 : HttpConnT = new HttpConnT extended with {
+
+    }
+    Connector proxyconn0 : ProxyConnT = new ProxyConnT extended with {
+
+    }
+    Connector proxyconn1 : ProxyConnT = new ProxyConnT extended with {
+
+    }
+    Connector proxyconn3 : ProxyConnT = new ProxyConnT extended with {
+
+    }
+    Connector proxyconn2 : ProxyConnT = new ProxyConnT extended with {
+
+    }
+    Connector conn : HttpConnT = new HttpConnT extended with {
+
+    }
+    Connector conn1 : HttpConnT = new HttpConnT extended with {
+
+    }
+    Attachment lbproxy.fwd0 to proxyconn0.req;
+    Attachment s2.http0 to proxyconn2.rec;
+    Attachment lbproxy.fwd1 to proxyconn1.req;
+    Attachment s1.http0 to proxyconn1.rec;
+    Attachment s0.http0 to proxyconn0.rec;
+    Attachment c0.p0 to conn0.req;
+    Attachment lbproxy.http0 to conn0.rec;
+    Attachment s3.http0 to proxyconn3.rec;
+    Attachment lbproxy.fwd3 to proxyconn3.req;
+    Attachment c1.p0 to conn.req;
+    Attachment c2.p0 to conn1.req;
+    Attachment lbproxy.http2 to conn1.rec;
+    Attachment lbproxy.http1 to conn.rec;
+}
+
