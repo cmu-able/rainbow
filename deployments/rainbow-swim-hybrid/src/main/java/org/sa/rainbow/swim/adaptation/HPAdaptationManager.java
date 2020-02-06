@@ -118,6 +118,7 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
     private TimeSeriesPredictorModelInstance m_tspModel; 
     private PMCAdaptationManager m_adaptMgr;
     private PlanDB m_planDB;
+    //private boolean startServerC;
     //private AdaptationPlanner m_adaptPlanner;
 
 
@@ -141,6 +142,7 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
 
     public HPAdaptationManager () {
         super (NAME);
+        //startServerC = true;
         String per = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MODEL_EVAL_PERIOD);
         if (per != null) {
             setSleepTime (Long.parseLong (per));
@@ -842,7 +844,7 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
     }
 
     private EnvironmentDTMCPartitioned generateEnvironmentModel() {
-        return m_tspModel.getModelInstance().generateEnvironmentDTMC(2, m_horizon);
+        return m_tspModel.getModelInstance().generateEnvironmentDTMC(4, m_horizon);
     } 
     
     private String get_initial_state_str (SwimModelHelper swimModel, boolean fastPlanning) {
@@ -884,40 +886,58 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
         res += "const int ini_servers_A = ";
         res += getBoolVal(m_model.getModelInstance().getComponent("server1").getProperty("isActive")) ? 1 : 0;
         res += ";\n";
-        
+    	
+        int temp = getBoolVal(m_model.getModelInstance().getComponent("server1").getProperty("isActive")) ? 1 : 0;
+    	//log("**************** const int ini_servers_A = " + temp + "   FastPlanning = " + fastPlanning);
+
         res += "const int ini_servers_B = ";
         res += getBoolVal(m_model.getModelInstance().getComponent("server2").getProperty("isActive")) ? 1 : 0;
         res += ";\n";
         
+        temp = getBoolVal(m_model.getModelInstance().getComponent("server2").getProperty("isActive")) ? 1 : 0;
+    	//log("**************** const int ini_servers_B = " + temp + "   FastPlanning = " + fastPlanning);
+    	
         res += "const int ini_servers_C = ";
         res += getBoolVal(m_model.getModelInstance().getComponent("server3").getProperty("isActive")) ? 1 : 0;
         res += ";\n";
         
+        temp = getBoolVal(m_model.getModelInstance().getComponent("server3").getProperty("isActive")) ? 1 : 0;
+    	//log("**************** const int ini_servers_C = " + temp + "   FastPlanning = " + fastPlanning);
+    	
         int addServerAState = 0;
         int addServerBState = 0;
         int addServerCState = 0;
+    	int bootType = getBootType();
+        
+        if (bootType != 0) {
+            int addServerState = swimModel.getAddServerTacticProgress();
 
-        int addServerState = swimModel.getAddServerTacticProgress();
-        int bootType = getBootType();
-        if(bootType == 1)
-            addServerAState = addServerState;
-        if(bootType == 2)
-            addServerBState = addServerState;
-        if(bootType == 3)
-            addServerCState = addServerState;
+        	if(bootType == 1)
+        		addServerAState = addServerState;
+        	else if(bootType == 2)
+        		addServerBState = addServerState;
+        	else if(bootType == 3)
+        		addServerCState = addServerState;
+        }
 
         res += "const int ini_addServerA_state = ";
         res += addServerAState;
         res += ";\n";
         
+    	//log("**************** const int ini_addServerA_state = " + addServerAState + "   FastPlanning = " + fastPlanning);
+
         res += "const int ini_addServerB_state = ";
         res += addServerBState;
         res += ";\n";
         
+    	//log("**************** const int ini_addServerB_state = " + addServerBState + "   FastPlanning = " + fastPlanning);
+
         res += "const int ini_addServerC_state = ";
         res += addServerCState;
         res += ";\n";
         
+    	//log("**************** const int ini_addServerC_state = " + addServerCState + "   FastPlanning = " + fastPlanning);
+
         res += "const double SERVERA_COST_SEC = ";
         res += getDoubleVal(m_model.getModelInstance().getComponent("server1").getProperty("cost"));
         res += ";\n";
@@ -970,12 +990,8 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
         res += (int) getDoubleVal(m_model.getModelInstance().getComponent("server3").getProperty("traffic"));
         res += ";\n";
         
-        //useInterArrivalScaleFactorForFast(Slow)Planning (?)
-        if(fastPlanning){
-            res += "const double interArrivalScaleFactorForDecision = 1;\n";
-        } else {
-            res += "const double interArrivalScaleFactorForDecision = 1;\n";
-        }
+        res += "const double interArrivalScaleFactorForDecision = 1;\n";
+
 
     	return res;
     }
@@ -1028,15 +1044,33 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
         	res = new DivertTrafficPlan(m_model, "divert_0_25_75");
         else if(plan.equals("divert_0_50_50"))
         	res = new DivertTrafficPlan(m_model, "divert_0_50_50");
-        
+        else if(plan.startsWith("progress") || plan.equals("addServerA_complete")
+        		|| plan.equals("addServerB_complete") || plan.equals("addServerC_complete")) {
+        	log("Ignoring #" + ": " + plan);
+        } else {
+        	assert(false);  // unknown tactic
+        }
+
         return res;
     }
 
     protected AdaptationTree<SwimExtendedPlan> parseActions (StringVector actions){
         AdaptationTree<SwimExtendedPlan> at = new AdaptationTree<>(AdaptationExecutionOperatorT.PARALLEL);
+        
+        //log("actions to take: " + actions.size());
+		
         for(int i = 0; i < actions.size(); ++i) {
-        	at.addLeaf(parsePlan(actions.get(i)));
+        	if (actions.get(i).startsWith("progress") 
+        			|| actions.get(i).equals("addServerA_complete")
+        			|| actions.get(i).equals("addServerB_complete")
+        			|| actions.get(i).equals("addServerC_complete")) {
+        		log("Ignoring #" + i + ": " + actions.get(i));
+        	} else {
+        		at.addLeaf(parsePlan(actions.get(i)));
+        		log("#" + i + ": " + actions.get(i));
+        	}
         }
+        
         return at;
     }
 
@@ -1076,17 +1110,20 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
     public void markStrategyExecuted(AdaptationTree<SwimExtendedPlan> plan) {
         AdaptationResultsVisitor v = new AdaptationResultsVisitor (plan);
         plan.visit(v);
+
         if (v.m_allOk) {
         	log("Finished adapting the system");
         } else {
         	log("Something in the adaptation plan failed to execute.");
         }
+        
         try {
 			Thread.sleep(5000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
         m_executingPlan = false;
     }
 
@@ -1122,7 +1159,6 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
         return true;
 	}
 
-
     protected AdaptationTree<SwimExtendedPlan> checkAdaptation () {
         boolean decide = true;
         AdaptationTree<SwimExtendedPlan> at = null;
@@ -1131,14 +1167,28 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
             initializeAdaptationMgr(swimModel);
         }
 
+        /*boolean enabled = getBoolVal(m_model.getModelInstance().getComponent("server1").getProperty("isArchEnabled"));
+        int temp = getBoolVal(m_model.getModelInstance().getComponent("server1").getProperty("isActive")) ? 1 : 0;
+    	log("**************** const int ini_servers_A = " + temp  + " Enabled = " + enabled);
+
+    	enabled = getBoolVal(m_model.getModelInstance().getComponent("server2").getProperty("isArchEnabled"));
+        temp = getBoolVal(m_model.getModelInstance().getComponent("server2").getProperty("isActive")) ? 1 : 0;
+    	log("**************** const int ini_servers_B = " + temp  + " Enabled = " + enabled);
+
+    	enabled = getBoolVal(m_model.getModelInstance().getComponent("server3").getProperty("isArchEnabled"));
+        temp = getBoolVal(m_model.getModelInstance().getComponent("server3").getProperty("isActive")) ? 1 : 0;
+    	log("**************** const int ini_servers_C = " + temp  + " Enabled = " + enabled);*/
+    	
         EnvironmentDTMCPartitioned env = generateEnvironmentModel();
+        
         if (env == null) {
             log("No environment observations available. Can't make adaptation decision");
             decide = false;
         }
+        
         if (decide) {
             at = checkAdaptationImpl (swimModel, env);
-            log("Adaptation decision time DNE");
+            log("Adaptation decision time DONE");
         }
 
         log ("About to return at");
@@ -1156,6 +1206,23 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
     }
     
     protected int getBootType () {
+    	//getBoolVal(m_model.getModelInstance().getComponent("server3").getProperty("isArchEnabled"));
+        //getBoolVal(m_model.getModelInstance().getComponent("server3").getProperty("isActive"));
+    	/*log("isArchEnabled = " 
+    			+ getBoolVal(m_model.getModelInstance().getComponent("server1").getProperty("isArchEnabled"))  
+    			+ " isActive = " 
+    			+ getBoolVal(m_model.getModelInstance().getComponent("server1").getProperty("isActive")));
+    	
+    	log("isArchEnabled = " 
+    			+ getBoolVal(m_model.getModelInstance().getComponent("server2").getProperty("isArchEnabled"))  
+    			+ " isActive = " 
+    			+ getBoolVal(m_model.getModelInstance().getComponent("server2").getProperty("isActive")));
+    	
+    	log("isArchEnabled = " 
+    			+ getBoolVal(m_model.getModelInstance().getComponent("server3").getProperty("isArchEnabled"))  
+    			+ " isActive = " 
+    			+ getBoolVal(m_model.getModelInstance().getComponent("server3").getProperty("isActive")));*/
+    	
     	if(getBoolVal(m_model.getModelInstance().getComponent("server1").getProperty("isActive")) 
     	!= getBoolVal(m_model.getModelInstance().getComponent("server1").getProperty("isArchEnabled")))
     		return 1;
@@ -1186,20 +1253,29 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
 		@Override
 		public void run() {
 			// TODO Auto-generated method stub
+			/*if (startServerC) {
+				log("fast planning returning addServerC_start");
+				actions.
+				actions.add("addServerC_start");
+				startServerC = false;
+				return;
+			}*/
 			initialState = get_initial_state_str(swimModel, true);
+
 			if(usePredictor) {
     			environmentModel = "formula stateValue = " + ";\n";
     		} else {
     			environmentModel = "formula stateValue = " + swimModel.getArrivalRate() + ";\n";
     		}
+
 			log("fast planning triggered");
             AdaptationPlanner m_adaptPlanner = new AdaptationPlanner();
-            m_adaptPlanner.setModelTemplatePath("/home/frank/Sandbox/plasasim/templates/final_ibl.prism");
+            String sysEnvStr = System.getenv("RAINBOW");
+            m_adaptPlanner.setModelTemplatePath(sysEnvStr + "/pladapt/templates/final_ibl.prism");
     		actions = m_adaptPlanner.plan(environmentModel, initialState, "", true);
     		String ret_path = m_adaptPlanner.getPlanned_path();
     		log("fast plan over, path = " + ret_path);
 		}
-		
 	}
 	
     //class that defines slow planning procedure
@@ -1225,9 +1301,13 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
         	} else {
         		environmentModel = PMCAdaptationManager.generateEnvironmentDTMC(generateEnvironmentModel());
         	}
+        	
+        	environmentModel = "module environment\n" + environmentModel;
+        	
         	log("slow planning triggered");
             AdaptationPlanner m_adaptPlanner = new AdaptationPlanner();
-            m_adaptPlanner.setModelTemplatePath("/home/frank/Sandbox/plasasim/templates/final_ibl.prism");
+            String sysEnvStr = System.getenv("RAINBOW");
+            m_adaptPlanner.setModelTemplatePath(sysEnvStr + "/pladapt/templates/final_ibl.prism");
         	m_adaptPlanner.plan(environmentModel, initialState, "", false);
         	String ret_path = m_adaptPlanner.getPlanned_path();
         	log("slow plan over, path = " + ret_path);
@@ -1236,7 +1316,6 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
         	log("slow plan populate db over");
 		}
 	}
-	
 
     protected AdaptationTree<SwimExtendedPlan> checkAdaptationImpl(SwimModelHelper swimModel,
             EnvironmentDTMCPartitioned env){
@@ -1286,25 +1365,37 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
         		runR.start();
         		try {
 					runR.join();
+					actions = runR.actions;
+		    		log("Executing reactive plan.");
+		    		/*if (startServerC) {
+						log("Adding fast planning action addServerC_start");
+
+		    			actions.add("addServerC_start");
+		    			startServerC = false;
+		    		}*/
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-        		actions = runR.actions;
+        		//actions = runR.actions;
         	}
-
-        	
         } else {
+    		log("State Found in Deliberative Plan");
         	actions = m_planDB.getActions();
         }
         
         //parse actions
         AdaptationTree<SwimExtendedPlan> at = parseActions(actions);
-        log("actions to take: " + actions.size());
+
+        /*log("actions to take: " + actions.size());
         for(int i = 0; i < actions.size(); ++i) {
-        	log("#" + i + ": " + actions.get(i));
-        	
-        }
+        	if (!actions.get(i).startsWith("progressC")) {
+        		log("#" + i + ": " + actions.get(i));
+        	} else {
+        		log("Ignoring #" + i + ": " + actions.get(i));
+        	}
+        }*/
+        
         return at;
     }
 
@@ -1312,7 +1403,7 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
 
 	@Override
 	protected void runAction() {
-        log("inside runAction");
+        //log("inside runAction");
 		// double arrivalRate = getDoubleVal(m_model.getModelInstance().getComponent("LB0").getProperty("arrivalRate"));
 		// m_tspModel.getModelInstance().observe(arrivalRate);
         m_currentTime++;
@@ -1322,7 +1413,7 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
                 //log (">> do strategy: " + at);
                 m_adaptationEnqueuePort.offerAdaptation (at, new Object[0]);
                 String logMessage = at.toString ();
-                log("New plan generated. Enqueueing...");
+                //log("New plan generated. Enqueueing...");
                 log(logMessage);
                 m_executingPlan = true;
             }
@@ -1331,14 +1422,14 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
         } 
 
         //testing code
-        String logInfo = "";
+        /*String logInfo = "";
         logInfo += "Load Balancer:";
         logInfo += "\ndimmer: " + getDoubleVal(m_model.getModelInstance().getComponent("LB0").getProperty("dimmer"));
         logInfo += "\narrivalRate: " + getDoubleVal(m_model.getModelInstance().getComponent("LB0").getProperty("arrivalRate"));
         logInfo += "\naverageResponseTime: " + getDoubleVal(m_model.getModelInstance().getComponent("LB0").getProperty("averageResponseTime"));
         logInfo += "\nServer 1:";
         logInfo += "\ntraffic: " + getDoubleVal(m_model.getModelInstance().getComponent("server1").getProperty("traffic"));
-        //logInfo += "\nisArchEnabled: " + getBoolVal(m_model.getModelInstance().getComponent("server1").getProperty("nisArchEnabled"));
+        logInfo += "\nisArchEnabled: " + getBoolVal(m_model.getModelInstance().getComponent("server1").getProperty("isArchEnabled"));
         logInfo += "\nmax_arrival_capacity: " + getIntVal(m_model.getModelInstance().getComponent("server1").getProperty("max_arrival_capacity"));
         logInfo += "\nmax_arrival_capacity_low: " + getIntVal(m_model.getModelInstance().getComponent("server1").getProperty("max_arrival_capacity_low"));
         logInfo += "\nindex: " + getIntVal(m_model.getModelInstance().getComponent("server1").getProperty("index"));
@@ -1349,7 +1440,7 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
         logInfo += "\ncost: " + getDoubleVal(m_model.getModelInstance().getComponent("server1").getProperty("cost"));
         logInfo += "\nServer 2:";
         logInfo += "\ntraffic: " + getDoubleVal(m_model.getModelInstance().getComponent("server2").getProperty("traffic"));
-        //logInfo += "\nisArchEnabled: " + getBoolVal(m_model.getModelInstance().getComponent("server2").getProperty("nisArchEnabled"));
+        logInfo += "\nisArchEnabled: " + getBoolVal(m_model.getModelInstance().getComponent("server2").getProperty("isArchEnabled"));
         logInfo += "\nmax_arrival_capacity: " + getIntVal(m_model.getModelInstance().getComponent("server2").getProperty("max_arrival_capacity"));
         logInfo += "\nmax_arrival_capacity_low: " + getIntVal(m_model.getModelInstance().getComponent("server2").getProperty("max_arrival_capacity_low"));
         logInfo += "\nindex: " + getIntVal(m_model.getModelInstance().getComponent("server2").getProperty("index"));
@@ -1360,7 +1451,7 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
         logInfo += "\ncost: " + getDoubleVal(m_model.getModelInstance().getComponent("server2").getProperty("cost"));
         logInfo += "\nServer 3:";
         logInfo += "\ntraffic: " + getDoubleVal(m_model.getModelInstance().getComponent("server3").getProperty("traffic"));
-        //logInfo += "\nisArchEnabled: " + getBoolVal(m_model.getModelInstance().getComponent("server3").getProperty("nisArchEnabled"));
+        logInfo += "\nisArchEnabled: " + getBoolVal(m_model.getModelInstance().getComponent("server3").getProperty("isArchEnabled"));
         logInfo += "\nmax_arrival_capacity: " + getIntVal(m_model.getModelInstance().getComponent("server3").getProperty("max_arrival_capacity"));
         logInfo += "\nmax_arrival_capacity_low: " + getIntVal(m_model.getModelInstance().getComponent("server3").getProperty("max_arrival_capacity_low"));
         logInfo += "\nindex: " + getIntVal(m_model.getModelInstance().getComponent("server3").getProperty("index"));
@@ -1369,7 +1460,7 @@ public final class HPAdaptationManager extends AbstractRainbowRunnable
         logInfo += "\nreqServiceRate: " + getDoubleVal(m_model.getModelInstance().getComponent("server3").getProperty("reqServiceRate"));
         logInfo += "\nbyteServiceRate: " + getDoubleVal(m_model.getModelInstance().getComponent("server3").getProperty("byteServiceRate"));
         logInfo += "\ncost: " + getDoubleVal(m_model.getModelInstance().getComponent("server3").getProperty("cost"));
-        //log(logInfo);
+        log(logInfo);*/
         
         //testing 2
         SwimModelHelper swimModel = new SwimModelHelper(m_model);

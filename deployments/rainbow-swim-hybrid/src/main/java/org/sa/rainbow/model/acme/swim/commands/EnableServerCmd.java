@@ -72,14 +72,21 @@ public class EnableServerCmd extends SwimAcmeModelCommand<IAcmeProperty> {
         try {
         	boolean enabled = Boolean.valueOf (getParameters ()[0]);
             IAcmePropertyValue acmeVal = PropertyHelper.toAcmeVal (enabled);
+            
+            String str =  getParameters ()[0];
+            
+            //System.out.println("New value for isArchEnabled for server " + this.getTarget() + " is " + enabled 
+            //			+ " ####  Current value = " + property.getValue () 
+            //			+ " %%%%  Boolean.valueOf (getParameters ()[0]) = " + str);
+            
             if (propertyValueChanging (property, acmeVal)) {
                 m_command = property.getCommandFactory ().propertyValueSetCommand (property,
                         acmeVal);
                 cmds.add (m_command);
             }
+            
             if (!enabled) {
-            	
-            	// set the traffic to 0, so that it does not affect the average
+               	// set the traffic to 0, so that it does not affect the average
             	IAcmeProperty trafficProperty = server.getProperty ("traffic");
             	IAcmeCommand<?> newCommand = trafficProperty.getCommandFactory ().propertyValueSetCommand (trafficProperty,
                         PropertyHelper.toAcmeVal(0.0));

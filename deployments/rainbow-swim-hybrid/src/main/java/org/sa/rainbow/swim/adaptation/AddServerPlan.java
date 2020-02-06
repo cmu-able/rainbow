@@ -31,7 +31,7 @@ public class AddServerPlan extends SwimExtendedPlan {
         (m_reference.getModelName() + ":" + m_reference.getModelType());
     SwimCommandFactory cf = (SwimCommandFactory) m_reference.getCommandFactory();
     AddServerWithTypeCmd cmd = cf.addServerWithTypeCmd(m_reference.getModelInstance().getComponent("LB0"), m_server);
-    System.out.println ("Changing Instructions");
+    System.out.println ("Changing Instructions inside AddServerPlan");
     if (executor == null) {
       System.out.println("executor null"); return false;
     }

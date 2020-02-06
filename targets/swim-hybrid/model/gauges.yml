@@ -150,7 +150,7 @@ gauge-types:
         default: 30000
       javaClass:
         type: String
-        default: "org.sa.rainbow.translator.swim.gauges.SimpleGauge"
+        default: "org.sa.rainbow.translator.swim.gauges.ServerActiveGauge"
     configParams:
       samplingFrequency:
         type: long
@@ -158,9 +158,9 @@ gauge-types:
       targetProbeType:
         type: String
         default: ~
-      #serverNum:
-      #  type: int
-      #  default: 0
+      serverNum:
+        type: int
+        default: 0
     comment: "ServerActivationGaugeT reports if a server is active or not. serverNum is the server number (e.g., 1, 2 3), so that if there are N active servers, this server is active if N >= serverNum"
 
 
@@ -233,34 +233,34 @@ gauge-instances:
     type:  ServerActivationGaugeT
     model: "SwimSys:Acme"
     commands:
-      activateServer : server1.activateServer($<enabled>)
+      serverActivated : server1.activateServer($<server1>)
     setupValues:
       targetIP: "${customize.system.target.lb}"
     configValues:
       targetProbeType  : activeServer1
-      #serverNum: 1
+      serverNum: 1
     comment: ""
   ServerActiveG2:
     type:  ServerActivationGaugeT
     model: "SwimSys:Acme"
     commands:
-      activateServer : server2.activateServer($<enabled>)
+      serverActivated : server2.activateServer($<server2>)
     setupValues:
       targetIP: "${customize.system.target.lb}"
     configValues:
       targetProbeType  : activeServer2
-      #serverNum: 2
+      serverNum: 2
     comment: ""
   ServerActiveG3:
     type:  ServerActivationGaugeT
     model: "SwimSys:Acme"
     commands:
-      activateServer : server3.activateServer($<enabled>)
+      serverActivated : server3.activateServer($<server3>)
     setupValues:
       targetIP: "${customize.system.target.lb}"
     configValues:
       targetProbeType  : activeServer3
-      #serverNum: 3
+      serverNum: 3
     comment: ""
   AverageResponseTimeG0:
     type:  AverageResponseTimeT

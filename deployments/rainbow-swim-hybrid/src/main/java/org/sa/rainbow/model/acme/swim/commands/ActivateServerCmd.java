@@ -75,7 +75,19 @@ public class ActivateServerCmd extends SwimAcmeModelCommand<IAcmeProperty> {
 					getTarget()));
         }
         try {
-            IAcmePropertyValue acmeVal = PropertyHelper.toAcmeVal (Boolean.valueOf (getParameters ()[0]));
+            String str =  getParameters ()[0];
+        	boolean activate = Boolean.valueOf (getParameters ()[0]);
+
+            //if (str.equals("1")) {
+            //	activate = true;
+            //}
+
+            IAcmePropertyValue acmeVal = PropertyHelper.toAcmeVal (activate);
+
+            //System.out.println("New value for isActive for server " + this.getTarget() + " is " + activate
+            //			+ " ####  Current value = " + property.getValue () 
+            //			+ " %%%% Boolean.valueOf (getParameters ()[0]) = " + str);
+            
             if (propertyValueChanging (property, acmeVal)) {
                 m_command = property.getCommandFactory ().propertyValueSetCommand (property,
                         acmeVal);
@@ -85,6 +97,7 @@ public class ActivateServerCmd extends SwimAcmeModelCommand<IAcmeProperty> {
         catch (IllegalArgumentException e) {
             throw new RainbowModelException (e.getMessage (), e);
         }
+
         return cmds;
 
     }
