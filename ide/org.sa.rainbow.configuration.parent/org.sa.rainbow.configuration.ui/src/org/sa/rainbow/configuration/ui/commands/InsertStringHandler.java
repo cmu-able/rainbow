@@ -21,11 +21,15 @@ DEALINGS IN THE SOFTWARE.
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentExtension3;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.xtext.ui.editor.XtextEditor;
 import org.eclipse.xtext.ui.editor.utils.EditorUtils;
+import org.sa.rainbow.configuration.ui.TokenTypeToPartitionMapper;
 
 /**
  * Handler to allow easy typing of guillemet characters on windows
@@ -57,7 +61,15 @@ public abstract class InsertStringHandler extends AbstractHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		XtextEditor editor = EditorUtils.getActiveXtextEditor(event);
+		
+		
 		if (editor != null) {
+			String type = IDocument.DEFAULT_CONTENT_TYPE;
+			try {
+				int offset = editor.getInternalSourceViewer().getTextWidget().getCaretOffset();
+				type = TextUtilities.getContentType(editor.getInternalSourceViewer().getDocument(), IDocumentExtension3.DEFAULT_PARTITIONING, offset, false);
+			}
+			catch (Exception e) {}
 			// Hack, would be nicer with document edits, but this way we don't loose auto edit
 			StyledText textWidget = editor.getInternalSourceViewer().getTextWidget();
 			Event e = new Event();
@@ -65,6 +77,13 @@ public abstract class InsertStringHandler extends AbstractHandler {
 			e.type = SWT.KeyDown;
 			e.doit = true;
 			textWidget.notifyListeners(SWT.KeyDown, e);
+			if (IDocument.DEFAULT_CONTENT_TYPE.equals(type)) {
+				e = new Event();
+				e.character = replaceChar;
+				e.type = SWT.KeyDown;
+				e.doit = true;
+				textWidget.notifyListeners(SWT.KeyDown, e);
+			}
 		}
 		return null;
 	}

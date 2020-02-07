@@ -21,6 +21,7 @@ FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TOR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
 DEALINGS IN THE SOFTWARE.
  */
+
 import com.google.inject.Binder
 import com.google.inject.name.Names
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
@@ -29,12 +30,15 @@ import org.eclipse.xtext.common.types.access.jdt.JdtTypeProviderFactory
 import org.eclipse.xtext.common.types.xtext.AbstractTypeScopeProvider
 import org.eclipse.xtext.common.types.xtext.ui.ITypesProposalProvider
 import org.eclipse.xtext.common.types.xtext.ui.JdtBasedSimpleTypeScopeProvider
+import org.eclipse.xtext.ide.editor.bracketmatching.IBracePairProvider
 import org.eclipse.xtext.ide.editor.syntaxcoloring.DefaultSemanticHighlightingCalculator
+import org.eclipse.xtext.service.SingletonBinding
+import org.eclipse.xtext.ui.editor.hyperlinking.HyperlinkHelper
+import org.eclipse.xtext.ui.editor.model.TerminalsTokenTypeToPartitionMapper
 import org.eclipse.xtext.ui.editor.syntaxcoloring.DefaultHighlightingConfiguration
 import org.sa.rainbow.configuration.ConfigAttributeConstants
 import org.sa.rainbow.configuration.ui.contentassist.RainbowJdtTypesProposalProvider
 import org.sa.rainbow.configuration.ui.contentassist.RainbowTemplateProposalProvider
-import org.eclipse.xtext.ui.editor.hyperlinking.HyperlinkHelper
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.
@@ -65,10 +69,17 @@ class RclUiModule extends AbstractRclUiModule {
 		binder.bind(HyperlinkHelper).to(RclHyperlinkHelper)
 	}
 	
-//	@SingletonBinding override Class<? extends IBracePairProvider> bindIBracePairProvider() {
-//		return RainbowBracePairProvider
-//	}
+	@SingletonBinding override Class<? extends IBracePairProvider> bindIBracePairProvider() {
+		return RainbowBracePairsProvider
+	}
 	
+	override bindAbstractEditStrategyProvider() {
+		return AutoEditStrategyProvider
+	}
+	
+	def Class<? extends TerminalsTokenTypeToPartitionMapper> bindTerminalsTokenTypeToPartitionMapper() {
+		return TokenTypeToPartitionMapper
+	}
 	
 //	override configureHighlightingLexer(Binder binder) {
 //		binder.bind(org.eclipse.xtext.parser.antlr.Lexer)

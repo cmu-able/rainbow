@@ -432,7 +432,7 @@ class RclProposalProvider extends AbstractRclProposalProvider {
 			}
 		}
 
-		super.completeReference_Referable(model, assignment, context, acceptor)
+		super.completeDeclaredProperty_Default(model, assignment, context, acceptor)
 	}
 
 	override completeAssignment_Value(EObject model, org.eclipse.xtext.Assignment assignment,
