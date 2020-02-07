@@ -140,7 +140,9 @@ class XtendUtils {
 			var str = new StringBuilder()
 			for (expr : rich.expressions) {
 				if (expr instanceof RichStringLiteral) {
-					str.append((expr as RichStringLiteral).value.replaceAll("«", "").replaceAll("»", ""))
+					val s = (expr as RichStringLiteral)?.value?.replaceAll("«", "")?.replaceAll("»", "")
+					
+					if (s !== null) str.append(s)
 				} else if (expr instanceof RichStringPart) {
 					val value = (expr as RichStringPart)?.referable?.^default?.value
 					val sv = switch value {
