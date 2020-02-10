@@ -22,9 +22,9 @@ package org.sa.rainbow.configuration.validation
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
  * DEALINGS IN THE SOFTWARE.
  */
+
 import com.google.inject.Inject
 import com.google.inject.name.Named
-import java.io.File
 import java.util.HashSet
 import java.util.LinkedList
 import java.util.List
@@ -49,6 +49,7 @@ import org.eclipse.xtext.util.Tuples
 import org.eclipse.xtext.validation.Check
 import org.eclipse.xtext.xbase.lib.Functions.Function1
 import org.sa.rainbow.configuration.ConfigAttributeConstants
+import org.sa.rainbow.configuration.ModelUtil
 import org.sa.rainbow.configuration.Utils
 import org.sa.rainbow.configuration.XtendUtils
 import org.sa.rainbow.configuration.rcl.Array
@@ -64,7 +65,6 @@ import org.sa.rainbow.configuration.rcl.DoubleLiteral
 import org.sa.rainbow.configuration.rcl.Effector
 import org.sa.rainbow.configuration.rcl.Factory
 import org.sa.rainbow.configuration.rcl.FactoryDefinition
-import org.sa.rainbow.configuration.rcl.FormalParam
 import org.sa.rainbow.configuration.rcl.Gauge
 import org.sa.rainbow.configuration.rcl.GaugeBody
 import org.sa.rainbow.configuration.rcl.GaugeTypeBody
@@ -97,6 +97,9 @@ class RclValidator extends AbstractRclValidator {
 	public static val ONLY_EXTEND_PROBE_TYPES = "invalidProbeType"
 	public static val MUST_SUBCLASS = "wrongtype"
 	public static val MISSING_PROPERTY = "missingRequiredProperty"
+	public static val COMMAND_NOT_IN_GAUGE_TYPE = "commandNotnGaugeSuperType"
+	public static val NOT_VALID_GAUGE_COMMAND = "gaugeCommandNotValid"
+	
 
 	@Check
 	def checkOnlyProbeAsSupertype(Probe probe) {
@@ -378,17 +381,17 @@ class RclValidator extends AbstractRclValidator {
 			if (hasRegExpCommand === null) {
 				hasRegExpCommand = cmd.regexp !== null
 			} else {
-				if (hasRegExpCommand != (cmd.regexp === null)) {
+				if (hasRegExpCommand && (cmd.regexp === null)) {
 					error(
 						'''Mixing commands with and without regular expression is not supported.''',
 						cmd,
-						RclPackage.Literals.COMMAND_CALL__NAME,
+						RclPackage.Literals.COMMAND_REFERENCE__NAME,
 						"mixedcommands"
 					)
 				}
 			}
 		}
-		if (hasRegExpCommand) {
+		if (hasRegExpCommand != null && hasRegExpCommand) {
 			var noGeneratedClass = true
 			var additional = ""
 			val setupProp = gb.assignment.findFirst[it.name == "setup"]
@@ -474,10 +477,13 @@ class RclValidator extends AbstractRclValidator {
 				if (g.superType.body.commands.findFirst [
 					it.name == cc.name
 				] === null) {
+					val commandNamesInGauge = g.body.commands.map[it.name]
+					val possibleRenamesInGauge = g.superType.body.commands.map[it.name].filter[!commandNamesInGauge.contains(it)].join(",")
 					error(
 						'''The command "«cc.name»" does not exists in «g.superType.name»''',
 						RclPackage.Literals.COMMAND_CALL__NAME,
-						"nocommand"
+						RclValidator.COMMAND_NOT_IN_GAUGE_TYPE,
+						possibleRenamesInGauge
 					)
 				}
 			}
@@ -547,7 +553,7 @@ class RclValidator extends AbstractRclValidator {
 			val typeCommands = g.superType.body.commands
 			for (cmd : g.body.commands) {
 				val tcmd = typeCommands.findFirst[it.name == cmd.name]
-				if (tcmd.regexp !== null) {
+				if (tcmd?.regexp !== null) {
 					val Set<String> namedGroups = newHashSet
 					val regexp = XtendUtils.unpackString(tcmd.regexp, true)
 					XtendUtils.fillNamedGroups(regexp, namedGroups)
@@ -593,10 +599,22 @@ class RclValidator extends AbstractRclValidator {
 				var commandMethod = mf.commands.filter[it.name.equalsIgnoreCase(command)]
 
 				if (commandMethod.empty) {
+					val validCommands = new LinkedList<String>();
+					val gauge = EcoreUtil2.getContainerOfType(cc, Gauge)
+					if (gauge !== null) {
+						val superTypeCmd =gauge?.superType?.body?.commands?.findFirst[it.name.equalsIgnoreCase(cc.name)]
+						if (superTypeCmd !== null) {
+							validCommands.add(superTypeCmd.command)
+						}
+						else {
+							validCommands.addAll(mf.commands.filter[it.formal.length == cc.actual.length].map[it.name])
+						}
+					}
 					error(
-						'''"«command»" is not a valid command in «(cmf as ModelFactoryReference).referable.name» ''',
+						'''"«command»" is not a valid command in «(cmf as PropertyReference).referable.name» ''',
 						RclPackage.Literals.COMMAND_CALL__COMMAND,
-						"nocommand"
+						NOT_VALID_GAUGE_COMMAND,
+						validCommands.join(",")
 					)
 				} else {
 					val factoryCommand = commandMethod.get(0)
@@ -806,7 +824,7 @@ class RclValidator extends AbstractRclValidator {
 					var i = 0
 					for (param : factoryCommand.formal) {
 						if (param.name != "target") {
-							val paramTypeName = getTypeName(param)
+							val paramTypeName = ModelUtil.getTypeName(param)
 							if (paramTypeName != cr.formal.get(i).simpleName) {
 								error(
 									'''Parameter «i» expecting «paramTypeName», received «cr.formal.get(i).simpleName».''',
@@ -816,7 +834,7 @@ class RclValidator extends AbstractRclValidator {
 							}
 							i = i + 1
 						} else {
-							val paramTypeName = getTypeName(param)
+							val paramTypeName = ModelUtil.getTypeName(param)
 							if (paramTypeName != cr.target) {
 								error(
 									'''Target type expecting «paramTypeName», received «cr.target».''',
@@ -833,19 +851,7 @@ class RclValidator extends AbstractRclValidator {
 		}
 	}
 
-	def getTypeName(FormalParam param) {
-		if (param.type.acme !== null) {
-			val ar = param.type.acme.referable
-			return XtendUtils.getAcmeTypeName(ar)
-		}
-		if (param.type.java != null) {
-			return param.type.java.referable.simpleName
-		}
-		if (param.type.base !== null) {
-			return param.type.base.getName()
-		}
-
-	}
+	
 
 	@Check
 	def checkClassAssignments(DeclaredProperty assignment) {
@@ -1122,7 +1128,8 @@ class RclValidator extends AbstractRclValidator {
 	static val MODEL_COMMAND_FACTORY_SUPERCLASS = typeof(ModelCommandFactory).name
 	static val RAINBOW_OPERATION_SUPERCLASS = typeof(AbstractRainbowModelOperation).name
 	static val MODEL_SUPERCLASS = typeof(IModelInstance).name
-
+	
+	
 	@Check
 	def checkFactoryDefinition(FactoryDefinition factory) {
 		if (!ConfigAttributeConstants.subclasses(factory.loadCmd, RclValidator.LOAD_MODEL_CMD_SUPERCLASS,

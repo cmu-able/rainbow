@@ -52,6 +52,29 @@ import org.sa.rainbow.configuration.validation.RclValidator
  */
 class RclQuickfixProvider extends DefaultQuickfixProvider {
 
+
+	@Fix(RclValidator.COMMAND_NOT_IN_GAUGE_TYPE)
+	@Fix(RclValidator.NOT_VALID_GAUGE_COMMAND)
+	def renameCommand(Issue issue, IssueResolutionAcceptor acceptor) {
+		if (issue?.data?.length === 0) {
+			return
+		}
+		val possibleRenames = new LinkedList<String>();
+		for (name : issue.data.get(0).split(",")) {
+			possibleRenames.add(name)
+		}
+		
+		for (name : possibleRenames) {
+			acceptor.accept(issue, "Rename to " + name, "Rename the command", null) [
+				context |
+				val xtextDocument = context.xtextDocument
+				xtextDocument.replace(issue.offset, issue.length, name);
+			]
+		}
+	}
+	
+
+
 //	@Fix(RclValidator.INVALID_NAME)
 //	def capitalizeName(Issue issue, IssueResolutionAcceptor acceptor) {
 //		acceptor.accept(issue, 'Capitalize name', 'Capitalize the name.', 'upcase.png') [
