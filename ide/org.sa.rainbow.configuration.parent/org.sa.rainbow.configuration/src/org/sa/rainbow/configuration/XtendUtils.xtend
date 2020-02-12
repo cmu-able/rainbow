@@ -106,7 +106,7 @@ class XtendUtils {
 	
 	
 	static def boolean isSimpleDeclaredProperty(DeclaredProperty p) {
-		val value = p?.^default?.value
+		val value = p?.value?.value
 		val simple = switch value {
 			Reference | StringLiteral | BooleanLiteral | IntegerLiteral | DoubleLiteral | IPLiteral | LogLiteral : true
 			PropertyReference case value.referable instanceof DeclaredProperty: isSimpleDeclaredProperty(value.referable as DeclaredProperty)
@@ -117,7 +117,7 @@ class XtendUtils {
 	
 	
 	static def String valueOfSimpleDeclaredProperty(DeclaredProperty p) {
-		val value = p?.^default?.value
+		val value = p?.value?.value
 		val sv = switch value {
 			StringLiteral : unpackString(value, false, true)
 			BooleanLiteral : Boolean.toString(value.isTrue)
@@ -144,7 +144,7 @@ class XtendUtils {
 					
 					if (s !== null) str.append(s)
 				} else if (expr instanceof RichStringPart) {
-					val value = (expr as RichStringPart)?.referable?.^default?.value
+					val value = (expr as RichStringPart)?.referable?.value?.value
 					val sv = switch value {
 						StringLiteral : unpackString(value, true, true)
 						BooleanLiteral: Boolean.toString(value.isTrue) 

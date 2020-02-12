@@ -139,7 +139,7 @@ enum ComponentType:
 ;
 
 DeclaredProperty:
-	'def' component=(ComponentType)? (type=[types::JvmType|FQN])? name=FQN('=' default=Value)? 
+	'def' component=(ComponentType)? (type=[types::JvmType|FQN])? name=FQN('=' value=Value)? 
 ;
 
 ProbeType returns Probe:

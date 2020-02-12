@@ -197,6 +197,9 @@ class RclProposalProvider extends AbstractRclProposalProvider {
 		proposal.priority = 1
 		acceptor.accept(proposal)
 	}
+	
+	override completeReference_Referable(EObject model, org.eclipse.xtext.Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+	}
 
 	override complete_Assignment(EObject model, RuleCall ruleCall, ContentAssistContext context,
 		ICompletionProposalAcceptor acceptor) {
@@ -434,29 +437,31 @@ class RclProposalProvider extends AbstractRclProposalProvider {
 		}
 	}
 
-	override completeDeclaredProperty_Default(EObject model, org.eclipse.xtext.Assignment assignment,
+	
+
+	override completeAssignment_Value(EObject model, org.eclipse.xtext.Assignment assignment,
 		ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
-		val ass = EcoreUtil2.getContainerOfType(model, DeclaredProperty)
-		if (ass.name.matches(".*class_[0-9]+$")) {
-			val checkName = ass.name.substring(0, ass.name.lastIndexOf('_')) + "*"
+		val dp = EcoreUtil2.getContainerOfType(model, DeclaredProperty)
+		if (dp?.name?.matches(".*class_[0-9]+$")) {
+			val checkName = dp.name.substring(0, dp.name.lastIndexOf('_')) + "*"
 			val subclass = ConfigAttributeConstants.PROPERTY_VALUE_CLASSES.get(checkName)
 			if (subclass !== null) {
 				val jvmTypeProvider = jvmTypeProviderFactory.createTypeProvider(model.eResource.resourceSet)
 				val sc = jvmTypeProvider.findTypeByName(subclass)
 				if (sc !== null) {
 					typeProposalProvider.createSubTypeProposals(sc, this, context,
-						RclPackage.Literals.DECLARED_PROPERTY__DEFAULT, TypeMatchFilters.canInstantiate, acceptor);
+						RclPackage.Literals.ASSIGNMENT__VALUE, TypeMatchFilters.canInstantiate, acceptor);
 					pauseAssisting(acceptor);
 					return
 				}
 			}
 		}
-
-		super.completeDeclaredProperty_Default(model, assignment, context, acceptor)
-	}
-
-	override completeAssignment_Value(EObject model, org.eclipse.xtext.Assignment assignment,
-		ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		if (ConfigAttributeConstants.PROPERTY_VALUE_TYPES.get(dp.name)!==null) {
+			val info = ConfigAttributeConstants.PROPERTY_VALUE_TYPES.get(dp.name)
+			processPropertySuggestionsBasedOnClass(info?.get('extends') as List<Class>, dp, context, acceptor)
+			
+			return
+		}
 		val ass = EcoreUtil2.getContainerOfType(model, Assignment)
 		if (ass.name == "javaClass") {
 			val gtc = EcoreUtil2.getContainerOfType(ass, GaugeType)
@@ -647,7 +652,7 @@ class RclProposalProvider extends AbstractRclProposalProvider {
 					val sc = jvmTypeProvider.findTypeByName(class.name)
 					if (sc !== null) {
 						typeProposalProvider.createSubTypeProposals(sc, this, context,
-							RclPackage.Literals.DECLARED_PROPERTY__DEFAULT, TypeMatchFilters.canInstantiate, acceptor);
+							RclPackage.Literals.ASSIGNMENT__VALUE, TypeMatchFilters.canInstantiate, acceptor);
 					}
 				}
 
@@ -736,7 +741,7 @@ class RclProposalProvider extends AbstractRclProposalProvider {
 					acceptor,
 					[ IEObjectDescription e |
 						e.EObjectOrProxy instanceof DeclaredProperty &&
-							class.isAssignableFrom((e.EObjectOrProxy as DeclaredProperty)?.^default?.value?.class)
+							class.isAssignableFrom((e.EObjectOrProxy as DeclaredProperty)?.value?.value?.class)
 					]
 				)
 			}
@@ -760,7 +765,7 @@ class RclProposalProvider extends AbstractRclProposalProvider {
 						acceptor,
 						[ IEObjectDescription e |
 							if (e.EObjectOrProxy instanceof DeclaredProperty) {
-								val class2 = (e.EObjectOrProxy as DeclaredProperty)?.^default?.value?.class
+								val class2 = (e.EObjectOrProxy as DeclaredProperty)?.value.value?.class
 								return class2 !== null && class.isAssignableFrom(class2)
 							}
 							return false;

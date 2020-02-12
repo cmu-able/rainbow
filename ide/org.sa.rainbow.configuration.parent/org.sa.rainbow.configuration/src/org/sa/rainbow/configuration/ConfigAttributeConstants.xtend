@@ -59,6 +59,7 @@ import org.sa.rainbow.gui.IRainbowGUI
 import org.sa.rainbow.translator.effectors.EffectorManager
 import org.sa.rainbow.translator.probes.AbstractProbe
 import org.sa.rainbow.configuration.validation.RclValidator
+import org.sa.rainbow.core.ports.IRainbowConnectionPortFactory
 
 class ConfigAttributeConstants {
 	public static val ALL_OFREQUIRED_PROBE_FIELDS = #{"alias", "location"};
@@ -136,15 +137,41 @@ class ConfigAttributeConstants {
 		}
 		set
 	}
+	
+	static val IS_STRING = #{'extends' -> #[StringLiteral], 'msg' -> 'must be a string'}
+	static val IS_NUMBER = #{'extends' -> #[IntegerLiteral], 'msg' -> 'must be a number'}
+	static val IS_COMPONENT = #{'extends' -> #[Component], 'msg' -> 'must be a composite'}
 
 	public static val PROPERTY_VALUE_CLASSES = #{
-		"rainbow.deployment.factory.class" -> "org.sa.rainbow.core.ports.IRainbowConnectionPortFactory",
+		
 		"rainbow.model.load.class*" -> "org.sa.rainbow.core.models.commands.ModelCommandFactory",
 		"rainbow.analyses*" -> "org.sa.rainbow.core.analysis.IRainbowAnalysis",
 		"rainbow.adaptation.manager.class*" -> "org.sa.rainbow.core.adaptation.IAdaptationManager",
 		"rainbow.adaptation.executor.class*" -> "org.sa.rainbow.core.adaptation.IAdaptationExecutor",
 		"rainbow.effector.manager.class*" -> "org.sa.rainbow.translator.effectors.EffectorManager",
 		"rainbow.gui" -> "org.sa.rainbow.gui.IRainbowGUI"
+	}
+	
+	public static val PROPERTY_VALUE_TYPES = #{
+		"rainbow.deployment.factory.class" -> #{
+			'func' -> [Value v | v?.value instanceof Reference && subclasses(v,IRainbowConnectionPortFactory.name)],
+			'extends' -> #[IRainbowConnectionPortFactory],
+			'msg' -> 'must implement ' + IRainbowConnectionPortFactory.name
+			},
+		"rainbow.master.location.host" -> #{
+			'extends' -> #[StringLiteral,IPLiteral],
+			'msg' -> 'Must be a hostname string or IP'
+		},
+		"rainbow.deployment.location" -> #{
+			'extends' -> #[StringLiteral,IPLiteral],
+			'msg' -> 'Must be a hostname string or IP'
+		},
+		"rainbow.master.location.port" -> IS_NUMBER,
+		"rainbow.deployment.environment" -> #{
+			'func' -> [Value v | v?.value instanceof StringLiteral && #{'linux', 'cygwin'}.contains(XtendUtils.unpackString(v.value as StringLiteral, true, true))],
+			'msg' -> 'Must be "linux" or "cygwin"'
+		},
+		'rainbow.delegate.beaconperiod' -> IS_NUMBER
 	}
 
 	static val MODEL_TYPES = #{
@@ -155,14 +182,14 @@ class ConfigAttributeConstants {
 			#{'func' -> [Value v|v.value instanceof StringLiteral], 'msg' -> 'must be a String',
 				'extends' -> #[StringLiteral]},
 		'saveOnClose' ->
-			#{'func' -> [Value v|v.value instanceof BooleanLiteral], 'msg' -> 'must be true or false',
+			#{'func' -> [Value v|v?.value instanceof BooleanLiteral], 'msg' -> 'must be true or false',
 				'extends' -> #[BooleanLiteral]},
 		'saveLocation' ->
-			#{'func' -> [Value v|v.value instanceof StringLiteral], 'msg' -> 'must be a String',
+			#{'func' -> [Value v|v?.value instanceof StringLiteral], 'msg' -> 'must be a String',
 				'extends' -> #[StringLiteral]},
 		'factory' -> #{'func' -> [ Value v |
-			(v.value instanceof PropertyReference && (v.value as PropertyReference).referable instanceof Factory) ||
-				(v.value instanceof Reference && subclasses(v, ModelCommandFactory.name))
+			(v?.value instanceof PropertyReference && (v.value as PropertyReference).referable instanceof Factory) ||
+				(v?.value instanceof Reference && subclasses(v, ModelCommandFactory.name))
 		], 'extends' -> #[Factory, ModelCommandFactory],
 			'msg' -> 'must be a model factory or subclass org.sa.rainbow.core.models.commands.ModelCommandFactory'}
 	}
@@ -206,9 +233,7 @@ class ConfigAttributeConstants {
 		}
 	}
 
-	static val IS_STRING = #{'extends' -> #[StringLiteral], 'msg' -> 'must be a string'}
-	static val IS_NUMBER = #{'extends' -> #[IntegerLiteral], 'msg' -> 'must be a number'}
-	static val IS_COMPONENT = #{'extends' -> #[Component], 'msg' -> 'must be a composite'}
+
 
 	public static val PROBE_PROPERTY_TYPES = #{
 		'location' ->
@@ -442,7 +467,7 @@ class ConfigAttributeConstants {
 	static private RawSuperTypes superTypeCollector;
 
 	public static def subclasses(Value v, String superclass) {
-		if (v.value instanceof Reference) {
+		if (v?.value instanceof Reference) {
 			val ref = v.value as Reference
 			return subclasses(ref, superclass)
 		}

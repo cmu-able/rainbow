@@ -73,7 +73,6 @@ import org.sa.rainbow.configuration.rcl.ImpactVector
 import org.sa.rainbow.configuration.rcl.Import
 import org.sa.rainbow.configuration.rcl.IntegerLiteral
 import org.sa.rainbow.configuration.rcl.JavaClassOrFactory
-import org.sa.rainbow.configuration.rcl.ModelFactoryReference
 import org.sa.rainbow.configuration.rcl.Probe
 import org.sa.rainbow.configuration.rcl.PropertyReference
 import org.sa.rainbow.configuration.rcl.RclPackage
@@ -95,6 +94,7 @@ class RclValidator extends AbstractRclValidator {
 
 	public static val ONLY_EXTEND_PROBE_TYPES_MSG = "A probe can only extend a probe type"
 	public static val ONLY_EXTEND_PROBE_TYPES = "invalidProbeType"
+	public static val ONLY_EXTEND_EFFECTOR_TYPES = "invalidEffectorType"
 	public static val MUST_SUBCLASS = "wrongtype"
 	public static val MISSING_PROPERTY = "missingRequiredProperty"
 	public static val COMMAND_NOT_IN_GAUGE_TYPE = "commandNotnGaugeSuperType"
@@ -106,10 +106,22 @@ class RclValidator extends AbstractRclValidator {
 		var st = probe.superType
 		if (st !== null) {
 			if (!st.type) {
+				val v = probe.eResource.resourceSet.resources
+				val probeTypes = newHashSet
+				for (r : v) {
+					val res = r.allContents
+					res.forEach[
+						if (it instanceof Probe && (it as Probe).type) {
+							probeTypes.add(it)
+						}
+					]
+				}
 				error(
 					ONLY_EXTEND_PROBE_TYPES_MSG,
 					RclPackage.Literals.PROBE__SUPER_TYPE,
-					ONLY_EXTEND_PROBE_TYPES
+					ONLY_EXTEND_PROBE_TYPES,
+					probeTypes.join(","),
+					"probe type"
 				)
 			}
 		}
@@ -148,10 +160,22 @@ class RclValidator extends AbstractRclValidator {
 		var st = effector.superType
 		if (st !== null) {
 			if (!st.type) {
+				val v = effector.eResource.resourceSet.resources
+				val effectorTypes = newHashSet
+				for (r : v) {
+					val res = r.allContents
+					res.forEach[
+						if (it instanceof Effector && (it as Effector).type) {
+							effectorTypes.add(it)
+						}
+					]
+				}
 				error(
 					"An effector can only extend an effector type",
 					RclPackage.Literals.EFFECTOR__SUPER_TYPE,
-					"invalidEffectorType"
+					ONLY_EXTEND_EFFECTOR_TYPES,
+					effectorTypes.join(","),
+					"effector type"
 				)
 			}
 		}
@@ -366,7 +390,9 @@ class RclValidator extends AbstractRclValidator {
 						'''«java.identifier» does not extend  «MODEL_COMMAND_FACTORY_SUPERCLASS»''',
 						RclPackage.Literals.GAUGE_TYPE_BODY__MCF,
 						RclValidator.MUST_SUBCLASS,
-						MODEL_COMMAND_FACTORY_SUPERCLASS
+						MODEL_COMMAND_FACTORY_SUPERCLASS,
+						sts.map[it.qualifiedName].join(","),
+						"factory type"
 					)
 				}
 			}
@@ -399,17 +425,28 @@ class RclValidator extends AbstractRclValidator {
 			if (setup instanceof Component) {
 				val gcProp = (setup as Component).assignment.findFirst[it.name == "generatedClass"]
 				if (gcProp == null) {
-					if ((setup as Component).assignment.findFirst[it.name == "javaClass"] !== null) {
+					val javaClass = (setup as Component).assignment.findFirst[it.name == "javaClass"]
+					if (javaClass !== null) {
 						additional = " Perhaps change javaClass to generatedClass?"
+//						error("Gauges with regular expressions should have generatedClass",
+//							javaClass,
+//							RclPackage.Literals.ASSIGNMENT,
+//							"noGeneratedClass",
+//							"generatedClass"
+//							
+//						)
 					}
-					error(
-						'''Gauge has regular expression, so "generatedClass" should be specified.«additional»''',
-						setupProp,
-						RclPackage.Literals.ASSIGNMENT__VALUE,
-						"noGeneratedClass"
-					)
+//					else {
+						error(
+							'''Gauge has regular expression, so "generatedClass" should be specified.''',
+							setupProp,
+							RclPackage.Literals.ASSIGNMENT__VALUE,
+							MISSING_PROPERTY,
+							"generatedClass"
+						)
+//					}
 				} else {
-					val gc = gcProp?.value.value
+					val gc = gcProp?.value?.value
 					if (gc instanceof StringLiteral) {
 						noGeneratedClass = false;
 						try {
@@ -437,10 +474,16 @@ class RclValidator extends AbstractRclValidator {
 					'''Gauge has regular expression, so "generatedClass" should be specified in setup''',
 					setup,
 					RclPackage.Literals.ASSIGNMENT__VALUE,
-					"noGeneratedClass"
+					MISSING_PROPERTY,
+					"generatedClass"
 				)
 			}
 		}
+		for (Assignment a : gb.assignment) {
+			checkAssignmentType(a, ConfigAttributeConstants.GAUGE_PROPERTY_TYPES, "")
+
+		}
+		
 	}
 
 	@Check
@@ -451,8 +494,8 @@ class RclValidator extends AbstractRclValidator {
 			var Object modelFactory = null
 			if (gb.ref?.referable instanceof DeclaredProperty &&
 				(gb.ref?.referable as DeclaredProperty)?.component == ComponentType.MODEL &&
-				(gb.ref?.referable as DeclaredProperty)?.^default.value instanceof Component) {
-				modelFactory = ((gb.ref.referable as DeclaredProperty).^default.value as Component).assignment.findFirst [
+				(gb.ref?.referable as DeclaredProperty)?.value.value instanceof Component) {
+				modelFactory = ((gb.ref.referable as DeclaredProperty).value.value as Component).assignment.findFirst [
 					it.name == "factory"
 				]
 //				if (factory )
@@ -496,8 +539,8 @@ class RclValidator extends AbstractRclValidator {
 			var Object modelFactory = null
 			if (ef.body?.ref?.referable instanceof DeclaredProperty &&
 				(ef.body?.ref?.referable as DeclaredProperty)?.component == ComponentType.MODEL &&
-				(ef.body?.ref?.referable as DeclaredProperty)?.^default.value instanceof Component) {
-				val factory = ((ef.body?.ref.referable as DeclaredProperty).^default.value as Component).assignment.
+				(ef.body?.ref?.referable as DeclaredProperty)?.value.value instanceof Component) {
+				val factory = ((ef.body?.ref.referable as DeclaredProperty).value.value as Component).assignment.
 					findFirst[it.name == "factory"]
 //				if (factory?.value?.value instanceof Reference) {
 //					modelFactory = (factory.value.value as Reference).referable as JvmDeclaredType
@@ -852,11 +895,11 @@ class RclValidator extends AbstractRclValidator {
 	}
 
 	
-
+ 
 	@Check
 	def checkClassAssignments(DeclaredProperty assignment) {
-		if (assignment?.^default.value instanceof Reference) {
-			val subType = (assignment.^default.value as Reference).referable
+		if (assignment?.value?.value instanceof Reference) {
+			val subType = (assignment.value.value as Reference).referable
 			if (assignment.name.matches(".*class_[0-9]+$")) {
 				val checkName = assignment.name.substring(0, assignment.name.lastIndexOf('_')) + "*"
 				val superClass = ConfigAttributeConstants.PROPERTY_VALUE_CLASSES.get(checkName)
@@ -867,7 +910,7 @@ class RclValidator extends AbstractRclValidator {
 					if (!sts.contains(superType)) {
 						error(
 							'''«subType.simpleName» is not a subclass of «superClass»''',
-							RclPackage.Literals.DECLARED_PROPERTY__DEFAULT,
+							RclPackage.Literals.DECLARED_PROPERTY__VALUE,
 							RclValidator.MUST_SUBCLASS,
 							superClass
 						)
@@ -875,15 +918,18 @@ class RclValidator extends AbstractRclValidator {
 				}
 			}
 		}
+		
+			checkTypeRule(ConfigAttributeConstants.PROPERTY_VALUE_TYPES, "", assignment.name, assignment.value, assignment, RclPackage.Literals.DECLARED_PROPERTY__VALUE)
+			
 	}
 
 	@Check
 	def checkComponentPropertiesAreComponent(DeclaredProperty dp) {
 		if (dp.component != ComponentType.PROPERTY) {
-			if (!(dp.^default.value instanceof Component)) {
+			if (!(dp.value.value instanceof Component)) {
 				error(
 					'''Values for «dp.component» must be compound values''',
-					RclPackage.Literals.DECLARED_PROPERTY__DEFAULT,
+					RclPackage.Literals.DECLARED_PROPERTY__VALUE,
 					"incorrectValue"
 				)
 			}
@@ -895,41 +941,41 @@ class RclValidator extends AbstractRclValidator {
 		if (dp.component != ComponentType.PROPERTY) {
 			switch dp.component {
 				case ANALYSIS: {
-					checkAttributes((dp.^default.value as Component).assignment, null,
+					checkAttributes((dp.value.value as Component).assignment, null,
 						ConfigAttributeConstants.ALL_OFREQUIRED_ANALYSIS_FIELDS, #{},
-						RclPackage.Literals.DECLARED_PROPERTY__DEFAULT)
+						RclPackage.Literals.DECLARED_PROPERTY__VALUE)
 
 				}
 				case EFFECTORMANAGER: {
-					checkAttributes((dp.^default.value as Component).assignment, null,
+					checkAttributes((dp.value.value as Component).assignment, null,
 						ConfigAttributeConstants.ALL_OFREQUIRED_EFFECTOR_MANAGER_FIELDS, #{},
-						RclPackage.Literals.DECLARED_PROPERTY__DEFAULT)
+						RclPackage.Literals.DECLARED_PROPERTY__VALUE)
 
 				}
 				case EXECUTOR: {
-					checkAttributes((dp.^default.value as Component).assignment, null,
+					checkAttributes((dp.value.value as Component).assignment, null,
 						ConfigAttributeConstants.ALL_OFREQUIRED_EXECUTOR_FIELDS, #{},
-						RclPackage.Literals.DECLARED_PROPERTY__DEFAULT)
+						RclPackage.Literals.DECLARED_PROPERTY__VALUE)
 				}
 				case GUI: {
 				}
 				case MANAGER: {
-					checkAttributes((dp.^default.value as Component).assignment, null,
+					checkAttributes((dp.value.value as Component).assignment, null,
 						ConfigAttributeConstants.ALL_OFREQUIRED_MANANGER_FIELDS, #{},
-						RclPackage.Literals.DECLARED_PROPERTY__DEFAULT)
+						RclPackage.Literals.DECLARED_PROPERTY__VALUE)
 
 				}
 				case MODEL: {
-					checkAttributes((dp.^default.value as Component).assignment, null,
+					checkAttributes((dp.value.value as Component).assignment, null,
 						ConfigAttributeConstants.ALL_OFREQUIRED_MODEL_FIELDS, #{},
-						RclPackage.Literals.DECLARED_PROPERTY__DEFAULT)
+						RclPackage.Literals.DECLARED_PROPERTY__VALUE)
 				}
 				case PROPERTY: {
 				}
 				case UTILITY: {
-					checkAttributes((dp.^default.value as Component).assignment, null,
+					checkAttributes((dp.value.value as Component).assignment, null,
 						ConfigAttributeConstants.ALL_OFREQUIRED_UTILITY_FIELDS, #{},
-						RclPackage.Literals.DECLARED_PROPERTY__DEFAULT)
+						RclPackage.Literals.DECLARED_PROPERTY__VALUE)
 				}
 			}
 		}
@@ -953,21 +999,25 @@ class RclValidator extends AbstractRclValidator {
 	}
 
 	def void checkTypeRule(Map<String, Map<String, Object>> rule, Assignment dp) {
-		checkTypeRule(rule, dp, "")
+		checkTypeRule(rule, "",  dp.name, dp.value, dp, RclPackage.Literals.ASSIGNMENT__VALUE)
 	}
 
 	protected def void checkTypeRule(Map<String, Map<String, Object>> rule, Assignment dp, String prefix) {
+		checkTypeRule(rule, prefix, dp.name, dp.value, dp, RclPackage.Literals.ASSIGNMENT__VALUE)
+	}
+	
+	protected def void checkTypeRule(Map<String, Map<String, Object>> rule, String prefix, String name, Value value, EObject target, EStructuralFeature feature) {
 		if (rule !== null) {
-			val lookupName = prefix == "" ? dp.name : (prefix + dp.name)
+			val lookupName = prefix == "" ? name : (prefix + name)
 			val fieldRule = rule.get(lookupName) as Map<String, Object>
 			if (fieldRule !== null) {
 				val (Value)=>boolean func = fieldRule.get('func') as (Value)=>boolean
 				if (func !== null) {
-					if (!func.apply(dp.value)) {
+					if (!func.apply(value)) {
 						error(
-							'''«dp.name» «fieldRule.get('msg')»''',
-							dp,
-							RclPackage.Literals.ASSIGNMENT__VALUE,
+							'''«name» «fieldRule.get('msg')»''',
+							target,
+							feature,
 							"invalidType"
 						)
 					}
@@ -975,21 +1025,21 @@ class RclValidator extends AbstractRclValidator {
 					var extends = fieldRule.get('extends') as List<Class>
 					var ok = false
 					for (class : extends) {
-						ok = ok || checkClass(dp, class)
+						ok = ok || checkClass(value, class)
 					}
 					if (!ok) {
 						error(
-							'''«dp.name» «fieldRule.get('msg')»''',
-							dp,
-							RclPackage.Literals.ASSIGNMENT__VALUE,
+							'''«name» «fieldRule.get('msg')»''',
+							target,
+							feature,
 							MUST_SUBCLASS,
 							extends.map[it.name].join(",")
 						)
 					}
-					if (extends.contains(Array) && dp.value.value instanceof Array) {
+					if (extends.contains(Array) && value.value instanceof Array) {
 						val furtherCheck = fieldRule.get(
 							'checkEach') as Function1<Array, LinkedList<Triple<String, EObject, EStructuralFeature>>>
-						for (e : furtherCheck.apply(dp.value.value as Array)) {
+						for (e : furtherCheck.apply(value.value as Array)) {
 							error(e.first, e.second, e.third)
 						}
 					}
@@ -1000,17 +1050,17 @@ class RclValidator extends AbstractRclValidator {
 		}
 	}
 
-	protected def boolean checkClass(Assignment dp, Class clazz) {
-		if(clazz == StringLiteral) return dp.value.value instanceof StringLiteral
-		if(clazz == BooleanLiteral) return dp.value.value instanceof BooleanLiteral
-		if(clazz == IntegerLiteral) return dp.value.value instanceof IntegerLiteral
-		if(clazz == DoubleLiteral) return dp.value.value instanceof DoubleLiteral
-		if(clazz == Component) return dp.value.value instanceof Component
-		if(clazz == IPLiteral) return dp.value.value instanceof IPLiteral
-		if(clazz == PropertyReference) return dp.value.value instanceof PropertyReference
+	protected def boolean checkClass(Value dp, Class clazz) {
+		if(clazz == StringLiteral) return dp.value instanceof StringLiteral
+		if(clazz == BooleanLiteral) return dp.value instanceof BooleanLiteral
+		if(clazz == IntegerLiteral) return dp.value instanceof IntegerLiteral
+		if(clazz == DoubleLiteral) return dp.value instanceof DoubleLiteral
+		if(clazz == Component) return dp.value instanceof Component
+		if(clazz == IPLiteral) return dp.value instanceof IPLiteral
+		if(clazz == PropertyReference) return dp.value instanceof PropertyReference
 //		if(clazz == ProbeReference) return dp.value.value instanceof ProbeReference
-		if(clazz == Array) return dp.value.value instanceof Array
-		ConfigAttributeConstants.subclasses(dp.value, clazz.name)
+		if(clazz == Array) return dp.value instanceof Array
+		ConfigAttributeConstants.subclasses(dp, clazz.name)
 	}
 
 	public static val CHECK_UTILITY_MONOTONIC = [ Array a |
@@ -1112,7 +1162,7 @@ class RclValidator extends AbstractRclValidator {
 			)
 			return
 		}
-		var definedUtilities = (((iv.utilityModel.referable as DeclaredProperty).^default.value as Component).
+		var definedUtilities = (((iv.utilityModel.referable as DeclaredProperty).value.value as Component).
 			assignment.findFirst [
 				it.name == "utilities"
 			]?.value.value as Component).assignment.map[it.name]
