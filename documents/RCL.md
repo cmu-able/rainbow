@@ -24,10 +24,10 @@ is organized as follows:
 target   |
 | [RCL Syntax and Conventions](#features)  |  The Syntax of RCL |
 | [Specifying Properties](#properties-files) | Specifying Rainbow Properties  |
-| [Model Command Factories](#model-command-factory)  | Specifying (and generating) model command factories  |
-| [Probes](#probe-specification) | How to define probes in the system |
+| [Model Command Factories](#model-command-factories)  | Specifying (and generating) model command factories  |
+| [Probes](#probe-specifications) | How to define probes in the system |
 | [Gauges](#gauge-specification) | How to specify gauges |
-| [Effectors](#effector-specification) | How to specify effectors |
+| [Effectors](#effector-specifications) | How to specify effectors |
 | [Stitch and Utilities](#stitch-and-utility-preferences) | Specifying adaptation with 
 Stitch and utility preferences |
 | [Installing the Eclipse plugin](#installing) | Using with Eclipse |
@@ -153,8 +153,8 @@ When referencing it outside a string, use double `««...»»`, e.g.,
 def customize.system.^target.master = ««rainbow.deployment.location»»
 ```
 
-To insert `«` type Ctrl-Shift-<, `»` with Ctrl-Shift-> (Cmd-Shift on MacOS). Also autocomplete 
-will give these proposals.
+To insert `«` type Ctrl-Shift-<, `»` in the provided Eclipse plugin type Ctrl-Shift-> (Cmd-Shift on MacOS). Also autocomplete 
+will give these proposals and there is context sensitive bracket completion (so you get `««|»»` or `«|»` depending on if you are in a string or not (`|` indicates where the cursor will end up when you type Ctrl-Shift-<).
 
 ### Acme and Stitch
 
@@ -307,7 +307,7 @@ def model SwimSys= {
 The `path` attribute indicates the file in the target that should be used to initialize the model. It is optional though most often should be specified. The model is loaded through the command factory, which is specified 
 with the `factory` attribute. The factory attribute can either point to a factory specified in 
 RCL  or a class that extends 
-`org.sa.rainbow.core.models.commands.ModelCommandFactory` (see [Model Command Factory](#model_command_factory)).
+`org.sa.rainbow.core.models.commands.ModelCommandFactory` (see [Model Command Factory](#model-command-factories)).
 The `type` indicates the type of the Model that should be registered with Rainbow. In this case, a model called `SwimSys` with the type `Acme` will be loaded into Rainbow.
 If you want the model to be saved when Rainbow quits, you should specify this by setting `saveOnClose` and indicating where the model should be saved in `saveLocation`.  
 
@@ -419,7 +419,7 @@ Probes are instruments in the running system that provide system-specific inform
 to Rainbow. Such information is converted to model information by _gauges_. There are 
 two types of probes supported by Rainbow: script based probes and Java probes. 
 In both cases, the `probes.rbw` file needs to be updated with the new probe information. 
-This file usually lives in the `system` directory of a target. See [Required Probe Fields](#required_probe_fields) 
+This file usually lives in the `system` directory of a target. See [Required Probe Fields](#required-probe-fields) 
 for a list of all the properties for a probe.
 
 ### Probe Types
@@ -580,7 +580,7 @@ command called `dimmer`. Notice that the command signature matches that in the f
 as the signature: `LoadBalancerT.setDimmer(int)`.
 
 There are then sections for setup and config that define possible parameters. These 
-are described in [Required Gauge Fields](#required_gauge_fileds)
+are described in [Required Gauge Fields](#required-gauge-fields)
  
 
 ### Gauge Instances
