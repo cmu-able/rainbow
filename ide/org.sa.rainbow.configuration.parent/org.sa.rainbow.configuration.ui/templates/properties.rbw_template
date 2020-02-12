@@ -53,19 +53,18 @@ def model aModel = {
 
 # Define your analysis here
 def analysis <<AnalysisName>> = {
-	model = 
 	class = <<AnalysisClass>>
 }
 
 # Define your Adaptation Manager here
 def adaptation-manager <<AdaptationManagerName>> = {
-	model =
+	^model =
 	class= <<AdaptationManagerClass>>
 }
 
 # Define your executors here
 def executor <<ExecutorName>> = {
-	model =
+	^model =
 	class = <<ExectorClass>>
 }
 

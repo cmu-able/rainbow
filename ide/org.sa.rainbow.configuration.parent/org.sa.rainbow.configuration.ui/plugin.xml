@@ -455,28 +455,28 @@
        point="org.eclipse.ui.bindings">
        
      <key
-     	  contextId="org.sa.rainbow.configuration.ide.RCLEditorScope"
+     	  contextId="org.eclipse.xtext.ui.XtextEditorScope"
           schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
           sequence="M1+&lt;"
           commandId="org.sa.rainbow.configuration.ui.insertLeftGuillemet"
           >
     </key>
     <key
-          contextId="org.sa.rainbow.configuration.ide.RCLEditorScope"
+     	  contextId="org.eclipse.xtext.ui.XtextEditorScope"
           schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
           sequence="M1+&gt;"
           commandId="org.sa.rainbow.configuration.ui.insertRightGuillemet"
           >
     </key>
      <key
-     	  contextId="org.sa.rainbow.configuration.ide.RCLEditorScope"
+     	  contextId="org.eclipse.xtext.ui.XtextEditorScope"
           schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
           sequence="M4+&lt;"
           commandId="org.sa.rainbow.configuration.ui.insertLeftGuillemet"
           >
     </key>
     <key
-          contextId="org.sa.rainbow.configuration.ide.RCLEditorScope"
+     	  contextId="org.eclipse.xtext.ui.XtextEditorScope"
           schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
           sequence="M4+&gt;"
           commandId="org.sa.rainbow.configuration.ui.insertRightGuillemet"
@@ -486,24 +486,32 @@
  <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="org.sa.rainbow.configuration.ui.commands.InsertStringHandler$LeftGuillemet"
+            class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.sa.rainbow.configuration.ui.commands.InsertStringHandler$RightGuillemet"
             commandId="org.sa.rainbow.configuration.ui.insertRightGuillemet">
-            <!--
-            <activeWhen>
-				<reference
-					definitionId="org.eclipse.xtend.core.Xtend.Editor.opened">
-				</reference>
-			</activeWhen>
-			-->
+         <activeWhen>
+            <or>
+               <reference
+                     definitionId="org.sa.rainbow.configuration.Rcl.Editor.opened">
+               </reference>
+               <reference
+                     definitionId="org.sa.rainbow.configuration.Rcl.XtextEditor.opened">
+               </reference>
+            </or>
+         </activeWhen>
       </handler>
       <handler
-            class="org.sa.rainbow.configuration.ui.commands.InsertStringHandler$RightGuillemet"
+            class="org.sa.rainbow.configuration.ui.RclExecutableExtensionFactory:org.sa.rainbow.configuration.ui.commands.InsertStringHandler$LeftGuillemet"
             commandId="org.sa.rainbow.configuration.ui.insertLeftGuillemet">
-           	<activeWhen>
-				<reference
-					definitionId="org.sa.rainbow.configuration.Rcl.Editor.opened">
-				</reference>
-			</activeWhen>
+        <activeWhen>
+            <or>
+               <reference
+                     definitionId="org.sa.rainbow.configuration.Rcl.Editor.opened">
+               </reference>
+               <reference
+                     definitionId="org.sa.rainbow.configuration.Rcl.XtextEditor.opened">
+               </reference>
+            </or>
+         </activeWhen>
       </handler>
    </extension>
    	<extension
