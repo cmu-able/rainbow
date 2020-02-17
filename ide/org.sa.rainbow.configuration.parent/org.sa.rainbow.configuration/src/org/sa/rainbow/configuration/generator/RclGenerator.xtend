@@ -154,15 +154,15 @@ class RclGenerator extends AbstractGenerator {
 		  «ENDFOR»
 		analyzers:
 		  «FOR a : analyzers»
-		    «(((((a.value.value as Component).assignment.findFirst[it.name=='for'].value.value as PropertyReference).referable as DeclaredProperty).^default.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»: «((a.value.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»
+		    «(((((a.value.value as Component).assignment.findFirst[it.name=='for'].value.value as PropertyReference).referable as DeclaredProperty).value.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»: «((a.value.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»
 		  «ENDFOR»
 		managers:
 		  «FOR a : managers»
-		    «(((((a.value.value as Component).assignment.findFirst[it.name=='for'].value.value as PropertyReference).referable as DeclaredProperty).^default.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»: «((a.value.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»
+		    «(((((a.value.value as Component).assignment.findFirst[it.name=='for'].value.value as PropertyReference).referable as DeclaredProperty).value.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»: «((a.value.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»
 		  «ENDFOR»
 		executors:
 		  «FOR a : executors»
-		    «(((((a.value.value as Component).assignment.findFirst[it.name=='for'].value.value as PropertyReference).referable as DeclaredProperty).^default.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»: «((a.value.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»
+		    «(((((a.value.value as Component).assignment.findFirst[it.name=='for'].value.value as PropertyReference).referable as DeclaredProperty).value.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»: «((a.value.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»
 		  «ENDFOR»
 		details:
 		  «FOR d : details»
@@ -207,7 +207,7 @@ class RclGenerator extends AbstractGenerator {
 			protected static final String THREAD_NAME = "«gt.name»";
 			
 			«FOR cmd : gt.body.commands»
-			  public static final String «cmd.command.toUpperCase.replaceAll("[\\-.]","_")» = "«cmd.command»";
+			  public static final String «cmd.command.toUpperCase.replaceAll("[\\-.]","_")» = "«cmd.name»";
 			  public static final String «cmd.command.toUpperCase.replaceAll("[\\-.]","_")»_PATTERN = "«XtendUtils.unpackString(cmd.regexp, true, true).replace("\\", "\\\\")»";
 			«ENDFOR»
 			
@@ -308,10 +308,10 @@ class RclGenerator extends AbstractGenerator {
 		var utilities = ""
 		var scenarios = ""
 		for (um : properties) {
-			val value = um.^default.value as Component
+			val value = um.value.value as Component
 			val m = value.assignment.findFirst[it.name=='model'].value.value as PropertyReference
 			val theModel = m.referable as DeclaredProperty
-			val component = theModel.^default.value  as Component
+			val component = theModel.value.value  as Component
 			val name = stringValue((component).assignment.findFirst[it.name == "name"]?.value) ?:
 				theModel.name
 			var type = stringValue(component.assignment.findFirst[it.name == "type"]?.value)
@@ -394,8 +394,8 @@ class RclGenerator extends AbstractGenerator {
 		#############################################################
 
 		«FOR v : properties»
-			«IF v.^default !== null»
-				«v.name» = «Utils.removeQuotes(stringValue(v.^default,false,false))»
+			«IF v.value !== null»
+				«v.name» = «Utils.removeQuotes(stringValue(v.value,false,false))»
 			«ENDIF»
 		«ENDFOR»
 		«outputModels(models)»
@@ -410,12 +410,11 @@ class RclGenerator extends AbstractGenerator {
 	def outputGUI(Iterable<DeclaredProperty> properties) {
 		if (properties.empty) ''''''
 		else {
-			val gui = (properties.get(0).^default.value as Component).assignment.findFirst[it.name=='class']
+			val gui = (properties.get(0).value.value as Component).assignment.findFirst[it.name=='class']
 			var p = '''rainbow.gui=«(gui.value.value as Reference).referable.qualifiedName»'''
-			val guispecs = (properties.get(0).^default.value as Component).assignment.findFirst[it.name=='specs']
+			val guispecs = (properties.get(0).value.value as Component).assignment.findFirst[it.name=='specs']
 			if (guispecs !== null) {
-				p = p +'''\n
-				rainbow.gui.specs=ui.yml'''
+				p = p +"\nrainbow.gui.specs=ui.yml"
 			}
 			p
 		}
@@ -427,7 +426,7 @@ class RclGenerator extends AbstractGenerator {
 			var sb = new StringBuffer('''rainbow.effector.manager.size=«ems.size»
 			''')
 			for (e : ems) {
-				val ass = e.^default.value as Component
+				val ass = e.value.value as Component
 				val class = ass.assignment.findFirst[it.name == "class"]
 				sb.append('''rainbow.effector.manager.class_«i»=«(class.value.value as Reference).referable.qualifiedName»
 			''')
@@ -441,7 +440,7 @@ class RclGenerator extends AbstractGenerator {
 			var sb = new StringBuffer('''rainbow.analyses.size=«analyses.size»
 			''')
 			for (a : analyses) {
-				val ass = a.^default.value as Component
+				val ass = a.value.value as Component
 				val class = ass.assignment.findFirst[it.name == "class"]
 				sb.append('''rainbow.analyses_«i»=«(class.value.value as Reference).referable.qualifiedName»
 			''')
@@ -455,14 +454,14 @@ class RclGenerator extends AbstractGenerator {
 		var sb = new StringBuffer('''rainbow.adaptation.executor.size=«executors.size»
 		''')
 		for (e : executors) {
-			val ass = e.^default.value as Component
+			val ass = e.value.value as Component
 			val class = ass.assignment.findFirst[it.name == "class"]
 			val model = ass.assignment.findFirst[it.name == "model"]
 			sb.append('''rainbow.adaptation.executor.class_«i»=«(class.value.value as Reference).referable.qualifiedName»
 			''')
 			sb.append('''rainbow.adaptation.executor.model_«i»=''')
 			val theModel = (model.value.value as PropertyReference).referable as DeclaredProperty
-			val component = theModel.^default.value  as Component
+			val component = theModel.value.value  as Component
 			val name = stringValue((component).assignment.findFirst[it.name == "name"]?.value) ?:
 				theModel.name
 			var type = stringValue(component.assignment.findFirst[it.name == "type"]?.value)
@@ -487,14 +486,14 @@ class RclGenerator extends AbstractGenerator {
 		var sb = new StringBuffer('''rainbow.adaptation.manager.size=«managers.size»
 		''')
 		for (m : managers) {
-			val ass = m.^default.value as Component
+			val ass = m.value.value as Component
 			val class = ass.assignment.findFirst[it.name == "class"]
 			val model = ass.assignment.findFirst[it.name == "model"]
 			sb.append('''rainbow.adaptation.manager.class_«i»=«(class.value.value as Reference).referable.qualifiedName»
 			''')
 			sb.append('''rainbow.adaptation.manager.model_«i»=''')
 			val theModel = (model.value.value as PropertyReference).referable as DeclaredProperty
-			val component = theModel.^default.value  as Component
+			val component = theModel.value.value  as Component
 			val name = stringValue((component).assignment.findFirst[it.name == "name"]?.value) ?:
 				theModel.name
 			var type = stringValue(component.assignment.findFirst[it.name == "type"]?.value)
@@ -530,7 +529,7 @@ class RclGenerator extends AbstractGenerator {
 		val sb = new StringBuffer('''rainbow.model.number = «models.size»
 		''')
 		for (m : models) {
-			val ass = m.^default.value as Component
+			val ass = m.value.value as Component
 			val loadclass = ass.assignment.findFirst[it.name == "factory"]
 			val path = ass.assignment.findFirst[it.name == "path"]
 			val saveOnClose = ass.assignment.findFirst[it.name == "saveOnClose"]
@@ -575,8 +574,8 @@ class RclGenerator extends AbstractGenerator {
 		«IF !vars.empty»
 			vars:
 			  «FOR v : vars»
-			  	«IF v.^default !== null»
-			  		«v.name»: «stringValue(v.^default, false,true)»
+			  	«IF v.value !== null»
+			  		«v.name»: «stringValue(v.value, false,true)»
 			  	«ENDIF»
 			  «ENDFOR»
 		«ENDIF»
@@ -599,8 +598,8 @@ class RclGenerator extends AbstractGenerator {
 		«IF !vars.empty»
 			vars:
 			  «FOR v : vars»
-			  	«IF v.^default !== null»
-			  		«v.name» : «stringValue(v.^default, false,true)»
+			  	«IF v.value !== null»
+			  		«v.name» : «stringValue(v.value, false,true)»
 				«ENDIF»
 			«ENDFOR»
 		«ENDIF»
@@ -618,8 +617,8 @@ class RclGenerator extends AbstractGenerator {
 		«IF !vars.empty»
 			vars:
 			  «FOR v : vars»
-			  	«IF v.^default !== null»
-			  		«v.name» : «stringValue(v.^default, false, true)»
+			  	«IF v.value !== null»
+			  		«v.name» : «stringValue(v.value, false, true)»
 			  	«ENDIF»
 			  «ENDFOR»
 		«ENDIF»
@@ -640,7 +639,7 @@ class RclGenerator extends AbstractGenerator {
 		if (gauge.body.ref !== null) {
 			var CharSequence internalName = gauge.body.ref.referable.name
 			var CharSequence type = ""
-			var gbv = (gauge.body.ref.referable as DeclaredProperty)?.^default.value
+			var gbv = (gauge.body.ref.referable as DeclaredProperty)?.value.value
 			if (gbv instanceof Component) {
 				val comp = gbv as Component
 				type = stringValue(comp.assignment.findFirst[it.name=="type"].value)
