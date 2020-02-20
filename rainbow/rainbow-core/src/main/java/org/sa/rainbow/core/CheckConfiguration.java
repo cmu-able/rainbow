@@ -85,6 +85,15 @@ public class CheckConfiguration {
 		}
 		
 		return L;
+		
+		// L is empty
+		// for each checker c
+		//   if before is empty, append c'class to L
+		//   else
+		//   index = 0
+		//   foreach before b
+		//      if b not in L append b to L
+		//   append c'class to L   
 	}
 	
 	
