@@ -398,7 +398,7 @@ class RclValidator extends AbstractRclValidator {
 					var fs = fields.map([return "\"" + it + "\""]).join(", ")
 					if (compoundElement != null) {
 						warning(
-							'''"«key»" is missing the required fields «fs».''',
+							'''"«key»" is missing the required fields «fs».''', 
 							compoundElement,
 							RclPackage.Literals.ASSIGNMENT__VALUE,
 							MISSING_PROPERTY,
