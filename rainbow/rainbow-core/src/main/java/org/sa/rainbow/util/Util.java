@@ -179,7 +179,7 @@ public class Util {
 
 
     public static String[] evalCommand (String value) {
-        String[] split = value.split (",|\\.|\\(|\\|");
+        String[] split = value.split (",|\\.|\\(|\\||\\)");
         for (int i = 0; i < split.length; i++) {
             split[i] = split[i].trim ();
         }
