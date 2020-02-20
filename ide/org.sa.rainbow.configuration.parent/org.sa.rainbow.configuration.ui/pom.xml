@@ -15,45 +15,49 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
-					<execution>
+										<execution>
 						<id>copy-libraries</id>
-						<phase>validate</phase>
+						<phase>initialize</phase>
 						<goals>
 							<goal>copy</goal>
 						</goals>
 						<configuration>
+							<outputDirectory>${basedir}/lib/</outputDirectory>
+							<stripVersion>true</stripVersion>
+							<overWriteReleases>true</overWriteReleases>
+    						<overWriteSnapshots>true</overWriteSnapshots>
+    						<overWriteIfNewer>true</overWriteIfNewer>
 							<artifactItems>
 								<artifactItem>
 									<groupId>rainbow</groupId>
 									<artifactId>rainbow-core</artifactId>
-									<version>3.0</version>
-									<outputDirectory>lib</outputDirectory>
+									<version>${rainbowVersion}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>rainbow</groupId>
 									<artifactId>rainbow-utility-model</artifactId>
-									<version>3.0</version>
-									<outputDirectory>lib</outputDirectory>
+									<version>${rainbowVersion}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>rainbow</groupId>
 									<artifactId>rainbow-gui</artifactId>
-									<version>3.0</version>
-									<outputDirectory>lib</outputDirectory>
+									<version>${rainbowVersion}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>rainbow</groupId>
 									<artifactId>rainbow-acme-model</artifactId>
-									<version>3.0</version>
-									<outputDirectory>lib</outputDirectory>
+									<version>${rainbowVersion}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>rainbow</groupId>
 									<artifactId>rainbow-stitch</artifactId>
-									<version>3.0</version>
-									<outputDirectory>lib</outputDirectory>
+									<version>${rainbowVersion}</version>
 								</artifactItem>
-								
+								<artifactItem>
+									<groupId>org.acme.xtext</groupId>
+									<artifactId>org.acme.xtext</artifactId>
+									<version>1.0.0-SNAPSHOT</version>
+								</artifactItem>
 							</artifactItems>
 						</configuration>
 					</execution>
@@ -70,7 +74,12 @@
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-core</artifactId>
-			<version>3.0</version>
+			<version>${rainbowVersion}</version>
+		</dependency>
+		<dependency>
+			<groupId>rainbow</groupId>
+			<artifactId>rainbow-acme-model</artifactId>
+			<version>${rainbowVersion}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.sa.rainbow.configuration</groupId>
