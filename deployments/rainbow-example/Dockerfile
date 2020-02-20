@@ -64,7 +64,7 @@ RUN mvn -DskipTests install
 WORKDIR /root/rainbow/ide/org.sa.rainbow.configuration.parent
 # This first is needed because of a bug in Tycho build classptahs
 # https://stackoverflow.com/questions/5017687/use-maven-tycho-to-build-with-a-manifest-entry-bundle-classpath-that-gets-downlo
-RUN mvn valdidate
+RUN mvn validate
 RUN mvn -DskipTests install
 
 
