@@ -218,6 +218,73 @@ class RclValidator extends AbstractRclValidator {
 			checkAssignmentType(a, ConfigAttributeConstants.GAUGE_PROPERTY_TYPES, "")
 
 		}
+		if (gauge.superType !== null) {
+			val setupT = gauge.superType.body.assignment.findFirst[it.name == 'setup']?.value?.value
+			val setupI = gauge.body.assignment.findFirst[it.name == 'setup']?.value?.value
+			if (setupT instanceof Component && setupI instanceof Component) {
+				val setupsInType = (setupT as Component).assignment.filter[!ConfigAttributeConstants.ALL_OFREQUIRED_GAUGE_SUBFILEDS?.get('setup')?.contains(it.name)].filter[!ConfigAttributeConstants.ONE_OFREQUIRED_GAUGE_SUBFILEDS?.get('setup')?.contains(it.name)]
+				val setupsInInstance = (setupI as Component).assignment.filter[!ConfigAttributeConstants.ALL_OFREQUIRED_GAUGE_SUBFILEDS?.get('setup')?.contains(it.name)].filter[!ConfigAttributeConstants.ONE_OFREQUIRED_GAUGE_SUBFILEDS?.get('setup')?.contains(it.name)]
+				val setup = gauge.body.assignment.findFirst[it.name == 'setup']
+				val noSetupDefaults =  setupsInType.filter[it?.value?.value instanceof Reference]
+				checkWithGaugeType(setupsInType, setupsInInstance, gauge, noSetupDefaults, setup)
+			}
+		
+			val configT = gauge.superType.body.assignment.findFirst[it.name == 'config']?.value?.value
+			val configI = gauge.body.assignment.findFirst[it.name == 'config']?.value?.value
+			if (configT instanceof Component && configI instanceof Component) {
+				var configInType = (configT as Component).assignment.filter[
+					!ConfigAttributeConstants.ALL_OFREQUIRED_GAUGE_SUBFILEDS?.get('config')?.contains(it.name)
+				]
+				configInType = configInType.filter[
+					!ConfigAttributeConstants.ONE_OFREQUIRED_GAUGE_SUBFILEDS?.get('config')?.contains(it.name)
+				]
+				val configInInstance = (configI as Component).assignment.filter[!ConfigAttributeConstants.ALL_OFREQUIRED_GAUGE_SUBFILEDS?.get('config')?.contains(it.name)].filter[!ConfigAttributeConstants.ONE_OFREQUIRED_GAUGE_SUBFILEDS?.get('config')?.contains(it.name)]
+				checkWithGaugeType(configInType, configInInstance,gauge, configInType.filter[it?.value?.value instanceof Reference],  gauge.body.assignment.findFirst[it.name == 'config'])
+			
+			}
+		}
+	}
+	
+	protected def void checkWithGaugeType(Iterable<Assignment> setupsInType, Iterable<Assignment> setupsInInstance, Gauge gauge, Iterable<Assignment> noSetupDefaults, Assignment setup) {
+		val TypeSetupNames = newLinkedList
+		TypeSetupNames.addAll(setupsInType.map[it.name])
+		for (p : setupsInInstance) {
+			if (!TypeSetupNames.contains(p.name)) {
+				warning('''Property «p.name» is not defined in type «gauge.superType.name»''', p,
+					RclPackage.Literals.ASSIGNMENT__NAME
+				)
+			} 
+			val pIntype = setupsInType.findFirst[it.name==p.name]?.value?.value
+			var typechecks = false
+			if (pIntype instanceof Reference) {
+				val type = (pIntype as Reference).referable
+				typechecks = switch type.qualifiedName {
+					case typeof(Integer).name : p?.value?.value instanceof IntegerLiteral
+					case typeof(String).name: p?.value?.value instanceof StringLiteral
+					case typeof(Boolean).name: p?.value?.value instanceof BooleanLiteral
+					case typeof(Double).name: p?.value?.value instanceof IntegerLiteral || p?.value?.value instanceof DoubleLiteral
+					default: false
+				}
+			}
+			else if (pIntype instanceof DoubleLiteral) {
+				typechecks = p?.value?.value instanceof DoubleLiteral || p?.value?.value instanceof IntegerLiteral
+			}
+			else {
+				typechecks = p?.value?.value?.class == pIntype?.class
+			}
+			if (!typechecks) {
+				
+				error('''The type of «p.name» does not match in the gauge type''', p, 
+					RclPackage.Literals.ASSIGNMENT__NAME
+				)
+			}
+			TypeSetupNames.remove(p.name)
+		}
+		
+		if (!TypeSetupNames.empty && !noSetupDefaults.empty) {
+			val badNames = noSetupDefaults.filter[TypeSetupNames.contains(it.name)].map[it.name]
+			error('''The «(badNames.length > 1)?"properties":"property"» «badNames.join(", ")» need(s) to be given a value in this instance''', setup, RclPackage.Literals.ASSIGNMENT__VALUE, MISSING_PROPERTY, badNames.join(","))
+		}
 	}
 
 //	@Check
@@ -377,8 +444,7 @@ class RclValidator extends AbstractRclValidator {
 	@Check
 	def checkGaugeTypeModelFactory(GaugeTypeBody gaugeType) {
 		var model = gaugeType.mcf
-		if (model != null) {
-
+		if (model instanceof Reference) {
 			if (model.referable instanceof JvmType) {
 				var java = model.referable as JvmType
 				var jvmTypeProvider = jvmTypeProviderFactory.createTypeProvider(gaugeType.eResource.resourceSet);
@@ -753,11 +819,12 @@ class RclValidator extends AbstractRclValidator {
 	def checkCommandSignature(CommandReference cr) {
 		if (cr.eContainer.eClass == RclPackage.Literals.GAUGE_TYPE_BODY) {
 			var gaugeType = cr.eContainer as GaugeTypeBody
-			if (gaugeType === null) {
-				if (gaugeType.mcf === null) {
-					if (gaugeType.mcf !== null &&
-						!(gaugeType.mcf.referable instanceof JvmDeclaredType ||
-							gaugeType.mcf.referable instanceof Factory)) {
+			if (gaugeType !== null) {
+				if (gaugeType.mcf !== null) {
+					val mcf = gaugeType.mcf
+					if (mcf instanceof Reference &&
+						!((mcf as Reference).referable instanceof JvmDeclaredType ||
+							(mcf as Reference).referable instanceof Factory)) {
 						warning(
 							'''"«cr.command» cannot be checked because there is no model defined"''',
 							RclPackage.Literals.COMMAND_REFERENCE__COMMAND,
@@ -769,9 +836,9 @@ class RclValidator extends AbstractRclValidator {
 			}
 			val command = cr.command
 
-			val java = gaugeType.mcf.referable instanceof JvmDeclaredType ? gaugeType.mcf.
+			val java = gaugeType.mcf instanceof Reference && (gaugeType.mcf as Reference).referable instanceof JvmDeclaredType ? (gaugeType.mcf as Reference).
 					referable as JvmDeclaredType : null
-			val factory = gaugeType.mcf.referable instanceof Factory ? gaugeType.mcf.referable as Factory : null
+			val factory = gaugeType.mcf instanceof PropertyReference && (gaugeType.mcf as PropertyReference).referable instanceof Factory ? (gaugeType.mcf as PropertyReference).referable as Factory : null
 
 			if (java !== null) {
 				var type = java

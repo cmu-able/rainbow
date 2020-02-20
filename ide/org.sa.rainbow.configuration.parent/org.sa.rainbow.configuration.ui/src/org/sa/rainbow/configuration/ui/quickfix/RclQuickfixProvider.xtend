@@ -37,6 +37,7 @@ import org.eclipse.xtext.ui.editor.quickfix.DefaultQuickfixProvider
 import org.eclipse.xtext.ui.editor.quickfix.Fix
 import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor
 import org.eclipse.xtext.validation.Issue
+import org.sa.rainbow.configuration.rcl.Assignment
 import org.sa.rainbow.configuration.rcl.Component
 import org.sa.rainbow.configuration.rcl.DeclaredProperty
 import org.sa.rainbow.configuration.rcl.Effector
@@ -280,6 +281,9 @@ class RclQuickfixProvider extends DefaultQuickfixProvider {
 
 							}
 							document.replace(insertOffset, 0, t);
+						}
+						else if (element instanceof Assignment && (element as Assignment)?.value?.value instanceof Component) {
+							insertProperty(((element as Assignment)?.value?.value as Component), element, prop, document)
 						}
 					}
 
