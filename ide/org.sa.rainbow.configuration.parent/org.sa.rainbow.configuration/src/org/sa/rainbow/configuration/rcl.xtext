@@ -185,7 +185,7 @@ GaugeBody:
 
 GaugeTypeBody:
 	'{'
-	    (ModelFactory  mcf=PropertyReference)?
+	    (ModelFactory  mcf=(PropertyReference | Reference))?
 	    (commands+=CommandReference)+
 		(assignment+=Assignment)*
 		
@@ -260,10 +260,31 @@ Value:
 	value=IPLiteral |
 	value=LogLiteral |
 	value=PropertyReference |
+//	value=ModelMapping |
 //	value=ProbeReference |
 	value=Array // |
 //	value=ModelFactoryReference
+
 ;
+
+//ModelMapping:
+//	mapping=AcmeMapping |
+//	mapping=JavaMapping
+//;
+//
+//enum MappingType:
+//	EAVG='EAvg' |
+//	AVG='Avg' |
+//	MAX='Max' |
+//	MIN='Min' |
+//	EXPR='Expr'
+//;
+//	
+//	
+//
+//AcmeMapping:
+//	type=MappingType expr=(acme::booleanExpression  | acme::idExpression | acme::setExpression | acme::pathExpression)
+//;
 
 
 AnyRef:

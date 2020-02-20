@@ -19,8 +19,8 @@ class RainbowBracePairsProvider  implements IBracePairProvider {
 		this(#{
 			new BracePair("(", ")", true),
 			new BracePair("{", "}", true),
-			new BracePair("[", "]", true),
-			new BracePair("\u00AB", "\u00BB", true)
+			new BracePair("[", "]", true)//,
+//			new BracePair("\u00AB", "\u00BB", true)
 		})
 	}
 	

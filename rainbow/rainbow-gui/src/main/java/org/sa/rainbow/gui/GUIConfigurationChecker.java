@@ -18,6 +18,7 @@ import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.util.IRainbowConfigurationChecker;
+import org.sa.rainbow.util.RainbowConfigurationChecker;
 import org.sa.rainbow.util.RainbowConfigurationChecker.Problem;
 import org.sa.rainbow.util.RainbowConfigurationChecker.ProblemT;
 import org.sa.rainbow.util.Util;
@@ -203,7 +204,7 @@ public class GUIConfigurationChecker implements IRainbowConfigurationChecker {
 
 	@Override
 	public Collection<Class> getMustBeExecutedAfter() {
-		return Collections.<Class>emptySet();
+		return Collections.<Class>singleton(RainbowConfigurationChecker.class);
 	}
 
 }

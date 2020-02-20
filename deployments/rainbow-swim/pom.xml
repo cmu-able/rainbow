@@ -530,22 +530,22 @@
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-acme-model</artifactId>
-			<version>3.0</version>
+			<version>3.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-stitch</artifactId>
-			<version>3.0</version>
+			<version>3.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-utility-model</artifactId>
-			<version>3.0</version>
+			<version>3.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-gui</artifactId>
-			<version>3.0</version>
+			<version>3.1.0</version>
 		</dependency>
 		<!-- <dependency> <groupId>rainbow</groupId> <artifactId>rainbow-znn</artifactId> 
 			<version>2.1-SNAPSHOT</version> </dependency> <dependency> <groupId>org.jyaml</groupId> 
@@ -562,7 +562,7 @@
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-mem-comms</artifactId>
-			<version>3.0</version>
+			<version>3.1.0</version>
 		</dependency>
 	
 	</dependencies>

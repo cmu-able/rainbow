@@ -16,6 +16,7 @@ import org.sa.rainbow.configuration.ModelUtil.CommandRep
 import org.sa.rainbow.configuration.rcl.EffectorBody
 import org.sa.rainbow.configuration.rcl.Gauge
 import org.sa.rainbow.configuration.rcl.GaugeTypeBody
+import org.sa.rainbow.configuration.rcl.PropertyReference
 import org.sa.rainbow.configuration.services.RclGrammarAccess
 
 class RainbowTemplateProposalProvider extends DefaultTemplateProposalProvider {
@@ -56,13 +57,13 @@ class RainbowTemplateProposalProvider extends DefaultTemplateProposalProvider {
 				EffectorBody:
 					templatesForFactory(ModelUtil.getCommandsFromReference(container.ref, null, null, false),
 						templateContext, context, acceptor, false, false)
-				GaugeTypeBody:
-					templatesForFactory(ModelUtil.getCommandsFromReference(container.mcf, null, container.commands.map [
+				GaugeTypeBody case container.mcf instanceof PropertyReference:
+					templatesForFactory(ModelUtil.getCommandsFromReference(container.mcf as PropertyReference, null, container.commands.map [
 						it.command
 					].toList, true), templateContext, context, acceptor, true, true)
-				Gauge:
+				Gauge case container?.superType?.body?.mcf instanceof PropertyReference:
 					templatesForFactory(
-						ModelUtil.getCommandsFromReference(container?.superType?.body?.mcf,
+						ModelUtil.getCommandsFromReference(container?.superType?.body?.mcf as PropertyReference,
 							container?.superType?.body?.commands?.map[it.command]?.toList(), container.body.commands.map [
 								it.command
 							].toList, true), templateContext, context, acceptor, true, false)

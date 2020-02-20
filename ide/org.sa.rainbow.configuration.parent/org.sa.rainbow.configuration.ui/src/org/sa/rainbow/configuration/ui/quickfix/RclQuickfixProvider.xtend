@@ -372,3 +372,4 @@ class RclQuickfixProvider extends DefaultQuickfixProvider {
 		}
 	}
 }
+

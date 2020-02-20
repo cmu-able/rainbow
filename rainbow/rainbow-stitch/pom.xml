@@ -5,11 +5,12 @@
 	<groupId>rainbow</groupId>
 	<artifactId>rainbow-stitch</artifactId>
 	<packaging>jar</packaging>
-	<version>3.0</version>
+	<version>3.1.0-SNAPSHOT</version>
 	<name>Rainbow Stitch Language Parser</name>
 
 	<properties>
 		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
+		<rainbowVersion>3.1.0-SNAPSHOT</rainbowVersion>
 	</properties>
 
 	<!-- Software licences go here. -->
@@ -40,7 +41,7 @@
 		<!-- One block per developer. -->
 		<developer>
 			<!-- Unique ID for the developer. This ID is referenced in the changelog. -->
-			<id>schemerl</id>
+			<id>schmerl</id>
 			<!-- Developer name. -->
 			<name>Bradley Schmerl</name>
 			<!-- Developer e-mail address. -->
@@ -396,7 +397,7 @@
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-core</artifactId>
-			<version>3.0</version>
+			<version>${rainbowVersion}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
@@ -406,7 +407,7 @@
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-acme-model</artifactId>
-			<version>3.0.0</version>
+			<version>${rainbowVersion}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.antlr</groupId>
@@ -427,7 +428,7 @@
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-gui</artifactId>
-			<version>3.0</version>
+			<version>${rainbowVersion}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fifesoft</groupId>

@@ -963,4 +963,3 @@ chosen as the folder and the target given some name.
 
 Rainbow deployments can be built outside of Eclipse with Maven. The generated `pom.xml` 
 file contains the necessary instructions for building the RCL files using Xtext, as 
-well as any Java classes that are created or generated.
