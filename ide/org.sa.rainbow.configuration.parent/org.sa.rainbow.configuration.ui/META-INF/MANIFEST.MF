@@ -43,9 +43,9 @@ Export-Package: org.sa.rainbow.configuration.ui;uses:="com.google.inject,com.goo
  org.sa.rainbow.configuration.ui.quickfix;uses:="org.eclipse.xtext.validation,org.eclipse.xtext.ui.editor.quickfix",
  org.sa.rainbow.configuration.ui.wizard;uses:="org.eclipse.core.runtime,org.eclipse.xtext.ui.wizard.template"
 Bundle-Activator: org.sa.rainbow.configuration.ui.ConfigurationActivator
-Bundle-ClassPath: lib/rainbow-acme-model-3.0.jar,
- lib/rainbow-core-3.0.jar,
- lib/rainbow-gui-3.0.jar,
- lib/rainbow-stitch-3.0.jar,
- lib/rainbow-utility-model-3.0.jar,
- .
+Bundle-ClassPath: .,
+ lib/rainbow-acme-model.jar,
+ lib/rainbow-core.jar,
+ lib/rainbow-gui.jar,
+ lib/rainbow-stitch.jar,
+ lib/rainbow-utility-model.jar
