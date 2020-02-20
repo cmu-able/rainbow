@@ -25,10 +25,7 @@ def logging.level = DEBUG
 def event.log.path = "log"
 def logging.path = "«event.log.path»/rainbow.out" 
 def monitoring.log.path = "«event.log.path»/rainbow-data.log"
-# (default)
-#def logging.pattern = "%d{ISO8601/yyyy-MM-dd HH:mm:ss.SSS} [%t] %p %c %x - %m%n"
-#def logging.max.size = 1024
-#def logging.max.backups = 5
+
 
 ### Rainbow component customization
 ## Rainbow host info and communication infrastructure

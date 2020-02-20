@@ -23,7 +23,7 @@ gauge type LoadGaugeT = {
 
 gauge type DimmerGaugeT = {
 	model factory ««SWIM»»
-	command dimmer = "(?<dimmer>«int.pattern»)" -> LoadBalancerT.setDimmer(int)
+	command dimmer = "(?<dimmer>«double.pattern»)" -> LoadBalancerT.setDimmer(int)
 	setup = {
 		targetIP = "localhost"
 		beaconPeriod = 30000
