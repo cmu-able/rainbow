@@ -8,7 +8,9 @@
 	<packaging>pom</packaging>
 
 	<properties>
+		<rainbowVersion>3.1.0-SNAPSHOT</rainbowVersion>
 		<xtextVersion>2.19.0</xtextVersion>
+		<rclVersion>1.0.1-SNAPSHOT</rclVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
