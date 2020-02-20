@@ -21,12 +21,12 @@ Require-Bundle: org.eclipse.xtext,
  org.acme.xtext;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: org.apache.log4j
-Bundle-ClassPath: lib/rainbow-acme-model-3.0.jar,
- lib/rainbow-core-3.0.jar,
- lib/rainbow-gui-3.0.jar,
- lib/rainbow-stitch-3.0.jar,
- lib/rainbow-utility-model-3.0.jar,
- .
+Bundle-ClassPath: .,
+ lib/rainbow-acme-model.jar,
+ lib/rainbow-core.jar,
+ lib/rainbow-gui.jar,
+ lib/rainbow-stitch.jar,
+ lib/rainbow-utility-model.jar
 Export-Package: org.sa.rainbow.configuration,
  org.sa.rainbow.configuration.rcl,
  org.sa.rainbow.configuration.rcl.impl,
