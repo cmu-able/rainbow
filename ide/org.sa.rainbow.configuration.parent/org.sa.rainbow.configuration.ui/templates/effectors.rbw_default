@@ -1,0 +1,7 @@
+target <<rainbow-target>>
+import properties "../properties.rbw"  
+
+# Define effectors here
+
+
+export * to "system/effectors.yml"

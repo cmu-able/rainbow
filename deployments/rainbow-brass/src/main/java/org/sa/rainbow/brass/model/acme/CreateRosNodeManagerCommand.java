@@ -14,8 +14,8 @@ public class CreateRosNodeManagerCommand extends RosAcmeModelCommand<IAcmeCompon
     private String                      m_nodeName;
     private IAcmeComponentCreateCommand m_rosNodeCmd;
 
-    public CreateRosNodeManagerCommand (AcmeModelInstance model, String system, String nodeName) {
-        super ("createNodeManager", model, system, nodeName);
+    public CreateRosNodeManagerCommand (String commandName, AcmeModelInstance model, String system, String nodeName) {
+        super (commandName, model, system, nodeName);
         m_nodeName = nodeName;
     }
 

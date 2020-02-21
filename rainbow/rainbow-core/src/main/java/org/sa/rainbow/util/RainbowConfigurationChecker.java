@@ -28,6 +28,7 @@ import org.sa.rainbow.core.IRainbowMaster;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.gauges.GaugeDescription;
 import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
@@ -485,63 +486,71 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort, IRain
 
 			List<Pair<String, OperationRepresentation>> commandSignatures = gid.commandSignatures();
 			Set<String> commandsFromType = new HashSet<>();
-			ModelCommandFactory<Object> cf = modelInstance.getCommandFactory();
-			for (Pair<String, OperationRepresentation> pair : commandSignatures) {
-				String commandName = pair.secondValue().getName();
-				try {
-					commandsFromType.add(commandName);
-					if (!findCommand(cf, commandName)) {
-						Problem p = new Problem();
-						p.problem = ProblemT.ERROR;
-						p.msg = MessageFormat.format(
-								"{0}: Has a command that can''t be found in ''{1}:{2}''s command factory: {3}",
-								gid.gaugeName(), gid.modelDesc().getName(), gid.modelDesc().getType(), commandName);
-						m_problems.add(p);
-					}
-				} catch (RainbowModelException e) {
-					if (e.getCause() instanceof NoSuchMethodException || e.getCause() instanceof SecurityException) {
-						Problem p = new Problem();
-						p.problem = ProblemT.ERROR;
-						p.msg = MessageFormat.format(
-								"{0}: Has a command that can''t be found in ''{1}:{2}''s command factory: {3}",
-								gid.gaugeName(), gid.modelDesc().getName(), gid.modelDesc().getType(), commandName);
-						m_problems.add(p);
+			try {
+				ModelCommandFactory<Object> cf;
+				cf = modelInstance.getCommandFactory();
+				for (Pair<String, OperationRepresentation> pair : commandSignatures) {
+					String commandName = pair.secondValue().getName();
+					try {
+						commandsFromType.add(commandName);
+						if (!findCommand(cf, commandName)) {
+							Problem p = new Problem();
+							p.problem = ProblemT.ERROR;
+							p.msg = MessageFormat.format(
+									"{0}: Has a command that can''t be found in ''{1}:{2}''s command factory: {3}",
+									gid.gaugeName(), gid.modelDesc().getName(), gid.modelDesc().getType(), commandName);
+							m_problems.add(p);
+						}
+					} catch (RainbowModelException e) {
+						if (e.getCause() instanceof NoSuchMethodException
+								|| e.getCause() instanceof SecurityException) {
+							Problem p = new Problem();
+							p.problem = ProblemT.ERROR;
+							p.msg = MessageFormat.format(
+									"{0}: Has a command that can''t be found in ''{1}:{2}''s command factory: {3}",
+									gid.gaugeName(), gid.modelDesc().getName(), gid.modelDesc().getType(), commandName);
+							m_problems.add(p);
+						}
 					}
 				}
-			}
-			Collection<OperationRepresentation> mappings = gid.mappings().values();
-			for (OperationRepresentation command : mappings) {
-				boolean remove = commandsFromType.remove(command.getName());
-				if (!remove) {
-					Problem p = new Problem();
-					p.problem = ProblemT.WARNING;
-					p.msg = MessageFormat.format(
-							"{0}: Specifiies the command ''{1}'' that is not referenced in the type ''{2}",
-							gid.gaugeName(), command.getName(), gid.gaugeType());
-					m_problems.add(p);
-				}
-				try {
-					if (!findCommand(cf, command.getName())) {
+				Collection<OperationRepresentation> mappings = gid.mappings().values();
+				for (OperationRepresentation command : mappings) {
+					boolean remove = commandsFromType.remove(command.getName());
+					if (!remove) {
 						Problem p = new Problem();
-						p.problem = ProblemT.ERROR;
+						p.problem = ProblemT.WARNING;
 						p.msg = MessageFormat.format(
-								"{0}: Has a command that can''t be found in ''{1}:{2}''s command factory: {3}",
-								gid.gaugeName(), gid.modelDesc().getName(), gid.modelDesc().getType(),
-								command.getName());
+								"{0}: Specifiies the command ''{1}'' that is not referenced in the type ''{2}",
+								gid.gaugeName(), command.getName(), gid.gaugeType());
 						m_problems.add(p);
 					}
+					try {
+						if (!findCommand(cf, command.getName())) {
+							Problem p = new Problem();
+							p.problem = ProblemT.ERROR;
+							p.msg = MessageFormat.format(
+									"{0}: Has a command that can''t be found in ''{1}:{2}''s command factory: {3}",
+									gid.gaugeName(), gid.modelDesc().getName(), gid.modelDesc().getType(),
+									command.getName());
+							m_problems.add(p);
+						}
 
-				} catch (RainbowModelException e) {
-					if (e.getCause() instanceof NoSuchMethodException || e.getCause() instanceof SecurityException) {
-						Problem p = new Problem();
-						p.problem = ProblemT.ERROR;
-						p.msg = MessageFormat.format(
-								"{0}: Has a command that can''t be found in ''{1}:{2}''s command factory: {3}",
-								gid.gaugeName(), gid.modelDesc().getName(), gid.modelDesc().getType(),
-								command.getName());
-						m_problems.add(p);
+					} catch (RainbowModelException e) {
+						if (e.getCause() instanceof NoSuchMethodException
+								|| e.getCause() instanceof SecurityException) {
+							Problem p = new Problem();
+							p.problem = ProblemT.ERROR;
+							p.msg = MessageFormat.format(
+									"{0}: Has a command that can''t be found in ''{1}:{2}''s command factory: {3}",
+									gid.gaugeName(), gid.modelDesc().getName(), gid.modelDesc().getType(),
+									command.getName());
+							m_problems.add(p);
+						}
 					}
 				}
+			} catch (RainbowException e1) {
+				m_problems.add(new Problem(ProblemT.ERROR, "Cannot create command factory for "
+						+ modelInstance.getModelName() + ":" + modelInstance.getModelType()));
 			}
 			if (!commandsFromType.isEmpty()) {
 				Problem p = new Problem();

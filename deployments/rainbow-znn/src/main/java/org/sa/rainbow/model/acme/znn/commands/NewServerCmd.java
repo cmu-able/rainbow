@@ -66,8 +66,8 @@ public class NewServerCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
      * @param port
      *            The port on which the server will accept HTTP requests
      */
-    public NewServerCmd (AcmeModelInstance model, String lb, String name, String host, String port) {
-        super ("connectNewServer", model, lb, name, host, port);
+    public NewServerCmd (String c, AcmeModelInstance model, String lb, String name, String host, String port) {
+        super (c, model, lb, name, host, port);
         m_lb = lb;
         m_name = name;
         m_host = host;

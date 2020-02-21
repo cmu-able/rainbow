@@ -25,8 +25,8 @@ public class SetSystemPropertiesCmd extends ZNNAcmeModelCommand<IAcmeSystem> {
     private String m_aboveRT;
     private String m_aboveMal;
 
-    public SetSystemPropertiesCmd (AcmeModelInstance model, String target, String avgRt, String maliciousness, String aboveRT, String aboveMal) {
-        super ("setSystemProperties", model, target, avgRt, maliciousness, aboveRT, aboveMal);
+    public SetSystemPropertiesCmd (String c, AcmeModelInstance model, String target, String avgRt, String maliciousness, String aboveRT, String aboveMal) {
+        super (c, model, target, avgRt, maliciousness, aboveRT, aboveMal);
         m_avgRt = avgRt;
         m_maliciousness = maliciousness;
         m_aboveRT = aboveRT;

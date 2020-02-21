@@ -50,8 +50,8 @@ public class ActivateServerCmd extends SwimAcmeModelCommand<IAcmeProperty> {
 
 
 	// Target is the server to enable, enable is whether to set it as enabled or not "true" or "false"
-    public ActivateServerCmd (AcmeModelInstance model, String target, String enable) {
-        super ("activateServer", model, target, enable);
+    public ActivateServerCmd (String c, AcmeModelInstance model, String target, String enable) {
+        super (c, model, target, enable);
     }
 
     /**

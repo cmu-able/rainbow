@@ -14,9 +14,9 @@ public class SetPlanIssuedCmd extends AbstractSimpleRainbowModelOperation<Boolea
 
 	private boolean m_issued;
 
-	public SetPlanIssuedCmd(RainbowStateModelInstance model, String target,
+	public SetPlanIssuedCmd(String commandName, RainbowStateModelInstance model, String target,
 			String issued) {
-		super("setPlanIssued", "setPlanIssued", model, target, issued);
+		super(commandName, "setPlanIssued", model, target, issued);
 		m_issued = Boolean.parseBoolean(issued);
 	}
 

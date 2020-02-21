@@ -352,7 +352,7 @@ public class Rainbow implements IRainbowEnvironment {
      * substitution for the master and deployment hosts.
      */
     private void canonicalizeHost2IPs () {
-        String masterLoc = m_props.getProperty (PROPKEY_MASTER_LOCATION);
+        String masterLoc = m_props.getProperty (PROPKEY_MASTER_LOCATION).replaceAll("\"", "");
         canonicalizeHost2IP ("Master Location", masterLoc, PROPKEY_MASTER_LOCATION);
 
         String deployLoc = m_props.getProperty (PROPKEY_DEPLOYMENT_LOCATION);
@@ -409,7 +409,7 @@ public class Rainbow implements IRainbowEnvironment {
     }
 
     private void canonicalizeHost2IP (String string, String masterLoc, String key) {
-        masterLoc = Util.evalTokens (masterLoc, m_props);
+        masterLoc = Util.evalTokens (masterLoc, m_props).replaceAll("\"", "");
         try {
             masterLoc = InetAddress.getByName (masterLoc).getHostAddress ();
             m_props.setProperty (key, masterLoc);

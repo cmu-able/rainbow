@@ -15,9 +15,9 @@ public class CancelInstructionsCmd extends AbstractRainbowModelOperation<Boolean
 
 	private LinkedList<IInstruction> m_oldInstructions;
 
-	public CancelInstructionsCmd(IModelInstance<InstructionGraphProgress> model,
+	public CancelInstructionsCmd(String commandName, IModelInstance<InstructionGraphProgress> model,
 			String target, String... parameters) {
-		super("cancelInstructions", model, target, parameters);
+		super(commandName, model, target, parameters);
 	}
 
 	@Override

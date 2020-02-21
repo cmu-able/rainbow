@@ -26,11 +26,10 @@ package org.sa.rainbow.model.acme.swim.commands;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 
 public class SetBasicResponseTimeCmd extends SetDoubleCmd {
-	private final static String COMMAND = "setBasicResponseTime";
 	private final static String PROPERTY = "basicResponseTime";
 	
-	public SetBasicResponseTimeCmd(AcmeModelInstance model, String component, String value) {
-		super(COMMAND, PROPERTY, model, component, value);
+	public SetBasicResponseTimeCmd(String c, AcmeModelInstance model, String component, String value) {
+		super(c, PROPERTY, model, component, value);
 	}
 	
 }

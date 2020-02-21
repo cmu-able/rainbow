@@ -45,7 +45,7 @@ public class RainbowStateModelInstance implements IModelInstance<RainbowState> {
 	}
 
 	@Override
-	public RainbowStateCommandFactory getCommandFactory() {
+	public RainbowStateCommandFactory getCommandFactory() throws RainbowException {
 		if (m_commandFactory == null) 
 			m_commandFactory = new RainbowStateCommandFactory(this);
 		return m_commandFactory;

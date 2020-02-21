@@ -14,13 +14,12 @@ import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 
 public class UpdatePowerModelCmd extends AbstractRainbowModelOperation<Boolean, SimpleConfigurationStore> {
 
-	public static final String NAME = "updatePowerModel";
 	private String m_newFileName;
 	private Boolean m_successful;
 	private HashMap<String, SimpleConfiguration> m_oldModel;
 
-	public UpdatePowerModelCmd(CP1PowerModelInstance modelInstance, String target, String newFileName) {
-		super(NAME, modelInstance, target, newFileName);
+	public UpdatePowerModelCmd(String commandName, CP1PowerModelInstance modelInstance, String target, String newFileName) {
+		super(commandName, modelInstance, target, newFileName);
 		m_newFileName = newFileName;
 	
 	}
@@ -32,7 +31,7 @@ public class UpdatePowerModelCmd extends AbstractRainbowModelOperation<Boolean, 
 
 	@Override
 	protected List<? extends IRainbowMessage> getGeneratedEvents(IRainbowMessageFactory messageFactory) {
-		return generateEvents(messageFactory, NAME);
+		return generateEvents(messageFactory, getName());
 	}
 
 	@Override
