@@ -641,6 +641,15 @@ The command specification part of the gauge type now specifies a regular express
 using named captured groups. It also specifies an attribute `generatedClass` that specifies 
 the class to generated when the project is built. 
 
+Note that you may do pattern matching over multiple lines by using `(?s)` at the beginning of an expression to indicate that Pattern.DOTALL should be used. For example, if you want to match the following:
+
+```
+event: clock
+value: 1234
+```
+You can indicated the pattern `(?s)event: clock.*time: (?<time>[0-9]+)`
+
+
 Gauges of this type follow these rules:
 
 - The regular expression must have named groups
