@@ -4,7 +4,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>rainbow</groupId>
 	<artifactId>rainbow-mem-comms</artifactId>
-	<version>3.0</version>
+	<version>3.1.0-SNAPSHOT</version>
+	<properties>
+		<rainbowVersion>3.1.0-SNAPSHOT</rainbowVersion>
+	</properties>
 	<build>
 		<!-- Build process extensions. -->
 		<extensions>
@@ -59,7 +62,7 @@
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-core</artifactId>
-			<version>3.0</version>
+			<version>${rainbowVersion}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>

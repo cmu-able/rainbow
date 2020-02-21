@@ -21,6 +21,7 @@ import org.sa.rainbow.core.IRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 
@@ -56,7 +57,7 @@ public class BRASSMissionAnalyzer extends P2CP1Analyzer {
 	}
 
 	@Override
-	protected void runAction() {
+	protected void runAction() throws RainbowException {
 		MissionState ms = getModels().getMissionStateModel().getModelInstance();
 		if (!m_reportedReady && ms.getInitialPose() != null) {
 			m_reportedReady = true;

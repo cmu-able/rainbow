@@ -53,8 +53,8 @@ public class SetCaptchaEnabledCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
      *            The load balancer to set the property on
      * @param enabled
      */
-    public SetCaptchaEnabledCmd (AcmeModelInstance model, String target, String enabled) {
-        super ("setCaptchaEnabled", model, target, enabled);
+    public SetCaptchaEnabledCmd (String c, AcmeModelInstance model, String target, String enabled) {
+        super (c, model, target, enabled);
     }
 
     @Override

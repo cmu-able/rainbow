@@ -3,6 +3,7 @@ package org.sa.rainbow.brass.model.p2_cp3.robot;
 import org.sa.rainbow.brass.model.robot.RobotState;
 import org.sa.rainbow.brass.model.robot.RobotStateCommandFactory;
 import org.sa.rainbow.brass.model.robot.RobotStateModelInstance;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.commands.ModelCommandFactory;
 
 public class CP3RobotStateModelInstance extends RobotStateModelInstance {
@@ -19,7 +20,7 @@ public class CP3RobotStateModelInstance extends RobotStateModelInstance {
 	}
 	
 	@Override
-	public ModelCommandFactory<RobotState> getCommandFactory() {
+	public ModelCommandFactory<RobotState> getCommandFactory() throws RainbowException {
 		if (m_commandFactory == null)
 			m_commandFactory = new CP3RobotStateCommandFactory(this);
 		return m_commandFactory;

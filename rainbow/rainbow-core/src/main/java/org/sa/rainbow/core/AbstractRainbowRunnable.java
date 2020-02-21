@@ -26,13 +26,14 @@
  */
 package org.sa.rainbow.core;
 
-import org.sa.rainbow.core.error.RainbowConnectionException;
-import org.sa.rainbow.core.ports.DisconnectedRainbowDelegateConnectionPort;
-import org.sa.rainbow.core.ports.IRainbowReportingPort;
-
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Date;
+
+import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowException;
+import org.sa.rainbow.core.ports.DisconnectedRainbowDelegateConnectionPort;
+import org.sa.rainbow.core.ports.IRainbowReportingPort;
 
 /**
  * Convenience abstract class that handles the usual thread start/stop/terminate
@@ -313,7 +314,7 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
     }
 
     protected abstract void log (String txt);
-    protected abstract void runAction (); 
+    protected abstract void runAction () throws RainbowException;
 
     public abstract RainbowComponentT getComponentType ();
 

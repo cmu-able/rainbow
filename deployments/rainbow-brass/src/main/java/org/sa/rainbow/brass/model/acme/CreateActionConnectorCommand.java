@@ -14,8 +14,8 @@ public class CreateActionConnectorCommand extends RosAcmeModelCommand<IAcmeConne
     private String                      m_connName;
     private IAcmeConnectorCreateCommand m_connectorCreateCommand;
 
-    public CreateActionConnectorCommand (AcmeModelInstance model, String target, String connName) {
-        super ("createActionConnector", model, target, connName);
+    public CreateActionConnectorCommand (String commandName, AcmeModelInstance model, String target, String connName) {
+        super (commandName, model, target, connName);
         m_connName = connName;
     }
 

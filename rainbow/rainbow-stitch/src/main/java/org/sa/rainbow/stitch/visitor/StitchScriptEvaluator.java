@@ -50,6 +50,7 @@ import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort;
@@ -1130,87 +1131,95 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 				nameObj = ami.getModelInstance().lookupName(name.substring(dotIdx + 1), true);
 				if (nameObj == null) {
 					// Look for the <name>Cmd method in the Command Factory
-					Class<?> commandFactoryClass = ami.getCommandFactory().getClass();
-					Method[] methods = commandFactoryClass.getMethods();
-					String m = name.substring(dotIdx + 1);
-					if (!m.endsWith("Cmd")) {
-						m += "Cmd";
-					}
-					for (int i = 0; i < methods.length && nameObj == null; i++) {
-						if (methods[i].getName().equals(m)) {
-							nameObj = methods[i];
+					try {
+						Class<?> commandFactoryClass = ami.getCommandFactory().getClass();
+						Method[] methods = commandFactoryClass.getMethods();
+						String m = name.substring(dotIdx + 1);
+						if (!m.endsWith("Cmd")) {
+							m += "Cmd";
 						}
-					}
-					if (nameObj != null) {
-						Method mtd = (Method) nameObj;
-						Class[] params = constructFormalParams(args);
-						if (checkMethodParams(mtd, params, args)) {
-							method = mtd;
-						}
-						if (method != null) {
-							try {
-								rv = method.invoke(ami.getCommandFactory(), args);
-							} catch (Throwable e) {
-								scope().setError(true);
-								Tool.error("Method invocation failed! " + method.toString(), e, null,
-										stitchProblemHandler());
-								e.printStackTrace();
-								IModelDSBusPublisherPort.OperationResult or = new IModelDSBusPublisherPort.OperationResult();
-								or.result = IModelDSBusPublisherPort.Result.FAILURE;
-								or.reply = "Method invocation failed! + " + method.toString() + ". Reason: "
-										+ e.getMessage();
-								rv = or;
-
-							}
-							if (rv instanceof IRainbowOperation) {
-								// Submit this to the effector manager to call the right effectors
-								IRainbowOperation op = (IRainbowOperation) rv;
-
-								IModelDSBusPublisherPort port = executor.getOperationPublishingPort();
-								((AbstractRainbowRunnable) executor).reportingPort().info(RainbowComponentT.EXECUTOR,
-										"SSE: Attempting " + "operation: " + op.toString());
-								IModelDSBusPublisherPort.OperationResult result = port.publishOperation(op);
-								((AbstractRainbowRunnable) executor).reportingPort().info(RainbowComponentT.EXECUTOR,
-										"SSE: Finished operation " + op.toString() + " = " + result.result + "("
-												+ result.reply + ")");
-								rv = result;
+						for (int i = 0; i < methods.length && nameObj == null; i++) {
+							if (methods[i].getName().equals(m)) {
+								nameObj = methods[i];
 							}
 						}
-						// check if OperatorResult, and if result is a failure
-						if (rv != null) {
-							if (rv instanceof String) {
-								ModelOperator.OperatorResult opResult = ModelOperator.OperatorResult
-										.parseEffectorResult((String) rv);
-								switch (opResult) {
-								case UNKNOWN:
-									((AbstractRainbowRunnable) executor).reportingPort().info(
-											RainbowComponentT.EXECUTOR,
-											"No effector found corresponding to method '" + name + "'!");
-									break;
-								case FAILURE:
-									// bad, set state to indicate failure occurred
+						if (nameObj != null) {
+							Method mtd = (Method) nameObj;
+							Class[] params = constructFormalParams(args);
+							if (checkMethodParams(mtd, params, args)) {
+								method = mtd;
+							}
+							if (method != null) {
+								try {
+									rv = method.invoke(ami.getCommandFactory(), args);
+								} catch (Throwable e) {
 									scope().setError(true);
-									((AbstractRainbowRunnable) executor).reportingPort().info(
-											RainbowComponentT.EXECUTOR, "Method invocation did not succeeed! " + name);
-									break;
-								}
-							} else if (rv instanceof IModelDSBusPublisherPort.OperationResult) {
-								IModelDSBusPublisherPort.OperationResult or = (IModelDSBusPublisherPort.OperationResult) rv;
-								switch (or.result) {
-								case UNKNOWN:
-									((AbstractRainbowRunnable) executor).reportingPort()
-											.info(RainbowComponentT.EXECUTOR, "No effector found: " + or.reply);
-									break;
-								case FAILURE:
-									scope().setError(true);
-									((AbstractRainbowRunnable) executor).reportingPort().info(
-											RainbowComponentT.EXECUTOR,
-											"Failed to execute operation " + name + "" + ". Reason: " + or.reply);
-									break;
-								}
+									Tool.error("Method invocation failed! " + method.toString(), e, null,
+											stitchProblemHandler());
+									e.printStackTrace();
+									IModelDSBusPublisherPort.OperationResult or = new IModelDSBusPublisherPort.OperationResult();
+									or.result = IModelDSBusPublisherPort.Result.FAILURE;
+									or.reply = "Method invocation failed! + " + method.toString() + ". Reason: "
+											+ e.getMessage();
+									rv = or;
 
+								}
+								if (rv instanceof IRainbowOperation) {
+									// Submit this to the effector manager to call the right effectors
+									IRainbowOperation op = (IRainbowOperation) rv;
+
+									IModelDSBusPublisherPort port = executor.getOperationPublishingPort();
+									((AbstractRainbowRunnable) executor).reportingPort().info(RainbowComponentT.EXECUTOR,
+											"SSE: Attempting " + "operation: " + op.toString());
+									IModelDSBusPublisherPort.OperationResult result = port.publishOperation(op);
+									((AbstractRainbowRunnable) executor).reportingPort().info(RainbowComponentT.EXECUTOR,
+											"SSE: Finished operation " + op.toString() + " = " + result.result + "("
+													+ result.reply + ")");
+									rv = result;
+								}
+							}
+							// check if OperatorResult, and if result is a failure
+							if (rv != null) {
+								if (rv instanceof String) {
+									ModelOperator.OperatorResult opResult = ModelOperator.OperatorResult
+											.parseEffectorResult((String) rv);
+									switch (opResult) {
+									case UNKNOWN:
+										((AbstractRainbowRunnable) executor).reportingPort().info(
+												RainbowComponentT.EXECUTOR,
+												"No effector found corresponding to method '" + name + "'!");
+										break;
+									case FAILURE:
+										// bad, set state to indicate failure occurred
+										scope().setError(true);
+										((AbstractRainbowRunnable) executor).reportingPort().info(
+												RainbowComponentT.EXECUTOR, "Method invocation did not succeeed! " + name);
+										break;
+									}
+								} else if (rv instanceof IModelDSBusPublisherPort.OperationResult) {
+									IModelDSBusPublisherPort.OperationResult or = (IModelDSBusPublisherPort.OperationResult) rv;
+									switch (or.result) {
+									case UNKNOWN:
+										((AbstractRainbowRunnable) executor).reportingPort()
+												.info(RainbowComponentT.EXECUTOR, "No effector found: " + or.reply);
+										break;
+									case FAILURE:
+										scope().setError(true);
+										((AbstractRainbowRunnable) executor).reportingPort().info(
+												RainbowComponentT.EXECUTOR,
+												"Failed to execute operation " + name + "" + ". Reason: " + or.reply);
+										break;
+									}
+
+								}
 							}
 						}
+					} catch (SecurityException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (RainbowException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
 				}
 			}

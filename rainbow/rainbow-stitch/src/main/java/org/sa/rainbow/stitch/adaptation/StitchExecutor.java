@@ -36,6 +36,7 @@ import org.sa.rainbow.core.adaptation.AdaptationTree;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
@@ -195,6 +196,9 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
                 }
             }
 
+			} catch (RainbowException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			} finally {
 				m_executionLocked = false;
 			}

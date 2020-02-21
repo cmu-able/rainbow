@@ -44,8 +44,8 @@ public class SetFidelityCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
     private String m_server;
     private int    m_fidelity;
 
-    public SetFidelityCmd (AcmeModelInstance model, String server, String fidelity) {
-        super ("setFidelity", model, server, fidelity);
+    public SetFidelityCmd (String c, AcmeModelInstance model, String server, String fidelity) {
+        super (c, model, server, fidelity);
         m_server = server;
         m_fidelity = Integer.valueOf (fidelity);
     }

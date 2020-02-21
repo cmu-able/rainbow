@@ -23,6 +23,7 @@ import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.analysis.IRainbowAnalysis;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IModelUSBusPort;
 import org.sa.rainbow.core.ports.IModelsManagerPort;
@@ -103,14 +104,15 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
         ModelReference emRef = new ModelReference ("Map", EnvMapModelInstance.ENV_MAP_TYPE);
         EnvMapModelInstance envModel = (EnvMapModelInstance) m_modelsManagerPort.<EnvMap> getModelInstance (emRef);
 
-        if (missionStateModel != null && igModel != null && envModel != null) {
-            MissionState missionState = missionStateModel.getModelInstance();
-            InstructionGraphProgress igProgress = igModel.getModelInstance();
-            EnvMap envMap = envModel.getModelInstance();
-            boolean currentOK = igProgress.getCurrentOK();
+        try {
+			if (missionStateModel != null && igModel != null && envModel != null) {
+			    MissionState missionState = missionStateModel.getModelInstance();
+			    InstructionGraphProgress igProgress = igModel.getModelInstance();
+			    EnvMap envMap = envModel.getModelInstance();
+			    boolean currentOK = igProgress.getCurrentOK();
 //            if (missionState.isAdaptationNeeded ()) return;
 
-            // If we start off with nothing (i.e., no instruction graph), this is a problem
+			    // If we start off with nothing (i.e., no instruction graph), this is a problem
 //            if (emptyInstructions (igProgress)
 //                    && !missionState.isRobotObstructed () && missionState.getCurrentPose () != null) {
 //                log ("Robot has no instructions - triggering planning to get started");
@@ -128,90 +130,93 @@ public class BRASSMissionAnalyzer extends AbstractRainbowRunnable implements IRa
 //            log ("Awaiting new IG?" + m_awaitingNewIG);
 //            log ("Empty instructions?" + emptyInstructions (igProgress));
 //            log ("Robot obstructed known? " + missionState.isRobotObstructed ());
-            if (igProgress.getInstructionGraphState () == IGExecutionStateT.FINISHED_SUCCESS) {
-                BRASSHttpConnector.instance (Phases.Phase1).reportDone (false, "Finished all the instructions in the task");
-                Rainbow.instance ().signalTerminate ();
-                return;
+			    if (igProgress.getInstructionGraphState () == IGExecutionStateT.FINISHED_SUCCESS) {
+			        BRASSHttpConnector.instance (Phases.Phase1).reportDone (false, "Finished all the instructions in the task");
+			        Rainbow.instance ().signalTerminate ();
+			        return;
 
-            }
-            if (missionState.getCurrentPose () == null) {
-                m_awaitingPose = true;
-            }
-            else if (missionState.getCurrentPose () != null && m_awaitingPose) {
-                m_awaitingPose = false;
-                BRASSHttpConnector.instance (Phases.Phase1).reportReady (true);
+			    }
+			    if (missionState.getCurrentPose () == null) {
+			        m_awaitingPose = true;
+			    }
+			    else if (missionState.getCurrentPose () != null && m_awaitingPose) {
+			        m_awaitingPose = false;
+			        BRASSHttpConnector.instance (Phases.Phase1).reportReady (true);
 
-            }
-            else if (!currentOK && igProgress.getExecutingInstruction () != null && !m_awaitingNewIG
-                    /*&& igProgress.getInstructionGraphState () == IGExecutionStateT.FINISHED_FAILED*/) {
-                // Current IG failed
-                m_reportingPort.info (getComponentType (), "Instruction graph failed...updating map model");
-                BRASSHttpConnector.instance (Phases.Phase1).reportStatus (DASPhase1StatusT.PERTURBATION_DETECTED.name(),
-                        "Obstruction to path detected");
-                // Get current robot position
-                LocationRecording pose = missionState.getCurrentPose ();
+			    }
+			    else if (!currentOK && igProgress.getExecutingInstruction () != null && !m_awaitingNewIG
+			            /*&& igProgress.getInstructionGraphState () == IGExecutionStateT.FINISHED_FAILED*/) {
+			        // Current IG failed
+			        m_reportingPort.info (getComponentType (), "Instruction graph failed...updating map model");
+			        BRASSHttpConnector.instance (Phases.Phase1).reportStatus (DASPhase1StatusT.PERTURBATION_DETECTED.name(),
+			                "Obstruction to path detected");
+			        // Get current robot position
+			        LocationRecording pose = missionState.getCurrentPose ();
 
-                // Get source and target positions of the failing instruction
-                IInstruction currentInst = igProgress.getCurrentInstruction();
+			        // Get source and target positions of the failing instruction
+			        IInstruction currentInst = igProgress.getCurrentInstruction();
 
-                // The current instruction is of type MoveAbsH
-                if (currentInst instanceof MoveAbsHInstruction) {
-                    MoveAbsHInstruction currentMoveAbsH = (MoveAbsHInstruction) currentInst;
-                    MoveAbsHInstruction prevMoveAbsH = getPreviousMoveAbsH(currentMoveAbsH, igProgress);
+			        // The current instruction is of type MoveAbsH
+			        if (currentInst instanceof MoveAbsHInstruction) {
+			            MoveAbsHInstruction currentMoveAbsH = (MoveAbsHInstruction) currentInst;
+			            MoveAbsHInstruction prevMoveAbsH = getPreviousMoveAbsH(currentMoveAbsH, igProgress);
 
-                    double sourceX;
-                    double sourceY;
-                    double targetX = currentMoveAbsH.getTargetX();
-                    double targetY = currentMoveAbsH.getTargetY();
+			            double sourceX;
+			            double sourceY;
+			            double targetX = currentMoveAbsH.getTargetX();
+			            double targetY = currentMoveAbsH.getTargetY();
 
-                    if (prevMoveAbsH != null) {
-                        sourceX = prevMoveAbsH.getTargetX();
-                        sourceY = prevMoveAbsH.getTargetY();
-                    } else {
-                        // The current instruction is the first MoveAbsH instruction in IG
-                        // Use the initial pose as the source pose
-                        sourceX = missionState.getInitialPose().getX();
-                        sourceY = missionState.getInitialPose().getY();
-                    }
+			            if (prevMoveAbsH != null) {
+			                sourceX = prevMoveAbsH.getTargetX();
+			                sourceY = prevMoveAbsH.getTargetY();
+			            } else {
+			                // The current instruction is the first MoveAbsH instruction in IG
+			                // Use the initial pose as the source pose
+			                sourceX = missionState.getInitialPose().getX();
+			                sourceY = missionState.getInitialPose().getY();
+			            }
 
-                    // Find the corresponding environment map nodes of the source and target positions
-                    // Node naming assumption: node's label is lX where X is the order in which the node is added
-                    int numNodes = envMap.getNodeCount() + 1;
-                    String n = "l" + numNodes;
-                    String na = envMap.getNode (sourceX, sourceY).getLabel ();
-                    String nb = envMap.getNode (targetX, targetY).getLabel ();
+			            // Find the corresponding environment map nodes of the source and target positions
+			            // Node naming assumption: node's label is lX where X is the order in which the node is added
+			            int numNodes = envMap.getNodeCount() + 1;
+			            String n = "l" + numNodes;
+			            String na = envMap.getNode (sourceX, sourceY).getLabel ();
+			            String nb = envMap.getNode (targetX, targetY).getLabel ();
 
-                    // Update the environment map
-                    String rx = Double.toString (pose.getX ());
-                    String ry = Double.toString (pose.getY ());
-                    InsertNodeCmd insertNodeCmd = envModel.getCommandFactory ()
-                            .insertNodeCmd (n, na, nb, rx, ry, "true");
-                    log ("Inserting node '" + n + "' at (" + rx + ", " + ry + ") between " + na + " and " + nb);
+			            // Update the environment map
+			            String rx = Double.toString (pose.getX ());
+			            String ry = Double.toString (pose.getY ());
+			            InsertNodeCmd insertNodeCmd = envModel.getCommandFactory ()
+			                    .insertNodeCmd (n, na, nb, rx, ry, "true");
+			            log ("Inserting node '" + n + "' at (" + rx + ", " + ry + ") between " + na + " and " + nb);
 
-                    // Set robot obstructed flag -- trigger planning for adaptation
-                    SetRobotObstructedCmd robotObstructedCmd = missionStateModel.getCommandFactory ()
-                            .setRobotObstructedCmd (true);
+			            // Set robot obstructed flag -- trigger planning for adaptation
+			            SetRobotObstructedCmd robotObstructedCmd = missionStateModel.getCommandFactory ()
+			                    .setRobotObstructedCmd (true);
 
-                    SetExecutionFailedCmd resetFailedCmd = igModel.getCommandFactory ().setExecutionFailedCmd ("false");
+			            SetExecutionFailedCmd resetFailedCmd = igModel.getCommandFactory ().setExecutionFailedCmd ("false");
 
-                    // Send the commands -- different models, so can't bundle them
-                    m_modelUSPort.updateModel (resetFailedCmd);
-                    m_modelUSPort.updateModel (insertNodeCmd);
-                    m_modelUSPort.updateModel (robotObstructedCmd);
-                    m_awaitingNewIG = true;
-                }
-            }
-            else if (currentOK && !emptyInstructions (igProgress) && missionState.isRobotObstructed ()) {
-                // New IG resumed after robot obstructed
-                log ("New instruction model was detected. Reseting models to ok");
-                m_reportingPort.info (getComponentType (), "New instruction graph detected");
-                m_awaitingNewIG = false;
-                // Clear robot obstructed flag
-                SetRobotObstructedCmd clearRobotObstructedCmd = missionStateModel.getCommandFactory ()
-                        .setRobotObstructedCmd (false);
-                m_modelUSPort.updateModel(clearRobotObstructedCmd);
-            }
-        }
+			            // Send the commands -- different models, so can't bundle them
+			            m_modelUSPort.updateModel (resetFailedCmd);
+			            m_modelUSPort.updateModel (insertNodeCmd);
+			            m_modelUSPort.updateModel (robotObstructedCmd);
+			            m_awaitingNewIG = true;
+			        }
+			    }
+			    else if (currentOK && !emptyInstructions (igProgress) && missionState.isRobotObstructed ()) {
+			        // New IG resumed after robot obstructed
+			        log ("New instruction model was detected. Reseting models to ok");
+			        m_reportingPort.info (getComponentType (), "New instruction graph detected");
+			        m_awaitingNewIG = false;
+			        // Clear robot obstructed flag
+			        SetRobotObstructedCmd clearRobotObstructedCmd = missionStateModel.getCommandFactory ()
+			                .setRobotObstructedCmd (false);
+			        m_modelUSPort.updateModel(clearRobotObstructedCmd);
+			    }
+			}
+		} catch (RainbowException e) {
+			e.printStackTrace();
+		}
     }
 
     boolean emptyInstructions (InstructionGraphProgress igProgress) {

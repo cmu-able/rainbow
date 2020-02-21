@@ -40,8 +40,8 @@ public class SetResponseTimeCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
     private String m_client;
     private float          m_responseTime;
 
-    public SetResponseTimeCmd (AcmeModelInstance model, String client, String rt) {
-        super ("setResponseTime", model, client, rt);
+    public SetResponseTimeCmd (String c, AcmeModelInstance model, String client, String rt) {
+        super (c, model, client, rt);
         m_client = client;
         m_responseTime = Float.valueOf (rt);
     }

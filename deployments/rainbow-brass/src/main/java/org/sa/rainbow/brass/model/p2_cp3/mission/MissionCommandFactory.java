@@ -6,6 +6,7 @@ import java.io.InputStream;
 
 import org.sa.rainbow.brass.model.p2_cp3.mission.MissionState.UtilityPreference;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowStateModelInstance;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelsManager;
@@ -16,24 +17,21 @@ import org.sa.rainbow.core.models.commands.ModelCommandFactory;
  */
 public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
 
-    public static MissionStateLoadCmd loadCommand (ModelsManager mm, String modelName, InputStream
+    private static final String SET_UTILITY_PREFERENCE_CMD = "setUtilityPreference";
+	private static final String SET_RECONFIGURING_CMD = "setReconfiguring";
+	private static final String SET_TARGET_WAYPOINT_CMD = "setTargetWaypoint";
+	private static final String SET_DEADLINE_CMD = "setDeadline";
+	private static final String SET_CURRENT_LOCATION_CMD = "setCurrentLocation";
+
+	@LoadOperation
+	public static MissionStateLoadCmd loadCommand (ModelsManager mm, String modelName, InputStream
             stream, String source) {
         return new MissionStateLoadCmd (mm, modelName, stream, source);
     }
 
     public MissionCommandFactory (
-            IModelInstance<MissionState> model) {
+            IModelInstance<MissionState> model) throws RainbowException {
         super (MissionStateModelInstance.class, model);
-    }
-
-    @Override
-    protected void fillInCommandMap () {
-        m_commandMap.put ("setCurrentLocation".toLowerCase (), SetCurrentLocationCmd.class);
-        m_commandMap.put ("setDeadlineCmd".toLowerCase (), SetDeadlineCmd.class);
-        m_commandMap.put ("setTargetWaypoint".toLowerCase (), SetTargetWaypointCmd.class);
-        m_commandMap.put("setReconfiguring".toLowerCase(), SetReconfiguringCmd.class);
-		m_commandMap.put("setUtilityPreference".toLowerCase(), SetUtilityPreferenceCmd.class);
-
     }
 
     @Override
@@ -46,25 +44,30 @@ public class MissionCommandFactory extends ModelCommandFactory<MissionState> {
         }
     }
 
+    @Operation(name=SET_CURRENT_LOCATION_CMD)
     public SetCurrentLocationCmd setCurrentLocationCmd (double x, double y, double w) {
-        return new SetCurrentLocationCmd ((MissionStateModelInstance) m_modelInstance, "", Double.toString (x),
+        return new SetCurrentLocationCmd (SET_CURRENT_LOCATION_CMD, (MissionStateModelInstance) m_modelInstance, "", Double.toString (x),
                 Double.toString (y), Double.toString (w));
     }
 
+    @Operation(name=SET_DEADLINE_CMD)
     public SetDeadlineCmd setDeadlineCmd (long d) {
-        return new SetDeadlineCmd ((MissionStateModelInstance) m_modelInstance, "",
+        return new SetDeadlineCmd (SET_DEADLINE_CMD, (MissionStateModelInstance) m_modelInstance, "",
                 Double.toString (d));
     }
 
+    @Operation(name=SET_TARGET_WAYPOINT_CMD)
     public SetTargetWaypointCmd setTargetWaypointCmd (String t) {
-        return new SetTargetWaypointCmd ((MissionStateModelInstance )m_modelInstance, "", t);
+        return new SetTargetWaypointCmd (SET_TARGET_WAYPOINT_CMD, (MissionStateModelInstance )m_modelInstance, "", t);
     }
     
+    @Operation(name=SET_RECONFIGURING_CMD)
     public SetReconfiguringCmd setReconfiguringCmd(boolean r) {
-    	return new SetReconfiguringCmd((MissionStateModelInstance )m_modelInstance, "", Boolean.toString(r));
+    	return new SetReconfiguringCmd(SET_RECONFIGURING_CMD, (MissionStateModelInstance )m_modelInstance, "", Boolean.toString(r));
     }
 
+    @Operation(name=SET_UTILITY_PREFERENCE_CMD)
 	public SetUtilityPreferenceCmd setUtilityPreference(UtilityPreference preference) {
-		return new SetUtilityPreferenceCmd((MissionStateModelInstance )m_modelInstance, "", preference.toString());
+		return new SetUtilityPreferenceCmd(SET_UTILITY_PREFERENCE_CMD, (MissionStateModelInstance )m_modelInstance, "", preference.toString());
 	}
 }

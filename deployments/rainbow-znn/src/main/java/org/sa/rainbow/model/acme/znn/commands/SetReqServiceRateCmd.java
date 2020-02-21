@@ -39,8 +39,8 @@ public class SetReqServiceRateCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
     private String m_server;
     private Float  m_serviceRate;
 
-    public SetReqServiceRateCmd (AcmeModelInstance model, String target, String serviceRate) {
-        super ("setReqServiceRate", model, target, serviceRate);
+    public SetReqServiceRateCmd (String c, AcmeModelInstance model, String target, String serviceRate) {
+        super (c, model, target, serviceRate);
         m_server = target;
         m_serviceRate = Float.valueOf (serviceRate);
 

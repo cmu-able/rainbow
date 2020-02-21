@@ -17,8 +17,8 @@ public class DeletePortCmd extends RosAcmeModelCommand<IAcmePort> {
     private String                 m_port;
     private IAcmePortDeleteCommand m_deleteCommand;
 
-    public DeletePortCmd (AcmeModelInstance model, String component, String port) {
-        super ("deletePort", model, component, port);
+    public DeletePortCmd (String commandName, AcmeModelInstance model, String component, String port) {
+        super (commandName, model, component, port);
         m_component = component;
         m_port = port;
 

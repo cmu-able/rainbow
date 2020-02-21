@@ -11,9 +11,9 @@ import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 
 public class SetConfigCmd extends AbstractRainbowModelOperation<String, RobotState> {
 
-	public SetConfigCmd(CP1RobotStateModelInstance model, String target,
+	public SetConfigCmd(String commandName, CP1RobotStateModelInstance model, String target,
 			String config) {
-		super("setConfig", model, target, config);
+		super(commandName, model, target, config);
 	}
 
 	@Override

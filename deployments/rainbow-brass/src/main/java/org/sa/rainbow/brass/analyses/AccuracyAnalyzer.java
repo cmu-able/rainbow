@@ -32,6 +32,7 @@ import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.analysis.IRainbowAnalysis;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
@@ -173,70 +174,74 @@ public class AccuracyAnalyzer extends AbstractRainbowRunnable implements IRainbo
                 // Only performing timing analysis once per instruction
 //                if (isNewOrUnpassedInstruction(currentInstruction)) {
 
-                if (m_missionState != null && !(currentInstruction instanceof ChargeInstruction)) {
+                try {
+					if (m_missionState != null && !(currentInstruction instanceof ChargeInstruction)) {
 
-                    // TODO: This may be a hack
-                    // Update the robot's configuration (Kinect and localization) in MissionState
-                    if (currentInstruction instanceof SetLocalizationFidelityInstruction) {
-                        SetLocalizationFidelityInstruction inst = (SetLocalizationFidelityInstruction) currentInstruction;
-                        MissionStateModelInstance missionStateModel = (MissionStateModelInstance) m_modelsManagerPort
-                                .<MissionState> getModelInstance(m_msRef);
-                        SetRobotLocalizationFidelityCmd robotLocFidelityCmd = missionStateModel.getCommandFactory()
-                                .setRobotLocalizationFidelityCmd(inst.getLocalizationFidelity());
-                        m_modelUSPort.updateModel(robotLocFidelityCmd);
-                    }
+					    // TODO: This may be a hack
+					    // Update the robot's configuration (Kinect and localization) in MissionState
+					    if (currentInstruction instanceof SetLocalizationFidelityInstruction) {
+					        SetLocalizationFidelityInstruction inst = (SetLocalizationFidelityInstruction) currentInstruction;
+					        MissionStateModelInstance missionStateModel = (MissionStateModelInstance) m_modelsManagerPort
+					                .<MissionState> getModelInstance(m_msRef);
+					        SetRobotLocalizationFidelityCmd robotLocFidelityCmd = missionStateModel.getCommandFactory()
+					                .setRobotLocalizationFidelityCmd(inst.getLocalizationFidelity());
+					        m_modelUSPort.updateModel(robotLocFidelityCmd);
+					    }
 
-                    // The remaining instructions, excluding the current instruction
-                    List<IInstruction> remainingInstructions = (List<IInstruction>) m_igProgress.getRemainingInstructions();
-                    Double batteryCharge = m_missionState.getBatteryCharge ();
-                    if (batteryCharge == null) return; // Don't have charge information yet
-                    double planEnergyConsumption = hasEnoughEnergy (currentInstruction, remainingInstructions);
-                    boolean hasEnoughEnergy = batteryCharge >= planEnergyConsumption;
-                    log ("Current charge = " + batteryCharge + ", needed charge = " + planEnergyConsumption);
-                    if (hasEnoughEnergy) {
-                        // Keep track of the latest instruction that we have analyzed the accuracy property,
-                        // and it passed
-                        m_prevAnalyzedAndPassedInstruction = currentInstruction;
-                    }
+					    // The remaining instructions, excluding the current instruction
+					    List<IInstruction> remainingInstructions = (List<IInstruction>) m_igProgress.getRemainingInstructions();
+					    Double batteryCharge = m_missionState.getBatteryCharge ();
+					    if (batteryCharge == null) return; // Don't have charge information yet
+					    double planEnergyConsumption = hasEnoughEnergy (currentInstruction, remainingInstructions);
+					    boolean hasEnoughEnergy = batteryCharge >= planEnergyConsumption;
+					    log ("Current charge = " + batteryCharge + ", needed charge = " + planEnergyConsumption);
+					    if (hasEnoughEnergy) {
+					        // Keep track of the latest instruction that we have analyzed the accuracy property,
+					        // and it passed
+					        m_prevAnalyzedAndPassedInstruction = currentInstruction;
+					    }
 
-                    if (hasEnoughEnergy && !m_missionState.isRobotAccurate()) {
-                        // Previous plan was not accurate; new plan is expected to be accurate
-                        // Update MissionState model to indicate that the robot can now get close enough to the goal
-                        MissionStateModelInstance missionStateModel = (MissionStateModelInstance) m_modelsManagerPort
-                                .<MissionState> getModelInstance(m_msRef);
-                        SetRobotAccurateCmd robotAccurateCmd = missionStateModel.getCommandFactory().setRobotAccurateCmd(true);
-                        m_modelUSPort.updateModel (robotAccurateCmd);
-                    } else if (!hasEnoughEnergy) {
-                        log ("Do not have enough battery. Current charge = " + batteryCharge + ", needed charge = "
-                                + planEnergyConsumption);
-                        planEnergyConsumption = hasEnoughEnergy (currentInstruction, remainingInstructions);
-                        // Update MissionState model to indicate that the robot cannot get close enough to the goal
-                        MissionStateModelInstance missionStateModel = (MissionStateModelInstance) m_modelsManagerPort
-                                .<MissionState> getModelInstance(m_msRef);
+					    if (hasEnoughEnergy && !m_missionState.isRobotAccurate()) {
+					        // Previous plan was not accurate; new plan is expected to be accurate
+					        // Update MissionState model to indicate that the robot can now get close enough to the goal
+					        MissionStateModelInstance missionStateModel = (MissionStateModelInstance) m_modelsManagerPort
+					                .<MissionState> getModelInstance(m_msRef);
+					        SetRobotAccurateCmd robotAccurateCmd = missionStateModel.getCommandFactory().setRobotAccurateCmd(true);
+					        m_modelUSPort.updateModel (robotAccurateCmd);
+					    } else if (!hasEnoughEnergy) {
+					        log ("Do not have enough battery. Current charge = " + batteryCharge + ", needed charge = "
+					                + planEnergyConsumption);
+					        planEnergyConsumption = hasEnoughEnergy (currentInstruction, remainingInstructions);
+					        // Update MissionState model to indicate that the robot cannot get close enough to the goal
+					        MissionStateModelInstance missionStateModel = (MissionStateModelInstance) m_modelsManagerPort
+					                .<MissionState> getModelInstance(m_msRef);
 
-                        LocationRecording pose = m_missionState.getCurrentPose ();
+					        LocationRecording pose = m_missionState.getCurrentPose ();
 
-                        // Get source and target positions of the failing instruction
-                        IInstruction currentInst = m_igProgress.getCurrentInstruction ();
+					        // Get source and target positions of the failing instruction
+					        IInstruction currentInst = m_igProgress.getCurrentInstruction ();
 
-                        // The current instruction is of type MoveAbsH
-                        insertNode (pose, currentInst, missionStateModel);
+					        // The current instruction is of type MoveAbsH
+					        insertNode (pose, currentInst, missionStateModel);
 
-                        SetRobotAccurateCmd robotAccurateCmd = missionStateModel.getCommandFactory().setRobotAccurateCmd(false);
-                        m_modelUSPort.updateModel (robotAccurateCmd);
+					        SetRobotAccurateCmd robotAccurateCmd = missionStateModel.getCommandFactory().setRobotAccurateCmd(false);
+					        m_modelUSPort.updateModel (robotAccurateCmd);
 
-                        // Wait for the planner to come up with an adaptation plan
-                        m_waitForPlanner = true;
-                    }
+					        // Wait for the planner to come up with an adaptation plan
+					        m_waitForPlanner = true;
+					    }
 //                    }
-                }
-                else if (m_missionState != null && !m_missionState.isRobotAccurate ()) {
-                    MissionStateModelInstance missionStateModel = (MissionStateModelInstance )m_modelsManagerPort
-                            .<MissionState> getModelInstance (m_msRef);
-                    SetRobotAccurateCmd robotAccurateCmd = missionStateModel.getCommandFactory ()
-                            .setRobotAccurateCmd (true);
-                    m_modelUSPort.updateModel (robotAccurateCmd);
-                }
+					}
+					else if (m_missionState != null && !m_missionState.isRobotAccurate ()) {
+					    MissionStateModelInstance missionStateModel = (MissionStateModelInstance )m_modelsManagerPort
+					            .<MissionState> getModelInstance (m_msRef);
+					    SetRobotAccurateCmd robotAccurateCmd = missionStateModel.getCommandFactory ()
+					            .setRobotAccurateCmd (true);
+					    m_modelUSPort.updateModel (robotAccurateCmd);
+					}
+				} catch (RainbowException e) {
+					e.printStackTrace();
+				}
             }
         }
     }

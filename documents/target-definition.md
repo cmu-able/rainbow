@@ -20,6 +20,25 @@ To place Rainbow on top of a system requires customizing it with information abo
 
 This document describes how to define and install these elements.
 
+## Rainbow Configuration Language
+
+Past configuration methods for Rainbow have been error prone, with a lack of checking 
+across the required multiple files. For example, there was no checking whether probes 
+referred to by gauges actually existed, or if properties referred to by any of the files 
+was defined. We have introduced two new features that should alleviate this:
+
+1. There is a new configuration checking tool that is now provided with Rainbow. This 
+is invoked when Rainbow is run (using `run-oracle.sh`), but can also be invoked standalone 
+through the shell script `check-config.sh`. This scrip takes the same arguments as `run-oracle.sh`, 
+i.e., you specify an optional properties file with `-p properties-file-in-target` and 
+the target directory (which should be a subdirectory of `targets` in the deployment).
+
+2. Using Eclipse's XText framework, we have defined a Rainbow Configuration Language 
+DSL that can be used for specifying configuration files. This can be used as an Eclipse 
+plugin, and provides consistency checking of target deployments in the Eclipse IDE. 
+This configuration language operates on files with the extension `.rbw`. The documentation 
+for this plugin can be found at [Rainbow Configuration with IDE](RCL.md).
+
 ## Customizing Rainbow to a New System
 
 ### Defining a target

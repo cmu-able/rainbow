@@ -20,7 +20,7 @@
 	<packaging>jar</packaging>
 	<!-- Version. This should *always* be a snapshot version by convention. 
 		Name should be <version-number>-SNAPSHOT. -->
-	<version>3.0</version>
+	<version>3.1.0-SNAPSHOT</version>
 	<!-- User readable name of the pom. -->
 	<name>Rainbow Core</name>
 	<!-- URL for the project site. -->
@@ -32,6 +32,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
+		<rainbowVersion>3.1.0-SNAPSHOT</rainbowVersion>
 	</properties>
 
 	<!-- Software licences go here. -->
@@ -409,11 +410,15 @@
 	</profiles>
 	<dependencies>
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.17</version>
-			<type>jar</type>
-		</dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>2.13.0</version>
+	  	</dependency>
+	  	<dependency>
+	    	<groupId>org.apache.logging.log4j</groupId>
+	    	<artifactId>log4j-core</artifactId>
+	    	<version>2.13.0</version>
+	  	</dependency>
 
 		<dependency>
 			<groupId>org.apache.commons</groupId>

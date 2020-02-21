@@ -1,6 +1,15 @@
 FROM ubuntu:16.04 AS builder
 #maven:3-jdk-8 AS builder
 ARG rainbow_version=SWIM1.0
+# This overcomes the Hash Sum error with the standard ubuntu locations
+RUN rm -f /etc/apt/sources.list
+RUN echo "deb mirror://mirrors.ubuntu.com/mirrors.txt xenial main restricted universe multiverse" >> /etc/apt/sources.list
+RUN echo "deb mirror://mirrors.ubuntu.com/mirrors.txt xenial-updates main restricted universe multiverse" >> /etc/apt/sources.list
+RUN echo "deb-src mirror://mirrors.ubuntu.com/mirrors.txt xenial-updates main restricted universe multiverse" >> /etc/apt/sources.list
+RUN echo "deb mirror://mirrors.ubuntu.com/mirrors.txt xenial-backports main restricted universe multiverse" >> /etc/apt/sources.list
+RUN echo "deb mirror://mirrors.ubuntu.com/mirrors.txt xenial-security main restricted universe multiverse" >> /etc/apt/sources.list
+
+# Start real installation from here
 RUN apt update && apt-get install --no-install-recommends -y software-properties-common zip unzip tar gzip libboost-all-dev libyaml-cpp-dev make automake autoconf g++ ant wget libpcre3-dev socat swig curl bash git-core
 
 # To ensure the right versions of the libraries in the build
@@ -47,14 +56,35 @@ RUN mvn -DskipTests install
 WORKDIR ../rainbow-mem-comms
 RUN mvn -DskipTests install
 
+ADD ide /root/rainbow/ide
+WORKDIR /root/rainbow/ide/org.acme.xtext.parent
+RUN mvn -DskiptTests install
+WORKDIR /root/rainbow/ide/org.sa.rainbow.stitch.parent
+RUN mvn -DskipTests install
+WORKDIR /root/rainbow/ide/org.sa.rainbow.configuration.parent
+# This first is needed because of a bug in Tycho build classptahs
+# https://stackoverflow.com/questions/5017687/use-maven-tycho-to-build-with-a-manifest-entry-bundle-classpath-that-gets-downlo
+RUN mkdir org.sa.rainbow.configuration/lib && cp /root/rainbow/rainbow/rainbow-core/target/rainbow-core*.jar org.sa.rainbow.configuration/lib/rainbow-core.jar
+
+
+RUN mvn -DskipTests install; exit 0
+RUN ls org.sa.rainbow.configuration/lib; exit 1
+
+
 ADD deployments /root/rainbow/deployments
 WORKDIR /root/rainbow/deployments/rainbow-example
-RUN mvn -DskipTests install
+RUN mvn -e -DskipTests install
+RUN ls /root/rainbow/deployments/rainbow-example/src/main/resources/generated/rainbow-example/*
 CMD [/bin/bash]
 
 
 FROM gabrielmoreno/swim:1.0
 ARG BUILD_ENV
+# This overcomes the Hash Sum error with the standard ubuntu locations
+#RUN cat /etc/apt/sources.list
+#RUN sed --in-place=.bak -e "s/debian/ubuntu/" -e "s/http:\/\/security.debian.org xenial\/updates/http:\/\/mirrors.digitalocean.com\/ubuntu xenial-security/" /etc/apt/sources.list
+#RUN cat /etc/apt/sources.list
+# Start real installation from here
 RUN apt update && DEBIAN_FRONTEND=noninteractive apt-get -y install software-properties-common dbus dbus-x11 xorg xserver-xorg-legacy xinit xterm libboost-all-dev libyaml-cpp-dev libpcre3-dev socat
 
 RUN sed -i "s/allowed_users=console/allowed_users=anybody/;$ a needs_root_rights=yes" /etc/X11/Xwrapper.config
@@ -71,7 +101,8 @@ COPY targets/rainbow-example targets/rainbow-example
 COPY license.html .
 COPY --from=builder /root/rainbow/deployments/rainbow-example/target/lib/* lib/
 COPY --from=builder /root/rainbow/deployments/rainbow-example/target/*.jar lib/
-
+COPY --from=builder /root/rainbow/deployments/rainbow-example/src/main/resources/generated/rainbow-example/ targets/rainbow-example/
+RUN ls targets/rainbow-example
 
 RUN echo "export SOCAT_PORT=4242" >> /headless/.bashrc
 RUN echo "export JAVA_FONTS=/usr/local/share/fonts/ms_fonts" >> /headless/.bashrc

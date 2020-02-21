@@ -44,8 +44,8 @@ public class TestGaugeInfrastructure extends DefaultTCase {
         protected void handleConfigParam (TypedAttributeWithValue triple) {
             super.handleConfigParam (triple);
             if (triple.getName ().equals ("REPORTING_PERIOD")) {
-                if (triple.getValue () instanceof Long) {
-                    m_reportingPeriod = (Long )triple.getValue ();
+                if (triple.getValue () instanceof Number) {
+                    m_reportingPeriod =((Number )triple.getValue ()).longValue();
                 }
                 else {
                     m_reportingPeriod = Long.parseLong (triple.getValue ().toString ());

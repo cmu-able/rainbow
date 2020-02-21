@@ -17,8 +17,8 @@ public class DeleteRoleCmd extends RosAcmeModelCommand<IAcmeRole> {
     private String                 m_role;
     private IAcmeRoleDeleteCommand m_deleteCommand;
 
-    public DeleteRoleCmd (AcmeModelInstance model, String connector, String role) {
-        super ("deleteRole", model, connector, role);
+    public DeleteRoleCmd (String commandName, AcmeModelInstance model, String connector, String role) {
+        super (commandName, model, connector, role);
         m_connector = connector;
         m_role = role;
 
