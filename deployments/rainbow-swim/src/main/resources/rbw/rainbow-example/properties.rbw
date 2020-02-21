@@ -35,7 +35,7 @@ def rainbow.master.location.host = "rainbow-example"
 #- Location information of the deployed delegate
 def rainbow.deployment.location = "rainbow-example"
 #- default registry port; change if port-tunneling
-def rainbow.master.location.port = 1100
+def rainbow.master.location.^port = 1100
 #- OS platform, supported modes are:  cygwin | linux
 #  Use "cygwin" for Windows, "linux" for MacOSX
 def rainbow.deployment.environment = "linux"
@@ -51,7 +51,7 @@ def rainbow.^model.number=2
 def model SwimSys= {
 	^type="Acme" 
 	path="model/swim.acme"
-	^factory=org.sa.rainbow.^model.acme.swim.commands.SwimCommandFactory
+	^factory=org.sa.rainbow.^model.^acme.swim.commands.SwimCommandFactory
 	saveOnClose = true
 	saveLocation="model/swim-post.acme"
 }
@@ -61,27 +61,27 @@ def model USwimSys = {
 	name="SwimSys"
 	//^type="Utility"
 	path="stitch/utilities.yml" 
-	^factory=org.sa.rainbow.^model.utility.UtilityCommandFactory    
+	^factory=org.sa.rainbow.^model.^utility.UtilityCommandFactory    
 }
 
 ### Rainbow analyses
 def analysis ArchEvaluator = {
-	class = org.sa.rainbow.evaluator.acme.ArchEvaluator
+	class = org.sa.rainbow.evaluator.^acme.ArchEvaluator
 }
 
 
 def adaptation-manager AdaptationManager = {
 	^model=««SwimSys»»
-	class=org.sa.rainbow.stitch.adaptation.AdaptationManager
+	class=org.sa.rainbow.^stitch.adaptation.AdaptationManager
 }
 
 def executor StitchExecutor = {
 	^model=««SwimSys»»
-	class=org.sa.rainbow.stitch.adaptation.StitchExecutor
+	class=org.sa.rainbow.^stitch.adaptation.StitchExecutor
 }
 
 def effector-manager AcmeEffectorManager = {
-	class = org.sa.rainbow.effectors.acme.AcmeEffectorManager
+	class = org.sa.rainbow.effectors.^acme.AcmeEffectorManager
 }
 
 
@@ -105,10 +105,10 @@ def customize.effectors.path = "system/effectors.yml"
 #- Directory of Stitch adaptation script
 def customize.scripts.path = "stitch"
 #- Utilities description file, Strategy evaluation config, and minimum score threshold
-def customize.utility.path = "stitch/utilities.yml"
-def customize.utility.trackStrategy = "uC"
-def customize.utility.score.minimum.threshold = 0.033
-def customize.utility.scenario = "scenario 1"
+def customize.^utility.path = "stitch/utilities.yml"
+def customize.^utility.trackStrategy = "uC"
+def customize.^utility.score.minimum.threshold = 0.033
+def customize.^utility.scenario = "scenario 1"
 #- Whether to enable prediction, ONLY enable if system has predictor probes! 
 #customize.prediction.enable = false
 
