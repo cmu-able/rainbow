@@ -481,8 +481,7 @@ probe DimmerProbe = {
 | `java = {...}`      | Indicates the probe is implemented by Java class |
 | &nbsp; &nbsp;`class`     | The class of the probe, implementing `org.sa.rainbow.translator.IProbe` or one of its subclasses. |
 | &nbsp; &nbsp;`period`    | The reporting period of the probe (in ms)|
-| &nbsp;&nbsp;`args` | The arguments that will be passed to the constructor of the probe, 
-in an array |
+| &nbsp;&nbsp;`args` | The arguments that will be passed to the constructor of the probe, in an array |
 | `script = {...}`             | Indicates the probe is implemented by a script |
 | &nbsp; &nbsp; `path`         | The path of the script, which should exist on `location` |
 | &nbsp; &nbsp; `argument`     | The argument(s) to pass to the script |
@@ -658,8 +657,7 @@ The format of the gauge-type portion of the `gauges.rbw` spec are:
 | YAML field | Description |
 | :---------- | :---------- |
 | `setup`                   | The parameters used when the gauge is constructed. It is possible to define your own setup parameters, giving values in the instance, but the required ones are: |
-| &nbsp; &nbsp; `targetIP`               | Where a gauge instance will be run. Here the default is localhost. This 
-should be a String|
+| &nbsp; &nbsp; `targetIP`               | Where a gauge instance will be run. Here the default is localhost. This should be a String|
 | &nbsp; &nbsp; `beaconPeriod:`           | How often the gauge will send a report of its liveness to rainbow, in ms |
 | &nbsp; &nbsp; `javaClass:`              | The javaClass that implements the gauge. | 
 | `config`                  |  The parameters used to configure the gauge, with values given in the instance. Gauges are configured in Rainbow when all the expected target locations have been created. It is possible to define your own parameters, but Rainbow understands the ones below: |
