@@ -4,7 +4,6 @@
 package org.acme.scoping
 
 import java.util.ArrayList
-import javax.xml.ws.EndpointReference
 import org.acme.acme.AcmeAttachmentDeclaration
 import org.acme.acme.AcmeComponentDeclaration
 import org.acme.acme.AcmeComponentTypeDeclaration
@@ -30,7 +29,6 @@ import org.eclipse.xtext.naming.QualifiedName
 import org.eclipse.xtext.resource.EObjectDescription
 import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.impl.SimpleScope
-import org.acme.acme.AcmeSystemBody
 
 /**
  * This class contains custom scoping description.
