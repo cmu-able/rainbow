@@ -2,7 +2,7 @@
 <feature id="org.acme.xtext.feature"
 	label="Acme Feature "
 	version="1.0.0.qualifier">
-	 <desription>
+	 <description>
 		 The minimal Xtext support for Acme
 	</description>
 	 <license url="">
