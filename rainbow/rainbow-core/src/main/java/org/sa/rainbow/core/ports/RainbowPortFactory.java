@@ -31,10 +31,12 @@ import java.util.Properties;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.RainbowDelegate;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.adaptation.IEvaluable;
 import org.sa.rainbow.core.error.RainbowConnectionException;
@@ -51,11 +53,15 @@ import org.sa.rainbow.translator.effectors.IEffectorExecutionPort;
 import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
 import org.sa.rainbow.translator.probes.IProbe;
 
+import com.google.inject.Inject;
+
 public class RainbowPortFactory {
 
     static final Logger LOGGER = Logger.getLogger (RainbowPortFactory.class);
     static final String                  DEFAULT_FACTORY = "org.sa.rainbow.ports.local.LocalRainbowDelegatePortFactory";
 
+    static IRainbowEnvironment m_rainbowEnvironment  = new RainbowEnvironmentDelegate();
+    
     static IRainbowConnectionPortFactory m_instance;
 
     private RainbowPortFactory () {
@@ -69,7 +75,7 @@ public class RainbowPortFactory {
      */
     protected static IRainbowConnectionPortFactory getFactory () {
         if (m_instance == null) {
-            String factory = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_PORT_FACTORY);
+            String factory = m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_PORT_FACTORY);
             if (factory == null) {
                 LOGGER.warn (MessageFormat.format ("No property defined for ''{0}''. Using default ''{1}''.",
                         RainbowConstants.PROPKEY_PORT_FACTORY, DEFAULT_FACTORY));
@@ -238,15 +244,15 @@ public class RainbowPortFactory {
 
     public static IMasterCommandPort createMasterCommandPort () throws RainbowConnectionException {
 
-        if (Rainbow.instance ().isMaster ())
-            return getFactory ().createMasterCommandProviderPort (Rainbow.instance ().getRainbowMaster ());
+        if (m_rainbowEnvironment.isMaster ())
+            return getFactory ().createMasterCommandProviderPort (m_rainbowEnvironment.getRainbowMaster ());
 
         return getFactory ().createMasterCommandRequirerPort ();
     }
 
     public static IModelsManagerPort createModelsManagerRequirerPort () throws RainbowConnectionException {
-        if (Rainbow.instance ().isMaster ()) {
-            final ModelsManager mm = Rainbow.instance ().getRainbowMaster ().modelsManager ();
+        if (m_rainbowEnvironment.isMaster ()) {
+            final ModelsManager mm = m_rainbowEnvironment.getRainbowMaster ().modelsManager ();
             return new IModelsManagerPort () {
 
                 @Override

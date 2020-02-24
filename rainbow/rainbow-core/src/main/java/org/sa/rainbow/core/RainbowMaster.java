@@ -55,6 +55,7 @@ import org.sa.rainbow.core.gauges.GaugeDescription;
 import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
 import org.sa.rainbow.core.gauges.GaugeManager;
 import org.sa.rainbow.core.globals.ExitState;
+import org.sa.rainbow.core.injection.RainbowRuntimeModule;
 import org.sa.rainbow.core.models.EffectorDescription;
 import org.sa.rainbow.core.models.EffectorDescription.EffectorAttributes;
 import org.sa.rainbow.core.models.ModelReference;
@@ -78,9 +79,10 @@ import org.sa.rainbow.util.RainbowConfigurationChecker.ProblemT;
 import org.sa.rainbow.util.Util;
 import org.sa.rainbow.util.YamlUtil;
 
+import com.google.inject.Guice;
+
 public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCommandPort, IRainbowMaster {
 
-	private IRainbowEnvironment m_rainbowEnvironment = Rainbow.instance();
 
 	static final Logger LOGGER = Logger.getLogger(Rainbow.class.getCanonicalName());
 
@@ -756,10 +758,13 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 					+ "Option defaults are defined in <rainbow.target>/rainbow.properties");
 			System.exit(RainbowConstants.EXIT_VALUE_ABORT);
 		}
+		
+		RainbowRuntimeModule module = new RainbowRuntimeModule();
+		Guice.createInjector(module);
 
 		RainbowMaster master = new RainbowMaster();
 		if (showGui) {
-			String guiProp = Rainbow.instance().getProperty(IRainbowEnvironment.PROPKEY_RAINBOW_GUI, null);
+			String guiProp = m_rainbowEnvironment.getProperty(IRainbowEnvironment.PROPKEY_RAINBOW_GUI, null);
 			IRainbowGUI gui = null;
 			if (guiProp != null) {
 				Class<IRainbowGUI> fc = null;
@@ -787,7 +792,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 			gui.setMaster(master);
 			gui.display();
 		} else {
-			Rainbow.instance().setProperty(Rainbow.PROPKEY_SHOW_GUI, false);
+			m_rainbowEnvironment.setProperty(Rainbow.PROPKEY_SHOW_GUI, false);
 		}
 		master.m_autoStart = autoStart;
 		

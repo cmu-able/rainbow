@@ -2,9 +2,11 @@ package org.sa.rainbow.core.ports.guava;
 
 import java.util.List;
 
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.IRainbowMaster;
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
@@ -17,6 +19,9 @@ public class GuavaGaugeModelUSBusPort implements IModelUSBusPort, ESEBConstants 
 
 	private GuavaEventConnector m_eventBus;
 	private Identifiable m_client;
+	
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+
 
 	public GuavaGaugeModelUSBusPort(Identifiable client) {
 		m_client = client;
@@ -54,8 +59,8 @@ public class GuavaGaugeModelUSBusPort implements IModelUSBusPort, ESEBConstants 
 
 	@Override
 	public <T> IModelInstance<T> getModelInstance(ModelReference modelRef) {
-		if (Rainbow.instance().isMaster()) {
-			IRainbowMaster master = Rainbow.instance().getRainbowMaster();
+		if (m_rainbowEnvironment.isMaster()) {
+			IRainbowMaster master = m_rainbowEnvironment.getRainbowMaster();
 			return master.modelsManager().getModelInstance(modelRef);
 		}
 		throw new UnsupportedOperationException(

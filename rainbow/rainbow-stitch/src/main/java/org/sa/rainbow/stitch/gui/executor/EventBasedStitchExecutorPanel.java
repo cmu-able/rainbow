@@ -19,7 +19,9 @@ import javax.swing.table.TableColumn;
 
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.event.IRainbowMessage;
@@ -42,6 +44,8 @@ import org.sa.rainbow.stitch.history.ExecutionHistoryModelInstance;
 import org.sa.rainbow.stitch.util.ExecutionHistoryData.ExecutionStateT;
 
 public class EventBasedStitchExecutorPanel extends JPanel implements IRainbowModelChangeCallback {
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+
 	public static class StitchTreeTableModel extends AbstractTreeTableModel {
 
 		private Strategy m_strategy;
@@ -238,7 +242,7 @@ public class EventBasedStitchExecutorPanel extends JPanel implements IRainbowMod
 //		m_executionScheduler = java.util.concurrent.Executors.newScheduledThreadPool(1);
 //		m_executionScheduler.scheduleAtFixedRate(m_checkForNewExecutionHistoryModel, 10, 5*60, TimeUnit.SECONDS);
 //		
-//		m_mm = Rainbow.instance().getRainbowMaster().modelsManager();
+//		m_mm = m_rainbowEnvironment.getRainbowMaster().modelsManager();
 		try {
 			m_modelChangePort = RainbowPortFactory.createModelChangeBusSubscriptionPort();
 			m_modelChangePort.subscribe(m_strategyExecutionSubscriber, this);
@@ -307,7 +311,7 @@ public class EventBasedStitchExecutorPanel extends JPanel implements IRainbowMod
 	}
 
 	private void getStrategyDetails(String strategyName) {
-		Collection<IAdaptationManager<?>> ams = Rainbow.instance().getRainbowMaster().adaptationManagers().values();
+		Collection<IAdaptationManager<?>> ams = m_rainbowEnvironment.getRainbowMaster().adaptationManagers().values();
 		Strategy s = null;
 		for (Iterator<IAdaptationManager<?>> iterator = ams.iterator(); iterator.hasNext() && s == null;) {
 			IAdaptationManager<?> m = iterator.next();

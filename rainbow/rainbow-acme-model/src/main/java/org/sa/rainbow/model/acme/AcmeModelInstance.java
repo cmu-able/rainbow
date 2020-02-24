@@ -75,8 +75,10 @@ import org.acmestudio.acme.type.verification.RuleTypeChecker;
 import org.acmestudio.standalone.resource.StandaloneResourceProvider;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.error.RainbowAbortException;
 import org.sa.rainbow.core.error.RainbowCopyException;
 import org.sa.rainbow.core.error.RainbowException;
@@ -108,6 +110,9 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
 	public static final String PROPKEY_ARCH_ENABLED = "isArchEnabled";
 	private static final String PROPKEY_HTTPPORT = "httpPort";
 
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+
+	
 	private IAcmeSystem m_system;
 	/** Map of qualified name to average values */
 	private final Map<String, Double> m_propExpAvg = new HashMap<>();
@@ -207,7 +212,7 @@ public abstract class AcmeModelInstance implements IModelInstance<IAcmeSystem> {
 	private void updateExponentialAverage(String id, double val) {
 		double avg = 0.0;
 		// retrieve exponential alpha
-		double alpha = Rainbow.instance().getProperty(RainbowConstants.PROPKEY_MODEL_ALPHA, .3);
+		double alpha = m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_MODEL_ALPHA, .3);
 		if (m_propExpAvg.containsKey(id)) {
 			avg = m_propExpAvg.get(id);
 			avg = (1 - alpha) * avg + alpha * val;

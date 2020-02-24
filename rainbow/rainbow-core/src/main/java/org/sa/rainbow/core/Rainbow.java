@@ -35,11 +35,9 @@ import java.net.UnknownHostException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -49,6 +47,8 @@ import org.sa.rainbow.core.gauges.IGauge;
 import org.sa.rainbow.core.globals.Environment;
 import org.sa.rainbow.core.globals.ExitState;
 import org.sa.rainbow.util.Util;
+
+import com.google.inject.Inject;
 
 /**
  * A singleton class that provides utilities for reading properties, and getting access to important Rainbow Framework
@@ -74,18 +74,18 @@ public class Rainbow implements IRainbowEnvironment {
 
     private boolean m_shouldTerminate = false;
 
-    private static IRainbowEnvironment _instance = null;
+//    private static IRainbowEnvironment _instance = null;
 
-    public static synchronized IRainbowEnvironment instance () {
-        if (_instance == null) {
-            _instance = new Rainbow ();
-        }
-        return _instance;
-    }
-    
-    public static void uninstantiate() {
-    	_instance = null;
-    }
+//    public static synchronized IRainbowEnvironment instance () {
+//        if (_instance == null) {
+//            _instance = new Rainbow ();
+//        }
+//        return _instance;
+//    }
+//    
+//    public static void uninstantiate() {
+//    	_instance = null;
+//    }
 
     /**
      * Returns whether the Rainbow runtime infrastructure should terminate.
@@ -163,7 +163,8 @@ public class Rainbow implements IRainbowEnvironment {
 
     private Properties m_defaultProps;
 
-    private Rainbow () {
+    @Inject
+    public Rainbow () {
         m_props = new Properties ();
         m_id2Gauge = new HashMap<> ();
         m_threadGroup = new ThreadGroup (NAME);

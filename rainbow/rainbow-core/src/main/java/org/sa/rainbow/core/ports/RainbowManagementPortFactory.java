@@ -23,21 +23,31 @@
  */
 package org.sa.rainbow.core.ports;
 
-import org.apache.commons.lang.NotImplementedException;
-import org.apache.log4j.Logger;
-import org.sa.rainbow.core.*;
-import org.sa.rainbow.core.error.RainbowConnectionException;
-import org.sa.rainbow.core.models.IModelsManager;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.Properties;
 
+import org.apache.commons.lang.NotImplementedException;
+import org.apache.log4j.Logger;
+import org.sa.rainbow.core.IRainbowEnvironment;
+import org.sa.rainbow.core.Identifiable;
+import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.RainbowDelegate;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
+import org.sa.rainbow.core.RainbowMaster;
+import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.models.IModelsManager;
+
+import com.google.inject.Inject;
+
 public class RainbowManagementPortFactory {
 
     static final Logger LOGGER = Logger.getLogger (RainbowManagementPortFactory.class);
     static final String                DEFAULT_FACTORY = "org.sa.rainbow.ports.local.LocalRainbowDelegatePortFactory";
+    
+    static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
 
     static IRainbowConnectionPortFactory m_instance;
 
@@ -52,7 +62,7 @@ public class RainbowManagementPortFactory {
      */
     protected static IRainbowConnectionPortFactory getFactory () {
         if (m_instance == null) {
-            String factory = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_PORT_FACTORY);
+            String factory = m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_PORT_FACTORY);
             if (factory == null) {
                 LOGGER.warn (MessageFormat.format ("No property defined for ''{0}''. Using default ''{1}''.", RainbowConstants.PROPKEY_PORT_FACTORY,
                         DEFAULT_FACTORY));

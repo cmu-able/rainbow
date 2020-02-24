@@ -5,8 +5,10 @@ import java.util.concurrent.CountDownLatch;
 
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.adaptation.AdaptationTree;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
@@ -33,6 +35,9 @@ import org.sa.rainbow.stitch.util.ExecutionHistoryData;
 public class TacticExecutor extends AbstractRainbowRunnable implements IAdaptationExecutor<Tactic>{
 
     public static final String NAME = "Rainbow Tactic Executor";
+    
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+
     private ModelReference                        m_modelRef;
     private IRainbowAdaptationDequeuePort<Tactic> m_adaptationDQPort;
     private AcmeModelInstance                     m_model;
@@ -55,7 +60,7 @@ public class TacticExecutor extends AbstractRainbowRunnable implements IAdaptati
         super.initialize (port);
         m_modelDSPort = RainbowPortFactory.createModelDSPublishPort (this);
         m_modelUSBusPort = RainbowPortFactory.createModelsManagerClientUSPort (this);
-        ModelsManager mm = Rainbow.instance ().getRainbowMaster ().modelsManager ();
+        ModelsManager mm = m_rainbowEnvironment.getRainbowMaster ().modelsManager ();
         try {
             if (!mm.getRegisteredModelTypes ().contains (ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE)) {
                 mm.registerModelType (ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE);
@@ -96,8 +101,8 @@ public class TacticExecutor extends AbstractRainbowRunnable implements IAdaptati
 
         } else if (m_done != null) { // We have a tactic that is executing
             if (m_done.getCount () == 0) {
-                if (!Rainbow.instance ().shouldTerminate ()) {
-                    final IAdaptationManager<Tactic> adaptationManager = ((RainbowMaster )Rainbow.instance ().getRainbowMaster ())
+                if (!m_rainbowEnvironment.shouldTerminate ()) {
+                    final IAdaptationManager<Tactic> adaptationManager = ((RainbowMaster )m_rainbowEnvironment.getRainbowMaster ())
                             .adaptationManagerForModel (this.m_modelRef.toString ());
                     if (adaptationManager != null) {
                         adaptationManager.markStrategyExecuted (m_adaptationTreeExecuting);
@@ -117,7 +122,7 @@ public class TacticExecutor extends AbstractRainbowRunnable implements IAdaptati
     public void setModelToManage (ModelReference model) {
         m_modelRef = model;
 
-        IModelInstance<IAcmeSystem> mi = Rainbow.instance ().getRainbowMaster ().modelsManager ().getModelInstance
+        IModelInstance<IAcmeSystem> mi = m_rainbowEnvironment.getRainbowMaster ().modelsManager ().getModelInstance
                 (model);
         m_adaptationDQPort = RainbowPortFactory.createAdaptationDequeuePort (model);
         if (mi == null ) {

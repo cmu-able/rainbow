@@ -27,8 +27,10 @@
 package org.sa.rainbow.stitch.core;
 
 import org.acmestudio.acme.element.IAcmeElement;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.stitch.Ohana;
@@ -60,6 +62,9 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
 	}
 
 	private static final String ATTRIBUTE_ARG_PREF = "_arg_";
+	
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+
 
 	public ParseState state = ParseState.UNKNOWN;
 
@@ -482,7 +487,7 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
 	public long estimateAvgTimeCost() {
 		long t = 0L;
 		// first check if we have history data on tactic execution
-		IModelInstance<Map<String, ExecutionHistoryData>> historyModel = Rainbow.instance().getRainbowMaster()
+		IModelInstance<Map<String, ExecutionHistoryData>> historyModel = m_rainbowEnvironment.getRainbowMaster()
 				.modelsManager().getModelInstance(new ModelReference("tacticExecutionHistoryModel",
 						ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE));
 		ExecutionHistoryData ehd = null;

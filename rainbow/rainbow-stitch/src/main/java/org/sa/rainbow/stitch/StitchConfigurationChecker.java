@@ -11,9 +11,11 @@ import java.util.LinkedList;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.sa.rainbow.checkers.acme.RainbowAcmeModelConfigurationChecker;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.IRainbowMaster;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.stitch.error.DummyStitchProblemHandler;
 import org.sa.rainbow.stitch.error.IStitchProblem;
 import org.sa.rainbow.stitch.visitor.IStitchBehavior;
@@ -30,6 +32,9 @@ public class StitchConfigurationChecker implements IRainbowConfigurationChecker 
 
 	private LinkedList<Problem> m_problems;
 	private IRainbowMaster m_master;
+	
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+
 
 	public StitchConfigurationChecker() {
 		m_problems = new LinkedList<Problem>();
@@ -42,8 +47,8 @@ public class StitchConfigurationChecker implements IRainbowConfigurationChecker 
 		m_problems.add(p);
 		int num = m_problems.size();
 		// Check file existence
-		File stitchPath = Util.getRelativeToPath(Rainbow.instance().getTargetPath(),
-				Rainbow.instance().getProperty(RainbowConstants.PROPKEY_SCRIPT_PATH));
+		File stitchPath = Util.getRelativeToPath(m_rainbowEnvironment.getTargetPath(),
+				m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_SCRIPT_PATH));
 		if (stitchPath == null) {
 			m_problems.add(new Problem(ProblemT.WARNING,
 					"There is no stitch path and yet the configuaration of stitch strategies is being checked."));

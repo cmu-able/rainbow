@@ -29,16 +29,20 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.sa.rainbow.core.IRainbowEnvironment;
-import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.ports.AbstractMasterManagementPort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.IESEBListener;
 
+import com.google.inject.Inject;
+
 public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort implements ESEBManagementPortConstants {
     private static final Logger LOGGER = Logger.getLogger (ESEBMasterSideManagementPort.class);
+    
+    static IRainbowEnvironment m_env = new RainbowEnvironmentDelegate();
 
 
     public ESEBMasterSideManagementPort (RainbowMaster master, String delegateID, Properties connectionProperties)
@@ -46,9 +50,9 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
         // Runs on delegate
         super (master, delegateID, connectionProperties.getProperty (
                 ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_HOST,
-                Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION)), Short.valueOf (connectionProperties
+                m_env.getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION)), Short.valueOf (connectionProperties
                         .getProperty (ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_PORT,
-                                Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION_PORT, "1234"))), ChannelT.HEALTH);
+                        		m_env.getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION_PORT, "1234"))), ChannelT.HEALTH);
         getConnectionRole().addListener (new IESEBListener () {
 
             @Override
@@ -102,7 +106,7 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
         try {
             BooleanReply reply = new BooleanReply ();
             getConnectionRole ().blockingSendAndReceive (msg, reply,
-                    Rainbow.instance ().getProperty (IRainbowEnvironment.PROPKEY_PORT_TIMEOUT, 10000));
+            		m_rainbowEnvironment.getProperty (IRainbowEnvironment.PROPKEY_PORT_TIMEOUT, 10000));
             return reply.m_reply;
         }
         catch (RainbowConnectionException e) {
@@ -120,7 +124,7 @@ public class ESEBMasterSideManagementPort extends AbstractMasterManagementPort i
         try {
             BooleanReply reply = new BooleanReply ();
             getConnectionRole ().blockingSendAndReceive (msg, reply,
-                    Rainbow.instance ().getProperty (IRainbowEnvironment.PROPKEY_PORT_TIMEOUT, 10000));
+            		m_rainbowEnvironment.getProperty (IRainbowEnvironment.PROPKEY_PORT_TIMEOUT, 10000));
             return reply.m_reply;
         }
         catch (RainbowConnectionException e) {

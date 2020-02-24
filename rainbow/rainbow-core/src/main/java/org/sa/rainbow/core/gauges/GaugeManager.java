@@ -23,18 +23,30 @@
  */
 package org.sa.rainbow.core.gauges;
 
+import java.text.MessageFormat;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import org.sa.rainbow.core.AbstractRainbowRunnable;
-import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.error.RainbowConnectionException;
-import org.sa.rainbow.core.ports.*;
+import org.sa.rainbow.core.ports.IGaugeConfigurationPort;
+import org.sa.rainbow.core.ports.IGaugeLifecycleBusPort;
+import org.sa.rainbow.core.ports.IGaugeQueryPort;
+import org.sa.rainbow.core.ports.IRainbowReportingPort;
+import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
-
-import java.text.MessageFormat;
-import java.util.*;
-import java.util.Map.Entry;
 
 /**
  * The "global" gauge manager that maintains information about the global state
@@ -48,6 +60,8 @@ public class GaugeManager extends AbstractRainbowRunnable implements IGaugeLifec
 	enum GMState {
 		CREATED, INITIALIZED, CONFIGURED, OPERATING
 	}
+	
+	private IRainbowEnvironment m_rainbowEnvironment  = new RainbowEnvironmentDelegate();
 
 	private static final String ID = "Gauge Manager";
 
@@ -78,7 +92,7 @@ public class GaugeManager extends AbstractRainbowRunnable implements IGaugeLifec
 		super.initialize(port);
 		initializeConnections();
 		// Read all the gauge information, including the deployment stuff
-		m_waitForGauges = Rainbow.instance().getProperty(RainbowConstants.PROPKEY_WAIT_FOR_GAUGES, false);
+		m_waitForGauges = m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_WAIT_FOR_GAUGES, false);
 		m_state = GMState.INITIALIZED;
 	}
 

@@ -28,8 +28,10 @@ package org.sa.rainbow.stitch.core;
 
 import org.acmestudio.acme.element.IAcmeElement;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.stitch.parser.StitchParser;
 import org.sa.rainbow.stitch.util.Tool;
 import org.sa.rainbow.stitch.visitor.IStitchBehavior;
@@ -50,6 +52,9 @@ public class Statement extends ScopedEntity implements IEvaluableScope {
 	}
 
 	public Kind type = Kind.UNKNOWN;
+	
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+
 	/**
 	 * This flag, if set to true, tells the stmt rule to suppress this AND its next
 	 * statement list block from starting a new scope, but will be reset within that
@@ -294,7 +299,7 @@ public class Statement extends ScopedEntity implements IEvaluableScope {
 		// track time elapsed and store exponential avg
 		long estTime = System.currentTimeMillis() - startTime;
 		try {
-			double alpha = Double.parseDouble(Rainbow.instance().getProperty(RainbowConstants.PROPKEY_MODEL_ALPHA));
+			double alpha = Double.parseDouble(m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_MODEL_ALPHA));
 			m_avgExecutionTime = (long) ((1 - alpha) * m_avgExecutionTime + alpha * estTime);
 		} catch (Throwable t) {
 		}

@@ -29,8 +29,10 @@ import java.util.concurrent.CountDownLatch;
 
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.adaptation.AdaptationTree;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
@@ -65,6 +67,9 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
 
     public static final String                      NAME = "Rainbow Strategy Executor";
 
+    
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+
     /* A queue of strategies to execute, this could be enriched later with
      * priorities and such... */
 
@@ -94,7 +99,7 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
     @Override
     public void setModelToManage (ModelReference model) {
         m_modelRef = model;
-        IModelInstance<IAcmeSystem> mi = Rainbow.instance ().getRainbowMaster ().modelsManager ()
+        IModelInstance<IAcmeSystem> mi = m_rainbowEnvironment.getRainbowMaster ().modelsManager ()
                 .getModelInstance (model);
         m_adapationDQPort = RainbowPortFactory.createAdaptationDequeuePort (model);
         m_model = (AcmeModelInstance )mi;
@@ -103,7 +108,7 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
             + ":" + model.getModelType ());
         }
         m_executionThreadGroup = new ThreadGroup (m_modelRef.toString () + " ThreadGroup");
-        ModelsManager mm = Rainbow.instance ().getRainbowMaster ().modelsManager ();
+        ModelsManager mm = m_rainbowEnvironment.getRainbowMaster ().modelsManager ();
         try {
             if (!mm.getRegisteredModelTypes ().contains (ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE)) {
                 mm.registerModelType (ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE);
@@ -184,11 +189,11 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
                 e.printStackTrace ();
             }
 
-            if (!Rainbow.instance ().shouldTerminate ()) {
+            if (!m_rainbowEnvironment.shouldTerminate ()) {
 				m_modelUSBusPort.updateModel(
 						m_historyModel.getCommandFactory().strategyExecutionStateCommand(getManagedModel(), at.getId(),
 								ExecutionHistoryModelInstance.ADAPTATION_TREE, ExecutionStateT.ADAPTATION_DONE, null));
-                final IAdaptationManager<Strategy> adaptationManager = ((RainbowMaster )Rainbow.instance ()
+                final IAdaptationManager<Strategy> adaptationManager = ((RainbowMaster )m_rainbowEnvironment
                         .getRainbowMaster ()).adaptationManagerForModel (this.m_modelRef.toString ());
                 if (adaptationManager != null) {
                     adaptationManager
@@ -285,7 +290,7 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
 //            target = component.toString();
 //        }
 //        // Get a reference to the named effector interface & execute
-//        Outcome r = Rainbow.instance ().getRainbowMaster ().effectorManager ()
+//        Outcome r = m_rainbowEnvironment.getRainbowMaster ().effectorManager ()
 //                .executeEffector (effName, target, optArgs);
 //
 //        m_reportingPort.trace (getComponentType (), effName + " ('start' Eff) returned " + r);
@@ -304,7 +309,7 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
 //            target = component.toString();
 //        }
 //        // Get a reference to the named effector interface & execute
-//        Outcome r = Rainbow.instance ().getRainbowMaster ().effectorManager ()
+//        Outcome r = m_rainbowEnvironment.getRainbowMaster ().effectorManager ()
 //                .executeEffector (effName, target, optArgs);
 //
 //        m_reportingPort.trace (getComponentType (), effName + " ('stop' Eff) returned " + r);
@@ -328,7 +333,7 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
 //            pairList.add(pair.getKey() + "=" + pair.getValue());
 //        }
 //        String[] args = pairList.toArray(new String[0]);
-//        Outcome r = Rainbow.instance ().getRainbowMaster ().effectorManager ().executeEffector (effName, target, args);
+//        Outcome r = m_rainbowEnvironment.getRainbowMaster ().effectorManager ().executeEffector (effName, target, args);
 //        // Get a reference to the named effector interface & execute
 //        m_reportingPort.trace (getComponentType (), effName + " ('changeState' Eff) returned " + r);
 //        return r;
@@ -355,7 +360,7 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
 //        Collections.addAll(argList, optArgs);
 //        String[] args = argList.toArray(new String[0]);
 //        // Get a reference to the named effector interface & execute
-//        Outcome r = Rainbow.instance ().getRainbowMaster ().effectorManager ()
+//        Outcome r = m_rainbowEnvironment.getRainbowMaster ().effectorManager ()
 //                .executeEffector (effName, target, optArgs);
 //
 //        m_reportingPort.trace (getComponentType (), effName + " ('connect' Eff) returned " + r);
@@ -391,7 +396,7 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
 //        Collections.addAll(argList, optArgs);
 //        String[] args = argList.toArray(new String[0]);
 //        // Get a reference to the named effector interface & execute
-//        Outcome r = Rainbow.instance ().getRainbowMaster ().effectorManager ().executeEffector (effName, target, args);
+//        Outcome r = m_rainbowEnvironment.getRainbowMaster ().effectorManager ().executeEffector (effName, target, args);
 //
 //        m_reportingPort.trace (getComponentType (), effName + " ('disconnect' Eff) returned " + r);
 //        return r;
@@ -409,7 +414,7 @@ public class StitchExecutor extends AbstractRainbowRunnable implements IAdaptati
 ////            target = element.toString();
 ////        }
 ////        // Get a reference to the named effector interface & execute
-////        Outcome r = Rainbow.instance ().getRainbowMaster ().effectorManager ().executeEffector (effName, target, args);
+////        Outcome r = m_rainbowEnvironment.getRainbowMaster ().effectorManager ().executeEffector (effName, target, args);
 ////
 ////        m_reportingPort.trace (getComponentType (), effName + " returned " + r);
 ////        return r;

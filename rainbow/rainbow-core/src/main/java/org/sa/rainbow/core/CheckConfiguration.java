@@ -28,7 +28,6 @@ import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +40,7 @@ import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.analysis.IRainbowAnalysis;
 import org.sa.rainbow.core.gauges.GaugeDescription;
 import org.sa.rainbow.core.gauges.GaugeManager;
+import org.sa.rainbow.core.injection.RainbowRuntimeModule;
 import org.sa.rainbow.core.models.EffectorDescription;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.ProbeDescription;
@@ -51,6 +51,9 @@ import org.sa.rainbow.util.IRainbowConfigurationChecker;
 import org.sa.rainbow.util.RainbowConfigurationChecker.Problem;
 import org.sa.rainbow.util.RainbowConfigurationChecker.ProblemT;
 import org.sa.rainbow.util.YamlUtil;
+
+import com.google.inject.Guice;
+import com.google.inject.Inject;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
@@ -72,6 +75,8 @@ public class CheckConfiguration {
 			checker = c.getClass();
 		}
 	}
+	
+	static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
 	
 	public static List<IRainbowConfigurationChecker> partialSort(List<IRainbowConfigurationChecker> checkers) {
 		List<IRainbowConfigurationChecker> L = new LinkedList<>();
@@ -119,7 +124,11 @@ public class CheckConfiguration {
 		parser.addArgument("-o", "--output").dest("output").type(String.class).help("The output file to write problems");
 		Namespace res = parser.parseArgs(args);
 		List<Problem> problems = checkConfiguration(System.out);
-		Rainbow.instance().signalTerminate();
+		
+		RainbowRuntimeModule module = new RainbowRuntimeModule();
+		Guice.createInjector(module);
+		
+		m_rainbowEnvironment.signalTerminate();
 		if (res.getString("output") != null) {
 			try (ObjectOutputStream o = new ObjectOutputStream(new FileOutputStream (new File(res.getString("output"))))) {
 				o.writeObject(problems);
@@ -131,9 +140,8 @@ public class CheckConfiguration {
 
 	public static List<Problem> checkConfiguration(PrintStream out) throws Throwable {
 		out.println("Reading configuration files");
-		Rainbow.instance();
 		out.println(
-				"Loading YAMLs for target: " + Rainbow.instance().getProperty(RainbowConstants.PROPKEY_TARGET_NAME));
+				"Loading YAMLs for target: " + m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_TARGET_NAME));
 		out.print("Loading probes...");
 		out.flush();
 		final ProbeDescription loadProbeDesc = YamlUtil.loadProbeDesc();
@@ -216,7 +224,7 @@ public class CheckConfiguration {
 		};
 
 		// Make Rainbow.instance().rainbowMaster() return this master
-		Rainbow.instance().setMaster(master);
+		m_rainbowEnvironment.setMaster(master);
 		out.println("Locating configuration checkers in system...");
 		Reflections reflections = new Reflections("org.sa", CheckConfiguration.class.getClassLoader());
 		List<IRainbowConfigurationChecker> checkers = new LinkedList<>();

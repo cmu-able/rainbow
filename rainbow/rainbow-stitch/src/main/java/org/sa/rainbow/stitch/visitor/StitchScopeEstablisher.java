@@ -23,7 +23,9 @@ import org.reflections.scanners.SubTypesScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.model.acme.AcmeModelCommandFactory;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
@@ -53,6 +55,8 @@ import org.sa.rainbow.util.Util;
  * Created by schmerl on 10/3/2016.
  */
 public class StitchScopeEstablisher extends BaseStitchBehavior {
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+
 
     public final class StitchImportedDirectAcmeModelInstance extends AcmeModelInstance {
 		protected StitchImportedDirectAcmeModelInstance(IAcmeSystem system, String source) {
@@ -1126,13 +1130,13 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
 					Tool.error("Could not import Acme from " + imp.path, null, stitchProblemHandler());
 				}
             } else if (imp.type == Import.Kind.MODEL) {
-                if (Rainbow.instance ().getRainbowMaster ().modelsManager () != null) {
+                if (m_rainbowEnvironment.getRainbowMaster ().modelsManager () != null) {
                     ModelReference model = Util.decomposeModelReference (imp.path);
                     if (model.getModelType () == null) {
 
                         model = new ModelReference (imp.path.split ("\\.")[0], "Acme");
                     }
-                    Object o = Rainbow.instance ().getRainbowMaster ().modelsManager ()
+                    Object o = m_rainbowEnvironment.getRainbowMaster ().modelsManager ()
                             .getModelInstance (model);
                     if (o instanceof AcmeModelInstance) {
                         AcmeModelInstance ami = (AcmeModelInstance) o;
@@ -1145,7 +1149,7 @@ public class StitchScopeEstablisher extends BaseStitchBehavior {
                     // TODO: Assumes that we run on same VM as the models manager
 
                     try {
-                        Object o = Rainbow.instance ().getRainbowMaster ().modelsManager ()
+                        Object o = m_rainbowEnvironment.getRainbowMaster ().modelsManager ()
                                 .getModelInstanceByResource (determinePath (imp.path).getCanonicalPath ());
 
                         if (o instanceof IAcmeModel) {

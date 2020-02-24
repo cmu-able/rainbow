@@ -46,6 +46,8 @@ import org.sa.rainbow.translator.probes.LocalProbeManager;
 import org.sa.rainbow.util.Beacon;
 import org.sa.rainbow.util.Util;
 
+import com.google.inject.Inject;
+
 public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowConstants {
 
 
@@ -55,6 +57,7 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
 
     protected static final String NAME = "Rainbow Delegate";
 
+    private IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
 
     private final String m_id;
 
@@ -123,7 +126,7 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
 
     private Properties getConnectionProperties () {
         Properties props = new Properties ();
-        props.setProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION, Rainbow.instance ().getProperty
+        props.setProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION, m_rainbowEnvironment.getProperty
                 (PROPKEY_DEPLOYMENT_LOCATION));
         return props;
     }
@@ -231,7 +234,7 @@ public class RainbowDelegate extends AbstractRainbowRunnable implements RainbowC
         log ("Terminating.");
         m_beacon = null;
         m_masterConnectionPort.disconnectDelegate (getId ());
-        Rainbow.instance ().signalTerminate ();
+        m_rainbowEnvironment.signalTerminate ();
         super.doTerminate ();
     }
 

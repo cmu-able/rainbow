@@ -26,25 +26,38 @@
  */
 package org.sa.rainbow.util;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeSet;
+
 import org.ho.yaml.Yaml;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.gauges.GaugeDescription;
 import org.sa.rainbow.core.gauges.GaugeInstanceDescription;
 import org.sa.rainbow.core.gauges.GaugeTypeDescription;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
-import org.sa.rainbow.core.models.*;
+import org.sa.rainbow.core.models.DescriptionAttributes;
+import org.sa.rainbow.core.models.EffectorDescription;
+import org.sa.rainbow.core.models.ModelReference;
+import org.sa.rainbow.core.models.ProbeDescription;
+import org.sa.rainbow.core.models.UtilityPreferenceDescription;
 import org.sa.rainbow.core.models.UtilityPreferenceDescription.UtilityAttributes;
 import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.translator.effectors.IEffector;
 import org.sa.rainbow.translator.probes.IProbe;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.text.MessageFormat;
-import java.util.*;
-import java.util.Map.Entry;
+import com.google.inject.Inject;
 
 /**
  * This utility class provides methods for parsing specific Yaml files for Rainbow. The class is non-instantiable.
@@ -52,6 +65,8 @@ import java.util.Map.Entry;
  * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
  */
 public abstract class YamlUtil {
+	
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
 
     /**
      * Retrieves the utility definitions, then
@@ -64,7 +79,7 @@ public abstract class YamlUtil {
      */
 //    @SuppressWarnings ("unchecked")
 //    public static UtilityPreferenceDescription loadUtilityPrefs () {
-//        String utilityPath = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_UTILITY_PATH);
+//        String utilityPath = m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_UTILITY_PATH);
 //        return loadUtilityPrefs (utilityPath);
 //    }
     public static UtilityPreferenceDescription loadUtilityPrefs (String utilityPath) {
@@ -74,7 +89,7 @@ public abstract class YamlUtil {
         try {
             File defFile = new File (utilityPath);
             if (!defFile.exists ()) {
-                defFile = Util.getRelativeToPath (Rainbow.instance ().getTargetPath (), utilityPath);
+                defFile = Util.getRelativeToPath (m_rainbowEnvironment.getTargetPath (), utilityPath);
             }
             Object o = Yaml.load (defFile);
             Util.logger ().trace ("Utiltiy Def Yaml file loaded: " + o.toString ());
@@ -148,8 +163,8 @@ public abstract class YamlUtil {
 
 
     public static GaugeDescription loadGaugeSpecs () {
-        File gaugeSpec = Util.getRelativeToPath (Rainbow.instance ().getTargetPath (),
-                Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_GAUGES_PATH));
+        File gaugeSpec = Util.getRelativeToPath (m_rainbowEnvironment.getTargetPath (),
+                m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_GAUGES_PATH));
         return loadGaugeSpecs (gaugeSpec);
     }
 
@@ -313,14 +328,14 @@ public abstract class YamlUtil {
 
         Map effectorMap = null;
         try {
-            String effectorPath = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_EFFECTORS_PATH);
+            String effectorPath = m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_EFFECTORS_PATH);
             if (effectorPath == null) {
                 Util.logger ().error (MessageFormat.format ("No property defined for ''{0}''. No effectors loaded.",
                         RainbowConstants.PROPKEY_EFFECTORS_PATH));
                 ed.effectors = new TreeSet<> ();
                 return ed;
             }
-            File effectorFile = Util.getRelativeToPath (Rainbow.instance ().getTargetPath (), effectorPath);
+            File effectorFile = Util.getRelativeToPath (m_rainbowEnvironment.getTargetPath (), effectorPath);
             if (!effectorFile
                     .exists ()) {
                 Util.logger ().error ("Effectr file does not exist: " + effectorPath);
@@ -333,7 +348,7 @@ public abstract class YamlUtil {
             Map<String, String> varMap = (Map<String, String> )effectorMap.get ("vars");
             if (varMap != null)
                 for (Map.Entry<String, String> varPair : varMap.entrySet ()) {
-                    Rainbow.instance ().setProperty (varPair.getKey (), Util.evalTokens (varPair.getValue ()));
+                    m_rainbowEnvironment.setProperty (varPair.getKey (), Util.evalTokens (varPair.getValue ()));
                 }
 
             // store effector type info
@@ -400,21 +415,21 @@ public abstract class YamlUtil {
 
         Map probeMap = null;
         try {
-            String probePath = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_PROBES_PATH);
+            String probePath = m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_PROBES_PATH);
             if (probePath == null) {
                 Util.logger ().error (MessageFormat.format ("No property defined for ''{0}''. No probes loaded.",
                         RainbowConstants.PROPKEY_PROBES_PATH));
                 ed.probes = new TreeSet<> ();
                 return ed;
             }
-            File probeFile = Util.getRelativeToPath (Rainbow.instance ().getTargetPath (), probePath);
+            File probeFile = Util.getRelativeToPath (m_rainbowEnvironment.getTargetPath (), probePath);
             Object o = Yaml.load (probeFile);
             Util.logger ().trace ("Probe Desc Yaml file loaded: " + o.toString ());
             probeMap = (Map )o;
             Map<String, String> varMap = (Map<String, String> )probeMap.get ("vars");
             if (varMap != null)
                 for (Map.Entry<String, String> varPair : varMap.entrySet ()) {
-                    Rainbow.instance ().setProperty (varPair.getKey (), Util.evalTokens (varPair.getValue ()));
+                    m_rainbowEnvironment.setProperty (varPair.getKey (), Util.evalTokens (varPair.getValue ()));
                 }
 
             // store probe description info

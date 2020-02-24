@@ -10,6 +10,7 @@ import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowDelegate;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.ports.DisconnectedRainbowManagementPort;
 import org.sa.rainbow.core.ports.IDelegateManagementPort;
@@ -23,6 +24,9 @@ public class GuavaDelegateConnectionPort extends AbstractGuavaReportingPort impl
 	
 
 	private static final Logger LOGGER = Logger.getLogger(GuavaDelegateConnectionPort.class);
+	
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+
 	
 	@Override
 	protected Logger getLogger() {
@@ -83,7 +87,7 @@ public class GuavaDelegateConnectionPort extends AbstractGuavaReportingPort impl
 						}
 					}
 				}
-			}, Rainbow.instance().getProperty(IRainbowEnvironment.PROPKEY_PORT_TIMEOUT, 10000));
+			}, m_rainbowEnvironment.getProperty(IRainbowEnvironment.PROPKEY_PORT_TIMEOUT, 10000));
 		}catch (RainbowConnectionException e) {
 			if (m_deploymentPort == null)
 				throw e;

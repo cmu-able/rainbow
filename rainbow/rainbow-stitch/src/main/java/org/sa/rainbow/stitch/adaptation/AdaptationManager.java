@@ -48,9 +48,11 @@ import java.util.concurrent.TimeUnit;
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.apache.commons.lang.time.StopWatch;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.adaptation.AdaptationTree;
 import org.sa.rainbow.core.adaptation.DefaultAdaptationExecutorVisitor;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
@@ -121,6 +123,9 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 	 * leap-version strategy.
 	 */
 	public static final String MULTI_STRATEGY_PREFIX = "Multi-";
+	
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+
 
 	private Mode m_mode = Mode.SERIAL;
 	private AcmeModelInstance m_model = null;
@@ -167,12 +172,12 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 
 		m_repertoire = new ArrayList<Stitch>();
 		m_pendingStrategies = new ArrayList<AdaptationTree<Strategy>>();
-		m_historyTrackUtilName = Rainbow.instance().getProperty(RainbowConstants.PROPKEY_TRACK_STRATEGY);
+		m_historyTrackUtilName = m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_TRACK_STRATEGY);
 		if (m_historyTrackUtilName != null) {
 			m_historyCnt = new HashMap<String, int[]>();
 			m_failTimer = new HashMap<String, Beacon>();
 		}
-		String thresholdStr = Rainbow.instance().getProperty(RainbowConstants.PROPKEY_UTILITY_MINSCORE_THRESHOLD);
+		String thresholdStr = m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_UTILITY_MINSCORE_THRESHOLD);
 		if (thresholdStr == null) {
 			m_minUtilityThreshold = MIN_UTILITY_THRESHOLD;
 		} else {
@@ -201,7 +206,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 	public void setModelToManage(ModelReference model) {
 		m_modelRef = model;
 		try {
-			m_strategyLog = new FileOutputStream(new File(new File(Rainbow.instance().getTargetPath(), "log"),
+			m_strategyLog = new FileOutputStream(new File(new File(m_rainbowEnvironment.getTargetPath(), "log"),
 					model.getModelName() + "-adaptation.log")).getChannel();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -226,7 +231,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 		} else {
 			m_utilityModel = modelInstance.getModelInstance();
 		}
-		ModelsManager mm = Rainbow.instance().getRainbowMaster().modelsManager();
+		ModelsManager mm = m_rainbowEnvironment.getRainbowMaster().modelsManager();
 		try {
 			if (!mm.getRegisteredModelTypes().contains(ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE)) {
 				mm.registerModelType(ExecutionHistoryModelInstance.EXECUTION_HISTORY_TYPE);
@@ -377,7 +382,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 	 */
 	public double computeSystemInstantUtility() {
 		Map<String, Double> weights = m_utilityModel.weights
-				.get(Rainbow.instance().getProperty(RainbowConstants.PROPKEY_SCENARIO));
+				.get(m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_SCENARIO));
 		double[] conds = new double[m_utilityModel.getUtilityFunctions().size()];
 		int i = 0;
 		double score = 0.0;
@@ -423,7 +428,7 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 			if (m_mode == Mode.SERIAL && m_pendingStrategies.size() > 0)
 				// Only go if there are no pending strategies
 				return;
-			if (Rainbow.instance().getProperty(RainbowConstants.PROPKEY_ADAPTATION_HOMEOSTATIC, false)
+			if (m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_ADAPTATION_HOMEOSTATIC, false)
 					|| m_modelError) {
 				// Reset model error because we don't want to continuously deal with the same
 				// problem
@@ -634,8 +639,8 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 	 * @return a map of score-strategy pairs, sorted in increasing order by score.
 	 */
 	private SortedMap<Double, Strategy> scoreStrategies(Map<String, Strategy> subset) {
-		String scenario = Rainbow.instance().getProperty(RainbowConstants.PROPKEY_SCENARIO);
-//        Set<String> scenarios = Rainbow.instance ().getRainbowMaster ().preferenceDesc ().weights.keySet ();
+		String scenario = m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_SCENARIO);
+//        Set<String> scenarios = m_rainbowEnvironment.getRainbowMaster ().preferenceDesc ().weights.keySet ();
 //        for (String s : scenarios) {
 //            if (scenarios.equals (s)) {
 //                continue;
@@ -771,8 +776,8 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 	 * tactic attribute vectors.
 	 */
 	private void initAdaptationRepertoire() {
-		File stitchPath = Util.getRelativeToPath(Rainbow.instance().getTargetPath(),
-				Rainbow.instance().getProperty(RainbowConstants.PROPKEY_SCRIPT_PATH));
+		File stitchPath = Util.getRelativeToPath(m_rainbowEnvironment.getTargetPath(),
+				m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_SCRIPT_PATH));
 		if (stitchPath == null) {
 			m_reportingPort.error(RainbowComponentT.ADAPTATION_MANAGER, "The stitchState path is not set!");
 		} else if (stitchPath.exists() && stitchPath.isDirectory()) {

@@ -33,9 +33,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.analysis.IRainbowAnalysis;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.error.RainbowException;
@@ -70,6 +72,9 @@ public class UtilityEvaluator extends AbstractRainbowRunnable implements IRainbo
 
     private static final String                 OVERALL_UTILITY_KEY     = "globalUtility";
     private static final String                 NAME                    = "Rainbow Utility Evaluator";
+    
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+
 
     /** Used to get the current state of a model, e.g., the Acme model and the utility model **/
     private IModelsManagerPort                  m_modelsManagerPort;
@@ -186,7 +191,7 @@ public class UtilityEvaluator extends AbstractRainbowRunnable implements IRainbo
             AcmeModelInstance acmeModel,
             IRainbowReportingPort reportingPort) {
         Map<String, Double> weights = utilityModel.weights
-                .get (Rainbow.instance().getProperty (RainbowConstants.PROPKEY_SCENARIO));
+                .get (m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_SCENARIO));
         Map<String, Double> utilities = new HashMap<> ();
         double[] conds = new double[utilityModel.getUtilities ().size ()];
         int i = 0;

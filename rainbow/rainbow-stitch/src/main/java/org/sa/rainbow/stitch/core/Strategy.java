@@ -28,8 +28,10 @@ package org.sa.rainbow.stitch.core;
 
 import org.acmestudio.acme.element.IAcmeElement;
 import org.antlr.v4.parse.ANTLRParser.labeledAlt_return;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation;
 import org.sa.rainbow.stitch.Ohana;
@@ -51,6 +53,9 @@ import java.util.*;
  * @author Shang-Wen Cheng (zensoul@cs.cmu.edu)
  */
 public class Strategy extends ScopedEntity implements IEvaluableScope {
+	
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+
 
 	public Outcome getOutcome() {
 		return m_outcome;
@@ -715,10 +720,10 @@ public class Strategy extends ScopedEntity implements IEvaluableScope {
 		if (getOutcome() != Outcome.FAILURE) { // is this a good idea?
 			try {
 				long estTime = System.currentTimeMillis() - startTime;
-				double alpha = Rainbow.instance().getProperty(RainbowConstants.PROPKEY_MODEL_ALPHA, 0.33);
+				double alpha = m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_MODEL_ALPHA, 0.33);
 				m_avgExecutionTime = (long) ((1 - alpha) * m_avgExecutionTime + alpha * estTime);
 			} catch (Throwable t) {
-				// Running outside Rainbow (Rainbow.instance() throws exeception)
+				// Running outside Rainbow (m_rainbowEnvironment throws exeception)
 			}
 		}
 

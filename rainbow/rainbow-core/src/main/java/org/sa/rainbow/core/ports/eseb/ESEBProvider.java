@@ -23,6 +23,33 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.sa.rainbow.core.IRainbowEnvironment;
+import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
+import org.sa.rainbow.core.ports.eseb.converters.CollectionConverter;
+import org.sa.rainbow.core.ports.eseb.converters.CommandRepresentationConverter;
+import org.sa.rainbow.core.ports.eseb.converters.DescriptionAttributesConverter;
+import org.sa.rainbow.core.ports.eseb.converters.ExitStateConverter;
+import org.sa.rainbow.core.ports.eseb.converters.GaugeInstanceDescriptionConverter;
+import org.sa.rainbow.core.ports.eseb.converters.GaugeStateConverter;
+import org.sa.rainbow.core.ports.eseb.converters.OperationResultConverter;
+import org.sa.rainbow.core.ports.eseb.converters.OutcomeConverter;
+import org.sa.rainbow.core.ports.eseb.converters.TypedAttributeConverter;
+
+import com.google.inject.Inject;
+
 import edu.cmu.cs.able.eseb.bus.EventBus;
 import edu.cmu.cs.able.eseb.conn.BusConnection;
 import edu.cmu.cs.able.eseb.conn.BusConnectionState;
@@ -33,17 +60,10 @@ import edu.cmu.cs.able.typelib.jconv.TypelibJavaConversionRule;
 import edu.cmu.cs.able.typelib.parser.DefaultTypelibParser;
 import edu.cmu.cs.able.typelib.parser.TypelibParsingContext;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
-import org.sa.rainbow.core.Rainbow;
-import org.sa.rainbow.core.RainbowConstants;
-import org.sa.rainbow.core.ports.eseb.converters.*;
-
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.text.MessageFormat;
-import java.util.*;
 
 public class ESEBProvider {
+	
+	private static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
 
     /** The set of BusServers on the local machine, keyed by the port **/
     private static final Map<Short, EventBus> s_servers = new HashMap<> ();
@@ -193,7 +213,7 @@ public class ESEBProvider {
     }
 
     public static short getESEBClientPort () {
-        String port = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION_PORT);
+        String port = m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION_PORT);
         if (port == null) {
             port = "1234";
         }
@@ -201,9 +221,9 @@ public class ESEBProvider {
     }
 
     public static short getESEBClientPort (String property) {
-        String port = Rainbow.instance ().getProperty (property);
+        String port = m_rainbowEnvironment.getProperty (property);
         if (port == null) {
-            port = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION_PORT);
+            port = m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION_PORT);
             if (port == null) {
                 port = "1234";
             }
@@ -212,15 +232,15 @@ public class ESEBProvider {
     }
 
     public static String getESEBClientHost (String property) {
-        String host = Rainbow.instance ().getProperty (property);
+        String host = m_rainbowEnvironment.getProperty (property);
         if (host == null) {
-            host = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION);
+            host = m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION);
         }
         return host;
     }
 
     public static String getESEBClientHost () {
-        return Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION, "localhost");
+        return m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_MASTER_LOCATION, "localhost");
     }
 
     /**

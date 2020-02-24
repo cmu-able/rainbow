@@ -23,16 +23,23 @@
  */
 package org.sa.rainbow.translator.probes;
 
-import org.apache.log4j.Logger;
-import org.sa.rainbow.core.Rainbow;
-import org.sa.rainbow.core.RainbowComponentT;
-import org.sa.rainbow.core.error.BadLifecycleStepException;
-import org.sa.rainbow.core.error.RainbowConnectionException;
-import org.sa.rainbow.core.ports.*;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.log4j.Logger;
+import org.sa.rainbow.core.IRainbowEnvironment;
+import org.sa.rainbow.core.RainbowComponentT;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
+import org.sa.rainbow.core.error.BadLifecycleStepException;
+import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.ports.IProbeConfigurationPort;
+import org.sa.rainbow.core.ports.IProbeLifecyclePort;
+import org.sa.rainbow.core.ports.IProbeReportPort;
+import org.sa.rainbow.core.ports.IRainbowReportingPort;
+import org.sa.rainbow.core.ports.RainbowPortFactory;
+
+import com.google.inject.Inject;
 
 /**
  * The AbstractProbe provides the probe State member and the transition of that state when a lifecycle method is
@@ -46,6 +53,7 @@ public abstract class AbstractProbe implements IProbe {
 
     private Map<String, Object> m_configParams = null;
 
+    protected IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
 
     private String m_name = null;
 
@@ -278,7 +286,7 @@ public abstract class AbstractProbe implements IProbe {
      */
     @Override
     public boolean isActive () {
-        return m_state == State.ACTIVE && !Rainbow.instance ().shouldTerminate ();
+        return m_state == State.ACTIVE && !m_rainbowEnvironment.shouldTerminate ();
     }
 
     /* (non-Javadoc)

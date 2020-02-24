@@ -73,7 +73,7 @@ public class LocalEffectorManager extends AbstractRainbowRunnable {
         for (EffectorAttributes effAttr : effectors.effectors) {
             // Ignore any effectors that shouldn't start on this machine
             // This should not happen
-            if (!effAttr.getLocation().equals (Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION))) {
+            if (!effAttr.getLocation().equals (m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION))) {
                 continue;
             }
             IEffector effector = null;

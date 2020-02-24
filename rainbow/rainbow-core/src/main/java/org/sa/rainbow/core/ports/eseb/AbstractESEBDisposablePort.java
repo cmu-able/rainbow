@@ -23,10 +23,14 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
+import java.io.IOException;
+
+import org.sa.rainbow.core.IRainbowEnvironment;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.ports.IDisposablePort;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 
-import java.io.IOException;
+import com.google.inject.Inject;
 
 /**
  * The parent class of all ESEB publishing ports. This class manages the connection to ESEB, as well as disposing
@@ -39,6 +43,8 @@ public abstract class AbstractESEBDisposablePort implements IDisposablePort {
 
 
     private ESEBConnector m_connectionRole;
+    
+    protected IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
 
     protected AbstractESEBDisposablePort (String host, short port, ChannelT channel) throws IOException {
         if (host != null) {

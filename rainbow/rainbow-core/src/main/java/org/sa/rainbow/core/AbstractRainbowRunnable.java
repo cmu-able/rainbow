@@ -35,6 +35,8 @@ import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.ports.DisconnectedRainbowDelegateConnectionPort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 
+import com.google.inject.Inject;
+
 /**
  * Convenience abstract class that handles the usual thread start/stop/terminate
  * steps, so subclass need not worry about those unless specific actions
@@ -56,7 +58,8 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
     protected IRainbowReportingPort m_reportingPort;
     protected static final int DELAY_TOLERANCE = 500;
 
-    protected IRainbowEnvironment m_rainbowEnvironment = Rainbow.instance ();
+    protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate ();
+//    protected IRainbowEnvironment m_rainbowEnvironment = Rainbow.instance ();
 
     /**
      * Default Constructor with name for the thread.
@@ -64,7 +67,7 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
      */
     public AbstractRainbowRunnable (String name) {
         m_name = name;
-        m_rainbowEnvironment = Rainbow.instance();
+//        m_rainbowEnvironment = Rainbow.instance();
     	init();
     }
 
@@ -253,7 +256,7 @@ public abstract class AbstractRainbowRunnable implements IRainbowRunnable, Ident
             	nextRelease += m_sleepTime;
             }
             if (m_threadState == State.STARTED) {  // only process if started
-                if (shouldTerminate() || Rainbow.instance().shouldTerminate()) {
+                if (shouldTerminate() || m_rainbowEnvironment.shouldTerminate()) {
                     // time to stop RainbowRunnable as well
                     doTerminate();
                 } else if (!isTaskBehind && !interrupted) {

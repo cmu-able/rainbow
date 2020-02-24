@@ -32,6 +32,9 @@ import org.apache.log4j.Logger;
 import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
+
+import com.google.inject.Inject;
 
 import edu.cmu.cs.able.eseb.bus.EventBus;
 import edu.cmu.cs.able.eseb.conn.BusConnection;
@@ -43,6 +46,8 @@ import edu.cmu.cs.able.typelib.jconv.TypelibJavaConverter;
 
 public class ESEBRPCConnector {
 	public static final Logger LOGGER = Logger.getLogger(ESEBRPCConnector.class);
+	
+	private IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
 
 	private BusConnection m_client;
 	private EventBus m_srvr;
@@ -73,7 +78,7 @@ public class ESEBRPCConnector {
 	private ESEBRPCConnector(short port, String serverId) throws IOException, ParticipantException {
 		m_srvr = ESEBProvider.getBusServer(port);
 		ESEBProvider.useServer(m_srvr);
-		setClient(Rainbow.instance().getProperty(RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION, "localhost"), port);
+		setClient(m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION, "localhost"), port);
 		setUpEnvironment(serverId);
 
 	}
@@ -132,7 +137,7 @@ public class ESEBRPCConnector {
 	public <T> T createRemoteStub(Class<T> cls, String obj_id) {
 		LOGGER.info("Creating RPC Requirer end for " + obj_id + " with participant " + getParticipantId());
 		return JavaRpcFactory.create_remote_stub(cls, this.getRPCEnvironment(), this.getParticipantId(),
-				Rainbow.instance().getProperty(IRainbowEnvironment.PROPKEY_PORT_TIMEOUT, 10000), obj_id);
+				m_rainbowEnvironment.getProperty(IRainbowEnvironment.PROPKEY_PORT_TIMEOUT, 10000), obj_id);
 	}
 
 	public <T> void createRegistryWrapper(Class<T> cls, T wrapped, String obj_id) {

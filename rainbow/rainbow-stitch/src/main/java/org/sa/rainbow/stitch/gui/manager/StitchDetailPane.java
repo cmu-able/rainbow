@@ -18,11 +18,14 @@ import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.fife.ui.rtextarea.RTextScrollPane;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.util.Util;
 
 public class StitchDetailPane extends JPanel {
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
 
 	
 	private Map<String,String> m_stitchData = new HashMap<>();
@@ -37,8 +40,8 @@ public class StitchDetailPane extends JPanel {
 	 */
 	public StitchDetailPane() {
 		
-		File stitchPath = Util.getRelativeToPath(Rainbow.instance().getTargetPath(),
-				Rainbow.instance().getProperty(RainbowConstants.PROPKEY_SCRIPT_PATH));
+		File stitchPath = Util.getRelativeToPath(m_rainbowEnvironment.getTargetPath(),
+				m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_SCRIPT_PATH));
 		if (stitchPath != null) {
 			FilenameFilter ff = new FilenameFilter() { // find only ".s" files
 				@Override

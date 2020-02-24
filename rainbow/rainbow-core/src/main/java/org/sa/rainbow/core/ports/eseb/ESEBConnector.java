@@ -23,6 +23,19 @@
  */
 package org.sa.rainbow.core.ports.eseb;
 
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import org.apache.log4j.Logger;
+import org.sa.rainbow.core.IRainbowEnvironment;
+import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
+import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowException;
+
 import edu.cmu.cs.able.eseb.BusData;
 import edu.cmu.cs.able.eseb.BusDataQueue;
 import edu.cmu.cs.able.eseb.BusDataQueueListener;
@@ -30,19 +43,6 @@ import edu.cmu.cs.able.eseb.bus.EventBus;
 import edu.cmu.cs.able.eseb.conn.BusConnection;
 import edu.cmu.cs.able.typelib.comp.MapDataValue;
 import edu.cmu.cs.able.typelib.type.DataValue;
-import org.apache.log4j.Logger;
-import org.sa.rainbow.core.Rainbow;
-import org.sa.rainbow.core.RainbowConstants;
-import org.sa.rainbow.core.error.RainbowConnectionException;
-import org.sa.rainbow.core.error.RainbowException;
-import org.sa.rainbow.core.models.commands.IRainbowOperation;
-
-import java.io.IOException;
-import java.net.Inet4Address;
-import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 /**
  * The ESEBConnector implements both a publish/subscribe and call-return connection over ESEB.
@@ -59,6 +59,8 @@ import java.util.UUID;
  */
 public class ESEBConnector {
     static final Logger LOGGER = Logger.getLogger (ESEBConnector.class);
+    
+    protected IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
 
     public enum ChannelT {
         HEALTH, UIREPORT, MODEL_US, MODEL_CHANGE, SYSTEM_US, RPC, MODEL_DS
@@ -121,7 +123,7 @@ public class ESEBConnector {
         m_srvr = ESEBProvider.getBusServer (port);
         ESEBProvider.useServer (m_srvr);
         // Create a local client
-        String host = Rainbow.instance().getProperty(RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION, "localhost");
+        String host = m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION, "localhost");
         setClient (host, port);
     }
 

@@ -26,15 +26,18 @@
  */
 package org.sa.rainbow.translator.effectors;
 
+import java.util.List;
+
 import org.apache.log4j.Logger;
-import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.RainbowComponentT;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.ports.IEffectorLifecycleBusPort;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.ports.RainbowPortFactory;
 
-import java.util.List;
+import com.google.inject.Inject;
 
 /**
  * Abstract definition of the effector with common methods to simplify
@@ -53,6 +56,8 @@ public abstract class AbstractEffector implements IEffector {
     private String m_name = null;
 
     private Kind m_kind = null;
+    
+    protected IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
 
 
     private IRainbowReportingPort m_reportingPort;
@@ -124,7 +129,7 @@ public abstract class AbstractEffector implements IEffector {
             m_reportingPort.info (RainbowComponentT.EFFECTOR, msg);
         }
         // avoid duplicate output in the master's process
-        if (!Rainbow.instance ().isMaster () || m_reportingPort == null) {
+        if (!m_rainbowEnvironment.isMaster () || m_reportingPort == null) {
             LOGGER.info (msg);
         }
     }

@@ -47,8 +47,10 @@ import org.acmestudio.standalone.resource.StandaloneLanguagePackHelper;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.sa.rainbow.core.AbstractRainbowRunnable;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.IModelInstance;
@@ -79,6 +81,7 @@ import org.sa.rainbow.util.Util;
 public class StitchScriptEvaluator extends BaseStitchBehavior {
 	private static final int LOP = Expression.LOP;
 	private static final int ROP = Expression.ROP;
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
 
 
 	public StitchScriptEvaluator(Stitch/* State */ stitchState) {
@@ -1126,7 +1129,7 @@ public class StitchScriptEvaluator extends BaseStitchBehavior {
 			} else if (n instanceof AcmeModelInstance) {
 
 				AcmeModelInstance ami = (AcmeModelInstance) n;
-				IAdaptationExecutor<Object> executor = (IAdaptationExecutor<Object>) Rainbow.instance().getRainbowMaster()
+				IAdaptationExecutor<Object> executor = (IAdaptationExecutor<Object>) m_rainbowEnvironment.getRainbowMaster()
 						.adaptationExecutors().get(Util.genModelRef(ami.getModelName(), ami.getModelType()).toString());
 				nameObj = ami.getModelInstance().lookupName(name.substring(dotIdx + 1), true);
 				if (nameObj == null) {

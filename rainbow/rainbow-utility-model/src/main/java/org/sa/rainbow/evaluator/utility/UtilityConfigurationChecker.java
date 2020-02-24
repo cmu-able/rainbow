@@ -17,9 +17,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.IRainbowMaster;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.UtilityPreferenceDescription;
 import org.sa.rainbow.core.models.UtilityPreferenceDescription.UtilityAttributes;
@@ -32,6 +34,7 @@ import org.sa.rainbow.util.RainbowConfigurationChecker.ProblemT;
 import org.sa.rainbow.util.Util;
 
 public class UtilityConfigurationChecker implements IRainbowConfigurationChecker {
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
 
 	private IRainbowMaster m_master;
 	private List<Problem> m_problems;
@@ -40,7 +43,7 @@ public class UtilityConfigurationChecker implements IRainbowConfigurationChecker
 
 	public UtilityConfigurationChecker() {
 		m_problems = new LinkedList<Problem>();
-		m_master = Rainbow.instance().getRainbowMaster();
+		m_master = m_rainbowEnvironment.getRainbowMaster();
 	}
 
 	@Override
@@ -99,8 +102,8 @@ public class UtilityConfigurationChecker implements IRainbowConfigurationChecker
 	
 	protected Set<String> fetchTacticNames() {
 		Set<String> tactics = new HashSet<>();
-		File stitchPath = Util.getRelativeToPath(Rainbow.instance().getTargetPath(),
-				Rainbow.instance().getProperty(RainbowConstants.PROPKEY_SCRIPT_PATH));
+		File stitchPath = Util.getRelativeToPath(m_rainbowEnvironment.getTargetPath(),
+				m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_SCRIPT_PATH));
 		if (stitchPath == null) {
 			m_problems.add(new Problem(ProblemT.ERROR, "The Stitch path is not set!"));
 			return tactics;

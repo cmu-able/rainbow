@@ -1,6 +1,8 @@
 package org.sa.rainbow.stitch.gui.manager;
 
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.UtilityPreferenceDescription;
@@ -10,6 +12,7 @@ import org.sa.rainbow.gui.arch.model.RainbowArchAdapationManagerModel;
 
 // Be careful, this is stitch specific
 public class StitchAdaptationManagerTabbedPane extends AdaptationManagerTabbedPane {
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
 
 	private UtilityFunctionPane m_utilityFunctionPanel;
 	private UtilityModelPane m_utilityModelPanel;
@@ -27,7 +30,7 @@ public class StitchAdaptationManagerTabbedPane extends AdaptationManagerTabbedPa
 	public void initBindings(RainbowArchAdapationManagerModel amModel) {
 		super.initBindings(amModel);
 		ModelReference managedModel = amModel.getAdaptationManager().getManagedModel();
-		IModelInstance<Object> utilityModel = Rainbow.instance().getRainbowMaster().modelsManager()
+		IModelInstance<Object> utilityModel = m_rainbowEnvironment.getRainbowMaster().modelsManager()
 				.getModelInstance(new ModelReference(managedModel.getModelName(), "UtilityModel"));
 		if (utilityModel != null) {
 			UtilityPreferenceDescription upd = (UtilityPreferenceDescription) utilityModel.getModelInstance();

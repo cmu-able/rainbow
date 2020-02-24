@@ -27,7 +27,9 @@
 package org.sa.rainbow.stitch.core;
 
 import org.acmestudio.acme.model.IAcmeModel;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.model.acme.AcmeModelCommandFactory;
@@ -60,6 +62,9 @@ public class StitchScript extends ScopedEntity implements IScope {
     public List<AcmeModelInstance> models     = null;
 
     private List<AcmeModelInstance> m_snapshotModels = null; // for tactic eval
+    
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+
 
     /**
      * Main Constructor for a new StitchScript object.
@@ -198,7 +203,7 @@ public class StitchScript extends ScopedEntity implements IScope {
     public void unfreezeModel () {
         for (AcmeModelInstance model : m_snapshotModels) {
             try {
-                Rainbow.instance ().getRainbowMaster ().modelsManager ().unregisterModel (model);
+                m_rainbowEnvironment.getRainbowMaster ().modelsManager ().unregisterModel (model);
             } catch (RainbowModelException e) {
             }
         }

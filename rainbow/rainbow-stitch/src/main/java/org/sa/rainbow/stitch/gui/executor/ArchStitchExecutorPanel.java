@@ -19,7 +19,9 @@ import javax.swing.table.TableColumn;
 
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.gui.arch.elements.IUIReporter;
@@ -33,7 +35,8 @@ import org.sa.rainbow.stitch.core.Strategy.ConditionKind;
 import org.sa.rainbow.stitch.core.StrategyNode;
 
 public class ArchStitchExecutorPanel extends JPanel implements IUIReporter {
-	
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+
 	public static class StitchTreeTableModel extends AbstractTreeTableModel {
 
 		private Strategy m_strategy;
@@ -245,7 +248,7 @@ public class ArchStitchExecutorPanel extends JPanel implements IUIReporter {
 	}
 	
 	protected void getStrategyDetails(String strategyName) {
-		Collection<IAdaptationManager<?>> ams = Rainbow.instance().getRainbowMaster().adaptationManagers().values();
+		Collection<IAdaptationManager<?>> ams = m_rainbowEnvironment.getRainbowMaster().adaptationManagers().values();
 		Strategy s = null;
 		for (Iterator<IAdaptationManager<?>> iterator = ams.iterator(); iterator.hasNext() && s == null;) {
 			IAdaptationManager<?> m = iterator.next();

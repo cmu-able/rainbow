@@ -54,17 +54,21 @@ import org.reflections.scanners.SubTypesScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
-import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.health.IRainbowHealthProtocol;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.translator.probes.IBashBasedScript;
 
+import com.google.inject.Inject;
+
 public class Util {
 
     static final Logger LOGGER = Logger.getLogger (Util.class);
+    protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
 
     public static final String            FILESEP                  = "/";
     public static final String            PATHSEP                  = ":";
@@ -162,7 +166,7 @@ public class Util {
 
     public static String evalTokens (String str) {
         if (str == null) return str;
-        return evalTokens (str, Rainbow.instance ().allProperties ());
+        return evalTokens (str, m_rainbowEnvironment.allProperties ());
     }
 
 
@@ -428,13 +432,13 @@ public class Util {
 
 
     public static Properties defineLoggerProperties () {
-        String filepath = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_LOG_PATH);
+        String filepath = m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_LOG_PATH);
         if (!filepath.startsWith ("/")) {
-            filepath = getRelativeToPath (Rainbow.instance ().getTargetPath (), filepath).toString ();
+            filepath = getRelativeToPath (m_rainbowEnvironment.getTargetPath (), filepath).toString ();
         }
-        String datapath = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_DATA_LOG_PATH);
+        String datapath = m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_DATA_LOG_PATH);
         if (!datapath.startsWith ("/")) {
-            datapath = getRelativeToPath (Rainbow.instance ().getTargetPath (), datapath).toString ();
+            datapath = getRelativeToPath (m_rainbowEnvironment.getTargetPath (), datapath).toString ();
         }
 
 // setup logging
@@ -442,26 +446,26 @@ public class Util {
         props.setProperty ("log4j.appender.FileLog", "org.apache.log4j.RollingFileAppender");
         props.setProperty ("log4j.appender.FileLog.layout", "org.apache.log4j.PatternLayout");
         props.setProperty ("log4j.appender.FileLog.layout.ConversionPattern",
-                Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_LOG_PATTERN, DEFAULT_PATTERN));
+                m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_LOG_PATTERN, DEFAULT_PATTERN));
         props.setProperty ("log4j.appender.FileLog.MaxFileSize",
-                Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_LOG_MAX_SIZE, String.valueOf (DEFAULT_MAX_SIZE)) + "KB");
+                m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_LOG_MAX_SIZE, String.valueOf (DEFAULT_MAX_SIZE)) + "KB");
         props.setProperty ("log4j.appender.FileLog.MaxBackupIndex",
-                Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_LOG_MAX_BACKUPS, String.valueOf (DEFAULT_MAX_BACKUPS)));
+                m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_LOG_MAX_BACKUPS, String.valueOf (DEFAULT_MAX_BACKUPS)));
         props.setProperty ("log4j.appender.FileLog.File", filepath);
         props.setProperty ("log4j.appender.ConsoleLog", "org.apache.log4j.ConsoleAppender");
         props.setProperty ("log4j.appender.ConsoleLog.Target", "System.out");
         props.setProperty ("log4j.appender.ConsoleLog.layout", "org.apache.log4j.PatternLayout");
         props.setProperty ("log4j.appender.ConsoleLog.layout.ConversionPattern", CONSOLE_PATTERN);
-        String rootSetting = Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_LOG_LEVEL, DEFAULT_LEVEL) + ",FileLog,ConsoleLog";
+        String rootSetting = m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_LOG_LEVEL, DEFAULT_LEVEL) + ",FileLog,ConsoleLog";
         props.setProperty ("log4j.rootLogger", rootSetting);
         // setup data logging, using trace level
         props.setProperty ("log4j.appender.DataLog", "org.apache.log4j.RollingFileAppender");
         props.setProperty ("log4j.appender.DataLog.layout", "org.apache.log4j.PatternLayout");
         props.setProperty ("log4j.appender.DataLog.layout.ConversionPattern", DATA_PATTERN);
         props.setProperty ("log4j.appender.DataLog.MaxFileSize",
-                Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_LOG_MAX_SIZE, String.valueOf (DEFAULT_MAX_SIZE)) + "KB");
+                m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_LOG_MAX_SIZE, String.valueOf (DEFAULT_MAX_SIZE)) + "KB");
         props.setProperty ("log4j.appender.DataLog.MaxBackupIndex",
-                Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_LOG_MAX_BACKUPS, String.valueOf (DEFAULT_MAX_BACKUPS)));
+                m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_LOG_MAX_BACKUPS, String.valueOf (DEFAULT_MAX_BACKUPS)));
         props.setProperty ("log4j.appender.DataLog.File", datapath);
         props.setProperty ("log4j.logger." + DATA_LOGGER_NAME, "INFO,DataLog");
         // don't invoke ancester appenders

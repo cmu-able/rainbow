@@ -24,10 +24,12 @@
 package org.sa.rainbow.util;
 
 import org.apache.log4j.Logger;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.IRainbowMaster;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.gauges.GaugeDescription;
@@ -48,6 +50,8 @@ import org.sa.rainbow.core.util.TypedAttribute;
 import org.sa.rainbow.core.util.TypedAttributeWithValue;
 import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
 import org.sa.rainbow.translator.probes.IProbe.Kind;
+
+import com.google.inject.Inject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -96,6 +100,8 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort, IRain
 	final List<Problem> m_problems = new LinkedList<>();
 	private IRainbowMaster m_master;
 	final Set<String> m_referredToProbes = new HashSet<>();
+	
+	protected IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
 
 	public RainbowConfigurationChecker() {
 
@@ -122,13 +128,13 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort, IRain
 		Problem p = new Problem(ProblemT.INFO, message);
 		m_problems.add(p);
 		int num = m_problems.size();
-		String noAs = Rainbow.instance().getProperty(RainbowConstants.PROPKEY_ADAPTATION_EXECUTOR_SIZE, "0");
+		String noAs = m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_ADAPTATION_EXECUTOR_SIZE, "0");
 		int numberOfAnalyzers = Integer.parseInt(noAs);
 		if (numberOfAnalyzers == 0) {
 			m_problems.add(new Problem(ProblemT.WARNING, "There seem to be no executors specified."));
 		} else {
 			for (int anum = 0; anum < numberOfAnalyzers; anum++) {
-				String analyzerClass = Rainbow.instance()
+				String analyzerClass = m_rainbowEnvironment
 						.getProperty(RainbowConstants.PROPKEY_ADAPTATION_MANAGER_CLASS + "_" + anum);
 				if (analyzerClass == null) {
 					m_problems.add(
@@ -140,7 +146,7 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort, IRain
 						m_problems.add(new Problem(ProblemT.ERROR,
 								MessageFormat.format("Executor {0}: Could not load class {1}.", anum, analyzerClass)));
 					}
-					String modelRef = Rainbow.instance()
+					String modelRef = m_rainbowEnvironment
 							.getProperty(RainbowConstants.PROPKEY_ADAPTATION_EXECUTOR_MODEL + "_" + anum);
 					IModelInstance<Object> modelInstance = m_master.modelsManager()
 							.getModelInstance(ModelReference.fromString(modelRef));
@@ -164,13 +170,13 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort, IRain
 		Problem p = new Problem(ProblemT.INFO, message);
 		m_problems.add(p);
 		int num = m_problems.size();
-		String noAs = Rainbow.instance().getProperty(RainbowConstants.PROPKEY_ADAPTATION_MANAGER_SIZE, "0");
+		String noAs = m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_ADAPTATION_MANAGER_SIZE, "0");
 		int numberOfManagers = Integer.parseInt(noAs);
 		if (numberOfManagers == 0) {
 			m_problems.add(new Problem(ProblemT.WARNING, "There seem to be no analyzers specified."));
 		} else {
 			for (int anum = 0; anum < numberOfManagers; anum++) {
-				String managerClass = Rainbow.instance()
+				String managerClass = m_rainbowEnvironment
 						.getProperty(RainbowConstants.PROPKEY_ADAPTATION_MANAGER_CLASS + "_" + anum);
 				if (managerClass == null) {
 					m_problems.add(
@@ -182,7 +188,7 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort, IRain
 						m_problems.add(new Problem(ProblemT.ERROR,
 								MessageFormat.format("Manager {0}: Could not load class {1}.", anum, managerClass)));
 					}
-					String modelRef = Rainbow.instance()
+					String modelRef = m_rainbowEnvironment
 							.getProperty(RainbowConstants.PROPKEY_ADAPTATION_MANAGER_MODEL + "_" + anum);
 					IModelInstance<Object> modelInstance = m_master.modelsManager()
 							.getModelInstance(ModelReference.fromString(modelRef));
@@ -205,13 +211,13 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort, IRain
 		Problem p = new Problem(ProblemT.INFO, message);
 		m_problems.add(p);
 		int num = m_problems.size();
-		String noAs = Rainbow.instance().getProperty(RainbowConstants.PROPKEY_ANALYSIS_COMPONENT_SIZE, "0");
+		String noAs = m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_ANALYSIS_COMPONENT_SIZE, "0");
 		int numberOfAnalyzers = Integer.parseInt(noAs);
 		if (numberOfAnalyzers == 0) {
 			m_problems.add(new Problem(ProblemT.WARNING, "There seem to be no analyzers specified."));
 		} else {
 			for (int anum = 0; anum < numberOfAnalyzers; anum++) {
-				String analyzerClass = Rainbow.instance()
+				String analyzerClass = m_rainbowEnvironment
 						.getProperty(RainbowConstants.PROPKEY_ANALYSIS_COMPONENTS + "_" + anum);
 				if (analyzerClass == null) {
 					m_problems.add(
@@ -237,13 +243,13 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort, IRain
 		Problem p = new Problem(ProblemT.INFO, message);
 		m_problems.add(p);
 		int num = m_problems.size();
-		String numberOfModelsStr = Rainbow.instance().getProperty(RainbowConstants.PROPKEY_MODEL_NUMBER, "0");
+		String numberOfModelsStr = m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_MODEL_NUMBER, "0");
 		int numberOfModels = Integer.parseInt(numberOfModelsStr);
 		if (numberOfModels == 0) {
 			m_problems.add(new Problem(ProblemT.ERROR, "There are no models specified"));
 		} else {
 			for (int modelNum = 0; modelNum < numberOfModels; modelNum++) {
-				String factoryClassName = Rainbow.instance()
+				String factoryClassName = m_rainbowEnvironment
 						.getProperty(RainbowConstants.PROPKEY_MODEL_LOAD_CLASS_PREFIX + modelNum);
 				if (factoryClassName == null || "".equals(factoryClassName)) {
 					m_problems.add(new Problem(ProblemT.WARNING,
@@ -251,15 +257,15 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort, IRain
 									"Model number {0} is not specified. Looking for property. Looking for ''{1}''.",
 									modelNum, (RainbowConstants.PROPKEY_MODEL_LOAD_CLASS_PREFIX + modelNum))));
 				}
-				String modelName = Rainbow.instance()
+				String modelName = m_rainbowEnvironment
 						.getProperty(RainbowConstants.PROPKEY_MODEL_NAME_PREFIX + modelNum);
 				if (modelName == null) {
 					m_problems.add(new Problem(ProblemT.ERROR,
 							MessageFormat.format("Model {0} does not have a name. ''{1}'' is unspecified.", modelNum,
 									(RainbowConstants.PROPKEY_MODEL_NAME_PREFIX + modelNum))));
 				}
-				String path = Rainbow.instance().getProperty(RainbowConstants.PROPKEY_MODEL_PATH_PREFIX + modelNum);
-				String saveOnClose = Rainbow.instance()
+				String path = m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_MODEL_PATH_PREFIX + modelNum);
+				String saveOnClose = m_rainbowEnvironment
 						.getProperty(RainbowConstants.PROPKEY_MODEL_SAVE_PREFIX + modelNum);
 				// It is possible for a model not to be sourced from a file, in which case
 				// the load command may just create and register the model in the manager
@@ -267,7 +273,7 @@ public class RainbowConfigurationChecker implements IRainbowReportingPort, IRain
 				if (path != null) {
 					modelPath = new File(path);
 					if (!modelPath.isAbsolute()) {
-						modelPath = Util.getRelativeToPath(Rainbow.instance().getTargetPath(), path);
+						modelPath = Util.getRelativeToPath(m_rainbowEnvironment.getTargetPath(), path);
 					}
 
 				}

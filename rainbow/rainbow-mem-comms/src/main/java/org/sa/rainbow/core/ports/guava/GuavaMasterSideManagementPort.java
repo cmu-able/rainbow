@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.ports.IDelegateManagementPort;
@@ -26,14 +27,15 @@ public class GuavaMasterSideManagementPort extends AbstractGuavaReportingPort
 
 	private RainbowMaster m_rainbowMaster;
 	private String m_delegateID;
-	private Properties m_connectionProperties;
+	
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+
 
 	public GuavaMasterSideManagementPort(RainbowMaster rainbowMaster, String delegateID,
 			Properties connectionProperties) {
 		super(ChannelT.HEALTH);
 		m_rainbowMaster = rainbowMaster;
 		m_delegateID = delegateID;
-		m_connectionProperties = connectionProperties;
 		getEventBus().addListener(new IGuavaMessageListener() {
 
 			@Override
@@ -100,7 +102,7 @@ public class GuavaMasterSideManagementPort extends AbstractGuavaReportingPort
 		try {
 			BooleanReply reply = new BooleanReply();
 			getEventBus().blockingSendAndReceive(msg, reply,
-					Rainbow.instance().getProperty(IRainbowEnvironment.PROPKEY_PORT_TIMEOUT, 10000));
+					m_rainbowEnvironment.getProperty(IRainbowEnvironment.PROPKEY_PORT_TIMEOUT, 10000));
 			return reply.m_reply;
 		} catch (RainbowConnectionException e) {
 			LOGGER.error(MessageFormat.format("startDelegate did not return for delegate {0}", getDelegateId()));
@@ -117,7 +119,7 @@ public class GuavaMasterSideManagementPort extends AbstractGuavaReportingPort
 		try {
 			BooleanReply reply = new BooleanReply();
 			getEventBus().blockingSendAndReceive(msg, reply,
-					Rainbow.instance().getProperty(IRainbowEnvironment.PROPKEY_PORT_TIMEOUT, 10000));
+					m_rainbowEnvironment.getProperty(IRainbowEnvironment.PROPKEY_PORT_TIMEOUT, 10000));
 			return reply.m_reply;
 		} catch (RainbowConnectionException e) {
 			LOGGER.error(MessageFormat.format("pauseDelegate did not return for delegate {0}", getDelegateId()));

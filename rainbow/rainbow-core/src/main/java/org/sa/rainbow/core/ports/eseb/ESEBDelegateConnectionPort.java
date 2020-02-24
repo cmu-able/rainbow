@@ -33,6 +33,7 @@ import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.RainbowDelegate;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.ports.AbstractDelegateConnectionPort;
 import org.sa.rainbow.core.ports.DisconnectedRainbowManagementPort;
@@ -41,10 +42,14 @@ import org.sa.rainbow.core.ports.RainbowPortFactory;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.ChannelT;
 import org.sa.rainbow.core.ports.eseb.ESEBConnector.IESEBListener;
 
+import com.google.inject.Inject;
+
 public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
 	private static final Logger LOGGER = Logger.getLogger(ESEBDelegateConnectionPort.class);
 
 	private IDelegateManagementPort m_deploymentPort;
+	
+	private IRainbowEnvironment m_rainbow = new RainbowEnvironmentDelegate();
 
 	public ESEBDelegateConnectionPort(RainbowDelegate delegate) throws IOException {
 		super(delegate, ESEBProvider.getESEBClientHost(),
@@ -85,7 +90,7 @@ public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
 
 		msg.setProperty(ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_PORT, Short.toString(deploymentPortNum));
 		String host = connectionProperties.getProperty(ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_HOST,
-				Rainbow.instance().getProperty(RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION, "localhost"));
+				m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION, "localhost"));
 		msg.setProperty(ESEBConstants.PROPKEY_ESEB_DELEGATE_DEPLOYMENT_HOST, host);
 		msg.setProperty(ESEBConstants.MSG_DELEGATE_ID_KEY, delegateID);
 		msg.setProperty(ESEBConstants.MSG_TYPE_KEY, ESEBConstants.MSG_TYPE_CONNECT_DELEGATE);
@@ -110,7 +115,7 @@ public class ESEBDelegateConnectionPort extends AbstractDelegateConnectionPort {
 						}
 					}
 				}
-			}, Rainbow.instance().getProperty(IRainbowEnvironment.PROPKEY_PORT_TIMEOUT, 10000));
+			}, m_rainbowEnvironment.getProperty(IRainbowEnvironment.PROPKEY_PORT_TIMEOUT, 10000));
 		} catch (RainbowConnectionException e) {
 			if (m_deploymentPort == null)
 				throw e;

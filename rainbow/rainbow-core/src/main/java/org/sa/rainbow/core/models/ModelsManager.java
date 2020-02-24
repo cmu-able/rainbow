@@ -128,24 +128,24 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
 	}
 
 	public void initializeModels() {
-		String numberOfModelsStr = Rainbow.instance().getProperty(RainbowConstants.PROPKEY_MODEL_NUMBER, "0");
+		String numberOfModelsStr = m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_MODEL_NUMBER, "0");
 		int numberOfModels = Integer.parseInt(numberOfModelsStr);
 		for (int modelNum = 0; modelNum < numberOfModels; modelNum++) {
-			String factoryClassName = Rainbow.instance()
+			String factoryClassName = m_rainbowEnvironment
 					.getProperty(RainbowConstants.PROPKEY_MODEL_LOAD_CLASS_PREFIX + modelNum);
 			if (factoryClassName == null || "".equals(factoryClassName)) {
 				continue;
 			}
-			String modelName = Rainbow.instance().getProperty(RainbowConstants.PROPKEY_MODEL_NAME_PREFIX + modelNum);
-			String path = Rainbow.instance().getProperty(RainbowConstants.PROPKEY_MODEL_PATH_PREFIX + modelNum);
-			String saveOnClose = Rainbow.instance().getProperty(RainbowConstants.PROPKEY_MODEL_SAVE_PREFIX + modelNum);
+			String modelName = m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_MODEL_NAME_PREFIX + modelNum);
+			String path = m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_MODEL_PATH_PREFIX + modelNum);
+			String saveOnClose = m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_MODEL_SAVE_PREFIX + modelNum);
 			// It is possible for a model not to be sourced from a file, in which case
 			// the load command may just create and register the model in the manager
 			File modelPath = null;
 			if (path != null) {
 				modelPath = new File(path);
 				if (!modelPath.isAbsolute()) {
-					modelPath = Util.getRelativeToPath(Rainbow.instance().getTargetPath(), path);
+					modelPath = Util.getRelativeToPath(m_rainbowEnvironment.getTargetPath(), path);
 				}
 
 			}
@@ -179,17 +179,17 @@ public class ModelsManager extends AbstractRainbowRunnable implements IModelsMan
 				boolean toSave = saveOnClose == null ? false : Boolean.valueOf(saveOnClose);
 				ModelReference ref = new ModelReference(instance.getModelName(), instance.getModelType());
 				if (toSave) {
-					String saveLocation = Rainbow.instance()
+					String saveLocation = m_rainbowEnvironment
 							.getProperty(RainbowConstants.RAINBOW_MODEL_SAVE_LOCATION_PREFIX + modelNum);
 					if (saveLocation == null) {
 						saveLocation = path;
 					}
-					File savePath = Util.getRelativeToPath(Rainbow.instance().getTargetPath(), saveLocation);
+					File savePath = Util.getRelativeToPath(m_rainbowEnvironment.getTargetPath(), saveLocation);
 					m_modelsToSave.put(ref, savePath);
 				}
 
 				// Open log files
-				File targetPath = Rainbow.instance().getTargetPath();
+				File targetPath = m_rainbowEnvironment.getTargetPath();
 				File logPath = new File(targetPath, "log");
 				logPath.mkdirs();
 				File logFile = new File(logPath, ref.getModelName() + "-" + ref.getModelType() + ".log");

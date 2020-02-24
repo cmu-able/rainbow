@@ -55,7 +55,7 @@ public class ESEBEffectorSideLifecyclePort extends AbstractESEBDisposablePort im
         msg.setProperty (IEffectorProtocol.ID, effector.id ());
         msg.setProperty (IEffectorProtocol.SERVICE, effector.service ());
         msg.setProperty (IEffectorProtocol.KIND, effector.kind ().name ());
-        msg.setProperty (IEffectorProtocol.LOCATION, Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION));
+        msg.setProperty (IEffectorProtocol.LOCATION, m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_DEPLOYMENT_LOCATION));
     }
 
     @Override

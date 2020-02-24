@@ -29,10 +29,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.IRainbowMaster;
 import org.sa.rainbow.core.Identifiable;
-import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowDelegate;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.RainbowMaster;
 import org.sa.rainbow.core.adaptation.IEvaluable;
 import org.sa.rainbow.core.error.RainbowConnectionException;
@@ -70,6 +71,8 @@ import org.sa.rainbow.translator.effectors.IEffector;
 import org.sa.rainbow.translator.effectors.IEffectorExecutionPort;
 import org.sa.rainbow.translator.effectors.IEffectorIdentifier;
 import org.sa.rainbow.translator.probes.IProbe;
+
+import com.google.inject.Inject;
 
 public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
 
@@ -381,9 +384,11 @@ public class LocalRainbowPortFactory implements IRainbowConnectionPortFactory {
         return rainbowMaster.getCommandPort();
     }
 
+    IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+    
     @Override
     public IMasterCommandPort createMasterCommandRequirerPort () throws RainbowConnectionException {
-        return Rainbow.instance ().getRainbowMaster ().getCommandPort();
+        return m_rainbowEnvironment.getRainbowMaster ().getCommandPort();
     }
 
 }

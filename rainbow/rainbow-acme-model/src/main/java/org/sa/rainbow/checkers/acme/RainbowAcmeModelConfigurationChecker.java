@@ -11,9 +11,11 @@ import org.acmestudio.acme.core.resource.IAcmeResource;
 import org.acmestudio.acme.core.resource.ParsingFailureException;
 import org.acmestudio.acme.environment.error.AcmeError;
 import org.acmestudio.standalone.resource.StandaloneResourceProvider;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.IRainbowMaster;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.model.acme.AcmeModelCommandFactory;
 import org.sa.rainbow.util.IRainbowConfigurationChecker;
 import org.sa.rainbow.util.RainbowConfigurationChecker;
@@ -25,6 +27,9 @@ public class RainbowAcmeModelConfigurationChecker implements IRainbowConfigurati
 
 	private LinkedList<Problem> m_problems = new LinkedList<>();
 	private IRainbowMaster m_master;
+	
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+ 
 
 	public RainbowAcmeModelConfigurationChecker() {
 		m_problems = new LinkedList<Problem>();
@@ -37,10 +42,10 @@ public class RainbowAcmeModelConfigurationChecker implements IRainbowConfigurati
 		m_problems.add(p);
 		int num = m_problems.size();
 
-		String numberOfModelsStr = Rainbow.instance().getProperty(RainbowConstants.PROPKEY_MODEL_NUMBER, "0");
+		String numberOfModelsStr = m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_MODEL_NUMBER, "0");
 		int numberOfModels = Integer.parseInt(numberOfModelsStr);
 		for (int modelNum = 0; modelNum < numberOfModels; modelNum++) {
-			String factoryClassName = Rainbow.instance()
+			String factoryClassName = m_rainbowEnvironment
 					.getProperty(RainbowConstants.PROPKEY_MODEL_LOAD_CLASS_PREFIX + modelNum);
 			if (factoryClassName == null || "".equals(factoryClassName)) {
 				continue;
@@ -50,13 +55,13 @@ public class RainbowAcmeModelConfigurationChecker implements IRainbowConfigurati
 			try {
 				Class loadClass = Class.forName(factoryClassName);
 				if (AcmeModelCommandFactory.class.isAssignableFrom(loadClass)) {
-					modelName = Rainbow.instance().getProperty(RainbowConstants.PROPKEY_MODEL_NAME_PREFIX + modelNum);
-					String path = Rainbow.instance().getProperty(RainbowConstants.PROPKEY_MODEL_PATH_PREFIX + modelNum);
+					modelName = m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_MODEL_NAME_PREFIX + modelNum);
+					String path = m_rainbowEnvironment.getProperty(RainbowConstants.PROPKEY_MODEL_PATH_PREFIX + modelNum);
 					modelPath = null;
 					if (path != null) {
 						modelPath = new File(path);
 						if (!modelPath.isAbsolute()) {
-							modelPath = Util.getRelativeToPath(Rainbow.instance().getTargetPath(), path);
+							modelPath = Util.getRelativeToPath(m_rainbowEnvironment.getTargetPath(), path);
 						}
 
 					}

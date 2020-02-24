@@ -2,8 +2,10 @@ package org.sa.rainbow.model.acme.swim;
 
 import org.acmestudio.acme.PropertyHelper;
 import org.acmestudio.acme.element.property.IAcmeProperty;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.stitch.lib.SwimUtils;
 
@@ -31,6 +33,9 @@ public class SwimModelHelper {
 	private double m_estimatedBasicServiceTimeVariance;
 	private double m_estimatedOptServiceTime;
 	private double m_estimatedOptServiceTimeVariance;
+	
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+
    
 	public double getEstimatedBasicServiceTime() {
 		return m_estimatedBasicServiceTime;
@@ -92,7 +97,7 @@ public class SwimModelHelper {
     
 	public int getAddServerLatencyPeriods() {
     	int latencySec = getAddServerLatencySec();
-    	double periodMsec = Double.parseDouble(Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_MODEL_EVAL_PERIOD));
+    	double periodMsec = Double.parseDouble(m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_MODEL_EVAL_PERIOD));
     	return (int) Math.ceil(latencySec * 1000 / periodMsec);
 	}
 
