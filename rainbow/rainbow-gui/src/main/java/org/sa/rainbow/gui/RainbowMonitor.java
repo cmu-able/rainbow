@@ -31,8 +31,10 @@ import javax.swing.table.TableColumnModel;
 
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 
 public class RainbowMonitor extends JInternalFrame {
 	
@@ -40,6 +42,9 @@ public class RainbowMonitor extends JInternalFrame {
 	private RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
 	private OperatingSystemMXBean osMxBean = ManagementFactory.getOperatingSystemMXBean();
 	private int nrCPUs = osMxBean.getAvailableProcessors();
+	
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+
 
 	public static class ThreadData {
 		Thread thread;
@@ -234,7 +239,7 @@ public class RainbowMonitor extends JInternalFrame {
 
 		};
 
-		Map<RainbowComponentT, Map<String, Thread>> registeredThreads = Rainbow.instance().getRegisteredThreads();
+		Map<RainbowComponentT, Map<String, Thread>> registeredThreads = m_rainbowEnvironment.getRegisteredThreads();
 		for (Map.Entry<RainbowComponentT, Map<String, Thread>> e : registeredThreads.entrySet()) {
 			for (Map.Entry<String, Thread> e2 : e.getValue().entrySet()) {
 				e2.getValue().setUncaughtExceptionHandler(m_exceptionHandler);

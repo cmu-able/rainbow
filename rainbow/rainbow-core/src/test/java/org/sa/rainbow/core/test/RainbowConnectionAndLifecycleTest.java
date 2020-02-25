@@ -37,6 +37,8 @@ public abstract class RainbowConnectionAndLifecycleTest extends DefaultTCase {
     private RainbowMaster   m_master;
 
     private static String   s_currentDirectory;
+    
+    protected IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
 
     @BeforeClass
     public static void rememberUserDir () {
@@ -94,7 +96,7 @@ public abstract class RainbowConnectionAndLifecycleTest extends DefaultTCase {
         final int extra = TestPropertiesDefinition.getInt ("heartbeat.extra.time");
 
         // Wait for the heartbeat to arrive
-        Thread.sleep (Integer.valueOf (Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_DELEGATE_BEACONPERIOD))
+        Thread.sleep (Integer.valueOf (m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_DELEGATE_BEACONPERIOD))
                 + extra);
         Beacon b = mth.getBeaconFor (m_delegate.getId ());
         assertTrue (b != null);
@@ -170,7 +172,7 @@ public abstract class RainbowConnectionAndLifecycleTest extends DefaultTCase {
         }, 5000);
         // Wait for heartbeat period to ensure that a heartbeat isn't received, so the delegate is truly paused
         final int extra = TestPropertiesDefinition.getInt ("heartbeat.extra.time");
-        int heartbeatTime = Integer.valueOf (Rainbow.instance ().getProperty (
+        int heartbeatTime = Integer.valueOf (m_rainbowEnvironment.getProperty (
                 RainbowConstants.PROPKEY_DELEGATE_BEACONPERIOD))
                 + extra;
 

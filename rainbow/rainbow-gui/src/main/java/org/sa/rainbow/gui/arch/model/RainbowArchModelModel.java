@@ -15,7 +15,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.sa.rainbow.core.AbstractRainbowRunnable;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
@@ -63,6 +65,9 @@ public class RainbowArchModelModel extends RainbowArchModelElement implements IR
 	private Map<String, RainbowModelOperationRepresentation> m_operationsAccepted = new HashMap<>();
 
 	private IModelChangeBusSubscriberPort m_modelChangePort;
+	
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+
 
 	public RainbowArchModelModel(ModelReference m) {
 		super();
@@ -88,7 +93,7 @@ public class RainbowArchModelModel extends RainbowArchModelElement implements IR
 	}
 
 	private void addOperations() {
-		IModelInstance<Object> rm = Rainbow.instance().getRainbowMaster().modelsManager().getModelInstance(m_modelRef);
+		IModelInstance<Object> rm = m_rainbowEnvironment.getRainbowMaster().modelsManager().getModelInstance(m_modelRef);
 		if (rm == null)
 			return;
 		Map<String, Class<? extends AbstractRainbowModelOperation<?, Object>>> commands;

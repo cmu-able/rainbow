@@ -56,8 +56,10 @@ import org.graphstream.graph.implementations.DefaultGraph;
 import org.graphstream.stream.file.FileSourceDOT;
 import org.ho.yaml.Yaml;
 import org.sa.rainbow.core.IDisposable;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.analysis.IRainbowAnalysis;
@@ -191,6 +193,9 @@ public class RainbowWindoe extends RainbowWindow
 	private DefaultThreadInfoPane m_exPanel;
 
 	private DefaultThreadInfoPane m_anPanel;
+	
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+
 
 	public RainbowWindoe(IMasterCommandPort master) {
 		super(master);
@@ -203,8 +208,8 @@ public class RainbowWindoe extends RainbowWindow
 	}
 
 	private void init() {
-		File specs = Util.getRelativeToPath(Rainbow.instance().getTargetPath(),
-				Rainbow.instance().getProperty("rainbow.gui.specs"));
+		File specs = Util.getRelativeToPath(m_rainbowEnvironment.getTargetPath(),
+				m_rainbowEnvironment.getProperty("rainbow.gui.specs"));
 		if (specs != null) {
 			try {
 				m_uidb = (Map<String, Object>) Yaml.load(specs);
@@ -790,7 +795,7 @@ public class RainbowWindoe extends RainbowWindow
 			e.printStackTrace();
 		}
 
-		EffectorDescription effectorDesc = Rainbow.instance().getRainbowMaster().effectorDesc();
+		EffectorDescription effectorDesc = m_rainbowEnvironment.getRainbowMaster().effectorDesc();
 		for (EffectorAttributes ea : effectorDesc.effectors) {
 			if (!m_rainbowModel.hasEffector(ea)) {
 				RainbowArchEffectorModel model = new RainbowArchEffectorModel(ea);
@@ -803,7 +808,7 @@ public class RainbowWindoe extends RainbowWindow
 	}
 
 	private void createExecutors() {
-		Map<String, IAdaptationExecutor<?>> executors = Rainbow.instance().getRainbowMaster().adaptationExecutors();
+		Map<String, IAdaptationExecutor<?>> executors = m_rainbowEnvironment.getRainbowMaster().adaptationExecutors();
 		Map<String, Object> aui = m_uidb.containsKey("executors") ? (Map<String, Object>) m_uidb.get("executors")
 				: Collections.<String, Object>emptyMap();
 		for (IAdaptationExecutor a : executors.values()) {
@@ -818,7 +823,7 @@ public class RainbowWindoe extends RainbowWindow
 	}
 
 	private void createAdaptationManagers() {
-		Map<String, IAdaptationManager<?>> analyzers = Rainbow.instance().getRainbowMaster().adaptationManagers();
+		Map<String, IAdaptationManager<?>> analyzers = m_rainbowEnvironment.getRainbowMaster().adaptationManagers();
 		Map<String, Object> aui = m_uidb.containsKey("managers") ? (Map<String, Object>) m_uidb.get("managers")
 				: Collections.<String, Object>emptyMap();
 		for (IAdaptationManager a : analyzers.values()) {
@@ -833,7 +838,7 @@ public class RainbowWindoe extends RainbowWindow
 	}
 
 	private void createAnalyzers() {
-		Collection<IRainbowAnalysis> analyzers = Rainbow.instance().getRainbowMaster().analyzers();
+		Collection<IRainbowAnalysis> analyzers = m_rainbowEnvironment.getRainbowMaster().analyzers();
 		Map<String, Object> aui = m_uidb.containsKey("analyzers") ? (Map<String, Object>) m_uidb.get("analyzers")
 				: Collections.<String, Object>emptyMap();
 		for (IRainbowAnalysis a : analyzers) {
@@ -847,7 +852,7 @@ public class RainbowWindoe extends RainbowWindow
 	}
 
 	private void createModels() {
-		ModelsManager modelsManager = Rainbow.instance().getRainbowMaster().modelsManager();
+		ModelsManager modelsManager = m_rainbowEnvironment.getRainbowMaster().modelsManager();
 		Collection<? extends String> types = modelsManager.getRegisteredModelTypes();
 		for (String t : types) {
 			Collection<? extends IModelInstance<?>> models = modelsManager.getModelsOfType(t);
@@ -870,11 +875,11 @@ public class RainbowWindoe extends RainbowWindow
 	}
 
 	private void createGauges() {
-		GaugeManager gaugeManager = Rainbow.instance().getRainbowMaster().gaugeManager();
+		GaugeManager gaugeManager = m_rainbowEnvironment.getRainbowMaster().gaugeManager();
 		int i = 1;
 		for (String g : gaugeManager.getCreatedGauges()) {
 			if (!m_rainbowModel.hasGauge(g)) {
-				GaugeInstanceDescription description = Rainbow.instance().getRainbowMaster().gaugeDesc().instSpec
+				GaugeInstanceDescription description = m_rainbowEnvironment.getRainbowMaster().gaugeDesc().instSpec
 						.get(g.split("@")[0].split(":")[0]);
 				RainbowArchGaugeModel model = new RainbowArchGaugeModel(description);
 				model.addPropertyChangeListener(locationChange);
@@ -915,7 +920,7 @@ public class RainbowWindoe extends RainbowWindow
 			e.printStackTrace();
 		}
 
-		ProbeDescription probes = Rainbow.instance().getRainbowMaster().probeDesc();
+		ProbeDescription probes = m_rainbowEnvironment.getRainbowMaster().probeDesc();
 		int i = 1;
 		for (ProbeAttributes probe : probes.probes) {
 			String probeId = probe.alias + "@" + probe.getLocation();

@@ -16,7 +16,9 @@ import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.table.DefaultTableModel;
 
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.event.IRainbowMessage;
@@ -43,6 +45,9 @@ public class ArchModelPanel extends JPanel
 	private ModelReference m_ref;
 	private ArrayList<Runnable> m_updaters = new ArrayList<>(1);
 	private HashMap<String, Integer> m_op2row = new HashMap<>();
+	
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+
 
 	public ArchModelPanel(ModelReference ref) {
 		m_ref = ref;
@@ -61,7 +66,7 @@ public class ArchModelPanel extends JPanel
 //		m_table.setAutoscrolls(true);
 		m_table.addComponentListener(new JTableCellDisplayer(m_table));
 
-		IModelInstance<Object> mi = Rainbow.instance().getRainbowMaster().modelsManager().getModelInstance(ref);
+		IModelInstance<Object> mi = m_rainbowEnvironment.getRainbowMaster().modelsManager().getModelInstance(ref);
 		m_table.setPreferredScrollableViewportSize(new Dimension(200, 120));
 		m_table.setFont(new Font(m_table.getFont().getFontName(), m_table.getFont().getStyle(), 8));
 		m_table.getTableHeader()

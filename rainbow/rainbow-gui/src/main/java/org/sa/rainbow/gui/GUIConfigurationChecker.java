@@ -12,8 +12,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.ho.yaml.Yaml;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.IRainbowMaster;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.Pair;
@@ -27,6 +29,9 @@ public class GUIConfigurationChecker implements IRainbowConfigurationChecker {
 
 	private IRainbowMaster m_master;
 	private LinkedList<Problem> m_problems;
+	
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+
 
 	private static final List<String> CATEGORIES = Arrays.asList("meter", "timeseries", "onoff");
 	private static final List<String> COMPONENTS = Arrays.asList("analyzers", "managers", "executors", "models");
@@ -49,9 +54,9 @@ public class GUIConfigurationChecker implements IRainbowConfigurationChecker {
 
 	@Override
 	public void checkRainbowConfiguration() {
-		String property = Rainbow.instance().getProperty("rainbow.gui.specs", null);
+		String property = m_rainbowEnvironment.getProperty("rainbow.gui.specs", null);
 		if (property == null) return;
-		File specs = Util.getRelativeToPath(Rainbow.instance().getTargetPath(),
+		File specs = Util.getRelativeToPath(m_rainbowEnvironment.getTargetPath(),
 				property);
 		if (specs != null) {
 			try {

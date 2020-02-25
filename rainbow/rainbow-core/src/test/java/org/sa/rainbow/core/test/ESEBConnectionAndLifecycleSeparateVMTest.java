@@ -6,9 +6,11 @@ import org.apache.log4j.*;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.RainbowDelegate;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.RainbowMaster;
 
 import java.io.ByteArrayOutputStream;
@@ -29,6 +31,9 @@ public class ESEBConnectionAndLifecycleSeparateVMTest extends DefaultTCase {
 
     @TestHelper
     ThreadCountTestHelper m_threadCountHelper;
+    
+    protected IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+
 
     /**
      * The directory that the test was started in, so that it can be used subsequently to start the delegate in the same
@@ -111,7 +116,7 @@ public class ESEBConnectionAndLifecycleSeparateVMTest extends DefaultTCase {
         ProcessInterface pi = launchDelegate (s_currentDirectory);
 
         int extra = TestPropertiesDefinition.getInt ("heartbeat.extra.time");
-        Thread.sleep (Integer.valueOf (Rainbow.instance ().getProperty (RainbowConstants.PROPKEY_DELEGATE_BEACONPERIOD))
+        Thread.sleep (Integer.valueOf (m_rainbowEnvironment.getProperty (RainbowConstants.PROPKEY_DELEGATE_BEACONPERIOD))
                 + extra * 3);
         String logMsg = baos.toString ();
         assertTrue (logMsg.contains ("Received heartbeat from known delegate: "));

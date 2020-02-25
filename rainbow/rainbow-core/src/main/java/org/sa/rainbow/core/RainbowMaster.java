@@ -80,6 +80,7 @@ import org.sa.rainbow.util.Util;
 import org.sa.rainbow.util.YamlUtil;
 
 import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCommandPort, IRainbowMaster {
 
@@ -760,7 +761,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 		}
 		
 		RainbowRuntimeModule module = new RainbowRuntimeModule();
-		Guice.createInjector(module);
+		Injector injector = Guice.createInjector(module);
 
 		RainbowMaster master = new RainbowMaster();
 		if (showGui) {
@@ -794,9 +795,7 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 		} else {
 			m_rainbowEnvironment.setProperty(Rainbow.PROPKEY_SHOW_GUI, false);
 		}
-		master.m_autoStart = autoStart;
-		
-		
+		master.m_autoStart = autoStart;		
 		
 		
 		master.initialize();

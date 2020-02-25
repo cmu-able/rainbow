@@ -20,7 +20,9 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.commands.AbstractLoadModelCmd;
 import org.sa.rainbow.core.models.commands.AbstractRainbowModelOperation;
@@ -39,6 +41,9 @@ public class ModelInfoPanel extends JPanel {
 	private JTextField m_sourceText;
 	private JTable m_table;
 	private RainbowArchModelModel m_selectedModel;
+	
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+
 
 	public ModelInfoPanel() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
@@ -136,7 +141,7 @@ public class ModelInfoPanel extends JPanel {
 //		if (m_selectedModel != null) m_selected
 		GaugeTabbedPane.clearTable((DefaultTableModel) m_table.getModel());
 		m_selectedModel = model;
-		IModelInstance<Object> rm = Rainbow.instance().getRainbowMaster().modelsManager()
+		IModelInstance<Object> rm = m_rainbowEnvironment.getRainbowMaster().modelsManager()
 				.getModelInstance(model.getModelRef());
 		m_modelName.setText(model.getModelRef().getModelName());
 		m_modelType.setText(model.getModelRef().getModelType());

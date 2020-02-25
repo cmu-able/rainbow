@@ -62,6 +62,7 @@ public class RainbowPortFactory {
 
     static IRainbowEnvironment m_rainbowEnvironment  = new RainbowEnvironmentDelegate();
     
+//    @Inject    
     static IRainbowConnectionPortFactory m_instance;
 
     private RainbowPortFactory () {

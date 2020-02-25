@@ -38,11 +38,13 @@ import javax.swing.border.TitledBorder;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.sa.rainbow.core.IDisposable;
+import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.IRainbowRunnable;
 import org.sa.rainbow.core.Identifiable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
+import org.sa.rainbow.core.RainbowEnvironmentDelegate;
 import org.sa.rainbow.core.error.RainbowConnectionException;
 import org.sa.rainbow.core.gauges.GaugeManager;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
@@ -130,6 +132,9 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	private javax.swing.Timer m_tabTimer;
 	protected JInternalFrame m_masterFrame;
 	protected JMenuBar m_menuBar;
+	
+	protected static IRainbowEnvironment m_rainbowEnvironment = new RainbowEnvironmentDelegate();
+
 
 	/**
 	 * Launch the application.
@@ -405,7 +410,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	}
 
 	protected void quit() {
-		Rainbow.instance().signalTerminate();
+		m_rainbowEnvironment.signalTerminate();
 	}
 
 	protected JTextArea createTextAreaInTab(JTabbedPane tabbedPane, String title) {
@@ -455,7 +460,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 	}
 
 	protected void populateUI() {
-		ModelsManager modelsManager = Rainbow.instance().getRainbowMaster().modelsManager();
+		ModelsManager modelsManager = m_rainbowEnvironment.getRainbowMaster().modelsManager();
 		Collection<? extends String> types = modelsManager.getRegisteredModelTypes();
 		for (String t : types) {
 			Collection<? extends IModelInstance<?>> models = modelsManager.getModelsOfType(t);
@@ -472,7 +477,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 				}
 			}
 		}
-		GaugeManager gaugeManager = Rainbow.instance().getRainbowMaster().gaugeManager();
+		GaugeManager gaugeManager = m_rainbowEnvironment.getRainbowMaster().gaugeManager();
 		for (String g : gaugeManager.getCreatedGauges()) {
 			if (m_gaugeSections.get(g) == null) {
 				addGaugePanel(g);
@@ -509,7 +514,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 			e.printStackTrace();
 		}
 
-		ProbeDescription probes = Rainbow.instance().getRainbowMaster().probeDesc();
+		ProbeDescription probes = m_rainbowEnvironment.getRainbowMaster().probeDesc();
 		for (ProbeAttributes p : probes.probes) {
 			String probeId = p.alias + "@" + p.getLocation();
 			if (m_probeSections.get(probeId) == null) {
@@ -595,7 +600,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 			e.printStackTrace();
 		}
 		
-		EffectorDescription effectorDesc = Rainbow.instance().getRainbowMaster().effectorDesc();
+		EffectorDescription effectorDesc = m_rainbowEnvironment.getRainbowMaster().effectorDesc();
 		for (EffectorAttributes ea : effectorDesc.effectors) {
 			String effectorId = ea.name + "@" + ea.getLocation();
 			if (m_effectorSections.get(effectorId) == null) {
@@ -767,8 +772,8 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		item.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				boolean b = Rainbow.instance().getRainbowMaster().getCommandPort().isAdaptationEnabled();
-				Rainbow.instance().getRainbowMaster().getCommandPort().enableAdaptation(!b);
+				boolean b = m_rainbowEnvironment.getRainbowMaster().getCommandPort().isAdaptationEnabled();
+				m_rainbowEnvironment.getRainbowMaster().getCommandPort().enableAdaptation(!b);
 
 				// boolean b = !((AdaptationManager )Oracle.instance().adaptationManager())
 				// .adaptationEnabled();
@@ -840,7 +845,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		item.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Rainbow.instance().signalTerminate(ExitState.RESTART);
+				m_rainbowEnvironment.signalTerminate(ExitState.RESTART);
 			}
 		});
 		item.setEnabled(false);
@@ -853,7 +858,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				m_master.destroyDelegates();
-				Rainbow.instance().signalTerminate(ExitState.DESTRUCT);
+				m_rainbowEnvironment.signalTerminate(ExitState.DESTRUCT);
 			}
 		});
 		menu.add(item);
@@ -884,9 +889,9 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 			@Override
 			public void run() {
 				m_master.destroyDelegates();
-				Rainbow.instance().signalTerminate();
+				m_rainbowEnvironment.signalTerminate();
 				Util.pause(IRainbowRunnable.LONG_SLEEP_TIME);
-				while (Rainbow.instance().getThreadGroup().activeCount() > 0) {
+				while (m_rainbowEnvironment.getThreadGroup().activeCount() > 0) {
 					try {
 						Thread.sleep(100);
 					} catch (InterruptedException e) {
@@ -1157,7 +1162,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 				// "Please provide a hostname to send update software.\n'*' for all delegate
 				// hosts.");
 				// if (hostname != null && hostname.length() > 0) {
-				// final JFileChooser fc = new JFileChooser(Rainbow.instance().getBasePath());
+				// final JFileChooser fc = new JFileChooser(m_rainbowEnvironment.getBasePath());
 				// int rv = fc.showDialog(m_frame, "Select File");
 				// if (rv == JFileChooser.APPROVE_OPTION) {
 				// File file = fc.getSelectedFile();
@@ -1257,7 +1262,7 @@ public class RainbowWindow implements IRainbowGUI, IDisposable, IRainbowReportin
 		// writeText(ID_EXECUTOR, "Testing Effector " + effName +
 		// Arrays.toString(args));
 		// IEffector.Outcome outcome =
-		// Rainbow.instance().sysOpProvider().execute(effName, target, args);
+		// m_rainbowEnvironment.sysOpProvider().execute(effName, target, args);
 		// writeText(ID_EXECUTOR, " - outcome: " + outcome);
 	}
 
