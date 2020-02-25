@@ -760,6 +760,12 @@ public class RainbowMaster extends AbstractRainbowRunnable implements IMasterCom
 			System.exit(RainbowConstants.EXIT_VALUE_ABORT);
 		}
 		
+		
+		/* The Injection stuff isn't working because there is too much class loading going on.
+		 * 
+		 * See: https://github.com/cmu-able/rainbow/issues/91
+		
+		*/
 		RainbowRuntimeModule module = new RainbowRuntimeModule();
 		Injector injector = Guice.createInjector(module);
 
