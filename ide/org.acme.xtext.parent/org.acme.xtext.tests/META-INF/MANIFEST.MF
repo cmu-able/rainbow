@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: org.acme.xtext.tests
+Bundle-ManifestVersion: 2
+Bundle-Name: org.acme.xtext.tests
+Bundle-Vendor: My Company
+Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: org.acme.xtext.tests;singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.acme.xtext;bundle-version="1.0.0",
+ org.junit.jupiter.api;bundle-version="[5.0.0,6.0.0)",
+ org.eclipse.xtext.testing,
+ org.eclipse.xtext.xbase.testing
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8

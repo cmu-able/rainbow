@@ -3,14 +3,57 @@
  */
 package org.acme.validation
 
+import java.util.Collection
+import java.util.Collections
+import java.util.Comparator
+import java.util.LinkedHashSet
+import java.util.List
+import java.util.regex.Pattern
+import org.acme.acme.AcmeComponentDeclaration
+import org.acme.acme.AcmeComponentTypeDeclaration
+import org.acme.acme.AcmeConnectorDeclaration
+import org.acme.acme.AcmeConnectorTypeDeclaration
+import org.acme.acme.AcmeElementInstance
+import org.acme.acme.AcmeElementType
+import org.acme.acme.AcmeElementTypeDeclaration
+import org.acme.acme.AcmeFactory
+import org.acme.acme.AcmeFamilyDeclaration
+import org.acme.acme.AcmeGroupDeclaration
+import org.acme.acme.AcmeGroupTypeDeclaration
+import org.acme.acme.AcmePackage
+import org.acme.acme.AcmePortDeclaration
+import org.acme.acme.AcmePortTypeDeclaration
+import org.acme.acme.AcmePropertyDeclaration
+import org.acme.acme.AcmePropertyRecord
+import org.acme.acme.AcmePropertyRecordEntry
+import org.acme.acme.AcmePropertyRecordFieldDescription
+import org.acme.acme.AcmePropertySequence
+import org.acme.acme.AcmePropertySet
+import org.acme.acme.AcmePropertyTypeRecord
+import org.acme.acme.AcmePropertyTypeRef
+import org.acme.acme.AcmePropertyTypeSequence
+import org.acme.acme.AcmePropertyTypeSet
+import org.acme.acme.AcmePropertyValueDeclaration
+import org.acme.acme.AcmeRoleDeclaration
+import org.acme.acme.AcmeRoleTypeDeclaration
+import org.acme.acme.AcmeSystemDeclaration
+import org.acme.acme.BooleanLiteral
+import org.acme.acme.FloatLiteral
+import org.acme.acme.IntegerLiteral
+import org.acme.acme.PrimitivePropertyType
+import org.acme.acme.PropertyBearer
+import org.acme.acme.StringLiteral
+import org.eclipse.emf.ecore.util.EcoreUtil
+import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.xtext.validation.Check
 
 /**
  * This class contains custom validation rules. 
- *
+ * 
  * See https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#validation
  */
 class AcmeValidator extends AbstractAcmeValidator {
-	
+
 //	public static val INVALID_NAME = 'invalidName'
 //
 //	@Check
@@ -21,5 +64,466 @@ class AcmeValidator extends AbstractAcmeValidator {
 //					INVALID_NAME)
 //		}
 //	}
+	@Check
+	def propertyValueMatchesType(AcmePropertyDeclaration decl) {
+		val unifiedProperty = unifyPropertyDeclarationWithSuperTypes(decl)
+		if (unifiedProperty.type !== null) {
+			if (unifiedProperty.^val !== null) {
+				val t = unifiedProperty.type.rootType
+				val checks = switch t {
+					case PrimitivePropertyType.INT.name():
+						unifiedProperty.^val.value instanceof IntegerLiteral
+					case PrimitivePropertyType.FLOAT.name():
+						unifiedProperty.^val.value instanceof FloatLiteral ||
+							unifiedProperty.^val.value instanceof IntegerLiteral
+					case PrimitivePropertyType.ANY.name():
+						true
+					case PrimitivePropertyType.DOUBLE.name():
+						unifiedProperty.^val.value instanceof FloatLiteral ||
+							unifiedProperty.^val.value instanceof IntegerLiteral
+					case PrimitivePropertyType.STRING.name():
+						unifiedProperty.^val.value instanceof StringLiteral
+					case PrimitivePropertyType.BOOLEAN.name():
+						unifiedProperty.^val.value instanceof BooleanLiteral
+					case t.startsWith("set"): {
+						val value = unifiedProperty.^val.value;
+						value instanceof AcmePropertySet &&
+							setTypesCompatible((value as AcmePropertySet).inferredTypeString, t)
+
+					}
+					case t.startsWith("seq"): {
+						val value = unifiedProperty.^val.value;
+						value instanceof AcmePropertySequence &&
+							seqTypesCompatible((value as AcmePropertySequence).inferredTypeString, t)
+					}
+					case t.startsWith('record'): {
+						val value = unifiedProperty.^val.value;
+						value instanceof AcmePropertyRecord &&
+							recordTypesCompatible((value as AcmePropertyRecord).inferredTypeString, t)
+					}
+					default:
+						false
+				}
+				if (!checks) {
+					error(
+						'''The value of «decl.name» does not typecheck''',
+						decl,
+						AcmePackage.Literals.ACME_PROPERTY_DECLARATION__VAL,
+						Diagnostics.TYPES_INCOMPATIBLE
+					)
+				}
+			} else if (EcoreUtil2.getContainerOfType(decl, AcmeElementInstance) !== null) {
+				error('''The property «decl.name» must have a value''', decl,
+					AcmePackage.Literals.ACME_PROPERTY_DECLARATION__NAME, Diagnostics.NO_PROPERTY_VALUE)
+			}
+		}
+
+	}
+
+	def boolean typesCompatibleByString(String check, String against) {
+		switch against {
+			case PrimitivePropertyType.INT.name():
+				check == PrimitivePropertyType.INT.name()
+			case PrimitivePropertyType.FLOAT.name():
+				check == PrimitivePropertyType.INT.name() || check == PrimitivePropertyType.FLOAT.name()
+			case PrimitivePropertyType.DOUBLE.name():
+				check == PrimitivePropertyType.INT.name() || check == PrimitivePropertyType.FLOAT.name() ||
+					check == PrimitivePropertyType.DOUBLE.name()
+			case PrimitivePropertyType.BOOLEAN.name():
+				check == PrimitivePropertyType.BOOLEAN.name()
+			case PrimitivePropertyType.STRING.name():
+				check == PrimitivePropertyType.STRING.name()
+			case PrimitivePropertyType.ANY.name(): true
+			case against.startsWith('set'):
+				check.startsWith('set') && setTypesCompatible(check, against)
+			case against.startsWith('seq'):
+				check.startsWith('seq') && seqTypesCompatible(check, against)
+			case against.startsWith('record'):
+				check.startsWith('record') && recordTypesCompatible(check, against)
+			default:
+				throw new UnsupportedOperationException("unknown type")
+		}
+	}
 	
+	static val RECORD_PATTERN = Pattern.compile("record\\[(.*)\\]");
+
+	def boolean recordTypesCompatible(String check, String against) {
+		var checkPart = check
+		var againstPart = against
+		if (check == against) return true;
+		if (check.startsWith('record') && against.startsWith('record')) {
+			checkPart = check.substring(0, check.length - 1).substring('record['.length)
+			var matcher = RECORD_PATTERN.matcher(checkPart)
+			var cp = ""
+			while (matcher.find) {
+				cp = Pattern.quote(matcher.group(1))
+				checkPart = checkPart.replaceAll(cp, matcher.group(1).replaceAll("\\|", "&"));
+			}
+			val checkFields = checkPart.split("\\|")
+			
+			againstPart = against.substring(0, against.length - 1).substring('record['.length)
+			matcher = RECORD_PATTERN.matcher(againstPart)
+			while (matcher.find) {
+				cp = Pattern.quote(matcher.group(1))
+				againstPart = againstPart.replaceAll(cp, matcher.group(1).replaceAll("\\|", "&"));			}
+			val againstFields = againstPart.split("\\|")
+			
+			if (againstFields.length != checkFields.length) return false;
+			
+			for (var i = 0; i < againstFields.length; i++) {
+				var af = againstFields.get(i)
+				var cf = checkFields.get(i)
+				var ai = af.indexOf(':')
+				var ci = cf.indexOf(':')
+				val an = af.substring(0, ai)
+				val cn = cf.substring(0, ci)
+				if (an != cn) return false;
+				
+				if (!typesCompatibleByString(cf.substring(ci+1).replaceAll("&","|"), af.substring(ai+1).replaceAll("&","|"))) {
+					return false;
+				}
+				
+			}
+			return true;
+
+		}
+		return false;
+	}
+
+	def boolean seqTypesCompatible(String check, String against) {
+		var checkPart = check
+		var againstPart = against
+		if (check.startsWith('seq') && against.startsWith('seq')) {
+			checkPart = check.substring(0, check.length - 1).substring('seq<'.length)
+			againstPart = against.substring(0, against.length - 1).substring('seq<'.length)
+			return typesCompatibleByString(checkPart, againstPart)
+		}
+		return false
+	}
+
+	def boolean setTypesCompatible(String check, String against) {
+		var checkPart = check
+		var againstPart = against
+		if (check.startsWith('set') && against.startsWith('set')) {
+			checkPart = check.substring(0, check.length - 1).substring('set{'.length)
+			againstPart = against.substring(0, against.length - 1).substring('set{'.length)
+			return typesCompatibleByString(checkPart, againstPart)
+		}
+		return false
+	}
+
+
+
+	def inferMostCommonPropertyType(Collection<AcmePropertyValueDeclaration> list) {
+		var String type = null
+		for (v : list) {
+			val typeofV = getTypeOf(v)
+			if (type === null)
+				type = typeofV
+			else if (type != typeofV) {
+				type = inferMostCommonPropertyTypeFromString(type, typeofV)
+			}
+		}
+		type
+	}
+
+	protected def String inferMostCommonPropertyTypeFromString(String type, String typeofV) {
+		var ret = type;
+		if (type == PrimitivePropertyType.INT.name() && typeofV == PrimitivePropertyType.FLOAT.name()) {
+			ret = PrimitivePropertyType.FLOAT.name()
+		} else if (type == PrimitivePropertyType.INT.name() && typeofV == PrimitivePropertyType.DOUBLE.name()) {
+			ret = PrimitivePropertyType.DOUBLE.name()
+		} else if (type == PrimitivePropertyType.FLOAT.name() && typeofV == PrimitivePropertyType.DOUBLE.name()) {
+			ret == typeofV == PrimitivePropertyType.DOUBLE.name()
+		} else if (type.startsWith('set') && typeofV.startsWith('set')) {
+			val tContents = type.substring(0, type.length - 1).substring('set{'.length)
+			val vContents = typeofV.substring(0, typeofV.length - 1).substring('set{'.length)
+			ret = "set{" + inferMostCommonPropertyTypeFromString(tContents, vContents) + "}"
+		} else if (type.startsWith('seq') && typeofV.startsWith('seq')) {
+			val tContents = type.substring(0, type.length - 1).substring('seq<'.length)
+			val vContents = typeofV.substring(0, typeofV.length - 1).substring('seq<'.length)
+			ret = "seq<" + inferMostCommonPropertyTypeFromString(tContents, vContents) + ">"
+		} else if (type.startsWith('record') && typeofV.startsWith('record')) {
+			throw new UnsupportedOperationException("Records not supported")
+		} else {
+			ret = PrimitivePropertyType.ANY.name()
+		}
+		ret
+	}
+
+	def getTypeOf(AcmePropertyValueDeclaration declaration) {
+		val value = declaration.value
+		switch value {
+			IntegerLiteral: PrimitivePropertyType.INT.name()
+			FloatLiteral: PrimitivePropertyType.FLOAT.name()
+			BooleanLiteral: PrimitivePropertyType.BOOLEAN.name()
+			StringLiteral: PrimitivePropertyType.STRING.name()
+			AcmePropertySet: value.getInferredTypeString
+			AcmePropertySequence: value.getInferredTypeString
+			AcmePropertyRecord: value.getInferredTypeString
+			default: throw new UnsupportedOperationException("Unknown property value")
+		}
+	}
+
+	def void collectSuperTypes(AcmeElementType type, LinkedHashSet<AcmeElementType> types, boolean reversed) {
+		switch type {
+			AcmeComponentTypeDeclaration:
+				type.refs.forEach [
+					if(!reversed) types.add(it)
+					collectSuperTypes(it, types, reversed)
+					if(reversed) types.add(it)
+				]
+			AcmeConnectorTypeDeclaration:
+				type.refs.forEach [
+					if(!reversed) types.add(it)
+					it.collectSuperTypes(types, reversed)
+					if(reversed) types.add(it)
+				]
+			AcmeGroupTypeDeclaration:
+				type.refs.forEach [
+					if(!reversed) types.add(it)
+					it.collectSuperTypes(types, reversed)
+					if(reversed) types.add(it)
+				]
+			AcmeRoleTypeDeclaration:
+				type.refs.forEach [
+					if(!reversed) types.add(it)
+					it.collectSuperTypes(types, reversed)
+					if(reversed) types.add(it)
+				]
+			AcmePortTypeDeclaration:
+				type.refs.forEach [
+					if(!reversed) types.add(it)
+					it.collectSuperTypes(types, reversed)
+					if(reversed) types.add(it)
+				]
+			AcmeFamilyDeclaration:
+				type.refs.forEach [
+					if(!reversed) types.add(it)
+					it.collectSuperTypes(types, reversed)
+					if(reversed) types.add(it)
+				]
+		}
+	}
+
+	def getAllInstantiated(AcmeElementInstance e, boolean reversed) {
+		val LinkedHashSet<AcmeElementType> types = new LinkedHashSet()
+		switch e {
+			AcmeComponentDeclaration:
+				e.instantiated.filter[it instanceof AcmeElementType].forEach [
+					if(!reversed) types.add(it as AcmeElementType)
+					collectSuperTypes(it as AcmeElementType, types, reversed)
+					if(reversed) types.add(it as AcmeElementType)
+
+				]
+			AcmeSystemDeclaration:
+				e.instantiated.filter[it instanceof AcmeElementType].forEach [
+					if(!reversed) types.add(it)
+					it.collectSuperTypes(types, reversed)
+					if(reversed) types.add(it)
+
+				]
+			AcmeConnectorDeclaration:
+				e.instantiated.filter[it instanceof AcmeElementType].forEach [
+					if(!reversed) types.add(it as AcmeElementType)
+					(it as AcmeElementType).collectSuperTypes(types, reversed)
+					if(reversed) types.add(it as AcmeElementType)
+
+				]
+			AcmeGroupDeclaration:
+				e.instantiated.filter[it instanceof AcmeElementType].forEach [
+					if(!reversed) types.add(it as AcmeElementType)
+					(it as AcmeElementType).collectSuperTypes(types, reversed)
+					if(reversed) types.add(it as AcmeElementType)
+
+				]
+			AcmePortDeclaration:
+				e.instantiated.filter[it instanceof AcmeElementType].forEach [
+					if(!reversed) types.add(it as AcmeElementType)
+					(it as AcmeElementType).collectSuperTypes(types, reversed)
+					if(reversed) types.add(it as AcmeElementType)
+
+				]
+			AcmeRoleDeclaration:
+				e.instantiated.filter[it instanceof AcmeElementType].forEach [
+					if(!reversed) types.add(it as AcmeElementType)
+					(it as AcmeElementType).collectSuperTypes(types, reversed)
+					if(reversed) types.add(it as AcmeElementType)
+
+				]
+		}
+		types
+	}
+
+	def unifyPropertyDeclarationWithSuperTypes(AcmePropertyDeclaration declaration) {
+		val prop = AcmeFactory.eINSTANCE.createAcmePropertyDeclaration()
+		prop.name = declaration.name
+		var e = EcoreUtil2.getContainerOfType(declaration, AcmeElementInstance)
+
+		var LinkedHashSet<AcmeElementType> superTypes = new LinkedHashSet()
+
+		if (e !== null) {
+			superTypes = getAllInstantiated(e, true)
+
+		} else {
+			val t = EcoreUtil2.getContainerOfType(declaration, AcmeElementType)
+			if (t !== null) {
+				collectSuperTypes(t, superTypes, true)
+
+			}
+		}
+
+		superTypes.map[it.body?.properties]?.flatten.filter[it.name == declaration.name].forEach [
+			checkUnifiableProperty(prop, it, declaration)
+		]
+		checkUnifiableProperty(prop, declaration, declaration)
+		prop
+	}
+
+	def getTypeName(AcmePropertyTypeRef type) {
+		if (type.ref !== null)
+			type.ref.name
+		else if (type.structure != null) {
+			if (type.structure.primitive !== null)
+				type.structure.primitive.name()
+			else if (type.structure.num !== null)
+				"enum"
+			else if (type.structure.structure !== null) {
+				switch type.structure.structure {
+					AcmePropertyTypeRecord: "record [...]"
+					AcmePropertyTypeSet: "set {...}"
+					AcmePropertyTypeSequence: "seq <...>"
+					default: "???"
+				}
+			}
+
+		} else {
+			"???"
+		}
+	}
+
+//	def copy(AcmePropertyTypeRef ref) {
+//		val type = AcmeFactory.eINSTANCE.createAcmePropertyTypeRef
+//		if (ref.ref != null) type.ref = ref.ref
+//		else if (ref.structure !== null) {
+//			type.structure = AcmeFactory.eINSTANCE.createAcmePropertyTypeStructure
+//			if (ref.structure.primitive !== null) {
+//				type.structure.primitive = ref.structure.primitive
+//			}
+//			else if (ref.structure.structure != null) {
+//				val struct = ref.structure.structure
+//				switch struct {
+//					AcmePropertyTypeRecord: 
+//				}
+//			}
+//		}
+//		type
+//	}
+	protected def void checkUnifiableProperty(AcmePropertyDeclaration prop, AcmePropertyDeclaration candidate,
+		AcmePropertyDeclaration declaration) {
+		if (prop.type === null)
+			prop.type = EcoreUtil2.copy(candidate.type)
+		else if (candidate.type !== null && prop.type?.rootType != candidate.type?.rootType) {
+			error(
+				'''The type «candidate.name» cannot be unified with «declaration.name» because «candidate.type.typeName» is not compatible wth «prop.type.typeName»''',
+				declaration,
+				declaration.type === null ? AcmePackage.Literals.ACME_PROPERTY_DECLARATION__NAME : AcmePackage.Literals.
+					ACME_PROPERTY_DECLARATION__TYPE,
+				Diagnostics.UNIFICATION_ERROR
+			)
+		}
+
+		if (prop.^val === null)
+			prop.^val = EcoreUtil2.copy(candidate.^val)
+		else if (!EcoreUtil.equals(prop.^val.value, candidate.^val.value)) {
+			error(
+				'''The value for «declaration.name» cannot be unified because it is given a different value in a supertype''',
+				declaration,
+				declaration.^val === null ? AcmePackage.Literals.ACME_PROPERTY_DECLARATION__NAME : AcmePackage.Literals.
+					ACME_PROPERTY_DECLARATION__VAL,
+				Diagnostics.UNIFICATION_ERROR
+			)
+		}
+	}
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	// Extension Methods
+	
+	def String getInferredTypeString(AcmePropertySet set) {
+		'''set{«inferMostCommonPropertyType(set.values)»}'''
+	}
+
+	def String getInferredTypeString(AcmePropertySequence seq) {
+		'''seq<«inferMostCommonPropertyType(seq.values)»>'''
+	}
+
+	def String getInferredTypeString(AcmePropertyRecord req) {
+		val List<AcmePropertyRecordEntry> fields = newLinkedList
+		for (f : req.fields) {
+			fields.add(f)
+		}
+		Collections.sort(fields, new Comparator<AcmePropertyRecordEntry> () {
+			
+			override compare(AcmePropertyRecordEntry o1, AcmePropertyRecordEntry o2) {
+				return o1.name.compareTo(o2.name)
+			}
+			
+		})
+		val sortedFieldsInferred = fields.map [
+			'''«it.name»:«IF it.ref===null»«getTypeOf(it.value)»«ELSE»«it.ref.rootType»«ENDIF»'''
+		].join("|")
+
+		'''record[«sortedFieldsInferred»]'''
+	}
+
+	def String getRootType(AcmePropertyTypeRef ref) {
+		if (ref.structure === null)
+			ref.ref.type.rootType
+		else if (ref.structure.primitive !== null && (ref.structure.primitive != PrimitivePropertyType.NOT_PRIMITIVE))
+			ref.structure.primitive.name()
+		else if (ref.structure.structure !== null) {
+			val structure = ref.structure.structure
+			switch structure {
+				AcmePropertyTypeRecord: {
+					val List<AcmePropertyRecordFieldDescription> sortedFields = newLinkedList
+					for (f : structure.fields) {
+						sortedFields.add(f)
+					}
+					Collections.sort(sortedFields, new Comparator<AcmePropertyRecordFieldDescription> () {
+						
+						override compare(AcmePropertyRecordFieldDescription o1, AcmePropertyRecordFieldDescription o2) {
+							return o1.name.compareTo(o2.name)
+						}
+						
+					})
+					'''record[«sortedFields.map[it.name + ":" + it.type.rootType].join("|")»]'''
+				}
+					
+				AcmePropertyTypeSet: '''set{«structure.type.rootType»}'''
+				AcmePropertyTypeSequence: '''seq<«structure.type.rootType»>'''
+			}
+		} else if (ref.structure.num !== null) {
+			'''enum{«ref.structure.num.values.join(",")»}'''
+		} else {
+			throw new UnsupportedOperationException("Unknown property type referenced")
+		}
+	}
+
+	def void getRootName(AcmePropertyTypeRef ref) {
+		ref.ref.type === null ? ref.ref.name : ref.ref.type.rootName
+	}
+
+	def PropertyBearer getBody(AcmeElementType type) {
+		switch type {
+			AcmeElementTypeDeclaration: type.body
+			AcmeFamilyDeclaration: type.body
+			AcmeComponentTypeDeclaration: type.body
+			AcmeConnectorTypeDeclaration: type.body
+			AcmeGroupTypeDeclaration: type.body
+			AcmePortTypeDeclaration: type.body
+			AcmeRoleTypeDeclaration: type.body
+			default: null
+		}
+	}
+
 }

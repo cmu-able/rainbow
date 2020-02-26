@@ -55,7 +55,21 @@ AcmeFamilyBody:
 	)*
 	'}'
 ;
+PropertyBearer:
+	AcmeFamilyBody | AcmeSystemBody | AcmeComponentBody | AcmeConnectorBody | AcmePortBody | AcmeRoleBody | AcmeGroupBody | AcmeGenericElementBody
+;
 
+AcmeElementInstance:
+	AcmeSystemDeclaration | AcmeComponentDeclaration | AcmeConnectorDeclaration | 
+	AcmePortDeclaration | AcmeRoleDeclaration | AcmeGroupDeclaration
+;
+
+AcmeElementType:
+	AcmeElementTypeDeclaration | AcmeFamilyDeclaration | AcmeComponentTypeDeclaration |
+	AcmeConnectorTypeDeclaration |
+	AcmePortTypeDeclaration | AcmeRoleTypeDeclaration |
+	AcmeGroupTypeDeclaration
+;
 
 AcmeSystemDeclaration:
 	'system' name=ID (':' declared+=[AcmeFamilyDeclaration] (',' declared+=[AcmeFamilyDeclaration])*)?
@@ -166,7 +180,7 @@ MembersBlock:
 ;
 
 ElementsRef:
-	AcmeComponentDeclaration | AcmePortDeclaration | AcmeConnectorDeclaration | AcmeRoleDeclaration
+ 	AcmeComponentDeclaration | AcmePortDeclaration | AcmeConnectorDeclaration | AcmeRoleDeclaration
 ;
 
 QualifiedIdentifier returns ecore::EString:
@@ -344,7 +358,7 @@ AcmeConnectorDeclaration:
 ;
 
 ConnectorOrGenericRef:
-	AcmeElementTypeDeclaration|AcmeConnectorTypeDeclaration
+	(AcmeElementTypeDeclaration|AcmeConnectorTypeDeclaration)
 ;	
 
 AcmeConnectorBody:
@@ -376,7 +390,7 @@ AcmeBindingDeclaration:
 ;
 
 PortOrRoleRef:
-	AcmePortDeclaration | AcmeRoleDeclaration
+	(AcmePortDeclaration | AcmeRoleDeclaration)
 ;
 
 AcmeAttachmentDeclaration:
@@ -389,7 +403,7 @@ AcmeAttachmentDeclaration:
 
 AcmePropertyDeclaration:
 	'property' name=ID
-	(':' type+=AcmePropertyTypeRef)?
+	(':' type=AcmePropertyTypeRef)?
 	(
 		'=' val=AcmePropertyValueDeclaration |
 		'U=' val=AcmePropertyValueDeclaration
@@ -445,11 +459,11 @@ AcmePropertySet:
 ;
 
 AcmePropertySequence:
-	{AcmePropertySet} '<' (values+=AcmePropertyValueDeclaration (',' values+=AcmePropertyValueDeclaration)*)? '>'
+	 {AcmePropertySequence} '<' (values+=AcmePropertyValueDeclaration (',' values+=AcmePropertyValueDeclaration)*)? '>'
 ;
 
 AcmePropertyRecordEntry:
-	name=ID (':' ref=AcmePropertyTypeDeclaration)? '=' value=AcmePropertyValueDeclaration
+	name=ID (':' ref=AcmePropertyTypeRef)? '=' value=AcmePropertyValueDeclaration
 ;
 
 AcmePropertyRecord:
@@ -465,11 +479,11 @@ AcmePropertyTypeSet:
 ;
 
 AcmePropertyTypeSequence:
-	{AcmePropertyTypeSequence} ('seq' | 'sequence') '<' type=AcmePropertyTypeRef? '}'
+	{AcmePropertyTypeSequence} ('seq' | 'sequence') '<' type=AcmePropertyTypeRef? '>'
 ;
 
 AcmePropertyTypeEnum:
-	'enum' '{' ID (',' ID)* '}'
+	'enum' '{' values+=ID (',' values+=ID)* '}'
 ;
 
 AcmePropertyRecordFieldDescription:
@@ -483,6 +497,7 @@ AcmePropertyTypeRef:
 
 
 enum PrimitivePropertyType:
+	NOT_PRIMITIVE="$__NotPrimitive__$" | 
 	INT='int' | FLOAT='float' | ANY='any' | DOUBLE='double' | STRING='string' | BOOLEAN='boolean'
 ;
 

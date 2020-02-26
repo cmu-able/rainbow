@@ -25,6 +25,7 @@
 		<module>org.acme.xtext.ui</module>
 		<module>org.acme.xtext.target</module>
 		<module>org.acme.xtext.feature</module>
+		<module>org.acme.xtext.tests</module>
 		<module>org.acme.xtext.repository</module>
 	</modules>
 	<dependencyManagement>

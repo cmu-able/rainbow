@@ -44,7 +44,7 @@ class AcmeScopeProvider extends AbstractAcmeScopeProvider {
 			eGet as String
 
 		} catch (IllegalArgumentException e) {
-			target.eGet(AcmePackage.Literals.ACME_ELEMENT_TYPE_DECLARATION__NAME) as String
+			target.eGet(AcmePackage.Literals.ACME_ELEMENT_TYPE__NAME) as String
 		}
 	}
 
@@ -59,42 +59,42 @@ class AcmeScopeProvider extends AbstractAcmeScopeProvider {
 					context,
 					super.getScope(context, reference),
 					[AcmeFamilyDeclaration f|f.body.portTypes + f.body.elementTypes],
-					[EObject p|getNameWithElementTypes(p, AcmePackage.Literals.ACME_PORT_TYPE_DECLARATION__NAME)]
+					[EObject p|getNameWithElementTypes(p, AcmePackage.Literals.ACME_ELEMENT_TYPE__NAME)]
 				)
 			AcmeRoleTypeDeclaration:
 				addFamiliesToScope(
 					context,
 					super.getScope(context, reference),
 					[AcmeFamilyDeclaration f|f.body.roleTypes + f.body.elementTypes],
-					[EObject r|getNameWithElementTypes(r, AcmePackage.Literals.ACME_ROLE_TYPE_DECLARATION__NAME)]
+					[EObject r|getNameWithElementTypes(r, AcmePackage.Literals.ACME_ELEMENT_TYPE__NAME)]
 				)
 			AcmeComponentTypeDeclaration:
 				addFamiliesToScope(
 					context,
 					super.getScope(context, reference),
 					[AcmeFamilyDeclaration f|f.body.componentTypes + f.body.elementTypes],
-					[EObject c|getNameWithElementTypes(c, AcmePackage.Literals.ACME_COMPONENT_TYPE_DECLARATION__NAME)]
+					[EObject c|getNameWithElementTypes(c, AcmePackage.Literals.ACME_ELEMENT_TYPE__NAME)]
 				)
 			AcmeConnectorTypeDeclaration:
 				addFamiliesToScope(
 					context,
 					super.getScope(context, reference),
 					[AcmeFamilyDeclaration f|f.body.connectorTypes + f.body.elementTypes],
-					[EObject c|getNameWithElementTypes(c, AcmePackage.Literals.ACME_CONNECTOR_TYPE_DECLARATION__NAME)]
+					[EObject c|getNameWithElementTypes(c, AcmePackage.Literals.ACME_ELEMENT_TYPE__NAME)]
 				)
 			AcmeGroupTypeDeclaration:
 				addFamiliesToScope(
 					context,
 					super.getScope(context, reference),
 					[AcmeFamilyDeclaration f|f.body.groupTypes + f.body.elementTypes],
-					[EObject c|getNameWithElementTypes(c, AcmePackage.Literals.ACME_GROUP_TYPE_DECLARATION__NAME)]
+					[EObject c|getNameWithElementTypes(c, AcmePackage.Literals.ACME_ELEMENT_TYPE__NAME)]
 				)
 			AcmeElementTypeDeclaration:
 				addFamiliesToScope(
 					context,
 					super.getScope(context, reference),
 					[AcmeFamilyDeclaration f|f.body.elementTypes],
-					[EObject c|getNameWithElementTypes(c, AcmePackage.Literals.ACME_ELEMENT_TYPE_DECLARATION__NAME)]
+					[EObject c|getNameWithElementTypes(c, AcmePackage.Literals.ACME_ELEMENT_TYPE__NAME)]
 				)
 			AcmePropertyTypeDeclaration:
 				addFamiliesToScope(
@@ -108,35 +108,35 @@ class AcmeScopeProvider extends AbstractAcmeScopeProvider {
 					context,
 					super.getScope(context, reference),
 					[AcmeFamilyDeclaration f|f.body.portTypes + f.body.elementTypes],
-					[EObject e|getNameWithElementTypes(e, AcmePackage.Literals.ACME_PORT_TYPE_DECLARATION__NAME)]
+					[EObject e|getNameWithElementTypes(e, AcmePackage.Literals.ACME_ELEMENT_TYPE__NAME)]
 				)
 			AcmeRoleDeclaration:
 				addSystemFamiliesToScope(
 					context,
 					super.getScope(context, reference),
 					[AcmeFamilyDeclaration f|f.body.roleTypes + f.body.elementTypes],
-					[EObject e|getNameWithElementTypes(e, AcmePackage.Literals.ACME_ROLE_TYPE_DECLARATION__NAME)]
+					[EObject e|getNameWithElementTypes(e, AcmePackage.Literals.ACME_ELEMENT_TYPE__NAME)]
 				)
 			AcmeComponentDeclaration:
 				addSystemFamiliesToScope(
 					context,
 					super.getScope(context, reference),
 					[AcmeFamilyDeclaration f|f.body.componentTypes + f.body.elementTypes],
-					[EObject e|getNameWithElementTypes(e, AcmePackage.Literals.ACME_COMPONENT_TYPE_DECLARATION__NAME)]
+					[EObject e|getNameWithElementTypes(e, AcmePackage.Literals.ACME_ELEMENT_TYPE__NAME)]
 				)
 			AcmeConnectorDeclaration:
 				addSystemFamiliesToScope(
 					context,
 					super.getScope(context, reference),
 					[AcmeFamilyDeclaration f|f.body.connectorTypes + f.body.elementTypes],
-					[EObject e|getNameWithElementTypes(e, AcmePackage.Literals.ACME_CONNECTOR_TYPE_DECLARATION__NAME)]
+					[EObject e|getNameWithElementTypes(e, AcmePackage.Literals.ACME_ELEMENT_TYPE__NAME)]
 				)
 			AcmeGroupDeclaration:
 				addSystemFamiliesToScope(
 					context,
 					super.getScope(context, reference),
-					[AcmeFamilyDeclaration f|f.body.portTypes + f.body.elementTypes],
-					[EObject e|getNameWithElementTypes(e, AcmePackage.Literals.ACME_GROUP_DECLARATION__NAME)]
+					[AcmeFamilyDeclaration f|f.body.groupTypes + f.body.elementTypes],
+					[EObject e|getNameWithElementTypes(e, AcmePackage.Literals.ACME_ELEMENT_TYPE__NAME)]
 				)
 			AcmePropertyDeclaration:
 				addSystemFamiliesToScope(
@@ -248,5 +248,7 @@ class AcmeScopeProvider extends AbstractAcmeScopeProvider {
 		}
 
 	}
+	
+	
 
 }
