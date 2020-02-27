@@ -1,4 +1,5 @@
 package org.sa.rainbow.configuration.scoping;
+import org.eclipse.emf.ecore.EObject;
 /*
 Copyright 2020 Carnegie Mellon University
 
@@ -19,17 +20,22 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 DEALINGS IN THE SOFTWARE.
  */
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.impl.EReferenceImpl;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.common.types.TypesPackage;
 import org.eclipse.xtext.common.types.xtext.AbstractTypeScopeProvider;
 import org.eclipse.xtext.common.types.xtext.ClasspathBasedTypeScopeProvider;
 import org.eclipse.xtext.common.types.xtext.TypesAwareDefaultGlobalScopeProvider;
+import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.impl.ImportUriGlobalScopeProvider;
+import org.sa.rainbow.configuration.rcl.RclPackage;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
@@ -49,6 +55,50 @@ import com.google.inject.name.Named;
 @SuppressWarnings("restriction")
 public class RclGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 
+	class DoubleScope implements IScope {
+
+		private IScope m_one;
+		private IScope m_two;
+
+		DoubleScope(IScope one, IScope two) {
+			m_one = one;
+			m_two = two;
+			
+		}
+		
+		@Override
+		public IEObjectDescription getSingleElement(QualifiedName name) {
+			
+			IEObjectDescription se = m_one.getSingleElement(name);
+			if (se == null) se= m_two.getSingleElement(name);
+			return se;
+		}
+
+		@Override
+		public Iterable<IEObjectDescription> getElements(QualifiedName name) {
+			return Iterables.concat(m_one.getElements(name), m_two.getElements(name));
+		}
+
+		@Override
+		public IEObjectDescription getSingleElement(EObject object) {
+			IEObjectDescription se = m_one.getSingleElement(object);
+			if (se == null) se = m_two.getSingleElement(object);
+			return se;
+		}
+
+		@Override
+		public Iterable<IEObjectDescription> getElements(EObject object) {
+			return Iterables.concat(m_one.getElements(object), m_two.getElements(object));
+		}
+
+		@Override
+		public Iterable<IEObjectDescription> getAllElements() {
+			return Iterables.concat(m_one.getAllElements(), m_two.getAllElements());
+		}
+		
+	}
+	
+	
 	/*
 	 * AbstractTypeScopeProvider is bound to
 	 * org.eclipse.xtext.common.types.xtext.ClasspathBasedTypeScopeProvider in the
@@ -65,11 +115,22 @@ public class RclGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 
 	@Override
 	public IScope getScope(Resource resource, EReference reference, Predicate<IEObjectDescription> filter) {
-		if (EcoreUtil2.isAssignableFrom(TypesPackage.Literals.JVM_TYPE, reference.getEReferenceType())) {
+		if (EcoreUtil2.isAssignableFrom(TypesPackage.Literals.JVM_TYPE,
+				reference.getEReferenceType()) /*
+												 * || reference.equals(RclPackage.Literals.TYPE__REF)
+												 */) {
 			IScope typeScope = typeScopeProvider.getScope(resource, reference, filter);
 			return typeScope;
-		} else {
+		} else if (reference.equals(RclPackage.Literals.TYPE__REF)) {
+			EReferenceImpl javaReference = (EReferenceImpl )EcoreUtil.copy(reference);
+			javaReference.setEType(TypesPackage.eINSTANCE.getJvmType());
+			return new DoubleScope(super.getScope(resource, reference, filter), typeScopeProvider.getScope(resource, javaReference, filter));
+		}
+	    else {
 			return super.getScope(resource, reference, filter);
 		}
 	}
+	
+	
+	
 }

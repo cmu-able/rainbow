@@ -380,7 +380,7 @@ model factory SWIM yields org.sa.rainbow.^model.^acme.swim.commands.SwimCommandF
     for org.sa.rainbow.^model.^acme.AcmeModelInstance
     
     command load is org.sa.rainbow.^model.^acme.swim.commands.SwimLoadModelCommand
-    command setDimmer(acme::SwimFam.LoadBalancerT target, int dimmer) 
+    command setDimmer(SwimFam.LoadBalancerT target, int dimmer) 
         is org.sa.rainbow.^model.^acme.swim.commands.SetDimmerCmd;
     ...
 }
@@ -401,7 +401,7 @@ It is also possible to specify an operation to save a model when Rainbow is fini
 After this comes the list of operations that the model can produce, e.g.:
 
 ```
-    command setDimmer(acme::SwimFam.LoadBalancerT target, int dimmer) 
+    command setDimmer(SwimFam.LoadBalancerT target, int dimmer) 
         is org.sa.rainbow.^model.^acme.swim.commands.SetDimmerCmd;
 ```
 
@@ -409,8 +409,8 @@ The first part is the name of the operation (which may be referred to by gauges 
 effectors), e.g., _setDimmer_. Following this are the parameters for the operation. 
 The first argument may be a **target** which specifies the kind of model element that 
 the operation is defined on. The following list of arguments specify the operation paramters. 
-Operation argument types can refer to Acme types (by prefixing the type name with **acme::*, 
-Java types, or builtin types like **int**, **String**, etc.). Finally, the operation 
+Operation argument types can refer to Acme types, 
+Java types, or builtin types like **int**, **String**, etc. Finally, the operation 
 specifies the implementing class for the operation.
 
 ## Probe Specifications

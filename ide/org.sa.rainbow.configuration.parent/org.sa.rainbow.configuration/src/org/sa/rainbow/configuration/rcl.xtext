@@ -78,12 +78,13 @@ FormalParam:
 
 
 Type:
-	 /*{Type} 'int' |  {Type} 'boolean' | {Type} 'double' | {Type} 'String' | */base=BaseType | java=JavaReference | 'acme''::'acme=AcmeReference
+	 /*{Type} 'int' |  {Type} 'boolean' | {Type} 'double' | {Type} 'String' | */base=BaseType | ref=[ecore::EObject|FQN] 
+	 //refjava=JavaReference | 'acme''::'acme=AcmeReference
 ;
 
-AcmeReference:
-	referable=[acme::AnyTypeRef|FQN]
-;
+//AcmeReference:
+//	referable=[acme::AnyTypeRef|FQN]
+//;
 
 enum BaseType:
 	COMPONENT="component" | COMPONENT="Component" |
