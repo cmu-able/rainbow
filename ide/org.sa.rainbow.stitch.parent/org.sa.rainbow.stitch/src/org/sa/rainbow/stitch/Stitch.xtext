@@ -1,5 +1,8 @@
 grammar org.sa.rainbow.stitch.Stitch  hidden(WS, ML_COMMENT, SL_COMMENT)
 import "http://www.eclipse.org/emf/2002/Ecore" as ecore
+import "http://www.acme.org/Acme" as acme
+import "http://www.eclipse.org/xtext/common/JavaVMTypes" as types
+
 
 generate stitch "http://www.sa.org/rainbow/stitch/Stitch"
 
@@ -13,18 +16,29 @@ script
  	 strategy+=strategy*
   ;
 
+importSt:
+	'import' 
+	(
+		(importType=('acme'|'model') importURI=STRING ('{' renames+=importRename (',' renames+=importRename)* '}')?) |
+		(importType=('lib' | 'op') importedNamespace=STRING)
+	) ';'
+;
 
-importSt
-  : i = 'import'
-    ( tl = 'lib'
-    | tm = 'model' 
-    | to = 'op' 
-    | ta = 'acme'
-    )
-    s = STRING /*{beh.createImport($i, $s);}*/
-    ('{' renames+=importRename (',' renames+=importRename)* '}')? ';'
-  ;
+QualifiedNameWithWildcard:
+	QualifiedIdentifier ('.' '*')?
+;
 
+//importSt
+//  : i = 'import'
+//    ( tl = 'lib'
+//    | tm = 'model' 
+//    | to = 'op' 
+//    | ta = 'acme'
+//    )
+//    importURI = STRING /*{beh.createImport($i, $s);}*/
+//    ('{' renames+=importRename (',' renames+=importRename)* '}')? ';'
+//  ;
+//
 QualifiedIdentifier returns ecore::EString:
 	ID ('.' ID)*
 ;
@@ -158,7 +172,7 @@ enum AssignKind:
 	MULT_ASSIGN = '*=' | DIV_ASSIGN="/=" | REM_ASSIGN='%='
 ;
 
-assignmentExpression returns Expr
+assignmentExpression //returns Expr
   : booleanExpr= booleanExpression
     (assign=AssignKind
       assignmentExpr=assignmentExpression)?
@@ -170,41 +184,49 @@ booleanExpression returns Expr
   ;
 
 impliesExpression returns Expr
-  : iffExpression ('->' impliesExpr=impliesExpression)?
+  : iffExpression (({Implies.left=current} '->') right=iffExpression)*
   ;
 
 iffExpression returns Expr
-  : logicalOrExpression ('<->' iffExpr=iffExpression)?
+  : logicalAndOrExpression (({IFF.left=current} '<->') right=logicalAndOrExpression)*
   ;
 
-logicalOrExpression returns Expr
-  : logicalAndExpression (('or' | '||') logicalOrExpr=logicalOrExpression)?
+logicalAndOrExpression returns Expr
+  : relationalExpression (({andOrExpression.left=current} op=('or' | '||' | 'and' | '&&')) right=relationalExpression)*
   ;
 
-logicalAndExpression returns Expr
-  : equalityExpression ( ('and' | '&&') logicalAndExpr=logicalAndExpression)?
+//logicalAndExpression //returns Expr
+//  : equalityExpression ( ('and' | '&&') logicalAndExpr=logicalAndExpression)?
+//  ;
+//  
+
+
+//equalityExpression //returns Expr
+//  : relationalExpression (op=('!=' | '==') eqExpr=equalityExpression)?
+//  ;
+
+relationalExpression returns Expr
+  : equalityExpression (({Comparison.left=current} op=('<' | '<=' | '>' | '>=')) right=relationalExpression)*
   ;
-  
 
 
 equalityExpression returns Expr
-  : relationalExpression (eq=('!=' | '==') eqExpr=equalityExpression)?
-  ;
-
-relationalExpression returns Expr
-  : additiveExpression (rel=('<' | '<=' | '>' | '>=') relExpr=relationalExpression)?
+  : additiveExpression (({Equals.left=current} op=('==' | '!=')) right=additiveExpression)*
   ;
 
 additiveExpression returns Expr
-  : multiplicativeExpression (add=('+' | '-') addExpr=additiveExpression)?
+  : multiplicativeExpression (({Plus.left=current} '+' | {Minus.left=current} '-') right=additiveExpression)*
   ;
 
 multiplicativeExpression returns Expr
-  : unaryExpression (mult=("*" | "/" | "%") multExpr=multiplicativeExpression)?
+  : unaryExpression (({MultOrDiv.left=current} op=("*" | "/" | "%")) right=unaryExpression)*
   ;
 
 unaryExpression returns Expr
-  : unary=('++' | '--' | '-' | '+' | '!')? primaryExpr=primaryExpression post=('++' | '--')?
+  : {BooleanNegation} => '!' expression=primaryExpression |
+  	{ArithmeticSigned} => ('++' | '--' | '-' | '+') expression=primaryExpression  post=('++' | '--')? |
+  	primaryExpression post=('++' | '--')?
+  	
 //  | DECR unaryExpression
 //  | MINUS unaryExpression
 //  | PLUS unaryExpression
@@ -219,26 +241,31 @@ primaryExpression returns Expr
   | pathExpression
   | '(' assignmentExpression ')'
   ;
+  
+
 
 idExpression returns Expr
-  : methodCall
-  | {idExpression} QualifiedIdentifier
-  | {idExpression} INT
-  | {idExpression} FLOAT_LIT
-  | {idExpression}  STRING
-  | {idExpression} "'" ANY_OTHER "'"
-  | {idExpression} 'true'
-  | {idExpression} 'false'
-  | {idExpression} 'TNULL'
+  : idOrMethodCall
+//  | {Expr} QualifiedIdentifier
+  | {IntLiteral} value=INT
+  | {FLoatLiteral} value=FLOAT_LIT
+  | {StringLiteral}  value=STRING
+  //| {idExpression} "'" ANY_OTHER "'"
+  | {BooleanLiteral} value=('true' | 'false')
+  | {TacticLiteral} 'TNULL'
   ;
 
 postIdExpression returns Expr
   : id=ID "'"
   ;
 
-methodCall returns Expr
-  : id=QualifiedIdentifier '(' (expressions+=expression (',' expressions+=expression)*)? ')'
-  ;
+idOrMethodCall:
+	/*container=[ecore::EObject|QualifiedIdentifier]*/ ref=QualifiedIdentifier  ('(' (expressions+=expression (',' expressions+=expression)*)? ')')?
+;
+
+//methodCall //returns Expr
+//  : method=[ecore::EObject] =>'(' (expressions+=expression (',' expressions+=expression)*)? ')'
+//  ;
 
 params
   : params+=param (',' params+=param)*
@@ -271,7 +298,7 @@ setExpression
   ;
 
 pathExpression
-  : '/' (id=QualifiedIdentifier | call=methodCall)( declares=(':' | ':!') QualifiedIdentifier)? ('[' selector=expression ']')?
+  : '/' idOrMethodCall( declares=(':' | ':!') QualifiedIdentifier)? ('[' selector=expression ']')?
     continuation=pathExpressionContinuation?
   ;
 
@@ -433,6 +460,5 @@ terminal SL_COMMENT : '//' !('\n'|'\r')* ('\r'? '\n')?;
 
 terminal WS         : (' '|'\t'|'\r'|'\n')+;
 
-terminal ANY_OTHER: .;
 
 
