@@ -380,7 +380,7 @@ model factory SWIM yields org.sa.rainbow.^model.^acme.swim.commands.SwimCommandF
     for org.sa.rainbow.^model.^acme.AcmeModelInstance
     
     command load is org.sa.rainbow.^model.^acme.swim.commands.SwimLoadModelCommand
-    command setDimmer(acme::SwimFam.LoadBalancerT target, int dimmer) 
+    command setDimmer(SwimFam.LoadBalancerT target, int dimmer) 
         is org.sa.rainbow.^model.^acme.swim.commands.SetDimmerCmd;
     ...
 }
@@ -401,7 +401,7 @@ It is also possible to specify an operation to save a model when Rainbow is fini
 After this comes the list of operations that the model can produce, e.g.:
 
 ```
-    command setDimmer(acme::SwimFam.LoadBalancerT target, int dimmer) 
+    command setDimmer(SwimFam.LoadBalancerT target, int dimmer) 
         is org.sa.rainbow.^model.^acme.swim.commands.SetDimmerCmd;
 ```
 
@@ -409,8 +409,8 @@ The first part is the name of the operation (which may be referred to by gauges 
 effectors), e.g., _setDimmer_. Following this are the parameters for the operation. 
 The first argument may be a **target** which specifies the kind of model element that 
 the operation is defined on. The following list of arguments specify the operation paramters. 
-Operation argument types can refer to Acme types (by prefixing the type name with **acme::*, 
-Java types, or builtin types like **int**, **String**, etc.). Finally, the operation 
+Operation argument types can refer to Acme types, 
+Java types, or builtin types like **int**, **String**, etc. Finally, the operation 
 specifies the implementing class for the operation.
 
 ## Probe Specifications
@@ -887,11 +887,82 @@ All of the fields in the example above are required.
 
 ## Stitch and Utility Preferences
 
+Stitch is a language that is used to specify adaptations primarily on Acme models. For a description of Stitch and how to use it, see the paper [Stitch: A Language for Architecture-Based Self-Adaptation](http://acme.able.cs.cmu.edu/pubs/show.php?id=341) in addition to changes in [What's new in Rainbow 2.3](NewAndNoteworthy.md#what-s-new-in-rainbow-2-3). There are also numerous examples in papers and in the `targets` directory of the repository. 
+
+Stitch is not currently supported as a first class language in RCL. Like Acme, it has syntax highlighting and some referencing to enable tactics and strategies to be referred to in RCL. Further support may be forthcoming.
+
 ### Utility Specifications
+
+Stitch strategies are chosen by predicting their impacts on qualities in the system. This is done by:
+
+1. Defining the qualities of concern and how they are derived from the models
+2. Mapping the values calculated for the quality to a utility function with values in the range [0,1]. This function should be monotonic, with 1 being the highest utility.
+3. Defining scenarios that provide weightings among the utilities. 
+4. For each tactic and quality defined in (1), specifying the predicted impact that executing the tactic will have on the value of the quality.
+
+RCL provides a way to define these, usually in `stitch/utility.rbw`.
+
 
 #### Utility Model
 
+Consider the following utility model:
+
+```
+def utility utilityModel = {
+	^model = ««SwimSys»»
+	utilities = {
+		responseTime = {
+			label="Average Response Time"
+			mapping="[EXPR]LB0.optResponseTime"
+			description="Client experienced response time in milliseconds, R, defined as a float property 'ClientT.experRespTime' in the architecture"
+			^utility=[
+				[0.0,1],
+				[0.1,1],
+				[0.2,0.99],
+				[0.5,0.9],
+				[1.0,0.75],
+				[1.5,0.5],
+				[2.0,0.25],
+				[4.0,0]
+			]
+		}
+		...
+		scenarios = [{
+			name="scenario 1"
+			responseTime=0.7
+			cost=0.3
+		}
+	]
+```
+
+This indicates that the utility model being defined is for the model `««SwimSys»»`. In this example, one utility is defined, `responseTime`. All of the fields given are required. The important ones are:
+
+1. `mapping`: This specifies an (as yet unchecked) mapping that provides the value of the for the quality. In this case, the value computed from the property `optResponseTime` of the component `LB0` in `««SwimSys»»` is used. The valid mapping kinds are:
+  a. `[EXPR]` - must be followed by an Acme interpretable expression
+  b. `[EAvg]` - must be followed by a fully qualified Acme property. The model maintains an exponential average using the equation `expAvg = (1 - alpha) * expAvg + alpha * newVal`, where `alpha` is by default `.3` (and can be changed by defining the property `customize.model.expavg.alpha` in `properties.rbw`
+  c. `[MAX]` - must be followed by a fully qualifed Acme property referncing a type property, and returns the maximum of all the values for instances of that property. For example, if the mapping is `[AVG]ServerT.load`, then the mapping will look for all instances of `ServerT` and raturh the maximum of their `load` properties.
+  d. `[MIN]` - Like `[MAX]` but returns the minumum
+  e. `[AVG]` - Like `[MAX]` but returns the average over the properties. 
+  f. `[CALL]` - followed by a Java static method call to something on the classpath
+
+2. `utility` - this is a two dimensional array that defines a stepwise linear function for mapping values from the mapping into the [0,1] utility value. The function should be monotonic. So, in the example, if the value of `LB0.optResponseTime` is 0.2, then the utility will be calculated as 0.99. If the value is 0.7, then the value will between 0.9 and 0.75 as calculated by the linear function derived from the two closest values [0.5 -> 0.9, 1 -> 0.75].
+
+Finally, an array of scenarios is defined that specify how to combine the utilities using weights. In each scenario, every utility defined in the model must be weighted, with the weights adding to 1.0. The chosen scenario to use should be specified in `properties.rbw` as `def customize.^utility.scenario = "scenario 1"` for example.
+
+
 #### Impact Models
+
+Impact models define the expected impact that each tactic will have on each of the quality dimensions (in terms of the quality values not their utility). Consider the following impact specification:
+
+```
+impact  ««utilityModel»» TAddServer = {  
+	responseTime = -1.00
+	cost = 1.00
+}
+```
+
+This specifies that the impact is usng the `««utilityModel»»` model and applies to the tactic `TAddServer`. The impact specifies that if this tactic is applied, then it is expected that the `responseTime` utility will go down by 1.0 (e.g., seconds) and the `cost` will go up by 1.0 (e.g., dollars). Every tactic imported should be mentioned, and every quality attribute in the utility model must be mentioned. 
+
 
 
 ## Installing
