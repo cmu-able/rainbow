@@ -33,6 +33,7 @@ import org.eclipse.xtext.common.types.JvmType
 import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
+import org.sa.rainbow.configuration.ModelUtil
 import org.sa.rainbow.configuration.RainbowOutputConfigurationProvider
 import org.sa.rainbow.configuration.Utils
 import org.sa.rainbow.configuration.XtendUtils
@@ -131,6 +132,7 @@ class RclGenerator extends AbstractGenerator {
 	def outputUIModel(URI uri, Iterable<DeclaredProperty> properties) {
 		val ui = EcoreUtil2.getAllContentsOfType(properties.get(0), Assignment).findFirst[it.name=='specs']
 		val gauges = EcoreUtil2.getAllContentsOfType(ui, Assignment).filter[it.name=='gauge']
+		val models = EcoreUtil2.getAllContentsOfType(ui, Assignment).filter[it.name=='model']
 		val analyzers = EcoreUtil2.getAllContentsOfType(ui, Assignment).filter[it.name=='analyzers'].map[EcoreUtil2.getAllContentsOfType(it, Assignment)].flatten.filter[it.name=="analyzer"]
 		val managers = EcoreUtil2.getAllContentsOfType(ui, Assignment).filter[it.name=='managers'].map[EcoreUtil2.getAllContentsOfType(it, Assignment)].flatten.filter[it.name=="manager"]
 		val executors = EcoreUtil2.getAllContentsOfType(ui, Assignment).filter[it.name=='executors'].map[EcoreUtil2.getAllContentsOfType(it, Assignment)].flatten.filter[it.name=="executor"]
@@ -154,6 +156,12 @@ class RclGenerator extends AbstractGenerator {
 		          lower: «((g?.value?.value as Component)?.assignment?.findFirst[it.name=='lower'].value.value as DoubleLiteral).value»
 		        «ENDIF»
 		  «ENDFOR»
+		models:
+		   «FOR m : models»
+		   model:
+		     for: "«ModelUtil.extractModelReferenceFromModel(((m.value.value as Component).assignment.findFirst[it.name=='for'].value.value as PropertyReference).referable as DeclaredProperty)»"
+		     gui: «((m.value.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName» 
+		   «ENDFOR»
 		analyzers:
 		  «FOR a : analyzers»
 		    «(((((a.value.value as Component).assignment.findFirst[it.name=='for'].value.value as PropertyReference).referable as DeclaredProperty).value.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»: «((a.value.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»

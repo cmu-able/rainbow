@@ -22,7 +22,6 @@ package org.sa.rainbow.configuration.validation
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
  * DEALINGS IN THE SOFTWARE.
  */
-
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import java.util.HashSet
@@ -99,7 +98,7 @@ class RclValidator extends AbstractRclValidator {
 	public static val MISSING_PROPERTY = "missingRequiredProperty"
 	public static val COMMAND_NOT_IN_GAUGE_TYPE = "commandNotnGaugeSuperType"
 	public static val NOT_VALID_GAUGE_COMMAND = "gaugeCommandNotValid"
-	
+	public static val WRONG_VALUE = "wrongvalue"
 
 	@Check
 	def checkOnlyProbeAsSupertype(Probe probe) {
@@ -110,7 +109,7 @@ class RclValidator extends AbstractRclValidator {
 				val probeTypes = newHashSet
 				for (r : v) {
 					val res = r.allContents
-					res.forEach[
+					res.forEach [
 						if (it instanceof Probe && (it as Probe).type) {
 							probeTypes.add(it)
 						}
@@ -164,7 +163,7 @@ class RclValidator extends AbstractRclValidator {
 				val effectorTypes = newHashSet
 				for (r : v) {
 					val res = r.allContents
-					res.forEach[
+					res.forEach [
 						if (it instanceof Effector && (it as Effector).type) {
 							effectorTypes.add(it)
 						}
@@ -222,68 +221,81 @@ class RclValidator extends AbstractRclValidator {
 			val setupT = gauge.superType.body.assignment.findFirst[it.name == 'setup']?.value?.value
 			val setupI = gauge.body.assignment.findFirst[it.name == 'setup']?.value?.value
 			if (setupT instanceof Component && setupI instanceof Component) {
-				val setupsInType = (setupT as Component).assignment.filter[!ConfigAttributeConstants.ALL_OFREQUIRED_GAUGE_SUBFILEDS?.get('setup')?.contains(it.name)].filter[!ConfigAttributeConstants.ONE_OFREQUIRED_GAUGE_SUBFILEDS?.get('setup')?.contains(it.name)]
-				val setupsInInstance = (setupI as Component).assignment.filter[!ConfigAttributeConstants.ALL_OFREQUIRED_GAUGE_SUBFILEDS?.get('setup')?.contains(it.name)].filter[!ConfigAttributeConstants.ONE_OFREQUIRED_GAUGE_SUBFILEDS?.get('setup')?.contains(it.name)]
+				val setupsInType = (setupT as Component).assignment.filter [
+					!ConfigAttributeConstants.ALL_OFREQUIRED_GAUGE_SUBFILEDS?.get('setup')?.contains(it.name)
+				].filter[!ConfigAttributeConstants.ONE_OFREQUIRED_GAUGE_SUBFILEDS?.get('setup')?.contains(it.name)]
+				val setupsInInstance = (setupI as Component).assignment.filter [
+					!ConfigAttributeConstants.ALL_OFREQUIRED_GAUGE_SUBFILEDS?.get('setup')?.contains(it.name)
+				].filter[!ConfigAttributeConstants.ONE_OFREQUIRED_GAUGE_SUBFILEDS?.get('setup')?.contains(it.name)]
 				val setup = gauge.body.assignment.findFirst[it.name == 'setup']
-				val noSetupDefaults =  setupsInType.filter[it?.value?.value instanceof Reference]
+				val noSetupDefaults = setupsInType.filter[it?.value?.value instanceof Reference]
 				checkWithGaugeType(setupsInType, setupsInInstance, gauge, noSetupDefaults, setup)
 			}
-		
+
 			val configT = gauge.superType.body.assignment.findFirst[it.name == 'config']?.value?.value
 			val configI = gauge.body.assignment.findFirst[it.name == 'config']?.value?.value
 			if (configT instanceof Component && configI instanceof Component) {
-				var configInType = (configT as Component).assignment.filter[
+				var configInType = (configT as Component).assignment.filter [
 					!ConfigAttributeConstants.ALL_OFREQUIRED_GAUGE_SUBFILEDS?.get('config')?.contains(it.name)
 				]
-				configInType = configInType.filter[
+				configInType = configInType.filter [
 					!ConfigAttributeConstants.ONE_OFREQUIRED_GAUGE_SUBFILEDS?.get('config')?.contains(it.name)
 				]
-				val configInInstance = (configI as Component).assignment.filter[!ConfigAttributeConstants.ALL_OFREQUIRED_GAUGE_SUBFILEDS?.get('config')?.contains(it.name)].filter[!ConfigAttributeConstants.ONE_OFREQUIRED_GAUGE_SUBFILEDS?.get('config')?.contains(it.name)]
-				checkWithGaugeType(configInType, configInInstance,gauge, configInType.filter[it?.value?.value instanceof Reference],  gauge.body.assignment.findFirst[it.name == 'config'])
-			
+				val configInInstance = (configI as Component).assignment.filter [
+					!ConfigAttributeConstants.ALL_OFREQUIRED_GAUGE_SUBFILEDS?.get('config')?.contains(it.name)
+				].filter[!ConfigAttributeConstants.ONE_OFREQUIRED_GAUGE_SUBFILEDS?.get('config')?.contains(it.name)]
+				checkWithGaugeType(configInType, configInInstance, gauge, configInType.filter [
+					it?.value?.value instanceof Reference
+				], gauge.body.assignment.findFirst[it.name == 'config'])
+
 			}
 		}
 	}
-	
-	protected def void checkWithGaugeType(Iterable<Assignment> setupsInType, Iterable<Assignment> setupsInInstance, Gauge gauge, Iterable<Assignment> noSetupDefaults, Assignment setup) {
+
+	protected def void checkWithGaugeType(Iterable<Assignment> setupsInType, Iterable<Assignment> setupsInInstance,
+		Gauge gauge, Iterable<Assignment> noSetupDefaults, Assignment setup) {
 		val TypeSetupNames = newLinkedList
 		TypeSetupNames.addAll(setupsInType.map[it.name])
 		for (p : setupsInInstance) {
 			if (!TypeSetupNames.contains(p.name)) {
-				warning('''Property «p.name» is not defined in type «gauge.superType.name»''', p,
+				warning(
+					'''Property «p.name» is not defined in type «gauge.superType.name»''',
+					p,
 					RclPackage.Literals.ASSIGNMENT__NAME
 				)
-			} 
-			val pIntype = setupsInType.findFirst[it.name==p.name]?.value?.value
+			}
+			val pIntype = setupsInType.findFirst[it.name == p.name]?.value?.value
 			var typechecks = false
 			if (pIntype instanceof Reference) {
 				val type = (pIntype as Reference).referable
 				typechecks = switch type.qualifiedName {
-					case typeof(Integer).name : p?.value?.value instanceof IntegerLiteral
+					case typeof(Integer).name: p?.value?.value instanceof IntegerLiteral
 					case typeof(String).name: p?.value?.value instanceof StringLiteral
 					case typeof(Boolean).name: p?.value?.value instanceof BooleanLiteral
-					case typeof(Double).name: p?.value?.value instanceof IntegerLiteral || p?.value?.value instanceof DoubleLiteral
+					case typeof(Double).name: p?.value?.value instanceof IntegerLiteral ||
+						p?.value?.value instanceof DoubleLiteral
 					default: false
 				}
-			}
-			else if (pIntype instanceof DoubleLiteral) {
+			} else if (pIntype instanceof DoubleLiteral) {
 				typechecks = p?.value?.value instanceof DoubleLiteral || p?.value?.value instanceof IntegerLiteral
-			}
-			else {
+			} else {
 				typechecks = p?.value?.value?.class == pIntype?.class
 			}
 			if (!typechecks) {
-				
-				error('''The type of «p.name» does not match in the gauge type''', p, 
+
+				error(
+					'''The type of «p.name» does not match in the gauge type''',
+					p,
 					RclPackage.Literals.ASSIGNMENT__NAME
 				)
 			}
 			TypeSetupNames.remove(p.name)
 		}
-		
+
 		if (!TypeSetupNames.empty && !noSetupDefaults.empty) {
 			val badNames = noSetupDefaults.filter[TypeSetupNames.contains(it.name)].map[it.name]
-			error('''The «(badNames.length > 1)?"properties":"property"» «badNames.join(", ")» need(s) to be given a value in this instance''', setup, RclPackage.Literals.ASSIGNMENT__VALUE, MISSING_PROPERTY, badNames.join(","))
+			error('''The «(badNames.length > 1)?"properties":"property"» «badNames.join(", ")» need(s) to be given a value in this instance''',
+				setup, RclPackage.Literals.ASSIGNMENT__VALUE, MISSING_PROPERTY, badNames.join(","))
 		}
 	}
 
@@ -398,7 +410,7 @@ class RclValidator extends AbstractRclValidator {
 					var fs = fields.map([return "\"" + it + "\""]).join(", ")
 					if (compoundElement != null) {
 						warning(
-							'''"«key»" is missing the required fields «fs».''', 
+							'''"«key»" is missing the required fields «fs».''',
 							compoundElement,
 							RclPackage.Literals.ASSIGNMENT__VALUE,
 							MISSING_PROPERTY,
@@ -503,13 +515,13 @@ class RclValidator extends AbstractRclValidator {
 //						)
 					}
 //					else {
-						error(
-							'''Gauge has regular expression, so "generatedClass" should be specified.''',
-							setupProp,
-							RclPackage.Literals.ASSIGNMENT__VALUE,
-							MISSING_PROPERTY,
-							"generatedClass"
-						)
+					error(
+						'''Gauge has regular expression, so "generatedClass" should be specified.''',
+						setupProp,
+						RclPackage.Literals.ASSIGNMENT__VALUE,
+						MISSING_PROPERTY,
+						"generatedClass"
+					)
 //					}
 				} else {
 					val gc = gcProp?.value?.value
@@ -549,7 +561,7 @@ class RclValidator extends AbstractRclValidator {
 			checkAssignmentType(a, ConfigAttributeConstants.GAUGE_PROPERTY_TYPES, "")
 
 		}
-		
+
 	}
 
 	@Check
@@ -587,7 +599,9 @@ class RclValidator extends AbstractRclValidator {
 					it.name == cc.name
 				] === null) {
 					val commandNamesInGauge = g.body.commands.map[it.name]
-					val possibleRenamesInGauge = g.superType.body.commands.map[it.name].filter[!commandNamesInGauge.contains(it)].join(",")
+					val possibleRenamesInGauge = g.superType.body.commands.map[it.name].filter [
+						!commandNamesInGauge.contains(it)
+					].join(",")
 					error(
 						'''The command "«cc.name»" does not exists in «g.superType.name»''',
 						RclPackage.Literals.COMMAND_CALL__NAME,
@@ -670,7 +684,7 @@ class RclValidator extends AbstractRclValidator {
 			}
 		}
 	}
-	
+
 	def hasTarget(CommandCall cc) {
 		cc.ref !== null || cc.target !== null
 	}
@@ -711,11 +725,12 @@ class RclValidator extends AbstractRclValidator {
 					val validCommands = new LinkedList<String>();
 					val gauge = EcoreUtil2.getContainerOfType(cc, Gauge)
 					if (gauge !== null) {
-						val superTypeCmd =gauge?.superType?.body?.commands?.findFirst[it.name.equalsIgnoreCase(cc.name)]
+						val superTypeCmd = gauge?.superType?.body?.commands?.findFirst [
+							it.name.equalsIgnoreCase(cc.name)
+						]
 						if (superTypeCmd !== null) {
 							validCommands.add(superTypeCmd.command)
-						}
-						else {
+						} else {
 							validCommands.addAll(mf.commands.filter[it.formal.length == cc.actual.length].map[it.name])
 						}
 					}
@@ -788,7 +803,7 @@ class RclValidator extends AbstractRclValidator {
 		}
 	}
 
-	protected def  checkCommandCallElements(CommandCall cc, String command, JvmDeclaredType mf) {
+	protected def checkCommandCallElements(CommandCall cc, String command, JvmDeclaredType mf) {
 		var commandMethod = mf.members.filter[it instanceof JvmOperation].filter [
 			it.simpleName.equalsIgnoreCase(command) || it.simpleName.equalsIgnoreCase(command + "cmd")
 		]
@@ -822,9 +837,8 @@ class RclValidator extends AbstractRclValidator {
 			if (gaugeType !== null) {
 				if (gaugeType.mcf !== null) {
 					val mcf = gaugeType.mcf
-					if (mcf instanceof Reference &&
-						!((mcf as Reference).referable instanceof JvmDeclaredType ||
-							(mcf as Reference).referable instanceof Factory)) {
+					if (mcf instanceof Reference && !((mcf as Reference).referable instanceof JvmDeclaredType ||
+						(mcf as Reference).referable instanceof Factory)) {
 						warning(
 							'''"«cr.command» cannot be checked because there is no model defined"''',
 							RclPackage.Literals.COMMAND_REFERENCE__COMMAND,
@@ -836,9 +850,13 @@ class RclValidator extends AbstractRclValidator {
 			}
 			val command = cr.command
 
-			val java = gaugeType.mcf instanceof Reference && (gaugeType.mcf as Reference).referable instanceof JvmDeclaredType ? (gaugeType.mcf as Reference).
-					referable as JvmDeclaredType : null
-			val factory = gaugeType.mcf instanceof PropertyReference && (gaugeType.mcf as PropertyReference).referable instanceof Factory ? (gaugeType.mcf as PropertyReference).referable as Factory : null
+			val java = gaugeType.mcf instanceof Reference &&
+					(gaugeType.mcf as Reference).referable instanceof JvmDeclaredType
+					? (gaugeType.mcf as Reference).referable as JvmDeclaredType
+					: null
+			val factory = gaugeType.mcf instanceof PropertyReference &&
+					(gaugeType.mcf as PropertyReference).referable instanceof Factory ? (gaugeType.
+					mcf as PropertyReference).referable as Factory : null
 
 			if (java !== null) {
 				var type = java
@@ -961,8 +979,6 @@ class RclValidator extends AbstractRclValidator {
 		}
 	}
 
-	
- 
 	@Check
 	def checkClassAssignments(DeclaredProperty assignment) {
 		if (assignment?.value?.value instanceof Reference) {
@@ -985,9 +1001,10 @@ class RclValidator extends AbstractRclValidator {
 				}
 			}
 		}
-		
-			checkTypeRule(ConfigAttributeConstants.PROPERTY_VALUE_TYPES, "", assignment.name, assignment.value, assignment, RclPackage.Literals.DECLARED_PROPERTY__VALUE)
-			
+
+		checkTypeRule(ConfigAttributeConstants.PROPERTY_VALUE_TYPES, "", assignment.name, assignment.value, assignment,
+			RclPackage.Literals.DECLARED_PROPERTY__VALUE)
+
 	}
 
 	@Check
@@ -1036,6 +1053,31 @@ class RclValidator extends AbstractRclValidator {
 					checkAttributes((dp.value.value as Component).assignment, null,
 						ConfigAttributeConstants.ALL_OFREQUIRED_MODEL_FIELDS, #{},
 						RclPackage.Literals.DECLARED_PROPERTY__VALUE)
+					// Check that the model has a type
+					var typeProp = ((dp.value.value as Component).assignment.findFirst[it.name == 'type'])
+
+					var typeVal = ""
+					if (typeProp?.value?.value instanceof StringLiteral) typeVal = XtendUtils.unpackString(typeProp.value.value as StringLiteral, true, true)
+					var fromFactory = ModelUtil.getModelTypeFromFactory((dp.value.value as Component).assignment.
+						findFirst[it.name == 'factory'])
+					if (fromFactory === null && typeProp === null) {
+						error(
+							'''Model needs to specify a type''',
+							dp.value.value,
+							RclPackage.Literals.DECLARED_PROPERTY__VALUE,
+							MISSING_PROPERTY,
+							'type'
+						)
+					} else if (fromFactory != null && typeProp != null && fromFactory != typeVal) {
+						warning(
+							'''Factory specifies: "«fromFactory»" which should match this value.''',
+							typeProp,
+							RclPackage.Literals.ASSIGNMENT__VALUE,
+							WRONG_VALUE,
+							'''"«typeVal»"'''
+						)
+					}
+
 				}
 				case PROPERTY: {
 				}
@@ -1058,7 +1100,7 @@ class RclValidator extends AbstractRclValidator {
 				name = rent.name + ":" + name
 				rent = EcoreUtil2.getContainerOfType(rent.eContainer, Assignment);
 			}
-			checkTypeRule(ConfigAttributeConstants.GUI_PROPERTY_TUPES, dp, name)
+			checkTypeRule(ConfigAttributeConstants.GUI_PROPERTY_TYPES, dp, name)
 		} else if (parent?.component !== null && parent?.component != ComponentType.PROPERTY) {
 			val rule = ConfigAttributeConstants.COMPONENT_PROPERTY_TYPES.get(parent.component)
 			checkTypeRule(rule, dp)
@@ -1066,14 +1108,15 @@ class RclValidator extends AbstractRclValidator {
 	}
 
 	def void checkTypeRule(Map<String, Map<String, Object>> rule, Assignment dp) {
-		checkTypeRule(rule, "",  dp.name, dp.value, dp, RclPackage.Literals.ASSIGNMENT__VALUE)
+		checkTypeRule(rule, "", dp.name, dp.value, dp, RclPackage.Literals.ASSIGNMENT__VALUE)
 	}
 
 	protected def void checkTypeRule(Map<String, Map<String, Object>> rule, Assignment dp, String prefix) {
 		checkTypeRule(rule, prefix, dp.name, dp.value, dp, RclPackage.Literals.ASSIGNMENT__VALUE)
 	}
-	
-	protected def void checkTypeRule(Map<String, Map<String, Object>> rule, String prefix, String name, Value value, EObject target, EStructuralFeature feature) {
+
+	protected def void checkTypeRule(Map<String, Map<String, Object>> rule, String prefix, String name, Value value,
+		EObject target, EStructuralFeature feature) {
 		if (rule !== null) {
 			val lookupName = prefix == "" ? name : (prefix + name)
 			val fieldRule = rule.get(lookupName) as Map<String, Object>
@@ -1229,8 +1272,8 @@ class RclValidator extends AbstractRclValidator {
 			)
 			return
 		}
-		var definedUtilities = (((iv.utilityModel.referable as DeclaredProperty).value.value as Component).
-			assignment.findFirst [
+		var definedUtilities = (((iv.utilityModel.referable as DeclaredProperty).value.value as Component).assignment.
+			findFirst [
 				it.name == "utilities"
 			]?.value.value as Component).assignment.map[it.name]
 		for (ass : iv.component.assignment) {
@@ -1245,8 +1288,7 @@ class RclValidator extends AbstractRclValidator {
 	static val MODEL_COMMAND_FACTORY_SUPERCLASS = typeof(ModelCommandFactory).name
 	static val RAINBOW_OPERATION_SUPERCLASS = typeof(AbstractRainbowModelOperation).name
 	static val MODEL_SUPERCLASS = typeof(IModelInstance).name
-	
-	
+
 	@Check
 	def checkFactoryDefinition(FactoryDefinition factory) {
 		if (!ConfigAttributeConstants.subclasses(factory.loadCmd, RclValidator.LOAD_MODEL_CMD_SUPERCLASS,

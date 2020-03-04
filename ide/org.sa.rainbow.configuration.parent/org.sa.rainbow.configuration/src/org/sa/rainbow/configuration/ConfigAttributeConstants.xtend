@@ -81,7 +81,7 @@ class ConfigAttributeConstants {
 	public static val OPTIONAL_EFFECTOR_SUBFIELDS = #{'script' -> #{'argument'}}
 
 	public static val ALL_OFREQUIRED_MODEL_FIELDS = #{'factory'}
-	public static val OPTIONAL_MODEL_FIELDS = #{'name', 'path', 'saveOnClose', 'saveLocation'}
+	public static val OPTIONAL_MODEL_FIELDS = #{'name', 'path', 'saveOnClose', 'saveLocation', 'type'}
 
 	public static val ALL_OFREQUIRED_MANANGER_FIELDS = #{'model', 'class'}
 	public static val ALL_OFREQUIRED_EXECUTOR_FIELDS = #{'model', 'class'}
@@ -318,7 +318,7 @@ class ConfigAttributeConstants {
 		newArrayList(GUICategory.values).map['''"«it.name»"''']
 	]
 
-	public static val GUI_PROPERTY_TUPES = #{
+	public static val GUI_PROPERTY_TYPES = #{
 		'class' -> #{'extends' -> #[IRainbowGUI], 'msg' -> 'must implement IRainbowGUI'},
 		'specs:gauges:gauge:type' -> #{'extends' -> #[GaugeType], 'func' -> [ Value v |
 			(v.value instanceof PropertyReference && (v.value as PropertyReference).referable instanceof GaugeType)
@@ -350,6 +350,16 @@ class ConfigAttributeConstants {
 					validCategories.apply(null).contains(
 						"\"" + XtendUtils.unpackString(v.value as RichString, true) + "\"")
 			]
+		},
+		'specs:models:model:for' -> #{
+			'extends' -> #[DeclaredProperty],
+			'msg' -> 'must refer to a model',
+			'func' -> [Value v | v.value instanceof PropertyReference && (v.value as PropertyReference).referable instanceof DeclaredProperty &&
+					((v.value as PropertyReference).referable as DeclaredProperty).component == ComponentType.MODEL]
+		},
+		'specs:models:model:class' -> #{
+			'extends' -> #[JPanel],
+			'msg' -> 'must subclass JPanel'	
 		},
 		'specs:analyzers:analyzer:for' -> #{
 			'extends' -> #[DeclaredProperty],
