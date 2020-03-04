@@ -3,9 +3,15 @@
  */
 package org.sa.rainbow.stitch
 
+import org.sa.rainbow.stitch.scoping.StitchGlobalScopeProvider
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
  */
 class StitchRuntimeModule extends AbstractStitchRuntimeModule {
+	
+	override bindIGlobalScopeProvider() {
+		return StitchGlobalScopeProvider
+	}
+	
 }

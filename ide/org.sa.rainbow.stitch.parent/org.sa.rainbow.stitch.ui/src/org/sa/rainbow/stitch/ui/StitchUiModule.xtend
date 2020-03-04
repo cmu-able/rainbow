@@ -3,11 +3,29 @@
  */
 package org.sa.rainbow.stitch.ui
 
+import com.google.inject.Binder
+import com.google.inject.name.Names
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
+import org.eclipse.xtext.common.types.access.IJvmTypeProvider
+import org.eclipse.xtext.common.types.access.jdt.JdtTypeProviderFactory
+import org.eclipse.xtext.common.types.xtext.AbstractTypeScopeProvider
+import org.eclipse.xtext.common.types.xtext.ui.JdtBasedSimpleTypeScopeProvider
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.
  */
 @FinalFieldsConstructor
 class StitchUiModule extends AbstractStitchUiModule {
+	
+	
+	def configureJvmTypeProvider(Binder binder) {
+		binder.bind(AbstractTypeScopeProvider).annotatedWith(Names.named("jvmtypes")).to(JdtBasedSimpleTypeScopeProvider)
+		binder.bind(IJvmTypeProvider.Factory).annotatedWith(Names.named("jvmtypes")).to(JdtTypeProviderFactory)
+		
+	}
+	
+	override configure(Binder binder) {
+		super.configure(binder)
+		
+		}
 }

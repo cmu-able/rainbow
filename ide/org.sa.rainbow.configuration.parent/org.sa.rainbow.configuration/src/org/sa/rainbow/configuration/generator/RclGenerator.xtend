@@ -21,7 +21,9 @@ FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TOR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
 DEALINGS IN THE SOFTWARE.
  */
+
 import java.util.HashMap
+import org.acme.acme.AnyTypeRef
 import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
@@ -282,8 +284,8 @@ class RclGenerator extends AbstractGenerator {
 				public «cmd.cmd.simpleName» «cmd.name»Cmd «FOR p : cmd.formal BEFORE '(' SEPARATOR ',' AFTER ')'»«XtendUtils.formalTypeName(p, false)» «p.name»	«ENDFOR»
 				{
 					«FOR p : cmd.formal»
-					  «IF p.type.acme !== null»
-					    Ensure.is_true(«p.name».declaresType("«XtendUtils.getAcmeTypeName(p.type.acme.referable)»"));
+					  «IF p.type instanceof AnyTypeRef»
+					    Ensure.is_true(«p.name».declaresType("«XtendUtils.getAcmeTypeName(p.type as AnyTypeRef)»"));
 					  «ENDIF»
 					«ENDFOR»
 					return new «cmd.cmd.simpleName» («constantName(cmd.name)», («factory.defn.modelClass.simpleName» )m_modelInstance, «IF cmd.formal.get(0).name != "target"»"", «ENDIF»«FOR p : cmd.formal SEPARATOR ', '»«XtendUtils.convertToString(p)»«ENDFOR»);

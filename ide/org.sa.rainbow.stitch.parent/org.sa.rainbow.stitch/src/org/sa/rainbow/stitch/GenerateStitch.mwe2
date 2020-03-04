@@ -36,6 +36,8 @@ Workflow {
 			name = "org.sa.rainbow.stitch.Stitch"
 			fileExtensions = "s"
 
+			referencedResource="platform:/resource/org.acme.xtext/model/generated/Acme.genmodel"
+
 			serializer = {
 				generateStub = false
 			}

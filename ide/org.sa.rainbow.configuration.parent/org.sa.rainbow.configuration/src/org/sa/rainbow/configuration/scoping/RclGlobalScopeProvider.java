@@ -19,7 +19,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 DEALINGS IN THE SOFTWARE.
  */
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.impl.EReferenceImpl;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.common.types.TypesPackage;
 import org.eclipse.xtext.common.types.xtext.AbstractTypeScopeProvider;
@@ -28,6 +30,7 @@ import org.eclipse.xtext.common.types.xtext.TypesAwareDefaultGlobalScopeProvider
 import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.impl.ImportUriGlobalScopeProvider;
+import org.sa.rainbow.configuration.rcl.RclPackage;
 
 import com.google.common.base.Predicate;
 import com.google.inject.Inject;
@@ -49,6 +52,9 @@ import com.google.inject.name.Named;
 @SuppressWarnings("restriction")
 public class RclGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 
+	
+	
+	
 	/*
 	 * AbstractTypeScopeProvider is bound to
 	 * org.eclipse.xtext.common.types.xtext.ClasspathBasedTypeScopeProvider in the
@@ -65,11 +71,22 @@ public class RclGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 
 	@Override
 	public IScope getScope(Resource resource, EReference reference, Predicate<IEObjectDescription> filter) {
-		if (EcoreUtil2.isAssignableFrom(TypesPackage.Literals.JVM_TYPE, reference.getEReferenceType())) {
+		if (EcoreUtil2.isAssignableFrom(TypesPackage.Literals.JVM_TYPE,
+				reference.getEReferenceType()) /*
+												 * || reference.equals(RclPackage.Literals.TYPE__REF)
+												 */) {
 			IScope typeScope = typeScopeProvider.getScope(resource, reference, filter);
 			return typeScope;
-		} else {
+		} else if (reference.equals(RclPackage.Literals.TYPE__REF)) {
+			EReferenceImpl javaReference = (EReferenceImpl )EcoreUtil.copy(reference);
+			javaReference.setEType(TypesPackage.eINSTANCE.getJvmType());
+			return new CombinedScope(super.getScope(resource, reference, filter), typeScopeProvider.getScope(resource, javaReference, filter));
+		}
+	    else {
 			return super.getScope(resource, reference, filter);
 		}
 	}
+	
+	
+	
 }

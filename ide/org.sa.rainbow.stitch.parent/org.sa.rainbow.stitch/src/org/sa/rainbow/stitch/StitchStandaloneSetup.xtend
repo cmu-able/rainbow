@@ -3,6 +3,7 @@
  */
 package org.sa.rainbow.stitch
 
+import com.google.inject.Guice
 
 /**
  * Initialization support for running Xtext languages without Equinox extension registry.
@@ -12,4 +13,11 @@ class StitchStandaloneSetup extends StitchStandaloneSetupGenerated {
 	def static void doSetup() {
 		new StitchStandaloneSetup().createInjectorAndDoEMFRegistration()
 	}
+	
+	override createInjector() {
+		return Guice.createInjector(new StitchRuntimeStandaloneModule)
+	}
+	
+	
+	
 }

@@ -5,6 +5,8 @@ package org.acme
 
 import org.acme.scoping.QualifiedNameProvider
 import org.acme.scoping.AcmeScopeProvider
+import org.eclipse.xtext.resource.XtextResource
+import org.eclipse.xtext.linking.lazy.LazyLinkingResource
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -18,5 +20,9 @@ class AcmeRuntimeModule extends AbstractAcmeRuntimeModule {
 	override bindIScopeProvider() {
 		AcmeScopeProvider
 	}
+	
+//	override bindXtextResource() {
+//		return AcmeLazyLinkingResource;
+//	}
 	
 }

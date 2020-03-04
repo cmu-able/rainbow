@@ -3,8 +3,15 @@
  */
 package org.sa.rainbow.configuration.scoping
 
+import org.acme.acme.AcmePackage
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
+import org.eclipse.xtext.common.types.TypesPackage
+import org.eclipse.xtext.scoping.IScope
+import org.eclipse.xtext.scoping.impl.FilteringScope
+import org.sa.rainbow.configuration.rcl.RclPackage
+import org.eclipse.xtext.scoping.impl.AbstractDeclarativeScopeProvider
+import org.sa.rainbow.configuration.rcl.Type
 
 /**
  * This class contains custom scoping description.
@@ -12,7 +19,7 @@ import org.eclipse.emf.ecore.EReference
  * See https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#scoping
  * on how and when to use it.
  */
-class RclScopeProvider extends AbstractRclScopeProvider {
+class RclScopeProvider extends AbstractDeclarativeScopeProvider {
 	override getScope(EObject context, EReference reference) {
 //		if (reference == RclPackage.Literals.REFERENCE__REFERABLE) {
 //			var ancestor = context;
@@ -26,10 +33,18 @@ class RclScopeProvider extends AbstractRclScopeProvider {
 //////				return Scopes.scopeFor(pc.eContainer().);
 ////			}
 //		}
+		
 		return super.getScope(context, reference);
 	}
 	
 //	def getGlobalScope(EObject context, EReference reference) {
 //		IScope globalScope = super.getGlobalScope(context, reference, null)
 //	}
+
+	def IScope scope_EObject(Type context, EReference ref) {
+		return new FilteringScope(delegateGetScope(context, ref)) [
+			return TypesPackage.Literals.JVM_TYPE.isSuperTypeOf(it.EClass) ||
+				AcmePackage.Literals.ANY_TYPE_REF.isSuperTypeOf(it.EClass)
+		]
+	}
 }

@@ -31,7 +31,7 @@ class RclRuntimeStandaloneModule extends RclRuntimeModule {
 	override configure(Binder binder) {
 		super.configure(binder)
 		configureJvmTypeProvider(binder)
-				if (!EPackage.Registry.INSTANCE.containsKey("http://www.sa.org/rainbow/stitch/Stitch")) {
+		if (!EPackage.Registry.INSTANCE.containsKey("http://www.sa.org/rainbow/stitch/Stitch")) {
 			EPackage.Registry.INSTANCE.put("http://www.sa.org/rainbow/stitch/Stitch", StitchPackage.eINSTANCE)
 		}
 	
