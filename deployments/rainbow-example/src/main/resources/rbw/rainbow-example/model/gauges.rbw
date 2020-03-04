@@ -8,7 +8,7 @@ def double.pattern = "[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?"
 
 gauge type LoadGaugeT = {
 	model factory ««SWIM»»
-	command ^load = "(?<load>«double.pattern»)" -> ServerT.setLoad(double)      
+	command ^load = "(?<load>«double.pattern»)" -> ServerT.setLoad(double)        
 	setup = {
 		targetIP = "localhost"
 		beaconPeriod = 20000
