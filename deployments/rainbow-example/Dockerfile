@@ -64,11 +64,8 @@ RUN mvn -DskipTests install
 WORKDIR /root/rainbow/ide/org.sa.rainbow.configuration.parent
 # This first is needed because of a bug in Tycho build classptahs
 # https://stackoverflow.com/questions/5017687/use-maven-tycho-to-build-with-a-manifest-entry-bundle-classpath-that-gets-downlo
-RUN mkdir org.sa.rainbow.configuration/lib && cp /root/rainbow/rainbow/rainbow-core/target/rainbow-core*.jar org.sa.rainbow.configuration/lib/rainbow-core.jar
-
-
-RUN mvn -DskipTests install; exit 0
-RUN ls org.sa.rainbow.configuration/lib; exit 1
+#RUN mkdir org.sa.rainbow.configuration/lib && cp /root/rainbow/rainbow/rainbow-core/target/rainbow-core*.jar org.sa.rainbow.configuration/lib/rainbow-core.jar
+RUN mvn -DskipTests install
 
 
 ADD deployments /root/rainbow/deployments
