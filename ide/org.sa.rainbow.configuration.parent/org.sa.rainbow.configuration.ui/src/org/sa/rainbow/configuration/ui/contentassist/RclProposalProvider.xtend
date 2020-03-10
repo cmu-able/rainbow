@@ -49,8 +49,6 @@ import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.ui.editor.contentassist.ConfigurableCompletionProposal
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
 import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor
-import org.eclipse.xtext.ui.editor.contentassist.ITemplateAcceptor
-import org.eclipse.xtext.ui.editor.contentassist.ITemplateProposalProvider
 import org.eclipse.xtext.xbase.lib.Functions.Function1
 import org.sa.rainbow.configuration.ConfigAttributeConstants
 import org.sa.rainbow.configuration.XtendUtils
@@ -299,7 +297,7 @@ class RclProposalProvider extends AbstractRclProposalProvider {
 				var m = model;
 				if(m instanceof Assignment && m.eContainer instanceof Component) m = m.eContainer
 				allPossibleFields.addAll(
-					XtendUtils.getPropertySuggestions(ConfigAttributeConstants.GUI_PROPERTY_TUPES, m))
+					XtendUtils.getPropertySuggestions(ConfigAttributeConstants.GUI_PROPERTY_TYPES, m))
 			}
 		}
 		var suggestions = allPossibleFields.stream.filter[it.startsWith(context.prefix)].collect(Collectors.toSet)
@@ -498,7 +496,7 @@ class RclProposalProvider extends AbstractRclProposalProvider {
 				name = parent.name + ":" + name
 				parent = EcoreUtil2.getContainerOfType(parent.eContainer, Assignment);
 			}
-			val valVunc = ConfigAttributeConstants.GUI_PROPERTY_TUPES.get(name)?.get(
+			val valVunc = ConfigAttributeConstants.GUI_PROPERTY_TYPES.get(name)?.get(
 				'values') as Function1<Assignment, Collection<String>>
 			if (valVunc !== null) {
 				val values = (valVunc).apply(ass)
@@ -512,7 +510,7 @@ class RclProposalProvider extends AbstractRclProposalProvider {
 
 			}
 
-			val extends = ConfigAttributeConstants.GUI_PROPERTY_TUPES.get(name)?.get('extends') as List<Class>
+			val extends = ConfigAttributeConstants.GUI_PROPERTY_TYPES.get(name)?.get('extends') as List<Class>
 			processPropertySuggestionsBasedOnClass(extends, model, context, acceptor)
 		} else if (parentProp?.component !== null) {
 			var extends = ConfigAttributeConstants.COMPONENT_PROPERTY_TYPES.get(parentProp.component)?.get(ass.name)?.

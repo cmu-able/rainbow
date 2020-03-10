@@ -49,6 +49,7 @@ import org.sa.rainbow.configuration.rcl.RichString
 import org.sa.rainbow.configuration.rcl.RichStringLiteral
 import org.sa.rainbow.configuration.rcl.RichStringPart
 import org.sa.rainbow.configuration.rcl.StringLiteral
+import org.eclipse.xtext.naming.QualifiedName
 
 class XtendUtils {
 	static def formalTypeName(FormalParam fp, boolean keepSimple) {
@@ -264,6 +265,13 @@ class XtendUtils {
 		// Check if name is there
 		val cn = getComponentName(a)
 		return compoundNames.contains(cn)
+	}
+	
+	static def isKeyProperty(Map<String,?> knownCompoundNames, QualifiedName qn, String rootName) {
+		val compoundNames = updateStore(knownCompoundNames)
+		var cn = qn.toString(':')
+		cn = cn.substring(rootName.length+1)
+ 		return compoundNames.contains(cn);
 	}
 
 	static def getPropertySuggestions(Map<String, ?> knownCompoundNames, EObject a) {

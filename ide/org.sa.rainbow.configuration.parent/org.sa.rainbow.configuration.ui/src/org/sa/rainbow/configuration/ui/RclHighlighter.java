@@ -19,12 +19,16 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 DEALINGS IN THE SOFTWARE.
  */
 import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.ide.editor.syntaxcoloring.DefaultSemanticHighlightingCalculator;
 import org.eclipse.xtext.ide.editor.syntaxcoloring.IHighlightedPositionAcceptor;
+import org.eclipse.xtext.naming.IQualifiedNameProvider;
+import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.resource.XtextResource;
@@ -43,7 +47,13 @@ import org.sa.rainbow.configuration.rcl.RclPackage;
 import org.sa.rainbow.configuration.rcl.RichStringLiteral;
 import org.sa.rainbow.configuration.rcl.RichStringPart;
 
+import com.google.inject.Inject;
+
 public class RclHighlighter extends DefaultSemanticHighlightingCalculator {
+	
+	@Inject
+	IQualifiedNameProvider m_qualifiedName;
+	
 	@Override
 	protected void doProvideHighlightingFor(XtextResource resource, IHighlightedPositionAcceptor acceptor,
 			CancelIndicator cancelIndicator) {
@@ -101,10 +111,12 @@ public class RclHighlighter extends DefaultSemanticHighlightingCalculator {
 				}
 			}
 		}
-		for (Component c : EcoreUtil2.getAllContentsOfType(rootObject, Component.class)) {
-			DeclaredProperty p = EcoreUtil2.getContainerOfType(c, DeclaredProperty.class);
+		for (DeclaredProperty p : EcoreUtil2.getAllContentsOfType(rootObject, DeclaredProperty.class)) {
+//			DeclaredProperty p = EcoreUtil2.getContainerOfType(c, DeclaredProperty.class);
 			if (p != null) {
-				for (Assignment a : EcoreUtil2.getAllContentsOfType(p, Assignment.class)) {
+				int num = 1;
+				List<Assignment> allContentsOfType = EcoreUtil2.getAllContentsOfType(p, Assignment.class);
+				for (Assignment a : allContentsOfType) {
 					Set<String> kw = Collections.<String>emptySet();
 					switch (p.getComponent()) {
 					case ANALYSIS:
@@ -120,11 +132,14 @@ public class RclHighlighter extends DefaultSemanticHighlightingCalculator {
 						highlightSoftKeyword(acceptor, a, kw);
 						break;
 					case GUI:
-						if (XtendUtils.isKeyProperty(ConfigAttributeConstants.GUI_PROPERTY_TUPES, a)) {
+						Date d = new Date();
+						QualifiedName name = m_qualifiedName.getFullyQualifiedName(a);
+						if (XtendUtils.isKeyProperty(ConfigAttributeConstants.GUI_PROPERTY_TYPES, name, p.getName())) {
 							for (INode node : NodeModelUtils.findNodesForFeature(a, RclPackage.Literals.ASSIGNMENT__NAME)) {
 								acceptor.addPosition(node.getOffset(), node.getLength(), RclHighlightingConfiguration.SOFT_KEYWORD_ID);
 							}
 						}
+						System.out.println("" + num++ + ":" + (new Date().getTime() - d.getTime()));
 						break;
 					case MANAGER:
 						kw = ConfigAttributeConstants.MANAGER_KEYWORDS;
