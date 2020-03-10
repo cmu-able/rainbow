@@ -114,7 +114,6 @@ public class RclHighlighter extends DefaultSemanticHighlightingCalculator {
 		for (DeclaredProperty p : EcoreUtil2.getAllContentsOfType(rootObject, DeclaredProperty.class)) {
 //			DeclaredProperty p = EcoreUtil2.getContainerOfType(c, DeclaredProperty.class);
 			if (p != null) {
-				int num = 1;
 				List<Assignment> allContentsOfType = EcoreUtil2.getAllContentsOfType(p, Assignment.class);
 				for (Assignment a : allContentsOfType) {
 					Set<String> kw = Collections.<String>emptySet();
@@ -132,14 +131,12 @@ public class RclHighlighter extends DefaultSemanticHighlightingCalculator {
 						highlightSoftKeyword(acceptor, a, kw);
 						break;
 					case GUI:
-						Date d = new Date();
 						QualifiedName name = m_qualifiedName.getFullyQualifiedName(a);
 						if (XtendUtils.isKeyProperty(ConfigAttributeConstants.GUI_PROPERTY_TYPES, name, p.getName())) {
 							for (INode node : NodeModelUtils.findNodesForFeature(a, RclPackage.Literals.ASSIGNMENT__NAME)) {
 								acceptor.addPosition(node.getOffset(), node.getLength(), RclHighlightingConfiguration.SOFT_KEYWORD_ID);
 							}
 						}
-						System.out.println("" + num++ + ":" + (new Date().getTime() - d.getTime()));
 						break;
 					case MANAGER:
 						kw = ConfigAttributeConstants.MANAGER_KEYWORDS;
