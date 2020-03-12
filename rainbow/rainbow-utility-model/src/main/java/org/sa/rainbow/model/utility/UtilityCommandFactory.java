@@ -35,7 +35,7 @@ import org.sa.rainbow.core.models.commands.ModelCommandFactory;
 
 public class UtilityCommandFactory extends ModelCommandFactory<UtilityPreferenceDescription> {
 
-	public static final String MODELTYPE=UtilityHistoryModelInstance.UTILITY_HISTORY_TYPE;
+	public static final String MODELTYPE=UtilityModelInstance.UTILITY_MODEL_TYPE;
 	
     public static UtilityLoadModelCommand loadCommand (ModelsManager modelsManager,
             String modelName,
