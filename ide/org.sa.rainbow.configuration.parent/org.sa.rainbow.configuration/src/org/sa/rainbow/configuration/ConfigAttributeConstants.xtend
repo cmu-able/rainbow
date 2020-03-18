@@ -18,6 +18,7 @@ FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TOR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
 DEALINGS IN THE SOFTWARE.
  */
+
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import java.util.Collections
@@ -50,16 +51,17 @@ import org.sa.rainbow.configuration.rcl.Reference
 import org.sa.rainbow.configuration.rcl.RichString
 import org.sa.rainbow.configuration.rcl.StringLiteral
 import org.sa.rainbow.configuration.rcl.Value
+import org.sa.rainbow.configuration.validation.RclValidator
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor
 import org.sa.rainbow.core.adaptation.IAdaptationManager
 import org.sa.rainbow.core.analysis.IRainbowAnalysis
 import org.sa.rainbow.core.gauges.AbstractGauge
 import org.sa.rainbow.core.models.commands.ModelCommandFactory
+import org.sa.rainbow.core.ports.IRainbowConnectionPortFactory
 import org.sa.rainbow.gui.IRainbowGUI
 import org.sa.rainbow.translator.effectors.EffectorManager
 import org.sa.rainbow.translator.probes.AbstractProbe
-import org.sa.rainbow.configuration.validation.RclValidator
-import org.sa.rainbow.core.ports.IRainbowConnectionPortFactory
+import org.sa.rainbow.gui.arch.controller.RainbowModelController
 
 class ConfigAttributeConstants {
 	public static val ALL_OFREQUIRED_PROBE_FIELDS = #{"alias", "location"};
@@ -329,7 +331,7 @@ class ConfigAttributeConstants {
 			'extends' -> #[StringLiteral],
 			'msg' -> 'must be a string containing a command name'
 		},
-		'specs:gauges:gauge:value.parameter' -> #{
+		'specs:gauges:gauge:value:parameter' -> #{
 			'extends' -> #[IntegerLiteral],
 			'msg' -> 'must be an integer'
 		},
@@ -358,9 +360,10 @@ class ConfigAttributeConstants {
 					((v.value as PropertyReference).referable as DeclaredProperty).component == ComponentType.MODEL]
 		},
 		'specs:models:model:class' -> #{
-			'extends' -> #[JPanel],
-			'msg' -> 'must subclass JPanel'	
+			'extends' -> #[RainbowModelController],
+			'msg' -> 'must subclass RainbowModelController'	
 		},
+		'specs:models:model:config' -> IS_COMPONENT,
 		'specs:analyzers:analyzer:for' -> #{
 			'extends' -> #[DeclaredProperty],
 			'msg' -> 'must refer to an analysis',
@@ -423,6 +426,7 @@ class ConfigAttributeConstants {
 			'extends' -> #[JTabbedPane],
 			'msg' -> 'must extend JTabbedPane'
 		}
+		
 	}
 
 	def static getAllNamesFor(Assignment assignment, (EObject)=>boolean discriminator, (EObject)=>String name) {

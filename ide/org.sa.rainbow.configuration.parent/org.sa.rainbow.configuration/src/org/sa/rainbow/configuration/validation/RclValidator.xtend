@@ -1345,11 +1345,24 @@ class RclValidator extends AbstractRclValidator {
 			)
 		}
 
+
 		val factory = EcoreUtil2.getContainerOfType(cmd, FactoryDefinition)
 		if (!(cmd.cmd instanceof JvmDeclaredType)) {
 			return
 		}
 		val cmdClass = cmd.cmd as JvmDeclaredType
+		
+		if (cmdClass.simpleName.endsWith("Cmd")) {
+			if (!cmd.name.equalsIgnoreCase(cmdClass.simpleName.substring(0, cmdClass.simpleName.length-3))) {
+				warning('''By convention, the name of the class "«cmdClass.simpleName»" should start with the name of the command''',
+					cmd,
+					RclPackage.Literals.COMMAND_DEFINITION__CMD,
+					"commandClassUnconventional"
+				)
+			}
+		}
+		
+		
 		var compatibleConstructors = cmdClass.declaredConstructors.filter([
 			if (it.parameters.size == cmd.formal.size + 2) {
 				val firstString = it.parameters.get(0).parameterType.qualifiedName == "java.lang.String"
