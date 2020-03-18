@@ -62,6 +62,10 @@ public class UtilityCommandFactory extends ModelCommandFactory<UtilityPreference
         return null;
     }
 
+    @Override
+    protected boolean isNoCommandsOk() {
+    	return true;
+    }
   
 
 }

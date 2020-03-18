@@ -112,7 +112,7 @@ public abstract class ModelCommandFactory<T> {
 			}
 
 		});
-		if (m_commandMap.isEmpty()) {
+		if (m_commandMap.isEmpty() && !isNoCommandsOk()) {
 			throw new RainbowException("Model Factory has no operations. (Need to be annotated with @Operation.)");
 		}
 	}
@@ -214,4 +214,7 @@ public abstract class ModelCommandFactory<T> {
 
 	public abstract AbstractSaveModelCmd<T> saveCommand(String location) throws RainbowModelException;
 
+	protected boolean isNoCommandsOk() {
+		return false;
+	}
 }
