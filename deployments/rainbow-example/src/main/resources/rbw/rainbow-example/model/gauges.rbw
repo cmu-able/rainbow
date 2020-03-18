@@ -66,7 +66,7 @@ gauge type ServerActivationGaugeT = {
 
 gauge type BasicResponseTimeT = {
 	model factory ««SWIM»»
-	command basicResponseTime = "(?<rt>«double.pattern»)" -> LoadBalancerT.setBasicResponseTime(double)
+	command basicResponseTime = "(?<basicResponseTime>«double.pattern»)" -> LoadBalancerT.setBasicResponseTime(double)
 	setup = {
 		targetIP = "localhost"
 		beaconPeriod = 30000
@@ -79,7 +79,7 @@ gauge type BasicResponseTimeT = {
 
 gauge type OptResponseTimeT = {
 	model factory ««SWIM»»
-	command optResponseTime = "(?<rt>«double.pattern»)" -> LoadBalancerT.setOptResponseTime(double)
+	command optResponseTime = "(?<optResponseTime>«double.pattern»)" -> LoadBalancerT.setOptResponseTime(double)
 	setup = {
 		targetIP = "localhost"
 		beaconPeriod = 30000

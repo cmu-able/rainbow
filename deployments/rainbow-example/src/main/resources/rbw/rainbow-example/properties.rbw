@@ -1,7 +1,8 @@
 target rainbow-example
 import properties "model/gauges.rbw"
+import properties "stitch/utilities.rbw"
 import acme "model/swim.acme" 
-import factory "../SwimModelFactory.rbw"
+import factory "../SwimModelFactory.rbw" 
 ################################################################################
 # Purpose:  Common configuration file for the Rainbow infrastructure.
 #           Properties are loaded by class org.sa.rainbow.Rainbow .
@@ -56,9 +57,9 @@ def model SwimSys= {
 # Rainbow Utility Model
 def model USwimSys = {
 	name="SwimSys" 
-	//^type="Utility"
+//	^type="Utility" 
 	path="stitch/utilities.yml" 
-	^factory=org.sa.rainbow.^model.^utility.UtilityCommandFactory    
+	^factory=org.sa.rainbow.^model.^utility.UtilityCommandFactory     
 }
 
 ### Rainbow analyses
@@ -129,6 +130,27 @@ def gui rainbow.^gui = {
 				^command = "activateServer"
 				category = "onoff"
 				value.parameter = 1  
+			}
+		}
+		models = {
+			^model = {
+				^for=««USwimSys»»
+				class = org.sa.rainbow.^gui.^utility.UtilityModelController  
+				config = {
+					uR = {
+						upper=10
+						lower=0
+					}
+					uC = {
+						upper=3
+						lower=0
+						
+					}
+					uA = {
+						upper=5 
+						lower=0 
+					}
+				}  
 			}
 		}
 		analyzers = {
