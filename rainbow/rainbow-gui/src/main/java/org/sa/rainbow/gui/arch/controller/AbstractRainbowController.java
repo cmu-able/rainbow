@@ -8,6 +8,7 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.beans.PropertyChangeListener;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -19,7 +20,6 @@ import javax.swing.border.AbstractBorder;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.plaf.UIResource;
-import javax.swing.plaf.metal.MetalBorders;
 import javax.swing.plaf.metal.MetalLookAndFeel;
 
 import org.sa.rainbow.gui.RainbowWindoe.SelectionManager;
@@ -228,6 +228,9 @@ public abstract class AbstractRainbowController implements IRainbowUIController,
 
 	}
 
+	@Override
+	public void configure (Map<String, Object> configs) {}
+	
 	protected abstract Color[] highlightColors();
 
 }

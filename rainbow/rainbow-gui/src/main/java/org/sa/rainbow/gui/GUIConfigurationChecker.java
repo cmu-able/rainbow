@@ -15,6 +15,8 @@ import org.ho.yaml.Yaml;
 import org.sa.rainbow.core.IRainbowMaster;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
+import org.sa.rainbow.core.models.IModelInstance;
+import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.util.IRainbowConfigurationChecker;
@@ -29,7 +31,7 @@ public class GUIConfigurationChecker implements IRainbowConfigurationChecker {
 	private LinkedList<Problem> m_problems;
 
 	private static final List<String> CATEGORIES = Arrays.asList("meter", "timeseries", "onoff");
-	private static final List<String> COMPONENTS = Arrays.asList("analyzers", "managers", "executors", "models");
+	private static final List<String> COMPONENTS = Arrays.asList("analyzers", "managers", "executors");
 
 	private static final Collection<String> getValidFields(String category) {
 		switch (category) {
@@ -90,25 +92,47 @@ public class GUIConfigurationChecker implements IRainbowConfigurationChecker {
 	}
 
 	private void checkComponents(Map<String, Object> uidb) {
+		if (uidb.get("models") != null) {
+			Map<String, Object> cust = (Map<String, Object>) uidb.get("models");
+			for (Entry<String,Object> e : cust.entrySet()) {
+				IModelInstance<Object> instance = m_master.modelsManager().getModelInstance(ModelReference.fromString(e.getKey()));
+				if (instance == null) {
+					m_problems.add (new Problem(ProblemT.ERROR, MessageFormat.format("The model ''{0}'' is not a valid model.", e.getKey())));
+				}
+				else {
+					if (e.getValue() instanceof String) {
+						checkClassExists((String )e.getValue());
+					} 
+					else if (e.getValue() instanceof Map) {
+						Map<String,Object> vals = (Map<String, Object>) e.getValue();
+						if (vals.get("class") != null) {
+							Object clazz = vals.get("class");
+							if (clazz instanceof String) 
+								checkClassExists((String )clazz);
+							else 
+								m_problems.add(new Problem(ProblemT.ERROR, MessageFormat.format("The 'class' property of ''{0}'' should refer to a class", e.getKey())));
+						}
+					}
+				}
+			}
+		}
 		for (String component : COMPONENTS) {
 			Map<String, Object> cust = (Map<String, Object>) uidb.get(component);
 			if (cust != null) {
 				for (Entry<String, Object> entry : cust.entrySet()) {
-					try {
-						Class.forName(entry.getKey());
-					} catch (ClassNotFoundException e) {
-						m_problems.add(new Problem(ProblemT.ERROR, 
-								MessageFormat.format("The class ''{0}'' was not found.", entry.getKey())));
-					}
-					
-					try {
-						Class.forName((String )entry.getValue());
-					} catch (ClassNotFoundException e) {
-						m_problems.add(new Problem(ProblemT.ERROR, 
-								MessageFormat.format("The class ''{0}'' was not found.", entry.getKey())));
-					}
+					checkClassExists(entry.getKey());
+					checkClassExists((String) entry.getValue());
 				}
 			}
+		}
+	}
+
+	protected void checkClassExists(String cname) {
+		try {
+			Class.forName(cname);
+		} catch (ClassNotFoundException e) {
+			m_problems.add(new Problem(ProblemT.ERROR, 
+					MessageFormat.format("The class ''{0}'' was not found.", cname)));
 		}
 	}
 

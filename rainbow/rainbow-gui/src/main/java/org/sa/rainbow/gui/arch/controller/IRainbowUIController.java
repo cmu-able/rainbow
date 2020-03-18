@@ -2,6 +2,7 @@ package org.sa.rainbow.gui.arch.controller;
 
 import java.awt.geom.Point2D;
 import java.beans.PropertyChangeListener;
+import java.util.Map;
 
 import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
@@ -20,4 +21,6 @@ public interface IRainbowUIController extends PropertyChangeListener{
 	JComponent getView();
 
 	void move(Point2D realPoint, boolean b);
+
+	void configure(Map<String, Object> configs);
 }

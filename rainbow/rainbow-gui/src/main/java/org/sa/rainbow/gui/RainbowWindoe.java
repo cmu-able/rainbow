@@ -24,6 +24,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -299,15 +301,15 @@ public class RainbowWindoe extends RainbowWindow
 				m_selectionPanel.setSelectedIndex(1);
 				m_exPanel.setVisible(true);
 				m_exPanel.initBindings(exModel);
-				
+
 				((CardLayout) m_detailsPanel.getLayout()).show(m_detailsPanel, "executors");
 
-			}else if (o instanceof RainbowArchAnalysisModel) {
+			} else if (o instanceof RainbowArchAnalysisModel) {
 				RainbowArchAnalysisModel anModel = (RainbowArchAnalysisModel) o;
 				m_selectionPanel.setSelectedIndex(1);
 				m_anPanel.setVisible(true);
 				m_anPanel.initBindings(anModel);
-				
+
 				((CardLayout) m_detailsPanel.getLayout()).show(m_detailsPanel, "analyzers");
 
 			}
@@ -393,7 +395,7 @@ public class RainbowWindoe extends RainbowWindow
 
 	@Override
 	protected void createExecutorsUI() {
-		
+
 		if (m_uidb.containsKey("details")) {
 			String className = ((Map<String, String>) m_uidb.get("details")).get("executors");
 			if (className != null) {
@@ -422,8 +424,6 @@ public class RainbowWindoe extends RainbowWindow
 
 		((CardLayout) m_detailsPanel.getLayout()).addLayoutComponent(m_exPanel, "executors");
 
-		
-		
 		JTextArea modelsLogs = createTextAreaInTab(m_logTabs, "Execution");
 		m_allTabs.put(RainbowComponentT.EXECUTOR, modelsLogs);
 	}
@@ -457,8 +457,7 @@ public class RainbowWindoe extends RainbowWindow
 		m_anPanel.setVisible(true);
 
 		((CardLayout) m_detailsPanel.getLayout()).addLayoutComponent(m_anPanel, "analyzers");
-		
-		
+
 		JTextArea modelsLogs = createTextAreaInTab(m_logTabs, "Analyzers");
 		m_allTabs.put(RainbowComponentT.ANALYSIS, modelsLogs);
 	}
@@ -555,8 +554,7 @@ public class RainbowWindoe extends RainbowWindow
 								probeId = probeId.trim();
 								processProbeIntoGauge(gInfo.getId(), gInfo, setupParams, probeId);
 							}
-						}
-						else 
+						} else
 							processProbeIntoGauge(gInfo.getId(), gInfo, setupParams, tpt);
 					}
 					if (configParams.get("targetProbeList") instanceof String) {
@@ -856,14 +854,43 @@ public class RainbowWindoe extends RainbowWindow
 				String modelName = m.getModelName();
 				String modelType = m.getModelType();
 				ModelReference modelRef = new ModelReference(modelName, modelType);
-				if (!m_rainbowModel.hasModel(modelRef.toString()) && !"UtilityModel".equals(modelType)
-						&& !"ExecutionHistory".equals(modelType)) {
+				Map<String, Object> modelMap = (Map<String, Object>) m_uidb.get("models");
+
+				if (!m_rainbowModel.hasModel(modelRef.toString())
+						&& (!"UtilityModel".equals(modelType) && !"ExecutionHistory".equals(modelType)
+								|| modelMap.containsKey(modelRef.toString()))) {
 					RainbowArchModelModel model = new RainbowArchModelModel(modelRef);
 					model.addPropertyChangeListener(locationChange);
-
-					IRainbowUIController ctrl = new RainbowModelController(model, m_selectionManager);
-					JInternalFrame frame = ctrl.createView(m_desktopPane);
-					m_rainbowModel.addModel(model);
+					if (modelMap.containsKey(modelRef.toString())) {
+						Object object = modelMap.get(modelRef.toString());
+						String className = object instanceof String ? (String) object
+								: (String) ((Map<String, Object>) object).get("class");
+						
+						if (className != null) {
+							try {
+								Class<?> clazz = this.getClass().forName(className);
+								Constructor<?> xtor = clazz.getConstructor(RainbowArchModelModel.class,
+										SelectionManager.class);
+								IRainbowUIController ctrl = (IRainbowUIController) xtor.newInstance(model,
+										m_selectionManager);
+								if (object instanceof Map) {
+									Map<String, Object> configurationParams = (Map<String, Object>) ((Map<String, Object>) object)
+											.get("config");
+									ctrl.configure(configurationParams);
+								}
+								ctrl.createView(m_desktopPane);
+								m_rainbowModel.addModel(model);
+							} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+									| NoSuchMethodException | SecurityException | IllegalArgumentException
+									| InvocationTargetException e) {
+								e.printStackTrace();
+							}
+						}
+					} else {
+						IRainbowUIController ctrl = new RainbowModelController(model, m_selectionManager);
+						JInternalFrame frame = ctrl.createView(m_desktopPane);
+						m_rainbowModel.addModel(model);
+					}
 				}
 			}
 		}
@@ -1036,7 +1063,7 @@ public class RainbowWindoe extends RainbowWindow
 
 		}
 	}
-	
+
 	@Override
 	protected void createMenuBar() {
 		super.createMenuBar();
@@ -1048,12 +1075,12 @@ public class RainbowWindoe extends RainbowWindow
 
 	private void createLayoutMenu(JMenu menu) {
 		JMenuItem item;
-		
+
 		item = new JMenuItem("Dot");
 		item.setMnemonic(KeyEvent.VK_D);
 		item.setToolTipText("Layout desktop using the dot default layout");
 		item.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				layoutDOT("dot");
@@ -1065,7 +1092,7 @@ public class RainbowWindoe extends RainbowWindow
 		item.setMnemonic(KeyEvent.VK_C);
 		item.setToolTipText("Layout desktop using the Circo layout");
 		item.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				layoutDOT("circo");
@@ -1077,55 +1104,55 @@ public class RainbowWindoe extends RainbowWindow
 		item.setMnemonic(KeyEvent.VK_F);
 		item.setToolTipText("Layout desktop using the FDP layout");
 		item.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				layoutDOT("fdp");
 			}
 		});
 		menu.add(item);
-		
+
 		item = new JMenuItem("Neato");
 		item.setMnemonic(KeyEvent.VK_N);
 		item.setToolTipText("Layout desktop using the neato layout");
 		item.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				layoutDOT("neato");
 			}
 		});
 		menu.add(item);
-		
+
 		item = new JMenuItem("Twopi");
 		item.setMnemonic(KeyEvent.VK_T);
 		item.setToolTipText("Layout desktop using the twopi layout");
 		item.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				layoutDOT("twopi");
 			}
 		});
 		menu.add(item);
-		
+
 		item = new JMenuItem("Osage");
 		item.setMnemonic(KeyEvent.VK_O);
 		item.setToolTipText("Layout desktop using the osage layout");
 		item.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				layoutDOT("osage");
 			}
 		});
 		menu.add(item);
-		
+
 		item = new JMenuItem("Patchwork");
 		item.setMnemonic(KeyEvent.VK_P);
 		item.setToolTipText("Layout desktop using the patchwork layout");
 		item.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				layoutDOT("patchwork");
@@ -1133,65 +1160,65 @@ public class RainbowWindoe extends RainbowWindow
 		});
 		menu.add(item);
 		menu.add(new JSeparator());
-		
+
 		item = new JMenuItem("Reset user position");
 		item.setMnemonic(KeyEvent.VK_N);
 		item.setToolTipText("Remove the user defined locations");
 		item.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				m_rainbowModel.visit(new IRainbowModelVisitor() {
-					
+
 					protected void rs(RainbowArchModelElement el) {
 						el.setUserLocation(null);
 					}
-					
+
 					@Override
 					public void visitSystem(RainbowSystemModel model) {
 						// TODO Auto-generated method stub
-						
+
 					}
-					
+
 					@Override
 					public void visitProbe(RainbowArchProbeModel probe) {
 						rs(probe);
 					}
-					
+
 					@Override
 					public void visitModel(RainbowArchModelModel gauge) {
 						rs(gauge);
 					}
-					
+
 					@Override
 					public void visitGauge(RainbowArchGaugeModel gauge) {
 						rs(gauge);
 					}
-					
+
 					@Override
 					public void visitExecutor(RainbowArchExecutorModel executor) {
 						rs(executor);
 					}
-					
+
 					@Override
 					public void visitEffector(RainbowArchEffectorModel effector) {
 						rs(effector);
 					}
-					
+
 					@Override
 					public void visitAnalysis(RainbowArchAnalysisModel analysis) {
 						rs(analysis);
 					}
-					
+
 					@Override
 					public void visitAdaptationManager(RainbowArchAdapationManagerModel adaptationManager) {
 						rs(adaptationManager);
 					}
-					
+
 					@Override
 					public void postVisitSystem(RainbowSystemModel model) {
 						// TODO Auto-generated method stub
-						
+
 					}
 				});
 			}

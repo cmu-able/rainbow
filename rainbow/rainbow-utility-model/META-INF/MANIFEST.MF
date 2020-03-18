@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: rainbow-utility-model
 Bundle-SymbolicName: rainbow-utility-model
-Bundle-Version: 3.0.0.qualifier
+Bundle-Version: 3.1.0.qualifier
 Export-Package: org.sa.rainbow.evaluator.utility,
+ org.sa.rainbow.gui.utility,
  org.sa.rainbow.model.utility

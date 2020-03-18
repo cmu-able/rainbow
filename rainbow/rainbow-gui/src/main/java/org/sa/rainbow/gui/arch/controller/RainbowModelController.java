@@ -16,7 +16,7 @@ import org.sa.rainbow.gui.arch.model.RainbowArchModelModel;
 
 public class RainbowModelController extends AbstractRainbowController {
 
-	private ArchModelPanel m_mp;
+	protected ArchModelPanel m_mp;
 
 	public RainbowModelController(RainbowArchModelModel model, SelectionManager m) {
 		super(m);
