@@ -157,11 +157,16 @@ class RclGenerator extends AbstractGenerator {
 		        «ENDIF»
 		  «ENDFOR»
 		models:
-		   «FOR m : models»
-		   model:
-		     for: "«ModelUtil.extractModelReferenceFromModel(((m.value.value as Component).assignment.findFirst[it.name=='for'].value.value as PropertyReference).referable as DeclaredProperty)»"
-		     gui: «((m.value.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName» 
-		   «ENDFOR»
+		  «FOR m : models»
+		    «IF (m.value.value as Component).assignment.findFirst[it.name=='config'] === null»
+		    "«ModelUtil.extractModelReferenceFromModel(((m.value.value as Component).assignment.findFirst[it.name=='for'].value.value as PropertyReference).referable as DeclaredProperty)»": «((m.value.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»
+		    «ELSE»
+		  "«ModelUtil.extractModelReferenceFromModel(((m.value.value as Component).assignment.findFirst[it.name=='for'].value.value as PropertyReference).referable as DeclaredProperty)»":
+		    class: «((m.value.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»
+		    config:
+		«outputPropertiesAsYaml((m.value.value as Component).assignment.findFirst[it.name=='config'].value.value as Component, 6)»
+		    «ENDIF»
+		  «ENDFOR»
 		analyzers:
 		  «FOR a : analyzers»
 		    «(((((a.value.value as Component).assignment.findFirst[it.name=='for'].value.value as PropertyReference).referable as DeclaredProperty).value.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»: «((a.value.value as Component).assignment.findFirst[it.name=='class'].value.value as Reference).referable.qualifiedName»
@@ -180,6 +185,28 @@ class RclGenerator extends AbstractGenerator {
 		  «ENDFOR»
 		'''
 	}
+		
+		def String outputPropertiesAsYaml(Component component, int beginTab) {
+			val st = new StringBuilder()
+			for (a : component.assignment) {
+				if (a?.value?.value instanceof Component) {
+					spaces(beginTab, st)
+					st.append('''«a.name»: ''')
+					st.append("\n")
+					st.append(outputPropertiesAsYaml(a.value.value as Component, beginTab + 2))
+				}
+				else {
+					spaces(beginTab, st)
+					st.append('''«a.name»: «XtendUtils.valueOfSimpleProperty(a.value)»''')
+					st.append("\n")
+				}
+			}
+			st.toString()
+		}
+		
+		protected def void spaces(int beginTab, StringBuilder st) {
+			for (var i = 0; i < beginTab; i++) st.append(" ")
+		}
 	
 	def getCommand(Assignment g) {
 		val gt = (((g.value.value as Component).assignment.findFirst[it.name=='type'].value.value as PropertyReference).referable as GaugeType)
