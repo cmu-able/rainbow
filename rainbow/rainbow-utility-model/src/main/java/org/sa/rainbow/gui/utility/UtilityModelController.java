@@ -19,12 +19,14 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.labels.XYToolTipGenerator;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.Range;
 import org.jfree.data.time.Second;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.data.xy.XYDataset;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.error.RainbowException;
@@ -86,7 +88,7 @@ public class UtilityModelController extends org.sa.rainbow.gui.arch.controller.R
 			for (int r = 0; r < rows; r++) {
 				for (int c = 0; c < columns; c++) {
 					if (utility.hasNext()) {
-						String u = utility.next();
+						final String u = utility.next();
 						Map<String, Object> config = (Map<String, Object>) m_configParams.get(u);
 						double upper = 10.0;
 						double lower = 0.0;
@@ -95,10 +97,10 @@ public class UtilityModelController extends org.sa.rainbow.gui.arch.controller.R
 						}
 						if (config.containsKey("lower"))
 							lower = extractDouble(config.get("lower"));
-						TimeSeries series = new TimeSeries(u);
+						final TimeSeries series = new TimeSeries(u);
 						m_valueSeries.put(u, series);
 						TimeSeriesCollection dataset = new TimeSeriesCollection(series);
-						TimeSeries utilitySeries = new TimeSeries(UtilityModelController.UTILITY_KW);
+						final TimeSeries utilitySeries = new TimeSeries(UtilityModelController.UTILITY_KW);
 						TimeSeriesCollection udataset = new TimeSeriesCollection(utilitySeries);
 						m_utilitySeries.put(u, utilitySeries);
 
@@ -109,7 +111,7 @@ public class UtilityModelController extends org.sa.rainbow.gui.arch.controller.R
 						NumberAxis vAxis = new NumberAxis();
 						xyPlot.setRangeAxis(0, vAxis);
 						xyPlot.getRangeAxis(0).setVisible(true);
-						xyPlot.getRangeAxis(0).setRange(new Range(lower, upper));
+						xyPlot.getRangeAxis(0).setRange(new Range(lower, upper+1));
 						xyPlot.setDataset(0, dataset);
 
 						NumberAxis uAxis = new NumberAxis();
@@ -117,9 +119,19 @@ public class UtilityModelController extends org.sa.rainbow.gui.arch.controller.R
 						xyPlot.getRangeAxis(1).setVisible(true);
 						xyPlot.getRangeAxis(1).setRange(new Range(0, 1));
 						xyPlot.setDataset(1, udataset);
+						xyPlot.mapDatasetToRangeAxis(0, 0);
+						xyPlot.mapDatasetToRangeAxis(1, 1);
 
 						XYLineAndShapeRenderer r0 = new XYLineAndShapeRenderer();
 						XYLineAndShapeRenderer r1 = new XYLineAndShapeRenderer();
+						XYToolTipGenerator generator = new XYToolTipGenerator() {
+							
+							@Override
+							public String generateToolTip(XYDataset dataset, int se, int item) {
+								return MessageFormat.format("<html><b>{0}</b>: {1,number,#.##}<br/><b>{2}</b>: {3,number,##.##}</html>", u, series.getValue(series.getItemCount()-1), "Utility", utilitySeries.getValue(utilitySeries.getItemCount()-1));
+							}
+						};
+						
 						xyPlot.setRenderer(0, r0);
 						xyPlot.setRenderer(1, r1);
 						
@@ -127,8 +139,9 @@ public class UtilityModelController extends org.sa.rainbow.gui.arch.controller.R
 						xyPlot.getRenderer(1).setSeriesStroke(0, new BasicStroke(3.0f));
 						xyPlot.getRenderer(0).setSeriesPaint(0, Color.black);
 						xyPlot.getRenderer(1).setSeriesPaint(0, Color.green);
-						xyPlot.mapDatasetToRangeAxis(0, 0);
-						xyPlot.mapDatasetToRangeAxis(1, 1);
+						xyPlot.getRenderer(0).setDefaultToolTipGenerator(generator);
+						xyPlot.getRenderer(1).setDefaultToolTipGenerator(generator);
+
 
 //						xyPlot.getRangeAxis().setVisible(false);
 //						xyPlot.getRangeAxis().setRange(new Range(lower, upper));
@@ -155,6 +168,14 @@ public class UtilityModelController extends org.sa.rainbow.gui.arch.controller.R
 			xyPlot.setDataset(0, udataset);
 			xyPlot.getRenderer().setSeriesStroke(0, new BasicStroke(2.0f));
 			xyPlot.getRenderer().setSeriesPaint(0, Color.green);
+			XYToolTipGenerator generator = new XYToolTipGenerator() {
+				
+				@Override
+				public String generateToolTip(XYDataset dataset, int se, int item) {
+					return MessageFormat.format("<html><b>{0}</b>: {1,number,#.##}<br/><b>{2}</b>: {3,number,##.##}</html>", "Utility", utilitySeries.getValue(utilitySeries.getItemCount()-1));
+				}
+			};
+			xyPlot.getRenderer().setDefaultToolTipGenerator(generator);
 			frame.setSize(100 * columns, 100 * rows);
 			ChartPanel panel = new ChartPanel(chart);
 			m_panels.put(UtilityModelController.UTILITY_KW, panel);
@@ -201,7 +222,7 @@ public class UtilityModelController extends org.sa.rainbow.gui.arch.controller.R
 					}
 					double f = m_utilityModel.getUtilityFunctions().get(kv.getKey()).f(value);
 					m_utilitySeries.get(kv.getKey()).add(tick, f);
-					m_panels.get(kv.getKey()).setToolTipText(MessageFormat.format("<html><b>{0}</b>: {1,number,#.##}<br/><b>{2}</b>: {3,number,##.##}</html>", kv.getKey(), value, "Utility", f));
+//					m_panels.get(kv.getKey()).setToolTipText(MessageFormat.format("<html><b>{0}</b>: {1,number,#.##}<br/><b>{2}</b>: {3,number,##.##}</html>", kv.getKey(), value, "Utility", f));
 					currentUtility += weights.get(kv.getKey()) * f;
 				}
 				
