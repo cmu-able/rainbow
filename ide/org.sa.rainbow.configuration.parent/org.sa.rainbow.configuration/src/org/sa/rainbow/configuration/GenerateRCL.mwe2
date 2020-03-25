@@ -68,7 +68,9 @@ Workflow {
 			fileWizard = {
 				generate = true
 			}
-			
+			formatter = {
+				generateStub=true
+			}
 			fragment = ui.codemining.CodeMiningFragment {
 				generateStub = true
 				generateXtendStub = false

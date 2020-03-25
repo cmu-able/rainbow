@@ -35,6 +35,7 @@ import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.common.types.JvmDeclaredType
 import org.eclipse.xtext.common.types.JvmPrimitiveType
 import org.eclipse.xtext.common.types.JvmType
+import org.eclipse.xtext.naming.QualifiedName
 import org.sa.rainbow.configuration.rcl.Assignment
 import org.sa.rainbow.configuration.rcl.BooleanLiteral
 import org.sa.rainbow.configuration.rcl.DeclaredProperty
@@ -49,7 +50,7 @@ import org.sa.rainbow.configuration.rcl.RichString
 import org.sa.rainbow.configuration.rcl.RichStringLiteral
 import org.sa.rainbow.configuration.rcl.RichStringPart
 import org.sa.rainbow.configuration.rcl.StringLiteral
-import org.eclipse.xtext.naming.QualifiedName
+import org.sa.rainbow.configuration.rcl.Value
 
 class XtendUtils {
 	static def formalTypeName(FormalParam fp, boolean keepSimple) {
@@ -134,6 +135,11 @@ class XtendUtils {
 
 	static def String valueOfSimpleDeclaredProperty(DeclaredProperty p) {
 		val value = p?.value?.value
+		valueOfSimpleProperty(p?.value)
+	}
+	
+	def static valueOfSimpleProperty(Value ^val) {
+		val value = ^val?.value
 		val sv = switch value {
 			StringLiteral: unpackString(value, false, true)
 			BooleanLiteral: Boolean.toString(value.isTrue)
@@ -292,5 +298,7 @@ class XtendUtils {
 		]
 		names
 	}
+	
+	
 
 }

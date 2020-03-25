@@ -8,6 +8,7 @@ import org.eclipse.xtext.common.types.JvmDeclaredType
 import org.eclipse.xtext.common.types.JvmField
 import org.eclipse.xtext.common.types.JvmType
 import org.eclipse.xtext.common.types.JvmVisibility
+import org.sa.rainbow.configuration.rcl.Assignment
 import org.sa.rainbow.configuration.rcl.Component
 import org.sa.rainbow.configuration.rcl.ComponentType
 import org.sa.rainbow.configuration.rcl.DeclaredProperty
@@ -15,7 +16,7 @@ import org.sa.rainbow.configuration.rcl.Factory
 import org.sa.rainbow.configuration.rcl.FormalParam
 import org.sa.rainbow.configuration.rcl.PropertyReference
 import org.sa.rainbow.configuration.rcl.Reference
-import org.sa.rainbow.configuration.rcl.Assignment
+import org.sa.rainbow.configuration.rcl.StringLiteral
 
 class ModelUtil {
 
@@ -90,8 +91,8 @@ class ModelUtil {
 			var type = "???"
 			if (property.value.value instanceof Component) {
 				val component = property.value.value as Component
-				val overrideName = (component).assignment.findFirst[it.name == 'name']?.name
-				if(overrideName !== null) name = overrideName
+				val overrideName =(component).assignment.findFirst[it.name == 'name']
+				if(overrideName?.value?.value instanceof StringLiteral) name = XtendUtils.unpackString(overrideName.value.value as StringLiteral, true, true);
 				type = component.assignment.findFirst[it.name == 'type']?.name
 				if (type == null) {
 					// Try to get it from the Factory

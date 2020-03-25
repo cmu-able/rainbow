@@ -69,7 +69,7 @@ CommandSave:
 ;
 
 CommandDefinition:
-	'command' name=ID '(' (formal+=FormalParam (',' formal+=FormalParam)*)?')' 'is' cmd=[types::JvmType|FQN] ';'?
+	'command' name=ID '(' (formal+=FormalParam (',' formal+=FormalParam)*)?')' 'is' cmd=[types::JvmType|FQN] ';'
 ;
 
 FormalParam:
