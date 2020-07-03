@@ -9,6 +9,7 @@ import org.acmestudio.acme.element.IAcmeComponent;
 import org.acmestudio.acme.element.IAcmeSystem;
 import org.acmestudio.acme.element.property.IAcmeProperty;
 import org.acmestudio.acme.element.property.IAcmePropertyValue;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 
 public class TurtlebotModelInstance extends AcmeModelInstance {
@@ -28,7 +29,7 @@ public class TurtlebotModelInstance extends AcmeModelInstance {
 	}
 
 	@Override
-	public TurtlebotModelCommandFactory getCommandFactory() {
+	public TurtlebotModelCommandFactory getCommandFactory() throws RainbowException {
 		if (m_commandFactory == null) 
 			m_commandFactory = new TurtlebotModelCommandFactory(this);
 		return m_commandFactory;

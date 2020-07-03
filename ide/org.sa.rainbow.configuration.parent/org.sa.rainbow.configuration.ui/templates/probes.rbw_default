@@ -1,0 +1,9 @@
+target <<rainbow-target>>
+import properties "../properties.rbw"
+# Define any probe properties
+
+# Define probe types and probes here
+
+
+
+export * to "system/probes.yml"  

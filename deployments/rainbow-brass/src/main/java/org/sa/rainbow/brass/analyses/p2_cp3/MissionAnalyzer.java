@@ -7,6 +7,7 @@ import org.sa.rainbow.brass.model.instructions.InstructionGraphProgress.IGExecut
 import org.sa.rainbow.brass.model.p2_cp3.mission.MissionState;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RemoveModelProblemCmd;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.SetModelProblemCmd;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowState.CP3ModelState;
 
 public class MissionAnalyzer extends P2CP3Analyzer {
@@ -19,7 +20,7 @@ public class MissionAnalyzer extends P2CP3Analyzer {
 	}
 
 	@Override
-	protected void runAction() {
+	protected void runAction() throws RainbowException {
 		InstructionGraphModelInstance ig = getModels().getInstructionGraphModel();
 		
 		MissionState ms = getModels().getMissionStateModel().getModelInstance();

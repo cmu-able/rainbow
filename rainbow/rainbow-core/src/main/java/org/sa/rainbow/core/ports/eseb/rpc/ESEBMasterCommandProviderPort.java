@@ -20,7 +20,8 @@ implements IESEBMasterCommandPortRemoteInterface {
         super (ESEBProvider.getESEBClientHost (), ESEBProvider.getESEBClientPort (),
                 IESEBMasterCommandPortRemoteInterface.class.getSimpleName ());
         m_delegate = rainbowMaster.getCommandPort();
-        getConnectionRole ().createRegistryWrapper (IESEBMasterCommandPortRemoteInterface.class, this,
+      
+        getConnectionRoleForServer ().createRegistryWrapper (IESEBMasterCommandPortRemoteInterface.class, this,
                 "gui" + IESEBMasterCommandPortRemoteInterface.class.getSimpleName ());
     }
 

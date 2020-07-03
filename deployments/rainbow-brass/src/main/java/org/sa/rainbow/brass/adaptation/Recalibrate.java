@@ -6,6 +6,7 @@ import org.sa.rainbow.brass.model.mission.MissionStateModelInstance;
 import org.sa.rainbow.brass.model.mission.RecalibrateCmd;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.OperationResult;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.Result;
 
@@ -21,13 +22,18 @@ public class Recalibrate extends BrassPlan {
 
     @Override
     public Object evaluate (Object[] argsIn) {
-        IAdaptationExecutor<BrassPlan> executor = Rainbow.instance ().getRainbowMaster ()
-                .strategyExecutor (m_executorModel.getModelInstance ().getModelReference ().toString ());
-        MissionCommandFactory cf = m_reference.getCommandFactory ();
-        RecalibrateCmd cmd = cf.recalibrate (false);
-        OperationResult result = executor.getOperationPublishingPort ().publishOperation (cmd);
-        m_outcome = result.result == Result.SUCCESS;
-        return m_outcome;
+        try {
+			IAdaptationExecutor<BrassPlan> executor = (IAdaptationExecutor<BrassPlan>) Rainbow.instance ().getRainbowMaster ()
+			        .adaptationExecutors().get (m_executorModel.getModelInstance ().getModelReference ().toString ());
+			MissionCommandFactory cf = m_reference.getCommandFactory ();
+			RecalibrateCmd cmd = cf.recalibrate (false);
+			OperationResult result = executor.getOperationPublishingPort ().publishOperation (cmd);
+			m_outcome = result.result == Result.SUCCESS;
+			return m_outcome;
+		} catch (RainbowException e) {
+			e.printStackTrace();
+			return m_outcome;
+		}
     }
 
     @Override

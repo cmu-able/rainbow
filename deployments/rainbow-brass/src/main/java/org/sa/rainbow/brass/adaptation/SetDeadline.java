@@ -6,6 +6,7 @@ import org.sa.rainbow.brass.model.mission.MissionStateModelInstance;
 import org.sa.rainbow.brass.model.mission.SetDeadlineCmd;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.OperationResult;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.Result;
 
@@ -25,14 +26,19 @@ public class SetDeadline extends BrassPlan {
 
     @Override
     public Object evaluate (Object[] argsIn) {
-        IAdaptationExecutor<BrassPlan> executor = Rainbow.instance ().getRainbowMaster ()
-                .strategyExecutor (m_executorModel.getModelInstance ().getModelReference ().toString ());
-        MissionCommandFactory cf = m_reference.getCommandFactory ();
-        SetDeadlineCmd cmd = cf.setDeadlineCmd (m_deadline);
-        System.out.println ("Setting deadline to " + m_deadline);
-        OperationResult result = executor.getOperationPublishingPort ().publishOperation (cmd);
-        m_outcome = result.result == Result.SUCCESS;
-        System.out.println ("DOne");
+        try {
+			IAdaptationExecutor<BrassPlan> executor = (IAdaptationExecutor<BrassPlan>) Rainbow.instance ().getRainbowMaster ()
+			        .adaptationExecutors().get (m_executorModel.getModelInstance ().getModelReference ().toString ());
+			MissionCommandFactory cf = m_reference.getCommandFactory ();
+			SetDeadlineCmd cmd = cf.setDeadlineCmd (m_deadline);
+			System.out.println ("Setting deadline to " + m_deadline);
+			OperationResult result = executor.getOperationPublishingPort ().publishOperation (cmd);
+			m_outcome = result.result == Result.SUCCESS;
+			System.out.println ("DOne");
+		} catch (RainbowException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         return m_outcome;
     }
 

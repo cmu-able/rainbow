@@ -43,7 +43,7 @@ public class RobotStateModelInstance implements IModelInstance<RobotState> {
 	}
 
 	@Override
-	public ModelCommandFactory<RobotState> getCommandFactory() {
+	public ModelCommandFactory<RobotState> getCommandFactory() throws RainbowException {
 		if (m_commandFactory == null)
 			m_commandFactory = new RobotStateCommandFactory(this);
 		return m_commandFactory;

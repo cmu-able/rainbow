@@ -13,8 +13,8 @@ public class SetBatteryChargeCmd extends AbstractRainbowModelOperation<Double, R
 
     private double m_charge;
 
-    public SetBatteryChargeCmd (RobotStateModelInstance model, String target, String charge) {
-        super ("setBatteryCharge", model, target, charge);
+    public SetBatteryChargeCmd (String commandName, RobotStateModelInstance model, String target, String charge) {
+        super (commandName, model, target, charge);
         m_charge = Double.parseDouble (charge);
     }
 
@@ -25,7 +25,7 @@ public class SetBatteryChargeCmd extends AbstractRainbowModelOperation<Double, R
 
     @Override
     protected List<? extends IRainbowMessage> getGeneratedEvents (IRainbowMessageFactory messageFactory) {
-        return generateEvents (messageFactory, "setBatteryCharge");
+        return generateEvents (messageFactory, getName());
     }
 
     @Override

@@ -24,6 +24,7 @@ public interface IESEBMasterCommandPortRemoteInterface extends IMasterCommandPor
     @Override
     @ReturnTypeMapping("bool")
     boolean isAdaptationEnabled();
+
     @Override
     @ParametersTypeMapping ({ "string", "string", "list<string>" })
     @ReturnTypeMapping ("outcome")
@@ -56,5 +57,13 @@ public interface IESEBMasterCommandPortRemoteInterface extends IMasterCommandPor
     @Override
     @ReturnTypeMapping ("bool")
     boolean allDelegatesOK ();
+
+    
+    @Override
+    @ReturnTypeMapping("bool")
+    boolean autoStartProbes();
+    
+    
+
 
 }

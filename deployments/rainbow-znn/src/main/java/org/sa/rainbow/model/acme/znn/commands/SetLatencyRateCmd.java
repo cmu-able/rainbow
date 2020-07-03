@@ -39,8 +39,8 @@ public class SetLatencyRateCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
     private String m_httpConn;
     private double m_latencyRate;
 
-    public SetLatencyRateCmd (AcmeModelInstance model, String conn, String latencyRate) {
-        super ("setLatency", model, conn, latencyRate);
+    public SetLatencyRateCmd (String c, AcmeModelInstance model, String conn, String latencyRate) {
+        super (c, model, conn, latencyRate);
         m_httpConn = conn;
         m_latencyRate = Double.valueOf (latencyRate);
     }

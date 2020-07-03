@@ -30,6 +30,7 @@ import org.acmestudio.acme.type.AcmeTypeHelper;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 import org.sa.rainbow.stitch.Ohana;
 import org.sa.rainbow.stitch.core.Expression;
@@ -673,22 +674,30 @@ public class StitchTypechecker extends BaseStitchBehavior {
 			if (n instanceof IAcmeElement) {
 				nameObj = ((IAcmeElement) n).lookupName(name.substring(dotIdx + 1), true);
 			} else if (n instanceof AcmeModelInstance) {
-				Class<?> commandFactoryClass = ((AcmeModelInstance) n).getCommandFactory().getClass();
-				Method[] methods = commandFactoryClass.getMethods();
-				String m = name.substring(dotIdx + 1);
-				if (!m.endsWith("Cmd")) {
-					m += "Cmd";
-				}
-				for (int i = 0; i < methods.length && nameObj == null; i++) {
-					if (methods[i].getName().equals(m)) {
-						nameObj = methods[i];
-						m_modelOperationsReferenced.add(name.substring(dotIdx + 1));
-						break;
+				try {
+					Class<?> commandFactoryClass = ((AcmeModelInstance) n).getCommandFactory().getClass();
+					Method[] methods = commandFactoryClass.getMethods();
+					String m = name.substring(dotIdx + 1);
+					if (!m.endsWith("Cmd")) {
+						m += "Cmd";
 					}
-				}
+					for (int i = 0; i < methods.length && nameObj == null; i++) {
+						if (methods[i].getName().equals(m)) {
+							nameObj = methods[i];
+							m_modelOperationsReferenced.add(name.substring(dotIdx + 1));
+							break;
+						}
+					}
 
-				if (nameObj == null) {
-					nameObj = ((AcmeModelInstance) n).getModelInstance().lookupName(name.substring(dotIdx + 1), true);
+					if (nameObj == null) {
+						nameObj = ((AcmeModelInstance) n).getModelInstance().lookupName(name.substring(dotIdx + 1), true);
+					}
+				} catch (SecurityException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (RainbowException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 		} else {

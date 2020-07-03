@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<AcmeModel>
+  <family name="EnvType">
+    <userdata key="SaveData">
+      <data date="5/25/16 4:26 PM"/>
+    </userdata>
+    <userdata key="connection-patterns">
+      <data>
+        <portConnectionRule connector="Connector" name="">
+          <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+          <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+        </portConnectionRule>
+      </data>
+    </userdata>
+    <system name="prototype">
+      <userdata key="connection-patterns">
+        <data>
+          <portConnectionRule connector="Connector" name="">
+            <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+            <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+          </portConnectionRule>
+        </data>
+      </userdata>
+    </system>
+  </family>
+  <family name="SwimFam">
+    <userdata key="SaveData">
+      <data date="5/25/16 4:26 PM"/>
+    </userdata>
+    <userdata key="connection-patterns">
+      <data>
+        <portConnectionRule connector="Connector" name="">
+          <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+          <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+        </portConnectionRule>
+      </data>
+    </userdata>
+    <system name="prototype">
+      <userdata key="connection-patterns">
+        <data>
+          <portConnectionRule connector="Connector" name="">
+            <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+            <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+          </portConnectionRule>
+        </data>
+      </userdata>
+    </system>
+  </family>
+  <system name="SwimSys">
+    <userdata key="SaveData">
+      <data date="5/25/16 4:26 PM"/>
+    </userdata>
+    <userdata key="connection-patterns">
+      <data>
+        <portConnectionRule connector="Connector" name="">
+          <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+          <association componentType="Component" portName="p" portType="Port" roleName="r" roleType="Role"/>
+        </portConnectionRule>
+      </data>
+    </userdata>
+    <component name="Server0">
+      <userdata key="vis-information">
+        <data category="component" rotation="0.0" x="387" y="615"/>
+      </userdata>
+      <port name="http0">
+        <userdata key="vis-information">
+          <data category="port" componentManaged="true" relPosX="0" relPosY="25" rotation="0.0" x="387" y="640"/>
+        </userdata>
+      </port>
+    </component>
+    <component name="Server1">
+      <userdata key="vis-information">
+        <data category="component" rotation="0.0" x="1069" y="513"/>
+      </userdata>
+      <port name="http0">
+        <userdata key="vis-information">
+          <data category="port" componentManaged="true" relPosX="0" relPosY="25" rotation="0.0" x="1069" y="538"/>
+        </userdata>
+      </port>
+    </component>
+    <component name="LB0">
+      <userdata key="vis-information">
+        <data category="component" rotation="0.0" x="660" y="182"/>
+      </userdata>
+      <port name="fwd0">
+        <userdata key="vis-information">
+          <data category="port" componentManaged="true" relPosX="-7" relPosY="25" rotation="0.0" x="653" y="207"/>
+        </userdata>
+      </port>
+      <port name="fwd1">
+        <userdata key="vis-information">
+          <data category="port" componentManaged="true" relPosX="8" relPosY="25" rotation="0.0" x="668" y="207"/>
+        </userdata>
+      </port>
+    </component>
+    <connector name="proxyConn_0_0">
+      <userdata key="vis-information">
+        <data rotation="0.0" x="576" y="488"/>
+      </userdata>
+      <role name="req">
+        <userdata key="vis-information">
+          <data category="role" rotation="0.0" x="653" y="207"/>
+        </userdata>
+      </role>
+      <role name="rec">
+        <userdata key="vis-information">
+          <data category="role" rotation="0.0" x="387" y="640"/>
+        </userdata>
+      </role>
+    </connector>
+    <connector name="proxyConn_1_0">
+      <userdata key="vis-information">
+        <data rotation="0.0" x="962" y="349"/>
+      </userdata>
+      <role name="req">
+        <userdata key="vis-information">
+          <data category="role" rotation="0.0" x="668" y="207"/>
+        </userdata>
+      </role>
+      <role name="rec">
+        <userdata key="vis-information">
+          <data category="role" rotation="0.0" x="1069" y="538"/>
+        </userdata>
+      </role>
+    </connector>
+  </system>
+</AcmeModel>

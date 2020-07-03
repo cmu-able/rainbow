@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: rainbow-gui
+Bundle-SymbolicName: rainbow-gui
+Bundle-Version: 3.0.0.qualifier
+Export-Package: com.alexmerz.graphviz,
+ com.alexmerz.graphviz.cli,
+ com.alexmerz.graphviz.objects,
+ com.alexmerz.graphviz.unittest,
+ org.sa.rainbow.gui,
+ org.sa.rainbow.gui.arch,
+ org.sa.rainbow.gui.arch.controller,
+ org.sa.rainbow.gui.arch.elements,
+ org.sa.rainbow.gui.arch.model,
+ org.sa.rainbow.gui.stuff,
+ org.sa.rainbow.gui.visitor,
+ org.sa.rainbow.gui.widgets

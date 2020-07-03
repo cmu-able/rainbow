@@ -27,12 +27,16 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.core.models.commands.ModelCommandFactory;
 
 public class UtilityHistoryCommandFactory extends ModelCommandFactory<UtilityHistory> {
 
+	private static final String ADD_UTILITY_MEASURE_CMD = "addUtilityMeasure";
+
+	@LoadOperation
     public static UtilityHistoryLoadModelCommand loadCommand (ModelsManager mm,
             String modelName,
             InputStream stream,
@@ -40,17 +44,14 @@ public class UtilityHistoryCommandFactory extends ModelCommandFactory<UtilityHis
         return new UtilityHistoryLoadModelCommand (modelName, mm, stream, source);
     }
 
-    public UtilityHistoryCommandFactory (UtilityHistoryModelInstance model) {
+    public UtilityHistoryCommandFactory (UtilityHistoryModelInstance model) throws RainbowException {
         super (UtilityHistoryModelInstance.class, model);
     }
 
-    @Override
-    protected void fillInCommandMap () {
-        m_commandMap.put ("addUtilityMeasure".toLowerCase (), AddUtilityMeasureCmd.class);
-    }
 
+    @Operation(name=ADD_UTILITY_MEASURE_CMD)
     public AddUtilityMeasureCmd addUtilityMeasureCmd (String utilityKey, double utility) {
-        return new AddUtilityMeasureCmd ("addUtilityMeasure", (UtilityHistoryModelInstance )m_modelInstance,
+        return new AddUtilityMeasureCmd (UtilityHistoryCommandFactory.ADD_UTILITY_MEASURE_CMD, (UtilityHistoryModelInstance )m_modelInstance,
                 utilityKey,
                 Double.toString (utility));
     }

@@ -31,6 +31,7 @@ public class DecisionEngineCP1 extends DecisionEngine{
         MapTranslator.ROBOT_BATTERY_CHARGING_RATIO = SimpleConfigurationBatteryModel.getChargingRate();
         m_energyWeight = SimpleConfigurationBatteryModel.getEnergyWeight();
         m_timelinessWeight = SimpleConfigurationBatteryModel.getTimelinessWeight();
+        m_priority_index = 1;
     }
    /**
     * Returns the maximum estimated time for a candidate policy in the scoreboard

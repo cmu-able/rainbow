@@ -38,9 +38,9 @@ import java.util.List;
 
 public class SetMaliciousnessCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
 
-    public SetMaliciousnessCmd (AcmeModelInstance model, String target,
+    public SetMaliciousnessCmd (String c, AcmeModelInstance model, String target,
                                 String maliciousness) {
-        super ("setMaliciousness", model, target, maliciousness);
+        super (c, model, target, maliciousness);
     }
 
     @Override

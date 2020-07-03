@@ -1,0 +1,152 @@
+configs: 
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 4
+   s: 2
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 3
+   s: 2
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 2
+   s: 2
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 0
+   s: 2
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 1
+   s: 2
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 0
+   s: 1
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 4
+   s: 1
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 3
+   s: 1
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 2
+   s: 1
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 1
+   s: 1
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 1
+   s: 0
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 4
+   s: 0
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 3
+   s: 0
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 2
+   s: 0
+- !reach.ConfigRubis
+   addServerProgress: 1
+   d: 0
+   s: 0
+- !reach.ConfigRubis
+   addServerProgress: 0
+   d: 0
+   s: 1
+- !reach.ConfigRubis
+   addServerProgress: 0
+   d: 3
+   s: 1
+- !reach.ConfigRubis
+   addServerProgress: 0
+   d: 4
+   s: 1
+- !reach.ConfigRubis
+   addServerProgress: 0
+   d: 1
+   s: 1
+- !reach.ConfigRubis
+   addServerProgress: 0
+   d: 2
+   s: 1
+- !reach.ConfigRubis
+   addServerProgress: 0
+   d: 4
+   s: 0
+- !reach.ConfigRubis
+   addServerProgress: 0
+   d: 0
+   s: 0
+- !reach.ConfigRubis
+   addServerProgress: 0
+   d: 1
+   s: 0
+- !reach.ConfigRubis
+   addServerProgress: 0
+   d: 2
+   s: 0
+- !reach.ConfigRubis
+   addServerProgress: 0
+   d: 3
+   s: 0
+--- 
+0: 
+   0: &1 []
+1: 
+   1: *1
+2: 
+   2: *1
+3: 
+   3: *1
+4: 
+   4: *1
+5: 
+   5: *1
+6: 
+   6: *1
+7: 
+   7: *1
+8: 
+   8: *1
+9: 
+   9: *1
+10: 
+   10: *1
+11: 
+   11: *1
+12: 
+   12: *1
+13: 
+   13: *1
+14: 
+   14: *1
+15: 
+   3: *1
+16: 
+   1: *1
+17: 
+   0: *1
+18: 
+   4: *1
+19: 
+   2: *1
+20: 
+   6: *1
+21: 
+   5: *1
+22: 
+   9: *1
+23: 
+   8: *1
+24: 
+   7: *1

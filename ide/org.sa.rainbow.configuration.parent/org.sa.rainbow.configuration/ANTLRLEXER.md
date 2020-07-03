@@ -1,0 +1,1 @@
+The custom lexer needs to be regenerated everytime the xtext grammar changes.

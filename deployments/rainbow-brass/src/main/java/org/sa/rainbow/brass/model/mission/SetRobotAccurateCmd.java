@@ -10,8 +10,8 @@ import org.sa.rainbow.core.ports.IRainbowMessageFactory;
 public class SetRobotAccurateCmd extends AbstractRainbowModelOperation<Boolean, MissionState> {
 	private boolean m_robotAccurate;
 
-	public SetRobotAccurateCmd(MissionStateModelInstance model, String target, String robotAccurate) {
-		super("setRobotAccurate", model, target, robotAccurate);
+	public SetRobotAccurateCmd(String commandName, MissionStateModelInstance model, String target, String robotAccurate) {
+		super(commandName, model, target, robotAccurate);
 		m_robotAccurate = Boolean.parseBoolean(robotAccurate);
 	}
 
@@ -27,7 +27,7 @@ public class SetRobotAccurateCmd extends AbstractRainbowModelOperation<Boolean, 
 
 	@Override
 	protected List<? extends IRainbowMessage> getGeneratedEvents(IRainbowMessageFactory messageFactory) {
-		return generateEvents(messageFactory, "setRobotAccurate");
+		return generateEvents(messageFactory, getName());
 	}
 
 	@Override

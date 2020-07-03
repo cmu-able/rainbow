@@ -62,13 +62,19 @@ public class AbstractESEBDisposableRPCPort implements IDisposablePort {
 
     ESEBRPCConnector getConnectionRole () throws IOException, ParticipantException {
         if (m_connectionRole == null) {
-            initializeConnectionRole ();
+            initializeConnectionRole (false);
         }
         return m_connectionRole;
     }
+    ESEBRPCConnector getConnectionRoleForServer () throws IOException, ParticipantException {
+    	if (m_connectionRole == null) {
+    		initializeConnectionRole (true);
+    	}
+    	return m_connectionRole;
+    }
 
-    private void initializeConnectionRole () throws IOException, ParticipantException {
-        m_connectionRole = new ESEBRPCConnector (m_host, m_port, m_id);
+    private void initializeConnectionRole (boolean startServer) throws IOException, ParticipantException {
+        m_connectionRole = new ESEBRPCConnector (m_host, m_port, m_id, startServer);
 
     }
 

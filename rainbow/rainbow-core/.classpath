@@ -5,7 +5,7 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" output="target/classes" path="src/main/java">
+	<classpathentry excluding="org/reflections/copied/|org/reflections/copied/adapters/|org/reflections/copied/scanners/|org/reflections/copied/serializers/|org/reflections/copied/util/|org/reflections/copied/vfs/" kind="src" output="target/classes" path="src/main/java">
 		<attributes>
 			<attribute name="optional" value="true"/>
 			<attribute name="maven.pomderived" value="true"/>

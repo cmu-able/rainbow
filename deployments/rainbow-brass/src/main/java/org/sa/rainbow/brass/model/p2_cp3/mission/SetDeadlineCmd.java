@@ -11,8 +11,8 @@ public class SetDeadlineCmd extends AbstractRainbowModelOperation<Long, MissionS
 
     private Long m_date;
 
-    public SetDeadlineCmd (MissionStateModelInstance model, String target, String secondsHence) {
-        super ("setDeadline", model, target, secondsHence);
+    public SetDeadlineCmd (String commandName, MissionStateModelInstance model, String target, String secondsHence) {
+        super (commandName, model, target, secondsHence);
         try {
             m_date = Long.parseLong (secondsHence);
         }
@@ -29,7 +29,7 @@ public class SetDeadlineCmd extends AbstractRainbowModelOperation<Long, MissionS
 
     @Override
     protected List<? extends IRainbowMessage> getGeneratedEvents (IRainbowMessageFactory messageFactory) {
-        return generateEvents (messageFactory, "setDeadline");
+        return generateEvents (messageFactory, getName());
     }
 
     @Override

@@ -149,6 +149,7 @@ public class CP3BRASSAdaptationPlanner extends AbstractRainbowRunnable implement
 		} catch (RainbowException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
+			log(e1.getMessage());
 		}
 		if (v.m_allOk) {
 			log("Adaptation was successfully deployed");

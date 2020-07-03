@@ -47,6 +47,7 @@ import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.analysis.IRainbowAnalysis;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
@@ -230,23 +231,23 @@ public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAn
 				processNewOldAndFixedErrors(model, env);
 
 				if (!m_newErrors.isEmpty()) {
-					AcmeTypecheckSetCmd cmd = model.getCommandFactory().setTypecheckResultCmd(model.getModelInstance(),
-							false);
 
 					try {
+						AcmeTypecheckSetCmd cmd = model.getCommandFactory().setTypecheckResultCmd(model.getModelInstance(),
+								false);
 						m_modelUSPort.updateModel(cmd);
-					} catch (IllegalStateException e) {
+					} catch (IllegalStateException | RainbowException e) {
 						m_reportingPort.error(RainbowComponentT.ANALYSIS,
 								MessageFormat.format("[[{0}]]: Could not execute set typecheck command on model", id()),
 								e);
 					}
 				} else if (!m_fixedErrors.isEmpty()) {
-					AcmeTypecheckSetCmd cmd = model.getCommandFactory().setTypecheckResultCmd(model.getModelInstance(),
-							true);
 
 					try {
+						AcmeTypecheckSetCmd cmd = model.getCommandFactory().setTypecheckResultCmd(model.getModelInstance(),
+								true);
 						m_modelUSPort.updateModel(cmd);
-					} catch (IllegalStateException e) {
+					} catch (IllegalStateException | RainbowException e) {
 						m_reportingPort.error(RainbowComponentT.ANALYSIS,
 								MessageFormat.format("[[{0}]]: Could not execute set typecheck command on model", id()),
 								e);
@@ -336,11 +337,11 @@ public class ArchEvaluator extends AbstractRainbowRunnable implements IRainbowAn
 
 						@Override
 						public void requestAdaptation() {
-							AcmeTypecheckSetCmd cmd = model.getCommandFactory()
-									.setTypecheckResultCmd(getModel().getModelInstance(), false);
 							try {
+								AcmeTypecheckSetCmd cmd = model.getCommandFactory()
+										.setTypecheckResultCmd(getModel().getModelInstance(), false);
 								m_modelUSPort.updateModel(cmd);
-							} catch (IllegalStateException e) {
+							} catch (IllegalStateException | RainbowException e) {
 								m_reportingPort.error(RainbowComponentT.ANALYSIS,
 										"Could not execute set typecheck command on model", e);
 							}

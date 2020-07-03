@@ -39,9 +39,9 @@ public class SetNumSuccessfulRequestsCmd extends ZNNAcmeModelCommand<IAcmeProper
     private String m_server;
     private float          m_requests;
 
-    public SetNumSuccessfulRequestsCmd (AcmeModelInstance model, String server,
+    public SetNumSuccessfulRequestsCmd (String c, AcmeModelInstance model, String server,
                                         String requests) {
-        super ("setNumSuccessfulRequests", model, server, requests);
+        super (c, model, server, requests);
         m_server = server;
         m_requests = Integer.valueOf (requests);
     }

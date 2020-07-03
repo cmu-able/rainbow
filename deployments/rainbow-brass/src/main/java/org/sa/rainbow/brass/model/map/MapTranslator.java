@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -801,7 +802,7 @@ public class MapTranslator {
             out.close();
         }
         catch (IOException e){
-            System.out.println("Error exporting PRISM map translation:\n" + e);
+            System.out.println(MessageFormat.format("Error exporting PRISM map translation to ''{0}''. Error: {1}", f, e.getMessage()));
         }
     }
 

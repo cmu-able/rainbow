@@ -1,5 +1,6 @@
 package org.sa.rainbow.brass.model.instructions;
 
+import java.text.MessageFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,6 +32,11 @@ public class ChargeInstruction implements IInstruction {
 	@Override
 	public String getNextInstructionLabel() {
 		return m_nextLabel;
+	}
+	
+	@Override
+	public String toString() {
+		return MessageFormat.format("{0} -> Charge({1})", m_instruction, m_chargingTime);
 	}
 
 	@Override

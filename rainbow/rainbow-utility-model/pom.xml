@@ -3,9 +3,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>rainbow</groupId>
 	<artifactId>rainbow-utility-model</artifactId>
-	<version>3.0</version>
+	<version>3.1.0-SNAPSHOT</version>
 	<name>Rainbow Utility Model</name>
 	<description>Rainbow Model of Utility</description>
+	<properties>
+		<rainbowVersion>3.1.0-SNAPSHOT</rainbowVersion>
+		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
+	</properties>
 	<build>
 		<extensions>
 			<extension>
@@ -31,17 +35,17 @@
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-core</artifactId>
-			<version>3.0</version>
+			<version>${rainbowVersion}</version>
 		</dependency>
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-acme-model</artifactId>
-			<version>3.0</version>
+			<version>${rainbowVersion}</version>
 		</dependency>
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-stitch</artifactId>
-			<version>3.0</version>
+			<version>${rainbowVersion}</version>
 		</dependency>
 	</dependencies>
 	<repositories>
@@ -68,7 +72,5 @@
             </url>
 		</repository>
 	</distributionManagement>
-	<properties>
-		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
-	</properties>
+	
 </project>

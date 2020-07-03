@@ -1,0 +1,31 @@
+//**************************************************************
+// Strategy ReduceContentAndAddServer
+//**************************************************************
+
+//const int TAddServer_LATENCY = ?; set by init block 
+const int MAX_LATENCY = max(1, TAddServer_LATENCY);
+
+formula leaf = (node=2);
+
+module Strategy
+	node : [0..2] init 0;
+	exec : [0..MAX_LATENCY] init 0; // remaining tactic execution
+	tacticRunning : bool init false; // tactic with latency running
+
+	[DecDimmer_start] (sys_go & node=0 & dimmer > 1) -> 1: (node'=1);
+	[] (sys_go & node=0 & dimmer=1) -> 1: (node'=1); 
+
+	[] (sys_go & node=1 & !tacticRunning) -> 1: (tacticRunning'=true) & (exec'=TAddServer_LATENCY); // tactic start
+	[AddServer_complete] (sys_go & node=1 & tacticRunning & exec=0) -> 1: (tacticRunning'=false) & (node'=2); // tactic completion
+
+	[tick]	(leaf) -> 1: true;	
+
+	[tick]	(exec > 0) -> 1: (exec'=exec-1); // tactic progress
+
+	// prevent all other tactics from executing
+	[RemoveServer_start] false -> true;
+	[IncDimmer_start] false -> true;
+	[MinDimmer_start] false -> true;
+	[MaxDimmer_start] false -> true;
+endmodule
+
