@@ -51,6 +51,7 @@ import org.sa.rainbow.util.IRainbowConfigurationChecker;
 import org.sa.rainbow.util.RainbowConfigurationChecker.Problem;
 import org.sa.rainbow.util.RainbowConfigurationChecker.ProblemT;
 import org.sa.rainbow.util.YamlUtil;
+import org.sa.rainbow.util.ReflectionsExtension;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
@@ -218,7 +219,7 @@ public class CheckConfiguration {
 		// Make Rainbow.instance().rainbowMaster() return this master
 		Rainbow.instance().setMaster(master);
 		out.println("Locating configuration checkers in system...");
-		Reflections reflections = new Reflections("org.sa", CheckConfiguration.class.getClassLoader());
+		Reflections reflections = new ReflectionsExtension(new Object[] { "org.sa", CheckConfiguration.class.getClassLoader() });
 		List<IRainbowConfigurationChecker> checkers = new LinkedList<>();
 		Set<Class<? extends IRainbowConfigurationChecker>> checkerClasses = reflections
 				.getSubTypesOf(IRainbowConfigurationChecker.class);
