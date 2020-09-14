@@ -39,8 +39,8 @@ public class SetLoadCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
     private String m_server;
     private float          m_load;
 
-    public SetLoadCmd (AcmeModelInstance model, String server, String load) {
-        super ("setLoad", model, server, load);
+    public SetLoadCmd (String c, AcmeModelInstance model, String server, String load) {
+        super (c, model, server, load);
         m_server = server;
         m_load = Float.valueOf (load);
     }

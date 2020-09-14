@@ -21,6 +21,7 @@ import org.sa.rainbow.core.IRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 
@@ -82,28 +83,38 @@ public class BRASSMissionAnalyzer extends P2CP1Analyzer {
 //				return;
 //			}
 			if (!currentOK && m_wasOK && !getModels().getRainbowStateModel().getModelInstance().waitForIG()) {
-				m_wasOK = false;
-				m_reportingPort.info(getComponentType(), "Instruction graph failed...updating map model");
-				SetModelProblemCmd cmd1 = getModels().getRainbowStateModel().getCommandFactory()
-						.setModelProblem(CP3ModelState.INSTRUCTION_GRAPH_FAILED);
-				SetModelProblemCmd cmd2 = getModels().getRainbowStateModel().getCommandFactory()
-						.setModelProblem(CP3ModelState.IS_OBSTRUCTED);
-				m_modelUSPort.updateModel(Arrays.asList(new IRainbowOperation[] { cmd1, cmd2 }), true);
-				m_awaitingNewIG = true;
+				try {
+					m_wasOK = false;
+					m_reportingPort.info(getComponentType(), "Instruction graph failed...updating map model");
+					SetModelProblemCmd cmd1 = getModels().getRainbowStateModel().getCommandFactory()
+							.setModelProblem(CP3ModelState.INSTRUCTION_GRAPH_FAILED);
+					SetModelProblemCmd cmd2 = getModels().getRainbowStateModel().getCommandFactory()
+							.setModelProblem(CP3ModelState.IS_OBSTRUCTED);
+					m_modelUSPort.updateModel(Arrays.asList(new IRainbowOperation[] { cmd1, cmd2 }), true);
+					m_awaitingNewIG = true;
+				} catch (RainbowException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			else if (currentOK && !emptyInstructions(ig.getModelInstance()) && getModels().getRainbowStateModel().getModelInstance()
 					.getProblems().contains(RainbowState.CP3ModelState.IS_OBSTRUCTED)) {
 				// New IG resumed after robot obstructed
-				log("New instruction model was detected. Reseting models to ok");
-				m_reportingPort.info(getComponentType(), "New instruction graph detected");
-				m_awaitingNewIG = false;
-				getModels().getRainbowStateModel().getModelInstance().m_waitForIG = false;
-				// Clear robot obstructed flag
-				RemoveModelProblemCmd cmd1 = getModels().getRainbowStateModel().getCommandFactory()
-						.removeModelProblem(CP3ModelState.INSTRUCTION_GRAPH_FAILED);
-				RemoveModelProblemCmd cmd2 = getModels().getRainbowStateModel().getCommandFactory()
-						.removeModelProblem(CP3ModelState.IS_OBSTRUCTED);
-				m_modelUSPort.updateModel(Arrays.asList(new IRainbowOperation[] { cmd1, cmd2 }), true);
+				try {
+					log("New instruction model was detected. Reseting models to ok");
+					m_reportingPort.info(getComponentType(), "New instruction graph detected");
+					m_awaitingNewIG = false;
+					getModels().getRainbowStateModel().getModelInstance().m_waitForIG = false;
+					// Clear robot obstructed flag
+					RemoveModelProblemCmd cmd1 = getModels().getRainbowStateModel().getCommandFactory()
+							.removeModelProblem(CP3ModelState.INSTRUCTION_GRAPH_FAILED);
+					RemoveModelProblemCmd cmd2 = getModels().getRainbowStateModel().getCommandFactory()
+							.removeModelProblem(CP3ModelState.IS_OBSTRUCTED);
+					m_modelUSPort.updateModel(Arrays.asList(new IRainbowOperation[] { cmd1, cmd2 }), true);
+				} catch (RainbowException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 
 			}
 		}

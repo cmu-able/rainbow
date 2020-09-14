@@ -1,0 +1,9 @@
+target <<rainbow-target>>
+import properties "../properties.rbw"
+
+# Insert gauge types and gauge specifications 
+
+
+
+
+export * to "model/gauges.yml"

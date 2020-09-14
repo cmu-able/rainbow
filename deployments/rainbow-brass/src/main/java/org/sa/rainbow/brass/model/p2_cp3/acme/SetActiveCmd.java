@@ -21,8 +21,8 @@ public class SetActiveCmd extends AcmeModelOperation<IAcmeProperty> {
 
 	private ActiveT m_enablement;
 
-	public SetActiveCmd(AcmeModelInstance model, String target, String enablement) {
-		super("setActive", model, target, enablement);
+	public SetActiveCmd(String commandName, AcmeModelInstance model, String target, String enablement) {
+		super(commandName, model, target, enablement);
 		m_enablement = TurtlebotModelInstance.ActiveT.valueOf(enablement);
 	}
 

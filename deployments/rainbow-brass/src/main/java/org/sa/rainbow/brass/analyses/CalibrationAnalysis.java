@@ -30,6 +30,7 @@ import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.RainbowConstants;
 import org.sa.rainbow.core.analysis.IRainbowAnalysis;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IModelUSBusPort;
 import org.sa.rainbow.core.ports.IModelsManagerPort;
@@ -115,7 +116,7 @@ public class CalibrationAnalysis extends AbstractRainbowRunnable implements IRai
     protected int     m_calibrationErrorObsSize = 0;
 
     @Override
-    protected void runAction () {
+    protected void runAction () throws RainbowException {
         ModelReference missionStateRef = new ModelReference ("RobotAndEnvironmentState",
                 MissionStateModelInstance.MISSION_STATE_TYPE);
         MissionStateModelInstance missionStateModel = (MissionStateModelInstance )m_modelsManagerPort
@@ -227,7 +228,7 @@ public class CalibrationAnalysis extends AbstractRainbowRunnable implements IRai
             InstructionGraphModelInstance igModel,
             EnvMapModelInstance envModel,
             InstructionGraphProgress igProgress,
-            MissionState missionState) {
+            MissionState missionState) throws RainbowException {
         EnvMap envMap = envModel.getModelInstance ();
         // Get current robot position
         LocationRecording pose = missionState.getCurrentPose ();

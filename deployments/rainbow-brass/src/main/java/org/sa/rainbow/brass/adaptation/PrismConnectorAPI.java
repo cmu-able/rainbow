@@ -185,7 +185,9 @@ public class PrismConnectorAPI {
                 m_propertiesToCheck.add(m_propertiesFile.getPropertyObject(i));
             }
         } else {
+        	logInfo("Checking property " + propertyToCheck);
             m_propertiesToCheck.add(m_propertiesFile.getPropertyObject(propertyToCheck));
+            logInfo("Done");
             numPropertiesToCheck=1;
         }
 

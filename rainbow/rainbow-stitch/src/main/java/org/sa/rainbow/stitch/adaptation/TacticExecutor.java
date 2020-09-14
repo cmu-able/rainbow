@@ -12,6 +12,7 @@ import org.sa.rainbow.core.adaptation.AdaptationTree;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
@@ -84,9 +85,14 @@ public class TacticExecutor extends AbstractRainbowRunnable implements IAdaptati
             m_adaptationTreeExecuting = m_adaptationDQPort.dequeue ();
             log ("Dequeued an adaptation");
             m_done = new CountDownLatch (1);
-            TacticExecutionVisitor tacticVisitor = new TacticExecutionVisitor (this, m_modelRef, m_historyModel
-                    .getCommandFactory (), m_adaptationTreeExecuting, m_executionThreadGroup, m_done);
-            tacticVisitor.start ();
+            try {
+				TacticExecutionVisitor tacticVisitor = new TacticExecutionVisitor (this, m_modelRef, m_historyModel
+				        .getCommandFactory (), m_adaptationTreeExecuting, m_executionThreadGroup, m_done);
+				tacticVisitor.start ();
+			} catch (RainbowException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
         } else if (m_done != null) { // We have a tactic that is executing
             if (m_done.getCount () == 0) {

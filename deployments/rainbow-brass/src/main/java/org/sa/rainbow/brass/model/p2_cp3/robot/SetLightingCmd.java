@@ -21,8 +21,8 @@ public class SetLightingCmd extends AbstractRainbowModelOperation<Double, RobotS
 
 	private double m_lighting;
 
-	public SetLightingCmd(CP3RobotStateModelInstance model, String target, String lighting) {
-		super("setLighting", model, target, lighting);
+	public SetLightingCmd(String commandName, CP3RobotStateModelInstance model, String target, String lighting) {
+		super(commandName, model, target, lighting);
 		m_lighting = Double.valueOf(lighting);
 	}
 
@@ -33,7 +33,7 @@ public class SetLightingCmd extends AbstractRainbowModelOperation<Double, RobotS
 
 	@Override
 	protected List<? extends IRainbowMessage> getGeneratedEvents(IRainbowMessageFactory messageFactory) {
-		return generateEvents(messageFactory, "setLighting");
+		return generateEvents(messageFactory, getName());
 	}
 
 	@Override

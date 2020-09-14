@@ -1,0 +1,30 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: org.sa.rainbow.stitch
+Bundle-ManifestVersion: 2
+Bundle-Name: org.sa.rainbow.stitch
+Bundle-Vendor: My Company
+Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: org.sa.rainbow.stitch; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.xtext,
+ org.eclipse.xtext.xbase,
+ org.eclipse.equinox.common;bundle-version="3.5.0",
+ org.eclipse.emf.ecore,
+ org.eclipse.xtext.xbase.lib;bundle-version="2.14.0",
+ org.eclipse.xtext.util,
+ org.eclipse.emf.common,
+ org.eclipse.xtend.lib;bundle-version="2.14.0",
+ org.antlr.runtime;bundle-version="[3.2.0,3.2.1)"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: org.sa.rainbow.stitch.stitch,
+ org.sa.rainbow.stitch.generator,
+ org.sa.rainbow.stitch.validation,
+ org.sa.rainbow.stitch.scoping,
+ org.sa.rainbow.stitch,
+ org.sa.rainbow.stitch.stitch.impl,
+ org.sa.rainbow.stitch.services,
+ org.sa.rainbow.stitch.stitch.util,
+ org.sa.rainbow.stitch.serializer,
+ org.sa.rainbow.stitch.parser.antlr.internal,
+ org.sa.rainbow.stitch.parser.antlr
+Import-Package: org.apache.log4j

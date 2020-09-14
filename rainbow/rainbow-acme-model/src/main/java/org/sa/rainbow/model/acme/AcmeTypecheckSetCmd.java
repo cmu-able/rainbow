@@ -36,8 +36,8 @@ public class AcmeTypecheckSetCmd extends AcmeModelOperation<IAcmeElementExtensio
 
     private final Boolean m_typechecks;
 
-    public AcmeTypecheckSetCmd (AcmeModelInstance model, String system, String typechecks) {
-        super ("setTypecheckResult", model, system, typechecks);
+    public AcmeTypecheckSetCmd (String opname, AcmeModelInstance model, String system, String typechecks) {
+        super (opname, model, system, typechecks);
         m_typechecks = Boolean.valueOf (typechecks);
     }
 

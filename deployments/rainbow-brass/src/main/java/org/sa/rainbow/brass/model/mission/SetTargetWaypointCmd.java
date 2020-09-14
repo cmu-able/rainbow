@@ -11,8 +11,8 @@ public class SetTargetWaypointCmd extends AbstractRainbowModelOperation<String, 
 
     private String m_wp;
 
-    public SetTargetWaypointCmd (MissionStateModelInstance model, String target, String wp) {
-        super ("setTargetWaypoint", model, target, wp);
+    public SetTargetWaypointCmd (String commandName, MissionStateModelInstance model, String target, String wp) {
+        super (commandName, model, target, wp);
         m_wp = wp;
     }
 
@@ -23,7 +23,7 @@ public class SetTargetWaypointCmd extends AbstractRainbowModelOperation<String, 
 
     @Override
     protected List<? extends IRainbowMessage> getGeneratedEvents (IRainbowMessageFactory messageFactory) {
-        return generateEvents (messageFactory, "setTargetWaypoint");
+        return generateEvents (messageFactory, getName());
     }
 
     @Override

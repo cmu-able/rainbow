@@ -20,7 +20,7 @@
 	<packaging>jar</packaging>
 	<!-- Version. This should *always* be a snapshot version by convention. 
 		Name should be <version-number>-SNAPSHOT. -->
-	<version>3.0</version>
+	<version>3.1.0-SNAPSHOT</version>
 	<!-- User readable name of the pom. -->
 	<name>Rainbow Core</name>
 	<!-- URL for the project site. -->

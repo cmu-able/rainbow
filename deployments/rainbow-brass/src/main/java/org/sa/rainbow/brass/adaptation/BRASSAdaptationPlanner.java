@@ -147,7 +147,7 @@ implements IAdaptationManager<BrassPlan>, IRainbowModelChangeCallback {
         try {
 			plan.visit (v);
 		} catch (RainbowException e1) {
-			// TODO Auto-generated catch block
+			log(e1.getMessage());
 			e1.printStackTrace();
 		}
         if (v.m_allOk) {

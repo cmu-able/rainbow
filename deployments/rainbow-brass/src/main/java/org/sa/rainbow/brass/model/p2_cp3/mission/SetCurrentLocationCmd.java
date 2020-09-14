@@ -17,9 +17,9 @@ public class SetCurrentLocationCmd extends AbstractRainbowModelOperation<Mission
     private double       m_w;
     private Heading      m_heading;
 
-    public SetCurrentLocationCmd (MissionStateModelInstance model, String target, String x,
+    public SetCurrentLocationCmd (String commandName, MissionStateModelInstance model, String target, String x,
             String y, String w) {
-        super ("setCurrentLocation", model, target, x, y, w);
+        super (commandName, model, target, x, y, w);
         m_x = Double.parseDouble (x);
         m_y = Double.parseDouble (y);
         m_w = Double.parseDouble (w);
@@ -32,7 +32,7 @@ public class SetCurrentLocationCmd extends AbstractRainbowModelOperation<Mission
 
     @Override
     protected List<? extends IRainbowMessage> getGeneratedEvents (IRainbowMessageFactory messageFactory) {
-        return generateEvents (messageFactory, "setCurrentLocation");
+        return generateEvents (messageFactory, getName());
     }
 
     @Override

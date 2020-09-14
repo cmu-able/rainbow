@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: rainbow-acme-model
+Bundle-SymbolicName: rainbow-acme-model
+Bundle-Version: 3.0.0.qualifier
+Export-Package: acmetests,
+ modeltests,
+ org.sa.rainbow.checkers.acme,
+ org.sa.rainbow.effectors.acme,
+ org.sa.rainbow.evaluator.acme,
+ org.sa.rainbow.evaluator.acme.gui,
+ org.sa.rainbow.model.acme,
+ org.sa.rainbow.model.acme.eseb

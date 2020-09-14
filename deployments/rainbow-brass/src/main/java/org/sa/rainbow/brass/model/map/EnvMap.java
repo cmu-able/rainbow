@@ -40,9 +40,8 @@ public class EnvMap {
 		m_new_node_id = 0;
 		m_arcs = new HashMap<>();
 		m_arcs_lookup = new LinkedList<EnvMapArc>();
-		// initWithSimpleMap(); // TODO: Substitute hardwired version of the map by one
-		// parsed from file
-		loadFromFile(props.getProperty(PropertiesConnector.MAP_PROPKEY));
+		m_originalFile = props.getProperty(PropertiesConnector.MAP_PROPKEY);
+		loadFromFile(m_originalFile);
 	}
 
 	public EnvMap(ModelReference model) {
@@ -51,6 +50,14 @@ public class EnvMap {
 		m_nodes = new HashMap<>();
 		m_new_node_id = 0;
 		m_arcs = new HashMap<>();
+	}
+	
+	public void reload() {
+		m_last_insertion = new NodeInsertion();
+		m_nodes.clear();
+		m_arcs.clear();
+		m_arcs_lookup.clear();
+		loadFromFile(m_originalFile);
 	}
 
 	public ModelReference getModelReference() {
@@ -75,6 +82,7 @@ public class EnvMap {
 	private int m_new_node_id;
 
 	private final ModelReference m_model;
+	private String m_originalFile;
 
 	public synchronized void updateArcsLookup() {
 		m_arcs_lookup = new LinkedList<EnvMapArc>(new LinkedHashSet<EnvMapArc>(m_arcs.values()));

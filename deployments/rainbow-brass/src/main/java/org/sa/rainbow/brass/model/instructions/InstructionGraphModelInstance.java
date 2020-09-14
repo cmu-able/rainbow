@@ -47,7 +47,10 @@ public class InstructionGraphModelInstance implements IModelInstance<Instruction
     @Override
     public InstructionGraphCommandFactory getCommandFactory () {
         if (m_commandFactory == null) {
-            m_commandFactory = new InstructionGraphCommandFactory (this);
+            try {
+				m_commandFactory = new InstructionGraphCommandFactory (this);
+			} catch (RainbowException e) {
+			}
         }
         return m_commandFactory;
     }

@@ -14,6 +14,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -30,6 +32,7 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
 	public static final MediaType     JSON               = MediaType.parse ("application/json");
     public static final OkHttpClient  CLIENT             = new OkHttpClient ();
     public static final String        STATUS_SERVER      = "http://localhost:5000";
+	public static final String LEARN_ENDPOINT = "/internal-status";
     private static BRASSHttpConnector s_instance;
     public Queue<Request>             m_requestQ         = new SynchronousQueue<> ();
     private Callback                  m_responseCallback = new Callback () {
@@ -167,6 +170,54 @@ public class BRASSHttpConnector /*extends AbstractRainbowRunnable*/ implements I
 //        }
 //        catch (IOException e) {
 //        }
+    }
+    
+    boolean m_onlineLearning = false;
+    
+    public boolean requestOnlineLearning() {
+    	final Object lock = new Object();
+    	JsonObject json = getTimeJSON();
+    	addFieldsToStatus("learning-requested", "requesting online learning", json);
+    	RequestBody body = RequestBody.create(JSON, m_gsonPP.toJson(json));
+    	Request request = new Request.Builder().url(STATUS_SERVER + LEARN_ENDPOINT).post(body).build();
+    	
+    	
+    	CLIENT.newCall(request).enqueue(new Callback() {
+			
+			@Override
+			public void onResponse(Call call, Response response) throws IOException {
+	        	String responseString = response.body().string();
+				System.out.println("Received response from shim: " + responseString);
+				boolean wait = false;
+				try {
+					JsonObject j = new JsonParser().parse(responseString).getAsJsonObject();
+					wait = j.get("success").getAsBoolean();
+				} catch (JsonSyntaxException e) {
+					e.printStackTrace();
+				}
+				m_onlineLearning = wait;
+				synchronized (lock) {
+					lock.notifyAll();
+				} 
+				
+			}
+			
+			@Override
+			public void onFailure(Call call, IOException e) {
+				synchronized (lock) {
+					lock.notifyAll();
+				}
+			}
+		});
+    	
+    	// Wait for result
+    	synchronized (lock) {
+    		try {
+				lock.wait();
+			} catch (InterruptedException e1) {
+			}
+    	}
+    	return m_onlineLearning;
     }
 
 	private String missionSucceeded() {

@@ -24,6 +24,28 @@
 
 package org.sa.rainbow.util;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.reflections.Reflections;
@@ -39,18 +61,6 @@ import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IMasterConnectionPort.ReportType;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.translator.probes.IBashBasedScript;
-
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Util {
 
@@ -107,10 +117,14 @@ public class Util {
         }
         return basePath;
     }
+    
+    public static String makeValidPath(String path) {
+    	return path.replaceAll("\"", "");
+    }
 
     public static File getRelativeToPath (File parent, String relPath) {
         try {
-            return new File (parent, relPath).getCanonicalFile ();
+            return new File (parent, makeValidPath(relPath)).getCanonicalFile ();
         }
         catch (IOException e) {
             LOGGER.error (MessageFormat.format ("Failed to get relative to path {0}{2}{1}", parent.getAbsolutePath (),
@@ -165,7 +179,7 @@ public class Util {
 
 
     public static String[] evalCommand (String value) {
-        String[] split = value.split (",|\\.|\\(|\\|");
+        String[] split = value.split (",|\\.|\\(|\\||\\)");
         for (int i = 0; i < split.length; i++) {
             split[i] = split[i].trim ();
         }
@@ -194,6 +208,11 @@ public class Util {
         m_primName2Class.put ("boolean", Boolean.class);
         m_primName2Class.put ("byte", Byte.class);
         m_primName2Class.put ("char", Character.class);
+        m_primName2Class.put ("Integer", Integer.class);
+        m_primName2Class.put("Long", Long.class);
+        m_primName2Class.put("Float", Float.class);
+        m_primName2Class.put("Double", Double.class);
+        m_primName2Class.put("Boolean", Boolean.class);
         // Map of primitive type class to Java Class
         m_primClass2Class = new HashMap<> ();
         m_primClass2Class.put (int.class, Integer.class);
@@ -606,5 +625,18 @@ public class Util {
 
     public static boolean safeEquals (Object a, Object b) {
         return a != null ? a.equals (b) : b == null;
+    }
+    
+    public static List<Method> getMethodsAnnotatedWith(final Class<?> type, final Class<? extends Annotation> annotation) {
+    	final List<Method> methods = new ArrayList<>();
+    	Class<?> clazz = type;
+    	while (clazz != Object.class) {
+    		List<Method> collect = Arrays.asList(clazz.getDeclaredMethods()).stream().filter(m -> {
+    			return m.isAnnotationPresent(annotation);
+    		}).collect(Collectors.toList());
+    		methods.addAll(collect);
+    		clazz = clazz.getSuperclass();
+    	}
+    	return methods;
     }
 }

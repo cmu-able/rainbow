@@ -15,6 +15,7 @@ import org.sa.rainbow.brass.model.p2_cp3.rainbowState.SetModelProblemCmd;
 import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotState;
 import org.sa.rainbow.core.IRainbowEnvironment;
 import org.sa.rainbow.core.RainbowComponentT;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowModelChangeCallback;
@@ -43,7 +44,7 @@ public class DarknessAnalyzer extends P2CP3Analyzer implements IRainbowModelChan
 	Map<EnvMapArc, Map<String, LightingData>> m_lightingData = new HashMap<>();
 
 	@Override
-	protected void runAction() {
+	protected void runAction() throws RainbowException {
 		CP3RobotState rs = getModels().getRobotStateModel().getModelInstance();
 		try {
 			double ill = rs.getIllumination();

@@ -17,6 +17,7 @@ import org.acmestudio.standalone.resource.StandaloneLanguagePackHelper;
 import org.sa.rainbow.core.*;
 import org.sa.rainbow.core.analysis.IRainbowAnalysis;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.IModelInstance;
 import org.sa.rainbow.core.models.ModelReference;
@@ -170,8 +171,13 @@ public class ZNNStateAnalyzer extends AbstractRainbowRunnable implements IRainbo
                         }
                         avgRT = cum / clients.getValues ().size ();
                         perMal = ((float) numMal) / clients.getValues ().size () * 100f;
-                        SetSystemPropertiesCmd cmd = model.getCommandFactory ().setSystemProperties (system, avgRT, perMal, aboveRT, aboveMal);
-                        m_modelUSPort.updateModel (cmd);
+                        try {
+							SetSystemPropertiesCmd cmd = model.getCommandFactory ().setSystemProperties (system, avgRT, perMal, aboveRT, aboveMal);
+							m_modelUSPort.updateModel (cmd);
+						} catch (RainbowException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 
                     }
 

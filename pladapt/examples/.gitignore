@@ -1,0 +1,8 @@
+**/*.o
+**/*.d
+**/*.so
+!*.cpp
+!.cproject
+!.project
+
+.Rproj.user

@@ -43,7 +43,7 @@ public class ClockModelInstance implements IModelInstance<Clock> {
 	}
 
 	@Override
-	public ClockCommandFactory getCommandFactory() {
+	public ClockCommandFactory getCommandFactory() throws RainbowException {
 		if (m_commandFactory == null) 
 			m_commandFactory = new ClockCommandFactory(this);
 		return m_commandFactory;

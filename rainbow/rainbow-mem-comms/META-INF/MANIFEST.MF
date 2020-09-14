@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: rainbow-mem-comms
+Bundle-SymbolicName: rainbow-mem-comms
+Bundle-Version: 3.0.0.qualifier
+Export-Package: org.sa.rainbow.core.ports.guava

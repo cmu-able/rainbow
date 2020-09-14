@@ -15,8 +15,8 @@ public class RemoveClientCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
 
     private IAcmeComponentDeleteCommand m_deleteClientCmd;
 
-    public RemoveClientCmd (AcmeModelInstance model, String sys, String client) {
-        super ("deleteClient", model, sys, client);
+    public RemoveClientCmd (String c, AcmeModelInstance model, String sys, String client) {
+        super (c, model, sys, client);
     }
 
     @Override

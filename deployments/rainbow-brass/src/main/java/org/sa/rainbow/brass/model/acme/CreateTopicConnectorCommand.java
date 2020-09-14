@@ -18,9 +18,9 @@ public class CreateTopicConnectorCommand extends RosAcmeModelCommand<IAcmeConnec
     private String                      m_topic;
     private String                      m_msgType;
 
-    public CreateTopicConnectorCommand (AcmeModelInstance model, String target, String connName, String topic,
+    public CreateTopicConnectorCommand (String commandName, AcmeModelInstance model, String target, String connName, String topic,
             String msgType) {
-        super ("createTopicConnector", model, target, connName);
+        super (commandName, model, target, connName);
         m_connName = connName;
         m_topic = topic;
         m_msgType = msgType;

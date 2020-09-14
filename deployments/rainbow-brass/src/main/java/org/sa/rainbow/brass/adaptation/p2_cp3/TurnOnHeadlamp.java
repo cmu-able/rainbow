@@ -8,6 +8,7 @@ import org.sa.rainbow.brass.model.p2_cp3.robot.CP3RobotStateModelInstance;
 import org.sa.rainbow.brass.model.p2_cp3.robot.SetSensorCmd;
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.OperationResult;
 import org.sa.rainbow.core.ports.IModelDSBusPublisherPort.Result;
 
@@ -24,13 +25,18 @@ public class TurnOnHeadlamp extends BrassPlan {
 
 	@Override
 	public Object evaluate(Object[] argsIn) {
-		IAdaptationExecutor<BrassPlan> executor = Rainbow.instance().
-				getRainbowMaster().
-				strategyExecutor(m_models.getRainbowStateModel().getModelInstance().getModelReference().toString());
-		CP3RobotStateCommandFactory cf = (CP3RobotStateCommandFactory) m_models.getRobotStateModel().getCommandFactory();
-		SetSensorCmd tohl = cf.setSensorCmd(Sensors.HEADLAMP, m_on);
-		OperationResult result = executor.getOperationPublishingPort().publishOperation(tohl);
-		m_outcome = result.result == Result.SUCCESS;
+		try {
+			IAdaptationExecutor<BrassPlan> executor = (IAdaptationExecutor<BrassPlan>) Rainbow.instance().
+					getRainbowMaster().
+					adaptationExecutors().get(m_models.getRainbowStateModel().getModelInstance().getModelReference().toString());
+			CP3RobotStateCommandFactory cf = (CP3RobotStateCommandFactory) m_models.getRobotStateModel().getCommandFactory();
+			SetSensorCmd tohl = cf.setSensorCmd(Sensors.HEADLAMP, m_on);
+			OperationResult result = executor.getOperationPublishingPort().publishOperation(tohl);
+			m_outcome = result.result == Result.SUCCESS;
+		} catch (RainbowException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return m_outcome;
 	}
 

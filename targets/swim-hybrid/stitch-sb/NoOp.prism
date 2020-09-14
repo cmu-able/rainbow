@@ -1,0 +1,18 @@
+//**************************************************************
+// Strategy NoOp
+//**************************************************************
+
+module Strategy
+       	leaf : bool init true;
+
+	[tick]	true -> 1: true;	
+
+	// prevent all other tactics from executing
+	[AddServer_complete] false -> true;
+	[RemoveServer_start] false -> true;
+	[IncDimmer_start] false -> true;
+	[DecDimmer_start] false -> true;
+	[MinDimmer_start] false -> true;
+	[MaxDimmer_start] false -> true;
+endmodule
+

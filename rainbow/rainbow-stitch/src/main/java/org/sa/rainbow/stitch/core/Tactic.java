@@ -432,7 +432,7 @@ public class Tactic extends ScopedEntity implements IEvaluableScope {
 					m_hasError = true;
 					Tool.error("Statement failed to evaluate! " + ParserUtils.formatTree(stmt.tree()), null,
 							stitchState().stitchProblemHandler);
-					throw new StitchExecutionException ("Statement failed to evaluate! " + stmt.toString());
+					throw new StitchExecutionException ("Statement failed to evaluate! " + ParserUtils.formatTree(stmt.tree()));
 					// TODO: keep running, or break?
 //                System.out.print ("Statement failed to evaluate! " + stmt.toString ());
 				}

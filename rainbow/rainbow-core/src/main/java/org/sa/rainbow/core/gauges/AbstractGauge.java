@@ -171,7 +171,7 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
 
     @Override
     public void dispose () {
-        m_gaugeManagementPort.reportDeleted (this);
+//        m_gaugeManagementPort.reportDeleted (this);
 
 //        Rainbow.eventService().unlisten(m_gaugeEventHandler);
 
@@ -244,7 +244,9 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
         Object value = triple.getValue();
 		if (triple.getName ().equals (CONFIG_SAMPLING_FREQUENCY)) {
             // set the runner timer directly
-            setSleepTime ((Long) value);
+			if (value instanceof Number) {
+				setSleepTime (((Number) value).longValue());
+			}
         }
         else if (triple.getName().equals(RAINBOW_ADAPTING)) {
         	synchronized (this) {
@@ -293,6 +295,13 @@ public abstract class AbstractGauge extends AbstractRainbowRunnable implements I
                                                                              actualCmd.getTarget (), actualCmd
                                                                                      .getName (), Arrays.toString
                         (actualCmd.getParameters ())));
+    }
+    
+    protected Map<String,String> getParameters(IRainbowOperation operation) {
+    	Map<String,String> parameters = new HashMap<>();
+    	parameters.put(operation.getTarget(), operation.getTarget());
+    	Arrays.asList(operation.getParameters()).forEach(s -> parameters.put(s, s));
+    	return parameters;
     }
 
     private OperationRepresentation formOperation (IRainbowOperation cmd,

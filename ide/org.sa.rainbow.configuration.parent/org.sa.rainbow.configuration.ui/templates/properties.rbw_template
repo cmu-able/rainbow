@@ -1,0 +1,86 @@
+target <<rainbow-target>>
+import properties "<<gauges.rbw>>"
+
+###############################################################################
+# Purpose:  Common configuration file for the Rainbow infrastructure.
+#           Properties are loaded by class org.sa.rainbow.Rainbow .
+# Target:   ZNews case study system with Probes, Gauges, and Effectors implemented
+#           (rainbow.target = znews1-d)
+# Framework-defined special properties:
+#     rainbow.path - the canonical path to the target configuration location
+#
+# History:  see non-target-specific copy
+################################################################################
+
+###
+# Default values for location specific properties, meaning that, if the
+# rainbow-<host>.properties file does not specify a value, the default value
+# set here is used.
+def rainbow.path # Default property defined by rainbow
+
+### Utility mechanism configuration
+#- Config for Log4J, with levels:  OFF,FATAL,ERROR,WARN,INFO,DEBUG,TRACE,ALL 
+def logging.level = DEBUG
+def event.log.path = "log"
+def logging.path = "«event.log.path»/rainbow.out" 
+def monitoring.log.path = "«event.log.path»/rainbow-data.log"
+# (default)
+#logging.pattern = "%d{ISO8601/yyyy-MM-dd HH:mm:ss.SSS} [%t] %p %c %x - %m%n"
+#logging.max.size = 1024
+#logging.max.backups = 5
+
+### Rainbow component customization
+## Rainbow host info and communication infrastructure
+#- Location information of the master and this deployment
+def rainbow.master.location.host =
+#- Location information of the deployed delegate
+def rainbow.deployment.location = 
+#- default registry port; change if port-tunneling
+def rainbow.master.location.^port = 1100
+#- OS platform, supported modes are:  cygwin | linux
+#  Use "cygwin" for Windows, "linux" for MacOSX
+def rainbow.deployment.environment = "linux"
+
+def rainbow.delegate.beaconperiod = 10000
+def rainbow.deployment.^factory.class = <<deploymentFactory>>
+
+# Define your models here
+def model aModel = {
+	^type = ""
+	path = ""
+	^factory=
+} 
+
+# Define your analysis here
+def analysis <<AnalysisName>> = {
+	class = <<AnalysisClass>>
+}
+
+# Define your Adaptation Manager here
+def adaptation-manager <<AdaptationManagerName>> = {
+	^model =
+	class= <<AdaptationManagerClass>>
+}
+
+# Define your executors here
+def executor <<ExecutorName>> = {
+	^model =
+	class = <<ExectorClass>>
+}
+
+# Define effector managers here
+def effector-manager <<EffectorManagerName>> = {
+	class = <<EffectorManagerClass>>
+}
+
+def gui rainbow.^gui = {
+	class = org.sa.rainbow.^gui.RainbowWindoe
+	specs = {
+		<<GUISpecs>>
+	}
+}
+
+# Define any system/target-specific properties here
+
+
+export * to "rainbow.properties"

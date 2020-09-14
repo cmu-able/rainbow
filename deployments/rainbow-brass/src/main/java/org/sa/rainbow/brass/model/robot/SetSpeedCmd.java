@@ -12,8 +12,8 @@ public class SetSpeedCmd extends AbstractRainbowModelOperation<Double, RobotStat
 
 	private double m_speed;
 
-	public SetSpeedCmd(IModelInstance<RobotState> model, String target, String speed) {
-		super("setSpeed", model, target, speed);
+	public SetSpeedCmd(String commandName, IModelInstance<RobotState> model, String target, String speed) {
+		super(commandName, model, target, speed);
 		m_speed = Double.parseDouble(speed);
 	}
 
@@ -25,7 +25,7 @@ public class SetSpeedCmd extends AbstractRainbowModelOperation<Double, RobotStat
 
 	@Override
 	protected List<? extends IRainbowMessage> getGeneratedEvents(IRainbowMessageFactory messageFactory) {
-        return generateEvents (messageFactory, "setSpeed");
+        return generateEvents (messageFactory, getName());
 
 	}
 

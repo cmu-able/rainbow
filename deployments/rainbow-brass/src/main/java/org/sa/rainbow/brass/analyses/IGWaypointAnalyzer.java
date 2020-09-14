@@ -12,6 +12,7 @@ import org.sa.rainbow.brass.model.map.EnvMap;
 import org.sa.rainbow.brass.model.map.EnvMapNode;
 import org.sa.rainbow.brass.model.p2_cp3.mission.MissionState.LocationRecording;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort.IRainbowChangeBusSubscription;
@@ -66,7 +67,7 @@ public class IGWaypointAnalyzer extends P2Analyzer implements IRainbowModelChang
 	}
 
 	@Override
-	protected void runAction() {
+	protected void runAction() throws RainbowException {
 		boolean go = false;
 		synchronized (this) {
 			if (m_newIG)
@@ -105,6 +106,7 @@ public class IGWaypointAnalyzer extends P2Analyzer implements IRainbowModelChang
 				String currentSrc = srcNode == null ? null : srcNode.getLabel();
 				Collection<? extends IInstruction> instructions = getModels().getInstructionGraphModel()
 						.getModelInstance().getInstructions();
+				StringBuilder sb = new StringBuilder("Current instructions are:");
 				for (IInstruction i : instructions) {
 					if (i instanceof MoveAbsHInstruction) {
 						MoveAbsHInstruction mai = (MoveAbsHInstruction) i;
@@ -122,7 +124,9 @@ public class IGWaypointAnalyzer extends P2Analyzer implements IRainbowModelChang
 									+ " does not exist in envmap in instruction " + mai.getInstruction());
 						}
 					}
+					sb.append("\n").append(i.toString());
 				}
+				log(sb.toString());
 
 				log("Received and processed a new IG");
 				synchronized (this) {
