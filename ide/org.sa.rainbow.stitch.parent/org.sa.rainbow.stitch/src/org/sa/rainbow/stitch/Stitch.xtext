@@ -1,0 +1,438 @@
+grammar org.sa.rainbow.stitch.Stitch  hidden(WS, ML_COMMENT, SL_COMMENT)
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
+
+generate stitch "http://www.sa.org/rainbow/stitch/Stitch"
+
+
+
+script
+  : 'module' i=QualifiedIdentifier ';' /*{beh.createModule($i);}*/
+     imports+=importSt* /*{beh.doImports();}*/
+  	 functions+=function*
+     tactics+=tactic*
+ 	 strategy+=strategy*
+  ;
+
+
+importSt
+  : i = 'import'
+    ( tl = 'lib'
+    | tm = 'model' 
+    | to = 'op' 
+    | ta = 'acme'
+    )
+    s = STRING /*{beh.createImport($i, $s);}*/
+    ('{' renames+=importRename (',' renames+=importRename)* '}')? ';'
+  ;
+
+QualifiedIdentifier returns ecore::EString:
+	ID ('.' ID)*
+;
+
+importRename
+  : id1=ID 'as' id2=ID /*{beh.addImportRename(id1,id2);}*/
+  ;
+
+function:
+	('function' | 'define') var ';'
+;
+//
+////functions
+////  : /*{beh.beginVarList();}*/
+////    (var ';')*
+////    /*{beh.endVarList();}*/
+////  ;
+//
+//
+tactic
+  : 'tactic' name=ID /*{beh.beginTactic($id);}*/
+    '(' params=tacticParams? ')' '{'( variables+=var ';')* condition=condition action=action effect=effect '}'
+//    {beh.endTactic();}
+  ;
+
+tacticParams
+  : params+=tacticParam (',' params+=tacticParam)*
+  ;
+
+tacticParam
+  : dataType ID
+  ;
+
+////vars
+////  : /*{beh.beginVarList();}*/
+////    (var ';')*
+////    /*{beh.endVarList();}*/
+////  ;
+//
+var
+  :  t=dataType name=ID /*{beh.beginStatemetn($i);}*/ '=' expr=expression
+    /*{beh.createVar ($t, $i); beh.endStatement();}*/
+  ;
+
+condition
+  :   {condition}'condition' '{' (condition+=expression ';')* '}'
+  ;
+
+action
+  : {action}'action' '{' statements+=statement* '}'
+  ;
+
+effect
+  : {effect} 'effect' ('@' '[' settling=expression ']')? '{' (effect+=expression ';')* '}'
+  ;
+
+
+strategy
+  : 'strategy' name=ID
+    '[' applicability=expression ']'
+    '{' functions+=function* nodes+=strategyNode* '}'
+  ;
+
+
+strategyNode
+  : {strategyNode} (name=ID ':')?
+    condition=strategyCond
+    '->'
+    tactic=tacticRef
+  ;
+
+strategyCond
+  : {strategyCond} '(' ('#' probabilityExpre=expression)?
+    (condition=expression | 'success' | 'failure' | 'default')
+    ')'
+  ;
+
+tacticRef
+  : {tacticRef}
+  	(tactic=[tactic] '(' (params+=expression (',' params+=expression)*)? ')' ('@' '[' settling=expression ']')?
+    '{' (strategyBranch=strategyBranch | 'done') '}')
+  | {tacticRef} 'done' ';'
+  | {tacticRef} 'TNULL' ';'
+  | 'do' '[' (v=ID | i=INT)? ']' t2=[tactic] ';'
+  | {tacticRef} '|' 'done' ';'
+  | '{' strategyNode+=strategyNode+ '}'
+  /*| DO_UNSPEC*/
+  ;
+
+strategyBranch
+  : strategyNode+=strategyNode+
+  ;
+
+
+statement
+  : 
+  	'{' block+=statement+ '}' errorHandler=errorHandler?
+  | var=var ';'
+  | expression=expression ';'
+  | if=ifStmt
+  | while=whileStmt
+  | for=forStmt
+  | {statement} ';'
+  ;
+
+errorHandler
+  : {errorHandler} 'error' '{' ('(' expr+=expression ')' stmt+=statement)* '}'
+  ;
+
+
+ifStmt
+  : 'if' '(' expression ')' tStmt=statement (=>'else' fStmt=statement)?
+  ;
+
+whileStmt
+  : 'while' '(' expression ')' body=statement
+  ;
+
+forStmt
+  : 'for' '('
+    ( id=tacticParam ':' for=expression
+    | (var+=var+ | initExpr=expression)? ';' cond=expression? ';' (iter+=expression (',' iter+=expression)*)? ')' statement=statement )
+  ;
+
+expression 
+  : assignmentExpr=assignmentExpression
+  ;
+
+enum AssignKind:
+	ASSIGN = '=' | ADD_ASSIGN = '+=' | MINUS_ASSIGN='-=' |
+	MULT_ASSIGN = '*=' | DIV_ASSIGN="/=" | REM_ASSIGN='%='
+;
+
+assignmentExpression returns Expr
+  : booleanExpr= booleanExpression
+    (assign=AssignKind
+      assignmentExpr=assignmentExpression)?
+  ;
+//
+booleanExpression returns Expr
+  : impliesExpression
+  | quantifiedExpression
+  ;
+
+impliesExpression returns Expr
+  : iffExpression ('->' impliesExpr=impliesExpression)?
+  ;
+
+iffExpression returns Expr
+  : logicalOrExpression ('<->' iffExpr=iffExpression)?
+  ;
+
+logicalOrExpression returns Expr
+  : logicalAndExpression (('or' | '||') logicalOrExpr=logicalOrExpression)?
+  ;
+
+logicalAndExpression returns Expr
+  : equalityExpression ( ('and' | '&&') logicalAndExpr=logicalAndExpression)?
+  ;
+  
+
+
+equalityExpression returns Expr
+  : relationalExpression (eq=('!=' | '==') eqExpr=equalityExpression)?
+  ;
+
+relationalExpression returns Expr
+  : additiveExpression (rel=('<' | '<=' | '>' | '>=') relExpr=relationalExpression)?
+  ;
+
+additiveExpression returns Expr
+  : multiplicativeExpression (add=('+' | '-') addExpr=additiveExpression)?
+  ;
+
+multiplicativeExpression returns Expr
+  : unaryExpression (mult=("*" | "/" | "%") multExpr=multiplicativeExpression)?
+  ;
+
+unaryExpression returns Expr
+  : unary=('++' | '--' | '-' | '+' | '!')? primaryExpr=primaryExpression post=('++' | '--')?
+//  | DECR unaryExpression
+//  | MINUS unaryExpression
+//  | PLUS unaryExpression
+//  | LOGICAL_NOT unaryExpression
+//  | primaryExpression
+  ;
+
+primaryExpression returns Expr
+  : idExpression
+  | postIdExpression
+  | setExpression
+  | pathExpression
+  | '(' assignmentExpression ')'
+  ;
+
+idExpression returns Expr
+  : methodCall
+  | {idExpression} QualifiedIdentifier
+  | {idExpression} INT
+  | {idExpression} FLOAT_LIT
+  | {idExpression}  STRING
+  | {idExpression} "'" ANY_OTHER "'"
+  | {idExpression} 'true'
+  | {idExpression} 'false'
+  | {idExpression} 'TNULL'
+  ;
+
+postIdExpression returns Expr
+  : id=ID "'"
+  ;
+
+methodCall returns Expr
+  : id=QualifiedIdentifier '(' (expressions+=expression (',' expressions+=expression)*)? ')'
+  ;
+
+params
+  : params+=param (',' params+=param)*
+  ;
+
+param
+  : ID declares=(":" | ':!') dataType=dataType
+  ;
+
+quantifiedExpression
+  : 'forall' ('distinct')?
+    params+=param (',' params+=param)?
+    'in' range=(setExpression | idExpression)
+    '|' expr=expression
+  | 'exists' ('unique')?
+    params+=param (',' params+=param)?
+    'in' range=(setExpression | idExpression)
+    "|" expr=expression
+  | '{'? 'select' 
+    params+=param (',' params+=param)? 
+    'in' range=(setExpression | idExpression) 
+    '|' expr=expression '}'?
+  ;
+
+
+
+
+setExpression
+  : literalSet
+  ;
+
+pathExpression
+  : '/' (id=QualifiedIdentifier | call=methodCall)( declares=(':' | ':!') QualifiedIdentifier)? ('[' selector=expression ']')?
+    continuation=pathExpressionContinuation?
+  ;
+
+pathExpressionContinuation
+  : {pathExpressionContinuation} '/' path?='...'? ID ( declares=(':' | ':!') QualifiedIdentifier)? ('[' expression=expression ']')? continue?=pathExpressionContinuation?
+  ;
+
+literalSet
+  : lb='{' 
+      (expr+=expression (',' expr+=expression)*)?
+    '}'
+  ;
+
+dataType
+
+  : {dataType} 'object'
+  | {dataType} 'int'
+  | {dataType} 'float'
+  | {dataType} 'boolean' 
+  | {dataType} 'bool'
+  | {dataType} 'char'
+  | {dataType} 'string'
+  | {dataType} 'set' ('{' dataType=dataType '}')?
+  | ('seq' | 'sequence') ('{' dataType=dataType '}')
+  | {dataType} 'record' ('[' (id+=ID (',' id+=ID)* ':' type+=dataType ';')* ']')?
+  | {dataType} 'enum' ('{' (ID (',' ID)*)? '}')?
+  | i=QualifiedIdentifier 
+  ;
+  
+//terminal MODULE: 'module';
+//terminal IMPORT: 'import';
+//terminal LIB: 'lib';
+//terminal MODEL: 'model';
+//terminal OP: 'op';
+//terminal ACME: 'acme';
+//terminal AS: 'as';
+//terminal TACTIC_KW: 'tactic';
+//terminal CONDITION_KW: 'condition';
+//terminal ACTION_KW: 'action';
+//terminal EFFECT_KW: 'effect';
+//terminal ERROR: 'error';
+//terminal STRATEGY_KW: 'strategy';
+//terminal DEFINE: 'define';
+//terminal FUNCTION_KW: 'function';
+//terminal SUCCESS: 'success';
+//terminal FAILURE: 'failure';
+//terminal DEFAULT: 'default';
+//terminal NULLTACTIC: 'TNULL';
+//terminal DO: 'do';
+//terminal DONE: 'done';
+//
+//terminal IF: 'if';
+//terminal ELSE: 'else';
+//terminal FOR: 'for';
+//terminal WHILE: 'while';
+//
+//terminal T_OBJECT: 'object';
+//terminal T_INT: 'int';
+//terminal T_FLOAT: 'float';
+//terminal T_BOOLEAN: 'boolean';
+//terminal T_CHAR: 'char';
+//terminal T_STRING: 'string';
+//terminal SET: 'set';
+//terminal SEQUENCE: 'sequence';
+//terminal RECORD: 'record';
+//terminal ENUM: 'enum';
+//
+//terminal FORALL: 'forall';
+//terminal EXISTS: 'exists';
+//terminal UNIQUE: 'unique';
+//terminal SELECT: 'select';
+//terminal AND: 'and';
+//terminal OR: 'or';
+//terminal IN: 'in';
+//
+//terminal TRUE: 'true';
+//terminal FALSE: 'false';
+//terminal NULL: 'null';
+
+terminal fragment DIGIT: ('0'..'9');
+//terminal fragment LETTER: ('a'..'z' | 'A'..'Z');
+
+terminal FLOAT_LIT
+  : DIGIT+ '.' DIGIT+
+  ;
+
+
+//terminal STRING_LIT
+//  : DQUOTE -> DQUOTE;
+
+//terminal CHAR_LIT: "'" ('\\'?.) "'";
+
+//terminal LPAREN: '(';
+//terminal RPAREN: ')';
+//terminal LBRACKET: '[';
+//terminal RBRACKET: ']';
+////terminal LBRACE: '{';
+////terminal RBRACE: '}';
+//
+//terminal COLON: ':';
+////terminal SEMICOLON: ';';
+////terminal COMMA: ',';
+////terminal DOT: '.';
+//terminal ELLIPSIS: '...';
+//terminal DQUOTE: '"';
+//terminal SQUOTE: '\'';
+//terminal BSLASH: '\\';
+//terminal BAR: '|';
+//terminal HASH: '#';
+//terminal AT: '@';
+//terminal DOLLAR: '$';
+//
+//terminal ASSIGN: '=';
+//terminal PLUS_ASSIGN: '+=';
+//terminal MINUS_ASSIGN: '-=';
+//terminal STAR_ASSIGN: '*=';
+//terminal DIV_ASSIGN: '/=';
+//terminal MOD_ASSIGN: '%=';
+//terminal COLON_BANG: ':!';
+//terminal LOGICAL_OR: '||' | 'or';
+//terminal LOGICAL_AND: '&&' | 'and';
+//terminal EQ: '==';
+//terminal NE: '!=';
+//terminal LT: '<';
+//terminal LE: '<=';
+//terminal GE: '>=';
+//terminal GT: '>';
+//terminal PLUS: '+';
+//terminal MINUS: '-';
+//terminal STAR: '*';
+//terminal SLASH: '/';
+//terminal MOD: '%';
+//terminal INCR: '++';
+//terminal DECR: '--';
+//terminal LOGICAL_NOT: '!';
+//terminal IMPLIES: '->';
+//terminal IFF: '<->';
+//
+//terminal UNDERSCORE: '_';
+//terminal ID: '^'?('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
+//terminal STRING:
+//			'"' ( '\\' . /* 'b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\' */ | !('\\'|'"') )* '"' |
+//			"'" ( '\\' . /* 'b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\' */ | !('\\'|"'") )* "'"
+//		;
+//terminal ML_COMMENT : '/*' -> '*/';
+//terminal SL_COMMENT : '//' !('\n'|'\r')* ('\r'? '\n')?;
+//
+////terminal WS         : (' '|'\t'|'\r'|'\n')+;
+//
+//terminal ANY_OTHER: .;
+
+terminal ID: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'-'|'0'..'9')*;
+terminal INT returns ecore::EInt: ('0'..'9')+;
+terminal STRING:
+			'"' ( '\\' . /* 'b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\' */ | !('\\'|'"') )* '"'
+		;
+terminal ML_COMMENT : '/*' -> '*/';
+terminal SL_COMMENT : '//' !('\n'|'\r')* ('\r'? '\n')?;
+
+terminal WS         : (' '|'\t'|'\r'|'\n')+;
+
+terminal ANY_OTHER: .;
+
+

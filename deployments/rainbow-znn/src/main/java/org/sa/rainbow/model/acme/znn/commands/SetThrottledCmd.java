@@ -40,8 +40,8 @@ import java.util.List;
 
 public class SetThrottledCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
 
-    public SetThrottledCmd (AcmeModelInstance model, String target, String parameters) {
-        super ("setThrottled", model, target, parameters);
+    public SetThrottledCmd (String c, AcmeModelInstance model, String target, String parameters) {
+        super (c, model, target, parameters);
     }
 
     @Override

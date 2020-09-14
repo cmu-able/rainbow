@@ -18,8 +18,8 @@ public class UpdatePowerModelCmd extends AbstractRainbowModelOperation<Boolean, 
 	private Boolean m_successful;
 	private HashMap<String, SimpleConfiguration> m_oldModel;
 
-	public UpdatePowerModelCmd(CP1PowerModelInstance modelInstance, String target, String newFileName) {
-		super("updatePowerModel", modelInstance, target, newFileName);
+	public UpdatePowerModelCmd(String commandName, CP1PowerModelInstance modelInstance, String target, String newFileName) {
+		super(commandName, modelInstance, target, newFileName);
 		m_newFileName = newFileName;
 	
 	}
@@ -31,7 +31,7 @@ public class UpdatePowerModelCmd extends AbstractRainbowModelOperation<Boolean, 
 
 	@Override
 	protected List<? extends IRainbowMessage> getGeneratedEvents(IRainbowMessageFactory messageFactory) {
-		return generateEvents(messageFactory, "updatePowerModel");
+		return generateEvents(messageFactory, getName());
 	}
 
 	@Override

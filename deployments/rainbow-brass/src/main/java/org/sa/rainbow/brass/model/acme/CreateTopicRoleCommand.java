@@ -17,8 +17,8 @@ public class CreateTopicRoleCommand extends RosAcmeModelCommand<IAcmeRole> {
     private String                 m_roleType;
     private IAcmeRoleCreateCommand m_roleCreateCommand;
 
-    public CreateTopicRoleCommand (AcmeModelInstance model, String comp, String roleName, String roleType) {
-        super ("createTopicRole", model, comp, roleName, roleType);
+    public CreateTopicRoleCommand (String commandName, AcmeModelInstance model, String comp, String roleName, String roleType) {
+        super (commandName, model, comp, roleName, roleType);
         m_comp = comp;
         m_roleName = roleName;
         m_roleType = roleType;

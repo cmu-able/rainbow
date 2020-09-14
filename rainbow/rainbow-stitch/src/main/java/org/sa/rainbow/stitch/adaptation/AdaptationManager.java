@@ -55,6 +55,7 @@ import org.sa.rainbow.core.adaptation.AdaptationTree;
 import org.sa.rainbow.core.adaptation.DefaultAdaptationExecutorVisitor;
 import org.sa.rainbow.core.adaptation.IAdaptationManager;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.health.IRainbowHealthProtocol;
@@ -442,9 +443,14 @@ public final class AdaptationManager extends AbstractRainbowRunnable
 					AdaptationTree<Strategy> at = new AdaptationTree<Strategy>(selectedStrategy);
 					at.setId(UUID.randomUUID().toString());
 					m_pendingStrategies.add(at);
-					m_modelUSBusPort.updateModel(m_historyModel.getCommandFactory().strategyExecutionStateCommand(
-							 m_modelRef, at.getId(), ExecutionHistoryModelInstance.ADAPTATION_TREE,
-							ExecutionStateT.ADAPTATION_QUEUED, null));
+					try {
+						m_modelUSBusPort.updateModel(m_historyModel.getCommandFactory().strategyExecutionStateCommand(
+								 m_modelRef, at.getId(), ExecutionHistoryModelInstance.ADAPTATION_TREE,
+								ExecutionStateT.ADAPTATION_QUEUED, null));
+					} catch (RainbowException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					m_enqueuePort.offerAdaptation(at, null);
 					String logMessage = selectedStrategy.getName();
 					strategyLog(logMessage);

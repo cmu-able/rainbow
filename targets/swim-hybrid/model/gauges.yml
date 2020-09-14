@@ -1,0 +1,306 @@
+#
+# Gauge Type and Gauge Instance Specifications
+#  - time periods generally in milliseconds
+gauge-types:
+  TrafficGaugeT:
+    commands:
+      traffic : ServerT.setTraffic(int)
+    setupParams:
+      targetIP:
+        type:    String
+        default: "localhost"
+      beaconPeriod:
+        type:    long
+        default: 20000
+      javaClass:
+        type:    String
+        default: "org.sa.rainbow.translator.swim.gauges.SimpleGauge"
+    configParams:
+      samplingFrequency:
+        type:    long
+        default: 5000
+      targetProbeType:
+        type:    String
+        default: ~
+    comment: "TrafficGaugeT measures and reports CPU load of the target host"
+
+  DimmerGaugeT:
+    commands:
+      dimmer : ServerT.setDimmer(double)
+    setupParams:
+      targetIP:
+        type:    String
+        default: "localhost"
+      beaconPeriod:
+        type:    long
+        default: 30000
+      javaClass:
+        type:    String
+        default: "org.sa.rainbow.translator.swim.gauges.SimpleGauge"
+    configParams:
+      samplingFrequency:
+        type:    long
+        default: 15000
+      targetProbeType:
+        type:    String
+        default: ~
+    comment: "DimmerGaugeT measures and reports the dimmer value of the system"
+
+  ArrivalRateT:
+    commands:
+      arrivalRate : LoadBalancerT.setArrivalRate(double)
+    setupParams:
+      targetIP:
+        type:    String
+        default: "localhost"
+      beaconPeriod:
+        type:    long
+        default: 30000
+      javaClass:
+        type:    String
+        default: "org.sa.rainbow.translator.swim.gauges.SimpleGauge"
+    configParams:
+      samplingFrequency:
+        type:    long
+        default: 5000
+      targetProbeType:
+        type:    String
+        default: ~
+    comment: "ArrivalRateT measures and reports the request arrival rate"
+
+  # ???
+  ArrivalRateTST:
+    commands:
+      arrivalRate : BogusT.observe(double)
+    setupParams:
+      targetIP:
+        type:    String
+        default: "localhost"
+      beaconPeriod:
+        type:    long
+        default: 30000
+      javaClass:
+        type:    String
+        default: "org.sa.rainbow.translator.swim.gauges.SimpleGauge"
+    configParams:
+      samplingFrequency:
+        type:    long
+        default: 5000
+      targetProbeType:
+        type:    String
+        default: ~
+    comment: "DimmerGaugeTST feeds the time series predictor for the request arrival rate"
+
+  AverageResponseTimeT:
+    commands:
+      averageResponseTime : LoadBalancerT.setAverageResponseTime(double)
+    setupParams:
+      targetIP:
+        type:    String
+        default: "localhost"
+      beaconPeriod:
+        type:    long
+        default: 30000
+      javaClass:
+        type:    String
+        default: "org.sa.rainbow.translator.swim.gauges.SimpleGauge"
+    configParams:
+      samplingFrequency:
+        type:    long
+        default: 15000
+      targetProbeType:
+        type:    String
+        default: ~
+    comment: "AverageResponseTimeT measures and reports the average response time"
+
+  ServerEnablementGaugeT:
+    commands:
+      enableServer: ServerT.enableServer(boolean)
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.translator.swim.gauges.ServerEnabledGauge"
+    configParams:
+      samplingFrequency:
+        type: long
+        default: 15000
+      targetProbeType:
+        type: String
+        default: ~
+      serverNum:
+        type: int
+        default: 0
+    comment: "ServerEnablementGaugeT reports enablement/disablement of servers. serverNum is the server number (e.g., 1, 2 3), so that if there are N servers enabled, this server is enabled if N >= serverNum"
+
+  ServerActivationGaugeT:
+    commands:
+      activateServer: ServerT.activateServer(boolean)
+    setupParams:
+      targetIP:
+        type: String
+        default: "localhost"
+      beaconPeriod:
+        type: long
+        default: 30000
+      javaClass:
+        type: String
+        default: "org.sa.rainbow.translator.swim.gauges.ServerActiveGauge"
+    configParams:
+      samplingFrequency:
+        type: long
+        default: 15000
+      targetProbeType:
+        type: String
+        default: ~
+      serverNum:
+        type: int
+        default: 0
+    comment: "ServerActivationGaugeT reports if a server is active or not. serverNum is the server number (e.g., 1, 2 3), so that if there are N active servers, this server is active if N >= serverNum"
+
+
+gauge-instances:
+  # ???
+  ArrivalRateTSG0:
+    type:  ArrivalRateTST
+    model: "ArrivalRate:TSP"
+    commands:
+      arrivalRate : x.observe($<arrivalRate>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      targetProbeType  : arrivalRate
+    comment: ""
+  ArrivalRateG0:
+    type:  ArrivalRateT
+    model: "SwimSys:Acme"
+    commands:
+      arrivalRate : LB0.setArrivalRate($<arrivalRate>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      targetProbeType  : arrivalRate
+    comment: ""
+  DimmerG0:
+    type:  DimmerGaugeT
+    model: "SwimSys:Acme"
+    commands:
+      dimmer : LB0.setDimmer($<dimmer>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      targetProbeType  : dimmer
+    comment: "DimmerG0 is associated with the component LB0 of the System, SwimSys, defined as an Acme model"
+  ServerEnabledG1:
+    type:  ServerEnablementGaugeT
+    model: "SwimSys:Acme"
+    commands:
+      serverEnabled : server1.enableServer($<server1>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      targetProbeType  : server1
+      serverNum: 1
+    comment: ""
+  ServerEnabledG2:
+    type:  ServerEnablementGaugeT
+    model: "SwimSys:Acme"
+    commands:
+      serverEnabled : server2.enableServer($<server2>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      targetProbeType  : server2
+      serverNum: 2
+    comment: ""
+  ServerEnabledG3:
+    type:  ServerEnablementGaugeT
+    model: "SwimSys:Acme"
+    commands:
+      serverEnabled : server3.enableServer($<server3>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      targetProbeType  : server3
+      serverNum: 3
+    comment: ""
+  ServerActiveG1:
+    type:  ServerActivationGaugeT
+    model: "SwimSys:Acme"
+    commands:
+      serverActivated : server1.activateServer($<server1>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      targetProbeType  : activeServer1
+      serverNum: 1
+    comment: ""
+  ServerActiveG2:
+    type:  ServerActivationGaugeT
+    model: "SwimSys:Acme"
+    commands:
+      serverActivated : server2.activateServer($<server2>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      targetProbeType  : activeServer2
+      serverNum: 2
+    comment: ""
+  ServerActiveG3:
+    type:  ServerActivationGaugeT
+    model: "SwimSys:Acme"
+    commands:
+      serverActivated : server3.activateServer($<server3>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      targetProbeType  : activeServer3
+      serverNum: 3
+    comment: ""
+  AverageResponseTimeG0:
+    type:  AverageResponseTimeT
+    model: "SwimSys:Acme"
+    commands:
+      averageResponseTime : LB0.setAverageResponseTime($<averageResponseTime>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      targetProbeType  : averageResponseTime
+    comment: ""
+  TrafficG1:
+    type:  TrafficGaugeT
+    model: "SwimSys:Acme"
+    commands:
+      traffic : server1.setTraffic($<traffic>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      targetProbeType  : traffic1
+    comment: "TrafficG1 is associated with the component server1 of the System"
+  TrafficG2:
+    type:  TrafficGaugeT
+    model: "SwimSys:Acme"
+    commands:
+      traffic : server2.setTraffic($<traffic>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      targetProbeType  : traffic2
+    comment: "TrafficG2 is associated with the component server2 of the System"
+  TrafficG3:
+    type:  TrafficGaugeT
+    model: "SwimSys:Acme"
+    commands:
+      traffic : server3.setTraffic($<traffic>)
+    setupValues:
+      targetIP: "${customize.system.target.lb}"
+    configValues:
+      targetProbeType  : traffic3
+    comment: "TrafficG3 is associated with the component server3 of the System"
+unused-gauge-instances: 
+

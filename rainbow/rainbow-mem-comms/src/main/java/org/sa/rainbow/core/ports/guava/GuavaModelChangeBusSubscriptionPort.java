@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.ModelReference;
 import org.sa.rainbow.core.ports.IModelChangeBusPort;
 import org.sa.rainbow.core.ports.IModelChangeBusSubscriberPort;
@@ -27,11 +28,16 @@ public class GuavaModelChangeBusSubscriptionPort implements IModelChangeBusSubsc
 			public void receive(GuavaRainbowMessage msg) {
 				synchronized (m_subscribers) {
 					for (Pair<IRainbowChangeBusSubscription, IRainbowModelChangeCallback> pair : m_subscribers) {
-						if (pair.firstValue().matches(msg)) {
-							ModelReference mr = new ModelReference(
-									(String) msg.getProperty(IModelChangeBusPort.MODEL_NAME_PROP),
-									(String) msg.getProperty(IModelChangeBusPort.MODEL_TYPE_PROP));
-							pair.secondValue().onEvent(mr, msg);
+						try {
+							if (pair.firstValue().matches(msg)) {
+								ModelReference mr = new ModelReference(
+										(String) msg.getProperty(IModelChangeBusPort.MODEL_NAME_PROP),
+										(String) msg.getProperty(IModelChangeBusPort.MODEL_TYPE_PROP));
+								pair.secondValue().onEvent(mr, msg);
+							}
+						} catch (RainbowException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
 					}
 				}

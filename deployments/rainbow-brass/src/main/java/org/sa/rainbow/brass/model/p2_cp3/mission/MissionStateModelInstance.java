@@ -46,7 +46,7 @@ public class MissionStateModelInstance implements IModelInstance<MissionState> {
     }
 
     @Override
-    public MissionCommandFactory getCommandFactory () {
+    public MissionCommandFactory getCommandFactory () throws RainbowException {
         if (m_commandFactory == null) {
             m_commandFactory = new MissionCommandFactory (this);
         }

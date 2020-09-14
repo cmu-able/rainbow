@@ -38,9 +38,9 @@ public class ConnectServerCmd extends ZNNAcmeModelCommand<IAcmeComponent> {
 
     private IAcmeComponent m_server;
 
-    public ConnectServerCmd (AcmeModelInstance model, String lb, String name, String host, String
+    public ConnectServerCmd (String c, AcmeModelInstance model, String lb, String name, String host, String
             port) {
-        super ("connectServer", model, lb, name, host, port);
+        super (c, model, lb, name, host, port);
         m_lb = lb;
         m_name = name;
         m_host = host;

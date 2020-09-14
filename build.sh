@@ -102,57 +102,64 @@ cd libs/
 
 echo "Doing $target for auxtestlib"
 cd auxtestlib
-mvn $SKIPTESTS $target || exit 1
+mvn $SKIPTESTS $target
 
 echo "Doing $target for incubator"
 cd ../incubator
-mvn $SKIPTESTS $target || exit 1
+mvn $SKIPTESTS $target
 
 echo "Doing $target for parsec"
 cd ../parsec
-mvn -DskipTests $jcctarget || exit 1
+mvn -DskipTests $jcctarget 
 
 echo "Doing $target for typelib"
 cd ../typelib
-mvn $SKIPTESTS $jcctarget || exit 1
+mvn $SKIPTESTS $jcctarget 
 
 echo "Doing $target for eselib"
 cd ../eseblib
-mvn -DskipTests $target || exit 1
+mvn -DskipTests $target 
 
 cd ../../rainbow
 
 echo "Doing $target for rainbow-core"
 cd rainbow-core
-mvn -DskipTests $target || exit 1
+mvn -DskipTests $target 
 
 echo "Doing $target for rainbow-gui"
 cd ../rainbow-gui
-mvn -DskipTests $target || exit 1
+mvn -DskipTests $target 
 
 echo "Doing $target for rainbow-acme-model"
 cd ../rainbow-acme-model
-mvn -DskipTests $target || exit 1
-
-echo "Doing $target for rainbow-utility-model"
-cd ../rainbow-utility-model || exit 1
-mvn $target
+mvn -DskipTests $target
 
 echo "Doing $target for rainbow-stitch"
-
 cd ../rainbow-stitch
-mvn $SKIPTESTS $target || exit 1
+mvn $SKIPTESTS $target
 
-echo "Doing $target for rainbow-gui"
+echo "Doing $target for rainbow-utility-model"
+cd ../rainbow-utility-model 
+mvn $SKIPTESTS $target 
 
-cd ../rainbow-gui
-mvn $SKIPTESTS $target || exit 1
+echo "Doing $target for rainbow-mem-comms"
+cd ../rainbow-mem-comms
+mvn $SKIPTESTS $target
+
+cd ../../ide/org.acme.xtext.parent
+mvn $SKIPTESTS $target
+
+cd ../../ide/org.sa.rainbow.stitch.parent
+mvn $SKIPTESTS $target
+
+cd ../../ide/org.sa.rainbow.configuration.parent
+mvn $SKIPTESTS $target
 
 cd ../..
 BUILDDIR=`pwd`
 cd $DEPLOYMENT
 echo "Doing $target in $(pwd)"
-mvn $SKIPTESTS $target || exit 1
+mvn $SKIPTESTS $target 
 
 if [[ "$target" == "install" ]]; then
   mkdir -p $BUILDDIR/bin/lib

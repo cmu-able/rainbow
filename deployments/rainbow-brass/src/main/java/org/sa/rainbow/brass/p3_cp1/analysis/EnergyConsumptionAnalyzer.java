@@ -28,6 +28,7 @@ import org.sa.rainbow.brass.model.p2_cp3.rainbowState.RainbowState.CP3ModelState
 import org.sa.rainbow.core.Rainbow;
 import org.sa.rainbow.core.RainbowComponentT;
 import org.sa.rainbow.core.error.RainbowConnectionException;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.ports.IRainbowReportingPort;
 import org.sa.rainbow.core.util.Pair;
@@ -62,15 +63,21 @@ public class EnergyConsumptionAnalyzer extends P2CP1Analyzer {
 			return;
 
 		if (!(currentInstruction instanceof ChargeInstruction)) {
+			log("Analyzing energy consumption");
 			List<? extends IInstruction> remainingInstructions = igModel.getRemainingInstructions();
 			double batteryCharge = -1;
 			try {
-				batteryCharge = getModels().getRobotStateModel().getModelInstance().getCharge();
-				if (batteryCharge <= 0) {
-					IRainbowOperation op = getModels().getRainbowStateModel().getCommandFactory()
-							.setModelProblem(CP3ModelState.OUT_OF_BATTERY);
-					m_modelUSPort.updateModel(op);
-					return;
+				try {
+					batteryCharge = getModels().getRobotStateModel().getModelInstance().getCharge();
+					if (batteryCharge <= 0) {
+						IRainbowOperation op = getModels().getRainbowStateModel().getCommandFactory()
+								.setModelProblem(CP3ModelState.OUT_OF_BATTERY);
+						m_modelUSPort.updateModel(op);
+						return;
+					}
+				} catch (RainbowException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			} catch (IllegalStateException e) {
 				// Don't have battery information yet
@@ -120,23 +127,38 @@ public class EnergyConsumptionAnalyzer extends P2CP1Analyzer {
 			boolean knowAboutLowBattery = getModels().getRainbowStateModel().getModelInstance().getProblems()
 					.contains(CP3ModelState.LOW_ON_BATTERY);
 			if (hasEnoughEnergy && knowAboutLowBattery) {
-				IRainbowOperation op = getModels().getRainbowStateModel().getCommandFactory()
-						.removeModelProblem(CP3ModelState.LOW_ON_BATTERY);
-				m_modelUSPort.updateModel(op);
+				try {
+					IRainbowOperation op = getModels().getRainbowStateModel().getCommandFactory()
+							.removeModelProblem(CP3ModelState.LOW_ON_BATTERY);
+					m_modelUSPort.updateModel(op);
+				} catch (RainbowException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			} else if (!hasEnoughEnergy && !knowAboutLowBattery) {
-				log("Do not have enough battery.");
-				LocationRecording pose = getModels().getMissionStateModel().getModelInstance().getCurrentPose();
-				insertNodeIntoMap(pose, currentInstruction);
-				IRainbowOperation op = getModels().getRainbowStateModel().getCommandFactory()
-						.setModelProblem(CP3ModelState.LOW_ON_BATTERY);
-				m_modelUSPort.updateModel(op);
+				try {
+					log("Do not have enough battery.");
+					LocationRecording pose = getModels().getMissionStateModel().getModelInstance().getCurrentPose();
+					insertNodeIntoMap(pose, currentInstruction);
+					IRainbowOperation op = getModels().getRainbowStateModel().getCommandFactory()
+							.setModelProblem(CP3ModelState.LOW_ON_BATTERY);
+					m_modelUSPort.updateModel(op);
+				} catch (RainbowException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 
 			}
 		} else if (getModels().getRainbowStateModel().getModelInstance().getProblems()
 				.contains(CP3ModelState.LOW_ON_BATTERY)) {
-			IRainbowOperation op = getModels().getRainbowStateModel().getCommandFactory()
-					.removeModelProblem(CP3ModelState.LOW_ON_BATTERY);
-			m_modelUSPort.updateModel(op);
+			try {
+				IRainbowOperation op = getModels().getRainbowStateModel().getCommandFactory()
+						.removeModelProblem(CP3ModelState.LOW_ON_BATTERY);
+				m_modelUSPort.updateModel(op);
+			} catch (RainbowException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 

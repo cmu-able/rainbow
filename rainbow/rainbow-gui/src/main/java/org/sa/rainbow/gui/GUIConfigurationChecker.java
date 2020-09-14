@@ -18,6 +18,7 @@ import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.util.IRainbowConfigurationChecker;
+import org.sa.rainbow.util.RainbowConfigurationChecker;
 import org.sa.rainbow.util.RainbowConfigurationChecker.Problem;
 import org.sa.rainbow.util.RainbowConfigurationChecker.ProblemT;
 import org.sa.rainbow.util.Util;
@@ -48,8 +49,10 @@ public class GUIConfigurationChecker implements IRainbowConfigurationChecker {
 
 	@Override
 	public void checkRainbowConfiguration() {
+		String property = Rainbow.instance().getProperty("rainbow.gui.specs", null);
+		if (property == null) return;
 		File specs = Util.getRelativeToPath(Rainbow.instance().getTargetPath(),
-				Rainbow.instance().getProperty("rainbow.gui.specs"));
+				property);
 		if (specs != null) {
 			try {
 				Problem p = new Problem(ProblemT.INFO, "Checking GUI configuration...");
@@ -145,17 +148,28 @@ public class GUIConfigurationChecker implements IRainbowConfigurationChecker {
 									MessageFormat.format("The specified command ''{0}'' is not a valid command for {1}",
 											command, entry.getKey())));
 						} else {
-							String param = (String) fields.get("value");
-							if (param == null) {
-								m_problems.add(new Problem(ProblemT.ERROR, MessageFormat
-										.format("{0} must specify a value to display", command, entry.getKey())));
-							} else {
-								if (!Arrays.asList(op.getParameters()).contains(param)) {
-									m_problems.add(new Problem(ProblemT.ERROR, MessageFormat.format(
-											"The specified command ''{0}'' does not have a parameter called ''{2}'' in {1}",
-											command, entry.getKey(), param)));
+							Object param = fields.get("value");
+							if (param instanceof String) {
+								param = (String) fields.get("value");
+								if (param == null) {
+									m_problems.add(new Problem(ProblemT.ERROR, MessageFormat
+											.format("{0} must specify a value to display", command, entry.getKey())));
+								} else {
+									if (!Arrays.asList(op.getParameters()).contains(param)) {
+										m_problems.add(new Problem(ProblemT.ERROR, MessageFormat.format(
+												"The specified command ''{0}'' does not have a parameter called ''{2}'' in {1}",
+												command, entry.getKey(), param)));
+									}
 								}
 							}
+							else if (param instanceof Integer) {
+								int paramNo = (Integer ) param;
+								if (op.getParameters().length <= paramNo)
+									param = op.getParameters()[paramNo-1];
+								else 
+									m_problems.add(new Problem(ProblemT.ERROR, MessageFormat.format("The specified command ''{0}'' does not have''{1}'' parameters", command, paramNo)));
+							}
+							
 						}
 						Collection<String> validFields = getValidFields(category);
 						for (String key : fields.keySet()) {
@@ -190,7 +204,7 @@ public class GUIConfigurationChecker implements IRainbowConfigurationChecker {
 
 	@Override
 	public Collection<Class> getMustBeExecutedAfter() {
-		return Collections.<Class>emptySet();
+		return Collections.<Class>singleton(RainbowConfigurationChecker.class);
 	}
 
 }

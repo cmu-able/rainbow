@@ -33,6 +33,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.reflections.Reflections;
 import org.sa.rainbow.core.adaptation.IAdaptationExecutor;
@@ -50,6 +51,7 @@ import org.sa.rainbow.util.IRainbowConfigurationChecker;
 import org.sa.rainbow.util.RainbowConfigurationChecker.Problem;
 import org.sa.rainbow.util.RainbowConfigurationChecker.ProblemT;
 import org.sa.rainbow.util.YamlUtil;
+import org.sa.rainbow.util.ReflectionsExtension;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
@@ -60,6 +62,58 @@ public class CheckConfiguration {
 	public static interface IReporter {
 		public void report (String s);
 	}
+	
+	enum MARK  {None, Temporary, Permanent}
+	
+	static class Data {
+		MARK mark = MARK.None;
+		Class<? extends IRainbowConfigurationChecker> checker;
+		
+		Data(IRainbowConfigurationChecker c) {
+			checker = c.getClass();
+		}
+	}
+	
+	public static List<IRainbowConfigurationChecker> partialSort(List<IRainbowConfigurationChecker> checkers) {
+		List<IRainbowConfigurationChecker> L = new LinkedList<>();
+		List<Data> markedCheckers = checkers.stream().map(c -> new Data(c)).collect(Collectors.toList());
+		Data data = null;
+		try {
+			while ((data = markedCheckers.stream().filter(d -> d.mark == MARK.None).findFirst().get()) != null) {
+				visit(data, L, checkers, markedCheckers);
+			}
+		} catch (Exception e) {
+		}
+		
+		return L;
+		
+		// L is empty
+		// for each checker c
+		//   if before is empty, append c'class to L
+		//   else
+		//   index = 0
+		//   foreach before b
+		//      if b not in L append b to L
+		//   append c'class to L   
+	}
+	
+	
+
+	private static void visit(Data data, List<IRainbowConfigurationChecker> ret, List<IRainbowConfigurationChecker> checkers, List<Data> markedCheckers) {
+		if (data.mark == MARK.Permanent) return;
+		if (data.mark == MARK.Temporary) throw new IllegalArgumentException();
+		data.mark = MARK.Temporary;
+		for (IRainbowConfigurationChecker d : checkers.stream().filter(c -> c.getMustBeExecutedAfter().contains(data.checker)).collect(Collectors.toList())) {
+			Data m = markedCheckers.stream().filter(da -> da.checker == d.getClass()).findFirst().get();
+			visit(m, ret, checkers, markedCheckers);
+		}
+		
+		data.mark = MARK.Permanent;
+		List<IRainbowConfigurationChecker> collect = checkers.stream().filter(c -> c.getClass() == data.checker).collect(Collectors.toList());
+		ret.addAll(0, collect);
+	}
+
+
 
 	public static void main(String[] args) throws Throwable {
 		ArgumentParser parser = ArgumentParsers.newFor("CheckConfiguration").build().description("Checks a particular rainbow configuration");
@@ -165,7 +219,7 @@ public class CheckConfiguration {
 		// Make Rainbow.instance().rainbowMaster() return this master
 		Rainbow.instance().setMaster(master);
 		out.println("Locating configuration checkers in system...");
-		Reflections reflections = new Reflections("org.sa", CheckConfiguration.class.getClassLoader());
+		Reflections reflections = new ReflectionsExtension(new Object[] { "org.sa", CheckConfiguration.class.getClassLoader() });
 		List<IRainbowConfigurationChecker> checkers = new LinkedList<>();
 		Set<Class<? extends IRainbowConfigurationChecker>> checkerClasses = reflections
 				.getSubTypesOf(IRainbowConfigurationChecker.class);
@@ -177,17 +231,22 @@ public class CheckConfiguration {
 				out.println("Could not instantiate " + cls);
 			}
 		}
-		checkers.sort(new Comparator<IRainbowConfigurationChecker>() {
-
-			@Override
-			public int compare(IRainbowConfigurationChecker o1, IRainbowConfigurationChecker o2) {
-				if (o1.getMustBeExecutedAfter().contains(o2.getClass()))
-					return 1;
-				else if (o2.getMustBeExecutedAfter().contains(o1.getClass()))
-					return -1;
-				return 0;
-			}
-		});
+		
+		
+		checkers = partialSort(checkers);
+		
+		
+//		checkers.sort(new Comparator<IRainbowConfigurationChecker>() {
+//
+//			@Override
+//			public int compare(IRainbowConfigurationChecker o1, IRainbowConfigurationChecker o2) {
+//				if (o1.getMustBeExecutedAfter().contains(o2.getClass()))
+//					return 1;
+//				else if (o2.getMustBeExecutedAfter().contains(o1.getClass()))
+//					return -1;
+//				return 0;
+//			}
+//		});
 		out.println("Checking configuration consistency...");
 		List<Problem> problems = new LinkedList<>();
 		boolean hasProblems = false;

@@ -87,10 +87,12 @@ public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
      */
     @Override
     public void dispose () {
-        synchronized (m_lines) {
-            m_lines.clear ();
-        }
-        m_patternMap.clear();
+    	if (m_lines != null)
+	        synchronized (m_lines) {
+	            m_lines.clear ();
+	        }
+    	if (m_patternMap != null)
+    		m_patternMap.clear();
 
         // null-out data members
         m_lines = null;
@@ -185,6 +187,10 @@ public abstract class RegularPatternGauge extends AbstractGaugeWithProbes {
 
     protected void addPattern (String matchName, Pattern p) {
         m_patternMap.put(matchName.intern(), p);
+    }
+    
+    protected Set<String> getPatternKeys() {
+    	return m_patternMap.keySet();
     }
 
     protected abstract void doMatch (String matchName, Matcher m);

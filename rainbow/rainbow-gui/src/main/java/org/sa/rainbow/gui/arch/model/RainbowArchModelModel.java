@@ -16,6 +16,7 @@ import java.util.Set;
 
 import org.sa.rainbow.core.AbstractRainbowRunnable;
 import org.sa.rainbow.core.Rainbow;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.gauges.OperationRepresentation;
 import org.sa.rainbow.core.models.IModelInstance;
@@ -90,84 +91,93 @@ public class RainbowArchModelModel extends RainbowArchModelElement implements IR
 		IModelInstance<Object> rm = Rainbow.instance().getRainbowMaster().modelsManager().getModelInstance(m_modelRef);
 		if (rm == null)
 			return;
-		Method[] methods = rm.getCommandFactory().getClass().getMethods();
-		Map<String, Class<? extends AbstractRainbowModelOperation<?, Object>>> commands = rm.getCommandFactory()
-				.getCommands();
-		Map<String, Method> commandMethods = new HashMap<>();
-		Set<String> unhandledCommands = new HashSet<>(commands.keySet());
-		Set<Method> unhandledMethods = new HashSet<>();
-		for (Method method : methods) {
-			if (IRainbowOperation.class.isAssignableFrom(method.getReturnType())) {
-				String name = method.getName().toLowerCase();
-				if (commands.containsKey(name)) {
-					commandMethods.put(name, method);
-					unhandledCommands.remove(name);
-				} else {
-					if (name.endsWith("cmd")) {
-						name = name.substring(0, name.length() - 3);
-						if (commands.containsKey(name)) {
-							commandMethods.put(name, method);
-							unhandledCommands.remove(name);
-						}
+		Map<String, Class<? extends AbstractRainbowModelOperation<?, Object>>> commands;
+		Map<String, Method> commandMethods;
+		Set<String> unhandledCommands;
+		Set<Method> unhandledMethods;
+		try {
+			Method[] methods = rm.getCommandFactory().getClass().getMethods();
+			commands = rm.getCommandFactory().getCommands();
+			commandMethods = new HashMap<>();
+			unhandledCommands = new HashSet<>(commands.keySet());
+			unhandledMethods = new HashSet<>();
+			for (Method method : methods) {
+				if (IRainbowOperation.class.isAssignableFrom(method.getReturnType())) {
+					String name = method.getName().toLowerCase();
+					if (commands.containsKey(name)) {
+						commandMethods.put(name, method);
+						unhandledCommands.remove(name);
 					} else {
-						name = name + "cmd";
-						if (commands.containsKey(name)) {
-							commandMethods.put(name, method);
-							unhandledCommands.remove(name);
+						if (name.endsWith("cmd")) {
+							name = name.substring(0, name.length() - 3);
+							if (commands.containsKey(name)) {
+								commandMethods.put(name, method);
+								unhandledCommands.remove(name);
+							}
 						} else {
-							if (!method.getName().equals("generateCommand")
-									&& !AbstractSaveModelCmd.class.isAssignableFrom(method.getReturnType())
-									&& !AbstractLoadModelCmd.class.isAssignableFrom(method.getReturnType()))
-								unhandledMethods.add(method);
+							name = name + "cmd";
+							if (commands.containsKey(name)) {
+								commandMethods.put(name, method);
+								unhandledCommands.remove(name);
+							} else {
+								if (!method.getName().equals("generateCommand")
+										&& !AbstractSaveModelCmd.class.isAssignableFrom(method.getReturnType())
+										&& !AbstractLoadModelCmd.class.isAssignableFrom(method.getReturnType()))
+									unhandledMethods.add(method);
+							}
 						}
 					}
+
 				}
-
 			}
-		}
 
-		for (Entry<String, Method> e : commandMethods.entrySet()) {
-			String commandName = e.getKey();
+			for (Entry<String, Method> e : commandMethods.entrySet()) {
+				String commandName = e.getKey();
 //			Object[] row = new Object[] { commandName, "target", "args", "" };
-			Parameter[] parameters = e.getValue().getParameters();
-			String[] params = new String[0];
-			String target = "target";
-			if (parameters.length > 0) {
-				String paramname = parameters[0].getName();
-				target = !paramname.startsWith("arg") ? (paramname + " : ")
-						: "" + parameters[0].getType().getSimpleName();
-				params = fillParameters(parameters, 1);
+				Parameter[] parameters = e.getValue().getParameters();
+				String[] params = new String[0];
+				String target = "target";
+				if (parameters.length > 0) {
+					String paramname = parameters[0].getName();
+					target = !paramname.startsWith("arg") ? (paramname + " : ")
+							: "" + parameters[0].getType().getSimpleName();
+					params = fillParameters(parameters, 1);
+				}
+				RainbowModelOperationRepresentation op = new RainbowModelOperationRepresentation(commandName,
+						m_modelRef, target, params);
+				m_operationsAccepted.put(op.getName(), op);
+//			((DefaultTableModel) m_table.getModel()).addRow(row);
 			}
-			RainbowModelOperationRepresentation op = new RainbowModelOperationRepresentation(commandName, m_modelRef,
-					target, params);
-			m_operationsAccepted.put(op.getName(), op);
+			for (String command : unhandledCommands) {
+				Class<? extends AbstractRainbowModelOperation<?, Object>> class1 = commands.get(command);
+				Constructor<?> constructor = class1.getConstructors()[0];
+				String[] params = fillParameters(constructor.getParameters(), 2);
+				RainbowModelOperationRepresentation op = new RainbowModelOperationRepresentation(command, m_modelRef,
+						"target : String", params);
+				op.setEntryWarning("No corresponding method factory entry.");
+				m_operationsAccepted.put(op.getName(), op);
 //			((DefaultTableModel) m_table.getModel()).addRow(row);
-		}
-		for (String command : unhandledCommands) {
-			Class<? extends AbstractRainbowModelOperation<?, Object>> class1 = commands.get(command);
-			Constructor<?> constructor = class1.getConstructors()[0];
-			String[] params = fillParameters(constructor.getParameters(), 2);
-			RainbowModelOperationRepresentation op = new RainbowModelOperationRepresentation(command, m_modelRef,
-					"target : String", params);
-			op.setEntryWarning("No corresponding method factory entry.");
-			m_operationsAccepted.put(op.getName(), op);
-//			((DefaultTableModel) m_table.getModel()).addRow(row);
-		}
-		for (Method m : unhandledMethods) {
+			}
+			for (Method m : unhandledMethods) {
 
-			Parameter[] parameters = m.getParameters();
-			String target = "target : String";
-			String[] params = new String[0];
-			if (parameters.length > 0) {
-				String paramname = parameters[0].getName();
-				target = !paramname.startsWith("arg") ? (paramname + " : ") : "" + parameters[0].getType().getName();
-				params = fillParameters(parameters, 1);
-			}
-			RainbowModelOperationRepresentation op = new RainbowModelOperationRepresentation(m.getName(), m_modelRef,
-					"target : String", params);
-			op.setEntryWarning("No corresponding entry in factory table.");
-			m_operationsAccepted.put(op.getName(), op);
+				Parameter[] parameters = m.getParameters();
+				String target = "target : String";
+				String[] params = new String[0];
+				if (parameters.length > 0) {
+					String paramname = parameters[0].getName();
+					target = !paramname.startsWith("arg") ? (paramname + " : ")
+							: "" + parameters[0].getType().getName();
+					params = fillParameters(parameters, 1);
+				}
+				RainbowModelOperationRepresentation op = new RainbowModelOperationRepresentation(m.getName(),
+						m_modelRef, "target : String", params);
+				op.setEntryWarning("No corresponding entry in factory table.");
+				m_operationsAccepted.put(op.getName(), op);
 //			((DefaultTableModel) m_table.getModel()).addRow(row);
+			}
+		} catch (SecurityException | RainbowException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
 	}
 

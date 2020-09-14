@@ -151,15 +151,25 @@
 	
 	<dependencies>
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.16</version>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>2.13.0</version>
 			<scope>compile</scope>
 			<type>jar</type>
 			<classifier/>
 			<optional>false</optional>
 			<exclusions/>
-		</dependency>
+	  	</dependency>
+	  	<dependency>
+	    	<groupId>org.apache.logging.log4j</groupId>
+	    	<artifactId>log4j-core</artifactId>
+	    	<version>2.13.0</version>
+	    	<scope>compile</scope>
+			<type>jar</type>
+			<classifier/>
+			<optional>false</optional>
+			<exclusions/>
+	  	</dependency>
 		<dependency>
 			<groupId>auxtestlib</groupId>
 			<artifactId>auxtestlib</artifactId>

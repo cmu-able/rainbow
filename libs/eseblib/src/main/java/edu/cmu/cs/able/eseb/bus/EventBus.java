@@ -1,15 +1,5 @@
 package edu.cmu.cs.able.eseb.bus;
 
-import incubator.ExceptionSuppress;
-import incubator.dispatch.DispatcherOp;
-import incubator.dispatch.LocalDispatcher;
-import incubator.exh.LocalCollector;
-import incubator.pval.Ensure;
-import incubator.wt.CloseableListener;
-import incubator.wt.CloseableWorkerThread;
-import incubator.wt.WorkerThreadGroup;
-import incubator.wt.WorkerThreadGroupCI;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -21,7 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import edu.cmu.cs.able.eseb.BusData;
 import edu.cmu.cs.able.eseb.BusDataQueue;
@@ -33,6 +24,15 @@ import edu.cmu.cs.able.eseb.filter.EventFilterChain;
 import edu.cmu.cs.able.typelib.enc.DataValueEncoding;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
 import edu.cmu.cs.able.typelib.txtenc.typelib.DefaultTextEncoding;
+import incubator.ExceptionSuppress;
+import incubator.dispatch.DispatcherOp;
+import incubator.dispatch.LocalDispatcher;
+import incubator.exh.LocalCollector;
+import incubator.pval.Ensure;
+import incubator.wt.CloseableListener;
+import incubator.wt.CloseableWorkerThread;
+import incubator.wt.WorkerThreadGroup;
+import incubator.wt.WorkerThreadGroupCI;
 
 /**
  * <p>Implementation of an event bus which opens a port and receives
@@ -52,7 +52,7 @@ public class EventBus implements Closeable {
 	/**
 	 * Logger to use.
 	 */
-	private static final Logger LOG = Logger.getLogger(EventBus.class);
+	private static final Logger LOG = LogManager.getLogger(EventBus.class);
 	
 	/**
 	 * How much time to wait for the socket to time out.

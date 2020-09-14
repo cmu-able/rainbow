@@ -48,7 +48,12 @@ public class EnvMapModelInstance implements IModelInstance<EnvMap> {
     @Override
     public EnvMapCommandFactory getCommandFactory () {
         if (m_commandFactory==null){
-            m_commandFactory = new EnvMapCommandFactory(this);
+            try {
+				m_commandFactory = new EnvMapCommandFactory(this);
+			} catch (RainbowException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
         return m_commandFactory;
     }

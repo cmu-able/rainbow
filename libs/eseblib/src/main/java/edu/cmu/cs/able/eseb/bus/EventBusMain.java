@@ -1,11 +1,5 @@
 package edu.cmu.cs.able.eseb.bus;
 
-import incubator.rmi.RmiServerPublisher;
-import incubator.scb.ScbEditableContainerImpl;
-import incubator.scb.sync.SyncScbMaster;
-import incubator.scb.sync.SyncScbMasterImpl;
-import incubator.scb.sync.SyncScbSlave;
-
 import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,6 +12,11 @@ import edu.cmu.cs.able.eseb.bus.rci.EventBusRemoteControlInterface;
 import edu.cmu.cs.able.eseb.bus.rci.EventBusRemoteControlInterfaceImpl;
 import edu.cmu.cs.able.eseb.bus.rci.SyncConstants;
 import edu.cmu.cs.able.typelib.prim.PrimitiveScope;
+import incubator.rmi.RmiServerPublisher;
+import incubator.scb.ScbEditableContainerImpl;
+import incubator.scb.sync.SyncScbMaster;
+import incubator.scb.sync.SyncScbMasterImpl;
+import incubator.scb.sync.SyncScbSlave;
 
 /**
  * Main class that starts eseb.

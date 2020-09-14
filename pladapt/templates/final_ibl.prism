@@ -1,0 +1,374 @@
+mdp
+
+//#init
+
+//#environment
+
+module clk
+	time : [0..HORIZON + 1] init 0;
+	readyToTick : bool init true;
+	[tick] readyToTick & time < HORIZON + 1 -> 1 : (time' = time + 1) & (readyToTick'=false);
+	[tack] !readyToTick -> 1 : (readyToTick'=true);
+endmodule
+
+label "final" = time = HORIZON + 1;
+formula sys_go = readyToTick;
+
+module controller
+	active_servers_A : [0..MAX_SERVERS_A] init ini_servers_A;
+	active_servers_B : [0..MAX_SERVERS_B] init ini_servers_B;
+	active_servers_C : [0..MAX_SERVERS_C] init ini_servers_C;
+
+	dimmer : [1..DIMMER_LEVELS] init ini_dimmer;
+
+	traffic_A : [0..4] init ini_traffic_A;
+	traffic_B : [0..4] init ini_traffic_B;
+	traffic_C : [0..4] init ini_traffic_C;
+
+	[addServerA_complete] active_servers_A < MAX_SERVERS_A -> 1 : (active_servers_A' = active_servers_A + 1);
+	[addServerB_complete] active_servers_B < MAX_SERVERS_B -> 1 : (active_servers_B' = active_servers_B + 1);
+	[addServerC_complete] active_servers_C < MAX_SERVERS_C -> 1 : (active_servers_C' = active_servers_C + 1);
+
+	[removeServerA_start] active_servers_A > 0 -> 1 : (active_servers_A' = active_servers_A - 1);
+	[removeServerB_start] active_servers_B > 0 -> 1 : (active_servers_B' = active_servers_B - 1);
+	[removeServerC_start] active_servers_C > 0 -> 1 : (active_servers_C' = active_servers_C - 1);
+
+	[increaseDimmer_start] dimmer < DIMMER_LEVELS -> 1 : (dimmer' = dimmer + 1);
+	[decreaseDimmer_start] dimmer > 1 -> 1 : (dimmer' = dimmer - 1);
+
+	//A-B-C
+	//Possible values 0-25-50-75-100
+
+	// 100-0-0
+	[divert_100_0_0] active_servers_A > 0
+		-> 1 : (traffic_A' = 4) & (traffic_B' = 0) & (traffic_C' = 0);
+	// 75-25-0
+	[divert_75_25_0] active_servers_A > 0 & active_servers_B > 0
+		-> 1 : (traffic_A' = 3) & (traffic_B' = 1) & (traffic_C' = 0);
+	// 75-0-25
+	[divert_75_0_25] active_servers_A > 0 & active_servers_C > 0
+		-> 1 : (traffic_A' = 3) & (traffic_B' = 0) & (traffic_C' = 1);
+	// 50-50-0
+	[divert_50_50_0] active_servers_A > 0 & active_servers_B > 0
+		-> 1 : (traffic_A' = 2) & (traffic_B' = 2) & (traffic_C' = 0);
+	// 50-0-50
+	[divert_50_0_50] active_servers_A > 0 & active_servers_C > 0
+		-> 1 : (traffic_A' = 2) & (traffic_B' = 0) & (traffic_C' = 2);
+	// 50-25-25
+	[divert_50_25_25] active_servers_A > 0 & active_servers_B > 0 & active_servers_C > 0
+		-> 1 : (traffic_A' = 2) & (traffic_B' = 1) & (traffic_C' = 1);
+	// 25-75-0
+	[divert_25_75_0] active_servers_A > 0 & active_servers_B > 0
+		-> 1 : (traffic_A' = 1) & (traffic_B' = 3) & (traffic_C' = 0);
+	// 25-0-75
+	[divert_25_0_75] active_servers_A > 0 & active_servers_C > 0
+		-> 1 : (traffic_A' = 1) & (traffic_B' = 0) & (traffic_C' = 3);
+	// 25-50-25
+	[divert_25_50_25] active_servers_A > 0 & active_servers_B > 0 & active_servers_C > 0
+		-> 1 : (traffic_A' = 1) & (traffic_B' = 2) & (traffic_C' = 1);
+	// 25-25-50
+	[divert_25_25_50] active_servers_A > 0 & active_servers_B > 0 & active_servers_C > 0
+		-> 1 : (traffic_A' = 1) & (traffic_B' = 1) & (traffic_C' = 2);
+	// 0-100-0
+	[divert_0_100_0] active_servers_B > 0
+		-> 1 : (traffic_A' = 0) & (traffic_B' = 4) & (traffic_C' = 0);
+	// 0-0-100
+	[divert_0_0_100] active_servers_C > 0
+		-> 1 : (traffic_A' = 0) & (traffic_B' = 0) & (traffic_C' = 4);
+	// 0-75-25
+	[divert_0_75_25] active_servers_B > 0 & active_servers_C > 0
+		-> 1 : (traffic_A' = 0) & (traffic_B' = 3) & (traffic_C' = 1);
+	// 0-25-75
+	[divert_0_25_75] active_servers_B > 0 & active_servers_C > 0
+		-> 1 : (traffic_A' = 0) & (traffic_B' = 1) & (traffic_C' = 3);
+	// 0-50-50
+	[divert_0_50_50] active_servers_B > 0 & active_servers_C > 0
+		-> 1 : (traffic_A' = 0) & (traffic_B' = 2) & (traffic_C' = 2);
+endmodule
+
+
+formula addServerA_applicable = active_servers_A < MAX_SERVERS_A & !removeServer_used
+				& addServerB_state = 0 & addServerC_state = 0;
+formula addServerB_applicable = active_servers_B < MAX_SERVERS_B & !removeServer_used
+				& addServerA_state = 0 & addServerC_state = 0;
+formula addServerC_applicable = active_servers_C < MAX_SERVERS_C & !removeServer_used
+				& addServerA_state = 0 & addServerB_state = 0;
+
+// Two variables not required i.e. active_servers_A , addServerA_state
+formula removeServerA_applicable = active_servers_A > 0 & addServerA_state = 0 & active_servers > 1
+					 & addServerB_state = 0 & addServerC_state = 0;
+formula removeServerB_applicable = active_servers_B > 0 & addServerB_state = 0 & active_servers > 1
+					& addServerA_state = 0 & addServerC_state = 0;
+formula removeServerC_applicable = active_servers_C > 0 & addServerC_state = 0 & active_servers > 1
+					& addServerA_state = 0 & addServerB_state = 0;
+
+formula increaseDimmer_compatible = !decreaseDimmer_used;
+formula decreaseDimmer_compatible = !increaseDimmer_used;
+formula increase_dimmer_applicable = dimmer < DIMMER_LEVELS & increaseDimmer_compatible;
+formula decrease_dimmer_applicable = dimmer > 1 & decreaseDimmer_compatible;
+
+const int addServer_LATENCY_PERIODS = ceil(addServer_LATENCY / PERIOD);
+
+// This remove server constraints that only one server could be removed in one monitoring cycle.
+module removeServer
+	removeServer_go : bool init true;
+	removeServer_used : bool init false;
+
+	[removeServerA_start] sys_go & removeServer_go
+		& removeServerA_applicable // applicability conditions
+		-> (removeServer_go' = false) & (removeServer_used' = true);
+
+	[removeServerB_start] sys_go & removeServer_go
+		& removeServerB_applicable // applicability conditions
+		-> (removeServer_go' = false) & (removeServer_used' = true);
+
+	[removeServerC_start] sys_go & removeServer_go
+		& removeServerC_applicable // applicability conditions
+		-> (removeServer_go' = false) & (removeServer_used' = true);
+
+	// tactic applicable but not used
+	[pass_remove_server] sys_go & removeServer_go // can go
+		-> (removeServer_go' = false);
+
+	[tick] !removeServer_go -> 1 : (removeServer_go' = true) & (removeServer_used' = false);
+endmodule
+
+module addServer
+	addServerA_state : [0..addServer_LATENCY_PERIODS] init ini_addServerA_state;
+	addServerB_state : [0..addServer_LATENCY_PERIODS] init ini_addServerB_state;
+	addServerC_state : [0..addServer_LATENCY_PERIODS] init ini_addServerC_state;
+
+	addServer_go : bool init true;
+
+	// tactic applicable, start it
+	[addServerA_start] sys_go & addServer_go // can go
+		& addServerA_state = 0 // tactic has not been started
+		& addServerA_applicable
+		-> (addServerA_state' = 1) & (addServer_go' = false);
+
+	// tactic applicable, start it
+	[addServerB_start] sys_go & addServer_go // can go
+		& addServerB_state = 0 // tactic has not been started
+		& addServerB_applicable
+		-> (addServerB_state' = 1) & (addServer_go' = false);
+
+	// tactic applicable, start it
+	[addServerC_start] sys_go & addServer_go // can go
+		& addServerC_state = 0 // tactic has not been started
+		& addServerC_applicable
+		-> (addServerC_state' = 1) & (addServer_go' = false);
+
+	// tactic applicable, but don't use it
+	[pass_add] sys_go & addServer_go // can go
+		& addServerA_state = 0 // tactic has not been started
+		& addServerB_state = 0 & addServerC_state = 0
+		//& addServerA_applicable
+		-> (addServer_go' = false);
+
+	// progress of the tactic
+	[progressA] sys_go & addServer_go
+		& addServerA_state > 0 & addServerA_state < addServer_LATENCY_PERIODS
+		-> 1 : (addServerA_state' = addServerA_state + 1) & (addServer_go' = false);
+
+	[progressB] sys_go & addServer_go
+		& addServerB_state > 0 & addServerB_state < addServer_LATENCY_PERIODS
+		-> 1 : (addServerB_state' = addServerB_state + 1) & (addServer_go' = false);
+
+	[progressC] sys_go & addServer_go
+		& addServerC_state > 0 & addServerC_state < addServer_LATENCY_PERIODS
+		-> 1 : (addServerC_state' = addServerC_state + 1) & (addServer_go' = false);
+
+	// completion of the tactic
+	[addServerA_complete] sys_go & addServer_go
+		& addServerA_state = addServer_LATENCY_PERIODS // completed
+		-> 1 : (addServerA_state' = 0) & (addServer_go' = true); // so that it can start again at this time if needed
+
+	[addServerB_complete] sys_go & addServer_go
+		& addServerB_state = addServer_LATENCY_PERIODS // completed
+		-> 1 : (addServerB_state' = 0) & (addServer_go' = true); // so that it can start again at this time if needed
+
+	[addServerC_complete] sys_go & addServer_go
+		& addServerC_state = addServer_LATENCY_PERIODS // completed
+		-> 1 : (addServerC_state' = 0) & (addServer_go' = true); // so that it can start again at this time if needed
+	
+	[tick] !addServer_go -> 1 : (addServer_go' = true);
+endmodule
+
+// Make sure that divert traffic is executed at the end i.e.after adding or removing the servers.
+formula divert_traffic_applicable = divert_go & !addServer_go & !removeServer_go & !increaseDimmer_go & !decreaseDimmer_go;
+
+module divert_traffic
+	divert_go : bool init true;
+
+	//A-B-C
+	//Possible values 0-25-50-75-100
+
+	// 100-0-0
+	[divert_100_0_0] sys_go & divert_traffic_applicable 
+		-> 1 : (divert_go'=false);
+	// 75-25-0
+	[divert_75_25_0] sys_go & divert_traffic_applicable
+		-> 1 : (divert_go'=false);
+	// 75-0-25
+	[divert_75_0_25] sys_go & divert_traffic_applicable 
+		-> 1 : (divert_go'=false);
+	// 50-50-0
+	[divert_50_50_0] sys_go & divert_traffic_applicable 
+		-> 1 : (divert_go'=false);
+	// 50-0-50
+	[divert_50_0_50] sys_go & divert_traffic_applicable 
+		-> 1 : (divert_go'=false);
+	// 50-25-25
+	[divert_50_25_25] sys_go & divert_traffic_applicable
+		-> 1 : (divert_go'=false);
+	// 25-75-0
+	[divert_25_75_0] sys_go & divert_traffic_applicable
+		-> 1 : (divert_go'=false);
+	// 25-0-75
+	[divert_25_0_75] sys_go & divert_traffic_applicable
+		-> 1 : (divert_go'=false);
+	// 25-50-25
+	[divert_25_50_25] sys_go & divert_traffic_applicable
+		-> 1 : (divert_go'=false);
+	// 25-25-50
+	[divert_25_25_50] sys_go & divert_traffic_applicable
+		-> 1 : (divert_go'=false);
+	// 0-100-0
+	[divert_0_100_0] sys_go & divert_traffic_applicable
+		-> 1 : (divert_go'=false);
+	// 0-0-100
+	[divert_0_0_100] sys_go & divert_traffic_applicable
+		-> 1 : (divert_go'=false);
+	// 0-75-25
+	[divert_0_75_25] sys_go & divert_traffic_applicable
+		-> 1 : (divert_go'=false);
+	// 0-25-75
+	[divert_0_25_75] sys_go & divert_traffic_applicable
+		-> 1 : (divert_go'=false);
+	// 0-50-50
+	[divert_0_50_50] sys_go & divert_traffic_applicable
+		-> 1 : (divert_go'=false);
+
+	[tick] !divert_go -> 1 : (divert_go' = true);
+endmodule
+
+module increaseDimmer
+	increaseDimmer_go : bool init true;
+	increaseDimmer_used : bool init false;
+
+	[increaseDimmer_start] sys_go & increaseDimmer_go
+		& increase_dimmer_applicable // applicability conditions
+		-> (increaseDimmer_go' = false) & (increaseDimmer_used' = true);
+
+	// tactic applicable but not used
+	[pass_inc_dimmer] sys_go & increaseDimmer_go // can go
+		-> (increaseDimmer_go' = false);
+
+	[tick] !increaseDimmer_go -> 1 : (increaseDimmer_go' = true) & (increaseDimmer_used' = false);
+endmodule
+
+// tactic
+module decreaseDimmer
+	decreaseDimmer_go : bool init true;
+	decreaseDimmer_used : bool init false;
+
+	[decreaseDimmer_start] sys_go & decreaseDimmer_go
+		& decrease_dimmer_applicable // applicability conditions
+		-> (decreaseDimmer_go' = false) & (decreaseDimmer_used' = true);
+
+	// tactic applicable but not used
+	[pass_dec_dimmer] sys_go & decreaseDimmer_go // can go
+		-> (decreaseDimmer_go' = false);
+
+	[tick] !decreaseDimmer_go -> 1 : (decreaseDimmer_go' = true) & (decreaseDimmer_used' = false);
+endmodule
+
+//*****************************************************************
+// Queuing network with each server having queueing model of M/M/1 
+//*****************************************************************
+formula dimmerFactor = (dimmer - 1) / (DIMMER_LEVELS - 1);
+formula interarrivalMean = stateValue * interArrivalScaleFactorForDecision;
+
+formula Pa = (traffic_A * 25)/100;
+formula Pb = (traffic_B * 25)/100;
+formula Pc = (traffic_C * 25)/100;
+
+formula loaded_servers = (Pa != 0 ? 1 : 0) + (Pb != 0 ? 1 : 0) + (Pc != 0 ? 1 : 0);
+
+formula service_rate_A = dimmerFactor * (MAX_ARRIVALA_CAPACITY_LOW) 
+			+ (1 - dimmerFactor) * (MAX_ARRIVALA_CAPACITY);
+formula service_rate_B = dimmerFactor * (MAX_ARRIVALB_CAPACITY_LOW) 
+			+ (1 - dimmerFactor) * (MAX_ARRIVALB_CAPACITY);
+formula service_rate_C = dimmerFactor * (MAX_ARRIVALC_CAPACITY_LOW) 
+			+ (1 - dimmerFactor) * (MAX_ARRIVALC_CAPACITY);
+
+formula rhoA = Pa/(service_rate_A*interarrivalMean);
+formula rhoB = Pb/(service_rate_B*interarrivalMean);
+formula rhoC = Pc/(service_rate_C*interarrivalMean);
+
+formula overloaded = (rhoA >= 1 | rhoB >= 1 | rhoC >= 1);
+//const double DBL_MAX = 1.5e+300;
+
+formula rt_A = 1/(service_rate_A - (throughput*Pa));
+formula rt_B = 1/(service_rate_B - (throughput*Pb));
+formula rt_C = 1/(service_rate_C - (throughput*Pc));
+
+// Response time to clients utility function
+const double RT_THRESHOLD = 1.0;
+
+//formula expected_wait_time = interarrivalMean * (rhoA/(1-rhoA) + rhoB/(1-rhoB) + rhoC/(1-rhoC));
+formula expected_wait_time = (Pa*rt_A + Pb*rt_B + Pc*rt_C);
+formula rt = (interarrivalMean = 0 ? 0 : (overloaded ? RT_THRESHOLD + 2 : expected_wait_time));
+
+
+
+//const double NORMAL_A_REVENUE = (SERVERA_COST_SEC / MAX_ARRIVALA_CAPACITY) * 10;
+//const double DIMMER_A_REVENUE = (SERVERA_COST_SEC / MAX_ARRIVALA_CAPACITY_LOW) * 3 / 2;
+//const double NORMAL_B_REVENUE = (SERVERB_COST_SEC / MAX_ARRIVALB_CAPACITY) * 10;
+//const double DIMMER_B_REVENUE = (SERVERB_COST_SEC / MAX_ARRIVALB_CAPACITY_LOW) * 3 / 2;
+//const double NORMAL_C_REVENUE = (SERVERC_COST_SEC / MAX_ARRIVALC_CAPACITY) * 10;
+//const double DIMMER_C_REVENUE = (SERVERC_COST_SEC / MAX_ARRIVALC_CAPACITY_LOW) * 3 / 2;
+const double NORMAL_A_REVENUE = (SERVERA_COST_SEC / MAX_ARRIVALA_CAPACITY) * 10;
+const double DIMMER_A_REVENUE = (SERVERA_COST_SEC / MAX_ARRIVALA_CAPACITY_LOW) * 3 / 2;
+const double NORMAL_B_REVENUE = (SERVERB_COST_SEC / MAX_ARRIVALB_CAPACITY) * 10;
+const double DIMMER_B_REVENUE = (SERVERB_COST_SEC / MAX_ARRIVALB_CAPACITY_LOW) * 3 / 2;
+const double NORMAL_C_REVENUE = (SERVERC_COST_SEC / MAX_ARRIVALC_CAPACITY) * 10;
+const double DIMMER_C_REVENUE = (SERVERC_COST_SEC / MAX_ARRIVALC_CAPACITY_LOW) * 3 / 2;
+
+const double DIMMER_REVENUE = DIMMER_A_REVENUE + DIMMER_B_REVENUE + DIMMER_C_REVENUE;
+const double NORMAL_REVENUE = NORMAL_A_REVENUE + NORMAL_B_REVENUE + NORMAL_C_REVENUE;
+
+formula serverA_cost = ((addServerA_state > 0 ? 1 : 0) + active_servers_A) * SERVERA_COST_SEC;
+formula serverB_cost = ((addServerB_state > 0 ? 1 : 0) + active_servers_B) * SERVERB_COST_SEC;
+formula serverC_cost = ((addServerC_state > 0 ? 1 : 0) + active_servers_C) * SERVERC_COST_SEC;
+formula cost = serverA_cost + serverB_cost + serverC_cost;
+
+formula throughput = 1/interarrivalMean;
+
+formula basicUtilityA = throughput * Pa * (dimmerFactor * DIMMER_A_REVENUE + (1 - dimmerFactor) * NORMAL_A_REVENUE);
+formula basicUtilityB = throughput * Pb * (dimmerFactor * DIMMER_B_REVENUE + (1 - dimmerFactor) * NORMAL_B_REVENUE);
+formula basicUtilityC = throughput * Pc * (dimmerFactor * DIMMER_C_REVENUE + (1 - dimmerFactor) * NORMAL_C_REVENUE);
+
+formula basicUtility = basicUtilityA + basicUtilityB + basicUtilityC;
+//formula basicUtility = throughput * (dimmerFactor * DIMMER_REVENUE + (1-dimmerFactor) * NORMAL_REVENUE);
+formula active_servers = active_servers_A + active_servers_B + active_servers_C;
+formula poweredServers = (addServerA_state > 0 ? 1 : 0) + (addServerB_state > 0 ? 1 : 0) + (addServerC_state > 0 ? 1 : 0 )
+	 + active_servers;
+formula MAX_SERVERS = MAX_SERVERS_A + MAX_SERVERS_B + MAX_SERVERS_C;
+
+formula MAX_SERVER_COST = MAX_SERVERS_A * SERVERA_COST_SEC
+			+ MAX_SERVERS_B * SERVERB_COST_SEC
+			+ MAX_SERVERS_C * SERVERC_COST_SEC;
+
+formula netPenalty = stateValue > 0 ? penalty / stateValue : 0;
+
+formula uTotal = (overloaded & (poweredServers < MAX_SERVERS | dimmer < DIMMER_LEVELS | active_servers != loaded_servers))
+					? -(1000) // avoid unstable solutions
+				: (((rt > RT_THRESHOLD | rt <= 0) ? netPenalty : basicUtility) - cost);
+
+
+rewards "util"
+	[tack] true : 100000000.0 + (PERIOD)*(uTotal);
+endrewards
+
+

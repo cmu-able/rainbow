@@ -23,6 +23,7 @@
  */
 package org.sa.rainbow.core.ports;
 
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.event.IRainbowMessage;
 import org.sa.rainbow.core.models.ModelReference;
 
@@ -60,8 +61,9 @@ public interface IModelChangeBusSubscriberPort extends IDisposablePort {
          * 
          * @param model
          * @param message
+         * @throws RainbowException 
          */
-        void onEvent (ModelReference reference, IRainbowMessage message);
+        void onEvent (ModelReference reference, IRainbowMessage message) throws RainbowException;
     }
 
     /**

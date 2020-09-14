@@ -11,8 +11,8 @@ public class RecalibrateCmd extends AbstractRainbowModelOperation<Boolean, Missi
 
     private boolean m_bad;
 
-    public RecalibrateCmd (MissionStateModelInstance modelInstance, String target, String bad) {
-        super ("recalibrate", modelInstance, target, bad);
+    public RecalibrateCmd (String commandName, MissionStateModelInstance modelInstance, String target, String bad) {
+        super (commandName, modelInstance, target, bad);
         m_bad = Boolean.parseBoolean (bad);
     }
 
@@ -23,7 +23,7 @@ public class RecalibrateCmd extends AbstractRainbowModelOperation<Boolean, Missi
 
     @Override
     protected List<? extends IRainbowMessage> getGeneratedEvents (IRainbowMessageFactory messageFactory) {
-        return generateEvents (messageFactory, "recalibrate");
+        return generateEvents (messageFactory, getName());
     }
 
     @Override

@@ -12,8 +12,8 @@ public class SetReconfiguringCmd extends AbstractRainbowModelOperation<Boolean, 
 	private boolean m_reconfiguring;
 	private boolean m_old;
 
-	public SetReconfiguringCmd(MissionStateModelInstance model, String target, String reconfiguring) {
-		super("setReconfiguring", model, target, reconfiguring);
+	public SetReconfiguringCmd(String commandName, MissionStateModelInstance model, String target, String reconfiguring) {
+		super(commandName, model, target, reconfiguring);
 		try {
 			m_reconfiguring = Boolean.parseBoolean(reconfiguring);
 		} catch (Exception e) {
@@ -29,7 +29,7 @@ public class SetReconfiguringCmd extends AbstractRainbowModelOperation<Boolean, 
 
 	@Override
 	protected List<? extends IRainbowMessage> getGeneratedEvents(IRainbowMessageFactory messageFactory) {
-		return generateEvents(messageFactory, "setReconfiguring");
+		return generateEvents(messageFactory, getName());
 
 	}
 

@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: org.acme.xtext.ide
+Bundle-SymbolicName: org.acme.xtext.ide; singleton:=true
+Export-Package: org.acme.ide.contentassist.antlr.internal,org.acme.ide
+ .contentassist.antlr,org.acme.ide.contentassist.antlr.lexer
+Bundle-Name: org.acme.xtext.ide
+Bundle-Version: 1.0.0.201912112147
+Require-Bundle: org.acme.xtext,org.eclipse.xtext.ide,org.eclipse.xtext
+ .xbase.ide,org.antlr.runtime;bundle-version="[3.2.0,3.2.1)"
+Bundle-ManifestVersion: 2
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Vendor: My Company
+

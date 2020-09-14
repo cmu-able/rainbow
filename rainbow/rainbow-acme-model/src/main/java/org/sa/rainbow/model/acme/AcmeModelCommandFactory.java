@@ -24,6 +24,7 @@
 package org.sa.rainbow.model.acme;
 
 import org.acmestudio.acme.element.IAcmeSystem;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.error.RainbowModelException;
 import org.sa.rainbow.core.models.commands.ModelCommandFactory;
 
@@ -32,18 +33,17 @@ import java.io.FileOutputStream;
 
 public abstract class AcmeModelCommandFactory extends ModelCommandFactory<IAcmeSystem> {
 
-    public AcmeModelCommandFactory (AcmeModelInstance model) {
+    public static final String SET_TYPECHECK_RESULT_CMD = "setTypecheckResult";
+
+
+	public AcmeModelCommandFactory (AcmeModelInstance model) throws RainbowException {
         super (AcmeModelInstance.class, model);
     }
 
-    @Override
-    protected void fillInCommandMap () {
-        m_commandMap.put ("setTypecheckResult".toLowerCase (), AcmeTypecheckSetCmd.class);
-    }
 
-
+    @Operation(name=SET_TYPECHECK_RESULT_CMD)
     public AcmeTypecheckSetCmd setTypecheckResultCmd (IAcmeSystem system, boolean typechecks) {
-        return new AcmeTypecheckSetCmd ((AcmeModelInstance) m_modelInstance, "self",
+        return new AcmeTypecheckSetCmd (SET_TYPECHECK_RESULT_CMD, (AcmeModelInstance) m_modelInstance, "self",
                 Boolean.toString (typechecks));
     }
 

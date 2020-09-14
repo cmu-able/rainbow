@@ -33,8 +33,8 @@ import java.util.List;
 
 public class ForceReauthenticationCmd extends ZNNAcmeModelCommand<IAcmeProperty> {
 
-    public ForceReauthenticationCmd (AcmeModelInstance model, String target) {
-        super ("forceReauthentication", model, target);
+    public ForceReauthenticationCmd (String c, AcmeModelInstance model, String target) {
+        super (c, model, target);
     }
 
     @Override

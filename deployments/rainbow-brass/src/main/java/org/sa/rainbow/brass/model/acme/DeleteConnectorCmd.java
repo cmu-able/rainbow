@@ -16,8 +16,8 @@ public class DeleteConnectorCmd extends AcmeModelOperation<IAcmeConnector> {
     private String                      m_connector;
     private IAcmeConnectorDeleteCommand m_deleteConnectorCmd;
 
-    public DeleteConnectorCmd (AcmeModelInstance model, String system, String connector) {
-        super ("deleteConnector", model, system, connector);
+    public DeleteConnectorCmd (String commandName, AcmeModelInstance model, String system, String connector) {
+        super (commandName, model, system, connector);
         m_connector = connector;
 
     }

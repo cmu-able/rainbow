@@ -27,6 +27,7 @@ import org.sa.rainbow.core.models.commands.IRainbowOperation;
 import org.sa.rainbow.core.util.Pair;
 import org.sa.rainbow.gui.GaugePanel;
 import org.sa.rainbow.gui.arch.model.RainbowArchGaugeModel;
+import org.sa.rainbow.gui.utils.SafeGet;
 import org.sa.rainbow.gui.widgets.BooleanPanel;
 import org.sa.rainbow.gui.widgets.ICommandUpdate;
 import org.sa.rainbow.gui.widgets.MeterPanel;
@@ -145,14 +146,14 @@ public class ArchGuagePanel extends GaugePanel {
 			if (ui != null) {
 				Map<String, Object> builtin;
 				if ((builtin = (Map<String, Object>) ui.get("builtin")) != null) {
-					String category = (String) builtin.get("category");
+					String category = SafeGet.asString( builtin.get("category"));
 					if ("timeseries".equals(category)) {
-						String xLabel = (String) builtin.get("xlabel");
-						String yLabel = (String) builtin.get("ylabel");
-						String command = (String) builtin.get("command");
-						Double upper = (Double) builtin.get("upper");
-						Double lower = (Double) builtin.get("lower");
-						final String value = (String) builtin.get("value");
+						String xLabel = SafeGet.asString(builtin.get("xlabel"));
+						String yLabel = SafeGet.asString(builtin.get("ylabel"));
+						String command = SafeGet.asString(builtin.get("command"));
+						Double upper = SafeGet.asDouble(builtin.get("upper"));
+						Double lower = SafeGet.asDouble(builtin.get("lower"));
+						final String value = SafeGet.asString(builtin.get("value"));
 						if (command != null && value != null) {
 							ICommandProcessor<Double> processor = createOperationProcessor(command, value, s -> {
 								return Double.parseDouble(s);
@@ -162,11 +163,11 @@ public class ArchGuagePanel extends GaugePanel {
 							return new DynamicDesktopIconUI(ts);
 						}
 					} else if ("meter".equals(category)) {
-						String command = (String) builtin.get("command");
-						final String value = (String) builtin.get("value");
-						Double upper = (Double) builtin.get("upper");
-						Double lower = (Double) builtin.get("lower");
-						Double threshold = (Double) builtin.get("threshold");
+						String command = SafeGet.asString(builtin.get("command"));
+						final String value = SafeGet.asString(builtin.get("value"));
+						Double upper = SafeGet.asDouble( builtin.get("upper"));
+						Double lower = SafeGet.asDouble(builtin.get("lower"));
+						Double threshold = SafeGet.asDouble(builtin.get("threshold"));
 						if (command != null && value != null) {
 							ICommandProcessor<Double> processor = createOperationProcessor(command, value, s -> {
 								return Double.parseDouble(s);
@@ -175,10 +176,10 @@ public class ArchGuagePanel extends GaugePanel {
 							return new DynamicDesktopIconUI(meter);
 						}
 					} else if ("onoff".equals(category)) {
-						String command = (String) builtin.get("command");
-						final String value = (String) builtin.get("value");
-						final String onColor = (String) builtin.get("oncolor");
-						final String offColor = (String) builtin.get("offcolor");
+						String command = SafeGet.asString(builtin.get("command"));
+						final String value = SafeGet.asString(builtin.get("value"));
+						final String onColor =SafeGet.asString( builtin.get("oncolor"));
+						final String offColor = SafeGet.asString(builtin.get("offcolor"));
 						if (command != null && value != null) {
 							ICommandProcessor<Boolean> processor = createOperationProcessor(command, value, s -> {
 								return Boolean.parseBoolean(s);
@@ -201,11 +202,16 @@ public class ArchGuagePanel extends GaugePanel {
 	protected <T> ICommandProcessor<T> createOperationProcessor(String command, final String value, IConverter<T> cvt) {
 		final OperationRepresentation rep = OperationRepresentation.parseCommandSignature(command);
 		int param = 0;
-		String[] parameters = rep.getParameters();
-		for (String p : parameters) {
-			if (value.equals(p))
-				break;
-			param++;
+		try {
+			param = Integer.parseInt(value)-1;
+		}
+		catch (NumberFormatException e) {
+			String[] parameters = rep.getParameters();
+			for (String p : parameters) {
+				if (value.equals(p))
+					break;
+				param++;
+			}
 		}
 		final int theParam = param;
 		ICommandProcessor<T> processor = (op) -> {

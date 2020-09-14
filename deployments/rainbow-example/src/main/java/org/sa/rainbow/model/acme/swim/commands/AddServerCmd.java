@@ -60,8 +60,8 @@ public class AddServerCmd extends SwimAcmeModelCommand<IAcmeProperty> {
 	 *  
 	 *  The target is the load balancer, and the server is the server to be added
 	 */
-    public AddServerCmd (AcmeModelInstance model, String target, String server) {
-        super ("addServer", model, target, server);
+    public AddServerCmd (String commandName, AcmeModelInstance model, String target, String server) {
+        super (commandName, model, target, server);
         m_server = server;
     }
 

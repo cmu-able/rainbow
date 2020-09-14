@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>rainbow</groupId>
@@ -90,7 +91,7 @@
 		<url>svn://acme.able.cs.cmu.edu/rainbow/v2/trunk</url>
 	</scm>
 	<build>
-			<extensions>
+		<extensions>
 			<!-- The wagon extension allows webdav access. This plugin is required 
 				to deploy to the repository. -->
 			<extension>
@@ -196,7 +197,7 @@
 					</additionalClasspathElements>
 				</configuration>
 			</plugin>
-			
+
 
 			<plugin>
 				<artifactId>maven-dependency-plugin</artifactId>
@@ -210,38 +211,111 @@
 							<outputDirectory>${project.build.directory}/lib</outputDirectory>
 						</configuration>
 					</execution>
+					<execution>
+						<id>copy</id>
+						<phase>install</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>pladapt</groupId>
+									<artifactId>libpladapt_wrap</artifactId>
+									<version>1.0.1</version>
+									<type>so</type>
+									<classifier>x86_64</classifier>
+									<outputDirectory>${project.build.directory}/lib</outputDirectory>
+									<destFileName>libpladapt_wrap.so</destFileName>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
-	            <plugin>
-	                <groupId>org.apache.maven.plugins</groupId>
-	                <artifactId>maven-dependency-plugin</artifactId>
-	                <executions>
-	                    <execution>
-	                        <id>copy</id>
-	                        <phase>install</phase>
-	                        <goals>
-	                            <goal>copy</goal>
-	                        </goals>
-	                        <configuration>
-	                            <artifactItems>
-	                                <artifactItem>
-	                                    <groupId>pladapt</groupId>
-	                                    <artifactId>libpladapt_wrap</artifactId>
-	                                    <version>1.0.1</version>
-	                                    <type>so</type>
-	                                    		<classifier>x86_64</classifier>
-	                                    <outputDirectory>${project.build.directory}/lib</outputDirectory>
- 	                                    <destFileName>libpladapt_wrap.so</destFileName>
-	                                </artifactItem>
-	                            </artifactItems>
-	                        </configuration>
-	                    </execution>
-	                </executions>
-	            </plugin>
+
+			<plugin>
+				<groupId>org.eclipse.xtext</groupId>
+				<artifactId>xtext-maven-plugin</artifactId>
+				<version>2.19.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+					<languages>
+						<language>
+							<setup>org.sa.rainbow.configuration.ConfigModelStandaloneSetup</setup>
+							<outputConfigurations>
+								<outputConfiguration>
+									<outputDirectory>src-gen/main/java/</outputDirectory>
+								</outputConfiguration>
+								<outputConfigration>
+									<outputDirectory>tgt-gen</outputDirectory>
+									<createOutputDirectory>true</createOutputDirectory>
+									<overrideExistingResources>true</overrideExistingResources>
+									<cleanUpDerivedResources>true</cleanUpDerivedResources>
+								</outputConfigration>
+							</outputConfigurations>
+						</language>
+					</languages>
+					<sourceRoots>
+						<root>src/main/resources/rbw</root>
+					</sourceRoots>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.sa.rainbow.configuration</groupId>
+						<artifactId>org.sa.rainbow.configuration</artifactId>
+						<version>1.0.0-SNAPSHOT</version>
+					</dependency>
+					<dependency>
+						<groupId>org.eclipse.emf</groupId>
+						<artifactId>org.eclipse.emf.mwe2.launch</artifactId>
+						<version>2.11.0</version>
+					</dependency>
+					<dependency>
+						<groupId>org.eclipse.xtext</groupId>
+						<artifactId>org.eclipse.xtext.common.types</artifactId>
+						<version>2.19.0</version>
+					</dependency>
+					<dependency>
+						<groupId>org.eclipse.xtext</groupId>
+						<artifactId>org.eclipse.xtext.xtext.generator</artifactId>
+						<version>2.19.0</version>
+					</dependency>
+					<dependency>
+						<groupId>org.eclipse.xtext</groupId>
+						<artifactId>org.eclipse.xtext.xbase</artifactId>
+						<version>2.19.0</version>
+					</dependency>
+					<dependency>
+						<groupId>org.eclipse.xtext</groupId>
+						<artifactId>xtext-antlr-generator</artifactId>
+						<version>2.1.1</version>
+					</dependency>
+					<!-- https://mvnrepository.com/artifact/io.typefox.xtext/jflex-fragment -->
+					<dependency>
+						<groupId>io.typefox.xtext</groupId>
+						<artifactId>jflex-fragment</artifactId>
+						<version>0.2.1</version>
+					</dependency>
+					<dependency>
+						<groupId>org.eclipse.xtext</groupId>
+						<artifactId>org.eclipse.xtext.xbase.lib</artifactId>
+						<version>2.18.0</version>
+					</dependency>
+				</dependencies>
+			</plugin>
 		</plugins>
 	</build>
-	
-		<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 		- - - JAR REPOSITORIES - - - - - - - - - - - - - - - - - - - - - - - - - 
 		- - - - - - - - - - -->
 
@@ -253,6 +327,17 @@
 			<url>
 				dav:http://acme.able.cs.cmu.edu/maven-repository
 			</url>
+		</repository>
+		<repository>
+			<id>codehaus-snapshots</id>
+			<name>disable dead 'Codehaus Snapshots' repository, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=481478</name>
+			<url>http://nexus.codehaus.org/snapshots/</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
 		</repository>
 	</repositories>
 
@@ -440,77 +525,45 @@
 		</profile>
 	</profiles>
 	<dependencies>
-	<!-- 
-		<dependency>
-			<groupId>rainbow</groupId>
-			<artifactId>rainbow-core</artifactId>
-			<version>2.1.1-SNAPSHOT</version>
-		</dependency>
-		 -->
+		<!-- <dependency> <groupId>rainbow</groupId> <artifactId>rainbow-core</artifactId> 
+			<version>2.1.1-SNAPSHOT</version> </dependency> -->
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-acme-model</artifactId>
-			<version>3.0</version>
+			<version>3.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-stitch</artifactId>
-			<version>3.0</version>
+			<version>3.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-utility-model</artifactId>
-			<version>3.0</version>
+			<version>3.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>rainbow</groupId>
 			<artifactId>rainbow-gui</artifactId>
-			<version>3.0</version>
+			<version>3.1.0</version>
 		</dependency>
-<!--
+		<!-- <dependency> <groupId>rainbow</groupId> <artifactId>rainbow-znn</artifactId> 
+			<version>2.1-SNAPSHOT</version> </dependency> <dependency> <groupId>org.jyaml</groupId> 
+			<artifactId>jyaml</artifactId> <version>1.3</version> </dependency> <dependency> 
+			<groupId>org.apache</groupId> <artifactId>xerces</artifactId> <version>2.9.0</version> 
+			</dependency> <dependency> <groupId>opera</groupId> <artifactId>hogna</artifactId> 
+			<version>1.0</version> </dependency> <dependency> <groupId>opera</groupId> 
+			<artifactId>opera</artifactId> <version>1.0</version> </dependency> <dependency> 
+			<groupId>xerces</groupId> <artifactId>xercesImpl</artifactId> <version>2.9.1</version> 
+			</dependency> <dependency> <groupId>pladapt</groupId> <artifactId>pladapt_wrap</artifactId> 
+			<version>1.0.1</version> </dependency> <dependency> <groupId>pladapt</groupId> 
+			<artifactId>libpladapt_wrap</artifactId> <version>1.0.1</version> <scope>runtime</scope> 
+			<type>so</type> <classifier>x86_64</classifier> </dependency> -->
 		<dependency>
 			<groupId>rainbow</groupId>
-			<artifactId>rainbow-znn</artifactId>
-			<version>2.1-SNAPSHOT</version>
+			<artifactId>rainbow-mem-comms</artifactId>
+			<version>3.1.0</version>
 		</dependency>
-		<dependency>
-			<groupId>org.jyaml</groupId>
-			<artifactId>jyaml</artifactId>
-			<version>1.3</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache</groupId>
-			<artifactId>xerces</artifactId>
-			<version>2.9.0</version>
-		</dependency>
--->
-		<dependency>
-			<groupId>opera</groupId>
-			<artifactId>hogna</artifactId>
-			<version>1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>opera</groupId>
-			<artifactId>opera</artifactId>
-			<version>1.0</version>
-		</dependency>
-		<dependency>
-		    <groupId>xerces</groupId>
-		    <artifactId>xercesImpl</artifactId>
-		    <version>2.12.0</version>
-		</dependency>
-		<dependency>
-			<groupId>pladapt</groupId>
-			<artifactId>pladapt_wrap</artifactId>
-			<version>1.0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>pladapt</groupId>
-			<artifactId>libpladapt_wrap</artifactId>
-			<version>1.0.1</version>
-			<scope>runtime</scope>
-			<type>so</type>
-			<classifier>x86_64</classifier>
-		</dependency>
+	
 	</dependencies>
 </project>

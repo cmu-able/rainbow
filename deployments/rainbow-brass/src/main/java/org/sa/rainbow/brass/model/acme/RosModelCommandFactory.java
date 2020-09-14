@@ -12,93 +12,99 @@ import org.acmestudio.acme.element.IAcmePortType;
 import org.acmestudio.acme.element.IAcmeRole;
 import org.acmestudio.acme.element.IAcmeRoleType;
 import org.acmestudio.acme.element.IAcmeSystem;
+import org.sa.rainbow.core.error.RainbowException;
 import org.sa.rainbow.core.models.ModelsManager;
 import org.sa.rainbow.model.acme.AcmeModelCommandFactory;
 import org.sa.rainbow.model.acme.AcmeModelInstance;
 
 public class RosModelCommandFactory extends AcmeModelCommandFactory {
 
-    public static RosLoadModelCommand
+    private static final String CREATE_TOPIC_CONNECTOR_CMD = "createTopicConnector";
+	private static final String CREATE_TOPIC_ROLE_CMD = "createTopicRole";
+	private static final String CREATE_ACTION_CONNECTOR_CMD = "createActionConnector";
+	private static final String CREATE_ACTION_ROLE_CMD = "createActionRole";
+	private static final String CREATE_SERVICE_PORT_CMD = "createServicePort";
+	private static final String CREATE_TOPIC_PORT_CMD = "createTopicPort";
+	private static final String CREATE_ACTION_PORT_CMD = "createActionPort";
+	private static final String DELETE_CONNECTOR_CMD = "deleteConnector";
+	private static final String DELETE_COMPONENT_CMD = "deleteComponent";
+	private static final String ATTACH_CMD = "attach";
+	private static final String DELETE_ROLE_CMD = "deleteRole";
+	private static final String DELETE_PORT_CMD = "deletePort";
+	private static final String CREATE_NODE_MANAGER_CMD = "createNodeManager";
+	private static final String CREATE_NODE_CMD = "createNode";
+	private static final String SET_SYSTEM_CMD = "setSystem";
+
+	public static RosLoadModelCommand
     loadCommand (ModelsManager modelsManager, String modelName, InputStream stream, String source) {
         return new RosLoadModelCommand (modelName, modelsManager, stream, source);
     }
 
-    public RosModelCommandFactory (AcmeModelInstance model) {
+    public RosModelCommandFactory (AcmeModelInstance model) throws RainbowException {
         super (model);
     }
 
-    @Override
-    protected void fillInCommandMap () {
-        super.fillInCommandMap ();
-        m_commandMap.put ("setSystem".toLowerCase (), SetSystemCommand.class);
-        m_commandMap.put ("createNode".toLowerCase (), CreateRosNodeCommand.class);
-        m_commandMap.put ("createNodeManager".toLowerCase (), CreateRosNodeCommand.class);
-        m_commandMap.put ("deletePort".toLowerCase (), DeletePortCmd.class);
-        m_commandMap.put ("deleteRole".toLowerCase (), DeleteRoleCmd.class);
-        m_commandMap.put ("attach".toLowerCase (), AttachCmd.class);
-        m_commandMap.put ("deleteComponent".toLowerCase (), DeleteComponentCmd.class);
-        m_commandMap.put ("deleteConnector".toLowerCase (), DeleteConnectorCmd.class);
-        m_commandMap.put ("createActionPort".toLowerCase (), CreateActionPortCommand.class);
-        m_commandMap.put ("createTopicPort".toLowerCase (), CreateTopicPortCommand.class);
-        m_commandMap.put ("createServicePort".toLowerCase (), CreateServicePortCommand.class);
-        m_commandMap.put ("createActionRole".toLowerCase (), CreateActionRoleCommand.class);
-        m_commandMap.put ("createActionConnector".toLowerCase (), CreateActionConnectorCommand.class);
-        m_commandMap.put ("createTopicRole".toLowerCase (), CreateTopicRoleCommand.class);
-        m_commandMap.put ("createTopicConnector".toLowerCase (), CreateTopicConnectorCommand.class);
-
-    }
-
+    
+    @Operation(name=SET_SYSTEM_CMD)
     public SetSystemCommand setSystem (IAcmeSystem system, String systemSource) {
-        return new SetSystemCommand ((AcmeModelInstance )m_modelInstance, "", systemSource);
+        return new SetSystemCommand (SET_SYSTEM_CMD, (AcmeModelInstance )m_modelInstance, "", systemSource);
     }
 
+    @Operation(name=CREATE_NODE_CMD)
     public CreateRosNodeCommand createNode (IAcmeSystem system, String nodeName) {
         if (ModelHelper.getAcmeSystem (system) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException ("Cannot create a command for a system that is not part of the system");
-        return new CreateRosNodeCommand ((AcmeModelInstance )m_modelInstance, system.getQualifiedName (), nodeName);
+        return new CreateRosNodeCommand (CREATE_NODE_CMD, (AcmeModelInstance )m_modelInstance, system.getQualifiedName (), nodeName);
     }
 
+    @Operation(name=CREATE_NODE_MANAGER_CMD)
     public CreateRosNodeManagerCommand createNodeManager (IAcmeSystem system, String nodeName) {
         if (ModelHelper.getAcmeSystem (system) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException ("Cannot create a command for a system that is not part of the system");
-        return new CreateRosNodeManagerCommand ((AcmeModelInstance )m_modelInstance, system.getQualifiedName (),
+        return new CreateRosNodeManagerCommand (CREATE_NODE_MANAGER_CMD, (AcmeModelInstance )m_modelInstance, system.getQualifiedName (),
                 nodeName);
     }
-
+    
+    @Operation(name=DELETE_PORT_CMD)
     public DeletePortCmd deletePort (IAcmeComponent comp, String port) {
         if (ModelHelper.getAcmeSystem (comp) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException ("Cannot create a command for a system that is not part of the system");
-        return new DeletePortCmd ((AcmeModelInstance )m_modelInstance, comp.getQualifiedName (), port);
+        return new DeletePortCmd (DELETE_PORT_CMD, (AcmeModelInstance )m_modelInstance, comp.getQualifiedName (), port);
     }
 
+    @Operation(name=DELETE_ROLE_CMD)
     public DeleteRoleCmd deleteRole (IAcmeComponent comp, String Role) {
         if (ModelHelper.getAcmeSystem (comp) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException ("Cannot create a command for a system that is not part of the system");
-        return new DeleteRoleCmd ((AcmeModelInstance )m_modelInstance, comp.getQualifiedName (), Role);
+        return new DeleteRoleCmd (DELETE_ROLE_CMD, (AcmeModelInstance )m_modelInstance, comp.getQualifiedName (), Role);
     }
 
+    @Operation(name=ATTACH_CMD)
     public AttachCmd attach (IAcmePort port, IAcmeRole role) {
         IAcmeSystem sys = ModelHelper.getAcmeSystem (port);
         if (sys != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException ("Cannot create a command for a system that is not part of the system");
-        return new AttachCmd ((AcmeModelInstance )m_modelInstance, "", port.getQualifiedName (),
+        return new AttachCmd (ATTACH_CMD, (AcmeModelInstance )m_modelInstance, "", port.getQualifiedName (),
                 role.getQualifiedName ());
     }
 
+    @Operation(name=DELETE_COMPONENT_CMD)
     public DeleteComponentCmd deleteComponent (IAcmeSystem sys, IAcmeComponent comp) {
         if (ModelHelper.getAcmeSystem (comp) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException ("Cannot create a command for a system that is not part of the system");
-        return new DeleteComponentCmd ((AcmeModelInstance )m_modelInstance, sys.getQualifiedName (),
+        return new DeleteComponentCmd (DELETE_COMPONENT_CMD, (AcmeModelInstance )m_modelInstance, sys.getQualifiedName (),
                 comp.getQualifiedName ());
     }
 
+    @Operation(name=DELETE_CONNECTOR_CMD)
     public DeleteConnectorCmd deleteConnector (IAcmeSystem sys, IAcmeConnector comp) {
         if (ModelHelper.getAcmeSystem (comp) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException ("Cannot create a command for a system that is not part of the system");
-        return new DeleteConnectorCmd ((AcmeModelInstance )m_modelInstance, sys.getQualifiedName (),
+        return new DeleteConnectorCmd (DELETE_CONNECTOR_CMD, (AcmeModelInstance )m_modelInstance, sys.getQualifiedName (),
                 comp.getQualifiedName ());
     }
 
+    @Operation(name=CREATE_ACTION_PORT_CMD)
     public CreateActionPortCommand createActionPort (IAcmeComponent comp, String portName, IAcmeElementType portType) {
         if (ModelHelper.getAcmeSystem (comp) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException ("Cannot create a command for a system that is not part of the system");
@@ -106,10 +112,11 @@ public class RosModelCommandFactory extends AcmeModelCommandFactory {
             throw new IllegalArgumentException ("Cannot create a port with something that is not a port type");
         if (comp.getPort (portName) != null)
             throw new IllegalArgumentException ("Port already exists in " + comp.getQualifiedName ());
-        return new CreateActionPortCommand ((AcmeModelInstance )m_modelInstance, comp.getQualifiedName (), portName,
+        return new CreateActionPortCommand (CREATE_ACTION_PORT_CMD, (AcmeModelInstance )m_modelInstance, comp.getQualifiedName (), portName,
                 portType.getName ());
     }
 
+    @Operation(name=CREATE_TOPIC_PORT_CMD)
     public CreateTopicPortCommand createTopicPort (IAcmeComponent comp, String portName, IAcmeElementType portType) {
         if (ModelHelper.getAcmeSystem (comp) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException ("Cannot create a command for a system that is not part of the system");
@@ -117,10 +124,11 @@ public class RosModelCommandFactory extends AcmeModelCommandFactory {
             throw new IllegalArgumentException ("Cannot create a port with something that is not a port type");
         if (comp.getPort (portName) != null)
             throw new IllegalArgumentException ("Port already exists in " + comp.getQualifiedName ());
-        return new CreateTopicPortCommand ((AcmeModelInstance )m_modelInstance, comp.getQualifiedName (), portName,
+        return new CreateTopicPortCommand (CREATE_TOPIC_PORT_CMD, (AcmeModelInstance )m_modelInstance, comp.getQualifiedName (), portName,
                 portType.getName ());
     }
 
+    @Operation(name=CREATE_SERVICE_PORT_CMD)
     public CreateServicePortCommand
     createServicePort (IAcmeComponent comp, String portName, IAcmeElementType portType) {
         if (ModelHelper.getAcmeSystem (comp) != m_modelInstance.getModelInstance ())
@@ -129,10 +137,11 @@ public class RosModelCommandFactory extends AcmeModelCommandFactory {
             throw new IllegalArgumentException ("Cannot create a port with something that is not a port type");
         if (comp.getPort (portName) != null)
             throw new IllegalArgumentException ("Port already exists in " + comp.getQualifiedName ());
-        return new CreateServicePortCommand ((AcmeModelInstance )m_modelInstance, comp.getQualifiedName (), portName,
+        return new CreateServicePortCommand (CREATE_SERVICE_PORT_CMD, (AcmeModelInstance )m_modelInstance, comp.getQualifiedName (), portName,
                 portType.getName ());
     }
 
+    @Operation(name=CREATE_ACTION_ROLE_CMD)
     public CreateActionRoleCommand createActionRole (IAcmeConnector conn, String roleName, IAcmeElementType roleType) {
         if (ModelHelper.getAcmeSystem (conn) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException ("Cannot create a command for a system that is not part of the system");
@@ -140,18 +149,20 @@ public class RosModelCommandFactory extends AcmeModelCommandFactory {
             throw new IllegalArgumentException ("Cannot create a role with something that is not a role type");
         if (conn.getRole (roleName) != null)
             throw new IllegalArgumentException ("Role already exists in " + conn.getQualifiedName ());
-        return new CreateActionRoleCommand ((AcmeModelInstance )m_modelInstance, conn.getQualifiedName (), roleName,
+        return new CreateActionRoleCommand (CREATE_ACTION_ROLE_CMD, (AcmeModelInstance )m_modelInstance, conn.getQualifiedName (), roleName,
                 roleType.getName ());
     }
 
+    @Operation(name=CREATE_ACTION_CONNECTOR_CMD)
     public CreateActionConnectorCommand createActionConnector (IAcmeSystem sys, String connName) {
         if (ModelHelper.getAcmeSystem (sys) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException ("Cannot create a command for a system that is not part of the system");
         if (sys.lookupName (connName, false) != null)
             throw new IllegalArgumentException ("Name already exists in " + sys.getName ());
-        return new CreateActionConnectorCommand ((AcmeModelInstance )m_modelInstance, sys.getName (), connName);
+        return new CreateActionConnectorCommand (CREATE_ACTION_CONNECTOR_CMD, (AcmeModelInstance )m_modelInstance, sys.getName (), connName);
     }
 
+    @Operation(name=CREATE_TOPIC_ROLE_CMD)
     public CreateTopicRoleCommand createTopicRole (IAcmeConnector conn, String roleName, IAcmeElementType roleType) {
         if (ModelHelper.getAcmeSystem (conn) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException ("Cannot create a command for a system that is not part of the system");
@@ -159,17 +170,18 @@ public class RosModelCommandFactory extends AcmeModelCommandFactory {
             throw new IllegalArgumentException ("Cannot create a role with something that is not a role type");
         if (conn.getRole (roleName) != null)
             throw new IllegalArgumentException ("Role already exists in " + conn.getQualifiedName ());
-        return new CreateTopicRoleCommand ((AcmeModelInstance )m_modelInstance, conn.getQualifiedName (), roleName,
+        return new CreateTopicRoleCommand (CREATE_TOPIC_ROLE_CMD, (AcmeModelInstance )m_modelInstance, conn.getQualifiedName (), roleName,
                 roleType.getName ());
     }
 
+    @Operation(name=CREATE_TOPIC_CONNECTOR_CMD)
     public CreateTopicConnectorCommand
             createTopicConnector (IAcmeSystem sys, String connName, String topic, String msgType) {
         if (ModelHelper.getAcmeSystem (sys) != m_modelInstance.getModelInstance ())
             throw new IllegalArgumentException ("Cannot create a command for a system that is not part of the system");
         if (sys.lookupName (connName, false) != null)
             throw new IllegalArgumentException ("Name already exists in " + sys.getName ());
-        return new CreateTopicConnectorCommand ((AcmeModelInstance )m_modelInstance, sys.getName (), connName, topic,
+        return new CreateTopicConnectorCommand (CREATE_TOPIC_CONNECTOR_CMD, (AcmeModelInstance )m_modelInstance, sys.getName (), connName, topic,
                 msgType);
     }
 
