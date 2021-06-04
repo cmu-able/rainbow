@@ -131,7 +131,7 @@
 		<dependency>
 			<groupId>org.yaml</groupId>
 			<artifactId>snakeyaml</artifactId>
-			<version>1.14-SNAPSHOT</version>
+			<version>1.26</version>
 			<type>jar</type>
 		</dependency>
 		<dependency>
