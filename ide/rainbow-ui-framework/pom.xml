@@ -10,7 +10,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<vaadin.version>7.2.5</vaadin.version>
+		<vaadin.version>7.7.24</vaadin.version>
 		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
 		<tomcat.location>http://10.5.6.200:8080/</tomcat.location>
 		<maven.tomcat.url>${tomcat.location}/manager/text</maven.tomcat.url>
